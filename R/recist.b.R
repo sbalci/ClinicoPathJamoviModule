@@ -104,6 +104,10 @@ recistClass <- R6::R6Class(
         },
 
         # ---- Helper: Escape Variable Names ----
+        # TODO (cleanup): .escapeVar is dead code — defined here but never called anywhere
+        # in recist.b.R. Remove it. If a future formula ever needs safe variable names, use
+        # jmvcore::composeTerm()/toB64() rather than make.names() mangling (which can collide
+        # distinct non-syntactic column names onto the same name).
         .escapeVar = function(x) {
             # Make syntactically valid R names for variables with spaces/special chars
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
@@ -119,6 +123,12 @@ recistClass <- R6::R6Class(
                 return()
             }
 
+            # TODO (data hygiene): private$.summaryStatus$warnings and $exclusions are R6
+            # fields initialised once at class generation; jamovi reuses the instance across
+            # .run() calls, and .addWarning()/.selectTargetLesions() only ever append (c(...)).
+            # They are never reset, so warnings/exclusions accumulate and duplicate across
+            # successive runs (the scalar counts are overwritten each run, so only these two
+            # leak). Reset both to character() here at the top of .run() before any append.
             tryCatch({
                 private$.prepareData()
                 private$.selectTargetLesions()
@@ -167,7 +177,7 @@ recistClass <- R6::R6Class(
                 self$results$instructions$setContent(
                     paste0("<div class='error'>",
                            "<h4>Error in Analysis</h4>",
-                           "<p>", e$message, "</p>",
+                           "<p>", htmltools::htmlEscape(e$message), "</p>",
                            "<p><b>Common issues:</b></p>",
                            "<ul>",
                            "<li>Ensure data is in long format (one row per lesion per assessment)</li>",
@@ -176,7 +186,7 @@ recistClass <- R6::R6Class(
                            "<li>Ensure each patient has baseline assessment (earliest time)</li>",
                            "</ul></div>")
                 )
-                stop(e)
+                jmvcore::reject(e$message)
             })
         },
 
@@ -185,6 +195,13 @@ recistClass <- R6::R6Class(
 
             mydata <- self$data
 
+            # TODO (correctness): composeTerm() backtick-quotes non-syntactic names
+            # (e.g. "Patient ID" -> `Patient ID`), so mydata[[composeTerm(...)]] returns NULL
+            # for any column whose name contains spaces/special chars. composeTerm is for
+            # FORMULA terms, NOT data-frame indexing — index with the raw self$options$X.
+            # Affects every composeTerm()+mydata[[...]] pair below in .prepareData()
+            # (patientId, assessmentTime, lesionId, lesionType, lesionDiameter, organ,
+            # nonTargetStatus) and the groupVar/patientId merge in .populateStratifiedTable().
             patientId <- jmvcore::composeTerm(self$options$patientId)
             assessmentTime <- jmvcore::composeTerm(self$options$assessmentTime)
             lesionId <- jmvcore::composeTerm(self$options$lesionId)
@@ -192,7 +209,7 @@ recistClass <- R6::R6Class(
 
             data <- data.frame(
                 patientId = mydata[[patientId]],
-                assessmentTime = as.numeric(mydata[[assessmentTime]]),
+                assessmentTime = jmvcore::toNumeric(mydata[[assessmentTime]]),
                 lesionId = as.character(mydata[[lesionId]]),
                 lesionType = tolower(as.character(mydata[[lesionType]])),
                 stringsAsFactors = FALSE
@@ -201,7 +218,7 @@ recistClass <- R6::R6Class(
             # Add diameter if provided
             if (!is.null(self$options$lesionDiameter)) {
                 lesionDiameter <- jmvcore::composeTerm(self$options$lesionDiameter)
-                data$diameter <- as.numeric(mydata[[lesionDiameter]])
+                data$diameter <- jmvcore::toNumeric(mydata[[lesionDiameter]])
             } else {
                 data$diameter <- NA
             }
@@ -628,6 +645,10 @@ recistClass <- R6::R6Class(
                         }
                     },
 
+                    # TODO (correctness): for an all-NA patient (no measurable target sum),
+                    # min(..., na.rm=TRUE) emits a warning and returns Inf/-Inf, which then
+                    # renders as Inf in nadirSum / bestPercentChange. Guard with an all-NA
+                    # check (return NA_real_ when all values are NA).
                     nadirSum = min(targetSum, na.rm=TRUE),
                     bestPercentChange = min(changeFromBaseline, na.rm=TRUE),
 
@@ -928,7 +949,7 @@ recistClass <- R6::R6Class(
              if (length(status$exclusions) > 0) {
                   html <- paste0(html, "<h5 style='color: orange;'>Excluded Lesions (Rules)</h5><ul>")
                   for(m in status$exclusions) {
-                       html <- paste0(html, "<li>", m, "</li>")
+                       html <- paste0(html, "<li>", htmltools::htmlEscape(m), "</li>")
                   }
                   html <- paste0(html, "</ul>")
              }
@@ -936,7 +957,7 @@ recistClass <- R6::R6Class(
              if (length(status$warnings) > 0) {
                   html <- paste0(html, "<h5 style='color: red;'>Warnings</h5><ul>")
                   for(w in status$warnings) {
-                       html <- paste0(html, "<li>", w, "</li>")
+                       html <- paste0(html, "<li>", htmltools::htmlEscape(w), "</li>")
                   }
                   html <- paste0(html, "</ul>")
              }
@@ -949,6 +970,11 @@ recistClass <- R6::R6Class(
         .exportData = function() {
             data <- private$.lesionData
             if (!is.null(data) && nrow(data) > 0) {
+                # TODO (security): writes recist_lesion_data.csv to getwd() as a .run() side
+                # effect. On multi-tenant cloud jamovi the cwd is shared/process-level and the
+                # user never chose it — a silent, unconfirmed write. Not RCE/exfiltration
+                # (fixed filename, user's own data), but route exports through a jamovi
+                # Output/path option (or tempdir()) instead of getwd().
                 filepath <- file.path(getwd(), "recist_lesion_data.csv")
                 tryCatch({
                     write.csv(data, filepath, row.names = FALSE)
@@ -957,7 +983,7 @@ recistClass <- R6::R6Class(
                     if (is.null(currentHtml)) currentHtml <- ""
                     newHtml <- paste0(currentHtml,
                         "<p style='color: green;'><b> Data Exported:</b> ",
-                        filepath, "</p>")
+                        htmltools::htmlEscape(filepath), "</p>")
                     self$results$runSummary$setContent(newHtml)
                 }, error = function(e) {
                     private$.addWarning(paste0("Failed to export data: ", e$message))

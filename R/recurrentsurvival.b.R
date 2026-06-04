@@ -43,8 +43,8 @@ recurrentsurvivalClass <- R6::R6Class(
 
             self$results$instructions$setContent(
                 paste0("<h3>Recurrent Event Survival Analysis Ready</h3>
-                <p><b>Subject ID Variable:</b> ", subject_id, "</p>
-                <p><b>Event Time Variable:</b> ", event_time, "</p>
+                <p><b>Subject ID Variable:</b> ", htmltools::htmlEscape(subject_id), "</p>
+                <p><b>Event Time Variable:</b> ", htmltools::htmlEscape(event_time), "</p>
                 <p><b>Model Type:</b> ", stringr::str_to_title(gsub("_", " ", model_type)), "</p>
                 <p><b>Time Scale:</b> ", stringr::str_to_title(gsub("_", " ", self$options$time_scale)), "</p>
                 <p>Click <b>Results</b> below to view the analysis results.</p>")
@@ -56,6 +56,13 @@ recurrentsurvivalClass <- R6::R6Class(
             if (is.null(self$data) || is.null(self$options$subject_id) || is.null(self$options$event_time)) {
                 return()
             }
+
+            # Reset per-run model caches (jamovi reuses the R6 instance across runs; a stale
+            # ..current_model would otherwise drive .performModelDiagnostics / .performGoodnessOfFit
+            # to render a prior model's statistics after the user changes model_type or covariates)
+            private$..current_model <- NULL
+            private$..rereg_model <- NULL
+            private$..rereg_data <- NULL
 
             subject_id <- self$options$subject_id
             event_time <- self$options$event_time
@@ -74,7 +81,7 @@ recurrentsurvivalClass <- R6::R6Class(
             if (length(missing_vars) > 0) {
                 self$results$data_summary$setContent(
                     paste("Error: The following required variables were not found:",
-                          paste(missing_vars, collapse = ", "))
+                          paste(htmltools::htmlEscape(missing_vars), collapse = ", "))
                 )
                 return()
             }
@@ -94,7 +101,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 private$.performRecurrentAnalysis(recurrent_data, subject_id, event_time, covariates)
 
             }, error = function(e) {
-                self$results$data_summary$setContent(paste("Analysis error:", e$message))
+                self$results$data_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -255,7 +262,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                self$results$model_results$setContent(paste("Recurrent analysis error:", e$message))
+                self$results$model_results$setContent(paste("Recurrent analysis error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -292,7 +299,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 html <- paste0(html, "</table>")
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Data summary error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Data summary error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$data_summary$setContent(html)
@@ -356,7 +363,13 @@ recurrentsurvivalClass <- R6::R6Class(
                     surv_obj <- Surv(analysis_data$event_time, analysis_data$event_status)
 
                     # Fit Cox model (simplified AG approach)
-                    formula_str <- paste("surv_obj ~", paste(covariates, collapse = " + "))
+                    formula_str <- jmvcore::constructFormula("surv_obj", as.list(covariates))
+                    # TODO (forward-looking): the as.formula(formula_str) sinks (the two coxph()
+                    # calls just below, and the two reReg::reReg() calls in .fitReRegModel) could
+                    # move to jmvcore::asFormula() for allowlist-validated parsing (Defense-2) once
+                    # jmvcore is upgraded from 2.7.7 to 2.7.27+ (asFormula is absent in 2.7.7). RCE
+                    # is already closed by constructFormula's backtick-quoting (Defense-1); this is
+                    # defense-in-depth only.
 
                     if (self$options$robust_variance) {
                         # Use robust variance with clustering
@@ -391,12 +404,18 @@ recurrentsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Andersen-Gill analysis error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Andersen-Gill analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$model_results$setContent(html)
         },
 
+        # TODO (stub): these model branches are placeholders that only render a "simplified
+        # implementation" note and never fit a model — .performPWPAnalysis (here),
+        # .performFrailtyAnalysis, .performMultiStateAnalysis, .performCountingProcessAnalysis.
+        # Several declared options are also not yet consumed (e.g. prediction_times,
+        # frailty_distribution, stratification_vars, cluster_variable, the *_plots toggles).
+        # Implement these or hide the unused options/branches.
         .performPWPAnalysis = function(analysis_data, covariates, model_type) {
 
             pwp_type <- gsub("pwp_", "", model_type)
@@ -465,7 +484,7 @@ recurrentsurvivalClass <- R6::R6Class(
                             ci_text <- paste0("(", ci_lower, ", ", ci_upper, ")")
 
                             html <- paste0(html, "<tr>")
-                            html <- paste0(html, "<td>", var_name, "</td>")
+                            html <- paste0(html, "<td>", htmltools::htmlEscape(var_name), "</td>")
                             html <- paste0(html, "<td>", coef, "</td>")
                             html <- paste0(html, "<td>", exp_coef, "</td>")
                             html <- paste0(html, "<td>", se, "</td>")
@@ -481,7 +500,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Covariate effects error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Covariate effects error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$covariate_effects$setContent(html)
@@ -515,7 +534,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 html <- paste0(html, "</table>")
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Event frequency error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Event frequency error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$event_frequency_table$setContent(html)
@@ -546,7 +565,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Gap time analysis error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Gap time analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$gap_time_summary$setContent(html)
@@ -581,7 +600,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Terminal event analysis error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Terminal event analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$terminal_event_summary$setContent(html)
@@ -681,7 +700,7 @@ recurrentsurvivalClass <- R6::R6Class(
 
                 # Build formula
                 if (length(covariates) > 0) {
-                    formula_str <- paste("reData ~", paste(covariates, collapse = " + "))
+                    formula_str <- jmvcore::constructFormula("reData", as.list(covariates))
                 } else {
                     formula_str <- "reData ~ 1"
                 }
@@ -713,7 +732,10 @@ recurrentsurvivalClass <- R6::R6Class(
                 # Format and display results
                 private$.formatReRegResults(rereg_fit, reReg_model)
 
-                # Store model for plotting
+                # TODO (cleanup): ..rereg_model / ..rereg_data are stored here but never read back
+                # as fields — .generateReRegPlots uses the rereg_fit/reData passed as arguments, not
+                # these private$ fields. Either wire the plot renderers to read the fields or drop
+                # these dead stores (they are now reset at the top of .run() to avoid stale state).
                 private$..rereg_model <- rereg_fit
                 private$..rereg_data <- reData
 
@@ -752,7 +774,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 }
 
                 self$results$model_results$setContent(paste0(
-                    "<h3>reReg Analysis Error</h3><p>", detailed_msg, "</p>"
+                    "<h3>reReg Analysis Error</h3><p>", htmltools::htmlEscape(detailed_msg), "</p>"
                 ))
             })
         },
@@ -782,7 +804,7 @@ recurrentsurvivalClass <- R6::R6Class(
 
                 for (i in 1:nrow(coef_matrix)) {
                     html <- paste0(html, "<tr>")
-                    html <- paste0(html, "<td>", rownames(coef_matrix)[i], "</td>")
+                    html <- paste0(html, "<td>", htmltools::htmlEscape(rownames(coef_matrix)[i]), "</td>")
                     html <- paste0(html, "<td>", round(coef_matrix[i, "Estimate"], 4), "</td>")
                     html <- paste0(html, "<td>", round(coef_matrix[i, "SE"], 4), "</td>")
                     html <- paste0(html, "<td>", round(coef_matrix[i, "z"], 3), "</td>")

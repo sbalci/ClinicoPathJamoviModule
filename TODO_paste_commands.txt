@@ -5,33 +5,6 @@ add other, remaining, out-of-scope observations as TODO items
 
 
 
-/jamovify-function qualityoflife --apply
-/security-audit-function qualityoflife
-
-/jamovify-function raftgee --apply
-/security-audit-function raftgee
-
-/jamovify-function raincloud --apply
-/security-audit-function raincloud
-
-/jamovify-function recist --apply
-/security-audit-function recist
-
-/jamovify-function reclassmetrics --apply
-/security-audit-function reclassmetrics
-
-/jamovify-function recurrentsurvival --apply
-/security-audit-function recurrentsurvival
-
-/jamovify-function referenceintervals --apply
-/security-audit-function referenceintervals
-
-/jamovify-function relativesurvival --apply
-/security-audit-function relativesurvival
-
-/jamovify-function reportcat --apply
-/security-audit-function reportcat
-
 /jamovify-function reportcat2 --apply
 /security-audit-function reportcat2
 

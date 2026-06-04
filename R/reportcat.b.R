@@ -68,7 +68,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}: {vars}.</div>",
                         error_label = .("Error"),
                         error_msg = .("Variables not found in data"),
-                        vars = paste(missing_vars, collapse = ", ")))
+                        vars = paste(htmltools::htmlEscape(missing_vars), collapse = ", ")))
                     self$results$error$setVisible(TRUE)
                     return()
                 }
@@ -79,7 +79,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}: {vars}. {instruction}</div>",
                         error_label = .("Error"),
                         error_msg = .("Non-categorical variables detected"),
-                        vars = paste(non_categorical, collapse = ", "),
+                        vars = paste(htmltools::htmlEscape(non_categorical), collapse = ", "),
                         instruction = .("Please select only categorical (factor or character) variables.")))
                     self$results$error$setVisible(TRUE)
                     return()
@@ -98,7 +98,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning_msg <- glue::glue("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; color: #856404;'><strong>{warning_label}:</strong> {warning_msg}: {vars}. {action}</div>",
                         warning_label = .("Warning"),
                         warning_msg = .("Variables with no valid levels or all missing values"),
-                        vars = paste(empty_vars, collapse = ", "),
+                        vars = paste(htmltools::htmlEscape(empty_vars), collapse = ", "),
                         action = .("These will be excluded from analysis."))
                     self$results$error$setContent(warning_msg)
                     self$results$error$setVisible(TRUE)
@@ -138,7 +138,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             percent = n / validtotal,
                             level_description = glue::glue(
                                 .("{level}: n = {n}, {percent} of valid cases. "),
-                                level = level,
+                                level = htmltools::htmlEscape(level),
                                 n = n,
                                 percent = scales::percent(percent)
                             )
@@ -470,14 +470,6 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Detect common misuse patterns
         .detectMisusePatterns = function(data, variables) {
-            # TODO (security, forward-looking): the warning messages built
-            # below (and the `paste(missing_vars/non_categorical/empty_vars,
-            # collapse=", ")` joins in `.run()` around L71/L82/L101) embed
-            # raw variable names from user CSV headers into HTML. Variable
-            # names containing `<`, `>`, `&` corrupt rendering. Wrap each
-            # `var` with `htmltools::htmlEscape()` inside the
-            # `glue::glue(...)` calls below (L483, L493, L504) and in the
-            # paste joins in `.run()` for defence in depth.
             warnings <- c()
 
             for (var in variables) {
@@ -488,7 +480,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (n_levels > 20) {
                     warnings <- c(warnings, glue::glue(
                         .("Variable '{var}' has {n} categories. Consider recoding variables with >20 categories for clearer interpretation."),
-                        var = var, n = n_levels
+                        var = htmltools::htmlEscape(var), n = n_levels
                     ))
                 }
                 
@@ -499,7 +491,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (sparse_categories > 0 && sparse_categories / length(freq_table) > 0.3) {
                         warnings <- c(warnings, glue::glue(
                             .("Variable '{var}' has {n} categories with <5 cases. Consider combining rare categories."),
-                            var = var, n = sparse_categories
+                            var = htmltools::htmlEscape(var), n = sparse_categories
                         ))
                     }
                 }
@@ -509,7 +501,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (missing_rate > 0.2) {
                     warnings <- c(warnings, glue::glue(
                         .("Variable '{var}' has {rate}% missing data. High missing rates may indicate data quality issues."),
-                        var = var, rate = round(missing_rate * 100, 1)
+                        var = htmltools::htmlEscape(var), rate = round(missing_rate * 100, 1)
                     ))
                 }
             }

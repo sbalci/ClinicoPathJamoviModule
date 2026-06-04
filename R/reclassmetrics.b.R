@@ -60,6 +60,12 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # Reset per-run accumulators (jamovi reuses the R6 instance across runs, so
+            # conditionally-set sub-elements like $continuous would otherwise leak a stale
+            # value into .generateSummary when nriType changes between runs)
+            private$.nriResults <- NULL
+            private$.idiResults <- NULL
+
             # Prepare data
             tryCatch({
                 private$.prepareData()
@@ -76,12 +82,17 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.generateSummary()
 
             }, error = function(e) {
-                stop(paste("Analysis failed:", e$message))
+                jmvcore::reject("Analysis failed: {}", e$message)
             })
         },
 
         .prepareData = function() {
             # Get data
+            # TODO (data hygiene): column matching relies on janitor::clean_names() (whole frame)
+            # and janitor::make_clean_names() (each option name, below) producing identical results.
+            # Two distinct source columns can clean to the same name (collision), or a name can clean
+            # differently in the two calls, silently yielding NULL / wrong columns. Prefer indexing
+            # self$data by the raw self$options$X (jmvcore idiom) instead of janitor name-cleaning.
             mydata <- self$data %>% janitor::clean_names()
 
             # Get variable names
@@ -96,33 +107,33 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validate probabilities
             if (any(old_prob < 0, na.rm = TRUE) || any(old_prob > 1, na.rm = TRUE)) {
-                stop("Old model predictions must be between 0 and 1")
+                jmvcore::reject("Old model predictions must be between 0 and 1")
             }
             if (any(new_prob < 0, na.rm = TRUE) || any(new_prob > 1, na.rm = TRUE)) {
-                stop("New model predictions must be between 0 and 1")
+                jmvcore::reject("New model predictions must be between 0 and 1")
             }
 
             # For binary outcome, ensure it's 0/1
             if (self$options$outcomeType == "binary") {
                 if (is.factor(outcome_vec)) {
-                    outcome_vec <- as.numeric(outcome_vec) - 1
+                    outcome_vec <- jmvcore::toNumeric(outcome_vec) - 1
                 }
                 if (!all(outcome_vec %in% c(0, 1))) {
-                    stop("Binary outcome must be 0/1 or a factor with 2 levels")
+                    jmvcore::reject("Binary outcome must be 0/1 or a factor with 2 levels")
                 }
             }
 
             # For survival outcome, get time variable
             if (self$options$outcomeType == "survival") {
                 if (is.null(self$options$survivalTime)) {
-                    stop("Survival time is required for survival outcome analysis")
+                    jmvcore::reject("Survival time is required for survival outcome analysis")
                 }
 
                 time_var <- janitor::make_clean_names(self$options$survivalTime)
                 time_vec <- mydata[[time_var]]
 
                 if (any(time_vec <= 0, na.rm = TRUE)) {
-                    stop("Survival times must be positive")
+                    jmvcore::reject("Survival times must be positive")
                 }
             } else {
                 time_vec <- NULL
@@ -135,7 +146,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (sum(complete_idx) == 0) {
-                stop("No complete cases available for analysis")
+                jmvcore::reject("No complete cases available for analysis")
             }
 
             private$.preparedData <- list(
@@ -158,7 +169,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             risk_cutoffs <- sort(unique(risk_cutoffs))
 
             if (length(risk_cutoffs) < 2) {
-                stop("At least 2 risk cutoffs are required")
+                jmvcore::reject("At least 2 risk cutoffs are required")
             }
 
             # Calculate NRI
@@ -365,6 +376,10 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .bootstrapNRI = function(outcome, old_prob, new_prob, cutoffs) {
+            # TODO (UX): nBootstrap is hard-capped at 500 here (and identically in
+            # .bootstrapContinuousNRI and .bootstrapIDI), but reclassmetrics.a.yaml lets the user
+            # set up to 2000 — any value above 500 is silently ignored. Either honour the option
+            # (drop the min(), or cap at the .a.yaml max) or lower the .a.yaml max to 500.
             n_boot <- min(self$options$nBootstrap, 500)
             n <- length(outcome)
             nri_boot <- numeric(n_boot)
@@ -377,11 +392,11 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 boot_old <- old_prob[boot_idx]
                 boot_new <- new_prob[boot_idx]
 
-                tryCatch({
+                nri_boot[i] <- tryCatch({
                     boot_result <- private$.categoricalNRI(boot_outcome, boot_old, boot_new, cutoffs)
-                    nri_boot[i] <- boot_result$nri_total
+                    boot_result$nri_total
                 }, error = function(e) {
-                    nri_boot[i] <- NA
+                    NA_real_
                 })
             }
 
@@ -407,11 +422,11 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 boot_old <- old_prob[boot_idx]
                 boot_new <- new_prob[boot_idx]
 
-                tryCatch({
+                nri_boot[i] <- tryCatch({
                     boot_result <- private$.continuousNRI(boot_outcome, boot_old, boot_new)
-                    nri_boot[i] <- boot_result$nri_total
+                    boot_result$nri_total
                 }, error = function(e) {
-                    nri_boot[i] <- NA
+                    NA_real_
                 })
             }
 
@@ -436,11 +451,11 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 boot_old <- old_prob[boot_idx]
                 boot_new <- new_prob[boot_idx]
 
-                tryCatch({
+                idi_boot[i] <- tryCatch({
                     boot_result <- private$.calculateIDI(boot_outcome, boot_old, boot_new)
-                    idi_boot[i] <- boot_result$idi
+                    boot_result$idi
                 }, error = function(e) {
-                    idi_boot[i] <- NA
+                    NA_real_
                 })
             }
 
@@ -453,9 +468,15 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .calculateSurvivalMetrics = function() {
+            # TODO (stub): unimplemented surface that is advertised in the UI/results —
+            #   (1) survival outcome path (this method) rejects; implement via survIDINRI / nricens.
+            #   (2) .reclassPlot renders an "under development" placeholder.
+            #   (3) reclassTable (showReclassTable) and calibrationComparison (showCalibrationComparison)
+            #       are declared in reclassmetrics.r.yaml but never populated, so those checkboxes
+            #       surface empty tables. Either implement them or hide the options.
             # Placeholder for survival-specific metrics
             # Would use survIDINRI package or similar for survival outcomes
-            stop("Survival outcome analysis not yet implemented. Use binary outcome type for now.")
+            jmvcore::reject("Survival outcome analysis not yet implemented. Use binary outcome type for now.")
         },
 
         .populateResults = function() {

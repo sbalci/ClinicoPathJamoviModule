@@ -47,6 +47,18 @@ qualityoflifeClass <- R6::R6Class(
         },
         
         .run = function() {
+
+            # Reset cached state so the L65-67 early-return (no items selected)
+            # doesn't leave stale Tables from a previous valid run.
+            private$.domain_data             <- NULL
+            private$.domain_scores           <- NULL
+            private$.summary_scores          <- NULL
+            private$.health_utilities        <- NULL
+            private$.quality_results         <- NULL
+            private$.clinical_interpretation <- NULL
+            private$.group_results           <- NULL
+            private$.longitudinal_results    <- NULL
+
             # Check if we have domain items
             domain_items <- c(
                 self$options$physical_function_items,
@@ -136,11 +148,17 @@ qualityoflifeClass <- R6::R6Class(
             
             for (pkg in required_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
-                    tryCatch({
-                        install.packages(pkg, repos = "https://cran.rstudio.com/")
-                    }, error = function(e) {
-                        self$results$qol_overview$setNote("error", paste("Failed to install package:", pkg))
-                    })
+                    # In jamovi the bundle declares its dependencies via
+                    # DESCRIPTION, so a missing package here means the user's
+                    # R installation is incomplete OR they invoked this code
+                    # outside jamovi. Surface a structured error instead of
+                    # trying to install.packages() from the analysis worker
+                    # (which would silently fail / hang). Mirror of the
+                    # patientreported fix earlier this session.
+                    jmvcore::reject(
+                        "The '{}' package is required but not installed. Please install it from R: install.packages('{}')",
+                        pkg, pkg
+                    )
                 }
             }
         },

@@ -56,6 +56,10 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             probs_str <- self$options$reference_percentiles
             probs <- as.numeric(strsplit(probs_str, ",")[[1]]) / 100
             if (length(probs) < 2) probs <- c(0.025, 0.975)
+            # TODO (correctness): a malformed reference_percentiles entry (e.g. "abc" or "2.5,x")
+            # parses to NA via as.numeric(); the length<2 guard above does NOT catch NA values, so
+            # quantile(x, probs = c(NA, ...)) errors later. Validate here — drop/reject NAs and
+            # values outside [0,1], fall back to c(0.025, 0.975), and surface a user notice.
 
             method <- self$options$ri_method
             
@@ -71,6 +75,10 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 method_desc <- "Non-parametric (Percentiles)"
             } else if (method == "parametric") {
                 # Mean +/- Z * SD
+                # TODO (correctness): z_val is computed from confidence_level but never used — the
+                # parametric branch hardcodes 1.96 below, so the confidence_level option is ignored.
+                # Decide whether the RI should use fixed population coverage (1.96 for 95%) or the
+                # user's confidence_level, then apply one consistently (and drop the dead z_val).
                 z_val <- qnorm(1 - (1 - self$options$confidence_level)/2) # Usually 1.96 for 95% CI, but RI is usually 95% of population
                 # RI is typically 95% of population, which is mean +/- 1.96*SD
                 # Confidence level option in UI might refer to the confidence of the limits themselves (uncertainty)
@@ -82,6 +90,15 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 upper <- m + 1.96 * s
                 method_desc <- "Parametric (Mean ± 1.96 SD)"
             } else {
+                # TODO (stub): the DEFAULT ri_method is "robust_nonparametric", but it (and
+                # "bootstrap"/"box_cox"/"log_normal") is NOT implemented — all fall through to this
+                # basic percentile branch, labelled "<method> (Basic Implementation)". A default run
+                # therefore silently returns plain percentiles, not the advertised robust method.
+                # Many declared options are also never read by .run(): outlier_detection,
+                # partitioning_analysis, harris_boyd_test, age/gender/ethnicity + age_partitioning,
+                # additional_factors, minimum_sample_size, age_breakpoints, verification_study,
+                # transferability_assessment, uncertainty_estimation, clinical_interpretation,
+                # quality_assessment, literature_comparison, and all *_plots. Implement or hide them.
                 # Default to simple non-parametric for others if not implemented
                 quants <- quantile(x, probs = probs)
                 lower <- quants[1]

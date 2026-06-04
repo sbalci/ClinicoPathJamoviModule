@@ -9,6 +9,11 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         # ── Internal storage ──────────────────────────────────────────────
+        # TODO (cleanup): .plot_data / .excess_plot_data / .prepared_data / .rate_table are
+        # dead stores — written in .run()/.generatePlotData/.calculateExcessMortality but never
+        # read back as fields (plots read image$state via setState; data/rate_table flow via
+        # function args). They're harmless (no stale-cache bug since never read) but should be
+        # dropped, or wired up if intended. .noticeList is the only field actually read (reset L92).
         .plot_data = NULL,
         .excess_plot_data = NULL,
         .prepared_data = NULL,
@@ -245,8 +250,8 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data$status_num <- as.numeric(status_raw == lvls[2])
                     self$results$survivalTable$setNote(
                         "status_levels",
-                        paste0("Vital status is a factor. Level '", lvls[2],
-                               "' treated as event (death); '", lvls[1],
+                        paste0("Vital status is a factor. Level '", htmltools::htmlEscape(lvls[2]),
+                               "' treated as event (death); '", htmltools::htmlEscape(lvls[1]),
                                "' treated as censored.")
                     )
                 } else {
@@ -616,7 +621,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 table$setNote("error",
-                    paste("Excess mortality calculation failed:", e$message))
+                    paste("Excess mortality calculation failed:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -685,7 +690,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 table$setNote("error",
-                    paste("Crude probability calculation failed:", e$message))
+                    paste("Crude probability calculation failed:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -793,7 +798,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 table$setNote("error",
-                    paste("Age standardization failed:", e$message))
+                    paste("Age standardization failed:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -880,7 +885,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 table$setNote("error",
-                    paste("Period analysis failed:", e$message))
+                    paste("Period analysis failed:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -899,8 +904,12 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             tryCatch({
-                cov_terms <- paste(sapply(covariates, jmvcore::composeTerm), collapse = " + ")
+                cov_terms <- paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                 formula_str <- paste0("survival::Surv(time_days, status_num) ~ ", cov_terms)
+                # TODO (forward-looking): once jmvcore is upgraded to 2.7.27+, switch this to
+                # jmvcore::asFormula(formula_str) for allowlist-validated parsing (Defense-2).
+                # RCE is already closed by composeTerms backtick-quoting above (Defense-1); note
+                # the namespaced survival::Surv(...) LHS would need handling in any asFormula move.
                 fml <- as.formula(formula_str)
 
                 reg_model <- NULL
@@ -956,7 +965,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 reg_table$setNote("error",
-                    paste("Regression model fitting failed:", e$message))
+                    paste("Regression model fitting failed:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -1034,7 +1043,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }, error = function(e) {
                 reg_table$setNote("error",
-                    paste("Could not display regression results:", e$message))
+                    paste("Could not display regression results:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -1405,6 +1414,11 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0(
                     "<div style='", style,
                     "padding:4px 8px;margin:4px 0;background:#fafafa;'>",
+                    # TODO (security): n$title / n$content are interpolated into notices HTML
+                    # unescaped. No live XSS today — every .addNotice() call passes developer
+                    # literals or numeric scalars — but if a future .addNotice ever passes a
+                    # column name, factor label, or e$message, wrap title/content in
+                    # htmltools::htmlEscape() here (defense-in-depth at the render boundary).
                     "<b>", icon, " ", n$title, ":</b> ", n$content,
                     "</div>"
                 )

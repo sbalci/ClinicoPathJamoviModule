@@ -108,7 +108,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
+                jmvcore::reject(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
             }
 
             # Safely require ggdist
@@ -143,7 +143,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             analysis_data <- analysis_data[complete.cases(analysis_data), ]
             
             if (nrow(analysis_data) == 0) {
-                stop(.("Error: No complete cases found for the selected variables."))
+                jmvcore::reject(.("Error: No complete cases found for the selected variables."))
             }
 
             # Convert variables to appropriate types
@@ -166,7 +166,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
             missing_counts <- sapply(required_vars, function(v) sum(!complete.cases(dataset[, required_vars])) + sum(!complete.cases(dataset[, v, drop=FALSE])))
             missing_msg <- paste0(
                 "<ul style='margin:6px 0;'>",
-                paste0("<li>", required_vars, ": ", missing_counts, " missing</li>", collapse = ""),
+                paste0("<li>", htmltools::htmlEscape(required_vars), ": ", missing_counts, " missing</li>", collapse = ""),
                 "</ul>"
             )
             summary_msg <- paste0(
@@ -174,7 +174,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "<strong>Data summary:</strong> ", nrow(analysis_data), " complete rows (removed ",
                 nrow(dataset) - nrow(analysis_data), " with missing values). ",
                 length(group_counts), " groups: ",
-                paste(paste0(names(group_counts), " (n=", group_counts, ")"), collapse = ", "),
+                paste(paste0(htmltools::htmlEscape(names(group_counts)), " (n=", group_counts, ")"), collapse = ", "),
                 ".", imbalance_note,
                 "<br><strong>Missing by variable:</strong>", missing_msg,
                 if (min_group < 10) " <span style='color:#d9534f'>(some groups have n < 10; avoid inferential tests)</span>" else "",
@@ -555,7 +555,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 stats_html <- paste0(
                     stats_html,
                     "<tr style='background-color: ", row_bg, ";'>",
-                    "<td><strong>", stats_summary[[group_var]][i], "</strong></td>",
+                    "<td><strong>", htmltools::htmlEscape(as.character(stats_summary[[group_var]][i])), "</strong></td>",
                     "<td>", stats_summary$n[i], "</td>",
                     "<td>", stats_summary$mean[i], "</td>",
                     "<td>", stats_summary$median[i], "</td>",
@@ -617,7 +617,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 count <- outliers_list[[group]]
                 total_outliers <- total_outliers + count
                 outlier_html <- paste0(outlier_html,
-                    "<li><strong>", group, ":</strong> ", count, " outliers detected</li>"
+                    "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, " outliers detected</li>"
                 )
             }
             
@@ -671,7 +671,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 normality_html <- paste0(
                     normality_html,
                     "<tr>",
-                    "<td>", group, "</td>",
+                    "<td>", htmltools::htmlEscape(group), "</td>",
                     "<td>", w_stat, "</td>",
                     "<td>", p_val, "</td>",
                     "<td>", interpretation, "</td>",
@@ -836,8 +836,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 
                 "<h4 style='color: #2e7d32;'>Plot Summary:</h4>",
                 "<ul>",
-                "<li><strong>Variable:</strong> ", dep_var, " (distribution analysis)</li>",
-                "<li><strong>Groups:</strong> ", n_groups, " groups defined by ", group_var, "</li>",
+                "<li><strong>Variable:</strong> ", htmltools::htmlEscape(dep_var), " (distribution analysis)</li>",
+                "<li><strong>Groups:</strong> ", n_groups, " groups defined by ", htmltools::htmlEscape(group_var), "</li>",
                 "<li><strong>Observations:</strong> ", n_total, " data points</li>",
                 "<li><strong>Visualization:</strong> ", 
                 paste(c(
@@ -881,10 +881,15 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
         },
         
         .generate_report_sentence = function(test_method, p_value, groups) {
-            significance <- if (p_value < 0.001) "highly significant" else 
+            significance <- if (p_value < 0.001) "highly significant" else
                            if (p_value < 0.01) "very significant" else
                            if (p_value < 0.05) "significant" else "not significant"
-            
+
+            # `groups` is `levels(data[[group_var]])` (user factor labels) at the
+            # caller — escape once here since they reach HTML <p> via report_text
+            # below, then concatenated into comparison_html → setContent.
+            groups <- htmltools::htmlEscape(groups)
+
             report_text <- sprintf(
                 "The %s test comparing %s showed %s differences (p = %.3f). %s",
                 test_method,
