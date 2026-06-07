@@ -261,6 +261,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        notices = function() private$.items[["notices"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
         modelSummary = function() private$.items[["modelSummary"]],
         coefficients = function() private$.items[["coefficients"]],
@@ -299,6 +300,22 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcome",
                     "outcomeLevel",
                     "explanatory")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "explanatory",
+                    "lambda",
+                    "penalty",
+                    "alpha",
+                    "nfolds",
+                    "standardize",
+                    "random_seed",
+                    "suitabilityCheck",
+                    "bootstrapValidation")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="suitabilityReport",
@@ -881,6 +898,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr

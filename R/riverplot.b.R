@@ -505,6 +505,11 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     data <- bind_rows(from_data, to_data)
 
+                    # TODO (correctness): private$.add_warning() is called here and at three other
+                    # sites (multi-format detection + large-dataset sampling) but is NEVER defined on
+                    # this R6 class — these branches raise "could not find function" at runtime if
+                    # reached. Define .add_warning (append to a warnings field rendered via
+                    # .show_warnings) or remove the calls.
                     private$.add_warning("Multi-format support: Detected and converted source-target format to long format")
                 }
 
@@ -594,6 +599,10 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Add misuse detection warnings
             tryCatch({
+                # TODO (correctness): .detect_misuse() returns list(errors, warnings) but this
+                # treats the whole list as a flat warnings vector — $errors is silently dropped
+                # and the c() concatenation is malformed. Use res <- private$.detect_misuse();
+                # warnings <- c(warnings, res$warnings) and surface res$errors appropriately.
                 misuse_warnings <- private$.detect_misuse()
                 warnings <- c(warnings, misuse_warnings)
             }, error = function(e) {
@@ -601,7 +610,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             })
 
             if (length(errors) > 0) {
-                stop(paste0("Validation failed: ", paste(errors, collapse = "; ")))
+                jmvcore::reject("Validation failed: {}", paste(errors, collapse = "; "))
             }
             
             # Display warnings if any
@@ -633,18 +642,18 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         # Check if categorical variable has too many levels
                         n_levels <- length(unique(data[[strata_var]]))
                         if (n_levels > 15) {
-                            warnings <- c(warnings, sprintf(.("Variable '%s' has %d categories: Too many categories may create cluttered visualization. Consider grouping into 5-10 meaningful categories."), strata_var, n_levels))
+                            warnings <- c(warnings, sprintf(.("Variable '%s' has %d categories: Too many categories may create cluttered visualization. Consider grouping into 5-10 meaningful categories."), private$.sanitizeHTML(strata_var), n_levels))
                         }
                         
                         # Check if variable should be factor
                         if (!is.factor(data[[strata_var]]) && n_levels < 20) {
-                            warnings <- c(warnings, sprintf(.("Variable '%s' should be converted to factor for proper category ordering and display."), strata_var))
+                            warnings <- c(warnings, sprintf(.("Variable '%s' should be converted to factor for proper category ordering and display."), private$.sanitizeHTML(strata_var)))
                         }
                         
                         # Check for empty categories
                         if (any(is.na(data[[strata_var]]))) {
                             na_count <- sum(is.na(data[[strata_var]]))
-                            warnings <- c(warnings, sprintf(.("Variable '%s' has %d missing values: Missing data will be excluded from flow analysis."), strata_var, na_count))
+                            warnings <- c(warnings, sprintf(.("Variable '%s' has %d missing values: Missing data will be excluded from flow analysis."), private$.sanitizeHTML(strata_var), na_count))
                         }
                     }
                 }
@@ -1554,7 +1563,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     .("Categorical distribution analysis of %d cases identified %d distinct categories in variable '%s'. %s visualization shows frequency distribution and proportional representation."),
                     n_observations,
                     n_categories,
-                    self$options$strata[1],
+                    private$.sanitizeHTML(self$options$strata[1]),
                     stringr::str_to_title(plot_type)
                 )
 
@@ -2105,7 +2114,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$riverplotObject$setContent(
-                    paste0("<div style='color: red;'>Error generating riverplot object: ", e$message, "</div>")
+                    paste0("<div style='color: red;'>Error generating riverplot object: ", private$.sanitizeHTML(e$message), "</div>")
                 )
             })
         },
@@ -2505,11 +2514,11 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<h4 style='color: #495057; margin-top: 0;'> CRAN Riverplot Object Structure</h4>",
                 "<h5>Nodes:</h5>",
                 "<pre style='background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px;'>",
-                paste(capture.output(print(head(obj$nodes))), collapse = "\n"),
+                private$.sanitizeHTML(paste(capture.output(print(head(obj$nodes))), collapse = "\n")),
                 "</pre>",
                 "<h5>Edges:</h5>",
                 "<pre style='background: white; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 11px;'>",
-                paste(capture.output(print(head(do.call(rbind, lapply(obj$edges[1:min(5, length(obj$edges))], as.data.frame))))), collapse = "\n"),
+                private$.sanitizeHTML(paste(capture.output(print(head(do.call(rbind, lapply(obj$edges[1:min(5, length(obj$edges))], as.data.frame))))), collapse = "\n")),
                 "</pre>",
                 "</div>"
             )
@@ -2546,6 +2555,13 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         # === Enhanced Methods (inspired by alluvial) ===
         
         # Generate comprehensive validation report
+        # TODO (security): this panel and .generate_clinical_insights_panel are defined but
+        # NEVER called from .run() (not currently reachable) — yet both inject user-controlled
+        # data into setContent HTML unescaped: the strata_var column name in this method's
+        # validation_issues sprintf, and factor-level values (top_flow$from_category/to_category,
+        # bottleneck) in .generate_clinical_insights_panel. BEFORE wiring either into .run(),
+        # wrap those tokens in private$.sanitizeHTML() (as done this session in .detect_misuse,
+        # .generate_report_sentence, and .format_riverplot_object_display).
         .generate_validation_report = function() {
             if (!("validation_report" %in% names(self$results))) return()
             

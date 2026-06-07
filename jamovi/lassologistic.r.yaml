@@ -12,6 +12,22 @@ items:
           - outcomeLevel
           - explanatory
 
+    - name: notices
+      title: Important Information
+      type: Html
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - explanatory
+          - lambda
+          - penalty
+          - alpha
+          - nfolds
+          - standardize
+          - random_seed
+          - suitabilityCheck
+          - bootstrapValidation
+
     - name: suitabilityReport
       title: Data Suitability Assessment
       type: Html

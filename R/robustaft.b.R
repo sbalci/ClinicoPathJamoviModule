@@ -199,7 +199,7 @@ robustaftClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ 1"
             } else {
-                formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "))
+                formula <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
             }
             
             # Add stratification
@@ -246,7 +246,7 @@ robustaftClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ 1"
             } else {
-                formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "))
+                formula <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
             }
             
             # Add stratification

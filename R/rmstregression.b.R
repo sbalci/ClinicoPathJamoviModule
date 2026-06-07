@@ -97,7 +97,7 @@ rmstregressionClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setVisible(TRUE)
-                error_msg <- paste0('<h3>Analysis Error</h3><p><b>Error:</b> ', e$message, '</p>')
+                error_msg <- paste0('<h3>Analysis Error</h3><p><b>Error:</b> ', htmltools::htmlEscape(e$message), '</p>')
                 
                 if (grepl("tau|restriction", e$message, ignore.case = TRUE)) {
                     error_msg <- paste0(error_msg, 
@@ -445,7 +445,7 @@ rmstregressionClass <- R6::R6Class(
             
             # Build regression formula
             explanatory_vars <- self$options$explanatory
-            formula_str <- paste("pseudo_rmst ~", paste(explanatory_vars, collapse = " + "))
+            formula_str <- jmvcore::constructFormula("pseudo_rmst", as.list(explanatory_vars))
             formula_obj <- as.formula(formula_str)
             
             # Fit linear regression
@@ -493,7 +493,7 @@ rmstregressionClass <- R6::R6Class(
             
             # Fit parametric survival model
             explanatory_vars <- self$options$explanatory
-            formula_str <- paste("Surv(time_restricted, event_restricted) ~", paste(explanatory_vars, collapse = " + "))
+            formula_str <- paste("Surv(time_restricted, event_restricted) ~", paste(jmvcore::composeTerms(as.list(explanatory_vars)), collapse = " + "))
             formula_obj <- as.formula(formula_str)
             
             # Try different distributions
@@ -828,11 +828,11 @@ rmstregressionClass <- R6::R6Class(
             
             if (length(groups) > 1) {
                 html <- paste0(html, '<p><b>Number of Groups:</b> ', length(groups), '</p>
-                              <p><b>Groups:</b> ', paste(groups, collapse = ", "), '</p>')
+                              <p><b>Groups:</b> ', paste(htmltools::htmlEscape(groups), collapse = ", "), '</p>')
             }
             
             if (length(self$options$explanatory) > 0) {
-                html <- paste0(html, '<p><b>Explanatory Variables:</b> ', paste(self$options$explanatory, collapse = ", "), '</p>')
+                html <- paste0(html, '<p><b>Explanatory Variables:</b> ', paste(htmltools::htmlEscape(self$options$explanatory), collapse = ", "), '</p>')
             }
             
             # Add interpretation guidance

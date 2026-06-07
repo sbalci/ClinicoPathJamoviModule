@@ -5,27 +5,6 @@ add other, remaining, out-of-scope observations as TODO items
 
 
 
-/jamovify-function reportcat2 --apply
-/security-audit-function reportcat2
-
-/jamovify-function retracted --apply
-/security-audit-function retracted
-
-/jamovify-function riverplot --apply
-/security-audit-function riverplot
-
-/jamovify-function rmst --apply
-/security-audit-function rmst
-
-/jamovify-function rmstregression --apply
-/security-audit-function rmstregression
-
-/jamovify-function robustaft --apply
-/security-audit-function robustaft
-
-/jamovify-function robustcorrelation --apply
-/security-audit-function robustcorrelation
-
 /jamovify-function roc2d --apply
 /security-audit-function roc2d
 

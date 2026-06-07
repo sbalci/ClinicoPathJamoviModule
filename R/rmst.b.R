@@ -490,7 +490,7 @@ rmstClass <- R6::R6Class(
             for (group in groups) {
                 result <- rmst_results[[group]]
                 summary_text <- paste0(summary_text, glue::glue(
-                    "• {group}: RMST = {round(result$rmst, 2)} 
+                    "• {htmltools::htmlEscape(group)}: RMST = {round(result$rmst, 2)}
                     (95% CI: {round(result$rmst_lower, 2)} - {round(result$rmst_upper, 2)}),
                     N = {result$n}, Events = {result$events}<br>"
                 ))
@@ -501,7 +501,7 @@ rmstClass <- R6::R6Class(
                 summary_text <- paste0(summary_text, glue::glue(
                     "<br><b>Group Comparison:</b>
                     <br>• Difference in RMST: {round(diff, 2)} time units
-                    <br>• {groups[1]} has {ifelse(diff > 0, 'longer', 'shorter')} average survival time within tau
+                    <br>• {htmltools::htmlEscape(groups[1])} has {ifelse(diff > 0, 'longer', 'shorter')} average survival time within tau
                     "
                 ))
             }

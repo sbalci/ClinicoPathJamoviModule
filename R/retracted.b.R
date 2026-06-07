@@ -164,7 +164,7 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check for empty data
             if (length(dois) == 0)
-                stop('No DOIs found in selected variable')
+                jmvcore::reject('No DOIs found in selected variable')
 
             # Remove NAs
             dois <- dois[!is.na(dois)]
@@ -176,7 +176,7 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             results <- tryCatch({
                 .check_retractions(dois, db)
             }, error = function(e) {
-                stop('Error checking retractions: ', e$message)
+                jmvcore::reject('Error checking retractions: {}', e$message)
             })
 
             # Get PMIDs if requested
@@ -262,7 +262,7 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<thead><tr><th>DOI</th><th>Status</th></tr></thead>",
                     "<tbody>",
                     paste(apply(details, 1, function(row) {
-                        paste0("<tr><td>", row[1], "</td><td>", row[2], "</td></tr>")
+                        paste0("<tr><td>", htmltools::htmlEscape(row[1]), "</td><td>", htmltools::htmlEscape(row[2]), "</td></tr>")
                     }), collapse = ""),
                     "</tbody></table>"
                 )

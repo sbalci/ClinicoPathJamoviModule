@@ -171,13 +171,13 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check for sufficient data
             if (nrow(data_clean) < 3) {
-                stop("Insufficient data for correlation analysis. Need at least 3 complete observations.")
+                jmvcore::reject("Insufficient data for correlation analysis. Need at least 3 complete observations.")
             }
 
             # Check for sufficient variation in each variable
             for (var in vars) {
                 if (length(unique(data_clean[[var]])) < 2) {
-                    stop(paste("Variable", var, "has insufficient variation for correlation analysis."))
+                    jmvcore::reject("Variable {} has insufficient variation for correlation analysis.", var)
                 }
             }
 
@@ -581,7 +581,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             instructions <- glue::glue(
                 "<br>Robust correlation analysis using {toupper(self$options$method)} method
-                <br>Variables: {paste(self$options$dep, collapse = ', ')}
+                <br>Variables: {paste(htmltools::htmlEscape(self$options$dep), collapse = ', ')}
                 <br>Sample size: {nrow(data)} complete observations
                 <br><hr>"
             )

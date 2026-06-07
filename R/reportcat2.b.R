@@ -61,7 +61,7 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if the provided data contains any rows.
             if (nrow(self$data) == 0)
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
 
             mydata <- self$data
 
@@ -74,7 +74,7 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
             catsummary <- function(myvar) {
                 # Validate variable exists
                 if (!myvar %in% names(mydata)) {
-                    return(paste0("<strong>Error:</strong> Variable '", myvar, "' not found in dataset."))
+                    return(paste0("<strong>Error:</strong> Variable '", htmltools::htmlEscape(myvar), "' not found in dataset."))
                 }
                 
                 # Calculate total observations, missing values, and valid (non-missing) count.
@@ -84,7 +84,7 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Handle edge case: all values are missing
                 if (valid_obs == 0) {
-                    return(paste0("<strong>", myvar, "</strong>: All ", total_obs, " observations are missing."))
+                    return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong>: All ", total_obs, " observations are missing."))
                 }
                 
                 num_levels <- nlevels(as.factor(mydata[[myvar]]))
@@ -92,7 +92,7 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Handle edge case: only one level
                 if (num_levels <= 1) {
                     unique_val <- unique(mydata[[myvar]][!is.na(mydata[[myvar]])])
-                    return(paste0("<strong>", myvar, "</strong>: Only one category ('", unique_val, "') with ", valid_obs, " observations. Missing: ", missing_obs, "."))
+                    return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong>: Only one category ('", htmltools::htmlEscape(unique_val), "') with ", valid_obs, " observations. Missing: ", missing_obs, "."))
                 }
 
                 # Create a summary table for the variable with safer filtering.
@@ -125,14 +125,14 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                             cumulative = cumsum(n),
                             cum_percent = round(cumulative / validtotal * 100, 1),
                             table_row = paste0(
-                                .[[1]], ": ", n, " (", percent, "%) ",
+                                htmltools::htmlEscape(.[[1]]), ": ", n, " (", percent, "%) ",
                                 if(self$options$show_proportions) paste0("[Cumulative: ", cumulative, " (", cum_percent, "%)]") else ""
                             )
                         ) %>%
                         dplyr::pull(table_row)
                     
                     # Create comprehensive summary
-                    header <- paste0("<strong>", myvar, "</strong> - Categorical Variable Summary<br>")
+                    header <- paste0("<strong>", htmltools::htmlEscape(myvar), "</strong> - Categorical Variable Summary<br>")
                     basic_info <- paste0(
                         "Total observations: ", total_obs, "<br>",
                         "Valid responses: ", valid_obs, " (", round(valid_obs/total_obs*100, 1), "%)<br>",
@@ -152,13 +152,13 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dplyr::mutate(
                             percent = n / validtotal,
                             level_description = glue::glue(
-                                "{...1}: n = {n}, {scales::percent(percent)} of valid cases. "
+                                "{htmltools::htmlEscape(...1)}: n = {n}, {scales::percent(percent)} of valid cases. "
                             )
                         ) %>%
                         dplyr::pull(level_description)
 
                     # Create overall summary sentences with HTML tags for styling.
-                    sentence1 <- paste0("<strong>", myvar, "</strong> has ", total_obs, " observations and ", num_levels, " levels.")
+                    sentence1 <- paste0("<strong>", htmltools::htmlEscape(myvar), "</strong> has ", total_obs, " observations and ", num_levels, " levels.")
                     sentence2 <- paste0("Missing values: ", missing_obs, ".")
                     full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
                 }
@@ -249,7 +249,7 @@ reportcat2Class <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_missing <- sum(is.na(data_col))
                 
                 html <- paste0(html, "<tr>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", htmltools::htmlEscape(var), "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", levels_count, "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", n_valid, "</td>")
                 html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", n_missing, "</td>")

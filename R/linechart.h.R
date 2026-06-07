@@ -181,6 +181,7 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        naturalSummary = function() private$.items[["naturalSummary"]],
         summary = function() private$.items[["summary"]],
         correlation = function() private$.items[["correlation"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -198,6 +199,11 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="todo",
                 title="Instructions",
+                visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="naturalSummary",
+                title="Summary",
                 visible=TRUE))
             self$add(jmvcore::Table$new(
                 options=options,
@@ -252,7 +258,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "linechart",
-                version = c(0,0,37),
+                version = c(0,0,38),
                 options = options,
                 results = linechartResults$new(options=options),
                 data = data,
@@ -316,6 +322,7 @@ linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr

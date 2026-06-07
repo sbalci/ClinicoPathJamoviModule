@@ -13,6 +13,47 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
     inherit = lassologisticBase,
     private = list(
 
+        # ══════════════════════════════════════════════════════════════════
+        # Notice collection (HTML-based)
+        # jmvcore::Notice objects inserted via self$results$insert() carry
+        # function references that break jamovi's protobuf serialization
+        # ("attempt to apply non-function"). Collect notices here and render
+        # them into a single Html output item instead. See waterfall.b.R.
+        # ══════════════════════════════════════════════════════════════════
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content)
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) return()
+
+            typeStyles <- list(
+                ERROR          = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5"),
+                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74"),
+                WARNING        = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047"),
+                INFO           = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>",
+                    htmltools::htmlEscape(notice$content), "</span>",
+                    "</div>")
+            }
+            html <- paste0(html, "</div>")
+            self$results$notices$setContent(html)
+        },
+
         .init = function() {
             if (!requireNamespace("glmnet", quietly = TRUE)) {
                 self$results$todo$setContent(paste0(
@@ -63,10 +104,9 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 msg_html <- htmltools::htmlEscape(e$message)
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>Data Error</h4><p>", msg_html, "</p></div>"))
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'dataError', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('Data preparation failed: %s'), msg_html))
-                self$results$insert(1, notice)
+                private$.addNotice("ERROR", .("Data Error"),
+                    sprintf(.('Data preparation failed: %s'), e$message))
+                private$.renderNotices()
                 return(NULL)
             })
             if (is.null(data)) return()
@@ -85,21 +125,17 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 msg_html <- htmltools::htmlEscape(e$message)
                 self$results$todo$setContent(paste0(
                     "<div class='alert alert-danger'><h4>Model Fitting Error</h4><p>", msg_html, "</p></div>"))
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'modelError', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('LASSO model fitting failed: %s'), msg_html))
-                self$results$insert(1, notice)
+                private$.addNotice("ERROR", .("Model Fitting Error"),
+                    sprintf(.('LASSO model fitting failed: %s'), e$message))
+                private$.renderNotices()
                 return(NULL)
             })
             if (is.null(fit_result)) return()
 
             # ── Notice: no variables selected ──────────────────────────────
             if (length(fit_result$selected) == 0) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'noVarsSelected', type = jmvcore::NoticeType$STRONG_WARNING)
-                notice$setContent(
+                private$.addNotice("STRONG_WARNING", .("No Variables Selected"),
                     .('LASSO selected zero variables at the chosen lambda. Try lambda.min instead of lambda.1se, or add more predictors.'))
-                self$results$insert(1, notice)
             }
 
             private$.checkpoint()
@@ -149,12 +185,12 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             # ── 12. Completion notice ──────────────────────────────────────
             n_sel <- length(fit_result$selected)
-            notice <- jmvcore::Notice$new(options = self$options,
-                name = 'analysisComplete', type = jmvcore::NoticeType$INFO)
-            notice$setContent(
+            private$.addNotice("INFO", .("Analysis Complete"),
                 sprintf(.('LASSO logistic regression completed: %d/%d predictors selected using %s penalty with %s lambda (N=%d, %d events).'),
                     n_sel, data$p, self$options$penalty, self$options$lambda, data$n, data$n_events))
-            self$results$insert(999, notice)
+
+            # ── 13. Render all collected notices as HTML ───────────────────
+            private$.renderNotices()
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -260,8 +296,6 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             # Optional standardization
             if (self$options$standardize) {
                 X <- scale(X)
-                attr(X, "scaled:center") <- attr(X, "scaled:center")
-                attr(X, "scaled:scale") <- attr(X, "scaled:scale")
             }
 
             list(
@@ -381,21 +415,15 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
 
             # Surface critical suitability issues as Notices
             if (n_red > 0) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'suitabilityRed', type = jmvcore::NoticeType$STRONG_WARNING)
                 red_items <- paste(sapply(checks[sapply(checks, function(x) x$status == "red")],
                     function(x) x$label), collapse = "; ")
-                notice$setContent(
+                private$.addNotice("STRONG_WARNING", .("Data Suitability"),
                     sprintf(.('Data suitability: %d major concern(s) detected (%s). Results may be unreliable; consider reducing predictors or collecting more data.'),
                             n_red, red_items))
-                self$results$insert(1, notice)
             } else if (n_yellow > 0) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'suitabilityYellow', type = jmvcore::NoticeType$WARNING)
-                notice$setContent(
+                private$.addNotice("WARNING", .("Data Suitability"),
                     sprintf(.('Data suitability: %d minor concern(s). Enable bootstrap validation to assess overfitting risk.'),
                             n_yellow))
-                self$results$insert(1, notice)
             }
         },
 
@@ -581,8 +609,9 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             f1 <- if (precision + recall > 0) 2 * precision * recall / (precision + recall) else 0
 
             rows <- list(
-                list("AUC (apparent)", sprintf("%.3f (%.3f-%.3f)", auc_val, auc_ci_lower, auc_ci_upper),
-                     if (auc_val >= 0.9) "Excellent" else if (auc_val >= 0.8) "Good" else if (auc_val >= 0.7) "Acceptable" else "Poor"),
+                list("AUC (apparent)",
+                     if (is.na(auc_val)) "Not available" else sprintf("%.3f (%.3f-%.3f)", auc_val, auc_ci_lower, auc_ci_upper),
+                     if (is.na(auc_val)) "AUC could not be computed" else if (auc_val >= 0.9) "Excellent" else if (auc_val >= 0.8) "Good" else if (auc_val >= 0.7) "Acceptable" else "Poor"),
                 list("Optimal threshold", sprintf("%.3f", optimal_threshold), "Youden index"),
                 list("Accuracy", sprintf("%.3f", accuracy), ""),
                 list("Sensitivity (Recall)", sprintf("%.3f", sensitivity), ""),
@@ -601,21 +630,15 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             if (!is.na(auc_val) && auc_val > 0.95 && data$n < 100) {
                 table$setNote("overfit_warning",
                     .("Warning: Very high apparent AUC with small sample size suggests possible overfitting. Enable bootstrap validation to assess optimism."))
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'overfitWarning', type = jmvcore::NoticeType$STRONG_WARNING)
-                notice$setContent(
+                private$.addNotice("STRONG_WARNING", .("Possible Overfitting"),
                     sprintf(.('Apparent AUC = %.3f with N = %d: likely overfitted. Enable bootstrap validation for corrected estimate.'),
                             auc_val, data$n))
-                self$results$insert(1, notice)
             }
 
             if (!is.na(auc_val) && auc_val < 0.7) {
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'poorDiscrimination', type = jmvcore::NoticeType$WARNING)
-                notice$setContent(
+                private$.addNotice("WARNING", .("Poor Discrimination"),
                     sprintf(.('AUC = %.3f indicates poor discrimination. Consider adding more informative predictors or using a different model.'),
                             auc_val))
-                self$results$insert(1, notice)
             }
         },
 
@@ -810,6 +833,9 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 perf_table$addRow(rowKey = i, values = list(
                     metric = perf_rows[[i]][[1]], value = perf_rows[[i]][[2]]))
             }
+
+            perf_table$setNote("dichotomization",
+                .("Continuous predictors are scored by dichotomizing at their median (1 point block above the median, 0 below). The performance shown here reflects this simplified integer point system and may differ from the continuous LASSO model in the Classification Performance table."))
 
             # ── Method comparison (when compare mode selected) ──────────
             if (method == "compare") {
@@ -1221,6 +1247,7 @@ lassologisticClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 "<li>With correlated predictors, LASSO arbitrarily selects one from a group. Consider elastic net (alpha 0.5).</li>",
                 "<li>Events-per-variable (EPV) should be ≥10. Below 5, results are unreliable regardless of regularization.</li>",
                 "<li>The scoring system rounds coefficients to integers, which loses precision but gains clinical usability.</li>",
+                "<li>Continuous predictors in the scoring system are dichotomized at their median; the score-based performance therefore reflects a simplified point model and may differ from the continuous LASSO model's AUC.</li>",
                 "<li>Bootstrap optimism correction estimates how much the apparent AUC overestimates true performance.</li>",
                 "</ul>"
             ))
