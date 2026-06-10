@@ -106,7 +106,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     current_content <- self$results$text$content
                     roi_note <- paste0("<p><b>Note:</b> Multiple ROIs detected (", 
                                      length(roi_values), " total). Analysis performed for ROI: ", 
-                                     selected_roi, ". Use separate analyses for other ROIs.</p>")
+                                     htmltools::htmlEscape(selected_roi), ". Use separate analyses for other ROIs.</p>")
                     
                     if (is.null(current_content) || current_content == "") {
                         self$results$text$setContent(roi_note)
@@ -178,7 +178,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 private$.generateClinicalInterpretation(clean_data, x_var, y_var, cell_type_var)
                 
             }, error = function(e) {
-                error_msg <- paste0("<p style='color: red;'><b>Error in spatial analysis:</b> ", e$message, "</p>")
+                error_msg <- paste0("<p style='color: red;'><b>Error in spatial analysis:</b> ", htmltools::htmlEscape(e$message), "</p>")
                 self$results$text$setContent(error_msg)
             })
         },
@@ -976,7 +976,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     cell_types <- unique(data[[cell_type_var]])
                     summary_text <- paste0(summary_text, 
                         " across ", length(cell_types), " cell types (", 
-                        paste(cell_types, collapse = ", "), ")"
+                        paste(htmltools::htmlEscape(cell_types), collapse = ", "), ")"
                     )
                 }
                 
@@ -1031,7 +1031,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     if (length(groups) >= 2) {
                         summary_text <- paste0(summary_text, 
                             " Comparative analysis between ", length(groups), " groups (",
-                            paste(groups, collapse = ", "), ") revealed differences in spatial organization ",
+                            paste(htmltools::htmlEscape(groups), collapse = ", "), ") revealed differences in spatial organization ",
                             "that may be clinically relevant for understanding treatment responses or disease progression."
                         )
                     }
@@ -1049,7 +1049,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }, error = function(e) {
                 # Set error message for copy summary
                 self$results$copysummary$setContent(
-                    paste0("<p style='color: red;'><b>Summary Generation Error:</b> ", e$message, "</p>")
+                    paste0("<p style='color: red;'><b>Summary Generation Error:</b> ", htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },
@@ -1130,7 +1130,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         result <- group_results[[group_name]]
                         comparison_html <- paste0(comparison_html, sprintf(
                             "<tr><td>%s</td><td>%d</td><td>%.4f</td><td>%.3f</td><td>%.3f</td><td>%s</td></tr>",
-                            group_name, result$n_points, result$density, result$mean_nnd, result$ce_r, result$spatial_pattern
+                            htmltools::htmlEscape(group_name), result$n_points, result$density, result$mean_nnd, result$ce_r, result$spatial_pattern
                         ))
                     }
                     comparison_html <- paste0(comparison_html, "</table>")
@@ -1148,16 +1148,16 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         comparison_html <- paste0(comparison_html, "<p><b>Pairwise Comparison:</b></p>")
                         comparison_html <- paste0(comparison_html, "<ul>")
                         comparison_html <- paste0(comparison_html, sprintf(
-                            "<li>Density ratio (%s/%s): %.2f</li>", group_names[1], group_names[2], density_ratio
+                            "<li>Density ratio (%s/%s): %.2f</li>", htmltools::htmlEscape(group_names[1]), htmltools::htmlEscape(group_names[2]), density_ratio
                         ))
                         comparison_html <- paste0(comparison_html, sprintf(
-                            "<li>Mean NND ratio (%s/%s): %.2f</li>", group_names[1], group_names[2], nnd_ratio
+                            "<li>Mean NND ratio (%s/%s): %.2f</li>", htmltools::htmlEscape(group_names[1]), htmltools::htmlEscape(group_names[2]), nnd_ratio
                         ))
                         comparison_html <- paste0(comparison_html, sprintf(
-                            "<li>%s pattern: %s (p=%.3f)</li>", group_names[1], group1$spatial_pattern, group1$ce_p
+                            "<li>%s pattern: %s (p=%.3f)</li>", htmltools::htmlEscape(group_names[1]), group1$spatial_pattern, group1$ce_p
                         ))
                         comparison_html <- paste0(comparison_html, sprintf(
-                            "<li>%s pattern: %s (p=%.3f)</li>", group_names[2], group2$spatial_pattern, group2$ce_p
+                            "<li>%s pattern: %s (p=%.3f)</li>", htmltools::htmlEscape(group_names[2]), group2$spatial_pattern, group2$ce_p
                         ))
                         comparison_html <- paste0(comparison_html, "</ul>")
                     }
@@ -1174,7 +1174,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }, error = function(e) {
                 # Add error message to text content
                 current_content <- self$results$text$content
-                error_note <- paste0("<p style='color: red;'><b>Group Comparison Error:</b> ", e$message, "</p>")
+                error_note <- paste0("<p style='color: red;'><b>Group Comparison Error:</b> ", htmltools::htmlEscape(e$message), "</p>")
                 
                 if (is.null(current_content) || current_content == "") {
                     self$results$text$setContent(error_note)

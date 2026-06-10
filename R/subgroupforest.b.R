@@ -114,46 +114,46 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             
             # Check variable existence
             if (!outcome_var %in% names(data))
-                stop(paste("Outcome variable '", outcome_var, "' not found in data"))
+                jmvcore::reject("Outcome variable '{}' not found in data", outcome_var)
             
             if (!treatment_var %in% names(data))
-                stop(paste("Treatment variable '", treatment_var, "' not found in data"))
+                jmvcore::reject("Treatment variable '{}' not found in data", treatment_var)
             
             for (var in subgroup_vars) {
                 if (!var %in% names(data))
-                    stop(paste("Subgroup variable '", var, "' not found in data"))
+                    jmvcore::reject("Subgroup variable '{}' not found in data", var)
             }
             
             # Validate survival-specific variables
             if (outcome_type == "survival") {
                 if (is.null(time_var) || time_var == "")
-                    stop("Time variable is required for survival analysis")
+                    jmvcore::reject("Time variable is required for survival analysis")
                 if (is.null(event_var) || event_var == "")
-                    stop("Event variable is required for survival analysis")
+                    jmvcore::reject("Event variable is required for survival analysis")
                 
                 if (!time_var %in% names(data))
-                    stop(paste("Time variable '", time_var, "' not found in data"))
+                    jmvcore::reject("Time variable '{}' not found in data", time_var)
                 if (!event_var %in% names(data))
-                    stop(paste("Event variable '", event_var, "' not found in data"))
+                    jmvcore::reject("Event variable '{}' not found in data", event_var)
                 
                 # Check time variable is numeric
                 if (!is.numeric(data[[time_var]]))
-                    stop("Time variable must be numeric")
+                    jmvcore::reject("Time variable must be numeric")
                     
                 # Check event variable is binary
                 event_values <- unique(data[[event_var]][!is.na(data[[event_var]])])
                 if (length(event_values) > 2 || !all(event_values %in% c(0, 1)))
-                    stop("Event variable must be binary (0=censored, 1=event)")
+                    jmvcore::reject("Event variable must be binary (0=censored, 1=event)")
             }
             
             # Validate treatment variable is binary
             treatment_values <- unique(data[[treatment_var]][!is.na(data[[treatment_var]])])
             if (length(treatment_values) != 2)
-                stop("Treatment variable must be binary (exactly 2 levels)")
+                jmvcore::reject("Treatment variable must be binary (exactly 2 levels)")
             
             # Check for minimum sample size
             if (nrow(data) < 10)
-                stop("Insufficient data: At least 10 observations required")
+                jmvcore::reject("Insufficient data: At least 10 observations required")
             
             # Validate subgroup variables are categorical
             for (var in subgroup_vars) {
@@ -425,7 +425,7 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             }
             
             if (nrow(self$data) == 0)
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
             
             # Validate inputs before proceeding
             private$.validateInputs()

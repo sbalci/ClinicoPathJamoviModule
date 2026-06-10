@@ -200,6 +200,68 @@
 #' @include stagemigration-competing-risks.R
 #' @include stagemigration_helpers.R
 
+# ============================================================================
+# TODO (security): C1 RCE remediation — DEDICATED SESSION REQUIRED (Step 2)
+# ----------------------------------------------------------------------------
+# WHAT: ~90 dynamic formula builders interpolate RAW user column names
+#   (self$options$oldStage / newStage / survivalTime, and covariate names) into
+#   as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage, ...))
+#   which reach coxph()/survreg(). R's model.frame EVALUATES the formula RHS, so a
+#   crafted column name (e.g. a column literally named
+#   `stop(paste(collapse=', ', system('ls', intern=TRUE)))`) = arbitrary code
+#   execution on the (shared cloud) jamovi worker. This is the highest-severity
+#   finding in the module.
+#
+# DONE (this pass):
+#   * Step 1 — central anchor in .validateData(): the returned analysis data now
+#     carries fixed internal-safe column aliases  stage_old / stage_new /
+#     time_internal  (alongside the pre-existing event_binary). Additive + guarded,
+#     so no behavior change. THIS IS A PREREQUISITE, NOT THE FIX.
+#   * Step 2 — migrated 1 of ~25 methods: .performTimeROCAnalysis (2 formula sites)
+#     now uses  as.formula("Surv(time_internal, event_binary) ~ stage_old/stage_new").
+#
+# REMAINING (~88 formula sites across ~24 methods) — the dedicated session:
+#   1. Enumerate the sites:
+#        grep -nE 'as\.formula\(\s*paste' R/stagemigration.b.R
+#      (the live ones interpolate time_var/time_col/survival_time + old_stage/
+#      new_stage/old_col/new_col; many also use  factor(", old_col, ")  and
+#      "+ covariate_formula").
+#   2. For EACH site's enclosing method, verify BEFORE swapping:
+#        (a) the method receives the .validateData() output (so the aliases exist
+#            in its `data`); methods called with a re-validated copy or self$data
+#            need the aliases added at their own prep point first;
+#        (b) whether the method DISPLAYS Cox coefficient NAMES (coef()/summary(cox)/
+#            rownames → tables). If yes, the RHS swap changes labels from
+#            <oldStageColName><level> to "stage_old<level>" — keep the RAW option
+#            name for the displayed label and only swap the FORMULA RHS.
+#   3. Swap the formula string to the internal literals:
+#        Surv(time_internal, event_binary) ~ stage_old   (and ~ stage_new, etc.)
+#      Leave time_var/old_stage variables intact for data[[...]] access + display.
+#   4. COVARIATES: covariate_formula (e.g. ~L13080 baseline/old_plus/new_plus
+#      models) is built from raw covariate column names — wrap those with
+#      jmvcore::composeTerms(), or add internal covariate aliases in .validateData
+#      and reference them.
+#   5. The 4 non-paste  as.formula(varname)  sites + the trend/quartile formulas
+#      (~ stage_numeric / ~ survival_quartile, internal computed columns) are
+#      already safe — confirm and skip.
+#   6. After each method: Rscript -e 'parse("R/stagemigration.b.R")'  + spot-run.
+#   Also: 1 na.omit (→ jmvcore::naOmit), 23 stop() (triage user-facing →
+#   jmvcore::reject), 164 as.numeric (sample for as.numeric(factor) → toNumeric)
+#   are lower-priority jamovify items deferred to the same session.
+#
+# TODO (security): D HTML/XSS — SECOND systematic surface (same dedicated session).
+#   ~51 setContent + ~40 setNote sinks, 111 e$message interpolations, 0 htmlEscape file-wide.
+#   Confirmed: ~L5519 setNote("models_compared", paste(... old_label ... new_label ...)) where
+#   old_label/new_label are STAGE LABELS from the data (~L5447-5464); also e$message → error panels
+#   (error_msg <- paste("Error in multi-state analysis:", e$message) ~L23221/L23812) → setContent.
+#   A crafted stage factor label / column name / error string injects (setNote IS an HTML sink).
+#   REMEDIATION: add a private helper .escHtml(x) = htmltools::htmlEscape(x), then per-sink:
+#   (1) enumerate  grep -nE 'setContent|setNote' R/stagemigration.b.R  + the e$message paste sites;
+#   (2) SKIP the literal *_explanation_html / methodology setContents (no interpolation);
+#   (3) wrap every interpolated stage label / column name / factor value / e$message with .escHtml().
+#   Table cells (addRow/setRow) are auto-escaped — only setContent/setNote HTML needs wrapping.
+# ============================================================================
+
 stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "stagemigrationClass",
     inherit = stagemigrationBase,
@@ -950,7 +1012,19 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # Return validated data with event_binary column
-            return(validation_result$data)
+            # C1 RCE hardening (Step-1 anchor): add fixed internal-safe column aliases so downstream
+            # Surv() formula builders can reference literal names (stage_old / stage_new / time_internal /
+            # event_binary) instead of raw self$options$* column names. Additive + guarded → no behavior
+            # change for existing code; event_binary is already present. (Step 2: migrate the ~90
+            # as.formula(paste(...)) sites to use these literals — tracked TODO below.)
+            vdata <- validation_result$data
+            if (!is.null(self$options$oldStage) && self$options$oldStage %in% names(vdata))
+                vdata[["stage_old"]] <- vdata[[self$options$oldStage]]
+            if (!is.null(self$options$newStage) && self$options$newStage %in% names(vdata))
+                vdata[["stage_new"]] <- vdata[[self$options$newStage]]
+            if (!is.null(self$options$survivalTime) && self$options$survivalTime %in% names(vdata))
+                vdata[["time_internal"]] <- vdata[[self$options$survivalTime]]
+            return(vdata)
         },
 
         .calculateBasicMigration = function(data) {
@@ -1290,9 +1364,24 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             time_var <- self$options$survivalTime
             event_var <- "event_binary"
 
+            # TODO (security): C1 RCE — Step 2 IN PROGRESS (~88 of ~90 sites remain). old_stage/new_stage/
+            #   time_var are RAW self$options$oldStage/newStage/survivalTime column names pasted into
+            #   as.formula(paste(...)) → coxph/survreg (model.frame evaluates the RHS = arbitrary code
+            #   execution via a crafted column name). Step 1 (DONE, .validateData) exposes fixed internal-
+            #   safe aliases stage_old / stage_new / time_internal / event_binary in the analysis data.
+            #   DONE so far: .performTimeROCAnalysis (the 2 formulas just below). REMAINING: migrate the
+            #   other ~88 as.formula(paste("Surv(", time_var, ...) ~", old_stage)) sites to those literals,
+            #   e.g. as.formula("Surv(time_internal, event_binary) ~ stage_old"). PER-SITE CHECKLIST:
+            #   (1) confirm the method receives the .validateData() output (aliases present), (2) confirm it
+            #   does NOT display Cox COEFFICIENT NAMES (would regress oldStageName→stage_old in tables) —
+            #   if it does, keep raw name for the displayed label and only swap the formula RHS, (3) keep
+            #   the RAW option name for any DISPLAY use. Covariate RHS (covariate_formula, ~L13080) also
+            #   needs composeTerms / internal aliasing.
             # Fit Cox models
-            old_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", old_stage))
-            new_formula <- as.formula(paste("Surv(", time_var, ",", event_var, ") ~", new_stage))
+            # C1 fix (Step 2): internal-safe literals (stage_old/stage_new/time_internal/event_binary
+            # added by .validateData) — closes the RCE; same model (these are copies of the user cols).
+            old_formula <- as.formula("Surv(time_internal, event_binary) ~ stage_old")
+            new_formula <- as.formula("Surv(time_internal, event_binary) ~ stage_new")
 
             old_cox <- coxph(old_formula, data = data)
             new_cox <- coxph(new_formula, data = data)
@@ -28336,9 +28425,10 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     return(simplified_results)
                 }
                 
-                # Perform frailty models analysis with coxme
-                library(coxme)
-                
+                # Perform frailty models analysis with coxme (calls are coxme:: qualified below;
+                # requireNamespace guard above — no library() so we don't mutate the user search
+                # path / trip R CMD check).
+
                 # Create survival objects
                 surv_formula_old <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage_var, "` + (1|`", cluster_var, "`)", sep=""))
                 surv_formula_new <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage_var, "` + (1|`", cluster_var, "`)", sep=""))
@@ -28346,13 +28436,13 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                 
                 # Fit frailty models
                 model_old <- tryCatch({
-                    coxme(surv_formula_old, data = complete_data)
+                    coxme::coxme(surv_formula_old, data = complete_data)
                 }, error = function(e) {
                     return(NULL)
                 })
                 
                 model_new <- tryCatch({
-                    coxme(surv_formula_new, data = complete_data)
+                    coxme::coxme(surv_formula_new, data = complete_data)
                 }, error = function(e) {
                     return(NULL)
                 })
@@ -28478,8 +28568,8 @@ stagemigrationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                             boot_data <- complete_data[boot_indices, ]
                             
                             # Fit models
-                            boot_old <- coxme(surv_formula_old, data = boot_data)
-                            boot_new <- coxme(surv_formula_new, data = boot_data)
+                            boot_old <- coxme::coxme(surv_formula_old, data = boot_data)
+                            boot_new <- coxme::coxme(surv_formula_new, data = boot_data)
                             
                             # Extract variance components
                             c(old = as.numeric(VarCorr(boot_old)), new = as.numeric(VarCorr(boot_new)))

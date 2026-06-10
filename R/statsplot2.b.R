@@ -61,12 +61,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # Check if number of observations is divisible by number of groups
                     n_obs <- nrow(data)
                     if (n_obs %% n_levels != 0) {
+                        group_var_safe <- private$.safeHtmlOutput(group_var)
+                        group_levels_safe <- private$.safeHtmlOutput(paste(group_levels, collapse = ', '))
                         warning_msg <- glue::glue(
                             "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
                             "<strong>Design-Data Mismatch Warning</strong><br/>",
                             "You selected <strong>Repeated Measures</strong> design, but the data structure may not match:<br/>",
                             "• Total observations: {n_obs}<br/>",
-                            "• Groups in '{group_var}': {n_levels} ({paste(group_levels, collapse=', ')})<br/>",
+                            "• Groups in '{group_var_safe}': {n_levels} ({group_levels_safe})<br/>",
                             "• Expected for balanced repeated measures: {n_obs} should be divisible by {n_levels}<br/><br/>",
                             "<strong>Possible issues:</strong><br/>",
                             "1. This might be <em>independent groups</em> data, not repeated measures<br/>",
@@ -237,8 +239,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             all(abs(v[!is.na(v)] - round(v[!is.na(v)])) < .Machine$double.eps^0.5)) {
                             # Warning for borderline cases
                             if (unique_vals > 10) {
-                                warning(sprintf(
-                                    "Variable has %d unique integer values (borderline categorical/continuous). Treating as categorical. To force continuous, convert to numeric with decimals.",
+                                warning(jmvcore::format(
+                                    "Variable has {} unique integer values (borderline categorical/continuous). Treating as categorical. To force continuous, convert to numeric with decimals.",
                                     unique_vals
                                 ))
                             }
@@ -682,8 +684,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                 # Enhanced data validation with context
                 if (nrow(self$data) == 0) {
-                    dep_name <- self$options$dep %||% "not selected"
-                    group_name <- self$options$group %||% "not selected"
+                    dep_name <- private$.safeHtmlOutput(self$options$dep %||% "not selected")
+                    group_name <- private$.safeHtmlOutput(self$options$group %||% "not selected")
                     error_html <- glue::glue(
                         "<div style='color: #d32f2f; padding: 15px; border-left: 4px solid #d32f2f; background: #ffebee;'>",
                         "<h4 style='margin-top: 0;'>No Data Available</h4>",
@@ -1183,10 +1185,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             .plotAlluvialGG = function(prepared_data) {
                 # Enhanced package validation
                 if (!requireNamespace("ggalluvial", quietly = TRUE)) {
-                    stop("Package 'ggalluvial' is required for alluvial plots but is not installed. Install with: install.packages('ggalluvial')")
+                    jmvcore::reject("Package 'ggalluvial' is required for alluvial plots but is not installed. Install with: install.packages('ggalluvial')")
                 }
                 if (!requireNamespace("dplyr", quietly = TRUE)) {
-                    stop("Package 'dplyr' is required for data manipulation but is not installed. Install with: install.packages('dplyr')")
+                    jmvcore::reject("Package 'dplyr' is required for data manipulation but is not installed. Install with: install.packages('dplyr')")
                 }
                 
                 # Create plot data
@@ -1228,7 +1230,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             .plotAlluvialEasy = function(prepared_data) {
                 # Enhanced package validation
                 if (!requireNamespace("easyalluvial", quietly = TRUE)) {
-                    stop("Package 'easyalluvial' is required for simplified alluvial plots but is not installed. Install with: install.packages('easyalluvial')")
+                    jmvcore::reject("Package 'easyalluvial' is required for simplified alluvial plots but is not installed. Install with: install.packages('easyalluvial')")
                 }
                 
                 plot <- easyalluvial::alluvial_wide(
@@ -1258,6 +1260,16 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     grouped_func_available <- TRUE
                 } else if (analysis_info$plot_type == "independent_continuous_continuous") {
                     # Try grouped_ggscatterstats if available
+                    # TODO (correctness): the `error = function(e)` handler below assigns
+                    # `grouped_func_available <- FALSE` in its OWN local scope (no `<<-`), so the
+                    # assignment is discarded. It is harmless only because FALSE is already the
+                    # default (see :1245) and the success path sets TRUE last; if that default ever
+                    # becomes TRUE, a grouped_ggscatterstats failure would NOT reset the flag and the
+                    # manual fallback path would be skipped. Fix: use `<<-` or capture the result of
+                    # tryCatch (e.g. `ok <- tryCatch({...; TRUE}, error = function(e) FALSE)`).
+                    # Note also the asymmetry: the `independent_factor_continuous` branch above
+                    # (:1250) has no tryCatch at all, so a grouped_ggbetweenstats failure propagates
+                    # uncaught through .generatePlot (:1029 is not wrapped).
                     tryCatch({
                         plot <- ggstatsplot::grouped_ggscatterstats(
                             data = prepared_data$data,

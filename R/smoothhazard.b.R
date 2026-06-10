@@ -147,7 +147,7 @@ smoothhazardClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                self$results$data_summary$setContent(paste("Analysis error:", e$message))
+                self$results$data_summary$setContent(paste("Analysis error:", htmltools::htmlEscape(e$message)))
             })
         },
 
@@ -165,6 +165,10 @@ smoothhazardClass <- R6::R6Class(
                     status = status
                 )
 
+                # TODO (stub): covariates are added to analysis_data and drive the complete.cases
+                #   filtering below, but the smooth-hazard model (Surv(time, status), ~L279) never
+                #   uses them — selecting covariates silently narrows the sample without adjusting the
+                #   hazard. Either model them or drop the option / document the filtering-only behavior.
                 # Add covariates if specified
                 if (length(covariates) > 0) {
                     missing_covs <- covariates[!(covariates %in% names(data))]
@@ -194,6 +198,10 @@ smoothhazardClass <- R6::R6Class(
                     analysis_data <- analysis_data[analysis_data$time > 0, ]
                 }
 
+                # TODO (correctness): if status is an unordered 2-level FACTOR, max(unique(status))
+                #   below errors (caught by the outer tryCatch -> silent NULL, blank analysis). The
+                #   `== max()` recoding assumes numeric/orderable status — coerce via as.character()/
+                #   levels() or require a numeric 0/1 status before this branch.
                 if (!all(analysis_data$status %in% c(0, 1), na.rm = TRUE)) {
                     # Try to convert status to 0/1
                     unique_status <- unique(analysis_data$status)
@@ -251,7 +259,7 @@ smoothhazardClass <- R6::R6Class(
                         stratum_events <- sum(stratum_data$status, na.rm = TRUE)
                         
                         html <- paste0(html, "<tr>")
-                        html <- paste0(html, "<td>", stratum, "</td>")
+                        html <- paste0(html, "<td>", htmltools::htmlEscape(stratum), "</td>")
                         html <- paste0(html, "<td>", strata_counts[stratum], "</td>")
                         html <- paste0(html, "<td>", stratum_events, "</td>")
                         html <- paste0(html, "</tr>")
@@ -260,7 +268,7 @@ smoothhazardClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Data summary error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Data summary error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$data_summary$setContent(html)
@@ -538,7 +546,7 @@ smoothhazardClass <- R6::R6Class(
                 }
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Summary generation error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Summary generation error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$hazard_summary$setContent(html)
@@ -579,7 +587,7 @@ smoothhazardClass <- R6::R6Class(
                 html <- paste0(html, "</ul>")
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Bandwidth results error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Bandwidth results error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$bandwidth_selection$setContent(html)
@@ -822,7 +830,7 @@ smoothhazardClass <- R6::R6Class(
                 html <- paste0(html, "<p><b>Clinical Interpretation:</b> ", length(peaks), " distinct risk period(s) identified.</p>")
 
             }, error = function(e) {
-                html <- paste0(html, "<p>Peak analysis error: ", e$message, "</p>")
+                html <<- paste0(html, "<p>Peak analysis error: ", htmltools::htmlEscape(e$message), "</p>")
             })
 
             self$results$peak_analysis$setContent(html)

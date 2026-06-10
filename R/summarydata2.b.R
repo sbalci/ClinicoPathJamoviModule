@@ -185,7 +185,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                     "<h4> Input Validation Error</h4>",
-                    "<p>", e$message, "</p>",
+                    "<p>", htmltools::htmlEscape(e$message), "</p>",
                     "<p><em>Please check your variable selections and data, then try again.</em></p>",
                     "</div>"
                 )
@@ -348,10 +348,10 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
                             return(date_summary)
                         } else {
-                            return(paste0("<strong>", myvar, "</strong> (Date Variable): No valid dates found<br><br>"))
+                            return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong> (Date Variable): No valid dates found<br><br>"))
                         }
                     }, error = function(e) {
-                        return(paste0("<strong>", myvar, "</strong> (Date Variable): Error processing dates - ", e$message, "<br><br>"))
+                        return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong> (Date Variable): Error processing dates - ", htmltools::htmlEscape(e$message), "<br><br>"))
                     })
                 } else {
                     # Handle numeric variable with error handling
@@ -361,7 +361,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                         # Check for sufficient valid data
                         valid_data <- na.omit(numeric_data)
                         if (length(valid_data) < 2) {
-                            return(paste0("<strong>", myvar, "</strong>: Insufficient valid data (n=", length(valid_data), ")<br><br>"))
+                            return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong>: Insufficient valid data (n=", length(valid_data), ")<br><br>"))
                         }
 
                     # Original statistics (preserved for backward compatibility)
@@ -477,13 +477,13 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     return(private$.generate_summarytools_output(myvar, data_subset, summary_format))
                 } else {
                     # Original output format (preserved)
-                    return(paste0("Mean of <strong>", myvar, "</strong> is: ", mean_x, " \U00B1 ", sd_x,
+                    return(paste0("Mean of <strong>", htmltools::htmlEscape(myvar), "</strong> is: ", mean_x, " \U00B1 ", sd_x,
                                  ". (Median: ", median_x, " [Min: ", min_x, " - ", "Max: ",
                                  max_x, "]) <br>", dist_text, "<br><br>", collapse = " "))
                 }
 
                     }, error = function(e) {
-                        return(paste0("<strong>", myvar, "</strong>: Error processing numeric data - ", e$message, "<br><br>"))
+                        return(paste0("<strong>", htmltools::htmlEscape(myvar), "</strong>: Error processing numeric data - ", htmltools::htmlEscape(e$message), "<br><br>"))
                     })
                 } # End of numeric variable handling
 
@@ -511,7 +511,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     for (var in all_vars) {
                         # Pass the group subset to mysummary function
                         level_summary <- mysummary(var, group_subset)
-                        level_results[[var]] <- paste0("<em>Group: ", level, "</em><br>", level_summary)
+                        level_results[[var]] <- paste0("<em>Group: ", htmltools::htmlEscape(level), "</em><br>", level_summary)
                     }
 
                     group_results[[level]] <- paste(unlist(level_results), collapse = "<br>")
@@ -521,7 +521,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 }, error = function(e) {
                     error_msg <- paste0(
                         "<div style='color: red; padding: 10px; background-color: #ffebee;'>",
-                        "<strong>Error in grouped analysis:</strong> ", e$message,
+                        "<strong>Error in grouped analysis:</strong> ", htmltools::htmlEscape(e$message),
                         "<br>Falling back to ungrouped analysis.",
                         "</div><br>"
                     )
@@ -636,7 +636,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 
                 if (length(data_col) > 0) {
                     html <- paste0(html, "<tr>")
-                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", var, "</td>")
+                    html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", htmltools::htmlEscape(var), "</td>")
                     html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", length(data_col), "</td>")
                     html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(mean(data_col, na.rm = TRUE), 2), "</td>")
                     html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(sd(data_col, na.rm = TRUE), 2), "</td>")
@@ -690,7 +690,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             }, error = function(e) {
                 return(paste0(
                     "<div style='color: red; padding: 15px; background-color: #ffebee;'>",
-                    "<strong>Error generating pivot summary:</strong> ", e$message,
+                    "<strong>Error generating pivot summary:</strong> ", htmltools::htmlEscape(e$message),
                     "</div>"
                 ))
             })
@@ -794,7 +794,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             # Individual variable summarytools output - IMPLEMENTED
             tryCatch({
                 if (!requireNamespace("summarytools", quietly = TRUE)) {
-                    return(paste0("<em>summarytools package required for ", myvar, "</em><br><br>"))
+                    return(paste0("<em>summarytools package required for ", htmltools::htmlEscape(myvar), "</em><br><br>"))
                 }
 
                 # Set summarytools options for individual analysis
@@ -819,7 +819,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                         footnote = NA
                     )
 
-                    return(paste0("<h4>", myvar, " - Descriptive Statistics</h4>", html_output, "<br>"))
+                    return(paste0("<h4>", htmltools::htmlEscape(myvar), " - Descriptive Statistics</h4>", html_output, "<br>"))
 
                 } else if (summary_format == "summarytools_freq" && (is.factor(data_subset[[myvar]]) || is.character(data_subset[[myvar]]))) {
                     # Frequency analysis for individual categorical variable
@@ -837,15 +837,15 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                         footnote = NA
                     )
 
-                    return(paste0("<h4>", myvar, " - Frequency Table</h4>", html_output, "<br>"))
+                    return(paste0("<h4>", htmltools::htmlEscape(myvar), " - Frequency Table</h4>", html_output, "<br>"))
 
                 } else {
                     # Default summary for individual variable
-                    return(paste0("<em>Individual summarytools analysis for ", myvar, " (", summary_format, ")</em><br><br>"))
+                    return(paste0("<em>Individual summarytools analysis for ", htmltools::htmlEscape(myvar), " (", summary_format, ")</em><br><br>"))
                 }
 
             }, error = function(e) {
-                return(paste0("<em>Error in summarytools analysis for ", myvar, ": ", e$message, "</em><br><br>"))
+                return(paste0("<em>Error in summarytools analysis for ", htmltools::htmlEscape(myvar), ": ", htmltools::htmlEscape(e$message), "</em><br><br>"))
             })
         },
 
@@ -982,7 +982,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 error_html <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>",
                     "<h4>summarytools Error</h4>",
-                    "<p>Error generating summarytools output: ", e$message, "</p>",
+                    "<p>Error generating summarytools output: ", htmltools::htmlEscape(e$message), "</p>",
                     "<p><em>Please check your data and try again.</em></p>",
                     "</div>"
                 )

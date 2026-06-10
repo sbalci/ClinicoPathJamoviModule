@@ -214,9 +214,9 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
             
             # Handle nested vs crossed clusters
             if (self$options$nest_clusters) {
-              cluster_formula <- as.formula(paste("~", self$options$cluster))
+              cluster_formula <- as.formula(paste("~", jmvcore::composeTerm(self$options$cluster)))
             } else {
-              cluster_formula <- as.formula(paste("~", self$options$strata, "+", self$options$cluster))
+              cluster_formula <- as.formula(paste("~", jmvcore::composeTerm(self$options$strata), "+", jmvcore::composeTerm(self$options$cluster)))
             }
             
             design <- survey::svydesign(
@@ -237,8 +237,8 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Survey Design Error</h3><p>", 
-            e$message, 
+            "<h3>Survey Design Error</h3><p>",
+            htmltools::htmlEscape(e$message),
             "</p>"
           ))
           return(NULL)
@@ -275,7 +275,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           for (var in required_vars) {
             if (!(var %in% names(data))) {
               self$results$todo$setContent(paste0(
-                "<h3>Missing Variable</h3><p>Variable '", var, "' not found in data.</p>"
+                "<h3>Missing Variable</h3><p>Variable '", htmltools::htmlEscape(var), "' not found in data.</p>"
               ))
               return(NULL)
             }
@@ -298,7 +298,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Data Preparation Error</h3><p>", e$message, "</p>"
+            "<h3>Data Preparation Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
@@ -345,7 +345,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Date Calculation Error</h3><p>", e$message, "</p>"
+            "<h3>Date Calculation Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
@@ -363,7 +363,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
           # Create survival formula
           if (!is.null(self$options$explanatory) && length(self$options$explanatory) > 0) {
-            explanatory_vars <- paste(self$options$explanatory, collapse = " + ")
+            explanatory_vars <- paste(jmvcore::composeTerms(as.list(self$options$explanatory)), collapse = " + ")
             km_formula <- as.formula(paste("surv_obj ~", explanatory_vars))
           } else {
             km_formula <- surv_obj ~ 1
@@ -384,7 +384,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Kaplan-Meier Error</h3><p>", e$message, "</p>"
+            "<h3>Kaplan-Meier Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
         })
       },
@@ -405,7 +405,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
           if (length(predictors) == 0) return()
           
-          cox_formula <- as.formula(paste("surv_obj ~", paste(predictors, collapse = " + ")))
+          cox_formula <- as.formula(paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + ")))
           
           # Perform weighted Cox regression
           if (requireNamespace("survey", quietly = TRUE)) {
@@ -417,7 +417,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Cox Regression Error</h3><p>", e$message, "</p>"
+            "<h3>Cox Regression Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
         })
       },
@@ -442,6 +442,11 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           }
           
         }, error = function(e) {
+          # TODO (UX): file-wide pattern — these display/estimate helpers swallow
+          # errors into empty handlers with no user feedback (also .displayCoxResults
+          # ~L464, .plotKM ~L480, .populationEstimates ~L514). A genuine failure makes
+          # the result panel silently blank. Surface it via the todo/notice panel
+          # (htmlEscape'd) instead of discarding e.
           # Error handled silently - display in main results
         })
       },
@@ -454,7 +459,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           
           result_text <- paste0(
             "<h3>Survey-Weighted Cox Regression</h3>",
-            "<p><b>Model:</b> ", deparse(cox_result$call$formula), "</p>",
+            "<p><b>Model:</b> ", htmltools::htmlEscape(deparse(cox_result$call$formula)), "</p>",
             "<p><b>Observations:</b> ", cox_result$n, "</p>"
           )
           
@@ -483,6 +488,12 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
       
       # Create KM plot object
       .createKMPlot = function(km_result) {
+        # TODO (stub): KM plotting is unimplemented — this returns NULL and the
+        # render fn .kmPlot (~L562) is also an empty NULL stub, so the km_plot
+        # option (wired in .a.yaml/.u.yaml and gated at .weightedKaplanMeier ~L380)
+        # produces no plot. Either implement weighted-survival-curve plotting here
+        # + in .kmPlot, or hide the km_plot/endplot/byplot/ci95/risktable options
+        # until it's built.
         # This would implement the actual plotting logic
         # For now, return NULL as placeholder
         return(NULL)
@@ -520,9 +531,9 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
         design_text <- paste0(
           "<h3>Survey Design Summary</h3>",
           "<p><b>Design Type:</b> ", self$options$design_type, "</p>",
-          "<p><b>Weights:</b> ", ifelse(is.null(self$options$weights), "None", self$options$weights), "</p>",
-          "<p><b>Strata:</b> ", ifelse(is.null(self$options$strata), "None", self$options$strata), "</p>",
-          "<p><b>Clusters:</b> ", ifelse(is.null(self$options$cluster), "None", self$options$cluster), "</p>"
+          "<p><b>Weights:</b> ", ifelse(is.null(self$options$weights), "None", htmltools::htmlEscape(self$options$weights)), "</p>",
+          "<p><b>Strata:</b> ", ifelse(is.null(self$options$strata), "None", htmltools::htmlEscape(self$options$strata)), "</p>",
+          "<p><b>Clusters:</b> ", ifelse(is.null(self$options$cluster), "None", htmltools::htmlEscape(self$options$cluster)), "</p>"
         )
         
         self$results$designSummary$setContent(design_text)

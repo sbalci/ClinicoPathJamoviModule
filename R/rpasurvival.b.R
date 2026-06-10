@@ -3,12 +3,6 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "rpasurvivalClass",
     inherit = rpasurvivalBase,
     private = list(
-        # Escape variable names for safe formula construction
-        .escapeVar = function(x) {
-            # Use jmvcore::composeTerm for safe variable names
-            jmvcore::composeTerm(x)
-        },
-
         # Get time multiplier for 5-year survival calculation
         .getTime5Year = function() {
             switch(self$options$time_unit,
@@ -239,7 +233,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             }))
             # Use escaped names for safe formula construction
-            escapedNames <- sapply(self$options$predictors, private$.escapeVar)
+            escapedNames <- jmvcore::composeTerms(as.list(self$options$predictors))
             names(predictorData) <- escapedNames
 
             # Create complete case dataset
@@ -280,7 +274,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$instructions$setVisible(TRUE)
                 private$.hideResults()
                 private$.addNotice("ERROR", "Model Fitting Failed",
-                    paste0("Error: ", e$message))
+                    paste0("Error: ", htmltools::htmlEscape(e$message)))
                 private$.renderNotices()
                 return()
             })
@@ -537,7 +531,7 @@ rpasurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
 
                 private$.addNotice("INFO", "Variable Created",
-                    paste0("New variable '", newVarName, "' created with ", nGroups, " risk groups."))
+                    paste0("New variable '", htmltools::htmlEscape(newVarName), "' created with ", nGroups, " risk groups."))
             }
 
             # Add success summary

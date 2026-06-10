@@ -8,6 +8,13 @@ sparsegrouplassoClass <- R6::R6Class(
         # Notice Helper
         # ══════════════════════════════════════════════════════════════
         .insertNotice = function(name, type, content, position = 999) {
+            # TODO (forward-looking): `content` is interpolated UNESCAPED here (Notice$setContent below +
+            #   the todo fallback). User-controlled tokens are now htmlEscape'd at the 3 call sites that
+            #   carry them (missing column names L360, outcome/censor factor levels L406-407, e$message
+            #   L235). For defense-in-depth consider escaping `content` once here (all callers pass plain
+            #   text) and migrating off the self$results$insert(jmvcore::Notice) serialization pattern
+            #   (CLAUDE.md flags it for "attempt to apply non-function" errors — already softened by the
+            #   todo fallback below).
             tryCatch({
                 notice <- jmvcore::Notice$new(
                     options = self$options,
@@ -232,7 +239,7 @@ sparsegrouplassoClass <- R6::R6Class(
             }, error = function(e) {
                 private$.insertNotice(
                     'analysisError', jmvcore::NoticeType$ERROR,
-                    sprintf("Error in Sparse Group LASSO fitting: %s", e$message),
+                    sprintf("Error in Sparse Group LASSO fitting: %s", htmltools::htmlEscape(e$message)),
                     position = 1
                 )
             })
@@ -357,7 +364,7 @@ sparsegrouplassoClass <- R6::R6Class(
             if (length(missingVars) > 0) {
                 private$.insertNotice(
                     'missingVars', jmvcore::NoticeType$ERROR,
-                    sprintf("Missing variables in data: %s", paste(missingVars, collapse = ", ")),
+                    sprintf("Missing variables in data: %s", paste(htmltools::htmlEscape(missingVars), collapse = ", ")),
                     position = 1
                 )
                 return(NULL)
@@ -404,7 +411,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 private$.insertNotice(
                     'excludedRows', jmvcore::NoticeType$WARNING,
                     sprintf("%d row(s) excluded because outcome value matched neither event level ('%s') nor censored level ('%s').",
-                            n_excluded_outcome, event_level, censor_level)
+                            n_excluded_outcome, htmltools::htmlEscape(event_level), htmltools::htmlEscape(censor_level))
                 )
             }
 

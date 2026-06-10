@@ -170,7 +170,7 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             paste0(
               "<h3>Analysis Error</h3>",
               "<p>An error occurred during smooth time-varying effects analysis:</p>",
-              "<pre>", gsub("<", "&lt;", gsub("&", "&amp;", e$message)), "</pre>",
+              "<pre>", htmltools::htmlEscape(e$message), "</pre>",
               "<p>Please check your data and model specifications.</p>"
             )
           )
@@ -344,9 +344,12 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         covar_names <- data_prep$covariate_names
         tvc_names <- data_prep$tvc_names
         
+        # TODO (cleanup): `formula_parts` is built here (L348/L352) but never used — the real
+        #   formulas are constructed independently below (full_formula L363/L365, constant_formula
+        #   L500). Dead code; remove this block.
         # Create base formula components
         formula_parts <- c("survival", "~")
-        
+
         # Add baseline covariates if specified
         if (!is.null(covar_names) && length(covar_names) > 0) {
           formula_parts <- c(formula_parts, paste(covar_names, collapse = " + "))
@@ -360,9 +363,9 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           tryCatch({
             # Prepare formula for this time-varying covariate
             if (!is.null(covar_names) && length(covar_names) > 0) {
-              full_formula <- paste("survival ~", paste(covar_names, collapse = " + "), "+", var_name)
+              full_formula <- paste("survival ~", paste(jmvcore::composeTerms(as.list(covar_names)), collapse = " + "), "+", jmvcore::composeTerm(var_name))
             } else {
-              full_formula <- paste("survival ~", var_name)
+              full_formula <- paste("survival ~", jmvcore::composeTerm(var_name))
             }
             
             # Fit model based on smoothing method
@@ -497,7 +500,7 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           # Build formula for constant effects model
           all_vars <- c(covar_names, tvc_names)
           if (length(all_vars) > 0) {
-            constant_formula <- paste("survival ~", paste(all_vars, collapse = " + "))
+            constant_formula <- paste("survival ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + "))
             
             # Fit Cox model for comparison
             cox_model <- survival::coxph(
@@ -570,10 +573,10 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           "<p><strong>Observations:</strong> ", data_prep$n_obs, 
           " (", data_prep$n_events, " events)</p>",
           "<p><strong>Time-Varying Covariates:</strong> ", 
-          paste(data_prep$tvc_names, collapse = ", "), "</p>",
+          paste(htmltools::htmlEscape(data_prep$tvc_names), collapse = ", "), "</p>",
           if (!is.null(data_prep$covariate_names) && length(data_prep$covariate_names) > 0) {
             paste0("<p><strong>Baseline Covariates:</strong> ", 
-                   paste(data_prep$covariate_names, collapse = ", "), "</p>")
+                   paste(htmltools::htmlEscape(data_prep$covariate_names), collapse = ", "), "</p>")
           } else "",
           "<p><strong>Unique Event Times:</strong> ", data_prep$unique_event_times, "</p>",
           "<p><strong>Smoothing Parameters:</strong> ",

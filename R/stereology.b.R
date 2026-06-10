@@ -66,18 +66,18 @@ stereologyClass <- R6::R6Class(
             raw_data <- self$data
 
             data_list <- list()
-            data_list$intersections <- as.numeric(raw_data[[self$options$intersections]])
-            data_list$total_points <- as.numeric(raw_data[[self$options$totalPoints]])
-            data_list$ref_area <- as.numeric(raw_data[[self$options$referenceArea]])
-            data_list$grid_spacing <- as.numeric(raw_data[[self$options$gridSpacing]])
+            data_list$intersections <- jmvcore::toNumeric(raw_data[[self$options$intersections]])
+            data_list$total_points <- jmvcore::toNumeric(raw_data[[self$options$totalPoints]])
+            data_list$ref_area <- jmvcore::toNumeric(raw_data[[self$options$referenceArea]])
+            data_list$grid_spacing <- jmvcore::toNumeric(raw_data[[self$options$gridSpacing]])
 
             # Optional variables
             if (!is.null(self$options$boundaryIntersections)) {
-                data_list$boundary_ints <- as.numeric(raw_data[[self$options$boundaryIntersections]])
+                data_list$boundary_ints <- jmvcore::toNumeric(raw_data[[self$options$boundaryIntersections]])
             }
 
             if (!is.null(self$options$objectCount)) {
-                data_list$object_count <- as.numeric(raw_data[[self$options$objectCount]])
+                data_list$object_count <- jmvcore::toNumeric(raw_data[[self$options$objectCount]])
             }
 
             if (!is.null(self$options$groupVar)) {

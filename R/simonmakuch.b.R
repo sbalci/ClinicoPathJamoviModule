@@ -122,6 +122,13 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (is.factor(event_data) && !is.null(self$options$eventLevel)) {
                     event_binary <- as.numeric(event_data == self$options$eventLevel)
                 } else {
+                    # TODO (correctness): event_data may be a factor here (eventLevel is NULL). as.numeric()
+                    #   returns LEVEL INDICES (1,2…), not 0/1 — and a naive jmvcore::toNumeric() swap is
+                    #   unsafe (it honors the factor's `values`/labels, yielding 0/1 or NA for
+                    #   character-level factors, which can change/break the Surv() event coding that
+                    #   currently tolerates 1/2). Rework: require/derive the event level (as in the
+                    #   if-branch above) and map via as.numeric(event_data == <event_level>) so the
+                    #   coding is explicit, not positional level indices.
                     event_binary <- as.numeric(event_data)
                 }
                 
@@ -147,7 +154,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 self$results$welcomeMessage$setContent(
                     paste0("<h3>Error in Data Preparation</h3>",
-                           "<p>Error: ", e$message, "</p>",
+                           "<p>Error: ", htmltools::htmlEscape(e$message), "</p>",
                            "<p>Please check your variable selections and data format.</p>")
                 )
                 return(NULL)
@@ -667,7 +674,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Add additional covariates if specified
                 if (!is.null(self$options$timeDependentCovariates) && 
                     length(self$options$timeDependentCovariates) > 0) {
-                    covar_names <- paste(self$options$timeDependentCovariates, collapse = " + ")
+                    covar_names <- paste(jmvcore::composeTerms(as.list(self$options$timeDependentCovariates)), collapse = " + ")
                     cox_formula <- as.formula(paste("Surv(tstart, tstop, event) ~ exposed +", covar_names))
                 }
                 
@@ -826,6 +833,9 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (is.null(survData)) return()
                 
                 # Parse landmark times
+                # TODO (stub): the sibling free-text OptionString `plotTimeRange` (declared in
+                #   .a.yaml/.h.R) is never read anywhere in this backend — wire it into the plot
+                #   x-axis range (parse like landmark_times below) or remove it from the options.
                 landmark_times_str <- self$options$landmarkTimes
                 landmark_times <- as.numeric(unlist(strsplit(landmark_times_str, ",")))
                 landmark_times <- landmark_times[!is.na(landmark_times)]

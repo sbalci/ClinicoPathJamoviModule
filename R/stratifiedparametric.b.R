@@ -75,7 +75,7 @@ stratifiedparametricClass <- R6::R6Class(
             tryCatch({
                 self$.runStratifiedParametric(time_var, event_var, strata_var, covariates)
             }, error = function(e) {
-                error_msg <- paste("<p><strong>Error in analysis:</strong>", e$message, "</p>")
+                error_msg <- paste("<p><strong>Error in analysis:</strong>", htmltools::htmlEscape(e$message), "</p>")
                 self$results$todo$setContent(error_msg)
             })
         },
@@ -145,7 +145,7 @@ stratifiedparametricClass <- R6::R6Class(
                     
                     if (!is.null(covariates)) {
                         formula_str <- "surv_obj ~ "
-                        formula_str <- paste0(formula_str, paste(names(covariates), collapse = " + "))
+                        formula_str <- paste0(formula_str, paste(jmvcore::composeTerms(as.list(names(covariates))), collapse = " + "))
                     } else {
                         formula_str <- "surv_obj ~ 1"
                     }
@@ -169,7 +169,7 @@ stratifiedparametricClass <- R6::R6Class(
                 # Fit model with strata interaction terms
                 if (!is.null(covariates)) {
                     formula_str <- "surv_obj ~ strata_var * ("
-                    formula_str <- paste0(formula_str, paste(names(covariates), collapse = " + "))
+                    formula_str <- paste0(formula_str, paste(jmvcore::composeTerms(as.list(names(covariates))), collapse = " + "))
                     formula_str <- paste0(formula_str, ")")
                 } else {
                     formula_str <- "surv_obj ~ strata_var"
@@ -193,7 +193,7 @@ stratifiedparametricClass <- R6::R6Class(
                 # For other baseline specifications, use survival package
                 if (!is.null(covariates)) {
                     formula_str <- "surv_obj ~ "
-                    formula_str <- paste0(formula_str, paste(names(covariates), collapse = " + "))
+                    formula_str <- paste0(formula_str, paste(jmvcore::composeTerms(as.list(names(covariates))), collapse = " + "))
                     formula_str <- paste0(formula_str, " + strata(strata_var)")
                 } else {
                     formula_str <- "surv_obj ~ strata(strata_var)"
@@ -231,7 +231,7 @@ stratifiedparametricClass <- R6::R6Class(
             
             if (!is.null(covariates)) {
                 formula_str <- "surv_obj ~ "
-                formula_str <- paste0(formula_str, paste(names(covariates), collapse = " + "))
+                formula_str <- paste0(formula_str, paste(jmvcore::composeTerms(as.list(names(covariates))), collapse = " + "))
             } else {
                 formula_str <- "surv_obj ~ 1"
             }
@@ -525,7 +525,7 @@ stratifiedparametricClass <- R6::R6Class(
             html <- paste0(html, "<p><strong>Distribution:</strong> ", self$options$parametric_distribution, "</p>")
             html <- paste0(html, "<p><strong>Baseline Specification:</strong> ", self$options$baseline_specification, "</p>")
             html <- paste0(html, "<p><strong>Number of Strata:</strong> ", length(strata_levels), "</p>")
-            html <- paste0(html, "<p><strong>Strata Levels:</strong> ", paste(strata_levels, collapse = ", "), "</p>")
+            html <- paste0(html, "<p><strong>Strata Levels:</strong> ", paste(htmltools::htmlEscape(strata_levels), collapse = ", "), "</p>")
             
             if (!is.null(non_stratified_model)) {
                 html <- paste0(html, "<p><strong>Non-stratified AIC:</strong> ", round(non_stratified_model$AIC, 3), "</p>")

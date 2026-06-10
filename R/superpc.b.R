@@ -83,10 +83,10 @@ superpcClass <- R6::R6Class(
             analysis_data <- cbind(analysis_data, feature_data)
             
             # Remove missing values
-            analysis_data <- na.omit(analysis_data)
+            analysis_data <- jmvcore::naOmit(analysis_data)
             
             if (nrow(analysis_data) == 0) {
-                stop("No complete cases available for analysis")
+                jmvcore::reject("No complete cases available for analysis")
             }
             
             # Standardize features if requested
@@ -101,7 +101,7 @@ superpcClass <- R6::R6Class(
         
         .perform_feature_screening = function() {
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("Package 'survival' is required")
+                jmvcore::reject("Package 'survival' is required")
             }
             
             data <- private$.analysis_data
@@ -119,7 +119,7 @@ superpcClass <- R6::R6Class(
                     tryCatch({
                         # Fit univariate Cox model
                         surv_obj <- survival::Surv(data$time, data$event)
-                        formula_str <- paste("surv_obj ~", feature_name)
+                        formula_str <- paste("surv_obj ~", jmvcore::composeTerm(feature_name))
                         cox_model <- survival::coxph(as.formula(formula_str), data = data)
                         
                         # Extract results
@@ -175,7 +175,7 @@ superpcClass <- R6::R6Class(
             selected_features <- private$.selected_features
             
             if (length(selected_features) == 0) {
-                stop("No features passed the screening threshold")
+                jmvcore::reject("No features passed the screening threshold")
             }
             
             data <- private$.analysis_data
@@ -199,7 +199,7 @@ superpcClass <- R6::R6Class(
         
         .fit_cox_model = function() {
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("Package 'survival' is required")
+                jmvcore::reject("Package 'survival' is required")
             }
             
             data <- private$.analysis_data
@@ -320,7 +320,7 @@ superpcClass <- R6::R6Class(
             for (feature in features) {
                 tryCatch({
                     surv_obj <- survival::Surv(train_data$time, train_data$event)
-                    formula_str <- paste("surv_obj ~", feature)
+                    formula_str <- paste("surv_obj ~", jmvcore::composeTerm(feature))
                     cox_model <- survival::coxph(as.formula(formula_str), data = train_data)
                     
                     p_value <- summary(cox_model)$coefficients[1, 5]

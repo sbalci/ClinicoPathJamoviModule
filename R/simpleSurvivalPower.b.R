@@ -1682,6 +1682,11 @@ simpleSurvivalPowerClass <- R6::R6Class(
             freq_aa <- maf^2
 
             # Get sample size from calculation if available
+            # TODO (correctness): re-parsing numbers out of the FORMATTED result string is fragile —
+            #   .calculate_primary_result() returns display text and these sites re-extract the number
+            #   (here + L1760/L2056/L2062/L2271/L2319/L3226). Worse, gsub("[^0-9]", "", ...) strips ALL
+            #   non-digits incl. the decimal point, so "12.5" -> 125 (L1688/L1760/L3226). Return the
+            #   numeric value from .calculate_primary_result() directly instead of re-parsing its output.
             calculated_n <- if (self$options$analysis_type == "sample_size") {
                 result <- private$.calculate_primary_result()
                 if (grepl("([0-9,]+)", result)) {

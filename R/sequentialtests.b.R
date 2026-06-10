@@ -115,6 +115,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Insert ERROR notices at top and return early
+                # TODO (correctness): Notice serialization hazard — the self$results$insert(i, jmvcore::Notice)
+                #   calls in .run() (the ERROR-notices loop just below, the STRONG_WARNING insert, and the
+                #   ~5 PPV/NPV/PLR/NLR-undefined inserts) use the dynamically-inserted jmvcore::Notice pattern
+                #   that CLAUDE.md flags as causing "attempt to apply non-function" protobuf serialization
+                #   errors. The file already has the safe .addNotice()/.renderNotices() HTML mechanism
+                #   (escaped via .safeHtmlOutput) — migrate the remaining Notice$new()+insert() calls to
+                #   .addNotice() to remove the serialization hazard.
                 if (length(notices_error) > 0) {
                     for (i in seq_along(notices_error)) {
                         self$results$insert(i, notices_error[[i]])
@@ -146,10 +153,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Detect potential test correlation
+                # TODO (correctness): agrepl() treats test1_name as a REGEX (fixed=FALSE default); a
+                #   malformed-regex test name (e.g. "[") throws an uncaught error that aborts .run().
+                #   Pass fixed = TRUE so the names are compared literally, not as patterns.
                 test_similarity <- agrepl(test1_name, test2_name, max.distance = 0.3)
                 if (test_similarity && test1_name != "Screening Test" && test2_name != "Confirmatory Test") {
                     n <- jmvcore::Notice$new(options=self$options, name='test_correlation_risk', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent(sprintf('Test names are similar ("%s" vs "%s"). If tests measure similar biomarkers or use similar technology, they may be correlated. This violates the independence assumption and combined metrics will be overestimated.', test1_name, test2_name))
+                    n$setContent(sprintf('Test names are similar ("%s" vs "%s"). If tests measure similar biomarkers or use similar technology, they may be correlated. This violates the independence assumption and combined metrics will be overestimated.', private$.safeHtmlOutput(test1_name), private$.safeHtmlOutput(test2_name)))
                     notices_strong <- c(notices_strong, list(n))
                 }
 
@@ -407,8 +417,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     summary <- sprintf(
                         "<div style='background:#e8f4f8;padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%%%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%%%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%%%, a positive result indicates a %.1f%%%% chance the person truly has the disease (PPV), while a negative result indicates a %.1f%%%% chance the person is truly disease-free (NPV).%s %s</div>",
                         strategy_desc,
-                        test1_name,
-                        test2_name,
+                        private$.safeHtmlOutput(test1_name),
+                        private$.safeHtmlOutput(test2_name),
                         combined_sens*100, combined_sens*100,
                         combined_spec*100, combined_spec*100,
                         prevalence*100,
@@ -654,7 +664,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(
                             explanation,
                             "<li>All subjects are first tested with ",
-                            test1_name,
+                            private$.safeHtmlOutput(test1_name),
                             " (sensitivity = ",
                             format(test1_sens * 100, digits = 1),
                             "%, specificity = ",
@@ -664,7 +674,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(
                             explanation,
                             "<li>Only those who test positive on the first test receive ",
-                            test2_name,
+                            private$.safeHtmlOutput(test2_name),
                             " (sensitivity = ",
                             format(test2_sens * 100, digits = 1),
                             "%, specificity = ",
@@ -703,7 +713,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(
                             explanation,
                             "<li>All subjects are first tested with ",
-                            test1_name,
+                            private$.safeHtmlOutput(test1_name),
                             " (sensitivity = ",
                             format(test1_sens * 100, digits = 1),
                             "%, specificity = ",
@@ -713,7 +723,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(
                             explanation,
                             "<li>Only those who test negative on the first test receive ",
-                            test2_name,
+                            private$.safeHtmlOutput(test2_name),
                             " (sensitivity = ",
                             format(test2_sens * 100, digits = 1),
                             "%, specificity = ",
@@ -752,13 +762,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                         explanation <- paste0(
                             explanation,
                             "<li>All subjects receive both ",
-                            test1_name,
+                            private$.safeHtmlOutput(test1_name),
                             " (sensitivity = ",
                             format(test1_sens * 100, digits = 1),
                             "%, specificity = ",
                             format(test1_spec * 100, digits = 1),
                             "%) and ",
-                            test2_name,
+                            private$.safeHtmlOutput(test2_name),
                             " (sensitivity = ",
                             format(test2_sens * 100, digits = 1),
                             "%, specificity = ",

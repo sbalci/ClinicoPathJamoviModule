@@ -28,6 +28,14 @@ roc2dClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             outcome <- outcome[complete_cases]
 
             # Identify positive class
+            # TODO (correctness): rework this to respect the factor properly. `outcome` is
+            # permitted:[factor]; the else branch's `as.numeric(outcome) - 1` is a fragile
+            # positional idiom — it assumes the factor's 2nd level is the positive class AND that
+            # as.numeric() returns level indices 1,2. A naive jmvcore::toNumeric() swap would BREAK
+            # (toNumeric honours the factor's `values` attribute, so a 0/1-coded factor → -1,0).
+            # Instead derive/require the positive level (e.g. default to the last factor level) and
+            # map via `as.numeric(outcome == <positive_level>)` like the if-branch, so labelled
+            # factor coding is honoured rather than positional indices.
             if (!is.null(self$options$positive_level)) {
                 outcome_binary <- as.numeric(outcome == self$options$positive_level)
             } else {

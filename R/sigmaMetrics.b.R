@@ -36,7 +36,13 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cvVar <- self$options$cv
             teaVar <- self$options$tea
             analyteVar <- self$options$analyte
-            
+            # TODO (stub): ~16 declared options are never read by this backend — laboratory, method,
+            #   sigma_calculation, quality_goals, custom_tea, confidence_level, benchmark_comparison,
+            #   process_capability, method_validation, improvement_recommendations, regulatory_compliance,
+            #   cost_of_quality, control_planning, sigma_plots, normalized_plots, quality_scorecard.
+            #   Implement them or remove from sigmametrics.a.yaml/.u.yaml (only bias/cv/tea/analyte/
+            #   quality_goal_index/defect_rates are consumed).
+
             # Use jmvcore::naOmit to handle missing values
             vars <- c(biasVar, cvVar, teaVar)
             if (!is.null(analyteVar)) vars <- c(vars, analyteVar)
@@ -134,6 +140,9 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         error_type = analyte_val,
                         current_rate_ppm = mydata$defect_rate[i],
                         target_rate_ppm = 3.4, # 6 sigma goal
+                        # TODO (correctness): monthly_volume is hardcoded 1000 (placeholder), so annual_errors
+                        #   below is fabricated — not tied to any real test-volume input. Add a volume option
+                        #   or drop the monthly_volume/annual_errors columns until a real input exists.
                         monthly_volume = 1000, # Placeholder volume
                         annual_errors = as.integer(mydata$defect_rate[i] * 12 * 1000 / 1e6),
                         clinical_impact = if (mydata$sigma[i] < 3) "Critical Risk" else "Managed Risk"

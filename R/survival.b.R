@@ -1238,7 +1238,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Populate subtitle with explanatory variable
                 if (!is.null(self$options$explanatory)) {
-                    subtitle_text <- paste0("Survival Analysis - ", self$options$explanatory)
+                    subtitle_text <- paste0("Survival Analysis - ", htmltools::htmlEscape(self$options$explanatory))
                     self$results$subtitle$setContent(subtitle_text)
                 }
 
@@ -1523,7 +1523,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(list(
                         table = NULL,
                         tau = NULL,
-                        interpretation = paste("Error calculating RMST:", e$message)
+                        interpretation = paste("Error calculating RMST:", htmltools::htmlEscape(e$message))
                     ))
                 })
             }
@@ -1848,7 +1848,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 if (!is.null(strata_var) && strata_var %in% names(mydata)) {
                     factors_list <- trimws(unlist(strsplit(explanatory_formula, "\\+")))
                     for (var in factors_list) {
-                        strat_form <- .asSurvivalFormula(paste(myformula, "~", var, "+ strata(", strata_var, ")"))
+                        strat_form <- .asSurvivalFormula(paste(myformula, "~", var, "+ strata(", jmvcore::composeTerm(strata_var), ")"))
                         strat_mod <- try(survival::coxph(strat_form, data = mydata), silent = TRUE)
                         if (!inherits(strat_mod, "try-error")) {
                             mod_sum <- summary(strat_mod)
@@ -1874,7 +1874,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     }
                     
                     # Update model metrics for multivariable stratified model
-                    multi_form <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula, "+ strata(", strata_var, ")"))
+                    multi_form <- .asSurvivalFormula(paste(myformula, "~", explanatory_formula, "+ strata(", jmvcore::composeTerm(strata_var), ")"))
                     multi_mod <- try(survival::coxph(multi_form, data = mydata), silent = TRUE)
                     if (!inherits(multi_mod, "try-error")) {
                         tCox[[2]][[1]] <- paste("Stratified by", strata_var, "-", tCox[[2]][[1]])
@@ -2148,6 +2148,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Generate PH Interpretation Function ----
             ,
             .generatePHInterpretation = function(zph, covariate_name) {
+                covariate_name <- htmltools::htmlEscape(covariate_name)
                 tryCatch({
                     # Extract test results
                     zph_table <- zph$table
@@ -2231,7 +2232,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     return(html)
 
                 }, error = function(e) {
-                    return(paste0("<p>Error generating PH interpretation: ", e$message, "</p>"))
+                    return(paste0("<p>Error generating PH interpretation: ", htmltools::htmlEscape(e$message), "</p>"))
                 })
             }
 
@@ -2411,6 +2412,8 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     ) %>%
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> survTableSummary
+
+                survTableSummary <- htmltools::htmlEscape(survTableSummary)
 
                 survTableSummaryWithNote <- c(survTableSummary,
                                               "Note: Confidence intervals for survival probabilities are calculated using the log-log transformation method rather than the plain Greenwood formula for better performance with censored survival data.")
@@ -2738,7 +2741,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 tryCatch({
                     # Build formula for Cox model
                     formula_str <- paste0(
-                        'survival::Surv(', mytime, ', ', myoutcome, ') ~ ', myfactor
+                        'survival::Surv(', jmvcore::composeTerm(mytime), ', ', jmvcore::composeTerm(myoutcome), ') ~ ', jmvcore::composeTerm(myfactor)
                     )
                     formula_obj <- .asSurvivalFormula(formula_str)
 
@@ -2894,7 +2897,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     table$setNote("error", paste0(
-                        "Bootstrap validation failed: ", e$message
+                        "Bootstrap validation failed: ", htmltools::htmlEscape(e$message)
                     ))
                 })
             }
@@ -4496,7 +4499,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     interpretation_html <- paste(
                         '<div style="margin-bottom: 20px; padding: 15px; background-color: #e8f4fd; border-left: 4px solid #007bff;">',
                         '<h4> Clinical Interpretation</h4>',
-                        paste(lapply(clinical_interpretations, function(x) paste('<p>', x, '</p>')), collapse = ""),
+                        paste(lapply(clinical_interpretations, function(x) paste('<p>', htmltools::htmlEscape(x), '</p>')), collapse = ""),
                         '</div>'
                     )
                     
@@ -4765,7 +4768,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     self$results$calibrationTable$setNote("error",
-                        paste("Calibration error:", e$message))
+                        paste("Calibration error:", htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -4980,7 +4983,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 }, error = function(e) {
                     self$results$rcsTestTable$setNote("error",
-                        paste("RCS analysis error:", e$message))
+                        paste("RCS analysis error:", htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -6556,7 +6559,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         "<tr style='background: ", bg, ";'>",
                         "<td style='padding: 6px; border: 1px solid #ddd;'><b>", item$item, "</b><br><small>", item$desc, "</small></td>",
                         "<td style='padding: 6px; border: 1px solid #ddd; text-align: center;'>", icon, "</td>",
-                        "<td style='padding: 6px; border: 1px solid #ddd;'><small>", item$note, "</small></td>",
+                        "<td style='padding: 6px; border: 1px solid #ddd;'><small>", htmltools::htmlEscape(item$note), "</small></td>",
                         "</tr>"
                     ))
                 }

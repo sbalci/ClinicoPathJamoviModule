@@ -114,7 +114,7 @@ survivalbartClass <- R6::R6Class(
             }, error = function(e) {
                 self$results$instructions$setContent(
                     paste0("<html><body><h3>Analysis Error</h3><p>", 
-                           "Error in BART fitting: ", e$message,
+                           "Error in BART fitting: ", htmltools::htmlEscape(e$message),
                            "</p><p>Try reducing number of trees or adjusting MCMC parameters.</p></body></html>")
                 )
             })
@@ -139,7 +139,7 @@ survivalbartClass <- R6::R6Class(
             }
             
             analysis_data <- data[, vars_needed, drop = FALSE]
-            analysis_data <- na.omit(analysis_data)
+            analysis_data <- jmvcore::naOmit(analysis_data)
             
             if (nrow(analysis_data) < 20) {
                 self$results$instructions$setContent(
@@ -151,6 +151,12 @@ survivalbartClass <- R6::R6Class(
 
             # Prepare survival object
             time_values <- as.numeric(analysis_data[[time_var]])
+            # TODO (correctness): `event` is permitted [factor, numeric] (.a.yaml). For a
+            # FACTOR event with levels c("0","1"), as.numeric() returns level INDICES c(1,2),
+            # not the 0/1 codes — corrupting n_events (sum at ~L177), the event rate
+            # (mean at ~L450), and BART censoring. Switch to jmvcore::toNumeric() (honors the
+            # jamovi `values` attribute → correct 0/1). Behavior-risk: changes output for
+            # factor-coded event columns, so verify against a 0/1-factor test dataset first.
             event_values <- as.numeric(analysis_data[[event_var]])
             
             if (any(time_values <= 0, na.rm = TRUE)) {

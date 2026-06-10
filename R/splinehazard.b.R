@@ -122,7 +122,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 self$results$todo$setContent(
                     paste0("<html><body><h3> Analysis Error</h3><p>", 
-                           e$message, "</p></body></html>")
+                           htmltools::htmlEscape(e$message), "</p></body></html>")
                 )
             })
         },
@@ -137,11 +137,11 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Validate data
             if (any(is.na(data[[elapsedtime]]))) {
-                stop("Time variable contains missing values")
+                jmvcore::reject("Time variable contains missing values")
             }
             
             if (any(data[[elapsedtime]] <= 0)) {
-                stop("Time variable must be positive")
+                jmvcore::reject("Time variable must be positive")
             }
             
             # Prepare outcome variable
@@ -169,7 +169,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             clean_data <- clean_data[complete.cases(clean_data), ]
             
             if (nrow(clean_data) == 0) {
-                stop("No complete cases available for analysis")
+                jmvcore::reject("No complete cases available for analysis")
             }
             
             return(clean_data)
@@ -186,7 +186,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Build formula
             if (length(explanatory) > 0) {
-                formula_str <- paste("Surv(time, event) ~", paste(explanatory, collapse = " + "))
+                formula_str <- paste("Surv(time, event) ~", paste(jmvcore::composeTerms(as.list(explanatory)), collapse = " + "))
             } else {
                 formula_str <- "Surv(time, event) ~ 1"
             }

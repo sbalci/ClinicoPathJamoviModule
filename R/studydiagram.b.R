@@ -162,7 +162,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  # Extract standard flow
                  flow_data <- data.frame(
                       step = as.character(data[[step_col]]),
-                      n = as.numeric(count_values),
+                      n = jmvcore::toNumeric(count_values),
                       stringsAsFactors = FALSE
                  )
 
@@ -729,7 +729,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is.null(flow_data) || length(flow_data) == 0) return(FALSE)
 
-            library(ggplot2)
+            # (ggplot2 is package-imported — bare ggplot()/geom_*/aes resolve; no library() so we
+            #  don't mutate the user search path / trip R CMD check.)
 
             # Get style parameters and color schemes
             style <- private$.getStyleParams(diagram_type)
@@ -1023,7 +1024,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (stage in flow_data[-1]) {  # Skip first stage (initial)
                     if (stage$excluded > 0) {
                         exclusion_details <- c(exclusion_details,
-                            sprintf("%s (n=%d)", stage$step, stage$excluded))
+                            sprintf("%s (n=%d)", htmltools::htmlEscape(stage$step), stage$excluded))
                     }
                 }
             }

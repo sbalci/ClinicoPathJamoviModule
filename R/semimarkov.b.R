@@ -94,11 +94,17 @@ semimarkovClass <- R6::R6Class(
                     self$.generateInterpretationGuide()
                     
                     # Store results for plotting
+                    # TODO (correctness): I5 stale cache — private$.model_results is set here on
+                    #   success but never reset at the top of .run(); an early-return run (missing
+                    #   var at L36/L44/L61) leaves the prior result, which the .*Plot methods still
+                    #   render (they gate only on is.null(private$.model_results)). Harmless now ONLY
+                    #   because the mock data is constant — reset to NULL at the start of .run()
+                    #   (after the required-variable guard) when the real engine lands.
                     private$.model_results <- model_results
                 }
                 
             }, error = function(e) {
-                error_msg <- paste("Semi-Markov model fitting error:", e$message)
+                error_msg <- paste("Semi-Markov model fitting error:", htmltools::htmlEscape(e$message))
                 self$results$todo$setContent(error_msg)
             })
         },
@@ -224,6 +230,13 @@ semimarkovClass <- R6::R6Class(
         },
         
         .generateMockSemiMarkovResults = function(model_type) {
+            # TODO (stub): RELEASE BLOCKER — the entire Semi-Markov engine is mocked. This helper
+            #   returns hardcoded data frames; covariate effects (~L344) and predictions
+            #   (.fillPredictions ~L470) are fabricated via rnorm/runif/sample with no set.seed, so
+            #   the analysis shows non-reproducible fake statistics to clinicians.
+            #   .fitParametricSemiMarkov returns mock results even when the SemiMarkov package IS
+            #   installed (~L178). Implement real estimation (SemiMarkov::semiMarkov / flexsurv)
+            #   before exposing this analysis for clinical use.
             # Generate realistic mock results for Semi-Markov models
             n_states <- 3
             n_subjects <- 100
@@ -462,6 +475,9 @@ semimarkovClass <- R6::R6Class(
             pred_table <- self$results$predictionsTable
             
             # Generate sample predictions
+            # TODO (stub): the `timePoints` OptionString (declared in .a.yaml/.h.R) is never read
+            #   anywhere in this backend — wire it in or remove it from the options.
+            #   (predictionHorizons below IS consumed.)
             horizons <- as.numeric(strsplit(self$options$predictionHorizons, ",")[[1]])
             states <- c("State 1", "State 2", "State 3")
             
@@ -684,7 +700,6 @@ semimarkovClass <- R6::R6Class(
         .sojournDistributionPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotSojournDistributions || is.null(private$.model_results)) return()
             
-            library(ggplot2)
             
             # Generate distribution plots for each state
             dist_type <- self$options$distributionType
@@ -738,7 +753,6 @@ semimarkovClass <- R6::R6Class(
         .stateProbabilityPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotStateProbabilities || is.null(private$.model_results)) return()
             
-            library(ggplot2)
             
             state_data <- private$.model_results$state_probs
             
@@ -765,7 +779,6 @@ semimarkovClass <- R6::R6Class(
         .transitionIntensityPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotTransitionIntensities || is.null(private$.model_results)) return()
             
-            library(ggplot2)
             
             # Generate transition intensity functions
             time_vals <- seq(0.1, 10, length.out = 100)
@@ -817,8 +830,6 @@ semimarkovClass <- R6::R6Class(
         .reliabilityPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotReliabilityFunctions || is.null(private$.model_results)) return()
             
-            library(ggplot2)
-            library(gridExtra)
             
             # Generate reliability and hazard functions
             time_vals <- seq(0.1, 10, length.out = 100)
@@ -853,8 +864,6 @@ semimarkovClass <- R6::R6Class(
         .diagnosticsPlot = function(image, ggtheme, theme, ...) {
             if (!self$options$plotModelDiagnostics || is.null(private$.model_results)) return()
             
-            library(ggplot2)
-            library(gridExtra)
             
             # Generate diagnostic plots
             n <- 100

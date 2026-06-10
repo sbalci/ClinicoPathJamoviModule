@@ -99,6 +99,11 @@ spatialautocorrelationClass <- R6::R6Class(
             }
             
             tryCatch({
+                # TODO (cleanup): the requireNamespace("spdep")/stop() guard is duplicated 6× — here
+                #   (spdep + sp) and again in .createSpatialWeights / .calculateMoransI /
+                #   .calculateGearysC / .calculateLISA. All are caught by the central .run tryCatch →
+                #   jmvcore::reject (L169). Consolidate into one upfront requireNamespace check
+                #   (reject + return) at the top of .run() and drop the per-helper repeats.
                 # Load required libraries
                 if (!requireNamespace("spdep", quietly = TRUE)) {
                     stop("Package 'spdep' is required for spatial autocorrelation analysis")
