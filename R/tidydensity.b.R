@@ -187,7 +187,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) R6::R6Class("tidydensityCla
             # Comprehensive parameter validation
             validation_result <- private$.validate_parameters()
             if (!validation_result$valid) {
-                stop(validation_result$message)
+                jmvcore::reject(validation_result$message)
             }
             
             tryCatch({

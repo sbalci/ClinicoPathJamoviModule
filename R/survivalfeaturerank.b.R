@@ -262,7 +262,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                     }
 
                     # Build Cox model
-                    formula_str <- paste("survival::Surv(survtime, event) ~", feat)
+                    formula_str <- paste("survival::Surv(survtime, event) ~", jmvcore::composeTerm(feat))
                     cox_model <- survival::coxph(as.formula(formula_str), data = feat_data)
 
                     # Extract results
@@ -418,7 +418,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
             n_features <- nrow(ranked_features)
             n_significant <- sum(ranked_features[[p_col]] < alpha)
 
-            top_feature <- ranked_features[1, "feature"]
+            top_feature <- htmltools::htmlEscape(ranked_features[1, "feature"])
             top_hr <- ranked_features[1, "hr"]
             top_p <- ranked_features[1, p_col]
             top_cindex <- ranked_features[1, "cindex"]
@@ -478,7 +478,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                     feat <- top3[i, ]
                     direction <- if (feat$hr > 1) "increased" else "decreased"
 
-                    feat_name <- feat$feature
+                    feat_name <- htmltools::htmlEscape(feat$feature)
                     feat_hr <- format(feat$hr, digits = 2, nsmall = 2)
                     feat_p <- format(feat[[p_col]], digits = 4, nsmall = 4)
 
@@ -544,8 +544,6 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                 return()
             }
 
-            library(ggplot2)
-
             ranked_data <- private$.rankingData
 
             # Reverse order for plotting (top feature at top)
@@ -553,20 +551,20 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                                          levels = rev(ranked_data$feature))
 
             # Create forest plot
-            plot <- ggplot(ranked_data, aes(x = hr, y = feature)) +
-                geom_point(size = 3) +
-                geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
-                geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
-                scale_x_log10() +
-                labs(
+            plot <- ggplot2::ggplot(ranked_data, ggplot2::aes(x = hr, y = feature)) +
+                ggplot2::geom_point(size = 3) +
+                ggplot2::geom_errorbarh(ggplot2::aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+                ggplot2::geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+                ggplot2::scale_x_log10() +
+                ggplot2::labs(
                     x = "Hazard Ratio (95% CI)",
                     y = "Feature",
                     title = "Forest Plot - Univariate Cox Regression"
                 ) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(hjust = 0.5, face = "bold"),
-                    panel.grid.major.y = element_blank()
+                ggplot2::theme_minimal() +
+                ggplot2::theme(
+                    plot.title = ggplot2::element_text(hjust = 0.5, face = "bold"),
+                    panel.grid.major.y = ggplot2::element_blank()
                 )
 
             print(plot)
@@ -625,9 +623,6 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                 return(FALSE)
             }
 
-            library(survival)
-            library(survminer)
-
             # Get feature name for this rank
             feature_name <- private$.rankingData[rank, "feature"]
 
@@ -639,7 +634,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
             plot_data <- surv_data[!is.na(surv_data[[feature_name]]), ]
 
             # Create survival formula and fit
-            surv_formula <- as.formula(paste("survival::Surv(survtime, event) ~", feature_name))
+            surv_formula <- as.formula(paste("survival::Surv(survtime, event) ~", jmvcore::composeTerm(feature_name)))
             fit <- survival::survfit(surv_formula, data = plot_data)
 
             # Create plot
@@ -655,7 +650,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
                 risk.table = self$options$risktable,
                 xlim = c(0, self$options$endplot),
                 break.time.by = self$options$byplot,
-                ggtheme = theme_minimal()
+                ggtheme = ggplot2::theme_minimal()
             )
 
             print(plot)

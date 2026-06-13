@@ -200,8 +200,8 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create formula
             predictors <- c(vars, facs)
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
 
             # Determine mtry (number of variables to try at each split)
             mtry_value <- if (self$options$mtry_method == "custom") {
@@ -309,8 +309,8 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             predictors <- c(vars, facs)
             
             # Create formula
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
 
             # Determine mtry
             mtry_value <- if (self$options$mtry_method == "custom") {
@@ -358,7 +358,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Class distribution info
             class_dist <- table(private$.training_data[[self$options$target]])
-            class_info <- paste(names(class_dist), class_dist, sep="=", collapse=", ")
+            class_info <- paste(htmltools::htmlEscape(names(class_dist)), class_dist, sep="=", collapse=", ")
             
             summary_html <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
@@ -547,7 +547,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .populate_clinical_interpretation = function() {
             clinical_context <- self$options$clinical_context
-            target_level <- self$options$targetLevel
+            target_level <- htmltools::htmlEscape(self$options$targetLevel)
             
             # Get performance metrics for interpretation
             performance_metrics <- ""

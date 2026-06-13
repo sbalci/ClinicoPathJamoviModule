@@ -1824,6 +1824,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     dplyr::filter(HR_univariable != "-") %>%
                     dplyr::pull(coxdescription) -> coxSummary
 
+                coxSummary <- htmltools::htmlEscape(coxSummary)
+
                 # Add clinical interpretation box
                 if (length(coxSummary) > 0) {
                     clinical_summary <- private$.createInterpretationBox(
@@ -2063,6 +2065,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> km_fit_median_definition
 
+                km_fit_median_definition <- htmltools::htmlEscape(km_fit_median_definition)
+
                 medianSummary <- c(km_fit_median_definition,
                                    "The median survival time is when 50% of subjects have experienced the event.",
                                    "This means that 50% of subjects in this group survived longer than this time period."
@@ -2186,6 +2190,8 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                     ) %>%
                     dplyr::select(description) %>%
                     dplyr::pull(.) -> survTableSummary
+
+                survTableSummary <- htmltools::htmlEscape(survTableSummary)
 
                 self$results$survTableSummary$setContent(survTableSummary)
             }
@@ -3497,6 +3503,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         )
                     }
 
+                    summary_text <- htmltools::htmlEscape(summary_text)
                     self$results$rmstSummary$setContent(summary_text)
                 }
             }
@@ -3574,7 +3581,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         score = NA,
                         schoenfeld = NA
                     ))
-                    residuals_table$setNote("error", paste("Residual calculation failed:", e$message))
+                    residuals_table$setNote("error", paste("Residual calculation failed:", htmltools::htmlEscape(e$message)))
                 })
             }
 

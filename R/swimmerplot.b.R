@@ -1593,7 +1593,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     error_msg <- paste0(
                         "<div style='color: red; padding: 15px; border: 1px solid red; border-radius: 5px; margin: 10px;'>",
                         .("<h4>Data Validation Error</h4>"),
-                        .("<p><strong>Error:</strong> "), validation_result$message, .("</p>"),
+                        .("<p><strong>Error:</strong> "), htmltools::htmlEscape(validation_result$message), .("</p>"),
                         .("<p><strong>Please check:</strong></p>"),
                         "<ul>",
                         .("<li>All required variables are selected</li>"),
@@ -1734,7 +1734,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 error_msg <- paste(
                     "<div style='color: red; padding: 10px; border: 1px solid red; border-radius: 5px;'>",
                     .("<h4>Error in Swimmer Plot Analysis</h4>"),
-                    .("<p><strong>Error:</strong>"), e$message, .("</p>"),
+                    .("<p><strong>Error:</strong>"), htmltools::htmlEscape(e$message), .("</p>"),
                     .("<p><strong>Suggestions:</strong></p>"),
                     "<ul>",
                     .("<li>Ensure all required variables are selected</li>"),

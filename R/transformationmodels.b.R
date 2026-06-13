@@ -146,6 +146,12 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             outcome <- data[[outcomeVar]]
             
             # Convert outcome to numeric
+            # TODO (correctness): validate the event level + guard zero-event fits. If
+            #   outcomeLevel (default "1") matches no value in `outcome`, this yields an all-0
+            #   status that PASSES the binary guard (L163) and survreg fits 0 events → nonsense.
+            #   Reject via list(error=...) when outcomeLevel is absent from the observed values,
+            #   and when sum(status)==0 after dropping incomplete cases (n_events is already
+            #   computed for display at L544/L666/L803 but never used as a pre-fit guard).
             if (is.factor(outcome)) {
                 outcome <- as.numeric(outcome == outcomeLevel)
             } else if (is.character(outcome)) {
@@ -235,6 +241,19 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         .fitTramModel = function(data, transformation, distribution, method, 
                                 support, lambdaSearch, lambdaMin, lambdaMax) {
             
+            # TODO (stub): tram-package path + several .a.yaml options are inert no-ops.
+            #   - This branch (chosen in .fitTransformationModel when requireNamespace("tram")
+            #     succeeds) just delegates to the built-in survreg path; no tram:: call exists,
+            #     tram is not in DESCRIPTION, and the .run "Install 'tram' for full features"
+            #     notice (L57-60) + .a.yaml library(tram) usage example mislead users. Either
+            #     implement a real tram fit (tram::Survreg/Coxph/BoxCox) or remove the branch,
+            #     the notice, and the usage example.
+            #   - `support` (read L214) is passed here and never used; `method` (L213) is
+            #     cosmetic — survreg always does ML, yet output echoes the choice (L574/L730/L818)
+            #     while L821 hardcodes "Maximum likelihood" (self-contradiction). max_iterations /
+            #     convergence_tolerance / bootstrap_ci / bootstrap_samples / weights_variable are
+            #     declared in .a.yaml but never read/wired. Wire them through survreg.control() /
+            #     weights= or drop them from the .a.yaml/.u.yaml so the UI has no dead controls.
             # This would use the tram package if available
             # For now, fallback to built-in implementation
             return(private$.fitBuiltinTransformationModel(data, transformation, 
@@ -251,7 +270,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ 1"
             } else {
-                formula <- paste("Surv(time, status) ~", paste(covariates, collapse = " + "))
+                formula <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
             }
             
             # Initialize transformation info
@@ -284,6 +303,13 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         .searchOptimalLambda = function(data, formula, distribution, lambdaMin, lambdaMax) {
             
             # Grid search for optimal lambda
+            # TODO (correctness): Box-Cox lambda selection omits the Jacobian. loglik_values
+            #   below (L294) are model logliks on DIFFERENT transformed responses, not comparable
+            #   across lambda; which.max picks the variance-compressing lambda, not the best fit.
+            #   Add (lambda-1)*sum(log(data$time)) (lambda==0 -> -sum(log(time))) before which.max
+            #   (cf. MASS::boxcox). The SAME flaw invalidates the AIC/BIC cross-transformation
+            #   selection in .compareTransformations (~L413-435): those loglik/AIC are on different
+            #   response scales, so the model_selection winner is arbitrary until Jacobian-corrected.
             lambda_grid <- seq(lambdaMin, lambdaMax, by = 0.1)
             loglik_values <- numeric(length(lambda_grid))
             
@@ -330,7 +356,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             # Fit survival regression model
             tryCatch({
                 model <- survival::survreg(
-                    as.formula(formula),
+                    .asSurvivalFormula(formula),
                     data = transformed_data,
                     dist = survreg_dist
                 )
@@ -342,12 +368,21 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 
                 return(model)
             }, error = function(e) {
-                stop(paste("Model fitting failed:", e$message))
+                jmvcore::reject("Model fitting failed: {}", code = NULL, e$message)
             })
         },
         
         .applyTransformation = function(data, transformation, lambda = NULL) {
-            
+
+            # TODO (correctness): this design transforms the response TIME then fits a fixed
+            #   parametric survreg AFT — it is NOT a linear/tram transformation model, so the
+            #   "unified framework / encompasses many models as special cases / robust" HTML
+            #   (L824-829, L843-846, L877-884) overstates the method. Also loglog/probit/logit/
+            #   cloglog (and boxcox with lambda<0, the default search floor) produce NON-POSITIVE
+            #   transformed times: survreg then errors for weibull/exponential/extreme, or
+            #   SILENTLY fits nonsense for the default normal dist (the L158 guard checks only the
+            #   ORIGINAL time). Add a transformed-time validity guard and either drop the CDF-link
+            #   transforms or document them; rename the analysis if not wiring a real tram backend.
             transformed_data <- data
             
             # Apply transformation to time variable
@@ -413,6 +448,10 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                         loglik = model$loglik[length(model$loglik)],
                         aic = AIC(model),
                         bic = BIC(model),
+                        # TODO (correctness): `model$iter < 100` is always TRUE — survreg's
+                        #   default maxiter is 30, so a non-converged fit (iter == maxiter) is
+                        #   reported "converged". Flag via the survreg "Ran out of iterations"
+                        #   warning or model$iter >= survreg.control()$maxiter / non-finite loglik.
                         converged = model$iter < 100,
                         selected = FALSE
                     )
@@ -441,6 +480,11 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         .validateTransformation = function(model, data) {
             
             # Basic transformation validation tests
+            # TODO (correctness): normality tests use type="response" residuals of a CENSORED
+            #   survreg AFT — censored obs enter as raw values, so even a correct model looks
+            #   "Non-normal". Use censoring-aware residuals (deviance / Cox-Snell vs unit-exp).
+            #   Also ks.test(resid,"pnorm",mean,sd) estimates params from the same data
+            #   (Lilliefors problem) → anti-conservative; use nortest::lillie.test or a QQ plot.
             residuals <- residuals(model, type = "response")
             
             # Shapiro-Wilk test for normality of residuals
@@ -609,6 +653,11 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 ci_upper <- coeffs + z_crit * se
                 
                 # Calculate effect ratios (exp of coefficients)
+                # TODO (correctness): "Effect Ratio" = exp(coef) is mislabeled. survreg is an AFT
+                #   model so exp(coef) is a TIME RATIO (not a hazard ratio), and on any non-linear
+                #   transformed response (boxcox/loglog/logit/rank) it has no time-scale meaning.
+                #   Report only for transformation=="linear" (as "Time Ratio"), else omit/relabel
+                #   (also .initCoefficientsTable L487-489 + transformationmodels.r.yaml L51-59).
                 er <- exp(coeffs)
                 er_lower <- exp(ci_lower)
                 er_upper <- exp(ci_upper)

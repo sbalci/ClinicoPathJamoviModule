@@ -565,7 +565,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <strong>%s %s:</strong> %s
                     </div>",
                     color$bg, color$border, color$text, color$icon,
-                    tools::toTitleCase(gsub("_", " ", type)), content
+                    tools::toTitleCase(gsub("_", " ", type)), htmltools::htmlEscape(content)
                 )))
             }
 

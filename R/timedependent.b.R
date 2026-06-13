@@ -107,7 +107,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           error_msg <- paste0(
             "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>",
             "<h4>Analysis Error</h4>",
-            "<p><strong>Error:</strong> ", e$message, "</p>",
+            "<p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>",
             "</div>"
           )
           self$results$todo$setContent(error_msg)
@@ -179,7 +179,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           error_msg <- paste0(
             "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>",
             "<h4>Data Preparation Error</h4>",
-            "<p><strong>Error:</strong> ", e$message, "</p>",
+            "<p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>",
             "<p>Please check your data format and variable selections.</p>",
             "</div>"
           )
@@ -203,7 +203,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           }
           
           # Create formula
-          formula_str <- paste("Surv(start, stop, event) ~", paste(all_vars, collapse = " + "))
+          formula_str <- paste("Surv(start, stop, event) ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + "))
           model_formula <- as.formula(formula_str)
           
           # Fit Cox model based on type
@@ -211,7 +211,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
             # Time-varying coefficients model using timereg
             tryCatch({
               # Try timereg for time-varying effects
-              timereg_formula <- as.formula(paste("Event(start, stop, event) ~", paste(all_vars, collapse = " + ")))
+              timereg_formula <- as.formula(paste("Event(start, stop, event) ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + ")))
               model <- timereg::timecox(timereg_formula, data = data)
               
               # Store both timereg model and equivalent coxph for compatibility
@@ -413,7 +413,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
             
             # Fit landmark model
             all_vars <- c(self$options$time_dependent_vars, self$options$baseline_vars)
-            formula_str <- paste("Surv(start, stop, event) ~", paste(all_vars, collapse = " + "))
+            formula_str <- paste("Surv(start, stop, event) ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + "))
             landmark_formula <- as.formula(formula_str)
             
             landmark_model <- survival::coxph(landmark_formula, data = landmark_data)
@@ -584,7 +584,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         tryCatch({
           # Fit time-fixed model
           all_vars <- c(self$options$time_dependent_vars, self$options$baseline_vars)
-          formula_str <- paste("Surv(start, stop, event) ~", paste(all_vars, collapse = " + "))
+          formula_str <- paste("Surv(start, stop, event) ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + "))
           fixed_model <- survival::coxph(as.formula(formula_str), data = data)
           
           # Current time-varying model
@@ -664,7 +664,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
               tryCatch({
                 # Fit model on training data
                 all_vars <- c(self$options$time_dependent_vars, self$options$baseline_vars)
-                formula_str <- paste("Surv(start, stop, event) ~", paste(all_vars, collapse = " + "))
+                formula_str <- paste("Surv(start, stop, event) ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + "))
                 fold_model <- survival::coxph(as.formula(formula_str), data = train_data)
                 
                 # Predict on test data
@@ -728,7 +728,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         
         tryCatch({
           all_vars <- c(self$options$time_dependent_vars, self$options$baseline_vars)
-          formula_str <- paste("Surv(start, stop, event) ~", paste(all_vars, collapse = " + "))
+          formula_str <- paste("Surv(start, stop, event) ~", paste(jmvcore::composeTerms(as.list(all_vars)), collapse = " + "))
           model <- survival::coxph(as.formula(formula_str), data = data)
           
           # Try using riskRegression for enhanced AUC calculation

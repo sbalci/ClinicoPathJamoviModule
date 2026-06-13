@@ -301,8 +301,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
             if (requireNamespace("randomForest", quietly = TRUE)) {
                 tryCatch({
                     # Build random forest for feature importance
-                    formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-                    formula_obj <- as.formula(formula_str)
+                    formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+                    formula_obj <- jmvcore::asFormula(formula_str)
                     
                     rf_model <- randomForest::randomForest(
                         formula = formula_obj,
@@ -370,7 +370,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
                     
                     # Run Boruta
                     boruta_result <- Boruta::Boruta(
-                        stats::as.formula(paste(target, "~", ".")), 
+                        jmvcore::asFormula(paste(jmvcore::composeTerm(target), "~", ".")),
                         data = boruta_data,
                         doTrace = 0,
                         maxRuns = 50
@@ -467,8 +467,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
                         cp = params$cp
                     )
                     
-                    formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-                    formula_obj <- as.formula(formula_str)
+                    formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+                    formula_obj <- jmvcore::asFormula(formula_str)
                     
                     # Include cost-sensitive learning in tuning
                     parms_list <- list()
@@ -535,8 +535,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
                     xval = self$options$cv_folds
                 )
                 
-                formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-                formula_obj <- as.formula(formula_str)
+                formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+                formula_obj <- jmvcore::asFormula(formula_str)
                 
                 private$.best_model <- rpart::rpart(
                     formula = formula_obj,
@@ -556,16 +556,15 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
         },
 
         .parse_range = function(range_str, default_range) {
-            tryCatch({
-                parts <- strsplit(range_str, ":")[[1]]
-                if (length(parts) == 2) {
-                    return(c(as.numeric(parts[1]), as.numeric(parts[2])))
-                } else {
-                    return(default_range)
-                }
-            }, error = function(e) {
-                return(default_range)
-            })
+            # as.numeric() WARNS (not errors) on non-numeric tokens, so a tryCatch(error=)
+            # never fires and "a:b"/"<script>:8"/"3:" would return c(NA, NA). Validate the
+            # coercion result and fall back to default_range when any token isn't finite.
+            if (is.null(range_str) || !nzchar(range_str)) return(default_range)
+            parts <- strsplit(range_str, ":")[[1]]
+            if (length(parts) != 2) return(default_range)
+            vals <- suppressWarnings(as.numeric(trimws(parts)))
+            if (any(is.na(vals)) || !all(is.finite(vals))) return(default_range)
+            vals
         },
 
         .calculate_tuning_score = function(actual, predicted, metric) {
@@ -625,8 +624,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
             predictors <- setdiff(names(private$.training_data), target)
             
             # Create formula
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
 
             # Set up rpart control with default or custom parameters
             if (self$options$hyperparameter_tuning && !is.null(private$.tuning_results)) {
@@ -950,8 +949,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
             predictors <- setdiff(names(train_data), target)
             
             # Build simplified model for this fold
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
             
             # Use conservative parameters for fold models to prevent overfitting
             # But use tuned parameters if available
@@ -1016,6 +1015,10 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
 
             n_nodes <- nrow(private$.model$frame)
             n_leaves <- sum(private$.model$frame$var == "<leaf>")
+            # TODO (cleanup): rpart:::tree.depth is an UNEXPORTED internal — `:::` is fragile
+            #   across rpart versions and trips R CMD check. Compute depth from the public node
+            #   structure instead: max(floor(log2(as.numeric(rownames(private$.model$frame)))))
+            #   (rpart node ids encode depth as floor(log2(id))).
             tree_depth <- max(rpart:::tree.depth(as.numeric(rownames(private$.model$frame))))
             
             # Advanced features information
@@ -1275,7 +1278,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
 
         .populate_clinical_interpretation = function() {
             clinical_context <- self$options$clinical_context
-            target_level <- self$options$targetLevel
+            target_level <- htmltools::htmlEscape(self$options$targetLevel)
             
             # Get performance metrics for interpretation
             performance_metrics <- ""
@@ -1350,7 +1353,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) R6::R6Class("treeadvancedC
                 "<p><strong>Performance:</strong> ", performance_metrics, "</p>",
                 "<h4>Advanced Features Used:</h4>",
                 "<ul>",
-                "<li><strong>Validation Method:</strong> ", private$.predictions$validation_method, "</li>",
+                "<li><strong>Validation Method:</strong> ", htmltools::htmlEscape(private$.predictions$validation_method), "</li>",
                 if (self$options$hyperparameter_tuning) "<li><strong>Hyperparameter Optimization:</strong> Enabled</li>" else "",
                 if (self$options$feature_selection) "<li><strong>Feature Selection:</strong> Enabled</li>" else "",
                 if (self$options$cost_sensitive) "<li><strong>Cost-Sensitive Learning:</strong> Enabled</li>" else "",

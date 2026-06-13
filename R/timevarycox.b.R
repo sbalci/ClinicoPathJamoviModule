@@ -228,7 +228,7 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Data Preparation Error</h3><p>", e$message, "</p>"
+            "<h3>Data Preparation Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
@@ -276,8 +276,8 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
         missing_cols <- setdiff(required_cols, names(data))
         if (length(missing_cols) > 0) {
           self$results$todo$setContent(paste0(
-            "<h3>Missing Columns</h3><p>Required columns not found: ", 
-            paste(missing_cols, collapse = ", "), "</p>"
+            "<h3>Missing Columns</h3><p>Required columns not found: ",
+            htmltools::htmlEscape(paste(missing_cols, collapse = ", ")), "</p>"
           ))
           return(NULL)
         }
@@ -390,10 +390,10 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
           
           # Add time interactions if requested
           if (self$options$time_interaction && !is.null(self$options$time_interaction_vars)) {
-            time_interactions <- paste0("tt(", self$options$time_interaction_vars, ")", collapse = " + ")
-            formula_str <- paste("prepared_data$surv ~", paste(fixed_vars, collapse = " + "), "+", time_interactions)
+            time_interactions <- paste0("tt(", jmvcore::composeTerms(as.list(self$options$time_interaction_vars)), ")", collapse = " + ")
+            formula_str <- paste("prepared_data$surv ~", paste(jmvcore::composeTerms(as.list(fixed_vars)), collapse = " + "), "+", time_interactions)
           } else {
-            formula_str <- paste("prepared_data$surv ~", paste(fixed_vars, collapse = " + "))
+            formula_str <- paste("prepared_data$surv ~", paste(jmvcore::composeTerms(as.list(fixed_vars)), collapse = " + "))
           }
           
           cox_formula <- as.formula(formula_str)
@@ -439,7 +439,7 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
           
         }, error = function(e) {
           self$results$todo$setContent(paste0(
-            "<h3>Model Fitting Error</h3><p>", e$message, "</p>"
+            "<h3>Model Fitting Error</h3><p>", htmltools::htmlEscape(e$message), "</p>"
           ))
           return(NULL)
         })
@@ -479,7 +479,7 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
           if (self$options$show_model_summary) {
             model_text <- paste0(
               "<h3>Time-Varying Cox Regression Results</h3>",
-              "<p><b>Formula:</b> ", deparse(model_results$formula), "</p>",
+              "<p><b>Formula:</b> ", htmltools::htmlEscape(deparse(model_results$formula)), "</p>",
               "<p><b>Events:</b> ", model_results$model$nevent, "</p>",
               "<p><b>Log-likelihood:</b> ", round(model_results$summary$loglik[2], 4), "</p>",
               "<p><b>Likelihood ratio test:</b> χ² = ", round(model_results$summary$logtest["test"], 4), 

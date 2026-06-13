@@ -68,8 +68,8 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "border-left: 4px solid ", style$border, "; ",
                     "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
                     "<strong style='color: ", style$color, ";'>",
-                    notice$title, "</strong><br>",
-                    "<span style='color: #374151;'>", notice$content, "</span>",
+                    htmltools::htmlEscape(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>", htmltools::htmlEscape(notice$content), "</span>",
                     "</div>"
                 )
             }
@@ -125,7 +125,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             data <- self$data
 
             if (nrow(data) == 0) {
-                stop('Data contains no rows')
+                jmvcore::reject('Data contains no rows')
             }
 
             time_var <- self$options$elapsedtime
@@ -135,22 +135,22 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Input validation
             if (!is.null(time_var) && !is.numeric(data[[time_var]])) {
-                stop("Time variable must be numeric")
+                jmvcore::reject("Time variable must be numeric")
             }
 
             if (!is.numeric(data[[marker_var]])) {
-                stop("Marker variable must be numeric")
+                jmvcore::reject("Marker variable must be numeric")
             }
 
             # Convert outcome to 0/1
             if (is.factor(data[[outcome_var]])) {
                 if (is.null(outcome_level)) {
-                    stop("Please specify the event level for the outcome variable")
+                    jmvcore::reject("Please specify the event level for the outcome variable")
                 }
                 data$status <- ifelse(data[[outcome_var]] == outcome_level, 1, 0)
             } else {
                 if (!all(data[[outcome_var]] %in% c(0, 1, NA))) {
-                    stop("Numeric outcome must contain only 0s and 1s")
+                    jmvcore::reject("Numeric outcome must contain only 0s and 1s")
                 }
                 data$status <- data[[outcome_var]]
             }
@@ -170,13 +170,13 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Validate final dataset
             if (nrow(data) == 0) {
-                stop("No complete cases remaining after removing missing values")
+                jmvcore::reject("No complete cases remaining after removing missing values")
             }
 
             if (sum(data$status) == 0) {
                 private$.addNotice("ERROR", "No Events Found",
                     "The outcome variable contains no events (all 0). ROC analysis requires events to evaluate marker performance.")
-                stop("No events found in the outcome variable")
+                jmvcore::reject("No events found in the outcome variable")
             }
 
             if (length(unique(data$marker)) < 5) {
@@ -626,7 +626,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <li>Timepoints: %s</li>
                     </ul>
                 ",
-                e$message,
+                htmltools::htmlEscape(e$message),
                 ifelse(is.null(private$.data), 0, nrow(private$.data)),
                 ifelse(is.null(private$.data), 0, sum(private$.data$status, na.rm = TRUE)),
                 ifelse(is.null(private$.data), 0, 100 * mean(private$.data$status, na.rm = TRUE)),
@@ -659,7 +659,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <p><b>Marker Variable:</b> %s</p>
                 <p><b>Analysis Method:</b> %s</p>
                 <p><b>Sample Size:</b> %d observations, %d events (%.1f%%)</p>",
-                self$options$marker,
+                htmltools::htmlEscape(self$options$marker),
                 method_label,
                 nrow(private$.data),
                 sum(private$.data$status),
@@ -753,7 +753,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li><b>Assessment:</b> %s</li>
                 </ul>
                 <p><b>Method:</b> %s</p>",
-                self$options$marker,
+                htmltools::htmlEscape(self$options$marker),
                 if (mean_auc >= 0.8) "good to excellent"
                     else if (mean_auc >= 0.7) "fair to good"
                     else if (mean_auc >= 0.6) "poor to fair"

@@ -180,8 +180,8 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             
             # Create formula
             predictors <- c(vars, facs)
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
 
             # Set up rpart control
             control <- rpart::rpart.control(
@@ -363,6 +363,10 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
 
             n_nodes <- nrow(private$.model$frame)
             n_leaves <- sum(private$.model$frame$var == "<leaf>")
+            # TODO (cleanup): rpart:::tree.depth is an UNEXPORTED internal — `:::` is fragile
+            #   across rpart versions and trips R CMD check. Compute depth from the public node
+            #   ids instead: max(floor(log2(as.numeric(rownames(private$.model$frame)))))
+            #   (rpart node ids encode depth as floor(log2(id))). Same issue tracked in treeadvanced.
             tree_depth <- max(rpart:::tree.depth(as.numeric(rownames(private$.model$frame))))
             
             # Add cost-sensitive information
@@ -662,8 +666,8 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             target <- self$options$target
             
             predictors <- c(vars, facs)
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
             
             control <- rpart::rpart.control(
                 maxdepth = self$options$max_depth,

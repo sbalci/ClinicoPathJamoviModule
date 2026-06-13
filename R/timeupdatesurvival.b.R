@@ -61,7 +61,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
         .run = function() {
             # Check for required packages
             if (!requireNamespace("survival", quietly = TRUE)) {
-                stop("Package 'survival' is required for time-updated survival analysis but is not installed.")
+                jmvcore::reject("Package 'survival' is required for time-updated survival analysis but is not installed.")
             }
             
             if (!requireNamespace("timereg", quietly = TRUE)) {
@@ -215,7 +215,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             tryCatch({
                 if (requireNamespace("timereg", quietly = TRUE)) {
                     # Create formula
-                    formula_str <- paste("Surv(time, status) ~", paste(covariate_vars, collapse = " + "))
+                    formula_str <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariate_vars)), collapse = " + "))
                     formula_obj <- as.formula(formula_str)
                     
                     # Fit Aalen additive model
@@ -286,7 +286,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             coeff_table <- self$results$timeVaryingCoefficients
             
             # Fit standard Cox model first
-            formula_str <- paste("Surv(time, status) ~", paste(covariate_vars, collapse = " + "))
+            formula_str <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariate_vars)), collapse = " + "))
             cox_fit <- survival::coxph(as.formula(formula_str), data = data)
             
             # For each time point, fit local Cox model (simplified approach)
@@ -366,7 +366,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                     if (sum(weights > 0.01) > 10) {
                         # Fit local model
                         tryCatch({
-                            formula_str <- paste("Surv(time, status) ~", var_name)
+                            formula_str <- paste("Surv(time, status) ~", jmvcore::composeTerm(var_name))
                             local_fit <- survival::coxph(as.formula(formula_str), 
                                                        data = data, weights = weights)
                             
@@ -428,7 +428,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             coeff_table <- self$results$timeVaryingCoefficients
             
             # Fit standard Cox model
-            formula_str <- paste("Surv(time, status) ~", paste(covariate_vars, collapse = " + "))
+            formula_str <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariate_vars)), collapse = " + "))
             cox_fit <- survival::coxph(as.formula(formula_str), data = data)
             
             baseline_coeffs <- coef(cox_fit)
@@ -472,7 +472,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             for (var_name in covariate_vars) {
                 tryCatch({
                     # Fit standard Cox model
-                    formula_str <- paste("Surv(time, status) ~", var_name)
+                    formula_str <- paste("Surv(time, status) ~", jmvcore::composeTerm(var_name))
                     cox_fit <- survival::coxph(as.formula(formula_str), data = data)
                     
                     # Test for time-varying coefficient using Schoenfeld residuals
@@ -508,7 +508,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             comp_table <- self$results$modelComparison
             
             # Fit standard Cox model for comparison
-            formula_str <- paste("Surv(time, status) ~", paste(covariate_vars, collapse = " + "))
+            formula_str <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariate_vars)), collapse = " + "))
             cox_fit <- survival::coxph(as.formula(formula_str), data = data)
             
             # Extract fit statistics
@@ -556,7 +556,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             residual_table <- self$results$residualAnalysis
             
             # Fit standard Cox model for residual analysis
-            formula_str <- paste("Surv(time, status) ~", paste(covariate_vars, collapse = " + "))
+            formula_str <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariate_vars)), collapse = " + "))
             cox_fit <- survival::coxph(as.formula(formula_str), data = data)
             
             # Calculate different types of residuals
@@ -611,7 +611,7 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             )
             
             # Fit base Cox model
-            formula_str <- paste("Surv(time, status) ~", paste(covariate_vars, collapse = " + "))
+            formula_str <- paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(covariate_vars)), collapse = " + "))
             cox_fit <- survival::coxph(as.formula(formula_str), data = data)
             base_coeffs <- coef(cox_fit)
             

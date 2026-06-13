@@ -53,7 +53,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validate data
             if (nrow(self$data) == 0) {
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
             }
 
             # Validate variables exist in data
@@ -92,7 +92,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 facetvar <- private$.escapeVar(self$options$facet)
             }
 
-            message(paste("DEBUG: Variables - xvar:", xvar, "yvar:", yvar, "color:", colorvar, "group:", groupvar, "facet:", facetvar))
+            private$.debug(paste("DEBUG: Variables - xvar:", xvar, "yvar:", yvar, "color:", colorvar, "group:", groupvar, "facet:", facetvar))
 
             # Check if required variables are selected
             if (is.null(xvar)) {
@@ -117,10 +117,10 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stop("rlang package is not available")
             }
 
-            message("DEBUG: Packages available")
+            private$.debug("DEBUG: Packages available")
 
             # Initialize tidyplot with required aesthetics
-            message("DEBUG: Creating tidyplot with basic aesthetics")
+            private$.debug("DEBUG: Creating tidyplot with basic aesthetics")
             # Build the aesthetic mapping
             # Build arguments for tidyplot
             args <- list(
@@ -133,22 +133,22 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (!is.null(colorvar) && colorvar != "") {
-                message(paste("DEBUG: Adding color aesthetic:", colorvar))
+                private$.debug(paste("DEBUG: Adding color aesthetic:", colorvar))
                 args$color <- rlang::sym(colorvar)
             } else if (!is.null(groupvar) && groupvar != "") {
-                message(paste("DEBUG: Using group as color:", groupvar))
+                private$.debug(paste("DEBUG: Using group as color:", groupvar))
                 args$color <- rlang::sym(groupvar)
             }
 
-            message("DEBUG: Calling tidyplots::tidyplot")
-            message(paste("DEBUG: Data dimensions:", nrow(plotData), "x", ncol(plotData)))
-            message(paste("DEBUG: Data columns:", paste(names(plotData), collapse = ", ")))
+            private$.debug("DEBUG: Calling tidyplots::tidyplot")
+            private$.debug(paste("DEBUG: Data dimensions:", nrow(plotData), "x", ncol(plotData)))
+            private$.debug(paste("DEBUG: Data columns:", paste(names(plotData), collapse = ", ")))
 
             # Create tidyplot object
             p <- rlang::exec(tidyplots::tidyplot, !!!args)
-            message("DEBUG: tidyplot object created successfully")
-            message(paste("DEBUG: Current plot type option:", self$options$plotType))
-            message(paste("DEBUG: Alpha option:", self$options$alpha))
+            private$.debug("DEBUG: tidyplot object created successfully")
+            private$.debug(paste("DEBUG: Current plot type option:", self$options$plotType))
+            private$.debug(paste("DEBUG: Alpha option:", self$options$alpha))
 
             # Add main plot elements
             p <- private$.addTidyPlotElements(p)
@@ -203,24 +203,24 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if required variables exist in data
             if (!self$options$xvar %in% names(data)) {
-                stop(paste("X variable", self$options$xvar, "not found in data"))
+                jmvcore::reject("X variable {} not found in data", self$options$xvar)
             }
             if (!is.null(self$options$yvar) && self$options$yvar != "" && !self$options$yvar %in% names(data)) {
-                stop(paste("Y variable", self$options$yvar, "not found in data"))
+                jmvcore::reject("Y variable {} not found in data", self$options$yvar)
             }
 
             # Check optional variables
             if (!is.null(self$options$color) && self$options$color != "" &&
                 !self$options$color %in% names(data)) {
-                stop(paste("Color variable", self$options$color, "not found in data"))
+                jmvcore::reject("Color variable {} not found in data", self$options$color)
             }
             if (!is.null(self$options$group) && self$options$group != "" &&
                 !self$options$group %in% names(data)) {
-                stop(paste("Group variable", self$options$group, "not found in data"))
+                jmvcore::reject("Group variable {} not found in data", self$options$group)
             }
             if (!is.null(self$options$facet) && self$options$facet != "" &&
                 !self$options$facet %in% names(data)) {
-                stop(paste("Facet variable", self$options$facet, "not found in data"))
+                jmvcore::reject("Facet variable {} not found in data", self$options$facet)
             }
         },
 
@@ -264,13 +264,13 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             size <- self$options$pointSize
             white_border <- self$options$pointWhiteBorder
             line_width <- self$options$lineWidth
-            message(paste("DEBUG: Adding plot elements for type:", plot_type, "with alpha:", alpha))
+            private$.debug(paste("DEBUG: Adding plot elements for type:", plot_type, "with alpha:", alpha))
 
             switch(plot_type,
                 "points" = {
-                    message(paste("DEBUG: Adding points with pointType:", self$options$pointType))
+                    private$.debug(paste("DEBUG: Adding points with pointType:", self$options$pointType))
                     if (self$options$pointType == "jitter") {
-                        message("DEBUG: Adding jittered points")
+                        private$.debug("DEBUG: Adding jittered points")
                         p <- p |> tidyplots::add_data_points_jitter(
                             alpha = alpha,
                             size = size,
@@ -279,7 +279,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else if (self$options$pointType == "beeswarm") {
                         # Use shape parameter from options if available
                         shape_param <- if (!is.null(self$options$pointShape)) self$options$pointShape else 16
-                        message(paste("DEBUG: Adding beeswarm points with shape:", shape_param))
+                        private$.debug(paste("DEBUG: Adding beeswarm points with shape:", shape_param))
                         p <- p |> tidyplots::add_data_points_beeswarm(
                             alpha = alpha,
                             shape = shape_param,
@@ -287,7 +287,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             white_border = white_border
                         )
                     } else {
-                        message("DEBUG: Adding basic data points")
+                        private$.debug("DEBUG: Adding basic data points")
                         p <- p |> tidyplots::add_data_points(
                             alpha = alpha,
                             size = size,
@@ -467,21 +467,21 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add reference lines if requested
             if (self$options$showReferenceLines) {
-                message("DEBUG: Adding reference lines")
+                private$.debug("DEBUG: Adding reference lines")
                 ref_x <- if (!is.null(self$options$referenceX) && self$options$referenceX != "") {
-                    message(paste("DEBUG: Parsing X reference values:", self$options$referenceX))
+                    private$.debug(paste("DEBUG: Parsing X reference values:", self$options$referenceX))
                     as.numeric(strsplit(self$options$referenceX, ",")[[1]])
                 } else NULL
 
                 ref_y <- if (!is.null(self$options$referenceY) && self$options$referenceY != "") {
-                    message(paste("DEBUG: Parsing Y reference values:", self$options$referenceY))
+                    private$.debug(paste("DEBUG: Parsing Y reference values:", self$options$referenceY))
                     as.numeric(strsplit(self$options$referenceY, ",")[[1]])
                 } else NULL
 
                 if (!is.null(ref_x) || !is.null(ref_y)) {
-                    message("DEBUG: Calling add_reference_lines")
+                    private$.debug("DEBUG: Calling add_reference_lines")
                     p <- p |> tidyplots::add_reference_lines(x = ref_x, y = ref_y)
-                    message("DEBUG: Reference lines added")
+                    private$.debug("DEBUG: Reference lines added")
                 }
             }
 
@@ -717,7 +717,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply theme if specified
             theme_type <- self$options$plotTheme
             if (!is.null(theme_type) && theme_type != "default") {
-                message(paste("DEBUG: Applying theme:", theme_type))
+                private$.debug(paste("DEBUG: Applying theme:", theme_type))
                 switch(theme_type,
                     "tidyplot" = {
                         p <- p |> tidyplots::theme_tidyplot()
@@ -903,7 +903,7 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Build summary
                 summary_parts <- c(
                     sprintf("This <strong>%s</strong> visualizes the relationship between <strong>%s</strong> (y-axis) and <strong>%s</strong> (x-axis).",
-                            plot_desc, yvar, xvar)
+                            plot_desc, htmltools::htmlEscape(yvar), htmltools::htmlEscape(xvar))
                 )
 
                 # Add sample size
@@ -915,14 +915,14 @@ tidyplotsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$color) && self$options$color != "") {
                     summary_parts <- c(summary_parts,
                         sprintf("Data points are colored by <strong>%s</strong> to show group differences.",
-                                self$options$color)
+                                htmltools::htmlEscape(self$options$color))
                     )
                 }
 
                 if (!is.null(self$options$facet) && self$options$facet != "") {
                     summary_parts <- c(summary_parts,
                         sprintf("The plot is split into panels by <strong>%s</strong>.",
-                                self$options$facet)
+                                htmltools::htmlEscape(self$options$facet))
                     )
                 }
 

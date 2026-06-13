@@ -47,7 +47,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Check for data
             if (nrow(self$data) == 0) {
-                stop('Data contains no (complete) rows')
+                jmvcore::reject('Data contains no (complete) rows')
             }
 
             # Prepare Data
@@ -181,7 +181,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         # Start variable section with title
                         freqTables <- paste0(
                             freqTables,
-                            sprintf('<div class="variable-title">%s</div>', var),
+                            sprintf('<div class="variable-title">%s</div>', htmltools::htmlEscape(var)),
                             '<table class="freq-table">',
                             '<thead>',
                             '<tr><th style="width: 40%;">Category</th><th style="width: 20%;">Count</th><th style="width: 25%;">Percentage</th><th style="width: 15%;">Valid %</th></tr>',
@@ -206,7 +206,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             } else {
                                 validPercentage <- sprintf("%.1f%%", (count / nValid) * 100)
                                 rowClass <- ""
-                                categoryDisplay <- categoryName
+                                categoryDisplay <- htmltools::htmlEscape(categoryName)
                             }
 
                             freqTables <- paste0(
@@ -301,7 +301,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                 }, error = function(e) {
                     warning(paste("Error generating dfSummary:", e$message))
-                    self$results$dfSummary$setContent(paste("Error generating data frame summary:", e$message))
+                    self$results$dfSummary$setContent(paste("Error generating data frame summary:", htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -342,7 +342,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                 }, error = function(e) {
                     warning(paste("Error generating descriptive statistics:", e$message))
-                    self$results$descrStats$setContent(paste("Error generating descriptive statistics:", e$message))
+                    self$results$descrStats$setContent(paste("Error generating descriptive statistics:", htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -372,7 +372,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             freq_html <- print(freq_result, method = "render", file = tempfile(fileext = ".html"))
                             freq_var_content <- paste(readLines(freq_html, warn = FALSE), collapse = "\n")
                             freq_html_content <- paste(freq_html_content, 
-                                                     sprintf("<h3>%s</h3>", var),
+                                                     sprintf("<h3>%s</h3>", htmltools::htmlEscape(var)),
                                                      freq_var_content,
                                                      "<br>", sep = "\n")
                         }
@@ -384,7 +384,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                 }, error = function(e) {
                     warning(paste("Error generating frequency tables:", e$message))
-                    self$results$summaryToolsFreq$setContent(paste("Error generating frequency tables:", e$message))
+                    self$results$summaryToolsFreq$setContent(paste("Error generating frequency tables:", htmltools::htmlEscape(e$message)))
                 })
             }
 
@@ -414,7 +414,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 ctable_html <- print(ctable_result, method = "render", file = tempfile(fileext = ".html"))
                                 ctable_var_content <- paste(readLines(ctable_html, warn = FALSE), collapse = "\n")
                                 crosstab_html_content <- paste(crosstab_html_content,
-                                                             sprintf("<h3>%s by %s</h3>", var, groupVar),
+                                                             sprintf("<h3>%s by %s</h3>", htmltools::htmlEscape(var), htmltools::htmlEscape(groupVar)),
                                                              ctable_var_content,
                                                              "<br>", sep = "\n")
                             }
@@ -427,7 +427,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                 }, error = function(e) {
                     warning(paste("Error generating cross-tabulation tables:", e$message))
-                    self$results$crosstabs$setContent(paste("Error generating cross-tabulation tables:", e$message))
+                    self$results$crosstabs$setContent(paste("Error generating cross-tabulation tables:", htmltools::htmlEscape(e$message)))
                 })
             }
         }

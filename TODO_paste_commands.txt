@@ -3,91 +3,12 @@ add other, remaining, out-of-scope observations as TODO items
 
 
 
-/security-audit-function survivalcalibration
 
-/jamovify-function survivalcont --apply
-/security-audit-function survivalcont
 
-/jamovify-function survivalendpoints --apply
-/security-audit-function survivalendpoints
 
-/jamovify-function survivalfeaturerank --apply
-/security-audit-function survivalfeaturerank
 
-/jamovify-function survivalmodelvalidation --apply
-/security-audit-function survivalmodelvalidation
 
-/jamovify-function survivalvalidation --apply
-/security-audit-function survivalvalidation
 
-/jamovify-function swimmerplot --apply
-/security-audit-function swimmerplot
-
-/jamovify-function tableone --apply
-/security-audit-function tableone
-
-/jamovify-function tidydensity --apply
-/security-audit-function tidydensity
-
-/jamovify-function tidyplots --apply
-/security-audit-function tidyplots
-
-/jamovify-function timedependent --apply
-/security-audit-function timedependent
-
-/jamovify-function timedependentdca --apply
-/security-audit-function timedependentdca
-
-/jamovify-function timeinterval --apply
-/security-audit-function timeinterval
-
-/jamovify-function timeroc --apply
-/security-audit-function timeroc
-
-/jamovify-function timeupdatedsurvival --apply
-/security-audit-function timeupdatedsurvival
-
-/jamovify-function timeupdatesurvival --apply
-/security-audit-function timeupdatesurvival
-
-/jamovify-function timevarycox --apply
-/security-audit-function timevarycox
-
-/jamovify-function tinytable --apply
-/security-audit-function tinytable
-
-/jamovify-function toolssummary --apply
-/security-audit-function toolssummary
-
-/jamovify-function toxicityprofile --apply
-/security-audit-function toxicityprofile
-
-/jamovify-function transformationmodels --apply
-/security-audit-function transformationmodels
-
-/jamovify-function treatmenteffects --apply
-/security-audit-function treatmenteffects
-
-/jamovify-function treatmentmeta --apply
-/security-audit-function treatmentmeta
-
-/jamovify-function treatmentoptim --apply
-/security-audit-function treatmentoptim
-
-/jamovify-function treatmentswitching --apply
-/security-audit-function treatmentswitching
-
-/jamovify-function treeadvanced --apply
-/security-audit-function treeadvanced
-
-/jamovify-function treecompare --apply
-/security-audit-function treecompare
-
-/jamovify-function treeensemble --apply
-/security-audit-function treeensemble
-
-/jamovify-function treemedical --apply
-/security-audit-function treemedical
 
 /jamovify-function trichotomousroc --apply
 /security-audit-function trichotomousroc

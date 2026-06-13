@@ -88,7 +88,7 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
             
             if (nrow(clean_data) < 20) {
-                stop("Insufficient data for switching analysis (minimum 20 complete observations required)")
+                jmvcore::reject("Insufficient data for switching analysis (minimum 20 complete observations required)")
             }
             
             # Identify switching patterns
@@ -203,7 +203,7 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$summary$setContent(
-                    paste("<h3>Switching Pattern Analysis Error</h3><p>", e$message, "</p>")
+                    paste("<h3>Switching Pattern Analysis Error</h3><p>", htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },
@@ -213,8 +213,13 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                             covariates, method) {
             
             tryCatch({
+                # TODO (cleanup): library() inside package code modifies the user's search path
+                #   and trips R CMD check. 7 sites in this file (L216 survival; L639-641
+                #   ggplot2/survival/survminer; L686-687 ggplot2/dplyr; L1142 ggplot2). Drop them —
+                #   declare the packages in DESCRIPTION Imports and call survival::/ggplot2:: etc.,
+                #   or rely on the @import roxygen + NAMESPACE.
                 library(survival)
-                
+
                 # Get switching data
                 data <- private$switching_data
                 
@@ -249,7 +254,7 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$summary$setContent(
-                    paste("<h3>Switching Analysis Error</h3><p>", e$message, "</p>")
+                    paste("<h3>Switching Analysis Error</h3><p>", htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },
@@ -307,7 +312,7 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 switch_data <- data[!is.na(data$switch_time) | !data$switched, ]
                 
                 if (length(covariates) > 0) {
-                    ps_formula <- as.formula(paste("switched ~", paste(covariates, collapse = " + ")))
+                    ps_formula <- jmvcore::asFormula(paste("switched ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")))
                 } else {
                     ps_formula <- switched ~ initial_treatment
                 }
@@ -432,7 +437,12 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Stage 1: Among switchers, estimate treatment effect
             switchers <- data[data$switched & !is.na(data$switch_time), ]
-            
+
+            # TODO (correctness): switch_effect <- 0.7 is a hardcoded PLACEHOLDER, not estimated —
+            #   the two-stage adjusted HR (itt_hr / switch_effect) is therefore fabricated. Same
+            #   class of issue: .performSensitivityAnalysis generic branch returns hardcoded HRs
+            #   c(0.75,0.78,0.80,0.83,0.85) (~L1124). Implement the real stage-1 estimator (or gate
+            #   these outputs off) before clinical release.
             if (nrow(switchers) > 10) {
                 # Compare pre and post-switch periods (simplified)
                 switch_effect <- 0.7  # Placeholder - would be estimated
@@ -746,7 +756,7 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     time_data <- data[[time_var]]
                     
                     if (any(time_data <= 0, na.rm = TRUE)) {
-                        stop("Time variable contains non-positive values. Treatment switching analysis requires positive follow-up times.")
+                        jmvcore::reject("Time variable contains non-positive values. Treatment switching analysis requires positive follow-up times.")
                     }
                     
                     # Check for extremely short follow-up
@@ -827,7 +837,12 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                     
                     # Method-specific diagnostics
-                    if (method == "ipcw" && exists("data", inherits = FALSE) && 
+                    # TODO (correctness): exists("data", inherits = FALSE) is ALWAYS FALSE here —
+                    #   this method's params are (results, method); there is no local `data`. So the
+                    #   entire IPCW-weight diagnostics block below (mean/range/extreme weights) is
+                    #   DEAD CODE and never renders. Drop the exists() guard (the
+                    #   "ipcw_weight" %in% names(private$switching_data) check is the real condition).
+                    if (method == "ipcw" && exists("data", inherits = FALSE) &&
                         "ipcw_weight" %in% names(private$switching_data)) {
                         
                         weight_data <- private$switching_data$ipcw_weight[!is.na(private$switching_data$ipcw_weight)]
@@ -978,7 +993,12 @@ treatmentSwitchingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Test 2: RPSFT with different acceleration factors
                 acceleration_factors <- c(0.6, 0.8, 1.0, 1.2, 1.4)
                 original_factor <- self$options$accelerationFactor
-                
+
+                # TODO (correctness): mutating self$options (a read-only jamovi binding) to sweep the
+                #   acceleration factor is fragile and may silently no-op → every sensitivity row gets
+                #   the SAME HR. The sibling .performSensitivityAnalysis (~L1113) builds temp_options
+                #   but never passes it to .performRPSFTAnalysis, so that sweep is already broken.
+                #   Refactor .performRPSFTAnalysis to take accelerationFactor as a parameter instead.
                 for (af in acceleration_factors) {
                     self$options$accelerationFactor <- af
                     rpsft_result <- private$.performRPSFTAnalysis(data)

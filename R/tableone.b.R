@@ -132,7 +132,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     tableone::CreateTableOne(data = data)
                 }, error = function(e) {
                     if (grepl("insufficient", tolower(e$message))) {
-                        stop("Insufficient data for Table One analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or disabling 'Exclude Missing Values'.")
+                        jmvcore::reject("Insufficient data for Table One analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or disabling 'Exclude Missing Values'.")
                     } else {
                         stop("Error creating Table One: ", e$message, ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers.")
                     }
@@ -262,7 +262,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                         freq_table,
                         format = "html",
                         digits = 1,
-                        escape = FALSE,
+                        escape = TRUE,  # escape factor-level cell content (freq_table is plain data, not HTML)
                         align = c("l", "c", "c", "c")  # left, center, center, center
                     ) %>%
                         kableExtra::kable_styling(
@@ -286,7 +286,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 private$.checkpoint()
                 self$results$tablestyle4$setContent(result)
             } else {
-                stop("Invalid table style selected. Please choose a valid table style from the options (tableone, gtsummary, arsenal, janitor).")
+                jmvcore::reject("Invalid table style selected. Please choose a valid table style from the options (tableone, gtsummary, arsenal, janitor).")
             }
         }, # End of .run function.
 

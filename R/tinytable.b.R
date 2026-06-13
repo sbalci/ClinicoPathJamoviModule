@@ -71,7 +71,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
 
             # Validate dataset
             if (nrow(self$data) == 0) {
-                stop("Error: The provided dataset contains no complete rows. Please check your data and try again.")
+                jmvcore::reject("The provided dataset contains no complete rows. Please check your data and try again.")
             }
 
             # Enhanced package checking with better error messages
@@ -119,7 +119,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             analysis_data <- analysis_data[rowSums(!is.na(analysis_data[vars])) > 0, ]
             
             if (nrow(analysis_data) == 0) {
-                stop("Error: No data available for the selected variables.")
+                jmvcore::reject("No data available for the selected variables.")
             }
 
             # Generate table based on type with error handling
@@ -136,7 +136,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 error_msg <- paste0("
                 <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
                 <h4>Table Generation Error</h4>
-                <p><strong>Error:</strong> ", e$message, "</p>
+                <p><strong>Error:</strong> ", htmltools::htmlEscape(e$message), "</p>
                 
                 <h5>Troubleshooting Tips:</h5>
                 <ul>
@@ -176,10 +176,15 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 table_data <- private$.create_custom_table(data, vars, group_var)
             }
             
+            # Escape cell content and column names — tinytable does not HTML-escape by default
+            table_data[] <- lapply(table_data, function(col)
+                if (is.character(col) || is.factor(col)) htmltools::htmlEscape(as.character(col)) else col)
+            names(table_data) <- htmltools::htmlEscape(names(table_data))
+
             # Convert to tinytable
-            tt_obj <- tinytable::tt(table_data, 
-                                    caption = self$options$table_title,
-                                    notes = if (self$options$table_notes != "") self$options$table_notes else NULL,
+            tt_obj <- tinytable::tt(table_data,
+                                    caption = htmltools::htmlEscape(self$options$table_title),
+                                    notes = if (self$options$table_notes != "") htmltools::htmlEscape(self$options$table_notes) else NULL,
                                     width = self$options$column_width)
             
             # Apply theme

@@ -223,6 +223,13 @@ survivalmodelvalidationClass <- R6::R6Class(
                 
                 # Validate variable types and values
                 data[[time_var]] <- as.numeric(data[[time_var]])
+                # TODO (correctness): status_var is permitted [factor, numeric] (.a.yaml). For a
+                # FACTOR status with levels c("0","1"), as.numeric() returns level INDICES c(1,2),
+                # not the 0/1 codes — consider jmvcore::toNumeric() (honors the jamovi `values`
+                # attribute). ⚠ Behavior-risk: the 0/1-or-1/2 validation just below (~L237) already
+                # remaps 1/2→0/1, so the current path may yield correct results for binary factors;
+                # toNumeric changes which branch is taken. Verify against a 0/1-factor test dataset
+                # before switching.
                 data[[status_var]] <- as.numeric(data[[status_var]])
                 data[[risk_score]] <- as.numeric(data[[risk_score]])
                 
@@ -275,7 +282,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$diagnostics$setContent(
-                    paste("<p style='color: red;'><b>Data Preparation Error:</b>", e$message, "</p>")
+                    paste("<p style='color: red;'><b>Data Preparation Error:</b>", htmltools::htmlEscape(e$message), "</p>")
                 )
                 return(NULL)
             })
@@ -361,7 +368,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             }, error = function(e) {
                 self$results$diagnostics$setContent(
                     paste0(self$results$diagnostics$content, 
-                           "<p style='color: red;'><b>Validation Error:</b>", e$message, "</p>")
+                           "<p style='color: red;'><b>Validation Error:</b>", htmltools::htmlEscape(e$message), "</p>")
                 )
                 return(NULL)
             })
@@ -812,7 +819,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             if (requireNamespace('pec', quietly = TRUE)) {
                 tryCatch({
                     # Fit a simple Cox model based on risk scores to be compatible with pec
-                    surv_form <- as.formula(paste("survival::Surv(", vars$time, ",", vars$status, ") ~", vars$risk_score))
+                    surv_form <- as.formula(paste("survival::Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~", jmvcore::composeTerm(vars$risk_score)))
                     model_fit <- survival::coxph(surv_form, data = data, x = TRUE, y = TRUE)
                     
                     # Compute prediction error (Brier Score)
@@ -862,7 +869,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                 
                 tryCatch({
                      dca_res <- dcurves::dca(
-                        as.formula(paste("survival::Surv(", vars$time, ",", vars$status, ") ~", vars$risk_score)),
+                        as.formula(paste("survival::Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~", jmvcore::composeTerm(vars$risk_score))),
                         data = data,
                         time = eval_time,
                         label = list(risk_score = "Prognostic Model")
@@ -982,7 +989,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                 
                 tryCatch({
                     dca_res <- dcurves::dca(
-                        as.formula(paste("survival::Surv(", vars$time, ",", vars$status, ") ~", vars$risk_score)),
+                        as.formula(paste("survival::Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~", jmvcore::composeTerm(vars$risk_score))),
                         data = data,
                         time = eval_time
                     )

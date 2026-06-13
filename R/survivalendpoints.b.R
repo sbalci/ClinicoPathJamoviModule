@@ -1161,7 +1161,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     "<div style='padding: 15px; background-color: #f8d7da; ",
                     "border: 1px solid #f5c6cb; border-radius: 5px;'>",
                     "<strong>Export Failed</strong><br/>",
-                    "Error: ", e$message,
+                    "Error: ", htmltools::htmlEscape(e$message),
                     "</div>"
                 )
                 self$results$exportMessage$setContent(message)

@@ -26,6 +26,14 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             validation_result <- private$.validate_inputs()
             
             if (!validation_result$valid) {
+                # TODO (UX): validation_result$message (built at L85/93/110/116/132/141/152/155)
+                #   is NEVER rendered — only show_welcome is honored here, so the non-welcome
+                #   error cases (e.g. invalid targetLevel, too few cases) return a BLANK result
+                #   with no explanation. Surface it: when !show_welcome and message exists, call
+                #   jmvcore::reject(validation_result$message) (escaped channel). FORWARD-LOOKING
+                #   SECURITY: L93's message embeds targetLevel + target_levels (factor-level DATA
+                #   VALUES) — if it is ever routed to setContent/HTML instead of reject, wrap the
+                #   data-derived parts in htmltools::htmlEscape first (cf. treeadvanced L1281).
                 if (validation_result$show_welcome) {
                     private$.show_welcome_message()
                 }
@@ -271,6 +279,10 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .train_algorithms = function() {
             # Initialize algorithms list based on user selection
+            # TODO (correctness): also reset private$.tuned_parameters <- list() here. It is
+            #   declared (L22) and written during tuning but never cleared, so on R6-instance
+            #   reuse across runs (e.g. toggling tune_parameters or deselecting an algorithm)
+            #   stale entries for now-absent algorithms can still appear in the summary panel.
             private$.algorithms <- list()
             
             # Prepare formula for model training
@@ -284,8 +296,8 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
             
-            formula_str <- paste(target, "~", paste(predictors, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(predictors)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
             
             # Track algorithm initialization
             n_algorithms <- sum(c(self$options$include_cart, self$options$include_rf, 
@@ -825,8 +837,8 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             tryCatch({
                 # Re-train model on the fold/split
-                formula_str <- paste(target, "~", paste(c(self$options$vars, self$options$facs), collapse = " + "))
-                formula_obj <- as.formula(formula_str)
+                formula_str <- paste(jmvcore::composeTerm(target), "~", paste(jmvcore::composeTerms(as.list(c(self$options$vars, self$options$facs))), collapse = " + "))
+                formula_obj <- jmvcore::asFormula(formula_str)
                 
                 if (alg_info$package == "rpart") {
                     model <- rpart::rpart(formula_obj, data = train_data, method = "class",
@@ -1386,6 +1398,11 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 if (!is.null(model_info$model)) {
                     # Create filename
+                    # TODO (cleanup): saveRDS below writes a RELATIVE filename to the process
+                    #   working directory as a side effect of the analysis (gated on save_best_models).
+                    #   On shared/cloud jamovi the cwd may be read-only or shared. Write to
+                    #   tempfile()/tempdir() or expose a proper user-chosen save path instead.
+                    #   (No injection risk: top_algorithm is a hardcoded algorithm label, not user data.)
                     safe_name <- tolower(gsub(" ", "_", top_algorithm))
                     filename <- paste0("best_model_", safe_name, "_", format(Sys.Date(), "%Y%m%d"), ".rds")
                     

@@ -62,10 +62,10 @@ survivalcalibrationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check required packages
             if (!requireNamespace('survival', quietly = TRUE)) {
-                stop('The survival package is required but not installed')
+                jmvcore::reject('The survival package is required but not installed')
             }
             if (!requireNamespace('rms', quietly = TRUE)) {
-                stop('The rms package is required but not installed')
+                jmvcore::reject('The rms package is required but not installed')
             }
 
             # Validate and prepare data
@@ -82,7 +82,7 @@ survivalcalibrationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.generateInterpretation()
 
             }, error = function(e) {
-                stop(paste("Analysis failed:", e$message))
+                jmvcore::reject("Analysis failed: {}", e$message)
             })
         },
 

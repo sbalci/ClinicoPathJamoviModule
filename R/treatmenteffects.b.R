@@ -105,6 +105,12 @@ treatmenteffectsClass <- R6::R6Class(
                 required_packages <- c(required_packages, "grf", "causalTree")
             }
             
+            # TODO (security): do NOT install.packages() at runtime — this is the exact
+            #   silent-dependency-install pattern the module eradicated in commit eb986459
+            #   (CRAN-policy violation + security hazard on shared cloud jamovi). Declare these
+            #   packages in DESCRIPTION Imports/Suggests and, when a required one is missing,
+            #   jmvcore::reject("The '{}' package is required; please install it.", pkg) instead
+            #   of installing. Cf. R/utils.R load_required_package (which deliberately no longer installs).
             for (pkg in required_packages) {
                 if (!requireNamespace(pkg, quietly = TRUE)) {
                     tryCatch({
@@ -162,26 +168,26 @@ treatmenteffectsClass <- R6::R6Class(
             covariate_names <- names(covariates)
             
             if (ps_specification == "main_effects") {
-                formula_str <- paste("treatment ~", paste(covariate_names, collapse = " + "))
+                formula_str <- paste("treatment ~", paste(jmvcore::composeTerms(as.list(covariate_names)), collapse = " + "))
             } else if (ps_specification == "interactions") {
                 # Add two-way interactions
-                formula_str <- paste("treatment ~ (", paste(covariate_names, collapse = " + "), ")^2")
+                formula_str <- paste("treatment ~ (", paste(jmvcore::composeTerms(as.list(covariate_names)), collapse = " + "), ")^2")
             } else if (ps_specification == "polynomial") {
                 # Add polynomial terms for continuous variables
                 poly_terms <- c()
                 for (var in covariate_names) {
                     if (is.numeric(data[[var]])) {
-                        poly_terms <- c(poly_terms, paste0("poly(", var, ", 2)"))
+                        poly_terms <- c(poly_terms, paste0("poly(", jmvcore::composeTerm(var), ", 2)"))
                     } else {
-                        poly_terms <- c(poly_terms, var)
+                        poly_terms <- c(poly_terms, jmvcore::composeTerm(var))
                     }
                 }
                 formula_str <- paste("treatment ~", paste(poly_terms, collapse = " + "))
             } else {
-                formula_str <- paste("treatment ~", paste(covariate_names, collapse = " + "))
+                formula_str <- paste("treatment ~", paste(jmvcore::composeTerms(as.list(covariate_names)), collapse = " + "))
             }
             
-            formula_obj <- as.formula(formula_str)
+            formula_obj <- jmvcore::asFormula(formula_str)
             
             # Estimate propensity scores
             if (ps_method == "logistic") {
@@ -391,8 +397,8 @@ treatmenteffectsClass <- R6::R6Class(
             control_data <- data[treatment_numeric == 0, ]
             
             covariates <- names(data)[-(1:2)]  # Exclude treatment and outcome
-            formula_str <- paste("outcome ~", paste(covariates, collapse = " + "))
-            formula_obj <- as.formula(formula_str)
+            formula_str <- paste("outcome ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
+            formula_obj <- jmvcore::asFormula(formula_str)
             
             # Outcome models
             if (self$options$outcome_model == "linear") {
@@ -638,6 +644,14 @@ treatmenteffectsClass <- R6::R6Class(
             if (!is.null(private$.treatment_effects)) {
                 effects <- private$.treatment_effects
                 
+                # TODO (correctness): FABRICATED statistics presented as real results —
+                #   release-blocking for clinical use. std_error is hardcoded 0.1 (here + L655 +
+                #   the .plot_effects CI L867); CI/p-value below are derived from that fake SE
+                #   (no bootstrap is actually run despite the option name); .assessCovariateBalance
+                #   "adjusted" SMD is std_diff_unadj * 0.3 (L457, an invented constant, not from
+                #   matched/weighted data); Rosenbaum bounds p_upper <- 0.05 * gamma (L552) is a
+                #   placeholder, not real sensitivity analysis. Compute genuine SEs (bootstrap /
+                #   sandwich / survey-design) and real bounds, or gate these outputs off until implemented.
                 # Bootstrap confidence intervals (simplified)
                 if (self$options$bootstrap_inference) {
                     ci_lower <- effects$estimate - 1.96 * 0.1  # Simplified SE

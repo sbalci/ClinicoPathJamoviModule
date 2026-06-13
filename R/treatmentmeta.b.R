@@ -29,6 +29,11 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         },
 
         .run = function() {
+            # TODO (correctness): private$.meta_res is set only on a successful run (~L113) and
+            #   never cleared — after the user unselects a required variable or a run errors, the
+            #   6 plot callbacks (which gate only on is.null(.meta_res)) still render the PRIOR
+            #   result while the tables go empty (stale plot/table desync). Reset
+            #   private$.meta_res <- NULL here at the top of .run() to invalidate it each run.
             # Check for required data
             if (is.null(self$options$study_id) || is.null(self$data)) {
                 return()
@@ -36,7 +41,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
             # Package check
             if (!requireNamespace('meta', quietly=TRUE)) {
-                stop('The "meta" package is required but not installed.')
+                jmvcore::reject('The "meta" package is required but not installed.')
             }
 
             # Prepare data and options
@@ -106,6 +111,9 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
             }, error = function(e) {
+                # TODO (cleanup): reject(paste(...)) is brace-fragile — if e$message contains
+                #   literal { } (some package errors do), jmvcore::format treats it as an
+                #   unfilled placeholder. Prefer reject("Meta-analysis error: {}", code = NULL, e$message).
                 jmvcore::reject(paste("Meta-analysis error: ", e$message))
             })
         },
@@ -418,11 +426,16 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         .populateMetaRegression = function(res) {
             if (length(self$options$moderator_vars) == 0) return()
-            
+
+            # TODO (UX): silent try({}) swallows errors — a failed meta-regression leaves an
+            #   empty table with no user feedback. Same pattern in .populateSensitivity (L457),
+            #   .populateTrimFill (L528), .populateInfluence (L561), .populateBayesian (L736),
+            #   .populateCumulativeSummary (L795), .populateQualityAssessment (L829). Surface the
+            #   failure via the table's setNote("error", ...) (as .populatePublicationBias already does).
             try({
                 # Perform meta-regression
-                mods <- paste(self$options$moderator_vars, collapse = " + ")
-                form <- as.formula(paste("~", mods))
+                mods <- paste(jmvcore::composeTerms(as.list(self$options$moderator_vars)), collapse = " + ")
+                form <- jmvcore::asFormula(paste("~", mods))
                 
                 # Use metareg from meta package
                 mr <- meta::metareg(res, form)
@@ -817,6 +830,10 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             q_var <- self$options$quality_score
             d_subset <- self$data[self$data[[self$options$study_id]] %in% res$studlab, ]
             # Match by studlab
+            # TODO (correctness): match() returns the FIRST index per label, so if study_id has
+            #   duplicate labels every duplicate pulls the first occurrence's quality score,
+            #   misaligning q_scores against res$TE in the cor.test below. Dedupe/aggregate by
+            #   study_id first, or warn when study labels are non-unique.
             q_scores <- d_subset[match(res$studlab, d_subset[[self$options$study_id]]), q_var]
             effects <- res$TE
             

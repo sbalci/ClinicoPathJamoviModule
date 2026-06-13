@@ -184,7 +184,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setContent(
-                    paste("Data preparation failed:", e$message)
+                    paste("Data preparation failed:", htmltools::htmlEscape(e$message))
                 )
                 return(NULL)
             })
@@ -205,8 +205,8 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 } else if (!is.null(vars$model_formula) && vars$model_formula != "") {
                     # Fit Cox model with provided formula
-                    formula_str <- paste("Surv(", vars$time, ",", vars$status, ") ~", vars$model_formula)
-                    cox_model <- survival::coxph(as.formula(formula_str), data = data)
+                    formula_str <- paste("Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~", vars$model_formula)
+                    cox_model <- survival::coxph(.asSurvivalFormula(formula_str), data = data)
                     
                     model_info <- list(
                         type = "fitted",
@@ -223,7 +223,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setContent(
-                    paste("Model preparation failed:", e$message)
+                    paste("Model preparation failed:", htmltools::htmlEscape(e$message))
                 )
                 return(NULL)
             })
@@ -268,7 +268,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$todo$setContent(
-                    paste("Validation failed:", e$message)
+                    paste("Validation failed:", htmltools::htmlEscape(e$message))
                 )
                 return(NULL)
             })
@@ -281,7 +281,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use pec to perform cross-validation for Brier score
             if (requireNamespace("pec", quietly = TRUE)) {
                 
-                form <- as.formula(paste("Surv(", vars$time, ",", vars$status, ") ~ 1"))
+                form <- as.formula(paste("Surv(", jmvcore::composeTerm(vars$time), ",", jmvcore::composeTerm(vars$status), ") ~ 1"))
                 
                 if (model_info$type == "fitted") {
                      pec_cv <- pec::pec(

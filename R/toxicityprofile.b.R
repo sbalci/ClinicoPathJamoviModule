@@ -204,6 +204,14 @@ toxicityprofileClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         pval <- fisher_test$p.value
                         rr_ci <- fisher_test$conf.int
                     }, error = function(e) {
+                        # TODO (correctness): `<-` inside this error handler writes to the
+                        # handler's local env and is discarded. On a fisher.test() throw
+                        # (degenerate 2x2 for a rare AE term) the loop falls through to the
+                        # results[[ae]] assignment below with STALE pval/rr_ci from the prior
+                        # iteration (mislabels one AE's p-value/CI onto another), or
+                        # `object 'pval' not found` on the first iteration. Use `<<-` or set
+                        # pval/rr_ci before the tryCatch. Same bug in dead-code
+                        # .performStatisticalTests (~L113), no runtime effect there.
                         pval <- NA
                         rr_ci <- c(NA, NA)
                     })
@@ -276,7 +284,7 @@ toxicityprofileClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             }
 
             if (nrow(self$data) == 0)
-                stop("Data contains no (complete) rows")
+                jmvcore::reject("Data contains no (complete) rows")
 
             data <- self$data
             patient_var <- self$options$patientID
@@ -291,14 +299,14 @@ toxicityprofileClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             validation_errors <- private$.validateData(data, patient_var, ae_var, grade_var)
             if (length(validation_errors) > 0) {
                 error_msg <- paste("Data validation errors:", paste(validation_errors, collapse = "; "))
-                stop(error_msg)
+                jmvcore::reject(error_msg)
             }
 
             # Clean and prepare data
             clean_data <- data[!is.na(data[[ae_var]]) & !is.na(data[[grade_var]]), ]
 
             if (nrow(clean_data) == 0) {
-                stop("No complete cases found")
+                jmvcore::reject("No complete cases found")
             }
 
             # Ensure grade is numeric

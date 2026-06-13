@@ -98,7 +98,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
                 
             }, error = function(e) {
                 self$results$modelSummary$addFootnote(rowNo = 1, col = "parameter", 
-                    paste("Error in time-updated survival analysis:", e$message))
+                    paste("Error in time-updated survival analysis:", htmltools::htmlEscape(e$message)))
             })
         },
         
@@ -182,7 +182,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
             
             # Create formula
             if (length(covariates) > 0) {
-                cov_formula <- paste(covariates, collapse = " + ")
+                cov_formula <- paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                 formula_str <- paste("Surv(time, status) ~", cov_formula)
             } else {
                 formula_str <- "Surv(time, status) ~ 1"
@@ -264,7 +264,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
             
             if (length(timeVaryingCovs) > 0) {
                 # Specify which covariates are time-varying (Aalen) vs proportional (Cox)
-                aalen_formula <- paste(timeVaryingCovs, collapse = " + ")
+                aalen_formula <- paste(jmvcore::composeTerms(as.list(timeVaryingCovs)), collapse = " + ")
                 model <- timereg::cox.aalen(formula, data = data,
                                           aalen = as.formula(paste("~", aalen_formula)),
                                           max.time = max(data$time))
@@ -294,7 +294,7 @@ timeupdatedsurvivalClass <- R6::R6Class(
                 
                 # Refit with time interactions
                 updated_terms <- c(all.vars(formula)[-c(1:2)], paste0(timeVaryingCovs, "_time"))
-                updated_formula <- as.formula(paste("Surv(time, status) ~", paste(updated_terms, collapse = " + ")))
+                updated_formula <- as.formula(paste("Surv(time, status) ~", paste(jmvcore::composeTerms(as.list(updated_terms)), collapse = " + ")))
                 
                 model <- survival::coxph(updated_formula, data = data)
             }

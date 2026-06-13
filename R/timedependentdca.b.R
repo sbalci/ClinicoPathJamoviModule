@@ -152,7 +152,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                 html_parts <- c(html_parts, sprintf(
                     '<div class="jmv-results-notice %s"><span class="jmv-results-notice-icon">%s</span><span class="jmv-results-notice-content">%s</span></div>',
-                    css_class, icon, notice$content
+                    css_class, icon, htmltools::htmlEscape(notice$content)
                 ))
             }
 
