@@ -254,6 +254,7 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "alluvialResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         dataWarning = function() private$.items[["dataWarning"]],
         plot = function() private$.items[["plot"]],
@@ -270,6 +271,16 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "easyalluvial",
                     "ggalluvial",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "weight",
+                    "maxvars",
+                    "engine",
+                    "condensationvar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -400,6 +411,7 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param labelNodes Show node labels (for ggalluvial engine).
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

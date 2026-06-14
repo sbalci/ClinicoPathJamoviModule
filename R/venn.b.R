@@ -124,6 +124,13 @@ NULL
 #' @noRd
 NULL
 
+# TODO (cleanup): this .escapeVariableNames is a DUPLICATE of the one in R/utils.R (silent-
+#   divergence risk) — use the shared one or delete this copy. Worse, its 7 callers (L458-524 area)
+#   assign `escaped_varN <- .escapeVariableNames(varN)` but NEVER reference the result (the stop()s
+#   interpolate the RAW varN), so both the helper calls and the local copy are effectively dead.
+#   Separately (security): those per-variable stop(paste("Error processing variable '", varN, …))
+#   handlers interpolate the raw column name — the security audit should route them through
+#   jmvcore::reject (escaped channel) rather than stop().
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
     # Check if variable names contain special characters that need escaping
@@ -640,7 +647,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$var1) || is.null(self$options$var2))
                     return()
                 if (nrow(self$data) == 0)
-                    stop(.('Data contains no (complete) rows'))
+                    jmvcore::reject(.('Data contains no (complete) rows'))
 
                 # Count the number of variables selected
                 num_vars <- sum(!sapply(list(self$options$var1, self$options$var2, self$options$var3,
@@ -709,7 +716,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$var1) || is.null(self$options$var2))
                     return()
                 if (nrow(self$data) == 0)
-                    stop(.('Data contains no (complete) rows'))
+                    jmvcore::reject(.('Data contains no (complete) rows'))
 
                 # Retrieve the prepared data.
                 results <- image$state
@@ -731,7 +738,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$var1) || is.null(self$options$var2))
                     return()
                 if (nrow(self$data) == 0)
-                    stop(.('Data contains no (complete) rows'))
+                    jmvcore::reject(.('Data contains no (complete) rows'))
 
                 # Retrieve the prepared data.
                 results <- image$state
@@ -752,7 +759,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 if (is.null(self$options$var1) || is.null(self$options$var2))
                     return()
                 if (nrow(self$data) == 0)
-                    stop(.('Data contains no (complete) rows'))
+                    jmvcore::reject(.('Data contains no (complete) rows'))
 
                 # Retrieve the prepared data.
                 results <- image$state
@@ -814,7 +821,10 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (!self$options$var2true %in% levels(as.factor(var2_data))) {
                         available_levels <- paste(levels(as.factor(var2_data)), collapse=", ")
                         private$.errors <- c(private$.errors,
-                            sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", self$options$var2true, self$options$var2, available_levels))
+                            sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s",
+                                htmltools::htmlEscape(self$options$var2true),
+                                htmltools::htmlEscape(self$options$var2),
+                                htmltools::htmlEscape(available_levels)))
                         return(FALSE)
                     }
                 }
@@ -936,7 +946,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     intersection_analysis <- paste0(
                         "<p><strong>", .("Key Intersection:"), "</strong> ",
                         sprintf(.("%s cases (%s%%) had both %s and %s positive."), 
-                                both_true, both_pct, var_names[1], var_names[2]), "</p>"
+                                both_true, both_pct, htmltools::htmlEscape(var_names[1]), htmltools::htmlEscape(var_names[2])), "</p>"
                     )
                 }
                 
@@ -949,7 +959,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<h4 style='color: #2980b9; margin-top: 0;'>", .("Clinical Summary"), "</h4>",
                     "<p><strong>", .("Dataset:"), "</strong> ", sprintf(.("%s cases analyzed"), total_n), "</p>",
                     "<p><strong>", .("Most Prevalent:"), "</strong> ", 
-                    sprintf(.("%s was most common (%s cases, %s%%)."), largest_var, largest_count, largest_pct), "</p>",
+                    sprintf(.("%s was most common (%s cases, %s%%)."), htmltools::htmlEscape(largest_var), largest_count, largest_pct), "</p>",
                     intersection_analysis,
                     "<p><em>", .("Tip: Use the Venn diagram to visualize overlap patterns and the UpSet plot for detailed intersection analysis."), "</em></p>",
                     "</div>",
@@ -970,7 +980,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 # Create individual variable sentences
                 individual_sentences <- sapply(1:nrow(summaryData), function(i) {
                     sprintf("%s was positive in %s of %s cases (%s%%).",
-                            summaryData$Variable[i],
+                            htmltools::htmlEscape(summaryData$Variable[i]),
                             summaryData$TrueCount[i],
                             total_n,
                             round(summaryData$TruePercentage[i] * 100, 1))
@@ -991,9 +1001,9 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                     intersection_sentences <- sprintf(
                         "Co-occurrence of %s and %s was observed in %s cases (%s%%). %s cases (%s%%) were positive for %s only, while %s cases (%s%%) were positive for %s only.",
-                        var_names[1], var_names[2], both_positive, both_pct,
-                        var1_only, round((var1_only/total_n)*100, 1), var_names[1],
-                        var2_only, round((var2_only/total_n)*100, 1), var_names[2]
+                        htmltools::htmlEscape(var_names[1]), htmltools::htmlEscape(var_names[2]), both_positive, both_pct,
+                        var1_only, round((var1_only/total_n)*100, 1), htmltools::htmlEscape(var_names[1]),
+                        var2_only, round((var2_only/total_n)*100, 1), htmltools::htmlEscape(var_names[2])
                     )
                 }
 
@@ -1503,7 +1513,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                                             display_name <- private$.name_mapping[[set_name]]
                                         }
                                         html_content <- paste0(html_content,
-                                            "<p><strong>", display_name, ":</strong> ",
+                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
                                             count, " members (",
                                             round(count/total_observations*100, 1), "%)</p>")
                                     }
@@ -1517,7 +1527,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                                         }
                                         members <- overlaps[[i]]
                                         html_content <- paste0(html_content,
-                                            "<p><strong>", display_name, ":</strong> ",
+                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
                                             length(members), " members (",
                                             round(length(members)/total_observations*100, 1), "%)</p>")
                                     }
@@ -1545,7 +1555,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                                             display_name <- private$.name_mapping[[set_name]]
                                         }
                                         html_content <- paste0(html_content,
-                                            "<p><strong>", display_name, ":</strong> ",
+                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
                                             count, " unique members (",
                                             round(count/total_observations*100, 1), "%)</p>")
                                     }
@@ -1559,7 +1569,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                                         }
                                         members <- unique_members[[i]]
                                         html_content <- paste0(html_content,
-                                            "<p><strong>", display_name, ":</strong> ",
+                                            "<p><strong>", htmltools::htmlEscape(display_name), ":</strong> ",
                                             length(members), " unique members (",
                                             round(length(members)/total_observations*100, 1), "%)</p>")
                                     }
@@ -1753,7 +1763,7 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Find largest and most meaningful overlaps
                 largest_count <- max(intersection_data$TrueCount, na.rm = TRUE)
-                largest_var <- intersection_data$Variable[which.max(intersection_data$TrueCount)]
+                largest_var <- htmltools::htmlEscape(intersection_data$Variable[which.max(intersection_data$TrueCount)])
                 largest_pct <- round((largest_count / total_n) * 100, 1)
 
                 # Calculate overall overlap assessment
@@ -1887,7 +1897,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     error_html <- paste(
                         "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; border-radius: 4px;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> Validation Errors</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #721c24;'>• %s</p>", private$.errors), collapse = ""),
+                        paste(sprintf("<p style='margin: 5px 0; color: #721c24;'>• %s</p>", htmltools::htmlEscape(private$.errors)), collapse = ""),
                         "</div>",
                         sep = ""
                     )
@@ -1900,7 +1910,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     warning_html <- paste(
                         "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;'>",
                         "<h4 style='margin-top: 0; color: #856404;'> Important Warnings</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #856404;'>• %s</p>", private$.warnings), collapse = ""),
+                        paste(sprintf("<p style='margin: 5px 0; color: #856404;'>• %s</p>", htmltools::htmlEscape(private$.warnings)), collapse = ""),
                         "</div>",
                         sep = ""
                     )
@@ -1913,7 +1923,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     info_html <- paste(
                         "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 4px;'>",
                         "<h4 style='margin-top: 0; color: #0c5460;'> Analysis Information</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #0c5460;'>• %s</p>", private$.info), collapse = ""),
+                        paste(sprintf("<p style='margin: 5px 0; color: #0c5460;'>• %s</p>", htmltools::htmlEscape(private$.info)), collapse = ""),
                         "</div>",
                         sep = ""
                     )

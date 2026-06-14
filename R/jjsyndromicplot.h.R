@@ -241,12 +241,11 @@ jjsyndromicplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "center",
                     "scale",
                     "clinicalPreset")))
-            self$add(list(
-                `name`="notices", 
-                `title`="Notices", 
-                `type`="Notification", 
-                `visible`=FALSE, 
-                `clearWith`=list(
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
                     "vars",
                     "component",
                     "cutoff",
@@ -431,7 +430,7 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$notices} \tab \tab \tab \tab \tab a notification \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$loadings} \tab \tab \tab \tab \tab Standardized loadings for the selected principal component \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab Syndromic visualization of PCA loadings \cr

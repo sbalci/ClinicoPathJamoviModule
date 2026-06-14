@@ -160,7 +160,32 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .cached_plot = NULL,
         .cached_palette = NULL,
         .messages = NULL,
-        
+
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             # Reset messages for new analysis
             private$.resetMessages()
@@ -206,14 +231,11 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clean_msg <- gsub("&nbsp;", " ", clean_msg)
                 clean_msg <- trimws(clean_msg)
 
-                # Remove any existing accumulated_warnings notice before adding new one
-                # (jamovi will handle duplicates, but this keeps it clean)
                 tryCatch({
-                    private$.addNotice(
-                        content = clean_msg,
-                        type = notice_type,
-                        name = "accumulated_warnings"
-                    )
+                    # clean_msg already holds ALL accumulated messages combined, so
+                    # reset the notice list first to avoid appending duplicate blocks.
+                    private$.noticeList <- list()
+                    private$.addNotice(notice_type, "Data Quality Notes", clean_msg)
                 }, error = function(e) {
                     # Silent fail if notice system unavailable
                 })
@@ -223,58 +245,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Reset messages for new analysis run
         .resetMessages = function() {
             private$.messages <- character()
+            private$.noticeList <- list()
             if (!is.null(self$results$warnings)) {
                 self$results$warnings$setContent("")
             }
-        },
-
-        # Add jmvcore::Notice to results (modern notice system)
-        .addNotice = function(content, type = "WARNING", name = NULL) {
-            # Generate unique name if not provided
-            if (is.null(name)) {
-                if (requireNamespace("digest", quietly = TRUE)) {
-                    name <- paste0("notice_", digest::digest(content, algo = "md5"))
-                } else {
-                    name <- paste0("notice_", sample(10000:99999, 1))
-                }
-            }
-
-            # Map string types to jmvcore::NoticeType
-            notice_type <- switch(type,
-                "ERROR" = jmvcore::NoticeType$ERROR,
-                "STRONG_WARNING" = jmvcore::NoticeType$STRONG_WARNING,
-                "WARNING" = jmvcore::NoticeType$WARNING,
-                "INFO" = jmvcore::NoticeType$INFO,
-                jmvcore::NoticeType$WARNING  # Default
-            )
-
-            # Create notice
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = name,
-                type = notice_type
-            )
-
-            # Clean content for notice (remove HTML tags since notices don't support HTML)
-            clean_content <- gsub("<br>|<br/>|<hr>", "\n", content)
-            clean_content <- gsub("<[^>]*>", "", clean_content)
-            clean_content <- gsub("&bull;", "•", clean_content)
-            clean_content <- gsub("&nbsp;", " ", clean_content)
-            # Remove multiple consecutive line breaks
-            clean_content <- gsub("\n\n+", "\n\n", clean_content)
-            # Trim leading/trailing whitespace
-            clean_content <- trimws(clean_content)
-
-            notice$setContent(clean_content)
-
-            # Insert at beginning of results
-            # TODO (correctness): self$results$insert(999, notice) with a jmvcore::Notice
-            # object causes serialization errors (function refs cannot go through protobuf).
-            # Convert this whole .addNotice() helper to an HTML output item per
-            # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference impl).
-            self$results$insert(999, notice)
-
-            return(notice)
         },
 
         # Variable name safety utility
@@ -790,6 +764,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         
         .run = function() {
+            private$.noticeList <- list()
             if (is.null(self$options$groups)) {
                 todo <- paste0(
                     "<div style='background: #f8f9fa; ",

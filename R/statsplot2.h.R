@@ -96,6 +96,7 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "statsplot2Results",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         ExplanationMessage = function() private$.items[["ExplanationMessage"]],
         plot = function() private$.items[["plot"]]),
@@ -113,6 +114,18 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "patchwork",
                     "cowplot"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "direction",
+                    "distribution",
+                    "excl",
+                    "grvar",
+                    "sampleLarge")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -230,6 +243,7 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   rows) to 5,000 rows for improved performance.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$ExplanationMessage} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

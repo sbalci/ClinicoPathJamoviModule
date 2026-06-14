@@ -58,17 +58,40 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, character(1), USE.NAMES = FALSE)
         },
 
-        # Notice helper ----
-        .addNotice = function(msg, type = "INFO") {
-            if (!is.null(self$results$notices)) {
-                notice <- jmvcore::Notice$new(
-                    self$results$notices,
-                    name = paste0("notice_", as.integer(Sys.time() * 1000)),
-                    title = msg,
-                    type = type
-                )
-                self$results$notices$addNotice(notice)
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
             }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
         # Get style parameters based on diagram type ----
@@ -85,6 +108,9 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            # Reset notice collection
+            private$.noticeList <- list()
+
             # Check for required data
             if (is.null(self$data) || nrow(self$data) == 0) {
                 self$results$todo$setContent(private$.generateWelcomeMessage())
@@ -93,7 +119,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # 1. Validation
             if (is.null(self$options$data_format)) {
-                private$.addNotice("Please select a data format.", type = "ERROR")
+                private$.addNotice('ERROR', 'Data Format Required', "Please select a data format.")
                 return()
             }
 
@@ -122,7 +148,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                  # Ensure proper types
                  if (!is.numeric(data[[count_col]])) {
-                      private$.addNotice("Participant count must be numeric.", type = "ERROR")
+                      private$.addNotice('ERROR', 'Non-Numeric Participant Count', "Participant count must be numeric.")
                       add_warning("Participant count must be numeric.")
                       return()
                  }
@@ -132,9 +158,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                  # Check for negative counts
                  if (any(count_values < 0, na.rm = TRUE)) {
-                      private$.addNotice(
-                          "Participant counts cannot be negative. Please check your data.",
-                          type = "ERROR"
+                      private$.addNotice('ERROR', 'Negative Participant Counts',
+                          "Participant counts cannot be negative. Please check your data."
                       )
                       return()
                  }
@@ -142,9 +167,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  # Check for NA values in counts
                  if (any(is.na(count_values))) {
                       n_missing <- sum(is.na(count_values))
-                      private$.addNotice(
-                          paste0("Missing values detected in participant counts (", n_missing, " row", if(n_missing > 1) "s" else "", "). Complete data required for flow diagrams."),
-                          type = "ERROR"
+                      private$.addNotice('ERROR', 'Missing Participant Counts',
+                          paste0("Missing values detected in participant counts (", n_missing, " row", if(n_missing > 1) "s" else "", "). Complete data required for flow diagrams.")
                       )
                       return()
                  }
@@ -152,9 +176,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  # Check for NA in step names
                  if (any(is.na(data[[step_col]]))) {
                       n_missing <- sum(is.na(data[[step_col]]))
-                      private$.addNotice(
-                          paste0("Missing values detected in step names (", n_missing, " row", if(n_missing > 1) "s" else "", "). All steps must be labeled."),
-                          type = "ERROR"
+                      private$.addNotice('ERROR', 'Missing Step Names',
+                          paste0("Missing values detected in step names (", n_missing, " row", if(n_missing > 1) "s" else "", "). All steps must be labeled.")
                       )
                       return()
                  }
@@ -168,9 +191,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                  # Validate initial count is not zero
                  if (flow_data$n[1] == 0) {
-                      private$.addNotice(
-                          "Initial participant count is zero. Cannot generate flow diagram with no participants.",
-                          type = "ERROR"
+                      private$.addNotice('ERROR', 'Zero Initial Count',
+                          "Initial participant count is zero. Cannot generate flow diagram with no participants."
                       )
                       return()
                  }
@@ -180,9 +202,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                  # Check logic - increasing counts violate flow diagram assumptions
                  if (any(flow_data$excluded < 0)) {
-                      private$.addNotice(
-                          "Participant counts increase between steps - this violates flow diagram logic. Please verify your participant count variable shows decreasing or constant values (e.g., 1000 → 850 → 720).",
-                          type = "ERROR"
+                      private$.addNotice('ERROR', 'Increasing Participant Counts',
+                          "Participant counts increase between steps - this violates flow diagram logic. Please verify your participant count variable shows decreasing or constant values (e.g., 1000 -> 850 -> 720)."
                       )
                       self$results$diagram$setContent(
                           "<div style='background:#ffebee; padding:15px; border-left:4px solid #f44336;'><h4> Data Error Detected</h4><p>Participant counts must decrease or stay constant between sequential steps. Your data shows increases, which is illogical for a study flow diagram.</p><p><b>Action:</b> Check that your count variable is cumulative and in the correct order.</p></div>"
@@ -206,7 +227,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  
                  # Unique IDs check
                  if (any(duplicated(data[[pid_col]]))) {
-                      private$.addNotice("Duplicate Participant IDs found. Analysis assumes one row per participant.", type = "STRONG_WARNING")
+                      private$.addNotice('STRONG_WARNING', 'Duplicate Participant IDs', "Duplicate Participant IDs found. Analysis assumes one row per participant.")
                       add_warning("Duplicate Participant IDs found. Analysis assumes one row per participant.")
                  }
                  
@@ -305,10 +326,9 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_start <- flow_data$n[1]
                 n_end <- tail(flow_data$n, 1)
                 retention <- round(n_end/n_start * 100, 1)
-                private$.addNotice(
+                private$.addNotice('INFO', 'Study Diagram Generated',
                     paste0("Study diagram generated successfully. ", n_start, " initial participants, ",
-                           n_end, " in final analysis (", retention, "% retention)."),
-                    type = "INFO"
+                           n_end, " in final analysis (", retention, "% retention).")
                 )
             }
 
@@ -343,9 +363,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (length(missing_vars) > 0) {
                 # Add ERROR notice
-                private$.addNotice(
-                    paste("Missing required variables for", data_format, "format:", paste(missing_vars, collapse = ", ")),
-                    type = "ERROR"
+                private$.addNotice('ERROR', 'Missing Required Variables',
+                    paste("Missing required variables for", data_format, "format:", paste(missing_vars, collapse = ", "))
                 )
 
                 message <- paste0(
@@ -379,7 +398,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(warnings) > 0) {
                 # Add INFO notice about variable format mismatches
                 for (w in warnings) {
-                    private$.addNotice(w, type = "INFO")
+                    private$.addNotice('INFO', 'Variable Selection Note', w)
                 }
 
                 warning_msg <- paste0(

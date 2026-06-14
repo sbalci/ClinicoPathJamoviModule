@@ -6,7 +6,46 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = dendrogramBase,
     private = list(
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .run = function() {
+
+            private$.noticeList <- list()
+
 
             # Check required packages for selected plot type
             plotType <- self$options$plotType
@@ -18,40 +57,27 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!requireNamespace("tibble", quietly = TRUE)) missing_heatmap <- c(missing_heatmap, "tibble")
 
                 if (length(missing_heatmap) > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingHeatmapPackages',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-
                     install_cmd <- if ("ComplexHeatmap" %in% missing_heatmap) {
                         'install.packages("tidyHeatmap"); BiocManager::install("ComplexHeatmap")'
                     } else {
                         paste0('install.packages(c("', paste(missing_heatmap, collapse = '", "'), '"))')
                     }
 
-                    notice$setContent(jmvcore::format(
-                        'Heatmap plot requires missing packages: {pkgs}. • Install with {install_cmd}. • Alternatively, select Linear, Circular, or Base plot type to continue.',
+                    private$.addNotice('ERROR', 'Missing Heatmap Packages', jmvcore::format(
+                        'Heatmap plot requires missing packages: {pkgs}. - Install with {install_cmd}. - Alternatively, select Linear, Circular, or Base plot type to continue.',
                         pkgs = paste(missing_heatmap, collapse = ", "),
                         install_cmd = install_cmd
                     ))
-                    self$results$insert(999, notice)
                     return()
                 }
             }
 
             if (plotType %in% c("linear", "circular")) {
                 if (!requireNamespace("ggraph", quietly = TRUE) || !requireNamespace("igraph", quietly = TRUE)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingGgraphPackages',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(jmvcore::format(
-                        'ggraph and igraph packages recommended for {plot_type} plots. • Install with install.packages(c("ggraph", "igraph")). • Falling back to base plot.',
+                    private$.addNotice('WARNING', 'Missing Graph Packages', jmvcore::format(
+                        'ggraph and igraph packages recommended for {plot_type} plots. - Install with install.packages(c("ggraph", "igraph")). - Falling back to base plot.',
                         plot_type = if (plotType == "linear") "linear" else "circular"
                     ))
-                    self$results$insert(999, notice)
                 }
             }
 
@@ -104,18 +130,12 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             removedRows <- sum(!completeCases)
 
             if (sum(completeCases) < 2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientCases',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(jmvcore::format(
-                    'Insufficient complete observations for clustering (n={n}, minimum 2 required). • Current dataset has {total} observations with {removed} removed due to missing values. • Remove missing values or collect additional complete cases.',
+                private$.addNotice('ERROR', 'Insufficient Complete Observations', jmvcore::format(
+                    'Insufficient complete observations for clustering (n={n}, minimum 2 required). - Current dataset has {total} observations with {removed} removed due to missing values. - Remove missing values or collect additional complete cases.',
                     n = sum(completeCases),
                     total = nrow(data),
                     removed = removedRows
                 ))
-                self$results$insert(999, notice)
                 return()
             }
 
@@ -126,30 +146,18 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             groupLevels <- NULL
             if (colorGroups) {
                 if (is.null(group) || group == "") {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingGroupVariable',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(jmvcore::format(
-                        'Grouping variable required when "Color by groups" is enabled. • Please select a grouping variable in the "Grouping & Colors" panel. • Alternatively, disable "Color by groups" to continue without group coloring.'
+                    private$.addNotice('ERROR', 'Grouping Variable Required', jmvcore::format(
+                        'Grouping variable required when "Color by groups" is enabled. - Please select a grouping variable in the "Grouping & Colors" panel. - Alternatively, disable "Color by groups" to continue without group coloring.'
                     ))
-                    self$results$insert(999, notice)
                     return()
                 }
 
                 if (!group %in% names(data)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'groupVariableNotFound',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(jmvcore::format(
-                        'Grouping variable "{group}" not found in dataset. • Available variables: {vars}. • Please select a valid grouping variable or disable "Color by groups".',
+                    private$.addNotice('ERROR', 'Grouping Variable Not Found', jmvcore::format(
+                        'Grouping variable "{group}" not found in dataset. - Available variables: {vars}. - Please select a valid grouping variable or disable "Color by groups".',
                         group = group,
                         vars = paste(names(data)[1:min(10, length(names(data)))], collapse = ", ")
                     ))
-                    self$results$insert(999, notice)
                     return()
                 }
 
@@ -181,13 +189,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             prep <- private$.prepareClusterData(clusterData, standardize, distanceMethod)
             if (!prep$ok) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'dataPreparationError',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(prep$message)
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Data Preparation Error', prep$message)
                 return()
             }
 
@@ -197,13 +199,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CRITICAL: Validate distance/linkage compatibility
             validationResult <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
             if (!validationResult$valid) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'invalidDistanceLinkage',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(validationResult$message)
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid Distance/Linkage Combination', validationResult$message)
                 return()
             }
             if (!is.null(validationResult$warning)) {
@@ -255,21 +251,14 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Clinical Profile Notice: Sample Size Adequacy
             n_clustered <- nrow(clusterData)
             if (n_clustered < 30) {
-                notice_type <- if (n_clustered < 10) jmvcore::NoticeType$STRONG_WARNING else jmvcore::NoticeType$WARNING
-
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSampleClustering',
-                    type = notice_type
-                )
+                notice_type <- if (n_clustered < 10) 'STRONG_WARNING' else 'WARNING'
 
                 severity <- if (n_clustered < 10) "very small" else "small"
-                notice$setContent(jmvcore::format(
-                    '{severity_cap} sample size (n={n}) for hierarchical clustering. • Clusters may be unstable with fewer than 30 observations. • Dendrogram structure and cluster assignments should be interpreted cautiously. • Consider collecting additional data or using this as exploratory analysis only.',
+                private$.addNotice(notice_type, 'Small Sample Size', jmvcore::format(
+                    '{severity_cap} sample size (n={n}) for hierarchical clustering. - Clusters may be unstable with fewer than 30 observations. - Dendrogram structure and cluster assignments should be interpreted cautiously. - Consider collecting additional data or using this as exploratory analysis only.',
                     severity_cap = tools::toTitleCase(severity),
                     n = n_clustered
                 ))
-                self$results$insert(999, notice)
             }
 
             highlightClusters <- highlightClusters && effectiveClusters > 1
@@ -344,13 +333,8 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$clusterInfo$setContent(clusterInfoText)
 
             # Success Completion Notice
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent(jmvcore::format(
-                'Hierarchical clustering completed successfully. • {n_obs} observations clustered using {n_vars} variables. • {n_clust} cluster{s} identified. • Distance: {dist}, Linkage: {link}. • Review dendrogram and cluster membership below.',
+            private$.addNotice('INFO', 'Analysis Complete', jmvcore::format(
+                'Hierarchical clustering completed successfully. - {n_obs} observations clustered using {n_vars} variables. - {n_clust} cluster{s} identified. - Distance: {dist}, Linkage: {link}. - Review dendrogram and cluster membership below.',
                 n_obs = nrow(clusterData),
                 n_vars = length(vars),
                 n_clust = effectiveClusters,
@@ -358,7 +342,6 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dist = distanceMethod,
                 link = clusterMethod
             ))
-            self$results$insert(999, notice)
 
             # Store clustering result for plotting
             image <- self$results$plot

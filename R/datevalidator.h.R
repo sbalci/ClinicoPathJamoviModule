@@ -135,6 +135,7 @@ datevalidatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "datevalidatorResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         corrected_data = function() private$.items[["corrected_data"]],
         correction_table = function() private$.items[["correction_table"]],
@@ -154,6 +155,17 @@ datevalidatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "datefixR",
                     "anytime",
                     "lubridate"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "date_vars",
+                    "correction_method",
+                    "date_format",
+                    "day_impute",
+                    "month_impute",
+                    "handle_excel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -334,6 +346,7 @@ datevalidatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Includes information about the DateTime Converter module.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$corrected_data} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$correction_table} \tab \tab \tab \tab \tab a html \cr

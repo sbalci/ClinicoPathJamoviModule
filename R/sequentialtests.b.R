@@ -44,8 +44,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
             .run = function() {
 
+                private$.noticeList <- list()
+
                 # Ready to run?
-                if (is.null(self$options$test1_sens) || is.null(self$options$test1_spec) || 
+                if (is.null(self$options$test1_sens) || is.null(self$options$test1_spec) ||
                     is.null(self$options$test2_sens) || is.null(self$options$test2_spec)) {
                     return()
                 }
@@ -70,86 +72,60 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     sprintf("%.1f%%", value * 100)
                 }
 
-                # Input validation using jmvcore::Notice system
-                notices_error <- list()
-                notices_strong <- list()
-                notices_warning <- list()
+                # Input validation. Track whether any ERROR-level problem was found so we
+                # can early-return after collecting all of them.
+                had_error <- FALSE
 
                 # Validate probability ranges for all test parameters
                 if (is.na(test1_sens) || test1_sens < 0 || test1_sens > 1) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test1_sens_invalid', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Test 1 sensitivity must be between 0 and 1 (0% to 100%). Current value is invalid.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Test 1 Sensitivity Invalid', 'Test 1 sensitivity must be between 0 and 1 (0% to 100%). Current value is invalid.')
+                    had_error <- TRUE
                 }
                 if (is.na(test1_spec) || test1_spec < 0 || test1_spec > 1) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test1_spec_invalid', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Test 1 specificity must be between 0 and 1 (0% to 100%). Current value is invalid.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Test 1 Specificity Invalid', 'Test 1 specificity must be between 0 and 1 (0% to 100%). Current value is invalid.')
+                    had_error <- TRUE
                 }
                 if (is.na(test2_sens) || test2_sens < 0 || test2_sens > 1) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test2_sens_invalid', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Test 2 sensitivity must be between 0 and 1 (0% to 100%). Current value is invalid.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Test 2 Sensitivity Invalid', 'Test 2 sensitivity must be between 0 and 1 (0% to 100%). Current value is invalid.')
+                    had_error <- TRUE
                 }
                 if (is.na(test2_spec) || test2_spec < 0 || test2_spec > 1) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test2_spec_invalid', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Test 2 specificity must be between 0 and 1 (0% to 100%). Current value is invalid.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Test 2 Specificity Invalid', 'Test 2 specificity must be between 0 and 1 (0% to 100%). Current value is invalid.')
+                    had_error <- TRUE
                 }
                 if (is.na(prevalence) || prevalence <= 0 || prevalence >= 1) {
-                    n <- jmvcore::Notice$new(options=self$options, name='prevalence_invalid', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Prevalence must be greater than 0 and less than 1 (exclusive). Current value is invalid.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Prevalence Invalid', 'Prevalence must be greater than 0 and less than 1 (exclusive). Current value is invalid.')
+                    had_error <- TRUE
                 }
 
                 # Validate test names
                 if (is.null(test1_name) || nchar(trimws(test1_name)) == 0) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test1_name_empty', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Test 1 name cannot be empty. Please provide a descriptive name.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Test 1 Name Empty', 'Test 1 name cannot be empty. Please provide a descriptive name.')
+                    had_error <- TRUE
                 }
                 if (is.null(test2_name) || nchar(trimws(test2_name)) == 0) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test2_name_empty', type=jmvcore::NoticeType$ERROR)
-                    n$setContent('Test 2 name cannot be empty. Please provide a descriptive name.')
-                    notices_error <- c(notices_error, list(n))
+                    private$.addNotice('ERROR', 'Test 2 Name Empty', 'Test 2 name cannot be empty. Please provide a descriptive name.')
+                    had_error <- TRUE
                 }
 
-                # Insert ERROR notices at top and return early
-                # TODO (correctness): Notice serialization hazard — the self$results$insert(i, jmvcore::Notice)
-                #   calls in .run() (the ERROR-notices loop just below, the STRONG_WARNING insert, and the
-                #   ~5 PPV/NPV/PLR/NLR-undefined inserts) use the dynamically-inserted jmvcore::Notice pattern
-                #   that CLAUDE.md flags as causing "attempt to apply non-function" protobuf serialization
-                #   errors. The file already has the safe .addNotice()/.renderNotices() HTML mechanism
-                #   (escaped via .safeHtmlOutput) — migrate the remaining Notice$new()+insert() calls to
-                #   .addNotice() to remove the serialization hazard.
-                if (length(notices_error) > 0) {
-                    for (i in seq_along(notices_error)) {
-                        self$results$insert(i, notices_error[[i]])
-                    }
+                # Stop early if any ERROR notices were posted
+                if (had_error) {
                     return()
                 }
 
                 # Clinical plausibility warnings (STRONG_WARNING for serious concerns)
                 if (test1_sens < 0.50 || test1_spec < 0.50) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test1_poor_performance', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent(sprintf('Test 1 performance is unusually low (Sensitivity=%.1f%%, Specificity=%.1f%%). Results may not be clinically useful.', test1_sens*100, test1_spec*100))
-                    notices_strong <- c(notices_strong, list(n))
+                    private$.addNotice('STRONG_WARNING', 'Test 1 Low Performance', sprintf('Test 1 performance is unusually low (Sensitivity=%.1f%%, Specificity=%.1f%%). Results may not be clinically useful.', test1_sens*100, test1_spec*100))
                 }
                 if (test2_sens < 0.50 || test2_spec < 0.50) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test2_poor_performance', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent(sprintf('Test 2 performance is unusually low (Sensitivity=%.1f%%, Specificity=%.1f%%). Results may not be clinically useful.', test2_sens*100, test2_spec*100))
-                    notices_strong <- c(notices_strong, list(n))
+                    private$.addNotice('STRONG_WARNING', 'Test 2 Low Performance', sprintf('Test 2 performance is unusually low (Sensitivity=%.1f%%, Specificity=%.1f%%). Results may not be clinically useful.', test2_sens*100, test2_spec*100))
                 }
 
                 if (prevalence > 0.90) {
-                    n <- jmvcore::Notice$new(options=self$options, name='prevalence_very_high', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent(sprintf('Prevalence is very high (%.1f%%). This is unusual except in confirmatory testing scenarios. Verify this matches your clinical context.', prevalence*100))
-                    notices_strong <- c(notices_strong, list(n))
+                    private$.addNotice('STRONG_WARNING', 'Prevalence Very High', sprintf('Prevalence is very high (%.1f%%). This is unusual except in confirmatory testing scenarios. Verify this matches your clinical context.', prevalence*100))
                 }
                 if (prevalence < 0.001) {
-                    n <- jmvcore::Notice$new(options=self$options, name='prevalence_very_low', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent(sprintf('Prevalence is very low (%.3f%%). Even with excellent tests, PPV may be extremely low. Consider pre-test probability carefully.', prevalence*100))
-                    notices_strong <- c(notices_strong, list(n))
+                    private$.addNotice('STRONG_WARNING', 'Prevalence Very Low', sprintf('Prevalence is very low (%.3f%%). Even with excellent tests, PPV may be extremely low. Consider pre-test probability carefully.', prevalence*100))
                 }
 
                 # Detect potential test correlation
@@ -158,65 +134,36 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 #   Pass fixed = TRUE so the names are compared literally, not as patterns.
                 test_similarity <- agrepl(test1_name, test2_name, max.distance = 0.3)
                 if (test_similarity && test1_name != "Screening Test" && test2_name != "Confirmatory Test") {
-                    n <- jmvcore::Notice$new(options=self$options, name='test_correlation_risk', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent(sprintf('Test names are similar ("%s" vs "%s"). If tests measure similar biomarkers or use similar technology, they may be correlated. This violates the independence assumption and combined metrics will be overestimated.', private$.safeHtmlOutput(test1_name), private$.safeHtmlOutput(test2_name)))
-                    notices_strong <- c(notices_strong, list(n))
+                    private$.addNotice('STRONG_WARNING', 'Test Correlation Risk', sprintf('Test names are similar ("%s" vs "%s"). If tests measure similar biomarkers or use similar technology, they may be correlated. This violates the independence assumption and combined metrics will be overestimated.', test1_name, test2_name))
                 }
 
                 # Minor plausibility warnings
                 if (test1_sens > 0.99) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test1_sens_high', type=jmvcore::NoticeType$WARNING)
-                    n$setContent(sprintf('Test 1 sensitivity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test1_sens*100))
-                    notices_warning <- c(notices_warning, list(n))
+                    private$.addNotice('WARNING', 'Test 1 Sensitivity High', sprintf('Test 1 sensitivity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test1_sens*100))
                 }
                 if (test1_spec > 0.99) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test1_spec_high', type=jmvcore::NoticeType$WARNING)
-                    n$setContent(sprintf('Test 1 specificity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test1_spec*100))
-                    notices_warning <- c(notices_warning, list(n))
+                    private$.addNotice('WARNING', 'Test 1 Specificity High', sprintf('Test 1 specificity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test1_spec*100))
                 }
                 if (test2_sens > 0.99) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test2_sens_high', type=jmvcore::NoticeType$WARNING)
-                    n$setContent(sprintf('Test 2 sensitivity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test2_sens*100))
-                    notices_warning <- c(notices_warning, list(n))
+                    private$.addNotice('WARNING', 'Test 2 Sensitivity High', sprintf('Test 2 sensitivity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test2_sens*100))
                 }
                 if (test2_spec > 0.99) {
-                    n <- jmvcore::Notice$new(options=self$options, name='test2_spec_high', type=jmvcore::NoticeType$WARNING)
-                    n$setContent(sprintf('Test 2 specificity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test2_spec*100))
-                    notices_warning <- c(notices_warning, list(n))
+                    private$.addNotice('WARNING', 'Test 2 Specificity High', sprintf('Test 2 specificity >99%% (%.2f%%) is rarely achieved in practice. Verify this value.', test2_spec*100))
                 }
 
                 # Strategy-specific warnings
                 if (strategy == "serial_positive") {
                     if (test1_spec > test2_spec) {
-                        n <- jmvcore::Notice$new(options=self$options, name='strategy_serial_pos_suboptimal', type=jmvcore::NoticeType$WARNING)
-                        n$setContent(sprintf('Serial positive strategy: Test 2 specificity (%.1f%%) should typically exceed Test 1 specificity (%.1f%%) for confirmation.', test2_spec*100, test1_spec*100))
-                        notices_warning <- c(notices_warning, list(n))
+                        private$.addNotice('WARNING', 'Serial Positive Suboptimal', sprintf('Serial positive strategy: Test 2 specificity (%.1f%%) should typically exceed Test 1 specificity (%.1f%%) for confirmation.', test2_spec*100, test1_spec*100))
                     }
                 } else if (strategy == "serial_negative") {
                     if (test1_sens > test2_sens) {
-                        n <- jmvcore::Notice$new(options=self$options, name='strategy_serial_neg_suboptimal', type=jmvcore::NoticeType$WARNING)
-                        n$setContent(sprintf('Serial negative strategy: Test 2 sensitivity (%.1f%%) should typically exceed Test 1 sensitivity (%.1f%%) for exclusion.', test2_sens*100, test1_sens*100))
-                        notices_warning <- c(notices_warning, list(n))
+                        private$.addNotice('WARNING', 'Serial Negative Suboptimal', sprintf('Serial negative strategy: Test 2 sensitivity (%.1f%%) should typically exceed Test 1 sensitivity (%.1f%%) for exclusion.', test2_sens*100, test1_sens*100))
                     }
                 } else if (strategy == "parallel") {
                     if (abs(test1_sens - test2_sens) < 0.05 && abs(test1_spec - test2_spec) < 0.05) {
-                        n <- jmvcore::Notice$new(options=self$options, name='strategy_parallel_redundant', type=jmvcore::NoticeType$WARNING)
-                        n$setContent('Parallel testing: Tests have similar characteristics. Parallel strategy works best with complementary tests that detect different disease manifestations.')
-                        notices_warning <- c(notices_warning, list(n))
+                        private$.addNotice('WARNING', 'Parallel Tests Redundant', 'Parallel testing: Tests have similar characteristics. Parallel strategy works best with complementary tests that detect different disease manifestations.')
                     }
-                }
-
-                # Insert STRONG_WARNING notices at top
-                position <- 1
-                for (notice in notices_strong) {
-                    self$results$insert(position, notice)
-                    position <- position + 1
-                }
-
-                # Insert WARNING notices (after strong warnings)
-                for (notice in notices_warning) {
-                    self$results$insert(position, notice)
-                    position <- position + 1
                 }
 
                 # Calculate individual test metrics with error handling
@@ -320,10 +267,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 combined_ppv <- private$.safeDivide(combined_ppv_num, combined_ppv_denom)
 
                 if (is.na(combined_ppv)) {
-                    n <- jmvcore::Notice$new(options=self$options, name='ppv_undefined', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent('Combined PPV cannot be calculated (denominator is zero). Check for extreme sensitivity/specificity combinations.')
-                    self$results$insert(position, n)
-                    position <- position + 1
+                    private$.addNotice('STRONG_WARNING', 'Combined PPV Undefined', 'Combined PPV cannot be calculated (denominator is zero). Check for extreme sensitivity/specificity combinations.')
                 }
 
                 combined_npv_num <- (1 - prevalence) * combined_spec
@@ -331,18 +275,12 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 combined_npv <- private$.safeDivide(combined_npv_num, combined_npv_denom)
 
                 if (is.na(combined_npv)) {
-                    n <- jmvcore::Notice$new(options=self$options, name='npv_undefined', type=jmvcore::NoticeType$STRONG_WARNING)
-                    n$setContent('Combined NPV cannot be calculated (denominator is zero). Check for extreme sensitivity/specificity combinations.')
-                    self$results$insert(position, n)
-                    position <- position + 1
+                    private$.addNotice('STRONG_WARNING', 'Combined NPV Undefined', 'Combined NPV cannot be calculated (denominator is zero). Check for extreme sensitivity/specificity combinations.')
                 }
 
                 combined_plr <- private$.safeDivide(combined_sens, 1 - combined_spec, allowInfinite = TRUE)
                 if (is.na(combined_plr)) {
-                    n <- jmvcore::Notice$new(options=self$options, name='plr_undefined', type=jmvcore::NoticeType$WARNING)
-                    n$setContent('Combined positive likelihood ratio is undefined (both numerator and denominator approach zero).')
-                    self$results$insert(position, n)
-                    position <- position + 1
+                    private$.addNotice('WARNING', 'Positive Likelihood Ratio Undefined', 'Combined positive likelihood ratio is undefined (both numerator and denominator approach zero).')
                 } else if (is.infinite(combined_plr)) {
                     private$.addNotice(
                         type = "INFO",
@@ -353,15 +291,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 combined_nlr <- private$.safeDivide(1 - combined_sens, combined_spec, allowInfinite = TRUE)
                 if (is.na(combined_nlr)) {
-                    n <- jmvcore::Notice$new(options=self$options, name='nlr_undefined', type=jmvcore::NoticeType$WARNING)
-                    n$setContent('Combined negative likelihood ratio is undefined (both numerator and denominator approach zero).')
-                    self$results$insert(position, n)
-                    position <- position + 1
+                    private$.addNotice('WARNING', 'Negative Likelihood Ratio Undefined', 'Combined negative likelihood ratio is undefined (both numerator and denominator approach zero).')
                 } else if (is.infinite(combined_nlr)) {
-                    n <- jmvcore::Notice$new(options=self$options, name='nlr_infinite', type=jmvcore::NoticeType$WARNING)
-                    n$setContent('Combined negative likelihood ratio is infinite (combined specificity is effectively zero). This indicates poor rule-out capability.')
-                    self$results$insert(position, n)
-                    position <- position + 1
+                    private$.addNotice('WARNING', 'Negative Likelihood Ratio Infinite', 'Combined negative likelihood ratio is infinite (combined specificity is effectively zero). This indicates poor rule-out capability.')
                 }
 
                 # Calculate Number Needed to Screen
@@ -1146,7 +1078,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     content = 'Combined metrics assume conditional independence between tests. If tests are correlated (similar biology/technology), combined performance may be overestimated.'
                 )
 
-                # Render all collected notices as HTML (last step)
+                # Render all collected notices (plain text, last step)
                 private$.renderNotices()
 
                 },
@@ -1646,19 +1578,44 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 return(TRUE)
             },
 
-            # Notice collection and rendering (converted from insert(999, ) to avoid serialization errors)
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
             .noticeList = list(),
 
-            # Add a notice to the collection
             .addNotice = function(type, title, content) {
                 private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                     type = type,
                     title = title,
                     content = content
                 )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
             },
 
-            # HTML sanitization for security
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
+
+                # Plain text only — notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        "")
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
+
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+
+            # HTML sanitization for security (used by Html output items: plain_summary,
+            # explanation_text, clinical_guidance — NOT the plain-text notices sink)
             .safeHtmlOutput = function(text) {
                 if (is.null(text) || length(text) == 0) return("")
                 text <- as.character(text)
@@ -1670,41 +1627,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 text <- gsub("'", "&#x27;", text, fixed = TRUE)
                 text <- gsub("/", "&#x2F;", text, fixed = TRUE)
                 return(text)
-            },
-
-            # Render collected notices as HTML
-            .renderNotices = function() {
-                if (length(private$.noticeList) == 0) {
-                    return()
-                }
-
-                # Map notice types to colors and icons
-                typeStyles <- list(
-                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
-                )
-
-                html <- "<div style='margin: 10px 0;'>"
-
-                for (notice in private$.noticeList) {
-                    style <- typeStyles[[notice$type]] %||% typeStyles$INFO
-
-                    html <- paste0(html,
-                        "<div style='background-color: ", style$bgcolor, "; ",
-                        "border-left: 4px solid ", style$border, "; ",
-                        "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                        "<strong style='color: ", style$color, ";'>",
-                        style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-                        "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
-                        "</div>"
-                    )
-                }
-
-                html <- paste0(html, "</div>")
-
-                self$results$notices$setContent(html)
             },
 
             # Helper function for safe division

@@ -178,6 +178,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "sequentialtestsResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         plain_summary = function() private$.items[["plain_summary"]],
         summary_table = function() private$.items[["summary_table"]],
         individual_tests_table = function() private$.items[["individual_tests_table"]],
@@ -190,8 +191,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         plot_probability = function() private$.items[["plot_probability"]],
         plot_population_flow = function() private$.items[["plot_population_flow"]],
         plot_sensitivity_analysis = function() private$.items[["plot_sensitivity_analysis"]],
-        clinical_guidance = function() private$.items[["clinical_guidance"]],
-        notices = function() private$.items[["notices"]]),
+        clinical_guidance = function() private$.items[["clinical_guidance"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -205,6 +205,17 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "Fagan2",
                     "sensspecwiki",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "strategy",
+                    "prevalence",
+                    "test1_sens",
+                    "test1_spec",
+                    "test2_sens",
+                    "test2_spec")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="plain_summary",
@@ -417,18 +428,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_guidance",
-                title="Clinical Guidance"))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="notices",
-                title="Important Information",
-                clearWith=list(
-                    "strategy_type",
-                    "prevalence",
-                    "sens_first",
-                    "spec_first",
-                    "sens_second",
-                    "spec_second")))}))
+                title="Clinical Guidance"))}))
 
 sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "sequentialtestsBase",
@@ -521,6 +521,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param show_nomogram .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$plain_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary_table} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$individual_tests_table} \tab \tab \tab \tab \tab a table \cr
@@ -534,7 +535,6 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$plot_population_flow} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot_sensitivity_analysis} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clinical_guidance} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

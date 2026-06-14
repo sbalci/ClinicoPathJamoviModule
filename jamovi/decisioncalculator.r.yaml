@@ -5,6 +5,18 @@ jrs:   '1.1'
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - TP
+        - FP
+        - TN
+        - FN
+        - pp
+        - pprob
+        - ci
+
     - name: welcome
       title: ""
       type: Html

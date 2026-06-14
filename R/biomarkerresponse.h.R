@@ -181,6 +181,7 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     "biomarkerresponseResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         dataWarning = function() private$.items[["dataWarning"]],
         plot = function() private$.items[["plot"]],
@@ -202,6 +203,17 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "ggplot2",
                     "dplyr",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "biomarker",
+                    "response",
+                    "responseType",
+                    "positiveLevel",
+                    "thresholdMethod",
+                    "groupVariable")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -525,6 +537,7 @@ biomarkerresponseBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param confidenceLevel Confidence level for intervals and tests.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

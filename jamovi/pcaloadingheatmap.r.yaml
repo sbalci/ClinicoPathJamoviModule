@@ -4,6 +4,16 @@ title: PCA Loading Heatmap & Barmap
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - vars
+        - ncomp
+        - center
+        - scale
+        - cutoff
+
     - name: todo
       title: 'Instructions'
       type: Html

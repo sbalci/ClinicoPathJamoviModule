@@ -249,6 +249,7 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "tumorgrowthResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
         naturalLanguageSummary = function() private$.items[["naturalLanguageSummary"]],
@@ -274,6 +275,17 @@ tumorgrowthResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "nlme",
                     "glue",
                     "stringr"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time",
+                    "tumorSize",
+                    "patientId",
+                    "growthModel",
+                    "modelApproach",
+                    "treatmentEffect")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -540,6 +552,7 @@ tumorgrowthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   support dynamic plot sizing.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr

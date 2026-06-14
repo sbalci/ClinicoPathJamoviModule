@@ -394,11 +394,16 @@ studydiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "participant_id",
                     "step_excluded",
                     "participant_count")))
-            self$add(list(
-                `name`="notices", 
-                `title`="", 
-                `type`="Notification", 
-                `visible`=FALSE))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "data_format",
+                    "step_name",
+                    "participant_count",
+                    "participant_id_mapping",
+                    "exclusion_reason_mapping")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSummary",
@@ -515,7 +520,7 @@ studydiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$diagram} \tab \tab \tab \tab \tab Interactive study flow diagram \cr
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab Explanatory text about the diagram and results \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab Alerts about potential data quality issues \cr
-#'   \code{results$notices} \tab \tab \tab \tab \tab a notification \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab Plain-language summary for clinical interpretation \cr
 #'   \code{results$reportSentence} \tab \tab \tab \tab \tab Copy-ready sentence for manuscripts \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab Explanation of analysis type and usage \cr

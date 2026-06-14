@@ -4,6 +4,17 @@ title: Single Variable Quality Check
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - var
+        - showOutliers
+        - showDistribution
+        - showDuplicates
+        - showPatterns
+        - clinicalValidation
+
     - name: todo
       title: Getting Started
       type: Html

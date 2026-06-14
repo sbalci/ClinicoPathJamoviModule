@@ -198,6 +198,7 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     "pcacomponenttestResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         warnings = function() private$.items[["warnings"]],
         results = function() private$.items[["results"]],
@@ -216,6 +217,17 @@ pcacomponenttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "glue"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "nperm",
+                    "center",
+                    "scale",
+                    "conflevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -438,6 +450,7 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   for clinical use.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results} \tab \tab \tab \tab \tab Statistical significance of principal components based on permutation testing \cr

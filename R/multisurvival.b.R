@@ -402,6 +402,31 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .debug_dummy_plot_enabled = function() FALSE,
       .debug_write = function(lines) invisible(FALSE),
 
+      # Notice collection (single Preformatted plain-text output item; avoids the
+      # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+      .noticeList = list(),
+
+      .addNotice = function(type, title, content) {
+          private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+              type = type, title = title, content = content
+          )
+          private$.renderNotices()
+      },
+
+      .renderNotices = function() {
+          if (length(private$.noticeList) == 0) {
+              self$results$notices$setContent("")
+              return()
+          }
+          blocks <- vapply(private$.noticeList, function(notice) {
+              prefix <- switch(notice$type,
+                  ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                  WARNING = "WARNING: ", "")
+              paste0(prefix, notice$title, "\n", notice$content)
+          }, character(1))
+          self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+      },
+
       # HTML notice helper (replaces self$results$insert(N, jmvcore::Notice))
       # See R/survivalcont.b.R:700-743 for canonical pattern.
       # The protobuf serialization of Notice objects can fail with
@@ -2105,6 +2130,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       },
 
       .run = function() {
+        private$.noticeList <- list()
         # Modular execution using helper functions
         if (!private$.validateAndPrepare()) {
           return()

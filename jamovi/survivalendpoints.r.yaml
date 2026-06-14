@@ -4,6 +4,17 @@ title: Survival Endpoint Derivation
 jrs: '1.1'
 
 items:
+  - name: notices
+    title: Important Information
+    type: Preformatted
+    clearWith:
+      - patientId
+      - startDate
+      - lastFollowup
+      - calculatePFS
+      - calculateOS
+      - calculateTTP
+
   - name: instructions
     title: Instructions
     type: Html

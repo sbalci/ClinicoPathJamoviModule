@@ -12,6 +12,42 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..inferredMethod = NULL,
         ..assumptionReason = NULL,
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # === Helper: Escape Variable Names ===
         .escapeVarName = function(var) {
             if (is.null(var) || var == "") return(var)
@@ -40,6 +76,8 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # === Main Run Function ===
         .run = function() {
+            private$.noticeList <- list()
+
             if (!private$.validateInputs()) return()
 
             if (!requireNamespace("ggpubr", quietly = TRUE)) {

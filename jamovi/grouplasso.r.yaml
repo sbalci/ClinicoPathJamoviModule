@@ -3,6 +3,17 @@ name: grouplasso
 jrs: '1.1'
 title: Analysis Results
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - time
+        - event
+        - predictors
+        - penalty_type
+        - cv_folds
+        - group_definition
+
     - name: instructions
       title: Instructions
       type: Html

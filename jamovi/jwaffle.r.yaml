@@ -17,6 +17,16 @@ clearWith:
     - showExplanations
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - groups
+        - counts
+        - facet
+        - rows
+        - color_palette
+
     - name: todo
       title: To Do
       type: Html

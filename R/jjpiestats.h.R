@@ -239,6 +239,7 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjpiestatsResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         about = function() private$.items[["about"]],
         summary = function() private$.items[["summary"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -281,6 +282,17 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "showSummary",
                     "showAssumptions",
                     "showInterpretation"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "counts",
+                    "typestatistics",
+                    "paired")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -463,6 +475,7 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ggpubrDonutPalette Color palette for donut chart.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr

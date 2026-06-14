@@ -2,6 +2,17 @@ name: ihccluster
 title: IHC Clustering Analysis
 jrs: '1.1'
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - catVars
+          - contVars
+          - method
+          - nClusters
+          - distanceMethod
+          - handleMissing
+
     - name: todo
       title: Instructions
       type: Html

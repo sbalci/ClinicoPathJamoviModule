@@ -451,6 +451,7 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "survivalPowerResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         power_summary = function() private$.items[["power_summary"]],
         simulation_validation_table = function() private$.items[["simulation_validation_table"]],
@@ -491,6 +492,17 @@ survivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "survival",
                     "ggplot2",
                     "scales"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "analysis_type",
+                    "test_type",
+                    "effect_size",
+                    "alpha_level",
+                    "power_level",
+                    "control_median_survival")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -1453,6 +1465,7 @@ survivalPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param guided_mode Step-by-step guided analysis workflow
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$power_summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$simulation_validation_table} \tab \tab \tab \tab \tab a table \cr

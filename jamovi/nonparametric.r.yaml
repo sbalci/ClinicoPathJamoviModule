@@ -4,6 +4,15 @@ title: Enhanced Non-Parametric Statistical Methods
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - deps
+          - outcome
+          - groups
+          - test_type
+
     # Instructions and Getting Started
     - name: instructions
       title: Getting Started with Non-Parametric Tests

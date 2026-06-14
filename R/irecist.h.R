@@ -313,6 +313,7 @@ irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "irecistResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         dataInfo = function() private$.items[["dataInfo"]],
         responseTable = function() private$.items[["responseTable"]],
@@ -338,6 +339,16 @@ irecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="iRECIST Analysis")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "patientId",
+                    "assessmentTime",
+                    "targetLesionSum",
+                    "newLesions",
+                    "confirmationWindow")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -799,6 +810,7 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param formula (optional) the formula to use, see the examples
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$responseTable} \tab \tab \tab \tab \tab a table \cr

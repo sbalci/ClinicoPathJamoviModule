@@ -285,6 +285,7 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vartreeResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         text1 = function() private$.items[["text1"]],
         text2 = function() private$.items[["text2"]],
@@ -300,6 +301,17 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "vtree",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "percvar",
+                    "summaryvar",
+                    "prunebelow",
+                    "follow",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -408,6 +420,7 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param maxwidth Maximum width for tree display in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr

@@ -4,6 +4,17 @@ title: SCAD Cox Regression Results
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - time
+          - event
+          - covariates
+          - penalty
+          - lambda_type
+          - cv_folds
+
     - name: instructions
       title: Instructions
       type: Html

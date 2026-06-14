@@ -5,6 +5,16 @@ jrs:   '1.1'
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - vars
+          - weight
+          - maxvars
+          - engine
+          - condensationvar
+
     - name: todo
       title: To Do
       type: Html

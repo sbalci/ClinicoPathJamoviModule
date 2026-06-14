@@ -133,6 +133,7 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jwaffleResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         warnings = function() private$.items[["warnings"]],
         analysisSummary = function() private$.items[["analysisSummary"]],
@@ -161,6 +162,16 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "legendtitle",
                     "showSummaries",
                     "showExplanations"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "groups",
+                    "counts",
+                    "facet",
+                    "rows",
+                    "color_palette")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -267,6 +278,7 @@ jwaffleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   contexts.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$analysisSummary} \tab \tab \tab \tab \tab a html \cr

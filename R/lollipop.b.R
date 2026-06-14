@@ -65,61 +65,47 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "lollipopClass",
     inherit = lollipopBase,
     private = list(
-        .notices = list(),
 
-        # Helper method for adding notices with priority
-        .addNotice = function(type, message, name = NULL) {
-            if (is.null(name)) {
-                name <- paste0('notice', length(private$.notices) + 1)
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
             }
 
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = name,
-                type = type
-            )
-            notice$setContent(message)
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
 
-            # Store with priority for sorting
-            priority <- switch(
-                as.character(type),
-                "1" = 1,  # ERROR
-                "2" = 2,  # STRONG_WARNING
-                "3" = 3,  # WARNING
-                "4" = 4,  # INFO
-                3         # Default to WARNING
-            )
-
-            private$.notices[[length(private$.notices) + 1]] <- list(
-                notice = notice,
-                priority = priority
-            )
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
-        # Insert all notices in priority order
-        .insertNotices = function() {
-            if (length(private$.notices) == 0) return()
-
-            # Sort by priority (ERROR > STRONG_WARNING > WARNING > INFO)
-            notices_sorted <- private$.notices[order(sapply(private$.notices, function(x) x$priority))]
-
-            # Insert in order
-            position <- 1
-            for (n in notices_sorted) {
-                self$results$insert(position, n$notice)
-                position <- position + 1
-            }
-        },
-
-        # Reset notices for new analysis
-        .resetNotices = function() {
-            private$.notices <- list()
-        },
-        
         # Initialize results and validate dependencies
         .init = function() {
             # Reset notices for new analysis
-            private$.resetNotices()
+            private$.noticeList <- list()
 
             # Check for required packages
             missing_packages <- c()
@@ -138,13 +124,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     paste0("'", missing_packages, "'", collapse = ", "), "))"
                 )
 
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingPackages',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(error_msg)
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Missing Required Packages', error_msg)
                 return()
             }
             
@@ -205,6 +185,8 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .run = function() {
+            private$.noticeList <- list()
+
             # Early exits for missing data or variables
             if (is.null(self$data) || nrow(self$data) == 0) {
                 return()
@@ -218,9 +200,6 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$todo$setVisible(FALSE)
             self$results$summary$setVisible(TRUE)
             self$results$plot$setVisible(TRUE)
-
-            # Reset notices for new analysis run
-            private$.resetNotices()
 
             # Main analysis pipeline with comprehensive error handling
             tryCatch({
@@ -244,15 +223,12 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Add note about conditional coloring if enabled
                 if (self$options$conditionalColor) {
                     private$.addNotice(
-                        jmvcore::NoticeType$INFO,
+                        'INFO',
+                        'Conditional Coloring',
                         sprintf("Conditional coloring applied. Values > %.2f colored orange (above threshold), others blue (below).",
-                                self$options$colorThreshold),
-                        'conditionalColorNote'
+                                self$options$colorThreshold)
                     )
                 }
-
-                # Insert all notices in priority order (ERROR > STRONG_WARNING > WARNING > INFO)
-                private$.insertNotices()
 
                 # Generate and display clinical summary
                 clinical_summary <- private$.generateClinicalSummary(summary_stats, self$options$dep, self$options$group)
@@ -320,9 +296,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (n_groups > 50) {
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
-                    sprintf("Grouping variable has more than 50 levels (%d levels detected). Consider reducing categories for better visualization.", n_groups),
-                    'manyGroups'
+                    'WARNING',
+                    'Many Group Levels',
+                    sprintf("Grouping variable has more than 50 levels (%d levels detected). Consider reducing categories for better visualization.", n_groups)
                 )
             }
             
@@ -342,9 +318,9 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 n_removed <- complete_before - complete_after
                 pct_removed <- round(100 * n_removed / complete_before, 1)
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
-                    sprintf("%d rows (%g%%) with missing values were removed from analysis.", n_removed, pct_removed),
-                    'missingData'
+                    'WARNING',
+                    'Missing Data Removed',
+                    sprintf("%d rows (%g%%) with missing values were removed from analysis.", n_removed, pct_removed)
                 )
             }
             
@@ -362,10 +338,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (self$options$useHighlight && !is.null(highlight_level) && highlight_level != "" && !highlight_level %in% data[[group_var]]) {
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
+                    'WARNING',
+                    'Highlight Level Not Found',
                     sprintf("Highlight level '%s' not found in grouping variable. Highlight will be ignored.",
-                            htmltools::htmlEscape(highlight_level)),
-                    'highlightNotFound'
+                            highlight_level)
                 )
                 highlight_level <- NULL  # Disable highlighting for this case
             }
@@ -379,13 +355,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 max_count <- max(group_counts)
                 groups_with_dups <- names(group_counts[group_counts > 1])
                 private$.addNotice(
-                    jmvcore::NoticeType$STRONG_WARNING,
+                    'STRONG_WARNING',
+                    'Duplicate Groups Detected',
                     sprintf(
                         "Multiple observations per group detected (max=%d per group). Groups with duplicates: %s. Use aggregation (mean/median/sum) to avoid over-plotting and misleading visualization.",
                         max_count,
-                        htmltools::htmlEscape(paste(head(groups_with_dups, 5), collapse = ", "))
-                    ),
-                    'duplicateGroups'
+                        paste(head(groups_with_dups, 5), collapse = ", ")
+                    )
                 )
             }
 
@@ -532,20 +508,20 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check for too many groups relative to sample size
             if (summary_stats$n_groups > summary_stats$n_observations / 3) {
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
+                    'WARNING',
+                    'Many Groups vs Sample Size',
                     sprintf("Many groups (%d) relative to sample size (%d). Consider grouping categories or using a different visualization.",
-                            summary_stats$n_groups, summary_stats$n_observations),
-                    'manyGroupsVsN'
+                            summary_stats$n_groups, summary_stats$n_observations)
                 )
             }
 
             # Check for highly skewed data
             if (summary_stats$dep_range > 5 * summary_stats$dep_sd) {
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
+                    'WARNING',
+                    'High Variability',
                     sprintf("Data appears highly variable (range = %.2f, SD = %.2f). Consider log transformation or outlier investigation.",
-                            summary_stats$dep_range, summary_stats$dep_sd),
-                    'highVariability'
+                            summary_stats$dep_range, summary_stats$dep_sd)
                 )
             }
 
@@ -555,20 +531,20 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             min_count <- min(group_counts)
             if (max_count > 5 * min_count && length(group_counts) > 2) {
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
+                    'WARNING',
+                    'Unbalanced Group Sizes',
                     sprintf("Unbalanced group sizes detected (range: %d to %d observations per group). Interpretation should account for different sample sizes.",
-                            min_count, max_count),
-                    'unbalancedGroups'
+                            min_count, max_count)
                 )
             }
 
             # Check for small overall sample size
             if (summary_stats$n_observations < 10) {
                 private$.addNotice(
-                    jmvcore::NoticeType$WARNING,
+                    'WARNING',
+                    'Small Sample Size',
                     sprintf("Small sample size (n=%d). Results should be interpreted with caution.",
-                            summary_stats$n_observations),
-                    'smallSample'
+                            summary_stats$n_observations)
                 )
             }
         },

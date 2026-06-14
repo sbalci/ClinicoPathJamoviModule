@@ -564,6 +564,7 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
     "nonparametricResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         descriptives = function() private$.items[["descriptives"]],
         normality = function() private$.items[["normality"]],
@@ -610,6 +611,15 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "nortest",
                     "car",
                     "DescTools"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "deps",
+                    "outcome",
+                    "groups",
+                    "test_type")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -1394,6 +1404,7 @@ nonparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   statistics for better comparability.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$descriptives} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$normality} \tab \tab \tab \tab \tab a table \cr

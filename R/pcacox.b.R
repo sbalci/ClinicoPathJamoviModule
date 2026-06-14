@@ -28,27 +28,40 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         risk_groups = NULL,
         cv_scores = NULL,
 
-        # Notice helper
-        .insertNotice = function(name, type, content, position = 999) {
-            tryCatch({
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = name,
-                    type = type
-                )
-                notice$setContent(content)
-                self$results$insert(position, notice)
-            }, error = function(e) {
-                tryCatch({
-                    existing <- self$results$todo$content
-                    if (is.null(existing) || nchar(existing) == 0) existing <- ""
-                    label <- switch(as.character(type),
-                        "1" = "ERROR", "2" = "WARNING", "3" = "WARNING", "4" = "INFO", "NOTE")
-                    self$results$todo$setContent(paste0(
-                        existing, "<p><strong>", label, ":</strong> ", content, "</p>"
-                    ))
-                }, error = function(e2) NULL)
-            })
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
         .init = function() {
@@ -56,9 +69,11 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .run = function() {
-            
+
+            private$.noticeList <- list()
+
             # Check if variables are selected
-            if (is.null(self$options$time) || is.null(self$options$status) || 
+            if (is.null(self$options$time) || is.null(self$options$status) ||
                 is.null(self$options$predictors) || length(self$options$predictors) < 2) {
                 
                 self$results$todo$setContent(
@@ -120,8 +135,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
             if (n_excluded_outcome > 0) {
-                private$.insertNotice(
-                    'excludedRows', jmvcore::NoticeType$WARNING,
+                private$.addNotice('WARNING', 'Rows Excluded',
                     sprintf("%d row(s) excluded because outcome value matched neither event level ('%s') nor censored level ('%s').",
                             n_excluded_outcome, event_level, censor_level)
                 )
@@ -135,36 +149,29 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             time_vals <- as.numeric(clean_data[[time_var]])
             if (any(time_vals <= 0, na.rm = TRUE)) {
                 n_nonpos <- sum(time_vals <= 0, na.rm = TRUE)
-                private$.insertNotice(
-                    'nonPositiveTime', jmvcore::NoticeType$ERROR,
-                    sprintf("All survival times must be positive. Found %d non-positive value(s).", n_nonpos),
-                    position = 1
+                private$.addNotice('ERROR', 'Non-Positive Survival Time',
+                    sprintf("All survival times must be positive. Found %d non-positive value(s).", n_nonpos)
                 )
                 return()
             }
 
             # Check for zero events
             if (sum(clean_data[[status_var]] == 1) == 0) {
-                private$.insertNotice(
-                    'noEvents', jmvcore::NoticeType$ERROR,
-                    "No events detected after encoding. All observations are censored. PCA-Cox cannot be fitted.",
-                    position = 1
+                private$.addNotice('ERROR', 'No Events Detected',
+                    "No events detected after encoding. All observations are censored. PCA-Cox cannot be fitted."
                 )
                 return()
             }
 
             if (nrow(clean_data) < 20) {
-                private$.insertNotice(
-                    'insufficientData', jmvcore::NoticeType$ERROR,
-                    sprintf("Insufficient data for PCA-Cox analysis. Need at least 20 complete cases, found %d.", nrow(clean_data)),
-                    position = 1
+                private$.addNotice('ERROR', 'Insufficient Data',
+                    sprintf("Insufficient data for PCA-Cox analysis. Need at least 20 complete cases, found %d.", nrow(clean_data))
                 )
                 return()
             }
 
             if (length(predictors) > nrow(clean_data)) {
-                private$.insertNotice(
-                    'highDimensional', jmvcore::NoticeType$WARNING,
+                private$.addNotice('WARNING', 'High-Dimensional Setting',
                     sprintf("High-dimensional setting: p (%d) > n (%d). PCA dimensionality reduction is essential.",
                             length(predictors), nrow(clean_data))
                 )
@@ -261,30 +268,24 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Clinical notices
                 n_events <- sum(private$clean_data[[private$status_var]])
                 if (n_events < 10) {
-                    private$.insertNotice(
-                        'veryLowEvents', jmvcore::NoticeType$STRONG_WARNING,
-                        sprintf("Only %d events detected. PCA-Cox results are highly unreliable with fewer than 10 events.", n_events),
-                        position = 1
+                    private$.addNotice('STRONG_WARNING', 'Very Low Event Count',
+                        sprintf("Only %d events detected. PCA-Cox results are highly unreliable with fewer than 10 events.", n_events)
                     )
                 } else if (n_events < 20) {
-                    private$.insertNotice(
-                        'lowEvents', jmvcore::NoticeType$WARNING,
+                    private$.addNotice('WARNING', 'Low Event Count',
                         sprintf("Only %d events detected. Consider reducing the number of components to improve stability.", n_events)
                     )
                 }
 
                 c_idx <- tryCatch(survival::concordance(private$cox_model)$concordance, error = function(e) NA)
                 if (!is.na(c_idx) && c_idx < 0.5) {
-                    private$.insertNotice(
-                        'poorDiscrimination', jmvcore::NoticeType$STRONG_WARNING,
-                        sprintf("Training C-index = %.3f is below 0.5, indicating worse-than-chance discrimination.", c_idx),
-                        position = 1
+                    private$.addNotice('STRONG_WARNING', 'Poor Discrimination',
+                        sprintf("Training C-index = %.3f is below 0.5, indicating worse-than-chance discrimination.", c_idx)
                     )
                 }
 
                 # Success notice
-                private$.insertNotice(
-                    'analysisComplete', jmvcore::NoticeType$INFO,
+                private$.addNotice('INFO', 'Analysis Complete',
                     sprintf("PCA-Cox completed: %d components selected from %d predictors, %d observations (%d events), training C-index = %.3f.",
                             private$selected_components, length(private$predictors),
                             nrow(private$clean_data), n_events,
@@ -348,10 +349,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.fitPCCoxModel()
                 
             }, error = function(e) {
-                private$.insertNotice(
-                    'pcaError', jmvcore::NoticeType$ERROR,
-                    sprintf("PCA analysis failed: %s", htmltools::htmlEscape(conditionMessage(e))),
-                    position = 1
+                private$.addNotice('ERROR', 'PCA Analysis Failed',
+                    sprintf("PCA analysis failed: %s", conditionMessage(e))
                 )
             })
         },
@@ -454,8 +453,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
 
                 if (!requireNamespace('superpc', quietly = TRUE)) {
-                    private$.insertNotice(
-                        'superpcMissing', jmvcore::NoticeType$WARNING,
+                    private$.addNotice('WARNING', 'Package superpc Not Available',
                         "Package 'superpc' not available. Falling back to standard PCA. Install with: install.packages('superpc')"
                     )
                     private$.performStandardPCA()
@@ -516,9 +514,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.approximatePCAMetrics()
 
             }, error = function(e) {
-                private$.insertNotice(
-                    'superpcFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("Supervised PCA failed: %s. Using standard PCA.", htmltools::htmlEscape(conditionMessage(e)))
+                private$.addNotice('WARNING', 'Supervised PCA Failed',
+                    sprintf("Supervised PCA failed: %s. Using standard PCA.", conditionMessage(e))
                 )
                 private$.performStandardPCA()
             })
@@ -561,15 +558,13 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     
                 }, error = function(e) {
-                    private$.insertNotice(
-                        'sparsePCAFailed', jmvcore::NoticeType$WARNING,
-                        sprintf("Sparse PCA failed: %s. Using standard PCA instead.", htmltools::htmlEscape(conditionMessage(e)))
+                    private$.addNotice('WARNING', 'Sparse PCA Failed',
+                        sprintf("Sparse PCA failed: %s. Using standard PCA instead.", conditionMessage(e))
                     )
                     private$.performStandardPCA()
                 })
             } else {
-                private$.insertNotice(
-                    'sparsePCAMissing', jmvcore::NoticeType$WARNING,
+                private$.addNotice('WARNING', 'Package sparsepca Not Available',
                     "Package 'sparsepca' not available. Using standard PCA. Install with: install.packages('sparsepca')"
                 )
                 private$.performStandardPCA()
@@ -608,15 +603,13 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.approximatePCAMetrics()
                     
                 }, error = function(e) {
-                    private$.insertNotice(
-                        'kernelPCAFailed', jmvcore::NoticeType$WARNING,
-                        sprintf("Kernel PCA failed: %s. Using standard PCA instead.", htmltools::htmlEscape(conditionMessage(e)))
+                    private$.addNotice('WARNING', 'Kernel PCA Failed',
+                        sprintf("Kernel PCA failed: %s. Using standard PCA instead.", conditionMessage(e))
                     )
                     private$.performStandardPCA()
                 })
             } else {
-                private$.insertNotice(
-                    'kernelPCAMissing', jmvcore::NoticeType$WARNING,
+                private$.addNotice('WARNING', 'Package kernlab Not Available',
                     "Package 'kernlab' not available. Using standard PCA. Install with: install.packages('kernlab')"
                 )
                 private$.performStandardPCA()
@@ -752,9 +745,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(optimal_k)
                 
             }, error = function(e) {
-                private$.insertNotice(
-                    'cvSelectionFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("CV component selection failed: %s. Using default %d components.", htmltools::htmlEscape(conditionMessage(e)), min(5, ncol(private$pc_scores)))
+                private$.addNotice('WARNING', 'CV Component Selection Failed',
+                    sprintf("CV component selection failed: %s. Using default %d components.", conditionMessage(e), min(5, ncol(private$pc_scores)))
                 )
                 return(min(5, ncol(private$pc_scores)))
             })
@@ -823,10 +815,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.calculateModelPerformance()
                 
             }, error = function(e) {
-                private$.insertNotice(
-                    'coxFitError', jmvcore::NoticeType$ERROR,
-                    sprintf("Cox model fitting failed: %s", htmltools::htmlEscape(conditionMessage(e))),
-                    position = 1
+                private$.addNotice('ERROR', 'Cox Model Fitting Failed',
+                    sprintf("Cox model fitting failed: %s", conditionMessage(e))
                 )
             })
         },
@@ -914,9 +904,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 table$setNote("cindex", "* Note: The Training Concordance Index overestimates true out-of-sample performance, as it is evaluated on the data used for variable selection. See Bootstrap Validation for pessimism-corrected estimates.")
                 
             }, error = function(e) {
-                private$.insertNotice(
-                    'perfCalcFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("Performance calculation failed: %s", htmltools::htmlEscape(conditionMessage(e)))
+                private$.addNotice('WARNING', 'Performance Calculation Failed',
+                    sprintf("Performance calculation failed: %s", conditionMessage(e))
                 )
             })
         },
@@ -973,9 +962,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
             }, error = function(e) {
-                private$.insertNotice(
-                    'featureImportanceError', jmvcore::NoticeType$WARNING,
-                    sprintf("Feature importance calculation failed: %s", htmltools::htmlEscape(conditionMessage(e)))
+                private$.addNotice('WARNING', 'Feature Importance Failed',
+                    sprintf("Feature importance calculation failed: %s", conditionMessage(e))
                 )
             })
         },
@@ -1067,9 +1055,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$risk_groups <- risk_groups
                 
             }, error = function(e) {
-                private$.insertNotice(
-                    'riskScoreFailed', jmvcore::NoticeType$WARNING,
-                    sprintf("Risk score calculation failed: %s", htmltools::htmlEscape(conditionMessage(e)))
+                private$.addNotice('WARNING', 'Risk Score Calculation Failed',
+                    sprintf("Risk score calculation failed: %s", conditionMessage(e))
                 )
             })
         },
@@ -1327,9 +1314,8 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$pathwayAnalysis$setContent(html)
 
             }, error = function(e) {
-                private$.insertNotice(
-                    'pathwayError', jmvcore::NoticeType$WARNING,
-                    sprintf("Feature cluster analysis could not be completed: %s", htmltools::htmlEscape(conditionMessage(e)))
+                private$.addNotice('WARNING', 'Feature Cluster Analysis Failed',
+                    sprintf("Feature cluster analysis could not be completed: %s", conditionMessage(e))
                 )
             })
         },

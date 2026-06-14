@@ -4,6 +4,17 @@ title: Sequential Testing Analysis
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+         - strategy
+         - prevalence
+         - test1_sens
+         - test1_spec
+         - test2_sens
+         - test2_spec
+
     - name: plain_summary
       title: 'Summary (Plain Language)'
       type: Html
@@ -186,18 +197,6 @@ items:
     - name: clinical_guidance
       title: 'Clinical Guidance'
       type: Html
-
-    # Notice outputs converted to HTML to avoid serialization errors
-    - name: notices
-      title: Important Information
-      type: Html
-      clearWith:
-         - strategy_type
-         - prevalence
-         - sens_first
-         - spec_first
-         - sens_second
-         - spec_second
 
 
 refs:

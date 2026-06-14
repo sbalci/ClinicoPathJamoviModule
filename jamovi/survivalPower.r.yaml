@@ -4,6 +4,17 @@ title: Power Analysis & Sample Size Calculation
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - analysis_type
+          - test_type
+          - effect_size
+          - alpha_level
+          - power_level
+          - control_median_survival
+
     - name: instructions
       title: Instructions
       type: Html

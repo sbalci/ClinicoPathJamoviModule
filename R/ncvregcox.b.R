@@ -13,11 +13,38 @@ ncvregcoxClass <- R6::R6Class(
         .lambda_1se_fallback = FALSE,
         .cindex_cached = NA_real_,
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             private$.update_instructions()
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             if (is.null(self$options$time) || is.null(self$options$event) ||
                 length(self$options$covariates) == 0) {
                 return()
@@ -46,10 +73,8 @@ ncvregcoxClass <- R6::R6Class(
                 }),
                 error = function(e) {
                     analysis_ok <<- FALSE
-                    private$.insertNotice(
-                        'analysisError', jmvcore::NoticeType$ERROR,
-                        htmltools::htmlEscape(conditionMessage(e)), position = 1
-                    )
+                    private$.addNotice('ERROR', 'Analysis Error',
+                        conditionMessage(e))
                 }
             )
 
@@ -63,11 +88,8 @@ ncvregcoxClass <- R6::R6Class(
                 private$.append_warnings_html()
                 # Also add a Notice banner for convergence warnings
                 n_warn <- length(unique(private$.warnings_collected))
-                private$.insertNotice(
-                    'convergenceWarnings', jmvcore::NoticeType$WARNING,
-                    sprintf('%d warning(s) during model fitting -- see Model Interpretation section for details.', n_warn),
-                    position = 999
-                )
+                private$.addNotice('WARNING', 'Convergence Warnings',
+                    sprintf('%d warning(s) during model fitting -- see Model Interpretation section for details.', n_warn))
             }
 
             # Completion info notice
@@ -76,12 +98,9 @@ ncvregcoxClass <- R6::R6Class(
                 n_events <- sum(private$.analysis_data$event == 1)
                 coeffs <- coef(private$.final_fit, lambda = private$.lambda_opt)
                 n_sel <- sum(coeffs != 0)
-                private$.insertNotice(
-                    'analysisComplete', jmvcore::NoticeType$INFO,
+                private$.addNotice('INFO', 'Analysis Complete',
                     sprintf('Analysis completed: n=%d, events=%d, %s penalty, %d/%d variables selected.',
-                            n_obs, n_events, self$options$penalty, n_sel, ncol(private$.X)),
-                    position = 999
-                )
+                            n_obs, n_events, self$options$penalty, n_sel, ncol(private$.X)))
             }
         },
 
@@ -734,22 +753,7 @@ ncvregcoxClass <- R6::R6Class(
             return(TRUE)
         },
 
-        # ── jmvcore::Notice helpers ───────────────────────────────────
-
-        .insertNotice = function(name, type, content, position = 999) {
-            tryCatch({
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = name,
-                    type = type
-                )
-                notice$setContent(content)
-                self$results$insert(position, notice)
-            }, error = function(e) {
-                # Silently skip if Notice serialization fails
-                NULL
-            })
-        },
+        # ── Post-analysis notice collection ───────────────────────────
 
         .add_post_analysis_notices = function() {
             if (is.null(private$.final_fit) || is.null(private$.analysis_data)) return()
@@ -761,48 +765,33 @@ ncvregcoxClass <- R6::R6Class(
 
             # LOW EVENTS: clinical threshold checks
             if (n_events < 10) {
-                private$.insertNotice(
-                    'lowEvents', jmvcore::NoticeType$STRONG_WARNING,
-                    sprintf('Very few events (%d). Model estimates are highly unstable; interpret with extreme caution.', n_events),
-                    position = 1
-                )
+                private$.addNotice('STRONG_WARNING', 'Very Few Events',
+                    sprintf('Very few events (%d). Model estimates are highly unstable; interpret with extreme caution.', n_events))
             } else if (n_events < 20) {
-                private$.insertNotice(
-                    'moderateEvents', jmvcore::NoticeType$WARNING,
-                    sprintf('Only %d events with %d predictors (EPV=%.1f). Consider reducing predictors or increasing sample size.', n_events, p, n_events / p),
-                    position = 1
-                )
+                private$.addNotice('WARNING', 'Low Events Per Variable',
+                    sprintf('Only %d events with %d predictors (EPV=%.1f). Consider reducing predictors or increasing sample size.', n_events, p, n_events / p))
             }
 
             # NO VARIABLES SELECTED
             coeffs <- coef(private$.final_fit, lambda = private$.lambda_opt)
             n_selected <- sum(coeffs != 0)
             if (n_selected == 0) {
-                private$.insertNotice(
-                    'noSelection', jmvcore::NoticeType$WARNING,
-                    'No variables selected at the chosen lambda. Try lambda_type="min" or increase alpha toward 1.',
-                    position = 1
-                )
+                private$.addNotice('WARNING', 'No Variables Selected',
+                    'No variables selected at the chosen lambda. Try lambda_type="min" or increase alpha toward 1.')
             }
 
             # C-INDEX BELOW 0.5 (worse than random) — use cached value
             cindex <- private$.cindex_cached
 
             if (!is.na(cindex) && cindex < 0.5) {
-                private$.insertNotice(
-                    'poorDiscrimination', jmvcore::NoticeType$STRONG_WARNING,
-                    sprintf('C-index = %.3f (below 0.5). Model discrimination is worse than random; do not use for clinical prediction.', cindex),
-                    position = 1
-                )
+                private$.addNotice('STRONG_WARNING', 'Poor Discrimination',
+                    sprintf('C-index = %.3f (below 0.5). Model discrimination is worse than random; do not use for clinical prediction.', cindex))
             }
 
             # LAMBDA 1SE FALLBACK
             if (isTRUE(private$.lambda_1se_fallback)) {
-                private$.insertNotice(
-                    'lambda1seFallback', jmvcore::NoticeType$WARNING,
-                    'Lambda 1-SE not available for this fit; using lambda.min instead. This typically selects more variables.',
-                    position = 999
-                )
+                private$.addNotice('WARNING', 'Lambda 1-SE Fallback',
+                    'Lambda 1-SE not available for this fit; using lambda.min instead. This typically selects more variables.')
             }
 
             # MISSING DATA EXCLUDED
@@ -810,11 +799,8 @@ ncvregcoxClass <- R6::R6Class(
             n_excluded <- n_total - n
             if (n_excluded > 0) {
                 pct <- round(100 * n_excluded / n_total, 1)
-                private$.insertNotice(
-                    'missingData', jmvcore::NoticeType$WARNING,
-                    sprintf('%d rows (%.1f%%) excluded due to missing data. Analysis uses %d complete cases.', n_excluded, pct, n),
-                    position = 999
-                )
+                private$.addNotice('WARNING', 'Missing Data Excluded',
+                    sprintf('%d rows (%.1f%%) excluded due to missing data. Analysis uses %d complete cases.', n_excluded, pct, n))
             }
         },
 

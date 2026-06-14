@@ -211,6 +211,7 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "waterfallrecistResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         lesionTable = function() private$.items[["lesionTable"]],
         targetSumTable = function() private$.items[["targetSumTable"]],
         bestResponseTable = function() private$.items[["bestResponseTable"]],
@@ -225,6 +226,21 @@ waterfallrecistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="",
                 title="RECIST v1.1 Response Analysis")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "patientID",
+                    "lesionID",
+                    "visitTime",
+                    "diameter",
+                    "lesionType",
+                    "location",
+                    "baselineTimepoint",
+                    "maxTargetLesions",
+                    "maxLesionsPerOrgan",
+                    "confirmationInterval")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="lesionTable",
@@ -615,6 +631,7 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param colorScheme Color scheme for plots.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$lesionTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$targetSumTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$bestResponseTable} \tab \tab \tab \tab \tab a table \cr

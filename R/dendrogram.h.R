@@ -243,6 +243,7 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dendrogramResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         plot = function() private$.items[["plot"]],
         clusterInfo = function() private$.items[["clusterInfo"]],
@@ -270,6 +271,17 @@ dendrogramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "viridis",
                     "RColorBrewer",
                     "grDevices"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "clusterMethod",
+                    "distanceMethod",
+                    "group",
+                    "plotType",
+                    "standardize")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -380,6 +392,7 @@ dendrogramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showCellBorders .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$clusterInfo} \tab \tab \tab \tab \tab a html \cr

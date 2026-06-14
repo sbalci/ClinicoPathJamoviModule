@@ -46,6 +46,31 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     inherit = ihcclusterBase,
     private = list(
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .computeJaccardDistance = function(binary_matrix) {
             # Validate binary data
             if (!all(binary_matrix %in% c(0, 1, NA))) {
@@ -1121,6 +1146,8 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             # Save and restore RNG state to avoid leaking seed into caller's session
             if (exists(".Random.seed", envir = .GlobalEnv)) {
                 old_seed <- .GlobalEnv$.Random.seed
@@ -1144,13 +1171,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             allVars <- c(catVars, contVars)
 
             if (length(allVars) < 2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.insufficient_markers',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('At least 2 IHC markers required. Select categorical or continuous markers from the variable list to perform clustering analysis.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Insufficient Markers', 'At least 2 IHC markers required. Select categorical or continuous markers from the variable list to perform clustering analysis.')
                 return()
             }
 
@@ -1246,13 +1267,7 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     sprintf(". Handling method: %s.", handling_method_text)
                 )
 
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.missing_data_transparency',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(notice_text)
-                self$results$insert(2, notice)
+                private$.addNotice('INFO', 'Missing Data Transparency', notice_text)
             }
 
             # Validate data quality for clustering
@@ -1264,16 +1279,10 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 na_vars <- names(which(sapply(df, function(x) any(is.na(x)))))
                 complete_n <- sum(complete.cases(df))
 
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.missing_data_error',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('ERROR', 'Missing Data Error', sprintf(
                     'Cannot cluster %d continuous-only markers with missing data using pairwise distances. Solution: Change Missing Data Handling to "Complete cases only" (uses %d of %d cases) or add categorical markers to enable pairwise calculation.',
                     length(contVars), complete_n, nrow(df)
                 ))
-                self$results$insert(999, notice)
                 return()
             }
 
@@ -1889,34 +1898,19 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Notice 1: Small sample size warning
-            notice_position <- 1
             if (nrow(df) < 30) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.small_sample_warning',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('STRONG_WARNING', 'Small Sample Size', sprintf(
                     'Small sample size (N=%d). Clusters may be unstable with <30 cases. Consider reproducibility testing or increasing sample size for robust results.',
                     nrow(df)
                 ))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
             }
 
             # Notice 2: Poor cluster quality warning
             if (!is.na(avg_silhouette) && avg_silhouette < 0.3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = '.poor_cluster_quality',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('STRONG_WARNING', 'Poor Cluster Quality', sprintf(
                     'Poor cluster quality detected (avg silhouette=%.2f). Values <0.3 indicate weak cluster structure. Consider reducing cluster count, checking data quality, or using different markers.',
                     avg_silhouette
                 ))
-                self$results$insert(notice_position, notice)
-                notice_position <- notice_position + 1
             }
 
             txt <- paste(c(
@@ -1994,17 +1988,11 @@ ihcclusterClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Add completion info notice at bottom
-            info <- jmvcore::Notice$new(
-                options = self$options,
-                name = '.analysis_complete',
-                type = jmvcore::NoticeType$INFO
-            )
             sil_text <- if (!is.na(avg_silhouette)) sprintf(", avg silhouette=%.2f", avg_silhouette) else ""
-            info$setContent(sprintf(
+            private$.addNotice('INFO', 'Analysis Complete', sprintf(
                 'Analysis completed: %d cases clustered into %d groups using %s method%s.',
                 nrow(df), usedK, method_name, sil_text
             ))
-            self$results$insert(999, info)
         },
         
         # Initialize instruction panel with context-sensitive guidance

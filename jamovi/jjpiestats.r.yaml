@@ -27,6 +27,17 @@ clearWith:
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - dep
+        - group
+        - grvar
+        - counts
+        - typestatistics
+        - paired
+
     - name: about
       title: About This Analysis
       type: Html

@@ -23,6 +23,31 @@ pcaloadingtestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .rowInfo = NULL,
         .varianceInfo = NULL,
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # init ----
 
         .init = function() {
@@ -77,6 +102,8 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
         .run = function() {
 
+            private$.noticeList <- list()
+
             # Reset cached state so early-return error paths don't show
             # stale plots / tables from a previous valid run.
             private$.pcaResults       <- NULL
@@ -129,30 +156,12 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
                 self$results$todo$setContent(todo)
 
-                # TODO (correctness/security): `self$results$appendNotice(...)`
-                # is a non-existent method. jmvcore's Results R6 class exposes
-                # `Notice` and `NoticeType` but no `appendNotice` — all 13 call
-                # sites in this file (L129, L203, L216, L229, L247, L259, L282,
-                # L305, L317, L366, L449) will error at runtime the moment any
-                # validation branch fires. Two viable migrations:
-                #   (a) Standard pattern: `notice <- jmvcore::Notice$new(...)`
-                #       then `self$results$insert(N, notice)` — mirrors
-                #       R/outbreakanalysis.b.R; OR
-                #   (b) HTML-output-item pattern (project's canonical direction)
-                #       — see R/waterfall.b.R + docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md.
-                # The security audit found that user column names interpolated
-                # into these notice messages (e.g. L226 non_numeric_vars,
-                # already pre-escaped with htmltools::htmlEscape) would be a
-                # live XSS path the moment this method is wired up; the escape
-                # is in place defensively.
+                # Notices are emitted via private$.addNotice() into a single
+                # plain-text Preformatted output item (see helpers above), which
+                # avoids the jmvcore::Notice serialization error and keeps notice
+                # content plain text per project convention.
                 if (nrow(self$data) == 0) {
-                    notice <- list(
-                        name = "emptyData",
-                        title = "Empty Dataset",
-                        content = "Data contains no complete rows. Please check for missing values or provide a valid dataset.",
-                        level = "ERROR"
-                    )
-                    self$results$appendNotice(notice)
+                    private$.addNotice('ERROR', 'Empty Dataset', "Data contains no complete rows. Please check for missing values or provide a valid dataset.")
                     return()
                 }
             }
@@ -220,39 +229,21 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
             # Warn about small sample sizes
             if (nrow(pca_data) < 10) {
-                notice <- list(
-                    name = "lowSampleSize",
-                    title = "Small Sample Size Warning",
-                    content = sprintf('Very small sample size (N=%d complete observations). PCA loadings and permutation tests require larger samples for reliable inference. Recommend N >= 30 for stable results.', nrow(pca_data)),
-                    level = "STRONG_WARNING"
-                )
-                self$results$appendNotice(notice)
+                private$.addNotice('STRONG_WARNING', 'Small Sample Size Warning', sprintf('Very small sample size (N=%d complete observations). PCA loadings and permutation tests require larger samples for reliable inference. Recommend N >= 30 for stable results.', nrow(pca_data)))
             }
 
             # Check Events-Per-Variable (EPV) ratio
             epv_ratio <- nrow(pca_data) / length(vars)
             if (epv_ratio < 10) {
-                notice <- list(
-                    name = "lowEPV",
-                    title = "Low Sample-to-Variable Ratio",
-                    content = sprintf('Sample size to variable ratio is low (N=%d, variables=%d, ratio=%.1f:1). PCA loadings may be unstable with low sample-to-variable ratios. Recommend ratio >= 10:1 (N >= %d for %d variables).',
-                        nrow(pca_data), length(vars), epv_ratio, length(vars) * 10, length(vars)),
-                    level = "STRONG_WARNING"
-                )
-                self$results$appendNotice(notice)
+                private$.addNotice('STRONG_WARNING', 'Low Sample-to-Variable Ratio', sprintf('Sample size to variable ratio is low (N=%d, variables=%d, ratio=%.1f:1). PCA loadings may be unstable with low sample-to-variable ratios. Recommend ratio >= 10:1 (N >= %d for %d variables).',
+                        nrow(pca_data), length(vars), epv_ratio, length(vars) * 10, length(vars)))
             }
 
             # CRITICAL FIX: Validate numeric inputs (prevent silent factor coercion)
             non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
             if (any(non_numeric)) {
                 non_numeric_vars <- names(pca_data)[non_numeric]
-                notice <- list(
-                    name = "nonNumericVars",
-                    title = "Non-Numeric Variables Detected",
-                    content = sprintf('Non-numeric variables detected: %s. PCA Loading Test requires numeric variables only. Factors and character variables cannot be used. Please select only continuous numeric variables.', paste(htmltools::htmlEscape(non_numeric_vars), collapse = ', ')),
-                    level = "ERROR"
-                )
-                self$results$appendNotice(notice)
+                private$.addNotice('ERROR', 'Non-Numeric Variables Detected', sprintf('Non-numeric variables detected: %s. PCA Loading Test requires numeric variables only. Factors and character variables cannot be used. Please select only continuous numeric variables.', paste(non_numeric_vars, collapse = ', ')))
                 return()
             }
 
@@ -264,25 +255,13 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
                 cor_matrix <- cor(pca_matrix, use = "pairwise.complete.obs")
                 max_cor <- max(abs(cor_matrix[upper.tri(cor_matrix)]), na.rm = TRUE)
                 if (max_cor > 0.95) {
-                    notice <- list(
-                        name = "highMulticollinearity",
-                        title = "High Multicollinearity Detected",
-                        content = sprintf('Very high correlation detected between variables (max |r| = %.3f). This may indicate redundant variables or measurement error. Consider removing highly correlated variables before PCA to improve interpretability.', max_cor),
-                        level = "WARNING"
-                    )
-                    self$results$appendNotice(notice)
+                    private$.addNotice('WARNING', 'High Multicollinearity Detected', sprintf('Very high correlation detected between variables (max |r| = %.3f). This may indicate redundant variables or measurement error. Consider removing highly correlated variables before PCA to improve interpretability.', max_cor))
                 }
             }
 
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
-                notice <- list(
-                    name = "insufficientData",
-                    title = "Insufficient Data",
-                    content = sprintf('Insufficient data for PCA (N=%d complete observations). Need at least 3 complete observations. Check for missing values.', nrow(pca_matrix)),
-                    level = "ERROR"
-                )
-                self$results$appendNotice(notice)
+                private$.addNotice('ERROR', 'Insufficient Data', sprintf('Insufficient data for PCA (N=%d complete observations). Need at least 3 complete observations. Check for missing values.', nrow(pca_matrix)))
                 return()
             }
 
@@ -312,13 +291,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
                 if (max(var_ranges) / min(var_ranges) > 10 || max(abs(var_means)) > 1e-6) {
                     # Add non-blocking WARNING notice
-                    notice <- list(
-                        name = "centerscale_warning",
-                        title = "Centering/Scaling Disabled",
-                        content = "Center/scale disabled with mixed variable scales: loadings reflect raw variance (not correlations). Variables with larger variance will dominate. Enable 'Center Variables' and 'Scale Variables' for standard PCA interpretation.",
-                        level = "WARNING"
-                    )
-                    self$results$appendNotice(notice)
+                    private$.addNotice('WARNING', 'Centering/Scaling Disabled', "Center/scale disabled with mixed variable scales: loadings reflect raw variance (not correlations). Variables with larger variance will dominate. Enable 'Center Variables' and 'Scale Variables' for standard PCA interpretation.")
                 }
             }
 
@@ -334,26 +307,14 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
             ncomp_tested <- min(self$options$ncomp, nrow(var_info))
             total_var_explained <- sum(var_info$variance[1:ncomp_tested])
             if (total_var_explained < 0.50) {
-                notice <- list(
-                    name = "lowVarianceExplained",
-                    title = "Low Variance Explained",
-                    content = sprintf('First %d components explain only %.1f%% of total variance. Consider whether PCA is appropriate for this data or increase the number of components tested. Low variance explained suggests weak underlying structure.',
-                        ncomp_tested, total_var_explained * 100),
-                    level = "WARNING"
-                )
-                self$results$appendNotice(notice)
+                private$.addNotice('WARNING', 'Low Variance Explained', sprintf('First %d components explain only %.1f%% of total variance. Consider whether PCA is appropriate for this data or increase the number of components tested. Low variance explained suggests weak underlying structure.',
+                        ncomp_tested, total_var_explained * 100))
             }
 
             # Number of components to test
             ndim <- min(self$options$ncomp, ncol(original_loadings))
             if (ndim < 1) {
-                notice <- list(
-                    name = "noComponents",
-                    title = "No Components Available",
-                    content = "No principal components available to test. This may occur with constant variables or perfect multicollinearity.",
-                    level = "ERROR"
-                )
-                self$results$appendNotice(notice)
+                private$.addNotice('ERROR', 'No Components Available', "No principal components available to test. This may occur with constant variables or perfect multicollinearity.")
                 return()
             }
 
@@ -396,13 +357,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
                         } else {
                             # CRITICAL WARNING: pracma not available, sign correction disabled
                             # This degrades to sign-unstable comparison with inflated Type I errors
-                            notice <- list(
-                                name = "pracmaMissing",
-                                title = "Required Package Missing",
-                                content = "The pracma package is required for Procrustes rotation in the permV method but is not installed. Without Procrustes rotation, loading significance tests suffer from sign indeterminacy causing inflated Type I error rates. Install pracma with: install.packages('pracma')",
-                                level = "ERROR"
-                            )
-                            self$results$appendNotice(notice)
+                            private$.addNotice('ERROR', 'Required Package Missing', "The pracma package is required for Procrustes rotation in the permV method but is not installed. Without Procrustes rotation, loading significance tests suffer from sign indeterminacy causing inflated Type I error rates. Install pracma with: install.packages('pracma')")
                             return()
                         }
                     }, error = function(e) {
@@ -479,13 +434,7 @@ through <b>Procrustes rotation</b> to handle sign/reflection indeterminacy in PC
 
             # Success completion notice
             pca <- private$.pcaResults
-            infoNotice <- list(
-                name = "analysisComplete",
-                title = "Analysis Complete",
-                content = sprintf('Analysis completed: %d variables tested across %d components using %d permutations per variable (total %d permutation runs).', length(self$options$vars), min(self$options$ncomp, ncol(pca$rotation)), self$options$nperm, self$options$nperm * length(self$options$vars)),
-                level = "INFO"
-            )
-            self$results$appendNotice(infoNotice)
+            private$.addNotice('INFO', 'Analysis Complete', sprintf('Analysis completed: %d variables tested across %d components using %d permutations per variable (total %d permutation runs).', length(self$options$vars), min(self$options$ncomp, ncol(pca$rotation)), self$options$nperm, self$options$nperm * length(self$options$vars)))
 
             # Generate copy-ready report text
             results_df <- private$.resultsDF

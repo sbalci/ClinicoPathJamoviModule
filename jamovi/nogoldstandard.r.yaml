@@ -4,6 +4,17 @@ title: Analysis Without Gold Standard
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - test1
+        - test2
+        - test3
+        - method
+        - bootstrap
+        - clinicalPreset
+
     - name: instructions
       title: Instructions
       type: Html

@@ -19,7 +19,12 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .rowInfo = NULL,
         .varianceInfo = NULL,
         .originalVarNames = NULL,
-        .notices = list(),
+
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
 
         # Variable name handling utilities ----
         .escapeVar = function(x) {
@@ -53,41 +58,34 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(safe_name)
         },
 
-        # Notices management ----
-        .addNotice = function(name, message, severity = "WARNING") {
-            if (!name %in% names(private$.notices)) {
-                notice <- jmvcore::Notice$new(
-                    name = name,
-                    message = message,
-                    severity = severity
-                )
-                private$.notices[[name]] <- notice
-            }
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
         },
 
-        # TODO (forward-looking): self$results$insert(position, jmvcore::Notice)
-        # is on the project's known-serialization-issues list. Migrate to the
-        # HTML output-item pattern (see R/waterfall.b.R and
-        # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md). When that migration lands,
-        # the htmltools::htmlEscape() calls at the two sprintf sites in this
-        # file's .run() become strictly required, not defense-in-depth.
-        .insertNotices = function() {
-            if (length(private$.notices) == 0) return()
-
-            # Priority order: ERROR > STRONG_WARNING > WARNING > INFO
-            severities <- c("ERROR", "STRONG_WARNING", "WARNING", "INFO")
-            position <- 1
-
-            for (sev in severities) {
-                for (notice_name in names(private$.notices)) {
-                    notice <- private$.notices[[notice_name]]
-                    if (notice$severity == sev) {
-                        self$results$insert(position, notice)
-                        position <- position + 1
-                    }
-                }
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
             }
-            private$.notices <- list()  # Clear after insertion
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
         # init ----
@@ -115,7 +113,7 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.rowInfo          <- NULL
             private$.varianceInfo     <- NULL
             private$.originalVarNames <- NULL
-            private$.notices          <- list()
+            private$.noticeList       <- list()
 
             # Initial Message ----
             vars <- self$options$vars
@@ -144,13 +142,9 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add ERROR notice if some variables selected but < 3
                 if (!is.null(vars) && length(vars) > 0 && length(vars) < 3) {
-                    private$.addNotice(
-                        name = "insufficient_vars",
-                        message = sprintf("PCA requires at least 3 variables. Currently selected: %d. Please add %d more variable(s).",
-                                        length(vars), 3 - length(vars)),
-                        severity = "ERROR"
-                    )
-                    private$.insertNotices()
+                    private$.addNotice('ERROR', 'Insufficient Variables',
+                        sprintf("PCA requires at least 3 variables. Currently selected: %d. Please add %d more variable(s).",
+                                        length(vars), 3 - length(vars)))
                 }
                 return()
 
@@ -159,13 +153,9 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Validate variable availability ----
                 missing_vars <- setdiff(vars, names(self$data))
                 if (length(missing_vars) > 0) {
-                    private$.addNotice(
-                        name = "missing_vars",
-                        message = sprintf("The following variables are not in the dataset: %s. Please check variable selection and ensure all selected variables exist.",
-                                        paste(htmltools::htmlEscape(missing_vars), collapse = ', ')),
-                        severity = "ERROR"
-                    )
-                    private$.insertNotices()
+                    private$.addNotice('ERROR', 'Variables Not Found',
+                        sprintf("The following variables are not in the dataset: %s. Please check variable selection and ensure all selected variables exist.",
+                                        paste(missing_vars, collapse = ', ')))
                     return()
                 }
 
@@ -173,23 +163,15 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_data <- self$data[, vars, drop = FALSE]
                 non_numeric <- vars[!vapply(var_data, is.numeric, logical(1))]
                 if (length(non_numeric) > 0) {
-                    private$.addNotice(
-                        name = "non_numeric",
-                        message = sprintf("PCA requires numeric variables. Non-numeric variables detected: %s. Please select only continuous numeric variables.",
-                                        paste(htmltools::htmlEscape(non_numeric), collapse = ', ')),
-                        severity = "ERROR"
-                    )
-                    private$.insertNotices()
+                    private$.addNotice('ERROR', 'Non-Numeric Variables',
+                        sprintf("PCA requires numeric variables. Non-numeric variables detected: %s. Please select only continuous numeric variables.",
+                                        paste(non_numeric, collapse = ', ')))
                     return()
                 }
 
                 if (nrow(self$data) == 0) {
-                    private$.addNotice(
-                        name = "empty_data",
-                        message = "Dataset contains no observations. Please provide data with at least 3 complete rows.",
-                        severity = "ERROR"
-                    )
-                    private$.insertNotices()
+                    private$.addNotice('ERROR', 'No Observations',
+                        "Dataset contains no observations. Please provide data with at least 3 complete rows.")
                     return()
                 }
             }
@@ -214,56 +196,38 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_vars <- length(vars)
 
             if (n_obs < 3 * n_vars) {
-                private$.addNotice(
-                    name = "small_sample",
-                    message = sprintf("Sample size (%d observations) is less than 3× the number of variables (%d). PCA results may be unstable. Ideally n ≥ %d.",
-                                    n_obs, n_vars, 5 * n_vars),
-                    severity = "WARNING"
-                )
+                private$.addNotice('WARNING', 'Small Sample Size',
+                    sprintf("Sample size (%d observations) is less than 3× the number of variables (%d). PCA results may be unstable. Ideally n ≥ %d.",
+                                    n_obs, n_vars, 5 * n_vars))
             }
 
             if (n_obs < 20) {
-                private$.addNotice(
-                    name = "very_small_sample",
-                    message = sprintf("Very small sample size (%d observations). PCA with <20 observations is exploratory only and results may not generalize.",
-                                    n_obs),
-                    severity = "STRONG_WARNING"
-                )
+                private$.addNotice('STRONG_WARNING', 'Very Small Sample Size',
+                    sprintf("Very small sample size (%d observations). PCA with <20 observations is exploratory only and results may not generalize.",
+                                    n_obs))
             }
 
             # Convert HTML warnings to notices ----
             if (isTRUE(self$options$textvalues) && isTRUE(self$options$starvalues)) {
-                private$.addNotice(
-                    name = "stars_hidden",
-                    message = "Stars are hidden while numeric loadings are shown. Uncheck 'Show Loading Values' to display stars.",
-                    severity = "INFO"
-                )
+                private$.addNotice('INFO', 'Stars Hidden',
+                    "Stars are hidden while numeric loadings are shown. Uncheck 'Show Loading Values' to display stars.")
             }
 
             if (!isTRUE(self$options$center)) {
-                private$.addNotice(
-                    name = "no_centering",
-                    message = "PCA centering is disabled. This is uncommon and may bias loadings. Consider enabling centering unless you have specific methodological reasons.",
-                    severity = "STRONG_WARNING"
-                )
+                private$.addNotice('STRONG_WARNING', 'Centering Disabled',
+                    "PCA centering is disabled. This is uncommon and may bias loadings. Consider enabling centering unless you have specific methodological reasons.")
             }
 
             if (self$options$ncomp > ncomp_available) {
-                private$.addNotice(
-                    name = "truncated_components",
-                    message = sprintf("Requested %d components but only %d are available (limited by min of variables, observations). Displaying PC1-PC%d.",
-                                    self$options$ncomp, ncomp_available, ncomp_available),
-                    severity = "WARNING"
-                )
+                private$.addNotice('WARNING', 'Components Truncated',
+                    sprintf("Requested %d components but only %d are available (limited by min of variables, observations). Displaying PC1-PC%d.",
+                                    self$options$ncomp, ncomp_available, ncomp_available))
             }
 
             if (row_info$rows_removed > 0) {
-                private$.addNotice(
-                    name = "missing_data_removed",
-                    message = sprintf("Removed %d row(s) with missing values. Analysis uses %d complete observations.",
-                                    row_info$rows_removed, row_info$rows_used),
-                    severity = "INFO"
-                )
+                private$.addNotice('INFO', 'Missing Data Removed',
+                    sprintf("Removed %d row(s) with missing values. Analysis uses %d complete observations.",
+                                    row_info$rows_removed, row_info$rows_used))
             }
 
             # Simplified HTML summary (warnings now in Notices) ----
@@ -277,8 +241,6 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<br><hr>"
             )
 
-            # Insert notices before HTML summary ----
-            private$.insertNotices()
             self$results$todo$setContent(todo)
             private$.variance()
 
@@ -312,13 +274,9 @@ pcaloadingheatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
-                private$.addNotice(
-                    name = "insufficient_obs",
-                    message = sprintf("Insufficient data for PCA. Found %d complete observation(s) after removing missing values. Need at least 3 observations. Check for extensive missing data in selected variables.",
-                                    nrow(pca_matrix)),
-                    severity = "ERROR"
-                )
-                private$.insertNotices()
+                private$.addNotice('ERROR', 'Insufficient Observations',
+                    sprintf("Insufficient data for PCA. Found %d complete observation(s) after removing missing values. Need at least 3 observations. Check for extensive missing data in selected variables.",
+                                    nrow(pca_matrix)))
                 return()
             }
 

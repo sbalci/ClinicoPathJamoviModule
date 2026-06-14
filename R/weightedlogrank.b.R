@@ -334,7 +334,7 @@ weightedlogrankClass <- if (requireNamespace('jmvcore'))
         
         for (group_name in names(group_summary)) {
           group_data <- group_summary[[group_name]]
-          summary_text <- paste0(summary_text, "<tr><td>", group_name, "</td>")
+          summary_text <- paste0(summary_text, "<tr><td>", htmltools::htmlEscape(group_name), "</td>")
           
           if (self$options$show_sample_sizes) {
             summary_text <- paste0(summary_text, "<td>", group_data$n_obs, "</td>")

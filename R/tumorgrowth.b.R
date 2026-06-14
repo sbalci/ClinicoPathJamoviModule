@@ -15,6 +15,31 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             # Check for required packages
             required_packages <- c('nlme', 'ggplot2', 'dplyr', 'brms')
@@ -27,16 +52,10 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (length(missing_pkgs) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingPackages',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Required R package(s) not installed: %s. Install using: install.packages(c(%s))',
+                private$.addNotice('ERROR', 'Missing Required Packages', sprintf('Required R package(s) not installed: %s. Install using: install.packages(c(%s))',
                     paste(missing_pkgs, collapse = ', '),
                     paste(sprintf('"%s"', missing_pkgs), collapse = ', ')
                 ))
-                self$results$insert(999, notice)
             }
 
             # Populate glossary (always visible)
@@ -45,15 +64,11 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
+            private$.noticeList <- list()
+
             # Check if required variables are selected
             if (is.null(self$options$time) || is.null(self$options$tumorSize)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Time and Tumor Size variables are required. Please select both to begin tumor growth modeling.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Missing Required Variables', 'Time and Tumor Size variables are required. Please select both to begin tumor growth modeling.')
                 return()
             }
             
@@ -76,16 +91,10 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             clean_data <- data[complete.cases(data[, analysis_vars]), analysis_vars]
             
             if (nrow(clean_data) < 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Insufficient data for tumor growth modeling: %d observations after removing missing values. Minimum 10 complete observations required (time, tumor size%s).',
+                private$.addNotice('ERROR', 'Insufficient Data', sprintf('Insufficient data for tumor growth modeling: %d observations after removing missing values. Minimum 10 complete observations required (time, tumor size%s).',
                     nrow(clean_data),
                     if (!is.null(self$options$patientId)) ', patient ID' else ''
                 ))
-                self$results$insert(999, notice)
                 return()
             }
             
@@ -95,13 +104,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 avg_obs <- nrow(clean_data) / n_patients
 
                 if (n_patients < 5 || avg_obs < 2.5) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'insufficientLongitudinalStructure',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf('Insufficient longitudinal structure for NLME: %d patients, avg %.1f obs/patient. Minimum 5 patients with avg 2.5 obs/patient required. Switch to NLS approach or collect more data.', n_patients, avg_obs))
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Insufficient Longitudinal Structure', sprintf('Insufficient longitudinal structure for NLME: %d patients, avg %.1f obs/patient. Minimum 5 patients with avg 2.5 obs/patient required. Switch to NLS approach or collect more data.', n_patients, avg_obs))
                     return()
                 }
             }
@@ -129,18 +132,12 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add completion info notice
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice$setContent(sprintf('Tumor growth modeling completed successfully: %d observations analyzed using %s %s model%s.',
+            private$.addNotice('INFO', 'Analysis Complete', sprintf('Tumor growth modeling completed successfully: %d observations analyzed using %s %s model%s.',
                 nrow(clean_data),
                 stringr::str_to_title(self$options$modelApproach %||% 'nlme'),
                 stringr::str_to_title(self$options$growthModel %||% 'gompertz'),
                 if (!is.null(self$options$patientId)) sprintf(' with %d patients', length(unique(clean_data[[self$options$patientId]]))) else ''
             ))
-            self$results$insert(999, notice)
         },
         
         .fitGrowthModel = function(fit_data, time_var, size_var, patient_var, 
@@ -159,16 +156,10 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$data)) {
                     removed <- nrow(self$data) - nrow(fit_data)
                     if (removed > 0) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'dataFiltered',
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        notice$setContent(sprintf('Data note: %d row(s) removed due to missing values in required variables (%.1f%% of original data retained).',
+                        private$.addNotice('INFO', 'Data Filtered', sprintf('Data note: %d row(s) removed due to missing values in required variables (%.1f%% of original data retained).',
                             removed,
                             (nrow(fit_data) / nrow(self$data)) * 100
                         ))
-                        self$results$insert(998, notice)
                     }
                 }
                 
@@ -204,13 +195,18 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
             }, error = function(e) {
                 self$results$summary$setContent(
-                    paste("<h3>Model Fitting Error</h3><p>", e$message, "</p>")
+                    paste("<h3>Model Fitting Error</h3><p>", htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },
         
         .fitBrmsModel = function(data, growth_model) {
-            
+
+            # TODO (cleanup): 13 library() calls inside function bodies modify the user's search
+            #   path at source/run time and trip R CMD check — L214/L1309 brms, L322 + L1051/1089/
+            #   1123/1158/1193/1228 nlme, L776/L777/L865/L919 ggplot2/dplyr. Declare these in
+            #   DESCRIPTION Imports/Suggests and call qualified (brms::, nlme::, ggplot2::, dplyr::)
+            #   or rely on @import roxygen + NAMESPACE; gate optional pkgs (brms) on requireNamespace.
             library(brms)
             
             iter_val <- max(self$options$mcmcSamples %||% 2000, 1000)
@@ -638,13 +634,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'doublingTimeCalculationFailed',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Doubling time calculation failed: %s. Check model convergence and parameter estimates.', e$message))
-                self$results$insert(10, notice)
+                private$.addNotice('WARNING', 'Doubling Time Calculation Failed', sprintf('Doubling time calculation failed: %s. Check model convergence and parameter estimates.', e$message))
             })
         },
         
@@ -725,13 +715,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
                 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'fitStatisticsFailed',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Model fit statistics calculation failed: %s. Model parameters are still available but goodness-of-fit metrics cannot be computed.', e$message))
-                self$results$insert(10, notice)
+                private$.addNotice('WARNING', 'Fit Statistics Failed', sprintf('Model fit statistics calculation failed: %s. Model parameters are still available but goodness-of-fit metrics cannot be computed.', e$message))
             })
         },
         
@@ -1010,13 +994,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (is.null(treatment_var)) return()
 
                 if (!"patient" %in% names(data)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'treatmentNeedsPatientID',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent('Treatment effect analysis requires Patient ID variable for mixed-effects comparisons. Please select a Patient ID or switch modeling approach to NLS for pooled treatment comparison.')
-                    self$results$insert(10, notice)
+                    private$.addNotice('WARNING', 'Patient ID Required for Treatment Analysis', 'Treatment effect analysis requires Patient ID variable for mixed-effects comparisons. Please select a Patient ID or switch modeling approach to NLS for pooled treatment comparison.')
                     return()
                 }
 
@@ -1034,13 +1012,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Use post_treatment as the treatment indicator instead of treatment group
                     data$treatment <- data$post_treatment
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'treatmentTimeInfo',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent('Treatment time analysis: modeling growth parameter changes after treatment initiation. Treatment indicator is 1 for observations at or after treatment start time, 0 before.')
-                    self$results$insert(5, notice)
+                    private$.addNotice('INFO', 'Treatment Time Analysis', 'Treatment time analysis: modeling growth parameter changes after treatment initiation. Treatment indicator is 1 for observations at or after treatment start time, 0 before.')
                 }
 
                 growth_model <- self$options$growthModel %||% "gompertz"
@@ -1261,13 +1233,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'treatmentAnalysisFailed',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Treatment effect analysis failed: %s. Possible causes: insufficient data, model convergence issues, or treatment variable coding. Try simpler growth model or check data quality.', e$message))
-                self$results$insert(10, notice)
+                private$.addNotice('WARNING', 'Treatment Analysis Failed', sprintf('Treatment effect analysis failed: %s. Possible causes: insufficient data, model convergence issues, or treatment variable coding. Try simpler growth model or check data quality.', e$message))
             })
         },
 
@@ -1283,24 +1249,12 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         if (is.null(conv_code) || !conv_code) {
                             # Convergence failed
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'nlmeConvergenceFailed',
-                                type = jmvcore::NoticeType$STRONG_WARNING
-                            )
-                            notice$setContent('NLME model convergence warning: optimization did not converge. Results may be unreliable. Consider: (1) simplifying growth model, (2) using more data, (3) adjusting starting values, or (4) switching to Bayesian approach.')
-                            self$results$insert(2, notice)
+                            private$.addNotice('STRONG_WARNING', 'NLME Convergence Failed', 'NLME model convergence warning: optimization did not converge. Results may be unreliable. Consider: (1) simplifying growth model, (2) using more data, (3) adjusting starting values, or (4) switching to Bayesian approach.')
                         }
 
                         # Check for singular convergence (random effects variance near zero)
                         if (!is.null(model$sigma) && model$sigma < 1e-6) {
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'nlmeSingularFit',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent('NLME singular fit detected: random effects variance near zero. This may indicate overfitting or insufficient between-patient variability. Consider switching to NLS approach.')
-                            self$results$insert(3, notice)
+                            private$.addNotice('WARNING', 'NLME Singular Fit', 'NLME singular fit detected: random effects variance near zero. This may indicate overfitting or insufficient between-patient variability. Consider switching to NLS approach.')
                         }
                     }
                 } else if (model_approach == "bayesian") {
@@ -1314,28 +1268,16 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         if (max_rhat > 1.1) {
                             # Poor convergence (Rhat > 1.1)
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'bayesianConvergenceFailed',
-                                type = jmvcore::NoticeType$STRONG_WARNING
-                            )
-                            notice$setContent(sprintf('Bayesian model convergence failure: max Rhat = %.3f (should be < 1.01). Chains have not converged. Increase MCMC samples to at least %d iterations or simplify growth model.',
+                            private$.addNotice('STRONG_WARNING', 'Bayesian Convergence Failed', sprintf('Bayesian model convergence failure: max Rhat = %.3f (should be < 1.01). Chains have not converged. Increase MCMC samples to at least %d iterations or simplify growth model.',
                                 max_rhat,
                                 (self$options$mcmcSamples %||% 2000) * 4
                             ))
-                            self$results$insert(2, notice)
                         } else if (max_rhat > 1.01) {
                             # Marginal convergence (1.01 < Rhat < 1.1)
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'bayesianConvergenceWarning',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent(sprintf('Bayesian model marginal convergence: max Rhat = %.3f (should be < 1.01). Consider increasing MCMC samples to %d iterations for more reliable inference.',
+                            private$.addNotice('WARNING', 'Bayesian Convergence Warning', sprintf('Bayesian model marginal convergence: max Rhat = %.3f (should be < 1.01). Consider increasing MCMC samples to %d iterations for more reliable inference.',
                                 max_rhat,
                                 (self$options$mcmcSamples %||% 2000) * 2
                             ))
-                            self$results$insert(3, notice)
                         }
 
                         # Check effective sample size
@@ -1343,15 +1285,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         min_ess <- min(ess_bulk, na.rm = TRUE)
 
                         if (min_ess < 0.1) {
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'bayesianLowESS',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent(sprintf('Bayesian model low effective sample size: min ESS ratio = %.3f (should be > 0.1). Increase MCMC samples for more precise posterior estimates.',
+                            private$.addNotice('WARNING', 'Bayesian Low Effective Sample Size', sprintf('Bayesian model low effective sample size: min ESS ratio = %.3f (should be > 0.1). Increase MCMC samples for more precise posterior estimates.',
                                 min_ess
                             ))
-                            self$results$insert(4, notice)
                         }
                     }
                 }
@@ -1471,13 +1407,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'growthParametersFailed',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf('Growth characteristics table population failed: %s. Model parameters are available in main table.', e$message))
-                self$results$insert(10, notice)
+                private$.addNotice('WARNING', 'Growth Characteristics Failed', sprintf('Growth characteristics table population failed: %s. Model parameters are available in main table.', e$message))
             })
         },
         
@@ -1486,52 +1416,28 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for negative or zero tumor sizes
             if (any(data[[size_var]] <= 0, na.rm = TRUE)) {
                 n_invalid <- sum(data[[size_var]] <= 0, na.rm = TRUE)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'invalidTumorSize',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Invalid tumor size data: %d measurement(s) are zero or negative. Tumor size must be positive. Check data quality and remove invalid entries.', n_invalid))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid Tumor Size', sprintf('Invalid tumor size data: %d measurement(s) are zero or negative. Tumor size must be positive. Check data quality and remove invalid entries.', n_invalid))
                 return()
             }
             
             # Check for negative time values
             if (any(data[[time_var]] < 0, na.rm = TRUE)) {
                 n_invalid <- sum(data[[time_var]] < 0, na.rm = TRUE)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'invalidTimeValues',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Invalid time data: %d value(s) are negative. Time must be non-negative (days/weeks/months from baseline). Check data entry.', n_invalid))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid Time Values', sprintf('Invalid time data: %d value(s) are negative. Time must be non-negative (days/weeks/months from baseline). Check data entry.', n_invalid))
                 return()
             }
             
             # Check for reasonable time range
             time_range <- diff(range(data[[time_var]], na.rm = TRUE))
             if (time_range == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noTimeVariation',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('All time measurements are identical. Tumor growth modeling requires variation in time. Ensure longitudinal data with multiple timepoints per patient.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'No Time Variation', 'All time measurements are identical. Tumor growth modeling requires variation in time. Ensure longitudinal data with multiple timepoints per patient.')
                 return()
             }
             
             # Check for reasonable size variation
             size_cv <- sd(data[[size_var]], na.rm = TRUE) / mean(data[[size_var]], na.rm = TRUE)
             if (size_cv < 0.05) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'lowSizeVariation',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Very low variation in tumor sizes (CV = %.1f%%, threshold 5%%). Model parameter estimates may be unstable. Confidence intervals will be wide. Consider data quality or measurement precision issues.', size_cv * 100))
-                self$results$insert(2, notice)
+                private$.addNotice('STRONG_WARNING', 'Low Size Variation', sprintf('Very low variation in tumor sizes (CV = %.1f%%, threshold 5%%). Model parameter estimates may be unstable. Confidence intervals will be wide. Consider data quality or measurement precision issues.', size_cv * 100))
             }
             
             # Check for sufficient longitudinal data if patient ID provided
@@ -1539,29 +1445,17 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 obs_per_patient <- table(data$patient)
                 if (any(obs_per_patient < 3)) {
                     n_sparse <- sum(obs_per_patient < 3)
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'sparsePatientData',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('%d patient(s) have fewer than 3 measurements. Mixed-effects modeling (NLME/Bayesian) may be unreliable. Consider switching to Nonlinear Least Squares (NLS) approach or collecting more data.', n_sparse))
-                    self$results$insert(3, notice)
+                    private$.addNotice('WARNING', 'Sparse Patient Data', sprintf('%d patient(s) have fewer than 3 measurements. Mixed-effects modeling (NLME/Bayesian) may be unreliable. Consider switching to Nonlinear Least Squares (NLS) approach or collecting more data.', n_sparse))
                 }
                 
                 # Monotonic time check per patient
                 bad_patients <- names(Filter(function(v) any(diff(v) < 0, na.rm = TRUE),
                                              split(data[[time_var]], data$patient)))
                 if (length(bad_patients) > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'nonMonotonicTime',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf('Time values decrease for %d patient(s) (e.g., %s). Check data entry - time should be monotonically increasing (sequential measurements). Model results may be invalid.',
+                    private$.addNotice('STRONG_WARNING', 'Non-Monotonic Time', sprintf('Time values decrease for %d patient(s) (e.g., %s). Check data entry - time should be monotonically increasing (sequential measurements). Model results may be invalid.',
                         length(bad_patients),
                         paste(head(bad_patients, 3), collapse = ', ')
                     ))
-                    self$results$insert(2, notice)
                 }
             }
         },

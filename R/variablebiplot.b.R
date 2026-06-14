@@ -67,6 +67,14 @@ variablebiplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             }
 
             # Validate group structure
+            # TODO (cleanup): this file ships with DEBUG SCAFFOLDING that should be removed before
+            #   release: (a) 23 ungated message("DEBUG: …") calls fire on every run (console spam /
+            #   tempdir log writes) — gate behind getOption("ClinicoPath.debug", FALSE) like the
+            #   project .debug() helper, or delete; (b) 10 "DISABLED FOR DEBUGGING" tryCatch blocks
+            #   (L70/146/402/419/485/489/529/570/784/805 approx) leave error handling commented out
+            #   throughout — restore the tryCatch wrappers so failures surface cleanly instead of
+            #   raw R errors. (c) The %s/%d reproducibility-code template (~L1124) interpolates
+            #   feature/group names — see the security audit re: codegen escaping.
             # DISABLED FOR DEBUGGING - tryCatch({
                 group_data <- private$.getVarData(self$options$groupVar)
                 group_clean <- na.omit(group_data)
@@ -125,7 +133,7 @@ variablebiplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                         self$results$todo$setContent(paste0(
                             "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
                             "<p><b> Feature Type Error:</b></p>",
-                            "<p>Feature <b>'", feat, "'</b> is categorical (nominal factor). ",
+                            "<p>Feature <b>'", htmltools::htmlEscape(feat), "'</b> is categorical (nominal factor). ",
                             "Biplot analysis requires <b>numeric or ordinal</b> features.</p>",
                             "<p><b>Solutions:</b></p>",
                             "<ul>",
@@ -409,10 +417,9 @@ variablebiplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
                     var_data <- private$.getVarData(f)
                     if (is.factor(var_data)) {
                         if (!is.ordered(var_data)) {
-                            stop(paste0("Feature '", f, "' is an unordered factor. ",
-                                        "Convert to numeric or ordered factor first."))
+                            jmvcore::reject("Feature '{}' is an unordered factor. Convert to numeric or ordered factor first.", code = NULL, f)
                         }
-                        as.numeric(var_data)
+                        jmvcore::toNumeric(var_data)
                     } else {
                         as.numeric(var_data)
                     }
@@ -432,9 +439,7 @@ variablebiplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             group_factor <- group_factor[complete_cases]
 
             if (nrow(feature_data) < 10) {
-                stop(paste0("Insufficient complete cases for analysis. ",
-                            "Found ", nrow(feature_data), " complete cases, need at least 10. ",
-                            "(", n_missing, " cases excluded due to missing data)"))
+                jmvcore::reject("Insufficient complete cases for analysis. Found {} complete cases, need at least 10. ({} cases excluded due to missing data)", code = NULL, nrow(feature_data), n_missing)
             }
 
             # Store feature names
@@ -695,7 +700,7 @@ variablebiplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
 
             # Get top 3 contributors
             top_n <- min(3, nrow(contrib_df))
-            top_vars <- contrib_df$variable[1:top_n]
+            top_vars <- htmltools::htmlEscape(contrib_df$variable[1:top_n])
             top_contribs <- contrib_df$total_contrib[1:top_n]
 
             # Calculate contribution statistics
@@ -1098,7 +1103,9 @@ variablebiplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             topContributors <- self$options$topContributors
 
             # Build feature string
-            feature_str <- paste0("c(\"", paste(features, collapse = "\", \""), "\")")
+            # deparse() emits a valid R string-literal vector with embedded quotes/backslashes
+            # escaped, so a column name like a"b or a\b cannot corrupt the generated code.
+            feature_str <- paste(deparse(features), collapse = "")
 
             # Generate R code based on method
             if (method_name == "PCA") {
@@ -1116,7 +1123,7 @@ library(ggplot2)
 
 # 1. Prepare data
 features <- %s
-group_var <- "%s"
+group_var <- %s
 
 # Extract complete cases
 complete_idx <- complete.cases(mydata[, c(group_var, features)])
@@ -1183,7 +1190,7 @@ print(contrib_df)
 
 # ============================================',
                     groupVar, paste(features, collapse = ", "),
-                    feature_str, groupVar,
+                    feature_str, deparse(groupVar),
                     if (centerScale) "# Center and scale features\nX <- scale(X)" else "# Features used as-is (already centered/scaled in jamovi)",
                     pc1, pc2, pc1, pc1, pc2, pc2,
                     pc1, pc2, pc1, pc2,
@@ -1236,7 +1243,7 @@ library(ggplot2)
 
 # 1. Prepare data
 features <- %s
-group_var <- "%s"
+group_var <- %s
 
 # Extract complete cases
 complete_idx <- complete.cases(mydata[, c(group_var, features)])
@@ -1288,7 +1295,7 @@ vip_scores <- vip(plsda_result)
 print(vip_scores)
 
 # ============================================',
-                    feature_str, groupVar,
+                    feature_str, deparse(groupVar),
                     if (centerScale) "# Center and scale features\nX <- scale(X)" else "# Features used as-is",
                     pc1, pc1, pc2, pc2,
                     pc1, pc2, pc1, pc2,
@@ -1333,7 +1340,7 @@ library(ggplot2)
 
 # 1. Prepare data
 features <- %s
-group_var <- "%s"
+group_var <- %s
 
 # Extract complete cases
 complete_idx <- complete.cases(mydata[, c(group_var, features)])
@@ -1396,7 +1403,7 @@ print(p)
 print(lda_result$scaling)
 
 # ============================================',
-                    feature_str, groupVar,
+                    feature_str, deparse(groupVar),
                     if (centerScale) "# Center and scale features\nX <- scale(X)" else "# Features used as-is",
                     pc1, pc2, pc1, pc2
                 )

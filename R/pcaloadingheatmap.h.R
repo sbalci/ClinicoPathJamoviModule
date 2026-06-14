@@ -164,6 +164,7 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     "pcaloadingheatmapResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         variance = function() private$.items[["variance"]],
         heatmap = function() private$.items[["heatmap"]],
@@ -178,6 +179,16 @@ pcaloadingheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="PCA Loading Heatmap & Barmap",
                 refs=list(
                     "glue"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "center",
+                    "scale",
+                    "cutoff")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -350,6 +361,7 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @param plotheight Height of plots in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$variance} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$heatmap} \tab \tab \tab \tab \tab Heatmap visualization of PCA loadings across components \cr

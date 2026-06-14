@@ -579,7 +579,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
 
         .populate_clinical_interpretation = function() {
             clinical_context <- self$options$clinical_context
-            target_level <- self$options$targetLevel
+            target_level <- htmltools::htmlEscape(self$options$targetLevel)
             
             # Get performance metrics for interpretation
             performance_metrics <- ""

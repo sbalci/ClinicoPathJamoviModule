@@ -4,6 +4,16 @@ title: Advanced Ridge Plot
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - x_var
+        - y_var
+        - test_type
+        - show_stats
+        - effsize_type
+
     - name: instructions
       title: Instructions
       type: Html
@@ -177,11 +187,6 @@ items:
         - x_var
         - y_var
         - plot_type
-
-    - name: notices
-      title: Notices
-      type: Html
-      visible: true
 
 refs:
     - ClinicoPathJamoviModule

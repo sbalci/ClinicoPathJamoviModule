@@ -28,9 +28,8 @@ items:
         - clinicalPreset
 
     - name: notices
-      title: Notices
-      type: Notification
-      visible: false
+      title: Important Information
+      type: Preformatted
       clearWith:
         - vars
         - component

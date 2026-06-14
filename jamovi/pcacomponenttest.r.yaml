@@ -4,6 +4,17 @@ title: PCA Component Significance Test
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - vars
+        - ncomp
+        - nperm
+        - center
+        - scale
+        - conflevel
+
     - name: todo
       title: 'Instructions'
       type: Html

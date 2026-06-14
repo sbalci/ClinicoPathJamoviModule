@@ -31,6 +31,42 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.messages[[length(private$.messages) + 1]] <- message
         },
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # init ----
 
         .init = function() {
@@ -46,6 +82,8 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # run ----
 
         .run = function() {
+
+            private$.noticeList <- list()
 
             # Initial Message ----
             if (length(self$options$vars) < 3) {
@@ -89,13 +127,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(todo)
 
                 if (nrow(self$data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'emptyData',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Dataset contains no complete rows. Please provide data.')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Empty Dataset', 'Dataset contains no complete rows. Please provide data.')
                     return()
                 }
             }
@@ -157,14 +189,8 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             non_numeric <- sapply(pca_data, function(x) !is.numeric(x))
             if (any(non_numeric)) {
                 non_numeric_vars <- names(pca_data)[non_numeric]
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'nonNumericVars',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Non-numeric variables detected: %s. PCA requires numeric variables only. Factors and character variables cannot be used.',
-                    paste(htmltools::htmlEscape(non_numeric_vars), collapse = ', ')))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Non-Numeric Variables', sprintf('Non-numeric variables detected: %s. PCA requires numeric variables only. Factors and character variables cannot be used.',
+                    paste(non_numeric_vars, collapse = ', ')))
                 return()
             }
 
@@ -174,28 +200,16 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check for sufficient data
             if (nrow(pca_matrix) < 3) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Insufficient data for PCA (N=%d). Need at least 3 complete observations.', nrow(pca_matrix)))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Insufficient Data', sprintf('Insufficient data for PCA (N=%d). Need at least 3 complete observations.', nrow(pca_matrix)))
                 return()
             }
 
             # Warn for small samples (3 <= N < 30)
             if (nrow(pca_matrix) >= 3 && nrow(pca_matrix) < 30) {
-                notice_small <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSampleWarning',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice_small$setContent(sprintf(
+                private$.addNotice('STRONG_WARNING', 'Small Sample Size', sprintf(
                     'Small sample size (N=%d). PCA results may be unstable. Recommended N>=30 for reliable component identification.',
                     nrow(pca_matrix)
                 ))
-                self$results$insert(2, notice_small)
             }
 
             # CRITICAL FIX: Warn if centering/scaling disabled
@@ -205,13 +219,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_means <- apply(pca_matrix, 2, mean, na.rm = TRUE)
 
                 if (max(var_ranges) / min(var_ranges) > 10 || max(abs(var_means)) > 1e-6) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'scalingWarning',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent('Centering/Scaling should be enabled when variables have disparate ranges. Enable both for correlation-based interpretation.')
-                    self$results$insert(3, notice)
+                    private$.addNotice('WARNING', 'Centering/Scaling Recommended', 'Centering/Scaling should be enabled when variables have disparate ranges. Enable both for correlation-based interpretation.')
                 }
             }
 
@@ -219,14 +227,8 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             zero_var_cols <- which(apply(pca_matrix, 2, var) == 0)
             if (length(zero_var_cols) > 0) {
                 zero_var_names <- colnames(pca_matrix)[zero_var_cols]
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'constantVariables',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('Variables with zero variance detected: %s. Please remove constant variables.',
-                    paste(htmltools::htmlEscape(zero_var_names), collapse = ', ')))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Constant Variables', sprintf('Variables with zero variance detected: %s. Please remove constant variables.',
+                    paste(zero_var_names, collapse = ', ')))
                 return()
             }
 
@@ -245,16 +247,10 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Performance estimate for long analyses
             estimated_time <- (ndim * self$options$nperm * nrow(pca_matrix) * ncol(pca_matrix)) / 1e6
             if (estimated_time > 30) {  # > 30 seconds
-                notice_time <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'performanceWarning',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice_time$setContent(sprintf(
-                    'Analysis may take several minutes (%d components × %d permutations). Consider reducing permutations or components for faster results.',
+                private$.addNotice('INFO', 'Performance Notice', sprintf(
+                    'Analysis may take several minutes (%d components x %d permutations). Consider reducing permutations or components for faster results.',
                     ndim, self$options$nperm
                 ))
-                self$results$insert(999, notice_time)
             }
 
             # CRITICAL FIX: Implement sequential permutation test (Buja-Eyuboglu method)
@@ -333,16 +329,10 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         pvalue[remaining] <- NA
                     }
                     # Add INFO notice for sequential stopping
-                    notice_stopped <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'sequentialStopped',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice_stopped$setContent(sprintf(
+                    private$.addNotice('INFO', 'Sequential Testing Stopped', sprintf(
                         'Sequential testing stopped at PC%d (first non-significant component). Remaining components not tested to prevent Type I error inflation.',
                         comp_idx
                     ))
-                    self$results$insert(999, notice_stopped)
                     break
                 }
             }
@@ -365,16 +355,10 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Warn about over-conservatism if both sequential and adjustment enabled
             if (self$options$stop_rule && self$options$adjustmethod != 'none') {
-                notice_conservative <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'conservativeNote',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice_conservative$setContent(sprintf(
+                private$.addNotice('INFO', 'Conservative Testing Note', sprintf(
                     'Using both sequential testing and %s adjustment provides extra protection against false positives but reduces power to detect weak components.',
                     self$options$adjustmethod
                 ))
-                self$results$insert(999, notice_conservative)
             }
 
             # Store results
@@ -389,17 +373,11 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.adjPvalues <- adj_pvalue
 
             # Add successful completion INFO notice
-            notice_complete <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            notice_complete$setContent(sprintf(
+            private$.addNotice('INFO', 'Analysis Complete', sprintf(
                 'Analysis completed: %d components tested using %d permutations with %s adjustment. Sequential testing: %s.',
                 ndim, self$options$nperm, self$options$adjustmethod,
                 ifelse(self$options$stop_rule, 'enabled', 'disabled')
             ))
-            self$results$insert(999, notice_complete)
 
             # Populate results table
             private$.populateTable(ndim)

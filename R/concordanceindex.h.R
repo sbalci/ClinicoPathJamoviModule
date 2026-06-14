@@ -366,6 +366,7 @@ concordanceindexResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     "concordanceindexResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         cindexSummary = function() private$.items[["cindexSummary"]],
         somersD = function() private$.items[["somersD"]],
@@ -386,6 +387,17 @@ concordanceindexResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="",
                 title="Concordance Index (Harrell's C-index)")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "predictor",
+                    "event_code",
+                    "restricted_time",
+                    "max_time")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -805,6 +817,7 @@ concordanceindexBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   procedures.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$cindexSummary} \tab \tab \tab \tab \tab Overall C-index with confidence intervals \cr
 #'   \code{results$somersD} \tab \tab \tab \tab \tab Somers' D rank correlation \cr

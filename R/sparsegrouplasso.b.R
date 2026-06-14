@@ -7,34 +7,40 @@ sparsegrouplassoClass <- R6::R6Class(
         # ══════════════════════════════════════════════════════════════
         # Notice Helper
         # ══════════════════════════════════════════════════════════════
-        .insertNotice = function(name, type, content, position = 999) {
-            # TODO (forward-looking): `content` is interpolated UNESCAPED here (Notice$setContent below +
-            #   the todo fallback). User-controlled tokens are now htmlEscape'd at the 3 call sites that
-            #   carry them (missing column names L360, outcome/censor factor levels L406-407, e$message
-            #   L235). For defense-in-depth consider escaping `content` once here (all callers pass plain
-            #   text) and migrating off the self$results$insert(jmvcore::Notice) serialization pattern
-            #   (CLAUDE.md flags it for "attempt to apply non-function" errors — already softened by the
-            #   todo fallback below).
-            tryCatch({
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = name,
-                    type = type
-                )
-                notice$setContent(content)
-                self$results$insert(position, notice)
-            }, error = function(e) {
-                tryCatch({
-                    existing <- self$results$todo$content
-                    if (is.null(existing) || nchar(existing) == 0) existing <- ""
-                    label <- switch(as.character(type),
-                        "1" = "ERROR", "2" = "WARNING", "3" = "WARNING", "4" = "INFO", "NOTE")
-                    self$results$todo$setContent(paste0(
-                        existing, "<p><strong>", label, ":</strong> ", content, "</p>"
-                    ))
-                    self$results$todo$setVisible(TRUE)
-                }, error = function(e2) NULL)
-            })
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
         .init = function() {
@@ -135,6 +141,8 @@ sparsegrouplassoClass <- R6::R6Class(
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             # Set visibility for adaptive weights table (no negation support in .r.yaml)
             self$results$adaptiveWeights$setVisible(self$options$weight_type != "none")
 
@@ -146,18 +154,16 @@ sparsegrouplassoClass <- R6::R6Class(
 
             # Validate package availability
             if (!requireNamespace("glmnet", quietly = TRUE)) {
-                private$.insertNotice(
-                    'missingGlmnet', jmvcore::NoticeType$ERROR,
-                    "Package 'glmnet' is required for Sparse Group LASSO Cox regression. Install with: install.packages('glmnet')",
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Package glmnet Required',
+                    "Package 'glmnet' is required for Sparse Group LASSO Cox regression. Install with: install.packages('glmnet')"
                 )
                 return()
             }
             if (!requireNamespace("survival", quietly = TRUE)) {
-                private$.insertNotice(
-                    'missingSurvival', jmvcore::NoticeType$ERROR,
-                    "Package 'survival' is required. Install with: install.packages('survival')",
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Package survival Required',
+                    "Package 'survival' is required. Install with: install.packages('survival')"
                 )
                 return()
             }
@@ -186,21 +192,20 @@ sparsegrouplassoClass <- R6::R6Class(
                     n_selected <- sum(abs(results$cv_results$optimal_coefficients) > 1e-8)
 
                     if (n_events < 10) {
-                        private$.insertNotice(
-                            'veryLowEvents', jmvcore::NoticeType$STRONG_WARNING,
-                            sprintf("Only %d events detected. Results are highly unreliable with fewer than 10 events. Consider collecting more data.", n_events),
-                            position = 1
+                        private$.addNotice(
+                            'STRONG_WARNING', 'Very Low Event Count',
+                            sprintf("Only %d events detected. Results are highly unreliable with fewer than 10 events. Consider collecting more data.", n_events)
                         )
                     } else if (n_events < 20) {
-                        private$.insertNotice(
-                            'lowEvents', jmvcore::NoticeType$WARNING,
+                        private$.addNotice(
+                            'WARNING', 'Low Event Count',
                             sprintf("Only %d events detected. Penalized models need adequate events for stable variable selection.", n_events)
                         )
                     }
 
                     if (n_selected == 0) {
-                        private$.insertNotice(
-                            'noSelection', jmvcore::NoticeType$WARNING,
+                        private$.addNotice(
+                            'WARNING', 'No Variables Selected',
                             "No variables were selected at the optimal lambda. All coefficients are zero. Consider relaxing the penalty (lower alpha) or checking data quality."
                         )
                     }
@@ -213,10 +218,9 @@ sparsegrouplassoClass <- R6::R6Class(
                                 survival::Surv(results$y_time, results$y_event) ~ lp, reverse = TRUE
                             )
                             if (!is.na(conc$concordance) && conc$concordance < 0.5) {
-                                private$.insertNotice(
-                                    'poorDiscrimination', jmvcore::NoticeType$STRONG_WARNING,
-                                    sprintf("Training C-index = %.3f is below 0.5, indicating worse-than-chance discrimination. Review variable selection and data quality.", conc$concordance),
-                                    position = 1
+                                private$.addNotice(
+                                    'STRONG_WARNING', 'Poor Discrimination',
+                                    sprintf("Training C-index = %.3f is below 0.5, indicating worse-than-chance discrimination. Review variable selection and data quality.", conc$concordance)
                                 )
                             }
                         }, error = function(e) NULL)
@@ -229,18 +233,17 @@ sparsegrouplassoClass <- R6::R6Class(
                         length(unique(results$groups[abs(results$cv_results$optimal_coefficients) > 1e-8]))
                     } else 0L
 
-                    private$.insertNotice(
-                        'analysisComplete', jmvcore::NoticeType$INFO,
+                    private$.addNotice(
+                        'INFO', 'Analysis Complete',
                         sprintf("%s completed: %d/%d variables selected across %d/%d groups, using %d-fold CV with %d observations (%d events).",
                                 penalty_label, n_selected, n_vars, n_groups_sel, n_groups,
                                 self$options$cv_folds, nrow(results$X), n_events)
                     )
                 }
             }, error = function(e) {
-                private$.insertNotice(
-                    'analysisError', jmvcore::NoticeType$ERROR,
-                    sprintf("Error in Sparse Group LASSO fitting: %s", htmltools::htmlEscape(e$message)),
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Analysis Error',
+                    sprintf("Error in Sparse Group LASSO fitting: %s", e$message)
                 )
             })
         },
@@ -362,10 +365,9 @@ sparsegrouplassoClass <- R6::R6Class(
             }
 
             if (length(missingVars) > 0) {
-                private$.insertNotice(
-                    'missingVars', jmvcore::NoticeType$ERROR,
-                    sprintf("Missing variables in data: %s", paste(htmltools::htmlEscape(missingVars), collapse = ", ")),
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Missing Variables',
+                    sprintf("Missing variables in data: %s", paste(missingVars, collapse = ", "))
                 )
                 return(NULL)
             }
@@ -380,10 +382,9 @@ sparsegrouplassoClass <- R6::R6Class(
             data <- data[complete.cases(data), , drop = FALSE]
 
             if (nrow(data) < 10) {
-                private$.insertNotice(
-                    'insufficientData', jmvcore::NoticeType$ERROR,
-                    sprintf("Need at least 10 complete observations. Only %d available after removing missing data.", nrow(data)),
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Insufficient Data',
+                    sprintf("Need at least 10 complete observations. Only %d available after removing missing data.", nrow(data))
                 )
                 return(NULL)
             }
@@ -408,10 +409,10 @@ sparsegrouplassoClass <- R6::R6Class(
 
             n_excluded_outcome <- sum(is.na(event_numeric) & !is.na(event_data))
             if (n_excluded_outcome > 0) {
-                private$.insertNotice(
-                    'excludedRows', jmvcore::NoticeType$WARNING,
+                private$.addNotice(
+                    'WARNING', 'Rows Excluded',
                     sprintf("%d row(s) excluded because outcome value matched neither event level ('%s') nor censored level ('%s').",
-                            n_excluded_outcome, htmltools::htmlEscape(event_level), htmltools::htmlEscape(censor_level))
+                            n_excluded_outcome, event_level, censor_level)
                 )
             }
 
@@ -421,10 +422,9 @@ sparsegrouplassoClass <- R6::R6Class(
             data[[eventVar]] <- event_numeric[keep_rows]
 
             if (nrow(data) < 10) {
-                private$.insertNotice(
-                    'insufficientDataEncoding', jmvcore::NoticeType$ERROR,
-                    sprintf("Need at least 10 complete observations after event encoding. Only %d remain.", nrow(data)),
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Insufficient Data After Encoding',
+                    sprintf("Need at least 10 complete observations after event encoding. Only %d remain.", nrow(data))
                 )
                 return(NULL)
             }
@@ -433,19 +433,17 @@ sparsegrouplassoClass <- R6::R6Class(
             time_vals <- as.numeric(data[[timeVar]])
             if (any(time_vals <= 0, na.rm = TRUE)) {
                 n_nonpos <- sum(time_vals <= 0, na.rm = TRUE)
-                private$.insertNotice(
-                    'nonPositiveTime', jmvcore::NoticeType$ERROR,
-                    sprintf("All survival times must be positive. Found %d non-positive value(s). Check the time variable.", n_nonpos),
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'Non-Positive Survival Times',
+                    sprintf("All survival times must be positive. Found %d non-positive value(s). Check the time variable.", n_nonpos)
                 )
                 return(NULL)
             }
 
             if (sum(data[[eventVar]] == 1) == 0) {
-                private$.insertNotice(
-                    'noEvents', jmvcore::NoticeType$ERROR,
-                    "No events detected after encoding. All observations are censored. The model cannot be fitted.",
-                    position = 1
+                private$.addNotice(
+                    'ERROR', 'No Events Detected',
+                    "No events detected after encoding. All observations are censored. The model cannot be fitted."
                 )
                 return(NULL)
             }

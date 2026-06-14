@@ -265,6 +265,7 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     "patientsimilarityResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         summaryText = function() private$.items[["summaryText"]],
         projectionPlot = function() private$.items[["projectionPlot"]],
@@ -301,6 +302,17 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "survival",
                     "plotly",
                     "survminer"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "method",
+                    "dimensions",
+                    "colorBy",
+                    "performClustering",
+                    "survivalAnalysis")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -659,6 +671,7 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   dimensions=3).
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summaryText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$projectionPlot} \tab \tab \tab \tab \tab an image \cr

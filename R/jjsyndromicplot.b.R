@@ -25,6 +25,42 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .componentToUse = NULL,
         .presetMessage = "",
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # TODO (cleanup): `.escapeVar` is dead code — defined here but never
         # called anywhere in this file (grep confirms 1 occurrence: the
         # definition). Safe to delete. For any future formula-context need,
@@ -37,33 +73,31 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
-        # TODO (forward-looking): `.setNotice` uses
-        # `self$results$notices$insert(999, notice)` with `jmvcore::Notice`
-        # objects. Per CLAUDE.md "Notice Serialization" section: Notice
-        # objects contain function references that cannot be serialized by
-        # jamovi's protobuf system — known cause of "attempt to apply
-        # non-function" errors. Recommended migration: convert to HTML-based
-        # Notice pattern per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md
-        # (waterfall.b.R reference impl: `.noticeList` + `.addNotice` +
-        # `.renderNotices` rendering to a single Html result item). 13+
-        # `.setNotice` call sites would be affected; defer to a separate PR.
-        # Notice creation helper with single-line enforcement
+        # Notice creation helper with single-line enforcement. Routes to the
+        # plain-text Preformatted `notices` output item via `.addNotice`, avoiding the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice).
+        # The numeric `type` mirrors the former jmvcore::NoticeType mapping:
+        # 1 = ERROR, 2 = STRONG_WARNING, 3 = WARNING, 4 = INFO.
         .setNotice = function(content, type = 3) {
             # Convert multi-line content to single line
             content <- gsub("\\n", " ", content)
             content <- gsub("\\s+", " ", trimws(content))
 
-            # Create fresh Notice object
-            notice <- jmvcore::Notice$new(
-                content = content,
-                type = type
-            )
+            type_name <- switch(as.character(type),
+                "1" = "ERROR",
+                "2" = "STRONG_WARNING",
+                "3" = "WARNING",
+                "4" = "INFO",
+                "WARNING")
 
-            # Dynamic insertion based on type
-            # All notices now go to the end (position 999)
-            # Previously: ERROR (1) and STRONG_WARNING (2) at top, WARNING (3) and INFO (4) at bottom
-            # Now: All notices at bottom for consistent ordering
-            self$results$notices$insert(999, notice)
+            title <- switch(type_name,
+                ERROR          = "Error",
+                STRONG_WARNING = "Warning",
+                WARNING        = "Warning",
+                INFO           = "Information",
+                "Notice")
+
+            private$.addNotice(type_name, title, content)
         },
 
         # init ----
@@ -81,6 +115,9 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # run ----
 
         .run = function() {
+
+            # Reset notice collection
+            private$.noticeList <- list()
 
             # Reset messages each run
             self$results$warnings$setContent("")

@@ -4,6 +4,16 @@ title: PCA Loading Significance Test
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - vars
+        - ncomp
+        - nperm
+        - center
+        - scale
+
     - name: todo
       title: 'Instructions'
       type: Html

@@ -4,6 +4,16 @@ title: iRECIST Analysis
 jrs: '1.0'
 
 items:
+  - name: notices
+    title: Important Information
+    type: Preformatted
+    clearWith:
+      - patientId
+      - assessmentTime
+      - targetLesionSum
+      - newLesions
+      - confirmationWindow
+
   - name: instructions
     title: Instructions
     type: Html

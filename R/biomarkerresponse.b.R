@@ -11,6 +11,42 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
     inherit = biomarkerresponseBase,
     private = list(
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # Escape variable names with spaces/special characters
         .escapeVar = function(x) {
             if (is.null(x) || length(x) == 0) return(x)
@@ -70,24 +106,18 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
             } else {
                 # No positive level specified - BLOCK execution to prevent label inversion
-                error_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "positiveLevelRequired",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                error_notice$setContent(paste0(
-                    " <b>Positive Level Required:</b> For binary response analysis, you must specify ",
-                    "which level represents positive response (e.g., 'Responder', 'Yes', '1').<br/><br/>",
-                    "<b>Available levels:</b> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "<br/><br/>",
-                    "<b>Current alphabetical ordering:</b><br/>",
-                    "• Negative class (0): ", htmltools::htmlEscape(current_levels[1]), "<br/>",
-                    "• Positive class (1): ", htmltools::htmlEscape(current_levels[2]), "<br/><br/>",
-                    "<b>Why required?</b> Alphabetical ordering can invert sensitivity/specificity if, for example, ",
-                    "'Non-responder' comes before 'Responder'. This leads to incorrect clinical interpretation.<br/><br/>",
-                    "<b>Required Action:</b> Enter the positive response level (exactly as it appears above) ",
+                private$.addNotice('ERROR', 'Positive Level Required', paste0(
+                    "For binary response analysis, you must specify ",
+                    "which level represents positive response (e.g., 'Responder', 'Yes', '1').\n",
+                    "Available levels: ", paste(current_levels, collapse = ", "), "\n",
+                    "Current alphabetical ordering:\n",
+                    " - Negative class (0): ", current_levels[1], "\n",
+                    " - Positive class (1): ", current_levels[2], "\n",
+                    "Why required? Alphabetical ordering can invert sensitivity/specificity if, for example, ",
+                    "'Non-responder' comes before 'Responder'. This leads to incorrect clinical interpretation.\n",
+                    "Required Action: Enter the positive response level (exactly as it appears above) ",
                     "in the 'Positive Response Level' field."
                 ))
-                self$results$insert(999, error_notice)
                 return(NULL)  # Hard stop - do not proceed with analysis
             }
 
@@ -379,6 +409,8 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         },
         
         .run = function() {
+            private$.noticeList <- list()
+
             # Enhanced guidance and documentation
             if (is.null(self$options$biomarker) || is.null(self$options$response)) {
                 todo <- "
@@ -599,18 +631,12 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
             # Notice 1: Small Sample Size Warning
             if (n_complete < 30) {
-                small_n_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = "smallSampleWarning",
-                    type = jmvcore::NoticeType$WARNING
-                )
-                small_n_notice$setContent(paste0(
+                private$.addNotice('WARNING', 'Small Sample Size', paste0(
                     "Small sample size (n=", n_complete, ", below recommended minimum n=30). ",
                     "Bootstrap CIs may be unstable, correlation estimates unreliable. ",
                     "Results should be considered preliminary and validated in larger cohort. ",
                     "Recommend n>=50 for biomarker development, n>=100 for clinical validation."
                 ))
-                self$results$insert(999, small_n_notice)
             }
 
             # Notice 2: Low Event Count Validation (Binary Response Only)
@@ -635,53 +661,35 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
 
                 # CRITICAL: Block execution if < 10 events per group
                 if (n_events < 10 || n_non_events < 10) {
-                    low_events_error <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "insufficientEventsError",
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    low_events_error$setContent(paste0(
+                    private$.addNotice('ERROR', 'Insufficient Events', paste0(
                         "Insufficient events for reliable ROC analysis. ",
                         "Positive cases: n=", n_events, ", Negative cases: n=", n_non_events, ". ",
                         "Minimum 10 per group required for stable AUC/threshold estimates (Hanley & McNeil, 1982). ",
                         "Collect additional data before proceeding with biomarker validation."
                     ))
-                    self$results$insert(999, low_events_error)
                     return()  # HARD STOP - do not proceed
                 }
 
                 # STRONG WARNING: 10-19 events (low but not blocking)
                 if (n_events < 20 || n_non_events < 20) {
-                    moderate_events_warning <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "lowEventsWarning",
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    moderate_events_warning$setContent(paste0(
+                    private$.addNotice('STRONG_WARNING', 'Low Event Count', paste0(
                         "Low event count (Positive: n=", n_events, ", Negative: n=", n_non_events, "). ",
                         "ROC estimates may be unstable with wide confidence intervals. ",
                         "FDA biomarker guidance recommends n>=50 per group for clinical validation studies. ",
                         "Consider collecting additional data or use results cautiously as exploratory only."
                     ))
-                    self$results$insert(999, moderate_events_warning)
                 }
 
                 # Notice 3: Extreme Prevalence Warning
                 prevalence <- n_events / (n_events + n_non_events)
                 if (prevalence < 0.05 || prevalence > 0.95) {
-                    extreme_prev_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "extremePrevalenceWarning",
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    extreme_prev_notice$setContent(paste0(
+                    private$.addNotice('STRONG_WARNING', 'Extreme Response Prevalence', paste0(
                         "Extreme response prevalence (", round(prevalence * 100, 1), "% positive). ",
                         "PPV and NPV estimates are HIGHLY UNSTABLE and unlikely to generalize to populations with different prevalence. ",
                         "Threshold selection unreliable. ",
                         "ROC analysis assumes balanced sampling (recommend 40-60% prevalence for biomarker development). ",
                         "Consider stratified sampling or interpret with caution."
                     ))
-                    self$results$insert(999, extreme_prev_notice)
                 }
             }
 
@@ -709,26 +717,20 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     response_values[outlier_indices] <- NA
 
                     # Issue informative Notice about outlier removal
-                    outlier_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "outlierRemoval",
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    outlier_notice$setContent(paste0(
-                        " <b>Outliers Removed:</b> ", outlier_count, " data points (", outlier_pct, "% of total) ",
-                        "identified as outliers and excluded from analysis.<br/><br/>",
-                        "<b>Detection Method:</b> IQR-based (Tukey's fences)<br/>",
-                        "• Lower bound: ", round(lower_bound, 2), "<br/>",
-                        "• Upper bound: ", round(upper_bound, 2), "<br/>",
-                        "• Q1: ", round(Q1, 2), ", Q3: ", round(Q3, 2), ", IQR: ", round(IQR_val, 2), "<br/><br/>",
-                        "<b>Removed values range:</b> ", round(min(outlier_values, na.rm = TRUE), 2), " to ",
-                        round(max(outlier_values, na.rm = TRUE), 2), "<br/><br/>",
-                        "<b>Impact:</b> All subsequent analyses (ROC, statistics, correlations) are based on ",
-                        total_count - outlier_count, " remaining data points.<br/><br/>",
-                        "<b> Important:</b> Outlier removal can bias results, especially in small samples or skewed distributions. ",
+                    private$.addNotice('STRONG_WARNING', 'Outliers Removed', paste0(
+                        outlier_count, " data points (", outlier_pct, "% of total) ",
+                        "identified as outliers and excluded from analysis.\n",
+                        "Detection Method: IQR-based (Tukey's fences)\n",
+                        " - Lower bound: ", round(lower_bound, 2), "\n",
+                        " - Upper bound: ", round(upper_bound, 2), "\n",
+                        " - Q1: ", round(Q1, 2), ", Q3: ", round(Q3, 2), ", IQR: ", round(IQR_val, 2), "\n",
+                        "Removed values range: ", round(min(outlier_values, na.rm = TRUE), 2), " to ",
+                        round(max(outlier_values, na.rm = TRUE), 2), "\n",
+                        "Impact: All subsequent analyses (ROC, statistics, correlations) are based on ",
+                        total_count - outlier_count, " remaining data points.\n",
+                        "Important: Outlier removal can bias results, especially in small samples or skewed distributions. ",
                         "Consider reviewing excluded values to ensure they represent true outliers rather than valid extreme values."
                     ))
-                    self$results$insert(999, outlier_notice)
                 }
             }
             
@@ -830,24 +832,18 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     observed_prevalence <- mean(response_binary, na.rm = TRUE)
 
                     # Issue warning about PPV/NPV prevalence dependence
-                    ppv_npv_notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = "ppvNpvPrevalence",
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    ppv_npv_notice$setContent(paste0(
-                        " <b>PPV/NPV Prevalence Dependence:</b> The reported PPV and NPV values are calculated ",
-                        "using the <b>observed prevalence</b> in your dataset (", round(observed_prevalence * 100, 1), "%). ",
-                        "These values will differ in populations with different disease prevalence.<br/><br/>",
-                        "<b>Important:</b> When applying this biomarker in a different clinical setting:<br/>",
-                        "• PPV/NPV values will change based on local prevalence<br/>",
-                        "• Sensitivity and specificity remain constant across populations<br/>",
-                        "• For external validation, recalculate PPV/NPV using local prevalence<br/><br/>",
-                        "<b>Formulas for prevalence adjustment:</b><br/>",
-                        "PPV = (Sens × Prev) / (Sens × Prev + (1 - Spec) × (1 - Prev))<br/>",
-                        "NPV = (Spec × (1 - Prev)) / (Spec × (1 - Prev) + (1 - Sens) × Prev)"
+                    private$.addNotice('INFO', 'PPV/NPV Prevalence Dependence', paste0(
+                        "The reported PPV and NPV values are calculated ",
+                        "using the observed prevalence in your dataset (", round(observed_prevalence * 100, 1), "%). ",
+                        "These values will differ in populations with different disease prevalence.\n",
+                        "Important: When applying this biomarker in a different clinical setting:\n",
+                        " - PPV/NPV values will change based on local prevalence\n",
+                        " - Sensitivity and specificity remain constant across populations\n",
+                        " - For external validation, recalculate PPV/NPV using local prevalence\n",
+                        "Formulas for prevalence adjustment:\n",
+                        "PPV = (Sens x Prev) / (Sens x Prev + (1 - Spec) x (1 - Prev))\n",
+                        "NPV = (Spec x (1 - Prev)) / (Spec x (1 - Prev) + (1 - Sens) x Prev)"
                     ))
-                    self$results$insert(999, ppv_npv_notice)
 
                     # For optimal threshold method, we have bootstrap CIs from .calculateOptimalThreshold()
                     # For other methods (manual, median, q75), CIs are not available
@@ -903,12 +899,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     if (!is.na(auc_val)) {
                         # CRITICAL ERROR: AUC below chance (0.5)
                         if (auc_val < 0.5) {
-                            auc_catastrophic_notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = "aucBelowChance",
-                                type = jmvcore::NoticeType$ERROR
-                            )
-                            auc_catastrophic_notice$setContent(paste0(
+                            private$.addNotice('ERROR', 'AUC Below Chance', paste0(
                                 "CRITICAL: AUC=", round(auc_val, 3), " is below chance level (0.5). ",
                                 "Biomarker has NO discriminatory ability or relationship may be inverted. ",
                                 "Verify: (1) Positive level is specified correctly, ",
@@ -916,16 +907,10 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                                 "(3) Data quality (check for data entry errors, measurement issues). ",
                                 "Do NOT use this biomarker for clinical decision-making."
                             ))
-                            self$results$insert(999, auc_catastrophic_notice)
                         }
                         # STRONG WARNING: Poor discrimination (0.5-0.7)
                         else if (auc_val < 0.7) {
-                            auc_poor_notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = "aucPoorDiscrimination",
-                                type = jmvcore::NoticeType$STRONG_WARNING
-                            )
-                            auc_poor_notice$setContent(paste0(
+                            private$.addNotice('STRONG_WARNING', 'Poor Biomarker Discrimination', paste0(
                                 "Poor biomarker discrimination (AUC=", round(auc_val, 3), ", below acceptable threshold of 0.7). ",
                                 "Clinical utility is LIMITED for single-marker diagnostic use. ",
                                 "This biomarker alone CANNOT reliably predict response. ",
@@ -934,16 +919,10 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                                 "(3) Investigate alternative biomarkers. ",
                                 "Only use in multi-factorial clinical decision algorithms, NOT as standalone test."
                             ))
-                            self$results$insert(999, auc_poor_notice)
                         }
                         # INFO: Good-to-excellent performance (>= 0.8)
                         else if (auc_val >= 0.8) {
-                            auc_excellent_notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = "aucExcellentPerformance",
-                                type = jmvcore::NoticeType$INFO
-                            )
-                            auc_excellent_notice$setContent(paste0(
+                            private$.addNotice('INFO', 'Excellent Biomarker Discrimination', paste0(
                                 "Excellent biomarker discrimination (AUC=", round(auc_val, 3), "). ",
                                 "This biomarker shows strong predictive power and potential clinical utility. ",
                                 "Next steps for clinical implementation: ",
@@ -953,7 +932,6 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                                 "(4) Evaluate cost-effectiveness for clinical deployment. ",
                                 "Consider regulatory pathway for companion diagnostic if applicable."
                             ))
-                            self$results$insert(999, auc_excellent_notice)  # Bottom position for INFO
                         }
                     }
 
@@ -1035,19 +1013,13 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         }
 
                         # Add informative Notice about stratified analysis
-                        strat_notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = "stratifiedAnalysis",
-                            type = jmvcore::NoticeType$INFO
-                        )
-                        strat_notice$setContent(paste0(
-                            " <b>Stratified Analysis Performed:</b> Biomarker performance evaluated separately for each level of '",
-                            self$options$groupVariable, "'.<br/><br/>",
-                            "<b>Groups analyzed:</b> ", length(stratified_results), " of ", length(group_levels), " total groups<br/><br/>",
-                            "<b>Use case:</b> Compare biomarker performance across treatment arms, disease stages, or patient subgroups.<br/><br/>",
-                            "<b>Note:</b> Groups with <10 patients or insufficient class representation were excluded from stratified analysis."
+                        private$.addNotice('INFO', 'Stratified Analysis Performed', paste0(
+                            "Biomarker performance evaluated separately for each level of '",
+                            self$options$groupVariable, "'.\n",
+                            "Groups analyzed: ", length(stratified_results), " of ", length(group_levels), " total groups\n",
+                            "Use case: Compare biomarker performance across treatment arms, disease stages, or patient subgroups.\n",
+                            "Note: Groups with <10 patients or insufficient class representation were excluded from stratified analysis."
                         ))
-                        self$results$insert(999, strat_notice)
                     }
                 }
             }

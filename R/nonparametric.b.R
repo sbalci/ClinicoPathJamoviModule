@@ -7,6 +7,42 @@ nonparametricClass <- R6::R6Class(
     inherit = nonparametricBase,
     private = list(
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # Escape variable names for safe use in keys and lookups
         .escapeVar = function(x) gsub("[^A-Za-z0-9_]+", "_", make.names(x)),
 
@@ -34,6 +70,8 @@ nonparametricClass <- R6::R6Class(
         },
 
         .run = function() {
+
+            private$.noticeList <- list()
 
             # Set seed if requested
             if (self$options$set_seed) {
@@ -119,13 +157,9 @@ nonparametricClass <- R6::R6Class(
                 "jonckheere_terpstra" = "Jonckheere-Terpstra",
                 "sign_test" = "Sign Test",
                 self$options$test_type)
-            ok_notice <- jmvcore::Notice$new(
-                options = self$options, name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO)
-            ok_notice$setContent(
+            private$.addNotice('INFO', 'Analysis Complete',
                 sprintf('%s test completed using %d observations across %s variable(s).',
                         test_name, nrow(self$data), length(dep_vars)))
-            self$results$insert(999, ok_notice)
         },
         
         .initializeTables = function() {
@@ -242,12 +276,8 @@ nonparametricClass <- R6::R6Class(
             # Check for minimum sample size
             min_n <- self$options$minimum_sample_size %||% 5
             if (length(outcome) < min_n) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options, name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR)
-                notice$setContent(
+                private$.addNotice('ERROR', 'Insufficient Data',
                     sprintf('Insufficient data: only %d complete observations available (minimum %d required).', length(outcome), min_n))
-                self$results$insert(1, notice)
                 return(NULL)
             }
 
@@ -258,13 +288,9 @@ nonparametricClass <- R6::R6Class(
             group_counts <- table(groups)
             if (any(group_counts < 2)) {
                 small_groups <- names(group_counts[group_counts < 2])
-                notice <- jmvcore::Notice$new(
-                    options = self$options, name = 'smallGroups',
-                    type = jmvcore::NoticeType$STRONG_WARNING)
-                notice$setContent(
+                private$.addNotice('STRONG_WARNING', 'Small Groups',
                     sprintf('Groups with fewer than 2 observations: %s. Results may be unreliable.',
-                            paste(htmltools::htmlEscape(small_groups), collapse = ', ')))
-                self$results$insert(1, notice)
+                            paste(small_groups, collapse = ', ')))
             }
             
             # Outlier detection and handling
@@ -610,12 +636,8 @@ nonparametricClass <- R6::R6Class(
 
                             # Check for duplicate IDs within a group (would break pairing)
                             if (anyDuplicated(g1_df$id) || anyDuplicated(g2_df$id)) {
-                                notice <- jmvcore::Notice$new(
-                                    options = self$options, name = 'duplicatePairIds',
-                                    type = jmvcore::NoticeType$STRONG_WARNING)
-                                notice$setContent(
+                                private$.addNotice('STRONG_WARNING', 'Duplicate Pair IDs',
                                     .('Duplicate subject IDs found within a group. Each subject should appear exactly once per group for a paired test. Results may be incorrect.'))
-                                self$results$insert(1, notice)
                                 # Deduplicate: keep first occurrence
                                 g1_df <- g1_df[!duplicated(g1_df$id), ]
                                 g2_df <- g2_df[!duplicated(g2_df$id), ]
@@ -636,12 +658,8 @@ nonparametricClass <- R6::R6Class(
                                                      correct = continuity_corr)
                         } else if (nlevels(groups) == 2) {
                             # No pairing variable provided — warn and use positional fallback
-                            notice <- jmvcore::Notice$new(
-                                options = self$options, name = 'noPairingVar',
-                                type = jmvcore::NoticeType$WARNING)
-                            notice$setContent(
+                            private$.addNotice('WARNING', 'No Pairing Variable',
                                 .('No paired/subject variable specified. Using positional pairing (row order). Add a subject ID variable for correct paired analysis.'))
-                            self$results$insert(1, notice)
 
                             group_levels <- levels(groups)
                             g1 <- outcome[groups == group_levels[1]]
@@ -716,12 +734,8 @@ nonparametricClass <- R6::R6Class(
                     }
                 )
             }, error = function(e) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options, name = 'testError',
-                    type = jmvcore::NoticeType$ERROR)
-                notice$setContent(
-                    sprintf('Test error: %s', htmltools::htmlEscape(conditionMessage(e))))
-                self$results$insert(1, notice)
+                private$.addNotice('ERROR', 'Test Error',
+                    sprintf('Test error: %s', conditionMessage(e)))
                 return(NULL)
             })
             return(result)

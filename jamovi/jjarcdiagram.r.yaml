@@ -4,6 +4,15 @@ title: Arc Diagram
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+
     - name: instructions
       title: Instructions
       type: Html

@@ -66,6 +66,42 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(escaped)
         },
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
 
             # Welcome message when no variables selected
@@ -280,6 +316,8 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .run = function() {
+
+            private$.noticeList <- list()
 
             if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) return()
 
@@ -1843,15 +1881,9 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 nPositiveCases <- length(positiveIndices)
 
                 # Add CRITICAL WARNING about selection bias
-                selectionBiasNotice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'bootstrapSelectionBias',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                selectionBiasNotice$setContent(
+                private$.addNotice('STRONG_WARNING', 'Bootstrap Selection Bias',
                     ' SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively.'
                 )
-                self$results$insert(2, selectionBiasNotice)
 
                 # Perform bootstrap resampling
                 

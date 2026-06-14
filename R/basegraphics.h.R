@@ -315,6 +315,7 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     "basegraphicsResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         plot_description = function() private$.items[["plot_description"]],
         glossary = function() private$.items[["glossary"]],
@@ -334,6 +335,17 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "grDevices",
                     "janitor",
                     "labelled"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "plot_type",
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "show_statistics",
+                    "correlation_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -465,6 +477,7 @@ basegraphicsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   regression line.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot_description} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$glossary} \tab \tab \tab \tab \tab a html \cr

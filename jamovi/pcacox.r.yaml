@@ -4,6 +4,17 @@ title: Principal Component Cox Models
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - time
+          - status
+          - outcomeLevel
+          - censorLevel
+          - predictors
+          - pca_method
+
     - name: todo
       title: Instructions
       type: Html

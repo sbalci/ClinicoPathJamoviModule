@@ -19,6 +19,31 @@ irecistClass <- R6::R6Class(
         .baselineValues = NULL,
         .nadirValues = NULL,
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # ---- Initialization ----
         .init = function() {
 
@@ -28,14 +53,7 @@ irecistClass <- R6::R6Class(
                 is.null(self$options$targetLesionSum)) {
 
                 # Add ERROR notice
-                # Add ERROR notice
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".requiredVariables",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent("Required variables missing: Please select Patient ID, Assessment Time, Target Lesion Sum, and New Lesions to begin analysis.")
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Required Variables Missing', "Required variables missing: Please select Patient ID, Assessment Time, Target Lesion Sum, and New Lesions to begin analysis.")
 
                 self$results$instructions$setContent(
                     "<h3>Welcome to iRECIST Analysis</h3>
@@ -104,6 +122,8 @@ irecistClass <- R6::R6Class(
         # ---- Main Analysis ----
         .run = function() {
 
+            private$.noticeList <- list()
+
             # Check if variables are selected
             if (is.null(self$options$patientId) ||
                 is.null(self$options$assessmentTime) ||
@@ -113,47 +133,23 @@ irecistClass <- R6::R6Class(
 
             # Validate threshold parameters
             if (self$options$prThreshold < 0 || self$options$prThreshold > 100) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".prThresholdError",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent("PR threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid PR Threshold', "PR threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             if (self$options$pdThreshold < 0 || self$options$pdThreshold > 100) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".pdThresholdError",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent("PD threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid PD Threshold', "PD threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             if (self$options$pdAbsolute < 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".pdAbsoluteError",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent("PD absolute increase must be non-negative. Please check iRECIST Criteria Settings.")
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid PD Absolute Increase', "PD absolute increase must be non-negative. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             if (self$options$confirmationWindow < 0 ||
                 self$options$confirmationWindowMax < self$options$confirmationWindow) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".confirmationWindowError",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent("Invalid confirmation window: maximum must be greater than minimum. Please check iRECIST Criteria Settings.")
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Invalid Confirmation Window', "Invalid confirmation window: maximum must be greater than minimum. Please check iRECIST Criteria Settings.")
                 return()
             }
 
@@ -164,23 +160,11 @@ irecistClass <- R6::R6Class(
                 # Check sample size and add warnings
                 nPatients <- length(unique(private$.processedData$patientId))
                 if (nPatients < 10) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = ".criticalSampleSize",
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(paste0("Critically small sample size (N=", nPatients,
+                    private$.addNotice('ERROR', 'Critically Small Sample Size', paste0("Critically small sample size (N=", nPatients,
                                          " patients). iRECIST analysis requires at least 10 patients for meaningful results."))
-                    self$results$insert(999, notice)
                 } else if (nPatients < 30) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = ".smallSampleSize",
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(paste0("Small sample size (N=", nPatients,
+                    private$.addNotice('STRONG_WARNING', 'Small Sample Size', paste0("Small sample size (N=", nPatients,
                                          " patients). Results should be interpreted with caution. Consider this exploratory analysis."))
-                    self$results$insert(2, notice)
                 }
 
                 # Check minimum assessments per patient
@@ -189,13 +173,7 @@ irecistClass <- R6::R6Class(
                     summarise(nAssessments = n(), .groups = "drop")
 
                 if (all(assessmentsPerPatient$nAssessments == 1)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = ".onlyBaseline",
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent("All patients have only baseline assessment. At least one follow-up assessment is required for response evaluation.")
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Only Baseline Assessments', "All patients have only baseline assessment. At least one follow-up assessment is required for response evaluation.")
                     return()
                 }
 
@@ -254,28 +232,16 @@ irecistClass <- R6::R6Class(
                 if (self$options$trackPseudoprogression && !is.null(private$.responseData)) {
                     pendingIUPD <- sum(private$.responseData$irecistCategory == "iUPD", na.rm = TRUE)
                     if (pendingIUPD > 0) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = ".pendingIUPD",
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(paste0(pendingIUPD, " patient(s) have pending iUPD (unconfirmed progression) requiring confirmation scan ",
+                        private$.addNotice('WARNING', 'Pending iUPD Confirmation', paste0(pendingIUPD, " patient(s) have pending iUPD (unconfirmed progression) requiring confirmation scan ",
                                              "within ", self$options$confirmationWindow, "-", self$options$confirmationWindowMax, " weeks per iRECIST guidelines."))
-                        self$results$insert(998, notice)
                     }
                 }
 
                 # Add completion info notice
                 nPatients <- length(unique(private$.processedData$patientId))
                 nAssessments <- nrow(private$.processedData)
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".analysisComplete",
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(paste0("Analysis complete: ", nPatients, " patients, ", nAssessments, " assessments. ",
+                private$.addNotice('INFO', 'Analysis Complete', paste0("Analysis complete: ", nPatients, " patients, ", nAssessments, " assessments. ",
                                      "Results follow iRECIST guidelines (Seymour et al. 2017)."))
-                self$results$insert(999, notice)
 
             }, error = function(e) {
                 # Add ERROR notice
@@ -283,13 +249,7 @@ irecistClass <- R6::R6Class(
                                    " Common issues: Data must be in long format (one row per assessment per patient); ",
                                    "assessment times must be numeric; target lesion sum must be numeric and positive; ",
                                    "new lesions variable must be binary (0/1).")
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".analysisError",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(errorMsg)
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Analysis Error', errorMsg)
                 stop(e)
             })
         },
@@ -353,13 +313,7 @@ irecistClass <- R6::R6Class(
 
             # Check for negative target lesion sum values
             if (any(data$targetSum < 0, na.rm = TRUE)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".negativeTargetSum",
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent("Target lesion sum cannot be negative. Please check your data for errors.")
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Negative Target Lesion Sum', "Target lesion sum cannot be negative. Please check your data for errors.")
                 stop("Negative target lesion sum detected")
             }
 
@@ -370,14 +324,8 @@ irecistClass <- R6::R6Class(
 
             # Notify user if data was removed
             if (nBefore > nAfter) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".assessmentsRemoved",
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(paste0(nBefore - nAfter, " assessment(s) removed due to missing data. ",
+                private$.addNotice('WARNING', 'Assessments Removed', paste0(nBefore - nAfter, " assessment(s) removed due to missing data. ",
                                      nAfter, " assessments retained for analysis."))
-                self$results$insert(4, notice)
             }
 
             # Sort by patient and time
@@ -457,13 +405,7 @@ irecistClass <- R6::R6Class(
             # Warn if any baseline/nadir = 0
             if (any(data$baselineSum == 0, na.rm = TRUE) ||
                 (self$options$nadirReference && any(data$nadirSum == 0, na.rm = TRUE))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = ".zeroTumorBurden",
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent("Some patients have zero tumor burden at baseline or nadir. Percentage changes cannot be calculated for these cases.")
-                self$results$insert(3, notice)
+                private$.addNotice('WARNING', 'Zero Tumor Burden', "Some patients have zero tumor burden at baseline or nadir. Percentage changes cannot be calculated for these cases.")
             }
 
             # Classify responses

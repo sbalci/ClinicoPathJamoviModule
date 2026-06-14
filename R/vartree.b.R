@@ -20,6 +20,43 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "vartreeClass",
     inherit = vartreeBase,
     private = list(
+
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # .labelData ----
         # Prepare data by cleaning names and setting original labels.
         .labelData = function() {
@@ -73,13 +110,12 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
-            # TODO (cleanup): file contains 8+ commented-out `notice <-
-            # jmvcore::Notice$new(...) + insert(999, notice)` blocks (~L114,
-            # L152, L162, L179, L192, L207, L217, L229, L241, L343, L555).
-            # These were migrated to silent-on-error early returns or
-            # accepted as dead-code paths. The dead blocks add noise; drop
-            # them OR wire each to a dataInfo HTML block (see waterfall.b.R
-            # pattern) so the user gets feedback instead of a silent return.
+            private$.noticeList <- list()
+            # NOTE: the previously commented-out `jmvcore::Notice$new(...) +
+            # insert(999, notice)` blocks have been migrated to the
+            # serialization-safe plain-text notices pattern via
+            # private$.addNotice(type, title, content), rendered into the
+            # `notices` Preformatted output item (see .addNotice/.renderNotices).
             # TODO (security): zero `htmltools::htmlEscape` calls across
             # ~800 LOC. The clinical-summary HTML at ~L688-708, the about
             # section at ~L711-723, and the interpretation rendering all
@@ -129,13 +165,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Error Message - Check for empty dataset
             if (nrow(self$data) == 0) {
-                # notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'emptyDataset',
-                #     type = jmvcore::NoticeType$ERROR
-                # )
-                # notice$setContent('Dataset contains no complete rows. Please check your data and ensure at least one complete observation exists.')
-                # self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Empty Dataset', 'Dataset contains no complete rows. Please check your data and ensure at least one complete observation exists.')
                 return()
             }
 
@@ -167,23 +197,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (var in myvars) {
                     if (!var %in% names(mydata)) {
                         error_count <- error_count + 1
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = paste0('varNotFound_', error_count),
-                        #     type = jmvcore::NoticeType$ERROR
-                        # )
-                        # notice$setContent(sprintf("Variable '%s' not found in dataset. Please verify variable selection.", var))
-                        # self$results$insert(error_count, notice)
+                        private$.addNotice('ERROR', 'Variable Not Found', sprintf("Variable '%s' not found in dataset. Please verify variable selection.", var))
                     }
                     if (!is.factor(mydata[[var]]) && !is.character(mydata[[var]])) {
                         warning_count <- warning_count + 1
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = paste0('varNotCategorical_', warning_count),
-                        #     type = jmvcore::NoticeType$WARNING
-                        # )
-                        # notice$setContent(sprintf("Variable '%s' is not categorical (factor/character). Tree visualization may not display properly.", var))
-                        # self$results$insert(100 + warning_count, notice)  # Mid-section
+                        private$.addNotice('WARNING', 'Variable Not Categorical', sprintf("Variable '%s' is not categorical (factor/character). Tree visualization may not display properly.", var))
                     }
                 }
 
@@ -194,27 +212,15 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Validate percentage variable if specified
                 if (!is.null(percvar) && !percvar %in% names(mydata)) {
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'percvarNotFound',
-                    #     type = jmvcore::NoticeType$ERROR
-                    # )
-                    # notice$setContent('Percentage variable not found in dataset. Please verify your variable selection.')
-                    # self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Percentage Variable Not Found', 'Percentage variable not found in dataset. Please verify your variable selection.')
                     return()
                 } else if (!is.null(percvar)) {
                     # Ensure requested level exists
                     if (!is.null(self$options$percvarLevel) &&
                         !self$options$percvarLevel %in% levels(as.factor(mydata[[percvar]]))) {
                         available_levels <- paste(levels(as.factor(mydata[[percvar]])), collapse=", ")
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = 'percvarLevelInvalid',
-                        #     type = jmvcore::NoticeType$ERROR
-                        # )
-                        # notice$setContent(sprintf("Selected percentage level '%s' not present in percentage variable. Available levels: %s",
-                        #                           self$options$percvarLevel, available_levels))
-                        # self$results$insert(999, notice)
+                        private$.addNotice('ERROR', 'Invalid Percentage Level', sprintf("Selected percentage level '%s' not present in percentage variable. Available levels: %s",
+                                                  self$options$percvarLevel, available_levels))
                         return()
                     }
                 }
@@ -222,47 +228,23 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Validate summary variable if specified
                 if (!is.null(summaryvar)) {
                     if (!summaryvar %in% names(mydata)) {
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = 'summaryvarNotFound',
-                        #     type = jmvcore::NoticeType$ERROR
-                        # )
-                        # notice$setContent('Summary variable not found in dataset. Please verify your variable selection.')
-                        # self$results$insert(999, notice)
+                        private$.addNotice('ERROR', 'Summary Variable Not Found', 'Summary variable not found in dataset. Please verify your variable selection.')
                         return()
                     }
                     if (!is.numeric(mydata[[summaryvar]])) {
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = 'summaryvarNotNumeric',
-                        #     type = jmvcore::NoticeType$WARNING
-                        # )
-                        # notice$setContent('Summary variable is not numeric. Statistical summaries (mean, SD) may not be meaningful. Consider selecting a continuous variable.')
-                        # self$results$insert(101, notice)
+                        private$.addNotice('WARNING', 'Summary Variable Not Numeric', 'Summary variable is not numeric. Statistical summaries (mean, SD) may not be meaningful. Consider selecting a continuous variable.')
                     }
                 }
 
                 # Validate pruning variables if specified
                 if (!is.null(prunebelow) && !prunebelow %in% names(mydata)) {
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'prunebelowNotFound',
-                    #     type = jmvcore::NoticeType$ERROR
-                    # )
-                    # notice$setContent('Prune below variable not found in dataset. Please verify your variable selection.')
-                    # self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Prune Below Variable Not Found', 'Prune below variable not found in dataset. Please verify your variable selection.')
                     return()
                 }
 
                 # Validate follow variables if specified
                 if (!is.null(follow) && !follow %in% names(mydata)) {
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'followNotFound',
-                    #     type = jmvcore::NoticeType$ERROR
-                    # )
-                    # notice$setContent('Follow variable not found in dataset. Please verify your variable selection.')
-                    # self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Follow Variable Not Found', 'Follow variable not found in dataset. Please verify your variable selection.')
                     return()
                 }
             }
@@ -341,31 +323,19 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (excluded_n > 0) {
                     excluded_pct <- round(100 * excluded_n / original_n, 1)
 
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'missingValueExclusion',
-                    #     type = jmvcore::NoticeType$STRONG_WARNING
-                    # )
-                    # notice$setContent(sprintf(
-                    #     'CASE EXCLUSION: %d cases (%.1f%%) excluded due to missing values. Original N=%d, Final N=%d. Tree counts and percentages reflect complete cases only. Consider implications for generalizability.',
-                    #     excluded_n, excluded_pct, original_n, nrow(mydata)
-                    # ))
-                    # self$results$insert(999, notice)  # Top priority
+                    private$.addNotice('STRONG_WARNING', 'Case Exclusion', sprintf(
+                        'CASE EXCLUSION: %d cases (%.1f%%) excluded due to missing values. Original N=%d, Final N=%d. Tree counts and percentages reflect complete cases only. Consider implications for generalizability.',
+                        excluded_n, excluded_pct, original_n, nrow(mydata)
+                    ))
                 }
             }
 
             # Small sample warning
             if (nrow(mydata) < 50) {
-                # notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'smallSample',
-                #     type = jmvcore::NoticeType$WARNING
-                # )
-                # notice$setContent(sprintf(
-                #     'Small sample size (N=%d). Tree patterns may not be reliable for clinical decisions. Recommend N≥50 for stable subgroup identification. Interpret with caution.',
-                #     nrow(mydata)
-                # ))
-                # self$results$insert(2, notice)  # After errors
+                private$.addNotice('WARNING', 'Small Sample Size', sprintf(
+                    'Small sample size (N=%d). Tree patterns may not be reliable for clinical decisions. Recommend N>=50 for stable subgroup identification. Interpret with caution.',
+                    nrow(mydata)
+                ))
             }
 
             # Enhancement 1: Large tree complexity warning
@@ -374,17 +344,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             total_combinations <- prod(var_level_counts)
 
             if (total_combinations > 500) {
-                # notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'largeTreeComplexity',
-                #     type = jmvcore::NoticeType$WARNING
-                # )
                 var_summary <- paste(sprintf("%s (%d levels)", myvars, var_level_counts), collapse=", ")
-                # notice$setContent(sprintf(
-                #     'Large tree complexity detected: %d total subgroup combinations from variables: %s. Tree visualization may be difficult to interpret. Consider: (1) reducing variables, (2) collapsing variable levels, or (3) using pruning options to focus on key patterns.',
-                #     total_combinations, var_summary
-                # ))
-                # self$results$insert(3, notice)
+                private$.addNotice('WARNING', 'Large Tree Complexity', sprintf(
+                    'Large tree complexity detected: %d total subgroup combinations from variables: %s. Tree visualization may be difficult to interpret. Consider: (1) reducing variables, (2) collapsing variable levels, or (3) using pruning options to focus on key patterns.',
+                    total_combinations, var_summary
+                ))
             }
 
             # Create label mapping for vtree display
@@ -548,41 +512,22 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Analysis completion notice (INFO)
-            # success_notice <- jmvcore::Notice$new(
-            #     options = self$options,
-            #     name = 'analysisComplete',
-            #     type = jmvcore::NoticeType$INFO
-            # )
-
             # Reuse cached total_combinations from Enhancement 1 (line 355-356)
             n_vars <- length(myvars)
             # total_combinations already calculated above
 
-            # success_notice$setContent(sprintf(
-            #     'Analysis completed successfully. Tree displays %d categorical variables with %d total subgroup combinations across N=%d observations.',
-            #     n_vars, total_combinations, nrow(mydata)
-            # ))
-            # self$results$insert(999, success_notice)  # Bottom
+            private$.addNotice('INFO', 'Analysis Complete', sprintf(
+                'Analysis completed successfully. Tree displays %d categorical variables with %d total subgroup combinations across N=%d observations.',
+                n_vars, total_combinations, nrow(mydata)
+            ))
 
             # Enhancement 2: Pattern/sequence mode explanations
             if (self$options$pattern) {
-                # pattern_notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'patternModeExplanation',
-                #     type = jmvcore::NoticeType$INFO
-                # )
-                # pattern_notice$setContent('PATTERN MODE: Tree groups cases by unique variable combinations (patterns) regardless of order. Each branch represents a distinct pattern. Use this mode to identify common patient profiles or covariate combinations. Refer to pattern table for detailed counts.')
-                # self$results$insert(998, pattern_notice)  # Just above success notice
+                private$.addNotice('INFO', 'Pattern Mode', 'PATTERN MODE: Tree groups cases by unique variable combinations (patterns) regardless of order. Each branch represents a distinct pattern. Use this mode to identify common patient profiles or covariate combinations. Refer to pattern table for detailed counts.')
             }
 
             if (self$options$sequence) {
-                # sequence_notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'sequenceModeExplanation',
-                #     type = jmvcore::NoticeType$INFO
-                # )
-                # sequence_notice$setContent('SEQUENCE MODE: Tree preserves variable order to show progression patterns. Same combinations in different orders create separate branches. Use this mode for temporal sequences (diagnosis→treatment→outcome) or ordered clinical pathways. Particularly useful for longitudinal or staged data.')
-                # self$results$insert(998, sequence_notice)  # Just above success notice
+                private$.addNotice('INFO', 'Sequence Mode', 'SEQUENCE MODE: Tree preserves variable order to show progression patterns. Same combinations in different orders create separate branches. Use this mode for temporal sequences (diagnosis to treatment to outcome) or ordered clinical pathways. Particularly useful for longitudinal or staged data.')
             }
         },
 
@@ -604,8 +549,8 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Only claim percvar works if it's actually wired
             if (!is.null(self$options$percvar) && !is.null(self$options$percvarLevel)) {
-                interp_parts <- c(interp_parts, paste0("• ", .("Percentage calculated for '"), self$options$percvarLevel,
-                                                       .("' level of '"), self$options$percvar, .("'"), "<br>"))
+                interp_parts <- c(interp_parts, paste0("• ", .("Percentage calculated for '"), htmltools::htmlEscape(self$options$percvarLevel),
+                                                       .("' level of '"), htmltools::htmlEscape(self$options$percvar), .("'"), "<br>"))
             }
 
             # Style-specific notes
@@ -659,16 +604,16 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Fix variable names with spaces by backticking them
             if (!is.null(self$options$vars) && length(self$options$vars) > 0) {
                 # Process each variable name to add backticks if they contain spaces
-                vars_fixed <- sapply(self$options$vars, function(var) {
-                    if (grepl(" ", var)) {
-                        return(paste0("`", var, "`"))
-                    } else {
-                        return(var)
-                    }
-                })
+                # jmvcore::composeTerm backtick-quotes any non-syntactic name (spaces, hyphens,
+                # parens, …), not just names with spaces — more correct for the generated vtree syntax.
+                vars_fixed <- sapply(self$options$vars, jmvcore::composeTerm)
                 
                 # Create properly formatted variable list
-                vars_syntax <- paste0("c(", paste(paste0('"', vars_fixed, '"'), collapse = ", "), ")")
+                # TODO (cleanup): the `#' @importFrom stats as.formula` at L11 is a dead import
+                #   (no as.formula call in the body) — remove it.
+                # deparse() emits valid R string literals with embedded quotes/backslashes escaped,
+                # so a column name like a"b cannot corrupt the generated syntax-pane code.
+                vars_syntax <- paste0("c(", paste(vapply(vars_fixed, deparse, character(1)), collapse = ", "), ")")
                 
                 # Replace the problematic vars() call with proper c() syntax
                 syntax <- gsub("vars\\s*=\\s*vars\\([^)]+\\)", paste0("vars = ", vars_syntax), syntax)

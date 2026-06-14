@@ -166,6 +166,7 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ncvregcoxResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
         model_summary = function() private$.items[["model_summary"]],
@@ -189,6 +190,17 @@ ncvregcoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "survival",
                     "ncvreg"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "covariates",
+                    "penalty",
+                    "lambda_type",
+                    "cv_folds")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -585,6 +597,7 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   multicollinearity,  and whether regularization is needed.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$model_summary} \tab \tab \tab \tab \tab a table \cr

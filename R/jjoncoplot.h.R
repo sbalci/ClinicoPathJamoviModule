@@ -260,6 +260,7 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjoncoplotResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         setupGuidance = function() private$.items[["setupGuidance"]],
         main = function() private$.items[["main"]],
@@ -282,6 +283,17 @@ jjoncoplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "scales",
                     "patchwork",
                     "tidyr"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "sampleVar",
+                    "geneVars",
+                    "clinicalVars",
+                    "genesToInclude",
+                    "plotType",
+                    "sortBy")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -588,6 +600,7 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param showLegend Display plot legend.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$setupGuidance} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$main} \tab \tab \tab \tab \tab an image \cr

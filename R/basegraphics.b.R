@@ -60,6 +60,42 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             make.names(cleaned)
         },
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             # Initialize instructions
             instructions_html <- paste(
@@ -114,32 +150,18 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             original_names <- colnames(original_data)
             cleaned_names <- janitor::make_clean_names(original_names)
 
-            # TODO (cleanup): File-wide — `jmvcore::Notice$new(...)` objects are constructed at 17 sites but `self$results$insert(999, notice)` is commented out everywhere with "Causes serialization error". Lines: 120-129, 134-140, 170-179, 186-195, 203-212, 223-232, 241-250, 266-275, 280-289, 290-299, 301-310, 321-330, 338-347, 359-368, 376-385, 386-395, 396-405. The Notice objects are dead code (constructed and discarded). Convert to HTML output items per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference). Currently the user gets no feedback for any of these conditions.
-            # TODO (security): When converting Notice setContent calls to HTML output items per the file-wide cleanup TODO above, the existing sprintf interpolations at lines ~177-180, ~193-196, ~210-213, ~230-233 ALREADY embed user-supplied column names (x_var, y_var, group_var) — they're dormant only because the corresponding `self$results$insert(...)` lines are commented out. Wrap each user-derived value with `htmltools::htmlEscape()` at the construction site before re-enabling. Reference: R/tableone.b.R:235.
             # Check for duplicates in original names
             if (any(duplicated(original_names))) {
                 dup_names <- original_names[duplicated(original_names)]
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'duplicateVariableNames',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('WARNING', 'Duplicate Variable Names', sprintf(
                     'Duplicate variable names detected: %s. This may cause incorrect variable mapping.',
                     paste(unique(dup_names), collapse = ", ")
                 ))
-                # REMOVED:                 self$results$insert(999, notice)  # Causes serialization error
             }
 
             # Check if cleaning creates duplicates
             if (any(duplicated(cleaned_names))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'cleaningConflict',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent('Variable name cleaning created duplicate names. Some variables may be incorrectly mapped.')
-                # REMOVED:                 self$results$insert(999, notice)  # Causes serialization error
+                private$.addNotice('WARNING', 'Variable Name Cleaning Conflict', 'Variable name cleaning created duplicate names. Some variables may be incorrectly mapped.')
             }
 
             # Check if cleaning changed names - add to warnings
@@ -169,32 +191,20 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (plot_type %in% c("scatter", "line", "histogram", "density")) {
                 # These require continuous X variable
                 if (!is.numeric(mydata[[x_var_clean]])) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'inappropriateXType',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Inappropriate X Variable Type', sprintf(
                         "Plot type '%s' typically requires a continuous X variable, but '%s' appears to be categorical. Results may be misleading.",
                         plot_type, x_var
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
             }
 
             if (plot_type == "barplot") {
                 # Barplot works better with categorical data
                 if (is.numeric(mydata[[x_var_clean]]) && length(unique(mydata[[x_var_clean]])) > 20) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'tooManyBars',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Too Many Bars', sprintf(
                         "Variable '%s' has many unique values (%d). Consider using a histogram instead of a bar plot for continuous data.",
                         x_var, length(unique(mydata[[x_var_clean]]))
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
             }
 
@@ -202,16 +212,10 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(y_var)) {
                 y_var_clean <- private$.escapeVariableName(y_var)
                 if (!is.numeric(mydata[[y_var_clean]])) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'categoricalYVariable',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Categorical Y Variable', sprintf(
                         "Y variable '%s' should be continuous but appears to be categorical.",
                         y_var
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
             }
 
@@ -222,16 +226,10 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 n_groups <- length(levels(group_data))
 
                 if (n_groups > 10) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'tooManyGroups',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Too Many Groups', sprintf(
                         "Grouping variable '%s' has %d levels. Plots may be difficult to interpret with many groups.",
                         group_var, n_groups
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
 
                 # Check for group imbalance
@@ -240,16 +238,10 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 max_count <- max(group_counts)
 
                 if (max_count > 5 * min_count) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'groupImbalance',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Group Imbalance', sprintf(
                         'Severe group imbalance detected. Smallest group: n=%d, largest group: n=%d. Comparisons may be unreliable.',
                         min_count, max_count
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
             }
         },
@@ -264,52 +256,27 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             if (data_loss > 0) {
                 # Data loss WARNING (>20%) or INFO (<20%)
-                notice_type <- if (data_loss_pct > 20) jmvcore::NoticeType$STRONG_WARNING else jmvcore::NoticeType$INFO
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'dataLoss',
-                    type = notice_type
-                )
-                notice$setContent(sprintf(
+                notice_type <- if (data_loss_pct > 20) 'STRONG_WARNING' else 'INFO'
+                private$.addNotice(notice_type, 'Sample Size', sprintf(
                     'Sample size: %d observations retained from %d total (%d removed due to missing values, %.1f%% data loss).',
                     final_n, initial_n, data_loss, data_loss_pct
                 ))
-                position <- if (data_loss_pct > 20) 1 else 999
-                # REMOVED:                 self$results$insert(position, notice)  # Causes serialization error
 
                 # Additional warning for substantial loss
                 if (data_loss_pct > 20) {
-                    notice2 <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'substantialDataLoss',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice2$setContent('Substantial data loss (>20%) may indicate data quality issues or inappropriate variable selection.')
-                # REMOVED:                     self$results$insert(2, notice2)  # Causes serialization error
+                    private$.addNotice('STRONG_WARNING', 'Substantial Data Loss', 'Substantial data loss (>20%) may indicate data quality issues or inappropriate variable selection.')
                 }
             } else {
                 # No data loss - INFO
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'completeData',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(sprintf('Sample size: %d complete observations (no missing data).', final_n))
-                # REMOVED:                 self$results$insert(999, notice)  # Causes serialization error
+                private$.addNotice('INFO', 'Complete Data', sprintf('Sample size: %d complete observations (no missing data).', final_n))
             }
 
             # Small sample warning
             if (final_n < 30) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSample',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('WARNING', 'Small Sample', sprintf(
                     'Small sample size (n=%d). Results may be unstable and should be interpreted with caution.',
                     final_n
                 ))
-                # REMOVED:                 self$results$insert(999, notice)  # Causes serialization error
             }
         },
 
@@ -321,16 +288,10 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Check sample size for correlation/regression
             if (!is.null(y)) {
                 if (n < 30) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallSampleCorrelation',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('STRONG_WARNING', 'Small Sample for Correlation', sprintf(
                         'Sample size (n=%d) is below recommended minimum (n=30) for stable correlation estimates. Results should be interpreted with extreme caution.',
                         n
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
 
                 # Check for outliers using ±3 SD threshold
@@ -338,16 +299,10 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 y_outliers <- sum(abs(scale(y, center = TRUE, scale = TRUE)) > 3, na.rm = TRUE)
 
                 if (x_outliers > 0 || y_outliers > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'outliersDetected',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Outliers Detected', sprintf(
                         'Potential outliers detected (%d observations >3 SD from mean). Correlation may be influenced by extreme values.',
                         x_outliers + y_outliers
                     ))
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
                 }
 
                 # Check for non-linearity using simple curvature test
@@ -359,13 +314,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }, error = function(e) 1)
 
                     if (!is.na(p_value) && p_value < 0.05) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'nonLinearRelationship',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent('Non-linear relationship detected. Linear correlation (r) and R² may not adequately describe this relationship.')
-                # REMOVED:                         self$results$insert(999, notice)  # Causes serialization error
+                        private$.addNotice('WARNING', 'Non-Linear Relationship', 'Non-linear relationship detected. Linear correlation (r) and R² may not adequately describe this relationship.')
                     }
                 }
 
@@ -376,37 +325,21 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     shapiro_y <- tryCatch(shapiro.test(y)$p.value, error = function(e) 1)
 
                     if (shapiro_x < 0.05 || shapiro_y < 0.05) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'nonNormalDistribution',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent("Non-normal distribution detected. Pearson correlation assumes bivariate normality. Switch to Spearman's correlation (in Statistical Overlays options) for non-normal data.")
-                # REMOVED:                         self$results$insert(999, notice)  # Causes serialization error
+                        private$.addNotice('WARNING', 'Non-Normal Distribution', "Non-normal distribution detected. Pearson correlation assumes bivariate normality. Switch to Spearman's correlation (in Statistical Overlays options) for non-normal data.")
                     }
                 } else if (self$options$correlation_method == "spearman") {
                     # Inform user that Spearman is appropriate for non-normal data
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'spearmanMethodInfo',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent("Using Spearman's rank correlation (non-parametric). This method is robust to outliers and does not assume normality.")
-                # REMOVED:                     self$results$insert(999, notice)  # Causes serialization error
+                    private$.addNotice('INFO', 'Spearman Method', "Using Spearman's rank correlation (non-parametric). This method is robust to outliers and does not assume normality.")
                 }
 
                 # CRITICAL: Exploratory statistics disclaimer
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'exploratoryStatistics',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent('Correlation and R² displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation.')
-                # REMOVED:                 self$results$insert(999, notice)  # Causes serialization error
+                private$.addNotice('STRONG_WARNING', 'Exploratory Statistics Only', 'Correlation and R² displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation.')
             }
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             # Initialize warnings list (avoid Notice serialization errors)
             private$.warnings <- list()
 

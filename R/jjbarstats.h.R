@@ -294,6 +294,7 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjbarstatsResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         about = function() private$.items[["about"]],
         summary = function() private$.items[["summary"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -340,6 +341,17 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "showSummary",
                     "showAssumptions",
                     "showInterpretation"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "grvar",
+                    "counts",
+                    "paired",
+                    "ratio")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -477,6 +489,7 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ggpubrBalloonPalette Color palette for balloon plot.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr

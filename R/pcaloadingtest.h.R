@@ -155,6 +155,7 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     "pcaloadingtestResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         clinicalGuide = function() private$.items[["clinicalGuide"]],
         results = function() private$.items[["results"]],
@@ -172,6 +173,16 @@ pcaloadingtestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "glue",
                     "pracma",
                     "dplyr"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "vars",
+                    "ncomp",
+                    "nperm",
+                    "center",
+                    "scale")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -386,6 +397,7 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param plotheight Height of the plot in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalGuide} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$results} \tab \tab \tab \tab \tab Permutation-based significance testing for each variable-component loading \cr

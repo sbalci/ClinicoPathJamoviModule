@@ -190,6 +190,7 @@ misclassificationbiasResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
     "misclassificationbiasResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         observedTable = function() private$.items[["observedTable"]],
         biasAnalysis = function() private$.items[["biasAnalysis"]],
@@ -206,6 +207,17 @@ misclassificationbiasResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 title="Misclassification Bias Sensitivity Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "outcome",
+                    "exposure",
+                    "outcomeLevel",
+                    "exposureLevel",
+                    "misclassType",
+                    "effectMeasure")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -469,6 +481,7 @@ misclassificationbiasBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' @param random_seed Random seed for reproducible simulation results.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$observedTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$biasAnalysis} \tab \tab \tab \tab \tab a table \cr

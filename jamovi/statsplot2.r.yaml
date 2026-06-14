@@ -5,6 +5,18 @@ jrs:   '1.1'
 
 items:
 
+    - name:  notices
+      title: Important Information
+      type:  Preformatted
+      clearWith:
+          - dep
+          - group
+          - direction
+          - distribution
+          - excl
+          - grvar
+          - sampleLarge
+
     - name:  todo
       title: To Do
       type:  Html

@@ -12,6 +12,42 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
     inherit = misclassificationbiasBase,
     private = list(
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             if (is.null(self$options$outcome) || is.null(self$options$exposure)) {
                 self$results$todo$setVisible(TRUE)
@@ -34,6 +70,8 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             if (is.null(self$options$outcome) || is.null(self$options$exposure)) return()
 
             set.seed(self$options$random_seed)
@@ -70,16 +108,13 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
             # ── 7. Completion notice ──────────────────────────────────────
             measure_label <- switch(self$options$effectMeasure,
                 "or" = .("Odds Ratio"), "rr" = .("Risk Ratio"), "rd" = .("Risk Difference"))
-            notice <- jmvcore::Notice$new(options = self$options,
-                name = 'analysisComplete', type = jmvcore::NoticeType$INFO)
-            notice$setContent(
+            private$.addNotice('INFO', 'Analysis Complete',
                 sprintf(.('Misclassification bias analysis completed: %s corrected for %s misclassification (N=%d, Sen=%.2f, Spec=%.2f).'),
                     measure_label,
                     if (self$options$misclassType == "nondifferential") .("non-differential") else .("differential"),
                     data$n,
                     if (self$options$misclassType == "nondifferential") self$options$senExposure else self$options$senExposureCase,
                     if (self$options$misclassType == "nondifferential") self$options$specExposure else self$options$specExposureCase))
-            self$results$insert(999, notice)
         },
 
         # ══════════════════════════════════════════════════════════════════
@@ -108,10 +143,8 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
                     "<div class='alert alert-danger'>Both outcome and exposure must have at least 2 levels.</div>")
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'binaryRequired', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(.('Both outcome and exposure must have at least 2 levels. Check your variable selections.'))
-                self$results$insert(1, notice)
+                private$.addNotice('ERROR', 'Binary Variables Required',
+                    .('Both outcome and exposure must have at least 2 levels. Check your variable selections.'))
                 return(NULL)
             }
 
@@ -142,10 +175,8 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                 self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
                     "<div class='alert alert-danger'>Too few complete observations for analysis.</div>")
-                notice <- jmvcore::Notice$new(options = self$options,
-                    name = 'tooFewObs', type = jmvcore::NoticeType$ERROR)
-                notice$setContent(sprintf(.('Too few complete observations (%d). Need at least 10.'), n))
-                self$results$insert(1, notice)
+                private$.addNotice('ERROR', 'Too Few Observations',
+                    sprintf(.('Too few complete observations (%d). Need at least 10.'), n))
                 return(NULL)
             }
 
@@ -166,10 +197,8 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                     self$results$todo$setVisible(TRUE)
                     self$results$todo$setContent(
                         "<div class='alert alert-danger'>Sensitivity + Specificity must be > 1 for correction to be valid.</div>")
-                    notice <- jmvcore::Notice$new(options = self$options,
-                        name = 'invalidParams', type = jmvcore::NoticeType$ERROR)
-                    notice$setContent(sprintf(.('Sensitivity (%.2f) + Specificity (%.2f) = %.2f must be > 1 for bias correction to be valid.'), sen, spec, sen + spec))
-                    self$results$insert(1, notice)
+                    private$.addNotice('ERROR', 'Invalid Correction Parameters',
+                        sprintf(.('Sensitivity (%.2f) + Specificity (%.2f) = %.2f must be > 1 for bias correction to be valid.'), sen, spec, sen + spec))
                     return(NULL)
                 }
 
@@ -194,10 +223,8 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
                     self$results$todo$setVisible(TRUE)
                     self$results$todo$setContent(
                         "<div class='alert alert-danger'>Sensitivity + Specificity must be > 1 in both groups.</div>")
-                    notice <- jmvcore::Notice$new(options = self$options,
-                        name = 'invalidDiffParams', type = jmvcore::NoticeType$ERROR)
-                    notice$setContent(.('Sensitivity + Specificity must be > 1 in both cases and controls for bias correction to be valid.'))
-                    self$results$insert(1, notice)
+                    private$.addNotice('ERROR', 'Invalid Correction Parameters',
+                        .('Sensitivity + Specificity must be > 1 in both cases and controls for bias correction to be valid.'))
                     return(NULL)
                 }
 

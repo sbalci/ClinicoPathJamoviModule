@@ -16,7 +16,7 @@ analyses:
   - title: Table One
     name: tableone
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Table One
     description: >
@@ -28,7 +28,7 @@ analyses:
   - title: Summary of Continuous Variables
     name: summarydata
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptives
     menuTitle: Summary of Continuous Variables
     description: >
@@ -80,7 +80,7 @@ analyses:
   - title: Venn Diagram
     name: venn
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Venn Diagram
     menuSubtitle: Venn Diagram, UpSet Plot
@@ -89,7 +89,7 @@ analyses:
   - title: Variable Tree
     name: vartree
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Descriptive Plots
     menuTitle: Variable Tree
     description: >
@@ -128,7 +128,7 @@ analyses:
   - title: Treatment Response Analysis
     name: waterfall
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Treatment Response Analysis
     description: >-
@@ -140,7 +140,7 @@ analyses:
   - title: Swimmer Plot
     name: swimmerplot
     ns: ClinicoPath
-    menuGroup: OncoPath
+    menuGroup: OncoPathT
     menuSubgroup: Patient Follow-Up Plots
     menuTitle: Swimmer Plot
     description: >
@@ -1049,7 +1049,7 @@ analyses:
   - title: Survival Analysis for Continuous Variable
     name: survivalcont
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuSubgroup: ClinicoPath Survival
     menuTitle: Survival Analysis for Continuous Variable
     menuSubtitle: Cut-off & Univariate Survival Analysis
@@ -1103,7 +1103,7 @@ analyses:
   - title: Comprehensive Time Interval Calculator
     name: timeinterval
     ns: ClinicoPath
-    menuGroup: Survival
+    menuGroup: SurvivalT
     menuTitle: Comprehensive Time Interval Calculator
     menuSubgroup: Data Preparation
     menuSubtitle: Advanced time interval analysis with quality assessment
@@ -1534,7 +1534,7 @@ analyses:
   - title: Sequential Testing Analysis
     name: sequentialtests
     ns: ClinicoPath
-    menuGroup: meddecide
+    menuGroup: meddecideT
     menuTitle: Sequential Testing Analysis
     menuSubgroup: Decision Calculators
     menuSubtitle: Sequential Test Analysis
@@ -1800,7 +1800,7 @@ analyses:
   - title: Automatic Plot Selection
     name: statsplot2
     ns: ClinicoPath
-    menuGroup: JJStatsPlot
+    menuGroup: JJStatsPlotT
     menuSubgroup: All-In-One
     menuTitle: Automatic Plot Selection
     description: >-

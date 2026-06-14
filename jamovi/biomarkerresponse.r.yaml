@@ -4,6 +4,17 @@ title: Biomarker Response Association
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - biomarker
+          - response
+          - responseType
+          - positiveLevel
+          - thresholdMethod
+          - groupVariable
+
     - name: todo
       title: Instructions
       type: Html

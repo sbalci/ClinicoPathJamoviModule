@@ -3,6 +3,18 @@ name: sparsegrouplasso
 jrs: '1.1'
 title: Analysis Results
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - time_var
+        - event_var
+        - outcomeLevel
+        - censorLevel
+        - pred_vars
+        - alpha_sgl
+        - selection_criterion
+
     - name: instructions
       title: Instructions
       type: Html

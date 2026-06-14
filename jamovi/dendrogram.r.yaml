@@ -4,6 +4,17 @@ title: Dendrogram
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - vars
+        - clusterMethod
+        - distanceMethod
+        - group
+        - plotType
+        - standardize
+
     - name:  welcome
       title: ''
       type:  Html

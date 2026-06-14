@@ -2,6 +2,43 @@ grouplassoClass <- R6::R6Class(
     "grouplassoClass",
     inherit = grouplassoBase,
     private = list(
+
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             if (is.null(self$data) || is.null(self$options$time) || is.null(self$options$event)) {
                 self$results$instructions$setContent(
@@ -68,6 +105,8 @@ grouplassoClass <- R6::R6Class(
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             # Preserve global RNG state so set.seed() in CV/stability/nested/permutation
             # paths does not leak into the user's session.
             if (exists(".Random.seed", envir = .GlobalEnv)) {
@@ -88,20 +127,14 @@ grouplassoClass <- R6::R6Class(
 
             # Check if required packages are available
             if (!requireNamespace("grpreg", quietly = TRUE)) {
-                private$.insertNotice(
-                    'missingGrpreg', jmvcore::NoticeType$ERROR,
-                    "Package 'grpreg' is required for Group LASSO Cox regression. Install with: install.packages('grpreg')",
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'Missing Package: grpreg',
+                    "Package 'grpreg' is required for Group LASSO Cox regression. Install with: install.packages('grpreg')")
                 return()
             }
 
             if (!requireNamespace("survival", quietly = TRUE)) {
-                private$.insertNotice(
-                    'missingSurvival', jmvcore::NoticeType$ERROR,
-                    "Package 'survival' is required. Install with: install.packages('survival')",
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'Missing Package: survival',
+                    "Package 'survival' is required. Install with: install.packages('survival')")
                 return()
             }
 
@@ -121,16 +154,11 @@ grouplassoClass <- R6::R6Class(
             n_events <- group_data$n_events
             n_predictors <- ncol(group_data$x)
             if (n_events < 10) {
-                private$.insertNotice(
-                    'veryLowEvents', jmvcore::NoticeType$STRONG_WARNING,
-                    sprintf("Only %d events detected. Results are highly unreliable with fewer than 10 events. Consider collecting more data.", n_events),
-                    position = 1
-                )
+                private$.addNotice('STRONG_WARNING', 'Very Low Event Count',
+                    sprintf("Only %d events detected. Results are highly unreliable with fewer than 10 events. Consider collecting more data.", n_events))
             } else if (n_events < 20) {
-                private$.insertNotice(
-                    'lowEvents', jmvcore::NoticeType$WARNING,
-                    sprintf("Only %d events detected. Consider that penalized models need adequate events for stable selection.", n_events)
-                )
+                private$.addNotice('WARNING', 'Low Event Count',
+                    sprintf("Only %d events detected. Consider that penalized models need adequate events for stable selection.", n_events))
             }
 
             # Fit group LASSO model
@@ -142,10 +170,8 @@ grouplassoClass <- R6::R6Class(
                     # Post-analysis notices
                     n_selected <- sum(abs(group_results$coef_min) > self$options$selection_threshold)
                     if (n_selected == 0) {
-                        private$.insertNotice(
-                            'noSelection', jmvcore::NoticeType$WARNING,
-                            "No variables were selected at lambda.min. All coefficients are zero. Consider relaxing the penalty or checking data quality."
-                        )
+                        private$.addNotice('WARNING', 'No Variables Selected',
+                            "No variables were selected at lambda.min. All coefficients are zero. Consider relaxing the penalty or checking data quality.")
                     }
 
                     # Completion notice
@@ -161,45 +187,14 @@ grouplassoClass <- R6::R6Class(
                         length(unique(group_data$groups[abs(group_results$coef_min) > self$options$selection_threshold]))
                     } else { 0 }
 
-                    private$.insertNotice(
-                        'analysisComplete', jmvcore::NoticeType$INFO,
+                    private$.addNotice('INFO', 'Analysis Complete',
                         sprintf("%s analysis completed: %d/%d groups selected, %d/%d variables selected, using %d-fold CV with %d observations (%d events).",
                                 penalty_label, n_groups_sel, n_groups, n_selected, n_predictors,
-                                self$options$cv_folds, group_data$n_obs, n_events)
-                    )
+                                self$options$cv_folds, group_data$n_obs, n_events))
                 }
             }, error = function(e) {
-                private$.insertNotice(
-                    'analysisError', jmvcore::NoticeType$ERROR,
-                    sprintf("Error in Group LASSO fitting: %s. Check group definitions and variable structure.", e$message),
-                    position = 1
-                )
-            })
-        },
-
-        # ══════════════════════════════════════════════════════════════
-        # Notice Helper
-        # ══════════════════════════════════════════════════════════════
-        .insertNotice = function(name, type, content, position = 999) {
-            tryCatch({
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = name,
-                    type = type
-                )
-                notice$setContent(content)
-                self$results$insert(position, notice)
-            }, error = function(e) {
-                # Fallback to todo Html if Notice insertion fails
-                tryCatch({
-                    existing <- self$results$todo$content
-                    if (is.null(existing) || nchar(existing) == 0) existing <- ""
-                    label <- switch(as.character(type),
-                        "1" = "ERROR", "2" = "WARNING", "3" = "WARNING", "4" = "INFO", "NOTE")
-                    self$results$todo$setContent(paste0(
-                        existing, "<p><strong>", label, ":</strong> ", htmltools::htmlEscape(content), "</p>"
-                    ))
-                }, error = function(e2) NULL)
+                private$.addNotice('ERROR', 'Analysis Error',
+                    sprintf("Error in Group LASSO fitting: %s. Check group definitions and variable structure.", e$message))
             })
         },
 
@@ -223,11 +218,8 @@ grouplassoClass <- R6::R6Class(
             analysis_data <- jmvcore::naOmit(analysis_data)
 
             if (nrow(analysis_data) < length(pred_vars) + 10) {
-                private$.insertNotice(
-                    'insufficientData', jmvcore::NoticeType$ERROR,
-                    sprintf("Need at least p + 10 = %d complete observations for reliable Group LASSO. Only %d available.", length(pred_vars) + 10, nrow(analysis_data)),
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'Insufficient Data',
+                    sprintf("Need at least p + 10 = %d complete observations for reliable Group LASSO. Only %d available.", length(pred_vars) + 10, nrow(analysis_data)))
                 return(NULL)
             }
 
@@ -254,11 +246,9 @@ grouplassoClass <- R6::R6Class(
 
             n_excluded_outcome <- sum(is.na(event_values) & !is.na(event_data))
             if (n_excluded_outcome > 0) {
-                private$.insertNotice(
-                    'excludedRows', jmvcore::NoticeType$WARNING,
+                private$.addNotice('WARNING', 'Rows Excluded',
                     sprintf("%d row(s) excluded because outcome value matched neither event level ('%s') nor censored level ('%s').",
-                            n_excluded_outcome, event_level, censor_level)
-                )
+                            n_excluded_outcome, event_level, censor_level))
             }
 
             # Remove rows where event encoding produced NA
@@ -268,29 +258,20 @@ grouplassoClass <- R6::R6Class(
             event_values <- event_values[keep_rows]
 
             if (nrow(analysis_data) < length(pred_vars) + 10) {
-                private$.insertNotice(
-                    'insufficientDataAfterEncoding', jmvcore::NoticeType$ERROR,
-                    sprintf("Need at least p + 10 = %d complete observations after event encoding. Only %d remain.", length(pred_vars) + 10, nrow(analysis_data)),
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'Insufficient Data After Encoding',
+                    sprintf("Need at least p + 10 = %d complete observations after event encoding. Only %d remain.", length(pred_vars) + 10, nrow(analysis_data)))
                 return(NULL)
             }
 
             if (any(time_values <= 0, na.rm = TRUE)) {
-                private$.insertNotice(
-                    'invalidTime', jmvcore::NoticeType$ERROR,
-                    "All time values must be positive for survival analysis.",
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'Invalid Time Values',
+                    "All time values must be positive for survival analysis.")
                 return(NULL)
             }
 
             if (sum(event_values == 1) == 0) {
-                private$.insertNotice(
-                    'noEvents', jmvcore::NoticeType$ERROR,
-                    "No events detected in the data. All observations are censored. Group LASSO requires at least some events to fit.",
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'No Events Detected',
+                    "No events detected in the data. All observations are censored. Group LASSO requires at least some events to fit.")
                 return(NULL)
             }
 
@@ -358,11 +339,8 @@ grouplassoClass <- R6::R6Class(
             groups <- private$.defineGroups(x_matrix, pred_data, pred_vars, group_method, assign_vec)
 
             if (is.null(groups)) {
-                private$.insertNotice(
-                    'groupDefError', jmvcore::NoticeType$ERROR,
-                    "Failed to define variable groups. Check group structure specification.",
-                    position = 1
-                )
+                private$.addNotice('ERROR', 'Group Definition Error',
+                    "Failed to define variable groups. Check group structure specification.")
                 return(NULL)
             }
 
@@ -552,10 +530,8 @@ grouplassoClass <- R6::R6Class(
                 if (nchar(weight_str) > 0) {
                     weights <- as.numeric(unlist(strsplit(weight_str, ",")))
                     if (length(weights) != n_groups) {
-                        private$.insertNotice(
-                            'weightMismatch', jmvcore::NoticeType$WARNING,
-                            sprintf("Custom weights length (%d) does not match number of groups (%d). Using equal weights.", length(weights), n_groups)
-                        )
+                        private$.addNotice('WARNING', 'Custom Weight Mismatch',
+                            sprintf("Custom weights length (%d) does not match number of groups (%d). Using equal weights.", length(weights), n_groups))
                         weights <- rep(1, n_groups)
                     }
                 } else {
@@ -1316,11 +1292,8 @@ grouplassoClass <- R6::R6Class(
 
             # C-index clinical notice
             if (!is.na(c_index) && c_index < 0.5 && n_vars_selected > 0) {
-                private$.insertNotice(
-                    'poorDiscrimination', jmvcore::NoticeType$STRONG_WARNING,
-                    sprintf("Training C-index = %.3f is below 0.5, indicating the model predicts worse than chance. Review variable selection and data quality.", c_index),
-                    position = 1
-                )
+                private$.addNotice('STRONG_WARNING', 'Poor Discrimination',
+                    sprintf("Training C-index = %.3f is below 0.5, indicating the model predicts worse than chance. Review variable selection and data quality.", c_index))
             }
 
             metrics <- c("Number of Groups Selected", "Number of Variables Selected",

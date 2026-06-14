@@ -611,6 +611,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     "pathsamplingResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         guidedInstructions = function() private$.items[["guidedInstructions"]],
         conciseInstructions = function() private$.items[["conciseInstructions"]],
@@ -685,6 +686,16 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="",
                 title="Pathology Sampling Adequacy Analysis")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "totalSamples",
+                    "firstDetection",
+                    "targetConfidence",
+                    "maxSamples",
+                    "bootstrapIterations")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -1816,6 +1827,7 @@ pathsamplingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Type variable. Warns if CV > 30 percent.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$guidedInstructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$conciseInstructions} \tab \tab \tab \tab \tab a html \cr

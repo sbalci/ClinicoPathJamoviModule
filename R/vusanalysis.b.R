@@ -26,7 +26,7 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             outcome <- outcome[complete_cases]
 
             if (length(predictor) < 10) {
-                stop("Insufficient data for VUS analysis. Need at least 10 complete observations.")
+                jmvcore::reject("Insufficient data for VUS analysis. Need at least 10 complete observations.")
             }
 
             # Check for 3+ classes
@@ -34,7 +34,7 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             n_classes <- length(outcome_levels)
 
             if (n_classes < 3) {
-                stop("VUS analysis requires at least 3 outcome classes. For binary outcomes, use standard ROC analysis.")
+                jmvcore::reject("VUS analysis requires at least 3 outcome classes. For binary outcomes, use standard ROC analysis.")
             }
 
             # Check minimum class sizes
@@ -42,8 +42,8 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             min_size <- self$options$min_class_size
             if (any(class_counts < min_size)) {
                 small_classes <- names(class_counts)[class_counts < min_size]
-                stop(paste0("All classes must have at least ", min_size, " observations. ",
-                          "Classes with insufficient size: ", paste(small_classes, collapse=", ")))
+                jmvcore::reject("All classes must have at least {} observations. Classes with insufficient size: {}",
+                                code = NULL, min_size, paste(small_classes, collapse = ", "))
             }
 
             # Set random seed
@@ -77,7 +77,7 @@ vusanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.populateInterpretation()
 
             }, error = function(e) {
-                stop(paste0("Error in VUS analysis: ", e$message))
+                jmvcore::reject("Error in VUS analysis: {}", code = NULL, e$message)
             })
         },
 

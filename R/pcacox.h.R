@@ -296,6 +296,7 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "pcacoxResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
         summary = function() private$.items[["summary"]],
@@ -329,6 +330,17 @@ pcacoxResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "superpc",
                     "sparsepca",
                     "kernlab"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time",
+                    "status",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "predictors",
+                    "pca_method")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -769,6 +781,7 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param feature_importance Rank features by contribution
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr

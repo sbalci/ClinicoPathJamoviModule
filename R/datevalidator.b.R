@@ -12,27 +12,46 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
     inherit = datevalidatorBase,
     private = list(
         .correction_results = NULL,
-        .notices = list(),  # Track notices to avoid serialization issues
 
-        #' @keywords internal
-        .addNotice = function(name, type, content) {
-            # Helper to safely add notices without serialization issues
-            # Only create notice if it doesn't already exist for this run
-            if (!(name %in% names(private$.notices))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = name,
-                    type = type
-                )
-                notice$setContent(content)
-                self$results$insert(999, notice)
-                private$.notices[[name]] <- TRUE  # Track that we added it
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
             }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
         .run = function() {
-            # Clear notice tracking at start of each run
-            private$.notices <- list()
+            # Reset notice collection at start of each run
+            private$.noticeList <- list()
 
             # Check if required variables have been selected
             if (is.null(self$options$date_vars) || length(self$options$date_vars) == 0) {
@@ -103,8 +122,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
             # Validate dataset
             if (nrow(self$data) == 0) {
                 private$.addNotice(
-                    'emptyDataset',
-                    jmvcore::NoticeType$ERROR,
+                    'ERROR',
+                    'Empty Dataset',
                     'Dataset contains no complete rows. • Please check your data for missing values. • Ensure at least one row has complete data before running date validation.'
                 )
                 return()
@@ -131,8 +150,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
                 if (show_warning) {
                    private$.addNotice(
-                        'missingPackages',
-                        jmvcore::NoticeType$WARNING,
+                        'WARNING',
+                        'Missing Optional Packages',
                         sprintf('Optional package(s) not found: %s • The selected method "%s" requires these packages. • Falling back to basic date validation (lubridate) where possible. • Please install the full version of the module for advanced date correction features.',
                                 paste(missing_pkgs, collapse = ", "),
                                 requested_method)
@@ -146,8 +165,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
 
             if (length(date_vars) == 0) {
                 private$.addNotice(
-                    'missingDateVars',
-                    jmvcore::NoticeType$ERROR,
+                    'ERROR',
+                    'Date Variables Required',
                     'Date/DateTime variables are required. • Please select at least one variable containing date or datetime information. • Use the "Date/DateTime Variables to Validate" box in the left panel to add variables.'
                 )
                 return()
@@ -164,8 +183,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                     paste(available_vars, collapse = ", ")
                 }
                 private$.addNotice(
-                    'variablesNotFound',
-                    jmvcore::NoticeType$ERROR,
+                    'ERROR',
+                    'Variables Not Found',
                     sprintf('Selected variables not found in dataset: %s • Available variables: %s • Check variable names for typos. • Ensure variables are present in the active dataset.',
                             paste(missing_vars, collapse = ', '),
                             available_preview)
@@ -196,9 +215,9 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
             # Add quality notices based on success rate
             if (total_observations > 0 && success_rate < 85) {
                 severity <- if (success_rate < 70) {
-                    jmvcore::NoticeType$STRONG_WARNING
+                    'STRONG_WARNING'
                 } else {
-                    jmvcore::NoticeType$WARNING
+                    'WARNING'
                 }
 
                 content <- if (success_rate < 70) {
@@ -209,7 +228,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                             success_rate, successful_corrections, total_observations)
                 }
 
-                private$.addNotice('lowSuccessRate', severity, content)
+                private$.addNotice(severity, 'Low Validation Success Rate', content)
             }
 
             # Generate outputs
@@ -241,8 +260,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
             # Add completion summary INFO notice
             if (total_observations > 0) {
                 private$.addNotice(
-                    'analysisComplete',
-                    jmvcore::NoticeType$INFO,
+                    'INFO',
+                    'Validation Complete',
                     sprintf('Date/datetime validation completed successfully. • Processed %d observations across %d variable(s). • Successfully validated %d dates/datetimes (%.1f%%). • Full audit trail available in "Validated Date/DateTime Data" table. • Export table to CSV for documentation or downstream use.',
                             total_observations,
                             length(correction_results),
@@ -318,8 +337,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
                 if (all(is.na(var_data))) {
                     # Add warning notice for all-NA variable
                     private$.addNotice(
-                        paste0('allNA_', var),
-                        jmvcore::NoticeType$WARNING,
+                        'WARNING',
+                        'Variable All Missing',
                         sprintf('Variable "%s" contains only missing values (NA). • No date/datetime validation possible for this variable. • %d row(s) affected. • Consider removing this variable or checking your data source.',
                                 var, length(var_data))
                     )
@@ -589,8 +608,8 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) R6::R6Class("datevalidato
             # Add notice if there were conflicts
             if (conflict_count > 0) {
                 private$.addNotice(
-                    'consensusConflicts',
-                    jmvcore::NoticeType$INFO,
+                    'INFO',
+                    'Consensus Conflicts Detected',
                     sprintf('Consensus method detected %d conflict(s) where date/datetime parsers disagreed. • Using datefixR as primary resolver when conflicts occur. • Review "Method" column in audit table to see affected rows. • Consider specifying exact date/datetime format if conflicts are widespread. • Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
                             conflict_count)
                 )

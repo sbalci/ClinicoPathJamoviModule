@@ -4,6 +4,17 @@ title: Misclassification Bias Sensitivity Analysis
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - outcome
+          - exposure
+          - outcomeLevel
+          - exposureLevel
+          - misclassType
+          - effectMeasure
+
     - name: todo
       title: To Do
       type: Html

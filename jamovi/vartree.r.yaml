@@ -5,6 +5,17 @@ jrs:   '1.1'
 
 items:
 
+    - name:  notices
+      title: Important Information
+      type:  Preformatted
+      clearWith:
+        - vars
+        - percvar
+        - summaryvar
+        - prunebelow
+        - follow
+        - excl
+
     - name:  todo
       title: To Do
       type:  Html

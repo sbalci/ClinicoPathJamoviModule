@@ -334,6 +334,7 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjpubrResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         plot = function() private$.items[["plot"]],
         summary = function() private$.items[["summary"]],
@@ -352,6 +353,17 @@ jjpubrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ggpubr",
                     "ggplot2",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "plotType",
+                    "xvar",
+                    "yvar",
+                    "groupvar",
+                    "statMethod",
+                    "addStats")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -635,6 +647,7 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param clinicalPreset Clinical analysis preset
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr

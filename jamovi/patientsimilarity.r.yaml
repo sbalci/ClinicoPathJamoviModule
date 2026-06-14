@@ -4,6 +4,17 @@ title: Patient Similarity Clustering
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - vars
+        - method
+        - dimensions
+        - colorBy
+        - performClustering
+        - survivalAnalysis
+
     - name: instructions
       title: Instructions
       type: Html

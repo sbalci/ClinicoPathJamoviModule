@@ -14,17 +14,44 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
             MIN_TARGET_DIAMETER_NONLYMPH = 10,  # Minimum 10mm for non-lymph node targets
             MIN_TARGET_DIAMETER_LYMPH = 15,     # Minimum 15mm short axis for lymph nodes
 
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+
+            .addNotice = function(type, title, content) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
+
+                # Plain text only — notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        "")
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
+
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+
             # Initialization ====
             .init = function() {
-                # Methodology notice
-                method_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'methodology',
-                    type = jmvcore::NoticeType$INFO
-                )
-                method_notice$setContent(paste0('RECIST v1.1 protocol per Eisenhauer et al. (2009) Eur J Cancer 45:228-247. Target lesion limits: <=', self$options$maxTargetLesions, ' total, <=', self$options$maxLesionsPerOrgan, ' per organ. CR/PR confirmation: >=', self$options$confirmationInterval, ' weeks. Any new lesion = PD.'))
-                self$results$insert(999, method_notice)
-
                 # Initialize output elements
                 if (self$options$showLesionTable)
                     private$.initLesionTable()
@@ -47,6 +74,10 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
 
             # Main Execution ====
             .run = function() {
+                # Reset notice collection and post the methodology notice
+                private$.noticeList <- list()
+                private$.addNotice('INFO', 'RECIST v1.1 Methodology', paste0('RECIST v1.1 protocol per Eisenhauer et al. (2009) Eur J Cancer 45:228-247. Target lesion limits: <=', self$options$maxTargetLesions, ' total, <=', self$options$maxLesionsPerOrgan, ' per organ. CR/PR confirmation: >=', self$options$confirmationInterval, ' weeks. Any new lesion = PD.'))
+
                 # Input validation
                 validation_result <- private$.validateInput()
                 if (!validation_result$valid) {
@@ -57,13 +88,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                 lesion_data <- private$.prepareLesionData()
 
                 if (is.null(lesion_data) || nrow(lesion_data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noValidData',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(paste0('No valid lesion data after removing rows with missing Patient ID, Lesion ID, or Visit Time. Ensure baseline visit (time=', self$options$baselineTimepoint, ') exists and data is in lesion-level format.'))
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'No Valid Lesion Data', paste0('No valid lesion data after removing rows with missing Patient ID, Lesion ID, or Visit Time. Ensure baseline visit (time=', self$options$baselineTimepoint, ') exists and data is in lesion-level format.'))
                     return()
                 }
 
@@ -116,13 +141,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                 n_pr <- sum(best_responses$bestOverallResponse == "PR")
                 orr_pct <- round((n_cr + n_pr) / n_patients * 100, 1)
 
-                success_notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'analysisComplete',
-                    type = jmvcore::NoticeType$INFO
-                )
-                success_notice$setContent(paste0('RECIST v1.1 analysis completed for ', n_patients, ' patients. ORR: ', orr_pct, '% (CR=', n_cr, ', PR=', n_pr, '). Confirmation interval: >=', self$options$confirmationInterval, ' weeks.'))
-                self$results$insert(999, success_notice)
+                private$.addNotice('INFO', 'Analysis Complete', paste0('RECIST v1.1 analysis completed for ', n_patients, ' patients. ORR: ', orr_pct, '% (CR=', n_cr, ', PR=', n_pr, '). Confirmation interval: >=', self$options$confirmationInterval, ' weeks.'))
 
                 # Step 12 - Add BOR to dataset if requested
                 # TODO: Implement data augmentation
@@ -135,61 +154,31 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                 # Check for required variables
                 if (is.null(self$options$patientID) ||
                     length(self$options$patientID) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingPatientID',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Patient ID variable is required. Select a patient identifier variable and re-run.')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Patient ID Required', 'Patient ID variable is required. Select a patient identifier variable and re-run.')
                     return(list(valid = FALSE, message = ''))
                 }
 
                 if (is.null(self$options$lesionID) ||
                     length(self$options$lesionID) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingLesionID',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Lesion ID variable is required. Select a lesion identifier variable and re-run.')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Lesion ID Required', 'Lesion ID variable is required. Select a lesion identifier variable and re-run.')
                     return(list(valid = FALSE, message = ''))
                 }
 
                 if (is.null(self$options$visitTime) ||
                     length(self$options$visitTime) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingVisitTime',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Visit Time variable is required. Select a time variable (baseline=0 recommended) and re-run.')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Visit Time Required', 'Visit Time variable is required. Select a time variable (baseline=0 recommended) and re-run.')
                     return(list(valid = FALSE, message = ''))
                 }
 
                 if (is.null(self$options$diameter) ||
                     length(self$options$diameter) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'missingDiameter',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Lesion Diameter variable is required. Select a numeric diameter variable (in mm) and re-run.')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Diameter Required', 'Lesion Diameter variable is required. Select a numeric diameter variable (in mm) and re-run.')
                     return(list(valid = FALSE, message = ''))
                 }
 
                 # Get data
                 if (is.null(self$data) || nrow(self$data) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noData',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('No data available. Load a dataset in lesion-level format (one row per lesion per visit).')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'No Data', 'No data available. Load a dataset in lesion-level format (one row per lesion per visit).')
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -199,52 +188,28 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                 # Verify visitTime variable exists
                 visitTimeVar <- jmvcore::toB64(self$options$visitTime)
                 if (!visitTimeVar %in% colnames(data_df)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'visitTimeNotFound',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(paste0('Visit Time variable "', self$options$visitTime, '" not found in dataset. Verify variable name and re-run.'))
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Visit Time Variable Not Found', paste0('Visit Time variable "', self$options$visitTime, '" not found in dataset. Verify variable name and re-run.'))
                     return(list(valid = FALSE, message = ''))
                 }
 
                 # Verify baseline timepoint exists
                 baseline_present <- any(data_df[[visitTimeVar]] == self$options$baselineTimepoint, na.rm = TRUE)
                 if (!baseline_present) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noBaseline',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(paste0('Baseline timepoint (', self$options$baselineTimepoint, ') not found in Visit Time. Ensure baseline measurements exist or adjust Baseline Timepoint Value.'))
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Baseline Timepoint Not Found', paste0('Baseline timepoint (', self$options$baselineTimepoint, ') not found in Visit Time. Ensure baseline measurements exist or adjust Baseline Timepoint Value.'))
                     return(list(valid = FALSE, message = ''))
                 }
 
                 # Check diameter variable exists
                 diameterVar <- jmvcore::toB64(self$options$diameter)
                 if (!diameterVar %in% colnames(data_df)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'diameterNotFound',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(paste0('Diameter variable "', self$options$diameter, '" not found in dataset. Verify variable name and re-run.'))
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Diameter Variable Not Found', paste0('Diameter variable "', self$options$diameter, '" not found in dataset. Verify variable name and re-run.'))
                     return(list(valid = FALSE, message = ''))
                 }
 
                 # Check diameter values (must be non-negative)
                 diameter_values <- data_df[[diameterVar]]
                 if (any(diameter_values < 0, na.rm = TRUE)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'negativeDiameters',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Diameter values must be non-negative (>=0 mm). Correct negative values and re-run.')
-                    self$results$insert(999, notice)
+                    private$.addNotice('ERROR', 'Invalid Diameter Values', 'Diameter values must be non-negative (>=0 mm). Correct negative values and re-run.')
                     return(list(valid = FALSE, message = ''))
                 }
 
@@ -259,13 +224,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         invalid_types <- lesion_types[!lesion_types %in% valid_types]
 
                         if (length(invalid_types) > 0) {
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'invalidLesionTypes',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent(paste0('Lesion Type contains invalid values: ', paste(invalid_types, collapse=', '), '. Valid values: Target, NonTarget, New. Invalid entries treated as Target.'))
-                            self$results$insert(2, notice)
+                            private$.addNotice('WARNING', 'Invalid Lesion Types', paste0('Lesion Type contains invalid values: ', paste(invalid_types, collapse=', '), '. Valid values: Target, NonTarget, New. Invalid entries treated as Target.'))
                         }
                     }
                 }
@@ -325,7 +284,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                 if (!is.null(self$options$isNewLesion) && length(self$options$isNewLesion) > 0) {
                     isNewLesionVar <- jmvcore::toB64(self$options$isNewLesion)
                     if (isNewLesionVar %in% colnames(data_df)) {
-                        lesion_data$isNewLesion <- as.numeric(data_df[[isNewLesionVar]])
+                        lesion_data$isNewLesion <- jmvcore::toNumeric(data_df[[isNewLesionVar]])
                         # Mark new lesions
                         lesion_data$lesionType[lesion_data$isNewLesion == 1] <- "New"
                     } else {
@@ -415,14 +374,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
 
                 # Post violations as STRONG_WARNING
                 if (length(violations) > 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'recistViolations',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    # Single-line format (jamovi Notices don't support newlines)
-                    notice$setContent(paste0('RECIST v1.1 COMPLIANCE VIOLATIONS: ', paste(violations, collapse=' • '), ' • Results may not be suitable for regulatory submissions.'))
-                    self$results$insert(999, notice)
+                    private$.addNotice('STRONG_WARNING', 'RECIST v1.1 Compliance Violations', paste0('RECIST v1.1 COMPLIANCE VIOLATIONS: ', paste(violations, collapse=' • '), ' • Results may not be suitable for regulatory submissions.'))
                 }
 
                 return(list(
@@ -1021,7 +973,7 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         length(target_validation$violations), " violation(s) detected:</li>",
                         "<ul style='color: red;'>")
                     for (violation in target_validation$violations) {
-                        html_content <- paste0(html_content, "<li>", violation, "</li>")
+                        html_content <- paste0(html_content, "<li>", htmltools::htmlEscape(violation), "</li>")
                     }
                     html_content <- paste0(html_content, "</ul>")
                 }
@@ -1044,9 +996,9 @@ waterfallrecistClass <- if (requireNamespace('jmvcore', quietly = TRUE)) {
                         "<ul>")
                     for (i in seq_len(nrow(new_lesions))) {
                         html_content <- paste0(html_content,
-                            "<li>Patient ", new_lesions$patientID[i],
+                            "<li>Patient ", htmltools::htmlEscape(new_lesions$patientID[i]),
                             " - New lesion at visit ", new_lesions$first_new_lesion_visit[i],
-                            " (Location: ", new_lesions$new_lesion_location[i], ")</li>")
+                            " (Location: ", htmltools::htmlEscape(new_lesions$new_lesion_location[i]), ")</li>")
                     }
                     html_content <- paste0(html_content, "</ul>")
                 }

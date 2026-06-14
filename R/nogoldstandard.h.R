@@ -185,6 +185,7 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     "nogoldstandardResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         agreement_stats = function() private$.items[["agreement_stats"]],
         clinical_summary = function() private$.items[["clinical_summary"]],
@@ -206,6 +207,17 @@ nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "NoGoldDiagnostic",
                     "ClinicoPathJamoviModule",
                     "poLCA"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "test1",
+                    "test2",
+                    "test3",
+                    "method",
+                    "bootstrap",
+                    "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -466,6 +478,7 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param verbose Show detailed progress messages during bootstrap analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$agreement_stats} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr

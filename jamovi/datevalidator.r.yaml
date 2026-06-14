@@ -4,6 +4,17 @@ title: Date/DateTime Validator
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - date_vars
+        - correction_method
+        - date_format
+        - day_impute
+        - month_impute
+        - handle_excel
+
     - name: todo
       title: Instructions
       type: Html

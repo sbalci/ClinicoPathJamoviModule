@@ -4,6 +4,17 @@ title: Tumor Growth Models
 jrs:   '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - time
+          - tumorSize
+          - patientId
+          - growthModel
+          - modelApproach
+          - treatmentEffect
+
     - name:  todo
       title: To Do
       type:  Html

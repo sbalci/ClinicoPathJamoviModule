@@ -4,6 +4,17 @@ title: Publication-Ready Plots (ggpubr)
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - plotType
+        - xvar
+        - yvar
+        - groupvar
+        - statMethod
+        - addStats
+
     - name: todo
       title: Welcome
       type: Html

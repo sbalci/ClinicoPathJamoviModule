@@ -130,6 +130,42 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
     inherit = clinicalheatmapBase,
     private = list(
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .escapeVar = function(x) {
             # Escape variable names for rlang::sym() - original names work best
             if (is.null(x) || length(x) == 0) return(x)
@@ -163,6 +199,8 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             # Check if required variables have been selected
             if (is.null(self$options$rowVar) || is.null(self$options$colVar) || is.null(self$options$valueVar)) {
                 intro_msg <- "
@@ -213,23 +251,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 self$results$todo$setContent(intro_msg)
 
                 # Add ERROR notice for missing variables
-                # TODO (jamovify): this file uses the dynamic
-                # `self$results$insert(N, notice)` pattern with jmvcore::Notice
-                # objects — see all 10 sites at L<this>+1, L238, L267, L320,
-                # L339, L353, L378, L545, L1460, L1472. Per CLAUDE.md and
-                # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md, this pattern can
-                # cause protobuf serialization errors because Notice objects
-                # contain function references. Convert to the .addNotice() +
-                # .renderNotices() HTML-output pattern (see R/waterfall.b.R for
-                # the reference implementation). Tracked here for context, not
-                # urgent — no current crashes reported.
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingRequiredVars',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Row, column, and value variables are required. Select all three variables from the left panel to generate the clinical heatmap.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Missing Required Variables', 'Row, column, and value variables are required. Select all three variables from the left panel to generate the clinical heatmap.')
 
                 return()
             } else {
@@ -239,13 +261,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             # Validate dataset
             if (nrow(self$data) == 0) {
                 # Add ERROR notice
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'emptyDataset',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Dataset contains no rows. Ensure data was imported correctly and check if filters excluded all observations.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Empty Dataset', 'Dataset contains no rows. Ensure data was imported correctly and check if filters excluded all observations.')
 
                 # Keep detailed HTML explanation
                 error_msg <- "
@@ -268,13 +284,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             # Check for tidyheatmaps package
             if (!requireNamespace("tidyheatmaps", quietly = TRUE)) {
                 # Add ERROR notice
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingTidyheatmaps',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Required package tidyheatmaps is not installed. Install it using: install.packages("tidyheatmaps") then restart R.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Required Package Missing', 'Required package tidyheatmaps is not installed. Install it using: install.packages("tidyheatmaps") then restart R.')
 
                 # Keep detailed HTML explanation
                 error_msg <- "
@@ -321,46 +331,26 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             if (validation_results$should_stop) {
                 # Add ERROR notices for critical validation failures
                 for (i in seq_along(validation_results$errors)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('validationError', i),
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(validation_results$errors[i])
-                    self$results$insert(i, notice)
+                    private$.addNotice('ERROR', 'Validation Error', validation_results$errors[i])
                 }
             }
 
             # Add WARNING and STRONG_WARNING notices
-            pos <- if (validation_results$should_stop) length(validation_results$errors) + 1 else 1
             for (warn in validation_results$warnings) {
                 # Determine warning severity based on content
                 type <- if (grepl("50%|50 %", warn)) {
-                    jmvcore::NoticeType$STRONG_WARNING
+                    'STRONG_WARNING'
                 } else {
-                    jmvcore::NoticeType$WARNING
+                    'WARNING'
                 }
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = paste0('validationWarn', pos),
-                    type = type
-                )
-                notice$setContent(warn)
-                self$results$insert(pos, notice)
-                pos <- pos + 1
+                private$.addNotice(type, 'Validation Warning', warn)
             }
 
             # Add INFO notice if validation passed
             if (length(validation_results$info) > 0 &&
                 length(validation_results$errors) == 0 &&
                 length(validation_results$warnings) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'validationPassed',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent('Data validation passed. Heatmap generation proceeding.')
-                self$results$insert(999, notice)
+                private$.addNotice('INFO', 'Validation Passed', 'Data validation passed. Heatmap generation proceeding.')
             }
 
             # Show validation summary HTML if there are issues
@@ -379,13 +369,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
 
             if (is.null(heatmap_data)) {
                 # Add ERROR notice
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'dataPreparationFailed',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Data preparation failed. Ensure data is in tidy format with one row per row-variable/column-variable combination and check for excessive missing values.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Data Preparation Failed', 'Data preparation failed. Ensure data is in tidy format with one row per row-variable/column-variable combination and check for excessive missing values.')
 
                 # Keep detailed HTML explanation
                 error_msg <- "
@@ -536,11 +520,6 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             }
 
             # Add success INFO notice at end
-            notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
             n_rows <- length(unique(heatmap_data[[row_var]]))
             n_cols <- length(unique(heatmap_data[[col_var]]))
             clustering_text <- if (self$options$clusterRows && self$options$clusterCols) {
@@ -552,11 +531,10 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
             } else {
                 "no clustering"
             }
-            notice$setContent(sprintf('Clinical heatmap analysis completed successfully. Generated %dx%d heatmap with %s scaling and %s.',
+            private$.addNotice('INFO', 'Analysis Complete', sprintf('Clinical heatmap analysis completed successfully. Generated %dx%d heatmap with %s scaling and %s.',
                                       n_rows, n_cols,
                                       self$options$scaleMethod,
                                       clustering_text))
-            self$results$insert(999, notice)
         },
 
         .plotHeatmap = function(image, ggtheme, theme, ...) {
@@ -1486,26 +1464,14 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 # Log-rank test
                 # Guard against too few events per cluster
                 if (length(unique(surv_data$cluster)) < 2) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'survivalInsufficientClusters',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('Survival analysis skipped: clustering produced only %d group(s). Requires at least 2 clusters. Try adjusting splitRows or clustering parameters.',
+                    private$.addNotice('WARNING', 'Survival Analysis Skipped', sprintf('Survival analysis skipped: clustering produced only %d group(s). Requires at least 2 clusters. Try adjusting splitRows or clustering parameters.',
                                               length(unique(surv_data$cluster))))
-                    self$results$insert(2, notice)
                     return(invisible(NULL))
                 }
                 events_per_cluster <- tapply(surv_data$event, surv_data$cluster, sum)
                 if (length(events_per_cluster) < 2 || any(events_per_cluster == 0)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'survivalInsufficientEvents',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf('Survival analysis skipped: %d cluster(s) have zero events. All clusters need at least one event for log-rank test.',
+                    private$.addNotice('WARNING', 'Survival Analysis Skipped', sprintf('Survival analysis skipped: %d cluster(s) have zero events. All clusters need at least one event for log-rank test.',
                                               sum(events_per_cluster == 0)))
-                    self$results$insert(2, notice)
                     return(invisible(NULL))
                 }
                 log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)

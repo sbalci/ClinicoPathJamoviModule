@@ -4,6 +4,17 @@ title: "Swimmer Plot"
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - patientID
+          - startTime
+          - endTime
+          - responseVar
+          - censorVar
+          - timeUnit
+
     - name: errorNotice
       title: ""
       type: Html

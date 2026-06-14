@@ -115,9 +115,14 @@ items:
         - participant_count
 
     - name: notices
-      title: ''
-      type: Notification
-      visible: false
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - data_format
+        - step_name
+        - participant_count
+        - participant_id_mapping
+        - exclusion_reason_mapping
 
     - name: clinicalSummary
       title: Clinical Summary

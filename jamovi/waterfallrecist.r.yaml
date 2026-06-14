@@ -4,6 +4,21 @@ title: RECIST v1.1 Response Analysis
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - patientID
+        - lesionID
+        - visitTime
+        - diameter
+        - lesionType
+        - location
+        - baselineTimepoint
+        - maxTargetLesions
+        - maxLesionsPerOrgan
+        - confirmationInterval
+
     - name: lesionTable
       title: Lesion-Level Measurements
       type: Table

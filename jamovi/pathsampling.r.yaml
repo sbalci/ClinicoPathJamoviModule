@@ -4,6 +4,16 @@ title: Pathology Sampling Adequacy Analysis
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - totalSamples
+        - firstDetection
+        - targetConfidence
+        - maxSamples
+        - bootstrapIterations
+
     # === WELCOME & DATA SUMMARY (Always First) ===
     - name: welcome
       title: ''

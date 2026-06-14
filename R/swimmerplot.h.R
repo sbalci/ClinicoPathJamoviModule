@@ -475,6 +475,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "swimmerplotResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         errorNotice = function() private$.items[["errorNotice"]],
         warningNotice = function() private$.items[["warningNotice"]],
         infoNotice = function() private$.items[["infoNotice"]],
@@ -504,6 +505,17 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "ggswim"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "patientID",
+                    "startTime",
+                    "endTime",
+                    "responseVar",
+                    "censorVar",
+                    "timeUnit")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="errorNotice",
@@ -953,6 +965,7 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   metrics.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warningNotice} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$infoNotice} \tab \tab \tab \tab \tab a html \cr

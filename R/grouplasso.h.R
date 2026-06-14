@@ -388,6 +388,7 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "grouplassoResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
@@ -419,6 +420,17 @@ grouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "survival",
                     "grpreg",
                     "glmnet"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time",
+                    "event",
+                    "predictors",
+                    "penalty_type",
+                    "cv_folds",
+                    "group_definition")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -969,6 +981,7 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   sampling. Ensures reproducible results across analyses.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr

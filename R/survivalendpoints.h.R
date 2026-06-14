@@ -241,6 +241,7 @@ survivalendpointsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     "survivalendpointsResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         dataWarning = function() private$.items[["dataWarning"]],
         dataInfo = function() private$.items[["dataInfo"]],
@@ -258,6 +259,17 @@ survivalendpointsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 options=options,
                 name="",
                 title="Survival Endpoint Derivation")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "patientId",
+                    "startDate",
+                    "lastFollowup",
+                    "calculatePFS",
+                    "calculateOS",
+                    "calculateTTP")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -582,6 +594,7 @@ survivalendpointsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #'   analysis
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataWarning} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr

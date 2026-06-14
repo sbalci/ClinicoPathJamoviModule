@@ -4,6 +4,17 @@ title: Clinical Heatmap
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - rowVar
+        - colVar
+        - valueVar
+        - scaleMethod
+        - clusterRows
+        - clusterCols
+
     - name: todo
       title: Instructions
       type: Html

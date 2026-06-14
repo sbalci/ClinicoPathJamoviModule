@@ -17,7 +17,43 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             .cached_data = NULL,
             .data_hash = NULL,
             .validation_passed = FALSE,
-            
+
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+
+            .addNotice = function(type, title, content) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
+
+                # Plain text only — notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        "")
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
+
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+
             # init ----
 
             .init = function() {
@@ -789,26 +825,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     paired_valid <- private$.validatePairedData(data, dep_var)
                     if (!paired_valid$valid) {
                         # Create ERROR notice and force paired=FALSE
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'invalidPairedData',
-                            type = jmvcore::NoticeType$ERROR
-                        )
-                        notice$setContent(paired_valid$message)
-                        self$results$insert(999, notice)
+                        private$.addNotice('ERROR', 'Invalid Paired Data', paired_valid$message)
 
                         # SAFETY: Override paired option to prevent invalid McNemar
                         self$options$paired <- FALSE
                         warning(paste("Paired analysis disabled:", paired_valid$message))
                     } else {
                         # Data structure is compatible, but warn about pairing assumption
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'pairedDataWarning',
-                            type = jmvcore::NoticeType$STRONG_WARNING
-                        )
-                        notice$setContent(paired_valid$message)
-                        self$results$insert(999, notice)
+                        private$.addNotice('STRONG_WARNING', 'Paired Data Assumption', paired_valid$message)
                     }
                 }
 
@@ -822,13 +846,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     override_type <- "nonparametric"
 
                     # Notify user about automatic switch
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'fisherAutoSwitch',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(fisher_check$fisher_reason)
-                    self$results$insert(999, notice)
+                    private$.addNotice('INFO', 'Fisher Exact Test Auto-Selected', fisher_check$fisher_reason)
 
                     message(paste("INFO:", fisher_check$fisher_reason))
                 }
@@ -871,46 +889,28 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                         if (any(is.na(ratio_vec))) {
                             # Invalid non-numeric values
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'invalidRatioValues',
-                                type = jmvcore::NoticeType$WARNING
-                            )
-                            notice$setContent(sprintf(
+                            private$.addNotice('WARNING', 'Invalid Ratio Values', sprintf(
                                 "Invalid ratio values in '%s'. Expected comma-separated numbers (e.g., '0.5,0.5'). Using equal proportions instead.",
                                 self$options$ratio
                             ))
-                            self$results$insert(999, notice)
                             ratio_vec <- NULL
 
                         } else if (abs(sum(ratio_vec) - 1.0) > 0.001) {
                             # Ratio doesn't sum to 1.0 - normalize
                             normalized <- ratio_vec / sum(ratio_vec)
-                            notice <- jmvcore::Notice$new(
-                                options = self$options,
-                                name = 'ratioNormalized',
-                                type = jmvcore::NoticeType$INFO
-                            )
-                            notice$setContent(sprintf(
+                            private$.addNotice('INFO', 'Ratio Normalized', sprintf(
                                 "Ratio values normalized to sum to 1.0 (original sum: %.3f). Using: %s",
                                 sum(ratio_vec),
                                 paste(round(normalized, 3), collapse = ", ")
                             ))
-                            self$results$insert(999, notice)
                             ratio_vec <- normalized
                         }
                     }, error = function(e) {
                         # Parsing error
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = 'ratioParseError',
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(sprintf(
+                        private$.addNotice('WARNING', 'Ratio Parse Error', sprintf(
                             "Error parsing ratio '%s': %s. Using equal proportions.",
                             self$options$ratio, e$message
                         ))
-                        self$results$insert(999, notice)
                         ratio_vec <- NULL
                     })
                 }
@@ -1009,6 +1009,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             # run ----
             ,
             .run = function() {
+                private$.noticeList <- list()
+
                 # Always generate About content
                 private$.generateAboutContent()
                 
@@ -1126,16 +1128,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                                     # Warn about extreme prevalence (< 5% or > 95%)
                                     if (prevalence < 0.05 || prevalence > 0.95) {
-                                        notice <- jmvcore::Notice$new(
-                                            options = self$options,
-                                            name = 'extremePrevalence',
-                                            type = jmvcore::NoticeType$STRONG_WARNING
-                                        )
-                                        notice$setContent(sprintf(
+                                        private$.addNotice('STRONG_WARNING', 'Extreme Disease Prevalence', sprintf(
                                             "Extreme disease prevalence detected (%.1f%%). Positive/negative predictive values are highly prevalence-dependent and may not generalize to populations with different baseline risk. Consider reporting likelihood ratios or conducting sensitivity analysis across prevalence ranges.",
                                             prevalence * 100
                                         ))
-                                        self$results$insert(2, notice)  # Insert after ERROR notices
                                     }
                                 }
                             }, error = function(e) {
@@ -1278,16 +1274,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     # Use only the first dependent variable and notify user
                     dep_first <- dep[1]
 
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'balloonPlotMultipleVars',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('INFO', 'Balloon Plot Single Variable', sprintf(
                         "Balloon plot created for first variable only (%s). Multiple dependent variables not supported for balloon plots.",
                         dep_first
                     ))
-                    self$results$insert(999, notice)
 
                     dep <- dep_first
                 }

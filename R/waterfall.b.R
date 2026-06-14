@@ -716,8 +716,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           return(list(
             valid = FALSE,
             message = paste0(
-              "<br>", msgs$missing_columns, " ", paste(missing_columns, collapse = ", "),
-              "<br>", msgs$available_columns, " ", paste(names(df), collapse = ", ")
+              "<br>", msgs$missing_columns, " ", paste(htmltools::htmlEscape(missing_columns), collapse = ", "),
+              "<br>", msgs$available_columns, " ", paste(htmltools::htmlEscape(names(df)), collapse = ", ")
             )
           ))
         }
@@ -1559,7 +1559,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
           }
 
-          stop(plain_message, call. = FALSE)
+          jmvcore::reject("{}", code = NULL, plain_message)
           return(NULL)
         }
 
@@ -3564,26 +3564,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         if (is.null(responseVar))
           return('')
 
-        # Escape variable names that contain spaces or special characters
-        responseVar_escaped <- if (!is.null(responseVar) && !identical(make.names(responseVar), responseVar)) {
-          paste0('`', responseVar, '`')
-        } else {
-          responseVar
-        }
-
-        # Escape group variable if present
+        # Group variable argument (deparse -> valid, escaped R string literal)
         groupVar_arg <- ''
         if (!is.null(groupVar)) {
-          groupVar_escaped <- if (!identical(make.names(groupVar), groupVar)) {
-            paste0('`', groupVar, '`')
-          } else {
-            groupVar
-          }
-          groupVar_arg <- paste0(',\n    groupVar = "', groupVar_escaped, '"')
+          groupVar_arg <- paste0(',\n    groupVar = ', deparse(groupVar))
         }
 
-        # Build responseVar argument
-        responseVar_arg <- paste0('responseVar = "', responseVar_escaped, '"')
+        # Build responseVar argument (deparse -> valid, escaped R string literal)
+        responseVar_arg <- paste0('responseVar = ', deparse(responseVar))
 
         # Get other arguments using base helper (if available)
         args <- ''

@@ -217,6 +217,7 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
     "decisioncalculatorResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         welcome = function() private$.items[["welcome"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
@@ -241,6 +242,18 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "DiagnosticTests",
                     "sensspecwiki",
                     "ClinicoPathJamoviModule"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
+                    "pp",
+                    "pprob",
+                    "ci")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -652,6 +665,7 @@ decisioncalculatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param fn2 .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr

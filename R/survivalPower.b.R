@@ -22,6 +22,31 @@ survivalPowerClass <- R6::R6Class(
         effect_hr_info = NULL,
         calculated_sample_size = NULL,
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .init = function() {
             # Initialize the analysis with comprehensive checks
 
@@ -38,23 +63,16 @@ survivalPowerClass <- R6::R6Class(
         },
         
         .run = function() {
+            private$.noticeList <- list()
+
             # Main analysis runner
             if (is.null(self$options$analysis_type) ||
                 is.null(self$options$test_type)) {
                 return()
             }
 
-            # Validate inputs and collect notices
+            # Validate inputs (notices are added via private$.addNotice)
             validation_result <- private$.validate_inputs()
-
-            # Insert notices in priority order: ERROR → STRONG_WARNING → WARNING → INFO
-            if (length(validation_result$notices) > 0) {
-                sorted_notices <- private$.sort_notices(validation_result$notices)
-                for (i in seq_along(sorted_notices)) {
-                    # Insert at top (index i)
-                    self$results$insert(i, sorted_notices[[i]]$notice)
-                }
-            }
 
             # Stop if validation failed
             if (!validation_result$valid) {
@@ -77,17 +95,11 @@ survivalPowerClass <- R6::R6Class(
             private$.generate_clinical_friendly_outputs()
 
             # Add completion notice at bottom
-            info_notice <- jmvcore::Notice$new(
-                options = self$options,
-                name = 'analysisComplete',
-                type = jmvcore::NoticeType$INFO
-            )
-            info_notice$setContent(sprintf(
+            private$.addNotice('INFO', 'Analysis Complete', sprintf(
                 'Power analysis completed: %s with %s endpoint • Assumes exponential survival and uniform accrual',
                 private$.format_test_type(self$options$test_type),
                 tolower(private$.format_primary_endpoint(self$options$primary_endpoint))
             ))
-            self$results$insert(999, info_notice)
 
             # Refresh instructions
             private$.update_instructions()
@@ -99,48 +111,29 @@ survivalPowerClass <- R6::R6Class(
         },
 
         .validate_inputs = function() {
-            # Comprehensive input validation - returns list(valid, notices)
-            # Store notices as list(notice = notice_obj, type = type_name) for sorting
-            notices <- list()
+            # Comprehensive input validation - returns list(valid)
+            # Notices are emitted via private$.addNotice (plain-text Preformatted output)
             valid <- TRUE
 
             # Validate effect size (hazard ratio)
             hr <- private$.get_effect_hr()
             if (!is.null(hr)) {
                 if (!is.finite(hr)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidEffectSize',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(
+                    private$.addNotice('ERROR', 'Invalid Effect Size',
                         'Unable to derive a valid hazard ratio from the selected effect size inputs • Check effect size type and related parameters'
                     )
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (hr <= 0 || hr > 5) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidHazardRatio',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('ERROR', 'Invalid Hazard Ratio', sprintf(
                         'Hazard ratio must be between 0 and 5 (current: %.2f) • Common values: 0.5-0.8 (treatment benefit), 1.2-2.0 (increased risk)',
                         hr
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (hr < 0.3 || hr > 3) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'extremeHazardRatio',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('STRONG_WARNING', 'Extreme Hazard Ratio', sprintf(
                         'Extreme hazard ratio detected (%.2f) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible',
                         hr
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "STRONG_WARNING")))
                 }
             }
 
@@ -148,28 +141,16 @@ survivalPowerClass <- R6::R6Class(
             power <- self$options$power_level
             if (!is.null(power)) {
                 if (power <= 0 || power >= 1) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidPower',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('ERROR', 'Invalid Power', sprintf(
                         'Power must be between 0 and 1 (current: %.2f) • Standard values: 0.80 (80%%) or 0.90 (90%%)',
                         power
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (power < 0.7) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'lowPower',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Low Power', sprintf(
                         'Power below 70%% (current: %.0f%%) may result in underpowered study • Consider increasing to 80%% or 90%%',
                         power * 100
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
@@ -177,28 +158,16 @@ survivalPowerClass <- R6::R6Class(
             alpha <- self$options$alpha_level
             if (!is.null(alpha)) {
                 if (alpha <= 0 || alpha >= 1) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidAlpha',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('ERROR', 'Invalid Alpha', sprintf(
                         'Alpha level must be between 0 and 1 (current: %.3f) • Standard value: 0.05 (5%%)',
                         alpha
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 } else if (alpha > 0.1) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'highAlpha',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'High Alpha', sprintf(
                         'Alpha level above 0.10 (current: %.3f) is unusual for confirmatory trials',
                         alpha
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
@@ -206,40 +175,22 @@ survivalPowerClass <- R6::R6Class(
             median_survival <- self$options$control_median_survival
             if (!is.null(median_survival)) {
                 if (median_survival <= 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidMedianSurvival',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent('Median survival must be positive (in months)')
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                    private$.addNotice('ERROR', 'Invalid Median Survival', 'Median survival must be positive (in months)')
                     valid <- FALSE
                 } else if (median_survival > 240) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'longMedianSurvival',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('INFO', 'Long Median Survival', sprintf(
                         'Median survival > 20 years (current: %.0f months = %.1f years) may require very long follow-up',
                         median_survival, median_survival / 12
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "INFO")))
                 }
             }
 
             # Validate survival distribution
             distribution <- self$options$survival_distribution
             if (!is.null(distribution) && distribution != "exponential") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'distributionNotSupported',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(
+                private$.addNotice('ERROR', 'Distribution Not Supported',
                     'Only exponential survival distribution is validated in this release • Select "Exponential" to proceed'
                 )
-                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
@@ -247,16 +198,10 @@ survivalPowerClass <- R6::R6Class(
             ratio <- self$options$allocation_ratio
             if (!is.null(ratio)) {
                 if (ratio <= 0 || ratio > 10) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidAllocationRatio',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('ERROR', 'Invalid Allocation Ratio', sprintf(
                         'Allocation ratio must be positive and typically between 0.5 and 3 (current: %.2f)',
                         ratio
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                     valid <- FALSE
                 }
             }
@@ -265,110 +210,67 @@ survivalPowerClass <- R6::R6Class(
             dropout <- self$options$dropout_rate
             if (!is.null(dropout)) {
                 if (dropout < 0 || dropout > 1) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'invalidDropoutRate',
-                        type = jmvcore::NoticeType$ERROR
-                    )
-                    notice$setContent(sprintf('Dropout rate must be between 0 and 1 (current: %.2f)', dropout))
-                    notices <- append(notices, list(list(notice = notice, type = "ERROR")))
+                    private$.addNotice('ERROR', 'Invalid Dropout Rate', sprintf('Dropout rate must be between 0 and 1 (current: %.2f)', dropout))
                     valid <- FALSE
                 } else if (dropout > 0.3) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'highDropoutRate',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('STRONG_WARNING', 'High Dropout Rate', sprintf(
                         'Dropout rate > 30%% (current: %.0f%%) may significantly impact study power • Review retention strategies',
                         dropout * 100
                     ))
-                    notices <- append(notices, list(list(notice = notice, type = "STRONG_WARNING")))
                 }
             }
 
-            # Validate parameter combinations (appends more notices)
-            notices <- private$.validate_parameter_combinations(notices)
+            # Validate parameter combinations (emits additional notices)
+            private$.validate_parameter_combinations()
 
             # Multiplicity handling
-            # Multiplicity handling
             if (!isTRUE(self$options$multiple_comparisons %in% c("none", "bonferroni", "holm", "dunnett"))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'unsupportedMultiplicity',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('ERROR', 'Unsupported Multiplicity Adjustment', sprintf(
                     'Multiplicity adjustment "%s" not yet supported • Please select "none", "bonferroni", "holm", or "dunnett"',
                     self$options$multiple_comparisons
                 ))
-                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
             if (isTRUE(self$options$study_design == "multi_arm") &&
                 isTRUE(self$options$multiple_comparisons %in% c("holm", "dunnett"))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'multiplicityApproximation',
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(
+                private$.addNotice('WARNING', 'Multiplicity Approximation',
                     'Holm/Dunnett adjustments are approximated conservatively using Bonferroni in current calculations'
                 )
-                notices <- append(notices, list(list(notice = notice, type = "WARNING")))
             }
 
             # Stratification info
             if (!is.null(self$options$stratification_factors) && self$options$stratification_factors > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'stratificationNotUsed',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('INFO', 'Stratification Not Used', sprintf(
                     'Stratification factors (%d) not currently used to adjust variance • Plan stratified analyses separately',
                     self$options$stratification_factors
                 ))
-                notices <- append(notices, list(list(notice = notice, type = "INFO")))
             }
 
             # Non-inferiority margin type validation
             if (isTRUE(self$options$test_type == "non_inferiority") &&
                 !isTRUE(self$options$ni_type %in% c("relative_margin"))) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'niTypeNotSupported',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(
+                private$.addNotice('ERROR', 'Non-inferiority Margin Type Not Supported',
                     'Non-inferiority calculations currently support only relative hazard-ratio margins'
                 )
-                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
             # Unsupported tests
             unsupported_tests <- c("competing_risks", "rmst_test", "snp_survival", "weighted_log_rank")
             if (isTRUE(self$options$test_type %in% unsupported_tests)) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'unsupportedTestType',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('ERROR', 'Unsupported Test Type', sprintf(
                     'Test "%s" temporarily unavailable pending validation • Choose log-rank, Cox regression, or non-inferiority',
                     self$options$test_type
                 ))
-                notices <- append(notices, list(list(notice = notice, type = "ERROR")))
                 valid <- FALSE
             }
 
-            return(list(valid = valid, notices = notices))
+            return(list(valid = valid))
         },
 
-        .validate_parameter_combinations = function(notices_list) {
-            # Check for unrealistic parameter combinations - appends to notices list
+        .validate_parameter_combinations = function() {
+            # Check for unrealistic parameter combinations - emits notices via .addNotice
             hr <- private$.get_effect_hr()
             if (!is.finite(hr)) {
                 hr <- self$options$effect_size
@@ -386,48 +288,30 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(median_survival) && !is.null(accrual) && !is.null(followup)) {
                 total_duration <- accrual + followup
                 if (total_duration < median_survival * 1.5) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'shortStudyDuration',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Short Study Duration', sprintf(
                         'Study duration (%.1f mo) may be too short for median survival %.1f mo • Consider extending follow-up to at least %.1f mo',
                         total_duration, median_survival, median_survival * 1.5
                     ))
-                    notices_list <- append(notices_list, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
             # Check for underpowered studies with small effect sizes
             if (!is.null(hr) && !is.null(power)) {
                 if ((hr > 0.9 && hr < 1.1) && power > 0.8) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'smallEffectSize',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Small Effect Size', sprintf(
                         'Detecting very small effect (HR=%.2f near 1.0) with %.0f%% power requires very large sample • Consider clinical meaningfulness',
                         hr, power * 100
                     ))
-                    notices_list <- append(notices_list, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
             # Check for overly optimistic combinations
             if (!is.null(hr) && !is.null(power) && !is.null(alpha)) {
                 if (hr < 0.6 && power > 0.9 && alpha < 0.05) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'optimisticAssumptions',
-                        type = jmvcore::NoticeType$STRONG_WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('STRONG_WARNING', 'Optimistic Assumptions', sprintf(
                         'Assumes large effect (HR=%.2f) with high power (%.0f%%) • Ensure assumptions justified by prior data',
                         hr, power * 100
                     ))
-                    notices_list <- append(notices_list, list(list(notice = notice, type = "STRONG_WARNING")))
                 }
             }
 
@@ -436,20 +320,14 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(ratio)) {
                 if (ratio < 0.5 || ratio > 2) {
                     efficiency_loss <- (1 + ratio)^2 / (4 * ratio)
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'allocationRatioInefficiency',
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Allocation Ratio Inefficiency', sprintf(
                         'Allocation ratio %.2f:1 reduces efficiency by %.1f%% vs 1:1 randomization • Consider balancing if feasible',
                         ratio, (efficiency_loss - 1) * 100
                     ))
-                    notices_list <- append(notices_list, list(list(notice = notice, type = "WARNING")))
                 }
             }
 
-            return(notices_list)
+            invisible(NULL)
         },
 
         .check_required_packages = function() {
@@ -466,17 +344,11 @@ survivalPowerClass <- R6::R6Class(
             }
 
             if (length(missing_packages) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingPackages',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf(
+                private$.addNotice('ERROR', 'Missing Packages', sprintf(
                     'Missing required R package: %s • Install with: install.packages("%s")',
                     paste(missing_packages, collapse = ", "),
                     paste(missing_packages, collapse = '", "')
                 ))
-                self$results$insert(999, notice)
                 return(FALSE)
             }
 
@@ -1096,16 +968,10 @@ survivalPowerClass <- R6::R6Class(
                     total_duration <- accrual_period + avg_follow_up_needed
 
                     # Warn user about approximation method
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'durationApproximation',
-                        type = jmvcore::NoticeType$INFO
-                    )
-                    notice$setContent(sprintf(
+                    private$.addNotice('INFO', 'Duration Approximation', sprintf(
                         'Duration calculation uses simplified event rate model (%.3f events/month/subject) • For precise estimates, consider simulation-based methods',
                         event_rate_monthly
                     ))
-                    self$results$insert(900, notice)
 
                     return(paste("Required Study Duration:", round(total_duration, 1), "months"))
                 }

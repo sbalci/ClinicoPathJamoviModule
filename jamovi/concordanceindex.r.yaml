@@ -4,6 +4,17 @@ title: Concordance Index (Harrell's C-index)
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - time
+        - event
+        - predictor
+        - event_code
+        - restricted_time
+        - max_time
+
     - name: instructions
       title: Instructions
       type: Html

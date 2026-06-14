@@ -4,6 +4,17 @@ title: "Base Graphics Visualization"
 jrs: '1.1'
 
 items:
+  - name: notices
+    title: Important Information
+    type: Preformatted
+    clearWith:
+      - plot_type
+      - x_var
+      - y_var
+      - group_var
+      - show_statistics
+      - correlation_method
+
   - name: instructions
     title: "Instructions"
     type: Html

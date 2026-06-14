@@ -416,6 +416,7 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
     "sparsegrouplassoResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
         suitabilityReport = function() private$.items[["suitabilityReport"]],
@@ -445,6 +446,18 @@ sparsegrouplassoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "ClinicoPathJamoviModule",
                     "survival",
                     "glmnet"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "time_var",
+                    "event_var",
+                    "outcomeLevel",
+                    "censorLevel",
+                    "pred_vars",
+                    "alpha_sgl",
+                    "selection_criterion")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -1019,6 +1032,7 @@ sparsegrouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' @param showExplanations show explanations for the analysis
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr

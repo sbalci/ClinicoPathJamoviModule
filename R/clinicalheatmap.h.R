@@ -423,6 +423,7 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "clinicalheatmapResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         aboutAnalysis = function() private$.items[["aboutAnalysis"]],
         dataSummary = function() private$.items[["dataSummary"]],
@@ -448,6 +449,17 @@ clinicalheatmapResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 refs=list(
                     "tidyheatmaps",
                     "grDevices"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "rowVar",
+                    "colVar",
+                    "valueVar",
+                    "scaleMethod",
+                    "clusterRows",
+                    "clusterCols")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -894,6 +906,7 @@ clinicalheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param comparisonVars .
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataSummary$dataStructure} \tab \tab \tab \tab \tab a table \cr

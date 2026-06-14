@@ -26,46 +26,40 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Option overrides for presets
         overrides = list(),
 
-        # Notice collection list for HTML rendering
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
         .noticeList = list(),
 
-        # Add a notice to the collection
         .addNotice = function(type, title, content) {
-          private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-            type = type,
-            title = title,
-            content = content
-          )
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
         },
 
-        # Render collected notices as HTML
         .renderNotices = function() {
-          if (length(private$.noticeList) == 0) {
-            return()
-          }
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
 
-          typeStyles <- list(
-            ERROR = "background:#ffebee; border-left:4px solid #c62828; color:#b71c1c;",
-            STRONG_WARNING = "background:#fff3e0; border-left:4px solid #ef6c00; color:#e65100;",
-            WARNING = "background:#fff9c4; border-left:4px solid #f9a825; color:#f57f17;",
-            INFO = "background:#e3f2fd; border-left:4px solid #1976d2; color:#0d47a1;"
-          )
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
 
-          html <- "<div style='margin: 10px 0;'>"
-
-          for (notice in private$.noticeList) {
-            style <- typeStyles[[notice$type]] %||% typeStyles$INFO
-
-            html <- paste0(html,
-              "<div style='", style, " padding:12px; margin:8px 0; border-radius:4px;'>",
-                "<strong style='display:block; margin-bottom:4px;'>", notice$title, "</strong>",
-                "<span style='opacity:0.9;'>", notice$content, "</span>",
-              "</div>"
-            )
-          }
-
-          html <- paste0(html, "</div>")
-          self$results$notices$setContent(html)
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
         # === Helper: Escape Variable Names ===
@@ -796,13 +790,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             all_warnings <- c(input_warnings, data_warnings)
             if (length(all_warnings) > 0) {
                 for (i in seq_along(all_warnings)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('dataQualityWarning', i),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(all_warnings[i])
-                    self$results$insert(100, notice)
+                    private$.addNotice('WARNING', 'Data Quality Warning', all_warnings[i])
                 }
             }
             
@@ -1494,18 +1482,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (length(assumption_violations) > 0) {
                     # Auto-suggest and switch to nonparametric for robustness
-                    # Create WARNING Notice about assumption violations
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('assumptionViolation_', group1, '_', group2),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice_msg <- paste0(
+                    private$.addNotice('WARNING', 'Assumption Check Failed', paste0(
                         "Assumption check failed: ", paste(assumption_violations, collapse = "; "),
-                        " • Using Wilcoxon test instead of t-test (auto-suggested)."
-                    )
-                    notice$setContent(notice_msg)
-                    self$results$insert(100, notice)
+                        " - Using Wilcoxon test instead of t-test (auto-suggested)."
+                    ))
 
                     test_result <- wilcox.test(data1, data2, conf.int = TRUE)
                     statistic <- test_result$statistic
@@ -1553,19 +1533,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ci_upper <- test_result$conf.int[2]
                     test_method <- "t-test (WRS2 unavailable)"
 
-                    # Create WARNING Notice about WRS2 unavailability
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('wrs2Unavailable_', group1, '_', group2),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice_msg <- paste0(
+                    private$.addNotice('WARNING', 'WRS2 Package Unavailable', paste0(
                         "WRS2 package not available for robust test. Falling back to standard t-test for comparison: ",
                         group1, " vs ", group2,
                         if(stratum_label != "") paste0(" (", stratum_label, ")") else ""
-                    )
-                    notice$setContent(notice_msg)
-                    self$results$insert(100, notice)
+                    ))
                 }
 
             } else if (test_type == "bayes") {
@@ -1589,14 +1561,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ci_upper <- NA
                         test_method <- "Bayesian (failed)"
 
-                        # Create WARNING Notice about Bayesian test failure
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('bayesianTestFailed_', group1, '_', group2),
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(paste0("Bayesian test failed for: ", group1, " vs ", group2))
-                        self$results$insert(100, notice)
+                        private$.addNotice('WARNING', 'Bayesian Test Failed', paste0("Bayesian test failed for: ", group1, " vs ", group2))
                     }
                 } else {
                     statistic <- NA
@@ -1605,28 +1570,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ci_upper <- NA
                     test_method <- "Bayesian (unavailable)"
 
-                    # Create WARNING Notice about BayesFactor unavailability
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = paste0('bayesFactorUnavailable_', group1, '_', group2),
-                        type = jmvcore::NoticeType$WARNING
-                    )
-                    notice$setContent(paste0(
+                    private$.addNotice('WARNING', 'BayesFactor Package Unavailable', paste0(
                         "BayesFactor package not available. Cannot perform Bayesian test for: ",
                         group1, " vs ", group2
                     ))
-                    self$results$insert(100, notice)
                 }
 
             } else {
-                # Create WARNING Notice about unknown test type
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = paste0('unknownTestType_', group1, '_', group2),
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(paste0("Unknown test type '", test_type, "' for: ", group1, " vs ", group2))
-                self$results$insert(100, notice)
+                private$.addNotice('WARNING', 'Unknown Test Type', paste0("Unknown test type '", test_type, "' for: ", group1, " vs ", group2))
             }
 
             # Calculate effect size with proper CIs
@@ -1767,14 +1718,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
             }, error = function(e) {
-                # Create WARNING Notice about effect size calculation error
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = paste0('effectSizeError_', as.integer(runif(1, 1, 1e6))),
-                    type = jmvcore::NoticeType$WARNING
-                )
-                notice$setContent(paste0("Error calculating effect size: ", e$message))
-                self$results$insert(100, notice)
+                private$.addNotice('WARNING', 'Effect Size Calculation Error', paste0("Error calculating effect size: ", e$message))
             })
 
             return(list(

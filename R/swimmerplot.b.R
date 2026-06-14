@@ -26,6 +26,42 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .auto_detected_dates = FALSE,
         .detected_format = NULL,
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # Escape variable names for safe handling
         .escapeVar = function(x) {
             # Handle variables with spaces/special characters
@@ -1338,32 +1374,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         # Add clinical profile notices based on data characteristics
-        # DISABLED: Dynamic Notice insertion causes serialization errors
-        # HTML-based notices are used instead via errorNotice/warningNotice/infoNotice
         .addClinicalProfileNotices = function(patient_data, stats) {
-            # This function is disabled to prevent serialization errors
-            # All notices are now handled via HTML containers defined in r.yaml
-            # See errorNotice, warningNotice, infoNotice in swimmerplot.r.yaml
-
-            # # Original code commented out to prevent serialization errors:
-            # notice_position <- 2  # Start after any ERROR notices
-            #
-            # # STRONG_WARNING: Small sample size (<10 patients)
-            # if (!is.null(stats$n_patients) && stats$n_patients < 10) {
-            #     warn <- jmvcore::Notice$new(
-            #         options = self$options,
-            #         name = 'smallSampleSize',
-            #         type = jmvcore::NoticeType$STRONG_WARNING
-            #     )
-            #     warn$setContent(sprintf(
-            #         'Very small sample size (n=%d patients). Results may have limited statistical power and generalizability. Consider interpreting findings as exploratory.',
-            #         stats$n_patients
-            #     ))
-            #     self$results$insert(notice_position, warn)
-            #     notice_position <- notice_position + 1
-            # }
-            #
-            # # ... rest of notice code commented out
+            # STRONG_WARNING: Small sample size (<10 patients)
+            if (!is.null(stats$n_patients) && stats$n_patients < 10) {
+                private$.addNotice('STRONG_WARNING', 'Small Sample Size', sprintf(
+                    'Very small sample size (n=%d patients). Results may have limited statistical power and generalizability. Consider interpreting findings as exploratory.',
+                    stats$n_patients
+                ))
+            }
         },
 
         # Apply clinical preset configurations with context
@@ -1428,15 +1446,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 is.null(self$options$startTime) ||
                 is.null(self$options$endTime)) {
 
-                # ERROR Notice (single line, position 1)
-                # DISABLED: Dynamic Notice insertion causes serialization errors
-                # err <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'missingRequiredVariables',
-                #     type = jmvcore::NoticeType$ERROR
-                # )
-                # err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
-                # self$results$insert(999, err)
+                # ERROR notice for missing required variables
+                private$.addNotice('ERROR', 'Missing Required Variables', 'Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()
@@ -1445,6 +1456,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         .run = function() {
+            # Reset notice collection
+            private$.noticeList <- list()
+
             # Apply clinical preset configurations if selected
             # DISABLED: Clinical presets only affect text interpretation, not calculations
             # private$.applyClinicalPreset()
@@ -1454,15 +1468,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 is.null(self$options$startTime) ||
                 is.null(self$options$endTime)) {
 
-                # ERROR Notice (single line, position 1)
-                # DISABLED: Dynamic Notice insertion causes serialization errors
-                # err <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'missingRequiredVariables',
-                #     type = jmvcore::NoticeType$ERROR
-                # )
-                # err$setContent('Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
-                # self$results$insert(999, err)
+                # ERROR notice for missing required variables
+                private$.addNotice('ERROR', 'Missing Required Variables', 'Patient ID, Start Time, and End Time are required to generate swimmer plot. Please select all three variables in Core Data Variables section.')
 
                 # Keep detailed HTML guidance
                 instructions <- private$.generateInstructions()

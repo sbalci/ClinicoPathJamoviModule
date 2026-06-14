@@ -4,6 +4,17 @@ title: Genomic Landscape Visualization
 jrs: '1.1'
 
 items:
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+        - sampleVar
+        - geneVars
+        - clinicalVars
+        - genesToInclude
+        - plotType
+        - sortBy
+
     - name: instructions
       title: Instructions
       type: Html

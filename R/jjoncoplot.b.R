@@ -31,6 +31,42 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .guidanceNotes = NULL,
         .effectiveOptions = NULL,
 
+        # Notice collection helpers. A single Preformatted (plain-text) output item:
+        # avoids BOTH the jmvcore::Notice serialization error from
+        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # notice content must be plain text). ====
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type,
+                title = title,
+                content = content
+            )
+            # Render immediately so early-return validation aborts still display the notice
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # output item renders this literally (no markup, no injection surface).
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR          = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING        = "WARNING: ",
+                    "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         .optionsWithPreset = function() {
             # Build an effective options list without mutating self$options
             opts <- list(
@@ -649,37 +685,19 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # ERROR: Missing sample variable
             if (is.null(sampleVar) || length(sampleVar) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingSampleVar',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('Sample ID variable is required. Please select a variable containing unique patient or sample identifiers (e.g., PatientID, SampleID, TCGA-ID).')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Missing Sample Variable', 'Sample ID variable is required. Please select a variable containing unique patient or sample identifiers (e.g., PatientID, SampleID, TCGA-ID).')
                 return(FALSE)
             }
 
             # ERROR: Missing gene variables
             if (is.null(geneVars) || length(geneVars) < 1) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'missingGeneVars',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('At least one gene variable is required. Please select variables representing mutation status (0 = wild-type, 1 = mutated). Common examples: TP53, KRAS, PIK3CA, EGFR, BRAF.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Missing Gene Variables', 'At least one gene variable is required. Please select variables representing mutation status (0 = wild-type, 1 = mutated). Common examples: TP53, KRAS, PIK3CA, EGFR, BRAF.')
                 return(FALSE)
             }
 
             # ERROR: No data loaded
             if (is.null(data) || nrow(data) == 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'noData',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent('No data loaded. Please open a dataset containing genomic mutation information to begin analysis.')
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'No Data Loaded', 'No data loaded. Please open a dataset containing genomic mutation information to begin analysis.')
                 return(FALSE)
             }
 
@@ -696,38 +714,20 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # ERROR: Variables not found in dataset
             if (length(missing_vars) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'variablesNotFound',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('The following variables were not found in your dataset: %s. Please check variable names for typos, case sensitivity, or ensure your dataset contains these columns.', paste(missing_vars, collapse = ', ')))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Variables Not Found', sprintf('The following variables were not found in your dataset: %s. Please check variable names for typos, case sensitivity, or ensure your dataset contains these columns.', paste(missing_vars, collapse = ', ')))
                 return(FALSE)
             }
 
             # ERROR: Insufficient data
             if (nrow(data) < 2) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'insufficientData',
-                    type = jmvcore::NoticeType$ERROR
-                )
-                notice$setContent(sprintf('At least 2 samples are required for oncoplot visualization. Your dataset contains %d sample(s). Please load a dataset with multiple samples.', nrow(data)))
-                self$results$insert(999, notice)
+                private$.addNotice('ERROR', 'Insufficient Data', sprintf('At least 2 samples are required for oncoplot visualization. Your dataset contains %d sample(s). Please load a dataset with multiple samples.', nrow(data)))
                 return(FALSE)
             }
 
             # STRONG_WARNING: Duplicate sample IDs
             if (anyDuplicated(data[[sampleVar]]) > 0) {
                 dup_count <- sum(duplicated(data[[sampleVar]]))
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'duplicateSamples',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('%d duplicate sample IDs detected in the %s variable. Only the first occurrence of each sample will be retained for analysis. Consider deduplicating your data before analysis to ensure data integrity.', dup_count, sampleVar))
-                self$results$insert(999, notice)
+                private$.addNotice('STRONG_WARNING', 'Duplicate Sample IDs', sprintf('%d duplicate sample IDs detected in the %s variable. Only the first occurrence of each sample will be retained for analysis. Consider deduplicating your data before analysis to ensure data integrity.', dup_count, sampleVar))
                 private$.guidanceNotes <- c(private$.guidanceNotes, sprintf("Duplicate sample IDs (n=%d) will be removed", dup_count))
             }
 
@@ -737,25 +737,13 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, logical(1))
             if (any(nonbinary)) {
                 bad_genes <- paste(geneVars[nonbinary], collapse = ", ")
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'nonBinaryMutations',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Non-binary mutation values detected in the following genes: %s. Expected values are 0 (wild-type) or 1 (mutated). All non-zero values will be clipped to 1, and zero/negative values to 0 for analysis.', bad_genes))
-                self$results$insert(999, notice)
+                private$.addNotice('STRONG_WARNING', 'Non-Binary Mutation Values', sprintf('Non-binary mutation values detected in the following genes: %s. Expected values are 0 (wild-type) or 1 (mutated). All non-zero values will be clipped to 1, and zero/negative values to 0 for analysis.', bad_genes))
                 private$.guidanceNotes <- c(private$.guidanceNotes, sprintf("Non-binary values in %d genes", sum(nonbinary)))
             }
 
             # STRONG_WARNING: Small sample size
             if (nrow(data) < 10) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'smallSampleSize',
-                    type = jmvcore::NoticeType$STRONG_WARNING
-                )
-                notice$setContent(sprintf('Small sample size detected (n = %d). For robust mutation frequency analysis and statistical testing, a minimum of 10-20 samples is recommended. Findings should be interpreted with caution and validated in larger cohorts.', nrow(data)))
-                self$results$insert(999, notice)
+                private$.addNotice('STRONG_WARNING', 'Small Sample Size', sprintf('Small sample size detected (n = %d). For robust mutation frequency analysis and statistical testing, a minimum of 10-20 samples is recommended. Findings should be interpreted with caution and validated in larger cohorts.', nrow(data)))
             }
 
             return(TRUE)
@@ -817,39 +805,27 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # ERROR: No requested genes found in dataset
                 if (length(selected_genes) == 0) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'noGenesFound',
-                        type = jmvcore::NoticeType$ERROR
-                    )
                     missing_genes <- setdiff(genes_to_include, available_genes)
                     available_sample <- paste(head(available_genes, 10), collapse = ", ")
                     if (length(available_genes) > 10) {
                         available_sample <- paste0(available_sample, ", ...")
                     }
-                    notice$setContent(sprintf(
+                    private$.addNotice('ERROR', 'No Requested Genes Found', sprintf(
                         'None of the requested genes (%s) were found in your dataset. Available genes include: %s. Please check gene names for typos (they are case-sensitive) or select genes from the available list.',
                         paste(missing_genes, collapse = ', '),
                         available_sample
                     ))
-                    self$results$insert(999, notice)
                     return(NULL)
                 }
 
                 # WARNING: Partial gene match
                 if (length(selected_genes) < length(genes_to_include)) {
-                    notice <- jmvcore::Notice$new(
-                        options = self$options,
-                        name = 'partialGeneMatch',
-                        type = jmvcore::NoticeType$WARNING
-                    )
                     missing_genes <- setdiff(genes_to_include, selected_genes)
-                    notice$setContent(sprintf(
+                    private$.addNotice('WARNING', 'Partial Gene Match', sprintf(
                         'Some requested genes were not found in your dataset. Found: %s. Missing: %s. Gene names are case-sensitive - please verify spelling and capitalization.',
                         paste(selected_genes, collapse = ', '),
                         paste(missing_genes, collapse = ', ')
                     ))
-                    self$results$insert(999, notice)
                 }
             } else {
                 # Calculate mutation frequencies and select top N genes
@@ -1022,6 +998,8 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             effectiveOptions <- private$.optionsWithPreset()
 
             # Always update guidance message and visibility first
@@ -1174,43 +1152,19 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # INFO: Hierarchical sorting explanation
             if (effectiveOptions$sortBy == "hierarchical") {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'hierarchicalSorting',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent('Hierarchical sorting algorithm applied: Samples are ordered using ggoncoplot\'s base-2 exponential weighting based on gene frequency rank. Most frequently mutated genes contribute exponentially more weight (2^rank) to sample ordering, creating intuitive visual patterns.')
-                self$results$insert(999, notice)
+                private$.addNotice('INFO', 'Hierarchical Sorting', 'Hierarchical sorting algorithm applied: Samples are ordered using ggoncoplot\'s base-2 exponential weighting based on gene frequency rank. Most frequently mutated genes contribute exponentially more weight (2^rank) to sample ordering, creating intuitive visual patterns.')
             }
 
             # INFO: Gene selection method
             if (!is.null(self$options$genesToInclude) && nchar(self$options$genesToInclude) > 0) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'geneSelectionMethod',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(sprintf('Gene selection: Specific genes requested (%s). Displaying %d genes that were found in your dataset. Top N setting is overridden when specific genes are requested.', self$options$genesToInclude, length(prepared_data$selected_genes)))
-                self$results$insert(999, notice)
+                private$.addNotice('INFO', 'Gene Selection Method', sprintf('Gene selection: Specific genes requested (%s). Displaying %d genes that were found in your dataset. Top N setting is overridden when specific genes are requested.', self$options$genesToInclude, length(prepared_data$selected_genes)))
             } else {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'geneSelectionMethod',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent(sprintf('Gene selection: Displaying top %d most frequently mutated genes from your dataset (%d total gene variables). Use "Specific Genes to Include" to focus on genes of clinical interest.', effectiveOptions$topn, length(self$options$geneVars)))
-                self$results$insert(999, notice)
+                private$.addNotice('INFO', 'Gene Selection Method', sprintf('Gene selection: Displaying top %d most frequently mutated genes from your dataset (%d total gene variables). Use "Specific Genes to Include" to focus on genes of clinical interest.', effectiveOptions$topn, length(self$options$geneVars)))
             }
 
             # INFO: TMB transformation
             if (effectiveOptions$showTMB && effectiveOptions$log10TransformTMB) {
-                notice <- jmvcore::Notice$new(
-                    options = self$options,
-                    name = 'tmbTransformation',
-                    type = jmvcore::NoticeType$INFO
-                )
-                notice$setContent('Tumor Mutation Burden (TMB) values displayed using log10(TMB + 1) transformation. This transformation improves visualization when datasets contain hypermutator samples with extremely high mutation counts. Disable "Log10 Transform TMB" to view raw counts.')
-                self$results$insert(999, notice)
+                private$.addNotice('INFO', 'TMB Transformation', 'Tumor Mutation Burden (TMB) values displayed using log10(TMB + 1) transformation. This transformation improves visualization when datasets contain hypermutator samples with extremely high mutation counts. Disable "Log10 Transform TMB" to view raw counts.')
             }
 
             # WARNING: High missing rate in clinical variables
@@ -1220,13 +1174,7 @@ jjoncoplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     missing_pct <- sum(is.na(var_data)) / length(var_data) * 100
 
                     if (missing_pct > 50) {
-                        notice <- jmvcore::Notice$new(
-                            options = self$options,
-                            name = paste0('highMissing_', var),
-                            type = jmvcore::NoticeType$WARNING
-                        )
-                        notice$setContent(sprintf('Clinical variable "%s" has high missing data rate (%.1f%% missing). Consider imputation or removal of this variable for more reliable clinical correlations.', var, missing_pct))
-                        self$results$insert(500, notice)
+                        private$.addNotice('WARNING', 'High Missing Rate', sprintf('Clinical variable "%s" has high missing data rate (%.1f%% missing). Consider imputation or removal of this variable for more reliable clinical correlations.', var, missing_pct))
                     }
                 }
             }

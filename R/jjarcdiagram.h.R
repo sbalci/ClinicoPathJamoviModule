@@ -277,6 +277,7 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
     "jjarcdiagramResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         instructions = function() private$.items[["instructions"]],
         todo = function() private$.items[["todo"]],
         plot = function() private$.items[["plot"]],
@@ -294,6 +295,15 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "arcdiagram"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "source",
+                    "target",
+                    "weight",
+                    "group")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -519,6 +529,7 @@ jjarcdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Useful for users new to network analysis.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

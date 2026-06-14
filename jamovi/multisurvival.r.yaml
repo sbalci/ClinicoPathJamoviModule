@@ -6,6 +6,16 @@ jrs:   '1.1'
 
 items:
 
+    - name: notices
+      title: Important Information
+      type: Preformatted
+      clearWith:
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+
     - name:  todo
       title: To Do
       type:  Html

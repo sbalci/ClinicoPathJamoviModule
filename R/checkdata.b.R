@@ -9,6 +9,31 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Cache for performance optimization
         .data_cache = NULL,
 
+        # Notice collection (single Preformatted plain-text output item; avoids the
+        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
+        .noticeList = list(),
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+            private$.renderNotices()
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+            blocks <- vapply(private$.noticeList, function(notice) {
+                prefix <- switch(notice$type,
+                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ", "")
+                paste0(prefix, notice$title, "\n", notice$content)
+            }, character(1))
+            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+        },
+
         # Initialize and manage data cache
         .initializeCache = function(variable, var_name) {
             cache_key <- paste0(var_name, "_", length(variable))
@@ -1091,6 +1116,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .run = function() {
+            private$.noticeList <- list()
+
             # TODO (security): file-wide htmlEscape gap. Only 2 `htmlEscape`
             # calls across ~2.2k LOC of HTML construction. Variable names
             # (from user CSV headers — uncontrolled `<`, `>`, `&`) flow into

@@ -242,6 +242,7 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "lollipopResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         summary = function() private$.items[["summary"]],
         plot = function() private$.items[["plot"]]),
@@ -256,6 +257,17 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "RGraphGallery",
                     "ggplot2"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "dep",
+                    "group",
+                    "sortBy",
+                    "orientation",
+                    "aggregation",
+                    "colorScheme")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -409,6 +421,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param height Height of the plot in pixels.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr

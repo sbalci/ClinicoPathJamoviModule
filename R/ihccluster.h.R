@@ -664,6 +664,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ihcclusterResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         todo = function() private$.items[["todo"]],
         binaryConversionNote = function() private$.items[["binaryConversionNote"]],
         summary = function() private$.items[["summary"]],
@@ -737,6 +738,17 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "viridis",
                     "corrplot",
                     "pheatmap"))
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="notices",
+                title="Important Information",
+                clearWith=list(
+                    "catVars",
+                    "contVars",
+                    "method",
+                    "nClusters",
+                    "distanceMethod",
+                    "handleMissing")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -1979,6 +1991,7 @@ ihcclusterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   specificity, PPV, NPV
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$binaryConversionNote} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
