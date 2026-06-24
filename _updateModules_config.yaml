@@ -20,7 +20,7 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.43"
+new_version: "0.0.44"
 new_date: "2026-06-24"
 quick: false
 TEST: true
