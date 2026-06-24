@@ -1,9 +1,9 @@
 ---
 name:  crosstable
 title: Cross Tables
-menuGroup: ExplorationT
+menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
-version: '0.0.37'
+version: '0.0.43'
 jas: '1.2'
 
 description:
