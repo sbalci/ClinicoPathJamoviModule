@@ -1,5 +1,13 @@
 # ClinicoPath News
 
+# ClinicoPath 0.0.41
+
+## Bug fixes
+
+### Cross Tables (`crosstable`)
+
+* **Fixed:** The **arsenal** table style crashed with `Error ... cannot set non-repeated field to vector of length > 1` under jamovi 2.7. The arsenal summary HTML was captured with `capture.output()`, which returns a *multi-element* character vector (one element per printed line), but `Html$setContent()` serializes into a non-repeated protobuf field and requires a *scalar* string. The captured lines are now collapsed into a single newline-joined HTML string before assignment. Reported on the jamovi forum ([t=4163](https://forum.jamovi.org/viewtopic.php?t=4163)). Only the arsenal style was affected — the finalfit, gtsummary, and tangram (NEJM/Lancet/Hmisc) styles already produced scalar strings via `kableExtra::kable()` / `as_kable_extra()` / `tangram::html5()`.
+
 # ClinicoPath 0.0.39.0
 
 ## New features

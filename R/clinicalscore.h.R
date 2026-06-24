@@ -694,7 +694,7 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "clinicalscore",
-                version = c(0,0,38),
+                version = c(0,0,41),
                 options = options,
                 results = clinicalscoreResults$new(options=options),
                 data = data,

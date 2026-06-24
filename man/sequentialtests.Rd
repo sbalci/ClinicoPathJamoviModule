@@ -62,6 +62,7 @@ counts. Does not affect probabilities.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$plain_summary} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary_table} \tab \tab \tab \tab \tab a table \cr
 \code{results$individual_tests_table} \tab \tab \tab \tab \tab a table \cr
@@ -75,7 +76,6 @@ A results object containing:
 \code{results$plot_population_flow} \tab \tab \tab \tab \tab an image \cr
 \code{results$plot_sensitivity_analysis} \tab \tab \tab \tab \tab an image \cr
 \code{results$clinical_guidance} \tab \tab \tab \tab \tab a html \cr
-\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

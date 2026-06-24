@@ -110,6 +110,7 @@ dimensions=3).}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$summaryText} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$projectionPlot} \tab \tab \tab \tab \tab an image \cr

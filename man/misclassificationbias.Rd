@@ -80,6 +80,7 @@ bias analysis. Higher values give more stable estimates but take longer.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$observedTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$biasAnalysis} \tab \tab \tab \tab \tab a table \cr

@@ -3846,7 +3846,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agreement",
-                version = c(0,0,38),
+                version = c(0,0,41),
                 options = options,
                 results = agreementResults$new(options=options),
                 data = data,

@@ -229,9 +229,7 @@
 #' }
 #'
 #' @name groomecompare_test_data
-#' @aliases groomecompare_test groomecompare_small groomecompare_large
-#'   groomecompare_unbalanced groomecompare_tied groomecompare_identical
-#'   groomecompare_clear_winner groomecompare_edge_truefalse groomecompare_edge_12
+#' @aliases groomecompare_test groomecompare_small groomecompare_large groomecompare_unbalanced groomecompare_tied groomecompare_identical groomecompare_clear_winner groomecompare_edge_truefalse groomecompare_edge_12
 #' @docType data
 #' @keywords datasets
 NULL

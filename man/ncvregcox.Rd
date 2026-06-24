@@ -73,6 +73,7 @@ multicollinearity,  and whether regularization is needed.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$model_summary} \tab \tab \tab \tab \tab a table \cr

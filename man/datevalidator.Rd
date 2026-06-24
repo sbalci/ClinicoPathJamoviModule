@@ -70,6 +70,7 @@ Includes information about the DateTime Converter module.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$corrected_data} \tab \tab \tab \tab \tab a table \cr
 \code{results$correction_table} \tab \tab \tab \tab \tab a html \cr

@@ -129,6 +129,7 @@ and transitions}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 \code{results$responseTable} \tab \tab \tab \tab \tab a table \cr

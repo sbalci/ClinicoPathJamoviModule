@@ -195,14 +195,14 @@ NULL
         
         return(list(
             test = test_preference, 
-            reason = .("Test selected as requested"),
+            reason = "Test selected as requested",
             warning = FALSE,
             expected_min = expected_min
         ))
     }, error = function(e) {
         return(list(
             test = "fisher", 
-            reason = .("Cannot calculate expected frequencies. Using Fisher's exact test."),
+            reason = "Cannot calculate expected frequencies. Using Fisher's exact test.",
             warning = TRUE,
             expected_min = NA
         ))
@@ -256,7 +256,7 @@ NULL
     # Check overall sample size
     n_total <- nrow(mydata)
     if (n_total < 20) {
-        issues <- append(issues, sprintf(.("Very small sample size (n = %d). Results may be unreliable."), n_total))
+        issues <- append(issues, sprintf("Very small sample size (n = %d). Results may be unreliable.", n_total))
     }
 
     # Check group sizes
@@ -307,7 +307,7 @@ NULL
 # Helper function to generate clinical interpretation
 .generateClinicalSummary <- function(results, myvars, mygroup, test_type = "crosstable") {
     if (is.null(results) || length(results) == 0) {
-        return(.("No results available for interpretation."))
+        return("No results available for interpretation.")
     }
     
     # Count significant associations (assuming p-value column exists)
@@ -315,19 +315,19 @@ NULL
     total_tests <- length(myvars)
     
     if (test_type == "crosstable") {
-        summary <- sprintf(.("Cross-table analysis comparing %d variable(s) across %s groups."),
+        summary <- sprintf("Cross-table analysis comparing %d variable(s) across %s groups.",
                           total_tests, mygroup)
 
         if (significant_count > 0) {
             summary <- paste0(summary, " ",
-                sprintf(.("Found %d significant association(s) (p < 0.05)."), significant_count))
+                sprintf("Found %d significant association(s) (p < 0.05).", significant_count))
         } else {
             summary <- paste0(summary, " ",
-                .("No significant associations detected (all p ≥ 0.05)."))
+                "No significant associations detected (all p ≥ 0.05).")
         }
 
         summary <- paste0(summary, " ",
-            .("Review individual test results below for detailed findings."))
+            "Review individual test results below for detailed findings.")
     }
     
     return(summary)
@@ -688,7 +688,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         digits.count = 1
                     )
                     tablearsenal <- summary(tablearsenal, text = 'html', pfootnote = 'html')
-                    tablearsenal <- capture.output(tablearsenal)
+                    # capture.output() returns a character vector with one element per
+                    # printed line; Html$setContent requires a SCALAR string, so collapse
+                    # to a single string. Passing the multi-element vector triggers the
+                    # jamovi 2.7 serialization error "cannot set non-repeated field to
+                    # vector of length > 1" (forum.jamovi.org/viewtopic.php?t=4163).
+                    tablearsenal <- paste(capture.output(tablearsenal), collapse = "\n")
                     self$results$tablestyle1$setContent(tablearsenal)
                 } else if (sty == "finalfit") {
                     myvars_term <- jmvcore::composeTerm(components = myvars)

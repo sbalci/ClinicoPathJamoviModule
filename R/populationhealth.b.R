@@ -1,10 +1,6 @@
 # This file is a generated template, your changes will not be overwritten
 
-#' @importFrom ggplot2 ggplot aes geom_col geom_text geom_line geom_point
-#'   geom_smooth geom_ribbon geom_vline geom_hline geom_bar coord_polar
-#'   scale_fill_manual scale_color_gradient2 scale_size_continuous
-#'   scale_fill_brewer labs theme_minimal theme_void theme element_text
-#'   facet_wrap annotate
+#' @importFrom ggplot2 ggplot aes geom_col geom_text geom_line geom_point geom_smooth geom_ribbon geom_vline geom_hline geom_bar coord_polar scale_fill_manual scale_color_gradient2 scale_size_continuous scale_fill_brewer labs theme_minimal theme_void theme element_text facet_wrap annotate
 #' @importFrom reshape2 melt
 #' @importFrom gridExtra grid.arrange
 #' @importFrom stats rnorm runif quantile median sd

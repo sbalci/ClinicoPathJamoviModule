@@ -171,6 +171,7 @@ procedures.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$cindexSummary} \tab \tab \tab \tab \tab Overall C-index with confidence intervals \cr
 \code{results$somersD} \tab \tab \tab \tab \tab Somers' D rank correlation \cr

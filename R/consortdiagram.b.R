@@ -169,9 +169,9 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$todo$setContent(
                     private$.htmlError(
                         "Error Processing Data",
-                        paste0(e$message, " Please check your variable selections and data format."),
+                        paste0(htmltools::htmlEscape(e$message), " Please check your variable selections and data format."),
                         c(
-                            paste0("<strong>Error message:</strong> ", e$message),
+                            paste0("<strong>Error message:</strong> ", htmltools::htmlEscape(e$message)),
                             "Check variable selections in left panel",
                             "Verify data format matches requirements"
                         )
@@ -196,7 +196,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "Duplicate Participant IDs Detected",
                             paste0("Found ", length(dup_ids), " duplicate participant ID(s). Each row must represent one unique participant."),
                             c(
-                                paste0("<strong>Examples:</strong> ", paste(head(dup_ids, 3), collapse = ", ")),
+                                paste0("<strong>Examples:</strong> ", htmltools::htmlEscape(paste(head(dup_ids, 3), collapse = ", "))),
                                 "Each row must represent a unique participant",
                                 "Check your data and remove or merge duplicate entries"
                             )
@@ -529,7 +529,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (arm_key in names(private$.armData)) {
                     arm_data <- private$.armData[[arm_key]]
                     html <- paste0(html,
-                        "<li><strong>", arm_data$arm, ":</strong> ",
+                        "<li><strong>", htmltools::htmlEscape(arm_data$arm), ":</strong> ",
                         arm_data$analyzed, "/", arm_data$allocated, " analyzed (",
                         arm_data$retention_rate, "% retention)</li>"
                     )
@@ -682,7 +682,7 @@ consortdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (arm_key in names(private$.armData)) {
                     arm_data <- private$.armData[[arm_key]]
                     arm_text <- c(arm_text, paste0(
-                        arm_data$arm, " (n=", arm_data$analyzed, ", ", arm_data$retention_rate, "% retention)"
+                        htmltools::htmlEscape(arm_data$arm), " (n=", arm_data$analyzed, ", ", arm_data$retention_rate, "% retention)"
                     ))
                 }
                 summary_sentence <- paste0(

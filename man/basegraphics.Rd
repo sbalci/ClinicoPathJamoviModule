@@ -100,6 +100,7 @@ regression line.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot_description} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossary} \tab \tab \tab \tab \tab a html \cr

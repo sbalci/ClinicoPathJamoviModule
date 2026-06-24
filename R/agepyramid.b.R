@@ -70,15 +70,16 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- jmvcore::naOmit(mydata)
 
             # Convert age to numeric and gender to factor.
-            # jmvcore::toNumeric honors the `values` attribute on jamovi-encoded factors;
-            # for plain numerics or factors without that attribute it falls back to the
-            # same as.numeric(as.character(...)) path used previously.
-            mydata[["Age"]] <- jmvcore::toNumeric(mydata[[age]])
+            age_values <- jmvcore::toNumeric(mydata[[age]])
+            if (!is.numeric(age_values)) {
+                age_values <- suppressWarnings(as.numeric(as.character(age_values)))
+            }
+            mydata[["Age"]] <- age_values
             mydata[["Gender"]] <- as.factor(mydata[[gender]])
-            
+
             # Filter out invalid ages (created by conversion)
             n_before_age_filter <- nrow(mydata)
-            mydata <- mydata %>% dplyr::filter(!is.na(Age))
+            mydata <- mydata %>% dplyr::filter(!is.na(Age), is.finite(Age), Age >= 0)
             n_invalid_age <- n_before_age_filter - nrow(mydata)
 
             # Determine gender levels with smart defaults ----
@@ -160,6 +161,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             n_final <- nrow(mydata)  # Track for data summary
 
+            if (n_final == 0) {
+                jmvcore::reject("No valid rows remain after filtering age and gender values")
+            }
+
             # Determine age group breaks based on preset or custom bin width ----
             age_groups <- if (!is.null(self$options$age_groups)) self$options$age_groups else 'custom'
             max_age <- max(mydata[["Age"]], na.rm = TRUE)
@@ -195,6 +200,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }, error = function(e) {
                         # Fall back to bin_width if parsing fails
                         bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
+                        if (!is.numeric(bin_width) || length(bin_width) != 1 ||
+                                is.na(bin_width) || !is.finite(bin_width) || bin_width <= 0) {
+                            jmvcore::reject("Bin width must be a positive number")
+                        }
                         breaks <- seq(from = 0, to = max_age, by = bin_width)
                         if (max_age > tail(breaks, n = 1)) {
                             breaks <- c(breaks, max_age)
@@ -204,6 +213,10 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     # Use bin_width
                     bin_width <- if (!is.null(self$options$bin_width)) self$options$bin_width else 5
+                    if (!is.numeric(bin_width) || length(bin_width) != 1 ||
+                            is.na(bin_width) || !is.finite(bin_width) || bin_width <= 0) {
+                        jmvcore::reject("Bin width must be a positive number")
+                    }
                     breaks_seq <- seq(from = 0, to = max_age, by = bin_width)
                     if (max_age > tail(breaks_seq, n = 1)) {
                         breaks_seq <- c(breaks_seq, max_age)
@@ -243,7 +256,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Also save state for ggcharts plot (if enabled)
             if (self$options$enableGGCharts) {
                 imageGGCharts <- self$results$plotGGCharts
-                imageGGCharts$setState(plotData)
+                imageGGCharts$setState(private$.prepare_ggcharts_data(plotData))
             }
 
             # Pivot data for table output ----
@@ -424,6 +437,13 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(plotData))
                 return(FALSE)
 
+            # ggcharts::pyramid_chart() assigns sides and colors from the first
+            # appearance order of `group`. Use a completed Female/Male grid so
+            # side assignment and age-bin alignment are deterministic.
+            plotData <- private$.prepare_ggcharts_data(plotData)
+            if (nrow(plotData) == 0)
+                return(FALSE)
+
             # ggcharts pyramid_chart requires long-format data with:
             # - x: age groups (categorical)
             # - y: population counts (numeric)
@@ -507,6 +527,37 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 warning("ggcharts pyramid failed: ", e$message)
                 return(FALSE)
             })
+        },
+
+        .prepare_ggcharts_data = function(plotData) {
+            if (is.null(plotData) || nrow(plotData) == 0)
+                return(plotData)
+
+            observed_pop <- unique(as.character(plotData$Pop[!is.na(plotData$Pop)]))
+            pop_levels <- if (is.factor(plotData$Pop)) {
+                levels(plotData$Pop)[levels(plotData$Pop) %in% observed_pop]
+            } else {
+                observed_pop
+            }
+
+            if (length(pop_levels) == 0)
+                return(plotData[0, , drop = FALSE])
+
+            plotData %>%
+                dplyr::filter(!is.na(Pop)) %>%
+                dplyr::mutate(
+                    Gender = factor(as.character(Gender), levels = c("Female", "Male")),
+                    Pop = factor(as.character(Pop), levels = pop_levels)
+                ) %>%
+                dplyr::filter(!is.na(Gender), !is.na(Pop)) %>%
+                tidyr::complete(
+                    Gender = factor(c("Female", "Male"), levels = c("Female", "Male")),
+                    Pop = factor(pop_levels, levels = pop_levels),
+                    fill = list(n = 0)
+                ) %>%
+                dplyr::arrange(Gender, Pop) %>%
+                dplyr::mutate(Gender = as.character(Gender)) %>%
+                as.data.frame()
         },
 
         .create_age_labels = function(breaks) {

@@ -90,6 +90,7 @@ for clinical use.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$results} \tab \tab \tab \tab \tab Statistical significance of principal components based on permutation testing \cr

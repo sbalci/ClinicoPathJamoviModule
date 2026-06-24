@@ -9,7 +9,6 @@ Validated and quality-checked date/datetime fields using multiple packages
 \description{
 Date/DateTime Validation and Quality Assessment
 }
-\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{datevalidatorBase} -> \code{datevalidatorClass}
 }

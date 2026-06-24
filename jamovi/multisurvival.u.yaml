@@ -308,9 +308,6 @@ children:
           - type: ComboBox
             name: ac_method
             enable: (ac)
-      - type: Label
-        label: Advanced Options
-        children: []
   - type: CollapseBox
     label: Stratification Variables
     collapsed: true
@@ -378,31 +375,30 @@ children:
                 name: showExplanations
               - type: CheckBox
                 name: showSummaries
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Survival Decision Tree
+    collapsed: true
     children:
-      - type: CheckBox
-        name: use_tree
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: min_node
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: complexity
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: max_depth
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: show_terminal_nodes
+      - type: Label
+        label: Survival Decision Tree
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: CheckBox
+                name: use_tree
+              - type: TextBox
+                name: min_node
+                format: number
+                enable: (use_tree)
+              - type: TextBox
+                name: complexity
+                format: number
+                enable: (use_tree)
+              - type: TextBox
+                name: max_depth
+                format: number
+                enable: (use_tree)
+              - type: CheckBox
+                name: show_terminal_nodes
+                enable: (use_tree)

@@ -645,3 +645,37 @@ test_that("REGRESSION: exclusion breakdown in summary is accurate and complete",
   expect_equal(n_final, actual_total,
                info = "Even with multiple exclusion types, reported N must match table sum")
 })
+
+test_that("REGRESSION: ggcharts gender mapping is deterministic", {
+  # ggcharts::pyramid_chart() assigns sides/colors from unique(Gender), so a
+  # male-only youngest bin must not make Male the first group.
+  test_data <- data.frame(
+    age = c(1, 1, 6, 6),
+    gender = c("Male", "Male", "Female", "Female")
+  )
+
+  result <- agepyramid(
+    data = test_data,
+    age = "age",
+    gender = "gender",
+    female = "Female",
+    male = "Male",
+    bin_width = 5,
+    enableGGCharts = TRUE
+  )
+
+  ggcharts_state <- result$plotGGCharts$state
+
+  expect_equal(unique(ggcharts_state$Gender), c("Female", "Male"))
+  expect_equal(as.character(ggcharts_state$Pop), rep(c("1-5", "6-6"), 2))
+
+  female_young <- ggcharts_state$n[
+    ggcharts_state$Gender == "Female" & as.character(ggcharts_state$Pop) == "1-5"
+  ]
+  male_older <- ggcharts_state$n[
+    ggcharts_state$Gender == "Male" & as.character(ggcharts_state$Pop) == "6-6"
+  ]
+
+  expect_equal(female_young, 0L)
+  expect_equal(male_older, 0L)
+})

@@ -69,6 +69,7 @@ threshold). Set to 0 for no reference line.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$naturalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$correlation} \tab \tab \tab \tab \tab a table \cr
 \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr

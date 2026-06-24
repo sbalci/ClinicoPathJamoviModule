@@ -166,8 +166,7 @@
 #' # See jjstatsplot module documentation for examples
 #' }
 #' 
-#' @keywords package clinicopathology medical-research survival-analysis 
-#'          roc-analysis jamovi pathology statistics visualization
+#' @keywords package clinicopathology medical-research survival-analysis roc-analysis jamovi pathology statistics visualization
 #' 
 #' @seealso
 #' \itemize{

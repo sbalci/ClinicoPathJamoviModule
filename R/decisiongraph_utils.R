@@ -1,9 +1,12 @@
-#' Decision Tree Analysis Utility Functions
-#'
-#' This file contains modular utility functions for the decisiongraph jamovi module.
-#' These functions handle complex algorithms, data processing, and visualization.
-#'
-#' @keywords internal
+# Decision Tree Analysis Utility Functions
+#
+# This file contains modular utility functions for the decisiongraph jamovi module.
+# These functions handle complex algorithms, data processing, and visualization.
+#
+# (Plain comments, not roxygen: this is a file header, not documentation for an
+# object. As a floating `#'` block with `@keywords internal` it was rolled forward
+# into the next exported function and triggered a roxygen "@keywords must be only
+# 1 line long" error.)
 
 #' Create Decision Tree Plot
 #'

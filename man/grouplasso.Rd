@@ -188,6 +188,7 @@ sampling. Ensures reproducible results across analyses.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr

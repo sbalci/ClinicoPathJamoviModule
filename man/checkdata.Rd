@@ -68,6 +68,7 @@ quality assessment.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr

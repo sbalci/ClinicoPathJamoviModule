@@ -184,9 +184,7 @@
 #' }
 #'
 #' @name rpasurvival_test_data
-#' @aliases rpasurvival_test rpasurvival_small rpasurvival_large
-#'   rpasurvival_edge_truefalse rpasurvival_edge_12
-#'   rpasurvival_edge_days rpasurvival_edge_years
+#' @aliases rpasurvival_test rpasurvival_small rpasurvival_large rpasurvival_edge_truefalse rpasurvival_edge_12 rpasurvival_edge_days rpasurvival_edge_years
 #' @docType data
 #' @keywords datasets
 NULL

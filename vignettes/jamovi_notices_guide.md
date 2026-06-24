@@ -552,6 +552,32 @@ notice$setContent('Error: Invalid data detected')
 notice$setContent('Important points:\n• Item 1\n• Item 2')
 ```
 
+#### Table Footnotes (`setNote`) Allow Limited HTML
+
+The "avoid HTML" rule above applies to **`Notice` content**. Table footnotes set with
+`table$setNote(key, note)` are different: they render a small, fixed subset of HTML tags.
+(jamovi originally intended Markdown for notes, but since many modules were already using
+HTML, the developers settled on a short allow-list of HTML tags.) As of the current
+jamovi version, only these inline tags are honored:
+
+| Tag | Effect |
+| --- | --- |
+| `<i>`, `<em>` | italic |
+| `<b>`, `<strong>` | bold |
+| `<sub>` | subscript |
+| `<sup>` | superscript |
+
+**Paragraph breaks in a note:** use **two newlines** (`\n\n`). A single `\n` is collapsed
+like HTML whitespace and does *not* create a visible break.
+
+```r
+table$setNote("units", "Area in cm<sup>2</sup>; baseline at t<sub>0</sub>")
+table$setNote("multiline", "Complete-case analysis.\n\nCIs use profile likelihood.")
+```
+
+Any other HTML (links, lists, headings, `<br>`, colours) is not in the allow-list. See
+the [tables guide](jamovi_tables_guide.md) for the full footnote pattern.
+
 ### Internationalization Support
 
 For modules that support multiple languages, use the `..()` function and `jmvcore::format()`:

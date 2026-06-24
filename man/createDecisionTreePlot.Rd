@@ -2,7 +2,7 @@
 % Please edit documentation in R/decisiongraph_utils.R
 \name{createDecisionTreePlot}
 \alias{createDecisionTreePlot}
-\title{Decision Tree Analysis Utility Functions}
+\title{Create Decision Tree Plot}
 \usage{
 createDecisionTreePlot(
   treeData,
@@ -33,21 +33,5 @@ createDecisionTreePlot(
 ggplot2 object representing the decision tree
 }
 \description{
-This file contains modular utility functions for the decisiongraph jamovi module.
-These functions handle complex algorithms, data processing, and visualization.
+Generates the main decision tree visualization using network layout algorithms.
 }
-\keyword{Create}
-\keyword{Decision}
-\keyword{Generates}
-\keyword{Plot}
-\keyword{Tree}
-\keyword{algorithms.}
-\keyword{decision}
-\keyword{internal}
-\keyword{layout}
-\keyword{main}
-\keyword{network}
-\keyword{the}
-\keyword{tree}
-\keyword{using}
-\keyword{visualization}

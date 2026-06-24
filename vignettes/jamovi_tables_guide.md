@@ -752,6 +752,46 @@ table$setNote("missing", sprintf("Complete case analysis: %d/%d observations use
 table$setNote("ci", "Confidence intervals calculated using profile likelihood")
 ```
 
+#### Formatting Notes (Limited HTML)
+
+`setNote()` renders a **small, fixed subset of HTML tags**. (jamovi's original intention
+was Markdown, but because many modules were already embedding HTML in notes, the
+developers settled on a short allow-list of HTML tags instead.) As of the current jamovi
+version, only these inline tags are honored:
+
+| Tag | Effect |
+| --- | --- |
+| `<i>`, `<em>` | italic |
+| `<b>`, `<strong>` | bold |
+| `<sub>` | subscript |
+| `<sup>` | superscript |
+
+**Paragraph / line breaks:** use **two newlines** (`\n\n`, i.e. a blank line) for a
+paragraph break. A single `\n` is collapsed like ordinary HTML whitespace and does *not*
+produce a visible break.
+
+Any other HTML (links, lists, headings, tables, colours, `<br>`, etc.) is **not** in the
+allow-list — do not rely on it.
+
+```r
+# Bold / italic emphasis
+table$setNote("method", "Estimates from <i>Cox</i> proportional hazards regression")
+table$setNote("warn",   "<b>Caution:</b> fewer than 10 events per variable")
+
+# Subscript / superscript (e.g. units, chemical formulae, math notation)
+table$setNote("units", "Concentration in mg/cm<sup>2</sup>; baseline at t<sub>0</sub>")
+
+# Paragraph break: TWO newlines (a single \n is collapsed)
+table$setNote("multiline", paste0(
+    "Complete-case analysis.\n\n",   # <- blank line => paragraph break
+    "Confidence intervals use the profile likelihood."
+))
+```
+
+> **Note vs Notice:** this limited-HTML support applies to table footnotes set with
+> `setNote()`. It is distinct from `jmvcore::Notice` content — see the
+> [notices guide](jamovi_notices_guide.md) for those rules.
+
 ### Dynamic Column Addition
 
 #### Adding Columns Programmatically

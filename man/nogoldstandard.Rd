@@ -63,6 +63,7 @@ and method recommendations.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$agreement_stats} \tab \tab \tab \tab \tab a table \cr
 \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr

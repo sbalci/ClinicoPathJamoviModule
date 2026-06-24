@@ -4,7 +4,7 @@ title: Bar Charts
 menuGroup: JJStatsPlotT
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: 'Bar Charts, Grouped Bar Charts'
-version: '0.0.38'
+version: '0.0.42'
 jas: '1.2'
 
 description:

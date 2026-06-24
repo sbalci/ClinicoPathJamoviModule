@@ -116,6 +116,7 @@ selected variables.}
 A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+\code{results$notices} \tab \tab \tab \tab \tab a html \cr
 \code{results$suitabilityReport} \tab \tab \tab \tab \tab a html \cr
 \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 \code{results$coefficients} \tab \tab \tab \tab \tab a table \cr

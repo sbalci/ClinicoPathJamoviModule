@@ -16,6 +16,7 @@ This directory contains comprehensive guides for jamovi module development in th
 **Use this guide for:**
 - Starting a new jamovi analysis
 - Understanding module structure
+- Declaring package dependencies (DESCRIPTION `Imports` vs `Remotes`)
 - Data handling and state management
 - Formula building for statistical models
 - Plot rendering and state serialization
@@ -23,7 +24,7 @@ This directory contains comprehensive guides for jamovi module development in th
 - Best practices and common pitfalls
 
 **Contents:**
-1. Module Structure & 4-File Architecture
+1. Module Structure & 4-File Architecture (incl. DESCRIPTION `Imports`/`Remotes`)
 2. Data Handling Patterns (jmvcore functions)
 3. State Management (why & how)
 4. State Serialization Solutions (tibble → list fixes)
@@ -163,6 +164,7 @@ This directory contains comprehensive guides for jamovi module development in th
 
 | Problem | Guide to Consult | Section |
 |---------|------------------|---------|
+| Non-CRAN dependency: `Imports` vs `Remotes`, install fails/redundant | `jamovi_module_patterns_guide.md` | DESCRIPTION: Dependencies |
 | Plot doesn't update when options change | `jamovi_module_patterns_guide.md` | State Management |
 | `dplyr::pull()` error on plot data | `jamovi_module_patterns_guide.md` | State Serialization |
 | Variable names with spaces/special chars | `jamovi_module_patterns_guide.md` | Data Handling |
@@ -235,7 +237,8 @@ New guides should follow this structure:
 
 ---
 
-**Last Updated:** 2026-01-31
+**Last Updated:** 2026-06-22
 
 **Recent additions:**
+- 2026-06-22: Documented jmvtools DESCRIPTION `Imports`/`Remotes` behavior — a package may now appear in both fields; jmvtools suppresses the CRAN-mirror download of an import when it also appears in `Remotes` (see `jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies")
 - 2026-01-31: Added `jamovi_i18n_guide.md` - Comprehensive internationalization guide

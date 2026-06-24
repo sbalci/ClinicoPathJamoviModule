@@ -1,7 +1,11 @@
-# Ensure internationalization function is available
-if (!exists(".")) {
-  . <- function(x) x  # Fallback identity function for testing
-}
+# Internationalization note:
+# jamovi's translation helper `.()` (jmvcore) resolves `self` from the CALLING
+# frame, so it only works inside R6 analysis methods. The top-level helper
+# functions in this file run without `self` in scope, so they MUST use plain
+# string literals -- calling `.()` there throws "object 'self' not found"
+# (GitHub issue #122). Do not reintroduce `.()` into file-level helpers.
+# (The previous `if (!exists(".")) . <- function(x) x` guard was dead code:
+# jmvcore::`.` is imported into the namespace, so `exists(".")` is always TRUE.)
 
 # Note: `.escapeVariableNames` lives in R/utils.R as the canonical definition.
 
@@ -42,10 +46,10 @@ if (!exists(".")) {
       available = FALSE,
       message = paste0("
         <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 10px 0;'>
-          <h4 style='color: #856404; margin-top: 0;'> ", method_name, " ", .("Package Not Available"), "</h4>
-          <p><strong>", .("Issue:"), "</strong> ", .("The"), " '", package_name, "' ", .("package is required but not installed."), "</p>
-          <p><strong>", .("Solution:"), "</strong> ", .("Install the package using:"), " <code>install.packages('", package_name, "')</code></p>
-          <p><strong>", .("Alternative:"), "</strong> ", .("Automatically switching to"), " ", alternative_method, " ", .("analysis."), "</p>
+          <h4 style='color: #856404; margin-top: 0;'> ", method_name, " ", "Package Not Available", "</h4>
+          <p><strong>", "Issue:", "</strong> ", "The", " '", package_name, "' ", "package is required but not installed.", "</p>
+          <p><strong>", "Solution:", "</strong> ", "Install the package using:", " <code>install.packages('", package_name, "')</code></p>
+          <p><strong>", "Alternative:", "</strong> ", "Automatically switching to", " ", alternative_method, " ", "analysis.", "</p>
         </div>
       ")
     )
@@ -86,13 +90,13 @@ if (!exists(".")) {
 
     negative_times <- sum(time_vec < 0, na.rm = TRUE)
     if (negative_times > 0) {
-      issues <- append(issues, paste(.("Negative survival times detected:"), negative_times, .("observations")))
+      issues <- append(issues, paste("Negative survival times detected:", negative_times, "observations"))
     }
 
     # Check for zero survival times
     zero_times <- sum(time_vec == 0, na.rm = TRUE)
     if (zero_times > 0) {
-      warnings <- append(warnings, paste(.("Zero survival times detected:"), zero_times, .("observations. Consider adding small constant (0.5 days).")))
+      warnings <- append(warnings, paste("Zero survival times detected:", zero_times, "observations. Consider adding small constant (0.5 days)."))
     }
   }
 
@@ -107,17 +111,17 @@ if (!exists(".")) {
     if (is.numeric(outcome_vec) || is.logical(outcome_vec)) {
       unique_outcomes <- unique(outcome_vec[!is.na(outcome_vec)])
       if (!all(unique_outcomes %in% c(0, 1, TRUE, FALSE))) {
-        issues <- append(issues, .("Outcome should be binary (0/1 or TRUE/FALSE)"))
+        issues <- append(issues, "Outcome should be binary (0/1 or TRUE/FALSE)")
       }
     } else if (is.factor(outcome_vec) && length(levels(outcome_vec)) > 2) {
-      warnings <- append(warnings, .("Outcome has multiple levels; analysis will treat non-event levels as censored where applicable."))
+      warnings <- append(warnings, "Outcome has multiple levels; analysis will treat non-event levels as censored where applicable.")
     }
 
     # Check event rate when we have a usable indicator
     if (!is.null(event_indicator) && !all(is.na(event_indicator))) {
       event_rate <- mean(event_indicator, na.rm = TRUE)
       if (!is.na(event_rate) && event_rate < 0.05) {
-        warnings <- append(warnings, paste(.("Low event rate:"), round(event_rate * 100, 1), "%. ", .("Consider longer follow-up or different endpoint.")))
+        warnings <- append(warnings, paste("Low event rate:", round(event_rate * 100, 1), "%. ", "Consider longer follow-up or different endpoint."))
       }
     }
   }
@@ -127,7 +131,7 @@ if (!exists(".")) {
   if (!is.null(event_indicator)) {
     n_events <- sum(event_indicator, na.rm = TRUE)
     if (!is.na(n_events) && n_events < 10) {
-      warnings <- append(warnings, paste(.("Low number of events detected:"), n_events, .("events. Results may be unstable; interpret cautiously.")))
+      warnings <- append(warnings, paste("Low number of events detected:", n_events, "events. Results may be unstable; interpret cautiously."))
     }
   }
 
@@ -201,7 +205,7 @@ if (!exists(".")) {
                 if (!is.na(hr_val) && abs(log(hr_val)) > abs(log(strongest_hr))) {
                   strongest_hr <- hr_val
                   strongest_var <- results[i, 1]  # First column usually contains variable names
-                  strongest_effect <- if (hr_val > 1) .("increased risk") else .("decreased risk")
+                  strongest_effect <- if (hr_val > 1) "increased risk" else "decreased risk"
                 }
               }
             }
@@ -217,28 +221,28 @@ if (!exists(".")) {
 
     # Analysis overview
     summary_parts$overview <- paste0(
-      .("This multivariable Cox regression analysis examined"), " ", n_vars, " ",
-      .("potential risk factors in"), " ", .("patients with"), " ", n_events, " ",
-      .("events observed during follow-up.")
+      "This multivariable Cox regression analysis examined", " ", n_vars, " ",
+      "potential risk factors in", " ", "patients with", " ", n_events, " ",
+      "events observed during follow-up."
     )
 
     # Key findings
     if (sig_count > 0) {
       summary_parts$findings <- paste0(
-        .("Key Finding:"), " ", sig_count, " ", .("out of"), " ", n_vars, " ",
-        .("factors showed statistically significant associations with the outcome"), " (p < 0.05)."
+        "Key Finding:", " ", sig_count, " ", "out of", " ", n_vars, " ",
+        "factors showed statistically significant associations with the outcome", " (p < 0.05)."
       )
 
       if (!is.null(strongest_var) && !is.null(strongest_effect)) {
         summary_parts$strongest <- paste0(
-          .("Strongest predictor:"), " ", strongest_var, " ", .("was associated with"), " ",
-          strongest_effect, " (", .("hazard ratio"), " = ", round(strongest_hr, 2), ")."
+          "Strongest predictor:", " ", strongest_var, " ", "was associated with", " ",
+          strongest_effect, " (", "hazard ratio", " = ", round(strongest_hr, 2), ")."
         )
       }
     } else {
       summary_parts$findings <- paste0(
-        .("No statistically significant associations were identified among the"), " ",
-        n_vars, " ", .("factors examined"), " (", .("all p-values ≥ 0.05"), ")."
+        "No statistically significant associations were identified among the", " ",
+        n_vars, " ", "factors examined", " (", "all p-values ≥ 0.05", ")."
       )
     }
 
@@ -246,16 +250,16 @@ if (!exists(".")) {
     if (sig_count > 0 && !is.null(strongest_hr)) {
       risk_interpretation <- ""
       if (strongest_hr > 2) {
-        risk_interpretation <- .("This represents a substantial clinical effect.")
+        risk_interpretation <- "This represents a substantial clinical effect."
       } else if (strongest_hr > 1.5 || strongest_hr < 0.67) {
-        risk_interpretation <- .("This represents a moderate clinical effect.")
+        risk_interpretation <- "This represents a moderate clinical effect."
       } else if (strongest_hr != 1) {
-        risk_interpretation <- .("This represents a mild clinical effect.")
+        risk_interpretation <- "This represents a mild clinical effect."
       }
 
       summary_parts$interpretation <- paste0(
-        .("Clinical Significance:"), " ", risk_interpretation, " ",
-        .("Consider this factor in clinical decision-making and patient counseling.")
+        "Clinical Significance:", " ", risk_interpretation, " ",
+        "Consider this factor in clinical decision-making and patient counseling."
       )
     }
 
@@ -272,7 +276,7 @@ if (!exists(".")) {
 
   # Default return for other analysis types
   return(list(
-    summary = .("Analysis completed. Review detailed results below."),
+    summary = "Analysis completed. Review detailed results below.",
     sig_count = 0,
     strongest_var = NULL,
     strongest_hr = 1
@@ -282,19 +286,19 @@ if (!exists(".")) {
 # Helper function to assess clinical significance of hazard ratios
 .assessClinicalSignificance <- function(hr) {
   if (is.null(hr) || !is.numeric(hr) || hr <= 0) {
-    return(.("Unable to assess clinical significance."))
+    return("Unable to assess clinical significance.")
   }
 
   if (hr > 3 || hr < 0.33) {
-    return(.("Large clinical effect - high priority for clinical consideration."))
+    return("Large clinical effect - high priority for clinical consideration.")
   } else if (hr > 2 || hr < 0.5) {
-    return(.("Moderate clinical effect - clinically meaningful."))
+    return("Moderate clinical effect - clinically meaningful.")
   } else if (hr > 1.5 || hr < 0.67) {
-    return(.("Small to moderate clinical effect - may be clinically relevant."))
+    return("Small to moderate clinical effect - may be clinically relevant.")
   } else if (hr != 1) {
-    return(.("Small clinical effect - limited clinical impact."))
+    return("Small clinical effect - limited clinical impact.")
   } else {
-    return(.("No clinical effect detected."))
+    return("No clinical effect detected.")
   }
 }
 
@@ -462,7 +466,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               htmltools::htmlEscape(title),
               htmltools::htmlEscape(message)
           )
-          self$results[[output_name]]$setContent(paste0(current_content, new_message))
+          # Deduplicate notices: the central Cox model (.cox_model) is re-fit by
+          # many downstream consumers within a single run, and each call may emit
+          # the same EPV / event-count / proportional-hazards notice. Append only
+          # if this exact notice is not already shown.
+          if (!grepl(new_message, current_content, fixed = TRUE)) {
+              self$results[[output_name]]$setContent(paste0(current_content, new_message))
+          }
           self$results[[output_name]]$setVisible(TRUE)
       },
 
@@ -3323,7 +3333,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Add checkpoint before creating nomogram
         private$.checkpoint()
 
-        # Create nomogram
+        # Create nomogram (silent: degenerate models are handled below via the
+        # try-error check, so the raw error should not print to the console)
         nom <- try({
           # Use survfit on the cph object f which handles weights
           base_surv <- survival::survfit(f)
@@ -3335,7 +3346,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                         },
                         funlabel = paste("Predicted", pred_times[1], "month risk"),
                         fun.at = seq(0.1, 0.9, by = 0.1))
-        })
+        }, silent = TRUE)
 
 
         # private$.nom_object <- nom
@@ -6979,17 +6990,22 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         return(long_data)
       }
 
-      # Educational Explanations ----
       ,
+      # Helper: set explanation content on a (possibly absent) result item.
+      # Defined as a proper private method. Previously this was assigned at run
+      # time via `private$.setExplanationContent <- function(...)`, which threw
+      # "cannot add bindings to a locked environment" on the locked R6 instance
+      # whenever Show Explanations was enabled (GitHub issue #122).
+      .setExplanationContent = function(result_name, content) {
+        tryCatch({
+          self$results[[result_name]]$setContent(content)
+        }, error = function(e) {
+          # Silently ignore if result doesn't exist
+        })
+      },
+
+      # Educational Explanations ----
       .addExplanations = function() {
-        # Helper function to set explanation content
-        private$.setExplanationContent <- function(result_name, content) {
-          tryCatch({
-            self$results[[result_name]]$setContent(content)
-          }, error = function(e) {
-            # Silently ignore if result doesn't exist
-          })
-        }
 
         # Multivariable Cox Regression Explanation
         private$.setExplanationContent("multivariableCoxExplanation", '
@@ -7560,7 +7576,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             if (requireNamespace("randomForestSRC", quietly = TRUE)) {
               private$.performRandomForest(cleaneddata)
             } else {
-              private$.performCoxRegression(cleaneddata)
+              private$.cox_model()
             }
             return()
           }
@@ -7626,7 +7642,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             if (requireNamespace("randomForestSRC", quietly = TRUE)) {
               private$.performRandomForest(cleaneddata)
             } else {
-              private$.performCoxRegression(cleaneddata)
+              private$.cox_model()
             }
             return()
           }
@@ -8016,7 +8032,9 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
         ,
         .calculate_nomogram = function() {
-            # Nomogram calculation function
+            # Builds the rms nomogram (points table + plot) and a plain-language
+            # summary of the underlying Cox model for the "Natural Language
+            # Summary" output.
             tryCatch({
                 if (!requireNamespace("rms", quietly = TRUE)) {
                     self$results$nomogramSummary$setContent(paste0("
@@ -8028,35 +8046,74 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                     return()
                 }
 
-                # Get cleaned data
-                cleaneddata <- private$.cleandata()
-                mydata <- cleaneddata$cleanData
+                # Central Cox model (same model the rest of the analysis uses)
+                cox_model <- private$.cox_model()
 
-                # Get Cox model results
-                cox_results <- private$.performCoxRegression(cleaneddata)
-
-                if (!is.null(cox_results)) {
-                    nomogram_html <- paste0("
-                        <h4>", .("Nomogram for Risk Prediction"), "</h4>
-                        <p><strong>", .("Status:"), "</strong> ", .("Nomogram generation requires specialized implementation with the 'rms' package."), "</p>
-                        <p><strong>", .("Purpose:"), "</strong> ", .("Nomograms provide a visual calculator for individual risk prediction based on the multivariable Cox model."), "</p>
-                        <p><strong>", .("Implementation Note:"), "</strong> ", .("Full nomogram generation requires:"), "</p>
-                        <ul>
-                            <li>", .("Model fitting using rms::cph() instead of survival::coxph()"), "</li>
-                            <li>", .("Calibration and validation procedures"), "</li>
-                            <li>", .("Time-specific risk calculations"), "</li>
-                            <li>", .("Graphical nomogram construction"), "</li>
-                        </ul>
-                        <p><strong>", .("Alternative:"), "</strong> ", .("Use the risk score functionality for individual risk stratification."), "</p>
-                    ")
-
-                    self$results$nomogramSummary$setContent(nomogram_html)
-                } else {
-                    self$results$nomogramSummary$setContent(.("Unable to generate nomogram: Cox model results not available."))
+                if (is.null(cox_model)) {
+                    self$results$nomogramSummary$setContent(
+                        .("Unable to generate nomogram: the Cox model could not be fitted. See the warnings above (for example, too few events or invalid survival times)."))
+                    return()
                 }
 
+                # Construct the actual nomogram (populates the scoring guide and
+                # the nomogram plot via private$.nom_object). Degrade gracefully
+                # if rms cannot build a nomogram for this particular model.
+                nomogram_ok <- tryCatch({
+                    private$.nomogram(cox_model)
+                    !is.null(private$.nom_object)
+                }, error = function(e) {
+                    private$.debug_write(list(phase = ".nomogram(error)", message = e$message))
+                    FALSE
+                })
+
+                # Assemble a model-specific natural-language summary. Predictor
+                # display names come from user data labels, so they are HTML-
+                # escaped before being placed into this type:Html output.
+                cleaneddata <- private$.cleandata()
+                predictors <- c(cleaneddata$myexplanatory_labelled,
+                                cleaneddata$mycontexpl_labelled)
+                predictors <- predictors[!is.na(predictors) & nzchar(predictors)]
+                pred_html <- if (length(predictors))
+                    paste0("<li>", htmltools::htmlEscape(predictors), "</li>", collapse = "")
+                else
+                    paste0("<li>", .("(none specified)"), "</li>")
+
+                n_patients <- if (!is.null(cox_model$n)) cox_model$n else NA_integer_
+                n_events   <- if (!is.null(cox_model$nevent)) cox_model$nevent else NA_integer_
+                cidx <- tryCatch(unname(summary(cox_model)$concordance[1]),
+                                 error = function(e) NA_real_)
+                cidx_html <- if (is.na(cidx)) .("not available") else sprintf("%.2f", cidx)
+
+                pred_times <- suppressWarnings(as.numeric(
+                    trimws(unlist(strsplit(self$options$cutp, ",")))))
+                pred_times <- pred_times[!is.na(pred_times)]
+                horizon <- if (length(pred_times)) pred_times[1] else 12
+
+                avail_html <- if (nomogram_ok)
+                    paste0("<p style='color:#2e7d32;'>", .("The point-scoring guide and the nomogram plot are shown below."), "</p>")
+                else
+                    paste0("<p style='color:#b71c1c;'>", .("The nomogram plot could not be constructed for this model; the summary above still describes the fitted model."), "</p>")
+
+                summary_html <- paste0(
+                    "<div style='font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; line-height: 1.6; max-width: 820px;'>",
+                    "<p>", sprintf(.("This nomogram is a visual calculator derived from a multivariable Cox proportional-hazards model fitted on <b>%s patients</b> with <b>%s events</b>. It turns the model into a point-scoring tool so an individual patient's risk can be read off directly."),
+                                   format(n_patients), format(n_events)), "</p>",
+                    "<p><b>", .("Predictors included:"), "</b></p><ul>", pred_html, "</ul>",
+                    "<p>", sprintf(.("The nomogram estimates the probability of the event within <b>%g months</b> of follow-up. Model discrimination (Harrell's C-index) is <b>%s</b>, where 0.5 is no better than chance and 1.0 is perfect separation."),
+                                   horizon, cidx_html), "</p>",
+                    "<p><b>", .("How to read the nomogram:"), "</b></p><ol>",
+                    "<li>", .("For each predictor, draw a vertical line up to the <i>Points</i> axis to read its score."), "</li>",
+                    "<li>", .("Add the points from all predictors to obtain the <i>Total Points</i>."), "</li>",
+                    "<li>", .("Find the Total Points on the bottom axis and read down to the predicted-risk scale."), "</li></ol>",
+                    avail_html,
+                    "<p style='font-size: 0.9em; color: #555;'><i>", .("Caution: these estimates reflect the development cohort only and require external validation before clinical use. The nomogram assumes proportional hazards and (for continuous predictors) linear effects."), "</i></p>",
+                    "</div>")
+
+                self$results$nomogramSummary$setContent(summary_html)
+
             }, error = function(e) {
-                error_msg <- paste(.("Nomogram calculation error:"), e$message)
+                error_msg <- paste(.("Nomogram calculation error:"),
+                                   htmltools::htmlEscape(conditionMessage(e)))
                 self$results$nomogramSummary$setContent(error_msg)
             })
         }
@@ -8097,7 +8154,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             # Try to get Cox regression results for summary
             cox_results <- NULL
             tryCatch({
-              cox_model <- private$.performCoxRegression(cleaneddata)
+              cox_model <- private$.cox_model()
               if (!is.null(cox_model)) {
                 cox_summary <- summary(cox_model)
                 cox_results <- cox_summary$coefficients

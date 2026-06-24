@@ -92,6 +92,7 @@ better visualization.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$setupGuidance} \tab \tab \tab \tab \tab a html \cr
 \code{results$main} \tab \tab \tab \tab \tab an image \cr

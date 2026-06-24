@@ -226,6 +226,7 @@ statistics for better comparability.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$descriptives} \tab \tab \tab \tab \tab a table \cr
 \code{results$normality} \tab \tab \tab \tab \tab a table \cr

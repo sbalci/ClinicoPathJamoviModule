@@ -386,12 +386,19 @@ See `R/waterfall.b.R` for complete working example.
   - See "Using Guide Files" section above for when and how to use these guides
 - The notices feature does not allow new lines for the time being. So we need to update the implementation. For the
   time being we need to have both previous html and the new notices features to be present at the same time.
+- `table$setNote(key, note)` (table footnotes) DOES allow a small subset of HTML tags: `i`, `em` (italic), `b`,
+  `strong` (bold), `sub` (subscript), `sup` (superscript). (jamovi intended Markdown but settled on an HTML allow-list
+  because modules were already using HTML.) For a paragraph break use TWO newlines (`"...\n\n..."`); a single `\n` is
+  collapsed like HTML whitespace. No other HTML is honored. This is distinct from `jmvcore::Notice` content (which
+  should avoid HTML). Source: jamovi dev Slack (Damian Dropmann / jonathon). See
+  `vignettes/jamovi_tables_guide.md` → "Formatting Notes (Limited HTML)" and `vignettes/jamovi_notices_guide.md`.
 - you are an expert R-package and jamovi developer. you are an expert in biostatistics working with pathologists and clinicians.
 critically evaluate functions. is it mathematically and statistically accurate? is it ready to be used by clinicians and pathologists? is it ready for release?
 - The error "attempt to apply non-function" during serialization was caused by using jmvcore::Notice objects that
   were dynamically inserted with self$results$insert(). These Notice objects contain function references that
   cannot be serialized by jamovi's protobuf system.
 - jmvtools::check() only locates jamovi program bin file location. it does not check anything regarding module structure or code.
+- jmvtools DESCRIPTION dependencies: a package may now be listed in BOTH `Imports` and `Remotes`. The current jmvtools suppresses the CRAN-mirror download of an import when that package also appears in `Remotes`, installing it only from the remote (previously it tried CRAN first then the remote — redundant, or a failure when the package isn't on CRAN). Intended design: `Imports` *declares* the dependency, `Remotes` says *where to find* it. There's no functional install difference today if a dependency is only in `Remotes`, but list every real run-time dependency in `Imports` anyway (the reviewer "claudia" encourages it); add a `Remotes:` entry only for packages not on CRAN. See `vignettes/jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies".
 
 
 

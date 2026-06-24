@@ -148,6 +148,7 @@ discovered clusters.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$aboutAnalysis} \tab \tab \tab \tab \tab a html \cr
 \code{results$dataSummary$dataStructure} \tab \tab \tab \tab \tab a table \cr

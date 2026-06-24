@@ -688,7 +688,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 # Update overview with save status
                 save_message <- paste(
                     "<div style='background-color: #d4edda; padding: 10px; border: 1px solid #c3e6cb; margin: 5px 0;'>",
-                    "<strong> Explanations Saved:</strong> ", file_path,
+                    "<strong> Explanations Saved:</strong> ", htmltools::htmlEscape(file_path),
                     "</div>"
                 )
                 
@@ -699,7 +699,7 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 # Show error message
                 error_message <- paste(
                     "<div style='background-color: #f8d7da; padding: 10px; border: 1px solid #f5c6cb; margin: 5px 0;'>",
-                    "<strong> Save Error:</strong> ", e$message,
+                    "<strong> Save Error:</strong> ", htmltools::htmlEscape(e$message),
                     "</div>"
                 )
                 

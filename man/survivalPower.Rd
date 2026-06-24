@@ -137,6 +137,7 @@ settings only. May take 10-60 seconds depending on simulation_runs setting.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$power_summary} \tab \tab \tab \tab \tab a table \cr
 \code{results$simulation_validation_table} \tab \tab \tab \tab \tab a table \cr

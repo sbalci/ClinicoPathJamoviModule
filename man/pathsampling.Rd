@@ -232,6 +232,7 @@ Type variable. Warns if CV > 30 percent.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 \code{results$guidedInstructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$conciseInstructions} \tab \tab \tab \tab \tab a html \cr

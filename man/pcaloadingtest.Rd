@@ -62,6 +62,7 @@ components, 1 shows only PC1, 2 shows only PC2, etc.}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalGuide} \tab \tab \tab \tab \tab a html \cr
 \code{results$results} \tab \tab \tab \tab \tab Permutation-based significance testing for each variable-component loading \cr

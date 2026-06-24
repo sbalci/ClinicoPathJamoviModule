@@ -91,6 +91,7 @@ v1.1 compliance (target lesion limits, confirmation, new lesions).}
 \value{
 A results object containing:
 \tabular{llllll}{
+\code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$lesionTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$targetSumTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$bestResponseTable} \tab \tab \tab \tab \tab a table \cr
