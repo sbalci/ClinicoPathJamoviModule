@@ -23,6 +23,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             analysistype = "overall",
             explanatory = NULL,
             contexpl = NULL,
+            interactions = NULL,
             multievent = FALSE,
             hr = FALSE,
             sty = "t1",
@@ -187,6 +188,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "continuous"),
                 permitted=list(
                     "numeric"),
+                default=NULL)
+            private$..interactions <- jmvcore::OptionTerms$new(
+                "interactions",
+                interactions,
                 default=NULL)
             private$..multievent <- jmvcore::OptionBool$new(
                 "multievent",
@@ -373,6 +378,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..outcomeredefined)
             self$.addOption(private$..explanatory)
             self$.addOption(private$..contexpl)
+            self$.addOption(private$..interactions)
             self$.addOption(private$..multievent)
             self$.addOption(private$..hr)
             self$.addOption(private$..sty)
@@ -428,6 +434,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         outcomeredefined = function() private$..outcomeredefined$value,
         explanatory = function() private$..explanatory$value,
         contexpl = function() private$..contexpl$value,
+        interactions = function() private$..interactions$value,
         multievent = function() private$..multievent$value,
         hr = function() private$..hr$value,
         sty = function() private$..sty$value,
@@ -482,6 +489,7 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..outcomeredefined = NA,
         ..explanatory = NA,
         ..contexpl = NA,
+        ..interactions = NA,
         ..multievent = NA,
         ..hr = NA,
         ..sty = NA,
@@ -1250,7 +1258,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(0,0,38),
+                version = c(0,0,45),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -1412,6 +1420,11 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   in the Cox model.
 #' @param contexpl Continuous explanatory (predictor) variables included in
 #'   the Cox model.
+#' @param interactions Interaction (crossed) terms added to the Cox model,
+#'   built from variables already selected as explanatory or continuous
+#'   explanatory variables. Each term tests effect modification — e.g. Treatment
+#'   x Biomarker for predictive-biomarker analysis. For a 2-way term the first
+#'   variable is the focal effect and the second is the moderator.
 #' @param multievent If true, multiple event levels will be considered for
 #'   competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.
 #' @param hr If true, generates a plot of hazard ratios for each explanatory
@@ -1569,6 +1582,7 @@ multisurvival <- function(
     analysistype = "overall",
     explanatory = NULL,
     contexpl = NULL,
+    interactions = NULL,
     multievent = FALSE,
     hr = FALSE,
     sty = "t1",
@@ -1628,6 +1642,7 @@ multisurvival <- function(
     for (v in explanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in adjexplanatory) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
     for (v in stratvar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+    if (inherits(interactions, "formula")) interactions <- jmvcore::decomposeFormula(interactions)
 
     options <- multisurvivalOptions$new(
         elapsedtime = elapsedtime,
@@ -1647,6 +1662,7 @@ multisurvival <- function(
         analysistype = analysistype,
         explanatory = explanatory,
         contexpl = contexpl,
+        interactions = interactions,
         multievent = multievent,
         hr = hr,
         sty = sty,

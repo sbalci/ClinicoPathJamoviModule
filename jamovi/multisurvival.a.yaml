@@ -1,7 +1,7 @@
 ---
 name:  multisurvival
 title: Multivariable Survival Analysis
-menuGroup: Survival
+menuGroup: SurvivalT
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
 version: '0.0.45'
@@ -356,6 +356,20 @@ options:
         R: >
           Continuous explanatory (predictor) variables included in the Cox model.
 
+
+# Interactions ----
+
+    - name: interactions
+      title: Interaction Terms
+      type: Terms
+      default:
+      description:
+        R: >
+          Interaction (crossed) terms added to the Cox model, built from
+          variables already selected as explanatory or continuous explanatory
+          variables. Each term tests effect modification — e.g. Treatment x
+          Biomarker for predictive-biomarker analysis. For a 2-way term the
+          first variable is the focal effect and the second is the moderator.
 
 # Multievent ----
 
