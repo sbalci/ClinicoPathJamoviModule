@@ -102,6 +102,75 @@ items:
           - multievent
           # - use_modelSelection
 
+    - name: interactionTest
+      title: 'Interaction (Effect-Modification) Test'
+      type: Table
+      visible: (interactions)
+      clearWith:
+        - explanatory
+        - contexpl
+        - interactions
+        - outcome
+        - elapsedtime
+        - outcomeLevel
+      columns:
+        - name: term
+          title: 'Interaction'
+          type: text
+        - name: hr
+          title: 'HR'
+          type: number
+        - name: ci_lower
+          title: 'Lower'
+          type: number
+          superTitle: '95% CI'
+        - name: ci_upper
+          title: 'Upper'
+          type: number
+          superTitle: '95% CI'
+        - name: p
+          title: 'p'
+          type: number
+          format: zto,pvalue
+
+    - name: subgroupHR
+      title: 'Within-Subgroup Hazard Ratios'
+      type: Table
+      visible: (interactions)
+      clearWith:
+        - explanatory
+        - contexpl
+        - interactions
+        - outcome
+        - elapsedtime
+        - outcomeLevel
+      columns:
+        - name: interaction
+          title: 'Interaction'
+          type: text
+          combineBelow: true
+        - name: moderator_level
+          title: 'Subgroup'
+          type: text
+        - name: focal_effect
+          title: 'Focal level'
+          type: text
+        - name: hr
+          title: 'HR'
+          type: number
+        - name: ci_lower
+          title: 'Lower'
+          type: number
+          superTitle: '95% CI'
+        - name: ci_upper
+          title: 'Upper'
+          type: number
+          superTitle: '95% CI'
+        - name: p
+          title: 'p'
+          type: number
+          format: zto,pvalue
+
     # Multivariable Cox Summary (right after main analysis)
     - name: multivariableCoxSummaryHeading
       title: 'Natural Language Summary'
