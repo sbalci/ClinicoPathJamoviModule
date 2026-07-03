@@ -3882,6 +3882,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           formula2 <- formula2[!formula2 %in% mystratvar_labelled]
         }
 
+        # append interaction terms so the HR forest plot shows them
+        if (length(self$options$interactions) > 0) {
+          .all_labels_hp <- labelled::var_label(plotData$mydata_labelled)
+          formula2 <- c(
+            formula2,
+            .interactionTermsForFinalfit(
+              .mapInteractionTerms(self$options$interactions, .all_labels_hp))
+          )
+        }
+
 
 
 
@@ -6364,8 +6374,16 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     mycontexpl <- as.vector(cleaneddata$mycontexpl_labelled)
   }
 
-  # Combine all explanatory variables
+  # Combine all explanatory variables (+ interaction terms)
   explanatory_formula <- c(myexplanatory, mycontexpl)
+  if (length(self$options$interactions) > 0) {
+    .all_labels_ff <- labelled::var_label(cleaneddata$mydata_labelled)
+    explanatory_formula <- c(
+      explanatory_formula,
+      .interactionTermsForFinalfit(
+        .mapInteractionTerms(self$options$interactions, .all_labels_ff))
+    )
+  }
 
   # Prepare the dependent variable formula
   dependent_formula <- "Surv(mytime, myoutcome)"
