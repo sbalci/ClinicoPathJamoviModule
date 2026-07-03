@@ -447,9 +447,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           error = function(e) NULL
         )
         if (!is.null(itab) && nrow(itab) > 0) {
-          t <- self$results$interactionTest
+          itbl <- self$results$interactionTest
           for (i in seq_len(nrow(itab))) {
-            t$addRow(rowKey = i, values = list(
+            itbl$addRow(rowKey = i, values = list(
               term     = itab$term[i],
               hr       = itab$hr[i],
               ci_lower = itab$ci_lower[i],
@@ -457,7 +457,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               p        = itab$p[i]
             ))
           }
-          t$setNote("emkey",
+          itbl$setNote("emkey",
             "Each row tests whether the focal effect differs across the moderator (effect modification). A significant p indicates the effect is modified.")
         }
 
@@ -2512,8 +2512,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             )
         }
 
-        # Populate interaction / effect-modification output
-        if (length(self$options$interactions) > 0) {
+        # Populate interaction / effect-modification output.
+        # .cox_model() is a shared fitter invoked many times within a single
+        # run (survival analysis, clinical summary, plots, nomogram, risk score).
+        # jmvcore's Table$addRow appends unconditionally, so gate row-writing on
+        # the tables still being empty: jamovi clears result tables at the start
+        # of each run, so only the FIRST .cox_model() call of a run populates
+        # them; later calls see rowCount > 0 and skip (no duplicate rows, no
+        # repeated subgroup refits).
+        if (length(self$options$interactions) > 0 &&
+            self$results$interactionTest$rowCount == 0 &&
+            self$results$subgroupHR$rowCount == 0) {
           private$.populateInteractionTables(
             cox_model = cox_model,
             cox_formula = coxformula,
