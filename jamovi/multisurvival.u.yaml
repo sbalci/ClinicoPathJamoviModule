@@ -3,6 +3,8 @@ name: multisurvival
 jus: '3.0'
 stage: 0
 compilerMode: tame
+events:
+  update: './multisurvival.events::update'
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -32,12 +34,42 @@ children:
           - type: VariablesListBox
             name: explanatory
             isTarget: true
+            events:
+              change: './multisurvival.events::onChange_predictors'
       - type: TargetLayoutBox
         label: Continuous Explanatory Variable
         children:
           - type: VariablesListBox
             name: contexpl
             isTarget: true
+            events:
+              change: './multisurvival.events::onChange_predictors'
+  - type: CollapseBox
+    label: Interaction Terms
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Supplier
+        name: interactionSupplier
+        label: Available Predictors
+        persistentItems: true
+        stretchFactor: 1
+        format: term
+        higherOrders: true
+        events:
+          update: './multisurvival.events::onUpdate_interactionSupplier'
+        children:
+          - type: TargetLayoutBox
+            transferAction: interactions
+            label: 'Interaction Terms:'
+            children:
+              - type: ListBox
+                name: interactions
+                valueFilter: unique
+                isTarget: true
+                itemDropBehaviour: emptyspace
+                template:
+                  type: TermLabel
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
