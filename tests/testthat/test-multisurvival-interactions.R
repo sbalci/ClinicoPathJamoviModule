@@ -125,3 +125,35 @@ test_that(".interactionModeratorInfo identifies focal, moderator, categorical", 
   info3 <- .interactionModeratorInfo(c("arm", "bio", "age"), d)  # 3-way
   expect_false(info3$twoway)
 })
+
+test_that(".interactionTestTable extracts interaction-coefficient HRs matching coxph", {
+  set.seed(1)
+  n <- 400
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("neg","pos"), n, TRUE))
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(bio=="pos", 0.1, 0) +
+         ifelse(arm=="trt" & bio=="pos", -0.9, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, arm, bio)
+  fit <- survival::coxph(survival::Surv(time, status) ~ arm * bio, data = d)
+
+  tab <- .interactionTestTable(fit, conf_level = 0.95)
+  expect_s3_class(tab, "data.frame")
+  expect_true(any(grepl(":", tab$term)))
+
+  # HR of the interaction row equals exp(coef) from coxph
+  sm <- summary(fit)$coefficients
+  int_name <- rownames(sm)[grepl(":", rownames(sm))][1]
+  expect_equal(tab$hr[tab$term == int_name], unname(exp(sm[int_name, "coef"])),
+               tolerance = 1e-8)
+  expect_equal(tab$p[tab$term == int_name], unname(sm[int_name, "Pr(>|z|)"]),
+               tolerance = 1e-8)
+})
+
+test_that(".interactionTestTable returns NULL when no interaction present", {
+  set.seed(2); n <- 100
+  d <- data.frame(time = rexp(n), status = rbinom(n,1,.7),
+                  arm = factor(sample(c("a","b"), n, TRUE)))
+  fit <- survival::coxph(survival::Surv(time, status) ~ arm, data = d)
+  expect_null(.interactionTestTable(fit))
+})

@@ -46,3 +46,23 @@
   list(focal = focal, moderator = moderator,
        twoway = twoway, categorical_moderator = cat_mod)
 }
+
+# One row per interaction coefficient (name contains ":"): HR, CI, p.
+.interactionTestTable <- function(cox_model, conf_level = 0.95) {
+  sm <- summary(cox_model)$coefficients
+  if (is.null(sm) || nrow(sm) == 0) return(NULL)
+  cn <- rownames(sm)
+  int_idx <- which(grepl(":", cn))
+  if (length(int_idx) == 0) return(NULL)
+  cis <- suppressWarnings(stats::confint(cox_model, level = conf_level))
+  if (is.null(dim(cis))) cis <- matrix(cis, ncol = 2,
+                                       dimnames = list(cn, NULL))
+  data.frame(
+    term     = cn[int_idx],
+    hr       = exp(unname(sm[int_idx, "coef"])),
+    ci_lower = exp(unname(cis[int_idx, 1])),
+    ci_upper = exp(unname(cis[int_idx, 2])),
+    p        = unname(sm[int_idx, "Pr(>|z|)"]),
+    stringsAsFactors = FALSE
+  )
+}
