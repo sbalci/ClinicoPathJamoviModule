@@ -6817,10 +6817,79 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                 </div>
                 <p style='font-size: 0.9em; color: #666;'>
                     Weights for ordinal categories follow the <em>Weighted Kappa</em> option
-                    (unweighted / linear / squared).
+                    (unweighted / linear / squared). Confidence intervals use the non-null
+                    asymptotic standard error (via <code>vcd::Kappa</code>), so they agree with
+                    <code>psych::cohen.kappa()</code>; <em>z</em> and <em>p</em> are reported as
+                    kappa / SE against the no-agreement null.
                 </p>
             </div>"
             self$results$allPairsKappaExplanation$setContent(html_content)
+        },
+
+        # Per-pair Cohen's kappa with a CONFIDENCE-INTERVAL-appropriate SE.
+        #
+        # irr::kappa2()$statistic is the H0:kappa=0 test z, built from the
+        # NULL-hypothesis SE; recovering se = kappa/z therefore yields the null
+        # SE, which underestimates the width of a confidence interval (and is
+        # unstable when kappa ~ 0). vcd::Kappa() returns the non-null asymptotic
+        # SE (ASE) -- the correct SE for a Wald CI -- and matches
+        # psych::cohen.kappa() exactly. We compute se, CI, z and p from that
+        # single ASE so the reported row is internally consistent
+        # (z = kappa/se, ci = kappa +/- z*se). irr::kappa2() is kept as a
+        # fallback for degenerate tables where vcd::Kappa() cannot return a
+        # finite ASE (e.g. perfect agreement).
+        .pairKappaWithCI = function(sub, irr_weight) {
+            a <- as.character(sub[[1]])
+            b <- as.character(sub[[2]])
+            peragree <- mean(a == b)
+            lv <- sort(unique(c(a, b)))
+
+            res <- NULL
+            if (length(lv) >= 2) {
+                res <- tryCatch({
+                    tab <- table(factor(a, levels = lv), factor(b, levels = lv))
+                    vk <- if (identical(irr_weight, "equal"))
+                              vcd::Kappa(tab, weights = "Equal-Spacing")
+                          else if (identical(irr_weight, "squared"))
+                              vcd::Kappa(tab, weights = "Fleiss-Cohen")
+                          else
+                              vcd::Kappa(tab)
+                    comp <- if (identical(irr_weight, "unweighted"))
+                                vk$Unweighted else vk$Weighted
+                    kappa <- unname(comp[["value"]])
+                    ase   <- unname(comp[["ASE"]])
+                    if (is.na(kappa) || is.na(ase) || ase <= 0)
+                        stop("non-finite kappa or ASE")
+                    z  <- kappa / ase
+                    zc <- stats::qnorm(0.975)
+                    list(kappa = kappa, se = ase,
+                         ci_lower = kappa - zc * ase,
+                         ci_upper = kappa + zc * ase,
+                         z = z, p = 2 * stats::pnorm(-abs(z)),
+                         peragree = peragree, method = "vcd")
+                }, error = function(e) NULL)
+            }
+
+            if (!is.null(res)) return(res)
+
+            # Fallback: irr::kappa2 (null-SE based CI -- approximate)
+            kres <- tryCatch(irr::kappa2(sub, weight = irr_weight),
+                             error = function(e) NULL)
+            if (is.null(kres) || is.na(kres$value))
+                return(list(kappa = NA_real_, se = NA_real_,
+                            ci_lower = NA_real_, ci_upper = NA_real_,
+                            z = NA_real_, p = NA_real_,
+                            peragree = peragree, method = "failed"))
+            se <- if (!is.null(kres$statistic) && !is.na(kres$statistic) &&
+                      abs(kres$statistic) > .Machine$double.eps)
+                      kres$value / kres$statistic else NA_real_
+            zc <- stats::qnorm(0.975)
+            ci <- if (!is.na(se)) kres$value + c(-1, 1) * zc * se
+                  else c(NA_real_, NA_real_)
+            list(kappa = kres$value, se = se,
+                 ci_lower = ci[1], ci_upper = ci[2],
+                 z = kres$statistic, p = kres$p.value,
+                 peragree = peragree, method = "irr-fallback")
         },
 
         .calculateAllPairsKappa = function(ratings) {
@@ -6860,45 +6929,34 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     next
                 }
 
-                peragree <- mean(as.character(sub[[1]]) == as.character(sub[[2]]))
+                kc <- private$.pairKappaWithCI(sub, irr_weight)
 
-                kres <- tryCatch(
-                    irr::kappa2(sub, weight = irr_weight),
-                    error = function(e) NULL
-                )
-
-                if (is.null(kres) || is.na(kres$value)) {
+                if (is.na(kc$kappa)) {
                     rows[[key]] <- list(
                         rater_a = rater_names[a], rater_b = rater_names[b],
-                        n = n_pair, peragree = peragree, kappa = NA_real_,
+                        n = n_pair, peragree = kc$peragree, kappa = NA_real_,
                         se = NA_real_, ci_lower = NA_real_, ci_upper = NA_real_,
                         z = NA_real_, p = NA_real_, p_adj = NA_real_,
-                        error = if (!is.null(kres)) "kappa undefined" else "kappa2() failed"
+                        error = "kappa undefined"
                     )
                     next
                 }
-
-                se <- if (!is.null(kres$statistic) && !is.na(kres$statistic) &&
-                          abs(kres$statistic) > .Machine$double.eps)
-                          kres$value / kres$statistic else NA_real_
-
-                ci <- if (!is.na(se))
-                          kres$value + c(-1, 1) * stats::qnorm(0.975) * se
-                      else c(NA_real_, NA_real_)
 
                 rows[[key]] <- list(
                     rater_a = rater_names[a],
                     rater_b = rater_names[b],
                     n = n_pair,
-                    peragree = peragree,
-                    kappa = kres$value,
-                    se = se,
-                    ci_lower = ci[1],
-                    ci_upper = ci[2],
-                    z = kres$statistic,
-                    p = kres$p.value,
+                    peragree = kc$peragree,
+                    kappa = kc$kappa,
+                    se = kc$se,
+                    ci_lower = kc$ci_lower,
+                    ci_upper = kc$ci_upper,
+                    z = kc$z,
+                    p = kc$p,
                     p_adj = NA_real_,
-                    error = NULL
+                    error = if (identical(kc$method, "irr-fallback"))
+                                "CI via irr::kappa2 fallback; vcd::Kappa could not return a finite SE for this table"
+                            else NULL
                 )
             }
 
@@ -10110,6 +10168,32 @@ agreementClass <- if (requireNamespace("jmvcore")) R6::R6Class("agreementClass",
                     "Note: Exact Kappa (Conger, 1980) does not provide statistical test. Use Fleiss' Kappa for hypothesis testing (H0: Kappa=0)."
                 )
             }
+
+            # Imbalanced-prevalence (kappa-paradox) advisory ----
+            # A rare rating category can make kappa paradoxically low despite high
+            # observed agreement. Flag it and point to the prevalence-robust
+            # alternatives this analysis already offers (Gwet's AC1/AC2, PABAK).
+            prev_note <- tryCatch({
+                all_vals <- unlist(lapply(ratings, as.character), use.names = FALSE)
+                all_vals <- all_vals[!is.na(all_vals)]
+                n_obs <- length(all_vals)
+                if (n_obs > 0) {
+                    cat_tab <- table(all_vals)
+                    rare <- cat_tab[cat_tab < 5 | (cat_tab / n_obs) < 0.05]
+                    if (length(rare) > 0) {
+                        sprintf(paste0(
+                            "Low-prevalence categor%s detected (%s). Kappa can be paradoxically ",
+                            "low when a category is rare, even with high observed agreement. ",
+                            "Consider Gwet's AC1/AC2 or PABAK (both available in this analysis) ",
+                            "as prevalence-robust sensitivity analyses."),
+                            if (length(rare) == 1L) "y" else "ies",
+                            paste(sprintf("%s: n=%d", names(rare), as.integer(rare)),
+                                  collapse = "; "))
+                    } else NULL
+                } else NULL
+            }, error = function(e) NULL)
+            if (!is.null(prev_note))
+                self$results$irrtable$setNote("prevalence", prev_note)
 
             }  # end of categorical kappa block
 

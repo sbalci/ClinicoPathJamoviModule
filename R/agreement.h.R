@@ -847,6 +847,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..conditionBVars <- jmvcore::OptionVariables$new(
                 "conditionBVars",
                 conditionBVars,
+                default=NULL,
                 suggested=list(
                     "nominal",
                     "ordinal"),
@@ -3846,7 +3847,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "agreement",
-                version = c(0,0,41),
+                version = c(0,0,43),
                 options = options,
                 results = agreementResults$new(options=options),
                 data = data,
@@ -4691,7 +4692,7 @@ agreement <- function(
     showCaseClusterHeatmap = TRUE,
     showCaseClusterGuide = FALSE,
     pairedAgreementTest = FALSE,
-    conditionBVars,
+    conditionBVars = NULL,
     pairedBootN = 2000,
     showPairedAgreementGuide = FALSE,
     agreementSampleSize = FALSE,

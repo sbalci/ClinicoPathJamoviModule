@@ -3,7 +3,7 @@ name:  agreement
 title: Interrater Reliability
 menuGroup: meddecideT
 menuSubgroup: Agreement
-version: '0.0.43'
+version: '0.0.45'
 jas: '1.2'
 
 description:
@@ -1604,6 +1604,7 @@ options:
     - name: conditionBVars
       title: Condition B Raters
       type: Variables
+      default: NULL
       suggested:
         - nominal
         - ordinal

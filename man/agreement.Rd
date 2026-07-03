@@ -143,7 +143,7 @@ agreement(
   showCaseClusterHeatmap = TRUE,
   showCaseClusterGuide = FALSE,
   pairedAgreementTest = FALSE,
-  conditionBVars,
+  conditionBVars = NULL,
   pairedBootN = 2000,
   showPairedAgreementGuide = FALSE,
   agreementSampleSize = FALSE,
