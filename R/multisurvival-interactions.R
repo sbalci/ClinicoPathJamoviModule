@@ -79,18 +79,26 @@
   if (!is.factor(modvec)) {
     if (is.character(modvec)) modvec <- factor(modvec) else return(NULL)
   }
+  # Clean the moderator ONCE: unordered (relevel rejects ordered factors) and
+  # dropping declared-but-unobserved levels (relevel rejects a zero-count ref).
+  # Treatment-contrast subgroup HRs are inherently about observed discrete
+  # levels, so coercing an ordered moderator to unordered is correct here.
+  modvec <- droplevels(factor(as.character(modvec)))
+  data[[moderator]] <- modvec
   mod_levels <- levels(modvec)
   if (length(mod_levels) < 2) return(NULL)
 
   # Reconstruct focal coefficient names exactly (avoids prefix collisions).
+  # Escape the focal name the same way the formula builder did, so it matches
+  # coxph's backticked coefficient names for non-syntactic names (spaces etc.).
   fvec <- data[[focal]]
   focal_is_cat <- is.factor(fvec) || is.character(fvec)
   if (focal_is_cat) {
     flev <- levels(factor(fvec))
-    focal_coef_names <- paste0(focal, flev[-1])   # coxph names: <var><level>
+    focal_coef_names <- paste0(.escapeVariableNames(focal), flev[-1])  # <var><level>
     focal_effect_lab <- flev[-1]
   } else {
-    focal_coef_names <- focal
+    focal_coef_names <- .escapeVariableNames(focal)
     focal_effect_lab <- focal
   }
 
@@ -98,11 +106,15 @@
   rows <- list()
   for (b in mod_levels) {
     d2 <- data
-    d2[[moderator]] <- stats::relevel(factor(d2[[moderator]]), ref = b)
-    fit <- tryCatch(survival::coxph(cox_formula, data = d2),
-                    error = function(e) NULL,
-                    warning = function(w) suppressWarnings(
-                      survival::coxph(cox_formula, data = d2)))
+    d2[[moderator]] <- stats::relevel(d2[[moderator]], ref = b)
+    warned <- FALSE
+    fit <- tryCatch(
+      withCallingHandlers(
+        survival::coxph(cox_formula, data = d2),
+        warning = function(w) { warned <<- TRUE; invokeRestart("muffleWarning") }
+      ),
+      error = function(e) NULL
+    )
     if (is.null(fit)) next
     sm <- summary(fit)$coefficients
     for (i in seq_along(focal_coef_names)) {
@@ -117,6 +129,7 @@
         ci_lower        = exp(est - z * se),
         ci_upper        = exp(est + z * se),
         p               = sm[nm, "Pr(>|z|)"],
+        converged       = !warned,
         stringsAsFactors = FALSE
       )
     }

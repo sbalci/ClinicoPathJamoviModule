@@ -205,3 +205,86 @@ test_that(".computeSubgroupHRs returns NULL for non-factor moderator", {
   f <- survival::Surv(time, status) ~ arm * age
   expect_null(.computeSubgroupHRs(f, d, focal = "arm", moderator = "age"))
 })
+
+# Fix 1 regression: a focal name with a space is backticked by the formula
+# builder, so coxph's coefficient carries the backticks. The helper must
+# escape the focal name too, otherwise the coef lookup silently misses.
+test_that(".computeSubgroupHRs handles spaced (backticked) focal name", {
+  set.seed(7)
+  n <- 600
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("neg","pos"), n, TRUE))
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(arm=="trt" & bio=="pos", -0.9, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, bio, `treatment arm` = arm,
+                  check.names = FALSE, stringsAsFactors = FALSE)
+  d[["treatment arm"]] <- factor(d[["treatment arm"]])
+  f <- stats::as.formula(
+    "survival::Surv(time, status) ~ `treatment arm` * bio")
+
+  sub <- .computeSubgroupHRs(f, d, focal = "treatment arm", moderator = "bio")
+  expect_s3_class(sub, "data.frame")
+  expect_setequal(sub$moderator_level, c("neg","pos"))
+
+  # Ground truth: relevel bio to "pos", refit, read the backticked focal coef.
+  d2 <- d; d2$bio <- relevel(d2$bio, ref = "pos")
+  fit2 <- survival::coxph(f, data = d2)
+  hr_pos <- unname(exp(coef(fit2)["`treatment arm`trt"]))
+  got <- sub$hr[sub$moderator_level == "pos" & sub$focal_effect == "trt"]
+  expect_equal(got, hr_pos, tolerance = 1e-6)
+})
+
+# Fix 2a regression: an ORDERED-factor moderator must not crash relevel().
+test_that(".computeSubgroupHRs handles ordered-factor moderator", {
+  set.seed(8)
+  n <- 500
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("low","high"), n, TRUE),
+                levels = c("low","high"), ordered = TRUE)
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(arm=="trt" & bio=="high", -0.7, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, arm, bio)
+  f <- survival::Surv(time, status) ~ arm * bio
+
+  expect_error(
+    sub <- .computeSubgroupHRs(f, d, focal = "arm", moderator = "bio"),
+    NA)
+  expect_s3_class(sub, "data.frame")
+  expect_setequal(sub$moderator_level, c("low","high"))
+})
+
+# Fix 2b regression: a moderator with a declared-but-unobserved level must not
+# crash relevel() (a zero-count ref is rejected) — droplevels handles it.
+test_that(".computeSubgroupHRs handles unobserved moderator level", {
+  set.seed(9)
+  n <- 500
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("neg","pos"), n, TRUE),
+                levels = c("neg","pos","unknown"))   # "unknown" never sampled
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(arm=="trt" & bio=="pos", -0.8, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, arm, bio)
+  f <- survival::Surv(time, status) ~ arm * bio
+
+  expect_error(
+    sub <- .computeSubgroupHRs(f, d, focal = "arm", moderator = "bio"),
+    NA)
+  expect_s3_class(sub, "data.frame")
+  expect_setequal(sub$moderator_level, c("neg","pos"))  # no "unknown" row
+})
+
+# Fix 3 regression: a normal, convergent fit is flagged converged == TRUE.
+test_that(".computeSubgroupHRs reports converged column for a normal fit", {
+  set.seed(10)
+  n <- 600
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("neg","pos"), n, TRUE))
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(arm=="trt" & bio=="pos", -0.9, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, arm, bio)
+  f <- survival::Surv(time, status) ~ arm * bio
+
+  sub <- .computeSubgroupHRs(f, d, focal = "arm", moderator = "bio")
+  expect_true("converged" %in% names(sub))
+  expect_true(all(sub$converged))
+})
