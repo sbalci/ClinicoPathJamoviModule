@@ -73,3 +73,55 @@ test_that(".buildSurvivalFormula keeps strata after interactions", {
   expect_true(grepl("strata\\(", rhs))
   expect_true(grepl(":", rhs))
 })
+
+test_that(".buildSurvivalFormula applies strata even when predictors are empty", {
+  f <- .buildSurvivalFormula("mytime", "myoutcome",
+                             predictors = character(0),
+                             strata_vars = "site")
+  rhs <- as.character(f)[3]
+  expect_true(grepl("strata\\(", rhs))
+  expect_false(grepl(":", rhs))
+})
+
+test_that(".mapInteractionTerms maps display labels to real names", {
+  all_labels <- list(arm = "Treatment Arm", bio = "Biomarker", age = "Age")
+  interactions <- list(c("Treatment Arm", "Biomarker"))
+  out <- .mapInteractionTerms(interactions, all_labels)
+  expect_equal(out, list(c("arm", "bio")))
+})
+
+test_that(".mapInteractionTerms passes through names already real / unlabelled", {
+  all_labels <- list(arm = "Treatment Arm")
+  out <- .mapInteractionTerms(list(c("arm", "unlabelled_col")), all_labels)
+  expect_equal(out, list(c("arm", "unlabelled_col")))
+})
+
+test_that(".mapInteractionTerms returns empty list for NULL/empty", {
+  expect_equal(.mapInteractionTerms(NULL, list(a = "A")), list())
+  expect_equal(.mapInteractionTerms(list(), list(a = "A")), list())
+})
+
+test_that(".interactionTermsForFormula escapes and joins with colon", {
+  out <- .interactionTermsForFormula(list(c("arm", "weird name")))
+  expect_equal(out, "arm:`weird name`")
+})
+
+test_that(".interactionTermsForFinalfit joins raw with colon", {
+  out <- .interactionTermsForFinalfit(list(c("arm", "bio"), c("arm", "age")))
+  expect_equal(out, c("arm:bio", "arm:age"))
+})
+
+test_that(".interactionModeratorInfo identifies focal, moderator, categorical", {
+  d <- data.frame(arm = factor(c("a","b")), bio = factor(c("x","y")), age = c(1.0, 2.0))
+  info <- .interactionModeratorInfo(c("arm", "bio"), d)
+  expect_equal(info$focal, "arm")
+  expect_equal(info$moderator, "bio")
+  expect_true(info$twoway)
+  expect_true(info$categorical_moderator)
+
+  info2 <- .interactionModeratorInfo(c("arm", "age"), d)   # continuous moderator
+  expect_false(info2$categorical_moderator)
+
+  info3 <- .interactionModeratorInfo(c("arm", "bio", "age"), d)  # 3-way
+  expect_false(info3$twoway)
+})
