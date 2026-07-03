@@ -434,6 +434,86 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results[[output_name]]$setVisible(TRUE)
       },
 
+      # Populate the interaction (effect-modification) test table and the
+      # within-subgroup hazard-ratio table from a fitted Cox model. Called from
+      # .run() only when interaction terms are requested. Pure numeric helpers
+      # live in R/multisurvival-interactions.R.
+      .populateInteractionTables = function(cox_model, cox_formula, data,
+                                            real_interactions, conf_level,
+                                            is_finegray) {
+        # --- Interaction (effect-modification) test table ---
+        itab <- tryCatch(
+          .interactionTestTable(cox_model, conf_level = conf_level),
+          error = function(e) NULL
+        )
+        if (!is.null(itab) && nrow(itab) > 0) {
+          t <- self$results$interactionTest
+          for (i in seq_len(nrow(itab))) {
+            t$addRow(rowKey = i, values = list(
+              term     = itab$term[i],
+              hr       = itab$hr[i],
+              ci_lower = itab$ci_lower[i],
+              ci_upper = itab$ci_upper[i],
+              p        = itab$p[i]
+            ))
+          }
+          t$setNote("emkey",
+            "Each row tests whether the focal effect differs across the moderator (effect modification). A significant p indicates the effect is modified.")
+        }
+
+        # --- Within-subgroup hazard ratios ---
+        sg <- self$results$subgroupHR
+        if (isTRUE(is_finegray)) {
+          sg$setNote("fg",
+            "Within-subgroup hazard ratios are disabled in competing-risks (Fine-Gray) mode; interpret the interaction coefficient above instead.")
+          return(invisible(NULL))
+        }
+
+        rowKey <- 0
+        skipped_continuous <- FALSE
+        skipped_highorder <- FALSE
+        nonconverged <- character(0)
+        for (term in real_interactions) {
+          info <- .interactionModeratorInfo(term, data)
+          if (!isTRUE(info$twoway)) { skipped_highorder <- TRUE; next }
+          if (!isTRUE(info$categorical_moderator)) { skipped_continuous <- TRUE; next }
+          sub <- tryCatch(
+            .computeSubgroupHRs(cox_formula, data,
+                                focal = info$focal, moderator = info$moderator,
+                                conf_level = conf_level),
+            error = function(e) NULL
+          )
+          if (is.null(sub)) next
+          for (i in seq_len(nrow(sub))) {
+            rowKey <- rowKey + 1
+            conv <- is.null(sub$converged) || isTRUE(sub$converged[i])
+            sg$addRow(rowKey = rowKey, values = list(
+              interaction     = sub$interaction[i],
+              moderator_level = if (conv) sub$moderator_level[i] else paste0(sub$moderator_level[i], " *"),
+              focal_effect    = sub$focal_effect[i],
+              hr              = sub$hr[i],
+              ci_lower        = sub$ci_lower[i],
+              ci_upper        = sub$ci_upper[i],
+              p               = sub$p[i]
+            ))
+            if (!conv)
+              nonconverged <- c(nonconverged, paste0(sub$interaction[i], " [", sub$moderator_level[i], "]"))
+          }
+        }
+        notes <- character(0)
+        if (length(nonconverged) > 0)
+          notes <- c(notes, paste0("* Model did not converge for: ",
+                                   paste(unique(nonconverged), collapse = "; "),
+                                   " (likely small-sample separation); interpret these HRs with extreme caution."))
+        if (skipped_continuous)
+          notes <- c(notes, "Interactions with a continuous moderator are shown as a coefficient in the table above; per-subgroup HRs require a categorical moderator.")
+        if (skipped_highorder)
+          notes <- c(notes, "Within-subgroup HRs are computed for 2-way interactions only.")
+        if (length(notes) > 0)
+          sg$setNote("sgnote", paste(notes, collapse = " "))
+        invisible(NULL)
+      },
+
       .setPlotVisibility = function() {
         visible_flags <- list(
           plot = isTRUE(self$options$hr) && self$options$sty == "t1",
@@ -2267,8 +2347,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           mycontexpl <- as.vector(mycontexpl_labelled)
         }
 
+        # Get all labels for variable name mapping (needed to map interactions
+        # before building the Cox formula).
+        mydata_labelled <- cleaneddata$mydata_labelled
+        all_labels <- labelled::var_label(mydata_labelled)
+
         # Build formula parts (exclude strata from covariates)
         formula_parts <- c(myexplanatory, mycontexpl)
+
+        # Map interaction terms (display labels -> real names) and build the
+        # escaped, colon-joined terms for the Cox formula RHS.
+        real_interactions <- .mapInteractionTerms(self$options$interactions, all_labels)
+        interaction_terms_cox <- .interactionTermsForFormula(real_interactions)
 
         # Build Cox regression formula using consolidated function with proper strata
         coxformula <- .buildSurvivalFormula(
@@ -2276,7 +2366,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           outcome_var = "myoutcome",
           predictors = formula_parts,
           survival_type = "standard",
-          strata_vars = mystratvar
+          strata_vars = mystratvar,
+          interaction_terms = interaction_terms_cox
         )
 
 
@@ -2298,9 +2389,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Add checkpoint before the expensive Cox model fitting
         private$.checkpoint()
 
-        # Get all labels for variable name mapping
-        mydata_labelled <- cleaneddata$mydata_labelled
-        all_labels <- labelled::var_label(mydata_labelled)
+        # (mydata_labelled / all_labels are defined above, before the formula build)
 
         # Handle Time-Dependent Covariates
         # EXPERIMENTAL:         if (self$options$use_time_dependent && !is.null(self$options$time_dep_vars)) {
@@ -2421,6 +2510,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               y = TRUE,
               model = TRUE
             )
+        }
+
+        # Populate interaction / effect-modification output
+        if (length(self$options$interactions) > 0) {
+          private$.populateInteractionTables(
+            cox_model = cox_model,
+            cox_formula = coxformula,
+            data = mydata,
+            real_interactions = real_interactions,
+            conf_level = 0.95,
+            is_finegray = (self$options$multievent && self$options$analysistype == 'compete')
+          )
         }
 
         if (self$options$multievent && self$options$analysistype == 'compete') {
