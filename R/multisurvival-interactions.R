@@ -66,3 +66,61 @@
     stringsAsFactors = FALSE
   )
 }
+
+# Within-subgroup HRs for a 2-way interaction with a CATEGORICAL moderator.
+# Relevels `moderator` to each level, refits the SAME full model, and reads the
+# focal main-effect coefficient(s) — i.e. the fully-adjusted focal effect within
+# that subgroup. Focal may be categorical (one row per non-reference level) or
+# continuous (single "per unit" row). Returns NULL if moderator is not a usable
+# factor. Reference focal level yields no row (no contrast).
+.computeSubgroupHRs <- function(cox_formula, data, focal, moderator,
+                                conf_level = 0.95) {
+  modvec <- data[[moderator]]
+  if (!is.factor(modvec)) {
+    if (is.character(modvec)) modvec <- factor(modvec) else return(NULL)
+  }
+  mod_levels <- levels(modvec)
+  if (length(mod_levels) < 2) return(NULL)
+
+  # Reconstruct focal coefficient names exactly (avoids prefix collisions).
+  fvec <- data[[focal]]
+  focal_is_cat <- is.factor(fvec) || is.character(fvec)
+  if (focal_is_cat) {
+    flev <- levels(factor(fvec))
+    focal_coef_names <- paste0(focal, flev[-1])   # coxph names: <var><level>
+    focal_effect_lab <- flev[-1]
+  } else {
+    focal_coef_names <- focal
+    focal_effect_lab <- focal
+  }
+
+  z <- stats::qnorm(1 - (1 - conf_level) / 2)
+  rows <- list()
+  for (b in mod_levels) {
+    d2 <- data
+    d2[[moderator]] <- stats::relevel(factor(d2[[moderator]]), ref = b)
+    fit <- tryCatch(survival::coxph(cox_formula, data = d2),
+                    error = function(e) NULL,
+                    warning = function(w) suppressWarnings(
+                      survival::coxph(cox_formula, data = d2)))
+    if (is.null(fit)) next
+    sm <- summary(fit)$coefficients
+    for (i in seq_along(focal_coef_names)) {
+      nm <- focal_coef_names[i]
+      if (!nm %in% rownames(sm)) next
+      est <- sm[nm, "coef"]; se <- sm[nm, "se(coef)"]
+      rows[[length(rows) + 1]] <- data.frame(
+        interaction     = paste0(focal, " * ", moderator),
+        moderator_level = b,
+        focal_effect    = focal_effect_lab[i],
+        hr              = exp(est),
+        ci_lower        = exp(est - z * se),
+        ci_upper        = exp(est + z * se),
+        p               = sm[nm, "Pr(>|z|)"],
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+  if (length(rows) == 0) return(NULL)
+  do.call(rbind, rows)
+}

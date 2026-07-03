@@ -157,3 +157,51 @@ test_that(".interactionTestTable returns NULL when no interaction present", {
   fit <- survival::coxph(survival::Surv(time, status) ~ arm, data = d)
   expect_null(.interactionTestTable(fit))
 })
+
+test_that(".interactionTestTable CI columns equal exp(confint) bounds", {
+  set.seed(11)
+  n <- 400
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("neg","pos"), n, TRUE))
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(arm=="trt" & bio=="pos", -0.9, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, arm, bio)
+  fit <- survival::coxph(survival::Surv(time, status) ~ arm * bio, data = d)
+  tab <- .interactionTestTable(fit, conf_level = 0.95)
+  int_name <- rownames(summary(fit)$coefficients)[grepl(":", rownames(summary(fit)$coefficients))][1]
+  ci <- suppressWarnings(stats::confint(fit, level = 0.95))
+  expect_equal(tab$ci_lower[tab$term == int_name], unname(exp(ci[int_name, 1])), tolerance = 1e-8)
+  expect_equal(tab$ci_upper[tab$term == int_name], unname(exp(ci[int_name, 2])), tolerance = 1e-8)
+})
+
+test_that(".computeSubgroupHRs matches manual relevel-and-refit", {
+  set.seed(3)
+  n <- 600
+  arm <- factor(sample(c("ctrl","trt"), n, TRUE))
+  bio <- factor(sample(c("neg","pos"), n, TRUE))
+  lp  <- ifelse(arm=="trt", -0.2, 0) + ifelse(arm=="trt" & bio=="pos", -0.9, 0)
+  time <- rexp(n, exp(lp)); status <- rbinom(n, 1, 0.7)
+  d <- data.frame(time, status, arm, bio)
+  f <- survival::Surv(time, status) ~ arm * bio
+
+  sub <- .computeSubgroupHRs(f, d, focal = "arm", moderator = "bio",
+                             conf_level = 0.95)
+  expect_s3_class(sub, "data.frame")
+  expect_setequal(sub$moderator_level, c("neg","pos"))
+
+  # Ground truth: relevel bio to "pos", refit, read arm coefficient.
+  d2 <- d; d2$bio <- relevel(d2$bio, ref = "pos")
+  fit2 <- survival::coxph(f, data = d2)
+  hr_pos <- unname(exp(coef(fit2)["armtrt"]))
+  got <- sub$hr[sub$moderator_level == "pos" & sub$focal_effect == "trt"]
+  expect_equal(got, hr_pos, tolerance = 1e-6)
+})
+
+test_that(".computeSubgroupHRs returns NULL for non-factor moderator", {
+  set.seed(4); n <- 200
+  d <- data.frame(time = rexp(n), status = rbinom(n,1,.7),
+                  arm = factor(sample(c("a","b"), n, TRUE)),
+                  age = rnorm(n))
+  f <- survival::Surv(time, status) ~ arm * age
+  expect_null(.computeSubgroupHRs(f, d, focal = "arm", moderator = "age"))
+})
