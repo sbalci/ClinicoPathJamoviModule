@@ -1,5 +1,13 @@
 # ClinicoPath News
 
+# ClinicoPath 0.0.45
+
+## New features
+
+### Multivariable Survival Analysis (`multisurvival`)
+
+- Added support for Cox proportional-hazards **interaction terms** (e.g. Treatment × Biomarker) via a model-terms builder, with a new interaction (effect-modification) test table and a within-subgroup hazard-ratio table for predictive-biomarker analysis. Interaction rows also appear in the hazard-ratio table and forest plot. When no interaction terms are selected, the Cox formula is unchanged (backward compatible).
+
 # ClinicoPath 0.0.41
 
 ## Bug fixes
