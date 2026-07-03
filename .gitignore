@@ -71,3 +71,6 @@ PATCHES/
 .claude/skills/
 docs/SECURITY/
 *.bak.*
+
+# subagent-driven-development scratch
+.superpowers/
