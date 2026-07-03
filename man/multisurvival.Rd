@@ -23,6 +23,7 @@ multisurvival(
   analysistype = "overall",
   explanatory = NULL,
   contexpl = NULL,
+  interactions = NULL,
   multievent = FALSE,
   hr = FALSE,
   sty = "t1",
@@ -125,6 +126,12 @@ in the Cox model.}
 
 \item{contexpl}{Continuous explanatory (predictor) variables included in
 the Cox model.}
+
+\item{interactions}{Interaction (crossed) terms added to the Cox model,
+built from variables already selected as explanatory or continuous
+explanatory variables. Each term tests effect modification — e.g. Treatment
+x Biomarker for predictive-biomarker analysis. For a 2-way term the first
+variable is the focal effect and the second is the moderator.}
 
 \item{multievent}{If true, multiple event levels will be considered for
 competing risks analysis. Requires specifying \code{dod}, \code{dooc}, etc.}
@@ -243,6 +250,8 @@ A results object containing:
 \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$interactionTest} \tab \tab \tab \tab \tab a table \cr
+\code{results$subgroupHR} \tab \tab \tab \tab \tab a table \cr
 \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
@@ -292,9 +301,9 @@ A results object containing:
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
 
-\code{results$personTimeTable$asDF}
+\code{results$interactionTest$asDF}
 
-\code{as.data.frame(results$personTimeTable)}
+\code{as.data.frame(results$interactionTest)}
 }
 \description{
 Performs multivariable survival analysis using Cox proportional hazards
