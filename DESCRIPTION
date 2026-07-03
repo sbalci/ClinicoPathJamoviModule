@@ -860,6 +860,7 @@ Collate:
     'multiplexanalysis.h.R'
     'multistatesurvival.b.R'
     'multistatesurvival.h.R'
+    'multisurvival-interactions.R'
     'multisurvival.b.R'
     'multisurvival.h.R'
     'ncvregcox.b.R'

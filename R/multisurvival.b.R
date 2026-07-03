@@ -302,52 +302,10 @@
   }
 }
 
-# Consolidated function for building survival formulas
-.buildSurvivalFormula <- function(time_var, outcome_var, predictors, survival_type = "standard", start_var = NULL, stop_var = NULL, strata_vars = NULL) {
-  # Escape all variable names for safe formula construction
-  escaped_time <- .escapeVariableNames(time_var)
-  escaped_outcome <- .escapeVariableNames(outcome_var)
-  escaped_predictors <- .escapeVariableNames(predictors)
-
-  # Build left-hand side based on survival type
-  lhs <- switch(survival_type,
-    "standard" = paste0("survival::Surv(", escaped_time, ", ", escaped_outcome, ")"),
-    "counting" = {
-      if (is.null(start_var) || is.null(stop_var)) {
-        jmvcore::reject("Start and stop variables required for counting process format")
-      }
-      escaped_start <- .escapeVariableNames(start_var)
-      escaped_stop <- .escapeVariableNames(stop_var)
-      paste0("survival::Surv(", escaped_start, ", ", escaped_stop, ", ", escaped_outcome, ")")
-    },
-    "interval" = {
-      if (is.null(stop_var)) {
-        jmvcore::reject("Stop time variable required for interval censoring")
-      }
-      escaped_stop <- .escapeVariableNames(stop_var)
-      paste0("survival::Surv(", escaped_time, ", ", escaped_stop, ", ", escaped_outcome, ")")
-    },
-    jmvcore::reject("Unknown survival type: ", survival_type)
-  )
-
-  # Build right-hand side
-  if (length(escaped_predictors) == 0) {
-    rhs <- "1"  # Null model
-  } else {
-    rhs <- paste(escaped_predictors, collapse = " + ")
-
-    # Add stratification if specified
-    if (!is.null(strata_vars) && length(strata_vars) > 0) {
-      escaped_strata <- .escapeVariableNames(strata_vars)
-      strata_term <- paste0("strata(", paste(escaped_strata, collapse = ", "), ")")
-      rhs <- paste(rhs, strata_term, sep = " + ")
-    }
-  }
-
-  # Combine and return formula
-  formula_string <- paste0(lhs, " ~ ", rhs)
-  return(.asSurvivalFormula(formula_string))
-}
+# .buildSurvivalFormula() moved to R/utils.R (alongside its siblings
+# .asSurvivalFormula and .escapeVariableNames) so it is unit-testable via
+# source("R/utils.R") without loading the full jamovi/R6 harness. It is
+# still a package-level function called from this file (below) at runtime.
 
 #' @title Multivariable Survival Analysis Implementation
 #' @description
