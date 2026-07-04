@@ -20,8 +20,8 @@
 # MOST FREQUENTLY CHANGED SETTINGS - EDIT HERE 
 # ==============================================
 
-new_version: "0.0.45"
-new_date: "2026-06-30"
+new_version: "0.0.46"
+new_date: "2026-07-04"
 quick: false
 TEST: true
 jjstatsplot: false
@@ -80,6 +80,7 @@ modules:
       - "utils.R"
       - "diagnostichelpers.R"
       - "survivalPower_distributions.R"
+      - "multisurvival-interactions.R"
   ClinicoPathDescriptives:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     r_files:
@@ -111,6 +112,7 @@ modules:
       - "error_handling.R"
       - "diagnostichelpers.R"
       - "survivalPower_distributions.R"
+      - "multisurvival-interactions.R"
       - "decisiongraph_utils.R"
       - "ihc_utilities.R"
       - "psychopdaROC_utilities.R"

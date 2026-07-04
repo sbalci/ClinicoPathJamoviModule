@@ -1,6 +1,6 @@
 title: Multivariable Survival Analysis
 name: multisurvival
-jus: '3.0'
+jus: '2.0'
 stage: 0
 compilerMode: tame
 events:
@@ -44,32 +44,6 @@ children:
             isTarget: true
             events:
               change: './multisurvival.events::onChange_predictors'
-  - type: CollapseBox
-    label: Interaction Terms
-    collapsed: true
-    stretchFactor: 1
-    children:
-      - type: Supplier
-        name: interactionSupplier
-        label: Available Predictors
-        persistentItems: true
-        stretchFactor: 1
-        format: term
-        higherOrders: true
-        events:
-          update: './multisurvival.events::onUpdate_interactionSupplier'
-        children:
-          - type: TargetLayoutBox
-            transferAction: interactions
-            label: 'Interaction Terms:'
-            children:
-              - type: ListBox
-                name: interactions
-                valueFilter: unique
-                isTarget: true
-                itemDropBehaviour: emptyspace
-                template:
-                  type: TermLabel
   - type: CollapseBox
     label: Advanced Elapsed Time Options
     collapsed: true
@@ -434,3 +408,27 @@ children:
               - type: CheckBox
                 name: show_terminal_nodes
                 enable: (use_tree)
+  - type: CollapseBox
+    label: Interaction Terms
+    collapsed: true
+    stretchFactor: 1
+    children:
+      - type: Supplier
+        name: interactionSupplier
+        label: Available Predictors
+        persistentItems: true
+        stretchFactor: 1
+        events:
+          update: './multisurvival.events::onUpdate_interactionSupplier'
+        children:
+          - type: TargetLayoutBox
+            transferAction: interactions
+            label: 'Interaction Terms:'
+            children:
+              - type: ListBox
+                name: interactions
+                valueFilter: unique
+                isTarget: true
+                itemDropBehaviour: emptyspace
+                template:
+                  type: TermLabel

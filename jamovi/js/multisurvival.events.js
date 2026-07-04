@@ -1,16 +1,24 @@
-// Populates the interaction model-builder's term pool from the union of the
-// `explanatory` and `contexpl` variable boxes, and prunes interaction terms
-// that reference a variable no longer selected. Main effects are NOT added
-// here — they come from the `explanatory`/`contexpl` options directly.
-// Reference: jmvbaseR anova.events.js.
+// Interaction model-builder events for multisurvival.
+//
+// Populates the interaction term pool ("Available Predictors") from the union of
+// the `explanatory` and `contexpl` variable boxes, so the user can cross them
+// into interaction terms. Main effects are NOT added here — they come from the
+// `explanatory`/`contexpl` options directly.
+//
+// This uses the standard jamovi model-builder events API (`this.cloneArray`,
+// `this.valuesToItems`, `this.findChanges`, `FormatDef`). Those helpers live on
+// the handler `this` context under jus 2.0 (as used by jmvbaseR and gamlj); they
+// are NOT available under jus 3.0, which is why multisurvival.u.yaml is jus 2.0.
+//
+// Reference: jmvbaseR anova.events.js and gamlj gamlj.events.js.
 
 const events = {
     update: function(ui) {
-        syncInteractionPool(ui, this);
+        calcInteractionPool(ui, this);
     },
 
     onChange_predictors: function(ui) {
-        syncInteractionPool(ui, this);
+        calcInteractionPool(ui, this);
     },
 
     onUpdate_interactionSupplier: function(ui) {
@@ -26,13 +34,13 @@ let collectPredictors = function(ui, context) {
     return a.concat(b);
 };
 
-let syncInteractionPool = function(ui, context) {
+let calcInteractionPool = function(ui, context) {
     let vars = collectPredictors(ui, context);
 
     ui.interactionSupplier.setValue(
         context.valuesToItems(vars, FormatDef.variable));
 
-    // Prune interaction terms that reference removed variables.
+    // Prune interaction terms that reference a variable no longer selected.
     let varsDiff = context.findChanges("predictorList", vars, true,
                                        FormatDef.variable);
     let termsList = context.cloneArray(ui.interactions.value(), []);

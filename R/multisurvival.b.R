@@ -8315,50 +8315,62 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           })
         }
 
-    ), # End of private list
-    public = list(
+    ) # End of private list
+    
+    # , public = list(
         #' @description
         #' Generate R source code for Multi-Variable Survival analysis
         #' @return Character string with R syntax for reproducible analysis
-        asSource = function() {
-            elapsedtime <- self$options$elapsedtime
-            outcome <- self$options$outcome
-
-            if (is.null(elapsedtime) || is.null(outcome))
-                return('')
-
-            # Escape variable names that contain spaces or special characters
-            elapsedtime_escaped <- if (!is.null(elapsedtime) && !identical(make.names(elapsedtime), elapsedtime)) {
-                paste0('`', elapsedtime, '`')
-            } else {
-                elapsedtime
-            }
-
-            outcome_escaped <- if (!is.null(outcome) && !identical(make.names(outcome), outcome)) {
-                paste0('`', outcome, '`')
-            } else {
-                outcome
-            }
-
-            # Build arguments
-            elapsedtime_arg <- paste0('elapsedtime = "', elapsedtime_escaped, '"')
-            outcome_arg <- paste0('outcome = "', outcome_escaped, '"')
-
-            # Get other arguments using base helper (if available)
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
-            }
-            if (args != '')
-                args <- paste0(',\n    ', args)
-
-            # Get package name dynamically
-            pkg_name <- utils::packageName()
-            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
-
-            # Build complete function call
-            paste0(pkg_name, '::multisurvival(\n    data = data,\n    ',
-                   elapsedtime_arg, ',\n    ', outcome_arg, args, ')')
-        }
-    ) # End of public list
+        # NOTE (2026-07): Custom asSource() commented out. It emitted
+        # `elapsedtime`/`outcome` MANUALLY and then private$.asArgs() emitted
+        # them AGAIN, producing duplicated (non-runnable) arguments in the
+        # generated syntax, e.g.:
+        #     elapsedtime = "elapsedtime",
+        #     outcome = "outcome",
+        #     elapsedtime = elapsedtime,   <- duplicate from .asArgs
+        #     outcome = outcome,
+        # jmvcore's default asSource() renders every option exactly once, so we
+        # rely on it (this override is removed).
+        #
+        # asSource = function() {
+        #     elapsedtime <- self$options$elapsedtime
+        #     outcome <- self$options$outcome
+        #
+        #     if (is.null(elapsedtime) || is.null(outcome))
+        #         return('')
+        #
+        #     # Escape variable names that contain spaces or special characters
+        #     elapsedtime_escaped <- if (!is.null(elapsedtime) && !identical(make.names(elapsedtime), elapsedtime)) {
+        #         paste0('`', elapsedtime, '`')
+        #     } else {
+        #         elapsedtime
+        #     }
+        #
+        #     outcome_escaped <- if (!is.null(outcome) && !identical(make.names(outcome), outcome)) {
+        #         paste0('`', outcome, '`')
+        #     } else {
+        #         outcome
+        #     }
+        #
+        #     # Build arguments
+        #     elapsedtime_arg <- paste0('elapsedtime = "', elapsedtime_escaped, '"')
+        #     outcome_arg <- paste0('outcome = "', outcome_escaped, '"')
+        #
+        #     # Get other arguments using base helper (if available)
+        #     args <- ''
+        #     if (!is.null(private$.asArgs)) {
+        #         args <- private$.asArgs(incData = FALSE)
+        #     }
+        #     if (args != '')
+        #         args <- paste0(',\n    ', args)
+        #
+        #     # Get package name dynamically
+        #     pkg_name <- utils::packageName()
+        #     if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+        #
+        #     # Build complete function call
+        #     paste0(pkg_name, '::multisurvival(\n    data = data,\n    ',
+        #            elapsedtime_arg, ',\n    ', outcome_arg, args, ')')
+        # }
+   # ) # End of public list
 )

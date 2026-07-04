@@ -3,7 +3,7 @@ name:  jjcoefstats
 title: Coefficient Forest Plot (ggcoefstats)
 menuGroup: JJStatsPlotT
 menuSubgroup: Regression Plots
-version: '0.0.45'
+version: '0.0.46'
 jas: '1.2'
 
 description:

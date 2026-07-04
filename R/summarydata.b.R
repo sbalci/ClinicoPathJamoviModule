@@ -154,7 +154,11 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                            max_x, "]) <br>", dist_text, "<br><br>", collapse = " ")
             }
             results <- purrr::map(.x = var_list, .f = mysummary)
-            results <- unlist(results)
+            # Collapse the per-variable summary strings into a single HTML string.
+            # setContent() on an Html result item writes to a non-repeated protobuf
+            # field, so a length > 1 vector (multiple variables) triggers a
+            # serialization error. Each element already ends with <br><br>.
+            results <- paste(unlist(results), collapse = "")
             self$results$text$setContent(results)
             # CORRECT IMPLEMENTATION: Use gtExtras as intended by the package
             plot_dataset <- tryCatch({

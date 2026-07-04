@@ -559,8 +559,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Configure plot aesthetics ----
-                # Set color fill strategy for the alluvial flows
-                fill <- jmvcore::composeTerm(self$options$fill)
+                # Set color fill strategy for the alluvial flows.
+                # `fill` is a List keyword (first_variable/last_variable/all_flows/
+                # values) passed to alluvial_wide(fill_by=), NOT a formula term, so
+                # it must be used verbatim — do NOT run it through composeTerm().
+                fill <- self$options$fill
 
                 # Configure bin labels with proper binning method
                 bin_option <- self$options$bin
@@ -793,8 +796,12 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Data preparation for condensation analysis ----
             # CRITICAL: Only use selected variables to prevent PHI leakage
+            # Use the RAW column name for data-frame lookups and NSE injection
+            # below. Do NOT run this through jmvcore::composeTerm(): that helper
+            # backtick-quotes names with special characters for *formula* use,
+            # which would corrupt `mydata[[condvarName]]` and the `%in%` check
+            # for names containing spaces (e.g. "tumor grade").
             condvarName <- self$options$condensationvar
-            condvarName <- jmvcore::composeTerm(components = condvarName)
 
             # Ensure condensation variable is included in selected variables
             varsName <- self$options$vars
@@ -841,9 +848,16 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate condensation plot ----
             # Condensation plots show detailed relationships between the primary variable
             # and selected variables only (not the entire dataset)
-            plot2 <- easyalluvial::plot_condensation(
-                df = mydata,
-                first = condvarName
+            # easyalluvial::plot_condensation() evaluates `first` with NSE
+            # (enquo() + quo_name()), so passing `first = condvarName` captures
+            # the literal symbol "condvarName" instead of the variable's value,
+            # producing "condvarName is not a column in df". Inject the actual
+            # column name as a symbol so quo_name() resolves to the real name.
+            plot2 <- rlang::inject(
+                easyalluvial::plot_condensation(
+                    df = mydata,
+                    first = !!rlang::sym(condvarName)
+                )
             )
 
             # Render the condensation plot
