@@ -59,7 +59,7 @@ items:
       height: 450
       renderFun: .plot2
       requiresData: true
-      visible: (!is.null(grvar))
+      visible: (grvar)
 
     - name: plot
       title: '`${dep} vs {group}`'

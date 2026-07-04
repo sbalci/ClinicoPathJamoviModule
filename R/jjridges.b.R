@@ -2072,18 +2072,35 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(x_var) || is.null(y_var))
                 return('')
 
-            # Build arguments (deparse() emits a valid R string literal with proper escape
-            # for ", \, etc. — composeTerm is for formula contexts, not string literals)
-            x_var_arg <- paste0('x_var = ', deparse(x_var))
-            y_var_arg <- paste0('y_var = ', deparse(y_var))
-
-            # Get other arguments
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
+            # Build the argument list in option-declaration order.
+            #
+            # Every variable-name option (single OptionVariable or multi-variable
+            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
+            # produces valid, fully-escaped R for names containing spaces, quotes or
+            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
+            # some of these as bare, unquoted symbols and yield invalid syntax.
+            # Detecting the option by CLASS (not by name) means any variable option
+            # added later is escaped automatically.
+            #
+            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # previously duplicated them in the generated syntax (the "double
+            # variables" bug). All non-variable options keep jmvcore's per-option
+            # sourcify so formatting stays consistent with jamovi.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val) && length(val) > 0)
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
+                } else {
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
+                }
             }
-            if (args != '')
-                args <- paste0(',\n    ', args)
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
@@ -2091,7 +2108,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Build complete function call
             paste0(pkg_name, '::jjridges(\n    data = data,\n    ',
-                   x_var_arg, ',\n    ', y_var_arg, args, ')')
+                   paste(args, collapse = ',\n    '), ')')
         }
     ) # End of public list
 )

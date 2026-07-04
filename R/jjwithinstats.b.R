@@ -1304,36 +1304,39 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         asSource = function() {
             dep1 <- self$options$dep1
             dep2 <- self$options$dep2
-            dep3 <- self$options$dep3
-            dep4 <- self$options$dep4
 
             if (is.null(dep1) || is.null(dep2))
                 return('')
 
-            # Build base arguments (deparse() emits valid R string literals with proper
-            # escape for ", \, etc. — backtick-wrap inside double-quotes produces broken
-            # codegen like `dep1 = "\`Tumor Grade\`"`)
-            dep1_arg <- paste0('dep1 = ', deparse(dep1))
-            dep2_arg <- paste0('dep2 = ', deparse(dep2))
-
-            # Add optional dep3 and dep4
-            dep3_arg <- ''
-            if (!is.null(dep3)) {
-                dep3_arg <- paste0(',\n    dep3 = ', deparse(dep3))
+            # Build the argument list in option-declaration order.
+            #
+            # Every variable-name option (dep1, dep2, dep3, dep4) is emitted as a
+            # deparse()'d string literal. deparse() produces valid, fully-escaped
+            # R for names containing spaces, quotes or backslashes (e.g.
+            # `Tumor Grade`); jmvcore's default sourcify would emit these as bare,
+            # unquoted symbols and yield invalid syntax. Detecting OptionVariable
+            # by class (rather than by name) means any variable option added later
+            # is escaped automatically.
+            #
+            # dep1..dep4 are NOT re-emitted through private$.asArgs() — doing so
+            # previously duplicated the dep variables in the generated syntax (the
+            # "double variables" bug). All non-variable options keep jmvcore's
+            # per-option sourcify so formatting stays consistent with jamovi.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val))
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
+                } else {
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
+                }
             }
-
-            dep4_arg <- ''
-            if (!is.null(dep4)) {
-                dep4_arg <- paste0(',\n    dep4 = ', deparse(dep4))
-            }
-
-            # Get other arguments
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
-            }
-            if (args != '')
-                args <- paste0(',\n    ', args)
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
@@ -1341,7 +1344,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Build complete function call
             paste0(pkg_name, '::jjwithinstats(\n    data = data,\n    ',
-                   dep1_arg, ',\n    ', dep2_arg, dep3_arg, dep4_arg, args, ')')
+                   paste(args, collapse = ',\n    '), ')')
         }
     ) # End of public list
 )

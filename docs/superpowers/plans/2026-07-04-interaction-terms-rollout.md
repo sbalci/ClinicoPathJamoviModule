@@ -30,50 +30,43 @@ function's home module's `r_files` (and JamoviTest) if not already present.
 7. prepare() clean; deploy (`_updateModules.R`).
 8. **GATE: user tests in GUI → confirms before next function.**
 
-## Order
+## Order (CORRECTED — dropped single-predictor functions)
 
-### Gate 0 — TEMPLATE
-- [ ] `multisurvival` — confirm jus-2.0 build works in GUI (pool populates, treatment×biomarker builds, tables populate). THEN commit the multisurvival work as the stable base.
+DROPPED (single predictor `type: Variable` — cannot form an interaction):
+`survival` (explanatory), `survivalcont` (contexpl), `competingsurvival` (explanatory).
 
-### Tier 1 — easiest ports
-- [ ] `survival`
-- [ ] `survivalcont`  (also fix duplicated asSource)
+### Gate 0 — TEMPLATE ✅ confirmed working in GUI (2026-07-04); committed as 0f1f30b2.
 
-### Tier 2 — highest clinical value
-- [ ] `oddsratio`
-- [ ] `treatmenteffects`
-- [ ] `causalmediation`
-- [ ] `competingsurvival`
-- [ ] `finegray`
-- [ ] `causespecifichazards`
-- [ ] `flexcomprisk`
+### Tier A — Cox / competing-risks family (DIRECT reuse of HR helpers — easiest, high value)
+- [ ] `finegray`             (covariates)  competing risks, coxph/finegray
+- [ ] `causespecifichazards` (covariates)  competing risks, cause-specific Cox
+- [ ] `flexcomprisk`         (covs)        flexible competing risks
+- [ ] `coxphw`               (covariates)  weighted Cox
+- [ ] `coxrobust`            (covariates)  robust Cox
+- [ ] `firthregression`      (predictors)  Firth penalized Cox/logistic
+- [ ] `flexparametric`       (covariates)
+- [ ] `flexrstpm2`           (covariates)
+- [ ] `stratifiedparametric` (covariates)
+- [ ] `robustaft`            (covariates)
+- [ ] `transformationmodels` (covariates)
+- [ ] `frailtysurvival`      (covariates)
+- [ ] `parametricfrailty`    (covariates)
+- [ ] `multistatesurvival`   (covariates)
+- [ ] `illnessdeath`         (covariates)
+- [ ] `rmstregression`       (explanatory)
+- [ ] `recurrentsurvival`    (covariates)
+- [ ] `relativesurvival`     (covariates)
+- [ ] `intervalsurvival`     (covariates)
 
-### Tier 3 — survival-regression family
-- [ ] `coxphw`
-- [ ] `coxrobust`
-- [ ] `firthregression`
-- [ ] `flexparametric`
-- [ ] `flexrstpm2`
-- [ ] `stratifiedparametric`
-- [ ] `robustaft`
-- [ ] `transformationmodels`
-- [ ] `frailtysurvival`
-- [ ] `parametricfrailty`
-- [ ] `multistatesurvival`
-- [ ] `illnessdeath`
-- [ ] `rmstregression`
-- [ ] `recurrentsurvival`
-- [ ] `relativesurvival`
-- [ ] `intervalsurvival`
+### Tier B — logistic / non-Cox (needs OR/coef-adapted interaction + subgroup tables)
+- [ ] `oddsratio`            (explanatory) logistic; OR-based, not HR
+- [ ] `treatmenteffects`     (covariates)
+- [ ] `causalmediation`      (covariates)
 
-### Tier 4 — penalized / ML (interactions pre-specified, lower priority)
-- [ ] `lassocox`
-- [ ] `adaptivelasso`
-- [ ] `grouplasso`
-- [ ] `ncvregcox`
-- [ ] `plscox`
-- [ ] `pcacox`
-- [ ] `lassologistic`
+### Tier C — penalized / ML (interactions can be pre-specified; penalty selects — subgroup table maybe N/A; confirm per function)
+- [ ] `lassocox`  · `adaptivelasso` · `grouplasso` · `ncvregcox` · `plscox` · `pcacox` · `lassologistic`
+
+Total valid targets: **29** (was 33; 3 dropped, 1 done = multisurvival).
 
 ## Notes
 - Each target's `asSource` should be checked for the same manual-arg + `.asArgs`
@@ -82,3 +75,15 @@ function's home module's `r_files` (and JamoviTest) if not already present.
 - Tier 4 (penalized): the model builder can pre-specify interaction terms but the penalty
   selects among them — lower value; confirm with user whether to include the subgroup-HR
   table there.
+
+## 2026-07-04 UPDATE — exclude D-suffixed functions (user directive)
+Do NOT touch any function whose menuGroup ends in `D` (dev-held). This drops the
+entire high-value Cox/competing-risks/parametric family (all SurvivalD/ClinicoPathD)
+and coxphw (reverted). Remaining NON-D candidates (10, all already ...T):
+- High value:  firthregression, relativesurvival, oddsratio(OR-adapted)
+- Low value (penalized; interactions pre-specified, penalty selects):
+  lassocox, adaptivelasso, grouplasso, ncvregcox, plscox, pcacox, lassologistic
+Order: firthregression -> relativesurvival -> oddsratio -> (penalized 7).
+Deploy step per NEW-to-JamoviTest function: _updateModules.R (copy) THEN prepare the
+JamoviTest module (register .h.R + 0000.yaml). These 10 are already SurvivalT/meddecideT
+so already in JamoviTest — lighter deploy.

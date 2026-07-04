@@ -944,45 +944,39 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         asSource = function() {
             survivalTime <- self$options$survivalTime
             status <- self$options$status
-            covariates <- self$options$covariates
-            groupVar <- self$options$groupVar
 
             if (is.null(survivalTime) || is.null(status))
                 return('')
 
-            # Escape survivalTime variable (jmvcore::composeTerm handles non-syntactic names safely)
-            survivalTime_escaped <- jmvcore::composeTerm(survivalTime)
-
-            # Escape status variable
-            status_escaped <- jmvcore::composeTerm(status)
-
-            # Build required arguments — use deparse() for safe string quoting (handles embedded " and \)
-            survivalTime_arg <- paste0('survivalTime = ', deparse(survivalTime_escaped))
-            status_arg <- paste0('status = ', deparse(status_escaped))
-
-            # Build optional covariates argument
-            covariates_arg <- ''
-            if (!is.null(covariates) && length(covariates) > 0) {
-                covariates_escaped <- vapply(covariates, jmvcore::composeTerm, character(1))
-                covariates_arg <- paste0(',\n    covariates = c(',
-                                       paste(vapply(covariates_escaped, deparse, character(1)), collapse = ', '),
-                                       ')')
+            # Build the argument list in option-declaration order.
+            #
+            # Every variable-name option (single OptionVariable or multi-variable
+            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
+            # produces valid, fully-escaped R for names containing spaces, quotes or
+            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
+            # some of these as bare, unquoted symbols and yield invalid syntax.
+            # Detecting the option by CLASS (not by name) means any variable option
+            # added later is escaped automatically.
+            #
+            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # previously duplicated them in the generated syntax (the "double
+            # variables" bug). All non-variable options keep jmvcore's per-option
+            # sourcify so formatting stays consistent with jamovi.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val) && length(val) > 0)
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
+                } else {
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
+                }
             }
-
-            # Build optional groupVar argument
-            groupVar_arg <- ''
-            if (!is.null(groupVar)) {
-                groupVar_escaped <- jmvcore::composeTerm(groupVar)
-                groupVar_arg <- paste0(',\n    groupVar = ', deparse(groupVar_escaped))
-            }
-
-            # Get other arguments using base helper (if available)
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
-            }
-            if (args != '')
-                args <- paste0(',\n    ', args)
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
@@ -990,7 +984,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
             # Build complete function call
             paste0(pkg_name, '::finegray(\n    data = data,\n    ',
-                   survivalTime_arg, ',\n    ', status_arg, covariates_arg, groupVar_arg, args, ')')
+                   paste(args, collapse = ',\n    '), ')')
         }
     ) # End of public list
 )

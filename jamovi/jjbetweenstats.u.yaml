@@ -76,6 +76,15 @@ children:
                   - type: ComboBox
                     name: padjustmethod
                     enable: (pairwisecomparisons)
+      - type: Label
+        label: Multiple Endpoint Correction
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: multiEndpointCorrection
   - type: CollapseBox
     label: Plot Display
     collapsed: true
@@ -93,11 +102,6 @@ children:
                   - type: ComboBox
                     name: centralitytype
                     enable: (centralityplotting)
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: multiEndpointCorrection
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -115,8 +119,6 @@ children:
                 name: originaltheme
               - type: CheckBox
                 name: colorblindSafe
-              - type: CheckBox
-                name: addGGPubrPlot
               - type: CheckBox
                 name: showexplanations
       - type: Label
@@ -155,20 +157,28 @@ children:
               - type: TextBox
                 name: plotheight
                 format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ggpubrPlotType
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ggpubrPalette
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Publication-Ready Plot (ggpubr)
+    collapsed: true
     children:
       - type: CheckBox
-        name: ggpubrAddStats
-      - type: CheckBox
-        name: ggpubrAddPoints
+        name: addGGPubrPlot
+      - type: Label
+        label: ggpubr Options
+        fitToGrid: true
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: ggpubrPlotType
+                enable: (addGGPubrPlot)
+              - type: ComboBox
+                name: ggpubrPalette
+                enable: (addGGPubrPlot)
+              - type: CheckBox
+                name: ggpubrAddStats
+                enable: (addGGPubrPlot)
+              - type: CheckBox
+                name: ggpubrAddPoints
+                enable: (addGGPubrPlot)

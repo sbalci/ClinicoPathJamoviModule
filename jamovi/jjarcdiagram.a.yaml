@@ -1,7 +1,7 @@
 ---
 name: jjarcdiagram
 title: Arc Diagram
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: Network
 version: '0.0.46'
 jas: '1.2'

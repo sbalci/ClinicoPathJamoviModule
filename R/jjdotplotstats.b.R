@@ -1017,18 +1017,35 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(dep) || is.null(group))
                 return('')
 
-            # Build arguments — deparse emits valid R string literal with
-            # proper escaping for embedded quotes/backslashes/special chars
-            dep_arg <- paste0('dep = ', deparse(dep))
-            group_arg <- paste0('group = ', deparse(group))
-
-            # Get other arguments using base helper (if available)
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
+            # Build the argument list in option-declaration order.
+            #
+            # Every variable-name option (dep, group, grvar) is emitted as a
+            # deparse()'d string literal. deparse() produces valid, fully-escaped
+            # R for names containing spaces, quotes or backslashes (e.g.
+            # `Tumor Grade`); jmvcore's default sourcify would emit these as bare,
+            # unquoted symbols and yield invalid syntax. Detecting OptionVariable
+            # by class (rather than by name) means any variable option added later
+            # is escaped automatically.
+            #
+            # data/dep/group are NOT re-emitted through private$.asArgs() — doing
+            # so previously duplicated dep and group in the generated syntax (the
+            # "double variables" bug). All non-variable options keep jmvcore's
+            # per-option sourcify so formatting stays consistent with jamovi.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val))
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
+                } else {
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
+                }
             }
-            if (args != '')
-                args <- paste0(',\n    ', args)
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
@@ -1036,7 +1053,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Build complete function call
             paste0(pkg_name, '::jjdotplotstats(\n    data = data,\n    ',
-                   dep_arg, ',\n    ', group_arg, args, ')')
+                   paste(args, collapse = ',\n    '), ')')
         }
     ) # End of public list
 )

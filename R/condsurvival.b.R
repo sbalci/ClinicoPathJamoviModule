@@ -571,32 +571,39 @@ condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         asSource = function() {
             time <- self$options$time
             status <- self$options$status
-            group <- self$options$group
 
             if (is.null(time) || is.null(status))
                 return('')
 
-            # Build required arguments. `deparse()` produces a correctly quoted-and-escaped
-            # R string literal — backticks belong on bare symbols, not inside double-quoted
-            # strings, so the prior hand-rolled escape-then-quote logic produced invalid R
-            # for non-syntactic names. deparse handles all special chars (quotes, backslash,
-            # spaces) and is identical to the old output for syntactic names.
-            time_arg   <- paste0('time = ',   deparse(time))
-            status_arg <- paste0('status = ', deparse(status))
-
-            # Build optional group argument
-            group_arg <- ''
-            if (!is.null(group)) {
-                group_arg <- paste0(',\n    group = ', deparse(group))
+            # Build the argument list in option-declaration order.
+            #
+            # Every variable-name option (single OptionVariable or multi-variable
+            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
+            # produces valid, fully-escaped R for names containing spaces, quotes or
+            # backslashes (e.g. `Tumor Grade`); jmvcore's default sourcify would emit
+            # some of these as bare, unquoted symbols and yield invalid syntax.
+            # Detecting the option by CLASS (not by name) means any variable option
+            # added later is escaped automatically.
+            #
+            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # previously duplicated them in the generated syntax (the "double
+            # variables" bug). All non-variable options keep jmvcore's per-option
+            # sourcify so formatting stays consistent with jamovi.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val) && length(val) > 0)
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
+                } else {
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
+                }
             }
-
-            # Get other arguments using base helper (if available)
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
-            }
-            if (args != '')
-                args <- paste0(',\n    ', args)
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
@@ -604,7 +611,7 @@ condsurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Build complete function call
             paste0(pkg_name, '::condsurvival(\n    data = data,\n    ',
-                   time_arg, ',\n    ', status_arg, group_arg, args, ')')
+                   paste(args, collapse = ',\n    '), ')')
         }
     ) # End of public list
 )

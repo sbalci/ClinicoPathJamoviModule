@@ -17,6 +17,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .data_hash = NULL,
         .options_hash = NULL,
         .accumulated_messages = NULL,  # For accumulating diagnostic messages
+        .diagnosticsHtml = NULL,       # Persisted diagnostics HTML (survives .prepareData cache hits)
 
         # Helper to accumulate messages instead of overwriting
         .appendMessage = function(message) {
@@ -26,12 +27,23 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.accumulated_messages <- c(private$.accumulated_messages, message)
         },
 
-        # Helper to flush accumulated messages to todo panel
-        .flushMessages = function() {
+        # Combine accumulated interim-diagnostic messages into one HTML block and
+        # PERSIST it in a private field. Deliberately writes to NO results element:
+        # this runs inside .prepareData(), which is called from the plot render
+        # functions, and results content mutated during a render is discarded by
+        # jamovi (that made the whole panel vanish once plots were visible). The
+        # `diagnostics` element is populated only from .run() using this field.
+        .storeDiagnostics = function() {
             if (!is.null(private$.accumulated_messages) && length(private$.accumulated_messages) > 0) {
-                combined_message <- paste(private$.accumulated_messages, collapse = "")
-                self$results$todo$setContent(combined_message)
-                private$.accumulated_messages <- NULL  # Clear after flushing
+                body <- paste(private$.accumulated_messages, collapse = "")
+                private$.diagnosticsHtml <- paste0(
+                    "<div style='padding: 12px 15px; background-color: #eef2f7; ",
+                    "border-left: 4px solid #6c757d; margin: 10px 0;'>",
+                    "<strong>Data Diagnostics &amp; Assumptions</strong>", body, "</div>"
+                )
+                private$.accumulated_messages <- NULL
+            } else {
+                private$.diagnosticsHtml <- ""
             }
         },
 
@@ -224,36 +236,67 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(interpretation)
         },
         
+        # Build the multiple-endpoint correction guidance HTML.
+        # Rendered directly in .run() into the always-visible `mecGuidance` results
+        # element (NOT via the data-memoized .prepareData()/todo channel), so it
+        # reliably appears and updates whenever multiEndpointCorrection changes.
+        # Returns "" when guidance does not apply (< 2 dependent variables), which
+        # renders as an empty, effectively hidden element.
+        .endpointGuidanceHtml = function() {
+            dep <- self$options$dep
+            if (is.null(dep) || length(dep) <= 1)
+                return("")
+
+            num_endpoints <- length(dep)
+            correction <- self$options$multiEndpointCorrection
+
+            body <- if (correction == "none") {
+                actual_alpha <- 1 - (1 - 0.05)^num_endpoints
+                sprintf(
+                    .(" <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
+                    num_endpoints, actual_alpha * 100
+                )
+            } else if (correction == "bonferroni") {
+                adjusted_alpha <- 0.05 / num_endpoints
+                sprintf(
+                    .(" <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = %.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT 0.05)<br>• Only results with p < %.4f should be considered statistically significant<br>• Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
+                    num_endpoints, adjusted_alpha, adjusted_alpha, adjusted_alpha, adjusted_alpha
+                )
+            } else if (correction == "holm") {
+                sprintf(
+                    .(" <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
+                    num_endpoints, num_endpoints, 0.05/num_endpoints,
+                    num_endpoints - 1, 0.05/(num_endpoints - 1)
+                )
+            } else if (correction == "fdr") {
+                sprintf(
+                    .(" <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ ≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
+                    num_endpoints, num_endpoints, num_endpoints
+                )
+            } else {
+                return("")
+            }
+
+            # Colour the box by severity: red when uncorrected, amber otherwise.
+            border <- if (correction == "none") "#dc3545" else "#ffc107"
+            bg     <- if (correction == "none") "#ffe5e5" else "#fff3cd"
+            paste0(
+                "<div style='padding: 15px; background-color: ", bg,
+                "; border-left: 4px solid ", border, "; margin: 10px 0;'>",
+                "<p style='margin: 0;'>", body, "</p></div>"
+            )
+        },
+
         # Statistical assumption checker
         .checkAssumptions = function(data, variables, group_var, test_type) {
             warnings <- c()
 
-            # CHECK FOR MULTIPLE ENDPOINT TESTING
-            num_endpoints <- length(variables)
-            if (num_endpoints > 1 && self$options$multiEndpointCorrection == "none") {
-                actual_alpha <- 1 - (1 - 0.05)^num_endpoints
-                warnings <- c(warnings, sprintf(
-                    .(" <strong>CRITICAL: MULTIPLE ENDPOINT TESTING WITHOUT CORRECTION</strong><br>You are testing %d dependent variables simultaneously without adjustment. This inflates your family-wise error rate from 5%% to approximately %.1f%%.<br><strong>RECOMMENDATION:</strong> Select a correction method below to see guidance, or interpret all p-values cautiously acknowledging this inflated error rate."),
-                    num_endpoints, actual_alpha * 100
-                ))
-            } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "bonferroni") {
-                adjusted_alpha <- 0.05 / num_endpoints
-                warnings <- c(warnings, sprintf(
-                    .(" <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = %.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT 0.05)<br>• Only results with p < %.4f should be considered statistically significant<br>• Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
-                    num_endpoints, adjusted_alpha, adjusted_alpha, adjusted_alpha, adjusted_alpha
-                ))
-            } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "holm") {
-                warnings <- c(warnings, sprintf(
-                    .(" <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
-                    num_endpoints, num_endpoints, 0.05/num_endpoints,
-                    num_endpoints - 1, 0.05/(num_endpoints - 1)
-                ))
-            } else if (num_endpoints > 1 && self$options$multiEndpointCorrection == "fdr") {
-                warnings <- c(warnings, sprintf(
-                    .(" <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ ≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
-                    num_endpoints, num_endpoints, num_endpoints
-                ))
-            }
+            # NOTE: Multiple-endpoint correction guidance is rendered separately in
+            # .run() via private$.endpointGuidanceHtml() into the always-visible
+            # `mecGuidance` element. It used to be emitted here, but this path only
+            # reaches the user through the data-memoized .prepareData()/todo channel,
+            # so it silently vanished whenever multiEndpointCorrection changed
+            # without the data changing ("appears then disappears").
 
             for (var in variables) {
                 var_data <- data[[var]]
@@ -264,8 +307,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min_group_size <- min(group_counts)
 
                 if (min_group_size < 3) {
-                    warnings <- c(warnings, sprintf(.(" {var}: Minimum group size is {size} (recommend ≥3)"),
-                                                    var = htmltools::htmlEscape(var), size = min_group_size))
+                    warnings <- c(warnings, sprintf(.(" %s: Minimum group size is %d (recommend ≥3)"),
+                                                    htmltools::htmlEscape(var), min_group_size))
                 }
 
                 if (test_type == "parametric" && min_group_size >= 3) {
@@ -278,7 +321,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                             if (levene_p < 0.05 && !self$options$varequal) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" {var}: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
+                                    .(" %s: Variances differ significantly between groups (Levene's test p = %.3f). Consider enabling 'Equal Variances = FALSE' or using non-parametric test."),
                                     htmltools::htmlEscape(var), levene_p
                                 ))
                             }
@@ -297,7 +340,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             p_val <- tryCatch(shapiro.test(group_subset)$p.value, error = function(e) 1)
                             if (p_val < 0.05) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" {var}: Data may not be normally distributed in group '{level}' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
+                                    .(" %s: Data may not be normally distributed in group '%s' (Shapiro-Wilk p = %.3f, consider non-parametric)"),
                                     htmltools::htmlEscape(var), htmltools::htmlEscape(level), p_val
                                 ))
                             }
@@ -314,7 +357,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                             if (abs(skewness) > 1) {
                                 warnings <- c(warnings, sprintf(
-                                    .(" {var}: Large sample (n = %d) in group '{level}' shows substantial skewness (%.2f). Visual inspection recommended."),
+                                    .(" %s: Large sample (n = %d) in group '%s' shows substantial skewness (%.2f). Visual inspection recommended."),
                                     htmltools::htmlEscape(var), n_subset, htmltools::htmlEscape(level), skewness
                                 ))
                             }
@@ -334,7 +377,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 group = self$options$group,
                 data_dim = dim(self$data),
                 col_names = names(self$data),
-                grvar = self$options$grvar
+                grvar = self$options$grvar,
+                # Assumption diagnostics depend on the test type and the
+                # equal-variance flag, so include them: changing the test must
+                # recompute the interim calculations rather than reuse stale ones.
+                typestatistics = self$options$typestatistics,
+                varequal = self$options$varequal
             ), algo = "md5")
             
             # Only reprocess if data has changed or forced refresh
@@ -346,11 +394,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Checkpoint before expensive data processing
             private$.checkpoint()
-            
-            # Add progress feedback
-            self$results$todo$setContent(
-                glue::glue(.("<br>Processing data for analysis...<br>"))
-            )
 
             mydata <- self$data
             vars <- self$options$dep
@@ -418,8 +461,8 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # FLUSH all accumulated messages to the todo panel
-            private$.flushMessages()
+            # Persist accumulated diagnostics to a field (rendered later from .run()).
+            private$.storeDiagnostics()
 
             # Cache the processed data with hash
             private$.processedData <- mydata
@@ -550,6 +593,9 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
 
         self$results$todo$setContent(todo)
+        # No analysis yet -> clear the separate guidance / diagnostics panels.
+        self$results$mecGuidance$setContent("")
+        self$results$diagnostics$setContent("")
         return()
 
     } else {
@@ -560,14 +606,29 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             grouped = if(!is.null(self$options$grvar)) paste0(', grouped by ', htmltools::htmlEscape(self$options$grvar)) else ''
         )
 
+        # The To-Do panel holds ONLY the analysis header.
         self$results$todo$setContent(todo)
 
         # Data validation
         if (nrow(self$data) == 0)
             jmvcore::reject(.('Data contains no (complete) rows'))
-            
+
         # Add checkpoint for user feedback
         private$.checkpoint()
+
+        # Compute data + interim diagnostics HERE, in the run context, so their
+        # content persists. Setting results content inside the plot render
+        # functions (where .prepareData() is also called) is discarded by jamovi
+        # and made these panels vanish once plots were visible. .prepareData() is
+        # memoized, so the plot render functions reuse this without recomputing.
+        private$.prepareData()
+
+        # Separate, always-set panels (never written to during render):
+        #   mecGuidance -> multiple-endpoint correction recommendation ("" hides it)
+        #   diagnostics -> interim data-quality / assumption calculations ("" hides it)
+        self$results$mecGuidance$setContent(private$.endpointGuidanceHtml())
+        self$results$diagnostics$setContent(
+            if (is.null(private$.diagnosticsHtml)) "" else private$.diagnosticsHtml)
     }
 },
 .generateAboutContent = function() {
@@ -839,7 +900,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Generate clinical interpretation
                 interpretation <- private$.generateClinicalInterpretation(plot, opts$typestatistics, dep)
-                self$results$todo$setContent(interpretation)
+                self$results$clinicalSummary$setContent(interpretation)
             }
 
             # Multiple dependent variables analysis ----
@@ -860,7 +921,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         plot_args <- list(
                             data = mydata,
                             x = rlang::sym(group),
-                            y = !!y,
+                            y = y,
                             messages = messages,
                             title = opts$mytitle,
                             xlab = opts$xtitle,
@@ -911,7 +972,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Generate clinical interpretation for multiple variables
                 interpretation <- private$.generateClinicalInterpretation(plotlist[[1]], opts$typestatistics, dep)
-                self$results$todo$setContent(interpretation)
+                self$results$clinicalSummary$setContent(interpretation)
             }
 
             # Print Plot ----
@@ -1019,7 +1080,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         grouped_multi_args <- list(
                             data = mydata,
                             x = rlang::sym(group),
-                            y = !!y,
+                            y = y,
                             grouping.var = rlang::sym(grvar),
                             messages = messages,
                                     type = opts$typestatistics,

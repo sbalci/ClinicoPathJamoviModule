@@ -37,6 +37,18 @@ items:
       title: To Do
       type:  Html
 
+    - name: mecGuidance
+      title: ''
+      type: Html
+
+    - name: diagnostics
+      title: ''
+      type: Html
+
+    - name: clinicalSummary
+      title: ''
+      type: Html
+
     - name: about
       title: About This Analysis
       type: Html

@@ -322,6 +322,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        mecGuidance = function() private$.items[["mecGuidance"]],
+        diagnostics = function() private$.items[["diagnostics"]],
+        clinicalSummary = function() private$.items[["clinicalSummary"]],
         about = function() private$.items[["about"]],
         summary = function() private$.items[["summary"]],
         assumptions = function() private$.items[["assumptions"]],
@@ -371,6 +374,18 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="todo",
                 title="To Do"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="mecGuidance",
+                title=""))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="diagnostics",
+                title=""))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="clinicalSummary",
+                title=""))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",

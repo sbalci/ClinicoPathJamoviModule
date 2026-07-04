@@ -1,7 +1,7 @@
 ---
 name:  jjwithinstats
 title: Box-Violin Plots to Compare Within Groups
-menuGroup: JJStatsPlotT
+menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Continuous'
 menuSubtitle: Repeated Continuous Measurements
 version: '0.0.46'
@@ -256,17 +256,17 @@ options:
     - name: violin
       title: Violin Plot
       type: Bool
-      default: false
+      default: true
 
     - name: boxplot
       title: Box Plot
       type: Bool
-      default: false
+      default: true
 
     - name: point
       title: Points
       type: Bool
-      default: false
+      default: true
 
     - name: mytitle
       title: Title

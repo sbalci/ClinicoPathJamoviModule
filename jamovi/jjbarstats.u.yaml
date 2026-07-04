@@ -45,11 +45,6 @@ children:
             name: counts
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: addGGPubrBalloon
   - type: CollapseBox
     label: Statistical Analysis
     collapsed: true
@@ -117,11 +112,6 @@ children:
                 name: ratio
                 label: Expected Proportions (e.g., 0.5,0.5)
                 format: string
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: ggpubrBalloonPalette
   - type: CollapseBox
     label: Plot Appearance
     collapsed: true
@@ -160,6 +150,19 @@ children:
                 name: digitsperc
                 label: Decimal Places (Percentages)
                 format: number
+  - type: CollapseBox
+    label: Balloon Plot (ggpubr)
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: addGGPubrBalloon
+            children:
+              - type: ComboBox
+                name: ggpubrBalloonPalette
+                enable: (addGGPubrBalloon)
   - type: CollapseBox
     label: Report & Explanations
     collapsed: true
