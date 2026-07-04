@@ -24,10 +24,10 @@ new_version: "0.0.46"
 new_date: "2026-07-04"
 quick: false
 TEST: false
-jjstatsplot: true
-jsurvival: false
-ClinicoPathDescriptives: true
-OncoPath: true
+jjstatsplot: false
+jsurvival: true
+ClinicoPathDescriptives: false
+OncoPath: false
 meddecide: false
 
 

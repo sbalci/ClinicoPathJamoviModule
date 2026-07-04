@@ -273,6 +273,25 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 self$results[[output_name]]$setVisible(TRUE)
             },
 
+            # Reset all notice outputs to empty/hidden at the start of each run.
+            # jamovi persists Html result content across .run() invocations, so
+            # without this reset .addHtmlMessage would append a fresh copy of each
+            # notice on every option/interaction cycle (e.g. the "Missing outcome
+            # values excluded" warning appearing many times). See survivalcont.b.R.
+            .initializeMessageOutputs = function() {
+                self$results$errors$setContent("")
+                self$results$errors$setVisible(FALSE)
+
+                self$results$strongWarnings$setContent("")
+                self$results$strongWarnings$setVisible(FALSE)
+
+                self$results$warnings$setContent("")
+                self$results$warnings$setVisible(FALSE)
+
+                self$results$infoMessages$setContent("")
+                self$results$infoMessages$setVisible(FALSE)
+            },
+
             # Unified survival formula builder — always escapes variable names
             .buildSurvFormula = function(time_var, outcome_var, group_var = NULL, ns_prefix = TRUE) {
                 esc_time <- .escapeVariableNames(time_var)
@@ -1203,6 +1222,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                 # Reset cached data for this analysis cycle
                 private$.cachedGetData <- NULL
+
+                # Reset notice outputs so notices don't accumulate across runs
+                private$.initializeMessageOutputs()
 
                 # Input Validation ----
                 validation_result <- tryCatch({

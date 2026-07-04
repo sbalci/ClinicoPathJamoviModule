@@ -288,7 +288,8 @@ Imports:
     sva,
     timereg,
     torch,
-    torchvision
+    torchvision,
+    logistf
 VignetteBuilder: 
     knitr, 
     tiff, 
@@ -330,7 +331,6 @@ Suggests:
     covr,
     BoomSpikeSlab,
     rstanarm,
-    logistf,
     coxphf,
     doParallel,
     foreach,

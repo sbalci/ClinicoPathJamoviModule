@@ -1,10 +1,10 @@
 ---
 name: datetimeconverter
 title: DateTime Converter
-menuGroup: SurvivalT
+menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: Convert datetime and extract components
-version: '0.0.38'
+version: '0.0.46'
 jas: '1.2'
 
 description:
@@ -16,7 +16,7 @@ description:
     R:
         dontrun: true
         usage: |
-            # Basic datetime conversion: '0.0.38'
+            # Basic datetime conversion: '0.0.46'
             datetimeconverter(
               data = study_data,
               datetime_var = "event_date",

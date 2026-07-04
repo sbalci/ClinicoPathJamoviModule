@@ -13,12 +13,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # warnings / infoMessages) to avoid the protobuf serialization error
         # caused by jmvcore::Notice objects passed to self$results$insert().
         .addNotice = function(type, message, name = NULL) {
+            # jmvcore::NoticeType constants: ERROR=0, STRONG_WARNING=1, WARNING=2, INFO=3
             type_str <- switch(
                 as.character(type),
-                "1" = "error",
-                "2" = "strongWarning",
-                "3" = "warning",
-                "4" = "info",
+                "0" = "error",
+                "1" = "strongWarning",
+                "2" = "warning",
+                "3" = "info",
                 "warning"
             )
             title <- switch(
