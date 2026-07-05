@@ -9,7 +9,7 @@ lollipop(
   dep,
   group,
   useHighlight = FALSE,
-  highlight = "",
+  highlight,
   aggregation = "none",
   sortBy = "original",
   orientation = "vertical",

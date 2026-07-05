@@ -54,7 +54,6 @@ The multisurvivalClass implements a modular architecture with the following comp
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
-    \item \href{#method-multisurvivalClass-asSource}{\code{multisurvivalClass$asSource()}}
     \item \href{#method-multisurvivalClass-clone}{\code{multisurvivalClass$clone()}}
   }
 }
@@ -63,6 +62,7 @@ The multisurvivalClass implements a modular architecture with the following comp
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createImage"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.createImage'><code>jmvcore::Analysis$.createImage()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createImages"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.createImages'><code>jmvcore::Analysis$.createImages()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".createPlotObject"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.createPlotObject'><code>jmvcore::Analysis$.createPlotObject()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".getSessionTemp"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.getSessionTemp'><code>jmvcore::Analysis$.getSessionTemp()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".load"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.load'><code>jmvcore::Analysis$.load()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".render"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.render'><code>jmvcore::Analysis$.render()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".save"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.save'><code>jmvcore::Analysis$.save()</code></a></span></li>
@@ -75,6 +75,7 @@ The multisurvivalClass implements a modular architecture with the following comp
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id=".setStatePathSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-.setStatePathSource'><code>jmvcore::Analysis$.setStatePathSource()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="addAddon"><a href='../../jmvcore/html/Analysis.html#method-Analysis-addAddon'><code>jmvcore::Analysis$addAddon()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asProtoBuf"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asProtoBuf'><code>jmvcore::Analysis$asProtoBuf()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="asSource"><a href='../../jmvcore/html/Analysis.html#method-Analysis-asSource'><code>jmvcore::Analysis$asSource()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="check"><a href='../../jmvcore/html/Analysis.html#method-Analysis-check'><code>jmvcore::Analysis$check()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="init"><a href='../../jmvcore/html/Analysis.html#method-Analysis-init'><code>jmvcore::Analysis$init()</code></a></span></li>
   <li><span class="pkg-link" data-pkg="jmvcore" data-topic="Analysis" data-id="optionsChangedHandler"><a href='../../jmvcore/html/Analysis.html#method-Analysis-optionsChangedHandler'><code>jmvcore::Analysis$optionsChangedHandler()</code></a></span></li>
@@ -89,21 +90,6 @@ The multisurvivalClass implements a modular architecture with the following comp
   <li><code>multisurvivalBase$initialize()</code></li>
 </ul>
 </details>}}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-multisurvivalClass-asSource"></a>}}
-\if{latex}{\out{\hypertarget{method-multisurvivalClass-asSource}{}}}
-\subsection{\code{multisurvivalClass$asSource()}}{
-  Generate R source code for Multi-Variable Survival analysis
-  \subsection{Usage}{
-    \if{html}{\out{<div class="r">}}
-    \preformatted{multisurvivalClass$asSource()}
-    \if{html}{\out{</div>}}
-  }
-  \subsection{Returns}{
-    Character string with R syntax for reproducible analysis
-  }
-}
-
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-multisurvivalClass-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-multisurvivalClass-clone}{}}}

@@ -4,7 +4,7 @@ title: "Segmented Total Bar Charts"
 menuGroup: JJStatsPlot
 menuSubgroup: 'Categorical vs Categorical'
 # menuSubtitle: "100 percent Stacked Bar Charts for Proportional Data"
-version: '0.0.46'
+version: '0.0.47'
 jas: '1.2'
 
 description:

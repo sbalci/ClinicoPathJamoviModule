@@ -20,9 +20,9 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             pairwisedisplay = "significant",
             padjustmethod = "holm",
             effsizetype = "biased",
-            violin = FALSE,
-            boxplot = FALSE,
-            point = FALSE,
+            violin = TRUE,
+            boxplot = TRUE,
+            point = TRUE,
             mytitle = "Within Group Comparison",
             xtitle = "",
             ytitle = "",
@@ -153,15 +153,15 @@ jjwithinstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             private$..violin <- jmvcore::OptionBool$new(
                 "violin",
                 violin,
-                default=FALSE)
+                default=TRUE)
             private$..boxplot <- jmvcore::OptionBool$new(
                 "boxplot",
                 boxplot,
-                default=FALSE)
+                default=TRUE)
             private$..point <- jmvcore::OptionBool$new(
                 "point",
                 point,
-                default=FALSE)
+                default=TRUE)
             private$..mytitle <- jmvcore::OptionString$new(
                 "mytitle",
                 mytitle,
@@ -528,7 +528,7 @@ jjwithinstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "jjwithinstats",
-                version = c(0,0,41),
+                version = c(0,0,47),
                 options = options,
                 results = jjwithinstatsResults$new(options=options),
                 data = data,
@@ -702,9 +702,9 @@ jjwithinstats <- function(
     pairwisedisplay = "significant",
     padjustmethod = "holm",
     effsizetype = "biased",
-    violin = FALSE,
-    boxplot = FALSE,
-    point = FALSE,
+    violin = TRUE,
+    boxplot = TRUE,
+    point = TRUE,
     mytitle = "Within Group Comparison",
     xtitle = "",
     ytitle = "",

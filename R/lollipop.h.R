@@ -9,7 +9,7 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             dep = NULL,
             group = NULL,
             useHighlight = FALSE,
-            highlight = "",
+            highlight = NULL,
             aggregation = "none",
             sortBy = "original",
             orientation = "vertical",
@@ -54,10 +54,10 @@ lollipopOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "useHighlight",
                 useHighlight,
                 default=FALSE)
-            private$..highlight <- jmvcore::OptionString$new(
+            private$..highlight <- jmvcore::OptionLevel$new(
                 "highlight",
                 highlight,
-                default="")
+                variable="(group)")
             private$..aggregation <- jmvcore::OptionList$new(
                 "aggregation",
                 aggregation,
@@ -303,7 +303,7 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lollipop",
-                version = c(0,0,41),
+                version = c(0,0,47),
                 options = options,
                 results = lollipopResults$new(options=options),
                 data = data,
@@ -439,7 +439,7 @@ lollipop <- function(
     dep,
     group,
     useHighlight = FALSE,
-    highlight = "",
+    highlight,
     aggregation = "none",
     sortBy = "original",
     orientation = "vertical",

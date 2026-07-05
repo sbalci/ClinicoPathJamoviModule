@@ -450,7 +450,7 @@ outcomeorganizerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             super$initialize(
                 package = "ClinicoPath",
                 name = "outcomeorganizer",
-                version = c(0,0,38),
+                version = c(0,0,47),
                 options = options,
                 results = outcomeorganizerResults$new(options=options),
                 data = data,

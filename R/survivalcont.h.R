@@ -1571,7 +1571,7 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survivalcont",
-                version = c(0,0,38),
+                version = c(0,0,47),
                 options = options,
                 results = survivalcontResults$new(options=options),
                 data = data,
