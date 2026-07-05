@@ -21,6 +21,7 @@ Added a "Show Analysis Explanations" checkbox that displays comprehensive explan
 ### 2. Output Sections (When Enabled)
 
 #### Section 1: Treatment Response Summary
+
 **Color**: Blue (#007bff)
 **Content**: Data-driven natural language summary
 
@@ -55,6 +56,7 @@ verify against tumor-specific thresholds)
 #### Section 2: Analysis Guide
 
 ##### 2.1 What This Analysis Does
+
 **Color**: Teal (#17a2b8)
 
 ```
@@ -73,6 +75,7 @@ Visualization Types:
 ```
 
 ##### 2.2 When to Use This Analysis
+
 **Color**: Yellow (#ffc107)
 
 ```
@@ -86,6 +89,7 @@ When to Use This Analysis:
 ```
 
 ##### 2.3 Data Requirements
+
 **Color**: Cyan (#0c5460)
 
 ```
@@ -99,13 +103,14 @@ Data Requirements:
 ```
 
 ##### 2.4 Key Assumptions & Limitations
+
 **Color**: Red (#dc3545)
 
 ```
 Key Assumptions & Limitations:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-• RECIST v1.1 thresholds: CR ≤-100%, PR ≤-30%, PD >+20%
+• RECIST v1.1 thresholds: CR <=-100%, PR <=-30%, PD >+20%
 • For raw measurements, baseline assumed at time = 0
 • Waterfall plot shows best (most negative) response per patient
 • Missing values are excluded from analysis
@@ -134,10 +139,12 @@ with proper time variables for automatic calculation.
 ```
 
 **Input Parameters:**
+
 - `processed_data`: Data frame with waterfall plot data
 - `metrics`: List containing ORR, DCR, n_cr, n_pr, n_sd, n_pd
 
 **Outputs:**
+
 - `self$results$naturalLanguageSummary`: HTML content with data summary
 - `self$results$explanations`: HTML content with analysis guide
 
@@ -148,11 +155,13 @@ with proper time variables for automatic calculation.
 ### For Users (jamovi GUI)
 
 1. **Load Data**
+
    ```
    File → Open → waterfall_percentage_basic.omv
    ```
 
 2. **Run Analysis**
+
    ```
    Analyses → OncoPathT → Patient Follow-Up Plots → Treatment Response Analysis
    ```
@@ -199,21 +208,25 @@ result <- waterfall(
 ## Benefits
 
 ### 1. Educational Value
+
 - Helps new users understand what the analysis does
 - Explains when to use waterfall vs spider plots
 - Clarifies data requirements
 
 ### 2. Documentation
+
 - Provides copy-ready text for methods sections
 - Shows RECIST criteria and thresholds
 - Explains assumptions and limitations
 
 ### 3. Interpretation
+
 - Natural language summary of key findings
 - Clinical interpretation of ORR/DCR
 - Automatic calculation of response distribution
 
 ### 4. Transparency
+
 - Makes analysis methodology explicit
 - Documents limitations upfront
 - Provides context for results
@@ -223,6 +236,7 @@ result <- waterfall(
 ## Styling Guidelines
 
 ### Color Scheme
+
 All sections use Bootstrap-inspired colors with semantic meaning:
 
 | Color | Hex | Usage |
@@ -234,6 +248,7 @@ All sections use Bootstrap-inspired colors with semantic meaning:
 | Red | #dc3545 | Warnings/Limitations |
 
 ### Layout Pattern
+
 ```html
 <div style="padding: 15px;
             background-color: #...;
@@ -252,6 +267,7 @@ All sections use Bootstrap-inspired colors with semantic meaning:
 ## Testing Checklist
 
 ### ✅ Pre-Testing (Completed)
+
 - [x] YAML syntax validation (all 3 files)
 - [x] R syntax validation (waterfall.b.R)
 - [x] Function implementation (.generateExplanations)
@@ -260,6 +276,7 @@ All sections use Bootstrap-inspired colors with semantic meaning:
 - [x] HTML items added to .r.yaml
 
 ### 🧪 Testing Needed
+
 - [ ] Checkbox appears in jamovi UI
 - [ ] Checkbox toggles explanations visibility
 - [ ] Natural language summary displays with correct data
@@ -272,6 +289,7 @@ All sections use Bootstrap-inspired colors with semantic meaning:
 - [ ] No console errors or warnings
 
 ### 📊 Test Datasets
+
 Use these datasets to verify functionality:
 
 | Dataset | Patients | Expected ORR | Expected DCR | Notes |
@@ -286,20 +304,25 @@ Use these datasets to verify functionality:
 ## Maintenance Notes
 
 ### Updating Content
+
 To modify explanation text, edit `.generateExplanations()` in `R/waterfall.b.R`:
 
 **Lines 2054-2080**: Natural Language Summary HTML
 **Lines 2086-2131**: Analysis Guide HTML
 
 ### Adding Sections
+
 To add a new section:
+
 1. Add HTML to `.generateExplanations()`
 2. Use consistent styling (padding, border-left, colors)
 3. Follow semantic color scheme
 4. Test rendering in jamovi
 
 ### Internationalization
+
 All text uses `_(...)` function for translation support:
+
 ```r
 .("Text to translate")
 sprintf(.("Format %d patients"), n)

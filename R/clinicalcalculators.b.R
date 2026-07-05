@@ -262,7 +262,7 @@ clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         # include_calibration) default to TRUE in the .a.yaml, so users see the
         # stubs by default. Implement via the `rms` package (datadist + lrm/cph
         # + nomogram()) for real nomograms, and a calibration loess/decile plot
-        # for calibration — or hide the plots until ready.
+        # for calibration - or hide the plots until ready.
         .plotNomogram = function(image, ...) {
             if (is.null(self$options$outcome_variable) || is.null(self$options$predictor_variables))
                 return(FALSE)

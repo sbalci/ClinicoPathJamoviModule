@@ -203,7 +203,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .fitBrmsModel = function(data, growth_model) {
 
             # TODO (cleanup): 13 library() calls inside function bodies modify the user's search
-            #   path at source/run time and trip R CMD check — L214/L1309 brms, L322 + L1051/1089/
+            #   path at source/run time and trip R CMD check - L214/L1309 brms, L322 + L1051/1089/
             #   1123/1158/1193/1228 nlme, L776/L777/L865/L919 ggplot2/dplyr. Declare these in
             #   DESCRIPTION Imports/Suggests and call qualified (brms::, nlme::, ggplot2::, dplyr::)
             #   or rely on @import roxygen + NAMESPACE; gate optional pkgs (brms) on requireNamespace.

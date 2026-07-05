@@ -51,7 +51,7 @@ It gives you p-values, confidence intervals, and unbiased hazard ratios without 
 Use the Survival &rarr; Multivariable Survival menu instead.<br><br>
 <strong>Exception:</strong> If you have very few events (&lt;20), rare outcomes, or encounter
 complete/quasi-complete separation (infinite coefficients), use <strong>Firth Regression</strong>
-even with few predictors. Firth is not for variable selection &mdash; it is for bias correction.
+even with few predictors. Firth is not for variable selection - it is for bias correction.
 </div>
 
 <h3>Available Methods (Increasing Complexity)</h3>
@@ -172,7 +172,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
 <p><strong>Step 5: Event checks (The EPV Rule)</strong></p>
 <ul>
   <li>&lt; 10 events &rarr; Standard penalized regression is unreliable. Use <strong>Firth Regression</strong> for bias-corrected estimates, or Kaplan-Meier / univariate Cox.</li>
-  <li>10&ndash;50 events &rarr; Use LASSO or Elastic Net with caution. If complete separation is detected, switch to <strong>Firth Regression</strong>. Let the module\'s Suitability Assessment guide you.</li>
+  <li>10 - 50 events &rarr; Use LASSO or Elastic Net with caution. If complete separation is detected, switch to <strong>Firth Regression</strong>. Let the module\'s Suitability Assessment guide you.</li>
   <li>&gt; 50 events &rarr; Any method above is statistically appropriate.</li>
 </ul>
 
@@ -346,7 +346,7 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
   <tr>
     <td class="vtop"><strong>Sufficient events</strong></td>
     <td>The events-per-variable (EPV) ratio should be at least 2 for LASSO
-      (vs. 10&ndash;20 for standard Cox). With fewer events, results become unreliable
+      (vs. 10-20 for standard Cox). With fewer events, results become unreliable
       regardless of method. The LASSO Cox suitability assessment reports EPV automatically.</td>
   </tr>
   <tr>
@@ -402,7 +402,7 @@ estimates. The Firth Regression module includes automatic separation detection.<
 
 <p><strong>7. Confusing Firth with LASSO penalties.</strong>
 Firth&rsquo;s penalty (Jeffreys prior) serves a different purpose than LASSO. Firth corrects
-bias &mdash; it keeps all variables in the model. LASSO performs variable selection &mdash; it removes
+bias - it keeps all variables in the model. LASSO performs variable selection - it removes
 variables. They are complementary: use Firth for small-sample bias correction with a known
 set of variables; use LASSO for discovering which variables matter from a large candidate set.</p>
 

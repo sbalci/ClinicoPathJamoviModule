@@ -82,7 +82,7 @@ test_that("pprob option accepts valid prevalence values", {
 })
 
 test_that("pprob option rejects invalid values", {
-  # Too low (≤ 0)
+  # Too low (<= 0)
   expect_error(
     decisioncalculator(
       TP = 90, TN = 80, FP = 20, FN = 10,
@@ -90,7 +90,7 @@ test_that("pprob option rejects invalid values", {
     )
   )
 
-  # Too high (≥ 1)
+  # Too high (>= 1)
   expect_error(
     decisioncalculator(
       TP = 90, TN = 80, FP = 20, FN = 10,
@@ -312,9 +312,9 @@ test_that("minimal options (defaults only)", {
 
 test_that("high sensitivity scenario", {
   result <- decisioncalculator(
-    TP = 95,   # High sensitivity (95%)
+    TP = 95, # High sensitivity (95%)
     TN = 150,
-    FP = 50,   # Lower specificity (75%)
+    FP = 50, # Lower specificity (75%)
     FN = 5
   )
 
@@ -323,8 +323,8 @@ test_that("high sensitivity scenario", {
 
 test_that("high specificity scenario", {
   result <- decisioncalculator(
-    TP = 70,   # Lower sensitivity (70%)
-    TN = 195,  # High specificity (97.5%)
+    TP = 70, # Lower sensitivity (70%)
+    TN = 195, # High specificity (97.5%)
     FP = 5,
     FN = 30
   )
@@ -334,8 +334,8 @@ test_that("high specificity scenario", {
 
 test_that("balanced moderate performance", {
   result <- decisioncalculator(
-    TP = 70,   # 70% sensitivity
-    TN = 160,  # 80% specificity
+    TP = 70, # 70% sensitivity
+    TN = 160, # 80% specificity
     FP = 40,
     FN = 30
   )
@@ -345,8 +345,8 @@ test_that("balanced moderate performance", {
 
 test_that("excellent test performance", {
   result <- decisioncalculator(
-    TP = 98,   # 98% sensitivity
-    TN = 192,  # 96% specificity
+    TP = 98, # 98% sensitivity
+    TN = 192, # 96% specificity
     FP = 8,
     FN = 2
   )
@@ -360,12 +360,12 @@ test_that("excellent test performance", {
 
 test_that("rare disease prevalence", {
   result <- decisioncalculator(
-    TP = 9,      # Very few cases
-    TN = 9890,   # Many healthy
+    TP = 9, # Very few cases
+    TN = 9890, # Many healthy
     FP = 100,
     FN = 1,
     pp = TRUE,
-    pprob = 0.001  # 0.1% prevalence
+    pprob = 0.001 # 0.1% prevalence
   )
 
   expect_s3_class(result, "decisioncalculatorClass")
@@ -378,7 +378,7 @@ test_that("common disease prevalence", {
     FP = 90,
     FN = 15,
     pp = TRUE,
-    pprob = 0.30  # 30% prevalence
+    pprob = 0.30 # 30% prevalence
   )
 
   expect_s3_class(result, "decisioncalculatorClass")
@@ -391,7 +391,7 @@ test_that("high prevalence setting (ICU)", {
     FP = 80,
     FN = 20,
     pp = TRUE,
-    pprob = 0.50  # 50% prevalence
+    pprob = 0.50 # 50% prevalence
   )
 
   expect_s3_class(result, "decisioncalculatorClass")

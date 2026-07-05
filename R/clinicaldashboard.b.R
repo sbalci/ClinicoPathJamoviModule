@@ -296,7 +296,7 @@ clinicaldashboardClass <- R6::R6Class(
             #   - Unknown var_names silently skip with no notice.
             #   - On large datasets with permissive thresholds, the inner loop
             #     can build an O(thresholds * nrow(data)) `alerts` list before
-            #     the L<below>+~50 cap of 20 trims it — wasted work.
+            #     the L<below>+~50 cap of 20 trims it - wasted work.
             # Consider replacing with a structured threshold input (one row per
             # threshold via OptionArray, or per-variable Number options) and
             # surfacing parse failures via a Notice/HTML panel.
@@ -363,9 +363,9 @@ clinicaldashboardClass <- R6::R6Class(
             # TODO (forward-looking): the interpolations below are safe today
             # because dashboard_type / time_window are closed-enum OptionList
             # values and nrow/ncol/Sys.time() are not attacker-influenced. If
-            # any of these are ever swapped for a free-text OptionString — or
+            # any of these are ever swapped for a free-text OptionString - or
             # if attacker-controlled tokens (e.g. a column name from outcomeVars
-            # or a parsed alertThresholds value) start being interpolated here —
+            # or a parsed alertThresholds value) start being interpolated here - 
             # wrap each user-influenced value in htmltools::htmlEscape() before
             # paste0(), as done in R/clinicalcalculators.b.R:143 and L192.
             summary_content <- paste0(

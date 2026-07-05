@@ -1,4 +1,4 @@
-# Sparse Group LASSO Cox Regression -- Feature Mapping
+# Sparse Group LASSO Cox Regression - Feature Mapping
 
 This document provides a comprehensive overview of the Sparse Group LASSO module, detailing its features, user interface elements, and the underlying R functions.
 
@@ -15,11 +15,11 @@ The function is classified as Draft: it uses glmnet's elastic net as a principle
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Time to event | `time_var` | Time Variable | -- | `.prepareData()` |
-| Event indicator | `event_var` | Event Variable | -- | `.prepareData()` |
-| Event level | `outcomeLevel` | Event Level | -- | `.prepareData()` |
-| Censored level | `censorLevel` | Censored Level | -- | `.prepareData()` |
-| Predictors | `pred_vars` | Predictor Variables | -- | `.prepareData()` -> `.convertToDummies()` |
+| Time to event | `time_var` | Time Variable | - | `.prepareData()` |
+| Event indicator | `event_var` | Event Variable | - | `.prepareData()` |
+| Event level | `outcomeLevel` | Event Level | - | `.prepareData()` |
+| Censored level | `censorLevel` | Censored Level | - | `.prepareData()` |
+| Predictors | `pred_vars` | Predictor Variables | - | `.prepareData()` -> `.convertToDummies()` |
 | **Data Suitability** | | | | |
 | Suitability assessment | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` | `.assessSuitability()` |
 | **Group Definition** | | | | |
@@ -27,25 +27,25 @@ The function is classified as Draft: it uses glmnet's elastic net as a principle
 | Custom group spec | `custom_groups` | Custom Group Specification | `groupStructure` | `.customGrouping()` |
 | Pathway variable | `pathway_info` | Pathway Information | `groupStructure` | `.pathwayBasedGrouping()` |
 | Correlation threshold | `correlation_threshold` | Correlation Threshold | `groupStructure` | `.correlationBasedGrouping()` |
-| Descriptive group names | -- | -- | `groupStructure`, `coefficients` | `.buildGroupNames()` |
+| Descriptive group names | - | - | `groupStructure`, `coefficients` | `.buildGroupNames()` |
 | **Penalty & Lambda** | | | | |
 | Alpha mixing | `alpha_sgl` | Sparse Group LASSO Alpha | `summary`, `coefficients` | `.fitSparseGroupLASSO()` |
 | Lambda method | `lambda_sequence` | Lambda Sequence | `solutionPath` | `.generateLambdaSequence()` |
 | Custom lambda values | `custom_lambda` | Custom Lambda Values | `solutionPath` | `.generateLambdaSequence()` |
-| Lambda min ratio | `lambda_min_ratio` | Lambda Min Ratio | -- | `.generateLambdaSequence()` |
-| Lambda count | `n_lambda` | Number of Lambda Values | -- | `.generateLambdaSequence()` |
+| Lambda min ratio | `lambda_min_ratio` | Lambda Min Ratio | - | `.generateLambdaSequence()` |
+| Lambda count | `n_lambda` | Number of Lambda Values | - | `.generateLambdaSequence()` |
 | **Cross-Validation** | | | | |
 | Selection criterion | `selection_criterion` | Model Selection Criterion | `summary`, `performance` | `.selectOptimalLambda()` |
 | CV folds | `cv_folds` | Cross-Validation Folds | `validationResults` | `.fitSparseGroupLASSO()` |
 | CV repeats | `cv_repeats` | CV Repeats | `validationResults` | `.fitSparseGroupLASSO()` (repeated averaging) |
-| EBIC gamma | `ebic_gamma` | EBIC Gamma Parameter | -- | `.selectOptimalLambda()` |
+| EBIC gamma | `ebic_gamma` | EBIC Gamma Parameter | - | `.selectOptimalLambda()` |
 | **Adaptive Weights** | | | | |
 | Weight type | `weight_type` | Adaptive Weight Type | `adaptiveWeights` | `.calculateAdaptiveWeights()` |
 | Weight power | `weight_power` | Weight Power | `adaptiveWeights` | `.calculateAdaptiveWeights()` |
 | **Preprocessing** | | | | |
-| Standardize | `standardize_vars` | Standardize Variables | -- | `.performSparseGroupLASSO()` |
-| Center | `center_vars` | Center Variables | -- | `.performSparseGroupLASSO()` |
-| Random seed | `seed_value` | Random Seed | -- | `.run()` |
+| Standardize | `standardize_vars` | Standardize Variables | - | `.performSparseGroupLASSO()` |
+| Center | `center_vars` | Center Variables | - | `.performSparseGroupLASSO()` |
+| Random seed | `seed_value` | Random Seed | - | `.run()` |
 | **Validation & Stability** | | | | |
 | Bootstrap CIs | `confidence_intervals` | Calculate Confidence Intervals | `coefficients` (ci_lower, ci_upper) | `.bootstrapConfidenceIntervals()` |
 | Bootstrap count | `bootstrap_samples` | Bootstrap Samples | `coefficients`, `stabilityResults` | `.bootstrapConfidenceIntervals()`, `.performStabilitySelection()` |
@@ -68,5 +68,5 @@ The function is classified as Draft: it uses glmnet's elastic net as a principle
 | Stability plot | `plot_stability` | Plot Stability Selection | `stabilityPlot` | `.plotStability()` -> `.renderStabilityPlot()` |
 | **Clinical Output** | | | | |
 | Explanations | `showExplanations` | Show Explanations | `explanations` | `.populateExplanations()` |
-| Instructions | -- | -- | `instructions` | `.init()` |
-| Notices fallback | -- | -- | `todo` | `.insertNotice()` fallback |
+| Instructions | - | - | `instructions` | `.init()` |
+| Notices fallback | - | - | `todo` | `.insertNotice()` fallback |

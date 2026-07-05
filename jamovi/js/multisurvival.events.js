@@ -2,7 +2,7 @@
 //
 // Populates the interaction term pool ("Available Predictors") from the union of
 // the `explanatory` and `contexpl` variable boxes, so the user can cross them
-// into interaction terms. Main effects are NOT added here — they come from the
+// into interaction terms. Main effects are NOT added here - they come from the
 // `explanatory`/`contexpl` options directly.
 //
 // This uses the standard jamovi model-builder events API (`this.cloneArray`,

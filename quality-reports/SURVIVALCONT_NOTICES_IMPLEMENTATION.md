@@ -83,6 +83,7 @@ Completion summaries and methodology:
 ### 2. Single-Line Constraint Enforcement
 
 ✅ **All 29 notices use single-line messages** (verified: zero `\n` characters)
+
 - Use `sprintf()` for inline formatting
 - Use bullet separator (•) instead of line breaks: `paste(items, collapse = ' • ')`
 - Complex warnings: Notice (single-line summary) + Html output (detailed)
@@ -102,7 +103,7 @@ Comprehensive survival analysis power checking:
 Events < 10       → ERROR (cannot proceed)
 Events 10-19      → STRONG_WARNING (unreliable)
 Events 20-49      → WARNING (acceptable with caution)
-Events ≥ 50       → No warning (adequate power)
+Events >= 50       → No warning (adequate power)
 
 EPV < 10          → STRONG_WARNING (Cox unreliable)
 Censoring > 80%   → STRONG_WARNING (insufficient follow-up)
@@ -203,6 +204,7 @@ Based on survival analysis literature:
 ## Backward Compatibility
 
 **Dual Approach Maintained**:
+
 - **Clinical warnings**: Notice (single-line summary) + Html output (detailed multi-paragraph)
 - **Location**: Lines 1298-1336
 - **Reason**: User warned about serialization issues, so keeping both legacy Html and new Notices until jamovi Notice system is proven stable in production

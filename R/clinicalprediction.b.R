@@ -290,7 +290,7 @@ clinicalpredictionClass <- R6::R6Class(
                     # L<this>+~170 (event_rate computation) maps factor LEVEL
                     # INDICES {1,2} to {0,1} for binary modelling. Fragile if
                     # the factor has a `values = c(0,1)` attribute (jmvcore
-                    # coding) — would produce {-1,0}. Replace with a robust
+                    # coding) - would produce {-1,0}. Replace with a robust
                     # binary encoder that doesn't depend on level coding:
                     #   y_train <- as.integer(train_data[[outcome_var]] ==
                     #                         levels(train_data[[outcome_var]])[2])

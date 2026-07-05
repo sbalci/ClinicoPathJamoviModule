@@ -36,7 +36,7 @@ STRUCTURE:
 AUTOMATIC TEST SELECTION:
 
 For Categorical Variables:
-  • Chi-square test: Default for adequate cell frequencies (≥5)
+  • Chi-square test: Default for adequate cell frequencies (>=5)
   • Fisher's exact test: Small expected frequencies (<5)
   • Reports: n (%), p-value
 
@@ -505,7 +505,7 @@ cat("     ✓ Examples: PSA, survival time, hospital charges\n\n")
 cat("3. STATISTICAL TESTS:\n\n")
 
 cat("   Automatic selection for CATEGORICAL variables:\n")
-cat("     • Chi-square test: Expected frequencies ≥ 5 in all cells\n")
+cat("     • Chi-square test: Expected frequencies >= 5 in all cells\n")
 cat("     • Fisher's exact test: Any expected frequency < 5\n")
 cat("     • Manual override: Use pcat = 'fisher' to force exact test\n\n")
 
@@ -518,7 +518,7 @@ cat("4. P-VALUE INTERPRETATION:\n\n")
 
 cat("   Without adjustment:\n")
 cat("     • p < 0.05: Significant difference between groups\n")
-cat("     • p ≥ 0.05: No evidence of difference\n")
+cat("     • p >= 0.05: No evidence of difference\n")
 cat("     • Interpret each test independently\n\n")
 
 cat("   With adjustment (gtsummary only):\n")
@@ -568,8 +568,8 @@ cat("     ✓ Footnote: missing data handling\n\n")
 
 cat("   Example footnote:\n")
 cat('     \"Continuous variables presented as mean (SD) or median (IQR).\n')
-cat('     Categorical variables presented as n (%). P-values from\n')
-cat('     ANOVA/t-test for continuous, chi-square/Fisher exact for\n')
+cat("     Categorical variables presented as n (%). P-values from\n")
+cat("     ANOVA/t-test for continuous, chi-square/Fisher exact for\n")
 cat('     categorical variables.\"\n\n')
 
 cat("8. COMMON PITFALLS:\n\n")
@@ -602,7 +602,7 @@ cat("  • In observational studies: P-values show baseline differences\n")
 cat("  • Do NOT interpret significant p-values as treatment effects\n\n")
 
 cat("Multiple Comparisons:\n")
-cat("  • Family-wise error rate (FWER): Probability of ≥1 false positive\n")
+cat("  • Family-wise error rate (FWER): Probability of >=1 false positive\n")
 cat("  • False discovery rate (FDR): Expected proportion of false positives\n")
 cat("  • 5 tests at α=0.05 without adjustment: FWER ≈ 23%\n")
 cat("  • Bonferroni: Controls FWER (stringent)\n")
@@ -618,7 +618,7 @@ cat("  • Always consider both statistical AND clinical significance\n\n")
 cat("Assumptions:\n")
 cat("  • Independence: Observations are independent (no repeated measures)\n")
 cat("  • t-test/ANOVA: Approximately normal distributions, equal variances\n")
-cat("  • Chi-square: Expected frequencies ≥ 5 in each cell\n")
+cat("  • Chi-square: Expected frequencies >= 5 in each cell\n")
 cat("  • Fisher's exact: No assumptions about sample size (always valid)\n\n")
 
 cat("═══════════════════════════════════════════════════════════\n")

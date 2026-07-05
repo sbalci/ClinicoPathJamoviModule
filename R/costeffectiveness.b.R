@@ -116,7 +116,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 }
 
                 # Deterministic sensitivity analysis
-                # TODO (cleanup): the `sensitivity_parameters` OptionString (declared in jamovi/costeffectiveness.a.yaml / .h.R) is never read by this backend — `.performDeterministicSA` uses hardcoded parameter ranges instead of the user's free-text input. Either wire the option into the SA range parser or remove it from .a.yaml/.u.yaml. Current state: dead UI control. Also forward-looking: this analysis lacks an `asSource()` method, so the syntax pane can't reproduce the configured run; once `sensitivity_parameters` is wired (or removed) the asSource implementation should follow.
+                # TODO (cleanup): the `sensitivity_parameters` OptionString (declared in jamovi/costeffectiveness.a.yaml / .h.R) is never read by this backend - `.performDeterministicSA` uses hardcoded parameter ranges instead of the user's free-text input. Either wire the option into the SA range parser or remove it from .a.yaml/.u.yaml. Current state: dead UI control. Also forward-looking: this analysis lacks an `asSource()` method, so the syntax pane can't reproduce the configured run; once `sensitivity_parameters` is wired (or removed) the asSource implementation should follow.
                 if (self$options$deterministic_sensitivity) {
                     private$.performDeterministicSA(strategy, cost, effectiveness, data[complete_cases, ])
                 }

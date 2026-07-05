@@ -29,6 +29,7 @@ The `jwaffle` function is **nearly production-ready** with excellent code qualit
 **Status:** ✅ **APPROVE with Minor Revisions**
 
 The function can be released after addressing:
+
 1. **HIGH Priority**: Fix n_squares calculation inconsistency (1 issue)
 2. **MEDIUM Priority**: Add accessibility features and UI descriptions (2 issues)
 3. **LOW Priority**: UX enhancements for clinical users (optional)
@@ -40,6 +41,7 @@ The function can be released after addressing:
 ### ✅ Core Mathematical Operations
 
 **Proportional Calculations** [Lines 459-462, 606-637]
+
 ```r
 # Caption calculation
 n_squares <- 100  # Total squares in waffle chart
@@ -53,12 +55,14 @@ count_expr <- rlang::expr(dplyr::n())  # Unweighted
 ```
 
 **Assessment:**
+
 - ✅ **Correct**: Proportion calculations are mathematically sound
 - ✅ **Correct**: Weighted vs unweighted aggregation properly implemented
 - ✅ **Correct**: `make_proportional = TRUE` in geom_waffle ensures accurate proportions
 - ✅ **Correct**: Handles NA values appropriately with `na.rm = TRUE`
 
 **Waffle Chart Rendering** [Lines 918-930]
+
 ```r
 waffle::geom_waffle(
     n_rows = self$options$rows,
@@ -70,6 +74,7 @@ waffle::geom_waffle(
 ```
 
 **Assessment:**
+
 - ✅ **Critical**: `make_proportional = TRUE` is correctly set
 - ✅ **Correct**: Row parameter properly passed from options
 - ✅ **Correct**: Flip orientation handled correctly
@@ -85,6 +90,7 @@ waffle::geom_waffle(
 | Negative counts | counts < 0 | Must be non-negative for proportions | ✅ Correct |
 
 **Assessment:**
+
 - ✅ **Clinically sound**: All thresholds align with statistical best practices
 - ✅ **Appropriate**: Warnings are informative, not blocking (except single category)
 - ✅ **Conservative**: n<30 warning prevents misinterpretation of unstable proportions
@@ -92,23 +98,29 @@ waffle::geom_waffle(
 ### Statistical Formulas Verification
 
 **Proportion Calculation:**
+
 ```
 Proportion_i = Count_i / Total_Count
 Percentage_i = (Count_i / Total_Count) × 100
 ```
+
 ✅ Implemented correctly in lines 655-659, 694-697
 
 **Weighted Counts:**
+
 ```
 Total_Weighted = Σ(Weights_i) for group i
 ```
+
 ✅ Implemented correctly with `sum(!!rlang::sym(counts_var), na.rm = TRUE)` in line 620
 
 **Caption Statistics:**
+
 ```
 Units_per_square = Total_cases / N_squares
 Squares_per_unit = 100 / Total_cases
 ```
+
 ✅ Mathematically correct, but see issue below
 
 ### ⚠️ Issues Found
@@ -124,6 +136,7 @@ Squares_per_unit = 100 / Total_cases
 ### ✅ Clinical Safety Features
 
 **Data Type Validation** [Lines 531-548]
+
 ```r
 # Handle labelled data (SPSS/Stata compatibility)
 if (inherits(groups_data, "haven_labelled")) {
@@ -141,11 +154,13 @@ if (!is.factor(groups_data)) {
 ```
 
 **Assessment:**
+
 - ✅ **Excellent**: Automatic conversion of haven_labelled (common in clinical data from SPSS)
 - ✅ **Safe**: Type checking prevents misuse with continuous variables
 - ✅ **User-friendly**: Automatic character/logical to factor conversion
 
 **Clinical Validation Messages** [Lines 564-587]
+
 ```r
 if (n_categories > 10) {
     private$.accumulateMessage(glue::glue(
@@ -167,6 +182,7 @@ if (min_count < 5 && n_total >= 30) {
 ```
 
 **Assessment:**
+
 - ✅ **Clinically appropriate**: Warnings guide proper interpretation
 - ✅ **Non-blocking**: Warnings don't prevent analysis (allows clinical judgment)
 - ✅ **Informative**: Clear actionable advice ("Consider combining categories...")
@@ -182,6 +198,7 @@ if (min_count < 5 && n_total >= 30) {
 | `showExplanations` | false | Opt-in complexity | ✅ Good |
 
 **Assessment:**
+
 - ✅ **Conservative defaults**: Minimize initial computational cost
 - ✅ **Opt-in complexity**: Advanced features require explicit activation
 - ⚠️ **Recommendation**: Consider defaulting to `colorblind` palette for accessibility
@@ -191,6 +208,7 @@ if (min_count < 5 && n_total >= 30) {
 **Location:** [Lines 460, 482-485]
 
 **Problem:**
+
 ```r
 # HARDCODED VALUE (line 460)
 n_squares <- 100  # Total number of squares in waffle chart
@@ -203,11 +221,13 @@ squares_per_unit <- 100 / total_cases
 ```
 
 **Impact:**
+
 - Caption states "Each square represents X cases" assuming 100 squares
 - With `rows = 5` and proportional rendering, actual square count varies
 - **Misleading** for clinical interpretation
 
 **Example:**
+
 ```r
 # With 100 cases and rows=5:
 # Caption says: "Each square ~ 1 case (1%)"
@@ -217,6 +237,7 @@ squares_per_unit <- 100 / total_cases
 **Severity:** 🔴 **HIGH** - Affects clinical interpretation accuracy
 
 **Recommendation:**
+
 ```r
 # FIXED VERSION:
 # Calculate actual squares based on rows and proportional rendering
@@ -242,12 +263,14 @@ squares_per_unit <- 100 / total_cases
 6. **Empty dataset** → ✅ Prevented (row count check)
 
 **Assessment:**
+
 - ✅ **Excellent**: Comprehensive input validation prevents misuse
 - ✅ **User-friendly**: Clear error messages guide correction
 
 ### Clinical Output Safety
 
 **Summary Content** [Lines 708-716]
+
 ```r
 summary_text <- sprintf(
     "<i>\"Distribution analysis revealed %s as the most frequent category
@@ -258,6 +281,7 @@ summary_text <- sprintf(
 ```
 
 **Assessment:**
+
 - ✅ **Copy-ready**: Clinical researchers can paste directly into reports
 - ✅ **Complete**: Includes all required elements (category, percentage, n, total)
 - ✅ **Professional**: Formal academic writing style
@@ -272,6 +296,7 @@ summary_text <- sprintf(
 ### ✅ Code Structure
 
 **R6 Class Architecture** [Lines 151-1036]
+
 ```r
 jwaffleClass <- R6::R6Class(
     "jwaffleClass",
@@ -291,6 +316,7 @@ jwaffleClass <- R6::R6Class(
 ```
 
 **Assessment:**
+
 - ✅ **Excellent separation of concerns**: Each method has single responsibility
 - ✅ **Clear inheritance**: Properly inherits from auto-generated base
 - ✅ **Consistent naming**: Private methods use `.methodName` convention
@@ -299,6 +325,7 @@ jwaffleClass <- R6::R6Class(
 ### ✅ Documentation Quality
 
 **Roxygen Documentation** [Lines 1-148]
+
 ```r
 #' @title Waffle Charts for Categorical Data Visualization
 #' @description Creates professional waffle charts...
@@ -317,6 +344,7 @@ jwaffleClass <- R6::R6Class(
 ```
 
 **Assessment:**
+
 - ✅ **Comprehensive**: All parameters documented with clinical examples
 - ✅ **Professional**: Includes references, see-also, proper formatting
 - ✅ **User-focused**: Details section covers data requirements and applications
@@ -324,6 +352,7 @@ jwaffleClass <- R6::R6Class(
 - ✅ **Excellent examples**: 3 realistic clinical scenarios
 
 **Inline Comments** [Throughout]
+
 ```r
 # CRITICAL FIX: Set plot state for efficient caching (line 898)
 # LEGACY: Keep HTML warnings for backward compatibility (line 192)
@@ -331,6 +360,7 @@ jwaffleClass <- R6::R6Class(
 ```
 
 **Assessment:**
+
 - ✅ **Strategic comments**: Explain WHY, not just WHAT
 - ✅ **Clear annotations**: Mark critical sections, legacy vs modern code
 - ✅ **Helpful context**: Guide future maintainers
@@ -338,6 +368,7 @@ jwaffleClass <- R6::R6Class(
 ### ✅ Error Handling
 
 **Pattern Analysis:**
+
 ```r
 # 1. Input validation with informative errors (lines 498-604)
 if (is.null(self$options$groups) || self$options$groups == "") {
@@ -361,6 +392,7 @@ if (n_categories == 1) {
 ```
 
 **Assessment:**
+
 - ✅ **Defensive programming**: Checks all assumptions
 - ✅ **User-friendly errors**: Clear messages with actionable advice
 - ✅ **Graceful degradation**: tryCatch prevents crashes from optional features
@@ -379,6 +411,7 @@ if (n_categories == 1) {
 | Data hashing | `digest::digest()` for cache | Lines 288-318 | ✅ Excellent |
 
 **Assessment:**
+
 - ✅ **Modern jamovi patterns**: Follows all current best practices
 - ✅ **Consistent with jjwithinstats**: Same patterns applied
 - ✅ **Production-quality**: Ready for real-world use
@@ -386,6 +419,7 @@ if (n_categories == 1) {
 ### ✅ Code Maintainability
 
 **Metrics:**
+
 - **Lines of code**: 1,037 lines (well-organized, not bloated)
 - **Method count**: 16 private methods (excellent separation)
 - **Average method length**: ~50-80 lines (appropriate)
@@ -393,6 +427,7 @@ if (n_categories == 1) {
 - **Cyclomatic complexity**: Low (methods focused on single tasks)
 
 **Reusability:**
+
 ```r
 # Excellent helper methods that could be reused:
 .generateColorPalette(n_groups)  # Palette generation
@@ -402,6 +437,7 @@ if (n_categories == 1) {
 ```
 
 **Assessment:**
+
 - ✅ **High maintainability**: Clear structure, well-documented
 - ✅ **DRY principle**: No code duplication observed
 - ✅ **Modular design**: Methods can be tested independently
@@ -416,6 +452,7 @@ if (n_categories == 1) {
 ### ✅ Multi-Level Caching Strategy
 
 **Level 1: Data Hash Caching** [Lines 288-318]
+
 ```r
 .calculateDataHash = function() {
     relevant_vars <- c(groups, counts, facet)
@@ -429,11 +466,13 @@ if (n_categories == 1) {
 ```
 
 **Assessment:**
+
 - ✅ **Efficient**: Only hashes relevant columns (not entire dataset)
 - ✅ **Smart fallback**: serialize() if digest unavailable
 - ✅ **Accurate**: Detects actual data changes, not just metadata
 
 **Level 2: Options Hash Caching** [Lines 320-336]
+
 ```r
 .calculateOptionsHash = function() {
     options_list <- list(
@@ -445,11 +484,13 @@ if (n_categories == 1) {
 ```
 
 **Assessment:**
+
 - ✅ **Comprehensive**: Includes all options that affect output
 - ✅ **Lightweight**: Simple concatenation (fast)
 - ✅ **Accurate**: Detects any option change
 
 **Level 3: Cache Validation** [Lines 339-350]
+
 ```r
 .canUseCache = function() {
     current_data_hash <- private$.calculateDataHash()
@@ -462,11 +503,13 @@ if (n_categories == 1) {
 ```
 
 **Assessment:**
+
 - ✅ **Safe**: Multiple NULL checks prevent errors
 - ✅ **Accurate**: Compares both data and options hashes
 - ✅ **Fast**: Early return if cache invalid
 
 **Level 4: Palette Caching** [Lines 418-451]
+
 ```r
 .generateColorPalette = function(n_groups) {
     # Early return for common cases
@@ -487,11 +530,13 @@ if (n_categories == 1) {
 ```
 
 **Assessment:**
+
 - ✅ **Smart optimization**: Early return for common 2-3 category cases
 - ✅ **Attribute-based tracking**: Uses hash attribute for validation
 - ✅ **Prevents recomputation**: colorRampPalette only called when needed
 
 **Level 5: Plot State Management** [Lines 900-915]
+
 ```r
 state_data <- list(
     data = as.data.frame(plotdata),  # Serialization-safe
@@ -503,6 +548,7 @@ image$setState(state_data)
 ```
 
 **Assessment:**
+
 - ✅ **jamovi-native caching**: Leverages jamovi's built-in state system
 - ✅ **Comprehensive**: Includes all plot-affecting options
 - ✅ **Serialization-safe**: Converts to base data.frame
@@ -510,6 +556,7 @@ image$setState(state_data)
 ### ✅ Performance Optimizations
 
 **Data Preparation Caching** [Lines 352-401]
+
 ```r
 .prepareData = function() {
     current_hash <- private$.calculateDataHash()
@@ -527,11 +574,13 @@ image$setState(state_data)
 ```
 
 **Assessment:**
+
 - ✅ **Avoids redundant work**: Only processes data when changed
 - ✅ **Smart NA handling**: Only removes NAs from relevant columns (lines 379-394)
 - ✅ **Informative**: Reports how many rows removed
 
 **Efficient Data Aggregation** [Lines 606-637]
+
 ```r
 .aggregateData = function(data, groups_var, facet_var = NULL, counts_var = NULL) {
     # Uses dplyr for efficient aggregation
@@ -543,6 +592,7 @@ image$setState(state_data)
 ```
 
 **Assessment:**
+
 - ✅ **dplyr optimization**: Uses compiled C++ backend
 - ✅ **Minimal data**: Aggregates before plotting (not plotting raw data)
 - ✅ **Memory efficient**: Ungroups after aggregation
@@ -550,6 +600,7 @@ image$setState(state_data)
 ### ✅ Scalability Assessment
 
 **Large Dataset Handling** [Lines 500-502]
+
 ```r
 if (nrow(self$data) > 100000) {
     warning("Large dataset detected... Performance may be affected.
@@ -577,6 +628,7 @@ if (nrow(self$data) > 100000) {
 | Hash storage | O(1) | ✅ MD5 hashes are fixed size |
 
 **Assessment:**
+
 - ✅ **Excellent scalability**: Handles clinical datasets (typically n<50,000)
 - ✅ **Memory efficient**: Minimal memory footprint
 - ✅ **Cache effectiveness**: 30-70% performance improvement with caching
@@ -594,6 +646,7 @@ if (nrow(self$data) > 100000) {
 | Plot rendering | O(c × f) | On state change | ✅ State management |
 
 **Assessment:**
+
 - ✅ **Linear scalability**: All operations O(n) or better
 - ✅ **Minimal recomputation**: Cache prevents redundant work
 - ✅ **Optimized libraries**: dplyr, ggplot2 are highly optimized
@@ -607,6 +660,7 @@ if (nrow(self$data) > 100000) {
 ### ✅ Current Strengths
 
 **1. Professional Welcome Message** [Lines 770-802]
+
 ```html
 <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);'>
     <h2>📊 Welcome to Waffle Charts</h2>
@@ -626,12 +680,14 @@ if (nrow(self$data) > 100000) {
 ```
 
 **Assessment:**
+
 - ✅ **Visually appealing**: Gradient background, professional styling
 - ✅ **Clear instructions**: Step-by-step getting started guide
 - ✅ **Clinical context**: Examples relevant to pathologists/oncologists
 - ✅ **Progressive disclosure**: Shows only when no groups selected
 
 **2. Natural Language Summary** [Lines 639-720]
+
 ```r
 summary_text <- sprintf(
     "<b>📊 Waffle Chart Summary:</b><br><br>
@@ -645,12 +701,14 @@ summary_text <- sprintf(
 ```
 
 **Assessment:**
+
 - ✅ **Plain language**: No jargon, accessible to clinicians
 - ✅ **Key findings highlighted**: Dominant category called out
 - ✅ **Copy-ready template**: Can paste directly into clinical reports
 - ✅ **Complete statistics**: Includes percentages and sample sizes
 
 **3. Methodology Explanation** [Lines 722-765]
+
 ```html
 <b>What is a Waffle Chart?</b><br>
 A waffle chart is a visual representation of categorical data...
@@ -660,7 +718,7 @@ A waffle chart is a visual representation of categorical data...
 • Treatment Outcomes: Display response rates...
 
 <b>Statistical Considerations:</b><br>
-• Sample Size: Most effective with n≥30...
+• Sample Size: Most effective with n>=30...
 • Category Balance: Works best when no single category dominates...
 
 <b>Interpretation Guidelines:</b><br>
@@ -668,6 +726,7 @@ A waffle chart is a visual representation of categorical data...
 ```
 
 **Assessment:**
+
 - ✅ **Educational**: Teaches when/how to use waffle charts
 - ✅ **Clinical focus**: Applications relevant to medical research
 - ✅ **Interpretation guidance**: Helps clinicians draw conclusions
@@ -678,6 +737,7 @@ A waffle chart is a visual representation of categorical data...
 **1. Plain-Language Option Labels**
 
 **Current (from .a.yaml):**
+
 ```yaml
 - name: groups
   title: Groups  # ❌ Too generic
@@ -690,6 +750,7 @@ A waffle chart is a visual representation of categorical data...
 ```
 
 **Recommended:**
+
 ```yaml
 - name: groups
   title: Category Variable  # ✅ Clearer purpose
@@ -711,10 +772,12 @@ A waffle chart is a visual representation of categorical data...
 **2. Micro-Explanations in UI (Tooltips)**
 
 **Current:**
+
 - ❌ No `description` fields in .a.yaml for most options
 - ❌ No tooltips explaining what each option does
 
 **Recommended Addition to .a.yaml:**
+
 ```yaml
 - name: color_palette
   title: Color Scheme
@@ -740,6 +803,7 @@ A waffle chart is a visual representation of categorical data...
 **3. Guided Mode / Step-by-Step Wizard**
 
 **Current:**
+
 - ❌ No progressive disclosure of options
 - ❌ No "Quick Start" vs "Advanced" mode
 - ❌ Users see all 12 options at once (overwhelming for beginners)
@@ -747,6 +811,7 @@ A waffle chart is a visual representation of categorical data...
 **Recommended Implementation:**
 
 **Option A: Collapsible Sections in .u.yaml**
+
 ```yaml
 # Basic Options (always visible)
 - type: VariableSupplier
@@ -764,6 +829,7 @@ A waffle chart is a visual representation of categorical data...
 ```
 
 **Option B: Two-Step Workflow**
+
 ```
 Step 1: Select Variables
   [x] Groups: TumorGrade ✓
@@ -786,6 +852,7 @@ Step 2: Customize Appearance (Optional)
 **4. Accessibility Features**
 
 **Current:**
+
 - ❌ No alt-text for plots (screen reader inaccessible)
 - ❌ No ARIA labels for outputs
 - ❌ No keyboard navigation guidance
@@ -793,6 +860,7 @@ Step 2: Customize Appearance (Optional)
 **Recommended:**
 
 **Add alt-text generation in .plot() method:**
+
 ```r
 # Generate descriptive alt-text for accessibility
 alt_text <- sprintf(
@@ -813,10 +881,12 @@ image$setAltText(alt_text)
 **5. Interactive Tooltips on Plot Elements**
 
 **Current:**
+
 - ❌ Static plot (no hover information)
 - ❌ Users must calculate percentages mentally
 
 **Recommended (if jamovi supports plotly):**
+
 ```r
 # Convert to interactive plotly plot
 library(plotly)
@@ -831,10 +901,12 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 **6. Example Interpretations in Outputs**
 
 **Current:**
+
 - ✅ **EXCELLENT**: Report template already present in summary (line 712-714)
 - ✅ **EXCELLENT**: Clinical interpretation provided
 
 **Example (already implemented):**
+
 ```html
 <b>💡 Report Template:</b><br>
 <i>"Distribution analysis revealed Grade 3 as the most frequent category
@@ -842,6 +914,7 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 ```
 
 **Assessment:**
+
 - ✅ **Already implemented**: No changes needed
 - ✅ **Copy-ready**: Clinicians can paste directly into reports
 
@@ -850,10 +923,12 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 **7. Visual Examples in Welcome Message**
 
 **Current:**
+
 - ✅ Text-based clinical examples
 - ❌ No visual preview of what waffle chart looks like
 
 **Recommended:**
+
 ```html
 <h3>📸 Example Output:</h3>
 <img src="data:image/png;base64,..."
@@ -871,9 +946,11 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 **8. Quick Action Buttons**
 
 **Current:**
+
 - ❌ No quick presets for common clinical scenarios
 
 **Recommended:**
+
 ```html
 <h3>⚡ Quick Start Presets:</h3>
 <button onclick="applyPreset('tumorGrade')">
@@ -909,6 +986,7 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 ### Recommended UX Roadmap
 
 **Phase 1: Essential (Before Release)**
+
 1. ✅ Add `description` fields to all .a.yaml options
 2. ✅ Add alt-text generation for plots
 3. ✅ Update option labels to plain language
@@ -929,6 +1007,7 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 **Rating: ⭐⭐⭐☆☆ (3.5/5) - GOOD**
 
 **Justification:**
+
 - ✅ **Strong foundation**: Natural language summary and report templates are excellent
 - ✅ **Educational**: Methodology explanation helps interpretation
 - ❌ **Missing accessibility**: No alt-text for screen readers
@@ -944,6 +1023,7 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 ### 🔴 HIGH Priority (Must Fix Before Release)
 
 **Issue #1: n_squares Calculation Inconsistency**
+
 - **Location:** [R/jwaffle.b.R:460, 482-485]
 - **Problem:** Hardcoded `n_squares = 100` doesn't match actual rendered squares
 - **Impact:** Caption misleading ("Each square ~ X cases" assumes 100 squares)
@@ -951,6 +1031,7 @@ p_interactive <- ggplotly(p, tooltip = c("fill", "values")) %>%
 - **Fix Complexity:** 🟢 Low (10-15 minutes)
 
 **Recommended Fix:**
+
 ```r
 # CURRENT (line 460):
 n_squares <- 100  # ❌ HARDCODED
@@ -974,6 +1055,7 @@ caption_text <- sprintf(
 ```
 
 **Testing:**
+
 ```r
 # Test with different row values
 jwaffle(data = mtcars, groups = "gear", rows = 5)  # Should state 50 squares
@@ -986,6 +1068,7 @@ jwaffle(data = mtcars, groups = "gear", rows = 20) # Should state 200 squares
 ### 🟡 MEDIUM Priority (Should Fix Soon)
 
 **Issue #2: Missing Accessibility Features**
+
 - **Location:** [R/jwaffle.b.R:861-1034] (.plot method)
 - **Problem:** No alt-text for plots (screen reader inaccessible)
 - **Impact:** Violates accessibility guidelines (WCAG 2.1)
@@ -993,6 +1076,7 @@ jwaffle(data = mtcars, groups = "gear", rows = 20) # Should state 200 squares
 - **Fix Complexity:** 🟡 Medium (30-45 minutes)
 
 **Recommended Fix:**
+
 ```r
 # Add to .plot() method after plot generation (line 1030)
 
@@ -1018,6 +1102,7 @@ alt_text <- sprintf(
 ---
 
 **Issue #3: UI Option Descriptions Missing**
+
 - **Location:** [jamovi/jwaffle.a.yaml]
 - **Problem:** Most options lack detailed `description` fields
 - **Impact:** Users unsure what options do (hover tooltips empty)
@@ -1027,6 +1112,7 @@ alt_text <- sprintf(
 **Recommended Fix:**
 
 Add to **jamovi/jwaffle.a.yaml**:
+
 ```yaml
 - name: groups
   title: Category Variable  # ✅ Clearer than "Groups"
@@ -1069,6 +1155,7 @@ Add to **jamovi/jwaffle.a.yaml**:
 ### 🟢 LOW Priority (Future Enhancement)
 
 **Issue #4: Color Palette Names Not Clinically Contextualized**
+
 - **Location:** [R/jwaffle.b.R:431-439]
 - **Problem:** Palette names like "professional", "journal" lack clinical context
 - **Impact:** Minor - Users unsure which to choose
@@ -1076,6 +1163,7 @@ Add to **jamovi/jwaffle.a.yaml**:
 - **Fix Complexity:** 🟢 Very Low (5 minutes)
 
 **Recommended Fix:**
+
 ```r
 # Add comments explaining clinical use cases
 palettes <- list(
@@ -1092,6 +1180,7 @@ palettes <- list(
 ---
 
 **Issue #5: No Visual Preview in Welcome Message**
+
 - **Location:** [R/jwaffle.b.R:770-802]
 - **Problem:** Welcome message is text-only (no example image)
 - **Impact:** Minor - Users can't visualize expected output
@@ -1105,6 +1194,7 @@ palettes <- list(
 ### Priority Test Cases
 
 **Test Suite #1: Mathematical Correctness**
+
 ```r
 library(ClinicoPath)
 
@@ -1136,6 +1226,7 @@ result <- jwaffle(data = test_data, groups = "category", rows = 10)
 ---
 
 **Test Suite #2: Clinical Validation**
+
 ```r
 # Test 4: Small sample warning (n<30)
 small_data <- data.frame(
@@ -1173,6 +1264,7 @@ result <- jwaffle(data = single_cat, groups = "status")
 ---
 
 **Test Suite #3: Data Compatibility**
+
 ```r
 # Test 8: haven_labelled data (SPSS import)
 library(haven)
@@ -1204,6 +1296,7 @@ result <- jwaffle(data = space_data, groups = "Miles Per Gallon")
 ---
 
 **Test Suite #4: Performance & Caching**
+
 ```r
 # Test 11: Cache effectiveness
 large_data <- data.frame(
@@ -1237,6 +1330,7 @@ system.time({
 ---
 
 **Test Suite #5: Output Validation**
+
 ```r
 # Test 13: Summary accuracy
 summary_data <- data.frame(
@@ -1267,6 +1361,7 @@ result <- jwaffle(data = summary_data, groups = "grade",
 ### Automated Test Script
 
 Save as `tests/testthat/test-jwaffle.R`:
+
 ```r
 context("jwaffle function tests")
 
@@ -1312,6 +1407,7 @@ test_that("Data compatibility", {
 ### Before Release (Critical)
 
 1. **Fix n_squares calculation** [Lines 460, 482-485]
+
    ```r
    # Replace hardcoded 100 with calculated value
    n_cols <- 10
@@ -1319,6 +1415,7 @@ test_that("Data compatibility", {
    ```
 
 2. **Add accessibility alt-text** [Line ~1030]
+
    ```r
    # Generate and set alt-text for plots
    alt_text <- sprintf("Waffle chart: %s distribution...", groups_var)
@@ -1326,6 +1423,7 @@ test_that("Data compatibility", {
    ```
 
 3. **Add UI option descriptions** [jamovi/jwaffle.a.yaml]
+
    ```yaml
    # Add description fields to all options for tooltips
    description:
@@ -1338,10 +1436,10 @@ test_that("Data compatibility", {
 
 ### Post-Release Enhancements (Optional)
 
-5. **Add collapsible "Advanced Options"** in .u.yaml
-6. **Add visual preview** to welcome message (base64 image)
-7. **Default to colorblind palette** (change default from "default" to "colorblind")
-8. **Add quick-start presets** for common clinical scenarios
+1. **Add collapsible "Advanced Options"** in .u.yaml
+2. **Add visual preview** to welcome message (base64 image)
+3. **Default to colorblind palette** (change default from "default" to "colorblind")
+4. **Add quick-start presets** for common clinical scenarios
 
 ---
 
@@ -1374,6 +1472,7 @@ The `jwaffle` function demonstrates **exceptional code quality** with sophistica
 **Clinical Safety:** 🟢 **SAFE** - After fixing n_squares issue, safe for pathology/oncology reports
 
 **Recommended Action:**
+
 1. Fix n_squares calculation (15 minutes)
 2. Add alt-text (30 minutes)
 3. Add UI descriptions (20 minutes)

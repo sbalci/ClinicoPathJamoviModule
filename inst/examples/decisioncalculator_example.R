@@ -17,10 +17,10 @@ library(ClinicoPath)
 # Data: 200 patients, culture as gold standard
 
 decisioncalculator(
-  TP = 85,   # True Positives
-  TN = 90,   # True Negatives
-  FP = 10,   # False Positives
-  FN = 15    # False Negatives
+  TP = 85, # True Positives
+  TN = 90, # True Negatives
+  FP = 10, # False Positives
+  FN = 15 # False Negatives
 )
 
 # Clinical Interpretation:
@@ -41,7 +41,7 @@ decisioncalculator(
   TN = 90,
   FP = 10,
   FN = 15,
-  ci = TRUE      # Calculate 95% confidence intervals
+  ci = TRUE # Calculate 95% confidence intervals
 )
 
 # Clinical Interpretation:
@@ -62,9 +62,9 @@ decisioncalculator(
   TN = 808,
   FP = 142,
   FN = 5,
-  pp = TRUE,          # Use known population prevalence
-  pprob = 0.005,      # 0.5% prevalence in screening population
-  fagan = TRUE        # Generate Fagan nomogram
+  pp = TRUE, # Use known population prevalence
+  pprob = 0.005, # 0.5% prevalence in screening population
+  fagan = TRUE # Generate Fagan nomogram
 )
 
 # Clinical Interpretation:
@@ -82,8 +82,8 @@ decisioncalculator(
 # Strategy: Accept more false positives to avoid missing cases
 
 decisioncalculator(
-  TP = 95,    # High sensitivity (95%)
-  TN = 150,   # Moderate specificity (75%)
+  TP = 95, # High sensitivity (95%)
+  TN = 150, # Moderate specificity (75%)
   FP = 50,
   FN = 5,
   ci = TRUE,
@@ -107,8 +107,8 @@ decisioncalculator(
 # Strategy: Minimize false positives, accept some false negatives
 
 decisioncalculator(
-  TP = 85,    # Moderate sensitivity (85%)
-  TN = 195,   # Very high specificity (97.5%)
+  TP = 85, # Moderate sensitivity (85%)
+  TN = 195, # Very high specificity (97.5%)
   FP = 5,
   FN = 15,
   ci = TRUE,
@@ -126,39 +126,37 @@ decisioncalculator(
 # ═══════════════════════════════════════════════════════════════════════════════
 #
 # Clinical Context: PSA testing for prostate cancer
-# Question: Should we use PSA ≥4 (standard) or PSA ≥2.5 (aggressive)?
+# Question: Should we use PSA >=4 (standard) or PSA >=2.5 (aggressive)?
 # Analysis: Compare sensitivity/specificity trade-offs
 
 decisioncalculator(
-  # Current cut-off (PSA ≥4)
+  # Current cut-off (PSA >=4)
   TP = 85,
   TN = 180,
   FP = 20,
   FN = 15,
-
   multiplecuts = TRUE,
 
-  # Alternative cut-off 1: Conservative (PSA ≥10)
-  cutoff1 = "Conservative (≥10)",
+  # Alternative cut-off 1: Conservative (PSA >=10)
+  cutoff1 = "Conservative (>=10)",
   tp1 = 65,
   tn1 = 195,
   fp1 = 5,
   fn1 = 35,
 
-  # Alternative cut-off 2: Aggressive (PSA ≥2.5)
-  cutoff2 = "Aggressive (≥2.5)",
+  # Alternative cut-off 2: Aggressive (PSA >=2.5)
+  cutoff2 = "Aggressive (>=2.5)",
   tp2 = 95,
   tn2 = 160,
   fp2 = 40,
   fn2 = 5,
-
   ci = TRUE
 )
 
 # Clinical Interpretation:
-# - Conservative (≥10): High specificity, low sensitivity (few biopsies, miss cases)
-# - Standard (≥4): Balanced (current guideline)
-# - Aggressive (≥2.5): High sensitivity, low specificity (more biopsies, fewer missed)
+# - Conservative (>=10): High specificity, low sensitivity (few biopsies, miss cases)
+# - Standard (>=4): Balanced (current guideline)
+# - Aggressive (>=2.5): High sensitivity, low specificity (more biopsies, fewer missed)
 # - Choice depends on: Patient preferences, biopsy risks, disease severity
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -205,7 +203,7 @@ decisioncalculator(
   FN = decisioncalculator_raredisease$FN,
   ci = TRUE,
   pp = TRUE,
-  pprob = 0.001,   # 1:1000 prevalence
+  pprob = 0.001, # 1:1000 prevalence
   fagan = TRUE,
   showSummary = TRUE,
   showGlossary = TRUE
@@ -415,7 +413,7 @@ confirmatory_result <- decisioncalculator(
   FP = 20,
   FN = 5,
   pp = TRUE,
-  pprob = 0.06,  # Enriched population after screening
+  pprob = 0.06, # Enriched population after screening
   fagan = TRUE,
   showSummary = TRUE
 )
@@ -582,7 +580,7 @@ decisioncalculator(
   FN = 15,
   ci = TRUE,
   pp = TRUE,
-  pprob = 0.20,  # Pre-test probability
+  pprob = 0.20, # Pre-test probability
   fagan = TRUE,
   showSummary = TRUE,
   showGlossary = TRUE

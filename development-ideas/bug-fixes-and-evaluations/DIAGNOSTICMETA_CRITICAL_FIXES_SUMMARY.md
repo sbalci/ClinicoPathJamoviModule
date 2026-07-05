@@ -20,6 +20,7 @@ Three critical mathematical errors were identified and corrected that would have
 **Location:** `R/diagnosticmeta.b.R:1068-1074` (OLD)
 
 **OLD CODE (BROKEN):**
+
 ```r
 # Get summary point from bivariate model
 summary_results <- summary(biv_model)
@@ -29,11 +30,13 @@ sum_fpr <- 1 - sum_spec
 ```
 
 **Why broken:**
+
 - `summary(reitsma)$coefficients` already contains **probabilities** (sensitivity and false positive rate)
 - Applying `plogis()` treats them as **logits**, transforming them again
 - Example: 0.85 sensitivity → `plogis(0.85)` = 0.701 (pushed toward center)
 
 **NEW CODE (FIXED):**
+
 ```r
 # CRITICAL FIX: Get summary point from bivariate model
 # summary(reitsma)$coefficients already contains PROBABILITIES (sensitivity, specificity)
@@ -47,6 +50,7 @@ sum_fpr <- summary_results$coefficients[2,1]  # Use FPR directly
 **Fix:** `R/diagnosticmeta.b.R:1068-1074`
 
 **Mathematical Validation:**
+
 - Pooled sensitivity now matches the Reitsma model output directly
 - SROC summary triangle displays at the correct position
 - No artificial compression toward (0.5, 0.5)
@@ -62,6 +66,7 @@ sum_fpr <- summary_results$coefficients[2,1]  # Use FPR directly
 **Location:** `R/diagnosticmeta.b.R:929-942` (OLD)
 
 **OLD CODE (BROKEN):**
+
 ```r
 analysis_data$n_total <- analysis_data$tp + analysis_data$fp +
                           analysis_data$fn + analysis_data$tn  # ❌ ARITHMETIC TOTAL
@@ -76,6 +81,7 @@ deeks_test <- metafor::rma(yi = log_dor, vi = se_log_dor^2,
 ```
 
 **Why broken:**
+
 - Deeks' method specifies: `ESS = 4 / (1/TP + 1/FN + 1/FP + 1/TN)` (harmonic mean)
 - Arithmetic total overweights studies with large but imbalanced cell counts
 - Example: Study with TP=1000, FP=10, FN=1000, TN=10
@@ -84,6 +90,7 @@ deeks_test <- metafor::rma(yi = log_dor, vi = se_log_dor^2,
   - Using arithmetic gives wrong weight to this study in regression
 
 **NEW CODE (FIXED):**
+
 ```r
 # CRITICAL FIX: Use effective sample size (ESS) for Deeks' test
 # Deeks' method requires ESS = 4/(1/TP + 1/FN + 1/FP + 1/TN) - the harmonic mean
@@ -104,6 +111,7 @@ deeks_test <- metafor::rma(yi = log_dor, vi = se_log_dor^2,
 **Fix:** `R/diagnosticmeta.b.R:929-942`
 
 **Mathematical Validation:**
+
 - ESS correctly down-weights studies with sparse cells
 - Matches published Deeks test methodology (Deeks et al., 2005)
 - Regression slope now accurately reflects funnel asymmetry
@@ -119,6 +127,7 @@ deeks_test <- metafor::rma(yi = log_dor, vi = se_log_dor^2,
 **Location:** `R/diagnosticmeta.b.R:465-479` (OLD)
 
 **OLD CODE (BROKEN):**
+
 ```r
 # Extract I² values from the i2 data frame
 sens_i2 <- NA_real_
@@ -138,11 +147,13 @@ if (!is.null(summary_results$i2) && is.data.frame(summary_results$i2)) {
 ```
 
 **Why broken:**
+
 - mada returns separate rows for `tsens` (sensitivity) and `tfpr` (false positive rate)
 - Code only used first row `[1]`, assigning same value to both dimensions
 - Discarded dimension-specific information critical for heterogeneity assessment
 
 **NEW CODE (FIXED):**
+
 ```r
 # CRITICAL FIX: Extract dimension-specific I² values
 # mada returns separate I² estimates for sensitivity (tsens) and specificity (tfpr)
@@ -188,6 +199,7 @@ if (!is.null(summary_results$i2) && is.data.frame(summary_results$i2)) {
 **Fix:** `R/diagnosticmeta.b.R:465-503`
 
 **Mathematical Validation:**
+
 - Now uses row names (`tsens`, `tfpr`) to extract correct dimension-specific I²
 - Fallback to positional indexing if row names unavailable
 - Sensitivity and specificity heterogeneity reported independently
@@ -203,11 +215,12 @@ if (!is.null(summary_results$i2) && is.data.frame(summary_results$i2)) {
 **New Test File:** `tests/testthat/test-diagnosticmeta-critical-fixes.R` (400+ lines)
 
 **Test Coverage:**
+
 1. ✅ SROC pooled point uses probabilities directly (no double plogis)
 2. ✅ Deeks' test uses effective sample size (ESS) not arithmetic total
 3. ✅ I² heterogeneity values are dimension-specific
 4. ✅ Effective sample size calculation is mathematically correct
-5. ✅ Minimum study count requirements (≥3 studies)
+5. ✅ Minimum study count requirements (>=3 studies)
 6. ✅ Zero cells handling
 7. ✅ Pooled estimates within valid probability range
 8. ✅ Meta-regression with continuous covariate
@@ -216,6 +229,7 @@ if (!is.null(summary_results$i2) && is.data.frame(summary_results$i2)) {
 11. ✅ Confidence level parameter affects CI width
 
 **Example Test:**
+
 ```r
 test_that("Effective sample size calculation is mathematically correct", {
     # Known test case: balanced 2x2 table
@@ -295,6 +309,7 @@ Rscript -e "jmvtools::prepare()"
 ### ✅ Mathematical Soundness
 
 All fixes align with published diagnostic meta-analysis methodology:
+
 - ✅ SROC coordinates match Reitsma bivariate model (Reitsma et al., 2005)
 - ✅ Deeks' test uses correct ESS specification (Deeks et al., 2005)
 - ✅ I² heterogeneity dimension-specific (Higgins & Thompson, 2002)

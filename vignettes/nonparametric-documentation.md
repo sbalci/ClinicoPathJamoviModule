@@ -1,4 +1,4 @@
-# Non-Parametric Statistical Methods (`nonparametric`) -- Developer Documentation
+# Non-Parametric Statistical Methods (`nonparametric`) - Developer Documentation
 
 **Function:** `nonparametric`
 **Version:** 0.0.31
@@ -154,7 +154,7 @@ Comprehensive non-parametric statistical analysis module supporting 12 test type
 
 | # | Name | Type | Default | Range | Downstream |
 |---|------|------|---------|-------|------------|
-| 1 | `data` | Data | -- | -- | All computations |
+| 1 | `data` | Data | - | - | All computations |
 | 2 | `deps` | Variables | null | numeric | Multi-variable loop in `.run()` |
 | 3 | `outcome` | Variable | null | numeric | Single-variable fallback |
 | 4 | `groups` | Variable | null | factor | Group splitting, all tests |
@@ -171,16 +171,16 @@ Comprehensive non-parametric statistical analysis module supporting 12 test type
 
 | # | Name | Type | Default | Range | Downstream |
 |---|------|------|---------|-------|------------|
-| 8 | `effect_size` | Bool | `true` | -- | Gates `effectsizes` table, effect plots |
+| 8 | `effect_size` | Bool | `true` | - | Gates `effectsizes` table, effect plots |
 | 9 | `effect_size_method` | List | `eta_squared` | 9 methods | `.calculateMainEffectSize()` dispatch |
-| 10 | `confidence_intervals` | Bool | `true` | -- | Bootstrap CI in Cliff's Delta |
+| 10 | `confidence_intervals` | Bool | `true` | - | Bootstrap CI in Cliff's Delta |
 | 11 | `confidence_level` | Number | `0.95` | 0.50-0.99 | CI width everywhere |
 
 ### Post-Hoc Options (4)
 
 | # | Name | Type | Default | Values | Downstream |
 |---|------|------|---------|--------|------------|
-| 12 | `post_hoc` | Bool | `true` | -- | Gates `posthoc` table |
+| 12 | `post_hoc` | Bool | `true` | - | Gates `posthoc` table |
 | 13 | `post_hoc_method` | List | `dunn` | dunn, conover, steel_dwass, nemenyi, pairwise_wilcoxon, games_howell, dscf | `.runPostHocTest()` |
 | 14 | `p_adjustment` | List | `holm` | none, bonferroni, holm, hochberg, BH, BY | `p.adjust()` method |
 | 15 | `globalTestCount` | Integer | `1` | 1-1000 | Multiplies all reported p-values |
@@ -197,16 +197,16 @@ Comprehensive non-parametric statistical analysis module supporting 12 test type
 
 | # | Name | Type | Default | Range | Downstream |
 |---|------|------|---------|-------|------------|
-| 19 | `bootstrap_ci` | Bool | `false` | -- | Triggers bootstrap in Cliff's Delta CI |
+| 19 | `bootstrap_ci` | Bool | `false` | - | Triggers bootstrap in Cliff's Delta CI |
 | 20 | `bootstrap_samples` | Integer | `1000` | 100-10000 | Number of resamples |
 
 ### Assumption Testing (4)
 
 | # | Name | Type | Default | Values | Downstream |
 |---|------|------|---------|--------|------------|
-| 21 | `test_assumptions` | Bool | `true` | -- | Gates `assumptions` table |
-| 22 | `normality_tests` | Bool | `true` | -- | Gates `normality` table |
-| 23 | `assumption_checks` | Bool | `true` | -- | Gates `assumptions` table (OR with `test_assumptions`) |
+| 21 | `test_assumptions` | Bool | `true` | - | Gates `assumptions` table |
+| 22 | `normality_tests` | Bool | `true` | - | Gates `normality` table |
+| 23 | `assumption_checks` | Bool | `true` | - | Gates `assumptions` table (OR with `test_assumptions`) |
 | 24 | `homogeneity_test` | List | `levene` | levene, brown_forsythe, fligner, bartlett | Variance homogeneity test selection |
 
 ### Advanced Test Options (5)
@@ -261,7 +261,7 @@ Comprehensive non-parametric statistical analysis module supporting 12 test type
 
 | # | Name | Type | Default | Range | Downstream |
 |---|------|------|---------|-------|------------|
-| 48 | `set_seed` | Bool | `true` | -- | `set.seed()` in `.run()` |
+| 48 | `set_seed` | Bool | `true` | - | `set.seed()` in `.run()` |
 | 49 | `seed_value` | Integer | `42` | 1-999999 | Seed value |
 
 ### Advanced Clinical (5)
@@ -272,8 +272,8 @@ Comprehensive non-parametric statistical analysis module supporting 12 test type
 | 51 | `alpha_level` | Number | `0.05` | 0.001-0.10 | All significance tests |
 | 52 | `minimum_sample_size` | Integer | `5` | 3-20 | Data validation warnings |
 | 53 | `outlier_method` | List | `iqr` | none, iqr, modified_zscore, tukey, hampel | `.detectOutliers()`, outlier count |
-| 54 | `small_sample_exact` | Bool | `true` | -- | Auto exact when n<20 |
-| 55 | `report_standardized_statistics` | Bool | `false` | -- | Z-score from p-value added as note |
+| 54 | `small_sample_exact` | Bool | `true` | - | Auto exact when n<20 |
+| 55 | `report_standardized_statistics` | Bool | `false` | - | Z-score from p-value added as note |
 
 *(Total: 55 option entries including `data`)*
 
@@ -328,8 +328,8 @@ set.seed() -> hasRequiredVars() -> FOR EACH dep_var:
 | `kruskal_wallis` | `kruskal.test(outcome ~ groups)` | deps/outcome + groups | 2+ groups |
 | `wilcoxon_signed` | `wilcox.test(paired=TRUE)` | deps/outcome + groups | 2 groups; paired_variable recommended |
 | `friedman` | `friedman.test()` | deps/outcome + groups + blocking_variable | blocking required |
-| `median_test` | `chisq.test()` on above/below median | deps/outcome + groups | -- |
-| `van_der_waerden` | Custom normal-scores chi-sq | deps/outcome + groups | -- |
+| `median_test` | `chisq.test()` on above/below median | deps/outcome + groups | - |
+| `van_der_waerden` | Custom normal-scores chi-sq | deps/outcome + groups | - |
 | `mood_median` | `chisq.test()` or `fisher.test()` | deps/outcome + groups | Fisher for small expected counts |
 | `cochran_q` | `DescTools::CochranQTest()` | deps/outcome + groups + blocking/paired | Binary outcomes |
 | `page_trend` | `DescTools::PageTest()` | deps/outcome + groups + blocking/paired | Ordered groups |
@@ -601,12 +601,12 @@ sequenceDiagram
 
 ### Dual-role Options (gate both visibility AND computation)
 
-- `show_robust_statistics` -- controls both `robustStatistics` table visibility and whether `.calculateRobustStatistics()` runs
-- `show_power_analysis` -- controls both `powerAnalysis` table visibility and whether `.performPowerAnalysis()` runs
-- `effect_size` -- controls both effect size tables/plots visibility and whether `.calculateEffectSizes()` runs
-- `post_hoc` -- controls both `posthoc` table visibility and whether `.performPostHocTests()` runs
-- `normality_tests` -- controls both `normality` table visibility and whether `.populateNormality()` runs
-- `test_assumptions` / `assumption_checks` -- controls both `assumptions` table visibility and whether `.populateAssumptions()` runs
+- `show_robust_statistics` - controls both `robustStatistics` table visibility and whether `.calculateRobustStatistics()` runs
+- `show_power_analysis` - controls both `powerAnalysis` table visibility and whether `.performPowerAnalysis()` runs
+- `effect_size` - controls both effect size tables/plots visibility and whether `.calculateEffectSizes()` runs
+- `post_hoc` - controls both `posthoc` table visibility and whether `.performPostHocTests()` runs
+- `normality_tests` - controls both `normality` table visibility and whether `.populateNormality()` runs
+- `test_assumptions` / `assumption_checks` - controls both `assumptions` table visibility and whether `.populateAssumptions()` runs
 
 ---
 
@@ -687,10 +687,10 @@ nonparametric(
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `group` | Group | text | -- |
-| `n` | N | integer | -- |
-| `missing` | Missing | integer | -- |
+| `variable` | Variable | text | - |
+| `group` | Group | text | - |
+| `n` | N | integer | - |
+| `missing` | Missing | integer | - |
 | `median` | Median | number | zto |
 | `q1` | Q1 | number | zto |
 | `q3` | Q3 | number | zto |
@@ -701,85 +701,85 @@ nonparametric(
 | `min` | Min | number | zto |
 | `max` | Max | number | zto |
 | `mean_rank` | Mean Rank | number | zto |
-| `outliers` | Outliers | integer | -- |
+| `outliers` | Outliers | integer | - |
 
 ### normality (8 columns)
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `group` | Group | text | -- |
-| `test` | Test | text | -- |
+| `variable` | Variable | text | - |
+| `group` | Group | text | - |
+| `test` | Test | text | - |
 | `statistic` | Statistic | number | zto |
-| `df` | df | integer | -- |
+| `df` | df | integer | - |
 | `p` | p-value | number | zto,pvalue |
-| `conclusion` | Conclusion | text | -- |
-| `recommendation` | Recommendation | text | -- |
+| `conclusion` | Conclusion | text | - |
+| `recommendation` | Recommendation | text | - |
 
 ### assumptions (10 columns)
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `assumption` | Assumption | text | -- |
-| `test` | Test | text | -- |
+| `variable` | Variable | text | - |
+| `assumption` | Assumption | text | - |
+| `test` | Test | text | - |
 | `statistic` | Statistic | number | zto |
-| `df` | df | integer | -- |
+| `df` | df | integer | - |
 | `p` | p-value | number | zto,pvalue |
-| `result` | Result | text | -- |
-| `assessment` | Assessment | text | -- |
-| `implication` | Implication | text | -- |
-| `recommendation` | Recommendation | text | -- |
+| `result` | Result | text | - |
+| `assessment` | Assessment | text | - |
+| `implication` | Implication | text | - |
+| `recommendation` | Recommendation | text | - |
 
 ### tests (10 columns)
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `test` | Test | text | -- |
+| `variable` | Variable | text | - |
+| `test` | Test | text | - |
 | `statistic` | Statistic | number | zto |
-| `df` | df | integer | -- |
+| `df` | df | integer | - |
 | `p` | p-value | number | zto,pvalue |
 | `effect_size` | Effect Size | number | zto |
-| `effect_measure` | Measure | text | -- |
+| `effect_measure` | Measure | text | - |
 | `effect_ci_lower` | Lower CI | number | zto |
 | `effect_ci_upper` | Upper CI | number | zto |
-| `interpretation` | Statistical Interpretation | text | -- |
+| `interpretation` | Statistical Interpretation | text | - |
 
 ### effectsizes (8 columns)
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `measure` | Effect Size Measure | text | -- |
+| `variable` | Variable | text | - |
+| `measure` | Effect Size Measure | text | - |
 | `value` | Value | number | zto |
 | `ci_lower` | Lower CI | number | zto |
 | `ci_upper` | Upper CI | number | zto |
-| `magnitude` | Magnitude | text | -- |
-| `interpretation` | Interpretation | text | -- |
-| `clinical_relevance` | Clinical Relevance | text | -- |
+| `magnitude` | Magnitude | text | - |
+| `interpretation` | Interpretation | text | - |
+| `clinical_relevance` | Clinical Relevance | text | - |
 
 ### posthoc (10 columns)
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `comparison` | Comparison | text | -- |
+| `variable` | Variable | text | - |
+| `comparison` | Comparison | text | - |
 | `statistic` | Test Statistic | number | zto |
 | `p_raw` | p (raw) | number | zto,pvalue |
 | `p_adjusted` | p (adjusted) | number | zto,pvalue |
 | `effect_size` | Effect Size | number | zto |
 | `effect_ci_lower` | Effect Size CI Lower | number | zto |
 | `effect_ci_upper` | Effect Size CI Upper | number | zto |
-| `significance` | Significance | text | -- |
-| `interpretation` | Interpretation | text | -- |
+| `significance` | Significance | text | - |
+| `interpretation` | Interpretation | text | - |
 
 ### robustStatistics (8 columns)
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `group` | Group | text | -- |
+| `variable` | Variable | text | - |
+| `group` | Group | text | - |
 | `trimmed_mean` | Trimmed Mean | number | zto |
 | `winsorized_mean` | Winsorized Mean | number | zto |
 | `hodges_lehmann` | Hodges-Lehmann | number | zto |
@@ -791,12 +791,12 @@ nonparametric(
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `variable` | Variable | text | -- |
-| `comparison` | Comparison | text | -- |
+| `variable` | Variable | text | - |
+| `comparison` | Comparison | text | - |
 | `observed_effect` | Observed Effect | number | zto |
 | `power` | Achieved Power | number | zto |
-| `required_n` | Required N (80% power) | integer | -- |
-| `power_interpretation` | Power Assessment | text | -- |
+| `required_n` | Required N (80% power) | integer | - |
+| `power_interpretation` | Power Assessment | text | - |
 
 ### Effect Size Magnitude Thresholds (from `.interpretEffectSizeMagnitude()`)
 

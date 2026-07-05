@@ -1006,4 +1006,309 @@ setup_parallel_processing <- function(enabled = FALSE, max_workers = 4) {
   }
 }
 
+# =============================================================================
+# Dependency reconciliation (P0.2) and distribution coverage (P1.6) checks
+# -----------------------------------------------------------------------------
+# Rationale: the distributed submodule DESCRIPTIONs are hand-maintained and the
+# existing NAMESPACE->DESCRIPTION sync (sync_namespace_with_description) is driven
+# by the NAMESPACE file, which only records roxygen @import/@importFrom directives.
+# It therefore CANNOT see `pkg::fun()`-style namespaced calls. Real defects have
+# shipped this way: jsurvival used cmprsk::cuminc() (hard crash) and meddecide used
+# vcd::Kappa()/lme4::lmer() (silent statistical degradation / dead feature) while
+# those packages were absent from the submodule Imports. jamovi installs only a
+# submodule's Imports, so end users crashed even though the umbrella was fine.
+#
+# check_module_dependencies() closes that gap: it parses each distributed R file
+# and extracts the ACTUAL package usages (SYMBOL_PACKAGE tokens from the R parser,
+# which ignores mentions inside comments/strings), then asserts every used package
+# is declared in that submodule's DESCRIPTION. Packages that are referenced only
+# behind a requireNamespace() guard are reported as WARNINGS (they degrade
+# gracefully and may legitimately live in Suggests); unguarded-and-undeclared
+# packages are ERRORS (they crash on a clean install).
+# =============================================================================
+
+# Base + recommended packages ship with every R install and never need declaring.
+get_base_recommended_packages <- function() {
+  fallback <- c("base", "boot", "class", "cluster", "codetools", "compiler",
+                "datasets", "foreign", "graphics", "grDevices", "grid",
+                "KernSmooth", "lattice", "MASS", "Matrix", "methods", "mgcv",
+                "nlme", "nnet", "parallel", "rpart", "spatial", "splines",
+                "stats", "stats4", "survival", "tcltk", "tools", "utils")
+  out <- tryCatch({
+    ip <- utils::installed.packages()
+    prio <- ip[, "Priority"]
+    base_rec <- rownames(ip)[!is.na(prio) & prio %in% c("base", "recommended")]
+    unique(c(fallback, base_rec))
+  }, error = function(e) fallback)
+  out
+}
+
+# Extract packages actually referenced in R source via `pkg::` / `pkg:::` (robust:
+# uses the R parser, so `pkg::x` inside a comment or string is NOT counted) plus
+# the set of packages named inside a requireNamespace("pkg") guard.
+scan_r_package_usage <- function(r_dir) {
+  used <- character(0)
+  guarded <- character(0)
+  if (!dir.exists(r_dir)) return(list(used = used, guarded = guarded))
+
+  r_files <- list.files(r_dir, pattern = "\\.[Rr]$", full.names = TRUE)
+  for (f in r_files) {
+    parsed <- tryCatch(parse(f, keep.source = TRUE), error = function(e) NULL)
+    if (!is.null(parsed)) {
+      pd <- tryCatch(utils::getParseData(parsed), error = function(e) NULL)
+      if (!is.null(pd) && nrow(pd) > 0) {
+        pkgs <- pd$text[pd$token == "SYMBOL_PACKAGE"]
+        used <- c(used, pkgs)
+      }
+    }
+    # requireNamespace("pkg") / requireNamespace('pkg') guards (raw-text scan is
+    # adequate here: this only downgrades ERROR -> WARNING, never the reverse).
+    lines <- tryCatch(readLines(f, warn = FALSE), error = function(e) character(0))
+    g <- regmatches(lines, gregexpr("requireNamespace\\(\\s*[\"']([A-Za-z0-9.]+)[\"']", lines))
+    g <- unlist(g)
+    if (length(g) > 0) {
+      g <- sub("requireNamespace\\(\\s*[\"']([A-Za-z0-9.]+)[\"'].*", "\\1", g)
+      guarded <- c(guarded, g)
+    }
+  }
+  list(used = unique(used), guarded = unique(guarded))
+}
+
+# Packages declared in a DESCRIPTION (Imports + Depends + Suggests), version-stripped.
+get_declared_packages <- function(desc_file) {
+  if (!file.exists(desc_file)) return(character(0))
+  dcf <- tryCatch(read.dcf(desc_file), error = function(e) NULL)
+  if (is.null(dcf)) return(character(0))
+  fields <- intersect(c("Imports", "Depends", "Suggests"), colnames(dcf))
+  vals <- unlist(lapply(fields, function(fld) dcf[1, fld]))
+  vals <- vals[!is.na(vals)]
+  if (length(vals) == 0) return(character(0))
+  toks <- unlist(strsplit(paste(vals, collapse = ","), ","))
+  toks <- trimws(gsub("\\s*\\([^)]*\\)", "", toks))   # drop version specs
+  toks <- toks[nchar(toks) > 0 & toks != "R"]
+  unique(toks)
+}
+
+# Recursive Depends/Imports/LinkingTo closure of a set of packages, using the
+# LOCAL installed-package DB (no internet). A package pulled in transitively is
+# installed on the user's machine even if the submodule doesn't declare it, so
+# `pkg::` against it won't crash -- but it should still be declared directly
+# (R CMD check flags it), hence "hygiene" rather than "crash".
+get_transitive_dependencies <- function(declared) {
+  if (length(declared) == 0) return(character(0))
+  tryCatch({
+    db <- utils::installed.packages()
+    deps <- tools::package_dependencies(declared, db = db, recursive = TRUE,
+                                        which = c("Depends", "Imports", "LinkingTo"))
+    unique(unlist(deps, use.names = FALSE))
+  }, error = function(e) character(0))
+}
+
+# Check a single module directory. Returns list with three severities:
+#   errors  = used via pkg::, undeclared, unguarded, AND not transitively available -> CRASH
+#   hygiene = used via pkg::, undeclared, but transitively available -> should declare directly
+#   warnings= used only behind requireNamespace(), undeclared -> should be in Suggests
+check_module_dependencies <- function(module_dir, module_name = basename(module_dir),
+                                       base_recommended = get_base_recommended_packages()) {
+  r_dir <- file.path(module_dir, "R")
+  desc_file <- file.path(module_dir, "DESCRIPTION")
+
+  usage <- scan_r_package_usage(r_dir)
+  declared <- get_declared_packages(desc_file)
+
+  # A module never needs to declare itself or base/recommended packages.
+  ignore <- unique(c(base_recommended, module_name))
+  transitive <- get_transitive_dependencies(declared)
+
+  undeclared <- setdiff(usage$used, c(declared, ignore))
+
+  # Split undeclared into guarded (optional -> Suggests) vs unguarded (required).
+  undeclared_guarded   <- intersect(undeclared, usage$guarded)
+  undeclared_unguarded <- setdiff(undeclared, usage$guarded)
+
+  # Among required-but-undeclared: transitively available is a hygiene issue;
+  # genuinely absent is a hard crash.
+  hygiene <- intersect(undeclared_unguarded, transitive)
+  errors  <- setdiff(undeclared_unguarded, transitive)
+
+  list(module = module_name,
+       errors = sort(errors),
+       hygiene = sort(hygiene),
+       warnings = sort(undeclared_guarded),
+       used = usage$used)
+}
+
+# Aggregate check across modules. `module_specs` is a named list: name -> dir.
+# Prints a report and stop()s if any module has unguarded-undeclared packages.
+check_all_modules_dependencies <- function(module_specs, fail_on_error = TRUE) {
+  cat("\n🔎 Reconciling submodule dependencies (pkg:: usage vs DESCRIPTION)...\n")
+  base_rec <- get_base_recommended_packages()
+  any_errors <- FALSE
+
+  for (nm in names(module_specs)) {
+    dir <- module_specs[[nm]]
+    if (is.null(dir) || !dir.exists(dir)) {
+      cat("  ⏭️  ", nm, ": directory not found, skipping\n", sep = "")
+      next
+    }
+    res <- check_module_dependencies(dir, nm, base_rec)
+    if (length(res$errors) == 0 && length(res$hygiene) == 0 && length(res$warnings) == 0) {
+      cat("  ✅ ", nm, ": all used packages declared\n", sep = "")
+    }
+    if (length(res$warnings) > 0) {
+      cat("  ⚠️  ", nm, ": used behind requireNamespace() but NOT declared (add to Suggests): ",
+          paste(res$warnings, collapse = ", "), "\n", sep = "")
+    }
+    if (length(res$hygiene) > 0) {
+      cat("  ⚠️  ", nm, ": used via pkg:: and only transitively available -- declare directly (R CMD check): ",
+          paste(res$hygiene, collapse = ", "), "\n", sep = "")
+    }
+    if (length(res$errors) > 0) {
+      any_errors <- TRUE
+      cat("  ❌ ", nm, ": used via pkg:: but NOT declared and NOT available (WILL CRASH on install): ",
+          paste(res$errors, collapse = ", "), "\n", sep = "")
+    }
+  }
+
+  if (any_errors && fail_on_error) {
+    stop("❌ Dependency reconciliation failed: one or more submodules use packages ",
+         "via `pkg::` that are not declared in their DESCRIPTION Imports. Add the ",
+         "packages listed above to the relevant submodule DESCRIPTION and re-run.")
+  }
+  invisible(!any_errors)
+}
+
+# -----------------------------------------------------------------------------
+# Distribution coverage (P1.6): assert every production analysis is routed to
+# exactly one submodule; surface analyses that route nowhere or to >1 module,
+# and analyses parked in dev/test (…T) or undistributed (…D) buckets. This is a
+# REPORT by default (warn, not stop) because the …D staging convention legitimately
+# leaves many analyses umbrella-only; set fail_on_gap=TRUE to harden a release build.
+# -----------------------------------------------------------------------------
+check_distribution_coverage <- function(all_analyses, module_modules,
+                                        fail_on_gap = FALSE) {
+  cat("\n🗺️  Checking distribution coverage (analysis -> submodule routing)...\n")
+  all_analyses <- unique(all_analyses)
+
+  # Which module(s) claim each analysis
+  claim_count <- setNames(integer(length(all_analyses)), all_analyses)
+  duplicates <- list()
+  for (nm in names(module_modules)) {
+    claimed <- intersect(module_modules[[nm]], all_analyses)
+    for (a in claimed) claim_count[[a]] <- claim_count[[a]] + 1L
+  }
+  distributed <- names(claim_count)[claim_count >= 1L]
+  unrouted <- names(claim_count)[claim_count == 0L]
+  multi <- names(claim_count)[claim_count >= 2L]
+
+  cat("  📊 ", length(distributed), "/", length(all_analyses),
+      " production analyses routed to a submodule\n", sep = "")
+
+  if (length(multi) > 0) {
+    for (a in multi) {
+      owners <- names(module_modules)[vapply(module_modules,
+                                             function(v) a %in% v, logical(1))]
+      cat("  ❗ '", a, "' routed to MULTIPLE submodules: ",
+          paste(owners, collapse = ", "), "\n", sep = "")
+    }
+  }
+  if (length(unrouted) > 0) {
+    cat("  ℹ️  ", length(unrouted), " analyses route to NO submodule (umbrella-only). ",
+        "First few: ", paste(utils::head(unrouted, 8), collapse = ", "),
+        if (length(unrouted) > 8) ", ..." else "", "\n", sep = "")
+  }
+
+  if ((length(multi) > 0 || (fail_on_gap && length(unrouted) > 0))) {
+    if (length(multi) > 0)
+      stop("❌ Distribution coverage failed: analyses routed to more than one submodule (see above).")
+    if (fail_on_gap)
+      stop("❌ Distribution coverage failed: analyses routed to no submodule (fail_on_gap=TRUE).")
+  }
+  invisible(list(distributed = distributed, unrouted = unrouted, multi = multi))
+}
+
+# =============================================================================
+# Test distribution & infrastructure (P1.4 / P1.5)
+# -----------------------------------------------------------------------------
+# The umbrella has a rich test suite but none of it was shipped to submodules
+# (copy_test_files was off and every module's test_files list was empty), so the
+# dependency regressions above shipped with no CI net. These helpers (a) generate
+# a tests/testthat.R runner so any distributed tests actually run under
+# devtools::test()/R CMD check, (b) install a self-contained dependency-guard test
+# that is the runtime twin of check_module_dependencies(), and (c) provide a
+# name-keyed copier so the umbrella's `test-<analysis>*.R` files can be distributed.
+# =============================================================================
+
+# Write tests/testthat.R (the standard testthat runner) if the module lacks one.
+ensure_testthat_runner <- function(module_dir) {
+  desc_file <- file.path(module_dir, "DESCRIPTION")
+  if (!file.exists(desc_file)) return(invisible(FALSE))
+  pkg_name <- tryCatch(read.dcf(desc_file)[1, "Package"], error = function(e) NA_character_)
+  if (is.na(pkg_name)) return(invisible(FALSE))
+
+  tests_dir <- file.path(module_dir, "tests")
+  if (!dir.exists(tests_dir)) dir.create(tests_dir, recursive = TRUE)
+  runner <- file.path(tests_dir, "testthat.R")
+  if (!file.exists(runner)) {
+    writeLines(c(
+      "library(testthat)",
+      paste0("library(", pkg_name, ")"),
+      "",
+      paste0("test_check(\"", pkg_name, "\")")
+    ), runner)
+    cat("  🧪 Generated tests/testthat.R runner for ", pkg_name, "\n", sep = "")
+  }
+  invisible(TRUE)
+}
+
+# Copy the self-contained dependency-guard test into a submodule (always refreshed).
+write_dependency_guard_test <- function(module_dir, template_path) {
+  if (!file.exists(template_path)) {
+    warning("Dependency-guard test template not found: ", template_path)
+    return(invisible(FALSE))
+  }
+  dest_dir <- file.path(module_dir, "tests", "testthat")
+  if (!dir.exists(dest_dir)) dir.create(dest_dir, recursive = TRUE)
+  fs::file_copy(template_path,
+                file.path(dest_dir, "test-zzz-dependency-declaration.R"),
+                overwrite = TRUE)
+  cat("  🛡️  Installed dependency-guard test in ", basename(module_dir), "\n", sep = "")
+  invisible(TRUE)
+}
+
+# Distribute the umbrella's per-analysis tests (test-<name>.R, test-<name>-*.R) for
+# a set of analysis names. Returns the vector of copied file basenames. Anchored so
+# 'survival' does not also match 'survivalcont'. When `module_name` is supplied the
+# copied tests are namespace-translated (ClinicoPath -> module_name) so they run
+# against the submodule package -- self-contained, so it does NOT depend on the
+# separately-gated replace_clinicopath_with_module()/webpage step.
+copy_module_tests <- function(module_names, source_test_dir, dest_test_dir,
+                              module_name = NULL) {
+  if (!dir.exists(source_test_dir) || length(module_names) == 0)
+    return(character(0))
+  if (!dir.exists(dest_test_dir)) dir.create(dest_test_dir, recursive = TRUE)
+
+  all_tests <- list.files(source_test_dir, pattern = "^test-.*\\.R$")
+  copied <- character(0)
+  for (nm in module_names) {
+    pat <- paste0("^test-", nm, "(\\.R$|[.-])")
+    hits <- all_tests[grepl(pat, all_tests, ignore.case = FALSE)]
+    for (h in hits) {
+      dest <- file.path(dest_test_dir, h)
+      if (is.null(module_name)) {
+        fs::file_copy(file.path(source_test_dir, h), dest, overwrite = TRUE)
+      } else {
+        txt <- readLines(file.path(source_test_dir, h), warn = FALSE)
+        txt <- gsub("library(ClinicoPath)", paste0("library(", module_name, ")"), txt, fixed = TRUE)
+        txt <- gsub("ClinicoPath::", paste0(module_name, "::"), txt, fixed = TRUE)
+        txt <- gsub('package = "ClinicoPath"', paste0('package = "', module_name, '"'), txt, fixed = TRUE)
+        txt <- gsub("package = 'ClinicoPath'", paste0("package = '", module_name, "'"), txt, fixed = TRUE)
+        writeLines(txt, dest)
+      }
+      copied <- c(copied, h)
+    }
+  }
+  unique(copied)
+}
+
 message("✅ Module utilities loaded successfully")

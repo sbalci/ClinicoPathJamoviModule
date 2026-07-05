@@ -15,7 +15,7 @@ suppressMessages({
   library(lubridate)
 })
 
-set.seed(123)  # For reproducible results
+set.seed(123) # For reproducible results
 
 # =============================================================================
 # Dataset 1: Oncology Clinical Trial Safety Data
@@ -38,13 +38,13 @@ common_aes <- c(
 # System organ classes according to MedDRA
 soc_mapping <- c(
   "Fatigue" = "General disorders",
-  "Nausea" = "Gastrointestinal disorders", 
+  "Nausea" = "Gastrointestinal disorders",
   "Vomiting" = "Gastrointestinal disorders",
   "Diarrhea" = "Gastrointestinal disorders",
   "Constipation" = "Gastrointestinal disorders",
   "Decreased appetite" = "Metabolism and nutrition disorders",
   "Anemia" = "Blood and lymphatic system disorders",
-  "Neutropenia" = "Blood and lymphatic system disorders", 
+  "Neutropenia" = "Blood and lymphatic system disorders",
   "Thrombocytopenia" = "Blood and lymphatic system disorders",
   "Alopecia" = "Skin and subcutaneous tissue disorders",
   "Peripheral neuropathy" = "Nervous system disorders",
@@ -103,16 +103,16 @@ toxicityprofile_oncology_trial <- data.frame()
 for (i in 1:n_patients) {
   patient <- patients[i, ]
   treatment_idx <- which(treatment_arms == patient$treatment_arm)
-  
+
   # Generate adverse events for this patient
   for (ae in common_aes) {
     incidence_rate <- ae_incidence_rates[[ae]][treatment_idx]
-    
+
     # Determine if patient experiences this AE
     if (runif(1) < incidence_rate) {
       # Multiple events possible for same AE
       n_events <- sample(1:3, 1, prob = c(0.7, 0.25, 0.05))
-      
+
       for (event_num in 1:n_events) {
         # Generate grade based on AE type and treatment
         if (ae %in% c("Alopecia", "Rash")) {
@@ -128,14 +128,14 @@ for (i in 1:n_patients) {
           # General distribution
           grade <- sample(1:4, 1, prob = c(0.45, 0.35, 0.15, 0.05))
         }
-        
+
         # Time to event (days from study start)
         time_to_event <- round(rexp(1, rate = 0.01) + 1)
         if (time_to_event > 365) time_to_event <- 365
-        
+
         # Event date
         event_date <- patient$study_start_date + time_to_event
-        
+
         # Add to dataset
         toxicityprofile_oncology_trial <- rbind(toxicityprofile_oncology_trial, data.frame(
           patient_id = patient$patient_id,
@@ -160,8 +160,10 @@ toxicityprofile_oncology_trial$adverse_event <- as.factor(toxicityprofile_oncolo
 toxicityprofile_oncology_trial$system_organ_class <- as.factor(toxicityprofile_oncology_trial$system_organ_class)
 toxicityprofile_oncology_trial$patient_sex <- as.factor(toxicityprofile_oncology_trial$patient_sex)
 
-cat("✅ Oncology trial dataset:", nrow(toxicityprofile_oncology_trial), "events,", 
-    length(unique(toxicityprofile_oncology_trial$patient_id)), "patients\n")
+cat(
+  "✅ Oncology trial dataset:", nrow(toxicityprofile_oncology_trial), "events,",
+  length(unique(toxicityprofile_oncology_trial$patient_id)), "patients\n"
+)
 
 # =============================================================================
 # Dataset 2: Immunotherapy Safety Profile
@@ -179,7 +181,7 @@ immuno_aes <- c(
 
 immuno_soc_mapping <- c(
   "Fatigue" = "General disorders",
-  "Diarrhea" = "Gastrointestinal disorders", 
+  "Diarrhea" = "Gastrointestinal disorders",
   "Colitis" = "Gastrointestinal disorders",
   "Pneumonitis" = "Respiratory disorders",
   "Hepatitis" = "Hepatobiliary disorders",
@@ -238,10 +240,10 @@ toxicityprofile_immunotherapy <- data.frame()
 for (i in 1:n_patients_immuno) {
   patient <- immuno_patients[i, ]
   treatment_idx <- ifelse(patient$treatment_group == "Monotherapy", 1, 2)
-  
+
   for (ae in immuno_aes) {
     incidence_rate <- immuno_incidence_rates[[ae]][treatment_idx]
-    
+
     if (runif(1) < incidence_rate) {
       # Immunotherapy AEs often have specific grade patterns
       if (ae %in% c("Colitis", "Pneumonitis", "Hepatitis", "Myocarditis")) {
@@ -257,11 +259,11 @@ for (i in 1:n_patients_immuno) {
         # General distribution
         grade <- sample(1:4, 1, prob = c(0.5, 0.3, 0.15, 0.05))
       }
-      
+
       # Time to event - immunotherapy AEs often occur later
       time_to_event <- round(rweibull(1, shape = 1.5, scale = 80) + 7)
       if (time_to_event > 365) time_to_event <- 365
-      
+
       toxicityprofile_immunotherapy <- rbind(toxicityprofile_immunotherapy, data.frame(
         patient_id = patient$patient_id,
         treatment_group = patient$treatment_group,
@@ -283,8 +285,10 @@ toxicityprofile_immunotherapy$adverse_event <- as.factor(toxicityprofile_immunot
 toxicityprofile_immunotherapy$system_organ_class <- as.factor(toxicityprofile_immunotherapy$system_organ_class)
 toxicityprofile_immunotherapy$patient_sex <- as.factor(toxicityprofile_immunotherapy$patient_sex)
 
-cat("✅ Immunotherapy dataset:", nrow(toxicityprofile_immunotherapy), "events,", 
-    length(unique(toxicityprofile_immunotherapy$patient_id)), "patients\n")
+cat(
+  "✅ Immunotherapy dataset:", nrow(toxicityprofile_immunotherapy), "events,",
+  length(unique(toxicityprofile_immunotherapy$patient_id)), "patients\n"
+)
 
 # =============================================================================
 # Dataset 3: Targeted Therapy Safety Profile
@@ -370,10 +374,10 @@ targeted_incidence_rates <- list(
 for (i in 1:n_patients_targeted) {
   patient <- targeted_patients[i, ]
   treatment_idx <- ifelse(patient$treatment_group == "Monotherapy", 1, 2)
-  
+
   for (ae in targeted_aes) {
     incidence_rate <- targeted_incidence_rates[[ae]][treatment_idx]
-    
+
     if (runif(1) < incidence_rate) {
       # Targeted therapy specific grading
       if (ae %in% c("Rash", "Acneiform rash", "Paronychia", "Dry skin")) {
@@ -389,11 +393,11 @@ for (i in 1:n_patients_targeted) {
         # General distribution
         grade <- sample(1:4, 1, prob = c(0.45, 0.35, 0.15, 0.05))
       }
-      
+
       # Time to event - targeted therapy AEs often occur early
       time_to_event <- round(rweibull(1, shape = 2, scale = 30) + 1)
       if (time_to_event > 365) time_to_event <- 365
-      
+
       toxicityprofile_targeted_therapy <- rbind(toxicityprofile_targeted_therapy, data.frame(
         patient_id = patient$patient_id,
         treatment_group = patient$treatment_group,
@@ -415,8 +419,10 @@ toxicityprofile_targeted_therapy$adverse_event <- as.factor(toxicityprofile_targ
 toxicityprofile_targeted_therapy$system_organ_class <- as.factor(toxicityprofile_targeted_therapy$system_organ_class)
 toxicityprofile_targeted_therapy$patient_sex <- as.factor(toxicityprofile_targeted_therapy$patient_sex)
 
-cat("✅ Targeted therapy dataset:", nrow(toxicityprofile_targeted_therapy), "events,", 
-    length(unique(toxicityprofile_targeted_therapy$patient_id)), "patients\n")
+cat(
+  "✅ Targeted therapy dataset:", nrow(toxicityprofile_targeted_therapy), "events,",
+  length(unique(toxicityprofile_targeted_therapy$patient_id)), "patients\n"
+)
 
 # =============================================================================
 # Dataset 4: Dose Escalation Study
@@ -446,29 +452,29 @@ dose_patients <- data.frame(
 toxicityprofile_dose_escalation <- data.frame()
 
 # Dose-dependent incidence rates
-dose_multipliers <- c(1.0, 1.2, 1.5, 1.8, 2.2)  # Increasing with dose
+dose_multipliers <- c(1.0, 1.2, 1.5, 1.8, 2.2) # Increasing with dose
 base_incidence <- 0.15
 
 for (i in 1:n_patients_dose) {
   patient <- dose_patients[i, ]
   dose_idx <- which(dose_levels == patient$dose_level)
-  
+
   for (ae in dose_escalation_aes) {
     # Dose-dependent incidence
     incidence_rate <- base_incidence * dose_multipliers[dose_idx]
     if (incidence_rate > 0.8) incidence_rate <- 0.8
-    
+
     if (runif(1) < incidence_rate) {
       # Dose-dependent grade severity
       grade_probs <- c(0.6, 0.25, 0.1, 0.05) * (1 + (dose_idx - 1) * 0.1)
       grade_probs <- grade_probs / sum(grade_probs)
-      
+
       grade <- sample(1:4, 1, prob = grade_probs)
-      
+
       # Time to event
       time_to_event <- round(rexp(1, rate = 0.02) + 1)
       if (time_to_event > 180) time_to_event <- 180
-      
+
       toxicityprofile_dose_escalation <- rbind(toxicityprofile_dose_escalation, data.frame(
         patient_id = patient$patient_id,
         treatment_group = patient$dose_level,
@@ -490,8 +496,10 @@ toxicityprofile_dose_escalation$adverse_event <- as.factor(toxicityprofile_dose_
 toxicityprofile_dose_escalation$system_organ_class <- as.factor(toxicityprofile_dose_escalation$system_organ_class)
 toxicityprofile_dose_escalation$patient_sex <- as.factor(toxicityprofile_dose_escalation$patient_sex)
 
-cat("✅ Dose escalation dataset:", nrow(toxicityprofile_dose_escalation), "events,", 
-    length(unique(toxicityprofile_dose_escalation$patient_id)), "patients\n")
+cat(
+  "✅ Dose escalation dataset:", nrow(toxicityprofile_dose_escalation), "events,",
+  length(unique(toxicityprofile_dose_escalation$patient_id)), "patients\n"
+)
 
 # =============================================================================
 # Dataset 5: Pediatric Safety Study
@@ -542,18 +550,18 @@ pediatric_incidence_rates <- list(
 for (i in 1:n_patients_pediatric) {
   patient <- pediatric_patients[i, ]
   treatment_idx <- ifelse(patient$treatment_group == "Placebo", 1, 2)
-  
+
   for (ae in pediatric_aes) {
     incidence_rate <- pediatric_incidence_rates[[ae]][treatment_idx]
-    
+
     if (runif(1) < incidence_rate) {
       # Pediatric AEs are typically milder
       grade <- sample(1:3, 1, prob = c(0.7, 0.25, 0.05))
-      
+
       # Time to event
       time_to_event <- round(rexp(1, rate = 0.03) + 1)
       if (time_to_event > 90) time_to_event <- 90
-      
+
       toxicityprofile_pediatric <- rbind(toxicityprofile_pediatric, data.frame(
         patient_id = patient$patient_id,
         treatment_group = patient$treatment_group,
@@ -575,8 +583,10 @@ toxicityprofile_pediatric$adverse_event <- as.factor(toxicityprofile_pediatric$a
 toxicityprofile_pediatric$system_organ_class <- as.factor(toxicityprofile_pediatric$system_organ_class)
 toxicityprofile_pediatric$patient_sex <- as.factor(toxicityprofile_pediatric$patient_sex)
 
-cat("✅ Pediatric dataset:", nrow(toxicityprofile_pediatric), "events,", 
-    length(unique(toxicityprofile_pediatric$patient_id)), "patients\n")
+cat(
+  "✅ Pediatric dataset:", nrow(toxicityprofile_pediatric), "events,",
+  length(unique(toxicityprofile_pediatric$patient_id)), "patients\n"
+)
 
 # =============================================================================
 # Dataset 6: Small Sample Edge Cases
@@ -597,8 +607,10 @@ toxicityprofile_small_sample <- data.frame(
   stringsAsFactors = FALSE
 )
 
-cat("✅ Small sample dataset:", nrow(toxicityprofile_small_sample), "events,", 
-    length(unique(toxicityprofile_small_sample$patient_id)), "patients\n")
+cat(
+  "✅ Small sample dataset:", nrow(toxicityprofile_small_sample), "events,",
+  length(unique(toxicityprofile_small_sample$patient_id)), "patients\n"
+)
 
 # =============================================================================
 # Save All Datasets
@@ -701,42 +713,56 @@ write.csv(toxicityprofile_small_sample, "data/toxicityprofile_small_sample.csv",
 cat("Creating dataset summary information...\n")
 
 summary_stats <- data.frame(
-  Dataset = c("toxicityprofile_oncology_trial", "toxicityprofile_immunotherapy", 
-              "toxicityprofile_targeted_therapy", "toxicityprofile_dose_escalation",
-              "toxicityprofile_pediatric", "toxicityprofile_small_sample"),
-  Events = c(nrow(toxicityprofile_oncology_trial), nrow(toxicityprofile_immunotherapy),
-             nrow(toxicityprofile_targeted_therapy), nrow(toxicityprofile_dose_escalation),
-             nrow(toxicityprofile_pediatric), nrow(toxicityprofile_small_sample)),
-  Patients = c(length(unique(toxicityprofile_oncology_trial$patient_id)), 
-               length(unique(toxicityprofile_immunotherapy$patient_id)),
-               length(unique(toxicityprofile_targeted_therapy$patient_id)),
-               length(unique(toxicityprofile_dose_escalation$patient_id)),
-               length(unique(toxicityprofile_pediatric$patient_id)),
-               length(unique(toxicityprofile_small_sample$patient_id))),
-  Unique_AEs = c(length(unique(toxicityprofile_oncology_trial$adverse_event)),
-                 length(unique(toxicityprofile_immunotherapy$adverse_event)),
-                 length(unique(toxicityprofile_targeted_therapy$adverse_event)),
-                 length(unique(toxicityprofile_dose_escalation$adverse_event)),
-                 length(unique(toxicityprofile_pediatric$adverse_event)),
-                 length(unique(toxicityprofile_small_sample$adverse_event))),
-  Description = c("Oncology clinical trial with 3 treatment arms",
-                  "Immunotherapy safety profile with immune-related AEs",
-                  "Targeted therapy with characteristic toxicity pattern",
-                  "Dose escalation study with dose-dependent toxicity",
-                  "Pediatric safety study with age-appropriate AEs",
-                  "Small sample for edge case testing"),
-  Key_Features = c("CTCAE grading, multiple treatment arms, common oncology AEs",
-                   "Immune-related adverse events, delayed onset patterns",
-                   "Targeted therapy specific toxicities, early onset",
-                   "Dose-dependent toxicity, escalating severity",
-                   "Pediatric-specific AEs, milder severity profile",
-                   "Minimal data for edge case validation"),
-  Primary_Use_Case = c("Standard oncology safety analysis",
-                       "Immune-related AE monitoring",
-                       "Targeted therapy safety profiling",
-                       "Dose-limiting toxicity assessment",
-                       "Pediatric safety monitoring",
-                       "Edge case and validation testing"),
+  Dataset = c(
+    "toxicityprofile_oncology_trial", "toxicityprofile_immunotherapy",
+    "toxicityprofile_targeted_therapy", "toxicityprofile_dose_escalation",
+    "toxicityprofile_pediatric", "toxicityprofile_small_sample"
+  ),
+  Events = c(
+    nrow(toxicityprofile_oncology_trial), nrow(toxicityprofile_immunotherapy),
+    nrow(toxicityprofile_targeted_therapy), nrow(toxicityprofile_dose_escalation),
+    nrow(toxicityprofile_pediatric), nrow(toxicityprofile_small_sample)
+  ),
+  Patients = c(
+    length(unique(toxicityprofile_oncology_trial$patient_id)),
+    length(unique(toxicityprofile_immunotherapy$patient_id)),
+    length(unique(toxicityprofile_targeted_therapy$patient_id)),
+    length(unique(toxicityprofile_dose_escalation$patient_id)),
+    length(unique(toxicityprofile_pediatric$patient_id)),
+    length(unique(toxicityprofile_small_sample$patient_id))
+  ),
+  Unique_AEs = c(
+    length(unique(toxicityprofile_oncology_trial$adverse_event)),
+    length(unique(toxicityprofile_immunotherapy$adverse_event)),
+    length(unique(toxicityprofile_targeted_therapy$adverse_event)),
+    length(unique(toxicityprofile_dose_escalation$adverse_event)),
+    length(unique(toxicityprofile_pediatric$adverse_event)),
+    length(unique(toxicityprofile_small_sample$adverse_event))
+  ),
+  Description = c(
+    "Oncology clinical trial with 3 treatment arms",
+    "Immunotherapy safety profile with immune-related AEs",
+    "Targeted therapy with characteristic toxicity pattern",
+    "Dose escalation study with dose-dependent toxicity",
+    "Pediatric safety study with age-appropriate AEs",
+    "Small sample for edge case testing"
+  ),
+  Key_Features = c(
+    "CTCAE grading, multiple treatment arms, common oncology AEs",
+    "Immune-related adverse events, delayed onset patterns",
+    "Targeted therapy specific toxicities, early onset",
+    "Dose-dependent toxicity, escalating severity",
+    "Pediatric-specific AEs, milder severity profile",
+    "Minimal data for edge case validation"
+  ),
+  Primary_Use_Case = c(
+    "Standard oncology safety analysis",
+    "Immune-related AE monitoring",
+    "Targeted therapy safety profiling",
+    "Dose-limiting toxicity assessment",
+    "Pediatric safety monitoring",
+    "Edge case and validation testing"
+  ),
   stringsAsFactors = FALSE
 )
 
@@ -760,46 +786,56 @@ write.csv(summary_stats, "data/toxicityprofile_datasets_summary.csv", row.names 
 # =============================================================================
 
 test_scenarios <- data.frame(
-  Scenario = c("Basic Toxicity Profile", "Treatment Comparison", "High Grade Events Analysis",
-               "System Organ Class Analysis", "Time-to-Event Analysis", "Dose-Response Relationship",
-               "Immunotherapy-Specific Analysis", "Pediatric Safety Profile", "Statistical Testing",
-               "Confidence Interval Validation", "Edge Case Robustness", "Visualization Testing"),
-  Dataset = c("toxicityprofile_oncology_trial", "toxicityprofile_oncology_trial", 
-              "toxicityprofile_immunotherapy", "toxicityprofile_targeted_therapy",
-              "toxicityprofile_oncology_trial", "toxicityprofile_dose_escalation",
-              "toxicityprofile_immunotherapy", "toxicityprofile_pediatric",
-              "toxicityprofile_targeted_therapy", "toxicityprofile_oncology_trial",
-              "toxicityprofile_small_sample", "toxicityprofile_oncology_trial"),
-  Analysis_Type = c("Basic frequency and grade distribution", "Group comparison with statistical tests",
-                    "High grade (≥3) event analysis", "SOC-based toxicity summary",
-                    "Cumulative incidence over time", "Dose-dependent toxicity analysis",
-                    "Immune-related AE profiling", "Age-appropriate safety analysis",
-                    "Fisher's exact test and chi-square tests", "Binomial confidence intervals",
-                    "Small sample behavior", "Multiple plot types and themes"),
-  Variables = c("patient_id, adverse_event, toxicity_grade", 
-                "patient_id, adverse_event, toxicity_grade, treatment_group",
-                "patient_id, adverse_event, toxicity_grade (filter ≥3)",
-                "patient_id, adverse_event, toxicity_grade, system_organ_class",
-                "patient_id, adverse_event, toxicity_grade, time_to_event",
-                "patient_id, adverse_event, toxicity_grade, treatment_group (dose levels)",
-                "patient_id, adverse_event, toxicity_grade, system_organ_class",
-                "patient_id, adverse_event, toxicity_grade, patient_age",
-                "patient_id, adverse_event, toxicity_grade, treatment_group",
-                "patient_id, adverse_event, toxicity_grade",
-                "patient_id, adverse_event, toxicity_grade",
-                "patient_id, adverse_event, toxicity_grade"),
-  Expected_Result = c("Frequency tables and grade distribution plots",
-                      "Risk ratios, p-values, and comparison plots",
-                      "Focus on serious adverse events only",
-                      "Toxicity profile by organ system",
-                      "Time-to-event curves and cumulative incidence",
-                      "Dose-toxicity relationship visualization",
-                      "Immune-related toxicity patterns",
-                      "Pediatric-appropriate safety profile",
-                      "Statistical significance testing results",
-                      "Confidence intervals for incidence rates",
-                      "Graceful handling of minimal data",
-                      "Multiple plot types with appropriate themes"),
+  Scenario = c(
+    "Basic Toxicity Profile", "Treatment Comparison", "High Grade Events Analysis",
+    "System Organ Class Analysis", "Time-to-Event Analysis", "Dose-Response Relationship",
+    "Immunotherapy-Specific Analysis", "Pediatric Safety Profile", "Statistical Testing",
+    "Confidence Interval Validation", "Edge Case Robustness", "Visualization Testing"
+  ),
+  Dataset = c(
+    "toxicityprofile_oncology_trial", "toxicityprofile_oncology_trial",
+    "toxicityprofile_immunotherapy", "toxicityprofile_targeted_therapy",
+    "toxicityprofile_oncology_trial", "toxicityprofile_dose_escalation",
+    "toxicityprofile_immunotherapy", "toxicityprofile_pediatric",
+    "toxicityprofile_targeted_therapy", "toxicityprofile_oncology_trial",
+    "toxicityprofile_small_sample", "toxicityprofile_oncology_trial"
+  ),
+  Analysis_Type = c(
+    "Basic frequency and grade distribution", "Group comparison with statistical tests",
+    "High grade (>=3) event analysis", "SOC-based toxicity summary",
+    "Cumulative incidence over time", "Dose-dependent toxicity analysis",
+    "Immune-related AE profiling", "Age-appropriate safety analysis",
+    "Fisher's exact test and chi-square tests", "Binomial confidence intervals",
+    "Small sample behavior", "Multiple plot types and themes"
+  ),
+  Variables = c(
+    "patient_id, adverse_event, toxicity_grade",
+    "patient_id, adverse_event, toxicity_grade, treatment_group",
+    "patient_id, adverse_event, toxicity_grade (filter >=3)",
+    "patient_id, adverse_event, toxicity_grade, system_organ_class",
+    "patient_id, adverse_event, toxicity_grade, time_to_event",
+    "patient_id, adverse_event, toxicity_grade, treatment_group (dose levels)",
+    "patient_id, adverse_event, toxicity_grade, system_organ_class",
+    "patient_id, adverse_event, toxicity_grade, patient_age",
+    "patient_id, adverse_event, toxicity_grade, treatment_group",
+    "patient_id, adverse_event, toxicity_grade",
+    "patient_id, adverse_event, toxicity_grade",
+    "patient_id, adverse_event, toxicity_grade"
+  ),
+  Expected_Result = c(
+    "Frequency tables and grade distribution plots",
+    "Risk ratios, p-values, and comparison plots",
+    "Focus on serious adverse events only",
+    "Toxicity profile by organ system",
+    "Time-to-event curves and cumulative incidence",
+    "Dose-toxicity relationship visualization",
+    "Immune-related toxicity patterns",
+    "Pediatric-appropriate safety profile",
+    "Statistical significance testing results",
+    "Confidence intervals for incidence rates",
+    "Graceful handling of minimal data",
+    "Multiple plot types with appropriate themes"
+  ),
   stringsAsFactors = FALSE
 )
 
@@ -839,11 +875,13 @@ cat("✅ Test scenarios documented: 12 comprehensive scenarios\n")
 
 cat("\nDatasets Created:\n")
 for (i in 1:nrow(summary_stats)) {
-  cat(sprintf("- %s (%d events, %d patients): %s\n", 
-              summary_stats$Dataset[i], 
-              summary_stats$Events[i], 
-              summary_stats$Patients[i], 
-              summary_stats$Description[i]))
+  cat(sprintf(
+    "- %s (%d events, %d patients): %s\n",
+    summary_stats$Dataset[i],
+    summary_stats$Events[i],
+    summary_stats$Patients[i],
+    summary_stats$Description[i]
+  ))
 }
 
 cat("\nAll datasets include both .rda and .csv formats\n")

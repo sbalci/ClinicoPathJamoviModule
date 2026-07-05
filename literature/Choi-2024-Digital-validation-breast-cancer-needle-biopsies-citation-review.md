@@ -5,7 +5,7 @@
 ## ARTICLE SUMMARY
 
 - **Title/Label**: Digital Validation in Breast Cancer Needle Biopsies: Comparison of Histological Grade and Biomarker Expression Assessment Using Conventional Light Microscopy, Whole Slide Imaging, and Digital Image Analysis
-- **Design & Cohort**: Retrospective validation study; N = 101 primary breast cancer cases (115 specimens, 14 excluded for scant cells/poor fixation) from US-guided core needle biopsy at Chungnam National University Sejong Hospital (July 2020 - Dec 2022). Three board-certified pathologists with varying experience (3-25 years). Three modalities compared: CLM (glass slides), WSI (PANNORAMIC 250 Flash III, 40×), and DIA (QuantCenter 2.2, 3DHISTECH). Assessed: Nottingham grade (TF, NP, MCs), ER, PR, HER2, Ki67. ≥3 month washout between CLM and WSI reads.
+- **Design & Cohort**: Retrospective validation study; N = 101 primary breast cancer cases (115 specimens, 14 excluded for scant cells/poor fixation) from US-guided core needle biopsy at Chungnam National University Sejong Hospital (July 2020 - Dec 2022). Three board-certified pathologists with varying experience (3-25 years). Three modalities compared: CLM (glass slides), WSI (PANNORAMIC 250 Flash III, 40×), and DIA (QuantCenter 2.2, 3DHISTECH). Assessed: Nottingham grade (TF, NP, MCs), ER, PR, HER2, Ki67. >=3 month washout between CLM and WSI reads.
 - **Key Analyses**:
   - Cohen's kappa for intra-observer agreement (CLM vs WSI per pathologist)
   - Fleiss' kappa with 95% CIs for inter-observer agreement (3 pathologists)
@@ -81,7 +81,7 @@
 | Effect sizes with CIs | 2/2 | Fleiss' kappa with 95% CIs for inter-observer; all p values reported |
 | Assumption checking | 2/2 | KS normality test; nonparametric tests throughout; appropriate methods |
 | Appropriate test selection | 2/2 | Cohen's kappa for intra-observer, Fleiss' kappa for inter-observer, Wilcoxon for paired differences -- all appropriate |
-| Reproducibility | 2/2 | 3 pathologists; ≥3 month washout; all modalities on same cases; DIA automated |
+| Reproducibility | 2/2 | 3 pathologists; >=3 month washout; all modalities on same cases; DIA automated |
 | Handling of missing data | 1/2 | 14 of 115 excluded (scant cells/poor fixation); remaining appear complete |
 | Model diagnostics | 0/2 | No weighted kappa for ordinal data; no prevalence adjustment |
 | Clinical significance assessment | 1/1 | Major/minor discordance defined clinically; DIA improvement highlighted |
@@ -89,6 +89,7 @@
 | Bias assessment | 0/1 | Experience-dependent effects not formally tested (visual comparison only) |
 
 ### Strengths
+
 1. **Three-way comparison**: CLM vs WSI vs DIA -- comprehensive method validation
 2. **CNB focus**: Clinically important since CNB specimens have unique challenges (small tissue, heterogeneity)
 3. **Multiple biomarkers**: ER, PR, HER2, Ki67 all assessed alongside Nottingham grade
@@ -97,9 +98,10 @@
 6. **High-magnification scanning**: 40× WSI (0.121 μm/pixel) -- addresses previous concerns about mitotic counting at lower magnification
 
 ### Weaknesses
+
 1. **Small sample size**: n=101 limits power and precision of kappa estimates
 2. **No weighted kappa**: Ordinal Nottingham grade and components should use weighted kappa
-3. **NP subjectivity**: Nuclear pleomorphism had lowest agreement (kappa ≤ 0.394 inter-observer) -- known limitation of current grading system
+3. **NP subjectivity**: Nuclear pleomorphism had lowest agreement (kappa <= 0.394 inter-observer) -- known limitation of current grading system
 4. **Single scanner**: PANNORAMIC 250 Flash III only; scanner-specific effects not assessed
 5. **No formal test of CLM=WSI**: Kappa values compared visually without formal hypothesis test
 6. **DIA software-specific**: QuantCenter 2.2 results may not generalize to other DIA platforms
@@ -110,7 +112,7 @@
 
 No significant gaps identified. All statistical methods used (Cohen's kappa, Fleiss' kappa, Wilcoxon, concordance rates) are fully covered by existing ClinicoPath functions (`agreement`, `pathologyagreement`, `jjhistostats`).
 
-The article's findings reinforce that NP scoring is the weakest link in Nottingham grading (kappa ≤ 0.394), which is a clinical problem rather than a statistical method gap.
+The article's findings reinforce that NP scoring is the weakest link in Nottingham grading (kappa <= 0.394), which is a clinical problem rather than a statistical method gap.
 
 ---
 

@@ -224,7 +224,7 @@ comprehensive_result <- ihcheterogeneity(
 # - CV > 35%: Very high heterogeneity (additional sampling recommended)
 
 # Correlation Guidelines:
-# - r ≥ 0.90: Excellent agreement between biopsy and whole section
+# - r >= 0.90: Excellent agreement between biopsy and whole section
 # - r 0.80-0.89: Good agreement
 # - r 0.70-0.79: Moderate agreement
 # - r 0.60-0.69: Fair agreement
@@ -242,7 +242,7 @@ comprehensive_result <- ihcheterogeneity(
 
 # 1. Ki67 Proliferation Index:
 #    - Expected CV: 20-30% (due to biological heterogeneity)
-#    - Recommendation: Sample multiple regions (≥3)
+#    - Recommendation: Sample multiple regions (>=3)
 #    - Consider hot-spot vs. whole-section approaches
 #    - Use cv_threshold = 25.0
 
@@ -386,7 +386,7 @@ workflow_d <- ihcheterogeneity(
 # Spearman Correlation:
 #   - Assesses monotonic relationship between biopsy and reference
 #   - Robust to outliers
-#   - Values ≥ 0.80 indicate good representativeness
+#   - Values >= 0.80 indicate good representativeness
 
 # Bias:
 #   - Systematic difference between regional and reference measurements

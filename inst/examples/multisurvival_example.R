@@ -40,11 +40,11 @@ data(multisurvival_dates, package = "ClinicoPath")
 
 result_dates <- multisurvival(
   data = multisurvival_dates,
-  tint = TRUE,  # Calculate time from dates
-  dxdate = "dxdate",  # Diagnosis date
-  fudate = "fudate",  # Follow-up date
-  timetypedata = "ymd",  # Date format: YYYY-MM-DD
-  timetypeoutput = "months",  # Output in months
+  tint = TRUE, # Calculate time from dates
+  dxdate = "dxdate", # Diagnosis date
+  fudate = "fudate", # Follow-up date
+  timetypedata = "ymd", # Date format: YYYY-MM-DD
+  timetypeoutput = "months", # Output in months
   outcome = "outcome",
   outcomeLevel = "Dead",
   explanatory = c("treatment", "stage"),
@@ -68,8 +68,8 @@ result_forest <- multisurvival(
   outcomeLevel = "1",
   explanatory = c("treatment", "stage", "grade", "sex"),
   contexpl = c("age", "nodes", "biomarker"),
-  hr = TRUE,  # Show hazard ratio plot
-  sty = "t3"  # survminer style forest plot
+  hr = TRUE, # Show hazard ratio plot
+  sty = "t3" # survminer style forest plot
 )
 
 # Interpretation:
@@ -89,14 +89,14 @@ result_km <- multisurvival(
   outcome = "outcome",
   outcomeLevel = "1",
   explanatory = "treatment",
-  km = TRUE,  # Generate KM plot
-  risktable = TRUE,  # Show number at risk
-  ci95 = TRUE,  # Show 95% confidence intervals
-  censored = TRUE,  # Mark censored observations
-  medianline = "hv",  # Show median survival lines
-  pplot = TRUE,  # Show p-value on plot
-  endplot = 60,  # Plot up to 60 months
-  byplot = 12  # Time intervals every 12 months
+  km = TRUE, # Generate KM plot
+  risktable = TRUE, # Show number at risk
+  ci95 = TRUE, # Show 95% confidence intervals
+  censored = TRUE, # Mark censored observations
+  medianline = "hv", # Show median survival lines
+  pplot = TRUE, # Show p-value on plot
+  endplot = 60, # Plot up to 60 months
+  byplot = 12 # Time intervals every 12 months
 )
 
 # Clinical Context:
@@ -118,9 +118,9 @@ result_risk <- multisurvival(
   outcome = "outcome",
   explanatory = c("stage", "grade", "molecular_subtype"),
   contexpl = c("age", "ki67", "tumor_size"),
-  calculateRiskScore = TRUE,  # Calculate risk scores
-  numRiskGroups = "three",  # Divide into low/intermediate/high risk
-  plotRiskGroups = TRUE  # Plot survival by risk group
+  calculateRiskScore = TRUE, # Calculate risk scores
+  numRiskGroups = "three", # Divide into low/intermediate/high risk
+  plotRiskGroups = TRUE # Plot survival by risk group
 )
 
 # Clinical Application:
@@ -148,11 +148,11 @@ result_competing <- multisurvival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   outcomeLevel = "Dead of Disease",
-  dod = "Dead of Disease",  # Dead of disease
-  dooc = "Dead of Other",  # Dead of other causes
-  awd = "Alive w Disease",  # Alive with disease
-  awod = "Alive w/o Disease",  # Alive without disease
-  analysistype = "compete",  # Competing risks analysis
+  dod = "Dead of Disease", # Dead of disease
+  dooc = "Dead of Other", # Dead of other causes
+  awd = "Alive w Disease", # Alive with disease
+  awod = "Alive w/o Disease", # Alive without disease
+  analysistype = "compete", # Competing risks analysis
   multievent = TRUE,
   explanatory = c("treatment", "stage", "age_group"),
   contexpl = c("age", "charlson_score")
@@ -181,8 +181,8 @@ result_landmark <- multisurvival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   uselandmark = TRUE,
-  landmark = 3,  # 3-month landmark time
-  explanatory = "response_3mo",  # Response at 3 months
+  landmark = 3, # 3-month landmark time
+  explanatory = "response_3mo", # Response at 3 months
   contexpl = "age",
   timetypeoutput = "months"
 )
@@ -216,7 +216,7 @@ result_ph_test <- multisurvival(
   outcome = "outcome",
   explanatory = c("sex", "treatment"),
   contexpl = "age",
-  ph_cox = TRUE  # Test PH assumption
+  ph_cox = TRUE # Test PH assumption
 )
 
 # Step 2: If PH violated for sex, stratify by sex
@@ -224,10 +224,10 @@ result_stratified <- multisurvival(
   data = multisurvival_stratify,
   elapsedtime = "elapsedtime",
   outcome = "outcome",
-  explanatory = "treatment",  # Treatment effect of interest
+  explanatory = "treatment", # Treatment effect of interest
   contexpl = "age",
   use_stratify = TRUE,
-  stratvar = "sex"  # Stratify by sex (PH violated)
+  stratvar = "sex" # Stratify by sex (PH violated)
 )
 
 # Clinical Interpretation:
@@ -258,8 +258,8 @@ result_persontime <- multisurvival(
   outcome = "outcome",
   explanatory = "treatment_group",
   person_time = TRUE,
-  time_intervals = "12, 36, 60",  # Intervals: 0-12, 12-36, 36-60, 60+
-  rate_multiplier = 1000  # Rate per 1000 person-years
+  time_intervals = "12, 36, 60", # Intervals: 0-12, 12-36, 36-60, 60+
+  rate_multiplier = 1000 # Rate per 1000 person-years
 )
 
 # Clinical Application:
@@ -288,9 +288,9 @@ result_adjusted <- multisurvival(
   outcome = "outcome",
   explanatory = c("stage", "grade"),
   contexpl = c("age", "nodes"),
-  ac = TRUE,  # Adjusted curves
-  adjexplanatory = "treatment",  # Variable for adjusted curve
-  ac_method = "average"  # Average covariate values
+  ac = TRUE, # Adjusted curves
+  adjexplanatory = "treatment", # Variable for adjusted curve
+  ac_method = "average" # Average covariate values
 )
 
 # Adjustment Methods:
@@ -314,7 +314,7 @@ result_nomogram <- multisurvival(
   outcome = "outcome",
   explanatory = c("treatment", "stage", "grade"),
   contexpl = c("age", "nodes"),
-  showNomogram = TRUE  # Generate nomogram
+  showNomogram = TRUE # Generate nomogram
 )
 
 # Clinical Application:
@@ -346,9 +346,9 @@ result_diagnostics <- multisurvival(
   outcome = "outcome",
   explanatory = c("treatment", "stage"),
   contexpl = c("age", "nodes"),
-  ph_cox = TRUE,  # Test proportional hazards
-  hr = TRUE,  # Show hazard ratios
-  showExplanations = TRUE  # Show detailed explanations
+  ph_cox = TRUE, # Test proportional hazards
+  hr = TRUE, # Show hazard ratios
+  showExplanations = TRUE # Show detailed explanations
 )
 
 # Key Diagnostics:
@@ -377,31 +377,31 @@ result_trial <- multisurvival(
   outcome = "outcome",
   outcomeLevel = "1",
   timetypeoutput = "months",
-  
+
   # Predictors
   explanatory = c("treatment", "stage", "grade", "sex"),
   contexpl = c("age", "nodes", "biomarker", "performance_status"),
-  
+
   # Visualizations
-  hr = TRUE,  # Forest plot
-  sty = "t3",  # survminer style
-  km = TRUE,  # KM curves
+  hr = TRUE, # Forest plot
+  sty = "t3", # survminer style
+  km = TRUE, # KM curves
   risktable = TRUE,
   ci95 = TRUE,
   censored = TRUE,
   medianline = "hv",
   pplot = TRUE,
-  
+
   # Plot settings
   endplot = 60,
   byplot = 12,
-  
+
   # Diagnostics
   ph_cox = TRUE,
-  
+
   # Clinical tools
   showNomogram = TRUE,
-  
+
   # Documentation
   showExplanations = TRUE,
   showSummaries = TRUE
@@ -456,7 +456,7 @@ result_advanced <- multisurvival(
 # Common Subgroups:
 # - Stage (early vs. advanced)
 # - Biomarker status (positive vs. negative)
-# - Age (<65 vs. ≥65)
+# - Age (<65 vs. >=65)
 # - Performance status (0-1 vs. 2+)
 
 # ═══════════════════════════════════════════════════════════
@@ -491,7 +491,7 @@ result_landmark6mo <- multisurvival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   uselandmark = TRUE,
-  landmark = 6,  # 6-month landmark instead of 3
+  landmark = 6, # 6-month landmark instead of 3
   explanatory = "response_3mo",
   contexpl = "age"
 )

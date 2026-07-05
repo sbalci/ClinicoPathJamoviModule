@@ -112,7 +112,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Create survival object
-                # TODO (hygiene): drop `library(survival)` here and at L155 (.buildConditionalTree), L213 (.createTreePlot), L292 (.createSurvivalPlot) — `library()` inside package R files modifies the user's search path at source-load time and trips `R CMD check`. Replace each `Surv(...)`, `survfit(...)`, `survdiff(...)` reference with explicit `survival::` namespacing, or add `@importFrom survival Surv survfit survdiff` (etc.) to the roxygen header alongside the existing `@import jmvcore`. Same applies to `library(party)` at L155.
+                # TODO (hygiene): drop `library(survival)` here and at L155 (.buildConditionalTree), L213 (.createTreePlot), L292 (.createSurvivalPlot) - `library()` inside package R files modifies the user's search path at source-load time and trips `R CMD check`. Replace each `Surv(...)`, `survfit(...)`, `survdiff(...)` reference with explicit `survival::` namespacing, or add `@importFrom survival Surv survfit survdiff` (etc.) to the roxygen header alongside the existing `@import jmvcore`. Same applies to `library(party)` at L155.
                 library(survival)
                 surv_obj <- Surv(time_col, event_col)
                 

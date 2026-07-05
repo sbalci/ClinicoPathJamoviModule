@@ -188,7 +188,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
         },
 
         # Enhanced error handling and validation
-        # TODO (UX): file-wide pattern — 21 stop() calls (sites in .validateInputs/
+        # TODO (UX): file-wide pattern - 21 stop() calls (sites in .validateInputs/
         # .checkPackageDependencies/.splitData/.buildLogisticModel/.calculatePerformance
         # etc., e.g. L199, L204, L208, L218, L228, L234, L242, L246, L342, L516, L663,
         # L750, L757, L762, L816, L837, L845, L1505) all surface through .run()'s outer
@@ -1580,7 +1580,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.createInteractions(modeling_data, basic_predictors)
                 
                 # Build formula
-                # TODO (security): outcome_var (self$options$outcome — column name)
+                # TODO (security): outcome_var (self$options$outcome - column name)
                 # is NOT routed through .escapeVariableNames / jmvcore::composeTerm
                 # here or at sister sites L1606/L1641/L1676. jmvcore::asFormula now
                 # provides allow-list defense against function-call injection in the

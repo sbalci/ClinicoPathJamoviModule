@@ -11,7 +11,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # init ----
 
-        # TODO (data hygiene): the `num_levels * plotwidth` sizing below is unbounded —
+        # TODO (data hygiene): the `num_levels * plotwidth` sizing below is unbounded - 
         # a `grvar` column with hundreds of unique levels produces enormous canvases.
         # Cap num_levels at a sane upper bound (e.g., 16) with a notice when exceeded,
         # or defer sizing to .run/.plot post-validation. Same concern as jjradarplot.
@@ -739,7 +739,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # (rather than by name) means any variable option added later is
             # escaped automatically.
             #
-            # data/dep/group are NOT re-emitted through private$.asArgs() — doing
+            # data/dep/group are NOT re-emitted through private$.asArgs() - doing
             # so previously duplicated dep and group in the generated syntax (the
             # "double variables" bug). All non-variable options keep jmvcore's
             # per-option sourcify so formatting stays consistent with jamovi.

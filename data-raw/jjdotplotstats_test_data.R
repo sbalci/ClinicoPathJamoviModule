@@ -37,7 +37,8 @@ jjdotplotstats_test <- tibble(
 
   # Treatment group
   treatment = factor(rep(c("Control", "Treatment A", "Treatment B"), each = 40),
-                     levels = c("Control", "Treatment A", "Treatment B")),
+    levels = c("Control", "Treatment A", "Treatment B")
+  ),
 
   # Hospital site for grouped analysis
   hospital = factor(sample(c("Site A", "Site B", "Site C"), n_test, replace = TRUE)),
@@ -73,7 +74,8 @@ jjdotplotstats_twogroup <- tibble(
 
   # Timepoint
   timepoint = factor(rep(c("Pre-treatment", "Post-treatment"), each = 40),
-                     levels = c("Pre-treatment", "Post-treatment")),
+    levels = c("Pre-treatment", "Post-treatment")
+  ),
 
   # Gender for grouped analysis
   gender = factor(sample(c("Male", "Female"), n_two, replace = TRUE))
@@ -104,7 +106,8 @@ jjdotplotstats_fourgroup <- tibble(
 
   # Dose group
   dose = factor(rep(c("Placebo", "Low", "Medium", "High"), each = 40),
-                levels = c("Placebo", "Low", "Medium", "High")),
+    levels = c("Placebo", "Low", "Medium", "High")
+  ),
 
   # Age group for stratification
   age_group = factor(sample(c("Young", "Middle", "Elderly"), n_four, replace = TRUE))
@@ -134,7 +137,8 @@ jjdotplotstats_skewed <- tibble(
 
   # Treatment group
   treatment = factor(rep(c("Control", "Active"), each = 45),
-                     levels = c("Control", "Active")),
+    levels = c("Control", "Active")
+  ),
 
   # Disease type
   disease = factor(sample(c("Type 1", "Type 2"), n_skew, replace = TRUE))
@@ -159,7 +163,8 @@ jjdotplotstats_outliers <- tibble(
 
   # Group
   group = factor(rep(c("Group A", "Group B"), each = 50),
-                 levels = c("Group A", "Group B")),
+    levels = c("Group A", "Group B")
+  ),
 
   # Center for grouped analysis
   center = factor(sample(c("Center 1", "Center 2"), n_out, replace = TRUE))
@@ -188,7 +193,7 @@ jjdotplotstats_reference <- tibble(
   patient_id = 1:n_ref,
 
   # Blood pressure reduction (mmHg)
-  # Target reduction: ≥10 mmHg
+  # Target reduction: >=10 mmHg
   # Drug A: mean=8 (below target), Drug B: mean=15 (above target), Drug C: mean=12 (above target)
   bp_reduction = c(
     rnorm(50, mean = 8, sd = 5),
@@ -198,7 +203,8 @@ jjdotplotstats_reference <- tibble(
 
   # Drug
   drug = factor(rep(c("Drug A", "Drug B", "Drug C"), each = 50),
-                levels = c("Drug A", "Drug B", "Drug C")),
+    levels = c("Drug A", "Drug B", "Drug C")
+  ),
 
   # Baseline severity
   severity = factor(sample(c("Mild", "Moderate", "Severe"), n_ref, replace = TRUE))
@@ -228,11 +234,14 @@ jjdotplotstats_qol <- tibble(
 
   # Intervention
   intervention = factor(rep(c("Standard Care", "Intervention A", "Intervention B"), each = 40),
-                        levels = c("Standard Care", "Intervention A", "Intervention B")),
+    levels = c("Standard Care", "Intervention A", "Intervention B")
+  ),
 
   # Comorbidity
-  comorbidity = factor(sample(c("None", "Present"), n_qol, replace = TRUE,
-                              prob = c(0.6, 0.4)))
+  comorbidity = factor(sample(c("None", "Present"), n_qol,
+    replace = TRUE,
+    prob = c(0.6, 0.4)
+  ))
 )
 
 # Ensure bounds
@@ -259,7 +268,8 @@ jjdotplotstats_labvalues <- tibble(
 
   # Anemia severity
   anemia = factor(rep(c("Normal", "Mild", "Moderate"), each = 60),
-                  levels = c("Normal", "Mild", "Moderate")),
+    levels = c("Normal", "Mild", "Moderate")
+  ),
 
   # Gender (affects normal ranges)
   sex = factor(sample(c("Male", "Female"), n_lab, replace = TRUE))
@@ -485,7 +495,7 @@ SPECIAL FEATURES
 
 Test Value Testing (testvalue, testvalueline):
   • Test against clinically meaningful threshold
-  • Example: BP reduction ≥ 10 mmHg (reference dataset)
+  • Example: BP reduction >= 10 mmHg (reference dataset)
   • Null hypothesis: mean = test value
 
 Central Tendency Lines (centralityplotting):
@@ -538,7 +548,7 @@ Reference (BP Reduction):
   • Drug A: 8 mmHg (below threshold)
   • Drug B: 15 mmHg (above threshold)
   • Drug C: 12 mmHg (above threshold)
-  • Target: ≥10 mmHg reduction
+  • Target: >=10 mmHg reduction
 
 EXAMPLE R CODE
 --------------

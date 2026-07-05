@@ -228,10 +228,10 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # (1, 2, ...) when status_data is a jamovi factor, but the branch logic above
             # (`unique_vals %in% c(0,1)` / `c(FALSE,TRUE)`) implies the caller expects
             # 0/1-coded values, not indices. If a factor with levels c("0","1") arrives,
-            # `as.numeric()` returns c(1,2) — silently wrong by 1. The right call is
+            # `as.numeric()` returns c(1,2) - silently wrong by 1. The right call is
             # `jmvcore::toNumeric(status_data)` which honors the factor's `values` attribute
             # set by jamovi (returning the underlying 0/1 coding the user sees in the UI).
-            # Flagged as ⚠ behavior risk during jamovify pass — needs manual review to confirm
+            # Flagged as ⚠ behavior risk during jamovify pass - needs manual review to confirm
             # the values attribute matches the expected 0/1 semantics before swapping.
             # Standard binary conversions
             if (all(unique_vals %in% c(0, 1))) {
@@ -298,12 +298,12 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO (UX): three error paths in this function build HTML error blocks
             # (L292-306 empty-data, L320-330 validation-failure, L389-404 survival-fit-error)
-            # and surface them via `stop(html)`. jamovi renders stop() messages as PLAIN TEXT —
+            # and surface them via `stop(html)`. jamovi renders stop() messages as PLAIN TEXT - 
             # the HTML markup shows literally as `<div ...>...</div>` to the user. Replace each
             # with the project idiom: `self$results$text$setContent(html); return()`, or
             # accumulate via the .addNotice / .addHtmlMessage HTML-pane pattern used elsewhere
             # in the module (see waterfall.b.R / oddsratio.b.R for reference). Same fix applies
-            # to all three sites — sweep together.
+            # to all three sites - sweep together.
             # Check for empty data
             if (nrow(self$data) == 0) {
                 error_msg <- paste(

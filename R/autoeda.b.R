@@ -82,7 +82,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 analysis_data <- dataset
             }
 
-            # TODO (jamovify): File-wide — the missing-package error at lines 86-94 (DataExplorer) and 96-104 (ggEDA) display errors via `self$results$overview$setContent("...")` instead of `jmvcore::reject()`. The reject form surfaces a banner at the top of the analysis instead of in-section message. Skipped as a UX behavior change; needs explicit decision.
+            # TODO (jamovify): File-wide - the missing-package error at lines 86-94 (DataExplorer) and 96-104 (ggEDA) display errors via `self$results$overview$setContent("...")` instead of `jmvcore::reject()`. The reject form surfaces a banner at the top of the analysis instead of in-section message. Skipped as a UX behavior change; needs explicit decision.
             # Check package requirements based on engine
             if (eda_engine %in% c("dataexplorer", "hybrid") && !requireNamespace("DataExplorer", quietly = TRUE)) {
                 error_msg <- "

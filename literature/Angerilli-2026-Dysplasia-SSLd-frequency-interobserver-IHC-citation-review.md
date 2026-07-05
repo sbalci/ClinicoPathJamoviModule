@@ -8,7 +8,7 @@
 - **Design & Cohort**: Multi-component observational study with 4 aims:
   1. **National cohort study** (retrospective): 186,162 SSLs from 113,239 patients across 40 Dutch laboratories (2014–2022) via PALGA national pathology databank — frequency of dysplasia
   2. **National audit** (cross-sectional): 167 SSLd cases from 36 laboratories reviewed by expert panel — interobserver variability
-  3. **IHC biomarker study**: Retrospective cohort A (n=211 SSLs ≥1cm, 5 IHC markers) + Prospective cohort B (n=348 consecutive SSLs, MLH1 only) — diagnostic value of IHC
+  3. **IHC biomarker study**: Retrospective cohort A (n=211 SSLs >=1cm, 5 IHC markers) + Prospective cohort B (n=348 consecutive SSLs, MLH1 only) — diagnostic value of IHC
   4. **Misdiagnosis study**: Cohort C (n=1572 advanced adenomas, BRAF IHC) — SSLd hiding as conventional adenomas
 - **Key Analyses**:
   - Descriptive statistics (frequencies, percentages, medians, IQR, variance, SD)
@@ -116,6 +116,7 @@ None — PDF was successfully read.
 **Total Score**: 8/16 (excluding N/A) → Overall Badge: 🟡 Moderate
 
 **Red flags noted**:
+
 - **No multiplicity correction**: 20+ tests across 4 study aims with no family-wise or FDR correction. With the massive national cohort (N>186K), even trivial differences reach P<0.001.
 - **No effect sizes or CIs**: Every result is reported as a p-value only. With N=186,162, a p-value of <0.001 for age difference (68 vs 66 years) is clinically meaningless without an effect size showing the 2-year difference is trivial.
 - **No formal kappa for interobserver variability**: Despite the study explicitly examining "interobserver variability" as a primary aim, no kappa statistic or ICC is reported. The audit describes discrepancies (18/167 = 10.8%) but this is a crude measure — proper agreement statistics are needed.
@@ -127,24 +128,28 @@ None — PDF was successfully read.
 ## 🔎 GAP ANALYSIS (WHAT'S MISSING)
 
 ### Gap 1: Formal inter-rater agreement statistics (kappa) for the audit
+
 - **Method**: Cohen's/Fleiss' kappa, percentage agreement, specific agreement (positive/negative)
 - **Impact**: The audit (aim ii) is about interobserver variability but reports only raw discrepancy counts. Formal kappa statistics would quantify agreement properly.
 - **Closest existing function**: `agreement`, `cohenskappa`, `pathagreement` — **all available**
 - **Exact missing options**: None — this is an article gap, not a ClinicoPath gap
 
 ### Gap 2: Multivariable logistic regression for SSLd predictors
+
 - **Method**: Logistic regression with SSLd (yes/no) as outcome, adjusting for age, sex, site, size, year
 - **Impact**: Would provide adjusted odds ratios for clinical predictors of dysplasia
 - **Closest existing function**: `directregression` — supports logistic regression
 - **Exact missing options**: None — this is an article gap, not a ClinicoPath gap
 
 ### Gap 3: Effect sizes for categorical comparisons
+
 - **Method**: Cramér's V for χ² tests, OR/RR for 2×2 tables, rank-biserial r for Mann–Whitney
 - **Impact**: Critical for interpreting large-N results where even trivial differences reach significance
 - **Closest existing function**: `effectsize`, `nonparametric` — **available but check implementation completeness**
 - **Exact missing options**: Verify that `conttables` reports Cramér's V automatically
 
 ### Gap 4: Multilevel/mixed model for interlaboratory variability
+
 - **Method**: Random-effects logistic regression with laboratory as random intercept, SSLd as outcome
 - **Impact**: Would properly model the hierarchical structure (lesions nested within laboratories) and quantify between-laboratory variance
 - **Closest existing function**: `mixedmodelanova` (for continuous), `ordinalmixedmodel` (just implemented for ordinal) — but no **mixed logistic regression** (GLMM with binomial family)
@@ -154,7 +159,7 @@ None — PDF was successfully read.
 
 ## 🧭 ROADMAP (IMPLEMENTATION PLAN)
 
-### All primary methods in this article are already covered by ClinicoPath.
+### All primary methods in this article are already covered by ClinicoPath
 
 The only substantive gap identified is a **GLMM for binary outcomes** (mixed logistic regression), which the article should have used but didn't. This is a general infrastructure gap rather than an article-specific one.
 
@@ -163,6 +168,7 @@ The only substantive gap identified is a **GLMM for binary outcomes** (mixed log
 This would extend the existing `mixedmodelanova` (which handles continuous outcomes via `lme4::lmer`) to binary outcomes via `lme4::glmer` or `glmmTMB::glmmTMB`.
 
 **.a.yaml** (key options):
+
 ```yaml
 name: mixedlogistic
 title: Mixed-Effects Logistic Regression
@@ -202,6 +208,7 @@ options:
 ```
 
 **.b.R** (sketch):
+
 ```r
 # Fit GLMM
 model <- lme4::glmer(
@@ -224,6 +231,7 @@ icc <- var_u / (var_u + pi^2/3)
 ```
 
 #### Validation
+
 - Simulate binary outcome with known ICC and random intercepts
 - Compare `glmer` and `glmmTMB` estimates
 - Verify ICC calculation against `performance::icc()` from the `performance` package
@@ -243,6 +251,7 @@ icc <- var_u / (var_u + pi^2/3)
 ## 📦 DEPENDENCIES
 
 No new dependencies needed — all methods are covered by existing imports:
+
 - `stats` (χ², Fisher's exact, Mann–Whitney, linear regression, McNemar)
 - `PMCMRplus` (Friedman post-hoc, if extended)
 - `lme4` / `glmmTMB` (for future GLMM function)

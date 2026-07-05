@@ -875,18 +875,6 @@ idiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' valuable when numeric risk improvement is more relevant than categorical 
 #' reclassification, such as in precision medicine applications.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- idi(
-#'     data = mydata,
-#'     outcome = "event_indicator",
-#'     baseline_risk = "baseline_predictions",
-#'     new_risk = "new_model_predictions",
-#'     time_point = 5,
-#'     bootstrap_samples = 1000
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (0/1) indicating event occurrence.
 #'   For time-to-event data, this should be event status at the specified time

@@ -4,10 +4,10 @@
 
 - **Function**: `curemodels`
 - **Files**:
-  - `jamovi/curemodels.u.yaml` -- UI
-  - `jamovi/curemodels.a.yaml` -- Options (19 total)
-  - `R/curemodels.b.R` -- Backend
-  - `jamovi/curemodels.r.yaml` -- Results (5 tables, 2 plots, 5 HTML)
+  - `jamovi/curemodels.u.yaml` - UI
+  - `jamovi/curemodels.a.yaml` - Options (19 total)
+  - `R/curemodels.b.R` - Backend
+  - `jamovi/curemodels.r.yaml` - Results (5 tables, 2 plots, 5 HTML)
 - **Menu location**: OncoPathD > Cure Models for Long-Term Survivors
 - **Summary**: Cure models estimate the proportion of patients who are statistically cured (i.e., whose long-term hazard returns to that of the general population) and characterize the survival distribution of uncured patients. The module implements four modelling frameworks: mixture cure (smcure), non-mixture cure (flexsurvcure), background-mortality-adjusted cure (cuRe), and nonparametric cure (npcure). It supports covariate-adjusted cure fraction estimation, bootstrap confidence intervals, goodness-of-fit testing, sensitivity analysis across cure thresholds, and side-by-side model comparison with AIC/BIC/log-likelihood. Designed for oncology researchers evaluating long-term survivors in colorectal, breast, lung, and other solid tumour cohorts.
 

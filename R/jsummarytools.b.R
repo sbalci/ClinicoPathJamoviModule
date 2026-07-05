@@ -31,10 +31,10 @@ jsummarytoolsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         # TODO (correctness): the hash helpers below are fragile:
         # (1) `.calculateDataHash` uses `paste(analysis_type, nrow, ncol, var_names,
-        #     range(...))` — mutations within the min/max range (row shuffling,
+        #     range(...))` - mutations within the min/max range (row shuffling,
         #     value changes preserving extremes) won't invalidate the cache →
         #     stale `summary_output`/`crosstab_output` HTML possible.
-        # (2) `.calculateOptionsHash` uses `paste(options_list, collapse = "_")` —
+        # (2) `.calculateOptionsHash` uses `paste(options_list, collapse = "_")` - 
         #     option values with colliding string representations would yield
         #     same hash.
         # Recommend content-based invalidation matching jjpiestats/jjtreemap pattern:

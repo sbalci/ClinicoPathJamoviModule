@@ -93,7 +93,7 @@ children:
           - type: TextBox
             name: subsampling_ratio
             format: number
-            label: Subsampling Ratio (0.1–0.9)
+            label: Subsampling Ratio (0.1-0.9)
             enable: (stability_selection)
           - type: TextBox
             name: stability_threshold

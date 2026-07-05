@@ -27,7 +27,7 @@
 |---|---|---|---|---|
 | Descriptive statistics | Primary | Frequencies, percentages, means | Not explicitly stated | Throughout |
 | Fisher exact test | Primary | Pairwise comparisons between block groups | Independence, appropriate for small cell counts | Page 3 (lines 441, 673) |
-| Chi-squared test of independence | Primary | Between block groups and MPR | Independence, expected frequencies ≥5 | Page 3 (lines 441) |
+| Chi-squared test of independence | Primary | Between block groups and MPR | Independence, expected frequencies >=5 | Page 3 (lines 441) |
 | Cochran-Armitage test for trend | Secondary | Linear trend in MPR across increasing blocks | Ordered categorical exposure, independence | Page 3 (lines 671-672) |
 | Binomial logistic regression | Secondary | Block groups and block-to-size ratio as predictors | Linearity of logit, independence, no multicollinearity | Page 3 (lines 682-685) |
 | Contingency table analysis | Primary | Cross-tabulation of gross vs microscopic status | Independence assumption | Throughout |
@@ -91,7 +91,7 @@
 **Method**: Cochran-Armitage Test for Trend  
 **Impact**: Essential for testing linear trends in proportions across ordered categories (block groups 1-2, 3-4, 5-6, >6). Widely used in pathology and epidemiology for dose-response relationships.  
 **Closest existing function**: contTables (provides chi-squared test but not trend test)  
-**Exact missing options**: 
+**Exact missing options**:
 
 - Trend test for ordered categorical exposure
 - One-sided and two-sided trend tests
@@ -292,17 +292,20 @@ F --> G[Enhanced contTables]
 
 **Article Analysis**: Pathologic sampling study with appropriate statistical methods for practice evaluation research
 
-**Coverage Assessment**: 
+**Coverage Assessment**:
+
 - COVERED: 7/8 methods fully covered
 - MISSING: 1/8 method missing (Cochran-Armitage trend test)
 - High overall coverage (87.5%)
 
-**Critical Evaluation**: 
+**Critical Evaluation**:
+
 - Overall robust methodology (15/18 points)
 - Minor improvements needed in assumption checking and missing data reporting
 - Good alignment between research question and statistical approach
 
-**Implementation Priority**: 
+**Implementation Priority**:
+
 - Single high-impact gap: Cochran-Armitage trend test
 - Clear implementation path via contTables extension
 - Moderate development effort with high clinical utility

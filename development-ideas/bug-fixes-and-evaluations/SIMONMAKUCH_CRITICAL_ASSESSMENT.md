@@ -27,6 +27,7 @@ The `simonmakuch` function has **fundamental architectural flaws** that make it 
 The function assumes each patient has **at most ONE exposure change**, stored as a scalar `timedep_time` value. Real Simon-Makuch analyses require capturing **every exposure change** in long format (counting-process format).
 
 **Current Implementation**:
+
 ```r
 .createTimeDependentDataset = function(id, time, event, timedep_time, timedep_status, exposed_level) {
     # For each person...
@@ -47,11 +48,13 @@ The function assumes each patient has **at most ONE exposure change**, stored as
 ```
 
 **What's Missing**:
+
 - Cannot handle patient who switches: Unexposed → Exposed → Unexposed
 - Cannot handle multiple medication starts/stops
 - Cannot handle any scenario with >1 exposure change
 
 **Example of Failure**:
+
 ```r
 # Patient with 2 exposure changes:
 # Days 0-30: Unexposed
@@ -72,6 +75,7 @@ The function assumes each patient has **at most ONE exposure change**, stored as
 ```
 
 **Why This Can't Be Quickly Fixed**:
+
 1. Requires changing data input format (scalar → vector of change times)
 2. Requires UI changes to accept longitudinal exposure data
 3. Requires validation of multiple change times
@@ -87,6 +91,7 @@ The function assumes each patient has **at most ONE exposure change**, stored as
 The code fits `survfit(Surv(tstart, tstop, event) ~ exposed, data = survData)` treating `exposed` as a fixed covariate. This is **mathematically incorrect** for time-varying exposures.
 
 **Current Implementation**:
+
 ```r
 # Time-dependent log-rank test (INCORRECTLY IMPLEMENTED)
 survfit_obj <- survfit(Surv(tstart, tstop, event) ~ exposed, data = survData)
@@ -94,12 +99,14 @@ survdiff_obj <- survdiff(Surv(tstart, tstop, event) ~ exposed, data = survData)
 ```
 
 **What's Wrong**:
+
 1. `survfit()` expects **one row per subject** with baseline covariates
 2. Feeding counting-process data (multiple rows per subject) **double-counts person-time**
 3. The `exposed` variable **flips mid-follow-up**, violating Kaplan-Meier assumptions
 4. This is **not** a valid time-dependent log-rank test
 
 **Clinical Impact**:
+
 ```r
 # Example: 100 patients, each followed 10 years
 # 50 switch from unexposed to exposed at year 5
@@ -118,11 +125,13 @@ survdiff_obj <- survdiff(Surv(tstart, tstop, event) ~ exposed, data = survData)
 ```
 
 **Correct Methodology**:
+
 - Should use **Mantel-Byar** method or **landmark analysis**
 - Should use `coxph()` with time-varying covariates, NOT `survfit()`
 - Should properly account for person-time in each exposure state
 
 **Why This Can't Be Quickly Fixed**:
+
 - Requires complete rewrite of survival estimation
 - Requires implementing proper Mantel-Byar methodology
 - Requires changing output format (can't use standard KM curves)
@@ -137,6 +146,7 @@ survdiff_obj <- survdiff(Surv(tstart, tstop, event) ~ exposed, data = survData)
 The code promises to compare proper (Simon-Makuch) vs. naive (baseline exposure) models to demonstrate immortal time bias. The entire naive branch is **not implemented** - just NA placeholders.
 
 **Current Implementation**:
+
 ```r
 if (self$options$showImmortalTimeBias && !is.null(survData)) {
     # Prepare comparison table
@@ -163,6 +173,7 @@ if (self$options$showImmortalTimeBias && !is.null(survData)) {
 ```
 
 **What Users See**:
+
 ```
 Immortal Time Bias Assessment
 ┌─────────────────────────────┬─────┬──────────┬──────────┬─────────┐
@@ -174,12 +185,14 @@ Immortal Time Bias Assessment
 ```
 
 **Clinical Impact**:
+
 - Users **believe** bias assessment ran
 - Users see "Simon-Makuch (Proper)" row and assume the naive comparison validates it
 - **No actual comparison** was performed
 - **Completely misleading** - worse than omitting the feature
 
 **Why This Can't Be Quickly Fixed**:
+
 - Requires implementing the naive analysis (fit Cox on baseline exposure)
 - Requires ensuring both models use same data/censoring
 - Requires statistical comparison methodology
@@ -195,6 +208,7 @@ Immortal Time Bias Assessment
 There is **NO test file** for this function. None of the issues above are validated. No edge cases tested. No numerical correctness verified.
 
 **Consequence**:
+
 - All 3 critical bugs above went undetected
 - Any future changes could break function without detection
 - No validation that fixes actually work
@@ -241,6 +255,7 @@ Unlike `outcomeorganizer` and `timeinterval` (which had **targeted bugs** that c
 ### Immediate (Required Before Any Release)
 
 1. **Option A: Disable the Function** ⚠️ RECOMMENDED
+
    ```r
    # In jamovi 0000.yaml, mark as disabled or remove from menu
    # Add warning in documentation:
@@ -253,6 +268,7 @@ Unlike `outcomeorganizer` and `timeinterval` (which had **targeted bugs** that c
    - Can be re-enabled when properly implemented
 
 2. **Option B: Remove the Function** (if Option A not feasible)
+
    ```r
    # Remove from jamovi menu entirely
    # Keep code in repository for future development
@@ -288,7 +304,7 @@ Unlike `outcomeorganizer` and `timeinterval` (which had **targeted bugs** that c
    - Ensure all UI options actually work
 
 4. **Comprehensive Testing** (3-4 weeks)
-   - Create test-simonmakuch.R with ≥50 tests
+   - Create test-simonmakuch.R with >=50 tests
    - Test counting-process construction
    - Test survival estimation correctness
    - Test edge cases (single switch, multiple switches, no switches)
@@ -313,6 +329,7 @@ Unlike `outcomeorganizer` and `timeinterval` (which had **targeted bugs** that c
 | **timeinterval** | Negative intervals, date format | ~4 hours | ✅ Complete, tested |
 
 Both had:
+
 - Targeted bugs with clear fixes
 - Core methodology sound
 - Could be fixed without redesign
@@ -325,6 +342,7 @@ Both had:
 | **simonmakuch** | Architecture, methodology, fake features | **15-21 weeks** | ⛔ Requires redesign |
 
 Has:
+
 - Fundamental architectural issues
 - Wrong statistical methodology
 - Incomplete implementation
@@ -366,6 +384,7 @@ The `simonmakuch` function addresses a **critical clinical need** (handling time
 4. ⛔ Has zero automated testing (no quality assurance)
 
 These are **not bugs that can be patched** - they are **architectural issues requiring complete redesign**. Attempting quick fixes would be like:
+
 - Fixing a structural crack in a building's foundation with tape
 - Repairing a car's engine by painting the hood
 - Treating cancer with band-aids
@@ -373,12 +392,14 @@ These are **not bugs that can be patched** - they are **architectural issues req
 ### Recommendation: 🚫 DO NOT RELEASE
 
 **Action Required**: Disable or remove this function from any release until it can be properly:
+
 1. Redesigned to handle longitudinal exposure data
 2. Implemented with correct time-dependent methodology
 3. Validated against published examples
 4. Tested comprehensively
 
 **Alternative**: If urgent need for Simon-Makuch analysis:
+
 - Direct users to established packages: `survival::tmerge()`, `survival::survfit()` with proper setup
 - Provide tutorial/vignette showing how to do it correctly in R
 - State that jamovi implementation is "in development"
@@ -388,6 +409,7 @@ These are **not bugs that can be patched** - they are **architectural issues req
 ---
 
 **Files**:
+
 - Assessment: `SIMONMAKUCH_CRITICAL_ASSESSMENT.md`
 - Implementation: `R/simonmakuch.b.R` (REQUIRES REDESIGN)
 - Tests: NONE EXIST (tests/testthat/test-simonmakuch.R needs to be created)

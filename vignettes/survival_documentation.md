@@ -9,12 +9,12 @@
 
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
-| Time elapsed (numeric) | `elapsedtime` (Variable, numeric) | VariablesListBox `elapsedtime` | -- | `.definemytime()` |
+| Time elapsed (numeric) | `elapsedtime` (Variable, numeric) | VariablesListBox `elapsedtime` | - | `.definemytime()` |
 | Calculate time from dates | `tint` (Bool), `dxdate`, `fudate` (Variable) | CollapseBox "Advanced Elapsed Time Options" | `calculatedtime` (Output) | `.definemytime()` |
-| Date format in data | `timetypedata` (List: ymdhms/ymd/ydm/mdy/myd/dmy/dym) | ComboBox `timetypedata` | -- | `.definemytime()` |
-| Output time unit | `timetypeoutput` (List: days/weeks/months/years) | ComboBox `timetypeoutput` | -- | `.definemytime()` |
+| Date format in data | `timetypedata` (List: ymdhms/ymd/ydm/mdy/myd/dmy/dym) | ComboBox `timetypedata` | - | `.definemytime()` |
+| Output time unit | `timetypeoutput` (List: days/weeks/months/years) | ComboBox `timetypeoutput` | - | `.definemytime()` |
 | Outcome variable | `outcome` (Variable, factor/numeric) | VariablesListBox `outcome` | `outcomeredefined` (Output) | `.definemyoutcome()` |
-| Event level | `outcomeLevel` (Level of outcome) | LevelSelector `outcomeLevel` | -- | `.definemyoutcome()` |
+| Event level | `outcomeLevel` (Level of outcome) | LevelSelector `outcomeLevel` | - | `.definemyoutcome()` |
 | Explanatory variable | `explanatory` (Variable, factor) | VariablesListBox `explanatory` | `subtitle` (Preformatted) | `.definemyfactor()` |
 
 ---
@@ -23,9 +23,9 @@
 
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
-| Median survival (always runs) | (none -- always computed) | -- | `medianSurvivalHeading` (Preformatted), `medianSummary` (Preformatted), `medianTable` (Table: factor, records, events, rmean, se_rmean, median, x0_95lcl, x0_95ucl) | `.medianSurv()` |
-| Median survival explanation | `showExplanations` (Bool) | -- | `medianSurvivalHeading3` (Preformatted), `medianSurvivalExplanation` (Html) | `.populateExplanations()` |
-| Median survival summary | `showSummaries` (Bool) | -- | `medianSummary` (Preformatted) | `.medianSurv()` |
+| Median survival (always runs) | (none - always computed) | - | `medianSurvivalHeading` (Preformatted), `medianSummary` (Preformatted), `medianTable` (Table: factor, records, events, rmean, se_rmean, median, x0_95lcl, x0_95ucl) | `.medianSurv()` |
+| Median survival explanation | `showExplanations` (Bool) | - | `medianSurvivalHeading3` (Preformatted), `medianSurvivalExplanation` (Html) | `.populateExplanations()` |
+| Median survival summary | `showSummaries` (Bool) | - | `medianSummary` (Preformatted) | `.medianSurv()` |
 
 ---
 
@@ -33,9 +33,9 @@
 
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
-| Cox proportional hazards (always runs) | (none -- always computed unless competing risk) | -- | `coxRegressionHeading` (Preformatted), `coxSummary` (Preformatted), `coxTable` (Table: Explanatory, Levels, all, HR_univariable), `tCoxtext2` (Html) | `.cox()` |
-| Cox regression explanation | `showExplanations` (Bool) | -- | `coxRegressionHeading3` (Preformatted), `coxRegressionExplanation` (Html) | `.populateExplanations()` |
-| Cox regression summary | `showSummaries` (Bool) | -- | `coxSummary` (Preformatted) | `.cox()` |
+| Cox proportional hazards (always runs) | (none - always computed unless competing risk) | - | `coxRegressionHeading` (Preformatted), `coxSummary` (Preformatted), `coxTable` (Table: Explanatory, Levels, all, HR_univariable), `tCoxtext2` (Html) | `.cox()` |
+| Cox regression explanation | `showExplanations` (Bool) | - | `coxRegressionHeading3` (Preformatted), `coxRegressionExplanation` (Html) | `.populateExplanations()` |
+| Cox regression summary | `showSummaries` (Bool) | - | `coxSummary` (Preformatted) | `.cox()` |
 
 ---
 
@@ -44,7 +44,7 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Survival at cutpoints (always runs) | `cutp` (String, default "12, 36, 60") | CollapseBox "Survival Tables" > TextBox `cutp` | `survivalTablesHeading` (Preformatted), `survTableSummary` (Preformatted), `survTable` (Table: strata, time, n.risk, n.event, surv, lower, upper) | `.survTable()` |
-| Survival tables explanation | `showExplanations` (Bool) | -- | `survivalTablesHeading3` (Preformatted), `survivalTablesExplanation` (Html) | `.populateExplanations()` |
+| Survival tables explanation | `showExplanations` (Bool) | - | `survivalTablesHeading3` (Preformatted), `survivalTablesExplanation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -61,7 +61,7 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Pairwise group comparisons | `pw` (Bool) | CollapseBox "Statistical Analysis" > CheckBox `pw` | `pairwiseComparisonHeading` (Preformatted), `pairwiseSummary` (Preformatted), `pairwiseTable` (Table: rowname, name, value) | `.pairwise()` |
-| P-value adjustment method | `padjustmethod` (List: holm/hochberg/hommel/bonferroni/BH/BY/fdr/none) | ComboBox `padjustmethod` | -- | `.pairwise()` |
+| P-value adjustment method | `padjustmethod` (List: holm/hochberg/hommel/bonferroni/BH/BY/fdr/none) | ComboBox `padjustmethod` | - | `.pairwise()` |
 
 ---
 
@@ -70,8 +70,8 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | RMST analysis | `rmst_analysis` (Bool) | CollapseBox "Statistical Analysis" > CheckBox `rmst_analysis` | `rmstHeading` (Preformatted), `rmstTable` (Table: group, rmst, se, ci_lower, ci_upper, tau), `rmstSummary` (Preformatted) | `.calculateRMST()` |
-| RMST time horizon | `rmst_tau` (Number, default 0 = auto 75th percentile) | TextBox `rmst_tau` | -- | `.calculateRMST()` |
-| RMST explanation | `showExplanations` (Bool) | -- | `rmstExplanation` (Html) | `.populateExplanations()` |
+| RMST time horizon | `rmst_tau` (Number, default 0 = auto 75th percentile) | TextBox `rmst_tau` | - | `.calculateRMST()` |
+| RMST explanation | `showExplanations` (Bool) | - | `rmstExplanation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -80,8 +80,8 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Fleming-Harrington family tests | `weightedLogRank` (Bool) | CollapseBox "Statistical Analysis" > CheckBox `weightedLogRank` | `weightedLogRankTable` (Table: test, rho, chisq, df, pvalue, weighting) | `.calculateWeightedLogRank()` |
-| Survival test type selection | `survivalTestType` (List: logrank/gehan_breslow/tarone_ware/peto_peto/fleming_harrington) | ComboBox `survivalTestType` | -- | `.calculateWeightedLogRank()` |
-| Weighted log-rank explanation | `showSummaries` (Bool) | -- | `weightedLogRankExplanation` (Html) | `.populateWeightedLogRankExplanation()` |
+| Survival test type selection | `survivalTestType` (List: logrank/gehan_breslow/tarone_ware/peto_peto/fleming_harrington) | ComboBox `survivalTestType` | - | `.calculateWeightedLogRank()` |
+| Weighted log-rank explanation | `showSummaries` (Bool) | - | `weightedLogRankExplanation` (Html) | `.populateWeightedLogRankExplanation()` |
 
 ---
 
@@ -90,8 +90,8 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Bootstrap optimism-corrected C-index | `bootstrapValidation` (Bool) | CollapseBox "Statistical Analysis" > CheckBox `bootstrapValidation` | `bootstrapValidationTable` (Table: metric, apparent, optimism, corrected, n_bootstrap) | `.calculateBootstrapValidation()` |
-| Number of bootstrap resamples | `bootstrapValN` (Integer, default 200, min 50, max 1000) | TextBox `bootstrapValN` | -- | `.calculateBootstrapValidation()` |
-| Bootstrap explanation | `showSummaries` (Bool) | -- | `bootstrapValidationExplanation` (Html) | `.populateBootstrapValidationExplanation()` |
+| Number of bootstrap resamples | `bootstrapValN` (Integer, default 200, min 50, max 1000) | TextBox `bootstrapValN` | - | `.calculateBootstrapValidation()` |
+| Bootstrap explanation | `showSummaries` (Bool) | - | `bootstrapValidationExplanation` (Html) | `.populateBootstrapValidationExplanation()` |
 
 ---
 
@@ -100,9 +100,9 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Cox model calibration assessment | `calibration_curves` (Bool) | CollapseBox "Statistical Analysis" > CheckBox `calibration_curves` | `calibrationTable` (Table: metric, value, ci_lower, ci_upper, ideal, interpretation), `calibrationGroupTable` (Table: group, n, events, predicted, observed, observed_lower, observed_upper), `calibrationPlot` (Image, renderFun: `.plotCalibration`) | `.calculateCalibration()`, `.plotCalibration()` |
-| Calibration time point | `calibration_timepoint` (Number, default 0 = median) | TextBox `calibration_timepoint` | -- | `.calculateCalibration()` |
-| Number of risk groups | `calibration_ngroups` (Integer, default 5, min 3, max 10) | TextBox `calibration_ngroups` | -- | `.calculateCalibration()` |
-| Calibration explanation | `showExplanations` (Bool) | -- | `calibrationInterpretation` (Html) | `.populateExplanations()` |
+| Calibration time point | `calibration_timepoint` (Number, default 0 = median) | TextBox `calibration_timepoint` | - | `.calculateCalibration()` |
+| Number of risk groups | `calibration_ngroups` (Integer, default 5, min 3, max 10) | TextBox `calibration_ngroups` | - | `.calculateCalibration()` |
+| Calibration explanation | `showExplanations` (Bool) | - | `calibrationInterpretation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -111,9 +111,9 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Non-linearity assessment | `rcs_analysis` (Bool) | CollapseBox "Statistical Analysis" > CheckBox `rcs_analysis` | `rcsTestTable` (Table: model, df, loglik, aic, lr_chisq, lr_df, p_value, conclusion), `rcsPlot` (Image, renderFun: `.plotRCS`) | `.calculateRCS()`, `.plotRCS()` |
-| Continuous variable for spline | `rcs_variable` (Variable, numeric) | VariablesListBox `rcs_variable` | -- | `.calculateRCS()` |
-| Number of knots | `rcs_knots` (Integer, default 4, min 3, max 7) | TextBox `rcs_knots` | -- | `.calculateRCS()` |
-| RCS explanation | `showExplanations` (Bool) | -- | `rcsInterpretation` (Html) | `.populateExplanations()` |
+| Continuous variable for spline | `rcs_variable` (Variable, numeric) | VariablesListBox `rcs_variable` | - | `.calculateRCS()` |
+| Number of knots | `rcs_knots` (Integer, default 4, min 3, max 7) | TextBox `rcs_knots` | - | `.calculateRCS()` |
+| RCS explanation | `showExplanations` (Bool) | - | `rcsInterpretation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -128,7 +128,7 @@
 | Age standardization (SMR) | `age_standardization` (Bool), `age_standardization_method` (List: indirect/direct) | CheckBox + ComboBox | `ageStandardizationTable` (Table: group, observed, expected, smr, smr_ci_lower, smr_ci_upper, pvalue), `ageStandardizationInterpretation` (Html) | `.ageStandardization()` |
 | Age-stratified KM plots | `age_stratified_km` (Bool) | CheckBox `age_stratified_km` | `ageStratifiedKMPlot` (Image, 700x500, renderFun: `.plotAgeStratifiedKM`) | `.plotAgeStratifiedKM()` |
 | Adjusted survival curves | `adjusted_curves` (Bool) | CheckBox `adjusted_curves` | `adjustedCurvesPlot` (Image, 700x500, renderFun: `.plotAdjustedCurves`) | `.plotAdjustedCurves()` |
-| Age adjustment explanation | `showExplanations` (Bool) | -- | `ageAdjustedExplanation` (Html) | `.populateExplanations()` |
+| Age adjustment explanation | `showExplanations` (Bool) | - | `ageAdjustedExplanation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -137,12 +137,12 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Multiple event levels | `multievent` (Bool) | CollapseBox "Analysis with Multiple Outcomes" > CheckBox `multievent` | `outcomeredefined` (Output) | `.definemyoutcome()` |
-| Dead of Disease | `dod` (Level of outcome) | LevelSelector `dod` | -- | `.definemyoutcome()` |
-| Dead of Other Causes | `dooc` (Level of outcome) | LevelSelector `dooc` | -- | `.definemyoutcome()` |
-| Alive with Disease | `awd` (Level of outcome) | LevelSelector `awd` | -- | `.definemyoutcome()` |
-| Alive without Disease | `awod` (Level of outcome) | LevelSelector `awod` | -- | `.definemyoutcome()` |
-| Analysis type | `analysistype` (List: overall/cause/compete) | ComboBox `analysistype` | -- | `.definemyoutcome()`, `.isCompetingRisk()` |
-| Competing risk cumulative incidence | (auto when `analysistype == "compete"`) | -- | (via plots) | `.competingRiskCumInc()` |
+| Dead of Disease | `dod` (Level of outcome) | LevelSelector `dod` | - | `.definemyoutcome()` |
+| Dead of Other Causes | `dooc` (Level of outcome) | LevelSelector `dooc` | - | `.definemyoutcome()` |
+| Alive with Disease | `awd` (Level of outcome) | LevelSelector `awd` | - | `.definemyoutcome()` |
+| Alive without Disease | `awod` (Level of outcome) | LevelSelector `awod` | - | `.definemyoutcome()` |
+| Analysis type | `analysistype` (List: overall/cause/compete) | ComboBox `analysistype` | - | `.definemyoutcome()`, `.isCompetingRisk()` |
+| Competing risk cumulative incidence | (auto when `analysistype == "compete"`) | - | (via plots) | `.competingRiskCumInc()` |
 
 ---
 
@@ -151,9 +151,9 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Person-time metrics & incidence rates | `person_time` (Bool) | CollapseBox "Person-Time Analysis" > CheckBox `person_time` | `personTimeHeading` (Preformatted), `personTimeTable` (Table: interval, events, person_time, rate, rate_ci_lower, rate_ci_upper), `personTimeSummary` (Html) | `.personTimeAnalysis()` |
-| Time intervals for stratification | `time_intervals` (String, default "12, 36, 60") | TextBox `time_intervals` | -- | `.personTimeAnalysis()` |
-| Rate multiplier | `rate_multiplier` (Integer, default 100) | TextBox `rate_multiplier` | -- | `.personTimeAnalysis()` |
-| Person-time explanation | `showExplanations` (Bool) | -- | `personTimeExplanation` (Html) | `.populateExplanations()` |
+| Time intervals for stratification | `time_intervals` (String, default "12, 36, 60") | TextBox `time_intervals` | - | `.personTimeAnalysis()` |
+| Rate multiplier | `rate_multiplier` (Integer, default 100) | TextBox `rate_multiplier` | - | `.personTimeAnalysis()` |
+| Person-time explanation | `showExplanations` (Bool) | - | `personTimeExplanation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -162,7 +162,7 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Stratified Cox model | `stratified_cox` (Bool), `strata_variable` (Variable, factor) | CheckBox `stratified_cox`, VariablesListBox `strata_variable` | (within `coxTable`) | `.cox()` |
-| Landmark analysis | `uselandmark` (Bool), `landmark` (Integer, default 3) | Label "Landmark Analysis" > CheckBox + TextBox | -- | `.cleandata()` (filters data at landmark time) |
+| Landmark analysis | `uselandmark` (Bool), `landmark` (Integer, default 3) | Label "Landmark Analysis" > CheckBox + TextBox | - | `.cleandata()` (filters data at landmark time) |
 
 ---
 
@@ -171,9 +171,9 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Enable parametric models | `use_parametric` (Bool) | CollapseBox "Parametric Survival Models" | `parametricModelSummary` (Table), `parametricModelComparison` (Table), `parametricDiagnostics` (Html) | *disabled in .run()* |
-| Distribution selection | `parametric_distribution` (List: exp/weibull/lnorm/llogis/gamma/gengamma/gompertz/survspline) | ComboBox | -- | *disabled* |
-| Include covariates | `parametric_covariates` (Bool) | CheckBox | -- | *disabled* |
-| Spline knots / scale | `spline_knots` (Int, 1-10), `spline_scale` (List) | TextBox, ComboBox | -- | *disabled* |
+| Distribution selection | `parametric_distribution` (List: exp/weibull/lnorm/llogis/gamma/gengamma/gompertz/survspline) | ComboBox | - | *disabled* |
+| Include covariates | `parametric_covariates` (Bool) | CheckBox | - | *disabled* |
+| Spline knots / scale | `spline_knots` (Int, 1-10), `spline_scale` (List) | TextBox, ComboBox | - | *disabled* |
 | Extrapolation | `parametric_extrapolation` (Bool), `extrapolation_time` (Number) | CheckBox, TextBox | `extrapolationPlot` (Image), `extrapolationTable` (Table) | *disabled* |
 | Compare distributions | `compare_distributions` (Bool) | CheckBox | `parametricModelComparison` (Table) | *disabled* |
 | Parametric survival plots | `parametric_survival_plots` (Bool) | CheckBox | `parametricSurvivalPlot` (Image) | `.plotParametricSurvival()` *disabled* |
@@ -186,7 +186,7 @@
 | Feature | .a.yaml Option(s) | .u.yaml Section | .r.yaml Output(s) | .b.R Method |
 |---------|-------------------|-----------------|-------------------|-------------|
 | Cox model residuals | `residual_diagnostics` (Bool) | CheckBox `residual_diagnostics` | `residualsTable` (Table: observation, martingale, deviance, score, schoenfeld), `residualsPlot` (Image, renderFun: `.plot9`) | `.calculateResiduals()`, `.plot9()` |
-| Residual diagnostics explanation | `showExplanations` (Bool) | -- | `residualDiagnosticsExplanation` (Html) | `.populateExplanations()` |
+| Residual diagnostics explanation | `showExplanations` (Bool) | - | `residualDiagnosticsExplanation` (Html) | `.populateExplanations()` |
 
 ---
 
@@ -228,9 +228,9 @@
 |---------|-------------------|-----------------|-------------------|-------------|
 | Analysis explanations | `showExplanations` (Bool) | CollapseBox "Analysis Explanations" > CheckBox | `medianSurvivalExplanation`, `coxRegressionExplanation`, `survivalTablesExplanation`, `personTimeExplanation`, `rmstExplanation`, `residualDiagnosticsExplanation`, `survivalPlotsExplanation`, `ageAdjustedExplanation`, `calibrationInterpretation`, `rcsInterpretation`, `parametricModelsExplanation` (all Html) | `.populateExplanations()` |
 | Natural language summaries | `showSummaries` (Bool) | CheckBox | `medianSummary`, `coxSummary`, `survTableSummary`, `pairwiseSummary`, `rmstSummary` (Preformatted); `weightedLogRankExplanation`, `bootstrapValidationExplanation` (Html) | various methods |
-| Clinical glossary | `showExplanations` (Bool) | -- | `clinicalGlossaryExplanation` (Html) | `.generateClinicalGlossary()` |
-| Clinical interpretation | `showSummaries` (Bool) | -- | `clinicalInterpretationExplanation` (Html) | `.generateClinicalInterpretation()` |
-| Copy-ready report sentences | `showSummaries` (Bool) | -- | `copyReadySentencesExplanation` (Html) | `.generateCopyReadySentences()` |
+| Clinical glossary | `showExplanations` (Bool) | - | `clinicalGlossaryExplanation` (Html) | `.generateClinicalGlossary()` |
+| Clinical interpretation | `showSummaries` (Bool) | - | `clinicalInterpretationExplanation` (Html) | `.generateClinicalInterpretation()` |
+| Copy-ready report sentences | `showSummaries` (Bool) | - | `copyReadySentencesExplanation` (Html) | `.generateCopyReadySentences()` |
 | REMARK checklist | `remark_checklist` (Bool) | CheckBox `remark_checklist` | `remarkChecklist` (Html) | `.generateRemarkChecklist()` |
 
 ---
@@ -249,7 +249,7 @@
 
 | Check | Location | Condition | Behavior |
 |-------|----------|-----------|----------|
-| **Critical: <10 events** | `.run()` | `n_events < 10` | `stop()` -- blocks analysis entirely |
+| **Critical: <10 events** | `.run()` | `n_events < 10` | `stop()` - blocks analysis entirely |
 | **Warning: 10-19 events** | `.run()` | `n_events >= 10 && n_events < 20` | Table note on `medianTable` warning about unreliability |
 | **Note: 20-49 events** | `.run()` | `n_events >= 20 && n_events < 50` | Table note on `medianTable` noting limitations for complex models |
 | **Missing outcome** | `.validateInputs()` | `outcome == NULL` | `jmvcore::reject()` |

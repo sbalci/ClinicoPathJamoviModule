@@ -30,7 +30,7 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         #   digest::digest(list(group, size, color,
         #                        self$data[, c(group, size, color), drop = FALSE]),
         #                  algo = "md5")
-        # — matches the hashing pattern used in `.prepareOptions` (post-audit) and
+        # - matches the hashing pattern used in `.prepareOptions` (post-audit) and
         # in `.processedData` of jjpiestats.
         #
         # TODO (operational hygiene): namespaced refs `treemap::treemap` (L168),

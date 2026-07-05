@@ -181,7 +181,7 @@ extratreesClass <- if (requireNamespace("jmvcore"))
             .buildExtraTreesModel = function(surv_data) {
                 set.seed(self$options$random_seed)
                 
-                # Prepare formula — backtick-escape user column names and parse via jmvcore allowlist
+                # Prepare formula - backtick-escape user column names and parse via jmvcore allowlist
                 pred_rhs <- jmvcore::composeTerms(as.list(surv_data$predictors))
                 if (is.null(surv_data$strata)) {
                     formula_str <- paste0("survival_object ~ ", paste(pred_rhs, collapse = " + "))

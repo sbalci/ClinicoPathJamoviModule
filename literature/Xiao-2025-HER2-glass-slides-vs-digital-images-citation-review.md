@@ -5,7 +5,7 @@
 ## ARTICLE SUMMARY
 
 - **Title/Label**: Comparative study of intra- and inter-observer variability in manual scoring of HER2 immunohistochemical stains on glass slides versus paired digital images with emphasis on the low end of the expression spectrum
-- **Design & Cohort**: Retrospective concordance study; N = 247 breast carcinomas (117 core biopsies + 130 excisions, including 12 metastatic) from UCSF CoPath laboratory (2021-2024). Oversampled HER2 score 0 (n=100). Three experienced breast pathologists independently scored all glass slides and paired digital images (Philips WSI, 20x). 5-category scoring: null (no staining), ultralow (faint ≤10%), 1+, 2+, 3+. Washout period ≥2 weeks between slide and image reads.
+- **Design & Cohort**: Retrospective concordance study; N = 247 breast carcinomas (117 core biopsies + 130 excisions, including 12 metastatic) from UCSF CoPath laboratory (2021-2024). Oversampled HER2 score 0 (n=100). Three experienced breast pathologists independently scored all glass slides and paired digital images (Philips WSI, 20x). 5-category scoring: null (no staining), ultralow (faint <=10%), 1+, 2+, 3+. Washout period >=2 weeks between slide and image reads.
 - **Key Analyses**:
   - Cohen's kappa (weighted) for intra-observer agreement (glass slide vs digital image per pathologist)
   - Cohen's kappa for inter-observer agreement (between pathologists, all 5 categories and lowest 3 categories)
@@ -28,7 +28,7 @@
 | PMID | TODO |
 | Publisher | Elsevier |
 | First Author | Andrew Xiao |
-| Corresponding Author | Joseph Geradts (joseph.geradts@duke.edu) |
+| Corresponding Author | Joseph Geradts (<joseph.geradts@duke.edu>) |
 | Received / Accepted | April 29, 2025 / June 24, 2025 |
 | License | All rights reserved (Elsevier) |
 
@@ -77,7 +77,7 @@
 | Effect sizes with CIs | 2/2 | All kappa values with 95% CIs consistently reported |
 | Assumption checking | 1/2 | Appropriate use of unweighted kappa for ordinal categories; no discussion of linearly vs quadratically weighted alternatives |
 | Appropriate test selection | 2/2 | Cohen's kappa appropriate for paired rater agreement; separate analyses for 5 vs 3 categories is methodologically sound |
-| Reproducibility | 2/2 | 3 experienced pathologists; ≥2 week washout; paired glass/digital for same cases; blinded to prior reads |
+| Reproducibility | 2/2 | 3 experienced pathologists; >=2 week washout; paired glass/digital for same cases; blinded to prior reads |
 | Handling of missing data | 1/2 | 1 case without clinical HER2 score excluded; otherwise complete |
 | Model diagnostics | 0/2 | No prevalence-adjusted kappa; no discussion of kappa paradoxes (high agreement with low kappa due to prevalence imbalance) |
 | Clinical significance assessment | 1/1 | Re-classification implications for ADC therapy eligibility discussed; 7% upgraded from 0 to 1+ |
@@ -85,6 +85,7 @@
 | Bias assessment | 0/1 | Selection bias from oversampled HER2 0; acknowledged but not analyzed for impact on kappa values |
 
 ### Strengths
+
 1. **Novel comparison**: First study (per authors) to compare glass slide vs digital image HER2 scoring with paired images
 2. **5-category scoring with ultralow**: Clinically relevant sub-stratification of HER2 0 (null vs ultralow) per emerging guidelines
 3. **Separate low-end analysis**: Dedicated analysis of the most clinically challenging categories (null/ultralow/1+)
@@ -93,6 +94,7 @@
 6. **High-quality kappa values**: Inter-observer kappa 0.82-0.87 (near-perfect) across all 5 categories
 
 ### Weaknesses
+
 1. **No weighted kappa**: Ordinal scale (null < ultralow < 1+ < 2+ < 3+) should use quadratic weighted kappa; unweighted kappa treats all disagreements equally
 2. **No prevalence-adjusted kappa**: Oversampled HER2 0 creates prevalence imbalance; PABAK would be informative
 3. **Small number of raters**: Only 3 pathologists; Fleiss' kappa would better characterize multi-rater agreement

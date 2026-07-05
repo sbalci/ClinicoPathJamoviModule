@@ -118,18 +118,18 @@
 #'      colorPalette = "viridis")
 #' }
 #' @name vennClass
-#' @export vennClass
+#' @keywords internal
 NULL
 
 #' @noRd
 NULL
 
 # TODO (cleanup): this .escapeVariableNames is a DUPLICATE of the one in R/utils.R (silent-
-#   divergence risk) — use the shared one or delete this copy. Worse, its 7 callers (L458-524 area)
+#   divergence risk) - use the shared one or delete this copy. Worse, its 7 callers (L458-524 area)
 #   assign `escaped_varN <- .escapeVariableNames(varN)` but NEVER reference the result (the stop()s
 #   interpolate the RAW varN), so both the helper calls and the local copy are effectively dead.
-#   Separately (security): those per-variable stop(paste("Error processing variable '", varN, …))
-#   handlers interpolate the raw column name — the security audit should route them through
+#   Separately (security): those per-variable stop(paste("Error processing variable '", varN, ...))
+#   handlers interpolate the raw column name - the security audit should route them through
 #   jmvcore::reject (escaped channel) rather than stop().
 # Helper function to escape variable names with special characters for formulas
 .escapeVariableNames <- function(var_names) {
@@ -666,15 +666,15 @@ vennClass <- if (requireNamespace('jmvcore'))
                         "\n\n",
                         .("Recommended Solution:"),
                         "\n",
-                        .("• Enable 'Show ggVennDiagram Plot' instead"),
+                        .("\u{2022} Enable 'Show ggVennDiagram Plot' instead"),
                         "\n",
-                        .("• ggVennDiagram supports 5+ variables with better visualization"),
+                        .("\u{2022} ggVennDiagram supports 5+ variables with better visualization"),
                         "\n\n",
                         .("Alternative Options:"),
                         "\n",
-                        .("• Use UpSetR or ComplexUpset plots for complex intersections"),
+                        .("\u{2022} Use UpSetR or ComplexUpset plots for complex intersections"),
                         "\n",
-                        .("• Reduce to 4 or fewer variables for ggvenn visualization")
+                        .("\u{2022} Reduce to 4 or fewer variables for ggvenn visualization")
                     )
 
                     # Create a text plot with the warning message
@@ -1897,7 +1897,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     error_html <- paste(
                         "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; border-radius: 4px;'>",
                         "<h4 style='margin-top: 0; color: #721c24;'> Validation Errors</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #721c24;'>• %s</p>", htmltools::htmlEscape(private$.errors)), collapse = ""),
+                        paste(sprintf("<p style='margin: 5px 0; color: #721c24;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.errors)), collapse = ""),
                         "</div>",
                         sep = ""
                     )
@@ -1910,7 +1910,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     warning_html <- paste(
                         "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;'>",
                         "<h4 style='margin-top: 0; color: #856404;'> Important Warnings</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #856404;'>• %s</p>", htmltools::htmlEscape(private$.warnings)), collapse = ""),
+                        paste(sprintf("<p style='margin: 5px 0; color: #856404;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.warnings)), collapse = ""),
                         "</div>",
                         sep = ""
                     )
@@ -1923,7 +1923,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     info_html <- paste(
                         "<div style='padding: 15px; background-color: #d1ecf1; border-left: 4px solid #17a2b8; border-radius: 4px;'>",
                         "<h4 style='margin-top: 0; color: #0c5460;'> Analysis Information</h4>",
-                        paste(sprintf("<p style='margin: 5px 0; color: #0c5460;'>• %s</p>", htmltools::htmlEscape(private$.info)), collapse = ""),
+                        paste(sprintf("<p style='margin: 5px 0; color: #0c5460;'>\u{2022} %s</p>", htmltools::htmlEscape(private$.info)), collapse = ""),
                         "</div>",
                         sep = ""
                     )

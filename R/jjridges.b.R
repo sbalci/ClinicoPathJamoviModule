@@ -48,7 +48,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -135,7 +135,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<ul>",
                         "<li>", .("Adjust plot width and height in Export Options"), "</li>",
                         "<li>", .("Set DPI for high-resolution output (300 DPI recommended for publications)"), "</li>",
-                        "<li>", .("Use right-click → Save Image As for quick export"), "</li>",
+                        "<li>", .("Use right-click \u2192 Save Image As for quick export"), "</li>",
                     "</ul>"
                 ))
                 self$results$instructions$setVisible(visible = TRUE)
@@ -461,15 +461,15 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<li>You have 3+ groups to compare (works well up to ~10 groups)</li>",
                 "<li>Understanding distribution shape is important (not just mean differences)</li>",
                 "<li>You want to detect bimodality or subgroups within categories</li>",
-                "<li>Data is continuous and you have sufficient observations per group (n≥20 recommended)</li>",
+                "<li>Data is continuous and you have sufficient observations per group (n\u226520 recommended)</li>",
                 "</ul>",
 
                 "<p><strong>Consider Alternatives When:</strong></p>",
                 "<ul>",
-                "<li>Only 2 groups → Use violin plots or density plots side-by-side</li>",
-                "<li>Focus on summary statistics only → Use box plots or error bars</li>",
-                "<li>Categorical data → Use bar charts or mosaic plots</li>",
-                "<li>Very few observations per group (n<10) → Individual data points may be better</li>",
+                "<li>Only 2 groups \u2192 Use violin plots or density plots side-by-side</li>",
+                "<li>Focus on summary statistics only \u2192 Use box plots or error bars</li>",
+                "<li>Categorical data \u2192 Use bar charts or mosaic plots</li>",
+                "<li>Very few observations per group (n<10) \u2192 Individual data points may be better</li>",
                 "</ul>",
 
                 "<h4 style='color:#2e7d32;'>Plot Type Options</h4>",
@@ -594,11 +594,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 "<h4 style='color:#856404;'>Recommendations for Pathology Data</h4>",
                 "<ul>",
-                "<li>Biomarker percentages (Ki-67, CD3+): Often skewed → Use nonparametric tests</li>",
-                "<li>Cell counts (mitotic index, lymphocytes): Count data with overdispersion → Consider nonparametric or robust methods</li>",
-                "<li>Tumor size measurements: May have outliers → Robust tests or nonparametric</li>",
-                "<li>Age distributions: Often normal → Parametric tests appropriate</li>",
-                "<li>Survival times: Always right-skewed → Use specialized survival analysis methods (not ridge plots)</li>",
+                "<li>Biomarker percentages (Ki-67, CD3+): Often skewed \u2192 Use nonparametric tests</li>",
+                "<li>Cell counts (mitotic index, lymphocytes): Count data with overdispersion \u2192 Consider nonparametric or robust methods</li>",
+                "<li>Tumor size measurements: May have outliers \u2192 Robust tests or nonparametric</li>",
+                "<li>Age distributions: Often normal \u2192 Parametric tests appropriate</li>",
+                "<li>Survival times: Always right-skewed \u2192 Use specialized survival analysis methods (not ridge plots)</li>",
                 "</ul>",
 
                 "</div>"
@@ -612,7 +612,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # this mutation pattern may silently no-op or raise a runtime error in newer
         # jamovi versions. Same concern as jjbarstats/jjcoefstats/jjhistostats/jjpubr.
         # The `private$overrides` + `private$.option(name)` indirection works without
-        # the mutation — drop the direct `opt$value <- value` line and rely on the
+        # the mutation - drop the direct `opt$value <- value` line and rely on the
         # override list (jjoncoplot's `.optionsWithPreset` L34-93 is the right pattern).
         #
         # TODO (UX): L719 emits `warning(msg)` AND L723-728 sets `warnings$setContent`.
@@ -807,8 +807,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(repeated_measures_warning)) {
                     # Create STRONG_WARNING Notice about independence assumption violation
                     notice_msg <- paste0(
-                        "INDEPENDENCE ASSUMPTION: ", repeated_measures_warning, " • ",
-                        "Statistical tests assume independent observations. Repeated measures, matched samples, or clustered data may produce invalid results. • ",
+                        "INDEPENDENCE ASSUMPTION: ", repeated_measures_warning, " \u2022 ",
+                        "Statistical tests assume independent observations. Repeated measures, matched samples, or clustered data may produce invalid results. \u2022 ",
                         "Recommendations: Aggregate to one value per subject, use specialized repeated measures models, or treat statistics as exploratory only."
                     )
                     private$.addNotice(
@@ -863,10 +863,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             n_obs <- nrow(plot_data)
             n_groups <- length(unique(plot_data$y))
             notice_msg <- paste0(
-                "Ridge plot analysis completed successfully • ",
-                n_obs, " observations across ", n_groups, " groups • ",
+                "Ridge plot analysis completed successfully \u2022 ",
+                n_obs, " observations across ", n_groups, " groups \u2022 ",
                 "Plot type: ", self$options$plot_type,
-                if(self$options$show_stats) paste0(" • Statistical tests: ", self$options$test_type) else ""
+                if(self$options$show_stats) paste0(" \u2022 Statistical tests: ", self$options$test_type) else ""
             )
             private$.addNotice(
                 type = "INFO",
@@ -1770,7 +1770,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check 3: Look for variables with "patient", "subject", "id" in the data
             # (checked in parent data, not just plot_data)
-            # TODO (correctness): the grepl pattern below is a naive substring match —
+            # TODO (correctness): the grepl pattern below is a naive substring match - 
             # "id" matches inside "candidate", "android", "video"; "case" matches inside
             # "lowercase", "phasecase". Use word-boundary anchors:
             #   grepl("\\b(patient|subject|id|case)\\b", col_names)
@@ -2082,7 +2082,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Detecting the option by CLASS (not by name) means any variable option
             # added later is escaped automatically.
             #
-            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # Variables are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated them in the generated syntax (the "double
             # variables" bug). All non-variable options keep jmvcore's per-option
             # sourcify so formatting stays consistent with jamovi.

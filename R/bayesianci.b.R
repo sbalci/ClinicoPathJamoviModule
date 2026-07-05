@@ -64,7 +64,7 @@ bayesianciClass <- R6::R6Class(
         },
         
         .run = function() {
-            # TODO (UX): File-wide — silent `return()` validation paths at lines 68 (outcome unset), 76 (outcome not in data), 81 (all-NA outcome), and 141 (n < 2 after NA removal) leave the user with no feedback about why nothing rendered. Surface via `jmvcore::reject(...)` or an HTML notice per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md so users understand which precondition failed.
+            # TODO (UX): File-wide - silent `return()` validation paths at lines 68 (outcome unset), 76 (outcome not in data), 81 (all-NA outcome), and 141 (n < 2 after NA removal) leave the user with no feedback about why nothing rendered. Surface via `jmvcore::reject(...)` or an HTML notice per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md so users understand which precondition failed.
             if (is.null(self$options$outcome)) {
                 return()
             }
@@ -405,7 +405,7 @@ bayesianciClass <- R6::R6Class(
             credible_level <- self$options$credible_level
             additional_levels <- self$options$additional_levels
 
-            # TODO (UX): File-wide — `additional_levels` is a free-text String option ("0.50,0.80,0.90"). `as.numeric(unlist(strsplit(...)))` produces NA for non-numeric tokens, then the next line silently filters them out. A user typing "0.5; 0.8" or "fifty percent" gets no feedback that their input was discarded. Same parsing logic at the start of `.calculateCredibleIntervalsNormal` below. Detect parse failures and surface a Notice (or use `jmvcore::canBeNumeric()` to validate before parse).
+            # TODO (UX): File-wide - `additional_levels` is a free-text String option ("0.50,0.80,0.90"). `as.numeric(unlist(strsplit(...)))` produces NA for non-numeric tokens, then the next line silently filters them out. A user typing "0.5; 0.8" or "fifty percent" gets no feedback that their input was discarded. Same parsing logic at the start of `.calculateCredibleIntervalsNormal` below. Detect parse failures and surface a Notice (or use `jmvcore::canBeNumeric()` to validate before parse).
             # Parse additional levels
             levels <- c(credible_level)
             if (!is.null(additional_levels) && additional_levels != "") {

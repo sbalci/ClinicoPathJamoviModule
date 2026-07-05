@@ -35,11 +35,13 @@ The statistical implementations are mathematically sound and align with establis
 ### ✅ Verified Correct Implementations
 
 #### 1. Core ROC Analysis (pROC package integration)
+
 - **AUC Calculation**: Uses industry-standard `pROC::roc()` and `pROC::auc()`
 - **DeLong's Method**: Properly implemented for AUC variance/CI estimation
 - **Validation**: Aligns with Hanley & McNeil (1982), DeLong et al. (1988)
 
 #### 2. DeLong Test for Comparing Correlated ROCs
+
 **Location**: Lines 1640-1720, 4310-4339
 
 ```r
@@ -56,6 +58,7 @@ p <- pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
 **Correctness**: ✅ Uses generalized inverse (`MASS::ginv`) for robustness with singular matrices
 
 #### 3. Optimal Cutpoint Methods (cutpointr package)
+
 **Location**: Lines 1189-1220, 2222-2400
 
 - **12 Methods Implemented**: Youden's J, maximize metric, cost-ratio, bootstrap, LOESS, etc.
@@ -63,6 +66,7 @@ p <- pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
 - **Validation**: Delegates to peer-reviewed `cutpointr` package (Thiele & Hirschfeld, 2021)
 
 #### 4. Partial AUC Calculation
+
 **Location**: Lines 955-980
 
 ```r
@@ -75,6 +79,7 @@ p <- pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
 **Correctness**: ✅ Properly specifies partial AUC bounds and focus
 
 #### 5. IDI & NRI Calculations
+
 **Location**: Lines 2995-3100 (IDI), 3050-3120 (NRI)
 
 - **IDI**: Integrated Discrimination Improvement with bootstrap CIs
@@ -82,6 +87,7 @@ p <- pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
 - **Validation**: Follows Pencina et al. (2008) methodology
 
 #### 6. Clinical Interpretation Thresholds
+
 **Location**: Lines 441-476
 
 ```r
@@ -102,6 +108,7 @@ p <- pchisq(z, df = qr(L %*% S %*% t(L))$rank, lower.tail = FALSE)
 **Problem**: Two different implementations of AUC variance exist in the codebase:
 
 #### Simplified Version (Line 2589)
+
 ```r
 auc_se <- sqrt((auc_value * (1 - auc_value)) / (n_pos * n_neg))
 ```
@@ -109,6 +116,7 @@ auc_se <- sqrt((auc_value * (1 - auc_value)) / (n_pos * n_neg))
 **Issue**: Missing Q1/Q2 corrections for small sample bias
 
 #### Full Version with Q1/Q2 Corrections (Lines 4316-4318, 1646-1650)
+
 ```r
 q1 <- auc_values / (2 - auc_values)
 q2 <- 2 * auc_values^2 / (1 + auc_values)
@@ -120,6 +128,7 @@ aucvar_hanley <- (auc_values * (1 - auc_values) +
 **Correctness**: ✅ This is the proper Hanley & McNeil (1982) formula
 
 **Recommendation**:
+
 1. **Verify where simplified version (line 2589) is used** - if in critical paths, replace with full formula
 2. **Consolidate to single implementation** - create `.calculateAUCVariance()` helper method
 3. **Unit test**: Validate against published examples from Hanley & McNeil (1982)
@@ -129,6 +138,7 @@ aucvar_hanley <- (auc_values * (1 - auc_values) +
 ---
 
 ### ✅ Bootstrap Confidence Intervals
+
 **Location**: Lines 2960-2990
 
 Properly implements percentile bootstrap method with resampling. Mathematically sound.
@@ -170,22 +180,26 @@ The module requires additional safeguards before widespread clinical deployment.
 **Problem**: Function uses legacy `stop()` and `warning()` calls instead of jamovi's Notice system
 
 **Evidence from /check-function-base audit**:
+
 - **18 `stop()` calls** → Should be `ERROR` Notices
 - **7 `warning()` calls** → Should be `STRONG_WARNING`/`WARNING` Notices
 - **0 jamovi Notices** currently implemented
 
 **Clinical Risk**:
+
 - Errors crash analysis instead of graceful degradation
 - Warnings easily missed by clinicians
 - No progressive severity (INFO → WARNING → ERROR)
 
 **Example Current Pattern** (Lines 1839-1840):
+
 ```r
 self$results$runSummary$setContent(paste("<b>Error:</b>", val$message))
 self$results$instructions$setVisible(FALSE)
 ```
 
 **Should Be**:
+
 ```r
 self$results$notices$addNotice(
   type = jmvcore::NoticeType$ERROR,
@@ -201,6 +215,7 @@ self$results$notices$addNotice(
 The function **does not check** for clinically problematic scenarios:
 
 #### 1. Small Sample Size
+
 ```r
 # MISSING: Should warn if n < 30 or n_pos/n_neg < 10
 if (n_pos < 10 || n_neg < 10) {
@@ -210,6 +225,7 @@ if (n_pos < 10 || n_neg < 10) {
 ```
 
 #### 2. Extreme Prevalence
+
 ```r
 # MISSING: Should warn if prevalence < 5% or > 95%
 prevalence <- n_pos / (n_pos + n_neg)
@@ -220,6 +236,7 @@ if (prevalence < 0.05 || prevalence > 0.95) {
 ```
 
 #### 3. Poor AUC Clinical Use
+
 ```r
 # MISSING: Should warn clinicians when AUC < 0.7
 if (auc < 0.7) {
@@ -229,6 +246,7 @@ if (auc < 0.7) {
 ```
 
 #### 4. Bootstrap Iterations Too Low
+
 ```r
 # MISSING: Should warn if boot_runs < 1000
 if (self$options$bootstrapCI && self$options$bootstrapReps < 1000) {
@@ -243,7 +261,7 @@ if (self$options$bootstrapCI && self$options$bootstrapReps < 1000) {
 
 **79% of outputs unpopulated** (130 out of 164 defined in `.r.yaml`)
 
-#### Advanced Features Marked as Scaffolds:
+#### Advanced Features Marked as Scaffolds
 
 1. **Effect Size Analysis** (`effectSizeAnalysis` option)
    - ⚠️ UI option exists but no implementation
@@ -267,6 +285,7 @@ if (self$options$bootstrapCI && self$options$bootstrapReps < 1000) {
    - No `.performMetaAnalysis()` method found
 
 **Recommendation**:
+
 - **Option 1**: Complete implementations before release
 - **Option 2**: Remove options from UI and `.a.yaml`
 - **Option 3**: Add "Coming Soon" badges and disable with Notices
@@ -302,7 +321,7 @@ These components are **production-ready** and clinically validated:
   - Each preset explains optimization strategy
 
 - [x] **AUC interpretation thresholds** (Lines 441-445)
-  - Excellent (≥0.9), Good (≥0.8), Fair (≥0.7), Poor (<0.7)
+  - Excellent (>=0.9), Good (>=0.8), Fair (>=0.7), Poor (<0.7)
   - Aligned with clinical literature
 
 - [x] **Clinical recommendation logic** (Lines 447-462)
@@ -331,6 +350,7 @@ These components are **production-ready** and clinically validated:
   - Clinicians must guess meaning of "LOESS", "Youden's J", etc.
 
   **Example Implementation**:
+
   ```yaml
   - type: ComboBox
     name: method
@@ -359,6 +379,7 @@ These components are **production-ready** and clinically validated:
   - Should explain: "You selected Youden's J, which finds the cutpoint that..."
 
   **Example**:
+
   ```r
   if (self$options$method == "oc_youden") {
     summary <- paste0(
@@ -395,6 +416,7 @@ These components are **production-ready** and clinically validated:
 ### ✅ Strengths
 
 #### 1. Well-Organized Method Decomposition
+
 - **66+ private helper methods** with clear, descriptive names
 - Logical grouping: validation, calculation, plotting, formatting
 - Examples:
@@ -404,11 +426,13 @@ These components are **production-ready** and clinically validated:
   - `.interpretAUC()` - Clinical interpretation
 
 #### 2. Consistent Naming Conventions
+
 - Private methods: `.camelCase()`
 - Public interface: `self$options$`, `self$results$`
 - Clear semantic names: `.getClinicalRecommendation()` not `.getRecData()`
 
 #### 3. Adequate Error Handling
+
 - **14 `tryCatch` blocks** for critical operations
 - Catches errors from:
   - Package loading (.checkPackageDependencies)
@@ -417,12 +441,14 @@ These components are **production-ready** and clinically validated:
   - Plot rendering
 
 #### 4. Variable Name Escaping (RECENTLY FIXED)
+
 - **Lines 358-373**: `.escapeVar()` utility method
 - Handles spaces, special characters, Unicode in column names
 - Applied consistently across 12+ data access points
 - **CRITICAL FIX**: Prevents crashes with real-world datasets
 
 #### 5. Code Documentation
+
 - Section headers delineate major blocks
 - Inline comments explain complex statistical logic
 - DEBUG print statements for development (should be removed for production)
@@ -436,6 +462,7 @@ These components are **production-ready** and clinically validated:
 **Problem**: Single monolithic file is difficult to navigate and maintain
 
 **Impact**:
+
 - Hard to locate specific functionality
 - Risky to refactor (cascading changes)
 - Slow to load in IDE
@@ -455,6 +482,7 @@ These components are **production-ready** and clinically validated:
 ```
 
 **Benefits**:
+
 - Each file < 800 lines (readable in one screen scroll)
 - Clear separation of concerns
 - Easier parallel development
@@ -463,16 +491,19 @@ These components are **production-ready** and clinically validated:
 #### 2. **Incomplete Feature Cleanup**
 
 **Problem**:
+
 - 52% of options unused (75/145)
 - 79% of outputs unpopulated (130/164)
 
 **Examples of Unused Options** (from `/check-function-base` audit):
+
 - `effectSizeAnalysis` - No implementation
 - `powerAnalysis` - No implementation
 - `bayesianAnalysis` - No implementation
 - `metaAnalysis` - No implementation
 
 **Recommendation**:
+
 1. Remove unused options from `.a.yaml` OR
 2. Implement features OR
 3. Add `enable: false` and "Coming Soon" tooltip
@@ -480,6 +511,7 @@ These components are **production-ready** and clinically validated:
 #### 3. **DEBUG Statements Left in Production**
 
 **Example** (Line 1952):
+
 ```r
 print("DEBUG: Setup Analysis Parameters")
 ```
@@ -491,10 +523,12 @@ print("DEBUG: Setup Analysis Parameters")
 #### 4. **Magic Numbers**
 
 **Examples**:
+
 - Line 2589: `sqrt((auc_value * (1 - auc_value)) / (n_pos * n_neg))`
 - Line 2027: HTML styling hardcoded
 
 **Recommendation**: Define constants
+
 ```r
 .MINIMUM_SAMPLE_SIZE <- 30
 .MINIMUM_CLASS_SIZE <- 10
@@ -506,10 +540,12 @@ print("DEBUG: Setup Analysis Parameters")
 #### 5. **Limited Unit Testing**
 
 **Current State**:
+
 - Test file exists: `tests/test_psychopdaROC_variable_escaping.R`
 - Covers variable name escaping (7 test cases)
 
 **Missing Tests**:
+
 - Mathematical correctness (compare to published examples)
 - Edge cases (n=2, all positive class, perfect separation)
 - Bootstrap reproducibility (seed handling)
@@ -525,6 +561,7 @@ print("DEBUG: Setup Analysis Parameters")
 ### ✅ Excellent Patterns
 
 #### 1. Jamovi R6 Class Structure
+
 ```r
 psychopdaROCClass <- R6::R6Class(
   "psychopdaROCClass",
@@ -540,6 +577,7 @@ psychopdaROCClass <- R6::R6Class(
 **Correctness**: ✅ Follows jamovi module architecture perfectly
 
 #### 2. State Management for Plots
+
 **Location**: Lines 3721-3750, 4520-4550
 
 ```r
@@ -557,11 +595,13 @@ image$setState(plotState)
 **Correctness**: ✅ Includes visual options to trigger updates when user changes settings
 
 #### 3. Clinical Mode Abstraction
+
 **Location**: Lines 386-438
 
 Elegant separation of clinical use cases from statistical implementation. Modes set defaults; statistics remain independent.
 
 #### 4. Package Dependency Checking
+
 **Location**: Lines 328-353
 
 ```r
@@ -589,6 +629,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 **Impact**: Hard to test statistical functions in isolation
 
 **Recommendation**: Extract pure functions
+
 ```r
 # Current (coupled):
 .deLongTest = function(data, classVar, positiveClass, ref, conf.level) {
@@ -604,6 +645,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 #### 2. Mixed Concerns in `.run()`
 
 **Problem**: `.run()` handles:
+
 - Data validation
 - Statistical computation
 - Table population
@@ -612,6 +654,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 - Error messaging
 
 **Recommendation**: Split into phases
+
 ```r
 .run = function() {
   # 1. Validate (early return on error)
@@ -647,6 +690,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 ### ⚠️ Potential Bottlenecks
 
 #### 1. Bootstrap Iterations
+
 **Location**: Lines 326-332 (UI), 2960-2990 (implementation)
 
 - Default: `bootstrapReps = 2000`
@@ -657,6 +701,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
   - Consider parallel processing with `future` package
 
 #### 2. DeLong Test with Many Variables
+
 **Location**: Lines 1640-1720
 
 - Pairwise comparisons: n(n-1)/2
@@ -666,6 +711,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
   - Bonferroni correction for multiple testing
 
 #### 3. Plot Rendering with Subgroups
+
 **Location**: Lines 3650-4100
 
 - Separate plot for each variable × subgroup
@@ -681,6 +727,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 ### Core ROC Module: **READY FOR LIMITED RELEASE**
 
 **Suitable For**:
+
 - ✅ Basic diagnostic test evaluation (AUC, sensitivity, specificity)
 - ✅ Optimal cutpoint selection (Youden's J, cost-ratio)
 - ✅ Comparing 2-5 diagnostic markers (DeLong test)
@@ -688,6 +735,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 - ✅ Pathology/oncology biomarker studies
 
 **Not Suitable For** (require completion):
+
 - ❌ Bayesian ROC analysis
 - ❌ Power analysis / sample size planning
 - ❌ Effect size analysis
@@ -729,7 +777,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 
 #### HIGH Priority (Strongly Recommended Before Release)
 
-5. **Add UI Tooltips** (Priority: HIGH)
+1. **Add UI Tooltips** (Priority: HIGH)
    - Add `description` fields to `.u.yaml` for all complex options
    - Plain-language explanations for:
      - Cutpoint methods (Youden's J, maximize metric, etc.)
@@ -738,7 +786,7 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
    - **Estimated Effort**: 3-4 hours
    - **Blocking**: No - but critical for clinician usability
 
-6. **Add Clinical Validation Warnings** (Priority: HIGH)
+2. **Add Clinical Validation Warnings** (Priority: HIGH)
    - Small sample size (n < 30, class < 10)
    - Extreme prevalence (< 5% or > 95%)
    - Poor AUC (< 0.7) for clinical use
@@ -746,13 +794,13 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
    - **Estimated Effort**: 2-3 hours
    - **Blocking**: No - but important for clinical safety
 
-7. **Enhance procedureNotes with Explanatory Text** (Priority: MEDIUM)
+3. **Enhance procedureNotes with Explanatory Text** (Priority: MEDIUM)
    - Replace parameter echoing with plain-language summaries
    - Explain "why" and "what it means" instead of "what was selected"
    - **Estimated Effort**: 2-3 hours
    - **Blocking**: No
 
-8. **Add Unit Tests for Mathematical Correctness** (Priority: HIGH)
+4. **Add Unit Tests for Mathematical Correctness** (Priority: HIGH)
    - Validate DeLong test against `pROC::roc.test()`
    - Validate Hanley-McNeil variance against published examples
    - Validate IDI/NRI against `PredictABEL` package
@@ -761,19 +809,19 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 
 #### MEDIUM Priority (Future Enhancements)
 
-9. **Refactor into Modular Files** (Priority: MEDIUM)
+1. **Refactor into Modular Files** (Priority: MEDIUM)
    - Split 5329-line file into 6-7 focused files
    - Improves maintainability, testability, readability
    - **Estimated Effort**: 8-12 hours
    - **Blocking**: No - quality of life improvement
 
-10. **Add Guided Mode / Wizard** (Priority: LOW)
+2. **Add Guided Mode / Wizard** (Priority: LOW)
     - Step-by-step workflow for first-time users
     - Preset selection → Variable selection → Interpretation
     - **Estimated Effort**: 6-8 hours
     - **Blocking**: No - nice-to-have for onboarding
 
-11. **Add About/How-to Sections** (Priority: LOW)
+3. **Add About/How-to Sections** (Priority: LOW)
     - Collapsible HTML primers on IDI/NRI, partial AUC, DeLong test
     - "When to use this feature" guidance
     - **Estimated Effort**: 4-6 hours
@@ -786,12 +834,14 @@ Elegant separation of clinical use cases from statistical implementation. Modes 
 ### 1. Implement Jamovi Notices for Error Handling
 
 **Current Code** (Lines 1839-1840):
+
 ```r
 self$results$runSummary$setContent(paste("<b>Error:</b>", val$message))
 self$results$instructions$setVisible(FALSE)
 ```
 
 **Recommended Code**:
+
 ```r
 # Add to .r.yaml:
 # - name: notices
@@ -809,6 +859,7 @@ return(invisible(NULL))
 ```
 
 **Replace all stop() calls**:
+
 ```r
 # OLD:
 stop("Class variable must have exactly 2 levels")
@@ -891,7 +942,7 @@ if (self$options$bootstrapCI && self$options$bootstrapReps < 1000) {
     type = jmvcore::NoticeType$INFO,
     message = paste0(
       "Bootstrap CIs computed with ", self$options$bootstrapReps, " iterations. ",
-      "For more stable estimates, consider using ≥1000 iterations (≥2000 recommended)."
+      "For more stable estimates, consider using >=1000 iterations (>=2000 recommended)."
     ),
     location = "resultsTable"
   )
@@ -956,6 +1007,7 @@ if (self$options$bootstrapCI && self$options$bootstrapReps < 1000) {
 ### 4. Enhance procedureNotes with Explanatory Text
 
 **Current** (Lines 1906-1929):
+
 ```r
 procedureNotes <- paste0(
   procedureNotes,
@@ -965,6 +1017,7 @@ procedureNotes <- paste0(
 ```
 
 **Recommended**:
+
 ```r
 # Create interpretive summaries instead of echoing parameters
 procedureNotes <- paste0(
@@ -1085,6 +1138,7 @@ aucvar_hanley <- private$.calculateAUCVariance(auc_values, np, nn, "hanley_mcnei
 ```
 
 **Add Unit Test**:
+
 ```r
 # tests/testthat/test-psychopdaROC-variance.R
 
@@ -1177,6 +1231,7 @@ test_that("Hanley-McNeil variance matches published example", {
 ## Action Items (Prioritized)
 
 ### Phase 1: Critical Fixes (Required Before Any Release)
+
 **Estimated Total Time: 8-12 hours**
 
 | Priority | Task | Effort | Blocking | Assignee |
@@ -1187,6 +1242,7 @@ test_that("Hanley-McNeil variance matches published example", {
 | 🔴 CRITICAL | Remove DEBUG statements | 0.5h | Yes | Developer |
 
 ### Phase 2: High Priority (Strongly Recommended)
+
 **Estimated Total Time: 11-16 hours**
 
 | Priority | Task | Effort | Blocking | Assignee |
@@ -1197,6 +1253,7 @@ test_that("Hanley-McNeil variance matches published example", {
 | 🟡 MEDIUM | Enhance procedureNotes with explanatory text | 2-3h | No | Clinical Writer |
 
 ### Phase 3: Quality Improvements (Future Releases)
+
 **Estimated Total Time: 18-26 hours**
 
 | Priority | Task | Effort | Blocking | Assignee |
@@ -1287,20 +1344,23 @@ test_that("Bootstrap CIs reproducible with same seed", {
 
 However, **release readiness depends on completion of critical infrastructure**:
 
-### ✅ **READY NOW** (with Phase 1 fixes):
+### ✅ **READY NOW** (with Phase 1 fixes)
+
 - Basic ROC analysis (AUC, sensitivity, specificity, cutpoints)
 - DeLong comparisons for 2-5 markers
 - IDI/NRI for model improvement
 - Clinical interpretation with plain-language guidance
 - Publication-quality plots with confidence bands
 
-### ⚠️ **NEEDS VALIDATION** (Phase 2 recommended):
+### ⚠️ **NEEDS VALIDATION** (Phase 2 recommended)
+
 - Small sample sizes without warnings
 - Extreme prevalence scenarios
 - Complex multi-marker workflows without tooltips
 - Advanced statistical features without explanatory help
 
-### ❌ **NOT READY** (requires implementation or removal):
+### ❌ **NOT READY** (requires implementation or removal)
+
 - Effect size analysis
 - Power analysis / sample size calculation
 - Bayesian ROC analysis
@@ -1326,6 +1386,7 @@ However, **release readiness depends on completion of critical infrastructure**:
    - Add advanced user guide
 
 **Confidence Level**:
+
 - Core ROC: **90%** confident in mathematical correctness and clinical utility
 - Advanced features: **30%** confident (mostly scaffolds, need implementation)
 

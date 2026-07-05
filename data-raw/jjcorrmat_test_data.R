@@ -11,7 +11,7 @@
 
 library(tibble)
 library(dplyr)
-library(MASS)  # For mvrnorm (multivariate normal)
+library(MASS) # For mvrnorm (multivariate normal)
 library(here)
 library(writexl)
 library(jmvReadWrite)
@@ -27,12 +27,12 @@ n_test <- 150
 
 # Define correlation matrix for realistic clinical relationships
 cor_matrix_test <- matrix(c(
-  1.00,  0.65,  0.70,  0.55, -0.10,  0.05,  # tumor_size
-  0.65,  1.00,  0.85,  0.60, -0.15,  0.00,  # ki67_index (proliferation)
-  0.70,  0.85,  1.00,  0.50, -0.12,  0.03,  # mitotic_count
-  0.55,  0.60,  0.50,  1.00, -0.20,  0.10,  # necrosis_percent
- -0.10, -0.15, -0.12, -0.20,  1.00, -0.05,  # age
-  0.05,  0.00,  0.03,  0.10, -0.05,  1.00   # bmi
+  1.00, 0.65, 0.70, 0.55, -0.10, 0.05, # tumor_size
+  0.65, 1.00, 0.85, 0.60, -0.15, 0.00, # ki67_index (proliferation)
+  0.70, 0.85, 1.00, 0.50, -0.12, 0.03, # mitotic_count
+  0.55, 0.60, 0.50, 1.00, -0.20, 0.10, # necrosis_percent
+  -0.10, -0.15, -0.12, -0.20, 1.00, -0.05, # age
+  0.05, 0.00, 0.03, 0.10, -0.05, 1.00 # bmi
 ), nrow = 6, byrow = TRUE)
 
 # Generate correlated data
@@ -40,19 +40,23 @@ means_test <- c(45, 35, 15, 25, 62, 26)
 sds_test <- c(15, 20, 8, 15, 12, 4)
 
 # Generate multivariate normal data
-raw_data_test <- mvrnorm(n = n_test, mu = means_test,
-                          Sigma = cor_matrix_test * outer(sds_test, sds_test))
+raw_data_test <- mvrnorm(
+  n = n_test, mu = means_test,
+  Sigma = cor_matrix_test * outer(sds_test, sds_test)
+)
 
 jjcorrmat_test <- tibble(
   patient_id = 1:n_test,
-  tumor_size = pmax(5, raw_data_test[, 1]),  # Tumor size (mm)
-  ki67_index = pmin(100, pmax(0, raw_data_test[, 2])),  # Ki-67 proliferation index (0-100%)
-  mitotic_count = pmax(0, round(raw_data_test[, 3])),  # Mitotic count per HPF
-  necrosis_percent = pmin(100, pmax(0, raw_data_test[, 4])),  # Necrosis percentage
-  age = round(pmax(18, pmin(90, raw_data_test[, 5]))),  # Age in years
-  bmi = pmax(15, pmin(45, raw_data_test[, 6])),  # BMI
-  tumor_stage = sample(c("I", "II", "III", "IV"), n_test, replace = TRUE,
-                       prob = c(0.2, 0.3, 0.3, 0.2))
+  tumor_size = pmax(5, raw_data_test[, 1]), # Tumor size (mm)
+  ki67_index = pmin(100, pmax(0, raw_data_test[, 2])), # Ki-67 proliferation index (0-100%)
+  mitotic_count = pmax(0, round(raw_data_test[, 3])), # Mitotic count per HPF
+  necrosis_percent = pmin(100, pmax(0, raw_data_test[, 4])), # Necrosis percentage
+  age = round(pmax(18, pmin(90, raw_data_test[, 5]))), # Age in years
+  bmi = pmax(15, pmin(45, raw_data_test[, 6])), # BMI
+  tumor_stage = sample(c("I", "II", "III", "IV"), n_test,
+    replace = TRUE,
+    prob = c(0.2, 0.3, 0.3, 0.2)
+  )
 )
 
 # Add ~3% missing data
@@ -70,31 +74,35 @@ n_bio <- 120
 
 # Correlation matrix for biomarkers
 cor_matrix_bio <- matrix(c(
-  1.00,  0.45,  0.20,  0.35,  0.50, -0.40,  # CEA
-  0.45,  1.00,  0.25,  0.30,  0.40, -0.35,  # CA19-9
-  0.20,  0.25,  1.00,  0.15,  0.25, -0.20,  # AFP
-  0.35,  0.30,  0.15,  1.00,  0.60, -0.30,  # LDH
-  0.50,  0.40,  0.25,  0.60,  1.00, -0.55,  # CRP (inflammation)
- -0.40, -0.35, -0.20, -0.30, -0.55,  1.00   # Albumin (inverse with inflammation)
+  1.00, 0.45, 0.20, 0.35, 0.50, -0.40, # CEA
+  0.45, 1.00, 0.25, 0.30, 0.40, -0.35, # CA19-9
+  0.20, 0.25, 1.00, 0.15, 0.25, -0.20, # AFP
+  0.35, 0.30, 0.15, 1.00, 0.60, -0.30, # LDH
+  0.50, 0.40, 0.25, 0.60, 1.00, -0.55, # CRP (inflammation)
+  -0.40, -0.35, -0.20, -0.30, -0.55, 1.00 # Albumin (inverse with inflammation)
 ), nrow = 6, byrow = TRUE)
 
 # Log-normal distributions for biomarkers
 means_bio <- c(log(15), log(25), log(8), log(250), log(10), log(4.0))
 sds_bio <- c(0.8, 1.0, 1.2, 0.6, 1.0, 0.3)
 
-raw_data_bio <- mvrnorm(n = n_bio, mu = means_bio,
-                         Sigma = cor_matrix_bio * outer(sds_bio, sds_bio))
+raw_data_bio <- mvrnorm(
+  n = n_bio, mu = means_bio,
+  Sigma = cor_matrix_bio * outer(sds_bio, sds_bio)
+)
 
 jjcorrmat_biomarker <- tibble(
   patient_id = 1:n_bio,
-  cea = exp(raw_data_bio[, 1]),  # CEA (ng/mL)
-  ca199 = exp(raw_data_bio[, 2]),  # CA19-9 (U/mL)
-  afp = exp(raw_data_bio[, 3]),  # AFP (ng/mL)
-  ldh = exp(raw_data_bio[, 4]),  # LDH (U/L)
-  crp = exp(raw_data_bio[, 5]),  # CRP (mg/L)
-  albumin = exp(raw_data_bio[, 6]),  # Albumin (g/dL)
+  cea = exp(raw_data_bio[, 1]), # CEA (ng/mL)
+  ca199 = exp(raw_data_bio[, 2]), # CA19-9 (U/mL)
+  afp = exp(raw_data_bio[, 3]), # AFP (ng/mL)
+  ldh = exp(raw_data_bio[, 4]), # LDH (U/L)
+  crp = exp(raw_data_bio[, 5]), # CRP (mg/L)
+  albumin = exp(raw_data_bio[, 6]), # Albumin (g/dL)
   cancer_type = sample(c("Colorectal", "Pancreatic", "Hepatocellular"),
-                       n_bio, replace = TRUE)
+    n_bio,
+    replace = TRUE
+  )
 )
 
 # Add missing data
@@ -111,32 +119,34 @@ n_lab <- 200
 
 # Correlation matrix for lab values
 cor_matrix_lab <- matrix(c(
-  1.00,  0.55,  0.60,  0.15,  0.50,  0.10,  0.25,  0.30,  # glucose
-  0.55,  1.00,  0.70, -0.40,  0.85,  0.20,  0.15,  0.20,  # cholesterol
-  0.60,  0.70,  1.00, -0.50,  0.80,  0.25,  0.10,  0.15,  # triglycerides
-  0.15, -0.40, -0.50,  1.00, -0.60,  0.05,  0.00,  0.00,  # HDL
-  0.50,  0.85,  0.80, -0.60,  1.00,  0.15,  0.18,  0.22,  # LDL
-  0.10,  0.20,  0.25,  0.05,  0.15,  1.00,  0.35,  0.40,  # creatinine
-  0.25,  0.15,  0.10,  0.00,  0.18,  0.35,  1.00,  0.75,  # ALT (liver enzymes)
-  0.30,  0.20,  0.15,  0.00,  0.22,  0.40,  0.75,  1.00   # AST
+  1.00,  0.55,  0.60,  0.15,  0.50,  0.10,  0.25,  0.30, # glucose
+  0.55,  1.00,  0.70, -0.40,  0.85,  0.20,  0.15,  0.20, # cholesterol
+  0.60,  0.70,  1.00, -0.50,  0.80,  0.25,  0.10,  0.15, # triglycerides
+  0.15, -0.40, -0.50,  1.00, -0.60,  0.05,  0.00,  0.00, # HDL
+  0.50,  0.85,  0.80, -0.60,  1.00,  0.15,  0.18,  0.22, # LDL
+  0.10,  0.20,  0.25,  0.05,  0.15,  1.00,  0.35,  0.40, # creatinine
+  0.25,  0.15,  0.10,  0.00,  0.18,  0.35,  1.00,  0.75, # ALT (liver enzymes)
+  0.30,  0.20,  0.15,  0.00,  0.22,  0.40,  0.75,  1.00 # AST
 ), nrow = 8, byrow = TRUE)
 
 means_lab <- c(95, 195, 140, 55, 115, 0.95, 30, 28)
 sds_lab <- c(20, 40, 60, 15, 35, 0.25, 15, 12)
 
-raw_data_lab <- mvrnorm(n = n_lab, mu = means_lab,
-                         Sigma = cor_matrix_lab * outer(sds_lab, sds_lab))
+raw_data_lab <- mvrnorm(
+  n = n_lab, mu = means_lab,
+  Sigma = cor_matrix_lab * outer(sds_lab, sds_lab)
+)
 
 jjcorrmat_labvalues <- tibble(
   patient_id = 1:n_lab,
-  glucose = pmax(60, pmin(300, raw_data_lab[, 1])),  # mg/dL
-  cholesterol = pmax(100, pmin(350, raw_data_lab[, 2])),  # mg/dL
-  triglycerides = pmax(30, pmin(400, raw_data_lab[, 3])),  # mg/dL
-  hdl = pmax(20, pmin(100, raw_data_lab[, 4])),  # mg/dL
-  ldl = pmax(50, pmin(250, raw_data_lab[, 5])),  # mg/dL
-  creatinine = pmax(0.5, pmin(2.5, raw_data_lab[, 6])),  # mg/dL
-  alt = pmax(5, pmin(150, raw_data_lab[, 7])),  # U/L
-  ast = pmax(5, pmin(150, raw_data_lab[, 8])),  # U/L
+  glucose = pmax(60, pmin(300, raw_data_lab[, 1])), # mg/dL
+  cholesterol = pmax(100, pmin(350, raw_data_lab[, 2])), # mg/dL
+  triglycerides = pmax(30, pmin(400, raw_data_lab[, 3])), # mg/dL
+  hdl = pmax(20, pmin(100, raw_data_lab[, 4])), # mg/dL
+  ldl = pmax(50, pmin(250, raw_data_lab[, 5])), # mg/dL
+  creatinine = pmax(0.5, pmin(2.5, raw_data_lab[, 6])), # mg/dL
+  alt = pmax(5, pmin(150, raw_data_lab[, 7])), # U/L
+  ast = pmax(5, pmin(150, raw_data_lab[, 8])), # U/L
   risk_group = sample(c("Low", "Medium", "High"), n_lab, replace = TRUE)
 )
 
@@ -155,28 +165,30 @@ n_img <- 100
 
 # Strong correlations for size measurements
 cor_matrix_img <- matrix(c(
-  1.00,  0.92,  0.88,  0.65,  0.70, -0.55,  # tumor_volume
-  0.92,  1.00,  0.85,  0.60,  0.65, -0.50,  # longest_diameter
-  0.88,  0.85,  1.00,  0.58,  0.63, -0.48,  # shortest_diameter
-  0.65,  0.60,  0.58,  1.00,  0.90, -0.45,  # SUV_max
-  0.70,  0.65,  0.63,  0.90,  1.00, -0.50,  # SUV_mean
- -0.55, -0.50, -0.48, -0.45, -0.50,  1.00   # ADC (inverse with cellularity)
+  1.00, 0.92, 0.88, 0.65, 0.70, -0.55, # tumor_volume
+  0.92, 1.00, 0.85, 0.60, 0.65, -0.50, # longest_diameter
+  0.88, 0.85, 1.00, 0.58, 0.63, -0.48, # shortest_diameter
+  0.65, 0.60, 0.58, 1.00, 0.90, -0.45, # SUV_max
+  0.70, 0.65, 0.63, 0.90, 1.00, -0.50, # SUV_mean
+  -0.55, -0.50, -0.48, -0.45, -0.50, 1.00 # ADC (inverse with cellularity)
 ), nrow = 6, byrow = TRUE)
 
 means_img <- c(log(25), log(40), log(30), log(8), log(5), log(1.2))
 sds_img <- c(0.6, 0.5, 0.5, 0.4, 0.4, 0.3)
 
-raw_data_img <- mvrnorm(n = n_img, mu = means_img,
-                         Sigma = cor_matrix_img * outer(sds_img, sds_img))
+raw_data_img <- mvrnorm(
+  n = n_img, mu = means_img,
+  Sigma = cor_matrix_img * outer(sds_img, sds_img)
+)
 
 jjcorrmat_imaging <- tibble(
   patient_id = 1:n_img,
-  tumor_volume = exp(raw_data_img[, 1]),  # cm³
-  tumor_longest_diameter = exp(raw_data_img[, 2]),  # mm
-  tumor_shortest_diameter = exp(raw_data_img[, 3]),  # mm
-  suv_max = exp(raw_data_img[, 4]),  # SUV (PET)
-  suv_mean = exp(raw_data_img[, 5]),  # SUV (PET)
-  adc = exp(raw_data_img[, 6]),  # ADC (×10⁻³ mm²/s)
+  tumor_volume = exp(raw_data_img[, 1]), # cm³
+  tumor_longest_diameter = exp(raw_data_img[, 2]), # mm
+  tumor_shortest_diameter = exp(raw_data_img[, 3]), # mm
+  suv_max = exp(raw_data_img[, 4]), # SUV (PET)
+  suv_mean = exp(raw_data_img[, 5]), # SUV (PET)
+  adc = exp(raw_data_img[, 6]), # ADC (×10⁻³ mm²/s)
   imaging_modality = sample(c("CT", "MRI", "PET-CT"), n_img, replace = TRUE)
 )
 
@@ -193,30 +205,34 @@ jjcorrmat_imaging$suv_max[sample(n_img, n_missing_img)] <- NA
 n_vital <- 180
 
 cor_matrix_vital <- matrix(c(
-  1.00,  0.75,  0.35,  0.20, -0.10,  0.15,  # systolic_bp
-  0.75,  1.00,  0.30,  0.15, -0.08,  0.12,  # diastolic_bp
-  0.35,  0.30,  1.00,  0.40, -0.25,  0.20,  # heart_rate
-  0.20,  0.15,  0.40,  1.00, -0.30,  0.10,  # respiratory_rate
- -0.10, -0.08, -0.25, -0.30,  1.00, -0.35,  # temperature
-  0.15,  0.12,  0.20,  0.10, -0.35,  1.00   # oxygen_saturation
+  1.00, 0.75, 0.35, 0.20, -0.10, 0.15, # systolic_bp
+  0.75, 1.00, 0.30, 0.15, -0.08, 0.12, # diastolic_bp
+  0.35, 0.30, 1.00, 0.40, -0.25, 0.20, # heart_rate
+  0.20, 0.15, 0.40, 1.00, -0.30, 0.10, # respiratory_rate
+  -0.10, -0.08, -0.25, -0.30, 1.00, -0.35, # temperature
+  0.15, 0.12, 0.20, 0.10, -0.35, 1.00 # oxygen_saturation
 ), nrow = 6, byrow = TRUE)
 
 means_vital <- c(125, 78, 75, 16, 37.0, 97)
 sds_vital <- c(15, 10, 12, 3, 0.6, 2.5)
 
-raw_data_vital <- mvrnorm(n = n_vital, mu = means_vital,
-                           Sigma = cor_matrix_vital * outer(sds_vital, sds_vital))
+raw_data_vital <- mvrnorm(
+  n = n_vital, mu = means_vital,
+  Sigma = cor_matrix_vital * outer(sds_vital, sds_vital)
+)
 
 jjcorrmat_vitals <- tibble(
   patient_id = 1:n_vital,
-  systolic_bp = pmax(90, pmin(180, raw_data_vital[, 1])),  # mmHg
-  diastolic_bp = pmax(50, pmin(110, raw_data_vital[, 2])),  # mmHg
-  heart_rate = pmax(45, pmin(140, round(raw_data_vital[, 3]))),  # bpm
-  respiratory_rate = pmax(10, pmin(30, round(raw_data_vital[, 4]))),  # breaths/min
-  temperature = pmax(35.5, pmin(39.5, raw_data_vital[, 5])),  # °C
-  oxygen_saturation = pmax(88, pmin(100, round(raw_data_vital[, 6]))),  # %
+  systolic_bp = pmax(90, pmin(180, raw_data_vital[, 1])), # mmHg
+  diastolic_bp = pmax(50, pmin(110, raw_data_vital[, 2])), # mmHg
+  heart_rate = pmax(45, pmin(140, round(raw_data_vital[, 3]))), # bpm
+  respiratory_rate = pmax(10, pmin(30, round(raw_data_vital[, 4]))), # breaths/min
+  temperature = pmax(35.5, pmin(39.5, raw_data_vital[, 5])), # °C
+  oxygen_saturation = pmax(88, pmin(100, round(raw_data_vital[, 6]))), # %
   patient_status = sample(c("Stable", "Monitoring", "Critical"),
-                          n_vital, replace = TRUE, prob = c(0.6, 0.3, 0.1))
+    n_vital,
+    replace = TRUE, prob = c(0.6, 0.3, 0.1)
+  )
 )
 
 # Add missing data
@@ -233,30 +249,32 @@ n_mixed <- 150
 
 # Designed correlation matrix with varying strengths
 cor_matrix_mixed <- matrix(c(
-  1.00,  0.90,  0.70,  0.40,  0.10, -0.30, -0.60,  # var_a (very strong positive)
-  0.90,  1.00,  0.65,  0.35,  0.08, -0.25, -0.55,  # var_b (strong positive)
-  0.70,  0.65,  1.00,  0.50,  0.05, -0.20, -0.45,  # var_c (moderate positive)
-  0.40,  0.35,  0.50,  1.00,  0.02, -0.15, -0.30,  # var_d (weak positive)
-  0.10,  0.08,  0.05,  0.02,  1.00, -0.05, -0.08,  # var_e (near zero)
- -0.30, -0.25, -0.20, -0.15, -0.05,  1.00,  0.80,  # var_f (moderate negative)
- -0.60, -0.55, -0.45, -0.30, -0.08,  0.80,  1.00   # var_g (strong negative)
+  1.00, 0.90, 0.70, 0.40, 0.10, -0.30, -0.60, # var_a (very strong positive)
+  0.90, 1.00, 0.65, 0.35, 0.08, -0.25, -0.55, # var_b (strong positive)
+  0.70, 0.65, 1.00, 0.50, 0.05, -0.20, -0.45, # var_c (moderate positive)
+  0.40, 0.35, 0.50, 1.00, 0.02, -0.15, -0.30, # var_d (weak positive)
+  0.10, 0.08, 0.05, 0.02, 1.00, -0.05, -0.08, # var_e (near zero)
+  -0.30, -0.25, -0.20, -0.15, -0.05, 1.00, 0.80, # var_f (moderate negative)
+  -0.60, -0.55, -0.45, -0.30, -0.08, 0.80, 1.00 # var_g (strong negative)
 ), nrow = 7, byrow = TRUE)
 
 means_mixed <- rep(50, 7)
 sds_mixed <- rep(15, 7)
 
-raw_data_mixed <- mvrnorm(n = n_mixed, mu = means_mixed,
-                           Sigma = cor_matrix_mixed * outer(sds_mixed, sds_mixed))
+raw_data_mixed <- mvrnorm(
+  n = n_mixed, mu = means_mixed,
+  Sigma = cor_matrix_mixed * outer(sds_mixed, sds_mixed)
+)
 
 jjcorrmat_mixed <- tibble(
   subject_id = 1:n_mixed,
-  var_a = raw_data_mixed[, 1],  # Very strong positive correlation with b
-  var_b = raw_data_mixed[, 2],  # Strong positive
-  var_c = raw_data_mixed[, 3],  # Moderate positive
-  var_d = raw_data_mixed[, 4],  # Weak positive
-  var_e = raw_data_mixed[, 5],  # Near zero correlation
-  var_f = raw_data_mixed[, 6],  # Moderate negative
-  var_g = raw_data_mixed[, 7],  # Strong negative with a
+  var_a = raw_data_mixed[, 1], # Very strong positive correlation with b
+  var_b = raw_data_mixed[, 2], # Strong positive
+  var_c = raw_data_mixed[, 3], # Moderate positive
+  var_d = raw_data_mixed[, 4], # Weak positive
+  var_e = raw_data_mixed[, 5], # Near zero correlation
+  var_f = raw_data_mixed[, 6], # Moderate negative
+  var_g = raw_data_mixed[, 7], # Strong negative with a
   group = sample(c("Group1", "Group2", "Group3"), n_mixed, replace = TRUE)
 )
 
@@ -356,9 +374,9 @@ VARIABLE DESCRIPTIONS
 ---------------------
 
 Main Dataset (Clinical Metrics):
-  • tumor_size [numeric, ≥5]: Tumor size in millimeters
+  • tumor_size [numeric, >=5]: Tumor size in millimeters
   • ki67_index [numeric, 0-100]: Ki-67 proliferation index (percentage)
-  • mitotic_count [numeric, ≥0]: Mitotic count per high-power field
+  • mitotic_count [numeric, >=0]: Mitotic count per high-power field
   • necrosis_percent [numeric, 0-100]: Necrosis percentage
   • age [numeric, 18-90]: Patient age in years
   • bmi [numeric, 15-45]: Body mass index

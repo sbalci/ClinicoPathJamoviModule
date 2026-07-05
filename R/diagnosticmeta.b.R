@@ -95,7 +95,7 @@ diagnosticmetaClass <- R6::R6Class(
         
         .run = function() {
 
-            # TODO (jamovify): i18n — this function emits substantial English
+            # TODO (jamovify): i18n - this function emits substantial English
             # text (HTML banners in .populateWelcome/.populateAbout, table
             # notes, sprintf-formatted summaries in .generateSummary /
             # .generateBasicSummary, all interpretation/explanation panels).
@@ -103,7 +103,7 @@ diagnosticmetaClass <- R6::R6Class(
             # not extractable for translation. Run `/prepare-translation
             # diagnosticmeta` to wrap them and produce the .po file.
 
-            # TODO (jamovify): notices migration — error reporting uses ad-hoc
+            # TODO (jamovify): notices migration - error reporting uses ad-hoc
             # patterns: (a) the 5 `setNote("error", sprintf(... e$message))`
             # tryCatch handlers at lines 222/241/253/265/277, (b) HTML alert
             # banners via `.appendInstructionMessage()`, (c) plain HTML
@@ -459,14 +459,14 @@ diagnosticmetaClass <- R6::R6Class(
             private$.pooled_specificity <- pooled_spec
 
             # Heterogeneity assessment: Use Q-statistic from bivariate model
-            # Note: Univariate I² values ignore bivariate correlation and overstate precision
+            # Note: Univariate I^2 values ignore bivariate correlation and overstate precision
             # Proper assessment requires examining the bivariate covariance structure
             sens_i2 <- NA_real_
             spec_i2 <- NA_real_
 
             # SERIALIZATION FIX: Use table note instead of inserting Notice
             self$results$bivariateresults$setNote("heterogeneity_info",
-                "I² values are not included in the bivariate table as univariate I² calculations ignore within-study correlation and bivariate model structure. Please refer to the Heterogeneity Assessment table for proper evaluation using Q-statistics and tau-squared."
+                "I\u{00b2} values are not included in the bivariate table as univariate I\u{00b2} calculations ignore within-study correlation and bivariate model structure. Please refer to the Heterogeneity Assessment table for proper evaluation using Q-statistics and tau-squared."
             )
 
             bivariate_table$addRow(rowKey = "sensitivity", values = list(
@@ -610,7 +610,7 @@ diagnosticmetaClass <- R6::R6Class(
                 # TODO (correctness): the function uses `mada::phm` (Holling
                 # proportional-hazards SROC) but labels the output as HSROC
                 # (Rutter-Gatsonis), and `param_labels` at lines 688-690 spell
-                # out the Rutter-Gatsonis θ/Λ parametrization that `phm` does
+                # out the Rutter-Gatsonis theta/Lambda parametrization that `phm` does
                 # NOT return. Either (a) relabel the table to "Proportional
                 # Hazards SROC (Holling)" and update the parameter names to
                 # match phm's actual output, or (b) add a true HSROC backend
@@ -696,9 +696,9 @@ diagnosticmetaClass <- R6::R6Class(
                 if (is.vector(coefficients) && !is.null(names(coefficients))) {
                     # Define parameter labels
                     param_labels <- list(
-                        "theta" = "HSROC Threshold (θ)",
-                        "Lambda" = "HSROC Accuracy (Λ)",
-                        "taus_sq" = "Between-Study Variance (τ²)"
+                        "theta" = "HSROC Threshold (\u{03b8})",
+                        "Lambda" = "HSROC Accuracy (\u{039b})",
+                        "taus_sq" = "Between-Study Variance (\u{03c4}\u{00b2})"
                     )
 
                     hsroc_table <- self$results$hsrocresults
@@ -1381,7 +1381,7 @@ diagnosticmetaClass <- R6::R6Class(
         # TODO (cleanup): the `welcome` output is defined in .r.yaml and
         # populated by .populateWelcome below, but every reachable code path
         # in .run() calls `self$results$welcome$setVisible(FALSE)` (lines 85,
-        # 130, 154, 160 — there is no path where it is set visible). The
+        # 130, 154, 160 - there is no path where it is set visible). The
         # output is dead. Either (a) remove the `welcome` entry from .r.yaml
         # and delete .populateWelcome, or (b) reach a code path that sets it
         # visible (e.g. when no required variables are selected, show the
@@ -1391,7 +1391,7 @@ diagnosticmetaClass <- R6::R6Class(
         # message when no data, (b) data-validation error sink (lines 151, 186),
         # (c) meta-regression-missing-covariate notice (.appendInstructionMessage),
         # (d) HSROC unavailable / sparse-data notices. Mixing onboarding with
-        # error states makes the UI confusing — first-time users see error
+        # error states makes the UI confusing - first-time users see error
         # styling when they have not yet selected variables. Splitting into a
         # dedicated `notices` Html output (notice-pattern from waterfall.b.R)
         # would clarify the UX and align with the notices-migration TODO at
@@ -1624,12 +1624,12 @@ diagnosticmetaClass <- R6::R6Class(
             <h3> Heterogeneity Assessment</h3>
             
             <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
-                <h4>I² Statistic Interpretation:</h4>
+                <h4>I&sup2; Statistic Interpretation:</h4>
                 <ul>
-                    <li><strong>I² < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
-                    <li><strong>I² 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
-                    <li><strong>I² 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
-                    <li><strong>I² > 75%:</strong> Considerable heterogeneity - avoid pooling, use subgroup analysis</li>
+                    <li><strong>I&sup2; < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
+                    <li><strong>I&sup2; 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
+                    <li><strong>I&sup2; 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
+                    <li><strong>I&sup2; > 75%:</strong> Considerable heterogeneity - avoid pooling, use subgroup analysis</li>
                 </ul>
             </div>
             
@@ -1645,7 +1645,7 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>Deeks' Funnel Plot Test:</h4>
             <ul>
-                <li><strong>p ≥ 0.05:</strong> No significant asymmetry - low risk of publication bias</li>
+                <li><strong>p &ge; 0.05:</strong> No significant asymmetry - low risk of publication bias</li>
                 <li><strong>p < 0.05:</strong> Significant asymmetry - potential publication bias detected</li>
             </ul>
             
@@ -1663,8 +1663,8 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>IHC Marker Validation:</h4>
             <ul>
-                <li><strong>Screening Applications:</strong> Prioritize high sensitivity (≥90%)</li>
-                <li><strong>Confirmatory Testing:</strong> Prioritize high specificity (≥90%)</li>
+                <li><strong>Screening Applications:</strong> Prioritize high sensitivity (&ge;90%)</li>
+                <li><strong>Confirmatory Testing:</strong> Prioritize high specificity (&ge;90%)</li>
                 <li><strong>Balanced Performance:</strong> Consider clinical costs of false positives vs false negatives</li>
             </ul>
             
@@ -1708,7 +1708,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <li> <strong>Study Selection:</strong> Number of studies included and excluded</li>
                 <li> <strong>Pooled Estimates:</strong> Sensitivity and specificity with 95% confidence intervals</li>
                 <li> <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
-                <li> <strong>Heterogeneity:</strong> I² values and potential sources investigated</li>
+                <li> <strong>Heterogeneity:</strong> I&sup2; values and potential sources investigated</li>
                 <li> <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
                 <li> <strong>Clinical Implications:</strong> Population-specific predictive values</li>
                 <li> <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
@@ -1798,7 +1798,7 @@ diagnosticmetaClass <- R6::R6Class(
                 sprintf("<p><strong>Positive Likelihood Ratio:</strong> %.2f - A positive test is %.1fx more likely in disease than healthy</p>",
                         lr_pos, lr_pos)
             } else {
-                "<p><strong>Positive Likelihood Ratio:</strong> Not estimable with the current data (specificity ≈ 100% or model unstable).</p>"
+                "<p><strong>Positive Likelihood Ratio:</strong> Not estimable with the current data (specificity &asymp; 100% or model unstable).</p>"
             }
 
             nlr_text <- if (is.finite(lr_neg)) {
@@ -1806,11 +1806,11 @@ diagnosticmetaClass <- R6::R6Class(
                     sprintf("<p><strong>Negative Likelihood Ratio:</strong> %.2f - A negative test is %.1fx more likely in healthy than disease</p>",
                             lr_neg, inv_lr_neg)
                 } else {
-                    sprintf("<p><strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity ≈ 100%%).</p>",
+                    sprintf("<p><strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity &asymp; 100%%).</p>",
                             lr_neg)
                 }
             } else {
-                "<p><strong>Negative Likelihood Ratio:</strong> Not estimable with the current data (sensitivity ≈ 100% or model unstable).</p>"
+                "<p><strong>Negative Likelihood Ratio:</strong> Not estimable with the current data (sensitivity &asymp; 100% or model unstable).</p>"
             }
 
             copy_text <- sprintf(
@@ -2183,13 +2183,13 @@ diagnosticmetaClass <- R6::R6Class(
                     <p><strong>HSROC Model (Hierarchical Summary ROC):</strong></p>
                     <ul>
                         <li> Models the <em>entire ROC curve</em> across different thresholds</li>
-                        <li> Provides threshold-independent accuracy estimates (Λ parameter)</li>
-                        <li> Captures asymmetry in diagnostic accuracy (β parameter)</li>
+                        <li> Provides threshold-independent accuracy estimates (&Lambda; parameter)</li>
+                        <li> Captures asymmetry in diagnostic accuracy (&beta; parameter)</li>
                         <li> Better for studies with <em>varying cutoffs or thresholds</em></li>
                         <li> <strong>Use this when:</strong> Studies use different diagnostic thresholds</li>
                     </ul>
 
-                    <p><strong> Clinical Insight:</strong> The SROC plot shown by this module is derived from the <em>bivariate model</em>, which provides a simpler and more intuitive visualization. The HSROC table provides additional parametric information (θ = threshold, Λ = accuracy) that can be useful for understanding test performance across different threshold scenarios. <strong>Both approaches are statistically valid</strong> - the choice depends on your research question and whether thresholds vary across studies.</p>
+                    <p><strong> Clinical Insight:</strong> The SROC plot shown by this module is derived from the <em>bivariate model</em>, which provides a simpler and more intuitive visualization. The HSROC table provides additional parametric information (&theta; = threshold, &Lambda; = accuracy) that can be useful for understanding test performance across different threshold scenarios. <strong>Both approaches are statistically valid</strong> - the choice depends on your research question and whether thresholds vary across studies.</p>
                 </div>
 
                 <div style='margin: 15px 0;'>
@@ -2205,7 +2205,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <div style='margin: 15px 0; background-color: #fff3cd; padding: 15px; border-radius: 5px;'>
                     <h5> Key Requirements & Assumptions</h5>
                     <ul>
-                        <li>Minimum 3 studies with 2×2 diagnostic data</li>
+                        <li>Minimum 3 studies with 2&times;2 diagnostic data</li>
                         <li>Studies should evaluate the same test and target condition</li>
                         <li>Reference standard should be consistent across studies</li>
                         <li>Patient spectrum should be clinically relevant</li>
@@ -2450,7 +2450,7 @@ diagnosticmetaClass <- R6::R6Class(
                     <h5> No Bias Indicators</h5>
                     <ul>
                         <li><strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides</li>
-                        <li><strong>Deeks' Test p ≥ 0.05:</strong> No statistical evidence of asymmetry</li>
+                        <li><strong>Deeks' Test p &ge; 0.05:</strong> No statistical evidence of asymmetry</li>
                         <li><strong>Small Studies Present:</strong> Range of precision levels represented</li>
                     </ul>
                 </div>
@@ -2470,7 +2470,7 @@ diagnosticmetaClass <- R6::R6Class(
             self$results$funnelplot_explanation$setContent(html)
         }
 
-        # TODO (forward-looking): no `.asSource()` method — the jamovi syntax
+        # TODO (forward-looking): no `.asSource()` method - the jamovi syntax
         # pane therefore cannot render the equivalent R call for the user's
         # configured analysis (users cannot copy-paste the analysis as
         # reproducible R code). Adding one requires emitting a call shape like:
@@ -2485,7 +2485,7 @@ diagnosticmetaClass <- R6::R6Class(
         #       ...
         #   )
         # Use `jmvcore::sourcifyOption()` per option and `jmvcore::sourcifyName()`
-        # for variable references (NOT manual paste0 quoting — see project
+        # for variable references (NOT manual paste0 quoting - see project
         # MEMORY.md `feedback_sourcify_quoting_correct_helper`). The
         # `/add-R-code diagnosticmeta` skill scaffolds this with the
         # `showRCode` option + `rCode` Html output.

@@ -227,16 +227,6 @@ groupsummaryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Group and Summarize
 #'
 #' Group data by categorical variables and calculate summary statistics
-#'
-#' @examples
-#' \donttest{
-#' # Group by one or more categorical variables and sum numeric variables
-#' groupsummary(
-#'     data = mydata,
-#'     groupVars = c("Category", "Group"),
-#'     sumVars = c("Value1", "Value2")
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param groupVars Variables to group by (categorical or date).
 #' @param sumVars Numeric variables to calculate statistics for each group.

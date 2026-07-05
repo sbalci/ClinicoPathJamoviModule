@@ -15,17 +15,17 @@
 - **21 missing options** (read in .b.R but not defined in .a.yaml)
   - 14 are name mismatches, 7 need new entries
 - **4 naming convention collisions:**
-  - A: `forest*` (.a.yaml) vs `rf*` (.b.R) — Random Forest
-  - B: `survivalTime`/`event` vs `timeVar`/`eventVar` — Win Ratio/Frailty/Clinical Utility
-  - C: `survivalTime`/`event`/`oldStage` vs `outcome`/`outcomeEvent`/`explanatory` — Interval/Informative Censoring, Concordance
-  - D: `winRatio*` vs `wr*` — Win Ratio
+  - A: `forest*` (.a.yaml) vs `rf*` (.b.R) - Random Forest
+  - B: `survivalTime`/`event` vs `timeVar`/`eventVar` - Win Ratio/Frailty/Clinical Utility
+  - C: `survivalTime`/`event`/`oldStage` vs `outcome`/`outcomeEvent`/`explanatory` - Interval/Informative Censoring, Concordance
+  - D: `winRatio*` vs `wr*` - Win Ratio
 
 ### .r.yaml Audit
 - **2 unpopulated tables**: `forestSurvivalPredictions`, `forestStagingComparison`
-- **41 tables missing `visible:` rules** across 6 feature groups (interval censoring, informative censoring, concordance probability, win ratio, frailty, clinical utility) — show empty tables to users
+- **41 tables missing `visible:` rules** across 6 feature groups (interval censoring, informative censoring, concordance probability, win ratio, frailty, clinical utility) - show empty tables to users
 - **7 option-result name collisions** (same name used for both Bool option and Table output): `stratifiedAnalysis`, `forestStagingComparison`, `cureModelComparison`, `clinicalUtilityComparison`, `clinicalUtilityNNT`, `clinicalUtilityTimeVarying`, `clinicalUtilityBootstrap`
 - **41 invalid `clearWith` references** using nonexistent option names (`vars`, `explanatory`, `outcome`, `timeVar`, `eventVar`)
-- **41 `description:` schema violations** — not valid on r.yaml result items
+- **41 `description:` schema violations** - not valid on r.yaml result items
 - **1 format typo**: `zto.pvalue` should be `zto,pvalue` (willRogersEnhancedAnalysis table)
 
 ### Plot Quality Audit
@@ -39,7 +39,7 @@
 - **24 guard clauses** return `return()` instead of `return(FALSE)`
 
 ### Utility Extraction Audit
-- `.escapeVar` duplicated across **51 files** — extract to `R/utils-common.R`
+- `.escapeVar` duplicated across **51 files** - extract to `R/utils-common.R`
 - `.safeExecute` in 4 files with inconsistent signatures
 - 24 bootstrap CI patterns + 4 pseudo-R2 methods consolidatable
 

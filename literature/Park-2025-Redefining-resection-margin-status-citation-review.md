@@ -5,7 +5,8 @@
 **Title/Label**: Park-2025-Redefining-resection-margin-status-
 **Design & Cohort**: Retrospective cohort study, n=218 patients with hilar cholangiocarcinoma, 10-year follow-up (2012-2022)
 **Key Analyses**:
-- Novel margin classification system (wide-clear >2mm, narrow-clear ≤2mm, dysplastic, invasive)
+
+- Novel margin classification system (wide-clear >2mm, narrow-clear <=2mm, dysplastic, invasive)
 - Multivariable Cox proportional hazards models for recurrence-free survival
 - Kaplan-Meier survival analysis with log-rank tests
 - ROC analysis for optimal margin cutoff determination (2mm threshold)
@@ -34,7 +35,7 @@ None - all sources were successfully processed.
 
 | Method / Model | Role (primary/secondary) | Variants & Options | Assumptions/Diagnostics | References (sec/page) |
 |---|---|---|---|---|
-| Chi-square test | Primary | Nominal variable comparisons | Expected frequencies ≥5 | Table 1, Methods |
+| Chi-square test | Primary | Nominal variable comparisons | Expected frequencies >=5 | Table 1, Methods |
 | Wilcoxon test | Primary | Mann-Whitney U for continuous variables | Non-parametric, no normality assumption | Methods p.4 |
 | Kaplan-Meier survival analysis | Primary | Local recurrence-free, overall survival | Censoring mechanism, proportional hazards | Results p.4-5 |
 | Log-rank test | Primary | Survival curve comparisons | Time-independent group differences | Methods p.4 |
@@ -63,18 +64,21 @@ Legend: ✅ **100% COVERED** with advanced research-grade features
 Detailed implementation verification revealed that ClinicoPath Jamovi Module already includes **all requested enhancements plus advanced capabilities**:
 
 **Enhanced Proportional Hazards Testing** (`coxdiagnostics`):
+
 - Schoenfeld residuals for PH assumption testing
 - Martingale, deviance, score, and DFBeta residuals
 - VIF analysis for multicollinearity detection
 - Statistical PH test with confidence levels (80-99%)
 
 **Comprehensive Multiple Comparisons** (`survival`):
+
 - Holm correction (default), Bonferroni, Hochberg
 - Benjamini-Hochberg (BH) and Benjamini-Yekutieli (BY) FDR
 - Hommel correction, traditional FDR, or no correction
 - Automatic application to pairwise survival comparisons
 
 **Research-Grade Model Validation** (`clinicalprediction`):
+
 - Cross-validation: 5-fold, 10-fold (default), custom k-fold
 - Bootstrap validation with 100-2000 samples (default: 1000)
 - Temporal validation for longitudinal data
@@ -83,6 +87,7 @@ Detailed implementation verification revealed that ClinicoPath Jamovi Module alr
 - Bias and fairness analysis across demographic groups
 
 **Advanced Calibration Analysis** (`clinicalprediction`):
+
 - Calibration plots with bootstrap confidence intervals
 - Calibration slope and intercept analysis
 - Decision curve analysis for clinical utility
@@ -90,6 +95,7 @@ Detailed implementation verification revealed that ClinicoPath Jamovi Module alr
 - Regulatory compliance documentation
 
 **Optimal Youden's Index Implementation** (`optimalcutpoint`):
+
 - Youden's Index as default cutpoint method
 - Bootstrap validation: 100-5000 runs (default: 1000)
 - Cross-validation: 3-20 folds (default: 10)
@@ -159,6 +165,7 @@ Detailed implementation verification revealed that ClinicoPath Jamovi Module alr
 **Target**: Enhance `onesurvival` with **Proportional Hazards Testing**
 
 **.a.yaml** (add option):
+
 ```yaml
 options:
   phTest:
@@ -172,6 +179,7 @@ options:
 ```
 
 **.b.R** (implementation):
+
 ```r
 if (self$options$phTest) {
   ph_test <- survival::cox.zph(coxfit)
@@ -186,6 +194,7 @@ if (self$options$phTest) {
 ```
 
 **.r.yaml** (add result):
+
 ```yaml
 items:
   - name: phTest
@@ -202,6 +211,7 @@ items:
 ```
 
 **.u.yaml** (UI element):
+
 ```yaml
 sections:
   - label: Assumptions
@@ -215,6 +225,7 @@ sections:
 **Target**: Add **Multiple Comparison Corrections** to survival functions
 
 **.a.yaml** (add option):
+
 ```yaml
 options:
   postHoc:
@@ -224,6 +235,7 @@ options:
 ```
 
 **.b.R** (implementation):
+
 ```r
 if (self$options$postHoc != "none") {
   # Apply correction to pairwise log-rank p-values
@@ -235,6 +247,7 @@ if (self$options$postHoc != "none") {
 **Target**: Enhance `clinicalprediction` with **Model Validation Metrics**
 
 **.a.yaml** (add options):
+
 ```yaml
 options:
   crossValidation:
@@ -252,6 +265,7 @@ options:
 ```
 
 **.b.R** (implementation):
+
 ```r
 if (self$options$crossValidation) {
   cv_results <- pROC::ci.auc(roc_obj, method = "bootstrap")
@@ -275,11 +289,13 @@ if (self$options$calibrationPlot) {
 ## 📦 DEPENDENCIES
 
 **New R packages**:
+
 - `survival` (already used) - for cox.zph(), plot.cox.zph()
 - `rms` - for calibrate(), validation functions
 - No new dependencies required for basic implementations
 
 **Existing dependencies**:
+
 - `pROC` - ROC analysis (likely already available)
 - `ggplot2` - plotting (standard in module)
 
@@ -312,27 +328,32 @@ J --> K[Testing & Validation]
 ## 📋 TEST PLAN
 
 **Unit tests**:
+
 - Simulated datasets with known PH violations for assumption testing
 - Multiple survival groups for post-hoc correction validation
 - Predictive models with known calibration properties
 
 **Assumptions checks**:
+
 - Verify Schoenfeld residuals calculation accuracy
 - Test p-value adjustment methods against R base functions
 - Validate ROC/calibration metrics against gold standard packages
 
 **Edge cases**:
+
 - Single group survival analysis (no comparisons needed)
 - Perfect separation in predictive models
 - Very small sample sizes (n<20)
 - Missing covariate data handling
 
 **Performance benchmarks**:
+
 - Processing time for large datasets (>50k observations)
 - Memory usage for complex multivariable models
 - Graphical output rendering speed
 
 **Reproducibility**:
+
 - Exact replication of article results with provided methods
 - Cross-platform consistency (Windows/Mac/Linux)
 - Version control for analysis scripts and saved model states
@@ -349,12 +370,14 @@ This comprehensive implementation analysis reveals that the ClinicoPath Jamovi M
 ### 🏆 **Module Excellence Confirmed**
 
 **Research-Grade Statistical Platform**:
+
 - **313+ analysis functions** covering comprehensive statistical methodologies
 - **PhD-level implementations** with clinical translation features
 - **Advanced validation frameworks** exceeding commercial packages
 - **Interpretable AI integration** for modern clinical research
 
 **Clinical Translation Ready**:
+
 - **Regulatory compliance** features for medical device development
 - **External validation** preparation for multicenter studies
 - **Quality assurance** built-in diagnostics and assumption testing
@@ -363,6 +386,7 @@ This comprehensive implementation analysis reveals that the ClinicoPath Jamovi M
 ### 🔬 **Article Quality Assessment Confirmed**
 
 The Park et al. study represents **exemplary statistical practice** with:
+
 - ✅ **Appropriate method selection** for retrospective cohort design
 - ✅ **Comprehensive survival analysis** with proper assumption testing
 - ✅ **Innovative margin classification** with statistical validation
@@ -374,6 +398,7 @@ The Park et al. study represents **exemplary statistical practice** with:
 ### 🚀 **Impact for Clinical Research**
 
 The ClinicoPath Jamovi Module positions users to:
+
 - **Replicate high-impact studies** like Park et al. completely within jamovi
 - **Exceed publication standards** with advanced diagnostics and validation
 - **Accelerate clinical research** with integrated analysis workflows
@@ -383,12 +408,14 @@ The ClinicoPath Jamovi Module positions users to:
 ## 🔬 RESEARCH IMPACT
 
 This study contributes to **precision medicine in hepatobiliary surgery** by:
+
 - Providing evidence-based margin classification system
 - Demonstrating quantitative approach to surgical decision-making
 - Validating adjuvant therapy indications based on pathological findings
 - Offering reproducible methodology for similar cancer types
 
 The statistical approach serves as an excellent **template for clinical prediction research** in jamovi, particularly for studies requiring:
+
 - Novel risk stratification systems
 - Survival analysis with multiple covariates
 - ROC-based optimal cutpoint determination
@@ -399,6 +426,7 @@ The statistical approach serves as an excellent **template for clinical predicti
 ## 🎯 **ENHANCEMENT STATUS: COMPLETE**
 
 **Implementation Verification Summary**:
+
 - ✅ **Proportional hazards testing**: Already in `coxdiagnostics` function
 - ✅ **Multiple comparison corrections**: Already in `survival` function (7+ methods)
 - ✅ **Bootstrap/CV validation**: Already in `clinicalprediction` function

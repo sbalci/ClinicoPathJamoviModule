@@ -15,11 +15,13 @@ Applied 4 critical fixes to the `statsplot2` jamovi module to improve type infer
 ### ✅ Fix 1: Enhanced Type Inference (Lines 152-184)
 
 **Problem:**
+
 - Original threshold of 10 unique values too strict (missed 11-15 point clinical scales)
 - Character variables (common in clinical data) treated as "unknown"
 - No warnings for borderline categorical/continuous cases
 
 **Solution:**
+
 ```r
 .infer_type <- function(v) {
     contin <- c("integer", "numeric", "double")
@@ -56,12 +58,14 @@ Applied 4 critical fixes to the `statsplot2` jamovi module to improve type infer
 ```
 
 **Impact:**
+
 - ✅ Handles character variables (e.g., "Tumor Grade: G1, G2, G3")
 - ✅ Correctly identifies 11-15 point clinical scales (ECOG, WHO grade, etc.)
 - ✅ Warns users about borderline cases for informed decisions
 - ✅ Reduces "unknown" variable type errors
 
 **Testing scenarios:**
+
 - Character: `c("Positive", "Negative", "Equivocal")`
 - 15-point scale: `c(1:15)` (ECOG performance status, pain scales)
 - Borderline: Variables with 11-14 unique integers
@@ -71,11 +75,13 @@ Applied 4 critical fixes to the `statsplot2` jamovi module to improve type infer
 ### ✅ Fix 2: Sample Size Warnings (Lines 564-611, 645-647)
 
 **Problem:**
+
 - All sample size checks commented out (legacy Notice issues)
 - Users could run statistical tests on n=3 without warnings
 - No clinical guidance for small sample situations
 
 **Solution:**
+
 ```r
 # Sample size validation with HTML warnings
 dep_data <- self$data[[analysis_info$dep_var]]
@@ -99,12 +105,12 @@ if (n_complete < 10) {
         "<strong>Clinical recommendations:</strong><br/>",
         "1. <strong>Collect more data</strong> before drawing conclusions<br/>",
         "2. Use descriptive statistics only (no hypothesis testing)<br/>",
-        "3. Consider exact tests if n≥5 (Fisher's exact test)<br/>",
+        "3. Consider exact tests if n>=5 (Fisher's exact test)<br/>",
         "4. Clearly report sample size limitations in any publication",
         "</div>"
     ))
 } else if (n_complete < 30) {
-    # Warning: 10 ≤ n < 30
+    # Warning: 10 <= n < 30
     validation_warnings <- paste0(validation_warnings, glue::glue(
         "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px;'>",
         "<strong>⚠ Small Sample Warning (n={n_complete})</strong><br/>",
@@ -123,27 +129,31 @@ if (n_complete < 10) {
 ```
 
 **Impact:**
+
 - 🔴 **CRITICAL** alerts for n < 10 (red background)
-- 🟠 **WARNING** for 10 ≤ n < 30 (orange background)
+- 🟠 **WARNING** for 10 <= n < 30 (orange background)
 - ✅ Actionable clinical guidance (exact tests, nonparametric methods)
 - ✅ Publication considerations (sample size reporting)
 - ✅ Prevents unreliable statistical inferences
 
 **Thresholds:**
+
 - `n < 10`: CRITICAL - Descriptive statistics only
-- `10 ≤ n < 30`: WARNING - Use nonparametric/exact methods
-- `n ≥ 30`: No warning (conventional guideline met)
+- `10 <= n < 30`: WARNING - Use nonparametric/exact methods
+- `n >= 30`: No warning (conventional guideline met)
 
 ---
 
 ### ✅ Fix 3: Remove Dead Code (Lines 28-33 deleted)
 
 **Problem:**
+
 - `.escapeVar()` function defined but never used anywhere in codebase
 - Dead code increases maintenance burden
 - False impression that variable escaping is implemented
 
 **Solution:**
+
 ```r
 # REMOVED:
 # .escapeVar = function(x) {
@@ -152,6 +162,7 @@ if (n_complete < 10) {
 ```
 
 **Impact:**
+
 - ✅ Cleaner codebase (5 lines removed)
 - ✅ No false documentation of unused features
 - ✅ Reduced code complexity
@@ -163,11 +174,13 @@ if (n_complete < 10) {
 ### ✅ Fix 4: Design Validation (Lines 28-86, 607-611)
 
 **Problem:**
+
 - Users could select "Repeated Measures" for independent groups data
 - No validation of data structure vs. study design
 - Common error: treating between-subjects data as within-subjects
 
 **Solution:**
+
 ```r
 .validateDesignDataMatch = function(analysis_info, data) {
     if (analysis_info$direction != "repeated") {
@@ -222,12 +235,14 @@ if (n_complete < 10) {
 ```
 
 **Impact:**
+
 - ✅ Detects unbalanced data for repeated measures
 - ✅ Warns when data structure suggests independent groups
 - ℹ️ Educational messages about study design assumptions
 - ✅ Prevents common statistical analysis errors
 
 **Validation checks:**
+
 1. **Divisibility check**: n_obs should be divisible by n_groups for balanced RM
 2. **Perfect balance check**: Equal group sizes often indicate independent groups
 3. **Missing data detection**: Flags incomplete repeated measurements
@@ -246,12 +261,14 @@ From `CLAUDE.md`:
 > "The notices feature does not allow new lines for the time being."
 
 **Current Approach:**
+
 - Use styled HTML `<div>` blocks in `ExplanationMessage` output
 - Color-coded severity: Red (critical), Orange (warning), Blue (info)
 - Prepend validation warnings to regular explanatory text
 - Avoids serialization errors while providing rich user feedback
 
 **Example HTML Structure:**
+
 ```html
 <div style='background: #ffebee; border-left: 4px solid #d32f2f; padding: 12px;'>
     <strong>⚠ CRITICAL: Very Small Sample (n=8)</strong><br/>
@@ -264,6 +281,7 @@ From `CLAUDE.md`:
 
 **Future Migration Path:**
 When jamovi supports multiline notices and fixes serialization:
+
 1. Convert HTML warnings to single-line Notice calls
 2. Update to use `jmvcore::NoticeType` (ERROR, STRONG_WARNING, WARNING, INFO)
 3. Remove HTML fallbacks from ExplanationMessage
@@ -288,6 +306,7 @@ When jamovi supports multiline notices and fixes serialization:
 ## Validation Results
 
 ### ✅ Syntax Validation
+
 ```bash
 Rscript -e "devtools::document()"
 # ✅ SUCCESS - No syntax errors in statsplot2.b.R
@@ -313,7 +332,7 @@ Rscript -e "devtools::document()"
 ### Type Inference Testing
 
 - [ ] **Character variables**: `c("Positive", "Negative", "Equivocal")`
-  - Expected: Treated as factor (≤20 unique values)
+  - Expected: Treated as factor (<=20 unique values)
 
 - [ ] **11-15 point scales**: ECOG (0-5), WHO grade (1-4), VAS pain (0-10)
   - Expected: Treated as factor with borderline warning
@@ -335,12 +354,14 @@ Rscript -e "devtools::document()"
 ### Design Validation Testing
 
 - [ ] **Repeated measures with unbalanced data**:
+
   ```
   Data: 47 rows, 2 groups (Pre, Post)
   Expected: Warning about 47 not divisible by 2
   ```
 
 - [ ] **Independent groups misidentified as repeated**:
+
   ```
   Data: 30 Treatment, 30 Control (perfectly balanced)
   Selected: "Repeated Measures"
@@ -348,6 +369,7 @@ Rscript -e "devtools::document()"
   ```
 
 - [ ] **Proper repeated measures data**:
+
   ```
   Data: 25 subjects × 2 timepoints = 50 rows
   Expected: No design warnings
@@ -365,6 +387,7 @@ Rscript -e "devtools::document()"
 ## Clinical Impact
 
 ### Before Fixes
+
 ❌ Character variables → "unknown" type errors
 ❌ 11-point pain scales → treated as continuous (incorrect)
 ❌ n=3 analyses → no warnings (dangerous)
@@ -372,6 +395,7 @@ Rscript -e "devtools::document()"
 ⚠️ Dead code → false feature documentation
 
 ### After Fixes
+
 ✅ Character variables → correctly identified as categorical
 ✅ Clinical scales → properly treated as ordinal with warnings
 ✅ Small samples → explicit CRITICAL/WARNING guidance
@@ -385,6 +409,7 @@ Rscript -e "devtools::document()"
 ### Updated Guide References
 
 This fix complements existing documentation:
+
 - **`STATSPLOT2_IMPROVEMENTS_APPLIED.md`** - Previous enhancement round
 - **`vignettes/jamovi_notices_guide.md`** - Notice system patterns (for future migration)
 - **`vignettes/jamovi_module_patterns_guide.md`** - Overall module architecture
@@ -392,6 +417,7 @@ This fix complements existing documentation:
 ### New Examples Added
 
 **Type Inference Edge Cases:**
+
 ```r
 # Character clinical data
 tumor_grade <- c("G1", "G2", "G3", "G1", "G2")  # Factor
@@ -403,14 +429,15 @@ pain_score_100pt <- 0:100  # Continuous
 ```
 
 **Sample Size Scenarios:**
+
 ```r
 # CRITICAL (n<10)
 pilot_study <- data.frame(outcome = rnorm(7), group = rep(c("A","B"), c(3,4)))
 
-# WARNING (10≤n<30)
+# WARNING (10<=n<30)
 small_rct <- data.frame(outcome = rnorm(22), group = rep(c("Tx","Ctrl"), c(11,11)))
 
-# ACCEPTABLE (n≥30)
+# ACCEPTABLE (n>=30)
 powered_study <- data.frame(outcome = rnorm(120), group = rep(c("Tx","Ctrl"), c(60,60)))
 ```
 
@@ -466,6 +493,7 @@ powered_study <- data.frame(outcome = rnorm(120), group = rep(c("Tx","Ctrl"), c(
 **Overall Quality: A+ (Excellent)**
 
 All 4 critical fixes successfully implemented with:
+
 - ✅ Enhanced clinical safety (sample size validation)
 - ✅ Improved type inference (character variables, better thresholds)
 - ✅ Design validation (prevents common errors)

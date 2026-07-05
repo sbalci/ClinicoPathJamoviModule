@@ -449,19 +449,6 @@ firthregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' counts, unbalanced predictors, or when standard maximum likelihood 
 #' estimates become infinite due to separation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Firth logistic regression
-#' firthregression(data = mydata, analysisType = "logistic",
-#'     outcome = "mortality",
-#'     predictors = c("age", "stage", "biomarker"))
-#'
-#' # Firth Cox regression
-#' firthregression(data = mydata, analysisType = "cox",
-#'     time = "follow_up_time", outcome = "status",
-#'     predictors = c("age", "stage", "biomarker"))
-#'}
 #' @param data The data as a data frame.
 #' @param analysisType Type of regression model. Logistic uses logistf package
 #'   for binary outcomes with Jeffreys-prior bias reduction. Cox uses coxphf

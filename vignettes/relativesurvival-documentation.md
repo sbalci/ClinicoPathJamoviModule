@@ -1,4 +1,4 @@
-# Relative Survival Analysis -- Developer Documentation
+# Relative Survival Analysis - Developer Documentation
 
 ---
 
@@ -71,12 +71,12 @@ Derived from `relativesurvival.u.yaml` mapped to `relativesurvival.a.yaml`.
 
 | # | Name | Type | Default | Description | Downstream Effects |
 |---|---|---|---|---|---|
-| 1 | `data` | Data | -- | The data frame | Passed to all private methods |
-| 2 | `time` | Variable | -- | Follow-up time (days/months/years) | `.prepareData()`: converted to `time_years` and `time_days` based on `time_scale` |
-| 3 | `status` | Variable | -- | Vital status (0=alive, 1=dead) | `.prepareData()`: parsed to binary `status_num`; supports factor or numeric |
-| 4 | `age` | Variable | -- | Age at diagnosis (years) | `.prepareData()`: validated 0-120, converted to `age_days` for ratetable `rmap` |
-| 5 | `sex` | Variable | -- | Sex/gender (factor) | `.prepareData()`: mapped to `"male"`/`"female"` via multilingual pattern matching |
-| 6 | `year` | Variable | -- | Calendar year of diagnosis | `.prepareData()`: converted to `diagdate` (Date, mid-year July 1) |
+| 1 | `data` | Data | - | The data frame | Passed to all private methods |
+| 2 | `time` | Variable | - | Follow-up time (days/months/years) | `.prepareData()`: converted to `time_years` and `time_days` based on `time_scale` |
+| 3 | `status` | Variable | - | Vital status (0=alive, 1=dead) | `.prepareData()`: parsed to binary `status_num`; supports factor or numeric |
+| 4 | `age` | Variable | - | Age at diagnosis (years) | `.prepareData()`: validated 0-120, converted to `age_days` for ratetable `rmap` |
+| 5 | `sex` | Variable | - | Sex/gender (factor) | `.prepareData()`: mapped to `"male"`/`"female"` via multilingual pattern matching |
+| 6 | `year` | Variable | - | Calendar year of diagnosis | `.prepareData()`: converted to `diagdate` (Date, mid-year July 1) |
 | 7 | `covariates` | Variables | `[]` | Additional covariates | `.fitRegressionModel()`: composed into formula terms; EPV check at top of `.run()` |
 | 8 | `ratetable` | List | `us` | Population rate table (15 options) | `.getRateTable()`: selects relsurv built-in or loads WHO bundle; fallback to US |
 | 9 | `method` | List | `poharperme` | Estimation method (4 options) | `.calculateRelativeSurvival()`: mapped to relsurv method string; `.displaySurvivalTable()` note |
@@ -180,22 +180,22 @@ Derived from `relativesurvival.u.yaml` mapped to `relativesurvival.a.yaml`.
 
 | # | Name | Type | Title | Visibility Rule | clearWith | Column Schema |
 |---|---|---|---|---|---|---|
-| 1 | `todo` | Html | To Do | always | time, status, age, sex, year | -- |
-| 2 | `notices` | Html | Notices | always | time, status, age, sex, year, covariates, ratetable, method, regression_model | -- |
-| 3 | `summary` | Html | Analysis Summary | always | -- | -- |
-| 4 | `survivalTable` | Table | Survival Estimates by Time | always | -- | See Appendix |
-| 5 | `netSurvivalTable` | Table | Net Survival Estimates | `(net_survival)` | -- | See Appendix |
-| 6 | `excessMortalityTable` | Table | Excess Mortality Rates | `(excess_mortality)` | -- | See Appendix |
-| 7 | `crudeProbTable` | Table | Crude Probability of Death | `(crude_probability)` | -- | See Appendix |
-| 8 | `regressionTable` | Table | Regression Model Results | `(!regression_model:none)` | -- | See Appendix |
+| 1 | `todo` | Html | To Do | always | time, status, age, sex, year | - |
+| 2 | `notices` | Html | Notices | always | time, status, age, sex, year, covariates, ratetable, method, regression_model | - |
+| 3 | `summary` | Html | Analysis Summary | always | - | - |
+| 4 | `survivalTable` | Table | Survival Estimates by Time | always | - | See Appendix |
+| 5 | `netSurvivalTable` | Table | Net Survival Estimates | `(net_survival)` | - | See Appendix |
+| 6 | `excessMortalityTable` | Table | Excess Mortality Rates | `(excess_mortality)` | - | See Appendix |
+| 7 | `crudeProbTable` | Table | Crude Probability of Death | `(crude_probability)` | - | See Appendix |
+| 8 | `regressionTable` | Table | Regression Model Results | `(!regression_model:none)` | - | See Appendix |
 | 9 | `observedPlot` | Image | Observed Survival | `(plot_observed)` | time, status, covariates, time_scale | renderFun: `.plotObserved` |
 | 10 | `expectedPlot` | Image | Expected Survival | `(plot_expected)` | age, sex, year, ratetable, time_scale | renderFun: `.plotExpected` |
 | 11 | `relativePlot` | Image | Relative Survival | `(plot_relative)` | time, status, age, sex, year, method, ratetable, time_scale, confidence_level | renderFun: `.plotRelative` |
 | 12 | `excessPlot` | Image | Excess Mortality | `(plot_excess && excess_mortality)` | time, status, age, sex, year, method, ratetable, time_scale | renderFun: `.plotExcess` |
-| 13 | `ageStandardizedTable` | Table | Age-Standardized Survival | `(age_standardized)` | -- | See Appendix |
-| 14 | `periodAnalysisTable` | Table | Period Analysis Results | `(period_analysis)` | -- | See Appendix |
-| 15 | `modelFit` | Table | Model Fit Statistics | `(!regression_model:none)` | -- | See Appendix |
-| 16 | `interpretation` | Html | Clinical Interpretation | always | -- | -- |
+| 13 | `ageStandardizedTable` | Table | Age-Standardized Survival | `(age_standardized)` | - | See Appendix |
+| 14 | `periodAnalysisTable` | Table | Period Analysis Results | `(period_analysis)` | - | See Appendix |
+| 15 | `modelFit` | Table | Model Fit Statistics | `(!regression_model:none)` | - | See Appendix |
+| 16 | `interpretation` | Html | Clinical Interpretation | always | - | - |
 
 ### Plot Specifications
 
@@ -355,11 +355,11 @@ Step-by-step from user action to results display.
 
 | Option Changed | What Recalculates | Pitfalls | Recommended Default |
 |---|---|---|---|
-| `time` | Everything (all tables, all plots, summary, interpretation) | Ensure correct `time_scale` is set; mismatch silently produces wrong results | -- |
+| `time` | Everything (all tables, all plots, summary, interpretation) | Ensure correct `time_scale` is set; mismatch silently produces wrong results | - |
 | `status` | Everything | Must be 0/1 or 2-level factor; 3+ levels rejected | Numeric 0/1 preferred |
-| `age` | Rate table matching, age standardization, all survival estimates | Must be in years (not months or days); out of 0-120 rejected | -- |
+| `age` | Rate table matching, age standardization, all survival estimates | Must be in years (not months or days); out of 0-120 rejected | - |
 | `sex` | Rate table matching, all survival estimates | Multilingual mapping covers 7 patterns per sex; unmapped values cause hard reject | Use "male"/"female" |
-| `year` | Rate table matching, period analysis, all survival estimates | Must be 4-digit year; converted to mid-year Date; out of 1900-2100 rejected | -- |
+| `year` | Rate table matching, period analysis, all survival estimates | Must be 4-digit year; converted to mid-year Date; out of 1900-2100 rejected | - |
 | `ratetable` | All survival/mortality calculations | WHO tables require `ratetable_who_collection` data object; missing table falls back to US silently | `us` for US data |
 | `method` | `rel_surv` object, survivalTable, netSurvivalTable, relativePlot, excessMortalityTable | Pohar-Perme is only unbiased net survival estimator; others are biased in presence of informative censoring | `poharperme` |
 | `time_scale` | Data preparation (time conversion) | Incorrect scale produces wildly wrong estimates; no automatic detection | Match input data units |
@@ -463,10 +463,10 @@ With default settings, the analysis produces:
 
 | Column Name | Title | Type | Format |
 |---|---|---|---|
-| `time_interval` | Time Interval | text | -- |
-| `excess_hazard` | Excess Hazard | number | -- |
-| `hazard_ci_lower` | CI Lower | number | -- |
-| `hazard_ci_upper` | CI Upper | number | -- |
+| `time_interval` | Time Interval | text | - |
+| `excess_hazard` | Excess Hazard | number | - |
+| `hazard_ci_lower` | CI Lower | number | - |
+| `hazard_ci_upper` | CI Upper | number | - |
 | `p_value` | p-value | number | `zto,pvalue` |
 
 ### crudeProbTable
@@ -483,13 +483,13 @@ With default settings, the analysis produces:
 
 | Column Name | Title | Type | Format |
 |---|---|---|---|
-| `variable` | Variable | text | -- |
-| `coefficient` | Coefficient | number | -- |
-| `std_error` | Std. Error | number | -- |
-| `z_value` | z-value | number | -- |
+| `variable` | Variable | text | - |
+| `coefficient` | Coefficient | number | - |
+| `std_error` | Std. Error | number | - |
+| `z_value` | z-value | number | - |
 | `p_value` | p-value | number | `zto,pvalue` |
-| `coef_ci_lower` | CI Lower | number | -- |
-| `coef_ci_upper` | CI Upper | number | -- |
+| `coef_ci_lower` | CI Lower | number | - |
+| `coef_ci_upper` | CI Upper | number | - |
 
 ### ageStandardizedTable
 

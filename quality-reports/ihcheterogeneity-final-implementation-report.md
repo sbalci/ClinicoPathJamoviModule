@@ -11,20 +11,24 @@ Successfully updated and enhanced the `ihcheterogeneity` function to focus on IH
 ## 📋 **1. EXPLANATORY TEXT UPDATE**
 
 ### **From**: Biopsy Sampling Simulation
+
 ### **To**: IHC Heterogeneity Analysis
 
 **Key Changes:**
+
 - **Main Title**: "IHC Heterogeneity Analysis for Digital Pathology"
 - **Purpose**: Focus on spatial heterogeneity in continuous IHC biomarker expression
 - **Data Requirements**: Reference region vs regional measurements
 - **Applications**: Tumor heterogeneity, QC assessment, protocol optimization
 
 **Variable Labels Updated:**
+
 - `wholesection` → "Reference Region Biomarker Value"
 - `biopsy1-4` → "Regional Measurement 1-4"
 - `biopsies` → "Additional Regional Measurements"
 
 **Clinical Context Enhanced:**
+
 - Continuous biomarker focus (Ki67 %, ER H-scores, PR percentages)
 - Spatial variability assessment
 - Quality control for IHC staining uniformity
@@ -37,6 +41,7 @@ Successfully updated and enhanced the `ihcheterogeneity` function to focus on IH
 ### **Critical Bottleneck Fixed**: O(n²) Correlation Loops
 
 **Before** (Inefficient nested loops):
+
 ```r
 # 332-341: Manual correlation calculation
 for (i in 1:(n_biopsies-1)) {
@@ -48,6 +53,7 @@ for (i in 1:(n_biopsies-1)) {
 ```
 
 **After** (Vectorized approach):
+
 ```r
 # Vectorized correlation matrix calculation
 cor_matrix <- cor(biopsy_data, use = "pairwise.complete.obs", method = "spearman")
@@ -56,6 +62,7 @@ inter_biopsy_corr <- cor_matrix[upper_tri_indices]
 ```
 
 **Performance Impact**:
+
 - **Time Complexity**: O(n²) → O(n) for correlation calculations
 - **Memory Efficiency**: Single matrix operation vs repeated calculations
 - **Scalability**: Now handles >10 regional measurements efficiently
@@ -67,6 +74,7 @@ inter_biopsy_corr <- cor_matrix[upper_tri_indices]
 ### **New User Experience Features**
 
 **3.1 Statistical Glossary** (`.populateGlossary()`)
+
 - **📊 Correlation Measures**: Spearman vs Pearson correlations with clinical interpretation
 - **🎯 Reliability Measures**: ICC thresholds (>0.90 excellent, 0.75-0.90 good, etc.)
 - **📈 Variability Measures**: CV interpretation (<10% excellent, >30% very high)
@@ -74,12 +82,14 @@ inter_biopsy_corr <- cor_matrix[upper_tri_indices]
 - **📋 Clinical Guidelines**: Agreement level interpretations
 
 **3.2 Plain-Language Summary** (`.generatePlainLanguageSummary()`)
+
 - Natural language interpretation of statistical results
 - Clinical implications based on ICC and CV values
 - Copy-ready text for clinical understanding
 - Visual styling with color-coded sections
 
 **3.3 UI Controls Added**
+
 ```yaml
 # New options in .a.yaml
 - name: showSummary
@@ -100,12 +110,14 @@ inter_biopsy_corr <- cor_matrix[upper_tri_indices]
 ### **4.1 Robust ICC Calculation**
 
 **Enhanced Validation**:
+
 - ✅ Check for sufficient variance in each column (>1e-6)
-- ✅ Validate ICC prerequisites (≥3 cases, ≥2 measurements)
+- ✅ Validate ICC prerequisites (>=3 cases, >=2 measurements)
 - ✅ Range validation (ICC between -1 and +1)
 - ✅ Fallback to mean correlation when ICC fails
 
 **Error Recovery**:
+
 ```r
 tryCatch({
     icc_result <- psych::ICC(icc_data)
@@ -123,6 +135,7 @@ tryCatch({
 ### **4.2 Comprehensive Misuse Detection** (`.detectMisuse()`)
 
 **Data Quality Warnings**:
+
 - ⚠️ **Sample Size**: Warning if n<10 cases for low statistical power
 - ⚠️ **Outliers**: Alert if >10% outliers detected (IQR method)
 - ⚠️ **High Variability**: Warning if >20% cases have CV>50%
@@ -131,6 +144,7 @@ tryCatch({
 - ⚠️ **Invalid Ranges**: Negative values or values >300 (inappropriate for most IHC scales)
 
 **Visual Warning Display**:
+
 ```html
 <div style='background-color: #fff3cd; border: 1px solid #ffeaa7;'>
   <h4>⚠️ Data Quality Warnings</h4>
@@ -143,6 +157,7 @@ tryCatch({
 ## 🎨 **5. IMPROVED USER INTERFACE**
 
 ### **Organized UI Structure**
+
 ```yaml
 # Grouped panels for better organization
 - type: CollapseBox
@@ -170,12 +185,14 @@ tryCatch({
 ## 📈 **6. CLINICAL FEATURES FOR CONTINUOUS IHC**
 
 ### **Designed for Continuous Biomarkers**
+
 - **Ki67 Proliferation Index**: 0-100% range validation
 - **ER/PR H-scores**: 0-300 range with clinical thresholds
 - **Quantitative IHC**: Continuous measurement validation
 - **Spatial Analysis**: Regional heterogeneity assessment
 
 ### **Evidence-Based Clinical Thresholds**
+
 - **CV Thresholds**: <15% excellent, 15-30% moderate, >30% high variability
 - **ICC Thresholds**: >0.90 excellent, 0.75-0.90 good, 0.50-0.75 moderate agreement
 - **Correlation Thresholds**: >0.8 strong, 0.6-0.8 moderate, <0.6 weak relationships
@@ -185,12 +202,14 @@ tryCatch({
 ## 🧪 **7. VALIDATION RESULTS**
 
 ### **Technical Validation**
+
 - ✅ **jmvtools::prepare()**: Passes without errors
 - ✅ **Performance**: Vectorized calculations tested
 - ✅ **Error Handling**: All edge cases covered
 - ✅ **UI Integration**: New options properly integrated
 
 ### **Feature Testing**
+
 - ✅ **Statistical Glossary**: Comprehensive definitions with clinical context
 - ✅ **Plain-Language Summary**: Auto-generated interpretations
 - ✅ **Misuse Detection**: Appropriate warnings for data quality issues
@@ -202,6 +221,7 @@ tryCatch({
 ## 📁 **8. FILES MODIFIED**
 
 ### **Core Implementation Files**
+
 - **`R/ihcheterogeneity.b.R`**: Major enhancements (1383 lines)
   - Updated explanatory text and clinical focus
   - Vectorized correlation calculations
@@ -239,6 +259,7 @@ tryCatch({
 ### **Quality Score**: 98/100 → **⭐⭐⭐⭐⭐ EXCELLENT**
 
 **Breakdown**:
+
 - **Functionality**: 100/100 (all features working, performance optimized)
 - **Clinical Relevance**: 100/100 (IHC heterogeneity focus, continuous biomarkers)
 - **User Experience**: 95/100 (plain-language summaries, glossary, warnings)
@@ -252,6 +273,7 @@ tryCatch({
 **Status**: ✅ **READY FOR IMMEDIATE DEPLOYMENT**
 
 ### **Key Achievements**
+
 1. ✅ **Complete Focus Shift**: From biopsy sampling to IHC heterogeneity
 2. ✅ **Performance Excellence**: Vectorized calculations for scalability
 3. ✅ **Clinical Usability**: Plain-language summaries and statistical glossary
@@ -259,12 +281,14 @@ tryCatch({
 5. ✅ **Quality Assurance**: Comprehensive misuse detection and warnings
 
 ### **Clinical Impact**
+
 - **Pathologists**: Clear interpretation of heterogeneity patterns
 - **Researchers**: Robust statistical analysis for continuous IHC biomarkers
 - **Quality Control**: Automated detection of measurement issues
 - **Education**: Statistical glossary enhances understanding
 
 ### **Next Steps**
+
 1. ✅ Deploy to production (all validations passed)
 2. 📋 Update user documentation with new features
 3. 📋 Create tutorial examples for common IHC biomarkers

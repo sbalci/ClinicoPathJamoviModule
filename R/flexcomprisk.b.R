@@ -165,7 +165,7 @@ flexcompriskClass <- R6::R6Class(
             # Add spline terms for flexible parametric models
             if (model_type == "splines") {
                 df <- as.numeric(self$options$splineDf)
-                # Simplified — uses first covariate (would check variable types in a fuller implementation)
+                # Simplified - uses first covariate (would check variable types in a fuller implementation)
                 if (length(covs) > 0) {
                     spline_fn <- switch(self$options$splineType,
                         "ns" = "ns",

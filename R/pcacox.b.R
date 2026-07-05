@@ -50,7 +50,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -305,7 +305,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Extract predictor matrix using model.matrix to handle factors
                 # composeTerms backtick-escapes user-supplied predictor names (Defense 1);
-                # jmvcore::asFormula allow-list validates the RHS (Defense 2 — closes C1 RCE).
+                # jmvcore::asFormula allow-list validates the RHS (Defense 2 - closes C1 RCE).
                 formula_str <- paste("~ -1 +", paste(jmvcore::composeTerms(as.list(private$predictors)), collapse = " + "))
                 X <- model.matrix(jmvcore::asFormula(formula_str), data = private$clean_data)
                 
@@ -792,7 +792,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
                 # Create formula
-                # PC names ("PC1"/"PC2"/...) are internal — no escape needed.
+                # PC names ("PC1"/"PC2"/...) are internal - no escape needed.
                 # composeTerms backtick-escapes user-supplied clinical_vars (Defense 1).
                 # .asSurvivalFormula provides Defense 2 (Surv allow-list).
                 pc_vars <- colnames(selected_pcs)

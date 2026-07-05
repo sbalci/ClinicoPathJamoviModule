@@ -200,7 +200,7 @@ toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                             # Calculate valid percentage (excluding NAs from denominator)
                             if (is.na(categoryName) || categoryName == "NA") {
-                                validPercentage <- "—"
+                                validPercentage <- " - "
                                 rowClass <- "missing-row"
                                 categoryDisplay <- "Missing (NA)"
                             } else {

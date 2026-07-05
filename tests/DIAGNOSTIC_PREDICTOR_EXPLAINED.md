@@ -5,13 +5,16 @@
 The `oddsratio` function actually creates **TWO different types of nomograms**, which can be confusing:
 
 ### 1. Risk Prediction Nomogram (Main Nomogram)
+
 **What it is:**
+
 - Uses ALL predictors in your logistic regression model
 - Predicts probability of the outcome (e.g., death, recurrence)
 - Each predictor gets a point scale
 - You add up points to get total risk
 
 **Example:**
+
 ```
 Patient Profile:
 - Age: 65 years       → 45 points
@@ -24,18 +27,22 @@ Predicted Risk:        65% chance of death
 ```
 
 **When to use:**
+
 - Predicting individual patient risk
 - Clinical decision-making (should we treat aggressively?)
 - Research: developing risk scores
 
 ### 2. Fagan's Diagnostic Nomogram (Diagnostic Predictor Nomogram)
+
 **What it is:**
+
 - Uses ONE binary test/predictor only
 - Converts pre-test probability → post-test probability
 - Based on likelihood ratios (LR+ and LR-)
 - Classic tool for diagnostic test evaluation
 
 **Example:**
+
 ```
 Scenario: Using "LVI Present/Absent" as diagnostic test for mortality
 
@@ -50,6 +57,7 @@ increases from 40% to 67%
 ```
 
 **When to use:**
+
 - Evaluating diagnostic test performance
 - Medical education (understanding test utility)
 - Evidence-based medicine (updating probabilities)
@@ -58,34 +66,42 @@ increases from 40% to 67%
 
 ## Why Do We Need a "Diagnostic Predictor"?
 
-### The Technical Reason:
+### The Technical Reason
+
 Fagan's nomogram requires:
+
 1. **Binary test** (Yes/No, Present/Absent, Positive/Negative)
 2. **Sensitivity and specificity** (calculated from 2×2 table)
 3. **Likelihood ratios** (derived from sens/spec)
 
 You CAN'T calculate these for:
+
 - ❌ Continuous variables (Age, Tumor Size) - infinite possible values
 - ❌ Multi-category variables (Grade 1/2/3) - no single 2×2 table
 - ✅ Binary variables only (LVI: Absent/Present)
 
-### The Clinical Reason:
+### The Clinical Reason
+
 Different predictors serve different purposes:
 
 **In the regression model (all predictors):**
+
 ```R
 oddsratio(
   explanatory = c("Age", "Sex", "LVI", "PNI", "TumorSize"),
   outcome = "Mortality5yr"
 )
 ```
+
 → Gives you ADJUSTED odds ratios (controlling for confounders)
 → Multi-variable risk prediction
 
 **For diagnostic testing (single predictor):**
+
 ```R
 diagnosticPredictor = "LVI"
 ```
+
 → Evaluates LVI as a standalone TEST
 → "If I only know LVI status, how useful is it?"
 → Calculates sensitivity, specificity, likelihood ratios
@@ -100,12 +116,14 @@ diagnosticPredictor = "LVI"
 "How good is LVI at predicting 5-year mortality?"
 
 **Setup:**
+
 - Outcome: Mortality5yr = Dead
 - Diagnostic Predictor: LVI (Present/Absent)
 
 **What you get:**
 
 **Contingency Table:**
+
 ```
               Mortality
          Alive    Dead
@@ -115,6 +133,7 @@ Present   20      60     (Sensitivity: 60/100 = 60%)
 ```
 
 **Diagnostic Metrics:**
+
 - Sensitivity: 60% (detects 60% of deaths)
 - Specificity: 60% (correctly identifies 60% of survivors)
 - LR+: 1.5 (weak positive evidence)
@@ -129,6 +148,7 @@ LVI is a modest diagnostic test - not great, but provides some information.
 Age is continuous (25, 26, 27, ... 85)
 
 **You'd need:**
+
 ```
               Mortality
          Alive    Dead
@@ -143,7 +163,8 @@ Age
 This doesn't make sense! You can't calculate sensitivity/specificity for 61 different age values.
 
 **What you COULD do:**
-1. Dichotomize Age: "Young" (<50) vs "Old" (≥50)
+
+1. Dichotomize Age: "Young" (<50) vs "Old" (>=50)
 2. Then use as diagnostic predictor
 3. But you lose information (why 50? why not 55?)
 
@@ -163,12 +184,14 @@ oddsratio(
 ```
 
 **What happens:**
+
 1. Function tries to use **first explanatory variable** (LVI)
 2. Checks if it's binary ✓
 3. Calculates diagnostic metrics for LVI
 4. Creates Fagan's nomogram using LVI
 
 **Why this makes sense:**
+
 - Often the first variable is your main predictor of interest
 - Provides a reasonable default
 - User can override if needed
@@ -178,6 +201,7 @@ oddsratio(
 ## When to Specify a Different Diagnostic Predictor
 
 ### Scenario 1: Main Predictor is Continuous
+
 ```R
 oddsratio(
   explanatory = c("Age", "LVI", "PNI"),  # Age is first
@@ -188,6 +212,7 @@ oddsratio(
 ```
 
 ### Scenario 2: Want to Evaluate Specific Test
+
 ```R
 oddsratio(
   explanatory = c("LVI", "PNI", "Sex"),
@@ -198,6 +223,7 @@ oddsratio(
 ```
 
 ### Scenario 3: Test Not in Regression Model
+
 ```R
 oddsratio(
   explanatory = c("LVI", "PNI"),
@@ -206,6 +232,7 @@ oddsratio(
   diagnosticPredictor = "NewBiomarker"  # Not in model!
 )
 ```
+
 → Calculates diagnostic metrics independently
 → Useful for comparing new vs. established tests
 
@@ -220,6 +247,7 @@ oddsratio(
 ### Q: Can I create a diagnostic nomogram without odds ratio analysis?
 
 **A:** Not in this function. But you could:
+
 1. Run `oddsratio()` with just your test variable
 2. Enable nomogram
 3. Ignore the regression table if not needed
@@ -227,6 +255,7 @@ oddsratio(
 ### Q: What if I have 3 binary tests (LVI, PNI, Sex) - which one should be diagnostic predictor?
 
 **A:** Depends on your research question:
+
 - **Clinical utility:** Which test is most practical to measure?
 - **Novel biomarker:** Comparing new test to established tests
 - **Best performer:** Check sensitivity/specificity for each, pick best

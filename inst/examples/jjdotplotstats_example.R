@@ -74,7 +74,7 @@ jjdotplotstats(
   dep = "efficacy_score",
   group = "dose",
   typestatistics = "parametric",
-  effsizetype = "unbiased",  # Hedge's g for small samples
+  effsizetype = "unbiased", # Hedge's g for small samples
   centralityplotting = TRUE,
   resultssubtitle = TRUE,
   mytitle = "Dose-Response Relationship"
@@ -93,7 +93,7 @@ jjdotplotstats(
   group = "treatment",
   typestatistics = "nonparametric",
   centralityplotting = TRUE,
-  centralitytype = "nonparametric",  # Show medians
+  centralitytype = "nonparametric", # Show medians
   resultssubtitle = TRUE,
   mytitle = "Biomarker Response (Nonparametric)"
 )
@@ -111,7 +111,7 @@ jjdotplotstats(
   group = "group",
   typestatistics = "robust",
   centralityplotting = TRUE,
-  centralitytype = "robust",  # Trimmed means
+  centralitytype = "robust", # Trimmed means
   mytitle = "Robust Analysis with Outliers"
 )
 
@@ -126,11 +126,11 @@ jjdotplotstats(
   data = jjdotplotstats_reference,
   dep = "bp_reduction",
   group = "drug",
-  testvalue = 10,  # Clinical threshold
+  testvalue = 10, # Clinical threshold
   testvalueline = TRUE,
   centralityplotting = TRUE,
   resultssubtitle = TRUE,
-  mytitle = "BP Reduction vs Target (≥10 mmHg)",
+  mytitle = "BP Reduction vs Target (>=10 mmHg)",
   xtitle = "Blood Pressure Reduction (mmHg)"
 )
 
@@ -173,7 +173,7 @@ jjdotplotstats(
   dep = "tumor_reduction",
   group = "treatment",
   typestatistics = "parametric",
-  effsizetype = "biased",  # Cohen's d
+  effsizetype = "biased", # Cohen's d
   centralityplotting = TRUE,
   centralitytype = "parametric",
   centralityparameter = "mean",
@@ -199,7 +199,7 @@ jjdotplotstats(
   dep = "qol_score",
   group = "intervention",
   typestatistics = "parametric",
-  effsizetype = "eta",  # Eta-squared
+  effsizetype = "eta", # Eta-squared
   centralityplotting = TRUE,
   resultssubtitle = TRUE,
   mytitle = "Quality of Life by Intervention"
@@ -218,7 +218,7 @@ jjdotplotstats(
   group = "anemia",
   typestatistics = "parametric",
   centralityplotting = TRUE,
-  centralityparameter = "median",  # Show median lines
+  centralityparameter = "median", # Show median lines
   mytitle = "Hemoglobin by Anemia Severity",
   xtitle = "Hemoglobin (g/dL)"
 )
@@ -246,7 +246,7 @@ jjdotplotstats(
   data = jjdotplotstats_reference,
   dep = "bp_reduction",
   group = "drug",
-  k = 3,  # 3 decimal places
+  k = 3, # 3 decimal places
   centralityk = 3,
   resultssubtitle = TRUE,
   mytitle = "High Precision Results"
@@ -261,7 +261,7 @@ jjdotplotstats(
   data = jjdotplotstats_fourgroup,
   dep = "efficacy_score",
   group = "dose",
-  conflevel = 0.99,  # 99% CI
+  conflevel = 0.99, # 99% CI
   resultssubtitle = TRUE,
   mytitle = "Efficacy with 99% Confidence Intervals"
 )

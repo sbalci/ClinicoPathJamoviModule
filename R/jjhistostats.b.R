@@ -22,7 +22,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             .optionsHash = NULL,
 
             # TODO (correctness): This helper mutates `self$options$<name>` directly
-            #   (L34/L39/L44/L49). jamovi options are read-only — these assignments
+            #   (L34/L39/L44/L49). jamovi options are read-only - these assignments
             #   silently no-op or raise a runtime error in newer jamovi. The JS-side
             #   `onChange_clinicalPreset` handler at jamovi/js/jjhistostats.events.js
             #   (L3-76) is the correct mechanism and already wires the same presets,
@@ -320,10 +320,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                             "Testing 'is the mean equal to 0?' is <strong>rarely clinically meaningful</strong> for biomedical data. ",
                             "Your data contains only positive or only negative values, making a test against 0 inappropriate.<br>",
                             "<strong>RECOMMENDED ACTION:</strong> Change the 'Test Value' to a clinically relevant threshold:<br>",
-                            "• Normal reference range limit (e.g., upper limit for cholesterol)<br>",
-                            "• Treatment decision threshold (e.g., cutoff for intervention)<br>",
-                            "• Population norm or expected value (e.g., established biomarker level)<br>",
-                            "• Or <strong>uncheck 'Enable One-Sample Test'</strong> if you only need descriptive statistics."
+                            "\u2022 Normal reference range limit (e.g., upper limit for cholesterol)<br>",
+                            "\u2022 Treatment decision threshold (e.g., cutoff for intervention)<br>",
+                            "\u2022 Population norm or expected value (e.g., established biomarker level)<br>",
+                            "\u2022 Or <strong>uncheck 'Enable One-Sample Test'</strong> if you only need descriptive statistics."
                         ))
                     }
                 }
@@ -494,7 +494,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                         "<div style='background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0;'>",
                         "<h3>Clinical Interpretation</h3>",
                         "<div style='background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin: 10px 0;'>",
-                        "<strong> Note:</strong> This interpretation uses simplified heuristics (skewness &lt; 0.5 and n ≥ 30) ",
+                        "<strong> Note:</strong> This interpretation uses simplified heuristics (skewness &lt; 0.5 and n \u2265 30) ",
                         "as initial screening guidance. These are <strong>rule-of-thumb approximations</strong>, not formal ",
                         "diagnostic criteria. Always supplement with formal normality tests (Shapiro-Wilk, Anderson-Darling) ",
                         "and expert clinical judgment before making analysis decisions.",
@@ -1097,7 +1097,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # Detecting the option by CLASS (not by name) means any variable option
                 # added later is escaped automatically.
                 #
-                # Variables are NOT re-emitted through private$.asArgs() — doing so
+                # Variables are NOT re-emitted through private$.asArgs() - doing so
                 # previously duplicated them in the generated syntax (the "double
                 # variables" bug). All non-variable options keep jmvcore's per-option
                 # sourcify so formatting stays consistent with jamovi.

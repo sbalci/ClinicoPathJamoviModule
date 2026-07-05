@@ -6,7 +6,7 @@ This document provides a comprehensive feature-to-implementation mapping for the
 
 The PLS-Cox Regression module (`plscox`) performs Partial Least Squares dimensionality reduction combined with Cox proportional hazards modeling for high-dimensional survival data. It is designed for clinicopathological research with genomic, proteomic, or metabolomic datasets where the number of predictors may greatly exceed the number of observations (the p >> n problem). The core computation engine is the `plsRcox` R package.
 
-The module extracts latent PLS components -- supervised linear combinations of all predictors that maximally covary with the survival outcome -- and fits a Cox proportional hazards model on these components. Unlike LASSO or other penalized regression approaches that select individual variables, PLS retains information from all predictors by projecting them into a lower-dimensional space. This makes it particularly well-suited for metabolomics, gene expression, and proteomic datasets where variables are highly correlated and reflect shared underlying biological pathways.
+The module extracts latent PLS components - supervised linear combinations of all predictors that maximally covary with the survival outcome - and fits a Cox proportional hazards model on these components. Unlike LASSO or other penalized regression approaches that select individual variables, PLS retains information from all predictors by projecting them into a lower-dimensional space. This makes it particularly well-suited for metabolomics, gene expression, and proteomic datasets where variables are highly correlated and reflect shared underlying biological pathways.
 
 The module includes automatic component selection (via cross-validation, BIC, or AIC), four variable scaling methods, data suitability assessment with a traffic-light system, bootstrap validation for optimism-corrected performance estimates, permutation testing for overall model significance, risk group stratification with Kaplan-Meier survival curves, and five visualization types. Advanced options expose plsRcox-specific parameters including sparse PLS mode, Q-squared stopping criterion, and p-value-based variable selection within the PLS fitting algorithm.
 
@@ -16,12 +16,12 @@ The module includes automatic component selection (via cross-validation, BIC, or
 
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---|---|---|---|---|
-| Data frame | `data` | *(implicit)* | -- | `.run` |
-| Survival time | `time` | Time Variable | -- | `.run` |
-| Event status | `status` | Status Variable | -- | `.run` |
-| Event level | `outcomeLevel` | Event Level | -- | `.run` |
-| Censored level | `censorLevel` | Censored Level | -- | `.run` |
-| High-dim predictors | `predictors` | High-dimensional Predictors | -- | `.run` |
+| Data frame | `data` | *(implicit)* | - | `.run` |
+| Survival time | `time` | Time Variable | - | `.run` |
+| Event status | `status` | Status Variable | - | `.run` |
+| Event level | `outcomeLevel` | Event Level | - | `.run` |
+| Censored level | `censorLevel` | Censored Level | - | `.run` |
+| High-dim predictors | `predictors` | High-dimensional Predictors | - | `.run` |
 
 ### PLS Model Settings
 
@@ -81,13 +81,13 @@ The module includes automatic component selection (via cross-validation, BIC, or
 
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---|---|---|---|---|
-| Welcome instructions | -- | Instructions | `todo` (Html) | `.init` |
-| Model summary | -- | Model Summary | `modelSummary` (Html) | `.run` |
-| Component selection table | -- | Component Selection Results | `componentSelection` (Table) | `.run` |
-| Model coefficients table | -- | PLS Cox Model Coefficients | `modelCoefficients` (Table) | `.run` |
-| Risk group table | -- | Risk Group Stratification | `riskStratification` (Table) | `.run` |
-| Clinical guidance | -- | Clinical Interpretation Guide | `clinicalGuidance` (Html) | `.run` |
-| Technical notes | -- | Technical Notes and Assumptions | `technicalNotes` (Html) | `.run` |
+| Welcome instructions | - | Instructions | `todo` (Html) | `.init` |
+| Model summary | - | Model Summary | `modelSummary` (Html) | `.run` |
+| Component selection table | - | Component Selection Results | `componentSelection` (Table) | `.run` |
+| Model coefficients table | - | PLS Cox Model Coefficients | `modelCoefficients` (Table) | `.run` |
+| Risk group table | - | Risk Group Stratification | `riskStratification` (Table) | `.run` |
+| Clinical guidance | - | Clinical Interpretation Guide | `clinicalGuidance` (Html) | `.run` |
+| Technical notes | - | Technical Notes and Assumptions | `technicalNotes` (Html) | `.run` |
 
 ### Explanatory Output (Conditional Visibility)
 
@@ -127,10 +127,10 @@ The data suitability assessment (enabled by `suitabilityCheck`) runs 6 checks wi
 | Check | Green | Yellow | Red |
 |---|---|---|---|
 | Events-Per-Variable | EPV >= 10 | 1 <= EPV < 10 | EPV < 1 |
-| Reduction Need | p >= n/3 | p < n/3 | -- |
+| Reduction Need | p >= n/3 | p < n/3 | - |
 | Sample Size | n >= 100 | 30 <= n < 100 | n < 30 |
-| Event Rate | 20--80% | Outside 20--80% | -- |
-| Multicollinearity | max\|r\| < 0.7 | -- | -- (always green for PLS) |
+| Event Rate | 20--80% | Outside 20--80% | - |
+| Multicollinearity | max\|r\| < 0.7 | - | - (always green for PLS) |
 | Data Quality | No missing | 0--20% missing | > 20% missing |
 
 ## Dependencies

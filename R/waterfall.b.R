@@ -9,8 +9,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
 
         # RECIST v1.1 Constants ----
-        RECIST_CR_THRESHOLD = -100,  # Complete Response threshold (≤-100%)
-        RECIST_PR_THRESHOLD = -30,   # Partial Response threshold (≤-30%)
+        RECIST_CR_THRESHOLD = -100,  # Complete Response threshold (\u{2264}-100%)
+        RECIST_PR_THRESHOLD = -30,   # Partial Response threshold (\u{2264}-30%)
         RECIST_PD_THRESHOLD = 20,    # Progressive Disease threshold (>20%)
         RECIST_SD_MIN = -30,         # Stable Disease minimum (-30%)
         RECIST_SD_MAX = 20,          # Stable Disease maximum (20%)
@@ -59,7 +59,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             verify_data = list(
               .("Verify data entry for calculation errors"),
               .("Check if baseline measurements are correct"),
-              .("Confirm percentage calculation method: ((current - baseline) / baseline) × 100")
+              .("Confirm percentage calculation method: ((current - baseline) / baseline) \u{00d7} 100")
             ),
             large_growth = .("Unusually Large Growth Values Detected:"),
             growth_verification = list(
@@ -170,7 +170,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Interpretation
             interpretation <- if (power >= 0.80) {
-              .("Adequate statistical power (≥80%)")
+              .("Adequate statistical power (\u{2265}80%)")
             } else if (power >= 0.60) {
               .("Moderate statistical power (60-80%)")
             } else if (power >= 0.40) {
@@ -209,7 +209,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               dplyr::group_by(!!rlang::sym(patientID)) %>%
               dplyr::arrange(!!rlang::sym(timeVar)) %>%
               dplyr::summarise(
-                # Time to first response (PR or better: ≤-30%)
+                # Time to first response (PR or better: <=-30%)
                 time_to_first_response = ifelse(
                   any(.data[[responseVar]] <= private$RECIST_PR_THRESHOLD, na.rm = TRUE),
                   min(.data[[timeVar]][.data[[responseVar]] <= private$RECIST_PR_THRESHOLD], na.rm = TRUE),
@@ -862,7 +862,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
               "<br><br>", .("Recommended actions:"),
               "<br>1. ", .("Verify data entry for calculation errors"),
               "<br>2. ", .("Check if baseline measurements are correct"),
-              "<br>3. ", .("Confirm percentage calculation method: ((current - baseline) / baseline) × 100"),
+              "<br>3. ", .("Confirm percentage calculation method: ((current - baseline) / baseline) \u{00d7} 100"),
               "<br>4. ", .("Values will be automatically capped at -100% for analysis"),
               "<br><br>", .("Note: Values <-100% are mathematically impossible for tumor shrinkage.")
             ))
@@ -1121,11 +1121,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # NOTE: Variable name "recist_category" retained for backward compatibility
             # but represents SIMPLIFIED categories (no confirmation, no new lesions, no non-target)
             # FIXED: Corrected boundary conditions for proper RECIST categorization
-            # CR: ≤-100%, PR: -99% to -30%, SD: -29% to +20%, PD: >+20%
+            # CR: <=-100%, PR: -99% to -30%, SD: -29% to +20%, PD: >+20%
             recist_category = factor(
               dplyr::case_when(
                 is.na(response) ~ "Unknown",                                           # Handle NA values first
-                response <= private$RECIST_CR_THRESHOLD ~ "CR",                        # ≤-100% Complete Response
+                response <= private$RECIST_CR_THRESHOLD ~ "CR",                        # \u{2264}-100% Complete Response
                 response > private$RECIST_CR_THRESHOLD &
                   response <= private$RECIST_PR_THRESHOLD ~ "PR",                      # -99% to -30% Partial Response
                 response > private$RECIST_PR_THRESHOLD &
@@ -1438,8 +1438,8 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<br>- ", .("Baseline assumed at Time = 0"),
           "<br><br>",
           "<b> ", .("RECIST v1.1 Categories:"), "</b>",
-          sprintf("<br>- <b>%s</b> ≤ %d%% (%s)", .("Complete Response (CR):"), private$RECIST_CR_THRESHOLD, .("complete disappearance")),
-          sprintf("<br>- <b>%s</b> ≤ %d%% %s", .("Partial Response (PR):"), private$RECIST_PR_THRESHOLD, .("decrease")),
+          sprintf("<br>- <b>%s</b> \u{2264} %d%% (%s)", .("Complete Response (CR):"), private$RECIST_CR_THRESHOLD, .("complete disappearance")),
+          sprintf("<br>- <b>%s</b> \u{2264} %d%% %s", .("Partial Response (PR):"), private$RECIST_PR_THRESHOLD, .("decrease")),
           sprintf("<br>- <b>%s</b> %d%% %s +%d%% %s", .("Stable Disease (SD):"), private$RECIST_PR_THRESHOLD, .("to"), private$RECIST_PD_THRESHOLD, .("change")),
           sprintf("<br>- <b>%s</b> > +%d%% %s", .("Progressive Disease (PD):"), private$RECIST_PD_THRESHOLD, .("increase")),
           "<br><br>",
@@ -1619,7 +1619,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         private$.addNotice(
           type = "WARNING",
           title = "CONFIRMATION NOT REQUIRED",
-          content = "RECIST v1.1 requires CR/PR confirmation at ≥4 weeks. This analysis uses FIRST instance of response thresholds without confirmation. ORR and DCR may be INFLATED compared to confirmed RECIST responses. For clinical trials, unconfirmed responses should be clearly disclosed as exploratory endpoints."
+          content = "RECIST v1.1 requires CR/PR confirmation at \u{2265}4 weeks. This analysis uses FIRST instance of response thresholds without confirmation. ORR and DCR may be INFLATED compared to confirmed RECIST responses. For clinical trials, unconfirmed responses should be clearly disclosed as exploratory endpoints."
         )
 
         # Warning #4: Time-to-Event Methodology Limitations (MEDIUM)
@@ -2200,7 +2200,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; margin: 20px 0;'>",
           "<h3 style='color: #721c24; margin-top: 0;'>", .("Key Assumptions & Limitations:"), "</h3>",
           "<ul style='margin: 5px 0;'>",
-          "<li>", sprintf(.("RECIST v1.1 thresholds: CR ≤-100%%, PR ≤-30%%, PD >+20%%")), "</li>",
+          "<li>", sprintf(.("RECIST v1.1 thresholds: CR \u{2264}-100%%, PR \u{2264}-30%%, PD >+20%%")), "</li>",
           "<li>", .("For raw measurements, baseline assumed at time = 0"), "</li>",
           "<li>", .("Waterfall plot shows best (most negative) response per patient"), "</li>",
           "<li>", .("Missing values are excluded from analysis"), "</li>",
@@ -2936,7 +2936,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           
           "<h5>", .("Key Assumptions & Limitations:"), "</h5>",
           "<ul>",
-          sprintf("<li>%s CR ≤%d%%, PR ≤%d%%, PD >+%d%%</li>", .("RECIST v1.1 thresholds:"), private$RECIST_CR_THRESHOLD, private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD),
+          sprintf("<li>%s CR \u{2264}%d%%, PR \u{2264}%d%%, PD >+%d%%</li>", .("RECIST v1.1 thresholds:"), private$RECIST_CR_THRESHOLD, private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD),
           "<li>", .("For raw measurements, baseline assumed at time = 0"), "</li>",
           "<li>", .("Waterfall plot shows best (most negative) response per patient"), "</li>",
           "<li>", .("Missing values are excluded from analysis"), "</li>",
@@ -3132,7 +3132,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div style='background-color: white; padding: 10px; border-radius: 3px; margin: 10px 0;'>",
           "<h5>", .("Methods Description:"), "</h5>",
           "<p style='font-family: monospace; background-color: #f8f9fa; padding: 8px; border-radius: 3px;'>",
-          .("Tumor response was categorized using SIMPLIFIED threshold-based criteria adapted from RECIST v1.1 (NOT full RECIST-compliant). Categories based on percent change thresholds: CR ≤-100%, PR ≤-30%, SD -30% to +20%, PD >+20%. This analysis does NOT include target lesion summation, new lesion detection, non-target assessment, or confirmation requirements mandated by RECIST v1.1. Response rates calculated with exact binomial confidence intervals."),
+          .("Tumor response was categorized using SIMPLIFIED threshold-based criteria adapted from RECIST v1.1 (NOT full RECIST-compliant). Categories based on percent change thresholds: CR \u{2264}-100%, PR \u{2264}-30%, SD -30% to +20%, PD >+20%. This analysis does NOT include target lesion summation, new lesion detection, non-target assessment, or confirmation requirements mandated by RECIST v1.1. Response rates calculated with exact binomial confidence intervals."),
           "</p>",
           "</div>",
 
@@ -3309,7 +3309,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div>",
           "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Response Metrics"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
-          "<li><strong>ORR (Objective Response Rate - Unconfirmed):</strong> ", .("Percentage of patients achieving threshold-based CR (≤-100%) or PR (≤-30%) without RECIST v1.1 confirmation requirement. May overestimate true confirmed ORR."), "</li>",
+          "<li><strong>ORR (Objective Response Rate - Unconfirmed):</strong> ", .("Percentage of patients achieving threshold-based CR (\u{2264}-100%) or PR (\u{2264}-30%) without RECIST v1.1 confirmation requirement. May overestimate true confirmed ORR."), "</li>",
           "<li><strong>DCR (Disease Control Rate - Unconfirmed):</strong> ", .("Percentage achieving threshold-based response or stable disease (CR + PR + SD) without confirmation. Exploratory endpoint only."), "</li>",
           "<li><strong>Best Response (Simplified):</strong> ", .("Most favorable (most negative) percent change from baseline. NOT equivalent to RECIST v1.1 'Best Overall Response' which requires confirmation."), "</li>",
           "<li><strong>Person-Time:</strong> ", .("Total time patients are followed, accounting for different follow-up durations"), "</li>",
@@ -3319,10 +3319,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "<div>",
           "<h5 style='color: #6c757d; margin-bottom: 10px;'>", .("Response Categories (Simplified Threshold-Based)"), "</h5>",
           "<ul style='margin: 0; padding-left: 15px; line-height: 1.6;'>",
-          "<li><strong>CR (Complete Response - Threshold):</strong> ", .("≤-100% change from baseline (simplified criterion, NOT full RECIST CR which requires disappearance of ALL lesions including non-target)"), "</li>",
-          "<li><strong>PR (Partial Response - Threshold):</strong> ", .("≤-30% change from baseline (simplified criterion, NOT full RECIST PR which requires target lesion sum calculation and no new lesions)"), "</li>",
+          "<li><strong>CR (Complete Response - Threshold):</strong> ", .("\u{2264}-100% change from baseline (simplified criterion, NOT full RECIST CR which requires disappearance of ALL lesions including non-target)"), "</li>",
+          "<li><strong>PR (Partial Response - Threshold):</strong> ", .("\u{2264}-30% change from baseline (simplified criterion, NOT full RECIST PR which requires target lesion sum calculation and no new lesions)"), "</li>",
           "<li><strong>SD (Stable Disease - Threshold):</strong> ", .("Between -30% and +20% change (simplified criterion)"), "</li>",
-          "<li><strong>PD (Progressive Disease - Threshold):</strong> ", .("≥+20% change from baseline (simplified criterion, NOT full RECIST PD which includes new lesion detection and non-target progression)"), "</li>",
+          "<li><strong>PD (Progressive Disease - Threshold):</strong> ", .("\u{2265}+20% change from baseline (simplified criterion, NOT full RECIST PD which includes new lesion detection and non-target progression)"), "</li>",
           "</ul>",
           "</div>",
 
@@ -3573,7 +3573,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # Detecting the option by CLASS (not by name) means any variable option
           # added later is escaped automatically.
           #
-          # Variables are NOT re-emitted through private$.asArgs() — doing so
+          # Variables are NOT re-emitted through private$.asArgs() - doing so
           # previously duplicated them in the generated syntax (the "double
           # variables" bug). All non-variable options keep jmvcore's per-option
           # sourcify so formatting stays consistent with jamovi.

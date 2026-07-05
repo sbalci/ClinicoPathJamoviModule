@@ -946,8 +946,8 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' WHEN TO USE: • Cancer survival with complex hazard patterns • Health 
 #' economic evaluations requiring extrapolation • Time-varying treatment 
 #' effects • Relative survival analysis with population mortality
-#' REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering the 
-#' period of interest • For df>4: need ≥100 events to avoid overfitting
+#' REQUIREMENTS: • Minimum 30 events (preferably >=50) • Follow-up covering 
+#' the period of interest • For df>4: need >=100 events to avoid overfitting
 #' KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival 
 #' predictions at specific time points • Model fit statistics (AIC, 
 #' concordance) • Time-varying effect plots • Copy-ready clinical report 
@@ -991,7 +991,7 @@ flexrstpm2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param scale Scale for the flexible parametric model
 #' @param df Degrees of freedom for baseline spline function (complexity of
 #'   hazard curve). Clinical guide: df=3-4 for most analyses, df=5-6 for complex
-#'   patterns. Need ≥30 events per df for reliable results.
+#'   patterns. Need >=30 events per df for reliable results.
 #' @param knots Comma-separated knot positions (optional, overrides df)
 #' @param boundary_knots Comma-separated boundary knot positions (optional)
 #' @param time_varying_covariates Covariates with time-varying effects (spline

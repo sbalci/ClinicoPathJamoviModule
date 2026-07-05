@@ -150,7 +150,7 @@ stagemigration_competingRisksAnalysis <- function(data, old_stage, new_stage,
                 cmprsk::crr(
                     ftime = fg_data$time,
                     fstatus = fg_data$event,
-                    cov1 = model.matrix(~ old_stage, data = fg_data)[, -1, drop = FALSE],
+                    cov1 = stats::model.matrix(~ old_stage, data = fg_data)[, -1, drop = FALSE],
                     failcode = 1,
                     cencode = 0
                 )
@@ -163,7 +163,7 @@ stagemigration_competingRisksAnalysis <- function(data, old_stage, new_stage,
                 cmprsk::crr(
                     ftime = fg_data$time,
                     fstatus = fg_data$event,
-                    cov1 = model.matrix(~ new_stage, data = fg_data)[, -1, drop = FALSE],
+                    cov1 = stats::model.matrix(~ new_stage, data = fg_data)[, -1, drop = FALSE],
                     failcode = 1,
                     cencode = 0
                 )
@@ -278,6 +278,59 @@ stagemigration_competingRisksDiscrimination <- function(data, fg_old, fg_new,
 # RESTRICTED MEAN SURVIVAL TIME (RMST) ANALYSIS
 # =============================================================================
 
+#' Single-arm restricted mean survival time (RMST)
+#'
+#' @description
+#' Portable replacement for survRM2's internal (unexported) \code{rmst1()}.
+#' Computes RMST for a single group up to \code{tau} from the Kaplan-Meier
+#' estimator using the trapezoidal rule, with a Greenwood-based variance
+#' approximation (the same approach used elsewhere in the module). Uses only
+#' exported functions so it is portable and passes R CMD check.
+#'
+#' @param time Numeric vector of follow-up times
+#' @param status Event indicator (1 = event, 0 = censored)
+#' @param tau Restriction time
+#' @return List with \code{rmst}, \code{se}, \code{var}, and \code{tau}
+#' @keywords internal
+stagemigration_rmstSingleArm <- function(time, status, tau) {
+    km_fit <- survival::survfit(survival::Surv(time, status) ~ 1)
+
+    times <- c(0, km_fit$time)
+    surv  <- c(1, km_fit$surv)
+
+    keep    <- times <= tau
+    times_t <- times[keep]
+    surv_t  <- surv[keep]
+
+    # Evaluate the survival curve exactly at tau (linear interpolation)
+    if (length(times_t) == 0 || max(times_t) < tau) {
+        surv_at_tau <- stats::approx(times, surv, xout = tau, rule = 2)$y
+        times_t <- c(times_t, tau)
+        surv_t  <- c(surv_t, surv_at_tau)
+    }
+
+    # RMST = area under the KM curve up to tau (trapezoidal rule)
+    if (length(times_t) > 1) {
+        dt       <- diff(times_t)
+        avg_surv <- (surv_t[-length(surv_t)] + surv_t[-1]) / 2
+        rmst     <- sum(dt * avg_surv)
+    } else {
+        rmst <- 0
+    }
+
+    # Greenwood-based variance approximation for RMST
+    n_risk    <- km_fit$n.risk
+    n_event   <- km_fit$n.event
+    greenwood <- cumsum(n_event / (n_risk * (n_risk - n_event)))
+    within_tau <- km_fit$time <= tau
+    rmst_var <- if (any(within_tau)) {
+        mean(greenwood[within_tau], na.rm = TRUE) * (tau^2 / 4)
+    } else 0
+    if (!is.finite(rmst_var)) rmst_var <- 0
+
+    list(rmst = rmst, se = sqrt(rmst_var), var = rmst_var, tau = tau)
+}
+
 #' Calculate Restricted Mean Survival Time for Stage Migration
 #'
 #' @description
@@ -335,7 +388,7 @@ stagemigration_calculateRMST <- function(data, old_stage, new_stage,
                 stage_data <- data[data[[old_stage]] == stage, ]
 
                 rmst_result <- tryCatch({
-                    survRM2::rmst1(
+                    stagemigration_rmstSingleArm(
                         time = stage_data[[time_var]],
                         status = stage_data[[event_var]],
                         tau = tau
@@ -355,7 +408,7 @@ stagemigration_calculateRMST <- function(data, old_stage, new_stage,
                 stage_data <- data[data[[new_stage]] == stage, ]
 
                 rmst_result <- tryCatch({
-                    survRM2::rmst1(
+                    stagemigration_rmstSingleArm(
                         time = stage_data[[time_var]],
                         status = stage_data[[event_var]],
                         tau = tau
@@ -493,7 +546,7 @@ stagemigration_cutpointAnalysis <- function(data, stage_var, time_var, event_var
 
             } else if (method == "median") {
                 # Median split
-                median_val <- median(as.numeric(stage_clean), na.rm = TRUE)
+                median_val <- stats::median(as.numeric(stage_clean), na.rm = TRUE)
 
                 list(
                     method = "median",

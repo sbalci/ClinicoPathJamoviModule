@@ -491,26 +491,6 @@ jjcoefstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' automatic model fitting from raw data. Uses ggstatsplot's ggcoefstats() for 
 #' professional visualization.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # For pre-computed coefficients:
-#' # ClinicoPath::jjcoefstats(
-#' #   data = model_results,
-#' #   term = "term",
-#' #   estimate = "estimate",
-#' #   std_error = "std_error"
-#' # )
-#' #
-#' # For automatic fitting:
-#' # ClinicoPath::jjcoefstats(
-#' #   data = mydata,
-#' #   outcome = "weight",
-#' #   predictors = vars(height, age, sex),
-#' #   modelType = "lm"
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param inputMode Whether to use pre-computed coefficients or fit a model
 #'   from raw data.

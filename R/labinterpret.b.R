@@ -118,7 +118,7 @@ labinterpretClass <- R6::R6Class(
             # (or surface a notice via private$.addNotice in waterfall.b.R's style) so
             # the structured-error UI explains the gap. Same pattern at .init():9 and
             # .interpretationPlot():992, .trendPlot():1055, .referencePlot():1118,
-            # .deltaPlot():1181, .correlationPlot():1256 — touch the .run() site first.
+            # .deltaPlot():1181, .correlationPlot():1256 - touch the .run() site first.
             if (is.null(self$data) || is.null(self$options$labValues) || length(self$options$labValues) == 0)
                 return()
 
@@ -297,7 +297,7 @@ labinterpretClass <- R6::R6Class(
                         clinical_significance = clinicalSignificance
                     ))
                 }, error = function(e) {
-                    # TODO (correctness): empty handler swallows lm() failures silently —
+                    # TODO (correctness): empty handler swallows lm() failures silently - 
                     # the trendAnalysisTable simply skips that row with no user notice.
                     # Same pattern at the correlation tryCatch ~line 430. Either populate
                     # the table row with a "Trend analysis failed: <reason>" cell, or
@@ -566,17 +566,17 @@ labinterpretClass <- R6::R6Class(
         # TODO (correctness): the clinical-knowledge lookups below are all keyed on
         # *exact* variable-name matches (e.g. "Hemoglobin", "Glucose", "Creatinine").
         # Users whose datasets use different spellings ("HGB", "FBS", "K+", "Hgb")
-        # silently fall through to the default branch — generic "units" string, default
+        # silently fall through to the default branch - generic "units" string, default
         # reference range [0, 100], blanket interpretation. Sites:
-        #   .determineUnits()                 — units_map at line ~559
-        #   .calculateReferenceRange()        — base_ranges at line ~579
-        #   .generateInterpretation()         — interpretations at line ~626
-        #   .getCriticalLimits()              — critical_limits at line ~680
-        #   .getRequiredAction()              — actions list at line ~696
-        #   .assessClinicalSignificance()     — significance_thresholds at line ~728
-        #   .getMedicationEffects()           — effects_db at line ~762
-        #   .calculateAnalyticalSensitivity() — sensitivities at line ~836
-        #   .assessReferenceQuality()         — quality_ratings at line ~852
+        #   .determineUnits()                 - units_map at line ~559
+        #   .calculateReferenceRange()        - base_ranges at line ~579
+        #   .generateInterpretation()         - interpretations at line ~626
+        #   .getCriticalLimits()              - critical_limits at line ~680
+        #   .getRequiredAction()              - actions list at line ~696
+        #   .assessClinicalSignificance()     - significance_thresholds at line ~728
+        #   .getMedicationEffects()           - effects_db at line ~762
+        #   .calculateAnalyticalSensitivity() - sensitivities at line ~836
+        #   .assessReferenceQuality()         - quality_ratings at line ~852
         # Fix shape: expose a user-facing mapping option (e.g. type: Array of Group with
         # var + canonical name) and resolve labVar → canonical key before lookup; or at
         # minimum, surface a notice when a labVar doesn't match any known canonical name

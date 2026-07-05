@@ -22,6 +22,7 @@ testthat::test_file('tests/testthat/test-pathagreement.R')
 ## Test Datasets
 
 ### Dataset 1: Two-Rater Agreement (Cohen's Kappa)
+
 **File:** `pathagreement_two_raters.{csv,rda,omv}`
 
 - **Purpose:** Basic Cohen's kappa calculation
@@ -32,6 +33,7 @@ testthat::test_file('tests/testthat/test-pathagreement.R')
   - ~70% observed agreement
 
 **Usage Example:**
+
 ```r
 data("pathagreement_two_raters", package = "ClinicoPath")
 pathagreement(
@@ -41,6 +43,7 @@ pathagreement(
 ```
 
 **jamovi Test:**
+
 1. Open `pathagreement_two_raters.omv`
 2. Analysis → OncoPathT → Agreement → Pathology Interrater Reliability
 3. Select both Pathologist_A and Pathologist_B as Raters
@@ -49,6 +52,7 @@ pathagreement(
 ---
 
 ### Dataset 2: Multi-Rater Agreement (Fleiss' Kappa)
+
 **File:** `pathagreement_multi_raters.{csv,rda,omv}`
 
 - **Purpose:** Fleiss' kappa and Krippendorff's alpha
@@ -59,6 +63,7 @@ pathagreement(
   - ~65% agreement
 
 **Usage Example:**
+
 ```r
 data("pathagreement_multi_raters", package = "ClinicoPath")
 pathagreement(
@@ -70,6 +75,7 @@ pathagreement(
 ```
 
 **What to Test:**
+
 - ✅ Fleiss' kappa calculation
 - ✅ Confidence intervals
 - ✅ Krippendorff's alpha (nominal and ordinal)
@@ -79,6 +85,7 @@ pathagreement(
 ---
 
 ### Dataset 3: Breast Pathology with Reference Standard
+
 **File:** `pathagreement_breast.{csv,rda,omv}`
 
 - **Purpose:** Agreement vs reference standard
@@ -89,6 +96,7 @@ pathagreement(
   - Varying expertise levels (85% to 60% agreement with reference)
 
 **Usage Example:**
+
 ```r
 data("pathagreement_breast", package = "ClinicoPath")
 raters <- paste0("Path_", 1:6)
@@ -100,6 +108,7 @@ pathagreement(
 ```
 
 **What to Test:**
+
 - ✅ Sensitivity/specificity vs reference
 - ✅ Case difficulty stratification
 - ✅ Pathologist performance metrics
@@ -107,6 +116,7 @@ pathagreement(
 ---
 
 ### Dataset 4: Diagnostic Style Clustering (Usubutun Method)
+
 **File:** `pathagreement_clustering.{csv,rda,omv}`
 
 - **Purpose:** Identify diagnostic style groups
@@ -120,9 +130,11 @@ pathagreement(
     - Aggressive (Raters I-L): Bias toward higher grades
 
 **Companion File:** `pathagreement_clustering_rater_info.csv`
+
 - Contains rater characteristics (experience, institution, volume, etc.)
 
 **Usage Example:**
+
 ```r
 data("pathagreement_clustering", package = "ClinicoPath")
 pathagreement(
@@ -137,6 +149,7 @@ pathagreement(
 ```
 
 **What to Test:**
+
 - ✅ Ward's, complete, and average linkage clustering
 - ✅ Automatic optimal group selection
 - ✅ Clustering heatmap visualization
@@ -144,6 +157,7 @@ pathagreement(
 - ✅ Association with rater characteristics
 
 **Expected Result:**
+
 - Should identify 3 groups corresponding to conservative/moderate/aggressive styles
 - Conservative group should show bias toward "Benign"
 - Aggressive group should show bias toward "Adenocarcinoma"
@@ -151,6 +165,7 @@ pathagreement(
 ---
 
 ### Dataset 5: Melanoma Classification (Nominal Categories)
+
 **File:** `pathagreement_melanoma.{csv,rda,omv}`
 
 - **Purpose:** Nominal (unordered) categories
@@ -166,6 +181,7 @@ pathagreement(
   - ~60% agreement (difficult diagnoses)
 
 **Usage Example:**
+
 ```r
 data("pathagreement_melanoma", package = "ClinicoPath")
 pathagreement(
@@ -178,6 +194,7 @@ pathagreement(
 ```
 
 **What to Test:**
+
 - ✅ Unweighted kappa (nominal appropriate)
 - ✅ Krippendorff's alpha nominal method
 - ⚠️ Weighted kappa should NOT be used (or warn user)
@@ -185,6 +202,7 @@ pathagreement(
 ---
 
 ### Dataset 6: Perfect Agreement (Edge Case)
+
 **File:** `pathagreement_perfect.{csv,rda,omv}`
 
 - **Purpose:** Test kappa = 1.0 scenario
@@ -195,6 +213,7 @@ pathagreement(
   - 2 categories: Benign, Malignant
 
 **Usage Example:**
+
 ```r
 data("pathagreement_perfect", package = "ClinicoPath")
 pathagreement(
@@ -204,6 +223,7 @@ pathagreement(
 ```
 
 **Expected Result:**
+
 - Kappa = 1.0
 - CI should be narrow
 - No warnings or errors
@@ -211,9 +231,10 @@ pathagreement(
 ---
 
 ### Dataset 7: Complete Disagreement (Edge Case)
+
 **File:** `pathagreement_disagreement.{csv,rda,omv}`
 
-- **Purpose:** Test kappa ≤ 0 scenario
+- **Purpose:** Test kappa <= 0 scenario
 - **Structure:**
   - 15 cases
   - 3 raters
@@ -221,6 +242,7 @@ pathagreement(
   - 3 categories
 
 **Usage Example:**
+
 ```r
 data("pathagreement_disagreement", package = "ClinicoPath")
 pathagreement(
@@ -230,6 +252,7 @@ pathagreement(
 ```
 
 **Expected Result:**
+
 - Kappa near 0 or negative
 - Wide CI
 - Function should handle gracefully (not crash)
@@ -237,6 +260,7 @@ pathagreement(
 ---
 
 ### Dataset 8: Missing Data Patterns
+
 **File:** `pathagreement_missing.{csv,rda,omv}`
 
 - **Purpose:** Test missing value handling
@@ -246,6 +270,7 @@ pathagreement(
   - ~10% missing values randomly distributed
 
 **Usage Example:**
+
 ```r
 data("pathagreement_missing", package = "ClinicoPath")
 pathagreement(
@@ -255,6 +280,7 @@ pathagreement(
 ```
 
 **What to Test:**
+
 - ✅ Pairwise deletion (default)
 - ✅ Listwise deletion option
 - ✅ Warning messages about missing data
@@ -263,6 +289,7 @@ pathagreement(
 ---
 
 ### Dataset 9: Single Case (Minimum Data)
+
 **File:** `pathagreement_single.{csv,rda,omv}`
 
 - **Purpose:** Test minimum viable input
@@ -272,6 +299,7 @@ pathagreement(
   - Disagree
 
 **Usage Example:**
+
 ```r
 data("pathagreement_single", package = "ClinicoPath")
 pathagreement(
@@ -281,6 +309,7 @@ pathagreement(
 ```
 
 **Expected Result:**
+
 - May produce error OR warning
 - If error, should be informative ("Insufficient cases")
 - Should not crash jamovi
@@ -288,6 +317,7 @@ pathagreement(
 ---
 
 ### Dataset 10: Comprehensive Test Dataset
+
 **File:** `pathagreement_comprehensive.{csv,rda,omv}`
 
 - **Purpose:** Test all features simultaneously
@@ -301,6 +331,7 @@ pathagreement(
   - Discordant case flagging
 
 **Usage Example:**
+
 ```r
 data("pathagreement_comprehensive", package = "ClinicoPath")
 raters <- paste0("Pathologist_", LETTERS[1:8])
@@ -319,6 +350,7 @@ pathagreement(
 ```
 
 **What to Test:**
+
 - ✅ All kappa methods
 - ✅ All visualization options
 - ✅ All advanced analyses
@@ -437,6 +469,7 @@ testthat::test_file(
 ```
 
 **Expected Results:**
+
 - All tests should pass
 - No warnings or errors
 - Coverage of all major features
@@ -448,6 +481,7 @@ testthat::test_file(
 ### Issue: "Data not found" error
 
 **Solution:**
+
 ```r
 # Ensure data is loaded in package
 devtools::load_all()  # If testing during development
@@ -511,7 +545,7 @@ library(ClinicoPath)
 ### Edge Cases
 
 - ✅ Handles perfect agreement (κ = 1.0)
-- ✅ Handles no agreement (κ ≤ 0)
+- ✅ Handles no agreement (κ <= 0)
 - ✅ Handles missing data
 - ✅ Handles small samples (n < 10)
 - ✅ Handles large samples (n > 100)
@@ -535,6 +569,7 @@ R -e "load('data/pathagreement_two_raters.rda'); str(pathagreement_two_raters)"
 ```
 
 **Data Generation Features:**
+
 - ✅ Reproducible (set.seed(2025))
 - ✅ Realistic clinical scenarios
 - ✅ Controlled agreement levels
@@ -566,8 +601,9 @@ When adding new features to `pathagreement`:
 ## Contact
 
 For issues or questions about testing:
-- GitHub: https://github.com/sbalci/ClinicoPathJamoviModule/issues
-- Documentation: https://www.serdarbalci.com/ClinicoPathJamoviModule/
+
+- GitHub: <https://github.com/sbalci/ClinicoPathJamoviModule/issues>
+- Documentation: <https://www.serdarbalci.com/ClinicoPathJamoviModule/>
 
 ---
 

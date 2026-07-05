@@ -210,7 +210,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
                 }
             }
 
-            # Build model formula — split into internal hardcoded terms + user covariates
+            # Build model formula - split into internal hardcoded terms + user covariates
             internal_rhs <- c("offset(log(pyears))", "offset(log(expected_hazard))")
 
             # Add time spline terms

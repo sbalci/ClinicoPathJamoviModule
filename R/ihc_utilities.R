@@ -86,9 +86,9 @@ calculateIHCDistance <- function(data, method = "gower") {
     } else if (method == "jaccard") {
         # Binary jaccard for IHC data
         binary_data <- data > 0
-        dist_matrix <- dist(binary_data, method = "binary")
+        dist_matrix <- stats::dist(binary_data, method = "binary")
     } else {
-        dist_matrix <- dist(data, method = "euclidean")
+        dist_matrix <- stats::dist(data, method = "euclidean")
     }
 
     return(dist_matrix)
@@ -298,7 +298,7 @@ calculateIHCMarkerSummary <- function(marker_data, marker_name) {
         marker = marker_name,
         n = length(clean_data),
         mean = mean(clean_data),
-        median = median(clean_data),
+        median = stats::median(clean_data),
         sd = sd(clean_data),
         min = min(clean_data),
         max = max(clean_data),

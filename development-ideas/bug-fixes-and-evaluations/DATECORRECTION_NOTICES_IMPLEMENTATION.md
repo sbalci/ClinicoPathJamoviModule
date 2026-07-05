@@ -11,6 +11,7 @@ The `datecorrection` function has been upgraded to use the jamovi `jmvcore::Noti
 ### 1. ERROR Notices (Critical Issues - Cannot Proceed)
 
 #### 1.1 Empty Dataset Error
+
 **Location**: R/datecorrection.b.R:85-94
 **Trigger**: Dataset contains zero rows
 **Name**: `emptyDataset`
@@ -31,6 +32,7 @@ self$results$insert(1, notice)
 ---
 
 #### 1.2 Missing Required Package Error
+
 **Location**: R/datecorrection.b.R:99-111
 **Trigger**: Required package (datefixR or anytime) not installed
 **Name**: `missing_<packagename>`
@@ -54,6 +56,7 @@ self$results$insert(1, notice)
 ---
 
 #### 1.3 Missing Date Variables Error
+
 **Location**: R/datecorrection.b.R:118-127
 **Trigger**: No date variables selected by user
 **Name**: `missingDateVars`
@@ -74,6 +77,7 @@ self$results$insert(1, notice)
 ---
 
 #### 1.4 Variables Not Found Error
+
 **Location**: R/datecorrection.b.R:133-151
 **Trigger**: Selected variable names don't exist in dataset
 **Name**: `variablesNotFound`
@@ -101,6 +105,7 @@ self$results$insert(1, notice)
 ### 2. WARNING Notices (Quality Issues)
 
 #### 2.1 All-NA Variable Warning
+
 **Location**: R/datecorrection.b.R:250-260
 **Trigger**: Selected variable contains only NA values
 **Name**: `allNA_<variablename>` (sanitized)
@@ -125,6 +130,7 @@ self$results$insert(2, notice)
 ---
 
 #### 2.2 Moderate Success Rate Warning (70-84%)
+
 **Location**: R/datecorrection.b.R:173-199
 **Trigger**: Overall success rate between 70-84%
 **Name**: `lowSuccessRate`
@@ -151,6 +157,7 @@ self$results$insert(2, notice)
 ### 3. STRONG_WARNING Notices (Serious Quality Concerns)
 
 #### 3.1 Low Success Rate Strong Warning (<70%)
+
 **Location**: R/datecorrection.b.R:173-199
 **Trigger**: Overall success rate below 70%
 **Name**: `lowSuccessRate`
@@ -177,6 +184,7 @@ self$results$insert(2, notice)
 ### 4. INFO Notices (Informational)
 
 #### 4.1 Analysis Completion Summary
+
 **Location**: R/datecorrection.b.R:227-242
 **Trigger**: Analysis completes successfully
 **Name**: `analysisComplete`
@@ -204,6 +212,7 @@ self$results$insert(999, notice)
 ---
 
 #### 4.2 Consensus Method Conflicts
+
 **Location**: R/datecorrection.b.R:507-518
 **Trigger**: Consensus method detects disagreement between parsers
 **Name**: `consensusConflicts`
@@ -240,6 +249,7 @@ The implementation follows jamovi best practices for notice positioning:
 | 5 | INFO (summary) | Bottom | 999 |
 
 **Rationale**:
+
 - **Errors first** - User must see blockers immediately
 - **Warnings grouped** - Quality concerns visible but don't obscure errors
 - **Contextual info** - Helpful details in middle
@@ -250,6 +260,7 @@ The implementation follows jamovi best practices for notice positioning:
 ## Changes from Previous Implementation
 
 ### Before (Non-Compliant)
+
 ```r
 # ERROR handling
 stop("Error: The provided dataset contains no complete rows...")
@@ -266,12 +277,14 @@ if (success_rate < 85) {
 ```
 
 **Problems**:
+
 - ❌ `stop()` breaks jamovi UX (error not shown in results)
 - ❌ HTML-only warnings hidden in optional panels
 - ❌ No structured error/warning system
 - ❌ Inconsistent positioning
 
 ### After (Compliant)
+
 ```r
 # ERROR handling
 notice <- jmvcore::Notice$new(
@@ -303,6 +316,7 @@ self$results$insert(999, notice)
 ```
 
 **Benefits**:
+
 - ✅ Errors displayed in results panel (proper jamovi UX)
 - ✅ Structured warning system with severity levels
 - ✅ Consistent positioning
@@ -316,13 +330,14 @@ The implementation uses evidence-based clinical thresholds:
 
 | Metric | Threshold | Notice Type | Rationale |
 |--------|-----------|-------------|-----------|
-| Success Rate | ≥85% | None | Acceptable for clinical use |
+| Success Rate | >=85% | None | Acceptable for clinical use |
 | Success Rate | 70-84% | WARNING | Review recommended |
 | Success Rate | <70% | STRONG_WARNING | Unreliable for clinical decisions |
 | All-NA variables | Any | WARNING | Data quality issue |
 | Parser conflicts | Any | INFO | User awareness |
 
 **Source**: Based on:
+
 - Clinical data quality standards
 - Date parsing literature
 - ClinicoPath internal guidelines (jamovi_notices_guide.md)
@@ -334,6 +349,7 @@ The implementation uses evidence-based clinical thresholds:
 All notices follow these content rules:
 
 ### Structure
+
 ```
 Brief summary statement.
 • Bullet point 1 (problem detail)
@@ -346,6 +362,7 @@ Consider:
 ```
 
 ### Best Practices Applied
+
 1. **Plain text only** - No HTML formatting in notices
 2. **Quantitative** - Include counts, percentages, affected rows
 3. **Actionable** - Clear next steps for user
@@ -357,6 +374,7 @@ Consider:
 ❌ **Bad**: "Low success rate"
 
 ✅ **Good**:
+
 ```
 Low date correction success rate: 68.5%
 • Only 137 of 200 dates were successfully parsed.
@@ -390,6 +408,7 @@ All notice types have been tested in the comprehensive test suite:
 ## Verification Commands
 
 ### Build Verification
+
 ```bash
 # jamovi module compilation
 Rscript -e "jmvtools::prepare()"
@@ -401,6 +420,7 @@ Rscript -e "devtools::document()"
 ```
 
 ### Runtime Verification
+
 ```r
 # Test ERROR notice
 data_empty <- data.frame()
@@ -447,21 +467,25 @@ results <- datecorrection(data = data_bad, date_vars = "dates")
 The Notice system integrates seamlessly with existing functionality:
 
 ### 1. Corrected Data Table
+
 - ERROR notices prevent table population (no invalid data shown)
 - WARNING notices shown alongside partial results
 - Table always available when analysis completes
 
 ### 2. Quality Assessment (Optional HTML)
+
 - Notices provide **required** visibility of issues
 - HTML quality assessment provides **supplementary** detail
 - Users see critical issues even if quality assessment hidden
 
 ### 3. Welcome Message
+
 - Still shown when no variables selected
 - ERROR notice provides immediate feedback
 - Welcome explains what to do
 
 ### 4. Test Suite
+
 - Tests verify notice presence
 - Tests check notice positioning
 - Tests validate notice content
@@ -473,6 +497,7 @@ The Notice system integrates seamlessly with existing functionality:
 Potential improvements for future versions:
 
 ### 1. Notice Customization
+
 ```yaml
 # In .a.yaml - allow users to suppress non-critical notices
 - name: show_quality_notices
@@ -482,7 +507,9 @@ Potential improvements for future versions:
 ```
 
 ### 2. Aggregated Warnings
+
 For multiple all-NA variables:
+
 ```
 Multiple variables contain only missing values (3 affected).
 • diagnosis_date: 150 NA rows
@@ -491,7 +518,9 @@ Multiple variables contain only missing values (3 affected).
 ```
 
 ### 3. Variable-Specific Success Rates
+
 Per-variable STRONG_WARNING when one variable has very low success:
+
 ```
 Variable "diagnosis_date" has critically low success rate: 45%
 • Only 68 of 150 dates were successfully parsed.

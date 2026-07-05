@@ -9,7 +9,6 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
         "decisioncompareClass",
         inherit = decisioncompareBase,
         private = list(
-
             # Clinical thresholds for likelihood ratio interpretation
             LR_CLINICAL_THRESHOLDS = list(
                 excellent_pos = 10, # LR+ > 10 = excellent for ruling in disease
@@ -66,7 +65,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         type = "ERROR",
                         title = "Invalid Positive Level",
-                        content = paste0('The positive level "', level, '" was not found in ', label, '. Check spelling and capitalisation. Available levels: ', paste(levels(x), collapse = ", "), '.')
+                        content = paste0('The positive level "', level, '" was not found in ', label, ". Check spelling and capitalisation. Available levels: ", paste(levels(x), collapse = ", "), ".")
                     )
                     stop("Validation failed", call. = FALSE)
                 }
@@ -152,73 +151,76 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Add a notice to the collection
             .addNotice = function(type, title, content) {
-              private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-              )
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
             },
 
             # Render collected notices as HTML
             .renderNotices = function() {
-              if (length(private$.noticeList) == 0) {
-                return()
-              }
+                if (length(private$.noticeList) == 0) {
+                    return()
+                }
 
-              # Map notice types to colors and icons
-              typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
-              )
-
-              html <- "<div style='margin: 10px 0;'>"
-
-              for (notice in private$.noticeList) {
-                style <- typeStyles[[notice$type]] %||% typeStyles$INFO
-
-                html <- paste0(html,
-                  "<div style='background-color: ", style$bgcolor, "; ",
-                  "border-left: 4px solid ", style$border, "; ",
-                  "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                  "<strong style='color: ", style$color, ";'>",
-                  style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-                  "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
-                  "</div>"
+                # Map notice types to colors and icons
+                typeStyles <- list(
+                    ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
+                    STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
+                    WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
+                    INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
                 )
-              }
 
-              html <- paste0(html, "</div>")
+                html <- "<div style='margin: 10px 0;'>"
 
-              self$results$notices$setContent(html)
+                for (notice in private$.noticeList) {
+                    style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+
+                    html <- paste0(
+                        html,
+                        "<div style='background-color: ", style$bgcolor, "; ",
+                        "border-left: 4px solid ", style$border, "; ",
+                        "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                        "<strong style='color: ", style$color, ";'>",
+                        style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
+                        "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
+                        "</div>"
+                    )
+                }
+
+                html <- paste0(html, "</div>")
+
+                self$results$notices$setContent(html)
             },
 
             # HTML sanitization for security
             .safeHtmlOutput = function(text) {
-              if (is.null(text) || length(text) == 0) return("")
-              text <- as.character(text)
-              # Sanitize potentially dangerous characters
-              text <- gsub("&", "&amp;", text, fixed = TRUE)
-              text <- gsub("<", "&lt;", text, fixed = TRUE)
-              text <- gsub(">", "&gt;", text, fixed = TRUE)
-              text <- gsub("\"", "&quot;", text, fixed = TRUE)
-              text <- gsub("'", "&#x27;", text, fixed = TRUE)
-              text <- gsub("/", "&#x2F;", text, fixed = TRUE)
-              return(text)
+                if (is.null(text) || length(text) == 0) {
+                    return("")
+                }
+                text <- as.character(text)
+                # Sanitize potentially dangerous characters
+                text <- gsub("&", "&amp;", text, fixed = TRUE)
+                text <- gsub("<", "&lt;", text, fixed = TRUE)
+                text <- gsub(">", "&gt;", text, fixed = TRUE)
+                text <- gsub("\"", "&quot;", text, fixed = TRUE)
+                text <- gsub("'", "&#x27;", text, fixed = TRUE)
+                text <- gsub("/", "&#x2F;", text, fixed = TRUE)
+                return(text)
             },
 
             # ======================================================================
             # Main Analysis Methods
             # ======================================================================
 
-            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [SECURITY/D-HIGH] ALREADY PATCHED in ClinicoPath — test_names + best_test wrapped via
+            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [SECURITY/D-HIGH] ALREADY PATCHED in ClinicoPath - test_names + best_test wrapped via
             #     private$.safeHtmlOutput in .generateMethodsSection (~L1816) and .generateResultsSection (~L1841)
-            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice — consolidate
+            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice - consolidate
             #   [hygiene/notices] add STRONG_WARNING for small cell counts in McNemar paths
-            #   [hygiene/jmvcore] some bare stop("Validation failed", call. = FALSE) — /jamovify-function decisioncompare
-            #   [statistical-validation] /review-function decisioncompare — McNemar small-n + paired-CI checks
+            #   [hygiene/jmvcore] some bare stop("Validation failed", call. = FALSE) - /jamovify-function decisioncompare
+            #   [statistical-validation] /review-function decisioncompare - McNemar small-n + paired-CI checks
             #   [i18n] 26 .() wraps but no .po catalog; bootstrap jamovi/i18n/
             #   [testing] no tests/testthat/test-decisioncompare.R
 
@@ -534,9 +536,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         html_table <- knitr::kable(
                             cross_tab,
                             format = "html",
-                            caption = paste("Cross-tabulation of",
-                                            private$.safeHtmlOutput(test_var), "and",
-                                            private$.safeHtmlOutput(goldVariable))
+                            caption = paste(
+                                "Cross-tabulation of",
+                                private$.safeHtmlOutput(test_var), "and",
+                                private$.safeHtmlOutput(goldVariable)
+                            )
                         )
                         html_tables <- paste(html_tables, html_table, "<br><br>")
                     }
@@ -610,7 +614,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = "Multi-Level Test Variable",
-                        content = paste0(testVariable, " has ", length(test_levels), " levels: ", paste(test_levels, collapse = ", "), '. Only "', testPLevel, '" treated as positive; all others (', paste(extra_levels, collapse = ", "), ') treated as NEGATIVE. This may inflate specificity/NPV if equivocal results are present. ', count_extra, ' non-positive cases detected. Consider enabling "Exclude Indeterminate" option or using binary variables.')
+                        content = paste0(testVariable, " has ", length(test_levels), " levels: ", paste(test_levels, collapse = ", "), '. Only "', testPLevel, '" treated as positive; all others (', paste(extra_levels, collapse = ", "), ") treated as NEGATIVE. This may inflate specificity/NPV if equivocal results are present. ", count_extra, ' non-positive cases detected. Consider enabling "Exclude Indeterminate" option or using binary variables.')
                     )
                 }
 
@@ -620,7 +624,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         type = "STRONG_WARNING",
                         title = "Multi-Level Gold Standard",
-                        content = paste0('Gold standard "', goldVariable, '" has ', length(gold_levels), ' levels: ', paste(gold_levels, collapse = ", "), '. Only "', goldPLevel, '" treated as positive; all others (', paste(extra_levels, collapse = ", "), ') treated as NEGATIVE. Ensure your reference standard truly has only two outcomes or use a binary variable.')
+                        content = paste0('Gold standard "', goldVariable, '" has ', length(gold_levels), " levels: ", paste(gold_levels, collapse = ", "), '. Only "', goldPLevel, '" treated as positive; all others (', paste(extra_levels, collapse = ", "), ") treated as NEGATIVE. Ensure your reference standard truly has only two outcomes or use a binary variable.")
                     )
                 }
 
@@ -633,7 +637,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     mydata <- mydata %>%
                         dplyr::filter(
                             (.data[[testVariable]] %in% valid_test_levels) &
-                            (.data[[goldVariable]] %in% valid_gold_levels)
+                                (.data[[goldVariable]] %in% valid_gold_levels)
                         )
                     rows_after <- nrow(mydata)
                     if (rows_after < rows_before) {
@@ -732,7 +736,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 spec_is_zero <- !is.na(Spec) && abs(Spec - 0) < sqrt(.Machine$double.eps)
 
                 # Apply continuity correction for LR stability only; do not alter reported counts
-               zero_cells <- any(c(TP, FP, FN, TN) == 0)
+                zero_cells <- any(c(TP, FP, FN, TN) == 0)
                 if (zero_cells) {
                     private$.addNotice(
                         type = "INFO",
@@ -745,7 +749,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     FN_cc <- FN + private$ZERO_CELL_CONTINUITY
                     TN_cc <- TN + private$ZERO_CELL_CONTINUITY
                 } else {
-                    TP_cc <- TP; FP_cc <- FP; FN_cc <- FN; TN_cc <- TN
+                    TP_cc <- TP
+                    FP_cc <- FP
+                    FN_cc <- FN
+                    TN_cc <- TN
                 }
 
                 LRP <- if (is.na(Sens) || is.na(Spec)) {
@@ -877,7 +884,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
             # Compute confidence interval for a proportion (Wilson, logit, or exact)
             .proportionCI = function(x, n, method = "wilson", alpha = 0.05) {
-                if (n == 0) return(list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                if (n == 0) {
+                    return(list(est = NA_real_, lower = NA_real_, upper = NA_real_))
+                }
                 p_hat <- x / n
                 z <- qnorm(1 - alpha / 2)
 
@@ -914,7 +923,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 try(opaTable$clearRows(), silent = TRUE)
 
                 ci_method <- self$options$ciMethod
-                ni_margin <- self$options$niMargin / 100  # Convert % to proportion
+                ni_margin <- self$options$niMargin / 100 # Convert % to proportion
 
                 # Update table note to reflect CI method
                 method_label <- switch(ci_method,
@@ -978,8 +987,10 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 if (!strat_var %in% colnames(mydata)) {
                     # Re-fetch from original data with the strat column
                     strat_col <- self$data[[strat_var]]
-                    if (is.null(strat_col)) return()
-                    # Align by row — processed_data may have dropped NA rows
+                    if (is.null(strat_col)) {
+                        return()
+                    }
+                    # Align by row - processed_data may have dropped NA rows
                     # Rebuild from self$data
                     testVariables <- private$.getTestVariables()
                     all_vars <- c(goldVariable, testVariables, strat_var)
@@ -1295,7 +1306,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             p_value < 0.001 ~ "Highly significant overall difference among tests (p<0.001)",
                             p_value < 0.01 ~ "Significant overall difference among tests (p<0.01)",
                             p_value < 0.05 ~ "Statistically significant overall difference among tests (p<0.05)",
-                            TRUE ~ "No significant overall difference among tests (p≥0.05)"
+                            TRUE ~ "No significant overall difference among tests (p>=0.05)"
                         )
 
                         mcnemarTable$addRow(
@@ -1433,7 +1444,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             p_to_interpret < 0.01 ~ "Significant difference (p<0.01)",
                             p_to_interpret < private$P_THRESHOLD_SIGNIFICANT ~ "Statistically significant difference (p<0.05)",
                             p_to_interpret < 0.1 ~ "Marginally significant difference (p<0.1)",
-                            TRUE ~ "No significant difference (p≥0.1)"
+                            TRUE ~ "No significant difference (p>=0.1)"
                         )
 
                         # Add suffix to interpretation if adjusted
@@ -1458,7 +1469,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                                 rowKey = comparison_name,
                                 col = "p",
                                 sprintf(
-                                    " Small number of discordant pairs (n=%d). Results may be unreliable (recommend n≥%d).",
+                                    " Small number of discordant pairs (n=%d). Results may be unreliable (recommend n>=%d).",
                                     n_discordant, private$MIN_DISCORDANT_PAIRS
                                 )
                             )
@@ -1518,7 +1529,8 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             col = "diff",
                             jmvcore::format(jmvcore::.("Small paired sample/discordant counts; CI may be unstable (n={n}, discordant counts: {counts})."),
                                 n = result$n,
-                                counts = paste(result$counts, collapse = ", "))
+                                counts = paste(result$counts, collapse = ", ")
+                            )
                         )
                     }
                 }
@@ -1969,11 +1981,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #2e7d32;">',
                     "<div>",
                     '<h4 style="margin-bottom: 5px;">Screening Tests (Rule-Out):</h4>',
-                    '<p style="margin-top: 0;">• Sensitivity ≥95%: Excellent<br>• NPV ≥95%: High confidence<br>• Goal: Minimize false negatives</p>',
+                    '<p style="margin-top: 0;">• Sensitivity >=95%: Excellent<br>• NPV >=95%: High confidence<br>• Goal: Minimize false negatives</p>',
                     "</div>",
                     "<div>",
                     '<h4 style="margin-bottom: 5px;">Confirmatory Tests (Rule-In):</h4>',
-                    '<p style="margin-top: 0;">• Specificity ≥95%: Excellent<br>• PPV ≥90%: High confidence<br>• Goal: Minimize false positives</p>',
+                    '<p style="margin-top: 0;">• Specificity >=95%: Excellent<br>• PPV >=90%: High confidence<br>• Goal: Minimize false positives</p>',
                     "</div>",
                     "</div>",
                     "</div>",
@@ -2069,7 +2081,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Returns a plain data.frame suitable for setState (protobuf-safe)
             .buildHeatmapData = function() {
                 pd <- private$.cached_processed_data
-                if (is.null(pd)) return(NULL)
+                if (is.null(pd)) {
+                    return(NULL)
+                }
 
                 mydata <- pd$data
                 goldVariable <- pd$goldVariable
@@ -2130,7 +2144,9 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
             # Render concordance heatmap
             .plotHeatmap = function(imageHeatmap, ggtheme, ...) {
                 df_long <- imageHeatmap$state
-                if (is.null(df_long) || nrow(df_long) == 0) return(FALSE)
+                if (is.null(df_long) || nrow(df_long) == 0) {
+                    return(FALSE)
+                }
 
                 # Identify test names (everything that isn't "Gold Standard")
                 all_sources <- unique(df_long$source)
@@ -2139,27 +2155,32 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
 
                 # Order: Gold Standard at top, then tests below
                 df_long$source <- factor(df_long$source,
-                    levels = rev(c("Gold Standard", test_names)))
+                    levels = rev(c("Gold Standard", test_names))
+                )
 
                 p <- ggplot2::ggplot(df_long, ggplot2::aes(
-                        x = case_order, y = source, fill = factor(value))) +
+                    x = case_order, y = source, fill = factor(value)
+                )) +
                     ggplot2::geom_tile(color = "grey90", linewidth = 0.1) +
                     ggplot2::scale_fill_manual(
                         values = c("0" = "white", "1" = "black"),
                         labels = c("Negative", "Positive"),
-                        name = "Result") +
+                        name = "Result"
+                    ) +
                     ggplot2::labs(
                         title = jmvcore::.("Concordance Heatmap: Per-Case Test Results vs Gold Standard"),
                         subtitle = paste0(jmvcore::.("Cases sorted by gold standard result"), " (n=", n_cases, ")"),
                         x = jmvcore::.("Sample"),
-                        y = "") +
+                        y = ""
+                    ) +
                     ggtheme +
                     ggplot2::theme(
                         panel.grid = ggplot2::element_blank(),
                         axis.text.x = ggplot2::element_blank(),
                         axis.ticks.x = ggplot2::element_blank(),
                         plot.title = ggplot2::element_text(hjust = 0.5),
-                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 9))
+                        plot.subtitle = ggplot2::element_text(hjust = 0.5, size = 9)
+                    )
 
                 print(p)
                 TRUE
@@ -2190,7 +2211,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                             html <- paste0(
                                 html,
                                 "<span style='color:#d32f2f;'><b>found significant differences</b></span> ",
-                                "among the three tests. This means the tests do NOT perform equally—at least one differs significantly from the others.</p>"
+                                "among the three tests. This means the tests do NOT perform equally - at least one differs significantly from the others.</p>"
                             )
 
                             # Identify best test
@@ -2237,7 +2258,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         ))
 
                         html <- paste0(html, sprintf(
-                            "<p><b>McNemar's test:</b> χ² = %.2f, p = %.3f — ",
+                            "<p><b>McNemar's test:</b> χ² = %.2f, p = %.3f - ",
                             mcn_stat, mcn_p
                         ))
 
@@ -2395,7 +2416,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(
                     html,
                     "<dt><b>PPV (Positive Predictive Value)</b></dt>",
-                    "<dd style='margin-bottom:12px;'>Probability that a positive test result truly indicates disease. Depends on disease prevalence—higher in populations with higher disease rates.</dd>"
+                    "<dd style='margin-bottom:12px;'>Probability that a positive test result truly indicates disease. Depends on disease prevalence - higher in populations with higher disease rates.</dd>"
                 )
 
                 html <- paste0(
@@ -2436,11 +2457,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul style='margin-left:15px; color:#c0392b;'>")
                 html <- paste0(
                     html,
-                    "<li>McNemar's test compares overall accuracy only—does not separately test sensitivity vs specificity differences</li>",
-                    "<li>Requires paired observations—cannot compare tests performed on different patient groups</li>",
+                    "<li>McNemar's test compares overall accuracy only - does not separately test sensitivity vs specificity differences</li>",
+                    "<li>Requires paired observations - cannot compare tests performed on different patient groups</li>",
                     "<li>This function cannot handle continuous test results directly for statistical comparison. For continuous diagnostic tests, please use the dedicated ROC (Receiver Operating Characteristic) analysis functions for comparing curves (e.g., DeLong's test).</li>",
                     "<li>Small number of discordant pairs reduces statistical power and reliability</li>",
-                    "<li>P-values do not indicate clinical importance—consider effect sizes and practical implications</li>"
+                    "<li>P-values do not indicate clinical importance - consider effect sizes and practical implications</li>"
                 )
                 html <- paste0(html, "</ul>")
 

@@ -27,6 +27,7 @@ Added optional checkbox to enable omentum-specific literature analysis:
 **Location:** Lines 194-197
 
 **Why default: false?**
+
 - Keeps module lightweight by default
 - Omentum analysis only relevant for gynecologic oncology cases
 - Users opt-in when analyzing omentum sampling data
@@ -69,6 +70,7 @@ Added collapsible UI section for omentum analysis:
 **Location:** Lines 167-175
 
 **Design:**
+
 - Collapsible section to reduce UI clutter
 - Starts collapsed (user expands when needed)
 - Clear label indicating specialized analysis
@@ -114,16 +116,16 @@ Full `.populateOmentumAnalysis()` method with:
 
 | Scenario | Maglalang MPR | Recommended Blocks |
 |----------|---------------|-------------------|
-| Grossly normal, no NACT | 8.0% | ≥4 (guideline) |
-| Grossly normal, post-NACT | 19.0% | ≥6 (high risk) |
+| Grossly normal, no NACT | 8.0% | >=4 (guideline) |
+| Grossly normal, post-NACT | 19.0% | >=6 (high risk) |
 | Multifocal/diffuse abnormal | 92.1% | 2-3 (high pre-test probability) |
-| Focal abnormal | 66.4% | ≥4 (heterogeneous) |
+| Focal abnormal | 66.4% | >=4 (heterogeneous) |
 
 **Key Content:**
 
 1. **Recent Evidence Section:**
    - Maglalang & Fadare 2025 findings
-   - ISGyP Guidelines (≥4 blocks)
+   - ISGyP Guidelines (>=4 blocks)
    - Skala & Hagemann 2015 simulation data
 
 2. **Critical Limitation Warning:**
@@ -151,7 +153,7 @@ Full `.populateOmentumAnalysis()` method with:
 **Our Response (Via Module):**
 
 1. **Acknowledges their data** but highlights critical limitation (no gold standard)
-2. **Preserves guideline recommendation** (ISGyP ≥4 blocks) as current standard
+2. **Preserves guideline recommendation** (ISGyP >=4 blocks) as current standard
 3. **Provides risk-stratification** rather than one-size-fits-all reduction
 4. **Emphasizes post-NACT context** (19% MPR = 5× higher risk)
 5. **Calls for prospective validation** before changing practice
@@ -161,29 +163,33 @@ Full `.populateOmentumAnalysis()` method with:
 ## Testing Checklist
 
 ✅ **YAML Syntax**
+
 - All three YAML files validated
 - Options, results, and UI properly linked
 
 ✅ **R Code Compilation**
+
 - `jmvtools::prepare()` completed without errors
 - `.h.R` files generated successfully
 - All 400+ module files compiled
 
 ✅ **Namespace Integration**
+
 - Method called in `.run()` correctly
 - HTML output populated via `setContent()`
 - Visibility controlled by option checkbox
 
 ✅ **Content Accuracy**
+
 - Maglalang data accurately cited (n=1,055, MPR values)
-- ISGyP guideline correctly referenced (≥4 blocks)
+- ISGyP guideline correctly referenced (>=4 blocks)
 - Skala & Hagemann data correct (5 blocks→82%, 10 blocks→95%)
 
 ---
 
 ## Usage Instructions
 
-### For Jamovi Users:
+### For Jamovi Users
 
 1. **Load omentum sampling data** with variables:
    - Total samples taken (e.g., total omentum blocks)
@@ -208,11 +214,13 @@ Full `.populateOmentumAnalysis()` method with:
 ## File Locations
 
 ### Documentation
+
 - **Critical Analysis:** `/Users/serdarbalci/Desktop/omentum/maglalang-fadare-2025-ucsd-omentum-analysis.md`
 - **Response Strategy:** `/Users/serdarbalci/Desktop/omentum/omentum-study-response-strategy.md`
 - **Implementation Summary:** `/Users/serdarbalci/Desktop/omentum/pathsampling-omentum-implementation-summary.md` (this file)
 
 ### Module Files
+
 - **Analysis Definition:** `/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/pathsampling.a.yaml`
 - **Results Definition:** `/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/pathsampling.r.yaml`
 - **UI Definition:** `/Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule/jamovi/pathsampling.u.yaml`
@@ -222,7 +230,7 @@ Full `.populateOmentumAnalysis()` method with:
 
 ## Next Steps for Prospective Study
 
-### Immediate Actions:
+### Immediate Actions
 
 1. **IRB Submission:**
    - Protocol: Complete sampling gold standard design
@@ -239,14 +247,16 @@ Full `.populateOmentumAnalysis()` method with:
    - Variable definitions matching module inputs
    - Quality control procedures
 
-### Publication Strategy:
+### Publication Strategy
 
 **Phase 1 Paper (Gold Standard Validation):**
+
 - Title: "Complete Sampling Validation of Omentum Adequacy: A Prospective Response to Maglalang & Fadare 2025"
 - Target: *Int J Gynecol Pathol* or *Am J Surg Pathol*
 - Content: False negative rate assessment with complete sampling
 
 **Phase 2 Paper (Probabilistic Modeling):**
+
 - Title: "Binomial Probability Models for Omentum Sampling Adequacy in Gynecologic Oncology"
 - Target: *Mod Pathol* or *Arch Pathol Lab Med*
 - Content: Statistical framework for evidence-based recommendations
@@ -256,16 +266,19 @@ Full `.populateOmentumAnalysis()` method with:
 ## Key Success Metrics
 
 ✅ **Technical Implementation:**
+
 - Module compiles without errors
 - UI components properly linked
 - Output displays correctly
 
 ✅ **Scientific Content:**
+
 - Accurate citation of Maglalang data
 - Clear presentation of limitations
 - Risk-stratified recommendations
 
 ✅ **Strategic Positioning:**
+
 - Acknowledges new evidence
 - Maintains guideline recommendations
 - Calls for prospective validation
@@ -329,12 +342,14 @@ omentumText$setContent(html_string)
 ## Status: Production Ready ✅
 
 All omentum analysis features are:
+
 - ✅ Fully implemented
 - ✅ Successfully compiled
 - ✅ Ready for use in jamovi
 - ✅ Documented with comprehensive analysis
 
 The pathsampling module now serves as both:
+
 1. **Research tool** for omentum sampling adequacy analysis
 2. **Educational resource** comparing current evidence and guidelines
 3. **Strategic platform** positioning prospective validation studies

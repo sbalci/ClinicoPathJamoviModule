@@ -199,13 +199,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent(paste(private$.messages, collapse = ""))
         },
         
-        # TODO (security): Dead helpers below have latent D1 XSS — callers at
+        # TODO (security): Dead helpers below have latent D1 XSS - callers at
         #   `.run()` L843-845 are commented out, so this is not currently reachable.
         #   If uncommented, the following sites interpolate user column names and
         #   factor-level values into HTML without htmltools::htmlEscape:
         #     - .generateClinicalInterpretation L243 (group factor levels),
         #       L249-258 (factor levels), L272-275 (dep_var/group_var)
-        #     - .checkAssumptions L363-364 (names(group_counts) — factor levels)
+        #     - .checkAssumptions L363-364 (names(group_counts) - factor levels)
         #     - .generateReportSentence L450 (dep_var, group_var)
         #   Before uncommenting any `.run()` call, wrap user-controlled tokens
         #   with htmltools::htmlEscape() at the glue/sprintf sources, matching
@@ -390,7 +390,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
-        # TODO (cleanup): Commented-out preset infrastructure is dead code —
+        # TODO (cleanup): Commented-out preset infrastructure is dead code - 
         #   `.applyClinicalPreset` below (L382-405 of original), `.generateGuidedSteps`
         #   (L462-480), `.generateRecommendations` (L483-527), the `.currentPreset`
         #   field declaration at L22, and the `.run()` body calls at L843-849.
@@ -1027,7 +1027,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # by class (rather than by name) means any variable option added later
             # is escaped automatically.
             #
-            # data/dep/group are NOT re-emitted through private$.asArgs() — doing
+            # data/dep/group are NOT re-emitted through private$.asArgs() - doing
             # so previously duplicated dep and group in the generated syntax (the
             # "double variables" bug). All non-variable options keep jmvcore's
             # per-option sourcify so formatting stays consistent with jamovi.

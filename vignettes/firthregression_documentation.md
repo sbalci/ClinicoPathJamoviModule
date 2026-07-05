@@ -1,4 +1,4 @@
-# Firth's Penalized Likelihood Regression -- Feature Mapping
+# Firth's Penalized Likelihood Regression - Feature Mapping
 
 ## Feature Summary
 
@@ -11,11 +11,11 @@ Key users include pathologists analyzing rare tumor subtypes with few events, on
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Analysis mode | `analysisType` | Analysis Type | -- | `.init()` dispatch |
-| Time variable (Cox) | `time` | Time Variable | -- | `.prepareData()` |
-| Outcome variable | `outcome` | Outcome Variable | -- | `.prepareData()` |
-| Event level | `outcomeLevel` | Event Level | -- | `.prepareData()` encoding |
-| Predictors | `predictors` | Predictor Variables | -- | `.prepareData()` |
+| Analysis mode | `analysisType` | Analysis Type | - | `.init()` dispatch |
+| Time variable (Cox) | `time` | Time Variable | - | `.prepareData()` |
+| Outcome variable | `outcome` | Outcome Variable | - | `.prepareData()` |
+| Event level | `outcomeLevel` | Event Level | - | `.prepareData()` encoding |
+| Predictors | `predictors` | Predictor Variables | - | `.prepareData()` |
 | **Data Assessment** | | | | |
 | Suitability check | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` | `.assessSuitability()` |
 | **Confidence Intervals** | | | | |
@@ -25,13 +25,13 @@ Key users include pathologists analyzing rare tumor subtypes with few events, on
 | Separation detection | `separationCheck` | Separation Detection | `separationDiagnostics` | `.runSeparationCheck()` |
 | Standard comparison | `compareStandard` | Compare with Standard Model | `comparisonTable`, `coefficients` (bias_reduction) | `.populateComparison()` |
 | **Core Results** | | | | |
-| Coefficients | -- | -- | `coefficients` | `.populateCoefficients()` |
+| Coefficients | - | - | `coefficients` | `.populateCoefficients()` |
 | Model fit | `showModelFit` | Model Fit Statistics | `modelFit` | `.populateModelFit()` |
-| Notices | -- | -- | `notices` | `.addNotice()` + `.renderNotices()` |
+| Notices | - | - | `notices` | `.addNotice()` + `.renderNotices()` |
 | **Plots** | | | | |
 | Forest plot | `forestPlot` | Forest Plot | `forestPlotImage` | `.prepareForestPlot()` + `.renderForestPlot()` |
 | Separation plot | `separationPlot` | Separation Diagnostic Plot | `separationPlotImage` | `.prepareSeparationPlot()` + `.renderSeparationPlot()` |
 | **Explanatory Output** | | | | |
 | Results summary | `showSummary` | Results Summary | `summaryText` | `.showSummaryText()` |
 | Method explanations | `showExplanations` | Method Explanations | `explanationText` | `.showExplanations()` |
-| Instructions | -- | -- | `instructions` | `.showMessage()` |
+| Instructions | - | - | `instructions` | `.showMessage()` |

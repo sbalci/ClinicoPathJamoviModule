@@ -246,12 +246,12 @@ parallelplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot_data$._id <- seq_len(nrow(plot_data))
 
             # TODO (performance): the nested for-loop reshape below (this site and the
-            # else branch at L273+) is O(n × k) with row-by-row `rbind` — quadratic in
+            # else branch at L273+) is O(n × k) with row-by-row `rbind` - quadratic in
             # observations. `tidyr::pivot_longer` (already imported per the roxygen tag
             # at L12) does this in a single vectorised pass. For large datasets this is
             # significantly slower than necessary.
             # TODO (correctness): L295 `as.factor(plot_long[[group_var]])` does not honor
-            # the jamovi `values` attribute — for a factor column with values c(10,20,30)
+            # the jamovi `values` attribute - for a factor column with values c(10,20,30)
             # but levels c("Low","Med","High"), the legend labels reflect levels not values.
             # Consider `jmvcore::toNumeric(...)` upstream, or document the behavior.
             # Reshape data for plotting

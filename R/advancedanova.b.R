@@ -150,12 +150,12 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     
                     # Dunnett's test (if control group specified)
                     # TODO (dead-UI + future-proof): self$options$control_group is OptionString
-                    # (free text). It is currently only used as a non-empty guard here — the
+                    # (free text). It is currently only used as a non-empty guard here - the
                     # downstream call .performDunnettTest never reads it; multcomp::glht uses
                     # the factor's default reference level instead (see L604). Either:
                     #   (a) wire the value through: validate `control_group %in% levels(group_clean)`
                     #       (jmvcore::reject if not), then pass it as the reference level via
-                    #       relevel(group_clean, ref = control_group) before calling glht — and
+                    #       relevel(group_clean, ref = control_group) before calling glht - and
                     #       htmltools::htmlEscape any echo of it into HTML, or
                     #   (b) remove the option from the .a.yaml until it does something.
                     # Until one of these lands, the field is a UI lie that misleads users into

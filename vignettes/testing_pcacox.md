@@ -94,10 +94,10 @@ Test datasets:
 
 | # | File | Variables | Options to Test | Expected Behavior |
 |---|------|-----------|-----------------|-------------------|
-| 32 | -- | No data | -- | Welcome HTML displayed |
-| 33 | `pcacox_clinical` | Only 1 predictor | -- | Welcome HTML (< 2 predictors) |
+| 32 | - | No data | - | Welcome HTML displayed |
+| 33 | `pcacox_clinical` | Only 1 predictor | - | Welcome HTML (< 2 predictors) |
 | 34 | `pcacox_clinical` | 2 predictors: `age, albumin` | `n_components=1` | Should work (minimum) |
-| 35 | `pcacox_clinical` | All-censored status | -- | ERROR notice: no events |
+| 35 | `pcacox_clinical` | All-censored status | - | ERROR notice: no events |
 | 36 | `pcacox_clinical` | Missing data (~15%) | Default | Listwise deletion, runs OK |
 | 37 | `pcacox_clinical` | `n_components=50` (> available) | Default | Auto-capped |
 
@@ -118,37 +118,37 @@ Test datasets:
 
 ## COMPLETE OPTION COVERAGE CHECKLIST
 
-- [x] `time` -- tests #1-37
-- [x] `status` -- tests #1-37
-- [x] `outcomeLevel` -- tests #1-37
-- [x] `censorLevel` -- tests #1-37
-- [x] `predictors` -- tests #1-37
-- [x] `clinical_vars` -- not tested explicitly (optional)
-- [x] `suitabilityCheck` -- tests #20, #21
-- [x] `pca_method` (supervised) -- tests #2, #3
-- [x] `pca_method` (standard) -- test #1
-- [x] `pca_method` (sparse) -- tests #4, #5
-- [x] `pca_method` (kernel) -- test #6
-- [x] `n_components` -- tests #7, #8, #37
-- [x] `component_selection` (fixed) -- tests #7, #8
-- [x] `component_selection` (cv) -- tests #9, #10
-- [x] `component_selection` (variance) -- tests #11, #12
-- [x] `cv_folds` -- tests #9, #10
-- [x] `variance_threshold` -- tests #11, #12
-- [x] `sparse_parameter` -- tests #4, #5
-- [x] `confidence_level` -- test #16
-- [x] `scaling` -- tests #13, #15
-- [x] `centering` -- tests #14, #15
-- [x] `survival_weighting` -- tests #2, #3
-- [x] `permutation_test` -- test #19
-- [x] `n_permutations` -- test #19
-- [x] `bootstrap_validation` -- tests #17, #18
-- [x] `n_bootstrap` -- test #17
-- [x] `plot_scree` -- tests #28, #29
-- [x] `plot_loadings` -- tests #28, #29
-- [x] `plot_biplot` -- tests #28, #29
-- [x] `plot_survival` -- tests #28, #29
-- [x] `risk_score` -- tests #24, #25
-- [x] `show_model_comparison` -- test #22
-- [x] `pathway_analysis` -- test #23
-- [x] `feature_importance` -- tests #26, #27
+- [x] `time` - tests #1-37
+- [x] `status` - tests #1-37
+- [x] `outcomeLevel` - tests #1-37
+- [x] `censorLevel` - tests #1-37
+- [x] `predictors` - tests #1-37
+- [x] `clinical_vars` - not tested explicitly (optional)
+- [x] `suitabilityCheck` - tests #20, #21
+- [x] `pca_method` (supervised) - tests #2, #3
+- [x] `pca_method` (standard) - test #1
+- [x] `pca_method` (sparse) - tests #4, #5
+- [x] `pca_method` (kernel) - test #6
+- [x] `n_components` - tests #7, #8, #37
+- [x] `component_selection` (fixed) - tests #7, #8
+- [x] `component_selection` (cv) - tests #9, #10
+- [x] `component_selection` (variance) - tests #11, #12
+- [x] `cv_folds` - tests #9, #10
+- [x] `variance_threshold` - tests #11, #12
+- [x] `sparse_parameter` - tests #4, #5
+- [x] `confidence_level` - test #16
+- [x] `scaling` - tests #13, #15
+- [x] `centering` - tests #14, #15
+- [x] `survival_weighting` - tests #2, #3
+- [x] `permutation_test` - test #19
+- [x] `n_permutations` - test #19
+- [x] `bootstrap_validation` - tests #17, #18
+- [x] `n_bootstrap` - test #17
+- [x] `plot_scree` - tests #28, #29
+- [x] `plot_loadings` - tests #28, #29
+- [x] `plot_biplot` - tests #28, #29
+- [x] `plot_survival` - tests #28, #29
+- [x] `risk_score` - tests #24, #25
+- [x] `show_model_comparison` - test #22
+- [x] `pathway_analysis` - test #23
+- [x] `feature_importance` - tests #26, #27

@@ -82,7 +82,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -801,7 +801,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             tryCatch({
-                # TODO (data hygiene): `x_min`/`x_max`/`y_min`/`y_max` are declared `type: String` (free-text) in jamovi/basegraphics.a.yaml but only ever parsed via `as.numeric()` here and at line ~876. A non-numeric entry produces silent NA → broken xlim/ylim with no user feedback. Either (a) change the .a.yaml options to `type: Number` (UI-visible behavior change — the field becomes a numeric input), or (b) guard with `jmvcore::canBeNumeric()` and surface a Notice when conversion fails.
+                # TODO (data hygiene): `x_min`/`x_max`/`y_min`/`y_max` are declared `type: String` (free-text) in jamovi/basegraphics.a.yaml but only ever parsed via `as.numeric()` here and at line ~876. A non-numeric entry produces silent NA → broken xlim/ylim with no user feedback. Either (a) change the .a.yaml options to `type: Number` (UI-visible behavior change - the field becomes a numeric input), or (b) guard with `jmvcore::canBeNumeric()` and surface a Notice when conversion fails.
                 # Prepare custom axis limits
                 xlim <- NULL
                 if (options$custom_limits && options$x_min != "" && options$x_max != "") {

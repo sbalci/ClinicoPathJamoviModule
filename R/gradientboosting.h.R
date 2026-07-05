@@ -477,21 +477,6 @@ gradientboostingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' performance with noisy data. Especially suitable for biomarker discovery, 
 #' prognostic modeling, and complex survival prediction tasks.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- gradientboosting(
-#'     data = mydata,
-#'     time = "time_to_event",
-#'     event = "event_indicator",
-#'     predictors = c("age", "stage", "biomarker1", "biomarker2"),
-#'     algorithm = "mboost",
-#'     n_trees = 100,
-#'     learning_rate = 0.1,
-#'     max_depth = 3,
-#'     cv_folds = 5
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

@@ -300,7 +300,7 @@ pseudosurvivalClass <- R6::R6Class(
 
             tryCatch({
 
-                # Create design matrix — Defense 1: composeTerms backtick-
+                # Create design matrix - Defense 1: composeTerms backtick-
                 # escapes user column names safely. Defense 2: asFormula
                 # allow-list-validates against jamovi 2.7.27+'s hardened
                 # as.formula, blocking C1 RCE via crafted column names.
@@ -403,7 +403,7 @@ pseudosurvivalClass <- R6::R6Class(
                             html <- paste0(html, "<tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>t-value</th><th>p-value</th><th>95% CI</th><th>Clinical Interpretation</th></tr>")
                             
                             for (i in 1:nrow(coef_table)) {
-                                # htmlEscape at assignment — var_name reaches `<td>` HTML at L428.
+                                # htmlEscape at assignment - var_name reaches `<td>` HTML at L428.
                                 # The L418 == "(Intercept)" string-equality check still works since
                                 # htmlEscape is identity on plain ASCII.
                                 var_name <- htmltools::htmlEscape(rownames(coef_table)[i])
@@ -485,7 +485,7 @@ pseudosurvivalClass <- R6::R6Class(
                                 html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>Robust SE</th><th>Wald Z</th><th>p-value</th></tr>")
                                 
                                 for (i in 1:nrow(gee_coef)) {
-                                    # htmlEscape at assignment — reaches `<td>` HTML below.
+                                    # htmlEscape at assignment - reaches `<td>` HTML below.
                                     var_name <- htmltools::htmlEscape(rownames(gee_coef)[i])
                                     estimate <- round(gee_coef[i, "Estimate"], 4)
                                     se <- round(gee_coef[i, "Std.err"], 4)
@@ -589,7 +589,7 @@ pseudosurvivalClass <- R6::R6Class(
                     html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>SE</th><th>t value</th><th>Pr(&gt;|t|)</th><th>Interpretation</th></tr>")
 
                     for (i in 1:nrow(coef_table)) {
-                        # htmlEscape at assignment — reaches `<td>` HTML below.
+                        # htmlEscape at assignment - reaches `<td>` HTML below.
                         # The == "(Intercept)" check still works since htmlEscape
                         # is identity on plain ASCII identifiers.
                         var_name <- htmltools::htmlEscape(rownames(coef_table)[i])

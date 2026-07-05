@@ -160,7 +160,7 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 for (j in 1:length(vars)) {
                     if (i == j) {
-                        row_values[[vars[j]]] <- "—"
+                        row_values[[vars[j]]] <- " - "
                     } else {
                         cor_val <- cor_matrix[i, j]
                         p_val <- p_matrix[i, j]
@@ -511,7 +511,7 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Detecting the option by CLASS (not by name) means any variable option
             # added later is escaped automatically.
             #
-            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # Variables are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated them in the generated syntax (the "double
             # variables" bug). All non-variable options keep jmvcore's per-option
             # sourcify so formatting stays consistent with jamovi.

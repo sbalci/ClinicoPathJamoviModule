@@ -1,31 +1,30 @@
-
 functionalsamplingClass <- R6::R6Class(
     "functionalsamplingClass",
     inherit = functionalsamplingBase,
     private = list(
         .data = NULL,
         .results_cache = NULL,
-
         .init = function() {
             if (self$options$show_methodology) private$.setMethodology()
             if (self$options$show_references) private$.setReferences()
         },
-
         .run = function() {
             if (is.null(self$options$x_coord) || is.null(self$options$y_coord) ||
                 is.null(self$options$event_type)) {
                 return()
             }
 
-            tryCatch({
-                private$.prepareData()
-                private$.analyzeSpatialPattern()
-                private$.populateTables()
-            }, error = function(e) {
-                self$setError(paste("Error:", e$message))
-            })
+            tryCatch(
+                {
+                    private$.prepareData()
+                    private$.analyzeSpatialPattern()
+                    private$.populateTables()
+                },
+                error = function(e) {
+                    self$setError(paste("Error:", e$message))
+                }
+            )
         },
-
         .prepareData = function() {
             raw_data <- self$data
             data_list <- list(
@@ -36,7 +35,6 @@ functionalsamplingClass <- R6::R6Class(
             private$.data <- as.data.frame(data_list)
             private$.data <- private$.data[complete.cases(private$.data), ]
         },
-
         .analyzeSpatialPattern = function() {
             data <- private$.data
             n_total <- nrow(data)
@@ -48,7 +46,7 @@ functionalsamplingClass <- R6::R6Class(
             freq_rare <- (n_rare / n_total) * 100
 
             if (n_rare < 2) {
-                self$setError("Insufficient rare events for analysis (need ≥2)")
+                self$setError("Insufficient rare events for analysis (need >=2)")
                 return()
             }
 
@@ -56,7 +54,7 @@ functionalsamplingClass <- R6::R6Class(
             nnd <- numeric(n_rare)
             for (i in 1:n_rare) {
                 distances <- sqrt((rare_data$x[i] - data$x)^2 + (rare_data$y[i] - data$y)^2)
-                distances[distances == 0] <- Inf  # Exclude self
+                distances[distances == 0] <- Inf # Exclude self
                 nnd[i] <- min(distances)
             }
 
@@ -94,7 +92,7 @@ functionalsamplingClass <- R6::R6Class(
             criterion_2 <- pattern == "Random"
 
             # 3. Regular/consistent neighborhoods (low CV of NND)
-            criterion_3 <- cv_nnd < 30  # Arbitrary but reasonable threshold
+            criterion_3 <- cv_nnd < 30 # Arbitrary but reasonable threshold
 
             # Overall conclusion
             if (criterion_1 && criterion_2 && criterion_3) {
@@ -125,7 +123,6 @@ functionalsamplingClass <- R6::R6Class(
                 all_data = data
             )
         },
-
         .populateTables = function() {
             results <- private$.results_cache
 
@@ -188,7 +185,6 @@ functionalsamplingClass <- R6::R6Class(
                 ))
             }
         },
-
         .plot = function(image, ggtheme, theme, ...) {
             results <- private$.results_cache
             data <- results$all_data
@@ -201,8 +197,10 @@ functionalsamplingClass <- R6::R6Class(
                     x = "X Coordinate",
                     y = "Y Coordinate",
                     title = "Spatial Distribution of Events",
-                    subtitle = paste0("Rare events (red triangles): ", results$n_rare,
-                                    " (", sprintf("%.1f%%", results$freq_rare), ")")
+                    subtitle = paste0(
+                        "Rare events (red triangles): ", results$n_rare,
+                        " (", sprintf("%.1f%%", results$freq_rare), ")"
+                    )
                 ) +
                 ggtheme +
                 ggplot2::theme(legend.position = "bottom")
@@ -210,7 +208,6 @@ functionalsamplingClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .setMethodology = function() {
             html <- "
 <h3>Functional Sampling Methodology (Kayser et al., 2009)</h3>
@@ -284,7 +281,6 @@ their spatial distribution pattern.</p>
 "
             self$results$methodology$setContent(html)
         },
-
         .setReferences = function() {
             html <- "
 <h3>References</h3>

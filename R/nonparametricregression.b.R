@@ -21,7 +21,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             # or hide the unused options from the UI until the backend supports them.
             # Security caveat when implementing: any time a non-loess branch builds a formula or selects
             # smoother bases, route through jmvcore::asFormula (with explicit additional_allowed_functions
-            # for survival/mgcv helpers like s(), te(), ti(), rcs()) — see vignettes/jamovi_formula_guide.md.
+            # for survival/mgcv helpers like s(), te(), ti(), rcs()) - see vignettes/jamovi_formula_guide.md.
 
             # 1. Provide instructions if inputs are missing
             if (is.null(self$options$outcome) || is.null(self$options$predictors)) {
@@ -46,7 +46,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             outcomeVar <- self$options$outcome
             predVars <- self$options$predictors
             # TODO (correctness): grouping_variable is read and kept in `vars` but never used in
-            # any model branch — stratified analysis is documented in the welcome HTML but unimplemented.
+            # any model branch - stratified analysis is documented in the welcome HTML but unimplemented.
             # Either implement per-group models (loop over levels, build a results group per stratum)
             # or stop reading the option until stratification is wired up.
             groupVar <- self$options$grouping_variable

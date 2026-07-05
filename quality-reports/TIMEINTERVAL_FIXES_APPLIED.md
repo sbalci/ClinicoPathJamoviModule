@@ -17,9 +17,11 @@ Applied high-priority fixes to the `timeinterval` jamovi function following comp
 **Lines**: 425-426 (formerly line 426)
 
 ### Problem
+
 The `.calculate_survival_time()` method called `private$.validateInputData()` at line 426, but this validation was already performed in `.run()` at lines 553-557 before calling `.calculate_survival_time()`. This resulted in duplicate validation logic.
 
 ### Solution
+
 Removed the redundant validation call and replaced with explanatory comments:
 
 ```r
@@ -28,6 +30,7 @@ Removed the redundant validation call and replaced with explanatory comments:
 ```
 
 ### Impact
+
 - **Performance**: Eliminates duplicate validation checks
 - **Code clarity**: Makes execution flow clearer
 - **Maintenance**: Reduces code duplication
@@ -41,14 +44,17 @@ Removed the redundant validation call and replaced with explanatory comments:
 **Lines**: 835-858
 
 ### Problem
+
 The function did not warn users when sample sizes were too small for reliable statistical inference. Small samples (n<20) produce unreliable confidence intervals and summary statistics, but users received no warning.
 
 **Clinical Risk**: Pathologists/oncologists might use unreliable statistics from small samples without realizing the limitations.
 
 ### Solution
+
 Added two-tier Notice system for small samples:
 
 #### Tier 1: STRONG_WARNING for critically small samples (n<10)
+
 ```r
 if (summary_stats$n < 10 && summary_stats$n > 1) {
     smallNNotice <- jmvcore::Notice$new(
@@ -64,11 +70,12 @@ if (summary_stats$n < 10 && summary_stats$n > 1) {
 }
 ```
 
-**Trigger**: n ≥ 2 and n < 10
+**Trigger**: n >= 2 and n < 10
 **Message**: Clear warning that results are unreliable and exploratory only
 **Position**: 1 (top, prominently displayed)
 
 #### Tier 2: WARNING for small samples (n<20)
+
 ```r
 else if (summary_stats$n < 20 && summary_stats$n >= 10) {
     smallNNotice <- jmvcore::Notice$new(
@@ -84,11 +91,12 @@ else if (summary_stats$n < 20 && summary_stats$n >= 10) {
 }
 ```
 
-**Trigger**: n ≥ 10 and n < 20
+**Trigger**: n >= 10 and n < 20
 **Message**: Warning about wide/unreliable CIs with actionable advice
 **Position**: 1 (top, prominently displayed)
 
 ### Impact
+
 - **Clinical Safety**: ✅ Users warned about statistical unreliability
 - **Educational**: ✅ Explains why small samples are problematic
 - **Actionable**: ✅ Recommends collecting more data or cautious interpretation
@@ -97,6 +105,7 @@ else if (summary_stats$n < 20 && summary_stats$n >= 10) {
 ### Statistical Rationale
 
 **Why n=20 threshold?**
+
 - t-distribution with df<19 has substantially wider tails than normal distribution
 - Confidence interval width inversely proportional to √n
 - At n=10: CI width ~3.2× wider than large sample
@@ -104,7 +113,8 @@ else if (summary_stats$n < 20 && summary_stats$n >= 10) {
 - At n=30: CI width ~1.8× wider than large sample
 
 **Why n=10 threshold for STRONG_WARNING?**
-- Below n=10: t-distribution extremely non-normal (df ≤ 9)
+
+- Below n=10: t-distribution extremely non-normal (df <= 9)
 - Extreme sensitivity to outliers
 - SD estimate highly unstable
 - Mean may not be representative
@@ -132,23 +142,28 @@ The timeinterval function now has **7 distinct Notice types**:
 ## Design Compliance
 
 ### ✅ Single-Line Content
+
 Both new notices use single-line `sprintf()` format without `\n` characters:
+
 ```r
 sprintf('Critically small sample (n=%d). Statistical summaries are unreliable with fewer than 10 observations. Results should be considered exploratory only. Minimum n=20 recommended for basic descriptive analysis.', summary_stats$n)
 ```
 
 ### ✅ No Serialization Issues
+
 - Notices created **dynamically in .b.R only**
 - **NOT defined in .r.yaml**
 - No function references stored
 - Uses `self$results$insert()` correctly
 
 ### ✅ Correct Positioning
+
 - Small sample guards inserted at position 1 (top priority)
 - Completion INFO notice remains at position 999 (bottom)
 - Visual hierarchy maintained: ERROR/STRONG_WARNING/WARNING at top, INFO at bottom
 
 ### ✅ Actionable Messages
+
 - **Specific**: States exact sample size (n=%d)
 - **Explains impact**: "unreliable," "wide CIs"
 - **Actionable**: "collect more data" or "interpret cautiously"
@@ -161,6 +176,7 @@ sprintf('Critically small sample (n=%d). Statistical summaries are unreliable wi
 Before marking as production-ready:
 
 ### Small Sample Scenarios
+
 - [ ] n=5 → STRONG_WARNING displayed
 - [ ] n=9 → STRONG_WARNING displayed
 - [ ] n=15 → WARNING displayed
@@ -169,6 +185,7 @@ Before marking as production-ready:
 - [ ] n=25 → NO small sample warning
 
 ### Integration Tests
+
 - [ ] Small sample notice + missing data notice (both displayed)
 - [ ] Small sample notice + future dates notice (both displayed)
 - [ ] All other notices still function correctly
@@ -177,6 +194,7 @@ Before marking as production-ready:
 - [ ] Html outputs not affected
 
 ### Edge Cases
+
 - [ ] n=2 (minimum for calculation) → STRONG_WARNING
 - [ ] n=1 → Should trigger ERROR earlier in validation
 - [ ] n=0 → Should trigger ERROR earlier in validation
@@ -188,6 +206,7 @@ Before marking as production-ready:
 These were identified in the code review but are **lower priority** and **optional**:
 
 ### Medium Priority
+
 1. **Plain-language UI tooltips** in `.u.yaml`
    - Add `description:` fields for complex options
    - Explain "calendar-aware" vs "standardized" time basis
@@ -199,10 +218,11 @@ These were identified in the code review but are **lower priority** and **option
    - Explain person-time interpretation
 
 ### Low Priority (Nice to Have)
-3. **Clinical preset recommendations**
+
+1. **Clinical preset recommendations**
    - Suggest appropriate settings for common scenarios (adjuvant therapy, recurrence analysis, etc.)
 
-4. **Enhanced validation vignette**
+2. **Enhanced validation vignette**
    - Worked examples with published cohort data
    - Reference dataset comparisons
    - Validation against manual calculations
@@ -258,6 +278,7 @@ These were identified in the code review but are **lower priority** and **option
 ## Changelog
 
 ### 2025-12-20
+
 - ✅ Removed redundant validation call at line 426
 - ✅ Added small sample size guards (n<10 STRONG_WARNING, n<20 WARNING)
 - ✅ Syntax validated

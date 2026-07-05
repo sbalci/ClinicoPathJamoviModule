@@ -176,7 +176,7 @@ marginalrecurrentClass <- R6::R6Class(
                 terminal_data <- tryCatch(
                     private$.coerceIndicator(data[[terminal_event]], "Terminal event indicator", allow_all_zero = TRUE),
                     error = function(e) {
-                        # Defensive escape — see parallel handler above.
+                        # Defensive escape - see parallel handler above.
                         self$results$todo$setContent(
                             paste0("<p>", htmltools::htmlEscape(conditionMessage(e)), "</p>"))
                         return(NULL)
@@ -584,7 +584,7 @@ marginalrecurrentClass <- R6::R6Class(
 
             if (is.factor(x)) {
                 # TODO (correctness): as.numeric(factor) - 1 assumes the FIRST level is
-                # "censored/no-event" and the SECOND is "event" — i.e. alphabetical level
+                # "censored/no-event" and the SECOND is "event" - i.e. alphabetical level
                 # order determines the 0/1 encoding. For a factor with levels c("event",
                 # "censored") the encoding inverts and reReg models are fit on the wrong
                 # event indicator. Same pattern flagged in R/landmarkanalysis.b.R:86 and
@@ -595,7 +595,7 @@ marginalrecurrentClass <- R6::R6Class(
                 # Fix shape: add an `eventLevel` option (`type: Level` bound to each
                 # binary Variable, like R/survival.b.R) and encode via
                 # `as.integer(x == event_level)`.
-                # ⚠ NOT a drop-in jmvcore::toNumeric() swap — toNumeric honors the
+                # ⚠ NOT a drop-in jmvcore::toNumeric() swap - toNumeric honors the
                 # `values` attribute and has no -1 offset; behavior diverges for
                 # unlabelled R factors.
                 values <- as.numeric(x) - 1

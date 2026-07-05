@@ -84,7 +84,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # code and was deleted. Either remove these two options from the
             # .a.yaml + .u.yaml so they don't appear in the UI, or restore a
             # safe implementation. multiple_time_points / calculate_ibs /
-            # competing_risks fall in the same bucket — they're rejected at
+            # competing_risks fall in the same bucket - they're rejected at
             # lines ~54, ~60, ~66 with explicit "NOT SUPPORTED / NOT
             # IMPLEMENTED" messages. Same decision applies: trim the UI or
             # implement them.

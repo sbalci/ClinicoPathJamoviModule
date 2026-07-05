@@ -151,7 +151,7 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 if (!survivalVar %in% names(data))
                     jmvcore::reject("Survival variable {} not found in data", code = NULL, survivalVar)
 
-                # TODO (correctness): factor-vs-numeric comparison hazard. `survivalVar` is declared `permitted: [factor]` in the .a.yaml — when its levels are character "0"/"1", the `%in% c(0, 1, NA)` check coerces the factor via as.character then compares to numerics, which can return FALSE on otherwise-valid 0/1 data. Use `jmvcore::toNumeric(data[[survivalVar]])` (honors the `values` attribute) and check the result. Same hazard reappears in `.calculateSurvivalStats` at lines ~189-194 (`sum(x == 1)`, `mean(x == 0)`).
+                # TODO (correctness): factor-vs-numeric comparison hazard. `survivalVar` is declared `permitted: [factor]` in the .a.yaml - when its levels are character "0"/"1", the `%in% c(0, 1, NA)` check coerces the factor via as.character then compares to numerics, which can return FALSE on otherwise-valid 0/1 data. Use `jmvcore::toNumeric(data[[survivalVar]])` (honors the `values` attribute) and check the result. Same hazard reappears in `.calculateSurvivalStats` at lines ~189-194 (`sum(x == 1)`, `mean(x == 0)`).
                 if (!all(data[[survivalVar]] %in% c(0, 1, NA)))
                     jmvcore::reject("Survival variable must be binary (0/1) or missing")
             }
@@ -283,7 +283,7 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             treatmentVar <- self$options$treatmentVar
             patientId <- self$options$patientId
 
-            # TODO (correctness): `dplyr::arrange()` on a grouped frame does NOT order rows within each group by default — it orders the result globally. `first()`/`last()` then read whatever row dplyr happened to put first/last in each group, which can be nondeterministic across dplyr versions. Either arrange BEFORE group_by, or use `.by_group = TRUE` on arrange (>= 1.0.0): `dplyr::arrange(!!sym(timeVar), .by_group = TRUE)`. Otherwise initialStage / finalTreatment can be wrong.
+            # TODO (correctness): `dplyr::arrange()` on a grouped frame does NOT order rows within each group by default - it orders the result globally. `first()`/`last()` then read whatever row dplyr happened to put first/last in each group, which can be nondeterministic across dplyr versions. Either arrange BEFORE group_by, or use `.by_group = TRUE` on arrange (>= 1.0.0): `dplyr::arrange(!!sym(timeVar), .by_group = TRUE)`. Otherwise initialStage / finalTreatment can be wrong.
             # Create survival data by stage and treatment
             survData <- data %>%
                 dplyr::group_by(!!sym(patientId)) %>%
@@ -432,7 +432,7 @@ alluvialSurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 legend.labs = levels(as.factor(survData$finalTreatment))
             )
 
-            # TODO (correctness): `p2` (survival by final treatment, lines ~415-432) is built but never rendered — only `p1` is printed. Either drop the p2 construction (dead code) or wrap both via `survminer::arrange_ggsurvplots(list(p1, p2), ncol = 1)` and print that. The comment "Print both plots" indicates the second behavior was intended.
+            # TODO (correctness): `p2` (survival by final treatment, lines ~415-432) is built but never rendered - only `p1` is printed. Either drop the p2 construction (dead code) or wrap both via `survminer::arrange_ggsurvplots(list(p1, p2), ncol = 1)` and print that. The comment "Print both plots" indicates the second behavior was intended.
             # Print both plots
             print(p1)
             return(TRUE)

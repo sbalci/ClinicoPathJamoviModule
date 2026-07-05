@@ -15,7 +15,7 @@
 **Pu N, Gao S, Beckman R, et al.**
 Defining a minimum number of examined lymph nodes improves the prognostic value of lymphadenectomy in pancreas ductal adenocarcinoma.
 *HPB.* 2021;23:575-586.
-https://doi.org/10.1016/j.hpb.2020.08.016
+<https://doi.org/10.1016/j.hpb.2020.08.016>
 
 ### Study Design
 
@@ -26,17 +26,19 @@ https://doi.org/10.1016/j.hpb.2020.08.016
 **Follow-up**: Through July 2019 (median 21 months OS)
 
 **Inclusion Criteria**:
+
 - Pancreatic ductal adenocarcinoma (PDAC)
 - Surgery-first approach (NO neoadjuvant therapy)
 
 **Exclusion Criteria**:
+
 - Neoadjuvant therapy (impact on LN evaluation unclear)
 
 ---
 
 ## Key Findings
 
-### Finding 1: Binomial Probability Model Validates ≥12 LN
+### Finding 1: Binomial Probability Model Validates >=12 LN
 
 **Formula Used** (IDENTICAL to our implementation):
 
@@ -44,7 +46,7 @@ https://doi.org/10.1016/j.hpb.2020.08.016
 P = 1 - (1-p)^n
 
 Where:
-P = Probability of detecting ≥1 positive LN
+P = Probability of detecting >=1 positive LN
 p = LNR (lymph node ratio)
 n = Number of examined LN (ELN)
 ```
@@ -75,14 +77,17 @@ n = Number of examined LN (ELN)
 ### Finding 3: ELN Thresholds for Different Applications
 
 **For AJCC N0 vs N1/N2 (any positive)**:
+
 - **minELN = 12** (95% confidence)
 - Based on median LNR in node-positive = 0.227
 
 **For LNR = 0.1 (low burden metastases, 1 positive expected)**:
+
 - **minELN = 29** (95% confidence, binomial = 28.4)
 - Much higher threshold needed for rare positive nodes
 
 **For LNR = 0.3 (high burden metastases)**:
+
 - **minELN = 9** (95% confidence, binomial = 8.4)
 - Lower threshold sufficient when positivity is common
 
@@ -90,7 +95,7 @@ n = Number of examined LN (ELN)
 
 ---
 
-### Finding 4: LNR Superior to AJCC N When 9 ≤ ELN ≤ 29
+### Finding 4: LNR Superior to AJCC N When 9 <= ELN <= 29
 
 **Prognostic Performance by ELN Range**:
 
@@ -98,13 +103,14 @@ n = Number of examined LN (ELN)
 |-----------|---------------------|--------------|-----------|---------|
 | **<9** | LN status (pos/neg only) | NS | NS | - |
 | **9-29** | **LNR superior** | 0.621 | 0.637 | <0.001 |
-| **≥29** | AJCC N marginally superior | Higher | Lower | - |
-| **≥12** | LNR adds prognostic value | Significant | Significant | - |
+| **>=29** | AJCC N marginally superior | Higher | Lower | - |
+| **>=12** | LNR adds prognostic value | Significant | Significant | - |
 
 **Interpretation**:
+
 - **<9 ELN**: Neither AJCC N nor LNR reliable - use simple N0 vs N+ only
 - **9-29 ELN**: LNR provides better risk stratification (most common range!)
-- **≥29 ELN**: AJCC N performs marginally better, but rarely achieved
+- **>=29 ELN**: AJCC N performs marginally better, but rarely achieved
 
 **CRITICAL**: AUC values (0.621-0.637) are **below optimal** (typically >0.8), suggesting even with adequate ELN, N staging alone has limitations.
 
@@ -113,16 +119,19 @@ n = Number of examined LN (ELN)
 ### Finding 5: Survival Outcomes by ELN and Staging System
 
 **Median OS by Node Status**:
-- **N0**: 38 months (with ≥12 ELN) vs 35 months (with <12 ELN) - NS
-- **N+**: 19 months (with ≥12 ELN) vs 16 months (with <12 ELN) - **p=0.015**
+
+- **N0**: 38 months (with >=12 ELN) vs 35 months (with <12 ELN) - NS
+- **N+**: 19 months (with >=12 ELN) vs 16 months (with <12 ELN) - **p=0.015**
 
 **Median OS by AJCC N Stage** (entire cohort):
+
 - **N0**: 38 months
 - **N1** (1-3 positive): 23 months
-- **N2** (≥4 positive): 16 months
+- **N2** (>=4 positive): 16 months
 - **p < 0.001**
 
 **Median OS by LNR Stage** (entire cohort):
+
 - **LNR0** (0.000): 41 months
 - **LNR1** (0.001-0.100): Not specified
 - **LNR2** (0.101-0.300): Not specified
@@ -187,6 +196,7 @@ n = Number of examined LN (ELN)
 | **Tumor size >4cm** | 17.7% | 8.9% | 20.4% | <0.001 |
 
 **Adjuvant Chemotherapy**:
+
 - No: 30.6%
 - Yes: 54.7%
 - Unknown: 14.6%
@@ -203,11 +213,13 @@ n = Number of examined LN (ELN)
 | **Median LNR** (in N+) | 0.227 | - | 0.227 | - |
 
 **AJCC N Stage Distribution**:
+
 - **N0**: 23.7% (436 cases)
 - **N1** (1-3 positive): 40.0% (734 cases)
-- **N2** (≥4 positive): 36.3% (667 cases)
+- **N2** (>=4 positive): 36.3% (667 cases)
 
 **Median ELN by N Stage**:
+
 - N0: 18
 - N1: 18
 - N2: 21 (p<0.001)
@@ -247,6 +259,7 @@ n = Number of examined LN (ELN)
 **Key Difference**: Pu used binomial because they considered LN sampling as "with replacement" (conceptually, any node can be positive). We added hypergeometric for finite population modeling (orange-peeling study).
 
 **Both approaches are valid!** Choice depends on whether you view LN pool as:
+
 - **Infinite/large** → Binomial (Pu approach)
 - **Finite/exhausted** → Hypergeometric (orange-peeling approach)
 
@@ -265,7 +278,7 @@ n = Number of examined LN (ELN)
 | ELN Group | Median ELN | N+ Rate | Implication |
 |-----------|------------|---------|-------------|
 | Low | <median | Lower | Possible understaging |
-| High | ≥median | Higher | More accurate staging |
+| High | >=median | Higher | More accurate staging |
 
 **Statistical Finding**: N2 patients had median ELN = 21 vs N0/N1 = 18 (p<0.001).
 
@@ -277,11 +290,13 @@ n = Number of examined LN (ELN)
 
 **CRITICAL**: Unlike Ates LVSI study (which showed stage migration), Pu found that **adequate sampling improves accuracy WITHOUT inflating stage**.
 
-**Evidence**: With <12 ELN vs ≥12 ELN in node-negative patients:
+**Evidence**: With <12 ELN vs >=12 ELN in node-negative patients:
+
 - Median OS: 35 vs 38 months (NOT significant)
 - Conclusion: **True N0 remains N0 regardless of ELN**
 
-**With <12 ELN vs ≥12 ELN in node-positive patients**:
+**With <12 ELN vs >=12 ELN in node-positive patients**:
+
 - Median OS: 16 vs 19 months (**p=0.015**)
 - Conclusion: **Adequate ELN improves prognostic accuracy in N+ disease**
 
@@ -294,12 +309,14 @@ n = Number of examined LN (ELN)
 **Formula**: LNR = Positive LN / Total ELN
 
 **X-tile Optimization** (outcome-based cutpoints):
+
 - **LNR0**: 0.000 (node-negative)
 - **LNR1**: 0.001-0.100 (low burden)
 - **LNR2**: 0.101-0.300 (moderate burden)
 - **LNR3**: 0.301-1.000 (high burden)
 
 **Why these cutpoints?**
+
 - Maximized survival discrimination
 - Data-driven (not arbitrary)
 - Validated on 1,837 patients
@@ -309,20 +326,23 @@ n = Number of examined LN (ELN)
 ### LNR vs AJCC N: Comparative Performance
 
 **Strengths of LNR**:
+
 1. ✅ Continuous variable → more granular risk stratification
 2. ✅ 4 prognostic groups vs 3 for AJCC N
 3. ✅ Superior in 9-29 ELN range (most common!)
 4. ✅ Independent prognostic factor in multivariate analysis
 
 **Limitations of LNR**:
+
 1. ❌ Requires adequate ELN (meaningless with <9 ELN)
 2. ❌ Dependent on total ELN (undersampling affects denominator)
 3. ❌ AUC still suboptimal (0.637, want >0.8)
-4. ❌ Not superior to AJCC N when ≥29 ELN (rare achievement)
+4. ❌ Not superior to AJCC N when >=29 ELN (rare achievement)
 
 **AJCC N Strengths**:
+
 1. ✅ Simple, standardized
-2. ✅ Performant with ≥29 ELN (though rare)
+2. ✅ Performant with >=29 ELN (though rare)
 3. ✅ Less affected by ELN variations in high-quality specimens
 
 **Recommendation**: **Use BOTH** - AJCC N for staging, LNR for refined prognosis when 9-29 ELN.
@@ -344,6 +364,7 @@ n = Number of examined LN (ELN)
 | **Key innovation** | LNR thresholds + ELN optimization | Technique (OP) improves yield |
 
 **Complementary Findings**:
+
 - Pu: **What** threshold is needed (12 LN)
 - Orange-peeling: **How** to achieve it (OP technique)
 
@@ -367,7 +388,7 @@ n = Number of examined LN (ELN)
 | Feature | Pu2021 (LN) | Ates2025 (LVSI) |
 |---------|-------------|-----------------|
 | **Tissue** | Pancreatic LN | Endometrial LVSI |
-| **Threshold** | 12 LN (N0 vs N+) | 7 blocks (plateau), ≥5 foci |
+| **Threshold** | 12 LN (N0 vs N+) | 7 blocks (plateau), >=5 foci |
 | **Distribution pattern** | Not analyzed | Single vs summed matters |
 | **Stage migration** | None in N0 | Yes (40% difference) |
 
@@ -393,8 +414,9 @@ n = Number of examined LN (ELN)
 ### For Pathologists
 
 **Grossing Protocol**:
+
 1. ✅ **Standard**: Minimum 12 LN required (CAP guideline)
-2. ✅ **Enhanced**: Aim for ≥15-20 LN when possible
+2. ✅ **Enhanced**: Aim for >=15-20 LN when possible
 3. ✅ **Quality Control**: Second pathologist if <12 LN initially found
 4. ✅ **Documentation**: Record total ELN, positive LN, calculate LNR
 
@@ -410,7 +432,7 @@ Lymph node ratio (LNR): [X.XXX]
 AJCC 8th Edition N Stage:
 [ ] N0 (0 positive lymph nodes)
 [ ] N1 (1-3 positive lymph nodes)
-[ ] N2 (≥4 positive lymph nodes)
+[ ] N2 (>=4 positive lymph nodes)
 
 LNR Classification:
 [ ] LNR0 (0.000) - Node negative
@@ -419,10 +441,10 @@ LNR Classification:
 [ ] LNR3 (>0.300) - High nodal burden
 
 Adequacy Assessment:
-[✓] Adequate (≥12 lymph nodes examined)
+[✓] Adequate (>=12 lymph nodes examined)
 [ ] Limited (<12 lymph nodes examined - potential understaging)
 
-Comment: Binomial probability analysis indicates ≥12 lymph nodes
+Comment: Binomial probability analysis indicates >=12 lymph nodes
 required for 95% confidence in N0 vs N+ distinction (Pu et al. 2021).
 LNR provides additional prognostic stratification when 9-29 nodes
 examined.
@@ -435,14 +457,16 @@ Reference: Pu N, et al. HPB. 2021;23:575-586.
 ### For Surgeons
 
 **Operative Technique**:
+
 1. ✅ En bloc resection of locoregional draining LN basins
-2. ✅ Aim for comprehensive lymphadenectomy (target ≥15-20 LN)
+2. ✅ Aim for comprehensive lymphadenectomy (target >=15-20 LN)
 3. ✅ Consider orange-peeling technique (3.37× better adequacy)
 4. ❌ **Avoid** extended retroperitoneal lymphadenectomy (no benefit, added risk)
 
 **Quality Metrics**:
-- Target: ≥80% of cases achieve ≥12 LN
-- Benchmark: Median ELN ≥18-20 (Johns Hopkins standard)
+
+- Target: >=80% of cases achieve >=12 LN
+- Benchmark: Median ELN >=18-20 (Johns Hopkins standard)
 - Monitor: LN yield by surgeon and procedure type
 
 ---
@@ -455,12 +479,13 @@ Reference: Pu N, et al. HPB. 2021;23:575-586.
 |-----|---------|-----|-------------|-------------------|
 | **<9** | Any | Any | **Unreliable** | Use simple N0 vs N+ only |
 | **9-12** | N0 | - | Possible understaging | Consider adjuvant if high-risk features |
-| **≥12** | N0 | 0.000 | **Reliable** | Median OS 38 mo |
-| **≥12** | N1 | 0.001-0.100 | **Reliable** | Median OS 23 mo, adjuvant recommended |
-| **≥12** | N2 | 0.101-0.300 | **Reliable** | Median OS 16 mo, aggressive adjuvant |
-| **≥12** | N2 | >0.300 | **High risk** | Median OS 13 mo, clinical trial consideration |
+| **>=12** | N0 | 0.000 | **Reliable** | Median OS 38 mo |
+| **>=12** | N1 | 0.001-0.100 | **Reliable** | Median OS 23 mo, adjuvant recommended |
+| **>=12** | N2 | 0.101-0.300 | **Reliable** | Median OS 16 mo, aggressive adjuvant |
+| **>=12** | N2 | >0.300 | **High risk** | Median OS 13 mo, clinical trial consideration |
 
 **Treatment Decisions**:
+
 - **N0 with <12 ELN**: Possible understaging → Consider adjuvant therapy
 - **N1 vs N2**: Different prognosis (HR 1.5) → Consider treatment intensity
 - **LNR3 (>0.3)**: Worst prognosis (HR 2.1) → Clinical trials, intensive surveillance
@@ -476,11 +501,13 @@ Reference: Pu N, et al. HPB. 2021;23:575-586.
 **Derivation of minELN = 12**:
 
 Given:
+
 - Target confidence: P = 0.95
 - Median LNR in node-positive: p = 0.227
 - Unknown: n (minELN)
 
 Solve for n:
+
 ```
 0.95 = 1 - (1-0.227)^n
 0.05 = (0.773)^n
@@ -497,12 +524,13 @@ Wait, this doesn't match!
 They calculated minELN for **detecting at least 1 positive node** in 76.3% of cases (observed N+ rate).
 
 Using p = probability any node is positive:
+
 ```
-Given 76.3% of patients have ≥1 positive node,
+Given 76.3% of patients have >=1 positive node,
 And median positive LN = 3,
 Estimated p ≈ 0.15-0.20 per node
 
-For 95% confidence to detect ≥1 positive:
+For 95% confidence to detect >=1 positive:
 0.95 = 1 - (1-p)^n
 If p = 0.2:
 n = log(0.05) / log(0.8)
@@ -520,16 +548,19 @@ n = 11.6 ≈ 12 ✓
 ### X-tile Analysis for LNR Cutpoints
 
 **Method**: Outcome-based optimization
+
 - Maximize survival discrimination
 - Find inflection points in survival curves
 - Validate with log-rank tests
 
 **Advantages**:
+
 - Data-driven (not arbitrary)
 - Maximizes prognostic accuracy
 - Large sample size (n=1,837) provides robust estimates
 
 **Limitation**:
+
 - May overfit to this specific cohort
 - Requires external validation
 
@@ -538,12 +569,14 @@ n = 11.6 ≈ 12 ✓
 ### Cox Proportional Hazards Regression
 
 **Model Assumptions** (verified):
+
 1. ✅ Proportional hazards (Schoenfeld residuals)
 2. ✅ Linear relationship for continuous variables
 3. ✅ No multicollinearity
 4. ✅ Independence of observations
 
 **Variables Included**:
+
 - Age, tumor grade, chemotherapy, margin status
 - Perineural invasion, lymphovascular invasion, tumor size
 - **AJCC N stage OR LNR** (separate models to avoid collinearity)
@@ -559,11 +592,13 @@ n = 11.6 ≈ 12 ✓
 **Add to pathsampling**:
 
 1. **Automatic LNR Calculation**:
+
 ```r
 LNR <- positive_LN / total_ELN
 ```
 
-2. **LNR Classification** (Pu2021 thresholds):
+1. **LNR Classification** (Pu2021 thresholds):
+
 ```r
 LNR_stage <- case_when(
   LNR == 0 ~ "LNR0 (node-negative)",
@@ -573,7 +608,8 @@ LNR_stage <- case_when(
 )
 ```
 
-3. **Output Table**:
+1. **Output Table**:
+
 ```
 LNR Classification
 -------------------
@@ -599,13 +635,14 @@ N_stage <- case_when(
 ```
 
 **Output Table**:
+
 ```
 AJCC N Stage Distribution
 --------------------------
 Stage | Criteria | Cases | % | Median ELN
 N0    | 0 pos LN | XXX   | XX% | XX
 N1    | 1-3 pos  | XXX   | XX% | XX
-N2    | ≥4 pos   | XXX   | XX% | XX
+N2    | >=4 pos   | XXX   | XX% | XX
 ```
 
 ---
@@ -619,11 +656,12 @@ ELN_group <- case_when(
   total_ELN < 9 ~ "<9 (use N0 vs N+ only)",
   total_ELN >= 9 & total_ELN < 12 ~ "9-11 (possible understaging)",
   total_ELN >= 12 & total_ELN < 29 ~ "12-28 (adequate, LNR superior)",
-  total_ELN >= 29 ~ "≥29 (excellent, AJCC N superior)"
+  total_ELN >= 29 ~ ">=29 (excellent, AJCC N superior)"
 )
 ```
 
 **Output Table**:
+
 ```
 Adequacy Assessment
 --------------------
@@ -631,7 +669,7 @@ ELN Group | Cases | % | N+ Cases | Adequacy Comment
 <9        | XXX   | X% | XXX      | Limited - use N0 vs N+ only
 9-11      | XXX   | X% | XXX      | Marginal - possible understaging
 12-28     | XXX   | X% | XXX      | Adequate - LNR recommended
-≥29       | XXX   | X% | XXX      | Excellent - AJCC N optimal
+>=29       | XXX   | X% | XXX      | Excellent - AJCC N optimal
 ```
 
 ---
@@ -642,6 +680,7 @@ ELN Group | Cases | % | N+ Cases | Adequacy Comment
 **Enhanced**: Allow user to specify expected LNR for different scenarios
 
 **Add Option**:
+
 ```yaml
 - name: expectedLNR
   title: Expected lymph node ratio
@@ -652,6 +691,7 @@ ELN Group | Cases | % | N+ Cases | Adequacy Comment
 ```
 
 **Calculation**:
+
 ```r
 # For different LNR scenarios
 minELN_any <- ceiling(log(1-0.95) / log(1-0.227))     # 12 LN
@@ -660,6 +700,7 @@ minELN_high <- ceiling(log(1-0.95) / log(1-0.3))      # 9 LN
 ```
 
 **Output Table**:
+
 ```
 Minimum ELN by Expected LNR (95% confidence)
 ---------------------------------------------
@@ -676,6 +717,7 @@ Expected LNR | Clinical Scenario | minELN Required
 **Add to comparative analyses**:
 
 1. **Cliff's Delta** (non-parametric effect size):
+
 ```r
 cliff_delta <- function(x, y) {
   n1 <- length(x)
@@ -696,7 +738,8 @@ cliff_delta <- function(x, y) {
 }
 ```
 
-2. **Hodges-Lehmann Estimator** (median difference):
+1. **Hodges-Lehmann Estimator** (median difference):
+
 ```r
 hodges_lehmann <- function(x, y) {
   diffs <- outer(x, y, "-")
@@ -704,19 +747,21 @@ hodges_lehmann <- function(x, y) {
 }
 ```
 
-3. **OR/RR/RD for Adequacy**:
+1. **OR/RR/RD for Adequacy**:
+
 ```r
-# For 2x2 table: Adequate (≥12 LN) vs Limited (<12 LN) × N+ vs N0
+# For 2x2 table: Adequate (>=12 LN) vs Limited (<12 LN) × N+ vs N0
 OR <- (a * d) / (b * c)
 RR <- (a / (a + b)) / (c / (c + d))
 RD <- (a / (a + b)) - (c / (c + d))
 ```
 
 **Output Table**:
+
 ```
 Effect Size Measures
 ---------------------
-Comparison: ≥12 LN vs <12 LN (in N+ patients)
+Comparison: >=12 LN vs <12 LN (in N+ patients)
 Odds Ratio (OR): 1.52 (95% CI: 1.18-1.96)
 Relative Risk (RR): 1.23 (23% relative increase in accurate staging)
 Risk Difference (RD): +8.2% (absolute improvement)
@@ -738,6 +783,7 @@ Hodges-Lehmann: +3 LN (median difference)
 ### Implementation Priorities
 
 **HIGH PRIORITY** (implement immediately):
+
 1. ✅ LN ratio calculation and classification (LNR0-3)
 2. ✅ AJCC N stage distribution table
 3. ✅ Adequacy assessment by ELN thresholds
@@ -762,12 +808,14 @@ Hodges-Lehmann: +3 LN (median difference)
 The Pu et al. (2021) study from Johns Hopkins **validates our binomial probability approach** for lymph node adequacy analysis and provides critical insights for LN-specific features.
 
 **Key Validations**:
+
 1. ✅ Binomial model is appropriate for LN analysis
 2. ✅ minELN = 12 for 95% confidence (N0 vs N+)
 3. ✅ LNR superior to AJCC N in 9-29 ELN range
 4. ✅ No stage migration with adequate sampling in N0 patients
 
 **Implementation Impact**:
+
 - Pathsampling is now backed by **FIRST published study** using binomial probability for LN adequacy
 - LN-specific features (LNR, N stage, adequacy tiers) have strong evidence base
 - Effect size measures align with published best practices
@@ -781,9 +829,10 @@ The Pu et al. (2021) study from Johns Hopkins **validates our binomial probabili
 **Pu N, Gao S, Beckman R, et al.**
 Defining a minimum number of examined lymph nodes improves the prognostic value of lymphadenectomy in pancreas ductal adenocarcinoma.
 *HPB.* 2021;23:575-586.
-https://doi.org/10.1016/j.hpb.2020.08.016
+<https://doi.org/10.1016/j.hpb.2020.08.016>
 
 **Key Contributions**:
+
 - FIRST dedicated study using binomial probability for LN adequacy in PDAC
 - n = 1,837 patients, prospectively collected
 - Validates minELN = 12 for 95% confidence

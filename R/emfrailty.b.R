@@ -263,7 +263,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             covariates <- self$options$covariates
             
-            # Build formula — composeTerms backtick-escapes user column names.
+            # Build formula - composeTerms backtick-escapes user column names.
             # `Surv` and `frailty` are globally allow-listed in jmvcore.
             if (is.null(covariates) || length(covariates) == 0) {
                 formula <- "Surv(time, status) ~ frailty(frailty_id)"
@@ -350,7 +350,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             covariates <- self$options$covariates
             
-            # Fit standard Cox model without frailty — composeTerms backtick-
+            # Fit standard Cox model without frailty - composeTerms backtick-
             # escapes user column names. `Surv` is globally allow-listed.
             if (is.null(covariates) || length(covariates) == 0) {
                 cox_formula <- "Surv(time, status) ~ 1"
@@ -362,7 +362,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             results <- list()
             
             tryCatch({
-                # Standard Cox model — asFormula validates against allow-list.
+                # Standard Cox model - asFormula validates against allow-list.
                 cox_model <- survival::coxph(jmvcore::asFormula(cox_formula), data = data)
                 
                 results[["Standard Cox"]] <- list(
@@ -374,7 +374,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     selected = FALSE
                 )
                 
-                # EM Frailty model (current) — frailty is globally allow-listed.
+                # EM Frailty model (current) - frailty is globally allow-listed.
                 frailty_formula <- paste(cox_formula, "+ frailty(frailty_id)")
                 frailty_model <- survival::coxph(jmvcore::asFormula(frailty_formula), data = data)
                 

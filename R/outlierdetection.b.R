@@ -62,7 +62,7 @@
 #' - **False Positives:** Conservative thresholds reduce over-detection
 #'
 #' @section References:
-#' - Lüdecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021). 
+#' - Ludecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021). 
 #'   performance: An R Package for Assessment, Comparison and Testing of Statistical Models. 
 #'   Journal of Open Source Software, 6(60), 3139. https://doi.org/10.21105/joss.03139
 #' - Rousseeuw, P. J., & Hubert, M. (2018). Anomaly detection by robust statistics. 
@@ -192,7 +192,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # a /prepare-translation pass.
             # TODO (forward-looking, perf): no `private$.checkpoint()` calls.
             # `performance::check_outliers` with composite scoring across
-            # ≥4 algorithms (Z-scores, IQR, Mahalanobis, MCD, LOF, OPTICS)
+            # >=4 algorithms (Z-scores, IQR, Mahalanobis, MCD, LOF, OPTICS)
             # can take many seconds on n > 10k. Add checkpoints between
             # each method branch in `.runUnivariateOutliers` and
             # `.runMultivariateOutliers`.
@@ -428,11 +428,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 return()
             }
 
-            # TODO (correctness, ⚠ behavior risk): `as.numeric()` on a factor returns
+            # TODO (correctness, ? behavior risk): `as.numeric()` on a factor returns
             # level indices, not the jamovi values-attribute coding. `vars` is permitted:numeric
             # in .a.yaml but if a user accidentally selects a factor that gets coerced, all
             # downstream outlier-detection statistics would be wrong by an unpredictable offset.
-            # Consider guarding with `is.factor(...)` → skip or reject, or swap to
+            # Consider guarding with `is.factor(...)` -> skip or reject, or swap to
             # `jmvcore::toNumeric()`. Needs manual review before swapping (could shift results).
             # Convert to numeric with safe variable access
             for (var in selected_vars) {
@@ -459,7 +459,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 <ul>
                 <li>Try a different detection method (Robust Z-Score is most reliable)</li>
                 <li>Check for infinite or extremely large values</li>
-                <li>Ensure sufficient sample size (n ≥ 30 recommended)</li>
+                <li>Ensure sufficient sample size (n \u{2265} 30 recommended)</li>
                 <li>For multivariate methods, try with fewer variables</li>
                 </ul>
                 </div>")
@@ -1253,7 +1253,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 interpretation_html <- paste0(interpretation_html,
                     "<p><strong>Composite methods</strong> combine multiple algorithms to provide robust outlier detection with reduced false positive rates.</p>",
                     "<p><strong>Advantages:</strong> Robust across different data patterns, comprehensive coverage</p>",
-                    "<p><strong>Threshold:</strong> ", self$options$composite_threshold, " means outliers detected by ≥ ", round(self$options$composite_threshold * 100), "% of methods</p>"
+                    "<p><strong>Threshold:</strong> ", self$options$composite_threshold, " means outliers detected by \u{2265} ", round(self$options$composite_threshold * 100), "% of methods</p>"
                 )
             }
             
@@ -1275,7 +1275,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 "</ul>",
                 
                 "<p style='font-size: 12px; color: #1976d2; margin-top: 15px;'>",
-                "<em> Citation: Lüdecke et al. (2021). performance: An R package for assessment, comparison and testing of statistical models. Journal of Open Source Software, 6(60), 3139.</em>",
+                "<em> Citation: L\u{FC}decke et al. (2021). performance: An R package for assessment, comparison and testing of statistical models. Journal of Open Source Software, 6(60), 3139.</em>",
                 "</p></div>"
             )
             
@@ -1322,7 +1322,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # Check sample size
             if (nrow(dataset) < 30) {
                 validation_results$warnings <- c(validation_results$warnings,
-                    paste("Small sample size (n =", nrow(dataset), "). Results may be unreliable. Recommend n ≥ 30."))
+                    paste("Small sample size (n =", nrow(dataset), "). Results may be unreliable. Recommend n \u{2265} 30."))
             }
             
             # Check number of variables

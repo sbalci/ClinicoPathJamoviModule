@@ -5,7 +5,6 @@
 library(testthat)
 
 test_that("jjdotplotstats integrates with all test datasets", {
-
   datasets <- list(
     list(name = "jjdotplotstats_test", dep = "tumor_reduction", group = "treatment"),
     list(name = "jjdotplotstats_twogroup", dep = "pain_score", group = "timepoint"),
@@ -28,12 +27,12 @@ test_that("jjdotplotstats integrates with all test datasets", {
     )
 
     expect_s3_class(result, "jjdotplotstatsResults",
-                   info = paste("Failed for dataset:", dataset_info$name))
+      info = paste("Failed for dataset:", dataset_info$name)
+    )
   }
 })
 
 test_that("jjdotplotstats data.frame vs tibble compatibility", {
-
   data(jjdotplotstats_test)
 
   # As tibble (default)
@@ -56,7 +55,6 @@ test_that("jjdotplotstats data.frame vs tibble compatibility", {
 })
 
 test_that("jjdotplotstats consistency across runs with same data", {
-
   data(jjdotplotstats_test)
 
   # Run twice with identical settings
@@ -80,7 +78,6 @@ test_that("jjdotplotstats consistency across runs with same data", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - tumor response", {
-
   data(jjdotplotstats_test)
 
   # Step 1: Initial exploratory analysis
@@ -124,7 +121,6 @@ test_that("jjdotplotstats complete clinical workflow - tumor response", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - pain assessment", {
-
   data(jjdotplotstats_twogroup)
 
   # Step 1: Pre-post comparison with parametric test
@@ -161,7 +157,6 @@ test_that("jjdotplotstats complete clinical workflow - pain assessment", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - dose-response", {
-
   data(jjdotplotstats_fourgroup)
 
   # Step 1: ANOVA for dose-response
@@ -198,7 +193,6 @@ test_that("jjdotplotstats complete clinical workflow - dose-response", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - biomarker analysis", {
-
   data(jjdotplotstats_skewed)
 
   # Step 1: Parametric approach (may be inappropriate)
@@ -235,7 +229,6 @@ test_that("jjdotplotstats complete clinical workflow - biomarker analysis", {
 })
 
 test_that("jjdotplotstats complete clinical workflow - reference value testing", {
-
   data(jjdotplotstats_reference)
 
   # Step 1: Basic comparison
@@ -268,7 +261,7 @@ test_that("jjdotplotstats complete clinical workflow - reference value testing",
     centralityplotting = TRUE,
     centralitytype = "parametric",
     resultssubtitle = TRUE,
-    mytitle = "BP Reduction vs Target (≥10 mmHg)",
+    mytitle = "BP Reduction vs Target (>=10 mmHg)",
     xtitle = "Blood Pressure Reduction (mmHg)",
     plotwidth = 800,
     plotheight = 600
@@ -277,7 +270,6 @@ test_that("jjdotplotstats complete clinical workflow - reference value testing",
 })
 
 test_that("jjdotplotstats statistical method comparison on same data", {
-
   data(jjdotplotstats_test)
 
   # Parametric
@@ -320,7 +312,6 @@ test_that("jjdotplotstats statistical method comparison on same data", {
 })
 
 test_that("jjdotplotstats effect size comparison on same data", {
-
   data(jjdotplotstats_test)
 
   # Cohen's d (biased)
@@ -367,7 +358,6 @@ test_that("jjdotplotstats effect size comparison on same data", {
 })
 
 test_that("jjdotplotstats centrality type comparison on same data", {
-
   data(jjdotplotstats_test)
 
   # Parametric (mean)
@@ -414,7 +404,6 @@ test_that("jjdotplotstats centrality type comparison on same data", {
 })
 
 test_that("jjdotplotstats handles different group count scenarios", {
-
   # Two groups
   data(jjdotplotstats_twogroup)
   result_two <- jjdotplotstats(
@@ -422,7 +411,7 @@ test_that("jjdotplotstats handles different group count scenarios", {
     dep = "pain_score",
     group = "timepoint",
     typestatistics = "parametric",
-    effsizetype = "biased"  # Cohen's d
+    effsizetype = "biased" # Cohen's d
   )
 
   # Three groups
@@ -432,7 +421,7 @@ test_that("jjdotplotstats handles different group count scenarios", {
     dep = "tumor_reduction",
     group = "treatment",
     typestatistics = "parametric",
-    effsizetype = "eta"  # Eta-squared
+    effsizetype = "eta" # Eta-squared
   )
 
   # Four groups
@@ -442,7 +431,7 @@ test_that("jjdotplotstats handles different group count scenarios", {
     dep = "efficacy_score",
     group = "dose",
     typestatistics = "parametric",
-    effsizetype = "omega"  # Omega-squared
+    effsizetype = "omega" # Omega-squared
   )
 
   # All should complete
@@ -452,7 +441,6 @@ test_that("jjdotplotstats handles different group count scenarios", {
 })
 
 test_that("jjdotplotstats grouped analysis across different datasets", {
-
   # Tumor data stratified by hospital
   data(jjdotplotstats_test)
   result1 <- jjdotplotstats(
@@ -487,7 +475,6 @@ test_that("jjdotplotstats grouped analysis across different datasets", {
 })
 
 test_that("jjdotplotstats handles factor vs character group variables", {
-
   data(jjdotplotstats_test)
 
   # As factor (default)
@@ -513,7 +500,6 @@ test_that("jjdotplotstats handles factor vs character group variables", {
 })
 
 test_that("jjdotplotstats publication-ready configurations work correctly", {
-
   data(jjdotplotstats_test)
 
   # Configuration 1: Standard parametric with effect sizes
@@ -577,7 +563,6 @@ test_that("jjdotplotstats publication-ready configurations work correctly", {
 })
 
 test_that("jjdotplotstats handles complete analysis pipeline", {
-
   data(jjdotplotstats_test)
 
   # Pipeline: Basic → Refined → Stratified → Publication

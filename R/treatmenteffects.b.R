@@ -105,7 +105,7 @@ treatmenteffectsClass <- R6::R6Class(
                 required_packages <- c(required_packages, "grf", "causalTree")
             }
             
-            # TODO (security): do NOT install.packages() at runtime — this is the exact
+            # TODO (security): do NOT install.packages() at runtime - this is the exact
             #   silent-dependency-install pattern the module eradicated in commit eb986459
             #   (CRAN-policy violation + security hazard on shared cloud jamovi). Declare these
             #   packages in DESCRIPTION Imports/Suggests and, when a required one is missing,
@@ -644,7 +644,7 @@ treatmenteffectsClass <- R6::R6Class(
             if (!is.null(private$.treatment_effects)) {
                 effects <- private$.treatment_effects
                 
-                # TODO (correctness): FABRICATED statistics presented as real results —
+                # TODO (correctness): FABRICATED statistics presented as real results - 
                 #   release-blocking for clinical use. std_error is hardcoded 0.1 (here + L655 +
                 #   the .plot_effects CI L867); CI/p-value below are derived from that fake SE
                 #   (no bootstrap is actually run despite the option name); .assessCovariateBalance

@@ -1,4 +1,3 @@
-
 # Verification Script for decisioncombine Function
 
 library(testthat)
@@ -12,8 +11,8 @@ library(forcats)
 Option <- R6::R6Class("Option",
     public = list(
         value = NULL,
-        initialize = function(value=NULL, default=NULL) {
-            self$value <- if(is.null(value)) default else value
+        initialize = function(value = NULL, default = NULL) {
+            self$value <- if (is.null(value)) default else value
         }
     )
 )
@@ -42,7 +41,7 @@ Table <- R6::R6Class("Table",
         columns = list(),
         visible = TRUE,
         rowCount = 0,
-        initialize = function(options, name, title, visible=TRUE, rows=0, columns=list(), swapRowsColumns=FALSE, clearWith=NULL, refs=NULL) {
+        initialize = function(options, name, title, visible = TRUE, rows = 0, columns = list(), swapRowsColumns = FALSE, clearWith = NULL, refs = NULL) {
             self$visible <- visible
             self$columns <- columns
         },
@@ -50,7 +49,7 @@ Table <- R6::R6Class("Table",
             self$rows[[as.character(rowKey)]] <- values
             self$rowCount <- length(self$rows)
         },
-        setRow = function(rowNo=NULL, rowKey=NULL, values) {
+        setRow = function(rowNo = NULL, rowKey = NULL, values) {
             if (!is.null(rowKey)) {
                 self$rows[[as.character(rowKey)]] <- values
             } else if (!is.null(rowNo)) {
@@ -58,7 +57,9 @@ Table <- R6::R6Class("Table",
             }
         },
         asDF = function() {
-            if (length(self$rows) == 0) return(data.frame())
+            if (length(self$rows) == 0) {
+                return(data.frame())
+            }
             do.call(rbind, lapply(self$rows, as.data.frame))
         }
     )
@@ -69,7 +70,7 @@ Image <- R6::R6Class("Image",
         state = NULL,
         visible = TRUE,
         renderFun = NULL,
-        initialize = function(options, name, title, visible=TRUE, width=NULL, height=NULL, renderFun=NULL, ...) {
+        initialize = function(options, name, title, visible = TRUE, width = NULL, height = NULL, renderFun = NULL, ...) {
             self$visible <- visible
             self$renderFun <- renderFun
         },
@@ -105,32 +106,31 @@ Results <- R6::R6Class("Results",
         forestPlot = NULL,
         decisionTreePlot = NULL,
         recommendationTable = NULL,
-        
         initialize = function() {
-            self$combinationTable <- Table$new(options=NULL, name="combinationTable", title="")
-            self$combinationTableCI <- Table$new(options=NULL, name="combinationTableCI", title="")
-            self$goldFreqTable <- Table$new(options=NULL, name="goldFreqTable", title="")
-            self$crossTabTable <- Table$new(options=NULL, name="crossTabTable", title="")
-            self$recommendationTable <- Table$new(options=NULL, name="recommendationTable", title="")
-            
+            self$combinationTable <- Table$new(options = NULL, name = "combinationTable", title = "")
+            self$combinationTableCI <- Table$new(options = NULL, name = "combinationTableCI", title = "")
+            self$goldFreqTable <- Table$new(options = NULL, name = "goldFreqTable", title = "")
+            self$crossTabTable <- Table$new(options = NULL, name = "crossTabTable", title = "")
+            self$recommendationTable <- Table$new(options = NULL, name = "recommendationTable", title = "")
+
             # Mock individual test groups
             self$individualTest1 <- list(
-                test1Contingency = Table$new(options=NULL, name="test1Contingency", title=""),
-                test1Stats = Table$new(options=NULL, name="test1Stats", title="")
+                test1Contingency = Table$new(options = NULL, name = "test1Contingency", title = ""),
+                test1Stats = Table$new(options = NULL, name = "test1Stats", title = "")
             )
             self$individualTest2 <- list(
-                test2Contingency = Table$new(options=NULL, name="test2Contingency", title=""),
-                test2Stats = Table$new(options=NULL, name="test2Stats", title="")
+                test2Contingency = Table$new(options = NULL, name = "test2Contingency", title = ""),
+                test2Stats = Table$new(options = NULL, name = "test2Stats", title = "")
             )
             self$individualTest3 <- list(
-                test3Contingency = Table$new(options=NULL, name="test3Contingency", title=""),
-                test3Stats = Table$new(options=NULL, name="test3Stats", title="")
+                test3Contingency = Table$new(options = NULL, name = "test3Contingency", title = ""),
+                test3Stats = Table$new(options = NULL, name = "test3Stats", title = "")
             )
-            
-            self$barPlot <- Image$new(options=NULL, name="barPlot", title="")
-            self$heatmapPlot <- Image$new(options=NULL, name="heatmapPlot", title="")
-            self$forestPlot <- Image$new(options=NULL, name="forestPlot", title="")
-            self$decisionTreePlot <- Image$new(options=NULL, name="decisionTreePlot", title="")
+
+            self$barPlot <- Image$new(options = NULL, name = "barPlot", title = "")
+            self$heatmapPlot <- Image$new(options = NULL, name = "heatmapPlot", title = "")
+            self$forestPlot <- Image$new(options = NULL, name = "forestPlot", title = "")
+            self$decisionTreePlot <- Image$new(options = NULL, name = "decisionTreePlot", title = "")
         },
         insert = function(index, item) {
             print(paste("Notice inserted:", item$content))
@@ -147,40 +147,72 @@ mock_epi_tests <- function(dat, conf.level = 0.95) {
 }
 
 summary.epi.tests <- function(object, ...) {
-    tp <- object$data[1,1]; fp <- object$data[1,2]
-    fn <- object$data[2,1]; tn <- object$data[2,2]
-    
+    tp <- object$data[1, 1]
+    fp <- object$data[1, 2]
+    fn <- object$data[2, 1]
+    tn <- object$data[2, 2]
+
     # Simple calculation for verification
     se <- tp / (tp + fn)
     sp <- tn / (tn + fp)
     ppv <- tp / (tp + fp)
     npv <- tn / (tn + fn)
-    
+
     # Construct detail data frame as expected by the code
     data.frame(
         statistic = c("se", "sp", "pv.pos", "pv.neg"),
         est = c(se, sp, ppv, npv),
-        lower = c(0,0,0,0),
-        upper = c(1,1,1,1)
+        lower = c(0, 0, 0, 0),
+        upper = c(1, 1, 1, 1)
     )
 }
 
 # Mock ggplot2
-mock_ggplot <- function(...) { structure(list(...), class = "ggplot") }
-mock_aes <- function(...) { list(...) }
-mock_geom_bar <- function(...) { list(...) }
-mock_geom_tile <- function(...) { list(...) }
-mock_geom_point <- function(...) { list(...) }
-mock_geom_errorbarh <- function(...) { list(...) }
-mock_geom_text <- function(...) { list(...) }
-mock_scale_fill_gradient2 <- function(...) { list(...) }
-mock_scale_y_continuous <- function(...) { list(...) }
-mock_scale_x_continuous <- function(...) { list(...) }
-mock_labs <- function(...) { list(...) }
-mock_theme_minimal <- function(...) { list(...) }
-mock_theme <- function(...) { list(...) }
-mock_element_text <- function(...) { list(...) }
-mock_facet_wrap <- function(...) { list(...) }
+mock_ggplot <- function(...) {
+    structure(list(...), class = "ggplot")
+}
+mock_aes <- function(...) {
+    list(...)
+}
+mock_geom_bar <- function(...) {
+    list(...)
+}
+mock_geom_tile <- function(...) {
+    list(...)
+}
+mock_geom_point <- function(...) {
+    list(...)
+}
+mock_geom_errorbarh <- function(...) {
+    list(...)
+}
+mock_geom_text <- function(...) {
+    list(...)
+}
+mock_scale_fill_gradient2 <- function(...) {
+    list(...)
+}
+mock_scale_y_continuous <- function(...) {
+    list(...)
+}
+mock_scale_x_continuous <- function(...) {
+    list(...)
+}
+mock_labs <- function(...) {
+    list(...)
+}
+mock_theme_minimal <- function(...) {
+    list(...)
+}
+mock_theme <- function(...) {
+    list(...)
+}
+mock_element_text <- function(...) {
+    list(...)
+}
+mock_facet_wrap <- function(...) {
+    list(...)
+}
 
 # Inject mocks
 assign("jmvcore", list(
@@ -204,21 +236,23 @@ assign("jmvcore", list(
 
 assign("epi.tests", mock_epi_tests, envir = .GlobalEnv)
 # Note: summary.epi.tests is S3, so it should be found automatically if defined in global env
-# But we might need to ensure epiR namespace doesn't override it if loaded. 
+# But we might need to ensure epiR namespace doesn't override it if loaded.
 # Since we don't load epiR, it should be fine. But the code imports epiR.
 # We will mock the package function call directly if possible or rely on S3 dispatch.
 # The code calls epiR::epi.tests. We can mock that.
-# But it calls as.data.frame(result$detail). 
+# But it calls as.data.frame(result$detail).
 # Our mock_epi_tests returns a list where we can put $detail directly.
 mock_epi_tests_direct <- function(dat, conf.level = 0.95) {
-    tp <- dat[1,1]; fp <- dat[1,2]
-    fn <- dat[2,1]; tn <- dat[2,2]
-    
-    se <- if((tp+fn)>0) tp/(tp+fn) else NA
-    sp <- if((tn+fp)>0) tn/(tn+fp) else NA
-    ppv <- if((tp+fp)>0) tp/(tp+fp) else NA
-    npv <- if((tn+fn)>0) tn/(tn+fn) else NA
-    
+    tp <- dat[1, 1]
+    fp <- dat[1, 2]
+    fn <- dat[2, 1]
+    tn <- dat[2, 2]
+
+    se <- if ((tp + fn) > 0) tp / (tp + fn) else NA
+    sp <- if ((tn + fp) > 0) tn / (tn + fp) else NA
+    ppv <- if ((tp + fp) > 0) tp / (tp + fp) else NA
+    npv <- if ((tn + fn) > 0) tn / (tn + fn) else NA
+
     detail <- data.frame(
         statistic = c("se", "sp", "pv.pos", "pv.neg"),
         est = c(se, sp, ppv, npv)
@@ -265,7 +299,7 @@ decisioncombineBase <- R6::R6Class("decisioncombineBase",
         options = NULL,
         results = NULL,
         data = NULL,
-        initialize = function(options, data=NULL) {
+        initialize = function(options, data = NULL) {
             self$options <- options
             self$results <- Results$new()
             self$data <- data
@@ -285,12 +319,12 @@ source("R/decisioncombine.b.R")
 # 2. Helper Functions -----------------------------------------------------
 
 create_options <- function(
-    gold="gold", goldPositive="Pos",
-    test1="test1", test1Positive="Pos",
-    test2=NULL, test2Positive=NULL,
-    test3=NULL, test3Positive=NULL,
-    showIndividual=FALSE, showFrequency=FALSE, showRecommendation=FALSE,
-    addPatternToData=FALSE
+  gold = "gold", goldPositive = "Pos",
+  test1 = "test1", test1Positive = "Pos",
+  test2 = NULL, test2Positive = NULL,
+  test3 = NULL, test3Positive = NULL,
+  showIndividual = FALSE, showFrequency = FALSE, showRecommendation = FALSE,
+  addPatternToData = FALSE
 ) {
     list(
         gold = gold, goldPositive = goldPositive,
@@ -310,27 +344,30 @@ create_options <- function(
     )
 }
 
-create_data_2tests <- function(n=100) {
+create_data_2tests <- function(n = 100) {
     set.seed(123)
-    gold <- sample(c("Pos", "Neg"), n, replace=TRUE)
+    gold <- sample(c("Pos", "Neg"), n, replace = TRUE)
     # Test 1 correlates with gold
-    test1 <- ifelse(gold=="Pos", 
-                   sample(c("Pos", "Neg"), n, replace=TRUE, prob=c(0.8, 0.2)),
-                   sample(c("Pos", "Neg"), n, replace=TRUE, prob=c(0.2, 0.8)))
+    test1 <- ifelse(gold == "Pos",
+        sample(c("Pos", "Neg"), n, replace = TRUE, prob = c(0.8, 0.2)),
+        sample(c("Pos", "Neg"), n, replace = TRUE, prob = c(0.2, 0.8))
+    )
     # Test 2 correlates with gold
-    test2 <- ifelse(gold=="Pos", 
-                   sample(c("Pos", "Neg"), n, replace=TRUE, prob=c(0.7, 0.3)),
-                   sample(c("Pos", "Neg"), n, replace=TRUE, prob=c(0.3, 0.7)))
-    
-    data.frame(gold=factor(gold), test1=factor(test1), test2=factor(test2))
+    test2 <- ifelse(gold == "Pos",
+        sample(c("Pos", "Neg"), n, replace = TRUE, prob = c(0.7, 0.3)),
+        sample(c("Pos", "Neg"), n, replace = TRUE, prob = c(0.3, 0.7))
+    )
+
+    data.frame(gold = factor(gold), test1 = factor(test1), test2 = factor(test2))
 }
 
-create_data_3tests <- function(n=100) {
+create_data_3tests <- function(n = 100) {
     d <- create_data_2tests(n)
     # Test 3
-    d$test3 <- ifelse(d$gold=="Pos", 
-                     sample(c("Pos", "Neg"), n, replace=TRUE, prob=c(0.9, 0.1)),
-                     sample(c("Pos", "Neg"), n, replace=TRUE, prob=c(0.1, 0.9)))
+    d$test3 <- ifelse(d$gold == "Pos",
+        sample(c("Pos", "Neg"), n, replace = TRUE, prob = c(0.9, 0.1)),
+        sample(c("Pos", "Neg"), n, replace = TRUE, prob = c(0.1, 0.9))
+    )
     d$test3 <- factor(d$test3)
     d
 }
@@ -339,34 +376,34 @@ create_data_3tests <- function(n=100) {
 
 test_that("2-Test Combination Analysis", {
     data <- create_data_2tests(200)
-    options <- create_options(test2="test2", test2Positive="Pos")
-    
-    analysis <- decisioncombineClass$new(options, data=data)
+    options <- create_options(test2 = "test2", test2Positive = "Pos")
+
+    analysis <- decisioncombineClass$new(options, data = data)
     analysis$run()
-    
+
     # Check Combination Table
     comb_table <- analysis$results$combinationTable$asDF()
-    
+
     # Should have 4 patterns (+/+, +/-, -/+, -/-) + 2 strategies (Parallel, Serial)
     # Total 6 rows
     expect_equal(nrow(comb_table), 6)
-    
+
     patterns <- comb_table$pattern
     expect_true(all(c("+/+", "+/-", "-/+", "-/-") %in% patterns))
-    expect_true("Parallel (≥1 pos)" %in% patterns)
+    expect_true("Parallel (>=1 pos)" %in% patterns)
     expect_true("Serial (all pos)" %in% patterns)
-    
+
     # Verify Parallel Strategy Logic
     # Parallel is Positive if T1=Pos OR T2=Pos
     # Manual check
     t1_pos <- data$test1 == "Pos"
     t2_pos <- data$test2 == "Pos"
     parallel_pos <- t1_pos | t2_pos
-    
+
     tp_manual <- sum(parallel_pos & data$gold == "Pos")
     fp_manual <- sum(parallel_pos & data$gold == "Neg")
-    
-    parallel_row <- comb_table[comb_table$pattern == "Parallel (≥1 pos)", ]
+
+    parallel_row <- comb_table[comb_table$pattern == "Parallel (>=1 pos)", ]
     expect_equal(parallel_row$tp, tp_manual)
     expect_equal(parallel_row$fp, fp_manual)
 })
@@ -374,43 +411,43 @@ test_that("2-Test Combination Analysis", {
 test_that("3-Test Combination Analysis", {
     data <- create_data_3tests(200)
     options <- create_options(
-        test2="test2", test2Positive="Pos",
-        test3="test3", test3Positive="Pos"
+        test2 = "test2", test2Positive = "Pos",
+        test3 = "test3", test3Positive = "Pos"
     )
-    
-    analysis <- decisioncombineClass$new(options, data=data)
+
+    analysis <- decisioncombineClass$new(options, data = data)
     analysis$run()
-    
+
     comb_table <- analysis$results$combinationTable$asDF()
-    
+
     # Should have 8 patterns + 3 strategies (Parallel, Serial, Majority)
     # Total 11 rows
     expect_equal(nrow(comb_table), 11)
-    
+
     patterns <- comb_table$pattern
     expect_true("+/+/+" %in% patterns)
     expect_true("-/-/-" %in% patterns)
-    expect_true("Majority (≥2/3 pos)" %in% patterns)
-    
+    expect_true("Majority (>=2/3 pos)" %in% patterns)
+
     # Verify Majority Rule Logic
     t1_pos <- data$test1 == "Pos"
     t2_pos <- data$test2 == "Pos"
     t3_pos <- data$test3 == "Pos"
     majority_pos <- (as.integer(t1_pos) + as.integer(t2_pos) + as.integer(t3_pos)) >= 2
-    
+
     tp_manual <- sum(majority_pos & data$gold == "Pos")
-    
-    majority_row <- comb_table[comb_table$pattern == "Majority (≥2/3 pos)", ]
+
+    majority_row <- comb_table[comb_table$pattern == "Majority (>=2/3 pos)", ]
     expect_equal(majority_row$tp, tp_manual)
 })
 
 test_that("Individual Test Analysis", {
     data <- create_data_2tests(100)
-    options <- create_options(test2="test2", test2Positive="Pos", showIndividual=TRUE)
-    
-    analysis <- decisioncombineClass$new(options, data=data)
+    options <- create_options(test2 = "test2", test2Positive = "Pos", showIndividual = TRUE)
+
+    analysis <- decisioncombineClass$new(options, data = data)
     analysis$run()
-    
+
     # Check Test 1 Stats
     t1_stats <- analysis$results$individualTest1$test1Stats$asDF()
     expect_true(nrow(t1_stats) > 0)
@@ -420,7 +457,7 @@ test_that("Individual Test Analysis", {
 test_that("Input Validation", {
     # Missing Data
     options <- create_options()
-    analysis <- decisioncombineClass$new(options, data=NULL)
+    analysis <- decisioncombineClass$new(options, data = NULL)
     analysis$run()
     # Should insert error notice
     # We can't easily check notice content in this mock setup without capturing stdout or modifying mock
@@ -430,11 +467,11 @@ test_that("Input Validation", {
 
 test_that("Recommendation Feature", {
     data <- create_data_2tests(100)
-    options <- create_options(test2="test2", test2Positive="Pos", showRecommendation=TRUE)
-    
-    analysis <- decisioncombineClass$new(options, data=data)
+    options <- create_options(test2 = "test2", test2Positive = "Pos", showRecommendation = TRUE)
+
+    analysis <- decisioncombineClass$new(options, data = data)
     analysis$run()
-    
+
     rec_table <- analysis$results$recommendationTable$asDF()
     expect_equal(nrow(rec_table), 1)
     expect_true(!is.na(rec_table$youden))

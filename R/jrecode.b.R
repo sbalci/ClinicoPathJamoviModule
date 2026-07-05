@@ -12,7 +12,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 err <- attr(result, "condition")
                 msg <- if (!is.null(err)) conditionMessage(err) else as.character(result)
                 # TODO (forward-looking): `opt$value <- NULL` mutates jamovi option at
-                # runtime — same fragile API noted in jjbarstats/jjcoefstats/jjhistostats/
+                # runtime - same fragile API noted in jjbarstats/jjcoefstats/jjhistostats/
                 # jjpubr/jjridges/jjscatterstats `.applyClinicalPreset` patterns. Here
                 # the mutation is defensive cleanup (clearing stale dep when dataset
                 # changes), which is a more legitimate use than preset-override mutations.
@@ -39,7 +39,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         .escapeQuotes = function(x) {
             # Escape backslashes first (must come before single-quote escape),
-            # then single quotes — produces valid R single-quoted string literals
+            # then single quotes - produces valid R single-quoted string literals
             # for user values that may contain `\` (e.g., Windows paths like C:\Users)
             x <- gsub("\\", "\\\\", x, fixed = TRUE)
             gsub("'", "\\\\'", x, fixed = TRUE)
@@ -442,7 +442,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Validate variable name
             if (!grepl("^[a-zA-Z][a-zA-Z0-9_]*$", new_var_name)) {
-                # htmlEscape new_var_name — regex rejection happens AFTER interpolation,
+                # htmlEscape new_var_name - regex rejection happens AFTER interpolation,
                 # so the invalid name (which may contain HTML metachars) reaches HTML raw
                 notice <- paste0(
                     "<span style='color: red;'> Invalid variable name: '", htmltools::htmlEscape(new_var_name),

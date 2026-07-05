@@ -30,13 +30,13 @@ waterfall_test <- tibble(
   # Negative = tumor shrinkage (good), Positive = tumor growth (poor)
   # Range from -100% (complete response) to +150% (progressive disease)
   best_response = c(
-    # Complete Response (CR): ≤ -100%
+    # Complete Response (CR): <= -100%
     -100, -100,
     # Partial Response (PR): -99% to -30%
     -85, -75, -65, -55, -45, -35, -32,
     # Stable Disease (SD): -29% to +19%
     -25, -20, -15, -10, -5, 0, 5, 10, 15, 18,
-    # Progressive Disease (PD): ≥ +20%
+    # Progressive Disease (PD): >= +20%
     22, 28, 35, 45, 55, 70, 85, 100, 120, 150, 180
   ),
 
@@ -63,8 +63,8 @@ waterfall_test <- tibble(
 waterfall_test <- waterfall_test %>%
   mutate(
     best_response = case_when(
-      treatment == "Combination" ~ best_response - 15,  # Better response
-      treatment == "Control" ~ best_response + 10,      # Worse response
+      treatment == "Combination" ~ best_response - 15, # Better response
+      treatment == "Control" ~ best_response + 10, # Worse response
       TRUE ~ best_response
     ),
     # Cap at realistic values
@@ -77,7 +77,7 @@ waterfall_test <- waterfall_test %>%
 # Time-series data for spider plot testing
 
 n_patients_spider <- 20
-timepoints <- c(0, 2, 4, 6, 8, 12)  # Baseline and follow-up months
+timepoints <- c(0, 2, 4, 6, 8, 12) # Baseline and follow-up months
 
 # Generate baseline data
 spider_baseline <- tibble(
@@ -94,10 +94,10 @@ waterfall_spider_test <- spider_baseline %>%
   mutate(
     # Calculate response at each timepoint
     pct_change = case_when(
-      time == 0 ~ 0,  # Baseline = 0% change
+      time == 0 ~ 0, # Baseline = 0% change
       TRUE ~ response_trajectory +
-        rnorm(n(), mean = time * 2, sd = 5) +  # Add time effect + noise
-        ifelse(treatment == "Experimental", -10, 5)  # Treatment effect
+        rnorm(n(), mean = time * 2, sd = 5) + # Add time effect + noise
+        ifelse(treatment == "Experimental", -10, 5) # Treatment effect
     ),
     # Add realistic variability and limits
     pct_change = pmax(-100, pmin(200, pct_change)),
@@ -121,7 +121,7 @@ n_patients_raw <- 25
 
 waterfall_raw_test <- tibble(
   patientID = rep(paste0("PT", sprintf("%03d", 1:n_patients_raw)), each = 5),
-  time = rep(c(0, 1, 2, 4, 6), times = n_patients_raw),  # months
+  time = rep(c(0, 1, 2, 4, 6), times = n_patients_raw), # months
   treatment = rep(
     sample(c("Drug A", "Drug B", "Placebo"), n_patients_raw, replace = TRUE),
     each = 5
@@ -134,14 +134,14 @@ waterfall_raw_test <- tibble(
 
     # Generate response pattern
     response_rate = case_when(
-      treatment == "Drug A" ~ -0.08,  # 8% shrinkage per month
-      treatment == "Drug B" ~ -0.05,  # 5% shrinkage per month
-      TRUE ~ 0.02  # 2% growth per month
+      treatment == "Drug A" ~ -0.08, # 8% shrinkage per month
+      treatment == "Drug B" ~ -0.05, # 5% shrinkage per month
+      TRUE ~ 0.02 # 2% growth per month
     ),
 
     # Calculate tumor size at each timepoint
     tumor_size = baseline_size * exp(response_rate * time + rnorm(n(), 0, 0.1)),
-    tumor_size = pmax(0, tumor_size),  # Cannot be negative
+    tumor_size = pmax(0, tumor_size), # Cannot be negative
 
     # Round to realistic values
     tumor_size = round(tumor_size, 1)
@@ -182,18 +182,18 @@ waterfall_missing <- waterfall_test %>%
 waterfall_extreme <- tibble(
   patientID = paste0("PT", sprintf("%03d", 1:15)),
   best_response = c(
-    -100, -100, -100,  # Multiple complete responses
-    -95, -85, -75,     # Strong partial responses
-    -30, -20, -10, 0,  # Borderline PR/SD
-    20, 25, 30,        # Borderline SD/PD
-    200, 350           # Extreme progressive disease
+    -100, -100, -100, # Multiple complete responses
+    -95, -85, -75, # Strong partial responses
+    -30, -20, -10, 0, # Borderline PR/SD
+    20, 25, 30, # Borderline SD/PD
+    200, 350 # Extreme progressive disease
   ),
   treatment = rep(c("A", "B", "C"), length.out = 15)
 )
 
 # Dataset with baseline issues (for error testing)
 waterfall_no_baseline <- waterfall_spider_test %>%
-  filter(time != 0) %>%  # Remove all baseline measurements
+  filter(time != 0) %>% # Remove all baseline measurements
   slice(1:20)
 
 # ═══════════════════════════════════════════════════════════
@@ -221,13 +221,14 @@ waterfall_phase2 <- tibble(
   # Study arms
   cohort = sample(
     c("Dose Level 1", "Dose Level 2", "Dose Level 3"),
-    n_phase2, replace = TRUE
+    n_phase2,
+    replace = TRUE
   ),
 
   # Baseline characteristics
   age = round(rnorm(n_phase2, mean = 62, sd = 10)),
   ecog_ps = sample(0:2, n_phase2, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
-  pdl1_status = sample(c("<1%", "1-49%", "≥50%"), n_phase2, replace = TRUE),
+  pdl1_status = sample(c("<1%", "1-49%", ">=50%"), n_phase2, replace = TRUE),
 
   # Time on treatment (months)
   time_on_treatment = pmax(1, rnorm(n_phase2, mean = 6, sd = 3))
@@ -236,7 +237,7 @@ waterfall_phase2 <- tibble(
     best_response = pmax(-100, pmin(200, best_response)),
     # Better response with higher PD-L1
     best_response = case_when(
-      pdl1_status == "≥50%" ~ best_response - 20,
+      pdl1_status == ">=50%" ~ best_response - 20,
       pdl1_status == "1-49%" ~ best_response - 10,
       TRUE ~ best_response
     ),
@@ -267,22 +268,28 @@ for (dataset_name in names(datasets)) {
   # 1. RDA format (native R)
   save_name <- dataset_name
   assign(save_name, data)
-  save(list = save_name,
-       file = here::here("data", paste0(dataset_name, ".rda")),
-       compress = "xz")
+  save(
+    list = save_name,
+    file = here::here("data", paste0(dataset_name, ".rda")),
+    compress = "xz"
+  )
 
   # 2. CSV format
   write.csv(data,
-            file = here::here("data", paste0(dataset_name, ".csv")),
-            row.names = FALSE)
+    file = here::here("data", paste0(dataset_name, ".csv")),
+    row.names = FALSE
+  )
 
   # 3. Excel format
   writexl::write_xlsx(data,
-                      path = here::here("data", paste0(dataset_name, ".xlsx")))
+    path = here::here("data", paste0(dataset_name, ".xlsx"))
+  )
 
   # 4. Jamovi format (OMV)
-  jmvReadWrite::write_omv(dtaFrm = data,
-                          fleOut = here::here("data", paste0(dataset_name, ".omv")))
+  jmvReadWrite::write_omv(
+    dtaFrm = data,
+    fleOut = here::here("data", paste0(dataset_name, ".omv"))
+  )
 }
 
 # ═══════════════════════════════════════════════════════════
@@ -374,10 +381,10 @@ pct_change      : Percentage change at each timepoint
 response_category: RECIST category (CR/PR/SD/PD)
 
 RECIST v1.1 THRESHOLDS:
-  CR (Complete Response)    : ≤ -100%
+  CR (Complete Response)    : <= -100%
   PR (Partial Response)     : -99% to -30%
   SD (Stable Disease)       : -29% to +19%
-  PD (Progressive Disease)  : ≥ +20%
+  PD (Progressive Disease)  : >= +20%
 
 ─────────────────────────────────────────────────────────────
 USAGE EXAMPLES:

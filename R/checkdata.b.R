@@ -311,17 +311,17 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             detection_count <- rowSums(detection_matrix)
 
             # IMPROVED: For small samples (3-9), show informative-only results (single-method OK)
-            # For larger samples, require consensus (≥2 methods)
+            # For larger samples, require consensus (>=2 methods)
             if (is_small_sample) {
                 # Informative-only: show any point flagged by at least 1 method
                 consensus_outliers <- which(detection_count >= 1)
                 is_informative_only <- TRUE
                 consensus_note <- "INFORMATIVE ONLY (n<10): Single-method flags shown, not statistically robust"
             } else {
-                # Standard consensus: require ≥2 methods
+                # Standard consensus: require >=2 methods
                 consensus_outliers <- which(detection_count >= 2)
                 is_informative_only <- FALSE
-                consensus_note <- "Consensus outliers (≥2 methods)"
+                consensus_note <- "Consensus outliers (>=2 methods)"
             }
 
             # Store transformed z-scores for severity assessment
@@ -395,12 +395,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         if (p_runs < 0.05) {
                             if (n_runs < expected_runs) {
                                 patterns$clustering <- sprintf(
-                                    "HEURISTIC: Missing data appears clustered (runs test p=%.3f, %d vs %.1f expected) — possible systematic cause",
+                                    "HEURISTIC: Missing data appears clustered (runs test p=%.3f, %d vs %.1f expected) possible systematic cause",
                                     p_runs, n_runs, expected_runs
                                 )
                             } else {
                                 patterns$alternating <- sprintf(
-                                    "HEURISTIC: Missing data alternates (runs test p=%.3f, %d vs %.1f expected) — check data collection pattern",
+                                    "HEURISTIC: Missing data alternates (runs test p=%.3f, %d vs %.1f expected) check data collection pattern",
                                     p_runs, n_runs, expected_runs
                                 )
                             }
@@ -415,7 +415,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 } else {
                     patterns$insufficient <- sprintf(
-                        "HEURISTIC: Insufficient data (n_miss=%d, n_complete=%d) for runs test (need ≥5 each)",
+                        "HEURISTIC: Insufficient data (n_miss=%d, n_complete=%d) for runs test (need >=5 each)",
                         n_missing, n_complete
                     )
                 }
@@ -445,7 +445,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         )
                     } else if (dropout_prop > 0.6) {
                         patterns$possible_dropout <- sprintf(
-                            "HEURISTIC: Possible dropout pattern (%.1f%% of missing in last quarter, 95%% CI: %.1f%%-%.1f%%) — CI overlaps 50%%",
+                            "HEURISTIC: Possible dropout pattern (%.1f%% of missing in last quarter, 95%% CI: %.1f%%-%.1f%%) - CI overlaps 50%%",
                             dropout_prop * 100, ci_low * 100, ci_high * 100
                         )
                     }
@@ -455,12 +455,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Pattern 3: Missing data percentage thresholds with context
             if (missing_pct > 50) {
                 patterns$severe <- sprintf(
-                    "Severe missing data (%.1f%%) — major quality concern; analysis may be biased",
+                    "Severe missing data (%.1f%%) - major quality concern; analysis may be biased",
                     missing_pct
                 )
             } else if (missing_pct > 20) {
                 patterns$substantial <- sprintf(
-                    "Substantial missing data (%.1f%%) — investigate MCAR/MAR/MNAR mechanisms",
+                    "Substantial missing data (%.1f%%) - investigate MCAR/MAR/MNAR mechanisms",
                     missing_pct
                 )
             }
@@ -575,10 +575,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     clinical_issues$negative_age <- "PLAUSIBILITY CHECK: Negative age values detected (biologically impossible)"
                 }
                 if (any(clean_var > 120)) {
-                    clinical_issues$extreme_age <- "PLAUSIBILITY CHECK: Age >120 years detected (threshold: 120) — verify data accuracy"
+                    clinical_issues$extreme_age <- "PLAUSIBILITY CHECK: Age >120 years detected (threshold: 120) - verify data accuracy"
                 }
                 if (any(clean_var < 1 & clean_var > 0)) {
-                    clinical_issues$fractional_age <- "PLAUSIBILITY CHECK: Fractional age <1 detected — verify units (years vs months)"
+                    clinical_issues$fractional_age <- "PLAUSIBILITY CHECK: Fractional age <1 detected - verify units (years vs months)"
                 }
             }
 
@@ -600,31 +600,31 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (weight_units == "kg") {
                     if (any(clean_var < 2)) {
                         clinical_issues$low_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight <2 kg detected (assumed %s) — verify units or data entry",
+                            "PLAUSIBILITY CHECK: Weight <2 kg detected (assumed %s) - verify units or data entry",
                             weight_units
                         )
                     }
                     if (any(clean_var > 200)) {
                         clinical_issues$high_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight >200 kg detected (assumed %s, threshold: 200) — verify accuracy",
+                            "PLAUSIBILITY CHECK: Weight >200 kg detected (assumed %s, threshold: 200) - verify accuracy",
                             weight_units
                         )
                     }
                 } else if (weight_units == "lbs") {
                     if (any(clean_var < 5)) {
                         clinical_issues$low_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight <5 lbs detected (assumed %s) — verify units or data entry",
+                            "PLAUSIBILITY CHECK: Weight <5 lbs detected (assumed %s) - verify units or data entry",
                             weight_units
                         )
                     }
                     if (any(clean_var > 450)) {
                         clinical_issues$high_weight <- sprintf(
-                            "PLAUSIBILITY CHECK: Weight >450 lbs detected (assumed %s, threshold: 450) — verify accuracy",
+                            "PLAUSIBILITY CHECK: Weight >450 lbs detected (assumed %s, threshold: 450) - verify accuracy",
                             weight_units
                         )
                     }
                 } else {
-                    clinical_issues$weight_units <- "PLAUSIBILITY CHECK: Could not auto-detect weight units — specify manually or verify range"
+                    clinical_issues$weight_units <- "PLAUSIBILITY CHECK: Could not auto-detect weight units - specify manually or verify range"
                 }
             }
 
@@ -648,26 +648,26 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (height_units == "cm") {
                     if (any(clean_var < 50) || any(clean_var > 250)) {
                         clinical_issues$implausible_height <- sprintf(
-                            "PLAUSIBILITY CHECK: Height outside 50-250 cm range (assumed %s) — verify units",
+                            "PLAUSIBILITY CHECK: Height outside 50-250 cm range (assumed %s) - verify units",
                             height_units
                         )
                     }
                 } else if (height_units == "meters") {
                     if (any(clean_var < 0.5) || any(clean_var > 2.5)) {
                         clinical_issues$implausible_height <- sprintf(
-                            "PLAUSIBILITY CHECK: Height outside 0.5-2.5 m range (assumed %s) — verify units",
+                            "PLAUSIBILITY CHECK: Height outside 0.5-2.5 m range (assumed %s) - verify units",
                             height_units
                         )
                     }
                 } else if (height_units == "feet") {
                     if (any(clean_var < 1.5) || any(clean_var > 8)) {
                         clinical_issues$implausible_height <- sprintf(
-                            "PLAUSIBILITY CHECK: Height outside 1.5-8 ft range (assumed %s) — verify units",
+                            "PLAUSIBILITY CHECK: Height outside 1.5-8 ft range (assumed %s) - verify units",
                             height_units
                         )
                     }
                 } else {
-                    clinical_issues$height_units <- "PLAUSIBILITY CHECK: Could not auto-detect height units — specify manually"
+                    clinical_issues$height_units <- "PLAUSIBILITY CHECK: Could not auto-detect height units - specify manually"
                 }
             }
 
@@ -678,27 +678,27 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (any(clean_var > 25)) {
                     # Likely g/L
                     if (any(clean_var < 30) || any(clean_var > 200)) {
-                        clinical_issues$hemoglobin_range <- "PLAUSIBILITY CHECK: Hemoglobin outside 30-200 g/L range (assumed SI units, threshold: 30-200) — verify units"
+                        clinical_issues$hemoglobin_range <- "PLAUSIBILITY CHECK: Hemoglobin outside 30-200 g/L range (assumed SI units, threshold: 30-200) - verify units"
                     }
                 } else {
                     # Likely g/dL
                     if (any(clean_var < 3) || any(clean_var > 20)) {
-                        clinical_issues$hemoglobin_range <- "PLAUSIBILITY CHECK: Hemoglobin outside 3-20 g/dL range (assumed traditional units, threshold: 3-20) — verify accuracy"
+                        clinical_issues$hemoglobin_range <- "PLAUSIBILITY CHECK: Hemoglobin outside 3-20 g/dL range (assumed traditional units, threshold: 3-20) - verify accuracy"
                     }
                 }
             }
 
             if (grepl("creatinine|cr", var_name, ignore.case = TRUE)) {
-                # mg/dL (US) typically 0.3-10, µmol/L (SI) typically 30-1000
+                # mg/dL (US) typically 0.3-10, umol/L (SI) typically 30-1000
                 if (any(clean_var > 20)) {
-                    # Likely µmol/L
+                    # Likely umol/L
                     if (any(clean_var < 30) || any(clean_var > 1000)) {
-                        clinical_issues$creatinine_range <- "PLAUSIBILITY CHECK: Creatinine outside 30-1000 µmol/L range (assumed SI units, threshold: 30-1000) — verify units"
+                        clinical_issues$creatinine_range <- "PLAUSIBILITY CHECK: Creatinine outside 30-1000 \u{B5}mol/L range (assumed SI units, threshold: 30-1000) - verify units"
                     }
                 } else {
                     # Likely mg/dL
                     if (any(clean_var < 0.3) || any(clean_var > 10)) {
-                        clinical_issues$creatinine_range <- "PLAUSIBILITY CHECK: Creatinine outside 0.3-10 mg/dL range (assumed traditional units, threshold: 0.3-10) — verify accuracy"
+                        clinical_issues$creatinine_range <- "PLAUSIBILITY CHECK: Creatinine outside 0.3-10 mg/dL range (assumed traditional units, threshold: 0.3-10) - verify accuracy"
                     }
                 }
             }
@@ -775,7 +775,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$distribution$addRow(rowKey="coeff_var", values=list(
                         metric="Coefficient of Variation (%)",
                         value=round(cv, 2),
-                        interpretation=paste(cv_interpretation, "— appropriate for ratio scale data")
+                        interpretation=paste(cv_interpretation, " - appropriate for ratio scale data")
                     ))
                 } else {
                     self$results$distribution$addRow(rowKey="coeff_var", values=list(
@@ -810,7 +810,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$distribution$addRow(rowKey="iqr", values=list(
                     metric="Interquartile Range (IQR)",
                     value=round(iqr, 4),
-                    interpretation=sprintf("Q1: %.3f, Q3: %.3f — robust spread metric", q1, q3)
+                    interpretation=sprintf("Q1: %.3f, Q3: %.3f - robust spread metric", q1, q3)
                 ))
 
             } else if (is_categorical && n_complete >= 1) {
@@ -862,7 +862,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$distribution$addRow(rowKey="rare_categories", values=list(
                         metric="Rare Categories",
                         value=rare_categories,
-                        interpretation=sprintf("%d categories with <%.1f%% frequency — may violate chi-squared assumptions (expected cell count ≥5)",
+                        interpretation=sprintf("%d categories with <%.1f%% frequency - may violate chi-squared assumptions (expected cell count \u{2265}5)",
                                               rare_categories, rare_threshold_pct)
                     ))
                 }
@@ -911,8 +911,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add IQR method
                 self$results$outlierMethodSummary$addRow(rowKey="iqr", values=list(
-                    method="IQR (1.5×IQR)",
-                    threshold="< Q1-1.5×IQR or > Q3+1.5×IQR",
+                    method="IQR (1.5\u{D7}IQR)",
+                    threshold="< Q1-1.5\u{D7}IQR or > Q3+1.5\u{D7}IQR",
                     outliers_detected=length(outlier_analysis$all_methods$iqr$indices),
                     note=outlier_analysis$all_methods$iqr$method_note
                 ))
@@ -966,12 +966,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         # Per-method flags
                         method_flags <- outlier_analysis$detection_matrix[i, ]
-                        zscore_flag <- ifelse(method_flags["zscore"], "", "—")
-                        iqr_flag <- ifelse(method_flags["iqr"], "", "—")
+                        zscore_flag <- ifelse(method_flags["zscore"], "", " - ")
+                        iqr_flag <- ifelse(method_flags["iqr"], "", " - ")
                         mad_flag <- if (is.null(outlier_analysis$all_methods$mad)) {
                             "N/A"
                         } else {
-                            ifelse(method_flags["mad"], "", "—")
+                            ifelse(method_flags["mad"], "", " - ")
                         }
 
                         self$results$outliers$addRow(rowKey=i, values=list(
@@ -995,7 +995,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                     no_outliers_message <- paste0(
                         "<p style='color: #28a745; font-weight: bold;'>No consensus outliers detected</p>",
-                        "<p>No values were flagged by ≥2 methods", transform_note, ". ",
+                        "<p>No values were flagged by \u{2265}2 methods", transform_note, ". ",
                         "See Method Summary table for individual method results. ",
                         "This indicates good data quality for this variable.</p>"
                     )
@@ -1120,7 +1120,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO (security): file-wide htmlEscape gap. Only 2 `htmlEscape`
             # calls across ~2.2k LOC of HTML construction. Variable names
-            # (from user CSV headers — uncontrolled `<`, `>`, `&`) flow into
+            # (from user CSV headers - uncontrolled `<`, `>`, `&`) flow into
             # `<p><strong>Variable:</strong> ", var_name, "</p>` at ~L2013
             # and into many other HTML blocks in `.formatQualityHTML`,
             # `.buildSummaryHtml`, `.buildAboutHtml`, `.buildCaveatsHtml`,
@@ -1128,7 +1128,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # HTML construction with `htmltools::htmlEscape()` on every
             # dynamic interpolation. Lower priority than Cat A1 because
             # variable headers are owned by the user, not an external
-            # attacker — but reports may be exported and re-rendered.
+            # attacker - but reports may be exported and re-rendered.
             # TODO (forward-looking): no `.()` wrapping anywhere in this file
             # (~2.2k LOC of clinical interpretation copy). Address in a
             # /prepare-translation pass before i18n release.
@@ -1137,7 +1137,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # and the heuristic scoring block are O(n) but on >100k-row
             # variables can hold the UI for seconds. Add checkpoints around
             # each major analysis branch.
-            # TODO (cleanup): file is 2.2k LOC — split into helper files
+            # TODO (cleanup): file is 2.2k LOC - split into helper files
             # (`.checkOutliers`, `.checkDistribution`, `.checkPlausibility`,
             # `.renderHtml`) to keep each unit under ~500 LOC.
 
@@ -1162,7 +1162,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><strong>Purpose:</strong> Comprehensive evaluation of data completeness, accuracy, and patterns for clinical research.</p>
 
                 <p><strong> IMPORTANT:</strong> Outlier detection uses a <strong>consensus approach</strong> -
-                points are only flagged if detected by ≥2 of 3 methods (Z-score, IQR, Modified Z-score).
+                points are only flagged if detected by \u{2265}2 of 3 methods (Z-score, IQR, Modified Z-score).
                 Points flagged by only 1 method are <strong>not shown</strong>, even if they exceed |z|>3.</p>
 
                 <h4>Required Input:</h4>
@@ -1172,7 +1172,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 <h4> Analysis Options:</h4>
                 <ul>
-                    <li><strong>Outlier Analysis:</strong> Consensus-based detection (≥2 of 3 methods: Z-score |z|>3, IQR 1.5×rule, Modified Z-score |z|>3.5)</li>
+                    <li><strong>Outlier Analysis:</strong> Consensus-based detection (\u{2265}2 of 3 methods: Z-score |z|>3, IQR 1.5\u{D7}rule, Modified Z-score |z|>3.5)</li>
                     <li><strong>Distribution Analysis:</strong> Descriptive statistics and normality assessment</li>
                     <li><strong>Duplicate Analysis:</strong> Identify repeated values and patterns</li>
                     <li><strong>Pattern Analysis:</strong> Missing data mechanisms and systematic issues</li>
@@ -1336,7 +1336,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$distribution$addRow(rowKey="rare_categories", values=list(
                         metric="Rare Categories",
                         value=rare_categories,
-                        interpretation=sprintf("%d categories with <%.1f%% frequency — may violate chi-squared assumptions (expected cell count ≥5)",
+                        interpretation=sprintf("%d categories with <%.1f%% frequency - may violate chi-squared assumptions (expected cell count \u{2265}5)",
                                               rare_categories, rare_threshold_pct)
                     ))
                 }
@@ -1727,9 +1727,9 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # IMPROVED: Transparent heuristic quality summary with softened presentation
-            quality_text <- sprintf("═══════════════════════════════════════════════════════\n")
+            quality_text <- sprintf("\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\n")
             quality_text <- paste0(quality_text, sprintf("   DATA QUALITY ASSESSMENT FOR '%s'\n", toupper(var_name)))
-            quality_text <- paste0(quality_text, sprintf("═══════════════════════════════════════════════════════\n\n"))
+            quality_text <- paste0(quality_text, sprintf("\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\n\n"))
 
             # Soften presentation: show band instead of precise /100 score
             score_band <- if (quality_score >= 90) {
@@ -1742,33 +1742,33 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Poor (<70)"
             }
 
-            quality_text <- paste0(quality_text, sprintf(" HEURISTIC QUALITY: Grade %s — %s\n", quality_grade, score_band))
+            quality_text <- paste0(quality_text, sprintf(" HEURISTIC QUALITY: Grade %s - %s\n", quality_grade, score_band))
             quality_text <- paste0(quality_text, "\n  IMPORTANT: This is a HEURISTIC (rule-of-thumb) assessment, NOT a validated metric.\n")
             quality_text <- paste0(quality_text, "The score uses arbitrary thresholds. Apply clinical judgment, not automated rules.\n\n")
 
             # Show scoring breakdown for transparency
             quality_text <- paste0(quality_text, "SCORING BREAKDOWN (shows penalty applied / maximum penalty):\n")
-            quality_text <- paste0(quality_text, sprintf("• Missing Data:      -%2d / %2d pts  (%s)\n",
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Missing Data:      -%2d / %2d pts  (%s)\n",
                                                         component_scores$missing$penalty,
                                                         component_scores$missing$max_penalty,
                                                         component_scores$missing$description))
-            quality_text <- paste0(quality_text, sprintf("• Outliers:          -%2d / %2d pts  (%s)\n",
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Outliers:          -%2d / %2d pts  (%s)\n",
                                                         component_scores$outliers$penalty,
                                                         component_scores$outliers$max_penalty,
                                                         component_scores$outliers$description))
-            quality_text <- paste0(quality_text, sprintf("• Variability:       -%2d / %2d pts  (%s)\n",
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Variability:       -%2d / %2d pts  (%s)\n",
                                                         component_scores$variability$penalty,
                                                         component_scores$variability$max_penalty,
                                                         component_scores$variability$description))
-            quality_text <- paste0(quality_text, sprintf("• Clinical Checks:   -%2d / %2d pts  (%s)\n",
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Clinical Checks:   -%2d / %2d pts  (%s)\n",
                                                         component_scores$clinical$penalty,
                                                         component_scores$clinical$max_penalty,
                                                         component_scores$clinical$description))
-            quality_text <- paste0(quality_text, sprintf("• Sample Size:       -%2d / %2d pts  (%s)\n",
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Sample Size:       -%2d / %2d pts  (%s)\n",
                                                         component_scores$sample_size$penalty,
                                                         component_scores$sample_size$max_penalty,
                                                         component_scores$sample_size$description))
-            quality_text <- paste0(quality_text, sprintf("                     ────────────────\n"))
+            quality_text <- paste0(quality_text, sprintf("                     \u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\n"))
             quality_text <- paste0(quality_text, sprintf("  HEURISTIC GRADE:   %s (%s)\n\n",
                                                         quality_grade, score_band))
             
@@ -1776,23 +1776,23 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             var_type_desc <- ifelse(is_numeric, "Numeric/Continuous", 
                                    ifelse(is_categorical, "Categorical/Factor", "Other"))
             quality_text <- paste0(quality_text, sprintf("VARIABLE CHARACTERISTICS:\n"))
-            quality_text <- paste0(quality_text, sprintf("• Variable Type: %s\n", var_type_desc))
-            quality_text <- paste0(quality_text, sprintf("• Total Observations: %d\n", n_total))
-            quality_text <- paste0(quality_text, sprintf("• Complete Cases: %d (%.1f%%)\n", n_complete, 100-missing_pct))
-            quality_text <- paste0(quality_text, sprintf("• Unique Values: %d (%.1f%% of complete cases)\n\n", n_unique, unique_pct))
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Variable Type: %s\n", var_type_desc))
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Total Observations: %d\n", n_total))
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Complete Cases: %d (%.1f%%)\n", n_complete, 100-missing_pct))
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Unique Values: %d (%.1f%% of complete cases)\n\n", n_unique, unique_pct))
             
             # Completeness assessment
             quality_text <- paste0(quality_text, " COMPLETENESS ASSESSMENT:\n")
-            quality_text <- paste0(quality_text, sprintf("• Missing Data Rate: %.1f%% (%d/%d observations)\n", 
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Missing Data Rate: %.1f%% (%d/%d observations)\n", 
                                                         missing_pct, n_missing, n_total))
-            quality_text <- paste0(quality_text, sprintf("• Completeness Grade: %s\n", 
+            quality_text <- paste0(quality_text, sprintf("\u{2022} Completeness Grade: %s\n", 
                                                         private$.interpretMissing(missing_pct)))
             
             # Add missing pattern information if available
             if (n_missing > 0 && self$options$showPatterns) {
                 missing_patterns <- private$.analyzeMissingPatterns(variable)
                 if (length(missing_patterns) > 0) {
-                    quality_text <- paste0(quality_text, "• Missing Pattern: ", names(missing_patterns)[1], "\n")
+                    quality_text <- paste0(quality_text, "\u{2022} Missing Pattern: ", names(missing_patterns)[1], "\n")
                 }
             }
             quality_text <- paste0(quality_text, "\n")
@@ -1816,26 +1816,26 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 skewness <- ifelse(sd_val > 0, mean((clean_var - mean_val)^3) / sd_val^3, 0)
 
                 quality_text <- paste0(quality_text, " DISTRIBUTION ASSESSMENT:\n")
-                quality_text <- paste0(quality_text, sprintf("• Central Tendency: Mean = %.3f, Median = %.3f\n",
+                quality_text <- paste0(quality_text, sprintf("\u{2022} Central Tendency: Mean = %.3f, Median = %.3f\n",
                                                             mean_val, median(clean_var)))
 
                 # Show CV or explain suppression
                 if (!is.na(cv)) {
-                    quality_text <- paste0(quality_text, sprintf("• Variability: SD = %.3f, MAD = %.3f, CV = %.1f%%\n",
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} Variability: SD = %.3f, MAD = %.3f, CV = %.1f%%\n",
                                                                 sd_val, mad_val, cv))
                 } else {
-                    quality_text <- paste0(quality_text, sprintf("• Variability: SD = %.3f, MAD = %.3f (CV suppressed: |mean| < %.3f)\n",
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} Variability: SD = %.3f, MAD = %.3f (CV suppressed: |mean| < %.3f)\n",
                                                                 sd_val, mad_val, cv_min_mean))
                 }
 
-                quality_text <- paste0(quality_text, sprintf("• Distribution Shape: %s (skewness = %.2f)\n",
+                quality_text <- paste0(quality_text, sprintf("\u{2022} Distribution Shape: %s (skewness = %.2f)\n",
                                                             private$.interpretSkewness(skewness), skewness))
                 
                 if (outliers_found > 0) {
-                    quality_text <- paste0(quality_text, sprintf("• Outliers Detected: %d (%.1f%% of data)\n", 
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} Outliers Detected: %d (%.1f%% of data)\n", 
                                                                 outliers_found, 100*outlier_rate))
                 } else {
-                    quality_text <- paste0(quality_text, "• Outliers: None detected (excellent data quality)\n")
+                    quality_text <- paste0(quality_text, "\u{2022} Outliers: None detected (excellent data quality)\n")
                 }
                 quality_text <- paste0(quality_text, "\n")
             }
@@ -1844,15 +1844,15 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is_categorical && n_complete > 0) {
                 categorical_assessment <- private$.analyzeCategoricalQuality(variable)
                 quality_text <- paste0(quality_text, "  CATEGORICAL DATA ASSESSMENT:\n")
-                quality_text <- paste0(quality_text, sprintf("• Number of Categories: %d\n", n_unique))
+                quality_text <- paste0(quality_text, sprintf("\u{2022} Number of Categories: %d\n", n_unique))
                 
                 if (!is.null(categorical_assessment)) {
                     if (!is.null(categorical_assessment$balanced)) {
-                        quality_text <- paste0(quality_text, "• Category Balance: Good\n")
+                        quality_text <- paste0(quality_text, "\u{2022} Category Balance: Good\n")
                     } else if (!is.null(categorical_assessment$moderate_imbalance)) {
-                        quality_text <- paste0(quality_text, "• Category Balance: Moderate imbalance detected\n")
+                        quality_text <- paste0(quality_text, "\u{2022} Category Balance: Moderate imbalance detected\n")
                     } else if (!is.null(categorical_assessment$imbalance)) {
-                        quality_text <- paste0(quality_text, "• Category Balance: Severe imbalance detected\n")
+                        quality_text <- paste0(quality_text, "\u{2022} Category Balance: Severe imbalance detected\n")
                     }
                 }
                 quality_text <- paste0(quality_text, "\n")
@@ -1862,7 +1862,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(quality_issues) > 0) {
                 quality_text <- paste0(quality_text, "QUALITY CONCERNS IDENTIFIED:\n")
                 for (issue in quality_issues) {
-                    quality_text <- paste0(quality_text, sprintf("• %s\n", stringr::str_to_sentence(issue)))
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} %s\n", stringr::str_to_sentence(issue)))
                 }
                 quality_text <- paste0(quality_text, "\n")
             }
@@ -1872,63 +1872,63 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (quality_grade == "A") {
                 quality_text <- paste0(quality_text, "INTERPRETATION: High-Quality Data (by heuristic rules)\n")
-                quality_text <- paste0(quality_text, "• Data appears suitable for planned analyses\n")
-                quality_text <- paste0(quality_text, "• Few quality concerns based on automated checks\n")
-                quality_text <- paste0(quality_text, "• Document this quality assessment in study methods\n")
-                quality_text <- paste0(quality_text, "• Consider as baseline for quality monitoring\n")
+                quality_text <- paste0(quality_text, "\u{2022} Data appears suitable for planned analyses\n")
+                quality_text <- paste0(quality_text, "\u{2022} Few quality concerns based on automated checks\n")
+                quality_text <- paste0(quality_text, "\u{2022} Document this quality assessment in study methods\n")
+                quality_text <- paste0(quality_text, "\u{2022} Consider as baseline for quality monitoring\n")
 
             } else if (quality_grade == "B") {
                 quality_text <- paste0(quality_text, "INTERPRETATION: Good Quality with Minor Issues (by heuristic rules)\n")
-                quality_text <- paste0(quality_text, "• Data likely suitable for analysis with documented limitations\n")
-                quality_text <- paste0(quality_text, "• Note identified issues in study methods section\n")
-                quality_text <- paste0(quality_text, "• Consider sensitivity analyses for robust conclusions\n")
-                quality_text <- paste0(quality_text, "• Monitor quality trends in ongoing data collection\n")
+                quality_text <- paste0(quality_text, "\u{2022} Data likely suitable for analysis with documented limitations\n")
+                quality_text <- paste0(quality_text, "\u{2022} Note identified issues in study methods section\n")
+                quality_text <- paste0(quality_text, "\u{2022} Consider sensitivity analyses for robust conclusions\n")
+                quality_text <- paste0(quality_text, "\u{2022} Monitor quality trends in ongoing data collection\n")
 
             } else if (quality_grade == "C") {
                 quality_text <- paste0(quality_text, "INTERPRETATION: Quality Concerns Detected (by heuristic rules)\n")
-                quality_text <- paste0(quality_text, "• Data quality issues may affect analysis validity\n")
-                quality_text <- paste0(quality_text, "• Review specific issues below and consider cleaning\n")
-                quality_text <- paste0(quality_text, "• Perform sensitivity analyses to assess impact\n")
-                quality_text <- paste0(quality_text, "• Consult with data management or statistician\n")
-                quality_text <- paste0(quality_text, "• Document all cleaning decisions and rationale\n")
+                quality_text <- paste0(quality_text, "\u{2022} Data quality issues may affect analysis validity\n")
+                quality_text <- paste0(quality_text, "\u{2022} Review specific issues below and consider cleaning\n")
+                quality_text <- paste0(quality_text, "\u{2022} Perform sensitivity analyses to assess impact\n")
+                quality_text <- paste0(quality_text, "\u{2022} Consult with data management or statistician\n")
+                quality_text <- paste0(quality_text, "\u{2022} Document all cleaning decisions and rationale\n")
 
             } else {
                 quality_text <- paste0(quality_text, "INTERPRETATION: Significant Quality Issues (by heuristic rules)\n")
-                quality_text <- paste0(quality_text, "• Major data quality concerns may threaten validity\n")
-                quality_text <- paste0(quality_text, "• Caution: Analysis may produce unreliable results\n")
-                quality_text <- paste0(quality_text, "• Investigate root causes of quality problems\n")
-                quality_text <- paste0(quality_text, "• Consider whether data can be salvaged or need re-collection\n")
-                quality_text <- paste0(quality_text, "• Consult with senior investigator before proceeding\n")
+                quality_text <- paste0(quality_text, "\u{2022} Major data quality concerns may threaten validity\n")
+                quality_text <- paste0(quality_text, "\u{2022} Caution: Analysis may produce unreliable results\n")
+                quality_text <- paste0(quality_text, "\u{2022} Investigate root causes of quality problems\n")
+                quality_text <- paste0(quality_text, "\u{2022} Consider whether data can be salvaged or need re-collection\n")
+                quality_text <- paste0(quality_text, "\u{2022} Consult with senior investigator before proceeding\n")
             }
             
             # Specific actionable recommendations
             quality_text <- paste0(quality_text, "\n SPECIFIC ACTIONS:\n")
             
             if (missing_pct > 15) {
-                quality_text <- paste0(quality_text, "• MISSING DATA: Investigate missing data mechanisms (MCAR/MAR/MNAR)\n")
-                quality_text <- paste0(quality_text, "• MISSING DATA: Consider multiple imputation methods for sensitivity analysis\n")
+                quality_text <- paste0(quality_text, "\u{2022} MISSING DATA: Investigate missing data mechanisms (MCAR/MAR/MNAR)\n")
+                quality_text <- paste0(quality_text, "\u{2022} MISSING DATA: Consider multiple imputation methods for sensitivity analysis\n")
             }
             
             if (outliers_found > 0) {
-                quality_text <- paste0(quality_text, "• OUTLIERS: Review each outlier for data entry errors and clinical plausibility\n")
-                quality_text <- paste0(quality_text, "• OUTLIERS: Consider robust analysis methods (e.g., rank-based tests)\n")
+                quality_text <- paste0(quality_text, "\u{2022} OUTLIERS: Review each outlier for data entry errors and clinical plausibility\n")
+                quality_text <- paste0(quality_text, "\u{2022} OUTLIERS: Consider robust analysis methods (e.g., rank-based tests)\n")
             }
 
             if (!is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
-                quality_text <- paste0(quality_text, "• CLINICAL VALIDATION: Verify measurement units and clinical plausibility\n")
-                quality_text <- paste0(quality_text, "• CLINICAL VALIDATION: Review data collection procedures\n")
+                quality_text <- paste0(quality_text, "\u{2022} CLINICAL VALIDATION: Verify measurement units and clinical plausibility\n")
+                quality_text <- paste0(quality_text, "\u{2022} CLINICAL VALIDATION: Review data collection procedures\n")
             }
             
             if (n_total < 30) {
-                quality_text <- paste0(quality_text, "• SAMPLE SIZE: Consider collecting additional data for robust analysis\n")
-                quality_text <- paste0(quality_text, "• SAMPLE SIZE: Use appropriate methods for small sample sizes\n")
+                quality_text <- paste0(quality_text, "\u{2022} SAMPLE SIZE: Consider collecting additional data for robust analysis\n")
+                quality_text <- paste0(quality_text, "\u{2022} SAMPLE SIZE: Use appropriate methods for small sample sizes\n")
             }
             
             # Add validation warnings if present
             if (length(validation_results$warnings) > 0) {
                 quality_text <- paste0(quality_text, "\nVALIDATION WARNINGS:\n")
                 for (warning in validation_results$warnings) {
-                    quality_text <- paste0(quality_text, sprintf("• %s\n", warning))
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} %s\n", warning))
                 }
             }
             
@@ -1936,7 +1936,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(validation_results$recommendations) > 0) {
                 quality_text <- paste0(quality_text, "\nADDITIONAL RECOMMENDATIONS:\n")
                 for (rec in validation_results$recommendations) {
-                    quality_text <- paste0(quality_text, sprintf("• %s\n", rec))
+                    quality_text <- paste0(quality_text, sprintf("\u{2022} %s\n", rec))
                 }
             }
             
@@ -1949,7 +1949,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Outlier detection limitations
             if (is_numeric && self$options$showOutliers) {
                 if (n_complete < 10) {
-                    quality_text <- paste0(quality_text, "• OUTLIERS (n=", n_complete, "): Informative only, NOT statistically robust.\n")
+                    quality_text <- paste0(quality_text, "\u{2022} OUTLIERS (n=", n_complete, "): Informative only, NOT statistically robust.\n")
                     quality_text <- paste0(quality_text, "  Single-method flags shown for early QC; manually verify before taking action.\n")
                     limitations_added <- TRUE
                 } else if (outliers_found > 0) {
@@ -1962,7 +1962,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else {
                         ""
                     }
-                    quality_text <- paste0(quality_text, "• OUTLIERS: Consensus detection", outlier_transform_note, "; assumes approximate normality.\n")
+                    quality_text <- paste0(quality_text, "\u{2022} OUTLIERS: Consensus detection", outlier_transform_note, "; assumes approximate normality.\n")
 
                     if (exists("skewness") && abs(skewness) > 1 &&
                         (!exists("outlier_analysis") || is.null(outlier_analysis$transform_applied) || outlier_analysis$transform_applied == "none")) {
@@ -1974,7 +1974,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Missingness limitations
             if (n_missing > 0) {
-                quality_text <- paste0(quality_text, "• MISSINGNESS: Pattern tests are HEURISTIC")
+                quality_text <- paste0(quality_text, "\u{2022} MISSINGNESS: Pattern tests are HEURISTIC")
                 if (n_missing < 5 || n_complete < 5) {
                     quality_text <- paste0(quality_text, "; insufficient data (n_miss=", n_missing, ", n_complete=", n_complete, ") for runs test.\n")
                 } else {
@@ -1989,14 +1989,14 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Clinical checks limitations
             if (self$options$clinicalValidation && exists("clinical_issues_found") &&
                 !is.null(clinical_issues_found) && length(clinical_issues_found) > 0) {
-                quality_text <- paste0(quality_text, "• CLINICAL CHECKS: Hard-coded plausibility ranges may not suit all populations.\n")
+                quality_text <- paste0(quality_text, "\u{2022} CLINICAL CHECKS: Hard-coded plausibility ranges may not suit all populations.\n")
                 quality_text <- paste0(quality_text, "  May over-flag: pediatric, ICU, elite athletes, or diverse ethnic populations.\n")
                 quality_text <- paste0(quality_text, "  Unit auto-detection is heuristic; override if incorrect. Manually verify flagged values.\n")
                 limitations_added <- TRUE
             }
 
             # Quality score limitations (always shown)
-            quality_text <- paste0(quality_text, "• QUALITY SCORE: Based on ARBITRARY thresholds and penalties, NOT externally validated.\n")
+            quality_text <- paste0(quality_text, "\u{2022} QUALITY SCORE: Based on ARBITRARY thresholds and penalties, NOT externally validated.\n")
             quality_text <- paste0(quality_text, "  NOT suitable for regulatory submissions or as standalone quality metric.\n")
             quality_text <- paste0(quality_text, "  Use as initial screening tool only; review component breakdown for specific issues.\n")
             limitations_added <- TRUE
@@ -2004,7 +2004,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CV limitations
             if (is_numeric && self$options$showDistribution) {
                 cv_min_mean <- self$options$cvMinMean
-                quality_text <- paste0(quality_text, "• CV CALCULATION: Suppressed when |mean| < ", cv_min_mean, " to avoid instability.\n")
+                quality_text <- paste0(quality_text, "\u{2022} CV CALCULATION: Suppressed when |mean| < ", cv_min_mean, " to avoid instability.\n")
                 quality_text <- paste0(quality_text, "  Use MAD or IQR for spread when CV not reported. CV only appropriate for ratio-scale data.\n")
                 limitations_added <- TRUE
             }
@@ -2019,10 +2019,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 quality_text <- paste0(quality_text, "   - Study-specific quality requirements\n")
             }
 
-            quality_text <- paste0(quality_text, "\n═══════════════════════════════════════════════════════\n")
+            quality_text <- paste0(quality_text, "\n\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\n")
             quality_text <- paste0(quality_text, "Generated by ClinicoPath Data Quality Assessment Module\n")
             quality_text <- paste0(quality_text, sprintf("Assessment Date: %s\n", Sys.Date()))
-            quality_text <- paste0(quality_text, "═══════════════════════════════════════════════════════")
+            quality_text <- paste0(quality_text, "\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}")
 
             self$results$qualityText$setContent(quality_text)
 
@@ -2098,7 +2098,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 about_html <- paste0(about_html, "<h4>Assessment Components</h4>")
                 about_html <- paste0(about_html, "<ul>")
                 about_html <- paste0(about_html, "<li><strong>Missing Data Analysis:</strong> Examines completeness, missing data patterns, and heuristic assessment of potential mechanisms (MCAR/MAR/MNAR) using runs test when sample size permits</li>")
-                about_html <- paste0(about_html, "<li><strong>Outlier Detection:</strong> Uses consensus approach requiring agreement from ≥2 methods (Z-score |z|>3, IQR 1.5×rule, Modified Z-score MAD-based |z|>3.5) to minimize false positives</li>")
+                about_html <- paste0(about_html, "<li><strong>Outlier Detection:</strong> Uses consensus approach requiring agreement from \u{2265}2 methods (Z-score |z|>3, IQR 1.5\u{D7}rule, Modified Z-score MAD-based |z|>3.5) to minimize false positives</li>")
                 about_html <- paste0(about_html, "<li><strong>Distribution Analysis:</strong> Provides descriptive statistics, normality assessment, and coefficient of variation for numeric variables</li>")
                 about_html <- paste0(about_html, "<li><strong>Clinical Validation:</strong> Applies hard-coded plausibility ranges for common clinical variables (age, vital signs, lab values) with configurable unit systems</li>")
                 about_html <- paste0(about_html, "<li><strong>Quality Scoring:</strong> Generates heuristic composite score (0-100) based on completeness, outlier prevalence, sample size, and variability</li>")

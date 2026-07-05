@@ -338,9 +338,9 @@ icccoeffClass <- R6::R6Class(
             assessments <- list(
                 list(criteria = "Poor reliability", threshold = "< 0.50", 
                      assessment = if (icc_value < 0.50) " Poor" else ""),
-                list(criteria = "Moderate reliability", threshold = "0.50 - 0.75", 
+                list(criteria = "Moderate reliability", threshold = "0.50-0.75", 
                      assessment = if (icc_value >= 0.50 && icc_value < 0.75) " Moderate" else ""),
-                list(criteria = "Good reliability", threshold = "0.75 - 0.90", 
+                list(criteria = "Good reliability", threshold = "0.75-0.90", 
                      assessment = if (icc_value >= 0.75 && icc_value < 0.90) " Good" else ""),
                 list(criteria = "Excellent reliability", threshold = "> 0.90", 
                      assessment = if (icc_value >= 0.90) " Excellent" else "")

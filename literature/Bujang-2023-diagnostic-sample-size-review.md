@@ -13,14 +13,16 @@
 **Study Type**: Methodological/Guidelines paper
 
 **Design & Cohort**:
+
 - **Type**: Statistical methodology paper with sample size tables
 - **N**: Not applicable (theoretical/methodological)
 - **Purpose**: Provide sample size planning guidance for diagnostic test accuracy studies based on 95% CI width specification
 - **Scenarios**:
-  - Diagnostic purposes (high sensitivity AND specificity, both ≥0.70)
-  - Screening purposes (high sensitivity OR specificity, one ≥0.70, other ≥0.50)
+  - Diagnostic purposes (high sensitivity AND specificity, both >=0.70)
+  - Screening purposes (high sensitivity OR specificity, one >=0.70, other >=0.50)
 
 **Key Analyses**:
+
 - Sample size calculation using Clopper-Pearson exact binomial confidence intervals
 - Two-sided confidence intervals for one-sample sensitivity and specificity analysis
 - Stratified by:
@@ -65,7 +67,7 @@ None. All provided sources were successfully read and analyzed.
 | **Clopper-Pearson Exact Binomial CI** | Primary | Two-sided, alpha=0.05; cumulative probabilities from actual binomial distribution | Binomial distribution; exact method (not approximate) | Methods section (lines 685-689); Clopper & Pearson 1934 [38] |
 | **Sample Size for Sensitivity** | Primary | Based on prevalence, target sensitivity (0.70-0.95), CI width (0.05-0.20) | Requires known/estimated disease prevalence; separate calculation for sensitivity vs specificity | Tables 2, 3 (diagnostic & screening, sensitivity emphasis) |
 | **Sample Size for Specificity** | Primary | Based on prevalence, target specificity (0.70-0.95), CI width (0.05-0.20) | Complementary to sensitivity calculation; prevalence affects required N differently | Tables 2, 4 (diagnostic & screening, specificity emphasis) |
-| **Two-scenario planning** | Secondary | Diagnostic (Sens & Spec both high) vs Screening (one high, one moderate) | Different minimum acceptable thresholds: diagnostic ≥0.70/0.70; screening ≥0.70/0.50 or 0.50/0.70 | Discussion section 4.3-4.4 |
+| **Two-scenario planning** | Secondary | Diagnostic (Sens & Spec both high) vs Screening (one high, one moderate) | Different minimum acceptable thresholds: diagnostic >=0.70/0.70; screening >=0.70/0.50 or 0.50/0.70 | Discussion section 4.3-4.4 |
 | **Non-response adjustment** | Secondary | Inflate final N by non-response rate (e.g., 20%) | Assumes missing-at-random; proportional inflation | Sample size statements (lines 1895-1897, 1920-1922) |
 | **Precision-based planning** | Conceptual | CI width as proxy for precision/accuracy | Alternative to hypothesis-testing power approach; emphasizes confidence in estimates | Introduction/Discussion |
 
@@ -85,6 +87,7 @@ None. All provided sources were successfully read and analyzed.
 | **Comparison with 17 prior methods** | *(none)* | ❌ | Literature review in Table 1 (likelihood ratios, ROC-based, Bayesian, etc.) not systematically available |
 
 ### Legend
+
 - ✅ **Covered**: Function provides equivalent analysis as-is
 - 🟡 **Partial**: Workarounds or manual steps needed; close but not exact match
 - ❌ **Not covered**: Missing function or critical option
@@ -138,6 +141,7 @@ None. All provided sources were successfully read and analyzed.
 ### Red Flags
 
 **None identified**. This is a methodological/guidelines paper, not an empirical study. Key strengths:
+
 - Uses exact Clopper-Pearson intervals (not normal approximation)
 - Clearly differentiates diagnostic vs. screening purposes
 - Provides extensive tables across realistic parameter ranges
@@ -145,6 +149,7 @@ None. All provided sources were successfully read and analyzed.
 - Recommends inflating for non-response
 
 **Minor suggestions**:
+
 - Could provide R code for reproducibility (PASS is commercial)
 - Could compare precision-based vs. power-based sample sizes
 - Could address one-sided vs. two-sided testing more explicitly
@@ -158,21 +163,24 @@ None. All provided sources were successfully read and analyzed.
 **Method**: Sample size planning based on **specified CI width** for sensitivity and specificity (one-sample), using exact Clopper-Pearson binomial confidence intervals.
 
 **Impact**:
+
 - **Central to diagnostic test research**: Nearly all diagnostic accuracy studies need proper sample size justification
 - **Clinical relevance**: Precision-based planning ensures clinically meaningful accuracy estimates
 - **Frequency**: Cited heavily (Bujang has 2,000+ citations on this topic); appears in grant applications, protocols, manuscripts
 
 **Closest existing function**:
+
 - `samplingerror`: Implements Kayser E(p) formula (detection error + biological variance + frequency estimation). More complex, multi-component approach.
 - `screeningcalculator`: Likely provides diagnostic test sample size, but method unclear.
 
 **Exact missing options**:
+
 1. **Clopper-Pearson exact binomial CI** as the core method (not normal approximation)
 2. **CI width specification** as primary input (not power/effect size)
 3. **Separate calculations for sensitivity and specificity** based on prevalence
 4. **Diagnostic vs. screening mode**:
-   - Diagnostic: both Sens ≥ X and Spec ≥ Y (take max of two sample sizes)
-   - Screening: either Sens ≥ X (with Spec ≥ 0.5) OR Spec ≥ Y (with Sens ≥ 0.5)
+   - Diagnostic: both Sens >= X and Spec >= Y (take max of two sample sizes)
+   - Screening: either Sens >= X (with Spec >= 0.5) OR Spec >= Y (with Sens >= 0.5)
 5. **Prevalence-driven sample size adjustment**:
    - Low prevalence → larger N for sensitivity estimation
    - High prevalence → larger N for specificity estimation
@@ -189,6 +197,7 @@ None. All provided sources were successfully read and analyzed.
 **Method**: Text template generator that produces publication-ready sample size justification paragraphs (as shown in article lines 1884-1897, 1908-1922).
 
 **Impact**:
+
 - **High practical value**: Reduces researcher burden in writing Methods sections
 - **Standardization**: Ensures all necessary elements are included (objective, Sens/Spec targets, prevalence, CI width, non-response adjustment)
 - **Compliance**: Meets journal/IRB requirements for transparent sample size justification
@@ -196,6 +205,7 @@ None. All provided sources were successfully read and analyzed.
 **Closest existing function**: None identified.
 
 **Exact missing features**:
+
 - Template with placeholders for:
   - Study objective (diagnostic vs. screening)
   - Target sensitivity/specificity values
@@ -213,6 +223,7 @@ None. All provided sources were successfully read and analyzed.
 **Method**: Side-by-side comparison of sample size estimates from different approaches (Table 1 lists 17 prior methods: likelihood ratios, ROC-based, Bayesian, prevalence-adjusted, etc.).
 
 **Impact**:
+
 - **Educational**: Helps researchers understand why estimates differ
 - **Robustness**: Sensitivity analysis across methods
 - **Method selection guidance**: Which method for which scenario?
@@ -220,6 +231,7 @@ None. All provided sources were successfully read and analyzed.
 **Closest existing function**: None.
 
 **Exact missing features**:
+
 - Simultaneous calculation using:
   - Clopper-Pearson CI width (Bujang 2023)
   - Buderer prevalence-adjusted (1996)
@@ -352,7 +364,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
             nonresp <- self$options$nonresponse_rate / 100
 
             # Use binom package or manual iteration
-            # For sensitivity: need N_diseased such that CI width ≤ target
+            # For sensitivity: need N_diseased such that CI width <= target
             n_sens <- private$.calculate_n_for_ci_width(
                 p = sens,
                 width = width,
@@ -393,7 +405,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
         },
 
         .calculate_n_for_ci_width = function(p, width, alpha) {
-            # Binary search for N such that Clopper-Pearson CI width ≤ target
+            # Binary search for N such that Clopper-Pearson CI width <= target
             # Using binom::binom.confint or manual Clopper-Pearson
             # Simplified sketch:
             for (n in 10:100000) {
@@ -530,6 +542,7 @@ items:
 ```
 
 **Validation**:
+
 - Compare against Bujang 2023 Tables 2-4
 - Verify Clopper-Pearson CI calculation matches `binom::binom.confint(..., methods="exact")`
 - Test edge cases: very low prevalence (0.01), very high targets (0.99), narrow CI width (0.05)
@@ -550,6 +563,7 @@ items:
 **Target**: New module `diagnosticsamplesizecompare`
 
 **Features**:
+
 - Implement 3-5 methods side-by-side (Clopper-Pearson, Buderer, Obuchowski ROC, simple normal approximation)
 - Table showing all estimates with references
 - Recommendations based on study design characteristics
@@ -592,7 +606,7 @@ items:
 
 | Package | Purpose | Version |
 |---------|---------|---------|
-| **binom** | Exact binomial confidence intervals (Clopper-Pearson) | ≥1.1-1 |
+| **binom** | Exact binomial confidence intervals (Clopper-Pearson) | >=1.1-1 |
 | **glue** | Template string substitution for statement generation | Latest |
 | **pwr** | (Optional) Power-based comparisons | Latest |
 | **presize** | (Optional) Precision-based sample size (alternative implementation) | Latest |
@@ -725,6 +739,7 @@ erDiagram
 ### Long-Term Vision
 
 **Goal**: Make ClinicoPath the **go-to jamovi module for diagnostic test research**, covering:
+
 - Sample size (Clopper-Pearson, ROC-based, Bayesian)
 - ROC analysis (pROC, timeROC, ordinal, multiclass)
 - Agreement (kappa, ICC, Bland-Altman)
@@ -742,4 +757,4 @@ erDiagram
 *Generated by ClinicoPath Jamovi AI Assistant*
 *Review Protocol: `/review-article-stats` (v2025-10-27)*
 *Module: ClinicoPath v0.0.32.11*
-*Repository: https://github.com/sbalci/ClinicoPathJamoviModule*
+*Repository: <https://github.com/sbalci/ClinicoPathJamoviModule>*

@@ -362,9 +362,9 @@ no_sort <- swimmerplot(
 
 # Response Categories (RECIST 1.1):
 # - CR (Complete Response): Disappearance of all target lesions
-# - PR (Partial Response): ≥30% decrease in sum of target lesions
+# - PR (Partial Response): >=30% decrease in sum of target lesions
 # - SD (Stable Disease): Neither PR nor PD criteria met
-# - PD (Progressive Disease): ≥20% increase or new lesions
+# - PD (Progressive Disease): >=20% increase or new lesions
 
 # Timeline Components:
 # - Start Time: Treatment initiation or study enrollment
@@ -417,7 +417,7 @@ no_sort <- swimmerplot(
 
 # Identify patients with >12 months response
 long_responders <- swimmerplot_immuno[swimmerplot_immuno$EndTime > 365 &
-                                      swimmerplot_immuno$Response %in% c("CR", "PR"), ]
+  swimmerplot_immuno$Response %in% c("CR", "PR"), ]
 
 if (nrow(long_responders) > 0) {
   durable_response_plot <- swimmerplot(
@@ -473,7 +473,7 @@ surgery_timeline <- swimmerplot(
 
 # Filter to patients who received multiple treatment lines
 multi_line <- swimmerplot_events[swimmerplot_events$TreatmentLine %in%
-                                c("Second Line", "Third Line+"), ]
+  c("Second Line", "Third Line+"), ]
 
 if (nrow(multi_line) > 0) {
   sequencing_plot <- swimmerplot(

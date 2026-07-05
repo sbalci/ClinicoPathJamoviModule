@@ -24,7 +24,7 @@ The **Single Variable Quality Check** module provides comprehensive data quality
   - **Z-score** (|z| > 3): Standard approach, assumes normality
   - **IQR method** (1.5×IQR rule): Robust to non-normality
   - **Modified Z-score (MAD)** (|z| > 3.5): Most robust to outliers and skewness
-- **Consensus approach**: Points flagged by ≥2 methods for n≥10
+- **Consensus approach**: Points flagged by >=2 methods for n>=10
 - **Informative mode**: Single-method flags shown for small samples (n=3-9) with clear warnings
 - **Transformation support**: Log or square-root transformation for right-skewed data
 
@@ -139,18 +139,18 @@ Shows each detection method's performance:
 - Higher MAD count suggests robust outliers (not just z-score artifacts)
 - If only Z-score flags points, consider transformation
 
-#### Consensus Outliers Table (n≥10)
-Shows points flagged by ≥2 methods:
+#### Consensus Outliers Table (n>=10)
+Shows points flagged by >=2 methods:
 - **Row**: Original data row number
 - **Value**: Observed value
 - **Z-Score**: On transformed scale if transformation applied
-- **Z-score, IQR, MAD flags**: ✓ = flagged, — = not flagged
+- **Z-score, IQR, MAD flags**: ✓ = flagged, - = not flagged
 - **Severity**: Based on z-score magnitude with scale notation
 
 **Severity Levels**:
-- Mild: 3 < |z| ≤ 4
-- Moderate: 4 < |z| ≤ 5
-- Severe: 5 < |z| ≤ 6
+- Mild: 3 < |z| <= 4
+- Moderate: 4 < |z| <= 5
+- Severe: 5 < |z| <= 6
 - Extreme: |z| > 6
 
 **Scale Notation**:
@@ -181,7 +181,7 @@ For small samples, single-method flags shown with warning:
 
 **Key Metrics**:
 - **Missing %**: Overall missingness rate
-- **Pattern**: Clustering/alternating/random (with p-value if n≥5 each)
+- **Pattern**: Clustering/alternating/random (with p-value if n>=5 each)
 - **Dropout**: Proportion in last quarter (with 95% CI)
 - **MCAR Note**: Test result if enabled
 
@@ -221,7 +221,7 @@ For small samples, single-method flags shown with warning:
 - **SD**: Absolute spread (same units as data)
 - **MAD**: Robust spread (resistant to outliers, use when outliers present)
 - **IQR**: Robust range (25th to 75th percentile)
-- **CV**: Relative variability (only shown if |mean| ≥ threshold)
+- **CV**: Relative variability (only shown if |mean| >= threshold)
 
 **CV Interpretation** (when shown):
 | CV | Interpretation | Context |
@@ -258,7 +258,7 @@ For small samples, single-method flags shown with warning:
 
 **Rare Categories**:
 - Flagged if frequency < threshold% (default 5%)
-- Message: "may violate chi-squared assumptions (expected cell count ≥5)"
+- Message: "may violate chi-squared assumptions (expected cell count >=5)"
 - **Action**: Combine rare categories or use exact tests (Fisher's)
 
 ---
@@ -342,10 +342,10 @@ All messages prefixed **"PLAUSIBILITY CHECK:"** with detected units and threshol
 **Lab Values** (examples):
 - **Hemoglobin**:
   - >25 → likely g/L (30-200 range)
-  - ≤25 → likely g/dL (3-20 range)
+  - <=25 → likely g/dL (3-20 range)
 - **Creatinine**:
   - >20 → likely µmol/L (30-1000 range)
-  - ≤20 → likely mg/dL (0.3-10 range)
+  - <=20 → likely mg/dL (0.3-10 range)
 
 **False Positives/Negatives**:
 - **Pediatric populations**: May flag normal child weights/heights
@@ -383,7 +383,7 @@ All messages prefixed **"PLAUSIBILITY CHECK:"** with detected units and threshol
 ### Interpreting Results
 
 1. **Outliers**:
-   - ✅ **Do**: Investigate consensus outliers (≥2 methods)
+   - ✅ **Do**: Investigate consensus outliers (>=2 methods)
    - ✅ **Do**: Consider transformation for right-skewed data
    - ❌ **Don't**: Automatically remove all flagged points
    - ❌ **Don't**: Trust informative-only flags for n<10 without verification
@@ -470,9 +470,9 @@ After log transform:
 **Example**:
 ```
 Informative flags (n=7):
-- Row 3: Value 250 (✓ Z-score, ✓ IQR, — MAD)
+- Row 3: Value 250 (✓ Z-score, ✓ IQR, - MAD)
   → Strong signal, verify in source
-- Row 5: Value 85 (✓ Z-score, — IQR, — MAD)
+- Row 5: Value 85 (✓ Z-score, - IQR, - MAD)
   → Weak signal, likely not outlier
 ```
 
@@ -536,7 +536,7 @@ Informative flags (n=7):
 
 **Mitigation**:
 - Use transformation for skewed data
-- Require consensus (≥2 methods) for n≥10
+- Require consensus (>=2 methods) for n>=10
 - Investigate clinical context of flagged values
 
 ### Missingness Patterns
@@ -643,11 +643,11 @@ Informative flags (n=7):
 
 **Log Transform**:
 - Applied: log(x) for all x > 0
-- Fails: If any x ≤ 0 (message: "negative values present")
+- Fails: If any x <= 0 (message: "negative values present")
 - Use for: Right-skewed, multiplicative processes (e.g., biomarkers)
 
 **Square Root Transform**:
-- Applied: √x for all x ≥ 0
+- Applied: √x for all x >= 0
 - Fails: If any x < 0 (message: "negative values present")
 - Use for: Moderate right skew, count data, Poisson-distributed
 
@@ -665,7 +665,7 @@ Informative flags (n=7):
 **A**: No. Outlier detection identifies *potential* data quality issues or extreme but valid values.
 
 **Action**:
-1. Investigate consensus outliers (≥2 methods)
+1. Investigate consensus outliers (>=2 methods)
 2. Verify in source documents
 3. Assess clinical plausibility
 4. Consider:
@@ -707,7 +707,7 @@ Grade D (<70) requires more serious consideration of data validity.
 
 **Explanation**:
 - n<10: Outlier methods become unreliable
-- Consensus (≥2 methods) not required to detect obvious errors
+- Consensus (>=2 methods) not required to detect obvious errors
 - Goal: Early detection of data-entry mistakes
 
 **Action**:
@@ -796,10 +796,10 @@ MAD = 1.5 (unaffected by outlier)
 ### In Methods Section
 
 **Minimal**:
-> "Data quality was assessed for all variables using automated screening. Variables with >20% missing data were imputed using [method]. Outliers were identified using consensus detection (≥2 of 3 methods: Z-score, IQR, MAD) and verified in source documents before removal."
+> "Data quality was assessed for all variables using automated screening. Variables with >20% missing data were imputed using [method]. Outliers were identified using consensus detection (>=2 of 3 methods: Z-score, IQR, MAD) and verified in source documents before removal."
 
 **Comprehensive**:
-> "We performed comprehensive single-variable quality assessment using a multi-method approach. Missing data patterns were evaluated using Wald-Wolfowitz runs tests (α=0.05) and quantified with descriptive statistics. Outliers were detected using three independent methods (Z-score |z|>3, IQR 1.5×IQR rule, Modified Z-score |M|>3.5); consensus outliers (flagged by ≥2 methods) were investigated for data entry errors and clinical plausibility. Variables with severe right skew (skewness >1) were log-transformed before outlier detection. Heuristic quality scoring (A-D grades) was used for internal screening but not as a validated quality metric. [Specific details of quality issues and resolutions]."
+> "We performed comprehensive single-variable quality assessment using a multi-method approach. Missing data patterns were evaluated using Wald-Wolfowitz runs tests (α=0.05) and quantified with descriptive statistics. Outliers were detected using three independent methods (Z-score |z|>3, IQR 1.5×IQR rule, Modified Z-score |M|>3.5); consensus outliers (flagged by >=2 methods) were investigated for data entry errors and clinical plausibility. Variables with severe right skew (skewness >1) were log-transformed before outlier detection. Heuristic quality scoring (A-D grades) was used for internal screening but not as a validated quality metric. [Specific details of quality issues and resolutions]."
 
 ### In Results Section
 
@@ -833,7 +833,7 @@ MAD = 1.5 (unaffected by outlier)
 **Little's MCAR Test** (requires `naniar` package):
 - Null hypothesis: Data are missing completely at random
 - p < 0.05: Reject MCAR, suggests MAR or MNAR
-- p ≥ 0.05: Fail to reject MCAR (but doesn't prove it)
+- p >= 0.05: Fail to reject MCAR (but doesn't prove it)
 
 **Limitation**: Requires multivariate data; single-variable context limits utility
 
@@ -1116,7 +1116,7 @@ Specific actions taken:
 | | 5-20% | Moderate, consider imputation |
 | | 20-50% | Substantial, require imputation |
 | | >50% | Severe, major validity concern |
-| Outliers (n≥10) | ≥2 methods | Consensus outlier, investigate |
+| Outliers (n>=10) | >=2 methods | Consensus outlier, investigate |
 | | 1 method | Weak signal, likely normal |
 | Skewness | -0.5 to 0.5 | Approximately symmetric |
 | | 0.5 to 1 or -1 to -0.5 | Moderate skew, consider transform |
@@ -1126,7 +1126,7 @@ Specific actions taken:
 | | 20-50% | High relative variability |
 | | >50% | Very high, consider MAD |
 | Runs test p | <0.05 | Reject randomness (clustered/alternating) |
-| | ≥0.05 | Consistent with random missing |
+| | >=0.05 | Consistent with random missing |
 | Quality Grade | A (90-100) | Excellent (heuristic) |
 | | B (80-89) | Good with minor issues |
 | | C (70-79) | Quality concerns detected |
@@ -1141,16 +1141,16 @@ Variable Quality Check
 │  │
 │  ├─ Check skewness
 │  │  ├─ >1 → Use log transform for outlier detection
-│  │  └─ ≤1 → Use raw data
+│  │  └─ <=1 → Use raw data
 │  │
 │  ├─ Run outlier detection
-│  │  ├─ n≥10 → Consensus (≥2 methods) required
-│  │  ├─ 3≤n<10 → Informative only (single method OK, verify manually)
+│  │  ├─ n>=10 → Consensus (>=2 methods) required
+│  │  ├─ 3<=n<10 → Informative only (single method OK, verify manually)
 │  │  └─ n<3 → Insufficient data
 │  │
 │  ├─ Check missing %
 │  │  ├─ <20% → Complete-case analysis likely OK
-│  │  └─ ≥20% → Plan imputation
+│  │  └─ >=20% → Plan imputation
 │  │
 │  └─ Check CV
 │     ├─ Shown → Interpret relative variability
@@ -1164,7 +1164,7 @@ Variable Quality Check
    │
    └─ Check rare categories
       ├─ Any <threshold% → May violate chi-squared
-      └─ All ≥threshold% → OK for standard tests
+      └─ All >=threshold% → OK for standard tests
 ```
 
 ---

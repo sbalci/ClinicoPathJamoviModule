@@ -811,7 +811,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         # ── Plot: Time-dependent ROC curves ────────────────────
-        # TODO(m2): .plotROC uses base graphics — consider ggplot2 for theme consistency
+        # TODO(m2): .plotROC uses base graphics - consider ggplot2 for theme consistency
         .plotROC = function(image, ggtheme, theme, ...) {
             if (!self$options$plotROC || is.null(private$.fit))
                 return(FALSE)
@@ -914,7 +914,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     plot.caption = ggplot2::element_text(face = "italic")
                 )
 
-            # Add smoothing or line — fixed scope bug
+            # Add smoothing or line - fixed scope bug
             if (self$options$smoothAUC && nrow(plot_data) > 2) {
                 smooth_layer <- tryCatch({
                     ggplot2::geom_smooth(method = "loess", se = FALSE,

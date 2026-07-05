@@ -84,6 +84,7 @@ to `name/title/type/default/description`.
 ### 3.3 Backend — one helper, multiple injection sites (`R/multisurvival.b.R`)
 
 Add a private helper `.buildInteractionTerms()` that:
+
 1. reads `self$options$interactions` (list of labelled-name vectors),
 2. maps each component labelled name → real column name (same `all_labels` mechanism used
    for `explanatory`/`contexpl`),
@@ -149,7 +150,7 @@ table footnotes (`setNote`, limited HTML allow-list).
 ## 4. Guardrails & edge cases
 
 - **Marginality** — auto-enforced by the builder (only selected variables crossable).
-- **Factor levels** — moderator factor must have ≥2 levels; otherwise skip subgroup HRs
+- **Factor levels** — moderator factor must have >=2 levels; otherwise skip subgroup HRs
   with a note.
 - **Low subgroup event counts** — warn when a subgroup has few events (unstable HRs);
   reuse the existing EPV/low-event messaging style.

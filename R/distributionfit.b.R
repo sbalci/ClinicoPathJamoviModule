@@ -199,7 +199,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 selected_dists <- c("weibull", "exponential", "lognormal", "loglogistic", "gamma")
             }
             
-            # Build formula — composeTerms backtick-escapes user column names;
+            # Build formula - composeTerms backtick-escapes user column names;
             # asFormula validates against jamovi's allow-list (Surv is allow-listed).
             explanatory <- self$options$explanatory
             if (length(explanatory) > 0) {

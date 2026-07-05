@@ -24,21 +24,27 @@
 ## Learning Path
 
 ### Path 1: Clinical Trials Researcher
+
 ```
 Tutorial 1 → Tutorial 2 → Tutorial 3 → Tutorial 6
 ```
+
 Master descriptive statistics, group comparisons, survival analysis, and automated reporting.
 
 ### Path 2: Diagnostic Pathologist
+
 ```
 Tutorial 1 → Tutorial 4 → Tutorial 5
 ```
+
 Focus on diagnostic test evaluation, ROC curves, and clinical decision-making.
 
 ### Path 3: Comprehensive Clinical Researcher
+
 ```
 Tutorial 1 → 2 → 3 → 4 → 5 → 6 (complete series)
 ```
+
 Master all aspects of clinicopathological research analysis.
 
 ---
@@ -46,9 +52,11 @@ Master all aspects of clinicopathological research analysis.
 ## What You'll Learn
 
 ### Tutorial 1: Getting Started ⭐
+
 **Goal:** Install ClinicoPath and run your first analysis
 
 **Topics:**
+
 - Installing jamovi and ClinicoPath modules
 - Navigating the ClinicoPath interface
 - Importing clinical data (CSV, Excel, SPSS)
@@ -67,9 +75,11 @@ Master all aspects of clinicopathological research analysis.
 ---
 
 ### Tutorial 2: Table One for Clinical Trials ⭐⭐
+
 **Goal:** Create publication-quality baseline characteristics tables with statistical comparisons
 
 **Topics:**
+
 - Stratified analysis by treatment group
 - Automatic statistical test selection (t-test, chi-square, Fisher's exact)
 - Effect sizes (Cohen's d, Cramér's V)
@@ -88,9 +98,11 @@ Master all aspects of clinicopathological research analysis.
 ---
 
 ### Tutorial 3: Survival Analysis in Oncology ⭐⭐
+
 **Goal:** Perform comprehensive survival analysis for cancer research
 
 **Topics:**
+
 - Kaplan-Meier survival curves with confidence intervals
 - Log-rank, Wilcoxon, and Tarone-Ware tests
 - Median survival time calculation
@@ -112,9 +124,11 @@ Master all aspects of clinicopathological research analysis.
 ---
 
 ### Tutorial 4: ROC Analysis for Diagnostic Tests ⭐⭐
+
 **Goal:** Evaluate diagnostic test performance using ROC curves
 
 **Topics:**
+
 - Receiver Operating Characteristic (ROC) curves
 - Area Under the Curve (AUC) with 95% CI
 - Sensitivity and specificity at multiple cutpoints
@@ -136,9 +150,11 @@ Master all aspects of clinicopathological research analysis.
 ---
 
 ### Tutorial 5: Decision Curve Analysis ⭐⭐⭐
+
 **Goal:** Assess clinical utility and net benefit of prediction models
 
 **Topics:**
+
 - Decision curve analysis (DCA)
 - Net benefit calculation
 - Clinical utility vs. statistical significance
@@ -160,9 +176,11 @@ Master all aspects of clinicopathological research analysis.
 ---
 
 ### Tutorial 6: Creating Reproducible Reports ⭐⭐
+
 **Goal:** Automate analyses and generate reproducible manuscripts
 
 **Topics:**
+
 - Using ClinicoPath programmatically in R
 - Quarto document integration
 - Automated Table One, survival curves, ROC plots
@@ -184,19 +202,22 @@ Master all aspects of clinicopathological research analysis.
 ## Prerequisites
 
 ### Software Requirements
-- **jamovi** ≥ 2.5 (free download: [jamovi.org](https://www.jamovi.org))
+
+- **jamovi** >= 2.5 (free download: [jamovi.org](https://www.jamovi.org))
 - **ClinicoPath** modules (install via jamovi library)
 - **Computer:** Windows 10+, macOS 10.14+, or Linux Ubuntu 18.04+
 - **RAM:** 4 GB minimum, 8 GB recommended
 - **Disk Space:** 1 GB for jamovi + ClinicoPath + example data
 
 ### Knowledge Requirements
+
 - **Tutorial 1:** None! Complete beginners welcome.
 - **Tutorials 2-6:** Completion of Tutorial 1 recommended.
 - **No programming experience required** for any tutorial.
 
 ### Optional for Tutorial 6 (Reproducible Reports)
-- **R** ≥ 4.1 (for programmatic use)
+
+- **R** >= 4.1 (for programmatic use)
 - **RStudio** (recommended IDE)
 - **Quarto** (for report generation)
 
@@ -237,18 +258,21 @@ Each tutorial includes:
 ## How to Use These Tutorials
 
 ### For Self-Study
+
 1. Start with **Tutorial 1** (essential for all users)
 2. Follow your **learning path** based on research focus
 3. Complete **practice exercises** at the end of each tutorial
 4. Apply skills to **your own data**
 
 ### For Classroom Teaching
+
 - Each tutorial = one 90-minute lab session
 - Students work through tutorials at their own pace
 - Instructor provides guidance on practice exercises
 - Final project: Analyze real dataset using learned skills
 
 ### For Research Teams
+
 - Assign tutorials as onboarding for new team members
 - Use as reference for specific analyses
 - Standardize analytical approaches across team
@@ -259,17 +283,21 @@ Each tutorial includes:
 ## Additional Resources
 
 ### Documentation
+
 - **ClinicoPath Website:** [www.serdarbalci.com/ClinicoPathJamoviModule](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
 - **Development Guides:** [vignettes/](../vignettes/) (for developers)
 - **Function Reference:** [man/](../man/) (R documentation)
 
 ### Community
+
 - **GitHub Issues:** [Report bugs or request features](https://github.com/sbalci/ClinicoPathJamoviModule/issues/)
 - **jamovi Forum:** [Ask questions](https://forum.jamovi.org/)
-- **Email Support:** serdarbalci@serdarbalci.com
+- **Email Support:** <serdarbalci@serdarbalci.com>
 
 ### Scientific Skills Integration
+
 These tutorials align with the [scientific-skills framework](https://github.com/anthropics/claude-code) for:
+
 - **peer-review:** Critical evaluation of statistical methods
 - **statistical-analysis:** Rigorous hypothesis testing
 - **clinical-decision-support:** Evidence-based medicine
@@ -288,6 +316,7 @@ https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/
 ```
 
 **BibTeX:**
+
 ```bibtex
 @Misc{clinicopath-tutorials2025,
   title = {ClinicoPath Tutorial Series: Step-by-Step Guides for Clinicopathological Research},
@@ -316,6 +345,7 @@ Have suggestions for improving tutorials or ideas for new ones?
 **Software (ClinicoPath):** GPL-2
 
 You are free to:
+
 - ✅ Share tutorials with students and colleagues
 - ✅ Adapt tutorials for your courses
 - ✅ Translate tutorials into other languages
@@ -328,6 +358,7 @@ You are free to:
 ## Acknowledgments
 
 These tutorials were developed using:
+
 - **jamovi framework:** The jamovi project (2025)
 - **Clinical examples:** Based on published research and simulated data
 - **Statistical methods:** Standard clinicopathological research practices
@@ -384,7 +415,7 @@ A: Each tutorial has a Troubleshooting section. For additional help, visit the [
 ## Contact {#contact}
 
 **Tutorial Author:** Serdar Balci, MD, PhD
-**Email:** serdarbalci@serdarbalci.com
+**Email:** <serdarbalci@serdarbalci.com>
 **Website:** [www.serdarbalci.com](https://www.serdarbalci.com)
 **GitHub:** [sbalci/ClinicoPathJamoviModule](https://github.com/sbalci/ClinicoPathJamoviModule)
 
@@ -392,4 +423,4 @@ A: Each tutorial has a Troubleshooting section. For additional help, visit the [
 
 **Last Updated:** December 13, 2025
 **Tutorial Series Version:** 1.0
-**Compatible with:** ClinicoPath ≥ 0.0.32, jamovi ≥ 2.5
+**Compatible with:** ClinicoPath >= 0.0.32, jamovi >= 2.5

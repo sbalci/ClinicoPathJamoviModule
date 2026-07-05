@@ -13,6 +13,7 @@
 The per-cassette detection probability calculation has been corrected to account for **right-censored data**. In pathology sampling, cassettes after the first detection are typically not examined, meaning they should not be counted in the denominator.
 
 **Example:**
+
 - Case has 10 cassettes submitted
 - Tumor found in cassette #4
 - **What we know:** Cassettes 1-4 were examined (4 examined cassettes)
@@ -87,6 +88,7 @@ This recommendation is based on rigorous statistical analysis of 60 cases with m
 **Key Finding:** The binomial predictions now **PERFECTLY MATCH** the observed data!
 
 This confirms our calculation is correct:
+
 - At 4 cassettes: Predicted 95.2% vs Observed 95.0% (difference: 0.2%)
 - At 1 cassette: Predicted 53.1% vs Observed 55.0% (difference: 1.9%)
 
@@ -209,10 +211,12 @@ The original analysis **underestimated** the per-cassette detection probability 
 ### Skala & Hagemann 2015 Study
 
 **Their findings:**
+
 - Recommended: 10 blocks for 95% sensitivity
 - Population: Mixed gynecologic malignancies
 
 **Our findings (corrected):**
+
 - Recommended: 4-5 cassettes for 95-100% sensitivity
 - More efficient than published literature
 
@@ -239,7 +243,7 @@ Our data supports that 4-5 cassettes may be sufficient in populations with multi
 
 ### For Methods Section
 
-> **Pathology Sampling Adequacy Analysis:** We analyzed 60 cases with microscopic omental metastases to determine the minimum number of cassettes required for 95% sensitivity. Per-cassette detection probability was calculated accounting for right-censored data (cassettes after first detection are not examined), using the formula p = n_positive / sum(first_detection_positions). We employed two complementary statistical approaches: (1) Binomial probability modeling to calculate theoretical detection curves P(detect ≥1) = 1-(1-p)^n, and (2) Bootstrap resampling (10,000 iterations with replacement) following Skala and Hagemann (2015) to empirically estimate sensitivity and 95% confidence intervals without parametric assumptions. The binomial model predictions were validated against observed detection rates.
+> **Pathology Sampling Adequacy Analysis:** We analyzed 60 cases with microscopic omental metastases to determine the minimum number of cassettes required for 95% sensitivity. Per-cassette detection probability was calculated accounting for right-censored data (cassettes after first detection are not examined), using the formula p = n_positive / sum(first_detection_positions). We employed two complementary statistical approaches: (1) Binomial probability modeling to calculate theoretical detection curves P(detect >=1) = 1-(1-p)^n, and (2) Bootstrap resampling (10,000 iterations with replacement) following Skala and Hagemann (2015) to empirically estimate sensitivity and 95% confidence intervals without parametric assumptions. The binomial model predictions were validated against observed detection rates.
 
 ### For Results Section
 
@@ -268,15 +272,18 @@ Our data supports that 4-5 cassettes may be sufficient in populations with multi
 This correction addresses a fundamental issue in pathology sampling research:
 
 **The Problem:**
+
 - When a tumor is detected in cassette #N, cassettes N+1, N+2, etc. are not examined
 - These unexamined cassettes should NOT be counted as "negative"
 - They are **right-censored** (unknown status)
 
 **The Solution:**
+
 - Only count cassettes up to first detection: sum(first_detection_positions)
 - Do NOT use total submitted cassettes in the denominator
 
 **Mathematical Proof:**
+
 ```
 Case example:
 - 10 cassettes submitted

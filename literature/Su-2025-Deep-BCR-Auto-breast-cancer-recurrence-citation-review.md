@@ -5,14 +5,14 @@
 ## ARTICLE SUMMARY
 
 - **Title/Label**: Computational Pathology for Accurate Prediction of Breast Cancer Recurrence: Development and Validation of a Deep Learning-Based Tool
-- **Design & Cohort**: Development and external validation study. Training: TCGA-BRCA dataset (1006 patients, 1065 H&E WSIs, primarily HR+/HER2- with 516 cases, ODX-based labels: 443 low-risk [≤25] vs 73 high-risk [>25]). Independent testing: OSU dataset (339 patients, 465 H&E WSIs, 384 with ODX ≤25 and 81 with ODX >25). Pipeline: Deep-BCR-Auto (tumor bulk segmentation + weakly supervised learning via cross-attention MIL). 3-fold cross-validation on TCGA; best model tested on OSU.
+- **Design & Cohort**: Development and external validation study. Training: TCGA-BRCA dataset (1006 patients, 1065 H&E WSIs, primarily HR+/HER2- with 516 cases, ODX-based labels: 443 low-risk [<=25] vs 73 high-risk [>25]). Independent testing: OSU dataset (339 patients, 465 H&E WSIs, 384 with ODX <=25 and 81 with ODX >25). Pipeline: Deep-BCR-Auto (tumor bulk segmentation + weakly supervised learning via cross-attention MIL). 3-fold cross-validation on TCGA; best model tested on OSU.
 - **Key Analyses**:
   - AUROC with 1000-time bootstrap 95% CIs (primary metric)
   - Area under precision-recall curve
   - DeLong's test for comparing AUROC between models
   - Confusion matrices at 70%, 80%, 90% sensitivity thresholds
   - Calibration curve (LOESS-based) with C(ROC), Brier score, calibration slope, ECI
-  - Subgroup AUROC by race (African American, Caucasian, Asian), age (≤50, >50), and cancer subtype (IDC, ILC, other)
+  - Subgroup AUROC by race (African American, Caucasian, Asian), age (<=50, >50), and cancer subtype (IDC, ILC, other)
   - Misclassification analysis by ODX score distribution
 
 ---
@@ -30,7 +30,7 @@
 | PMID | TODO |
 | Publisher | Elsevier / USCAP |
 | First Author | Ziyu Su |
-| Corresponding Author | Metin N. Gurcan (Metin.Gurcan@advocatehealth.org) |
+| Corresponding Author | Metin N. Gurcan (<Metin.Gurcan@advocatehealth.org>) |
 | Received / Accepted | January 21, 2025 / July 1, 2025 |
 | License | All rights reserved (Elsevier) |
 
@@ -51,7 +51,7 @@
 | Area under precision-recall curve (AUPRC) | Secondary -- imbalanced classification performance | Bootstrap 95% CI; TCGA: 0.535 [0.531, 0.542]; OSU: 0.543 [0.542, 0.548] | Important given class imbalance (~16% high-risk); complements AUROC | Results (p5), Table 3, Figs 2B, 5B |
 | Confusion matrices | Secondary -- classification performance at thresholds | At 70%, 80%, 90% sensitivity on TCGA; threshold-tuned on OSU validation subset | Sensitivity fixed; specificity, PPV, NPV derived | Results (p6), Figs 3, Table 4 |
 | Calibration curve | Secondary -- calibration assessment | LOESS-based flexible calibration; metrics: C(ROC)=0.83, Brier=0.12, Brier scaled=0.15, Intercept=0.03, Slope=0.62, ECI=0.07 | Slope 0.62 indicates overfitting / miscalibration at high probabilities | Results (p8), Fig 5C |
-| Subgroup analysis | Secondary -- fairness/equity assessment | AUROC by race: African American 0.898, Caucasian 0.813, Asian 0.838; by age: <50 (0.832), ≥50 (0.808); by subtype: IDC (0.832), ILC (0.723), other (0.809) | Small subgroup sizes limit power; P values from DeLong's test | Results (p6-7), Fig 4 |
+| Subgroup analysis | Secondary -- fairness/equity assessment | AUROC by race: African American 0.898, Caucasian 0.813, Asian 0.838; by age: <50 (0.832), >=50 (0.808); by subtype: IDC (0.832), ILC (0.723), other (0.809) | Small subgroup sizes limit power; P values from DeLong's test | Results (p6-7), Fig 4 |
 | 3-fold cross-validation | Primary -- model selection | Patient-level split preventing data leakage; stratified by risk category; data augmentation for non-HR+/HER2- | Standard CV practice for model evaluation | Methods (p4-5) |
 | Partial correlation | Secondary -- biological validation | Correlation with ODX after controlling for histological grade (r=0.379, P<.001) and mitosis score (r=0.387, P<.001) | Pearson partial correlation; validates that model captures ODX-related morphological features | Results (p5), Supplementary |
 
@@ -93,6 +93,7 @@
 | Bias assessment | 0/1 | Calibration slope 0.62 indicates systematic miscalibration at high probabilities; acknowledged but not corrected |
 
 ### Strengths
+
 1. **Independent external validation**: OSU dataset from different institution with comparable AUROC (0.832 vs 0.827)
 2. **Comprehensive calibration**: LOESS calibration curve with Brier score, slope, intercept, ECI -- rarely seen in pathology DL papers
 3. **Equity analysis**: AUROC reported across racial groups, ages, and cancer subtypes -- addresses health disparities
@@ -102,8 +103,9 @@
 7. **Bootstrap CIs**: 1000-resample bootstrap for all AUROC values -- statistically rigorous
 
 ### Weaknesses
+
 1. **Calibration slope 0.62**: Substantial miscalibration at high predicted probabilities; model underestimates risk for high-risk patients
-2. **Binary classification only**: ODX score treated as binary (≤25 vs >25); continuous score prediction would be more informative
+2. **Binary classification only**: ODX score treated as binary (<=25 vs >25); continuous score prediction would be more informative
 3. **Class imbalance**: Only 16% high-risk in TCGA, 21% in OSU; AUPRC of ~0.54 is modest
 4. **ILC performance**: AUROC 0.723 for invasive lobular carcinoma (vs 0.832 for IDC) -- significant performance gap
 5. **No comparison with clinical predictors**: No comparison of DL model vs standard clinicopathological variables (grade, size, nodal status)
@@ -147,6 +149,7 @@
 ### Not Recommended: Gap 1 (DeLong's test) -- Already Covered
 
 **Verification result**: DeLong's test is **extensively implemented** across multiple ClinicoPath functions:
+
 - `psychopdaROC` (delongTest option with pairwise comparison table)
 - `enhancedROC` (comparisonMethod = "delong")
 - `aivalidation` (model comparison via DeLong)

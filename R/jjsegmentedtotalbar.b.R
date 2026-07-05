@@ -30,7 +30,6 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom stringr str_to_title
 #' @importFrom rlang sym
-#' @export
 
 jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jjsegmentedtotalbarClass",
@@ -44,12 +43,12 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .preset_style_override = NULL,
         .preset_palette_override = NULL,
 
-        # TODO (cleanup): `.escapeVar` is dead code — defined here but never called
+        # TODO (cleanup): `.escapeVar` is dead code - defined here but never called
         # anywhere in this file (grep confirms 1 occurrence: the definition).
         # Safe to delete. Removed for now via "no callers" rationale, but if a
         # future need arises, use `jmvcore::composeTerm()` for formula contexts
         # or `rlang::sym()` directly (handles non-syntactic names natively) for
-        # symbol contexts — do NOT resurrect this helper.
+        # symbol contexts - do NOT resurrect this helper.
         .escapeVar = function(x) {
             # Convert variable names with special characters to safe R names
             # This mirrors the modelbuilder behavior for handling spaces and punctuation
@@ -993,7 +992,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Faceting (simple)
             # TODO (forward-looking): `facet_wrap(rlang::sym(...))` passes a bare
-            # symbol — works via ggplot2 tidy-eval coercion but is undocumented API.
+            # symbol - works via ggplot2 tidy-eval coercion but is undocumented API.
             # For forward-compat, prefer either:
             #   facet_wrap(ggplot2::vars(!!rlang::sym(self$options$facet_var)), scales = "free_x")
             #   or
@@ -1291,7 +1290,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         # "custom"` (early return below for custom). If a user switches from a
         # preset to "custom" between runs against the same R6 instance, the
         # prior preset's config persists and leaks into the next analysis.
-        # Fix: clear it on the early-return path —
+        # Fix: clear it on the early-return path - 
         #   if (preset == "custom") { private$.preset_config <- NULL; return() }
         .applyPresetConfiguration = function() {
 
@@ -1451,9 +1450,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         residual_value <- residuals[max_residual_pos[1, 1], max_residual_pos[1, 2]]
                         
                         residual_interpretation <- if (residual_value > 0) {
-                            paste0("Highest positive association: ", max_row, " → ", max_col)
+                            paste0("Highest positive association: ", max_row, " \u2192 ", max_col)
                         } else {
-                            paste0("Highest negative association: ", max_row, " → ", max_col)
+                            paste0("Highest negative association: ", max_row, " \u2192 ", max_col)
                         }
                         
                         residual_row <- list(

@@ -9,12 +9,12 @@
 - OMV copy: `data-raw/non-rda/timeroc_test.omv`
 
 **Additional datasets for edge cases:**
-- `timeroc_cancer_biomarker` -- general cancer biomarker scenarios
-- `timeroc_cardiovascular_risk` -- cardiovascular risk markers
-- `timeroc_multi_biomarker` -- multiple biomarkers for comparison testing
-- `timeroc_edge_cases` -- designed edge cases (missing data, extremes)
-- `timeroc_competing_risks` -- competing risks scenarios
-- `timeroc_landmark_biomarker` -- landmark biomarker scenarios
+- `timeroc_cancer_biomarker` - general cancer biomarker scenarios
+- `timeroc_cardiovascular_risk` - cardiovascular risk markers
+- `timeroc_multi_biomarker` - multiple biomarkers for comparison testing
+- `timeroc_edge_cases` - designed edge cases (missing data, extremes)
+- `timeroc_competing_risks` - competing risks scenarios
+- `timeroc_landmark_biomarker` - landmark biomarker scenarios
 
 ---
 
@@ -384,7 +384,7 @@
 - Same as T01, but: `timepoints` = "120, 240, 360"
 
 **Expected Outputs:**
-- [ ] WARNING notice: "Timepoints Adjusted" -- all timepoints exceed max follow-up
+- [ ] WARNING notice: "Timepoints Adjusted" - all timepoints exceed max follow-up
 - [ ] Timepoints replaced with quartiles of actual follow-up time
 - [ ] Analysis completes with adjusted timepoints
 
@@ -491,7 +491,7 @@ Every option must appear in at least one test scenario:
 | 6 | `timepoints` | String | T01 (default), T11, T23, T26, T27, T28 |
 | 7 | `method` | List | T01 (default), T03 (all 3 values) |
 | 8 | `bootstrapCI` | Bool | T01 (false), T04 (true), T16 (true), T17 (false) |
-| 9 | `nboot` | Integer | (deprecated/hidden -- no active test needed) |
+| 9 | `nboot` | Integer | (deprecated/hidden - no active test needed) |
 | 10 | `plotROC` | Bool | T01 (default true), T19 (false) |
 | 11 | `plotAUC` | Bool | T01 (default true), T20 (false) |
 | 12 | `timetypeoutput` | List | T01 (default months), T12 (all 4 values) |

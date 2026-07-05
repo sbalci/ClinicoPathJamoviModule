@@ -783,55 +783,6 @@ decisioncompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' standard. Includes statistical comparison using McNemar's test and 
 #' confidence intervals for differences.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic comparison of two diagnostic tests
-#' library(ClinicoPath)
-#' data('histopathology')
-#'
-#' # Example 1: Compare imaging vs blood test performance
-#' result1 <- decisioncompare(
-#'     data = histopathology,
-#'     gold = "Golden Standart",
-#'     goldPositive = "1",
-#'     test1 = "New Test",
-#'     test1Positive = "1",
-#'     test2 = "Rater 1",
-#'     test2Positive = "1",
-#'     ci = TRUE,
-#'     plot = TRUE
-#' )
-#'
-#' # Example 2: Three-test comparison with statistical analysis
-#' result2 <- decisioncompare(
-#'     data = histopathology,
-#'     gold = "Golden Standart",
-#'     goldPositive = "1",
-#'     test1 = "New Test",
-#'     test1Positive = "1",
-#'     test2 = "Rater 1",
-#'     test2Positive = "1",
-#'     test3 = "Rater 2",
-#'     test3Positive = "1",
-#'     statComp = TRUE,
-#'     radarplot = TRUE
-#' )
-#'
-#' # Example 3: Using custom prevalence for clinical setting
-#' result3 <- decisioncompare(
-#'     data = histopathology,
-#'     gold = "Golden Standart",
-#'     goldPositive = "1",
-#'     test1 = "New Test",
-#'     test1Positive = "1",
-#'     test2 = "Rater 1",
-#'     test2Positive = "1",
-#'     pp = TRUE,
-#'     pprob = 0.15,  # 15 percent prevalence in screening population
-#'     od = TRUE      # Show original frequency tables
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param gold The gold standard reference variable representing true disease
 #'   status.

@@ -13,25 +13,26 @@ description:
         (year, month, day, hour, minute, day name, week number, quarter, etc.).
         Features automatic format detection, quality assessment, and preview of converted data.
         Perfect for preparing datetime data for analysis and creating time-based variables.
-    R:
-        dontrun: true
-        usage: |
-            # Basic datetime conversion: '0.0.47'
-            datetimeconverter(
-              data = study_data,
-              datetime_var = "event_date",
-              datetime_format = "auto"
-            )
+        
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Convert a character date column to standardized datetime:
+    #         datetimeconverter(
+    #           data = histopathology,
+    #           datetime_var = "SurgeryDate",
+    #           datetime_format = "ymdhms"
+    #         )
 
-            # Extract components:
-            datetimeconverter(
-              data = study_data,
-              datetime_var = "timestamp",
-              datetime_format = "ymd_hms",
-              extract_year = TRUE,
-              extract_month = TRUE,
-              extract_dayname = TRUE
-            )
+    #         # Extract datetime components:
+    #         datetimeconverter(
+    #           data = histopathology,
+    #           datetime_var = "SurgeryDate",
+    #           datetime_format = "ymdhms",
+    #           extract_year = TRUE,
+    #           extract_month = TRUE,
+    #           extract_dayname = TRUE
+    #         )
 
 options:
     # === CORE DATA INPUT ===

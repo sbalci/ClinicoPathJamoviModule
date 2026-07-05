@@ -1,4 +1,4 @@
-# Sparse Group LASSO Cox Regression -- Developer Documentation
+# Sparse Group LASSO Cox Regression - Developer Documentation
 
 ## 1. Overview
 
@@ -6,10 +6,10 @@
 - **Menu**: SurvivalT > Penalized Cox Regression > Sparse Group LASSO Cox
 - **Version**: 1.0.0 (Draft)
 - **Files**:
-  - `jamovi/sparsegrouplasso.u.yaml` -- UI
-  - `jamovi/sparsegrouplasso.a.yaml` -- Options
-  - `R/sparsegrouplasso.b.R` -- Backend
-  - `jamovi/sparsegrouplasso.r.yaml` -- Results
+  - `jamovi/sparsegrouplasso.u.yaml` - UI
+  - `jamovi/sparsegrouplasso.a.yaml` - Options
+  - `R/sparsegrouplasso.b.R` - Backend
+  - `jamovi/sparsegrouplasso.r.yaml` - Results
 
 **Summary**: Sparse Group LASSO approximates penalized Cox regression that selects variable groups while allowing individual sparsity within groups. Uses `glmnet::cv.glmnet(family="cox")` with penalty.factor weighting to combine group-level and individual-level penalties. Supports 5 grouping methods, 4 selection criteria (CV deviance, AIC, BIC, EBIC), adaptive weighting, stability selection, bootstrap CIs, repeated CV, and comparison against pure Group LASSO and LASSO models.
 
@@ -21,11 +21,11 @@
 
 | UI Control | Type | Label | Binds to Option | Default | Enable Condition |
 |------------|------|-------|-----------------|---------|------------------|
-| `time_var` | VariablesListBox | Time Variable | `time_var` | -- | Always |
-| `event_var` | VariablesListBox | Event Variable | `event_var` | -- | Always |
-| `outcomeLevel` | LevelSelector | Event Level | `outcomeLevel` | -- | `(event_var)` |
-| `censorLevel` | LevelSelector | Censored Level | `censorLevel` | -- | `(event_var)` |
-| `pred_vars` | VariablesListBox | Predictor Variables | `pred_vars` | -- | Always |
+| `time_var` | VariablesListBox | Time Variable | `time_var` | - | Always |
+| `event_var` | VariablesListBox | Event Variable | `event_var` | - | Always |
+| `outcomeLevel` | LevelSelector | Event Level | `outcomeLevel` | - | `(event_var)` |
+| `censorLevel` | LevelSelector | Censored Level | `censorLevel` | - | `(event_var)` |
+| `pred_vars` | VariablesListBox | Predictor Variables | `pred_vars` | - | Always |
 
 ### Data Suitability (CollapseBox, collapsed: false)
 
@@ -39,7 +39,7 @@
 |------------|------|-----------------|---------|------------------|
 | `group_definition` | ComboBox | `group_definition` | `factor_based` | Always |
 | `custom_groups` | TextBox (string) | `custom_groups` | `""` | `(group_definition:custom)` |
-| `pathway_info` | VariablesListBox | `pathway_info` | -- | Always |
+| `pathway_info` | VariablesListBox | `pathway_info` | - | Always |
 | `correlation_threshold` | TextBox (number) | `correlation_threshold` | `0.7` | `(group_definition:correlation_based)` |
 
 ### Penalty & Lambda (CollapseBox, collapsed: false)
@@ -275,7 +275,7 @@ cv_folds: 5
 
 | Package | Usage |
 |---------|-------|
-| `glmnet` | `cv.glmnet()`, `glmnet()` -- core engine |
+| `glmnet` | `cv.glmnet()`, `glmnet()` - core engine |
 | `survival` | `Surv()`, `concordance()`, `coxph()` |
 | `ggplot2` | All plot rendering |
 | `scales` | `percent_format()` in stability plot |

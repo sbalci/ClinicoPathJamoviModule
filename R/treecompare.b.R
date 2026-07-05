@@ -27,12 +27,12 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             if (!validation_result$valid) {
                 # TODO (UX): validation_result$message (built at L85/93/110/116/132/141/152/155)
-                #   is NEVER rendered — only show_welcome is honored here, so the non-welcome
+                #   is NEVER rendered - only show_welcome is honored here, so the non-welcome
                 #   error cases (e.g. invalid targetLevel, too few cases) return a BLANK result
                 #   with no explanation. Surface it: when !show_welcome and message exists, call
                 #   jmvcore::reject(validation_result$message) (escaped channel). FORWARD-LOOKING
                 #   SECURITY: L93's message embeds targetLevel + target_levels (factor-level DATA
-                #   VALUES) — if it is ever routed to setContent/HTML instead of reject, wrap the
+                #   VALUES) - if it is ever routed to setContent/HTML instead of reject, wrap the
                 #   data-derived parts in htmltools::htmlEscape first (cf. treeadvanced L1281).
                 if (validation_result$show_welcome) {
                     private$.show_welcome_message()

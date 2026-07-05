@@ -657,7 +657,7 @@ ratings. Will be added to the dataset and available for downstream
 analyses.}
 
 \item{consensusRule}{Rule for defining consensus. Simple majority = modal
-category with >50 percent of votes. Supermajority requires ≥75 percent
+category with >50 percent of votes. Supermajority requires >=75 percent
 agreement. Unanimous requires 100 percent agreement. Cases not meeting
 threshold are set to NA in consensus variable.}
 
@@ -672,7 +672,7 @@ categories) classification. Useful for identifying difficult cases and
 quality control.}
 
 \item{detailLevel}{Simple mode: All Agreed (100 percent), Majority Agreed
-(≥threshold percent), No Agreement (<threshold percent). Detailed mode:
+(>=threshold percent), No Agreement (<threshold percent). Detailed mode:
 Absolute (100 percent), High, Moderate, Low, Poor (based on
 custom/data-driven thresholds). Simple mode replicates the former
 "Agreement Status" feature.}
@@ -686,11 +686,11 @@ categories. Custom = user-defined cutpoints. Quartiles/Tertiles =
 data-driven splits.}
 
 \item{loaHighThreshold}{For Detailed mode with Custom thresholds only:
-Minimum  percent for "High" classification (e.g., 75 percent = ≥12/16
-raters). Cases ≥ this threshold are "High Agreement".}
+Minimum  percent for "High" classification (e.g., 75 percent = >=12/16
+raters). Cases >= this threshold are "High Agreement".}
 
 \item{loaLowThreshold}{For Detailed mode with Custom thresholds only:
-Minimum  percent for "Low" classification (e.g., 56 percent = ≥9/16
+Minimum  percent for "Low" classification (e.g., 56 percent = >=9/16
 raters). Below = "Poor", between Low and High = "Moderate".}
 
 \item{loaVariableName}{Name for the computed Level of Agreement variable

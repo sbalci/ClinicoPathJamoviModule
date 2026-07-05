@@ -1,7 +1,7 @@
 #' @title Multi-Model Performance Comparison
 #' @description
 #' Compare performance of multiple statistical models side-by-side. Supports Cox proportional hazards,
-#' logistic regression, and linear regression. Provides unified comparison with AIC, BIC, R², C-index.
+#' logistic regression, and linear regression. Provides unified comparison with AIC, BIC, R^2, C-index.
 #' Inspired by Orange Data Mining's Test & Score widget.
 #'
 #' @author ClinicoPath Development Team
@@ -417,7 +417,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 return(FALSE)
             }
 
-            # TODO (cleanup): file-wide pattern — `library(ggplot2)` / `library(pROC)`
+            # TODO (cleanup): file-wide pattern - `library(ggplot2)` / `library(pROC)`
             # calls at this site, L482 (.rocPlot), L483 (.rocPlot) modify the user's
             # search path at runtime and trip R CMD check. Replace with
             # `requireNamespace("ggplot2", quietly = TRUE)` + explicit `ggplot2::` /

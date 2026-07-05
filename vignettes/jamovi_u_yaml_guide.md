@@ -1379,7 +1379,7 @@ children:
 
 ## 12. Patterns Adopted from the SummaryTables Module
 
-This section captures advanced patterns observed in the [NourEdinDarwish/SummaryTables](https://github.com/NourEdinDarwish/SummaryTables) module (which mirrors the gtsummary R package as a jamovi UI). These patterns are battle-tested for clinical summary tables, regression tables, and survival tables — many are directly applicable to ClinicoPath functions and are currently underused.
+This section captures advanced patterns observed in the [NourEdinDarwish/SummaryTables](https://github.com/NourEdinDarwish/SummaryTables) module (which mirrors the gtsummary R package as a jamovi UI). These patterns are battle-tested for clinical summary tables, regression tables, and survival tables - many are directly applicable to ClinicoPath functions and are currently underused.
 
 ### 12.1 Manual Run Gate (Defer Computation)
 
@@ -1424,7 +1424,7 @@ Heavy analyses (survival, regression, ROC, bootstrapping) re-execute on every op
 
 The single most powerful pattern in SummaryTables: a "Default" ComboBox sets the choice for *all* variables, and a paired `ListBox` shows one row per selected variable letting users *override* the default for individual variables. This collapses what would otherwise be dozens of options into a clean two-tier UI.
 
-**`.a.yaml`** (two options — a List default and an Array of Groups):
+**`.a.yaml`** (two options - a List default and an Array of Groups):
 ```yaml
 - name: statContDefault
   title: Default statistic
@@ -1492,7 +1492,7 @@ The single most powerful pattern in SummaryTables: a "Default" ComboBox sets the
 }
 ```
 
-**When to use in ClinicoPath:** any function that currently applies a single setting (test, transform, plot type, color, scaling) to a *set* of variables — e.g. `jjbetweenstats` (per-DV test type), `multisurvival` (per-covariate display), `psychopdaroc` (per-marker direction), `tableone`/`crosstable` (per-variable statistic), `agreement` (per-rater weights), `crosstable` (per-row chi-square vs Fisher).
+**When to use in ClinicoPath:** any function that currently applies a single setting (test, transform, plot type, color, scaling) to a *set* of variables - e.g. `jjbetweenstats` (per-DV test type), `multisurvival` (per-covariate display), `psychopdaroc` (per-marker direction), `tableone`/`crosstable` (per-variable statistic), `agreement` (per-rater weights), `crosstable` (per-row chi-square vs Fisher).
 
 ---
 
@@ -1561,7 +1561,7 @@ This is more compact than nested `fitToGrid` and avoids the 2×N checkbox-grid l
 
 ### 12.5 The Standard "Appearance" Block (Journal Style + Typography)
 
-SummaryTables uses an identical `Appearance` `CollapseBox` across every analysis — a strong UX win because users learn it once. The pattern: theme picker, compact toggle, language selector, then a 2×2 typography grid.
+SummaryTables uses an identical `Appearance` `CollapseBox` across every analysis - a strong UX win because users learn it once. The pattern: theme picker, compact toggle, language selector, then a 2×2 typography grid.
 
 ```yaml
 - type: CollapseBox
@@ -1635,7 +1635,7 @@ SummaryTables ships a trailing `CollapseBox` that lets users export the rendered
 }
 ```
 
-**Security note:** validate the `path` value before writing — restrict to known directories or use `tools::file_path_sans_ext()` + a controlled extension. See `feedback_skip_approval_prompt_when_clean.md` for related guidance.
+**Security note:** validate the `path` value before writing - restrict to known directories or use `tools::file_path_sans_ext()` + a controlled extension. See `feedback_skip_approval_prompt_when_clean.md` for related guidance.
 
 ---
 
@@ -1647,7 +1647,7 @@ SummaryTables exposes a model-term builder (drag covariates → "Add interaction
 ```yaml
 - name: modelTerms
   title: Model terms
-  type: Terms                   # NOT Variables — Terms supports interactions
+  type: Terms                   # NOT Variables - Terms supports interactions
   default: []
 ```
 
@@ -1682,7 +1682,7 @@ formula <- as.formula(paste0(lhs, " ~ ", paste(rhs, collapse = " + ")))
 
 ### 12.8 `RadioButton` with `optionName` / `optionPart`
 
-When a List option has only 2–3 mutually exclusive choices *and* each branch should reveal different sub-controls, `RadioButton` is more discoverable than ComboBox. The `optionName` + `optionPart` binding lets each radio control one value of a shared List option:
+When a List option has only 2 - 3 mutually exclusive choices *and* each branch should reveal different sub-controls, `RadioButton` is more discoverable than ComboBox. The `optionName` + `optionPart` binding lets each radio control one value of a shared List option:
 
 ```yaml
 # .a.yaml

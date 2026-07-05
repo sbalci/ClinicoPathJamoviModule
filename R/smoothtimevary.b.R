@@ -344,7 +344,7 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         covar_names <- data_prep$covariate_names
         tvc_names <- data_prep$tvc_names
         
-        # TODO (cleanup): `formula_parts` is built here (L348/L352) but never used — the real
+        # TODO (cleanup): `formula_parts` is built here (L348/L352) but never used - the real
         #   formulas are constructed independently below (full_formula L363/L365, constant_formula
         #   L500). Dead code; remove this block.
         # Create base formula components

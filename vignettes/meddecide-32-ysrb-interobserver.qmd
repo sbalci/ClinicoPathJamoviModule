@@ -25,17 +25,17 @@ A reliability study almost never ends with one number. You report an overall
 Fleiss' kappa, a reviewer asks *"which two readers actually disagreed?"* and
 *"which diagnostic category is dragging the agreement down?"*, and suddenly a
 single summary statistic is not enough. Interobserver studies of structured
-reporting systems — the Yokohama System for Reporting Breast cytopathology
-(YSRB), the Milan system, the Bethesda system, ISUP grading — routinely pair the
+reporting systems - the Yokohama System for Reporting Breast cytopathology
+(YSRB), the Milan system, the Bethesda system, ISUP grading - routinely pair the
 overall kappa with two supplementary tables:
 
-* **Table I — every rater pair.** Cohen's kappa for each of the $\binom{k}{2}$
+* **Table I - every rater pair.** Cohen's kappa for each of the $\binom{k}{2}$
   reader pairs, with a confidence interval and a significance test. This is how
   you spot an outlier reader whose pairwise kappas are systematically lower than
   everyone else's.
-* **Table II — every category.** A per-category agreement rate that answers
+* **Table II - every category.** A per-category agreement rate that answers
   *"when readers land on category c, how often do they all agree?"* This is how
-  you find the diagnostic bottleneck — typically the "atypical / suspicious"
+  you find the diagnostic bottleneck - typically the "atypical / suspicious"
   middle category.
 
 The `agreement` analysis produces both, alongside the overall kappa, from the
@@ -104,7 +104,7 @@ knitr::kable(res$irrtable$asDF, digits = 3,
 The overall kappa tells you the readers agree appreciably better than chance,
 but it hides *where* the agreement comes from and *where* it breaks down.
 
-## Table I — All-pairs Cohen's kappa
+## Table I - All-pairs Cohen's kappa
 
 ```{r table1}
 allpairs <- res$allPairsKappaTable$asDF
@@ -122,14 +122,14 @@ Two points worth stressing about this table:
 
 * **The confidence intervals are computed from the non-null asymptotic standard
   error** (via `vcd::Kappa`), so they agree with `psych::cohen.kappa()` and are
-  *wider* — i.e. honest — compared with intervals built from the kappa/z test
+  *wider* - i.e. honest - compared with intervals built from the kappa/z test
   statistic, which uses the standard error under the null hypothesis of no
   agreement. A too-narrow CI would overstate precision.
 * **Pairs involving the noisier Reader 4** sit at the bottom of the kappa
   ranking. In a real study this is exactly the signal that prompts targeted
   re-training rather than a blanket "agreement was moderate" conclusion.
 
-## Table II — Agreement by modal category
+## Table II - Agreement by modal category
 
 For each case we take the modal (most common) reading across the four readers,
 then, within each category, average the case-level agreement rate. A 4/4 case
@@ -150,7 +150,7 @@ knitr::kable(
 The benign category (II) carries most of the cases and shows high, tightly
 estimated agreement. The rarer categories (I, III, IV) are represented by only a
 handful of modal cases, so their agreement estimates are unstable and their
-confidence intervals are wide — a reminder that a per-category mean is only as
+confidence intervals are wide - a reminder that a per-category mean is only as
 trustworthy as its cell count. In a real, larger YSRB or Milan series this same
 table is where the atypical/suspicious middle categories typically reveal
 themselves as the agreement bottleneck; here it mainly illustrates that you
@@ -161,13 +161,13 @@ should read sparse-category rows with their CIs, not their point estimates.
 **The kappa paradox.** When a category is rare, kappa can be paradoxically low
 even when observed agreement is high. If any category is sparse, the analysis
 attaches a note to the overall table suggesting the prevalence-robust
-alternatives it also offers — Gwet's AC1/AC2 and PABAK — as sensitivity
+alternatives it also offers - Gwet's AC1/AC2 and PABAK - as sensitivity
 analyses. Enable those (and `bootstrapCI`) when your marginal distribution is as
 lopsided as a typical benign-dominated cytology series.
 
-**Multiplicity.** With $k$ readers you run $\binom{k}{2}$ pairwise tests — 6 for
+**Multiplicity.** With $k$ readers you run $\binom{k}{2}$ pairwise tests - 6 for
 four readers, 15 for six. The `Multiple Testing Correction` option (Bonferroni,
-Benjamini–Hochberg, or Holm) adds an adjusted-p column to Table I so you do not
+Benjamini-Hochberg, or Holm) adds an adjusted-p column to Table I so you do not
 read six raw p-values as if they were one.
 
 ## Reproducibility

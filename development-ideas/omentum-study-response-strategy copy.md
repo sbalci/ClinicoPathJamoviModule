@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**Context**: Maglalang & Fadare (UCSD, 2025) published in *Am J Clin Pathol* claiming 1-2 blocks are sufficient for omentum sampling in gynecologic cancers (n=1,055), contradicting established guidelines (ISGyP/ICCR: ≥4 blocks).
+**Context**: Maglalang & Fadare (UCSD, 2025) published in *Am J Clin Pathol* claiming 1-2 blocks are sufficient for omentum sampling in gynecologic cancers (n=1,055), contradicting established guidelines (ISGyP/ICCR: >=4 blocks).
 
 **Critical Issues**: Retrospective design without gold standard, no false negative rate quantification, no clinical outcomes assessed, circular sampling bias.
 
@@ -14,7 +14,7 @@
 
 ### The Problem
 
-International guidelines for omentum sampling in gynecologic cancer staging recommend ≥4 blocks (ISGyP 2019, ICCR 2022), but a recent large retrospective study (Maglalang & Fadare 2025, n=1,055) suggests 1-2 blocks may be sufficient. However, this conclusion is based on microscopic positivity rates (MPR) without a gold standard comparison, precluding assessment of false negative rates—the critical metric for staging adequacy.
+International guidelines for omentum sampling in gynecologic cancer staging recommend >=4 blocks (ISGyP 2019, ICCR 2022), but a recent large retrospective study (Maglalang & Fadare 2025, n=1,055) suggests 1-2 blocks may be sufficient. However, this conclusion is based on microscopic positivity rates (MPR) without a gold standard comparison, precluding assessment of false negative rates—the critical metric for staging adequacy.
 
 ### The Gap
 
@@ -23,6 +23,7 @@ No prospective study has compared limited sampling strategies to complete tissue
 ### Our Contribution
 
 We propose the first prospective validation study using **complete sampling as the gold standard** to:
+
 1. Quantify false negative rates of 1-2 block sampling
 2. Model detection probability using validated frameworks (binomial, hypergeometric)
 3. Assess clinical impact on staging and survival outcomes
@@ -35,23 +36,27 @@ We propose the first prospective validation study using **complete sampling as t
 **Design**: Prospective, two-phase sampling study
 
 **Phase 1**: Complete Sampling Gold Standard (n=200)
+
 - Prosector submits initial 2 blocks (standardized protocol)
 - Study pathologist then **completely samples** all remaining tissue
 - Compare: 2-block diagnosis vs complete sampling diagnosis
 - Outcome: Sensitivity, false negative rate, predictors of missed disease
 
 **Phase 2**: Probabilistic Modeling
+
 - Binomial model: P(detection) = 1 - (1-p)^n
 - Tissue volume-based adequacy (blocks per cm³)
 - Clinical cutoff optimization (ROC analysis)
 
 **Subgroups** (addressing Maglalang limitations):
+
 - Gross appearance (normal, focal, multifocal, diffuse)
 - Primary site (tubo-ovarian vs endometrial)
 - Neoadjuvant chemotherapy (critical—Maglalang showed 5× higher MPR)
 - Specimen characteristics (weight, dimensions)
 
 **Clinical Outcomes** (5-year follow-up):
+
 - Stage migration rate (understaging frequency)
 - Adjuvant treatment decision changes
 - Recurrence-free survival (RFS)
@@ -62,26 +67,34 @@ We propose the first prospective validation study using **complete sampling as t
 ## Methodological Innovations
 
 ### 1. Gold Standard Comparison
+
 **Maglalang**: No gold standard → cannot assess false negatives
 **Our Study**: Complete sampling → quantifies missed disease
 
 ### 2. Detection Probability Modeling
+
 **Maglalang**: No modeling
 **Our Study**: Binomial framework (validated in LN adequacy studies)
+
 - Example: If disease prevalence = 10% per block, how many blocks for 95% detection?
 
 ### 3. Tissue Volume Accounting
+
 **Maglalang**: Block-to-size ratio uses 1D measurement (widest diameter)
 **Our Study**: Volume-based adequacy (blocks per gram or cm³)
+
 - 6 blocks from 100g omentum ≠ 6 blocks from 500g omentum
 
 ### 4. Clinical Impact Assessment
+
 **Maglalang**: No survival or staging outcomes
 **Our Study**: Cox regression for survival, stage migration quantification
 
 ### 5. Risk Stratification
+
 **Maglalang**: One-size-fits-all recommendation (1-2 blocks)
 **Our Study**: Context-dependent thresholds:
+
 - Normal, no NACT: 4 blocks (guideline)
 - Normal, post-NACT: 6+ blocks (19% MPR per Maglalang)
 - Multifocal/diffuse: 2-3 blocks (92% MPR)
@@ -94,6 +107,7 @@ We propose the first prospective validation study using **complete sampling as t
 ### New Feature: Omentum Adequacy Assessment
 
 **User Inputs**:
+
 - Gross appearance (normal/focal/multifocal/diffuse)
 - Blocks submitted
 - Specimen dimensions & weight
@@ -102,10 +116,11 @@ We propose the first prospective validation study using **complete sampling as t
 - Histology
 
 **Outputs**:
+
 1. **Adequacy Classification**:
    - Inadequate (<2 blocks or high false-negative risk)
    - Marginal (2-3 blocks, intermediate risk)
-   - Adequate (≥4 blocks, guideline-concordant)
+   - Adequate (>=4 blocks, guideline-concordant)
    - Excellent (risk-stratified approach)
 
 2. **Risk Assessment Table**:
@@ -116,6 +131,7 @@ We propose the first prospective validation study using **complete sampling as t
    - Block-to-volume ratio
 
 3. **Clinical Recommendation**:
+
    ```
    Scenario: Normal omentum, post-NACT, high-grade serous ovarian ca, 2 blocks
 
@@ -153,6 +169,7 @@ We propose the first prospective validation study using **complete sampling as t
 **Methods**: Prospective study with complete sampling gold standard (n=200 grossly normal omenta). Prosectors submitted initial 2 blocks; study pathologists completely sampled remaining tissue. Primary endpoint: sensitivity of 2-block sampling. Secondary: predictors of false negatives, clinical outcome correlation.
 
 **Results**: [Pending]
+
 - 2-block sensitivity: XX% (95% CI: XX-XX%)
 - False negative rate: XX%
 - Post-neoadjuvant cases: XX% false negative rate (vs XX% non-neoadjuvant, P=XX)
@@ -160,7 +177,7 @@ We propose the first prospective validation study using **complete sampling as t
 - Understaging rate: XX% with 2-block protocol vs XX% with complete sampling
 
 **Conclusions**: [Pending, but likely:]
-2-block sampling has insufficient sensitivity (< 90%) for detecting microscopic omental disease in high-risk scenarios. Evidence-based recommendations: ≥4 blocks standard, ≥6 blocks post-neoadjuvant. Prospective validation with gold standard comparison is essential before reducing sampling intensity.
+2-block sampling has insufficient sensitivity (< 90%) for detecting microscopic omental disease in high-risk scenarios. Evidence-based recommendations: >=4 blocks standard, >=6 blocks post-neoadjuvant. Prospective validation with gold standard comparison is essential before reducing sampling intensity.
 
 ---
 
@@ -170,7 +187,7 @@ We propose the first prospective validation study using **complete sampling as t
 > Omentectomy is a critical component of gynecologic cancer staging. Microscopic omental disease upstages 2-3% of "early-stage" ovarian cancers and 0.4-1.9% of endometrial cancers, directly impacting adjuvant treatment decisions and prognosis.
 
 **Paragraph 2** - Current Guidelines:
-> International guidelines (ISGyP 2019, ICCR 2022) recommend ≥4 blocks for grossly normal omenta, citing prior studies (Usubutun 2007, Skala & Hagemann 2015). However, these studies had methodological limitations (small n, simulation models), and optimal sampling remains debated.
+> International guidelines (ISGyP 2019, ICCR 2022) recommend >=4 blocks for grossly normal omenta, citing prior studies (Usubutun 2007, Skala & Hagemann 2015). However, these studies had methodological limitations (small n, simulation models), and optimal sampling remains debated.
 
 **Paragraph 3** - Maglalang Study:
 > Recently, Maglalang & Fadare (2025) analyzed 1,055 omentectomies and concluded 1-2 blocks are sufficient, as MPR did not statistically differ from higher sampling levels. This challenges established guidelines and could reduce pathology workload significantly.
@@ -211,17 +228,20 @@ We propose the first prospective validation study using **complete sampling as t
 ## Timeline & Milestones
 
 ### Month 1-3: Study Setup
+
 - IRB approval
 - Protocol finalization
 - Prosector training
 - Data collection system setup
 
 ### Month 4-24: Enrollment
+
 - Target: 200 grossly normal cases
 - Target: 100 grossly abnormal cases (comparison)
 - Complete sampling performed contemporaneously
 
 ### Month 25-30: Analysis & Manuscript
+
 - Statistical analysis (sensitivity, false negative rates, predictors)
 - Probabilistic modeling (binomial, tissue volume)
 - Survival analysis (if follow-up available)
@@ -229,11 +249,13 @@ We propose the first prospective validation study using **complete sampling as t
 - Internal review
 
 ### Month 31-33: Submission & Revision
+
 - Submit to *American Journal of Clinical Pathology* (same journal)
 - Response to peer review
 - Revision submission
 
 ### Month 34-36: Module Implementation
+
 - Code omentum adequacy feature in pathsampling
 - Integrate Maglalang data + our validation data
 - User testing
@@ -245,21 +267,25 @@ We propose the first prospective validation study using **complete sampling as t
 ## Budget Estimate
 
 **Personnel**:
+
 - Pathologist time: 50 hours @ $150/hr = $7,500
 - Histotechnologist time: 15,000 blocks @ $10/block = $150,000
 - Data management: 100 hours @ $50/hr = $5,000
 
 **Materials**:
+
 - Histology consumables (included in block cost)
 - Photography equipment (existing)
 - Database license (REDCap): $0 (institutional)
 
 **Statistical**:
+
 - R/jamovi (open-source): $0
 
 **Total**: ~$162,500
 
 **Funding Sources**:
+
 - Departmental research funds
 - Gynecologic oncology collaboration
 - Pathology foundation grants
@@ -270,17 +296,20 @@ We propose the first prospective validation study using **complete sampling as t
 ## Success Criteria
 
 **Scientific**:
+
 1. Establish sensitivity & false negative rate of 2-block sampling with narrow CI
 2. Identify predictors of missed disease (multivariable model)
 3. Quantify clinical impact (stage migration, survival)
 4. Publish in high-impact pathology journal (*Am J Clin Pathol* or *Mod Pathol*)
 
 **Clinical**:
+
 1. Evidence-based sampling recommendations adopted in guidelines
 2. Risk-stratification widely implemented
 3. Pathsampling module used for institutional QA/QC
 
 **Educational**:
+
 1. Prosector training materials disseminated
 2. Webinar/workshop presentations
 3. Module tutorials and vignettes
@@ -311,14 +340,17 @@ We propose the first prospective validation study using **complete sampling as t
 ## References
 
 **Study Being Critiqued**:
+
 - Maglalang NA, Fadare O. Pathologic sampling of the omentum for neoplasms that involve the female genital tract: A retrospective analysis of 1055 cases. *Am J Clin Pathol.* 2025. doi:10.1093/ajcp/aqaf082
 
 **Supporting Our Methodology**:
+
 - Skala SL, Hagemann IS. Optimal sampling of grossly normal omentum in staging of gynecologic malignancies. *Int J Gynecol Pathol.* 2015;34:281-287. [Simulation model, complete sampling conceptual framework]
 - Tomlinson JS, et al. Accuracy of staging node-negative pancreas cancer. *Arch Surg.* 2007;142(8):767-774. [Survival-based adequacy threshold validation]
 - Pu N, et al. An artificial neural network improves prediction of observed survival in patients with pancreatic Cancer. *J Natl Compr Canc Netw.* 2021;19(9):1029-1036. [Binomial detection modeling for LN adequacy]
 - Yoon SJ, et al. Optimal number of lymph nodes retrieved to lower false N0 risk in pancreatic cancer. *Ann Surg Oncol.* 2025. doi:10.1245/s10434-025-18029-7 [False negative modeling, validation cohorts]
 
 **Guidelines Being Defended**:
+
 - Malpica A, et al. Endometrial carcinoma, grossing and processing issues: recommendations of the International Society of Gynecologic Pathologists. *Int J Gynecol Pathol.* 2019;38:S9-S24.
 - Matias-Guiu X, et al. Data set for the reporting of endometrial cancer: recommendations from the International Collaboration on Cancer Reporting (ICCR). *Int J Gynecol Pathol.* 2022;41:S90-S118.

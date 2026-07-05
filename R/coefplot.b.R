@@ -315,7 +315,7 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                                         "Regression Model")
 
                 html_content <- paste0(html_content, "<h4>", model_type_name, "</h4>")
-                # Escape formula text — contains user-selected column names
+                # Escape formula text - contains user-selected column names
                 formula_text <- htmltools::htmlEscape(paste(deparse(formula(model)), collapse = " "))
                 html_content <- paste0(html_content, "<p><strong>Formula:</strong> ",
                                      formula_text, "</p>")
@@ -451,7 +451,7 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                         ci_upper <- ci_results[i, 2]
                     }
 
-                    # Escape coefficient label for HTML — rownames may contain
+                    # Escape coefficient label for HTML - rownames may contain
                     # user column names + factor level labels
                     var_name_esc <- htmltools::htmlEscape(var_name)
                     html_content <- paste0(html_content, "<tr>")

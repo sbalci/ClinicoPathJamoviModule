@@ -5,7 +5,7 @@ context("test-outlierdetection-integration")
 
 
 test_that("Univariate mode extracts per-method scores from check_outliers()", {
-  skip_if_not_installed('jmvReadWrite')
+    skip_if_not_installed("jmvReadWrite")
     skip_if_not_installed("ClinicoPath")
     skip_if_not_installed("performance")
 
@@ -14,7 +14,7 @@ test_that("Univariate mode extracts per-method scores from check_outliers()", {
     n <- 100
     testData <- data.frame(
         patient_id = 1:n,
-        value1 = c(rnorm(95, mean = 50, sd = 10), rep(150, 5))  # 5 extreme outliers
+        value1 = c(rnorm(95, mean = 50, sd = 10), rep(150, 5)) # 5 extreme outliers
     )
 
     # Run outlierdetection in univariate mode
@@ -79,7 +79,7 @@ test_that("Composite mode applies threshold to proportion, not binary flag", {
     expect_s3_class(result_50, "outlierdetectionResults")
     expect_s3_class(result_100, "outlierdetectionResults")
 
-    # The key test: results with threshold 1.0 should have ≤ outliers than 0.5
+    # The key test: results with threshold 1.0 should have <= outliers than 0.5
     # (We can't directly compare counts without accessing private results,
     # but the module should run without errors)
 })
@@ -253,7 +253,7 @@ test_that("Composite threshold tuning affects outlier counts", {
         data = testData,
         vars = c("var1", "var2"),
         method_category = "composite",
-        composite_threshold = 0.3,  # At least 30% of methods
+        composite_threshold = 0.3, # At least 30% of methods
         show_outlier_table = TRUE
     )
 
@@ -261,7 +261,7 @@ test_that("Composite threshold tuning affects outlier counts", {
         data = testData,
         vars = c("var1", "var2"),
         method_category = "composite",
-        composite_threshold = 0.7,  # At least 70% of methods
+        composite_threshold = 0.7, # At least 70% of methods
         show_outlier_table = TRUE
     )
 
@@ -282,7 +282,7 @@ test_that("Minimal dataset (n=30) runs without errors", {
     set.seed(666)
     n <- 30
     testData <- data.frame(
-        value = c(rnorm(28, mean = 50, sd = 10), 150, 200)  # 2 outliers
+        value = c(rnorm(28, mean = 50, sd = 10), 150, 200) # 2 outliers
     )
 
     # Run minimal analysis

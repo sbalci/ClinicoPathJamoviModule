@@ -106,11 +106,11 @@ result <- survival(
 
 This produces:
 
-1. **Median Survival Table** -- median survival time, restricted mean, number
+1. **Median Survival Table** - median survival time, restricted mean, number
    of events, and 95% CI for each level of the explanatory variable.
-2. **Cox Regression Table** -- hazard ratios (univariable) with 95% CI and
+2. **Cox Regression Table** - hazard ratios (univariable) with 95% CI and
    p-values for each level compared to the reference.
-3. **Survival Probability Table** -- survival probabilities at 12, 36, and 60
+3. **Survival Probability Table** - survival probabilities at 12, 36, and 60
    months (customizable via `cutp`).
 
 ## 4. Survival Plots
@@ -146,13 +146,13 @@ result_plots <- survival(
 
 **Plot appearance options:**
 
-- `ci95` -- shaded 95% confidence band around each curve
-- `risktable` -- number-at-risk table below the x-axis
-- `censored` -- tick marks where censoring occurred
-- `pplot` -- log-rank p-value annotation
-- `medianline` -- horizontal ("h"), vertical ("v"), or both ("hv") median line
-- `endplot`, `byplot` -- control x-axis range and tick spacing
-- `ybegin_plot`, `yend_plot` -- control y-axis range
+- `ci95` - shaded 95% confidence band around each curve
+- `risktable` - number-at-risk table below the x-axis
+- `censored` - tick marks where censoring occurred
+- `pplot` - log-rank p-value annotation
+- `medianline` - horizontal ("h"), vertical ("v"), or both ("hv") median line
+- `endplot`, `byplot` - control x-axis range and tick spacing
+- `ybegin_plot`, `yend_plot` - control y-axis range
 
 ### 4.2 Cumulative Events
 
@@ -292,7 +292,7 @@ Available adjustment methods: `holm` (default), `hochberg`, `hommel`,
 
 ## 7. Proportional Hazards Assumption Testing
 
-The Cox model assumes proportional hazards -- that the hazard ratio between
+The Cox model assumes proportional hazards - that the hazard ratio between
 groups is constant over time. This can be tested formally using Schoenfeld
 residuals and visually via the Schoenfeld residual plot.
 
@@ -313,10 +313,10 @@ result_ph <- survival(
 
 The output includes:
 
-- **Formal test** -- `cox.zph()` test with chi-square statistic and p-value.
+- **Formal test** - `cox.zph()` test with chi-square statistic and p-value.
   A significant p-value (< 0.05) suggests violation.
-- **Interpretation** -- automated plain-language assessment with recommendations
-- **Schoenfeld residual plot** -- scaled residuals vs. time; a flat trend
+- **Interpretation** - automated plain-language assessment with recommendations
+- **Schoenfeld residual plot** - scaled residuals vs. time; a flat trend
   supports proportional hazards
 
 ## 8. RMST Analysis
@@ -414,9 +414,9 @@ When enabled, the function runs all four weighted tests simultaneously:
 | Test | rho | Emphasizes |
 |------|-----|------------|
 | Log-Rank (standard) | 0 | All time points equally |
-| Gehan-Breslow-Wilcoxon | -- | Early differences |
-| Tarone-Ware | -- | Moderate early weighting |
-| Peto-Peto | -- | Early-to-mid differences |
+| Gehan-Breslow-Wilcoxon | - | Early differences |
+| Tarone-Ware | - | Moderate early weighting |
+| Peto-Peto | - | Early-to-mid differences |
 
 The `survivalTestType` option also controls which test is used for pairwise
 comparisons (via `survminer::pairwise_survdiff(rho=...)`).
@@ -487,11 +487,11 @@ result_cal <- survival(
 
 The output includes:
 
-1. **Calibration metrics table** -- calibration slope, calibration-in-the-large,
+1. **Calibration metrics table** - calibration slope, calibration-in-the-large,
    with ideal values and interpretation
-2. **Calibration by risk group table** -- predicted vs. observed survival for
+2. **Calibration by risk group table** - predicted vs. observed survival for
    each risk quantile
-3. **Calibration plot** -- predicted vs. observed with 45-degree perfect
+3. **Calibration plot** - predicted vs. observed with 45-degree perfect
    calibration reference line
 
 If `calibration_timepoint` is 0, the median observed follow-up time is used.
@@ -522,10 +522,10 @@ result_rcs <- survival(
 
 The output includes:
 
-1. **Non-linearity test table** -- likelihood ratio test comparing the spline
+1. **Non-linearity test table** - likelihood ratio test comparing the spline
    model (non-linear) against a linear model. A significant p-value indicates
    the relationship is non-linear.
-2. **Hazard ratio curve plot** -- HR as a function of the continuous predictor,
+2. **Hazard ratio curve plot** - HR as a function of the continuous predictor,
    with 95% confidence band. The reference value is typically the median.
 
 Knot recommendations: 3 knots (simplest, 2 df), 4 knots (recommended default,
@@ -654,9 +654,9 @@ result_compete <- survival(
 
 **Analysis types:**
 
-- `overall` -- standard overall survival (death from any cause)
-- `cause` -- cause-specific survival (censors deaths from other causes)
-- `compete` -- competing risks (cumulative incidence functions)
+- `overall` - standard overall survival (death from any cause)
+- `cause` - cause-specific survival (censors deaths from other causes)
+- `compete` - competing risks (cumulative incidence functions)
 
 **Important:** When `analysistype = "compete"`, the following analyses are
 automatically skipped because they are not valid for competing risks: Cox
@@ -710,8 +710,8 @@ result_resid <- survival(
 
 The output includes:
 
-- **Residuals table** -- Martingale, deviance, score, and Schoenfeld residuals
-- **Diagnostic plot** -- visual assessment of residual patterns
+- **Residuals table** - Martingale, deviance, score, and Schoenfeld residuals
+- **Diagnostic plot** - visual assessment of residual patterns
 
 ## 18. Clinical Interpretations and Explanations
 
@@ -760,9 +760,9 @@ result_summary <- survival(
 
 These features produce:
 
-- **Clinical interpretation** -- context-aware summary of findings
-- **Clinical glossary** -- definitions of survival analysis terminology
-- **Copy-ready sentences** -- publication-ready text for results sections
+- **Clinical interpretation** - context-aware summary of findings
+- **Clinical glossary** - definitions of survival analysis terminology
+- **Copy-ready sentences** - publication-ready text for results sections
 
 ## 19. REMARK Reporting Checklist
 
@@ -876,23 +876,23 @@ result_full <- survival(
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `elapsedtime` | Variable | -- | Survival time variable |
-| `outcome` | Variable | -- | Event indicator |
-| `outcomeLevel` | Level | -- | Which level = event |
-| `explanatory` | Variable | -- | Grouping variable |
+| `elapsedtime` | Variable | - | Survival time variable |
+| `outcome` | Variable | - | Event indicator |
+| `outcomeLevel` | Level | - | Which level = event |
+| `explanatory` | Variable | - | Grouping variable |
 | `cutp` | String | "12, 36, 60" | Cutpoints for survival table |
 | `tint` | Bool | FALSE | Calculate time from dates |
-| `dxdate` | Variable | -- | Diagnosis date (if tint) |
-| `fudate` | Variable | -- | Follow-up date (if tint) |
+| `dxdate` | Variable | - | Diagnosis date (if tint) |
+| `fudate` | Variable | - | Follow-up date (if tint) |
 | `timetypedata` | List | ymd | Date format in data |
 | `timetypeoutput` | List | months | Output time unit |
 | `uselandmark` | Bool | FALSE | Landmark analysis |
 | `landmark` | Integer | 3 | Landmark time |
 | `multievent` | Bool | FALSE | Multiple event levels |
-| `dod` | Level | -- | Dead of Disease level |
-| `dooc` | Level | -- | Dead of Other Causes level |
-| `awd` | Level | -- | Alive with Disease level |
-| `awod` | Level | -- | Alive without Disease level |
+| `dod` | Level | - | Dead of Disease level |
+| `dooc` | Level | - | Dead of Other Causes level |
+| `awd` | Level | - | Alive with Disease level |
+| `awod` | Level | - | Alive without Disease level |
 | `analysistype` | List | overall | overall/cause/compete |
 | `sc` | Bool | FALSE | Survival curve plot |
 | `kmunicate` | Bool | FALSE | KMunicate-style plot |
@@ -912,7 +912,7 @@ result_full <- survival(
 | `padjustmethod` | List | holm | P-value adjustment |
 | `ph_cox` | Bool | FALSE | PH assumption test |
 | `stratified_cox` | Bool | FALSE | Stratified Cox model |
-| `strata_variable` | Variable | -- | Stratification variable |
+| `strata_variable` | Variable | - | Stratification variable |
 | `rmst_analysis` | Bool | FALSE | RMST analysis |
 | `rmst_tau` | Number | 0 | RMST time horizon |
 | `person_time` | Bool | FALSE | Person-time analysis |
@@ -926,11 +926,11 @@ result_full <- survival(
 | `calibration_timepoint` | Number | 0 | Timepoint (0=median) |
 | `calibration_ngroups` | Integer | 5 | Risk group count |
 | `rcs_analysis` | Bool | FALSE | Non-linearity test |
-| `rcs_variable` | Variable | -- | Continuous predictor |
+| `rcs_variable` | Variable | - | Continuous predictor |
 | `rcs_knots` | Integer | 4 | Number of knots |
 | `residual_diagnostics` | Bool | FALSE | Model diagnostics |
 | `age_adjustment` | Bool | FALSE | Age-adjusted Cox |
-| `age_variable` | Variable | -- | Age variable |
+| `age_variable` | Variable | - | Age variable |
 | `age_interaction` | Bool | FALSE | Age x group test |
 | `age_stratified_cox` | Bool | FALSE | Stratify Cox by age |
 | `age_group_cutpoints` | String | "50, 65, 75" | Age group boundaries |
@@ -942,7 +942,7 @@ result_full <- survival(
 | `showExplanations` | Bool | FALSE | Method explanations |
 | `showSummaries` | Bool | FALSE | Plain-language summaries |
 | `remark_checklist` | Bool | FALSE | REMARK checklist |
-| `export_survival_data` | Output | -- | Export estimates |
+| `export_survival_data` | Output | - | Export estimates |
 
 ## References
 

@@ -1,12 +1,9 @@
-
 competingRisksPowerClass <- R6::R6Class(
     "competingRisksPowerClass",
     inherit = competingRisksPowerBase,
     private = list(
-
         .params = NULL,
         .power_result = NULL,
-
         .init = function() {
             todo <- paste0(
                 "<h4> Competing Risks Power Analysis</h4>",
@@ -21,7 +18,6 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$todo$setContent(todo)
         },
-
         .run = function() {
             # Get analysis parameters
             analysis_type <- self$options$analysisType
@@ -58,80 +54,87 @@ competingRisksPowerClass <- R6::R6Class(
                 return()
             }
 
-            tryCatch({
-                # Store parameters
-                private$.params <- list(
-                    analysis_type = analysis_type,
-                    alpha = alpha,
-                    power = power,
-                    total_n = total_n,
-                    allocation_ratio = allocation_ratio,
-                    event_rate1 = event_rate1,
-                    event_rate2 = event_rate2,
-                    competing_rate1 = competing_rate1,
-                    competing_rate2 = competing_rate2,
-                    hazard_ratio = as.numeric(self$options$hazardRatio),
-                    follow_up = as.numeric(self$options$followUpTime),
-                    accrual_time = as.numeric(self$options$accrualTime),
-                    test_type = self$options$testType,
-                    distribution = self$options$distributionType,
-                    n_simulations = as.numeric(self$options$numberOfSimulations)
-                )
+            tryCatch(
+                {
+                    # Store parameters
+                    private$.params <- list(
+                        analysis_type = analysis_type,
+                        alpha = alpha,
+                        power = power,
+                        total_n = total_n,
+                        allocation_ratio = allocation_ratio,
+                        event_rate1 = event_rate1,
+                        event_rate2 = event_rate2,
+                        competing_rate1 = competing_rate1,
+                        competing_rate2 = competing_rate2,
+                        hazard_ratio = as.numeric(self$options$hazardRatio),
+                        follow_up = as.numeric(self$options$followUpTime),
+                        accrual_time = as.numeric(self$options$accrualTime),
+                        test_type = self$options$testType,
+                        distribution = self$options$distributionType,
+                        n_simulations = as.numeric(self$options$numberOfSimulations)
+                    )
 
-                # Perform power analysis
-                power_result <- private$.performPowerAnalysis()
+                    # Perform power analysis
+                    power_result <- private$.performPowerAnalysis()
 
-                if (!is.null(power_result)) {
-                    private$.power_result <- power_result
+                    if (!is.null(power_result)) {
+                        private$.power_result <- power_result
 
-                    # Populate results
-                    private$.populateEducationalInfo()
-                    private$.populatePowerResults()
-                    private$.populateStudyDesignTable()
-                    private$.populateSampleSizeBreakdown()
-                    private$.populatePowerCurveTable()
-                    private$.populateMethodsInfo()
-                    private$.populateRecommendations()
+                        # Populate results
+                        private$.populateEducationalInfo()
+                        private$.populatePowerResults()
+                        private$.populateStudyDesignTable()
+                        private$.populateSampleSizeBreakdown()
+                        private$.populatePowerCurveTable()
+                        private$.populateMethodsInfo()
+                        private$.populateRecommendations()
 
-                    if (self$options$sensitivityAnalysis) {
-                        private$.populateSensitivityAnalysis()
+                        if (self$options$sensitivityAnalysis) {
+                            private$.populateSensitivityAnalysis()
+                        }
+
+                        if (self$options$showSimulationDetails) {
+                            private$.populateSimulationDiagnostics()
+                        }
                     }
+                },
+                error = function(e) {
+                    error_msg <- paste0(
+                        "<h4> Analysis Error</h4>",
+                        "<p>Error in power analysis: ", htmltools::htmlEscape(e$message), "</p>",
+                        "<p><b>Common solutions:</b></p>",
+                        "<ul>",
+                        "<li>Check that event rates are realistic (< 0.9)</li>",
+                        "<li>Ensure sample size is reasonable (> 20)</li>",
+                        "<li>Verify that hazard ratio is positive</li>",
+                        "</ul>"
+                    )
 
-                    if (self$options$showSimulationDetails) {
-                        private$.populateSimulationDiagnostics()
-                    }
+                    self$results$todo$setContent(error_msg)
                 }
-
-            }, error = function(e) {
-                error_msg <- paste0(
-                    "<h4> Analysis Error</h4>",
-                    "<p>Error in power analysis: ", htmltools::htmlEscape(e$message), "</p>",
-                    "<p><b>Common solutions:</b></p>",
-                    "<ul>",
-                    "<li>Check that event rates are realistic (< 0.9)</li>",
-                    "<li>Ensure sample size is reasonable (> 20)</li>",
-                    "<li>Verify that hazard ratio is positive</li>",
-                    "</ul>"
-                )
-
-                self$results$todo$setContent(error_msg)
-            })
+            )
         },
 
         # TODO (forward-looking): replace the free-text `allocationRatio` String option ("1:1") with two Number/Integer options (e.g. ratio1, ratio2). The string parsing in this helper is fragile and the only reason this method exists. Constrained numeric inputs would eliminate the parser, the .a.yaml regex requirement, and the "Invalid Allocation Ratio" validation branch above. UX change → out of jamovify scope.
         .parseAllocationRatio = function(ratio_str) {
-            if (is.null(ratio_str) || ratio_str == "") return(c(1, 1))
+            if (is.null(ratio_str) || ratio_str == "") {
+                return(c(1, 1))
+            }
 
             parts <- unlist(strsplit(gsub("\\s", "", ratio_str), ":"))
 
-            if (length(parts) != 2) return(NULL)
+            if (length(parts) != 2) {
+                return(NULL)
+            }
 
             ratios <- as.numeric(parts)
-            if (any(is.na(ratios)) || any(ratios <= 0)) return(NULL)
+            if (any(is.na(ratios)) || any(ratios <= 0)) {
+                return(NULL)
+            }
 
             return(ratios)
         },
-
         .performPowerAnalysis = function() {
             params <- private$.params
 
@@ -139,7 +142,7 @@ competingRisksPowerClass <- R6::R6Class(
                 "power" = {
                     estimated_power <- private$.calculatePower(params)
                     conf_level <- as.numeric(self$options$confidenceLevel)
-                    margin_error <- qnorm(1 - (1 - conf_level)/2) * 0.02
+                    margin_error <- qnorm(1 - (1 - conf_level) / 2) * 0.02
 
                     list(
                         type = "power",
@@ -156,7 +159,7 @@ competingRisksPowerClass <- R6::R6Class(
                 "samplesize" = {
                     required_n <- private$.calculateSampleSize(params)
                     conf_level <- as.numeric(self$options$confidenceLevel)
-                    margin_factor <- qnorm(1 - (1 - conf_level)/2) * 0.05
+                    margin_factor <- qnorm(1 - (1 - conf_level) / 2) * 0.05
 
                     list(
                         type = "sample_size",
@@ -173,7 +176,7 @@ competingRisksPowerClass <- R6::R6Class(
                 "effectsize" = {
                     detectable_hr <- private$.calculateMinimumDetectableHR(params)
                     conf_level <- as.numeric(self$options$confidenceLevel)
-                    margin_factor <- qnorm(1 - (1 - conf_level)/2) * 0.05
+                    margin_factor <- qnorm(1 - (1 - conf_level) / 2) * 0.05
 
                     list(
                         type = "effect_size",
@@ -190,7 +193,7 @@ competingRisksPowerClass <- R6::R6Class(
                 "difference" = {
                     detectable_diff <- private$.calculateMinimumDetectableDifference(params)
                     conf_level <- as.numeric(self$options$confidenceLevel)
-                    margin_factor <- qnorm(1 - (1 - conf_level)/2) * 0.02
+                    margin_factor <- qnorm(1 - (1 - conf_level) / 2) * 0.02
 
                     list(
                         type = "detectable_difference",
@@ -206,7 +209,6 @@ competingRisksPowerClass <- R6::R6Class(
                 }
             )
         },
-
         .calculatePower = function(params) {
             # Distribution-specific shape adjustment
             shape_adjustment <- 1.0
@@ -215,7 +217,7 @@ competingRisksPowerClass <- R6::R6Class(
                 shape2 <- as.numeric(self$options$shape2)
                 shape_adjustment <- sqrt((shape1 + shape2) / 2)
             } else if (params$distribution == "lognormal") {
-                shape_adjustment <- 1.1  # Log-normal typically has slightly higher power
+                shape_adjustment <- 1.1 # Log-normal typically has slightly higher power
             }
 
             # Enhanced power calculation for competing risks
@@ -223,71 +225,68 @@ competingRisksPowerClass <- R6::R6Class(
             n_factor <- (params$total_n / 200)^0.5
             hr_factor <- abs(log(params$hazard_ratio)) / log(1.5)
             event_factor <- (params$event_rate1 + params$event_rate2) / 0.6
-            
+
             # Test-specific adjustments
             test_adjustment <- switch(params$test_type,
-                "gray" = 1.0,           # Gray's test baseline
-                "finegray" = 1.05,      # Fine-Gray slightly more powerful
-                "causespecific" = 0.95   # Cause-specific less powerful for CIF comparison
+                "gray" = 1.0, # Gray's test baseline
+                "finegray" = 1.05, # Fine-Gray slightly more powerful
+                "causespecific" = 0.95 # Cause-specific less powerful for CIF comparison
             )
-            
+
             # Competing risk penalty (reduces power when competing risks are high)
             competing_penalty <- 1 - ((params$competing_rate1 + params$competing_rate2) / 2) * 0.3
-            
+
             power <- base_power * n_factor * hr_factor * event_factor * shape_adjustment * test_adjustment * competing_penalty
             return(min(0.99, max(0.05, power)))
         },
-        
         .calculateMinimumDetectableHR = function(params) {
             # Calculate minimum detectable hazard ratio for given power and sample size
             target_power <- params$power
             current_power <- private$.calculatePower(params)
-            
+
             # Iterative approach to find HR that gives target power
             hr_candidates <- seq(1.1, 3.0, 0.1)
             best_hr <- params$hazard_ratio
-            
+
             for (hr in hr_candidates) {
                 test_params <- params
                 test_params$hazard_ratio <- hr
                 test_power <- private$.calculatePower(test_params)
-                
+
                 if (abs(test_power - target_power) < abs(current_power - target_power)) {
                     best_hr <- hr
                     current_power <- test_power
                 }
             }
-            
+
             return(best_hr)
         },
-        
         .calculateMinimumDetectableDifference = function(params) {
             # Calculate minimum detectable difference in cumulative incidence
             target_power <- params$power
             base_diff <- abs(params$event_rate2 - params$event_rate1)
-            
+
             # Test different effect sizes
             diff_candidates <- seq(0.05, 0.40, 0.02)
             best_diff <- base_diff
             current_power <- private$.calculatePower(params)
-            
+
             for (diff in diff_candidates) {
                 test_params <- params
                 test_params$event_rate2 <- params$event_rate1 + diff
                 # Recalculate HR based on new event rates
-                test_params$hazard_ratio <- (test_params$event_rate2 / (1 - test_params$event_rate2)) / 
-                                           (test_params$event_rate1 / (1 - test_params$event_rate1))
+                test_params$hazard_ratio <- (test_params$event_rate2 / (1 - test_params$event_rate2)) /
+                    (test_params$event_rate1 / (1 - test_params$event_rate1))
                 test_power <- private$.calculatePower(test_params)
-                
+
                 if (abs(test_power - target_power) < abs(current_power - target_power)) {
                     best_diff <- diff
                     current_power <- test_power
                 }
             }
-            
+
             return(best_diff)
         },
-
         .calculateSampleSize = function(params) {
             base_n <- 200
             power_factor <- (params$power / 0.80)^2
@@ -297,7 +296,6 @@ competingRisksPowerClass <- R6::R6Class(
             required_n <- base_n * power_factor * hr_factor * event_factor
             return(round(max(20, required_n)))
         },
-
         .populateEducationalInfo = function() {
             educational_content <- paste0(
                 "<div style='background-color: #f8f9fa; padding: 15px; border-left: 4px solid #007bff; margin: 10px 0;'>",
@@ -310,9 +308,10 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$educationalInfo$setContent(educational_content)
         },
-
         .populatePowerResults = function() {
-            if (is.null(private$.power_result)) return()
+            if (is.null(private$.power_result)) {
+                return()
+            }
 
             result <- private$.power_result
             conf_level <- as.numeric(self$options$confidenceLevel)
@@ -329,8 +328,10 @@ competingRisksPowerClass <- R6::R6Class(
                         paste0(round(result$alpha * 100, 1), "%")
                     ),
                     confidence_interval = c(
-                        paste0("(", round(result$confidence_interval[1] * 100, 1), "%, ",
-                               round(result$confidence_interval[2] * 100, 1), "%)"),
+                        paste0(
+                            "(", round(result$confidence_interval[1] * 100, 1), "%, ",
+                            round(result$confidence_interval[2] * 100, 1), "%)"
+                        ),
                         "Fixed", "Fixed", "Fixed"
                     ),
                     interpretation = c(
@@ -351,8 +352,10 @@ competingRisksPowerClass <- R6::R6Class(
                         paste0(round(result$alpha * 100, 1), "%")
                     ),
                     confidence_interval = c(
-                        paste0("(", round(result$confidence_interval[1], 2), ", ",
-                               round(result$confidence_interval[2], 2), ")"),
+                        paste0(
+                            "(", round(result$confidence_interval[1], 2), ", ",
+                            round(result$confidence_interval[2], 2), ")"
+                        ),
                         "Fixed", "Fixed", "Fixed"
                     ),
                     interpretation = c(
@@ -373,8 +376,10 @@ competingRisksPowerClass <- R6::R6Class(
                         paste0(round(result$alpha * 100, 1), "%")
                     ),
                     confidence_interval = c(
-                        paste0("(", round(result$confidence_interval[1] * 100, 1), "%, ",
-                               round(result$confidence_interval[2] * 100, 1), "%)"),
+                        paste0(
+                            "(", round(result$confidence_interval[1] * 100, 1), "%, ",
+                            round(result$confidence_interval[2] * 100, 1), "%)"
+                        ),
                         "Fixed", "Fixed", "Fixed"
                     ),
                     interpretation = c(
@@ -411,7 +416,6 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$powerResults$setData(result_data)
         },
-
         .populateStudyDesignTable = function() {
             params <- private$.params
 
@@ -446,7 +450,6 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$studyDesignTable$setData(design_data)
         },
-
         .populateSampleSizeBreakdown = function() {
             params <- private$.params
 
@@ -471,7 +474,7 @@ competingRisksPowerClass <- R6::R6Class(
                     n1 - round(n1 * params$event_rate1) - round(n1 * params$competing_rate1),
                     n2 - round(n2 * params$event_rate2) - round(n2 * params$competing_rate2),
                     params$total_n - (round(n1 * params$event_rate1) + round(n2 * params$event_rate2) +
-                                     round(n1 * params$competing_rate1) + round(n2 * params$competing_rate2))
+                        round(n1 * params$competing_rate1) + round(n2 * params$competing_rate2))
                 ),
                 event_rate = c(
                     round(params$event_rate1 * 100, 1),
@@ -483,13 +486,12 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$sampleSizeBreakdown$setData(breakdown_data)
         },
-
         .populatePowerCurveTable = function() {
             base_params <- private$.params
-            
+
             # Generate realistic scenarios based on current parameters
             scenarios_list <- list()
-            
+
             # Current design
             current_power <- private$.calculatePower(base_params)
             scenarios_list[[1]] <- list(
@@ -499,7 +501,7 @@ competingRisksPowerClass <- R6::R6Class(
                 sample_size = base_params$total_n,
                 feasibility = "Current"
             )
-            
+
             # Increased HR scenario
             increased_hr_params <- base_params
             increased_hr_params$hazard_ratio <- base_params$hazard_ratio * 1.2
@@ -511,7 +513,7 @@ competingRisksPowerClass <- R6::R6Class(
                 sample_size = private$.calculateSampleSize(increased_hr_params),
                 feasibility = ifelse(private$.calculateSampleSize(increased_hr_params) < base_params$total_n * 1.5, "Feasible", "Challenging")
             )
-            
+
             # Higher event rate scenario
             higher_event_params <- base_params
             higher_event_params$event_rate1 <- min(0.85, base_params$event_rate1 * 1.15)
@@ -524,7 +526,7 @@ competingRisksPowerClass <- R6::R6Class(
                 sample_size = private$.calculateSampleSize(higher_event_params),
                 feasibility = "Feasible"
             )
-            
+
             # Larger sample scenario
             larger_sample_params <- base_params
             larger_sample_params$total_n <- round(base_params$total_n * 1.5)
@@ -536,7 +538,7 @@ competingRisksPowerClass <- R6::R6Class(
                 sample_size = larger_sample_params$total_n,
                 feasibility = ifelse(larger_sample_params$total_n > 500, "Challenging", "Feasible")
             )
-            
+
             # Different test type scenario
             if (base_params$test_type != "finegray") {
                 finegray_params <- base_params
@@ -550,7 +552,7 @@ competingRisksPowerClass <- R6::R6Class(
                     feasibility = "Feasible"
                 )
             }
-            
+
             # Convert to data frame
             scenarios <- do.call(rbind, lapply(scenarios_list, function(x) {
                 data.frame(
@@ -565,14 +567,13 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$powerCurveTable$setData(scenarios)
         },
-
         .populateSensitivityAnalysis = function() {
             base_params <- private$.params
             base_power <- private$.calculatePower(base_params)
-            
+
             # Test ±15% changes in key parameters
             sensitivity_results <- list()
-            
+
             # Event Rate 1 sensitivity
             test_params1 <- base_params
             test_params1$event_rate1 <- base_params$event_rate1 * 0.85
@@ -580,7 +581,7 @@ competingRisksPowerClass <- R6::R6Class(
             test_params1$event_rate1 <- base_params$event_rate1 * 1.15
             power_high1 <- private$.calculatePower(test_params1)
             power_range1 <- abs(power_high1 - power_low1)
-            
+
             sensitivity_results[[1]] <- list(
                 parameter = "Event Rate (Group 1)",
                 low_value = paste0(round(base_params$event_rate1 * 0.85 * 100, 1), "%"),
@@ -589,7 +590,7 @@ competingRisksPowerClass <- R6::R6Class(
                 power_change = paste0("±", round(power_range1 * 100, 1), "%"),
                 robustness = ifelse(power_range1 < 0.05, "Robust", ifelse(power_range1 < 0.15, "Moderate", "Sensitive"))
             )
-            
+
             # Event Rate 2 sensitivity
             test_params2 <- base_params
             test_params2$event_rate2 <- base_params$event_rate2 * 0.85
@@ -597,7 +598,7 @@ competingRisksPowerClass <- R6::R6Class(
             test_params2$event_rate2 <- base_params$event_rate2 * 1.15
             power_high2 <- private$.calculatePower(test_params2)
             power_range2 <- abs(power_high2 - power_low2)
-            
+
             sensitivity_results[[2]] <- list(
                 parameter = "Event Rate (Group 2)",
                 low_value = paste0(round(base_params$event_rate2 * 0.85 * 100, 1), "%"),
@@ -606,7 +607,7 @@ competingRisksPowerClass <- R6::R6Class(
                 power_change = paste0("±", round(power_range2 * 100, 1), "%"),
                 robustness = ifelse(power_range2 < 0.05, "Robust", ifelse(power_range2 < 0.15, "Moderate", "Sensitive"))
             )
-            
+
             # Hazard Ratio sensitivity
             test_params3 <- base_params
             test_params3$hazard_ratio <- base_params$hazard_ratio * 0.85
@@ -614,7 +615,7 @@ competingRisksPowerClass <- R6::R6Class(
             test_params3$hazard_ratio <- base_params$hazard_ratio * 1.15
             power_high3 <- private$.calculatePower(test_params3)
             power_range3 <- abs(power_high3 - power_low3)
-            
+
             sensitivity_results[[3]] <- list(
                 parameter = "Hazard Ratio",
                 low_value = round(base_params$hazard_ratio * 0.85, 2),
@@ -623,7 +624,7 @@ competingRisksPowerClass <- R6::R6Class(
                 power_change = paste0("±", round(power_range3 * 100, 1), "%"),
                 robustness = ifelse(power_range3 < 0.05, "Robust", ifelse(power_range3 < 0.15, "Moderate", "Sensitive"))
             )
-            
+
             # Sample Size sensitivity
             test_params4 <- base_params
             test_params4$total_n <- round(base_params$total_n * 0.8)
@@ -631,7 +632,7 @@ competingRisksPowerClass <- R6::R6Class(
             test_params4$total_n <- round(base_params$total_n * 1.2)
             power_high4 <- private$.calculatePower(test_params4)
             power_range4 <- abs(power_high4 - power_low4)
-            
+
             sensitivity_results[[4]] <- list(
                 parameter = "Sample Size",
                 low_value = round(base_params$total_n * 0.8),
@@ -640,7 +641,7 @@ competingRisksPowerClass <- R6::R6Class(
                 power_change = paste0("±", round(power_range4 * 100, 1), "%"),
                 robustness = ifelse(power_range4 < 0.05, "Robust", ifelse(power_range4 < 0.15, "Moderate", "Sensitive"))
             )
-            
+
             # Convert to data frame
             sensitivity_data <- do.call(rbind, lapply(sensitivity_results, function(x) {
                 data.frame(
@@ -656,7 +657,6 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$sensitivityTable$setData(sensitivity_data)
         },
-
         .populateSimulationDiagnostics = function() {
             diagnostics_data <- data.frame(
                 metric = c("Simulation Convergence", "Monte Carlo Error", "Confidence Interval Width"),
@@ -668,7 +668,6 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$simulationDiagnostics$setData(diagnostics_data)
         },
-
         .populateMethodsInfo = function() {
             params <- private$.params
             conf_level <- as.numeric(self$options$confidenceLevel)
@@ -689,8 +688,10 @@ competingRisksPowerClass <- R6::R6Class(
                 ), "</p>",
                 "<p><b>Distribution Model:</b> ", switch(params$distribution,
                     "exponential" = "Exponential survival distribution (constant hazard)",
-                    "weibull" = paste0("Weibull survival distribution (shapes: ", 
-                                     self$options$shape1, ", ", self$options$shape2, ")"),
+                    "weibull" = paste0(
+                        "Weibull survival distribution (shapes: ",
+                        self$options$shape1, ", ", self$options$shape2, ")"
+                    ),
                     "lognormal" = "Log-normal survival distribution"
                 ), "</p>",
                 "<p><b>Confidence Level:</b> ", round(conf_level * 100, 1), "% for all interval estimates.</p>",
@@ -700,9 +701,10 @@ competingRisksPowerClass <- R6::R6Class(
 
             self$results$methodsInfo$setContent(methods_content)
         },
-
         .populateRecommendations = function() {
-            if (is.null(private$.power_result)) return()
+            if (is.null(private$.power_result)) {
+                return()
+            }
 
             result <- private$.power_result
             params <- private$.params
@@ -714,23 +716,26 @@ competingRisksPowerClass <- R6::R6Class(
 
             if (result$type == "power") {
                 if (result$power < 0.8) {
-                    recommendations <- paste0(recommendations,
+                    recommendations <- paste0(
+                        recommendations,
                         "<p><b> Power Warning:</b> Current design provides only ",
                         round(result$power * 100, 1), "% power, below the conventional 80% threshold.</p>",
                         "<p><b>Suggestions to improve power:</b></p><ul>",
-                        "<li>Increase sample size by ", round((0.8/result$power)^2 * 100 - 100), "%</li>",
+                        "<li>Increase sample size by ", round((0.8 / result$power)^2 * 100 - 100), "%</li>",
                         "<li>Consider longer follow-up to increase event rates</li>",
                         "<li>Use Fine-Gray test if appropriate (5-10% power gain)</li></ul>"
                     )
                 } else {
-                    recommendations <- paste0(recommendations,
+                    recommendations <- paste0(
+                        recommendations,
                         "<p><b> Adequate Power:</b> Current design provides ",
                         round(result$power * 100, 1), "% power, meeting conventional standards.</p>"
                     )
                 }
             } else if (result$type == "sample_size") {
                 if (result$sample_size > 1000) {
-                    recommendations <- paste0(recommendations,
+                    recommendations <- paste0(
+                        recommendations,
                         "<p><b> Large Sample Required:</b> The required sample size of ",
                         result$sample_size, " may be challenging to achieve.</p>",
                         "<p><b>Alternative approaches:</b></p><ul>",
@@ -739,34 +744,39 @@ competingRisksPowerClass <- R6::R6Class(
                         "<li>Consider multi-center collaboration</li></ul>"
                     )
                 } else {
-                    recommendations <- paste0(recommendations,
+                    recommendations <- paste0(
+                        recommendations,
                         "<p><b> Feasible Sample Size:</b> Required sample size of ",
                         result$sample_size, " is realistic for most study settings.</p>"
                     )
                 }
             } else if (result$type == "effect_size") {
                 if (result$effect_size > 2.0) {
-                    recommendations <- paste0(recommendations,
+                    recommendations <- paste0(
+                        recommendations,
                         "<p><b> Large Effect Required:</b> Minimum detectable hazard ratio of ",
                         round(result$effect_size, 2), " represents a large clinical effect.</p>",
                         "<p><b>Consider:</b> Smaller, clinically relevant effects may not be detectable with current design.</p>"
                     )
                 } else {
-                    recommendations <- paste0(recommendations,
-                        "<p><b> Reasonable Sensitivity:</b> Can detect hazard ratios ≥ ",
+                    recommendations <- paste0(
+                        recommendations,
+                        "<p><b> Reasonable Sensitivity:</b> Can detect hazard ratios >= ",
                         round(result$effect_size, 2), ", which is clinically meaningful.</p>"
                     )
                 }
             } else if (result$type == "detectable_difference") {
                 if (result$difference > 0.2) {
-                    recommendations <- paste0(recommendations,
+                    recommendations <- paste0(
+                        recommendations,
                         "<p><b> Large Difference Required:</b> Minimum detectable difference of ",
                         round(result$difference * 100, 1), "% is quite large.</p>",
                         "<p><b>Consider:</b> Smaller differences may be clinically important but undetectable.</p>"
                     )
                 } else {
-                    recommendations <- paste0(recommendations,
-                        "<p><b> Good Sensitivity:</b> Can detect cumulative incidence differences ≥ ",
+                    recommendations <- paste0(
+                        recommendations,
+                        "<p><b> Good Sensitivity:</b> Can detect cumulative incidence differences >= ",
                         round(result$difference * 100, 1), "%, which is clinically relevant.</p>"
                     )
                 }
@@ -775,25 +785,28 @@ competingRisksPowerClass <- R6::R6Class(
             # Add general competing risks recommendations
             total_competing_rate <- (params$competing_rate1 + params$competing_rate2) / 2
             if (total_competing_rate > 0.3) {
-                recommendations <- paste0(recommendations,
-                    "<p><b> Competing Risks Impact:</b> High competing event rates (", 
+                recommendations <- paste0(
+                    recommendations,
+                    "<p><b> Competing Risks Impact:</b> High competing event rates (",
                     round(total_competing_rate * 100, 1), "%) reduce power. Consider cause-specific analyses.</p>"
                 )
             }
 
-            recommendations <- paste0(recommendations, 
+            recommendations <- paste0(
+                recommendations,
                 "<p><b> Additional Considerations:</b></p><ul>",
                 "<li>Validate assumptions with pilot data if available</li>",
                 "<li>Consider interim analyses for large studies</li>",
                 "<li>Account for potential loss to follow-up</li></ul>",
                 "</div>"
             )
-            
+
             self$results$recommendationsInfo$setContent(recommendations)
         },
-
         .powerCurvePlot = function(image, ggtheme, theme, ...) {
-            if (is.null(private$.params)) return()
+            if (is.null(private$.params)) {
+                return()
+            }
 
             sample_sizes <- seq(50, 500, 25)
             powers <- sapply(sample_sizes, function(n) {
@@ -820,9 +833,10 @@ competingRisksPowerClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .eventRatesPlot = function(image, ggtheme, theme, ...) {
-            if (is.null(private$.params)) return()
+            if (is.null(private$.params)) {
+                return()
+            }
 
             params <- private$.params
 

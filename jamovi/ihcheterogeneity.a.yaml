@@ -172,8 +172,8 @@ options:
       description:
           R: >
             Minimum Spearman correlation between biopsy and whole section measurements.
-            Clinical guidelines: ≥0.80 excellent agreement, ≥0.70 good agreement,
-            ≥0.60 moderate agreement, <0.60 poor agreement.
+            Clinical guidelines: >=0.80 excellent agreement, >=0.70 good agreement,
+            >=0.60 moderate agreement, <0.60 poor agreement.
             Higher values indicate better representativeness of biopsy samples.
 
     - name: show_variability_plots

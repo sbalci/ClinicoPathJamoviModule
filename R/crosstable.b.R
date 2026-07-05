@@ -132,7 +132,7 @@ NULL
         issues <- append(issues, paste0(
             "Duplicate variable names after cleaning: ",
             paste(duplicate_originals, collapse = ", "),
-            " → ", paste(duplicate_cleaned, collapse = ", ")
+            " \u{2192} ", paste(duplicate_cleaned, collapse = ", ")
         ))
     }
 
@@ -176,7 +176,7 @@ NULL
             } else {
                 return(list(
                     test = "chisq", 
-                    reason = paste0("All expected counts ≥ ", min_expected, ". Chi-square test appropriate."),
+                    reason = paste0("All expected counts \u{2265} ", min_expected, ". Chi-square test appropriate."),
                     warning = FALSE,
                     expected_min = expected_min
                 ))
@@ -275,12 +275,12 @@ NULL
                 # Continuous variables naturally have many unique values that won't appear in all groups
                 is_categorical <- is.factor(mydata[[var]]) ||
                                  is.character(mydata[[var]]) ||
-                                 (is.numeric(mydata[[var]]) && length(unique(na.omit(mydata[[var]]))) <= 6)
+                                 (is.numeric(mydata[[var]]) && length(unique(stats::na.omit(mydata[[var]]))) <= 6)
 
                 if (is_categorical) {
                     cont_table <- table(mydata[[var]], mydata[[mygroup]])
                     if (any(cont_table == 0)) {
-                        warnings <- append(warnings, paste0("Empty cells detected in ", .display(var), " × ", .display(mygroup), " table. Results may be unstable."))
+                        warnings <- append(warnings, paste0("Empty cells detected in ", .display(var), " \u{D7} ", .display(mygroup), " table. Results may be unstable."))
                     }
                 }
             }
@@ -323,7 +323,7 @@ NULL
                 sprintf("Found %d significant association(s) (p < 0.05).", significant_count))
         } else {
             summary <- paste0(summary, " ",
-                "No significant associations detected (all p ≥ 0.05).")
+                "No significant associations detected (all p \u{2265} 0.05).")
         }
 
         summary <- paste0(summary, " ",
@@ -452,12 +452,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "Adjusted p-values control the Family-Wise Error Rate (FWER) - the probability of making <strong>at least one</strong> false positive across all tests in the table.</p>",
 
                         "<p><strong>Why use FWER control?</strong><br>",
-                        "When comparing multiple variables across groups, the chance of finding at least one false positive increases. FWER methods (Bonferroni/Holm) provide <strong>strong control</strong> - ensuring the probability of ANY false positive stays below α (typically 0.05).</p>",
+                        "When comparing multiple variables across groups, the chance of finding at least one false positive increases. FWER methods (Bonferroni/Holm) provide <strong>strong control</strong> - ensuring the probability of ANY false positive stays below \u{3B1} (typically 0.05).</p>",
 
                         "<p><strong>Interpretation Guidelines:</strong></p>",
                         "<ul>",
                         "<li><strong>Adjusted p < 0.05:</strong> Statistically significant - strong evidence against null hypothesis</li>",
-                        "<li><strong>Adjusted p ≥ 0.05:</strong> Not significant after correction for multiple testing</li>",
+                        "<li><strong>Adjusted p \u{2265} 0.05:</strong> Not significant after correction for multiple testing</li>",
                         "<li><strong>Note:</strong> Adjusted p-values are typically <em>larger</em> than raw p-values (more conservative)</li>",
                         "</ul>",
 
@@ -679,7 +679,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         stats.labels = list(meansd = "Mean (SD)", median = "Median", q1q3 = "Q1, Q3")
                     )
 
-                    # TODO (security, forward-looking): the four `tablestyleN$setContent(...)` paths at L677 (arsenal), L726 (finalfit), L848 (gtsummary), L976 (tangram) push raw HTML produced by third-party packages directly into the result pane. Those packages embed the user's column names and factor labels inside <th>/<td> cells, and header escaping is package-version-dependent — modern versions typically escape cell contents but not always headers. Wrapping the table HTML wholesale would break the table markup. The proper fix is one of: (a) verify each package version escapes headers (audit each release used in production), (b) rename columns to alphanumeric placeholders before passing to the package and substitute display labels via the package's labeling API (arsenal::labels<- / finalfit `dependent_label` / gtsummary `modify_header`), or (c) post-process the HTML with rvest/xml2 to selectively escape <th>/<td> text content. Approach (b) is least fragile but most invasive. Defense-in-depth, not a confirmed exploit chain — flagged forward-looking.
+                    # TODO (security, forward-looking): the four `tablestyleN$setContent(...)` paths at L677 (arsenal), L726 (finalfit), L848 (gtsummary), L976 (tangram) push raw HTML produced by third-party packages directly into the result pane. Those packages embed the user's column names and factor labels inside <th>/<td> cells, and header escaping is package-version-dependent - modern versions typically escape cell contents but not always headers. Wrapping the table HTML wholesale would break the table markup. The proper fix is one of: (a) verify each package version escapes headers (audit each release used in production), (b) rename columns to alphanumeric placeholders before passing to the package and substitute display labels via the package's labeling API (arsenal::labels<- / finalfit `dependent_label` / gtsummary `modify_header`), or (c) post-process the HTML with rvest/xml2 to selectively escape <th>/<td> text content. Approach (b) is least fragile but most invasive. Defense-in-depth, not a confirmed exploit chain - flagged forward-looking.
                     tablearsenal <- arsenal::tableby(
                         formula = formula,
                         data = mydata,
@@ -766,7 +766,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # Heuristic: treat numeric variables with few unique values as categorical to avoid t/ANOVA on encoded factors
                 # Exclude grouping variable from type specification (it's used in 'by' argument)
                 all_cat_vars <- names(mydata_subset)[vapply(mydata_subset, function(v) {
-                    is.factor(v) || is.character(v) || (is.numeric(v) && length(unique(na.omit(v))) <= 6)
+                    is.factor(v) || is.character(v) || (is.numeric(v) && length(unique(stats::na.omit(v))) <= 6)
                 }, logical(1))]
                 cat_vars <- setdiff(all_cat_vars, mygroup)  # Remove grouping variable
                 cont_vars <- setdiff(myvars, all_cat_vars)  # Continuous = myvars minus all categoricals
@@ -791,7 +791,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 gtsummary_method <- method_mapping[p_adjust_method]
 
                 # Determine number of groups for correct test selection
-                n_groups <- length(unique(na.omit(mydata[[mygroup]])))
+                n_groups <- length(unique(stats::na.omit(mydata[[mygroup]])))
 
                 # Map user options to gtsummary syntax
                 stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
@@ -903,7 +903,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                             "<p><strong>How to interpret:</strong></p>",
                             "<ul>",
-                            "<li><strong>Q-value = 0.05:</strong> Among all variables with q ≤ 0.05, expect ~5% to be false positives</li>",
+                            "<li><strong>Q-value = 0.05:</strong> Among all variables with q \u{2264} 0.05, expect ~5% to be false positives</li>",
                             "<li><strong>Q-value = 0.10:</strong> Expect ~10% false positives (acceptable in exploratory research)</li>",
                             "<li><strong>Q-values are larger than raw p-values</strong> but smaller than FWER-adjusted p-values</li>",
                             "</ul>",
@@ -940,7 +940,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             "<p><strong>How to interpret:</strong></p>",
                             "<ul>",
                             "<li><strong>Adjusted p < 0.05:</strong> Statistically significant - strong evidence even after accounting for all tests</li>",
-                            "<li><strong>Adjusted p ≥ 0.05:</strong> Not significant after correction</li>",
+                            "<li><strong>Adjusted p \u{2265} 0.05:</strong> Not significant after correction</li>",
                             "<li><strong>Adjusted p-values are much larger than raw p-values</strong> (very conservative correction)</li>",
                             "</ul>",
 
@@ -1016,8 +1016,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                         for (var in myvars) {
                             # Check if variable is binary (2 levels)
-                            var_levels <- length(unique(na.omit(mydata[[var]])))
-                            group_levels <- length(unique(na.omit(mydata[[mygroup]])))
+                            var_levels <- length(unique(stats::na.omit(mydata[[var]])))
+                            group_levels <- length(unique(stats::na.omit(mydata[[mygroup]])))
 
                             if (var_levels == 2 && group_levels == 2) {
                                 # Perform Mantel-Haenszel test
@@ -1407,7 +1407,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # Calculate various effect size measures
                 # n <- sum(contingency_table)
                 #
-                # # Cramér's V
+                # # Cramer's V
                 # chi_square <- chisq.test(contingency_table)$statistic
                 # k <- min(nrow(contingency_table), ncol(contingency_table))
                 # cramers_v <- sqrt(chi_square / (n * (k - 1)))
@@ -1418,12 +1418,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # # Calculate confidence intervals (using bootstrap approximation)
                 # conf_level <- self$options$confidence_level
                 # 
-                # # Add Cramér's V
+                # # Add Cramer's V
                 # self$results$effectsizes$addRow(
                 #     rowKey = paste0(var, "_cramers_v"),
                 #     values = list(
                 #         variable = var,
-                #         measure = .("Cramér's V"),
+                #         measure = .("Cramer's V"),
                 #         value = cramers_v,
                 #         ci_lower = max(0, cramers_v - 1.96 * sqrt(cramers_v / n)),
                 #         ci_upper = min(1, cramers_v + 1.96 * sqrt(cramers_v / n)),
@@ -1514,7 +1514,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 #     )
                 #     
                 # } else if (method == "cramers_v") {
-                #     # Test significance of Cramér's V
+                #     # Test significance of Cramer's V
                 #     chi_test <- chisq.test(contingency_table)
                 #     n <- sum(contingency_table)
                 #     k <- min(nrow(contingency_table), ncol(contingency_table))
@@ -1524,7 +1524,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 #         rowKey = paste0(var, "_cramers_v_test"),
                 #         values = list(
                 #             variable = var,
-                #             method = .("Cramér's V Test"),
+                #             method = .("Cramer's V Test"),
                 #             statistic = cramers_v,
                 #             df = chi_test$parameter,
                 #             p_value = chi_test$p.value,
@@ -1894,7 +1894,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         "<p><strong>Interpretation:</strong></p>",
                         "<ul>",
                         "<li><strong>p > 0.05:</strong> Odds ratios are homogeneous across strata (common OR valid)</li>",
-                        "<li><strong>p ≤ 0.05:</strong> Odds ratios vary across strata (use stratified analysis instead)</li>",
+                        "<li><strong>p \u{2264} 0.05:</strong> Odds ratios vary across strata (use stratified analysis instead)</li>",
                         "</ul>",
 
                         "<p><strong>Stratum-specific odds ratios:</strong></p>",
@@ -1938,7 +1938,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 if (is.null(vars) || length(vars) == 0 || is.null(group))
                     return('')
 
-                # `deparse()` produces correctly quoted R literals — handles spaces,
+                # `deparse()` produces correctly quoted R literals - handles spaces,
                 # internal quotes, and backslashes, and is identical to the old output
                 # for syntactic names. (Backticks belong on bare symbols, not inside
                 # double-quoted string literals.)

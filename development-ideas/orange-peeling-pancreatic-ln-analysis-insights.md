@@ -13,7 +13,7 @@ This document analyzes a study comparing **orange-peeling (OP)** vs **convention
 ### What Orange-Peeling Achieves
 
 ✅ **Increases total LN yield**: Median 23 vs 16 LN (p < 0.001, δ = 0.424)
-✅ **Improves adequacy**: 91.9% vs 77.0% achieve ≥12 LN (p < 0.001, OR = 3.37)
+✅ **Improves adequacy**: 91.9% vs 77.0% achieve >=12 LN (p < 0.001, OR = 3.37)
 ✅ **Medium-large effect size**: Cliff's δ = 0.424, Hodges-Lehmann shift = +6 LN
 
 ### What Orange-Peeling Does NOT Change
@@ -35,19 +35,22 @@ This document analyzes a study comparing **orange-peeling (OP)** vs **convention
 **Comparison**: Orange-peeling vs Conventional LN dissection
 **Setting**: Pancreatic adenocarcinoma (Whipple resections)
 **Sample Size**: 521 cases total
+
 - Conventional: 300 cases
 - Orange-peeling: 221 cases
 - PDAC-only subset: 209 cases (131 CONV, 78 OP)
 - LN-positive subset: 338 cases (190 CONV, 148 OP)
 
 **Primary Outcomes**:
+
 1. Total LN yield
 2. Metastatic LN count
 3. LN ratio (Met LN / Total LN)
-4. Adequacy (≥12 LN dissected)
+4. Adequacy (>=12 LN dissected)
 5. Stage migration (N0 vs N1 vs N2)
 
 **Statistical Methods**:
+
 - Mann-Whitney U test (non-parametric comparison)
 - Cliff's delta (effect size for ordinal data)
 - Hodges-Lehmann shift (median difference estimator)
@@ -63,6 +66,7 @@ This document analyzes a study comparing **orange-peeling (OP)** vs **convention
 The **hypergeometric distribution** models sampling **without replacement** from a finite population:
 
 **Formula**:
+
 ```
 P(X = k) = C(K, k) × C(N-K, n-k) / C(N, n)
 
@@ -74,12 +78,13 @@ k = Observed successes (metastatic LN found)
 ```
 
 **Application to LN Sampling**:
+
 - **N**: True total LN in the specimen (unknown, must be estimated)
 - **K**: True metastatic LN (unknown, must be estimated)
 - **n**: LN examined by pathologist (what we control)
 - **k**: Metastatic LN found (what we observe)
 
-**Question**: How many LN (n) must we examine to have ≥90% or ≥95% confidence of detecting ≥1 metastatic LN (for N1 staging) or ≥4 metastatic LN (for N2 staging)?
+**Question**: How many LN (n) must we examine to have >=90% or >=95% confidence of detecting >=1 metastatic LN (for N1 staging) or >=4 metastatic LN (for N2 staging)?
 
 ---
 
@@ -88,17 +93,21 @@ k = Observed successes (metastatic LN found)
 Our current pathsampling implementation uses **binomial probability**:
 
 **Binomial Model** (current):
+
 ```r
-P(detect ≥1) = 1 - (1-p)^n
+P(detect >=1) = 1 - (1-p)^n
 ```
+
 - Assumes sampling **with replacement**
 - Assumes **infinite population**
 - Estimates **p** from first detection data
 
 **Hypergeometric Model** (new):
+
 ```r
-P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
+P(detect >=k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 ```
+
 - Models sampling **without replacement** (realistic!)
 - Uses **finite population** (actual LN pool)
 - Requires estimates of **N** (total LN) and **K** (metastatic LN)
@@ -121,23 +130,27 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 ### 1. Total LN Yield
 
 **All Cases** (n=521):
+
 - **Orange-peeling**: Median 23 LN (IQR 17-31)
 - **Conventional**: Median 16 LN (IQR 12-21)
 - **Statistics**: U = 19,092.5, p ≈ 1.2×10⁻¹⁶
 - **Effect size**: Cliff's δ = 0.424 (medium-large), Hodges-Lehmann shift = +6 LN
 
 **PDAC-only** (n=209):
+
 - **Orange-peeling**: Median 24 LN
 - **Conventional**: Median 18 LN
 - **Statistics**: U = 7,601, p ≈ 3.7×10⁻⁹
 - **Effect size**: Cliff's δ = 0.49 (medium-large)
 
 **LN-positive subset** (n=338):
+
 - **Orange-peeling**: Median 24 LN
 - **Conventional**: Median 17.5 LN
 - **Statistics**: p < 0.0001, Cliff's δ = -0.41 (medium)
 
 **Interpretation**:
+
 - Orange-peeling consistently yields **6 more LN** across all cohorts
 - Effect is robust (medium-large effect sizes)
 - Achieves statistical significance in every analysis
@@ -147,17 +160,20 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 ### 2. Metastatic LN Count
 
 **All Cases**:
+
 - **Orange-peeling**: Median 2 LN (IQR 0-5)
 - **Conventional**: Median 1 LN (IQR 0-4)
 - **Statistics**: U = 30,836, p = 0.163 (NOT significant)
 - **Effect size**: Cliff's δ = 0.070 (negligible)
 
 **PDAC-only**:
+
 - **Orange-peeling**: Median 3 LN
 - **Conventional**: Median 3 LN
 - **Statistics**: No difference
 
 **LN-positive only**:
+
 - **Orange-peeling**: Median 4 LN
 - **Conventional**: Median 3 LN
 - **Statistics**: p = 0.21 (NOT significant)
@@ -169,25 +185,29 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 ### 3. LN Ratio
 
 **All Cases**:
+
 - **Both groups**: Median 0.08-0.09
 - **Statistics**: U = 33,722, p = 0.731 (NOT significant)
 - **Effect size**: Cliff's δ = -0.017 (no effect)
 
 **LN-positive subset**:
+
 - **Orange-peeling**: 0.157
 - **Conventional**: 0.195
 - **Statistics**: p = 0.046 (borderline significant, LOWER in OP)
 
 **Interpretation**:
+
 - LN ratio actually DECREASES with orange-peeling (more denominator, same numerator)
 - This is expected if OP finds more negative LN, not more positive LN
 - LN ratio may be misleading when technique varies
 
 ---
 
-### 4. Adequacy (≥12 LN)
+### 4. Adequacy (>=12 LN)
 
 **All Cases**:
+
 - **Orange-peeling**: 91.9% (203/221)
 - **Conventional**: 77.0% (231/300)
 - **Statistics**: χ² = 19.13, p ≈ 1.2×10⁻⁵
@@ -198,15 +218,18 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
   - φ = 0.192 (small-medium correlation)
 
 **PDAC-only**:
+
 - **Orange-peeling**: 97.4% (76/78)
 - **Conventional**: 86.3% (113/131)
 
 **LN-positive subset**:
+
 - **Orange-peeling**: 94%
 - **Conventional**: 83%
 - **Statistics**: p = 0.0045, Cramer's V = 0.15
 
 **Interpretation**:
+
 - Orange-peeling dramatically improves adequacy achievement
 - Near-universal adequacy (97.4%) in PDAC with OP
 - This is the PRIMARY clinical benefit
@@ -216,16 +239,19 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 ### 5. Stage Migration Analysis
 
 **All Cases** (N0 / N1 / N2):
+
 - **Orange-peeling**: 33.0% / 31.2% / 35.7%
 - **Conventional**: 36.7% / 32.3% / 31.0%
 - **Statistics**: χ² = 1.40, p = 0.497 (NOT significant)
 
 **PDAC-only** (N0 / N1 / N2):
+
 - **Orange-peeling**: 15.4% / 35.9% / 48.7%
 - **Conventional**: 19.8% / 35.9% / 44.3%
 - **Statistics**: χ² = 0.689, p = 0.75 (NOT significant)
 
 **LN-positive only** (N1 / N2):
+
 - **Orange-peeling**: 47% / 53%
 - **Conventional**: 51% / 49%
 - **Statistics**: p = 0.48 (NOT significant)
@@ -233,6 +259,7 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 **Critical Finding**: NO Will Rogers phenomenon!
 
 **Interpretation**:
+
 - Orange-peeling does NOT cause stage migration
 - This is reassuring - it means the extra LN found are predominantly negative
 - The biological stage distribution is unaffected
@@ -246,23 +273,27 @@ P(detect ≥k) = 1 - sum(dhyper(0:(k-1), K, N-K, n))
 
 The study used hypergeometric analysis to determine minimum LN examination requirements:
 
-#### To Detect ≥1 Positive LN (Avoid Missing N1)
+#### To Detect >=1 Positive LN (Avoid Missing N1)
 
 **90% Confidence**:
+
 - Conventional: ~8 LN required
 - Orange-peeling: ~10 LN required
 
 **95% Confidence**:
+
 - Conventional: ~10 LN required
 - Orange-peeling: ~12 LN required
 
-#### To Detect ≥4 Positive LN (Avoid Missing N2)
+#### To Detect >=4 Positive LN (Avoid Missing N2)
 
 **90% Confidence**:
+
 - Conventional: ~13-14 LN required
 - Orange-peeling: ~17-18 LN required
 
 **95% Confidence**:
+
 - Conventional: ~14 LN required
 - Orange-peeling: ~18 LN required
 
@@ -279,19 +310,20 @@ This seems counterintuitive! Orange-peeling yields more LN, so shouldn't it need
 **Answer**: It's about the **sampling fraction** (n/N).
 
 - **Conventional**: Total pool N ≈ 16-18 LN
-  - To find ≥1 positive with 95% confidence: need 10 LN
+  - To find >=1 positive with 95% confidence: need 10 LN
   - Sampling fraction: 10/16 = 62.5%
 
 - **Orange-peeling**: Total pool N ≈ 23-24 LN
-  - To find ≥1 positive with 95% confidence: need 12 LN
+  - To find >=1 positive with 95% confidence: need 12 LN
   - Sampling fraction: 12/24 = 50%
 
 **The larger pool (OP) requires a larger absolute number (n) to maintain the same sampling fraction and confidence.**
 
 **Clinical Implication**:
-- The ≥12 LN adequacy criterion is more appropriate for orange-peeling than conventional
-- Conventional dissection should perhaps require ≥10 LN (not 12)
-- Or, technique should be standardized (all use OP → all use ≥12 criterion)
+
+- The >=12 LN adequacy criterion is more appropriate for orange-peeling than conventional
+- Conventional dissection should perhaps require >=10 LN (not 12)
+- Or, technique should be standardized (all use OP → all use >=12 criterion)
 
 ---
 
@@ -305,7 +337,7 @@ This seems counterintuitive! Orange-peeling yields more LN, so shouldn't it need
 | **Method** | Orange-peeling vs conventional | Sampling intensity (blocks) |
 | **Optimal samples** | 17-18 LN (95% for N2) | 7 blocks (plateau) |
 | **Statistical approach** | Hypergeometric | ROC analysis |
-| **Adequacy threshold** | ≥12 LN | ≥5 foci |
+| **Adequacy threshold** | >=12 LN | >=5 foci |
 | **Stage migration** | None (p=0.497) | Yes (40% difference) |
 | **Key finding** | OP improves adequacy, not detection | Single vs summed matters |
 
@@ -313,10 +345,12 @@ This seems counterintuitive! Orange-peeling yields more LN, so shouldn't it need
 **Difference**: Ates found stage migration; orange-peeling did NOT
 
 **Why the difference?**
+
 - **Ates**: Inadequate sampling MISSES disease (LVSI is present but not sampled)
 - **Orange-peeling**: Inadequate sampling misses NODES, not metastases
 
 This suggests:
+
 - For disease DETECTION (omentum, LVSI): More sampling → better detection
 - For node ADEQUACY (LN): Better technique → more nodes, same metastases
 
@@ -336,6 +370,7 @@ This suggests:
 **Key Difference**: Goess found stage migration, orange-peeling did NOT.
 
 **Possible Explanations**:
+
 1. **Pancreatic LN are more obvious** (surgeon identifies them during dissection)
 2. **Endometrial LN are smaller/harder to find** (more affected by pathologist effort)
 3. **Orange-peeling is technique**, Goess comparison is effort/experience
@@ -348,7 +383,7 @@ This suggests:
 | Feature | Orange-peeling PDAC | Habib IPMN |
 |---------|---------------------|------------|
 | **Tissue** | Pancreatic LN (PDAC) | Pancreatic LN (IPMN) |
-| **Threshold** | ≥12 LN (NCCN guideline) | Dual threshold (8 & 15 LN) |
+| **Threshold** | >=12 LN (NCCN guideline) | Dual threshold (8 & 15 LN) |
 | **Method** | Hypergeometric | Maximally selected log-rank |
 | **Survival impact** | Not analyzed | Yes (LN yield predicts survival) |
 | **Stage migration** | None | Not analyzed |
@@ -381,7 +416,7 @@ This suggests:
 Our pathsampling jamovi function currently implements:
 
 1. ✅ **Binomial probability model**
-   - P(detect ≥1) = 1 - (1-p)^n
+   - P(detect >=1) = 1 - (1-p)^n
    - Estimates p from first detection data
    - Suitable for omentum/LVSI (large/infinite populations)
 
@@ -409,12 +444,13 @@ Our pathsampling jamovi function currently implements:
 **Use Case**: Finite population sampling (lymph nodes, fixed number of cassettes)
 
 **Required Inputs**:
+
 - **N**: Total population size (e.g., total LN in specimen)
 - **K**: Success states (e.g., metastatic LN)
 - **n**: Samples examined (what we control)
-- **k**: Desired detections (e.g., ≥1 for N1, ≥4 for N2)
+- **k**: Desired detections (e.g., >=1 for N1, >=4 for N2)
 
-**Output**: Minimum n required for X% confidence of detecting ≥k positives
+**Output**: Minimum n required for X% confidence of detecting >=k positives
 
 ---
 
@@ -423,11 +459,13 @@ Our pathsampling jamovi function currently implements:
 **Option 1: Add Hypergeometric Model to Existing Pathsampling**
 
 Pros:
+
 - All methods in one analysis
 - Users can compare binomial vs hypergeometric
 - Consistent interface
 
 Cons:
+
 - Different data requirements (binomial needs first detection; hypergeometric needs N and K)
 - May confuse users about which method to use
 - Could make interface cluttered
@@ -435,11 +473,13 @@ Cons:
 **Option 2: Create Separate "LN Adequacy Analysis" Function**
 
 Pros:
+
 - Focused on LN dissection use case
 - Clear separation from omentum/LVSI analysis
 - Can include LN-specific outputs (stage, LN ratio, adequacy %)
 
 Cons:
+
 - Code duplication
 - Requires new function development
 - More maintenance
@@ -447,6 +487,7 @@ Cons:
 **RECOMMENDATION**: **Option 1** - Add hypergeometric as optional model in pathsampling
 
 Rationale:
+
 - Mathematical similarity (both probability models)
 - Users doing omentum analysis may also want LN analysis
 - Can enable/disable via checkbox: "Use hypergeometric model (for finite populations)"
@@ -463,8 +504,8 @@ Rationale:
 
 **Optional Enhancements**:
 
-4. **Dissection technique** (e.g., orange-peeling vs conventional) - Grouping variable
-5. **Specimen type** (e.g., Whipple, distal pancreatectomy) - Stratification variable
+1. **Dissection technique** (e.g., orange-peeling vs conventional) - Grouping variable
+2. **Specimen type** (e.g., Whipple, distal pancreatectomy) - Stratification variable
 
 **Data Structure Example**:
 
@@ -481,7 +522,7 @@ Rationale:
 
 **Table 1: Hypergeometric Model Predictions**
 
-| LN Examined | P(detect ≥1) | P(detect ≥4) | Classification |
+| LN Examined | P(detect >=1) | P(detect >=4) | Classification |
 |-------------|--------------|--------------|----------------|
 | 5           | 45.2%        | 8.1%         | Inadequate     |
 | 10          | 78.9%        | 32.4%        | Marginal       |
@@ -491,7 +532,7 @@ Rationale:
 
 **Table 2: Minimum LN Requirements**
 
-| Target Confidence | For ≥1 positive (N1) | For ≥4 positive (N2) |
+| Target Confidence | For >=1 positive (N1) | For >=4 positive (N2) |
 |-------------------|----------------------|----------------------|
 | 80%               | 8 LN                 | 12 LN                |
 | 90%               | 10 LN                | 14 LN                |
@@ -502,17 +543,17 @@ Rationale:
 
 | Adequacy Threshold | Cases Meeting | Percentage | Mean Met LN |
 |--------------------|---------------|------------|-------------|
-| ≥5 LN              | 218           | 95.2%      | 2.4         |
-| ≥10 LN             | 189           | 82.5%      | 2.6         |
-| ≥12 LN             | 167           | 72.9%      | 2.8         |
-| ≥15 LN             | 134           | 58.5%      | 3.1         |
+| >=5 LN              | 218           | 95.2%      | 2.4         |
+| >=10 LN             | 189           | 82.5%      | 2.6         |
+| >=12 LN             | 167           | 72.9%      | 2.8         |
+| >=15 LN             | 134           | 58.5%      | 3.1         |
 
 **Table 4: Stage Migration Analysis**
 
 | LN Examined | Cases | N0    | N1    | N2    |
 |-------------|-------|-------|-------|-------|
 | <12 LN      | 54    | 42.6% | 35.2% | 22.2% |
-| ≥12 LN      | 167   | 30.5% | 29.3% | 40.2% |
+| >=12 LN      | 167   | 30.5% | 29.3% | 40.2% |
 
 ---
 
@@ -521,9 +562,10 @@ Rationale:
 ### Does Orange-Peeling Methodology Apply to Omentum?
 
 **Similarities**:
+
 - Both are adequacy questions
 - Both involve sampling from specimens
-- Both have guideline thresholds (LN: ≥12, Omentum: 4 cassettes per Skala)
+- Both have guideline thresholds (LN: >=12, Omentum: 4 cassettes per Skala)
 
 **Differences**:
 
@@ -551,6 +593,7 @@ The binomial model remains appropriate for omentum because:
 4. **Right-censored data**: Cassettes after first detection are not examined (binomial handles this)
 
 **The hypergeometric model would be inappropriate because**:
+
 - Omentum doesn't have a fixed "total number of metastatic foci" (like LN has total nodes)
 - Sampling cassettes doesn't "exhaust" the omentum (unlike examining all LN)
 - n/N ratio is tiny (4 cassettes / hundreds of possible cassette locations)
@@ -565,9 +608,10 @@ The binomial model remains appropriate for omentum because:
 - **Omentum**: More CASSETTES → better metastasis detection
 
 **Implication**: For omentum, the equivalent of "orange-peeling" would be:
+
 - Gross examination technique (thorough palpation, bread-loafing)
 - Strategic cassette selection (target suspicious areas)
-- Adequate initial sampling (≥4 cassettes per Skala)
+- Adequate initial sampling (>=4 cassettes per Skala)
 
 **Lesson 2: Adequacy vs Stage Migration**
 
@@ -575,9 +619,10 @@ The binomial model remains appropriate for omentum because:
 - **Omentum**: Should aim for adequacy (95% detection) without over-sampling
 
 **Implication**: 4 cassettes is the "sweet spot" for omentum:
+
 - Achieves 95% detection (adequate)
 - Doesn't require excessive sampling
-- Parallels ≥12 LN criterion (evidence-based threshold)
+- Parallels >=12 LN criterion (evidence-based threshold)
 
 **Lesson 3: Effect Size Reporting**
 
@@ -585,6 +630,7 @@ The binomial model remains appropriate for omentum because:
 - **Our omentum analysis**: Could add these effect size measures
 
 **Implication**: Enhance pathsampling output with:
+
 - Cliff's delta for non-parametric comparisons
 - Hodges-Lehmann median difference
 - OR/RR/RD for adequacy achievement rates
@@ -598,6 +644,7 @@ The binomial model remains appropriate for omentum because:
 **Implementation**:
 
 1. **Add new option in pathsampling.a.yaml**:
+
 ```yaml
 - name: modelType
   title: Probability model
@@ -632,7 +679,8 @@ The binomial model remains appropriate for omentum because:
   default: 1
 ```
 
-2. **Add hypergeometric calculations in pathsampling.b.R**:
+1. **Add hypergeometric calculations in pathsampling.b.R**:
+
 ```r
 # Hypergeometric model
 if (self$options$modelType == 'hypergeometric') {
@@ -660,7 +708,8 @@ if (self$options$modelType == 'hypergeometric') {
 }
 ```
 
-3. **Add output tables in pathsampling.r.yaml**:
+1. **Add output tables in pathsampling.r.yaml**:
+
 ```yaml
 - name: hypergeometricTable
   title: Hypergeometric Model Predictions
@@ -671,7 +720,7 @@ if (self$options$modelType == 'hypergeometric') {
       title: 'Number of Samples'
       type: integer
     - name: cumProb
-      title: 'P(detect ≥k)'
+      title: 'P(detect >=k)'
       type: number
       format: 'pc'
     - name: marginalGain
@@ -687,6 +736,7 @@ if (self$options$modelType == 'hypergeometric') {
 **Add to existing analyses**:
 
 1. **Cliff's Delta** (for non-parametric comparisons)
+
 ```r
 # Calculate Cliff's delta
 cliff_delta <- function(x, y) {
@@ -705,10 +755,11 @@ cliff_delta <- function(x, y) {
 # |δ| < 0.147: negligible
 # |δ| < 0.330: small
 # |δ| < 0.474: medium
-# |δ| ≥ 0.474: large
+# |δ| >= 0.474: large
 ```
 
-2. **Hodges-Lehmann Estimator** (median difference)
+1. **Hodges-Lehmann Estimator** (median difference)
+
 ```r
 # All pairwise differences
 hodges_lehmann <- function(x, y) {
@@ -717,7 +768,8 @@ hodges_lehmann <- function(x, y) {
 }
 ```
 
-3. **Add to stage migration analysis**:
+1. **Add to stage migration analysis**:
+
 ```r
 # OR, RR, RD for adequacy achievement
 OR <- (a * d) / (b * c)
@@ -733,6 +785,7 @@ phi <- sqrt(chisq / n)  # Effect size for chi-square
 **New analysis section**: "Lymph Node Staging Analysis"
 
 **Required variables**:
+
 - Total LN examined
 - Metastatic LN found
 - Stage (N0/N1/N2) - optional
@@ -740,6 +793,7 @@ phi <- sqrt(chisq / n)  # Effect size for chi-square
 **Outputs**:
 
 1. **LN Ratio Statistics**:
+
 ```
 Measure                          | Value
 ---------------------------------|-------
@@ -748,7 +802,8 @@ Mean LN ratio                    | 0.213
 LN ratio range                   | 0.00 - 0.85
 ```
 
-2. **Stage Distribution**:
+1. **Stage Distribution**:
+
 ```
 Stage | Cases | Percentage | Mean Total LN | Mean Met LN
 ------|-------|------------|---------------|------------
@@ -757,9 +812,10 @@ N1    | 64    | 31.2%      | 23.1          | 2.1
 N2    | 73    | 35.7%      | 24.8          | 6.3
 ```
 
-3. **Adequacy by Stage**:
+1. **Adequacy by Stage**:
+
 ```
-Stage | <12 LN  | ≥12 LN  | Adequacy %
+Stage | <12 LN  | >=12 LN  | Adequacy %
 ------|---------|---------|------------
 N0    | 8       | 60      | 88.2%
 N1    | 5       | 59      | 92.2%
@@ -802,9 +858,9 @@ N2    | 4       | 69      | 94.5%
    - Yields +6 additional LN on average
 
 2. **Adequacy Threshold**:
-   - NCCN guideline: ≥12 LN
-   - Hypergeometric analysis: 12 LN achieves ~87% confidence for ≥1 detection
-   - For N2 detection (≥4 met LN): aim for 17-18 LN (95% confidence)
+   - NCCN guideline: >=12 LN
+   - Hypergeometric analysis: 12 LN achieves ~87% confidence for >=1 detection
+   - For N2 detection (>=4 met LN): aim for 17-18 LN (95% confidence)
 
 3. **Quality Assurance**:
    - Monitor adequacy achievement rate (target: >85%)
@@ -812,6 +868,7 @@ N2    | 4       | 69      | 94.5%
    - Standardize technique across institution
 
 **Reporting Template**:
+
 ```
 LYMPH NODE EXAMINATION
 
@@ -819,16 +876,16 @@ Total lymph nodes examined: [XX]
 Metastatic lymph nodes identified: [XX]
 Lymph node ratio: [XX.XX]
 
-Adequacy: [✓] Adequate (≥12 LN) / [ ] Limited (<12 LN)
+Adequacy: [✓] Adequate (>=12 LN) / [ ] Limited (<12 LN)
 
 pN Stage: [ ] N0 (0 metastatic LN)
           [ ] N1 (1-3 metastatic LN)
-          [ ] N2 (≥4 metastatic LN)
+          [ ] N2 (>=4 metastatic LN)
 
 Dissection technique: [ ] Orange-peeling [ ] Conventional
 
 Comment: Hypergeometric analysis indicates 95% confidence for N2
-detection requires ≥18 lymph nodes examined.
+detection requires >=18 lymph nodes examined.
 ```
 
 ---
@@ -840,7 +897,7 @@ detection requires ≥18 lymph nodes examined.
 1. **Submit Adequate Tissue**:
    - Ensure comprehensive LN dissection during Whipple
    - Label LN stations clearly (pancreatic head, body, tail, peripancreatic, etc.)
-   - Aim for ≥15-18 LN for optimal staging
+   - Aim for >=15-18 LN for optimal staging
 
 2. **Communication with Pathology**:
    - Request orange-peeling technique if available
@@ -854,8 +911,8 @@ detection requires ≥18 lymph nodes examined.
 
 1. **Adequacy Assessment**:
    - <12 LN: May be understaged (use clinical judgment)
-   - ≥12 LN: Adequate for N1 detection
-   - ≥18 LN: Adequate for N2 detection (95% confidence)
+   - >=12 LN: Adequate for N1 detection
+   - >=18 LN: Adequate for N2 detection (95% confidence)
 
 2. **LN Ratio Caveat**:
    - LN ratio may vary with dissection technique
@@ -971,7 +1028,7 @@ detection requires ≥18 lymph nodes examined.
 
 1. **For Pancreatic LN**:
    - Orange-peeling recommended (3.4× better adequacy)
-   - Aim for ≥18 LN (95% confidence for N2)
+   - Aim for >=18 LN (95% confidence for N2)
    - No stage migration risk
 
 2. **For Omentum**:
@@ -981,7 +1038,7 @@ detection requires ≥18 lymph nodes examined.
 
 3. **For LVSI**:
    - 7 blocks optimal (Ates 2025)
-   - ≥5 foci threshold validated
+   - >=5 foci threshold validated
    - Single vs summed matters for prognosis
 
 4. **Universal Principle**:
@@ -996,7 +1053,7 @@ detection requires ≥18 lymph nodes examined.
 The orange-peeling pancreatic LN study provides:
 
 1. ✅ **NEW methodology**: Hypergeometric probability model for finite population sampling
-2. ✅ **Validation**: Adequacy thresholds (≥12 for N1, ≥18 for N2) evidence-based
+2. ✅ **Validation**: Adequacy thresholds (>=12 for N1, >=18 for N2) evidence-based
 3. ✅ **Quality improvement**: Orange-peeling dramatically improves adequacy without stage inflation
 4. ✅ **Implementation path**: Add hypergeometric option to pathsampling for LN analysis
 
@@ -1017,6 +1074,7 @@ The orange-peeling pancreatic LN study provides:
 ### Primary Source
 
 **Orange-peeling study** (2025, unpublished data)
+
 - Comparison of orange-peeling vs conventional LN dissection in pancreatic adenocarcinoma
 - n = 521 cases (300 conventional, 221 orange-peeling)
 - **Key contribution**: Hypergeometric analysis for LN adequacy thresholds
@@ -1037,13 +1095,13 @@ The orange-peeling pancreatic LN study provides:
 
 ### Methodological References
 
-5. **Agresti A.** (2002) Categorical Data Analysis. 2nd ed. Wiley.
+1. **Agresti A.** (2002) Categorical Data Analysis. 2nd ed. Wiley.
    - Effect sizes for categorical data (φ, Cramer's V, OR, RR)
 
-6. **Cliff N.** (1993) Dominance statistics: Ordinal analyses to answer ordinal questions. *Psych Bull* 114:494-509.
+2. **Cliff N.** (1993) Dominance statistics: Ordinal analyses to answer ordinal questions. *Psych Bull* 114:494-509.
    - Cliff's delta for non-parametric effect size
 
-7. **Hodges JL, Lehmann EL.** (1963) Estimates of location based on rank tests. *Ann Math Stat* 34:598-611.
+3. **Hodges JL, Lehmann EL.** (1963) Estimates of location based on rank tests. *Ann Math Stat* 34:598-611.
    - Hodges-Lehmann median difference estimator
 
 ---

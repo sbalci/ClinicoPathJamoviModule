@@ -23,12 +23,13 @@
 new_version: "0.0.47"
 new_date: "2026-07-05"
 quick: false
-TEST: true
-jjstatsplot: false
-jsurvival: false
-ClinicoPathDescriptives: false
-OncoPath: false
-meddecide: false
+TEST: false
+jjstatsplot: true
+jsurvival: true
+ClinicoPathDescriptives: true
+OncoPath: true
+meddecide: true
+
 
 
 
@@ -51,10 +52,20 @@ modes:
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
   copy_data_files: false      # Enable/disable data file copying
-  copy_test_files: false      # Enable/disable test file copying
+  copy_test_files: false      # Distribute the umbrella's per-analysis functional tests to submodules
+                              # (name-keyed + namespace-translated). Leave FALSE until the umbrella
+                              # test suite is green -- otherwise a submodule's R CMD check goes red.
+                              # The self-contained dependency-guard test + testthat.R runner are shipped
+                              # regardless (to submodules with no pre-existing tests) as an always-green net.
   copy_r_files: true         # Enable/disable R utility file copying
   use_legacy_copying: false   # Use legacy hardcoded file lists instead of config-based copying
-  
+
+  # Build-time integrity checks (added with the submodule critical review)
+  check_module_dependencies: true   # Fail the build if a submodule uses pkg:: without declaring it in Imports
+  deps_fail_on_error: true          # Hard-stop on unguarded-undeclared deps (set FALSE to warn-only)
+  check_distribution_coverage: true # Report analyses routed to zero or >1 submodule
+  coverage_fail_on_gap: false       # Also hard-stop when an analysis routes to NO submodule (release hardening)
+
   # NAMESPACE-DESCRIPTION synchronization
   sync_namespace_description: true  # Enable NAMESPACE to DESCRIPTION package synchronization
   namespace_sync_dry_run: false     # Perform dry run only (show what would be changed)
@@ -65,6 +76,7 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/jjstatsplot"
     r_files:
       - "utils.R"
+      - "arcdiagram_vendored.R"
   meddecide:
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     r_files:

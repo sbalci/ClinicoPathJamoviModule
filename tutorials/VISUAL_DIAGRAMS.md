@@ -128,7 +128,7 @@ flowchart TD
     F -->|2 groups| G[Mann-Whitney U]
     F -->|3+ groups| H[Kruskal-Wallis]
 
-    A -->|Both categorical| I{Expected count ≥ 5?}
+    A -->|Both categorical| I{Expected count >= 5?}
     I -->|Yes| J[Chi-square test]
     I -->|No| K[Fisher's exact test]
 
@@ -287,7 +287,7 @@ flowchart TD
     K --> L[Create forest plot]
     L --> M[Calculate C-index]
 
-    M --> N{C-index ≥ 0.70?}
+    M --> N{C-index >= 0.70?}
     N -->|Yes| O[Good discrimination<br/>Clinically useful]
     N -->|No| P[Poor discrimination<br/>Limited utility]
 
@@ -397,12 +397,12 @@ flowchart TD
     A -->|Balanced use| D[Youden index<br/>Maximize Sens + Spec]
 
     B --> B1{Acceptable<br/>false positive rate?}
-    B1 -->|Low| B2[Sens ≥ 95%<br/>Lower cutpoint]
-    B1 -->|Moderate| B3[Sens ≥ 90%<br/>Moderate cutpoint]
+    B1 -->|Low| B2[Sens >= 95%<br/>Lower cutpoint]
+    B1 -->|Moderate| B3[Sens >= 90%<br/>Moderate cutpoint]
 
     C --> C1{Acceptable<br/>false negative rate?}
-    C1 -->|Low| C2[Spec ≥ 95%<br/>Higher cutpoint]
-    C1 -->|Moderate| C3[Spec ≥ 90%<br/>Moderate cutpoint]
+    C1 -->|Low| C2[Spec >= 95%<br/>Higher cutpoint]
+    C1 -->|Moderate| C3[Spec >= 90%<br/>Moderate cutpoint]
 
     D --> D1[Calculate Youden J<br/>J = Sens + Spec - 1]
     D1 --> D2[Choose cutpoint with<br/>maximum J value]
@@ -492,7 +492,7 @@ EXAMPLE: Treatment Decision at 15% Threshold
 
 ┌──────────────────────────────────────────────────────────┐
 │ Using the Model (at 15% threshold):                      │
-│   - Treat 75 patients (model predicts risk ≥ 15%)       │
+│   - Treat 75 patients (model predicts risk >= 15%)       │
 │   - True positives: 42 (would recur, benefit from Rx)   │
 │   - False positives: 33 (won't recur, harmed by Rx)     │
 │                                                           │
@@ -553,7 +553,7 @@ Difference (Model vs Treat All) = 0.076
 ```mermaid
 flowchart TD
     Start([Prediction model developed]) --> A[Assess discrimination<br/>AUC, C-index]
-    A --> B{AUC ≥ 0.70?}
+    A --> B{AUC >= 0.70?}
     B -->|No| C[Poor discrimination<br/>Model not useful]
     B -->|Yes| D[Check calibration<br/>Calibration plot]
 
@@ -802,6 +802,7 @@ flowchart LR
 **License:** CC-BY-4.0
 
 **Note:** All Mermaid diagrams can be rendered in:
+
 - Quarto documents
 - GitHub README files
 - Obsidian notes

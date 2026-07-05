@@ -10,9 +10,10 @@ Successfully enhanced the `pathsampling` jamovi function to incorporate the crit
 
 ## Key Finding from Ates et al. (2025)
 
-**Critical Discovery**: Among cases with ≥5 total LVSI foci:
-- Cases with **≥5 on a SINGLE slide** → **Worse overall survival** (P = .023)
-- Cases with **≥5 only when SUMMED** → Similar survival to focal LVSI
+**Critical Discovery**: Among cases with >=5 total LVSI foci:
+
+- Cases with **>=5 on a SINGLE slide** → **Worse overall survival** (P = .023)
+- Cases with **>=5 only when SUMMED** → Similar survival to focal LVSI
 - **Both groups** had similar lymph node metastasis rates at diagnosis
 
 **Implication**: HOW you reach the threshold matters for prognosis, not just the total count!
@@ -51,11 +52,13 @@ Successfully enhanced the `pathsampling` jamovi function to incorporate the crit
 ### Variables Required
 
 **Primary (already existed)**:
+
 - `totalSamples`: Total cassettes examined
 - `firstDetection`: First cassette where lesion detected
 - `positiveCassettes`: Total cassettes with tumor
 
 **New (added today)**:
+
 - `maxPositiveSingle`: Maximum positive foci on any single cassette
 
 ### Classification Logic
@@ -66,35 +69,37 @@ Cases are classified into THREE groups:
    - Example: Total 3 foci, threshold 5 → Focal
    - Low tumor burden
 
-2. **Substantial on single cassette** (≥threshold on ≥1 cassette)
+2. **Substantial on single cassette** (>=threshold on >=1 cassette)
    - Example: Max on single cassette = 7, threshold 5 → Substantial-single
    - **Worse prognosis** (Ates 2025)
 
-3. **Substantial only when summed** (≥threshold total, <threshold max)
+3. **Substantial only when summed** (>=threshold total, <threshold max)
    - Example: Total 6 foci, but max on single cassette = 3, threshold 5 → Substantial-summed
    - **Better prognosis** than substantial-single
 
 ### Output Tables
 
 **Distribution Pattern Classification**:
+
 ```
 Distribution Pattern                                  | Cases | Percentage
 -----------------------------------------------------|-------|------------
 Focal (<5 total)                                     | 58    | 27.9%
-Substantial on single cassette (≥5 on ≥1 cassette)   | 124   | 59.6%
-Substantial only when summed (≥5 total, <5 max)      | 26    | 12.5%
+Substantial on single cassette (>=5 on >=1 cassette)   | 124   | 59.6%
+Substantial only when summed (>=5 total, <5 max)      | 26    | 12.5%
 ```
 
 **Single vs Summed Comparison**:
+
 ```
 Measure                                          | Value
 -------------------------------------------------|---------------------------
-Cases with ≥5 foci (substantial)                 | 150 (72.1%)
+Cases with >=5 foci (substantial)                 | 150 (72.1%)
   - Met on single cassette                       | 124 (82.7% of substantial)
   - Met only by summing                          | 26 (17.3% of substantial)
 Mean max foci per cassette (single group)        | 15.3
 Mean max foci per cassette (summed group)        | 3.2
-Clinical significance                            | Cases with ≥5 on single cassette had worse survival (Ates 2025, p=.023)
+Clinical significance                            | Cases with >=5 on single cassette had worse survival (Ates 2025, p=.023)
 ```
 
 ---
@@ -104,18 +109,21 @@ Clinical significance                            | Cases with ≥5 on single cas
 ### Risk Stratification
 
 **High Risk** (Substantial-single):
-- ≥5 foci on at least one cassette
+>
+- >=5 foci on at least one cassette
 - Concentrated tumor involvement
 - Worse overall survival (evidence-based, Ates 2025)
 - Consider aggressive management
 
 **Moderate Risk** (Substantial-summed):
-- ≥5 foci total but <5 on any single cassette
+>
+- >=5 foci total but <5 on any single cassette
 - Distributed tumor involvement
 - Better prognosis than substantial-single
 - Standard management protocols
 
 **Low Risk** (Focal):
+
 - <5 foci total
 - Minimal tumor burden
 - Conservative management may be appropriate
@@ -129,10 +137,10 @@ Total foci across all cassettes: [XX]
 
 Classification:
 □ Focal (<5 total) - Low risk
-□ Substantial on single cassette (≥5 on ≥1 cassette) - High risk
-□ Substantial only when summed (≥5 total but <5 max) - Moderate risk
+□ Substantial on single cassette (>=5 on >=1 cassette) - High risk
+□ Substantial only when summed (>=5 total but <5 max) - Moderate risk
 
-Clinical Note: Cases with ≥5 foci on a single cassette may have worse
+Clinical Note: Cases with >=5 foci on a single cassette may have worse
 prognosis than those reaching threshold by summing (Ates 2025, p=.023).
 ```
 
@@ -143,22 +151,25 @@ prognosis than those reaching threshold by summing (Ates 2025, p=.023).
 ### From Ates et al. (2025)
 
 **Study Design**:
+
 - n = 208 endometrial cancer hysterectomies
 - Retrospective analysis (2014-2023)
 - Mean follow-up: 44.3 months
 - All H&E slides reviewed microscopically
 
 **Key Results**:
-- **Cutoff validation**: Only ≥5 (not ≥4 or ≥3) predicted lymph node metastasis (P =.038)
+
+- **Cutoff validation**: Only >=5 (not >=4 or >=3) predicted lymph node metastasis (P =.038)
 - **Optimal sampling**: 7 tumor infiltration front blocks (plateau after 7)
 - **Single vs summed**:
   - No difference in lymph node metastasis (P = .944 for presence, P = .463 for number)
   - **Significant difference in overall survival** (P = .023)
 
 **Multivariate Cox Regression** (survival predictors):
+
 - Serous histology: HR 3.77 (P < .001) ✓
 - Positive lymph nodes: HR 2.34 (P = .022) ✓
-- ≥5 on single slide vs summed: (P = .023 in univariate)
+- >=5 on single slide vs summed: (P = .023 in univariate)
 
 ### Comparison to Our Omentum Study
 
@@ -168,7 +179,7 @@ prognosis than those reaching threshold by summing (Ates 2025, p=.023).
 | **Optimal samples** | 7 blocks | 4 cassettes |
 | **Method** | ROC analysis | Binomial + bootstrap |
 | **Key innovation** | Single vs summed | Right-censored correction |
-| **Cutoff** | ≥5 foci | 95% detection probability |
+| **Cutoff** | >=5 foci | 95% detection probability |
 | **Validation** | Survival data (yes) | Literature concordance |
 | **Jamovi implementation** | ✅ Now complete | ✅ Complete |
 
@@ -181,6 +192,7 @@ prognosis than those reaching threshold by summing (Ates 2025, p=.023).
 ### Step 1: Select Variables
 
 **Required** (for distribution pattern analysis):
+
 1. Total number of samples taken → `totalSamples`
 2. Sample number where lesion first detected → `firstDetection`
 3. Number of cassettes with tumor → `positiveCassettes`
@@ -189,12 +201,14 @@ prognosis than those reaching threshold by summing (Ates 2025, p=.023).
 ### Step 2: Enable Analysis
 
 Under **"Tumor Burden Analysis"** collapse box:
+
 - ✅ Check "Show distribution pattern analysis (single vs summed)"
 - Set threshold (default: 5, based on Ates 2025 and FIGO 2023)
 
 ### Step 3: Interpret Results
 
 Review two tables:
+
 1. **Distribution Pattern Classification** - Shows breakdown by pattern
 2. **Single vs Summed Comparison** - Shows statistics for each group
 
@@ -208,15 +222,15 @@ Data entry for each case:
 - maxPositiveSingle: 4  ← NEW field
 
 Analysis shows:
-- Total foci: 6 (substantial, ≥5)
+- Total foci: 6 (substantial, >=5)
 - Max on single: 4 (<5)
 - Classification: "Substantial only when summed" (moderate risk)
 
 Interpretation:
 This case has substantial LVSI by total count, but the tumor is
-distributed across multiple cassettes (no single cassette has ≥5).
+distributed across multiple cassettes (no single cassette has >=5).
 Based on Ates 2025, this pattern has better prognosis than cases
-with ≥5 foci concentrated on a single cassette.
+with >=5 foci concentrated on a single cassette.
 ```
 
 ---
@@ -226,6 +240,7 @@ with ≥5 foci concentrated on a single cassette.
 ### What You Need for Distribution Pattern Analysis
 
 **Original pathology data** (per case):
+
 1. How many cassettes were examined total? → `totalSamples`
 2. Which cassette number had the first tumor? → `firstDetection`
 3. How many cassettes had tumor (total)? → `positiveCassettes`
@@ -265,11 +280,13 @@ nSubstantialSummed <- sum(substantialSummed, na.rm = TRUE)
 ### Statistical Outputs
 
 **For each group**:
+
 - Case count and percentage
 - Mean max foci per cassette
 - Percentage among substantial cases
 
 **Clinical interpretation**:
+
 - Automated message citing Ates 2025 finding
 - Risk stratification guidance
 
@@ -338,7 +355,7 @@ nSubstantialSummed <- sum(substantialSummed, na.rm = TRUE)
 
 1. **Report BOTH total and max on single cassette**
    - Not just "5+ LVSI foci present"
-   - Specify "≥5 foci on single slide" vs "≥5 total across slides"
+   - Specify ">=5 foci on single slide" vs ">=5 total across slides"
 
 2. **Sampling adequacy matters**
    - Ates found 7 blocks optimal for LVSI detection
@@ -359,12 +376,12 @@ nSubstantialSummed <- sum(substantialSummed, na.rm = TRUE)
 
 2. **Stage migration is real**
    - Inadequate sampling → understaging
-   - Ates: 40% difference in detection rates with <median vs ≥median cassettes
+   - Ates: 40% difference in detection rates with <median vs >=median cassettes
    - Quality assurance: Are we examining enough samples?
 
 3. **Evidence-based thresholds**
-   - ≥5 foci validated for lymph node metastasis prediction
-   - ≥5 on single slide validated for survival prediction
+   - >=5 foci validated for lymph node metastasis prediction
+   - >=5 on single slide validated for survival prediction
    - Use these cutoffs with confidence
 
 ### For Researchers
@@ -399,6 +416,7 @@ nSubstantialSummed <- sum(substantialSummed, na.rm = TRUE)
 ### Ready for Use
 
 The enhanced pathsampling function is now **production-ready** with:
+
 - Original first-detection analysis ✓
 - Tumor burden analysis ✓
 - Stage migration analysis ✓
@@ -416,7 +434,8 @@ Lymphovascular Space Invasion in Endometrial Cancer: Does it Matter Where and Ho
 *Mod Pathol.* 2025;38:100885.
 
 **Key findings incorporated**:
-- ≥5 foci cutoff validation (P = .038 for LN metastasis)
+>
+- >=5 foci cutoff validation (P = .038 for LN metastasis)
 - 7 blocks optimal sampling (plateau after 7)
 - **Single slide vs summed survival difference (P = .023)** ← Main innovation
 - Deep LVSI prognostic significance
@@ -425,14 +444,17 @@ Lymphovascular Space Invasion in Endometrial Cancer: Does it Matter Where and Ho
 ### Supporting Literature
 
 **Goess R, et al.** (2024) - Lymph node adequacy
+
 - Binomial probability approach
 - Median-based stage migration analysis
 
 **Habib JR, et al.** (2024) - IPMN lymph nodes
+
 - Dual threshold methodology
 - Maximally selected log-rank statistic
 
 **Skala SL, Hagemann IS.** (2015) - Omentum sampling
+
 - Bootstrap methodology
 - Original pathsampling inspiration
 
@@ -440,7 +462,7 @@ Lymphovascular Space Invasion in Endometrial Cancer: Does it Matter Where and Ho
 
 ## Summary
 
-**Implemented**: Distribution pattern analysis based on Ates et al. (2025) critical finding that ≥5 foci on a **single slide** predicts worse survival than ≥5 foci only when **summed across slides**.
+**Implemented**: Distribution pattern analysis based on Ates et al. (2025) critical finding that >=5 foci on a **single slide** predicts worse survival than >=5 foci only when **summed across slides**.
 
 **Status**: ✅ Complete, compiled, ready for testing with real data
 

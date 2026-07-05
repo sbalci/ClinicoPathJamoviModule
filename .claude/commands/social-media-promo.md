@@ -28,6 +28,7 @@ Generate **concise, clinician-friendly promotional text** for the jamovi functio
 **Target Platform**: `$2` (default: general if not specified)
 
 **Random Selection Mode**:
+
 - Use `random` or `surprise` (or leave empty) to automatically select a **mature function** to promote
 - Only functions with stable menuGroups are selected (excludes testing/development functions ending in "T" or "D")
 - Great for discovering lesser-known features or creating regular promotional content
@@ -74,9 +75,11 @@ For the full test data catalog (945+ datasets, function categories, GitHub URLs)
 Generate **3 promotional variants**:
 
 ### 🐦 Variant 1: Brief (Twitter/X Format)
+
 **Length**: Maximum 280 characters including hashtags
 **Style**: Punchy, direct, engaging
 **Structure**:
+
 ```
 [Hook: clinical problem or benefit] [Key feature] [Result/output]
 
@@ -84,9 +87,11 @@ Generate **3 promotional variants**:
 ```
 
 ### 📱 Variant 2: Standard (Multi-Platform)
+
 **Length**: 100-150 words
 **Style**: Professional but accessible
 **Structure**:
+
 ```
 [Engaging opening - clinical challenge]
 
@@ -103,9 +108,11 @@ Perfect for: [Clinical use cases]
 ```
 
 ### 💼 Variant 3: Extended (LinkedIn Format)
+
 **Length**: 200-300 words
 **Style**: Professional, educational, detailed
 **Structure**:
+
 ```
 [Compelling hook - clinical question or challenge]
 
@@ -130,7 +137,8 @@ Perfect for: [Clinical use cases]
 
 ## Writing Guidelines
 
-### ✅ DO:
+### ✅ DO
+
 - Use clinical terminology pathologists understand
 - Focus on clinical value, not technical implementation
 - Mention specific pathology/oncology scenarios
@@ -140,7 +148,8 @@ Perfect for: [Clinical use cases]
 - Use active voice and strong action verbs
 - Make it shareable and engaging
 
-### ❌ DON'T:
+### ❌ DON'T
+
 - Use heavy statistical jargon without context
 - Make exaggerated or unsubstantiated claims
 - Focus on code or technical implementation
@@ -165,46 +174,58 @@ Perfect for: [Clinical use cases]
 
 ## Hashtag Strategy
 
-### Core Tags (Always Include):
+### Core Tags (Always Include)
+
 - #Pathology
 - #ClinicalResearch
 - #Jamovi
 
-### Function-Specific Tags (Choose 2-3):
+### Function-Specific Tags (Choose 2-3)
 
 **For Diagnostic/ROC Functions**:
+
 - #DiagnosticAccuracy #ROC #Biomarkers #DigitalPathology
 
 **For Survival Analysis**:
+
 - #SurvivalAnalysis #Oncology #CancerResearch #Kaplan­Meier
 
 **For Agreement/QA Functions**:
+
 - #QualityAssurance #InterRaterReliability #PathologyQC
 
 **For Decision Analysis**:
+
 - #ClinicalDecisionSupport #CostEffectiveness #EvidenceBasedMedicine
 
 **For Descriptive Statistics**:
+
 - #Biostatistics #DataAnalysis #MedicalStatistics
 
 **General Research Tags**:
+
 - #OpenScience #ResearchTools #MedStats #DataScience
 
 ## Clinical Context by Function Type
 
 ### Diagnostic/ROC Functions
+
 "Validate new biomarkers against gold standards. Calculate sensitivity, specificity, PPV, NPV, and AUC with DeLong confidence intervals. Optimize cut-points for clinical decision-making."
 
 ### Survival Analysis Functions
+
 "Track patient outcomes and treatment response. Visualize time-to-event data with Kaplan-Meier curves. Compare treatment arms with hazard ratios and log-rank tests."
 
 ### Agreement Functions
+
 "Ensure diagnostic reproducibility. Measure inter-observer agreement with Cohen's kappa, ICC, or Fleiss' kappa. Generate Bland-Altman plots for method comparison."
 
 ### Decision Analysis Functions
+
 "Model clinical decision pathways. Evaluate cost-effectiveness of diagnostic strategies. Build decision trees with probabilistic sensitivity analysis."
 
 ### Descriptive Statistics
+
 "Summarize cohort characteristics for Table 1. Compare groups with appropriate statistical tests. Generate publication-ready summary tables."
 
 ## Platform-Specific Adjustments
@@ -212,6 +233,7 @@ Perfect for: [Clinical use cases]
 If `$2` is specified:
 
 ### twitter
+
 - Strict 280-character limit
 - More casual, engaging tone
 - 2-3 hashtags maximum
@@ -219,6 +241,7 @@ If `$2` is specified:
 - Focus on single key benefit
 
 ### linkedin
+
 - Professional, educational tone
 - Use full 200-300 words
 - Include detailed use cases
@@ -226,6 +249,7 @@ If `$2` is specified:
 - End with clear call-to-action
 
 ### general (or unspecified)
+
 - Balanced approach works across platforms
 - 100-200 words
 - 3-5 hashtags
@@ -237,7 +261,7 @@ Provide all three variants clearly labeled:
 
 ```markdown
 ## 🐦 VARIANT 1: Brief (Twitter/X)
-[≤280 character version with hashtags]
+[<=280 character version with hashtags]
 
 ---
 
@@ -296,12 +320,13 @@ Provide all three variants clearly labeled:
 7. Use that function for the main execution steps below
 
 **Mature Function Examples:**
+
 - ✅ VALID: `menuGroup: meddecide`, `menuGroup: Survival`, `menuGroup: Descriptives`
 - ❌ INVALID: `menuGroup: meddecideT`, `menuGroup: SurvivalD`, `menuGroup: ClinicoPathT`
 
 **Otherwise:** Use the specified function name from `$1`
 
-### Main Execution Steps:
+### Main Execution Steps
 
 1. **Read function files**: Analyze `jamovi/$1.a.yaml`, `R/$1.b.R`, `jamovi/$1.r.yaml`, `jamovi/$1.u.yaml`
 2. **Read test data catalog**: Use `Grep` to search `vignettes/test-data-complete-catalog.Rmd` for `$1_*.omv` files

@@ -757,7 +757,7 @@ survival::cox.zph(cox_fit)
                 self$results$rCode$setContent(rcode)
             }
 
-            # Success-path render — gate failures render and return earlier
+            # Success-path render - gate failures render and return earlier
             private$.renderNotices()
         }
     )

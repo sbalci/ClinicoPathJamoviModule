@@ -13,7 +13,7 @@
 #' @param use_landmark Enable landmark analysis (conditional survival from time point)
 #' @param landmark_time Landmark time point in output units
 #' @param remove_negative Remove negative intervals (end before start)
-#' @param remove_extreme Remove extreme outliers (>2× 99th percentile)
+#' @param remove_extreme Remove extreme outliers (>2x 99th percentile)
 #' @param add_times Add calculated intervals as new variable in dataset
 #' @param include_quality_metrics Include comprehensive quality assessment
 #' @param confidence_level Confidence level for mean intervals (90-99%)
@@ -558,7 +558,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "strong_warning" = list(bg = "#fff3cd", border = "#ff8800", text = "#856404", icon = ""),
                     "warning" = list(bg = "#fff3cd", border = "#ffc107", text = "#856404", icon = ""),
                     "info" = list(bg = "#d1ecf1", border = "#17a2b8", text = "#0c5460", icon = ""),
-                    list(bg = "#e2e3e5", border = "#6c757d", text = "#383d41", icon = "•")
+                    list(bg = "#e2e3e5", border = "#6c757d", text = "#383d41", icon = "\u2022")
                 )
                 messages <<- c(messages, list(sprintf(
                     "<div style='background-color: %s; padding: 12px; border-left: 4px solid %s; margin: 10px 0; color: %s;'>
@@ -676,7 +676,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><b>Key Concepts:</b></p>
                 <ul>
                     <li><b>Total Person-Time:</b> Sum of all individual follow-up periods</li>
-                    <li><b>Incidence Rate:</b> Number of events ÷ Total person-time</li>
+                    <li><b>Incidence Rate:</b> Number of events \u00f7 Total person-time</li>
                     <li><b>Time Units:</b> Typically expressed as person-{self$options$output_unit}</li>
                     <li><b>Censoring:</b> Accounts for participants leaving the study early</li>
                 </ul>
@@ -942,8 +942,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             Example: 100 people followed for 2 years = 200 person-years. This accounts for varying follow-up periods.</dd>
 
                             <dt style='font-weight: bold; margin-top: 10px;'>Incidence Rate</dt>
-                            <dd style='margin-left: 20px;'>Number of new events ÷ person-time.
-                            Example: 10 deaths ÷ 200 person-years = 0.05 deaths per person-year (or 5 per 100 person-years).</dd>
+                            <dd style='margin-left: 20px;'>Number of new events \u00f7 person-time.
+                            Example: 10 deaths \u00f7 200 person-years = 0.05 deaths per person-year (or 5 per 100 person-years).</dd>
 
                             <dt style='font-weight: bold; margin-top: 10px;'>Landmark Analysis</dt>
                             <dd style='margin-left: 20px;'>Start follow-up from a specific time point, excluding early events.
@@ -1050,13 +1050,13 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             <li><strong>Time Units (Months/Years):</strong> To ensure statistical consistency for survival analysis, this tool uses <strong>standardized durations</strong> (1 month = 30.4375 days, 1 year = 365.25 days) rather than calendar units. This prevents bias from varying month lengths (28-31 days).</li>
                             <li><strong>End dates should occur on or after start dates</strong> - Negative intervals usually indicate data entry errors</li>
                             <li><strong>Date formats must be consistent</strong> - All dates in a column should use the same format</li>
-                            <li><strong>Landmark analysis excludes participants</strong> - Only those with follow-up ≥ landmark time are included</li>
+                            <li><strong>Landmark analysis excludes participants</strong> - Only those with follow-up \u2265 landmark time are included</li>
                             <li><strong>Missing dates produce missing intervals</strong> - These are excluded from summary statistics</li>
                         </ul>
 
                         <h4 style='color: #7f5006;'> Common Pitfalls</h4>
                         <ul style='margin: 5px 0;'>
-                            <li><strong>Mixed date formats:</strong> DD/MM/YYYY vs MM/DD/YYYY in same column → Use manual format selection</li>
+                            <li><strong>Mixed date formats:</strong> DD/MM/YYYY vs MM/DD/YYYY in same column \u2192 Use manual format selection</li>
                             <li><strong>Text vs numeric dates:</strong> Ensure dates are stored consistently (all text or all numeric)</li>
                             <li><strong>Future dates:</strong> End dates after today's date may indicate data errors</li>
                             <li><strong>Extreme outliers:</strong> Very long intervals may be real (long follow-up) or errors</li>
@@ -1066,7 +1066,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <ul style='margin: 5px 0;'>
                             <li>If auto-detection fails, manually select your date format</li>
                             <li>Check for negative intervals - these indicate date column errors</li>
-                            <li>Review extreme values - anything > 2× the 99th percentile is flagged</li>
+                            <li>Review extreme values - anything > 2\u00d7 the 99th percentile is flagged</li>
                             <li>Ensure date columns don't contain non-date values (text, codes, etc.)</li>
                         </ul>
                     </div>

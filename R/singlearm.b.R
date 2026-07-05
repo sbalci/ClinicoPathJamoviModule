@@ -1229,7 +1229,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
               median_upper <- median_time * 1.2  # Fallback
             }
           } else if (!is.na(median_time)) {
-            # Fallback: Use conservative ±20% if variance not available
+            # Fallback: Use conservative +/-20% if variance not available
             median_lower <- median_time * 0.8
             median_upper <- median_time * 1.2
           }
@@ -1254,7 +1254,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           }
 
         } else {
-          # STANDARD SURVIVAL ANALYSIS using Kaplan-Meier — composeTerm backtick-
+          # STANDARD SURVIVAL ANALYSIS using Kaplan-Meier - composeTerm backtick-
           # escapes user column names; asFormula validates against jamovi's
           # allow-list (Surv is allow-listed).
           formula <-
@@ -1735,9 +1735,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <div style="background-color: #f3e5f5; padding: 10px; border-radius: 5px; margin: 10px 0;">
                         <strong> Treatment Planning:</strong>
                         <ul style="margin: 5px 0; padding-left: 20px;">
-                            <li>High early survival rates → consider less intensive follow-up</li>
-                            <li>Declining rates over time → focus on long-term monitoring</li>
-                            <li>Wide confidence intervals → need more data or longer follow-up</li>
+                            <li>High early survival rates \u2192 consider less intensive follow-up</li>
+                            <li>Declining rates over time \u2192 focus on long-term monitoring</li>
+                            <li>Wide confidence intervals \u2192 need more data or longer follow-up</li>
                         </ul>
                     </div>
                     
@@ -2089,13 +2089,13 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
               } else {
                 # Improved fallback using Poisson variance assumption
-                # Var(hazard) ≈ hazard / person-time
+                # Var(hazard) ~ hazard / person-time
                 se_hazard <- sqrt(hazard_rate / length(valid_indices))
                 hazard_lower <- pmax(0, hazard_rate - 1.96 * se_hazard)
                 hazard_upper <- hazard_rate + 1.96 * se_hazard
               }
             }, error = function(e) {
-              # Conservative fallback with wider intervals (±50% instead of ±20%)
+              # Conservative fallback with wider intervals (+/-50% instead of +/-20%)
               hazard_lower <- hazard_rate * 0.5
               hazard_upper <- hazard_rate * 1.5
             })

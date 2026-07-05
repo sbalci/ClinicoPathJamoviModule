@@ -40,17 +40,18 @@ methodcomparisonClass <- R6::R6Class(
                 )
             }
         },
-
         .run = function() {
-            if (is.null(self$options$method1) || is.null(self$options$method2))
+            if (is.null(self$options$method1) || is.null(self$options$method2)) {
                 return()
+            }
 
             # Get data
             method1 <- self$data[[self$options$method1]]
             method2 <- self$data[[self$options$method2]]
-            
-            if (length(method1) == 0 || length(method2) == 0)
+
+            if (length(method1) == 0 || length(method2) == 0) {
                 return()
+            }
 
             # Handle missing data
             if (self$options$missing_treatment == "complete") {
@@ -87,11 +88,15 @@ methodcomparisonClass <- R6::R6Class(
                 "<p><strong>Sample size:</strong> ", length(method1), " paired observations</p>",
                 "<p><strong>Method:</strong> ", switch(self$options$comparison_method,
                     "bland_altman" = "Bland-Altman Analysis",
-                    "passing_bablok" = "Passing-Bablok Regression", 
+                    "passing_bablok" = "Passing-Bablok Regression",
                     "deming" = "Deming Regression",
-                    "all" = "All Methods"), "</p>",
-                if (self$options$transformation != "none") 
-                    paste0("<p><strong>Transformation:</strong> ", self$options$transformation, "</p>") else "",
+                    "all" = "All Methods"
+                ), "</p>",
+                if (self$options$transformation != "none") {
+                    paste0("<p><strong>Transformation:</strong> ", self$options$transformation, "</p>")
+                } else {
+                    ""
+                },
                 "<p><strong>Confidence level:</strong> ", self$options$confidence_level * 100, "%</p>"
             ))
 
@@ -102,7 +107,7 @@ methodcomparisonClass <- R6::R6Class(
             if (self$options$correlation_analysis) {
                 private$.populateCorrelationTable(method1, method2)
             }
-            
+
             # Concordance correlation coefficient
             if (self$options$concordance_correlation) {
                 private$.populateConcordanceTable(method1, method2)
@@ -150,7 +155,6 @@ methodcomparisonClass <- R6::R6Class(
             private$.populateMethodGuidance()
             private$.populateTechnicalNotes()
         },
-
         .populateDescriptiveStats = function(method1, method2) {
             table <- self$results$descriptiveStats
 
@@ -165,7 +169,7 @@ methodcomparisonClass <- R6::R6Class(
                 max = max(method1, na.rm = TRUE)
             ))
 
-            # Method 2 statistics  
+            # Method 2 statistics
             table$addRow(rowKey = "method2", values = list(
                 method = "Test Method",
                 n = length(method2),
@@ -188,7 +192,6 @@ methodcomparisonClass <- R6::R6Class(
                 max = max(diff, na.rm = TRUE)
             ))
         },
-
         .populateCorrelationTable = function(method1, method2) {
             table <- self$results$correlationTable
             conf_level <- self$options$confidence_level
@@ -215,83 +218,89 @@ methodcomparisonClass <- R6::R6Class(
                 p_value = spearman_test$p.value
             ))
         },
-
         .populateConcordanceTable = function(method1, method2) {
-            if (!requireNamespace('DescTools', quietly = TRUE)) {
+            if (!requireNamespace("DescTools", quietly = TRUE)) {
                 # If DescTools not available, calculate CCC manually
                 private$.calculateCCCManually(method1, method2)
                 return()
             }
-            
+
             table <- self$results$concordanceTable
             conf_level <- self$options$confidence_level
-            
-            tryCatch({
-                # Calculate CCC using DescTools
-                ccc_result <- DescTools::CCC(method1, method2, conf.level = conf_level)
-                
-                # Extract values
-                ccc_value <- ccc_result$rho.c
-                ccc_ci <- ccc_result$conf.int
-                
-                # Calculate precision and accuracy components
-                r <- cor(method1, method2, use = "complete.obs")
-                mean1 <- mean(method1, na.rm = TRUE)
-                mean2 <- mean(method2, na.rm = TRUE)
-                var1 <- var(method1, na.rm = TRUE)
-                var2 <- var(method2, na.rm = TRUE)
-                
-                bias_correction <- 2 * r * sqrt(var1) * sqrt(var2) / (var1 + var2 + (mean1 - mean2)^2)
-                precision <- r
-                accuracy <- 2 / (1 + var1/var2 + var2/var1 + (mean1 - mean2)^2/(sqrt(var1) * sqrt(var2)))
-                
-                # Interpretation
-                ccc_interp <- if (ccc_value >= 0.99) "Almost perfect agreement"
-                              else if (ccc_value >= 0.95) "Substantial agreement"
-                              else if (ccc_value >= 0.90) "Moderate agreement"
-                              else if (ccc_value >= 0.75) "Fair agreement"
-                              else "Poor agreement"
-                
-                # Add rows to table
-                table$addRow(rowKey = "ccc", values = list(
-                    measure = "Concordance Correlation Coefficient",
-                    estimate = ccc_value,
-                    lower_ci = ccc_ci[1],
-                    upper_ci = ccc_ci[2],
-                    interpretation = ccc_interp
-                ))
-                
-                table$addRow(rowKey = "precision", values = list(
-                    measure = "Precision (Correlation)",
-                    estimate = precision,
-                    lower_ci = NA,
-                    upper_ci = NA,
-                    interpretation = paste("r =", round(precision, 4))
-                ))
-                
-                table$addRow(rowKey = "accuracy", values = list(
-                    measure = "Accuracy (Bias correction)",
-                    estimate = accuracy,
-                    lower_ci = NA,
-                    upper_ci = NA,
-                    interpretation = paste("C_b =", round(bias_correction, 4))
-                ))
-                
-            }, error = function(e) {
-                # Fallback to manual calculation
-                private$.calculateCCCManually(method1, method2)
-            })
+
+            tryCatch(
+                {
+                    # Calculate CCC using DescTools
+                    ccc_result <- DescTools::CCC(method1, method2, conf.level = conf_level)
+
+                    # Extract values
+                    ccc_value <- ccc_result$rho.c
+                    ccc_ci <- ccc_result$conf.int
+
+                    # Calculate precision and accuracy components
+                    r <- cor(method1, method2, use = "complete.obs")
+                    mean1 <- mean(method1, na.rm = TRUE)
+                    mean2 <- mean(method2, na.rm = TRUE)
+                    var1 <- var(method1, na.rm = TRUE)
+                    var2 <- var(method2, na.rm = TRUE)
+
+                    bias_correction <- 2 * r * sqrt(var1) * sqrt(var2) / (var1 + var2 + (mean1 - mean2)^2)
+                    precision <- r
+                    accuracy <- 2 / (1 + var1 / var2 + var2 / var1 + (mean1 - mean2)^2 / (sqrt(var1) * sqrt(var2)))
+
+                    # Interpretation
+                    ccc_interp <- if (ccc_value >= 0.99) {
+                        "Almost perfect agreement"
+                    } else if (ccc_value >= 0.95) {
+                        "Substantial agreement"
+                    } else if (ccc_value >= 0.90) {
+                        "Moderate agreement"
+                    } else if (ccc_value >= 0.75) {
+                        "Fair agreement"
+                    } else {
+                        "Poor agreement"
+                    }
+
+                    # Add rows to table
+                    table$addRow(rowKey = "ccc", values = list(
+                        measure = "Concordance Correlation Coefficient",
+                        estimate = ccc_value,
+                        lower_ci = ccc_ci[1],
+                        upper_ci = ccc_ci[2],
+                        interpretation = ccc_interp
+                    ))
+
+                    table$addRow(rowKey = "precision", values = list(
+                        measure = "Precision (Correlation)",
+                        estimate = precision,
+                        lower_ci = NA,
+                        upper_ci = NA,
+                        interpretation = paste("r =", round(precision, 4))
+                    ))
+
+                    table$addRow(rowKey = "accuracy", values = list(
+                        measure = "Accuracy (Bias correction)",
+                        estimate = accuracy,
+                        lower_ci = NA,
+                        upper_ci = NA,
+                        interpretation = paste("C_b =", round(bias_correction, 4))
+                    ))
+                },
+                error = function(e) {
+                    # Fallback to manual calculation
+                    private$.calculateCCCManually(method1, method2)
+                }
+            )
         },
-        
         .calculateCCCManually = function(method1, method2) {
             table <- self$results$concordanceTable
-            
+
             # Manual CCC calculation (Lin 1989)
             # Remove missing values
             complete_cases <- complete.cases(method1, method2)
             x <- method1[complete_cases]
             y <- method2[complete_cases]
-            
+
             if (length(x) < 3) {
                 table$addRow(rowKey = "error", values = list(
                     measure = "Error",
@@ -302,7 +311,7 @@ methodcomparisonClass <- R6::R6Class(
                 ))
                 return()
             }
-            
+
             # Calculate CCC components
             mean_x <- mean(x)
             mean_y <- mean(y)
@@ -310,30 +319,36 @@ methodcomparisonClass <- R6::R6Class(
             var_y <- var(y)
             cov_xy <- cov(x, y)
             r <- cor(x, y)
-            
+
             # Lin's CCC formula
             ccc <- (2 * cov_xy) / (var_x + var_y + (mean_x - mean_y)^2)
-            
+
             # Approximate confidence interval (Fisher's Z transformation)
             n <- length(x)
-            z_ccc <- 0.5 * log((1 + ccc)/(1 - ccc))
-            se_z <- 1/sqrt(n - 3)
+            z_ccc <- 0.5 * log((1 + ccc) / (1 - ccc))
+            se_z <- 1 / sqrt(n - 3)
             alpha <- 1 - self$options$confidence_level
-            z_critical <- qnorm(1 - alpha/2)
-            
+            z_critical <- qnorm(1 - alpha / 2)
+
             z_lower <- z_ccc - z_critical * se_z
             z_upper <- z_ccc + z_critical * se_z
-            
+
             ccc_lower <- (exp(2 * z_lower) - 1) / (exp(2 * z_lower) + 1)
             ccc_upper <- (exp(2 * z_upper) - 1) / (exp(2 * z_upper) + 1)
-            
+
             # Interpretation
-            ccc_interp <- if (ccc >= 0.99) "Almost perfect agreement"
-                          else if (ccc >= 0.95) "Substantial agreement"
-                          else if (ccc >= 0.90) "Moderate agreement"
-                          else if (ccc >= 0.75) "Fair agreement"
-                          else "Poor agreement"
-            
+            ccc_interp <- if (ccc >= 0.99) {
+                "Almost perfect agreement"
+            } else if (ccc >= 0.95) {
+                "Substantial agreement"
+            } else if (ccc >= 0.90) {
+                "Moderate agreement"
+            } else if (ccc >= 0.75) {
+                "Fair agreement"
+            } else {
+                "Poor agreement"
+            }
+
             table$addRow(rowKey = "ccc_manual", values = list(
                 measure = "Concordance Correlation Coefficient",
                 estimate = ccc,
@@ -341,11 +356,11 @@ methodcomparisonClass <- R6::R6Class(
                 upper_ci = ccc_upper,
                 interpretation = ccc_interp
             ))
-            
+
             # Add precision and accuracy decomposition
             precision <- r
-            accuracy <- 2 / (1 + var_x/var_y + var_y/var_x + (mean_x - mean_y)^2/(sqrt(var_x) * sqrt(var_y)))
-            
+            accuracy <- 2 / (1 + var_x / var_y + var_y / var_x + (mean_x - mean_y)^2 / (sqrt(var_x) * sqrt(var_y)))
+
             table$addRow(rowKey = "precision_manual", values = list(
                 measure = "Precision (Correlation)",
                 estimate = precision,
@@ -353,7 +368,7 @@ methodcomparisonClass <- R6::R6Class(
                 upper_ci = NA,
                 interpretation = "Measures how far observations deviate from the best-fit line"
             ))
-            
+
             table$addRow(rowKey = "accuracy_manual", values = list(
                 measure = "Accuracy (Location shift)",
                 estimate = accuracy,
@@ -362,34 +377,32 @@ methodcomparisonClass <- R6::R6Class(
                 interpretation = "Measures how far the best-fit line deviates from 45° line"
             ))
         },
-
         .populateBlandAltmanStats = function(method1, method2) {
             table <- self$results$blandAltmanStats
-            
+
             diff <- method2 - method1
             mean_diff <- mean(diff)
             sd_diff <- sd(diff)
             n <- length(diff)
-            
+
             # Calculate limits of agreement based on method
             if (self$options$limits_method == "standard") {
                 # Standard ±1.96 SD
                 lower_loa <- mean_diff - 1.96 * sd_diff
                 upper_loa <- mean_diff + 1.96 * sd_diff
-                
+
                 # Confidence intervals for limits
-                se_loa <- sd_diff * sqrt(3/n)
-                t_val <- qt((1 + self$options$confidence_level)/2, df = n-1)
+                se_loa <- sd_diff * sqrt(3 / n)
+                t_val <- qt((1 + self$options$confidence_level) / 2, df = n - 1)
                 lower_loa_ci <- c(lower_loa - t_val * se_loa, lower_loa + t_val * se_loa)
                 upper_loa_ci <- c(upper_loa - t_val * se_loa, upper_loa + t_val * se_loa)
-                
             } else if (self$options$limits_method == "exact") {
                 # Exact (t-distribution)
-                t_val <- qt((1 + self$options$confidence_level)/2, df = n-1)
+                t_val <- qt((1 + self$options$confidence_level) / 2, df = n - 1)
                 lower_loa <- mean_diff - t_val * sd_diff
                 upper_loa <- mean_diff + t_val * sd_diff
-                
-                se_loa <- sd_diff * sqrt((n-1)/n * (1 + t_val^2/(2*(n-1))))
+
+                se_loa <- sd_diff * sqrt((n - 1) / n * (1 + t_val^2 / (2 * (n - 1))))
                 lower_loa_ci <- c(lower_loa - t_val * se_loa, lower_loa + t_val * se_loa)
                 upper_loa_ci <- c(upper_loa - t_val * se_loa, upper_loa + t_val * se_loa)
             }
@@ -398,8 +411,8 @@ methodcomparisonClass <- R6::R6Class(
             table$addRow(rowKey = "bias", values = list(
                 statistic = "Mean Bias",
                 value = mean_diff,
-                lower_ci = mean_diff - qt((1 + self$options$confidence_level)/2, df = n-1) * sd_diff/sqrt(n),
-                upper_ci = mean_diff + qt((1 + self$options$confidence_level)/2, df = n-1) * sd_diff/sqrt(n),
+                lower_ci = mean_diff - qt((1 + self$options$confidence_level) / 2, df = n - 1) * sd_diff / sqrt(n),
+                upper_ci = mean_diff + qt((1 + self$options$confidence_level) / 2, df = n - 1) * sd_diff / sqrt(n),
                 interpretation = if (abs(mean_diff) < 0.1 * mean(c(mean(method1), mean(method2)))) "Negligible bias" else "Significant bias"
             ))
 
@@ -412,7 +425,7 @@ methodcomparisonClass <- R6::R6Class(
             ))
 
             table$addRow(rowKey = "upper_loa", values = list(
-                statistic = "Upper Limit of Agreement", 
+                statistic = "Upper Limit of Agreement",
                 value = upper_loa,
                 lower_ci = upper_loa_ci[1],
                 upper_ci = upper_loa_ci[2],
@@ -422,46 +435,45 @@ methodcomparisonClass <- R6::R6Class(
             table$addRow(rowKey = "precision", values = list(
                 statistic = "Precision (SD of differences)",
                 value = sd_diff,
-                lower_ci = sd_diff * sqrt((n-1)/qchisq((1 + self$options$confidence_level)/2, df = n-1)),
-                upper_ci = sd_diff * sqrt((n-1)/qchisq((1 - self$options$confidence_level)/2, df = n-1)),
+                lower_ci = sd_diff * sqrt((n - 1) / qchisq((1 + self$options$confidence_level) / 2, df = n - 1)),
+                upper_ci = sd_diff * sqrt((n - 1) / qchisq((1 - self$options$confidence_level) / 2, df = n - 1)),
                 interpretation = "Measure of random error"
             ))
         },
-
         .populatePassingBablokResults = function(method1, method2) {
             # Basic Passing-Bablok implementation
             # This is a simplified version - full implementation would use mcr package
             table <- self$results$passingBablokResults
-            
+
             # Simplified slope and intercept calculation
             # In practice, use mcr::mcreg() for proper Passing-Bablok
             n <- length(method1)
             slopes <- numeric()
-            
+
             # Calculate all possible slopes
-            for (i in 1:(n-1)) {
-                for (j in (i+1):n) {
+            for (i in 1:(n - 1)) {
+                for (j in (i + 1):n) {
                     if (method1[j] != method1[i]) {
-                        slopes <- c(slopes, (method2[j] - method2[i])/(method1[j] - method1[i]))
+                        slopes <- c(slopes, (method2[j] - method2[i]) / (method1[j] - method1[i]))
                     }
                 }
             }
-            
+
             # Median slope
             beta <- median(slopes, na.rm = TRUE)
-            
+
             # Intercept
             alpha <- median(method2 - beta * method1, na.rm = TRUE)
-            
+
             # Confidence intervals (simplified)
             n_slopes <- length(slopes)
-            k <- qnorm((1 + self$options$confidence_level)/2) * sqrt(n_slopes/3)
-            lower_idx <- max(1, round(n_slopes/2 - k))
-            upper_idx <- min(n_slopes, round(n_slopes/2 + k))
-            
+            k <- qnorm((1 + self$options$confidence_level) / 2) * sqrt(n_slopes / 3)
+            lower_idx <- max(1, round(n_slopes / 2 - k))
+            upper_idx <- min(n_slopes, round(n_slopes / 2 + k))
+
             sorted_slopes <- sort(slopes)
             beta_ci <- c(sorted_slopes[lower_idx], sorted_slopes[upper_idx])
-            
+
             table$addRow(rowKey = "intercept", values = list(
                 parameter = "Intercept (α)",
                 estimate = alpha,
@@ -478,39 +490,38 @@ methodcomparisonClass <- R6::R6Class(
                 test_result = if (beta_ci[1] <= 1 && beta_ci[2] >= 1) "No significant slope difference" else "Significant slope difference"
             ))
         },
-
         .populateDemingResults = function(method1, method2) {
             table <- self$results$demingResults
-            
+
             # Simplified Deming regression
             lambda <- self$options$error_ratio
             n <- length(method1)
-            
+
             # Sample means
             x_mean <- mean(method1)
             y_mean <- mean(method2)
-            
+
             # Sums of squares and cross products
             sxx <- sum((method1 - x_mean)^2)
             syy <- sum((method2 - y_mean)^2)
             sxy <- sum((method1 - x_mean) * (method2 - y_mean))
-            
+
             # Deming regression slope
             u <- (syy - lambda * sxx) / (2 * sxy)
             beta <- u + sqrt(u^2 + lambda)
-            
+
             # Intercept
             alpha <- y_mean - beta * x_mean
-            
+
             # Standard errors (simplified)
             residuals <- method2 - (alpha + beta * method1)
             mse <- sum(residuals^2) / (n - 2)
             se_beta <- sqrt(mse * lambda / sxx)
-            se_alpha <- sqrt(mse * (1/n + lambda * x_mean^2 / sxx))
-            
+            se_alpha <- sqrt(mse * (1 / n + lambda * x_mean^2 / sxx))
+
             # Confidence intervals
-            t_val <- qt((1 + self$options$confidence_level)/2, df = n-2)
-            
+            t_val <- qt((1 + self$options$confidence_level) / 2, df = n - 2)
+
             table$addRow(rowKey = "intercept", values = list(
                 parameter = "Intercept (α)",
                 estimate = alpha,
@@ -527,66 +538,67 @@ methodcomparisonClass <- R6::R6Class(
                 upper_ci = beta + t_val * se_beta
             ))
         },
-
         .populateRegressionComparison = function(method1, method2) {
             table <- self$results$regressionComparison
-            
+
             # Ordinary Least Squares
             ols_model <- lm(method2 ~ method1)
             ols_summary <- summary(ols_model)
-            
+
             table$addRow(rowKey = "ols", values = list(
                 method = "Ordinary Least Squares",
                 intercept = coef(ols_model)[1],
-                slope = coef(ols_model)[2], 
+                slope = coef(ols_model)[2],
                 r_squared = ols_summary$r.squared,
                 rmse = sqrt(mean(residuals(ols_model)^2))
             ))
-            
+
             # Add other regression methods if implemented
             # This would include results from Passing-Bablok and Deming
         },
-
         .populateBiasAnalysis = function(method1, method2) {
             table <- self$results$biasAnalysis
-            
+
             diff <- method2 - method1
             average <- (method1 + method2) / 2
-            
+
             # Test for proportional bias (correlation between difference and average)
             prop_bias_test <- cor.test(diff, average)
-            
+
             table$addRow(rowKey = "proportional", values = list(
                 bias_type = "Proportional Bias",
                 statistic = prop_bias_test$statistic,
                 p_value = prop_bias_test$p.value,
-                interpretation = if (prop_bias_test$p.value < 0.05) 
-                    "Significant proportional bias detected" else 
+                interpretation = if (prop_bias_test$p.value < 0.05) {
+                    "Significant proportional bias detected"
+                } else {
                     "No significant proportional bias"
+                }
             ))
-            
+
             # Fixed bias (one-sample t-test on differences)
             fixed_bias_test <- t.test(diff)
-            
+
             table$addRow(rowKey = "fixed", values = list(
                 bias_type = "Fixed Bias",
                 statistic = fixed_bias_test$statistic,
                 p_value = fixed_bias_test$p.value,
-                interpretation = if (fixed_bias_test$p.value < 0.05) 
-                    "Significant fixed bias detected" else 
+                interpretation = if (fixed_bias_test$p.value < 0.05) {
+                    "Significant fixed bias detected"
+                } else {
                     "No significant fixed bias"
+                }
             ))
         },
-
         .populateOutlierAnalysis = function(method1, method2) {
             table <- self$results$outlierAnalysis
-            
+
             diff <- method2 - method1
             standardized_residuals <- abs(diff - mean(diff)) / sd(diff)
             outlier_threshold <- 2 # 2 SD threshold
-            
+
             outliers <- which(standardized_residuals > outlier_threshold)
-            
+
             if (length(outliers) > 0) {
                 for (i in outliers) {
                     table$addRow(rowKey = paste0("outlier_", i), values = list(
@@ -600,28 +612,28 @@ methodcomparisonClass <- R6::R6Class(
                 }
             }
         },
-
         .populateClinicalAssessment = function(method1, method2) {
             table <- self$results$clinicalAssessment
-            
+
             diff <- method2 - method1
             lower_limit <- self$options$clinical_lower
             upper_limit <- self$options$clinical_upper
-            
+
             within_limits <- sum(diff >= lower_limit & diff <= upper_limit)
             total_obs <- length(diff)
             percentage_within <- (within_limits / total_obs) * 100
-            
+
             table$addRow(rowKey = "clinical", values = list(
                 criterion = paste0("Clinical Limits (", lower_limit, " to ", upper_limit, ")"),
                 result = paste0(within_limits, " / ", total_obs, " observations"),
                 percentage_within = percentage_within,
-                clinical_interpretation = if (percentage_within >= 95) 
-                    "Clinically acceptable agreement" else 
+                clinical_interpretation = if (percentage_within >= 95) {
+                    "Clinically acceptable agreement"
+                } else {
                     "Clinical agreement may be insufficient"
+                }
             ))
         },
-
         .populateCalibrationAnalysis = function(method1, method2) {
             # Calibration analysis: how well does test method (method2) track
             # the reference method (method1)?
@@ -631,116 +643,126 @@ methodcomparisonClass <- R6::R6Class(
 
             table <- self$results$calibrationTable
 
-            tryCatch({
-                # Fit calibration model: test = a + b * reference
-                cal_model <- lm(method2 ~ method1)
-                cal_summary <- summary(cal_model)
-                cal_coefs <- coef(cal_model)
-                cal_ci <- confint(cal_model)
+            tryCatch(
+                {
+                    # Fit calibration model: test = a + b * reference
+                    cal_model <- lm(method2 ~ method1)
+                    cal_summary <- summary(cal_model)
+                    cal_coefs <- coef(cal_model)
+                    cal_ci <- confint(cal_model)
 
-                intercept <- cal_coefs[1]
-                slope <- cal_coefs[2]
-                r_squared <- cal_summary$r.squared
+                    intercept <- cal_coefs[1]
+                    slope <- cal_coefs[2]
+                    r_squared <- cal_summary$r.squared
 
-                # Interpretation helpers
-                interpret_intercept <- function(val, ci) {
-                    if (ci[1] <= 0 && ci[2] >= 0) {
-                        return("No significant systematic bias (CI includes 0)")
-                    } else if (val > 0) {
-                        return(paste0("Systematic overestimation by ~", round(abs(val), 2), " units"))
-                    } else {
-                        return(paste0("Systematic underestimation by ~", round(abs(val), 2), " units"))
+                    # Interpretation helpers
+                    interpret_intercept <- function(val, ci) {
+                        if (ci[1] <= 0 && ci[2] >= 0) {
+                            return("No significant systematic bias (CI includes 0)")
+                        } else if (val > 0) {
+                            return(paste0("Systematic overestimation by ~", round(abs(val), 2), " units"))
+                        } else {
+                            return(paste0("Systematic underestimation by ~", round(abs(val), 2), " units"))
+                        }
                     }
-                }
 
-                interpret_slope <- function(val, ci) {
-                    if (ci[1] <= 1 && ci[2] >= 1) {
-                        return("Good calibration (CI includes 1)")
-                    } else if (val > 1) {
-                        return("Test overestimates at higher values (overshoot)")
-                    } else {
-                        return("Test underestimates at higher values (undershoot)")
+                    interpret_slope <- function(val, ci) {
+                        if (ci[1] <= 1 && ci[2] >= 1) {
+                            return("Good calibration (CI includes 1)")
+                        } else if (val > 1) {
+                            return("Test overestimates at higher values (overshoot)")
+                        } else {
+                            return("Test underestimates at higher values (undershoot)")
+                        }
                     }
+
+                    interpret_r2 <- function(val) {
+                        if (val >= 0.9) {
+                            return("Excellent tracking of reference method")
+                        }
+                        if (val >= 0.7) {
+                            return("Good tracking")
+                        }
+                        if (val >= 0.5) {
+                            return("Moderate tracking")
+                        }
+                        return("Poor tracking; methods may measure different constructs")
+                    }
+
+                    # Calibration-in-the-large (intercept)
+                    table$addRow(rowKey = 1, values = list(
+                        metric = "Calibration-in-the-large (Intercept)",
+                        value = intercept,
+                        ci_lower = cal_ci["(Intercept)", 1],
+                        ci_upper = cal_ci["(Intercept)", 2],
+                        ideal = "0",
+                        interpretation = interpret_intercept(intercept, cal_ci["(Intercept)", ])
+                    ))
+
+                    # Calibration slope
+                    table$addRow(rowKey = 2, values = list(
+                        metric = "Calibration Slope",
+                        value = slope,
+                        ci_lower = cal_ci["method1", 1],
+                        ci_upper = cal_ci["method1", 2],
+                        ideal = "1",
+                        interpretation = interpret_slope(slope, cal_ci["method1", ])
+                    ))
+
+                    # R-squared
+                    table$addRow(rowKey = 3, values = list(
+                        metric = "R-squared",
+                        value = r_squared,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        ideal = "1",
+                        interpretation = interpret_r2(r_squared)
+                    ))
+
+                    # Mean absolute error
+                    mae <- mean(abs(method2 - method1), na.rm = TRUE)
+                    table$addRow(rowKey = 4, values = list(
+                        metric = "Mean Absolute Error",
+                        value = mae,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        ideal = "0",
+                        interpretation = paste0("Average deviation from reference: ", round(mae, 2), " units")
+                    ))
+
+                    # Root mean squared error
+                    rmse <- sqrt(mean((method2 - method1)^2, na.rm = TRUE))
+                    table$addRow(rowKey = 5, values = list(
+                        metric = "Root Mean Squared Error (RMSE)",
+                        value = rmse,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        ideal = "0",
+                        interpretation = paste0("RMS deviation: ", round(rmse, 2), " units")
+                    ))
+
+                    table$setNote(
+                        "info",
+                        paste0(
+                            "Calibration model: Test = ", round(intercept, 3),
+                            " + ", round(slope, 3), " x Reference. ",
+                            "Perfect calibration: intercept = 0, slope = 1, R² = 1. ",
+                            "N = ", length(method1), " paired observations."
+                        )
+                    )
+                },
+                error = function(e) {
+                    table$addRow(rowKey = 1, values = list(
+                        metric = "Error",
+                        value = NA,
+                        ci_lower = NA,
+                        ci_upper = NA,
+                        ideal = "",
+                        interpretation = paste0("Calibration analysis failed: ", e$message)
+                    ))
                 }
-
-                interpret_r2 <- function(val) {
-                    if (val >= 0.9) return("Excellent tracking of reference method")
-                    if (val >= 0.7) return("Good tracking")
-                    if (val >= 0.5) return("Moderate tracking")
-                    return("Poor tracking; methods may measure different constructs")
-                }
-
-                # Calibration-in-the-large (intercept)
-                table$addRow(rowKey = 1, values = list(
-                    metric = "Calibration-in-the-large (Intercept)",
-                    value = intercept,
-                    ci_lower = cal_ci["(Intercept)", 1],
-                    ci_upper = cal_ci["(Intercept)", 2],
-                    ideal = "0",
-                    interpretation = interpret_intercept(intercept, cal_ci["(Intercept)", ])
-                ))
-
-                # Calibration slope
-                table$addRow(rowKey = 2, values = list(
-                    metric = "Calibration Slope",
-                    value = slope,
-                    ci_lower = cal_ci["method1", 1],
-                    ci_upper = cal_ci["method1", 2],
-                    ideal = "1",
-                    interpretation = interpret_slope(slope, cal_ci["method1", ])
-                ))
-
-                # R-squared
-                table$addRow(rowKey = 3, values = list(
-                    metric = "R-squared",
-                    value = r_squared,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    ideal = "1",
-                    interpretation = interpret_r2(r_squared)
-                ))
-
-                # Mean absolute error
-                mae <- mean(abs(method2 - method1), na.rm = TRUE)
-                table$addRow(rowKey = 4, values = list(
-                    metric = "Mean Absolute Error",
-                    value = mae,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    ideal = "0",
-                    interpretation = paste0("Average deviation from reference: ", round(mae, 2), " units")
-                ))
-
-                # Root mean squared error
-                rmse <- sqrt(mean((method2 - method1)^2, na.rm = TRUE))
-                table$addRow(rowKey = 5, values = list(
-                    metric = "Root Mean Squared Error (RMSE)",
-                    value = rmse,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    ideal = "0",
-                    interpretation = paste0("RMS deviation: ", round(rmse, 2), " units")
-                ))
-
-                table$setNote(
-                    "info",
-                    paste0("Calibration model: Test = ", round(intercept, 3),
-                           " + ", round(slope, 3), " x Reference. ",
-                           "Perfect calibration: intercept = 0, slope = 1, R² = 1. ",
-                           "N = ", length(method1), " paired observations.")
-                )
-            }, error = function(e) {
-                table$addRow(rowKey = 1, values = list(
-                    metric = "Error",
-                    value = NA,
-                    ci_lower = NA,
-                    ci_upper = NA,
-                    ideal = "",
-                    interpretation = paste0("Calibration analysis failed: ", e$message)
-                ))
-            })
+            )
         },
-
         .populateMethodGuidance = function() {
             content <- "
             <h3>Method Comparison Guidelines</h3>
@@ -753,13 +775,12 @@ methodcomparisonClass <- R6::R6Class(
             <h4>Decision Criteria:</h4>
             <ul>
                 <li><strong>Good Agreement:</strong> Mean bias near zero, narrow limits of agreement, high correlation</li>
-                <li><strong>Clinical Acceptability:</strong> Differences within predefined clinical limits for ≥95% of observations</li>
+                <li><strong>Clinical Acceptability:</strong> Differences within predefined clinical limits for >=95% of observations</li>
                 <li><strong>Method Equivalence:</strong> Slope ≈ 1, intercept ≈ 0 in regression analysis</li>
             </ul>
             "
             self$results$methodGuidance$setContent(content)
         },
-
         .populateTechnicalNotes = function() {
             content <- paste0(
                 "<h3>Technical Notes and Assumptions</h3>",
@@ -781,10 +802,10 @@ methodcomparisonClass <- R6::R6Class(
             )
             self$results$technicalNotes$setContent(content)
         },
-
         .plotBlandAltman = function(image, ggtheme, theme, ...) {
-            if (is.null(self$options$method1) || is.null(self$options$method2))
+            if (is.null(self$options$method1) || is.null(self$options$method2)) {
                 return()
+            }
 
             # Get data
             method1 <- self$data[[self$options$method1]]
@@ -797,8 +818,9 @@ methodcomparisonClass <- R6::R6Class(
                 method2 <- method2[complete_cases]
             }
 
-            if (length(method1) < 10)
+            if (length(method1) < 10) {
                 return()
+            }
 
             # Apply transformation if specified
             if (self$options$transformation == "log") {
@@ -814,7 +836,7 @@ methodcomparisonClass <- R6::R6Class(
             difference <- method2 - method1
             mean_diff <- mean(difference)
             sd_diff <- sd(difference)
-            
+
             # Limits of agreement
             lower_loa <- mean_diff - 1.96 * sd_diff
             upper_loa <- mean_diff + 1.96 * sd_diff
@@ -833,8 +855,10 @@ methodcomparisonClass <- R6::R6Class(
                 ggplot2::geom_hline(yintercept = 0, linetype = "dotted", color = "gray50") +
                 ggplot2::labs(
                     title = "Bland-Altman Plot",
-                    subtitle = paste0("Mean bias: ", round(mean_diff, 3), 
-                                    " (95% LoA: ", round(lower_loa, 3), " to ", round(upper_loa, 3), ")"),
+                    subtitle = paste0(
+                        "Mean bias: ", round(mean_diff, 3),
+                        " (95% LoA: ", round(lower_loa, 3), " to ", round(upper_loa, 3), ")"
+                    ),
                     x = "Average of Methods",
                     y = "Difference (Test - Reference)"
                 ) +
@@ -842,20 +866,24 @@ methodcomparisonClass <- R6::R6Class(
 
             # Add clinical limits if specified
             if (self$options$clinical_limits) {
-                p <- p + 
-                    ggplot2::geom_hline(yintercept = self$options$clinical_lower, 
-                                      linetype = "dotdash", color = "green", size = 1) +
-                    ggplot2::geom_hline(yintercept = self$options$clinical_upper, 
-                                      linetype = "dotdash", color = "green", size = 1)
+                p <- p +
+                    ggplot2::geom_hline(
+                        yintercept = self$options$clinical_lower,
+                        linetype = "dotdash", color = "green", size = 1
+                    ) +
+                    ggplot2::geom_hline(
+                        yintercept = self$options$clinical_upper,
+                        linetype = "dotdash", color = "green", size = 1
+                    )
             }
 
             print(p)
             TRUE
         },
-
         .plotScatter = function(image, ggtheme, theme, ...) {
-            if (is.null(self$options$method1) || is.null(self$options$method2))
+            if (is.null(self$options$method1) || is.null(self$options$method2)) {
                 return()
+            }
 
             # Get data
             method1 <- self$data[[self$options$method1]]
@@ -868,8 +896,9 @@ methodcomparisonClass <- R6::R6Class(
                 method2 <- method2[complete_cases]
             }
 
-            if (length(method1) < 10)
+            if (length(method1) < 10) {
                 return()
+            }
 
             # Apply transformation if specified
             if (self$options$transformation == "log") {
@@ -904,10 +933,10 @@ methodcomparisonClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .plotResiduals = function(image, ggtheme, theme, ...) {
-            if (is.null(self$options$method1) || is.null(self$options$method2))
+            if (is.null(self$options$method1) || is.null(self$options$method2)) {
                 return()
+            }
 
             # Get data
             method1 <- self$data[[self$options$method1]]
@@ -920,8 +949,9 @@ methodcomparisonClass <- R6::R6Class(
                 method2 <- method2[complete_cases]
             }
 
-            if (length(method1) < 10)
+            if (length(method1) < 10) {
                 return()
+            }
 
             # Apply transformation if specified
             if (self$options$transformation == "log") {
@@ -958,10 +988,10 @@ methodcomparisonClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .plotMountain = function(image, ggtheme, theme, ...) {
-            if (is.null(self$options$method1) || is.null(self$options$method2))
+            if (is.null(self$options$method1) || is.null(self$options$method2)) {
                 return()
+            }
 
             # Get data
             method1 <- self$data[[self$options$method1]]
@@ -974,8 +1004,9 @@ methodcomparisonClass <- R6::R6Class(
                 method2 <- method2[complete_cases]
             }
 
-            if (length(method1) < 10)
+            if (length(method1) < 10) {
                 return()
+            }
 
             # Apply transformation if specified
             if (self$options$transformation == "log") {

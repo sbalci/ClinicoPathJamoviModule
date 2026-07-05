@@ -888,10 +888,52 @@ replace_clinicopath_with_module <- function(base_dir, module_name) {
       pattern = "ClinicoPath::",
       replacement = paste0(module_name, "::")
     )
+    # Example data references: data(<name>, package = "ClinicoPath") -> this module
+    xfun::gsub_files(
+      files = files,
+      pattern = 'package = "ClinicoPath"',
+      replacement = paste0('package = "', module_name, '"')
+    )
+    xfun::gsub_files(
+      files = files,
+      pattern = "package = 'ClinicoPath'",
+      replacement = paste0("package = '", module_name, "'")
+    )
     cat("      ✅ Package references updated successfully\n")
   } else {
     cat("      ℹ️ No files found to update\n")
   }
+}
+
+# Post-process a submodule's GENERATED example docs (.h.R roxygen + man/*.Rd) ----
+# jmvtools regenerates these from the copied .a.yaml on every prepare(), so the
+# example `data(<name>, package = "ClinicoPath")` refs and `\donttest{}` markers
+# reappear after replace_clinicopath_with_module() has already run. This normalises
+# them on the *generated* files, right before install/check:
+#   - rewrite the parent-package data ref to this submodule (a self-reference keeps
+#     R CMD check's "unstated dependencies in examples" quiet), and
+#   - convert \donttest{} -> \dontrun{} because the parent example datasets are NOT
+#     shipped to submodules, so these illustrative examples must not execute under
+#     R CMD check --run-donttest. Mirrors the main-repo post-process further below.
+postprocess_module_examples <- function(module_dir, module_name) {
+  targets <- c(
+    list.files(file.path(module_dir, "R"),   pattern = "\\.h\\.R$", full.names = TRUE),
+    list.files(file.path(module_dir, "man"), pattern = "\\.Rd$",    full.names = TRUE)
+  )
+  n <- 0L
+  for (f in targets) {
+    txt  <- readLines(f, warn = FALSE)
+    orig <- txt
+    txt <- gsub('package = "ClinicoPath"', paste0('package = "', module_name, '"'), txt, fixed = TRUE)
+    txt <- gsub("package = 'ClinicoPath'", paste0("package = '", module_name, "'"), txt, fixed = TRUE)
+    txt <- gsub("\\donttest{", "\\dontrun{", txt, fixed = TRUE)
+    if (!identical(txt, orig)) {
+      writeLines(txt, f)
+      n <- n + 1L
+    }
+  }
+  cat(sprintf("      ✅ Post-processed %d example doc(s) for %s (ClinicoPath -> %s, donttest -> dontrun)\n",
+              n, module_name, module_name))
 }
 
 # Enhanced configuration-based asset copying ----
@@ -1346,6 +1388,27 @@ if (TEST) {
 
 
 
+# Distribution coverage check (P1.6) ----
+# Assert every production analysis routes to exactly one submodule. Analyses that
+# route to more than one submodule are a routing bug (hard stop); analyses that
+# route to none are reported (they are legitimately umbrella-only staging, e.g.
+# the undocumented '…D' suffix, so this is informational unless coverage_fail_on_gap).
+if (!TEST && (modes$check_distribution_coverage %||% TRUE)) {
+  all_analyses <- sub("\\.a\\.yaml$", "", basename(a_yaml_files))
+  module_modules <- list(
+    jjstatsplot = jjstatsplot_modules,
+    meddecide = meddecide_modules,
+    jsurvival = jsurvival_modules,
+    ClinicoPathDescriptives = ClinicoPathDescriptives_modules,
+    OncoPath = OncoPath_modules
+  )
+  invisible(check_distribution_coverage(
+    all_analyses, module_modules,
+    fail_on_gap = modes$coverage_fail_on_gap %||% FALSE
+  ))
+}
+
+
 # Update DESCRIPTION files ----
 description_paths <- c(
   file.path(main_repo_dir, "DESCRIPTION"),
@@ -1744,6 +1807,74 @@ if (!WIP & webpage) {
   replace_clinicopath_with_module(OncoPath_dir, "OncoPath")
 }
 
+# Distribute tests to submodules (P1.4 / P1.5) ----
+# Ship a self-contained dependency-guard test (the runtime twin of the dependency
+# check below) plus a tests/testthat.R runner. By DEFAULT this is done only for
+# submodules that have no pre-existing functional tests, so activating a runner
+# surfaces only the always-green guard test -- never a pre-existing failure. The
+# umbrella's per-analysis functional tests are also distributable (name-keyed and
+# namespace-translated by copy_module_tests), but the umbrella suite currently has
+# failing tests, so full distribution is gated behind `copy_test_files` -- enable it
+# once that suite is green so a submodule's R CMD check does not go red.
+if (!TEST) {
+  guard_template <- file.path(main_repo_dir, "_updateModules_test_dependency_guard.R")
+  umbrella_tests <- file.path(main_repo_dir, "tests", "testthat")
+
+  test_targets <- list()
+  if (jjstatsplot_module) test_targets$jjstatsplot <- list(dir = jjstatsplot_dir, mods = jjstatsplot_modules)
+  if (meddecide_module) test_targets$meddecide <- list(dir = meddecide_dir, mods = meddecide_modules)
+  if (jsurvival_module) test_targets$jsurvival <- list(dir = jsurvival_dir, mods = jsurvival_modules)
+  if (ClinicoPathDescriptives_module) test_targets$ClinicoPathDescriptives <- list(dir = ClinicoPathDescriptives_dir, mods = ClinicoPathDescriptives_modules)
+  if (OncoPath_module) test_targets$OncoPath <- list(dir = OncoPath_dir, mods = OncoPath_modules)
+
+  n_existing_tests <- function(module_dir) {
+    td <- file.path(module_dir, "tests", "testthat")
+    if (!dir.exists(td)) return(0L)
+    length(setdiff(list.files(td, pattern = "^test-.*\\.R$"),
+                   "test-zzz-dependency-declaration.R"))
+  }
+
+  cat("\n🧪 Distributing test infrastructure to submodules...\n")
+  for (nm in names(test_targets)) {
+    tt <- test_targets[[nm]]
+    if (copy_test_files) {
+      copied <- copy_module_tests(tt$mods, umbrella_tests,
+                                  file.path(tt$dir, "tests", "testthat"),
+                                  module_name = nm)
+      write_dependency_guard_test(tt$dir, guard_template)
+      ensure_testthat_runner(tt$dir)
+      cat("  🧪 ", nm, ": distributed ", length(copied),
+          " functional test file(s) + dependency-guard test\n", sep = "")
+    } else if (n_existing_tests(tt$dir) == 0L) {
+      write_dependency_guard_test(tt$dir, guard_template)
+      ensure_testthat_runner(tt$dir)
+    } else {
+      cat("  ⏭️  ", nm, ": has pre-existing tests; skipping auto test-infra ",
+          "(set copy_test_files: true to distribute the full suite)\n", sep = "")
+    }
+  }
+}
+
+# Dependency reconciliation check (P0.2) ----
+# Now that each submodule's R/ has been refreshed from the umbrella, assert every
+# package used via `pkg::` in the distributed code is declared in that submodule's
+# DESCRIPTION. The existing NAMESPACE->DESCRIPTION sync is driven by the NAMESPACE
+# file and CANNOT see `pkg::` calls, so this is the net that catches hard-crash gaps
+# (e.g. cmprsk in jsurvival; vcd/lme4 in meddecide; haven in jjstatsplot; viridis
+# in ClinicoPathDescriptives). Runs before the slow prepare/install so it fails fast.
+if (!TEST && (modes$check_module_dependencies %||% TRUE)) {
+  dep_specs <- list()
+  if (jjstatsplot_module) dep_specs$jjstatsplot <- jjstatsplot_dir
+  if (meddecide_module) dep_specs$meddecide <- meddecide_dir
+  if (jsurvival_module) dep_specs$jsurvival <- jsurvival_dir
+  if (ClinicoPathDescriptives_module) dep_specs$ClinicoPathDescriptives <- ClinicoPathDescriptives_dir
+  if (OncoPath_module) dep_specs$OncoPath <- OncoPath_dir
+  if (length(dep_specs) > 0) {
+    check_all_modules_dependencies(dep_specs,
+                                   fail_on_error = modes$deps_fail_on_error %||% TRUE)
+  }
+}
+
 # --- Prepare, document, and install modules ----
 if (!extended) {
   jmvtools::prepare(main_repo_dir)
@@ -1900,6 +2031,7 @@ if (extended) {
       
       jmvtools::prepare()
       devtools::document()
+      postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       jmvtools::install()
 
@@ -1939,6 +2071,7 @@ if (extended) {
       
       jmvtools::prepare()
       devtools::document()
+      postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       jmvtools::install()
 
@@ -1978,6 +2111,7 @@ if (extended) {
       
       jmvtools::prepare()
       devtools::document()
+      postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       jmvtools::install()
 
@@ -2017,6 +2151,7 @@ if (extended) {
       
       jmvtools::prepare()
       devtools::document()
+      postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       jmvtools::install()
 
@@ -2056,6 +2191,7 @@ if (extended) {
 
       jmvtools::prepare()
       devtools::document()
+      postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       jmvtools::install()
       if (check) {
@@ -2097,6 +2233,7 @@ if (extended) {
       
       jmvtools::prepare()
       devtools::document()
+      postprocess_module_examples(getwd(), basename(getwd()))
       cat("  📦 Installing...\n")
       jmvtools::install()
 

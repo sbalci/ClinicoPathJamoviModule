@@ -25,7 +25,7 @@ grouplassoClass <- R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -1496,7 +1496,7 @@ grouplassoClass <- R6::R6Class(
             p <- ncol(pred_matrix)
             event_rate <- n_events / n
 
-            # -- Check 1: Events-Per-Variable (EPV) --
+            # - Check 1: Events-Per-Variable (EPV) --
             epv <- n_events / p
             if (epv >= 10) {
                 checks$epv <- list(
@@ -1518,7 +1518,7 @@ grouplassoClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 2: Regularization/Reduction Need --
+            # - Check 2: Regularization/Reduction Need --
             if (p >= n / 3) {
                 checks$regularization <- list(
                     color = "green", label = "Reduction Need",
@@ -1533,7 +1533,7 @@ grouplassoClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 3: Sample Size --
+            # - Check 3: Sample Size --
             if (n >= 100) {
                 checks$sample_size <- list(
                     color = "green", label = "Sample Size",
@@ -1554,7 +1554,7 @@ grouplassoClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 4: Multicollinearity --
+            # - Check 4: Multicollinearity --
             tryCatch({
                 if (p <= 2000 && p >= 2) {
                     # Convert any non-numeric columns to numeric
@@ -1590,7 +1590,7 @@ grouplassoClass <- R6::R6Class(
                 NULL
             })
 
-            # -- Check 5: Data Quality --
+            # - Check 5: Data Quality --
             original_data <- self$data
             n_total <- nrow(original_data)
             n_missing <- n_total - n
@@ -1611,7 +1611,7 @@ grouplassoClass <- R6::R6Class(
                 )
             }
 
-            # -- Overall Verdict --
+            # - Overall Verdict --
             colors <- sapply(checks, function(x) x$color)
             if (any(colors == "red")) {
                 overall <- "red"

@@ -56,10 +56,10 @@ The `.u.yaml` defines four layout sections. Below is the complete mapping from e
 |---|---|---|---|
 | Time Points for Risk Estimates | TextBox | `timepoints` | string |
 | Confidence Level (0-1) | TextBox | `confidencelevel` | number |
-| Show Number at Risk | CheckBox | `showrisksets` | -- |
-| Show Stacked Probability Plot | CheckBox | `showStackedPlot` | -- |
-| Show 1-KM vs CIF Comparison | CheckBox | `showKMvsCIF` | -- |
-| CIF Color Scheme | ComboBox | `cifColors` | -- |
+| Show Number at Risk | CheckBox | `showrisksets` | - |
+| Show Stacked Probability Plot | CheckBox | `showStackedPlot` | - |
+| Show 1-KM vs CIF Comparison | CheckBox | `showKMvsCIF` | - |
+| CIF Color Scheme | ComboBox | `cifColors` | - |
 
 ---
 
@@ -69,25 +69,25 @@ All 16 options defined in `competingsurvival.a.yaml`, with their types, defaults
 
 | # | Option | Type | Default | Permitted / Range | Downstream Effect |
 |---|---|---|---|---|---|
-| 1 | `data` | Data | -- | data.frame | Passed to `self$data`; processed by `.getData()` |
+| 1 | `data` | Data | - | data.frame | Passed to `self$data`; processed by `.getData()` |
 | 2 | `explanatory` | Variable | `null` | factor (ordinal, nominal) | Optional group variable. When NULL, analyses run without group comparisons. Drives `finalfit()` explanatory arg, `cmprsk::cuminc(group=)`, and Fine-Gray covariate matrix. |
-| 3 | `overalltime` | Variable | -- | numeric (continuous) | Follow-up time in months. Used as `ftime` in `cmprsk::cuminc()` and `Surv()` time component. |
-| 4 | `outcome` | Variable | -- | factor (ordinal, nominal) | Multi-level outcome factor. Its levels are mapped to event codes via `dod`, `dooc`, `awd`, `awod`. |
-| 5 | `dod` | Level | `null` (allowNone) | level of `outcome` | "Dead of Disease" -- coded as event=1 in all analysis types. Required for `cause` and `compete`. |
-| 6 | `dooc` | Level | `null` (allowNone) | level of `outcome` | "Dead of Other Causes" -- coded as event=2 in `compete`, event=1 in `overall`, censored=0 in `cause`. Required for `compete`. |
-| 7 | `awd` | Level | `null` (allowNone) | level of `outcome` | "Alive with Disease" -- always coded as censored=0. |
-| 8 | `awod` | Level | `null` (allowNone) | level of `outcome` | "Alive without Disease" -- always coded as censored=0. |
+| 3 | `overalltime` | Variable | - | numeric (continuous) | Follow-up time in months. Used as `ftime` in `cmprsk::cuminc()` and `Surv()` time component. |
+| 4 | `outcome` | Variable | - | factor (ordinal, nominal) | Multi-level outcome factor. Its levels are mapped to event codes via `dod`, `dooc`, `awd`, `awod`. |
+| 5 | `dod` | Level | `null` (allowNone) | level of `outcome` | "Dead of Disease" - coded as event=1 in all analysis types. Required for `cause` and `compete`. |
+| 6 | `dooc` | Level | `null` (allowNone) | level of `outcome` | "Dead of Other Causes" - coded as event=2 in `compete`, event=1 in `overall`, censored=0 in `cause`. Required for `compete`. |
+| 7 | `awd` | Level | `null` (allowNone) | level of `outcome` | "Alive with Disease" - always coded as censored=0. |
+| 8 | `awod` | Level | `null` (allowNone) | level of `outcome` | "Alive without Disease" - always coded as censored=0. |
 | 9 | `analysistype` | List | `overall` | `overall`, `cause`, `compete` | Master switch. Determines which `.performAnalysis()` branch executes. Controls visibility of `cuminc`, `comprisksPlot`, `stackedPlot`, `kmvscifPlot` result items. |
-| 10 | `graystest` | Bool | `false` | -- | When TRUE + `compete`, calls `.performGraysTest()`. Results appear in `summary` HTML. Requires `explanatory` to produce `$Tests` from `cmprsk::cuminc()`. |
-| 11 | `subdistribution` | Bool | `false` | -- | When TRUE + `compete`, calls `.performSubdistributionAnalysis()`. Populates `fineGrayTable` and adds subdistribution HR row to `survivalTable`. Requires `explanatory`. |
+| 10 | `graystest` | Bool | `false` | - | When TRUE + `compete`, calls `.performGraysTest()`. Results appear in `summary` HTML. Requires `explanatory` to produce `$Tests` from `cmprsk::cuminc()`. |
+| 11 | `subdistribution` | Bool | `false` | - | When TRUE + `compete`, calls `.performSubdistributionAnalysis()`. Populates `fineGrayTable` and adds subdistribution HR row to `survivalTable`. Requires `explanatory`. |
 | 12 | `timepoints` | String | `"12,24,36,60"` | comma-separated numerics | Parsed into numeric vector. Used by `.calculateCumIncAtTimepoints()` and `.formatCumulativeIncidence()` for the `cuminc` table rows. |
-| 13 | `confidencelevel` | Number | `0.95` | 0.50 -- 0.99 | Used for CI calculation in Fine-Gray model, cumulative incidence at timepoints, and display labels. |
-| 14 | `showrisksets` | Bool | `false` | -- | When TRUE + `compete`, appends a summary risk-set count to the `summary` HTML. Full risk table is a TODO. |
-| 15 | `showStackedPlot` | Bool | `false` | -- | Controls visibility of `stackedPlot` (requires `analysistype:compete` too). |
-| 16 | `showKMvsCIF` | Bool | `false` | -- | Controls visibility of `kmvscifPlot` (requires `analysistype:compete` too). |
-| -- | `cifColors` | List | `default` | `default`, `colorblind`, `grayscale` | Color palette for all three competing-risks plots. Default = Red/Blue, Colorblind = Okabe-Ito, Grayscale = monochrome. |
+| 13 | `confidencelevel` | Number | `0.95` | 0.50-0.99 | Used for CI calculation in Fine-Gray model, cumulative incidence at timepoints, and display labels. |
+| 14 | `showrisksets` | Bool | `false` | - | When TRUE + `compete`, appends a summary risk-set count to the `summary` HTML. Full risk table is a TODO. |
+| 15 | `showStackedPlot` | Bool | `false` | - | Controls visibility of `stackedPlot` (requires `analysistype:compete` too). |
+| 16 | `showKMvsCIF` | Bool | `false` | - | Controls visibility of `kmvscifPlot` (requires `analysistype:compete` too). |
+| - | `cifColors` | List | `default` | `default`, `colorblind`, `grayscale` | Color palette for all three competing-risks plots. Default = Red/Blue, Colorblind = Okabe-Ito, Grayscale = monochrome. |
 
-**Note:** Options 1-8 are "core" -- changing any of them triggers a full re-analysis. Options 9-16 are "configuration" -- some only affect display or specific sub-analyses.
+**Note:** Options 1-8 are "core" - changing any of them triggers a full re-analysis. Options 9-16 are "configuration" - some only affect display or specific sub-analyses.
 
 ---
 
@@ -204,32 +204,32 @@ All 10 result items defined in `competingsurvival.r.yaml`.
 
 | # | Name | Type | Visible | renderFun | Key clearWith triggers |
 |---|---|---|---|---|---|
-| 1 | `todo` | Html | always | -- | explanatory, outcome, overalltime |
-| 2 | `summary` | Html | always | -- | All core + config options |
-| 3 | `survivalTable` | Table (0 rows) | always | -- | All core + config options |
-| 4 | `cuminc` | Table (0 rows) | `(analysistype:compete)` | -- | Core vars + timepoints |
+| 1 | `todo` | Html | always | - | explanatory, outcome, overalltime |
+| 2 | `summary` | Html | always | - | All core + config options |
+| 3 | `survivalTable` | Table (0 rows) | always | - | All core + config options |
+| 4 | `cuminc` | Table (0 rows) | `(analysistype:compete)` | - | Core vars + timepoints |
 | 5 | `comprisksPlot` | Image (700x400) | `(analysistype:compete)` | `.plotCompetingRisks` | Core vars + cifColors, showrisksets |
 | 6 | `stackedPlot` | Image (700x500) | `(showStackedPlot && analysistype:compete)` | `.stackedPlot` | Core vars + cifColors, showStackedPlot |
 | 7 | `kmvscifPlot` | Image (700x500) | `(showKMvsCIF && analysistype:compete)` | `.kmvscifPlot` | Core vars + cifColors, showKMvsCIF |
-| 8 | `interpretation` | Html | always | -- | Core vars + config options |
-| 9 | `assumptions` | Html | always | -- | overalltime, outcome, explanatory, analysistype |
-| 10 | `fineGrayTable` | Table (0 rows) | `(subdistribution)` | -- | Core vars + confidencelevel, subdistribution |
+| 8 | `interpretation` | Html | always | - | Core vars + config options |
+| 9 | `assumptions` | Html | always | - | overalltime, outcome, explanatory, analysistype |
+| 10 | `fineGrayTable` | Table (0 rows) | `(subdistribution)` | - | Core vars + confidencelevel, subdistribution |
 
 ### survivalTable Column Schema
 
 | Column | Title | Type | Format | Populated by |
 |---|---|---|---|---|
-| `term` | Variable | text | -- | `.formatSurvivalResults()` or `.formatEnhancedCompetingRisksResults()` |
-| `hr` | HR | number | -- | Hazard ratio (or median survival when no explanatory) |
-| `ci_lower` | CI Lower | number | -- | Lower confidence bound |
-| `ci_upper` | CI Upper | number | -- | Upper confidence bound |
+| `term` | Variable | text | - | `.formatSurvivalResults()` or `.formatEnhancedCompetingRisksResults()` |
+| `hr` | HR | number | - | Hazard ratio (or median survival when no explanatory) |
+| `ci_lower` | CI Lower | number | - | Lower confidence bound |
+| `ci_upper` | CI Upper | number | - | Upper confidence bound |
 | `p_value` | p-value | number | `zto,pvalue` | Wald p-value |
 
 ### cuminc Column Schema
 
 | Column | Title | Type | Populated by |
 |---|---|---|---|
-| `time` | Time | number | `.formatCumulativeIncidence()` -- user-specified timepoints |
+| `time` | Time | number | `.formatCumulativeIncidence()` - user-specified timepoints |
 | `est_1` | CIF Disease Death | number | CIF estimate for first event group |
 | `est_2` | CIF Other Death | number | CIF estimate for last event group |
 | `var_1` | Variance 1 | number | Variance of CIF estimate 1 |
@@ -239,13 +239,13 @@ All 10 result items defined in `competingsurvival.r.yaml`.
 
 | Column | Title | Type | Format | Notes |
 |---|---|---|---|---|
-| `term` | Term | text | -- | Covariate name from `cmprsk::crr()` summary |
-| `coef` | Coefficient | number | -- | Log subdistribution HR |
-| `hr` | HR | number | -- | Exponentiated coefficient |
-| `hr_lower` | HR CI Lower | number | -- | Lower CI of HR |
-| `hr_upper` | HR CI Upper | number | -- | Upper CI of HR |
-| `se` | SE | number | -- | Standard error of coefficient |
-| `z` | z | number | -- | Wald z-statistic |
+| `term` | Term | text | - | Covariate name from `cmprsk::crr()` summary |
+| `coef` | Coefficient | number | - | Log subdistribution HR |
+| `hr` | HR | number | - | Exponentiated coefficient |
+| `hr_lower` | HR CI Lower | number | - | Lower CI of HR |
+| `hr_upper` | HR CI Upper | number | - | Upper CI of HR |
+| `se` | SE | number | - | Standard error of coefficient |
+| `z` | z | number | - | Wald z-statistic |
 | `p` | p | number | `zto,pvalue` | Wald p-value |
 
 ---
@@ -429,9 +429,9 @@ When `explanatory` has more than 2 levels, the current code creates dummy variab
 
 ### Available Test Datasets
 
-- `data/competing_survival_data.rda` -- primary test dataset
-- `data/survival_competing.rda` -- alternative competing risks dataset
-- `data/competing_risks_person_time.rda` -- person-time format
+- `data/competing_survival_data.rda` - primary test dataset
+- `data/survival_competing.rda` - alternative competing risks dataset
+- `data/competing_risks_person_time.rda` - person-time format
 
 ### R Wrapper Function Call
 
@@ -506,10 +506,10 @@ The `cmprsk::cuminc()` result object can contain environments and function refer
 ### HR Text Parsing
 
 The `.parseHRText()` method handles finalfit's various output formats. Known patterns:
-- `"1.23 (0.89-1.67, p=0.045)"` -- dash-separated CI
-- `"1.23 (0.89, 1.67, p=0.045)"` -- comma-separated CI
-- `"1.23 (0.89 to 1.67, p=0.045)"` -- "to"-separated CI
-- `"1.23 (0.89-1.67)"` -- CI without p-value
+- `"1.23 (0.89-1.67, p=0.045)"` - dash-separated CI
+- `"1.23 (0.89, 1.67, p=0.045)"` - comma-separated CI
+- `"1.23 (0.89 to 1.67, p=0.045)"` - "to"-separated CI
+- `"1.23 (0.89-1.67)"` - CI without p-value
 
 ### Referenced Packages
 

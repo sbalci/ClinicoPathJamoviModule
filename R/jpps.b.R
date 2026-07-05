@@ -248,7 +248,7 @@ jppsClass <- R6::R6Class(
             sample_size <- self$options$sample_size
             if (sample_size > 0 && nrow(clean_data) > sample_size) {
                 # Save/restore RNG state so this set.seed doesn't pollute the user's
-                # global R session — reproducible subsampling within this run, without
+                # global R session - reproducible subsampling within this run, without
                 # affecting any other analysis in the same session
                 old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
                                 get(".Random.seed", envir = .GlobalEnv)
@@ -277,7 +277,7 @@ jppsClass <- R6::R6Class(
                    current_options_hash == private$.options_hash)
         },
         
-        # TODO (correctness): the hash below is fragile — `data_info$sample_sum`
+        # TODO (correctness): the hash below is fragile - `data_info$sample_sum`
         # only sums the first 5 complete rows, so mutations to row 6+ won't
         # invalidate the cache and downstream code will reuse stale results.
         # Replace with content-based invalidation:
@@ -450,7 +450,7 @@ jppsClass <- R6::R6Class(
                 }
                 
             }, error = function(e) {
-                # htmlEscape e$message — ppsr errors may include user column-name fragments
+                # htmlEscape e$message - ppsr errors may include user column-name fragments
                 self$results$instructions$setContent(
                     paste0("<div style='padding: 20px; color: #d32f2f;'>
                     <strong> PPS Analysis Error</strong><br>

@@ -158,7 +158,7 @@ waterfall(
   sortBy = "response",
   showThresholds = TRUE,
   labelOutliers = TRUE,
-  minResponseForLabel = 40,  # Label responses > 40%
+  minResponseForLabel = 40, # Label responses > 40%
   showMedian = TRUE,
   showCI = FALSE,
   barAlpha = 0.85,
@@ -200,10 +200,10 @@ waterfall(
 # ═══════════════════════════════════════════════════════════
 
 # RECIST v1.1 Response Categories:
-# - CR (Complete Response):  ≤ -100% (complete disappearance)
+# - CR (Complete Response):  <= -100% (complete disappearance)
 # - PR (Partial Response):   -99% to -30% (significant shrinkage)
 # - SD (Stable Disease):     -29% to +19% (minimal change)
-# - PD (Progressive Disease): ≥ +20% (tumor growth)
+# - PD (Progressive Disease): >= +20% (tumor growth)
 
 # Objective Response Rate (ORR) = (CR + PR) / Total
 # Disease Control Rate (DCR) = (CR + PR + SD) / Total

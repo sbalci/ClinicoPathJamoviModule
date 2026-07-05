@@ -117,7 +117,7 @@ NULL
 #'   \item{hdl}{Numeric. HDL cholesterol level (mg/dL)}
 #'   \item{ldl}{Numeric. LDL cholesterol level (mg/dL)}
 #'   \item{triglycerides}{Numeric. Triglyceride level (mg/dL)}
-#'   \item{bmi}{Numeric. Body mass index (kg/m²)}
+#'   \item{bmi}{Numeric. Body mass index (kg/m^2)}
 #'   \item{age}{Integer. Patient age (years)}
 #'   \item{smoking}{Factor. Smoking status ("Never", "Former", "Current")}
 #'   \item{diabetes}{Factor. Diabetes status ("No", "Yes")}
@@ -190,8 +190,8 @@ NULL
 #' @format A data frame with 300 cases and 12 variables:
 #' \describe{
 #'   \item{case_id}{Character. Unique case identifier (PATH_0001 to PATH_0300)}
-#'   \item{cell_size}{Numeric. Cell size measurement (μm)}
-#'   \item{nuclear_area}{Numeric. Nuclear area measurement (μm²)}
+#'   \item{cell_size}{Numeric. Cell size measurement (um)}
+#'   \item{nuclear_area}{Numeric. Nuclear area measurement (um^2)}
 #'   \item{mitotic_count}{Integer. Mitotic count per high-power field}
 #'   \item{pleomorphism_score}{Integer. Nuclear pleomorphism score (1-3)}
 #'   \item{ki67_percentage}{Numeric. Ki-67 proliferation index (%)}

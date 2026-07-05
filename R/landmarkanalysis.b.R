@@ -83,13 +83,13 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Ensure status is numeric (0/1) for calculations
             # TODO (correctness): as.numeric(as.factor(...)) - 1 assumes the first level
-            # is "censored" and the second is "event" — alphabetical / canonical level
+            # is "censored" and the second is "event" - alphabetical / canonical level
             # order. For a factor with levels c("dead", "alive") the mapping inverts and
             # the Cox model fits the *wrong* event. Either add an `eventLevel` option
             # (`type: Level` bound to the status Variable, like R/survival.b.R uses)
             # and explicit `as.integer(clean_data[[status_var]] == event_level)`, or
             # require status to already be numeric and reject() otherwise.
-            # ⚠ Not a drop-in jmvcore::toNumeric() swap — toNumeric() returns the
+            # ⚠ Not a drop-in jmvcore::toNumeric() swap - toNumeric() returns the
             # encoded `values` attribute when present (e.g. 0/1) and has no -1 offset,
             # so behavior diverges from current code for unlabelled R factors.
             if (is.factor(clean_data[[status_var]]) || is.character(clean_data[[status_var]])) {
@@ -149,7 +149,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Backtick-escape column names (composeTerm/composeTerms) and route the
                 # formula string through jmvcore::asFormula() so a poisoned column name
                 # cannot reach model.frame as a callable expression.
-                # Surv is globally allow-listed in current jmvcore — no extras needed.
+                # Surv is globally allow-listed in current jmvcore - no extras needed.
                 formula_str <- paste0(
                     "Surv(", jmvcore::composeTerm(private$time_var), ", ",
                     jmvcore::composeTerm(private$status_var), ") ~ ",
@@ -321,16 +321,16 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # TODO (stub): three large analysis sites below ship static-HTML placeholders
         # in place of actual computation, which silently misleads users:
-        #   .fitSuperModel()                — emits "Super Model Approach" prose at
+        #   .fitSuperModel()                - emits "Super Model Approach" prose at
         #                                     ~line 320 but never pools landmark data
         #                                     into a combined model.
-        #   .performBootstrapValidation()   — emits "Optimism-corrected C-index: Available"
+        #   .performBootstrapValidation()   - emits "Optimism-corrected C-index: Available"
         #                                     at ~line 375 with no actual resampling done.
-        #   .plotDynamicRisk() (~line 395)  — draws `1 - exp(-0.05 * t)` simulated risk
+        #   .plotDynamicRisk() (~line 395)  - draws `1 - exp(-0.05 * t)` simulated risk
         #                                     curves, not predictions from the fitted models.
-        #   .plotCalibration() (~line 426)  — draws `pred + rnorm(0, 0.05)` random points,
+        #   .plotCalibration() (~line 426)  - draws `pred + rnorm(0, 0.05)` random points,
         #                                     not actual observed-vs-predicted.
-        #   .plotDiscrimination() (~line 459) — draws a flat 0.7 C-index line with hardcoded
+        #   .plotDiscrimination() (~line 459) - draws a flat 0.7 C-index line with hardcoded
         #                                     0.65/0.75 confidence segments, ignoring the
         #                                     actual `c_index` values already computed at
         #                                     line 247 of .performLandmarkAnalysis.

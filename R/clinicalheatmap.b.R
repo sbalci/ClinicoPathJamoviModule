@@ -125,85 +125,83 @@
 #' #   clusterCols = TRUE
 #' # )
 #' }
+clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
+    R6::R6Class("clinicalheatmapClass",
+        inherit = clinicalheatmapBase,
+        private = list(
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+            .addNotice = function(type, title, content) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
 
-clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalheatmapClass",
-    inherit = clinicalheatmapBase,
-    private = list(
+                # Plain text only - notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        ""
+                    )
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
 
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-        # notice content must be plain text). ====
-        .noticeList = list(),
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+            .escapeVar = function(x) {
+                # Escape variable names for rlang::sym() - original names work best
+                if (is.null(x) || length(x) == 0) {
+                    return(x)
+                }
+                x
+            },
+            .escapeVarBare = function(x) {
+                # Create safe R identifiers for column names
+                if (is.null(x) || length(x) == 0) {
+                    return(x)
+                }
+                make.names(x)
+            },
+            .createHTMLSection = function(title, content, style = "info", icon = NULL) {
+                # Helper function to create consistent HTML sections
+                styles <- list(
+                    info = "background-color: #e3f2fd; color: #1976d2; border-left: 4px solid #2196f3;",
+                    warning = "background-color: #fff3e0; color: #f57c00; border-left: 4px solid #ff9800;",
+                    error = "background-color: #ffebee; color: #d32f2f; border-left: 4px solid #f44336;",
+                    success = "background-color: #e8f5e9; color: #388e3c; border-left: 4px solid #4caf50;",
+                    neutral = "background-color: #f5f5f5; color: #333; border-left: 4px solid #757575;"
+                )
 
-        .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
-            # Render immediately so early-return validation aborts still display the notice
-            private$.renderNotices()
-        },
+                icon_html <- if (!is.null(icon)) paste0(icon, " ") else ""
 
-        .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("")
-                return()
-            }
+                paste0(
+                    "<div style='", styles[[style]], " padding: 15px; border-radius: 8px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; font-weight: bold;'>", icon_html, title, "</h4>",
+                    content,
+                    "</div>"
+                )
+            },
+            .run = function() {
+                private$.noticeList <- list()
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
-            # output item renders this literally (no markup, no injection surface).
-            blocks <- vapply(private$.noticeList, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    "")
-                paste0(prefix, notice$title, "\n", notice$content)
-            }, character(1))
-
-            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-        },
-
-        .escapeVar = function(x) {
-            # Escape variable names for rlang::sym() - original names work best
-            if (is.null(x) || length(x) == 0) return(x)
-            x
-        },
-
-        .escapeVarBare = function(x) {
-            # Create safe R identifiers for column names
-            if (is.null(x) || length(x) == 0) return(x)
-            make.names(x)
-        },
-
-        .createHTMLSection = function(title, content, style = "info", icon = NULL) {
-            # Helper function to create consistent HTML sections
-            styles <- list(
-                info = "background-color: #e3f2fd; color: #1976d2; border-left: 4px solid #2196f3;",
-                warning = "background-color: #fff3e0; color: #f57c00; border-left: 4px solid #ff9800;",
-                error = "background-color: #ffebee; color: #d32f2f; border-left: 4px solid #f44336;",
-                success = "background-color: #e8f5e9; color: #388e3c; border-left: 4px solid #4caf50;",
-                neutral = "background-color: #f5f5f5; color: #333; border-left: 4px solid #757575;"
-            )
-
-            icon_html <- if (!is.null(icon)) paste0(icon, " ") else ""
-
-            paste0(
-                "<div style='", styles[[style]], " padding: 15px; border-radius: 8px; margin: 10px 0;'>",
-                "<h4 style='margin-top: 0; font-weight: bold;'>", icon_html, title, "</h4>",
-                content,
-                "</div>"
-            )
-        },
-
-        .run = function() {
-            private$.noticeList <- list()
-
-            # Check if required variables have been selected
-            if (is.null(self$options$rowVar) || is.null(self$options$colVar) || is.null(self$options$valueVar)) {
-                intro_msg <- "
+                # Check if required variables have been selected
+                if (is.null(self$options$rowVar) || is.null(self$options$colVar) || is.null(self$options$valueVar)) {
+                    intro_msg <- "
                 <div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;'>
                 <h3 style='color: #1976d2; margin-top: 0;'> Welcome to Clinical Heatmap Analysis!</h3>
                 <p><strong>Advanced heatmap visualization for clinical and biomedical data</strong></p>
@@ -248,23 +246,23 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 </p>
                 </div>"
 
-                self$results$todo$setContent(intro_msg)
+                    self$results$todo$setContent(intro_msg)
 
-                # Add ERROR notice for missing variables
-                private$.addNotice('ERROR', 'Missing Required Variables', 'Row, column, and value variables are required. Select all three variables from the left panel to generate the clinical heatmap.')
+                    # Add ERROR notice for missing variables
+                    private$.addNotice("ERROR", "Missing Required Variables", "Row, column, and value variables are required. Select all three variables from the left panel to generate the clinical heatmap.")
 
-                return()
-            } else {
-                self$results$todo$setContent("")
-            }
+                    return()
+                } else {
+                    self$results$todo$setContent("")
+                }
 
-            # Validate dataset
-            if (nrow(self$data) == 0) {
-                # Add ERROR notice
-                private$.addNotice('ERROR', 'Empty Dataset', 'Dataset contains no rows. Ensure data was imported correctly and check if filters excluded all observations.')
+                # Validate dataset
+                if (nrow(self$data) == 0) {
+                    # Add ERROR notice
+                    private$.addNotice("ERROR", "Empty Dataset", "Dataset contains no rows. Ensure data was imported correctly and check if filters excluded all observations.")
 
-                # Keep detailed HTML explanation
-                error_msg <- "
+                    # Keep detailed HTML explanation
+                    error_msg <- "
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4> Dataset Error</h4>
                 <p><strong>Problem:</strong> The provided dataset contains no rows.</p>
@@ -277,17 +275,17 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 </ul>
                 <p><em> Tip: Use data exploration tools to examine your dataset structure before creating heatmaps.</em></p>
                 </div>"
-                self$results$clinicalSummary$setContent(error_msg)
-                return()
-            }
+                    self$results$clinicalSummary$setContent(error_msg)
+                    return()
+                }
 
-            # Check for tidyheatmaps package
-            if (!requireNamespace("tidyheatmaps", quietly = TRUE)) {
-                # Add ERROR notice
-                private$.addNotice('ERROR', 'Required Package Missing', 'Required package tidyheatmaps is not installed. Install it using: install.packages("tidyheatmaps") then restart R.')
+                # Check for tidyheatmaps package
+                if (!requireNamespace("tidyheatmaps", quietly = TRUE)) {
+                    # Add ERROR notice
+                    private$.addNotice("ERROR", "Required Package Missing", 'Required package tidyheatmaps is not installed. Install it using: install.packages("tidyheatmaps") then restart R.')
 
-                # Keep detailed HTML explanation
-                error_msg <- "
+                    # Keep detailed HTML explanation
+                    error_msg <- "
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4> Required Package Missing</h4>
                 <p><strong>Problem:</strong> The 'tidyheatmaps' package is required for clinical heatmap functionality.</p>
@@ -311,68 +309,68 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 </ul>
                 <p><em> Tip: tidyheatmaps integrates seamlessly with the tidyverse ecosystem for clinical data analysis.</em></p>
                 </div>"
-                self$results$clinicalSummary$setContent(error_msg)
-                return()
-            }
-
-            # Generate explanatory content
-            private$.generateAboutAnalysis()
-
-            # Get data and variables
-            dataset <- self$data
-            row_var <- self$options$rowVar
-            col_var <- self$options$colVar
-            value_var <- self$options$valueVar
-
-            # Perform comprehensive input validation
-            validation_results <- private$.validateInputs(dataset, row_var, col_var, value_var)
-
-            # Convert validation results to Notices
-            if (validation_results$should_stop) {
-                # Add ERROR notices for critical validation failures
-                for (i in seq_along(validation_results$errors)) {
-                    private$.addNotice('ERROR', 'Validation Error', validation_results$errors[i])
+                    self$results$clinicalSummary$setContent(error_msg)
+                    return()
                 }
-            }
 
-            # Add WARNING and STRONG_WARNING notices
-            for (warn in validation_results$warnings) {
-                # Determine warning severity based on content
-                type <- if (grepl("50%|50 %", warn)) {
-                    'STRONG_WARNING'
-                } else {
-                    'WARNING'
+                # Generate explanatory content
+                private$.generateAboutAnalysis()
+
+                # Get data and variables
+                dataset <- self$data
+                row_var <- self$options$rowVar
+                col_var <- self$options$colVar
+                value_var <- self$options$valueVar
+
+                # Perform comprehensive input validation
+                validation_results <- private$.validateInputs(dataset, row_var, col_var, value_var)
+
+                # Convert validation results to Notices
+                if (validation_results$should_stop) {
+                    # Add ERROR notices for critical validation failures
+                    for (i in seq_along(validation_results$errors)) {
+                        private$.addNotice("ERROR", "Validation Error", validation_results$errors[i])
+                    }
                 }
-                private$.addNotice(type, 'Validation Warning', warn)
-            }
 
-            # Add INFO notice if validation passed
-            if (length(validation_results$info) > 0 &&
-                length(validation_results$errors) == 0 &&
-                length(validation_results$warnings) == 0) {
-                private$.addNotice('INFO', 'Validation Passed', 'Data validation passed. Heatmap generation proceeding.')
-            }
+                # Add WARNING and STRONG_WARNING notices
+                for (warn in validation_results$warnings) {
+                    # Determine warning severity based on content
+                    type <- if (grepl("50%|50 %", warn)) {
+                        "STRONG_WARNING"
+                    } else {
+                        "WARNING"
+                    }
+                    private$.addNotice(type, "Validation Warning", warn)
+                }
 
-            # Show validation summary HTML if there are issues
-            if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
-                validation_html <- private$.generateValidationSummary(validation_results)
-                self$results$clinicalSummary$setContent(validation_html)
-            }
+                # Add INFO notice if validation passed
+                if (length(validation_results$info) > 0 &&
+                    length(validation_results$errors) == 0 &&
+                    length(validation_results$warnings) == 0) {
+                    private$.addNotice("INFO", "Validation Passed", "Data validation passed. Heatmap generation proceeding.")
+                }
 
-            # Stop if critical errors found
-            if (validation_results$should_stop) {
-                return()
-            }
+                # Show validation summary HTML if there are issues
+                if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
+                    validation_html <- private$.generateValidationSummary(validation_results)
+                    self$results$clinicalSummary$setContent(validation_html)
+                }
 
-            # Prepare the data for heatmap
-            heatmap_data <- private$.prepareHeatmapData(dataset, row_var, col_var, value_var)
+                # Stop if critical errors found
+                if (validation_results$should_stop) {
+                    return()
+                }
 
-            if (is.null(heatmap_data)) {
-                # Add ERROR notice
-                private$.addNotice('ERROR', 'Data Preparation Failed', 'Data preparation failed. Ensure data is in tidy format with one row per row-variable/column-variable combination and check for excessive missing values.')
+                # Prepare the data for heatmap
+                heatmap_data <- private$.prepareHeatmapData(dataset, row_var, col_var, value_var)
 
-                # Keep detailed HTML explanation
-                error_msg <- "
+                if (is.null(heatmap_data)) {
+                    # Add ERROR notice
+                    private$.addNotice("ERROR", "Data Preparation Failed", "Data preparation failed. Ensure data is in tidy format with one row per row-variable/column-variable combination and check for excessive missing values.")
+
+                    # Keep detailed HTML explanation
+                    error_msg <- "
                 <div style='color: #721c24; background-color: #f8d7da; padding: 20px; border-radius: 8px;'>
                 <h4> Data Preparation Failed</h4>
                 <p><strong>Problem:</strong> Unable to prepare data for heatmap visualization.</p>
@@ -385,1348 +383,1398 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) R6::R6Class("clinicalhe
                 </ul>
                 <p><em> Tip: Ensure your data has one row per row-variable/column-variable combination.</em></p>
                 </div>"
-                self$results$clinicalSummary$setContent(error_msg)
-                return()
-            }
-
-            # Generate data summary if requested
-            if (self$options$showDataSummary) {
-                private$.generateDataSummary(heatmap_data, row_var, col_var, value_var)
-            }
-
-            # Generate clinical summary and interpretation
-            private$.generateClinicalSummary(heatmap_data, row_var, col_var, value_var)
-            private$.generateReportSentences(heatmap_data, row_var, col_var, value_var)
-
-            if (self$options$showSummary) {
-                private$.generatePlainSummary(heatmap_data, row_var, col_var, value_var)
-            }
-
-            if (self$options$showInterpretation) {
-                private$.generateInterpretationGuide()
-            }
-
-            if (self$options$showWorkflow) {
-                private$.generateWorkflowGuide()
-            }
-
-            private$.generateAssumptions()
-
-            # Populate annotation summaries if annotations are used
-            if (!is.null(self$options$annotationCols) && length(self$options$annotationCols) > 0) {
-                col_ann_html <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
-                    "<p><strong>Column Annotations:</strong> ",
-                    paste(htmltools::htmlEscape(self$options$annotationCols), collapse = ", "),
-                    "</p>",
-                    "</div>"
-                )
-                self$results$annotations$columnAnnotations$setContent(col_ann_html)
-            }
-
-            if (!is.null(self$options$annotationRows) && length(self$options$annotationRows) > 0) {
-                row_ann_html <- paste0(
-                    "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
-                    "<p><strong>Row Annotations:</strong> ",
-                    paste(htmltools::htmlEscape(self$options$annotationRows), collapse = ", "),
-                    "</p>",
-                    "</div>"
-                )
-                self$results$annotations$rowAnnotations$setContent(row_ann_html)
-            }
-
-            # Build scaled matrix once for clustering/export/survival to match plotted heatmap
-            matrix_state <- private$.buildScaledMatrix(
-                heatmap_data,
-                row_var,
-                col_var,
-                value_var,
-                self$options$scaleMethod
-            )
-
-            # Store plot data for visualization
-            plot_data <- list(
-                data = heatmap_data,
-                row_var = row_var,
-                col_var = col_var,
-                value_var = value_var,
-                scaled_matrix = matrix_state$matrix,
-                options = list(
-                    scale_method = self$options$scaleMethod,
-                    cluster_rows = self$options$clusterRows,
-                    cluster_cols = self$options$clusterCols,
-                    cluster_distance_rows = self$options$clusterDistanceRows,
-                    cluster_method_rows = self$options$clusterMethodRows,
-                    cluster_distance_cols = self$options$clusterDistanceCols,
-                    cluster_method_cols = self$options$clusterMethodCols,
-                    color_palette = self$options$colorPalette,
-                    show_rownames = self$options$showRownames,
-                    show_colnames = self$options$showColnames,
-                    annotation_cols = self$options$annotationCols,
-                    annotation_rows = self$options$annotationRows,
-                    annotation_type = self$options$annotationType,
-                    split_rows = self$options$splitRows,
-                    split_cols = self$options$splitCols
-                )
-            )
-
-            self$results$heatmap$setState(plot_data)
-
-            # === ADVANCED FEATURES IMPLEMENTATION ===
-
-            # Perform optimal K analysis if requested
-            if (self$options$findOptimalK && self$options$clusterRows) {
-                private$.performOptimalKAnalysis(matrix_state$matrix)
-            }
-
-            # Export cluster assignments if requested
-            cluster_assignments <- NULL
-            if ((self$options$exportRowClusters || self$options$exportColClusters) &&
-                (self$options$clusterRows || self$options$clusterCols)) {
-                cluster_assignments <- private$.extractClusterAssignments(
-                    matrix_state$matrix
-                )
-            }
-
-            # Perform survival analysis by clusters if requested
-            if (self$options$survivalAnalysis &&
-                !is.null(self$options$survivalTime) &&
-                !is.null(self$options$survivalEvent) &&
-                self$options$clusterRows) {
-                # Ensure we have row clusters even if export disabled
-                if (is.null(cluster_assignments) || is.null(cluster_assignments$row_clusters)) {
-                    cluster_assignments <- private$.extractClusterAssignments(matrix_state$matrix)
+                    self$results$clinicalSummary$setContent(error_msg)
+                    return()
                 }
-                if (!is.null(cluster_assignments$row_clusters)) {
-                    private$.performSurvivalAnalysis(
-                        dataset, cluster_assignments$row_clusters, row_var
+
+                # Generate data summary if requested
+                if (self$options$showDataSummary) {
+                    private$.generateDataSummary(heatmap_data, row_var, col_var, value_var)
+                }
+
+                # Generate clinical summary and interpretation
+                private$.generateClinicalSummary(heatmap_data, row_var, col_var, value_var)
+                private$.generateReportSentences(heatmap_data, row_var, col_var, value_var)
+
+                if (self$options$showSummary) {
+                    private$.generatePlainSummary(heatmap_data, row_var, col_var, value_var)
+                }
+
+                if (self$options$showInterpretation) {
+                    private$.generateInterpretationGuide()
+                }
+
+                if (self$options$showWorkflow) {
+                    private$.generateWorkflowGuide()
+                }
+
+                private$.generateAssumptions()
+
+                # Populate annotation summaries if annotations are used
+                if (!is.null(self$options$annotationCols) && length(self$options$annotationCols) > 0) {
+                    col_ann_html <- paste0(
+                        "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
+                        "<p><strong>Column Annotations:</strong> ",
+                        paste(htmltools::htmlEscape(self$options$annotationCols), collapse = ", "),
+                        "</p>",
+                        "</div>"
+                    )
+                    self$results$annotations$columnAnnotations$setContent(col_ann_html)
+                }
+
+                if (!is.null(self$options$annotationRows) && length(self$options$annotationRows) > 0) {
+                    row_ann_html <- paste0(
+                        "<div style='background-color: #f0f8ff; padding: 10px; border-radius: 4px;'>",
+                        "<p><strong>Row Annotations:</strong> ",
+                        paste(htmltools::htmlEscape(self$options$annotationRows), collapse = ", "),
+                        "</p>",
+                        "</div>"
+                    )
+                    self$results$annotations$rowAnnotations$setContent(row_ann_html)
+                }
+
+                # Build scaled matrix once for clustering/export/survival to match plotted heatmap
+                matrix_state <- private$.buildScaledMatrix(
+                    heatmap_data,
+                    row_var,
+                    col_var,
+                    value_var,
+                    self$options$scaleMethod
+                )
+
+                # Store plot data for visualization
+                plot_data <- list(
+                    data = heatmap_data,
+                    row_var = row_var,
+                    col_var = col_var,
+                    value_var = value_var,
+                    scaled_matrix = matrix_state$matrix,
+                    options = list(
+                        scale_method = self$options$scaleMethod,
+                        cluster_rows = self$options$clusterRows,
+                        cluster_cols = self$options$clusterCols,
+                        cluster_distance_rows = self$options$clusterDistanceRows,
+                        cluster_method_rows = self$options$clusterMethodRows,
+                        cluster_distance_cols = self$options$clusterDistanceCols,
+                        cluster_method_cols = self$options$clusterMethodCols,
+                        color_palette = self$options$colorPalette,
+                        show_rownames = self$options$showRownames,
+                        show_colnames = self$options$showColnames,
+                        annotation_cols = self$options$annotationCols,
+                        annotation_rows = self$options$annotationRows,
+                        annotation_type = self$options$annotationType,
+                        split_rows = self$options$splitRows,
+                        split_cols = self$options$splitCols
+                    )
+                )
+
+                self$results$heatmap$setState(plot_data)
+
+                # === ADVANCED FEATURES IMPLEMENTATION ===
+
+                # Perform optimal K analysis if requested
+                if (self$options$findOptimalK && self$options$clusterRows) {
+                    private$.performOptimalKAnalysis(matrix_state$matrix)
+                }
+
+                # Export cluster assignments if requested
+                cluster_assignments <- NULL
+                if ((self$options$exportRowClusters || self$options$exportColClusters) &&
+                    (self$options$clusterRows || self$options$clusterCols)) {
+                    cluster_assignments <- private$.extractClusterAssignments(
+                        matrix_state$matrix
                     )
                 }
-            }
 
-            # Perform cluster comparison if requested
-            if (self$options$clusterComparison &&
-                !is.null(self$options$comparisonVars) &&
-                length(self$options$comparisonVars) > 0 &&
-                self$options$clusterRows) {
-                if (is.null(cluster_assignments) || is.null(cluster_assignments$row_clusters)) {
-                    cluster_assignments <- private$.extractClusterAssignments(matrix_state$matrix)
-                }
-                if (!is.null(cluster_assignments$row_clusters)) {
-                    private$.performClusterComparison(
-                        dataset, cluster_assignments$row_clusters, row_var
-                    )
-                }
-            }
-
-            # Add success INFO notice at end
-            n_rows <- length(unique(heatmap_data[[row_var]]))
-            n_cols <- length(unique(heatmap_data[[col_var]]))
-            clustering_text <- if (self$options$clusterRows && self$options$clusterCols) {
-                "row and column clustering"
-            } else if (self$options$clusterRows) {
-                "row clustering"
-            } else if (self$options$clusterCols) {
-                "column clustering"
-            } else {
-                "no clustering"
-            }
-            private$.addNotice('INFO', 'Analysis Complete', sprintf('Clinical heatmap analysis completed successfully. Generated %dx%d heatmap with %s scaling and %s.',
-                                      n_rows, n_cols,
-                                      self$options$scaleMethod,
-                                      clustering_text))
-        },
-
-        .plotHeatmap = function(image, ggtheme, theme, ...) {
-            # Heatmap plotting function using tidyheatmaps
-            plot_data <- image$state
-
-            if (is.null(plot_data) || is.null(plot_data$data)) {
-                return(FALSE)
-            }
-
-            # Extract plotting parameters
-            data <- plot_data$data
-            row_var <- plot_data$row_var
-            col_var <- plot_data$col_var
-            value_var <- plot_data$value_var
-            options <- plot_data$options
-
-            # TODO (UX): this file has 13 tryCatch blocks that silently swallow
-            # errors (return NULL or empty {}) — failures are invisible to the
-            # user. Sites: L<this>, L640, L704, L1268, L1332, L1407, L1502,
-            # L1516, L1540, L1549, L1622, L1653, L1685.
-            # Convert at least the user-facing ones to surface error messages
-            # via the existing notice infrastructure, e.g.:
-            #   error = function(e) {
-            #     msg <- htmltools::htmlEscape(jmvcore::extractErrorMessage(e))
-            #     notice <- jmvcore::Notice$new(...)
-            #     notice$setContent(paste("Step failed:", msg))
-            #     self$results$insert(999, notice)
-            #   }
-            # so users know why a panel is empty.
-            #
-            # Safely create heatmap with error handling
-            tryCatch({
-                # Load required packages
-                if (!requireNamespace("rlang", quietly = TRUE)) {
-                    stop("rlang package is required")
+                # Perform survival analysis by clusters if requested
+                if (self$options$survivalAnalysis &&
+                    !is.null(self$options$survivalTime) &&
+                    !is.null(self$options$survivalEvent) &&
+                    self$options$clusterRows) {
+                    # Ensure we have row clusters even if export disabled
+                    if (is.null(cluster_assignments) || is.null(cluster_assignments$row_clusters)) {
+                        cluster_assignments <- private$.extractClusterAssignments(matrix_state$matrix)
+                    }
+                    if (!is.null(cluster_assignments$row_clusters)) {
+                        private$.performSurvivalAnalysis(
+                            dataset, cluster_assignments$row_clusters, row_var
+                        )
+                    }
                 }
 
-                # Build base heatmap call arguments
-                heatmap_args <- list(
-                    df = data,
-                    rows = rlang::sym(row_var),
-                    columns = rlang::sym(col_var),
-                    values = rlang::sym(value_var),
-                    scale = if(options$scale_method == "none") "none" else options$scale_method,
-                    cluster_rows = options$cluster_rows,
-                    cluster_cols = options$cluster_cols,
-                    show_rownames = options$show_rownames,
-                    show_colnames = options$show_colnames
-                )
-
-                # Add clustering options if clustering is enabled
-                if (options$cluster_rows) {
-                    heatmap_args$clustering_distance_rows <- options$cluster_distance_rows
-                    heatmap_args$clustering_method_rows <- options$cluster_method_rows
+                # Perform cluster comparison if requested
+                if (self$options$clusterComparison &&
+                    !is.null(self$options$comparisonVars) &&
+                    length(self$options$comparisonVars) > 0 &&
+                    self$options$clusterRows) {
+                    if (is.null(cluster_assignments) || is.null(cluster_assignments$row_clusters)) {
+                        cluster_assignments <- private$.extractClusterAssignments(matrix_state$matrix)
+                    }
+                    if (!is.null(cluster_assignments$row_clusters)) {
+                        private$.performClusterComparison(
+                            dataset, cluster_assignments$row_clusters, row_var
+                        )
+                    }
                 }
 
-                if (options$cluster_cols) {
-                    heatmap_args$clustering_distance_cols <- options$cluster_distance_cols
-                    heatmap_args$clustering_method_cols <- options$cluster_method_cols
+                # Add success INFO notice at end
+                n_rows <- length(unique(heatmap_data[[row_var]]))
+                n_cols <- length(unique(heatmap_data[[col_var]]))
+                clustering_text <- if (self$options$clusterRows && self$options$clusterCols) {
+                    "row and column clustering"
+                } else if (self$options$clusterRows) {
+                    "row clustering"
+                } else if (self$options$clusterCols) {
+                    "column clustering"
+                } else {
+                    "no clustering"
                 }
-
-                # Add column annotations if specified
-                if (!is.null(options$annotation_cols) && length(options$annotation_cols) > 0) {
-                    # tidyheatmaps expects column names as symbols, can be a vector
-                    col_ann_syms <- lapply(options$annotation_cols, rlang::sym)
-                    heatmap_args$annotation_col <- col_ann_syms
-                }
-
-                # Add row annotations if specified
-                if (!is.null(options$annotation_rows) && length(options$annotation_rows) > 0) {
-                    # tidyheatmaps expects column names as symbols, can be a vector
-                    row_ann_syms <- lapply(options$annotation_rows, rlang::sym)
-                    heatmap_args$annotation_row <- row_ann_syms
-                }
-
-                # Add annotation type
-                if (!is.null(options$annotation_type)) {
-                    heatmap_args$annotation_type <- options$annotation_type
-                }
-
-                # Add split options if > 1
-                if (!is.null(options$split_rows) && options$split_rows > 1) {
-                    heatmap_args$row_split <- options$split_rows
-                }
-
-                if (!is.null(options$split_cols) && options$split_cols > 1) {
-                    heatmap_args$column_split <- options$split_cols
-                }
-
-                # Create the base heatmap using tidyheatmaps
-                p <- do.call(tidyheatmaps::tidyheatmap, heatmap_args)
-
-                # Apply color palette if specified
-                if (!is.null(options$color_palette) && options$color_palette != "viridis") {
-                    # Build color palette function
-                    palette_colors <- switch(
-                        options$color_palette,
-                        "plasma" = grDevices::hcl.colors(100, "Plasma"),
-                        "inferno" = grDevices::hcl.colors(100, "Inferno"),
-                        "RdYlBu" = grDevices::hcl.colors(100, "RdYlBu"),
-                        "RdBu" = grDevices::hcl.colors(100, "RdBu"),
-                        "Blues" = grDevices::hcl.colors(100, "Blues"),
-                        "Reds" = grDevices::hcl.colors(100, "Reds"),
-                        grDevices::hcl.colors(100, "Viridis")  # default
-                    )
-
-                    # Apply palette
-                    tryCatch({
-                        p <- p %>% tidyheatmaps::add_palette(palette_colors)
-                    }, error = function(e) {
-                        # If palette fails, continue with default
-                    })
-                }
-
-                # Add title and apply theme
-                p <- p +
-                    ggplot2::ggtitle("Clinical Heatmap") +
-                    ggplot2::theme(
-                        plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 14)
-                    )
-
-                # Apply jamovi theme
-                p <- p + ggtheme
-
-                print(p)
-                return(TRUE)
-
-            }, error = function(e) {
-                # If tidyheatmaps fails, create a simple fallback message
-                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
-                text(1, 1, paste("Error creating heatmap:\n", e$message), cex = 1.2, col = "red")
-                title("Clinical Heatmap - Error")
-                return(TRUE)
-            })
-        },
-
-        .buildScaledMatrix = function(heatmap_data, row_var, col_var, value_var, scale_method) {
-            wide_data <- heatmap_data %>%
-                dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
-                tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var))
-
-            mat <- wide_data %>%
-                tibble::column_to_rownames(row_var) %>%
-                as.matrix()
-
-            # Impute any residual NAs with column means to stabilize scaling/clustering
-            if (anyNA(mat)) {
-                for (j in seq_len(ncol(mat))) {
-                    col_mean <- mean(mat[, j], na.rm = TRUE)
-                    if (is.na(col_mean)) col_mean <- 0
-                    na_idx <- is.na(mat[, j])
-                    if (any(na_idx)) mat[na_idx, j] <- col_mean
-                }
-            }
-
-            if (scale_method == "row") {
-                mat <- t(scale(t(mat)))
-            } else if (scale_method == "column") {
-                mat <- scale(mat)
-            } else if (scale_method == "both") {
-                scaled_vec <- scale(as.vector(mat))
-                mat <- matrix(scaled_vec, nrow = nrow(mat), ncol = ncol(mat))
-                rownames(mat) <- rownames(wide_data %>% tibble::column_to_rownames(row_var))
-                colnames(mat) <- colnames(wide_data)[-1]
-            }
-
-            return(list(matrix = mat))
-        },
-
-        .prepareHeatmapData = function(dataset, row_var, col_var, value_var) {
-            # Prepare data for heatmap visualization
-            tryCatch({
-                # Determine which columns to retain
-                required_vars <- c(row_var, col_var, value_var)
-
-                # Add annotation columns if specified
-                annotation_cols <- self$options$annotationCols
-                annotation_rows <- self$options$annotationRows
-
-                # Combine all needed variables
-                vars_to_keep <- unique(c(required_vars, annotation_cols, annotation_rows))
-
-                # Select only the variables we need (core + annotations)
-                analysis_data <- dataset %>%
-                    dplyr::select(dplyr::all_of(vars_to_keep))
-
-                # Aggregate duplicate row/col combinations (mean)
-                analysis_data <- analysis_data %>%
-                    dplyr::group_by(!!rlang::sym(row_var), !!rlang::sym(col_var)) %>%
-                    dplyr::summarise(!!rlang::sym(value_var) := mean(!!rlang::sym(value_var), na.rm = TRUE),
-                                     dplyr::across(dplyr::all_of(setdiff(vars_to_keep, c(row_var, col_var, value_var))), dplyr::first),
-                                     .groups = "drop")
-
-                # Handle missing data based on user selection
-                na_handling <- self$options$naHandling
-
-                if (na_handling == "exclude") {
-                    analysis_data <- analysis_data %>%
-                        dplyr::filter(stats::complete.cases(.))
-                } else if (na_handling == "mean") {
-                    analysis_data <- analysis_data %>%
-                        dplyr::group_by(!!rlang::sym(col_var)) %>%
-                        dplyr::mutate(!!rlang::sym(value_var) := ifelse(is.na(!!rlang::sym(value_var)),
-                                                                      mean(!!rlang::sym(value_var), na.rm = TRUE),
-                                                                      !!rlang::sym(value_var))) %>%
-                        dplyr::ungroup()
-                } else if (na_handling == "median") {
-                    analysis_data <- analysis_data %>%
-                        dplyr::group_by(!!rlang::sym(col_var)) %>%
-                        dplyr::mutate(!!rlang::sym(value_var) := ifelse(is.na(!!rlang::sym(value_var)),
-                                                                      stats::median(!!rlang::sym(value_var), na.rm = TRUE),
-                                                                      !!rlang::sym(value_var))) %>%
-                        dplyr::ungroup()
-                } else if (na_handling == "zero") {
-                    analysis_data <- analysis_data %>%
-                        dplyr::mutate(!!rlang::sym(value_var) := ifelse(is.na(!!rlang::sym(value_var)), 0, !!rlang::sym(value_var)))
-                }
-
-                # Check if we have enough data after processing
-                if (nrow(analysis_data) == 0) {
-                    return(NULL)
-                }
-
-                # Ensure we have complete data
-                analysis_data <- analysis_data %>%
-                    dplyr::filter(!is.na(!!rlang::sym(value_var)))
-
-                return(analysis_data)
-
-            }, error = function(e) {
-                return(NULL)
-            })
-        },
-
-        .validateInputs = function(dataset, row_var, col_var, value_var) {
-            validation_results <- list(
-                errors = character(0),
-                warnings = character(0),
-                info = character(0),
-                should_stop = FALSE
-            )
-
-            # Check dataset validity
-            if (is.null(dataset) || !is.data.frame(dataset)) {
-                validation_results$errors <- c(validation_results$errors, "Dataset is not a valid data frame")
-                validation_results$should_stop <- TRUE
-                return(validation_results)
-            }
-
-            if (nrow(dataset) == 0) {
-                validation_results$errors <- c(validation_results$errors, "Dataset contains no rows")
-                validation_results$should_stop <- TRUE
-                return(validation_results)
-            }
-
-            # Check variable selection
-            required_vars <- c(row_var, col_var, value_var)
-            missing_vars <- setdiff(required_vars, names(dataset))
-            if (length(missing_vars) > 0) {
-                validation_results$errors <- c(validation_results$errors,
-                    paste("Variables not found in dataset:",
-                          paste(htmltools::htmlEscape(missing_vars), collapse = ", ")))
-                validation_results$should_stop <- TRUE
-                return(validation_results)
-            }
-
-            # Check value variable is numeric
-            if (!is.numeric(dataset[[value_var]])) {
-                validation_results$errors <- c(validation_results$errors,
-                    paste("Value variable", htmltools::htmlEscape(value_var), "must be numeric"))
-                validation_results$should_stop <- TRUE
-                return(validation_results)
-            }
-
-            # Check for missing data
-            missing_pct <- sum(is.na(dataset[[value_var]])) / nrow(dataset) * 100
-            if (missing_pct > 50) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    paste("Value variable has", round(missing_pct, 1), "% missing data. Consider data quality review."))
-            } else if (missing_pct > 20) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    paste("Value variable has", round(missing_pct, 1), "% missing data. Results may be affected."))
-            }
-
-            # Check data dimensions
-            n_rows <- length(unique(dataset[[row_var]]))
-            n_cols <- length(unique(dataset[[col_var]]))
-
-            if (n_rows < 2) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    "Very few unique values in row variable. Heatmap may not be informative.")
-            }
-
-            if (n_cols < 2) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    "Very few unique values in column variable. Heatmap may not be informative.")
-            }
-
-            if (n_rows > 100 || n_cols > 100) {
-                validation_results$warnings <- c(validation_results$warnings,
-                    "Large number of rows/columns. Consider filtering or aggregation for better visualization.")
-            }
-
-            # Add success message if no major issues
-            if (length(validation_results$errors) == 0 && length(validation_results$warnings) == 0) {
-                validation_results$info <- c(validation_results$info,
-                    " Data validation passed. Heatmap can be generated.")
-            }
-
-            return(validation_results)
-        },
-
-        # TODO (forward-looking): the for-loops below interpolate strings from
-        # validation_results$errors / $warnings / $info directly into <li> tags
-        # via paste0(). Today this is safe because the user-controlled values
-        # in those strings (column names from .validateInputs L793/L801) are
-        # already wrapped in htmltools::htmlEscape() at construction. If new
-        # validation messages are added that interpolate user-controlled data
-        # (column names, factor levels, free-text option strings), they MUST
-        # likewise escape at construction — OR this rendering point should be
-        # rewritten to escape uniformly here as defense-in-depth.
-        .generateValidationSummary = function(validation_results) {
-            html_content <- "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>"
-            html_content <- paste0(html_content, "<h4 style='color: #495057; margin-top: 0;'> Data Validation Summary</h4>")
-
-            # Add errors
-            if (length(validation_results$errors) > 0) {
-                html_content <- paste0(html_content, "<div style='background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
-                html_content <- paste0(html_content, "<h5 style='color: #721c24; margin-top: 0;'> Errors (Analysis Stopped)</h5>")
-                html_content <- paste0(html_content, "<ul>")
-                for (error in validation_results$errors) {
-                    html_content <- paste0(html_content, "<li style='color: #721c24;'>", error, "</li>")
-                }
-                html_content <- paste0(html_content, "</ul></div>")
-            }
-
-            # Add warnings
-            if (length(validation_results$warnings) > 0) {
-                html_content <- paste0(html_content, "<div style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
-                html_content <- paste0(html_content, "<h5 style='color: #856404; margin-top: 0;'> Warnings</h5>")
-                html_content <- paste0(html_content, "<ul>")
-                for (warning in validation_results$warnings) {
-                    html_content <- paste0(html_content, "<li style='color: #856404;'>", warning, "</li>")
-                }
-                html_content <- paste0(html_content, "</ul></div>")
-            }
-
-            # Add info messages
-            if (length(validation_results$info) > 0) {
-                html_content <- paste0(html_content, "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
-                html_content <- paste0(html_content, "<h5 style='color: #0c5460; margin-top: 0;'> Information</h5>")
-                html_content <- paste0(html_content, "<ul>")
-                for (info in validation_results$info) {
-                    html_content <- paste0(html_content, "<li style='color: #0c5460;'>", info, "</li>")
-                }
-                html_content <- paste0(html_content, "</ul></div>")
-            }
-
-            html_content <- paste0(html_content, "</div>")
-            return(html_content)
-        },
-
-        .generateAboutAnalysis = function() {
-            about_content <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
-                "<h4 style='color: #2c3e50; margin-top: 0;'> About Clinical Heatmaps</h4>",
-                "<p><strong>Purpose:</strong> Clinical heatmaps visualize multivariate patterns in biomedical data, ",
-                "commonly used for biomarker profiling, genomic analysis, and quality control assessment.</p>",
-                "<ul style='margin-left: 20px;'>",
-                "<li><strong>Biomarker Expression:</strong> Multi-marker panels across patient cohorts</li>",
-                "<li><strong>Genomic Analysis:</strong> Gene expression and mutation landscapes</li>",
-                "<li><strong>Quality Control:</strong> Batch effects and instrument performance</li>",
-                "<li><strong>Treatment Response:</strong> Longitudinal measurements and dose relationships</li>",
-                "<li><strong>Precision Medicine:</strong> Molecular subtyping and therapeutic targets</li>",
-                "</ul>",
-                "<p><strong>How to Use:</strong></p>",
-                "<ol style='margin-left: 20px;'>",
-                "<li>Ensure your data is in tidy (long) format</li>",
-                "<li>Select row variable (e.g., patients, samples)</li>",
-                "<li>Select column variable (e.g., biomarkers, genes)</li>",
-                "<li>Select value variable (numeric measurements)</li>",
-                "<li>Configure scaling, clustering, and annotation options</li>",
-                "<li>Interpret patterns using clustering and color intensity</li>",
-                "</ol>",
-                "</div>"
-            )
-            self$results$aboutAnalysis$setContent(about_content)
-        },
-
-        .generateDataSummary = function(data, row_var, col_var, value_var) {
-            # Generate data structure summary
-            n_rows <- length(unique(data[[row_var]]))
-            n_cols <- length(unique(data[[col_var]]))
-            n_obs <- nrow(data)
-
-            structure_data <- data.frame(
-                dimension = c("Total Observations", "Unique Rows", "Unique Columns", "Data Completeness"),
-                value = c(
-                    as.character(n_obs),
-                    as.character(n_rows),
-                    as.character(n_cols),
-                    paste0(round((1 - sum(is.na(data[[value_var]])) / nrow(data)) * 100, 1), "%")
-                ),
-                stringsAsFactors = FALSE
-            )
-
-            for (i in seq_len(nrow(structure_data))) {
-                self$results$dataSummary$dataStructure$addRow(rowKey = i, values = list(
-                    dimension = structure_data$dimension[i],
-                    value = structure_data$value[i]
+                private$.addNotice("INFO", "Analysis Complete", sprintf(
+                    "Clinical heatmap analysis completed successfully. Generated %dx%d heatmap with %s scaling and %s.",
+                    n_rows, n_cols,
+                    self$options$scaleMethod,
+                    clustering_text
                 ))
-            }
+            },
+            .plotHeatmap = function(image, ggtheme, theme, ...) {
+                # Heatmap plotting function using tidyheatmaps
+                plot_data <- image$state
 
-            # Generate value summary statistics
-            value_stats <- data.frame(
-                statistic = c("Mean", "Median", "Standard Deviation", "Minimum", "Maximum"),
-                value = c(
-                    round(mean(data[[value_var]], na.rm = TRUE), 3),
-                    round(stats::median(data[[value_var]], na.rm = TRUE), 3),
-                    round(stats::sd(data[[value_var]], na.rm = TRUE), 3),
-                    round(min(data[[value_var]], na.rm = TRUE), 3),
-                    round(max(data[[value_var]], na.rm = TRUE), 3)
-                ),
-                stringsAsFactors = FALSE
-            )
+                if (is.null(plot_data) || is.null(plot_data$data)) {
+                    return(FALSE)
+                }
 
-            for (i in seq_len(nrow(value_stats))) {
-                self$results$dataSummary$valueSummary$addRow(rowKey = i, values = list(
-                    statistic = value_stats$statistic[i],
-                    value = value_stats$value[i]
-                ))
-            }
+                # Extract plotting parameters
+                data <- plot_data$data
+                row_var <- plot_data$row_var
+                col_var <- plot_data$col_var
+                value_var <- plot_data$value_var
+                options <- plot_data$options
 
-            # Missing data report
-            missing_by_var <- data.frame(
-                variable = c(row_var, col_var, value_var),
-                missing_count = c(
-                    sum(is.na(data[[row_var]])),
-                    sum(is.na(data[[col_var]])),
-                    sum(is.na(data[[value_var]]))
-                ),
-                stringsAsFactors = FALSE
-            )
-            missing_by_var$missing_pct <- round(missing_by_var$missing_count / nrow(data) * 100, 1)
+                # TODO (UX): this file has 13 tryCatch blocks that silently swallow
+                # errors (return NULL or empty {}) - failures are invisible to the
+                # user. Sites: L<this>, L640, L704, L1268, L1332, L1407, L1502,
+                # L1516, L1540, L1549, L1622, L1653, L1685.
+                # Convert at least the user-facing ones to surface error messages
+                # via the existing notice infrastructure, e.g.:
+                #   error = function(e) {
+                #     msg <- htmltools::htmlEscape(jmvcore::extractErrorMessage(e))
+                #     notice <- jmvcore::Notice$new(...)
+                #     notice$setContent(paste("Step failed:", msg))
+                #     self$results$insert(999, notice)
+                #   }
+                # so users know why a panel is empty.
+                #
+                # Safely create heatmap with error handling
+                tryCatch(
+                    {
+                        # Load required packages
+                        if (!requireNamespace("rlang", quietly = TRUE)) {
+                            stop("rlang package is required")
+                        }
 
-            for (i in seq_len(nrow(missing_by_var))) {
-                self$results$dataSummary$missingData$addRow(rowKey = i, values = list(
-                    variable = missing_by_var$variable[i],
-                    missing_count = missing_by_var$missing_count[i],
-                    missing_pct = missing_by_var$missing_pct[i]
-                ))
-            }
-        },
+                        # Build base heatmap call arguments
+                        heatmap_args <- list(
+                            df = data,
+                            rows = rlang::sym(row_var),
+                            columns = rlang::sym(col_var),
+                            values = rlang::sym(value_var),
+                            scale = if (options$scale_method == "none") "none" else options$scale_method,
+                            cluster_rows = options$cluster_rows,
+                            cluster_cols = options$cluster_cols,
+                            show_rownames = options$show_rownames,
+                            show_colnames = options$show_colnames
+                        )
 
-        .generateClinicalSummary = function(data, row_var, col_var, value_var) {
-            n_rows <- length(unique(data[[row_var]]))
-            n_cols <- length(unique(data[[col_var]]))
-            n_obs <- nrow(data)
+                        # Add clustering options if clustering is enabled
+                        if (options$cluster_rows) {
+                            heatmap_args$clustering_distance_rows <- options$cluster_distance_rows
+                            heatmap_args$clustering_method_rows <- options$cluster_method_rows
+                        }
 
-            # Escape user-controlled column names for HTML interpolation below
-            row_var_esc <- htmltools::htmlEscape(row_var)
-            col_var_esc <- htmltools::htmlEscape(col_var)
+                        if (options$cluster_cols) {
+                            heatmap_args$clustering_distance_cols <- options$cluster_distance_cols
+                            heatmap_args$clustering_method_cols <- options$cluster_method_cols
+                        }
 
-            mean_val <- round(mean(data[[value_var]], na.rm = TRUE), 2)
-            sd_val <- round(stats::sd(data[[value_var]], na.rm = TRUE), 2)
+                        # Add column annotations if specified
+                        if (!is.null(options$annotation_cols) && length(options$annotation_cols) > 0) {
+                            # tidyheatmaps expects column names as symbols, can be a vector
+                            col_ann_syms <- lapply(options$annotation_cols, rlang::sym)
+                            heatmap_args$annotation_col <- col_ann_syms
+                        }
 
-            clinical_summary <- paste0(
-                "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'>",
-                "<h4 style='color: #2980b9; margin-top: 0;'> Clinical Summary</h4>",
-                "<p><strong>Dataset Overview:</strong> ", n_obs, " observations across ", n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, "</p>",
-                "<p><strong>Value Distribution:</strong> Mean = ", mean_val, " (SD = ", sd_val, ")</p>",
-                "<p><strong>Scaling Method:</strong> ", switch(self$options$scaleMethod,
-                    "none" = "Raw values (no scaling)",
-                    "row" = "Row-wise Z-score normalization",
-                    "column" = "Column-wise Z-score normalization",
-                    "both" = "Global Z-score normalization"), "</p>",
-                "<p><strong>Clustering:</strong> ",
-                ifelse(self$options$clusterRows, "Rows clustered", "Rows not clustered"), ", ",
-                ifelse(self$options$clusterCols, "Columns clustered", "Columns not clustered"), "</p>",
-                "<p><em> Tip: Use clustering to identify patterns and the color intensity to assess magnitude of differences.</em></p>",
-                "</div>"
-            )
+                        # Add row annotations if specified
+                        if (!is.null(options$annotation_rows) && length(options$annotation_rows) > 0) {
+                            # tidyheatmaps expects column names as symbols, can be a vector
+                            row_ann_syms <- lapply(options$annotation_rows, rlang::sym)
+                            heatmap_args$annotation_row <- row_ann_syms
+                        }
 
-            self$results$clinicalSummary$setContent(clinical_summary)
-        },
+                        # Add annotation type
+                        if (!is.null(options$annotation_type)) {
+                            heatmap_args$annotation_type <- options$annotation_type
+                        }
 
-        .generateReportSentences = function(data, row_var, col_var, value_var) {
-            n_rows <- length(unique(data[[row_var]]))
-            n_cols <- length(unique(data[[col_var]]))
-            n_obs <- nrow(data)
+                        # Add split options if > 1
+                        if (!is.null(options$split_rows) && options$split_rows > 1) {
+                            heatmap_args$row_split <- options$split_rows
+                        }
 
-            # Escape user-controlled column names for HTML interpolation below
-            row_var_esc <- htmltools::htmlEscape(row_var)
-            col_var_esc <- htmltools::htmlEscape(col_var)
+                        if (!is.null(options$split_cols) && options$split_cols > 1) {
+                            heatmap_args$column_split <- options$split_cols
+                        }
 
-            scale_text <- switch(self$options$scaleMethod,
-                "none" = "without scaling",
-                "row" = "with row-wise normalization",
-                "column" = "with column-wise normalization",
-                "both" = "with global normalization")
+                        # Create the base heatmap using tidyheatmaps
+                        p <- do.call(tidyheatmaps::tidyheatmap, heatmap_args)
 
-            cluster_text <- paste0(
-                ifelse(self$options$clusterRows, "Row", "No row"), " clustering and ",
-                ifelse(self$options$clusterCols, "column", "no column"), " clustering were applied"
-            )
+                        # Apply color palette if specified
+                        if (!is.null(options$color_palette) && options$color_palette != "viridis") {
+                            # Build color palette function
+                            palette_colors <- switch(options$color_palette,
+                                "plasma" = grDevices::hcl.colors(100, "Plasma"),
+                                "inferno" = grDevices::hcl.colors(100, "Inferno"),
+                                "RdYlBu" = grDevices::hcl.colors(100, "RdYlBu"),
+                                "RdBu" = grDevices::hcl.colors(100, "RdBu"),
+                                "Blues" = grDevices::hcl.colors(100, "Blues"),
+                                "Reds" = grDevices::hcl.colors(100, "Reds"),
+                                grDevices::hcl.colors(100, "Viridis") # default
+                            )
 
-            report_sentence <- paste0(
-                "Clinical heatmap analysis was performed on ", n_obs, " observations representing ",
-                n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, ". ",
-                "Data visualization was conducted ", scale_text, ". ",
-                cluster_text, " to reveal underlying patterns in the data."
-            )
+                            # Apply palette
+                            tryCatch(
+                                {
+                                    p <- p %>% tidyheatmaps::add_palette(palette_colors)
+                                },
+                                error = function(e) {
+                                    # If palette fails, continue with default
+                                }
+                            )
+                        }
 
-            report_content <- paste0(
-                "<div style='background-color: #f0f8f0; padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60;'>",
-                "<h4 style='color: #27ae60; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
-                "<div style='background-color: white; padding: 10px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6;'>",
-                "<p>", report_sentence, "</p>",
-                "</div>",
-                "<p style='margin-top: 10px;'><small><em>",
-                "Note: Copy the text above for direct use in clinical reports. Modify as needed for your specific context.",
-                "</em></small></p>",
-                "</div>"
-            )
+                        # Add title and apply theme
+                        p <- p +
+                            ggplot2::ggtitle("Clinical Heatmap") +
+                            ggplot2::theme(
+                                plot.title = ggplot2::element_text(hjust = 0.5, face = "bold", size = 14)
+                            )
 
-            self$results$reportSentences$setContent(report_content)
-        },
+                        # Apply jamovi theme
+                        p <- p + ggtheme
 
-        .generatePlainSummary = function(data, row_var, col_var, value_var) {
-            n_rows <- length(unique(data[[row_var]]))
-            n_cols <- length(unique(data[[col_var]]))
-
-            # Escape user-controlled column names for HTML interpolation below
-            row_var_esc   <- htmltools::htmlEscape(row_var)
-            col_var_esc   <- htmltools::htmlEscape(col_var)
-            value_var_esc <- htmltools::htmlEscape(value_var)
-
-            # Describe the analysis in plain language
-            summary_text <- paste0(
-                "This analysis examined patterns in ", value_var_esc, " across ",
-                n_rows, " different ", row_var_esc, " and ", n_cols, " ", col_var_esc, "."
-            )
-
-            # Add scaling interpretation
-            scale_desc <- switch(self$options$scaleMethod,
-                "none" = " The heatmap displays the original measurement values without any transformation.",
-                "row" = " Values were standardized within each row to enable comparison of patterns across different rows.",
-                "column" = " Values were standardized within each column to compare how each measurement varies across different observations.",
-                "both" = " All values were standardized together to show relative differences across the entire dataset."
-            )
-            summary_text <- paste0(summary_text, scale_desc)
-
-            # Add clustering interpretation if used
-            if (self$options$clusterRows || self$options$clusterCols) {
-                cluster_desc <- paste0(
-                    " Hierarchical clustering was applied to",
-                    if (self$options$clusterRows && self$options$clusterCols) {
-                        " both rows and columns"
-                    } else if (self$options$clusterRows) {
-                        " rows"
-                    } else {
-                        " columns"
+                        print(p)
+                        return(TRUE)
                     },
-                    " to automatically group similar patterns together."
+                    error = function(e) {
+                        # If tidyheatmaps fails, create a simple fallback message
+                        plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                        text(1, 1, paste("Error creating heatmap:\n", e$message), cex = 1.2, col = "red")
+                        title("Clinical Heatmap - Error")
+                        return(TRUE)
+                    }
                 )
-                summary_text <- paste0(summary_text, cluster_desc)
-            }
+            },
+            .buildScaledMatrix = function(heatmap_data, row_var, col_var, value_var, scale_method) {
+                wide_data <- heatmap_data %>%
+                    dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
+                    tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var))
 
-            # Add practical interpretation
-            practical_text <- paste0(
-                " This visualization helps identify which ", row_var_esc,
-                " have similar ", col_var_esc, " profiles, and which ", col_var_esc,
-                " tend to vary together. Such patterns can reveal underlying biological relationships,",
-                " quality control issues, or clinically relevant subgroups."
-            )
-            summary_text <- paste0(summary_text, practical_text)
+                mat <- wide_data %>%
+                    tibble::column_to_rownames(row_var) %>%
+                    as.matrix()
 
-            plain_summary_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #6c757d;'>",
-                "<h4 style='color: #495057; margin-top: 0;'> Plain-Language Summary</h4>",
-                "<div style='background-color: white; padding: 15px; border-radius: 5px; font-family: Georgia, serif; line-height: 1.8;'>",
-                "<p style='text-align: justify;'>", summary_text, "</p>",
-                "</div>",
-                "<p style='margin-top: 15px; font-size: 0.9em; color: #6c757d;'>",
-                "<em> This summary is written in plain language for inclusion in clinical documentation,",
-                " patient communications, or interdisciplinary discussions.</em>",
-                "</p>",
-                "</div>"
-            )
+                # Impute any residual NAs with column means to stabilize scaling/clustering
+                if (anyNA(mat)) {
+                    for (j in seq_len(ncol(mat))) {
+                        col_mean <- mean(mat[, j], na.rm = TRUE)
+                        if (is.na(col_mean)) col_mean <- 0
+                        na_idx <- is.na(mat[, j])
+                        if (any(na_idx)) mat[na_idx, j] <- col_mean
+                    }
+                }
 
-            self$results$plainSummary$setContent(plain_summary_html)
-        },
+                if (scale_method == "row") {
+                    mat <- t(scale(t(mat)))
+                } else if (scale_method == "column") {
+                    mat <- scale(mat)
+                } else if (scale_method == "both") {
+                    scaled_vec <- scale(as.vector(mat))
+                    mat <- matrix(scaled_vec, nrow = nrow(mat), ncol = ncol(mat))
+                    rownames(mat) <- rownames(wide_data %>% tibble::column_to_rownames(row_var))
+                    colnames(mat) <- colnames(wide_data)[-1]
+                }
 
-        .generateWorkflowGuide = function() {
-            workflow_content <- paste0(
-                "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
-                "<h3 style='color: #2e7d32; margin-top: 0;'> Clinical Workflow Guidance</h3>",
+                return(list(matrix = mat))
+            },
+            .prepareHeatmapData = function(dataset, row_var, col_var, value_var) {
+                # Prepare data for heatmap visualization
+                tryCatch(
+                    {
+                        # Determine which columns to retain
+                        required_vars <- c(row_var, col_var, value_var)
 
-                "<h4 style='color: #2e7d32;'>Step 1: Data Preparation</h4>",
-                "<ul>",
-                "<li><strong>Quality Control:</strong> Review data for outliers, missing values, and batch effects</li>",
-                "<li><strong>Data Format:</strong> Ensure data is in tidy long format (one observation per row)</li>",
-                "<li><strong>Variable Selection:</strong> Choose biologically or clinically meaningful rows and columns</li>",
-                "<li><strong>Normalization:</strong> Consider whether raw values or normalized data are more appropriate</li>",
-                "</ul>",
+                        # Add annotation columns if specified
+                        annotation_cols <- self$options$annotationCols
+                        annotation_rows <- self$options$annotationRows
 
-                "<h4 style='color: #2e7d32;'>Step 2: Initial Visualization</h4>",
-                "<ul>",
-                "<li><strong>Explore Scaling:</strong> Try different scaling methods (none, row, column, both)</li>",
-                "<li><strong>Enable Clustering:</strong> Use hierarchical clustering to reveal patterns</li>",
-                "<li><strong>Select Palette:</strong> Choose colorblind-friendly palettes for presentations</li>",
-                "<li><strong>Add Annotations:</strong> Include clinical/demographic variables for context</li>",
-                "</ul>",
+                        # Combine all needed variables
+                        vars_to_keep <- unique(c(required_vars, annotation_cols, annotation_rows))
 
-                "<h4 style='color: #2e7d32;'>Step 3: Pattern Identification</h4>",
-                "<ul>",
-                "<li><strong>Identify Clusters:</strong> Look for groups of similar patients or biomarkers</li>",
-                "<li><strong>Spot Outliers:</strong> Note unusual patterns that may need investigation</li>",
-                "<li><strong>Find Correlations:</strong> Identify biomarkers that vary together</li>",
-                "<li><strong>Check Quality:</strong> Look for systematic biases or batch effects</li>",
-                "</ul>",
+                        # Select only the variables we need (core + annotations)
+                        analysis_data <- dataset %>%
+                            dplyr::select(dplyr::all_of(vars_to_keep))
 
-                "<h4 style='color: #2e7d32;'>Step 4: Statistical Validation</h4>",
-                "<ul>",
-                "<li><strong>Cluster Analysis:</strong> Use optimal K determination and cluster comparison</li>",
-                "<li><strong>Survival Analysis:</strong> If applicable, test cluster association with outcomes</li>",
-                "<li><strong>Compare Groups:</strong> Statistically compare clinical characteristics across clusters</li>",
-                "<li><strong>Export Assignments:</strong> Save cluster memberships for further analysis</li>",
-                "</ul>",
+                        # Aggregate duplicate row/col combinations (mean)
+                        analysis_data <- analysis_data %>%
+                            dplyr::group_by(!!rlang::sym(row_var), !!rlang::sym(col_var)) %>%
+                            dplyr::summarise(!!rlang::sym(value_var) := mean(!!rlang::sym(value_var), na.rm = TRUE),
+                                dplyr::across(dplyr::all_of(setdiff(vars_to_keep, c(row_var, col_var, value_var))), dplyr::first),
+                                .groups = "drop"
+                            )
 
-                "<h4 style='color: #2e7d32;'>Step 5: Clinical Interpretation</h4>",
-                "<ul>",
-                "<li><strong>Biological Plausibility:</strong> Do patterns make clinical/biological sense?</li>",
-                "<li><strong>Clinical Significance:</strong> Are differences clinically meaningful?</li>",
-                "<li><strong>Literature Context:</strong> Do findings align with existing knowledge?</li>",
-                "<li><strong>Hypothesis Generation:</strong> What new questions do patterns suggest?</li>",
-                "</ul>",
+                        # Handle missing data based on user selection
+                        na_handling <- self$options$naHandling
 
-                "<h4 style='color: #2e7d32;'>Step 6: Documentation & Reporting</h4>",
-                "<ul>",
-                "<li><strong>Plain Summary:</strong> Use the plain-language summary for documentation</li>",
-                "<li><strong>Save Visualizations:</strong> Export high-resolution images for publications</li>",
-                "<li><strong>Report Methods:</strong> Include scaling, clustering, and annotation details</li>",
-                "<li><strong>Share Results:</strong> Present findings to clinical team for validation</li>",
-                "</ul>",
+                        if (na_handling == "exclude") {
+                            analysis_data <- analysis_data %>%
+                                dplyr::filter(stats::complete.cases(.))
+                        } else if (na_handling == "mean") {
+                            analysis_data <- analysis_data %>%
+                                dplyr::group_by(!!rlang::sym(col_var)) %>%
+                                dplyr::mutate(!!rlang::sym(value_var) := ifelse(is.na(!!rlang::sym(value_var)),
+                                    mean(!!rlang::sym(value_var), na.rm = TRUE),
+                                    !!rlang::sym(value_var)
+                                )) %>%
+                                dplyr::ungroup()
+                        } else if (na_handling == "median") {
+                            analysis_data <- analysis_data %>%
+                                dplyr::group_by(!!rlang::sym(col_var)) %>%
+                                dplyr::mutate(!!rlang::sym(value_var) := ifelse(is.na(!!rlang::sym(value_var)),
+                                    stats::median(!!rlang::sym(value_var), na.rm = TRUE),
+                                    !!rlang::sym(value_var)
+                                )) %>%
+                                dplyr::ungroup()
+                        } else if (na_handling == "zero") {
+                            analysis_data <- analysis_data %>%
+                                dplyr::mutate(!!rlang::sym(value_var) := ifelse(is.na(!!rlang::sym(value_var)), 0, !!rlang::sym(value_var)))
+                        }
 
-                "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 20px;'>",
-                "<h5 style='color: #856404; margin-top: 0;'> Important Considerations</h5>",
-                "<ul style='color: #856404; margin-left: 20px;'>",
-                "<li>Heatmaps show associations, not causation</li>",
-                "<li>Validate patterns in independent datasets when possible</li>",
-                "<li>Consider multiple testing correction for cluster comparisons</li>",
-                "<li>Consult with statisticians for complex analyses</li>",
-                "<li>Always maintain patient confidentiality in presentations</li>",
-                "</ul>",
-                "</div>",
+                        # Check if we have enough data after processing
+                        if (nrow(analysis_data) == 0) {
+                            return(NULL)
+                        }
 
-                "</div>"
-            )
+                        # Ensure we have complete data
+                        analysis_data <- analysis_data %>%
+                            dplyr::filter(!is.na(!!rlang::sym(value_var)))
 
-            self$results$workflow$setContent(workflow_content)
-        },
+                        return(analysis_data)
+                    },
+                    error = function(e) {
+                        return(NULL)
+                    }
+                )
+            },
+            .validateInputs = function(dataset, row_var, col_var, value_var) {
+                validation_results <- list(
+                    errors = character(0),
+                    warnings = character(0),
+                    info = character(0),
+                    should_stop = FALSE
+                )
 
-        .generateInterpretationGuide = function() {
-            interpretation_content <- paste0(
-                "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
-                "<h3 style='color: #1976d2; margin-top: 0;'> Heatmap Interpretation Guide</h3>",
+                # Check dataset validity
+                if (is.null(dataset) || !is.data.frame(dataset)) {
+                    validation_results$errors <- c(validation_results$errors, "Dataset is not a valid data frame")
+                    validation_results$should_stop <- TRUE
+                    return(validation_results)
+                }
 
-                "<h4 style='color: #1976d2;'>Color Interpretation:</h4>",
-                "<ul>",
-                "<li><strong>Intensity:</strong> Color intensity represents magnitude of values</li>",
-                "<li><strong>Scale:</strong> ", switch(self$options$scaleMethod,
-                    "none" = "Raw values displayed without transformation",
-                    "row" = "Values standardized within each row (Z-scores)",
-                    "column" = "Values standardized within each column (Z-scores)",
-                    "both" = "Values standardized across entire dataset"), "</li>",
-                "<li><strong>Missing Data:</strong> ", switch(self$options$naHandling,
-                    "exclude" = "Rows/columns with missing values excluded",
-                    "mean" = "Missing values replaced with column means",
-                    "median" = "Missing values replaced with column medians",
-                    "zero" = "Missing values replaced with zero"), "</li>",
-                "</ul>",
+                if (nrow(dataset) == 0) {
+                    validation_results$errors <- c(validation_results$errors, "Dataset contains no rows")
+                    validation_results$should_stop <- TRUE
+                    return(validation_results)
+                }
 
-                "<h4 style='color: #1976d2;'>Pattern Recognition:</h4>",
-                "<ul>",
-                "<li><strong>Clusters:</strong> Groups of similar rows/columns indicate related patterns</li>",
-                "<li><strong>Blocks:</strong> Rectangular regions of similar colors suggest correlated features</li>",
-                "<li><strong>Gradients:</strong> Smooth color transitions indicate progressive changes</li>",
-                "<li><strong>Outliers:</strong> Isolated distinct colors may indicate unusual observations</li>",
-                "</ul>",
+                # Check variable selection
+                required_vars <- c(row_var, col_var, value_var)
+                missing_vars <- setdiff(required_vars, names(dataset))
+                if (length(missing_vars) > 0) {
+                    validation_results$errors <- c(
+                        validation_results$errors,
+                        paste(
+                            "Variables not found in dataset:",
+                            paste(htmltools::htmlEscape(missing_vars), collapse = ", ")
+                        )
+                    )
+                    validation_results$should_stop <- TRUE
+                    return(validation_results)
+                }
 
-                "<h4 style='color: #1976d2;'>Clinical Applications:</h4>",
-                "<ul>",
-                "<li><strong>Biomarker Co-expression:</strong> Identify markers that vary together</li>",
-                "<li><strong>Patient Subtyping:</strong> Discover molecular or clinical subtypes</li>",
-                "<li><strong>Quality Control:</strong> Detect batch effects or systematic biases</li>",
-                "<li><strong>Treatment Response:</strong> Identify responder vs. non-responder patterns</li>",
-                "</ul>",
+                # Check value variable is numeric
+                if (!is.numeric(dataset[[value_var]])) {
+                    validation_results$errors <- c(
+                        validation_results$errors,
+                        paste("Value variable", htmltools::htmlEscape(value_var), "must be numeric")
+                    )
+                    validation_results$should_stop <- TRUE
+                    return(validation_results)
+                }
 
-                "<h4 style='color: #1976d2;'>Next Steps:</h4>",
-                "<ul>",
-                "<li>Statistical testing for significant patterns</li>",
-                "<li>Pathway analysis for clustered biomarkers</li>",
-                "<li>Clinical correlation with patient outcomes</li>",
-                "<li>Validation in independent datasets</li>",
-                "</ul>",
-                "</div>"
-            )
+                # Check for missing data
+                missing_pct <- sum(is.na(dataset[[value_var]])) / nrow(dataset) * 100
+                if (missing_pct > 50) {
+                    validation_results$warnings <- c(
+                        validation_results$warnings,
+                        paste("Value variable has", round(missing_pct, 1), "% missing data. Consider data quality review.")
+                    )
+                } else if (missing_pct > 20) {
+                    validation_results$warnings <- c(
+                        validation_results$warnings,
+                        paste("Value variable has", round(missing_pct, 1), "% missing data. Results may be affected.")
+                    )
+                }
 
-            self$results$interpretation$setContent(interpretation_content)
-        },
+                # Check data dimensions
+                n_rows <- length(unique(dataset[[row_var]]))
+                n_cols <- length(unique(dataset[[col_var]]))
 
-        .generateAssumptions = function() {
-            assumptions_content <- paste0(
-                "<div style='background-color: #fff8dc; padding: 15px; border-radius: 5px; border-left: 4px solid #f39c12;'>",
-                "<h4 style='color: #e67e22; margin-top: 0;'> Assumptions & Technical Notes</h4>",
+                if (n_rows < 2) {
+                    validation_results$warnings <- c(
+                        validation_results$warnings,
+                        "Very few unique values in row variable. Heatmap may not be informative."
+                    )
+                }
 
-                "<h5>Data Assumptions:</h5>",
-                "<ul style='margin-left: 20px;'>",
-                "<li>Data is in tidy (long) format with one observation per row</li>",
-                "<li>Row and column variables uniquely identify observations</li>",
-                "<li>Value variable contains numeric measurements</li>",
-                "<li>Missing data pattern is appropriate for chosen handling method</li>",
-                "</ul>",
+                if (n_cols < 2) {
+                    validation_results$warnings <- c(
+                        validation_results$warnings,
+                        "Very few unique values in column variable. Heatmap may not be informative."
+                    )
+                }
 
-                "<h5>Visualization Assumptions:</h5>",
-                "<ul style='margin-left: 20px;'>",
-                "<li>Color intensity accurately reflects data magnitude</li>",
-                "<li>Hierarchical clustering reveals meaningful biological relationships</li>",
-                "<li>Scaling method is appropriate for the data type and research question</li>",
-                "<li>Sample size is sufficient for pattern detection</li>",
-                "</ul>",
+                if (n_rows > 100 || n_cols > 100) {
+                    validation_results$warnings <- c(
+                        validation_results$warnings,
+                        "Large number of rows/columns. Consider filtering or aggregation for better visualization."
+                    )
+                }
 
-                "<h5>Technical Notes:</h5>",
-                "<ul style='margin-left: 20px;'>",
-                "<li><strong>Package:</strong> Powered by tidyheatmaps for advanced visualization</li>",
-                "<li><strong>Clustering:</strong> Uses hierarchical clustering with default distance measures</li>",
-                "<li><strong>Performance:</strong> Large datasets (>1000 rows/columns) may require optimization</li>",
-                "<li><strong>Export:</strong> High-resolution outputs available for publication</li>",
-                sprintf("<li><strong>Scaling Applied:</strong> %s; <strong>NA handling:</strong> %s</li>", self$options$scaleMethod, self$options$naHandling),
-                "</ul>",
+                # Add success message if no major issues
+                if (length(validation_results$errors) == 0 && length(validation_results$warnings) == 0) {
+                    validation_results$info <- c(
+                        validation_results$info,
+                        " Data validation passed. Heatmap can be generated."
+                    )
+                }
 
-                "<h5>Clinical Considerations:</h5>",
-                "<ul style='margin-left: 20px;'>",
-                "<li>Patterns should be validated with independent data</li>",
-                "<li>Clinical significance may differ from statistical significance</li>",
-                "<li>Consider pre-analytical factors (sample handling, batch effects)</li>",
-                "<li>Interpret results in context of study design and patient population</li>",
-                "</ul>",
-                "</div>"
-            )
+                return(validation_results)
+            },
 
-            self$results$assumptions$setContent(assumptions_content)
-        },
+            # TODO (forward-looking): the for-loops below interpolate strings from
+            # validation_results$errors / $warnings / $info directly into <li> tags
+            # via paste0(). Today this is safe because the user-controlled values
+            # in those strings (column names from .validateInputs L793/L801) are
+            # already wrapped in htmltools::htmlEscape() at construction. If new
+            # validation messages are added that interpolate user-controlled data
+            # (column names, factor levels, free-text option strings), they MUST
+            # likewise escape at construction - OR this rendering point should be
+            # rewritten to escape uniformly here as defense-in-depth.
+            .generateValidationSummary = function(validation_results) {
+                html_content <- "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>"
+                html_content <- paste0(html_content, "<h4 style='color: #495057; margin-top: 0;'> Data Validation Summary</h4>")
 
-        # === ADVANCED FEATURES IMPLEMENTATION ===
+                # Add errors
+                if (length(validation_results$errors) > 0) {
+                    html_content <- paste0(html_content, "<div style='background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                    html_content <- paste0(html_content, "<h5 style='color: #721c24; margin-top: 0;'> Errors (Analysis Stopped)</h5>")
+                    html_content <- paste0(html_content, "<ul>")
+                    for (error in validation_results$errors) {
+                        html_content <- paste0(html_content, "<li style='color: #721c24;'>", error, "</li>")
+                    }
+                    html_content <- paste0(html_content, "</ul></div>")
+                }
 
-        .performOptimalKAnalysis = function(mat_data) {
-            tryCatch({
-                if (is.null(mat_data) || nrow(mat_data) < 3 || ncol(mat_data) < 2) return()
+                # Add warnings
+                if (length(validation_results$warnings) > 0) {
+                    html_content <- paste0(html_content, "<div style='background-color: #fff3cd; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                    html_content <- paste0(html_content, "<h5 style='color: #856404; margin-top: 0;'> Warnings</h5>")
+                    html_content <- paste0(html_content, "<ul>")
+                    for (warning in validation_results$warnings) {
+                        html_content <- paste0(html_content, "<li style='color: #856404;'>", warning, "</li>")
+                    }
+                    html_content <- paste0(html_content, "</ul></div>")
+                }
 
-                # Build K range from bounded integer options. The previous
-                # implementation evaluated a free-text string at runtime, which
-                # let any caller smuggle arbitrary R code through the option.
-                k_min <- as.integer(self$options$kMin)
-                k_max <- as.integer(self$options$kMax)
-                if (is.na(k_min) || k_min < 2L) k_min <- 2L
-                if (is.na(k_max) || k_max < k_min) k_max <- max(k_min + 1L, 8L)
-                k_range <- seq.int(k_min, k_max)
+                # Add info messages
+                if (length(validation_results$info) > 0) {
+                    html_content <- paste0(html_content, "<div style='background-color: #d1ecf1; padding: 10px; border-radius: 4px; margin: 10px 0;'>")
+                    html_content <- paste0(html_content, "<h5 style='color: #0c5460; margin-top: 0;'> Information</h5>")
+                    html_content <- paste0(html_content, "<ul>")
+                    for (info in validation_results$info) {
+                        html_content <- paste0(html_content, "<li style='color: #0c5460;'>", info, "</li>")
+                    }
+                    html_content <- paste0(html_content, "</ul></div>")
+                }
 
-                # Store data for plotting
-                self$results$optimalKAnalysis$elbowPlot$setState(list(
-                    data = mat_data,
-                    k_range = k_range,
-                    method = self$options$clusterMethodRows
-                ))
+                html_content <- paste0(html_content, "</div>")
+                return(html_content)
+            },
+            .generateAboutAnalysis = function() {
+                about_content <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<h4 style='color: #2c3e50; margin-top: 0;'> About Clinical Heatmaps</h4>",
+                    "<p><strong>Purpose:</strong> Clinical heatmaps visualize multivariate patterns in biomedical data, ",
+                    "commonly used for biomarker profiling, genomic analysis, and quality control assessment.</p>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li><strong>Biomarker Expression:</strong> Multi-marker panels across patient cohorts</li>",
+                    "<li><strong>Genomic Analysis:</strong> Gene expression and mutation landscapes</li>",
+                    "<li><strong>Quality Control:</strong> Batch effects and instrument performance</li>",
+                    "<li><strong>Treatment Response:</strong> Longitudinal measurements and dose relationships</li>",
+                    "<li><strong>Precision Medicine:</strong> Molecular subtyping and therapeutic targets</li>",
+                    "</ul>",
+                    "<p><strong>How to Use:</strong></p>",
+                    "<ol style='margin-left: 20px;'>",
+                    "<li>Ensure your data is in tidy (long) format</li>",
+                    "<li>Select row variable (e.g., patients, samples)</li>",
+                    "<li>Select column variable (e.g., biomarkers, genes)</li>",
+                    "<li>Select value variable (numeric measurements)</li>",
+                    "<li>Configure scaling, clustering, and annotation options</li>",
+                    "<li>Interpret patterns using clustering and color intensity</li>",
+                    "</ol>",
+                    "</div>"
+                )
+                self$results$aboutAnalysis$setContent(about_content)
+            },
+            .generateDataSummary = function(data, row_var, col_var, value_var) {
+                # Generate data structure summary
+                n_rows <- length(unique(data[[row_var]]))
+                n_cols <- length(unique(data[[col_var]]))
+                n_obs <- nrow(data)
 
-                self$results$optimalKAnalysis$silhouettePlot$setState(list(
-                    data = mat_data,
-                    k_range = k_range
-                ))
-
-                # Calculate optimal K using different methods
-                optimal_k_results <- data.frame(
-                    method = character(),
-                    optimal_k = integer(),
-                    metric_value = numeric(),
+                structure_data <- data.frame(
+                    dimension = c("Total Observations", "Unique Rows", "Unique Columns", "Data Completeness"),
+                    value = c(
+                        as.character(n_obs),
+                        as.character(n_rows),
+                        as.character(n_cols),
+                        paste0(round((1 - sum(is.na(data[[value_var]])) / nrow(data)) * 100, 1), "%")
+                    ),
                     stringsAsFactors = FALSE
                 )
 
-                # Silhouette on hierarchical clustering (consistent with heatmap)
-                dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
-                hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
-
-                sil_scores <- sapply(k_range[k_range > 1], function(k) {
-                    clusters <- stats::cutree(hc_rows, k = k)
-                    sil <- cluster::silhouette(clusters, dist_rows)
-                    mean(sil[, 3])
-                })
-
-                best_sil_k <- k_range[k_range > 1][which.max(sil_scores)]
-                optimal_k_results <- rbind(optimal_k_results, data.frame(
-                    method = "Hierarchical Silhouette",
-                    optimal_k = as.integer(best_sil_k),
-                    metric_value = max(sil_scores)
-                ))
-
-                # Populate table
-                for (i in seq_len(nrow(optimal_k_results))) {
-                    self$results$optimalKAnalysis$optimalKTable$addRow(rowKey = i, values = list(
-                        method = optimal_k_results$method[i],
-                        optimal_k = optimal_k_results$optimal_k[i],
-                        metric_value = optimal_k_results$metric_value[i]
+                for (i in seq_len(nrow(structure_data))) {
+                    self$results$dataSummary$dataStructure$addRow(rowKey = i, values = list(
+                        dimension = structure_data$dimension[i],
+                        value = structure_data$value[i]
                     ))
                 }
 
-            }, error = function(e) {
-                # Silently handle errors
-            })
-        },
+                # Generate value summary statistics
+                value_stats <- data.frame(
+                    statistic = c("Mean", "Median", "Standard Deviation", "Minimum", "Maximum"),
+                    value = c(
+                        round(mean(data[[value_var]], na.rm = TRUE), 3),
+                        round(stats::median(data[[value_var]], na.rm = TRUE), 3),
+                        round(stats::sd(data[[value_var]], na.rm = TRUE), 3),
+                        round(min(data[[value_var]], na.rm = TRUE), 3),
+                        round(max(data[[value_var]], na.rm = TRUE), 3)
+                    ),
+                    stringsAsFactors = FALSE
+                )
 
-        .extractClusterAssignments = function(data, row_var = NULL, col_var = NULL, value_var = NULL) {
-            tryCatch({
-                # Prepare data matrix
-                if (is.matrix(data)) {
-                    mat_data <- data
-                } else {
-                    mat_data <- data %>%
-                        dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
-                        tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
-                        tibble::column_to_rownames(row_var) %>%
-                        as.matrix()
-                }
-
-                result <- list(row_clusters = NULL, col_clusters = NULL)
-
-                # Extract row clusters if clustering requested
-                if (self$options$clusterRows) {
-                    # Perform hierarchical clustering on rows
-                    dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
-                    hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
-
-                    # Cut tree - use splitRows if > 1, otherwise estimate optimal K
-                    n_clusters <- self$options$splitRows
-                    if (n_clusters <= 1) n_clusters <- min(3, nrow(mat_data) - 1)
-
-                    row_clusters <- stats::cutree(hc_rows, k = n_clusters)
-                    result$row_clusters <- data.frame(
-                        row_id = names(row_clusters),
-                        cluster = as.integer(row_clusters),
-                        stringsAsFactors = FALSE
-                    )
-
-                    # Populate table only if export requested
-                    if (self$options$exportRowClusters) {
-                        for (i in seq_len(nrow(result$row_clusters))) {
-                            self$results$clusterAssignments$rowClusterTable$addRow(rowKey = i, values = list(
-                                row_id = result$row_clusters$row_id[i],
-                                cluster = result$row_clusters$cluster[i]
-                            ))
-                        }
-                    }
-                }
-
-                # Extract column clusters if clustering requested
-                if (self$options$clusterCols) {
-                    # Perform hierarchical clustering on columns
-                    dist_cols <- stats::dist(t(mat_data), method = self$options$clusterDistanceCols)
-                    hc_cols <- stats::hclust(dist_cols, method = self$options$clusterMethodCols)
-
-                    n_clusters <- self$options$splitCols
-                    if (n_clusters <= 1) n_clusters <- min(3, ncol(mat_data) - 1)
-
-                    col_clusters <- stats::cutree(hc_cols, k = n_clusters)
-                    result$col_clusters <- data.frame(
-                        col_id = names(col_clusters),
-                        cluster = as.integer(col_clusters),
-                        stringsAsFactors = FALSE
-                    )
-
-                    if (self$options$exportColClusters) {
-                        for (i in seq_len(nrow(result$col_clusters))) {
-                            self$results$clusterAssignments$colClusterTable$addRow(rowKey = i, values = list(
-                                col_id = result$col_clusters$col_id[i],
-                                cluster = result$col_clusters$cluster[i]
-                            ))
-                        }
-                    }
-                }
-
-                return(result)
-            }, error = function(e) {
-                return(list(row_clusters = NULL, col_clusters = NULL))
-            })
-        },
-
-        .performSurvivalAnalysis = function(dataset, row_clusters, row_var) {
-            tryCatch({
-                # Get survival variables
-                surv_time_var <- self$options$survivalTime
-                surv_event_var <- self$options$survivalEvent
-                event_level <- self$options$survivalEventLevel
-
-                # Merge cluster assignments with dataset
-                cluster_data <- row_clusters
-                names(cluster_data) <- c(row_var, "cluster")
-
-                surv_data <- dataset %>%
-                    dplyr::inner_join(cluster_data, by = row_var) %>%
-                    dplyr::filter(!is.na(!!rlang::sym(surv_time_var)),
-                                  !is.na(!!rlang::sym(surv_event_var)))
-
-                # Create binary event indicator
-                if (!is.null(event_level)) {
-                    surv_data <- surv_data %>%
-                        dplyr::mutate(event = as.integer(!!rlang::sym(surv_event_var) == event_level))
-                } else {
-                    surv_data <- surv_data %>%
-                        dplyr::mutate(event = as.integer(!!rlang::sym(surv_event_var)))
-                }
-
-                # Perform survival analysis
-                surv_obj <- survival::Surv(surv_data[[surv_time_var]], surv_data$event)
-                fit <- survival::survfit(surv_obj ~ cluster, data = surv_data)
-
-                # Log-rank test
-                # Guard against too few events per cluster
-                if (length(unique(surv_data$cluster)) < 2) {
-                    private$.addNotice('WARNING', 'Survival Analysis Skipped', sprintf('Survival analysis skipped: clustering produced only %d group(s). Requires at least 2 clusters. Try adjusting splitRows or clustering parameters.',
-                                              length(unique(surv_data$cluster))))
-                    return(invisible(NULL))
-                }
-                events_per_cluster <- tapply(surv_data$event, surv_data$cluster, sum)
-                if (length(events_per_cluster) < 2 || any(events_per_cluster == 0)) {
-                    private$.addNotice('WARNING', 'Survival Analysis Skipped', sprintf('Survival analysis skipped: %d cluster(s) have zero events. All clusters need at least one event for log-rank test.',
-                                              sum(events_per_cluster == 0)))
-                    return(invisible(NULL))
-                }
-                log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)
-
-                # Populate results
-                self$results$clusterSurvival$logRankTest$addRow(rowKey = 1, values = list(
-                    chisq = log_rank$chisq,
-                    df = length(log_rank$n) - 1,
-                    p = 1 - stats::pchisq(log_rank$chisq, length(log_rank$n) - 1)
-                ))
-
-                # Extract survival summary by cluster
-                for (i in seq_along(fit$strata)) {
-                    cluster_id <- gsub("cluster=", "", names(fit$strata)[i])
-                    cluster_idx <- fit$strata[1:i]
-                    if (i > 1) cluster_idx <- sum(fit$strata[1:(i-1)]) + 1:fit$strata[i]
-                    else cluster_idx <- 1:fit$strata[i]
-
-                    median_surv <- summary(fit)$table[i, "median"]
-                    ci_lower <- summary(fit)$table[i, paste0("0.95LCL")]
-                    ci_upper <- summary(fit)$table[i, paste0("0.95UCL")]
-
-                    self$results$clusterSurvival$survivalTable$addRow(rowKey = i, values = list(
-                        cluster = cluster_id,
-                        n = log_rank$n[i],
-                        events = log_rank$obs[i],
-                        median_surv = median_surv,
-                        ci_lower = ci_lower,
-                        ci_upper = ci_upper
+                for (i in seq_len(nrow(value_stats))) {
+                    self$results$dataSummary$valueSummary$addRow(rowKey = i, values = list(
+                        statistic = value_stats$statistic[i],
+                        value = value_stats$value[i]
                     ))
                 }
 
-                # Store plot data
-                self$results$clusterSurvival$kmPlot$setState(list(
-                    fit = fit,
-                    data = surv_data
-                ))
+                # Missing data report
+                missing_by_var <- data.frame(
+                    variable = c(row_var, col_var, value_var),
+                    missing_count = c(
+                        sum(is.na(data[[row_var]])),
+                        sum(is.na(data[[col_var]])),
+                        sum(is.na(data[[value_var]]))
+                    ),
+                    stringsAsFactors = FALSE
+                )
+                missing_by_var$missing_pct <- round(missing_by_var$missing_count / nrow(data) * 100, 1)
 
-            }, error = function(e) {
-                # Silently handle errors
-            })
-        },
+                for (i in seq_len(nrow(missing_by_var))) {
+                    self$results$dataSummary$missingData$addRow(rowKey = i, values = list(
+                        variable = missing_by_var$variable[i],
+                        missing_count = missing_by_var$missing_count[i],
+                        missing_pct = missing_by_var$missing_pct[i]
+                    ))
+                }
+            },
+            .generateClinicalSummary = function(data, row_var, col_var, value_var) {
+                n_rows <- length(unique(data[[row_var]]))
+                n_cols <- length(unique(data[[col_var]]))
+                n_obs <- nrow(data)
 
-        .performClusterComparison = function(dataset, row_clusters, row_var) {
-            tryCatch({
-                # Merge cluster assignments with dataset
-                cluster_data <- row_clusters
-                names(cluster_data) <- c(row_var, "cluster")
+                # Escape user-controlled column names for HTML interpolation below
+                row_var_esc <- htmltools::htmlEscape(row_var)
+                col_var_esc <- htmltools::htmlEscape(col_var)
 
-                comp_data <- dataset %>%
-                    dplyr::inner_join(cluster_data, by = row_var)
+                mean_val <- round(mean(data[[value_var]], na.rm = TRUE), 2)
+                sd_val <- round(stats::sd(data[[value_var]], na.rm = TRUE), 2)
 
-                comparison_vars <- self$options$comparisonVars
+                clinical_summary <- paste0(
+                    "<div style='background-color: #e8f4fd; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'>",
+                    "<h4 style='color: #2980b9; margin-top: 0;'> Clinical Summary</h4>",
+                    "<p><strong>Dataset Overview:</strong> ", n_obs, " observations across ", n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, "</p>",
+                    "<p><strong>Value Distribution:</strong> Mean = ", mean_val, " (SD = ", sd_val, ")</p>",
+                    "<p><strong>Scaling Method:</strong> ", switch(self$options$scaleMethod,
+                        "none" = "Raw values (no scaling)",
+                        "row" = "Row-wise Z-score normalization",
+                        "column" = "Column-wise Z-score normalization",
+                        "both" = "Global Z-score normalization"
+                    ), "</p>",
+                    "<p><strong>Clustering:</strong> ",
+                    ifelse(self$options$clusterRows, "Rows clustered", "Rows not clustered"), ", ",
+                    ifelse(self$options$clusterCols, "Columns clustered", "Columns not clustered"), "</p>",
+                    "<p><em> Tip: Use clustering to identify patterns and the color intensity to assess magnitude of differences.</em></p>",
+                    "</div>"
+                )
 
-                # Compare each variable across clusters
-                for (var in comparison_vars) {
-                    if (is.numeric(comp_data[[var]])) {
-                        # Use ANOVA or Kruskal-Wallis for numeric variables
-                        test_result <- tryCatch({
-                            aov_result <- stats::aov(jmvcore::asFormula(paste(jmvcore::composeTerm(var), "~ cluster")), data = comp_data)
-                            p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
+                self$results$clinicalSummary$setContent(clinical_summary)
+            },
+            .generateReportSentences = function(data, row_var, col_var, value_var) {
+                n_rows <- length(unique(data[[row_var]]))
+                n_cols <- length(unique(data[[col_var]]))
+                n_obs <- nrow(data)
 
-                            # Get mean by cluster
-                            means <- comp_data %>%
-                                dplyr::group_by(cluster) %>%
-                                dplyr::summarise(mean_val = mean(!!rlang::sym(var), na.rm = TRUE), .groups = "drop")
+                # Escape user-controlled column names for HTML interpolation below
+                row_var_esc <- htmltools::htmlEscape(row_var)
+                col_var_esc <- htmltools::htmlEscape(col_var)
 
-                            for (i in seq_len(nrow(means))) {
-                                self$results$clusterCharacteristics$characteristicTable$addRow(
-                                    rowKey = paste(var, means$cluster[i], sep = "_"),
-                                    values = list(
-                                        variable = var,
-                                        cluster = paste("Cluster", means$cluster[i]),
-                                        summary = sprintf("Mean: %.2f", means$mean_val[i]),
-                                        p_value = if (i == 1) p_value else NA
-                                    )
-                                )
-                            }
-                        }, error = function(e) NULL)
+                scale_text <- switch(self$options$scaleMethod,
+                    "none" = "without scaling",
+                    "row" = "with row-wise normalization",
+                    "column" = "with column-wise normalization",
+                    "both" = "with global normalization"
+                )
 
-                    } else {
-                        # Use chi-square or Fisher's exact for categorical variables
-                        test_result <- tryCatch({
-                            tbl <- table(comp_data$cluster, comp_data[[var]])
+                cluster_text <- paste0(
+                    ifelse(self$options$clusterRows, "Row", "No row"), " clustering and ",
+                    ifelse(self$options$clusterCols, "column", "no column"), " clustering were applied"
+                )
 
-                            # Check chi-square assumptions (expected counts ≥ 5)
-                            chi_test <- stats::chisq.test(tbl)
-                            expected_counts <- chi_test$expected
+                report_sentence <- paste0(
+                    "Clinical heatmap analysis was performed on ", n_obs, " observations representing ",
+                    n_rows, " ", row_var_esc, " and ", n_cols, " ", col_var_esc, ". ",
+                    "Data visualization was conducted ", scale_text, ". ",
+                    cluster_text, " to reveal underlying patterns in the data."
+                )
 
-                            if (any(expected_counts < 5)) {
-                                # Use Fisher's exact test when assumptions violated
-                                fisher_result <- tryCatch({
-                                    if (prod(dim(tbl)) > 2) {
-                                        stats::fisher.test(tbl, simulate.p.value = TRUE, B = 10000)
-                                    } else {
-                                        stats::fisher.test(tbl)
-                                    }
-                                }, error = function(e) NULL)
+                report_content <- paste0(
+                    "<div style='background-color: #f0f8f0; padding: 15px; border-radius: 5px; border-left: 4px solid #27ae60;'>",
+                    "<h4 style='color: #27ae60; margin-top: 0;'> Copy-Ready Clinical Summary</h4>",
+                    "<div style='background-color: white; padding: 10px; border-radius: 3px; font-family: Georgia, serif; line-height: 1.6;'>",
+                    "<p>", report_sentence, "</p>",
+                    "</div>",
+                    "<p style='margin-top: 10px;'><small><em>",
+                    "Note: Copy the text above for direct use in clinical reports. Modify as needed for your specific context.",
+                    "</em></small></p>",
+                    "</div>"
+                )
 
-                                if (!is.null(fisher_result)) {
-                                    p_value <- fisher_result$p.value
-                                    test_used <- if (prod(dim(tbl)) > 2) " (Fisher's exact, simulated)" else " (Fisher's exact)"
-                                } else {
-                                    p_value <- chi_test$p.value
-                                    test_used <- " (χ², low expected counts)"
-                                }
-                            } else {
-                                p_value <- chi_test$p.value
-                                test_used <- " (χ²)"
-                            }
+                self$results$reportSentences$setContent(report_content)
+            },
+            .generatePlainSummary = function(data, row_var, col_var, value_var) {
+                n_rows <- length(unique(data[[row_var]]))
+                n_cols <- length(unique(data[[col_var]]))
 
-                            # Get frequencies by cluster
-                            freqs <- comp_data %>%
-                                dplyr::group_by(cluster, !!rlang::sym(var)) %>%
-                                dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
-                                dplyr::group_by(cluster) %>%
-                                dplyr::mutate(pct = n / sum(n) * 100)
+                # Escape user-controlled column names for HTML interpolation below
+                row_var_esc <- htmltools::htmlEscape(row_var)
+                col_var_esc <- htmltools::htmlEscape(col_var)
+                value_var_esc <- htmltools::htmlEscape(value_var)
 
-                            # Add test method to first row summary
-                            for (i in seq_len(nrow(freqs))) {
-                                summary_text <- sprintf("%s: %d (%.1f%%)",
-                                                        freqs[[var]][i], freqs$n[i], freqs$pct[i])
-                                if (i == 1) {
-                                    summary_text <- paste0(summary_text, test_used)
-                                }
+                # Describe the analysis in plain language
+                summary_text <- paste0(
+                    "This analysis examined patterns in ", value_var_esc, " across ",
+                    n_rows, " different ", row_var_esc, " and ", n_cols, " ", col_var_esc, "."
+                )
 
-                                self$results$clusterCharacteristics$characteristicTable$addRow(
-                                    rowKey = paste(var, freqs$cluster[i], freqs[[var]][i], sep = "_"),
-                                    values = list(
-                                        variable = var,
-                                        cluster = paste("Cluster", freqs$cluster[i]),
-                                        summary = summary_text,
-                                        p_value = if (i == 1) p_value else NA
-                                    )
-                                )
-                            }
-                        }, error = function(e) NULL)
-                    }
+                # Add scaling interpretation
+                scale_desc <- switch(self$options$scaleMethod,
+                    "none" = " The heatmap displays the original measurement values without any transformation.",
+                    "row" = " Values were standardized within each row to enable comparison of patterns across different rows.",
+                    "column" = " Values were standardized within each column to compare how each measurement varies across different observations.",
+                    "both" = " All values were standardized together to show relative differences across the entire dataset."
+                )
+                summary_text <- paste0(summary_text, scale_desc)
+
+                # Add clustering interpretation if used
+                if (self$options$clusterRows || self$options$clusterCols) {
+                    cluster_desc <- paste0(
+                        " Hierarchical clustering was applied to",
+                        if (self$options$clusterRows && self$options$clusterCols) {
+                            " both rows and columns"
+                        } else if (self$options$clusterRows) {
+                            " rows"
+                        } else {
+                            " columns"
+                        },
+                        " to automatically group similar patterns together."
+                    )
+                    summary_text <- paste0(summary_text, cluster_desc)
                 }
 
-                # Add interpretation
-                interp_html <- paste0(
-                    "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px;'>",
-                    "<h4>Cluster Characteristics Interpretation</h4>",
-                    "<p>P-values indicate whether there are significant differences in each variable across clusters.</p>",
+                # Add practical interpretation
+                practical_text <- paste0(
+                    " This visualization helps identify which ", row_var_esc,
+                    " have similar ", col_var_esc, " profiles, and which ", col_var_esc,
+                    " tend to vary together. Such patterns can reveal underlying biological relationships,",
+                    " quality control issues, or clinically relevant subgroups."
+                )
+                summary_text <- paste0(summary_text, practical_text)
+
+                plain_summary_html <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 5px solid #6c757d;'>",
+                    "<h4 style='color: #495057; margin-top: 0;'> Plain-Language Summary</h4>",
+                    "<div style='background-color: white; padding: 15px; border-radius: 5px; font-family: Georgia, serif; line-height: 1.8;'>",
+                    "<p style='text-align: justify;'>", summary_text, "</p>",
+                    "</div>",
+                    "<p style='margin-top: 15px; font-size: 0.9em; color: #6c757d;'>",
+                    "<em> This summary is written in plain language for inclusion in clinical documentation,",
+                    " patient communications, or interdisciplinary discussions.</em>",
+                    "</p>",
+                    "</div>"
+                )
+
+                self$results$plainSummary$setContent(plain_summary_html)
+            },
+            .generateWorkflowGuide = function() {
+                workflow_content <- paste0(
+                    "<div style='background-color: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 5px solid #4caf50;'>",
+                    "<h3 style='color: #2e7d32; margin-top: 0;'> Clinical Workflow Guidance</h3>",
+                    "<h4 style='color: #2e7d32;'>Step 1: Data Preparation</h4>",
                     "<ul>",
-                    "<li>P < 0.05 suggests significant differences between clusters</li>",
-                    "<li>Review cluster-specific summaries to understand patterns</li>",
-                    "<li>Consider clinical significance alongside statistical significance</li>",
+                    "<li><strong>Quality Control:</strong> Review data for outliers, missing values, and batch effects</li>",
+                    "<li><strong>Data Format:</strong> Ensure data is in tidy long format (one observation per row)</li>",
+                    "<li><strong>Variable Selection:</strong> Choose biologically or clinically meaningful rows and columns</li>",
+                    "<li><strong>Normalization:</strong> Consider whether raw values or normalized data are more appropriate</li>",
+                    "</ul>",
+                    "<h4 style='color: #2e7d32;'>Step 2: Initial Visualization</h4>",
+                    "<ul>",
+                    "<li><strong>Explore Scaling:</strong> Try different scaling methods (none, row, column, both)</li>",
+                    "<li><strong>Enable Clustering:</strong> Use hierarchical clustering to reveal patterns</li>",
+                    "<li><strong>Select Palette:</strong> Choose colorblind-friendly palettes for presentations</li>",
+                    "<li><strong>Add Annotations:</strong> Include clinical/demographic variables for context</li>",
+                    "</ul>",
+                    "<h4 style='color: #2e7d32;'>Step 3: Pattern Identification</h4>",
+                    "<ul>",
+                    "<li><strong>Identify Clusters:</strong> Look for groups of similar patients or biomarkers</li>",
+                    "<li><strong>Spot Outliers:</strong> Note unusual patterns that may need investigation</li>",
+                    "<li><strong>Find Correlations:</strong> Identify biomarkers that vary together</li>",
+                    "<li><strong>Check Quality:</strong> Look for systematic biases or batch effects</li>",
+                    "</ul>",
+                    "<h4 style='color: #2e7d32;'>Step 4: Statistical Validation</h4>",
+                    "<ul>",
+                    "<li><strong>Cluster Analysis:</strong> Use optimal K determination and cluster comparison</li>",
+                    "<li><strong>Survival Analysis:</strong> If applicable, test cluster association with outcomes</li>",
+                    "<li><strong>Compare Groups:</strong> Statistically compare clinical characteristics across clusters</li>",
+                    "<li><strong>Export Assignments:</strong> Save cluster memberships for further analysis</li>",
+                    "</ul>",
+                    "<h4 style='color: #2e7d32;'>Step 5: Clinical Interpretation</h4>",
+                    "<ul>",
+                    "<li><strong>Biological Plausibility:</strong> Do patterns make clinical/biological sense?</li>",
+                    "<li><strong>Clinical Significance:</strong> Are differences clinically meaningful?</li>",
+                    "<li><strong>Literature Context:</strong> Do findings align with existing knowledge?</li>",
+                    "<li><strong>Hypothesis Generation:</strong> What new questions do patterns suggest?</li>",
+                    "</ul>",
+                    "<h4 style='color: #2e7d32;'>Step 6: Documentation & Reporting</h4>",
+                    "<ul>",
+                    "<li><strong>Plain Summary:</strong> Use the plain-language summary for documentation</li>",
+                    "<li><strong>Save Visualizations:</strong> Export high-resolution images for publications</li>",
+                    "<li><strong>Report Methods:</strong> Include scaling, clustering, and annotation details</li>",
+                    "<li><strong>Share Results:</strong> Present findings to clinical team for validation</li>",
+                    "</ul>",
+                    "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 20px;'>",
+                    "<h5 style='color: #856404; margin-top: 0;'> Important Considerations</h5>",
+                    "<ul style='color: #856404; margin-left: 20px;'>",
+                    "<li>Heatmaps show associations, not causation</li>",
+                    "<li>Validate patterns in independent datasets when possible</li>",
+                    "<li>Consider multiple testing correction for cluster comparisons</li>",
+                    "<li>Consult with statisticians for complex analyses</li>",
+                    "<li>Always maintain patient confidentiality in presentations</li>",
+                    "</ul>",
+                    "</div>",
+                    "</div>"
+                )
+
+                self$results$workflow$setContent(workflow_content)
+            },
+            .generateInterpretationGuide = function() {
+                interpretation_content <- paste0(
+                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px;'>",
+                    "<h3 style='color: #1976d2; margin-top: 0;'> Heatmap Interpretation Guide</h3>",
+                    "<h4 style='color: #1976d2;'>Color Interpretation:</h4>",
+                    "<ul>",
+                    "<li><strong>Intensity:</strong> Color intensity represents magnitude of values</li>",
+                    "<li><strong>Scale:</strong> ", switch(self$options$scaleMethod,
+                        "none" = "Raw values displayed without transformation",
+                        "row" = "Values standardized within each row (Z-scores)",
+                        "column" = "Values standardized within each column (Z-scores)",
+                        "both" = "Values standardized across entire dataset"
+                    ), "</li>",
+                    "<li><strong>Missing Data:</strong> ", switch(self$options$naHandling,
+                        "exclude" = "Rows/columns with missing values excluded",
+                        "mean" = "Missing values replaced with column means",
+                        "median" = "Missing values replaced with column medians",
+                        "zero" = "Missing values replaced with zero"
+                    ), "</li>",
+                    "</ul>",
+                    "<h4 style='color: #1976d2;'>Pattern Recognition:</h4>",
+                    "<ul>",
+                    "<li><strong>Clusters:</strong> Groups of similar rows/columns indicate related patterns</li>",
+                    "<li><strong>Blocks:</strong> Rectangular regions of similar colors suggest correlated features</li>",
+                    "<li><strong>Gradients:</strong> Smooth color transitions indicate progressive changes</li>",
+                    "<li><strong>Outliers:</strong> Isolated distinct colors may indicate unusual observations</li>",
+                    "</ul>",
+                    "<h4 style='color: #1976d2;'>Clinical Applications:</h4>",
+                    "<ul>",
+                    "<li><strong>Biomarker Co-expression:</strong> Identify markers that vary together</li>",
+                    "<li><strong>Patient Subtyping:</strong> Discover molecular or clinical subtypes</li>",
+                    "<li><strong>Quality Control:</strong> Detect batch effects or systematic biases</li>",
+                    "<li><strong>Treatment Response:</strong> Identify responder vs. non-responder patterns</li>",
+                    "</ul>",
+                    "<h4 style='color: #1976d2;'>Next Steps:</h4>",
+                    "<ul>",
+                    "<li>Statistical testing for significant patterns</li>",
+                    "<li>Pathway analysis for clustered biomarkers</li>",
+                    "<li>Clinical correlation with patient outcomes</li>",
+                    "<li>Validation in independent datasets</li>",
                     "</ul>",
                     "</div>"
                 )
-                self$results$clusterCharacteristics$clusterInterpretation$setContent(interp_html)
 
-            }, error = function(e) {
-                # Silently handle errors
-            })
-        },
-
-        # Plot functions for advanced features
-        .elbowPlot = function(image, ggtheme, theme, ...) {
-            plot_state <- image$state
-            if (is.null(plot_state)) return(FALSE)
-
-            tryCatch({
-                mat_data <- plot_state$data
-                k_range <- plot_state$k_range
-                method <- plot_state$method
-
-                # Calculate WSS for each K
-                wss <- sapply(k_range, function(k) {
-                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
-                    km$tot.withinss
-                })
-
-                # Create elbow plot
-                plot(k_range, wss, type = "b", pch = 19, frame = FALSE,
-                     xlab = "Number of Clusters (K)",
-                     ylab = "Total Within-Cluster Sum of Squares",
-                     main = "Elbow Method for Optimal K",
-                     col = "steelblue", lwd = 2)
-                grid()
-
-                return(TRUE)
-            }, error = function(e) {
-                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
-                text(1, 1, paste("Error creating elbow plot:\n", e$message), col = "red")
-                return(TRUE)
-            })
-        },
-
-        .silhouettePlot = function(image, ggtheme, theme, ...) {
-            plot_state <- image$state
-            if (is.null(plot_state)) return(FALSE)
-
-            tryCatch({
-                mat_data <- plot_state$data
-                k_range <- plot_state$k_range
-
-                # Calculate silhouette scores
-                sil_scores <- sapply(k_range[k_range > 1], function(k) {
-                    km <- stats::kmeans(mat_data, centers = k, nstart = 25)
-                    sil <- cluster::silhouette(km$cluster, stats::dist(mat_data))
-                    mean(sil[, 3])
-                })
-
-                # Create silhouette plot
-                plot(k_range[k_range > 1], sil_scores, type = "b", pch = 19, frame = FALSE,
-                     xlab = "Number of Clusters (K)",
-                     ylab = "Average Silhouette Width",
-                     main = "Silhouette Analysis for Optimal K",
-                     col = "darkgreen", lwd = 2)
-                grid()
-                abline(h = 0.5, col = "red", lty = 2)
-
-                return(TRUE)
-            }, error = function(e) {
-                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
-                text(1, 1, paste("Error creating silhouette plot:\n", e$message), col = "red")
-                return(TRUE)
-            })
-        },
-
-        .kmPlotClusters = function(image, ggtheme, theme, ...) {
-            plot_state <- image$state
-            if (is.null(plot_state)) return(FALSE)
-
-            tryCatch({
-                requireNamespace("survminer", quietly = TRUE)
-
-                fit <- plot_state$fit
-                data <- plot_state$data
-
-                # Create KM plot using survminer
-                p <- survminer::ggsurvplot(
-                    fit,
-                    data = data,
-                    pval = TRUE,
-                    conf.int = TRUE,
-                    risk.table = TRUE,
-                    risk.table.height = 0.25,
-                    ggtheme = theme_minimal(),
-                    palette = "jco",
-                    legend.title = "Cluster",
-                    legend.labs = paste("Cluster", unique(data$cluster)),
-                    title = "Kaplan-Meier Survival by Cluster"
+                self$results$interpretation$setContent(interpretation_content)
+            },
+            .generateAssumptions = function() {
+                assumptions_content <- paste0(
+                    "<div style='background-color: #fff8dc; padding: 15px; border-radius: 5px; border-left: 4px solid #f39c12;'>",
+                    "<h4 style='color: #e67e22; margin-top: 0;'> Assumptions & Technical Notes</h4>",
+                    "<h5>Data Assumptions:</h5>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>Data is in tidy (long) format with one observation per row</li>",
+                    "<li>Row and column variables uniquely identify observations</li>",
+                    "<li>Value variable contains numeric measurements</li>",
+                    "<li>Missing data pattern is appropriate for chosen handling method</li>",
+                    "</ul>",
+                    "<h5>Visualization Assumptions:</h5>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>Color intensity accurately reflects data magnitude</li>",
+                    "<li>Hierarchical clustering reveals meaningful biological relationships</li>",
+                    "<li>Scaling method is appropriate for the data type and research question</li>",
+                    "<li>Sample size is sufficient for pattern detection</li>",
+                    "</ul>",
+                    "<h5>Technical Notes:</h5>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li><strong>Package:</strong> Powered by tidyheatmaps for advanced visualization</li>",
+                    "<li><strong>Clustering:</strong> Uses hierarchical clustering with default distance measures</li>",
+                    "<li><strong>Performance:</strong> Large datasets (>1000 rows/columns) may require optimization</li>",
+                    "<li><strong>Export:</strong> High-resolution outputs available for publication</li>",
+                    sprintf("<li><strong>Scaling Applied:</strong> %s; <strong>NA handling:</strong> %s</li>", self$options$scaleMethod, self$options$naHandling),
+                    "</ul>",
+                    "<h5>Clinical Considerations:</h5>",
+                    "<ul style='margin-left: 20px;'>",
+                    "<li>Patterns should be validated with independent data</li>",
+                    "<li>Clinical significance may differ from statistical significance</li>",
+                    "<li>Consider pre-analytical factors (sample handling, batch effects)</li>",
+                    "<li>Interpret results in context of study design and patient population</li>",
+                    "</ul>",
+                    "</div>"
                 )
 
-                print(p$plot)
-                return(TRUE)
-            }, error = function(e) {
-                plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
-                text(1, 1, paste("Error creating KM plot:\n", e$message), col = "red")
-                return(TRUE)
-            })
-        }
+                self$results$assumptions$setContent(assumptions_content)
+            },
+
+            # === ADVANCED FEATURES IMPLEMENTATION ===
+
+            .performOptimalKAnalysis = function(mat_data) {
+                tryCatch(
+                    {
+                        if (is.null(mat_data) || nrow(mat_data) < 3 || ncol(mat_data) < 2) {
+                            return()
+                        }
+
+                        # Build K range from bounded integer options. The previous
+                        # implementation evaluated a free-text string at runtime, which
+                        # let any caller smuggle arbitrary R code through the option.
+                        k_min <- as.integer(self$options$kMin)
+                        k_max <- as.integer(self$options$kMax)
+                        if (is.na(k_min) || k_min < 2L) k_min <- 2L
+                        if (is.na(k_max) || k_max < k_min) k_max <- max(k_min + 1L, 8L)
+                        k_range <- seq.int(k_min, k_max)
+
+                        # Store data for plotting
+                        self$results$optimalKAnalysis$elbowPlot$setState(list(
+                            data = mat_data,
+                            k_range = k_range,
+                            method = self$options$clusterMethodRows
+                        ))
+
+                        self$results$optimalKAnalysis$silhouettePlot$setState(list(
+                            data = mat_data,
+                            k_range = k_range
+                        ))
+
+                        # Calculate optimal K using different methods
+                        optimal_k_results <- data.frame(
+                            method = character(),
+                            optimal_k = integer(),
+                            metric_value = numeric(),
+                            stringsAsFactors = FALSE
+                        )
+
+                        # Silhouette on hierarchical clustering (consistent with heatmap)
+                        dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
+                        hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
+
+                        sil_scores <- sapply(k_range[k_range > 1], function(k) {
+                            clusters <- stats::cutree(hc_rows, k = k)
+                            sil <- cluster::silhouette(clusters, dist_rows)
+                            mean(sil[, 3])
+                        })
+
+                        best_sil_k <- k_range[k_range > 1][which.max(sil_scores)]
+                        optimal_k_results <- rbind(optimal_k_results, data.frame(
+                            method = "Hierarchical Silhouette",
+                            optimal_k = as.integer(best_sil_k),
+                            metric_value = max(sil_scores)
+                        ))
+
+                        # Populate table
+                        for (i in seq_len(nrow(optimal_k_results))) {
+                            self$results$optimalKAnalysis$optimalKTable$addRow(rowKey = i, values = list(
+                                method = optimal_k_results$method[i],
+                                optimal_k = optimal_k_results$optimal_k[i],
+                                metric_value = optimal_k_results$metric_value[i]
+                            ))
+                        }
+                    },
+                    error = function(e) {
+                        # Silently handle errors
+                    }
+                )
+            },
+            .extractClusterAssignments = function(data, row_var = NULL, col_var = NULL, value_var = NULL) {
+                tryCatch(
+                    {
+                        # Prepare data matrix
+                        if (is.matrix(data)) {
+                            mat_data <- data
+                        } else {
+                            mat_data <- data %>%
+                                dplyr::select(!!rlang::sym(row_var), !!rlang::sym(col_var), !!rlang::sym(value_var)) %>%
+                                tidyr::pivot_wider(names_from = !!rlang::sym(col_var), values_from = !!rlang::sym(value_var)) %>%
+                                tibble::column_to_rownames(row_var) %>%
+                                as.matrix()
+                        }
+
+                        result <- list(row_clusters = NULL, col_clusters = NULL)
+
+                        # Extract row clusters if clustering requested
+                        if (self$options$clusterRows) {
+                            # Perform hierarchical clustering on rows
+                            dist_rows <- stats::dist(mat_data, method = self$options$clusterDistanceRows)
+                            hc_rows <- stats::hclust(dist_rows, method = self$options$clusterMethodRows)
+
+                            # Cut tree - use splitRows if > 1, otherwise estimate optimal K
+                            n_clusters <- self$options$splitRows
+                            if (n_clusters <= 1) n_clusters <- min(3, nrow(mat_data) - 1)
+
+                            row_clusters <- stats::cutree(hc_rows, k = n_clusters)
+                            result$row_clusters <- data.frame(
+                                row_id = names(row_clusters),
+                                cluster = as.integer(row_clusters),
+                                stringsAsFactors = FALSE
+                            )
+
+                            # Populate table only if export requested
+                            if (self$options$exportRowClusters) {
+                                for (i in seq_len(nrow(result$row_clusters))) {
+                                    self$results$clusterAssignments$rowClusterTable$addRow(rowKey = i, values = list(
+                                        row_id = result$row_clusters$row_id[i],
+                                        cluster = result$row_clusters$cluster[i]
+                                    ))
+                                }
+                            }
+                        }
+
+                        # Extract column clusters if clustering requested
+                        if (self$options$clusterCols) {
+                            # Perform hierarchical clustering on columns
+                            dist_cols <- stats::dist(t(mat_data), method = self$options$clusterDistanceCols)
+                            hc_cols <- stats::hclust(dist_cols, method = self$options$clusterMethodCols)
+
+                            n_clusters <- self$options$splitCols
+                            if (n_clusters <= 1) n_clusters <- min(3, ncol(mat_data) - 1)
+
+                            col_clusters <- stats::cutree(hc_cols, k = n_clusters)
+                            result$col_clusters <- data.frame(
+                                col_id = names(col_clusters),
+                                cluster = as.integer(col_clusters),
+                                stringsAsFactors = FALSE
+                            )
+
+                            if (self$options$exportColClusters) {
+                                for (i in seq_len(nrow(result$col_clusters))) {
+                                    self$results$clusterAssignments$colClusterTable$addRow(rowKey = i, values = list(
+                                        col_id = result$col_clusters$col_id[i],
+                                        cluster = result$col_clusters$cluster[i]
+                                    ))
+                                }
+                            }
+                        }
+
+                        return(result)
+                    },
+                    error = function(e) {
+                        return(list(row_clusters = NULL, col_clusters = NULL))
+                    }
+                )
+            },
+            .performSurvivalAnalysis = function(dataset, row_clusters, row_var) {
+                tryCatch(
+                    {
+                        # Get survival variables
+                        surv_time_var <- self$options$survivalTime
+                        surv_event_var <- self$options$survivalEvent
+                        event_level <- self$options$survivalEventLevel
+
+                        # Merge cluster assignments with dataset
+                        cluster_data <- row_clusters
+                        names(cluster_data) <- c(row_var, "cluster")
+
+                        surv_data <- dataset %>%
+                            dplyr::inner_join(cluster_data, by = row_var) %>%
+                            dplyr::filter(
+                                !is.na(!!rlang::sym(surv_time_var)),
+                                !is.na(!!rlang::sym(surv_event_var))
+                            )
+
+                        # Create binary event indicator
+                        if (!is.null(event_level)) {
+                            surv_data <- surv_data %>%
+                                dplyr::mutate(event = as.integer(!!rlang::sym(surv_event_var) == event_level))
+                        } else {
+                            surv_data <- surv_data %>%
+                                dplyr::mutate(event = as.integer(!!rlang::sym(surv_event_var)))
+                        }
+
+                        # Perform survival analysis
+                        surv_obj <- survival::Surv(surv_data[[surv_time_var]], surv_data$event)
+                        fit <- survival::survfit(surv_obj ~ cluster, data = surv_data)
+
+                        # Log-rank test
+                        # Guard against too few events per cluster
+                        if (length(unique(surv_data$cluster)) < 2) {
+                            private$.addNotice("WARNING", "Survival Analysis Skipped", sprintf(
+                                "Survival analysis skipped: clustering produced only %d group(s). Requires at least 2 clusters. Try adjusting splitRows or clustering parameters.",
+                                length(unique(surv_data$cluster))
+                            ))
+                            return(invisible(NULL))
+                        }
+                        events_per_cluster <- tapply(surv_data$event, surv_data$cluster, sum)
+                        if (length(events_per_cluster) < 2 || any(events_per_cluster == 0)) {
+                            private$.addNotice("WARNING", "Survival Analysis Skipped", sprintf(
+                                "Survival analysis skipped: %d cluster(s) have zero events. All clusters need at least one event for log-rank test.",
+                                sum(events_per_cluster == 0)
+                            ))
+                            return(invisible(NULL))
+                        }
+                        log_rank <- survival::survdiff(surv_obj ~ cluster, data = surv_data)
+
+                        # Populate results
+                        self$results$clusterSurvival$logRankTest$addRow(rowKey = 1, values = list(
+                            chisq = log_rank$chisq,
+                            df = length(log_rank$n) - 1,
+                            p = 1 - stats::pchisq(log_rank$chisq, length(log_rank$n) - 1)
+                        ))
+
+                        # Extract survival summary by cluster
+                        for (i in seq_along(fit$strata)) {
+                            cluster_id <- gsub("cluster=", "", names(fit$strata)[i])
+                            cluster_idx <- fit$strata[1:i]
+                            if (i > 1) {
+                                cluster_idx <- sum(fit$strata[1:(i - 1)]) + 1:fit$strata[i]
+                            } else {
+                                cluster_idx <- 1:fit$strata[i]
+                            }
+
+                            median_surv <- summary(fit)$table[i, "median"]
+                            ci_lower <- summary(fit)$table[i, paste0("0.95LCL")]
+                            ci_upper <- summary(fit)$table[i, paste0("0.95UCL")]
+
+                            self$results$clusterSurvival$survivalTable$addRow(rowKey = i, values = list(
+                                cluster = cluster_id,
+                                n = log_rank$n[i],
+                                events = log_rank$obs[i],
+                                median_surv = median_surv,
+                                ci_lower = ci_lower,
+                                ci_upper = ci_upper
+                            ))
+                        }
+
+                        # Store plot data
+                        self$results$clusterSurvival$kmPlot$setState(list(
+                            fit = fit,
+                            data = surv_data
+                        ))
+                    },
+                    error = function(e) {
+                        # Silently handle errors
+                    }
+                )
+            },
+            .performClusterComparison = function(dataset, row_clusters, row_var) {
+                tryCatch(
+                    {
+                        # Merge cluster assignments with dataset
+                        cluster_data <- row_clusters
+                        names(cluster_data) <- c(row_var, "cluster")
+
+                        comp_data <- dataset %>%
+                            dplyr::inner_join(cluster_data, by = row_var)
+
+                        comparison_vars <- self$options$comparisonVars
+
+                        # Compare each variable across clusters
+                        for (var in comparison_vars) {
+                            if (is.numeric(comp_data[[var]])) {
+                                # Use ANOVA or Kruskal-Wallis for numeric variables
+                                test_result <- tryCatch(
+                                    {
+                                        aov_result <- stats::aov(jmvcore::asFormula(paste(jmvcore::composeTerm(var), "~ cluster")), data = comp_data)
+                                        p_value <- summary(aov_result)[[1]][["Pr(>F)"]][1]
+
+                                        # Get mean by cluster
+                                        means <- comp_data %>%
+                                            dplyr::group_by(cluster) %>%
+                                            dplyr::summarise(mean_val = mean(!!rlang::sym(var), na.rm = TRUE), .groups = "drop")
+
+                                        for (i in seq_len(nrow(means))) {
+                                            self$results$clusterCharacteristics$characteristicTable$addRow(
+                                                rowKey = paste(var, means$cluster[i], sep = "_"),
+                                                values = list(
+                                                    variable = var,
+                                                    cluster = paste("Cluster", means$cluster[i]),
+                                                    summary = sprintf("Mean: %.2f", means$mean_val[i]),
+                                                    p_value = if (i == 1) p_value else NA
+                                                )
+                                            )
+                                        }
+                                    },
+                                    error = function(e) NULL
+                                )
+                            } else {
+                                # Use chi-square or Fisher's exact for categorical variables
+                                test_result <- tryCatch(
+                                    {
+                                        tbl <- table(comp_data$cluster, comp_data[[var]])
+
+                                        # Check chi-square assumptions (expected counts >= 5)
+                                        chi_test <- stats::chisq.test(tbl)
+                                        expected_counts <- chi_test$expected
+
+                                        if (any(expected_counts < 5)) {
+                                            # Use Fisher's exact test when assumptions violated
+                                            fisher_result <- tryCatch(
+                                                {
+                                                    if (prod(dim(tbl)) > 2) {
+                                                        stats::fisher.test(tbl, simulate.p.value = TRUE, B = 10000)
+                                                    } else {
+                                                        stats::fisher.test(tbl)
+                                                    }
+                                                },
+                                                error = function(e) NULL
+                                            )
+
+                                            if (!is.null(fisher_result)) {
+                                                p_value <- fisher_result$p.value
+                                                test_used <- if (prod(dim(tbl)) > 2) " (Fisher's exact, simulated)" else " (Fisher's exact)"
+                                            } else {
+                                                p_value <- chi_test$p.value
+                                                test_used <- " (χ², low expected counts)"
+                                            }
+                                        } else {
+                                            p_value <- chi_test$p.value
+                                            test_used <- " (χ²)"
+                                        }
+
+                                        # Get frequencies by cluster
+                                        freqs <- comp_data %>%
+                                            dplyr::group_by(cluster, !!rlang::sym(var)) %>%
+                                            dplyr::summarise(n = dplyr::n(), .groups = "drop") %>%
+                                            dplyr::group_by(cluster) %>%
+                                            dplyr::mutate(pct = n / sum(n) * 100)
+
+                                        # Add test method to first row summary
+                                        for (i in seq_len(nrow(freqs))) {
+                                            summary_text <- sprintf(
+                                                "%s: %d (%.1f%%)",
+                                                freqs[[var]][i], freqs$n[i], freqs$pct[i]
+                                            )
+                                            if (i == 1) {
+                                                summary_text <- paste0(summary_text, test_used)
+                                            }
+
+                                            self$results$clusterCharacteristics$characteristicTable$addRow(
+                                                rowKey = paste(var, freqs$cluster[i], freqs[[var]][i], sep = "_"),
+                                                values = list(
+                                                    variable = var,
+                                                    cluster = paste("Cluster", freqs$cluster[i]),
+                                                    summary = summary_text,
+                                                    p_value = if (i == 1) p_value else NA
+                                                )
+                                            )
+                                        }
+                                    },
+                                    error = function(e) NULL
+                                )
+                            }
+                        }
+
+                        # Add interpretation
+                        interp_html <- paste0(
+                            "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 5px;'>",
+                            "<h4>Cluster Characteristics Interpretation</h4>",
+                            "<p>P-values indicate whether there are significant differences in each variable across clusters.</p>",
+                            "<ul>",
+                            "<li>P < 0.05 suggests significant differences between clusters</li>",
+                            "<li>Review cluster-specific summaries to understand patterns</li>",
+                            "<li>Consider clinical significance alongside statistical significance</li>",
+                            "</ul>",
+                            "</div>"
+                        )
+                        self$results$clusterCharacteristics$clusterInterpretation$setContent(interp_html)
+                    },
+                    error = function(e) {
+                        # Silently handle errors
+                    }
+                )
+            },
+
+            # Plot functions for advanced features
+            .elbowPlot = function(image, ggtheme, theme, ...) {
+                plot_state <- image$state
+                if (is.null(plot_state)) {
+                    return(FALSE)
+                }
+
+                tryCatch(
+                    {
+                        mat_data <- plot_state$data
+                        k_range <- plot_state$k_range
+                        method <- plot_state$method
+
+                        # Calculate WSS for each K
+                        wss <- sapply(k_range, function(k) {
+                            km <- stats::kmeans(mat_data, centers = k, nstart = 25)
+                            km$tot.withinss
+                        })
+
+                        # Create elbow plot
+                        plot(k_range, wss,
+                            type = "b", pch = 19, frame = FALSE,
+                            xlab = "Number of Clusters (K)",
+                            ylab = "Total Within-Cluster Sum of Squares",
+                            main = "Elbow Method for Optimal K",
+                            col = "steelblue", lwd = 2
+                        )
+                        grid()
+
+                        return(TRUE)
+                    },
+                    error = function(e) {
+                        plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                        text(1, 1, paste("Error creating elbow plot:\n", e$message), col = "red")
+                        return(TRUE)
+                    }
+                )
+            },
+            .silhouettePlot = function(image, ggtheme, theme, ...) {
+                plot_state <- image$state
+                if (is.null(plot_state)) {
+                    return(FALSE)
+                }
+
+                tryCatch(
+                    {
+                        mat_data <- plot_state$data
+                        k_range <- plot_state$k_range
+
+                        # Calculate silhouette scores
+                        sil_scores <- sapply(k_range[k_range > 1], function(k) {
+                            km <- stats::kmeans(mat_data, centers = k, nstart = 25)
+                            sil <- cluster::silhouette(km$cluster, stats::dist(mat_data))
+                            mean(sil[, 3])
+                        })
+
+                        # Create silhouette plot
+                        plot(k_range[k_range > 1], sil_scores,
+                            type = "b", pch = 19, frame = FALSE,
+                            xlab = "Number of Clusters (K)",
+                            ylab = "Average Silhouette Width",
+                            main = "Silhouette Analysis for Optimal K",
+                            col = "darkgreen", lwd = 2
+                        )
+                        grid()
+                        abline(h = 0.5, col = "red", lty = 2)
+
+                        return(TRUE)
+                    },
+                    error = function(e) {
+                        plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                        text(1, 1, paste("Error creating silhouette plot:\n", e$message), col = "red")
+                        return(TRUE)
+                    }
+                )
+            },
+            .kmPlotClusters = function(image, ggtheme, theme, ...) {
+                plot_state <- image$state
+                if (is.null(plot_state)) {
+                    return(FALSE)
+                }
+
+                tryCatch(
+                    {
+                        requireNamespace("survminer", quietly = TRUE)
+
+                        fit <- plot_state$fit
+                        data <- plot_state$data
+
+                        # Create KM plot using survminer
+                        p <- survminer::ggsurvplot(
+                            fit,
+                            data = data,
+                            pval = TRUE,
+                            conf.int = TRUE,
+                            risk.table = TRUE,
+                            risk.table.height = 0.25,
+                            ggtheme = theme_minimal(),
+                            palette = "jco",
+                            legend.title = "Cluster",
+                            legend.labs = paste("Cluster", unique(data$cluster)),
+                            title = "Kaplan-Meier Survival by Cluster"
+                        )
+
+                        print(p$plot)
+                        return(TRUE)
+                    },
+                    error = function(e) {
+                        plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+                        text(1, 1, paste("Error creating KM plot:\n", e$message), col = "red")
+                        return(TRUE)
+                    }
+                )
+            }
+        )
     )
-)
+}

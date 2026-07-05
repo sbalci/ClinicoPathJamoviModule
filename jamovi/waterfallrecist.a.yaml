@@ -135,11 +135,11 @@ options:
       permitted: [numeric]
       description:
           R: >
-            Longest diameter of target lesions in millimeters (≥10mm for non-lymph nodes, ≥15mm for lymph nodes).
+            Longest diameter of target lesions in millimeters (>=10mm for non-lymph nodes, >=15mm for lymph nodes).
             For non-target lesions, can be NA (qualitative assessment only).
           jamovi: >
             Longest diameter in millimeters (RECIST measurement standard).
-            • Target lesions: ≥10mm (non-lymph nodes), ≥15mm (lymph nodes)
+            • Target lesions: >=10mm (non-lymph nodes), >=15mm (lymph nodes)
             • NonTarget lesions: Can be blank (qualitative assessment)
 
     - name: isNewLesion
@@ -178,10 +178,10 @@ options:
       description:
           R: >
             Minimum time interval (weeks) for response confirmation per RECIST v1.1.
-            CR and PR must be confirmed by repeat assessment ≥4 weeks after initial documentation.
+            CR and PR must be confirmed by repeat assessment >=4 weeks after initial documentation.
           jamovi: >
             Time required for CR/PR confirmation (RECIST default = 4 weeks).
-            Response must be sustained on subsequent scan ≥4 weeks later.
+            Response must be sustained on subsequent scan >=4 weeks later.
 
     - name: maxTargetLesions
       title: Maximum Target Lesions
@@ -266,7 +266,7 @@ options:
             Display audit report verifying RECIST v1.1 compliance (target lesion limits, confirmation, new lesions).
           jamovi: >
             Show compliance report documenting RECIST v1.1 adherence:
-            • Target lesion selection (≤5 total, ≤2 per organ)
+            • Target lesion selection (<=5 total, <=2 per organ)
             • New lesion detection
             • Confirmation requirements met
 
@@ -278,7 +278,7 @@ options:
           name: recist
         - title: jamovi
           name: jamovi
-        - title: Colorblind-Safe (Okabe–Ito)
+        - title: Colorblind-Safe (Okabe-Ito)
           name: colorblind
       default: recist
       description:

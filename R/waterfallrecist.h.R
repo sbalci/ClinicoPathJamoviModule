@@ -601,9 +601,9 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   lesions are assessed qualitatively (present/absent/progressed).
 #' @param location Anatomic site of lesion (e.g., Liver, Lung, Lymph_Node).
 #'   Used to enforce RECIST rule: max 2 target lesions per organ.
-#' @param diameter Longest diameter of target lesions in millimeters (≥10mm
-#'   for non-lymph nodes, ≥15mm for lymph nodes). For non-target lesions, can be
-#'   NA (qualitative assessment only).
+#' @param diameter Longest diameter of target lesions in millimeters (>=10mm
+#'   for non-lymph nodes, >=15mm for lymph nodes). For non-target lesions, can
+#'   be NA (qualitative assessment only).
 #' @param isNewLesion Binary indicator (0 = baseline/existing, 1 = new lesion
 #'   appearing after baseline). ANY new lesion automatically triggers
 #'   Progressive Disease (PD) per RECIST v1.1.
@@ -611,7 +611,7 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   = 0). All lesions at this timepoint establish the baseline sum.
 #' @param confirmationInterval Minimum time interval (weeks) for response
 #'   confirmation per RECIST v1.1. CR and PR must be confirmed by repeat
-#'   assessment ≥4 weeks after initial documentation.
+#'   assessment >=4 weeks after initial documentation.
 #' @param maxTargetLesions Maximum number of target lesions per patient
 #'   (RECIST v1.1 default = 5).
 #' @param maxLesionsPerOrgan Maximum target lesions per organ (RECIST v1.1

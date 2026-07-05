@@ -7,6 +7,7 @@
 **Title/Label:** The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets
 
 **Design & Cohort:**
+
 - **Study Type:** Methodological study with simulation analysis and literature review
 - **Sample:**
   - Simulation: 1,000 positives + 1,000 negatives (balanced); 1,000 positives + 10,000 negatives (imbalanced)
@@ -15,6 +16,7 @@
 - **Design:** Comparative evaluation of ROC, PRC, CROC, and Cost Curves using random sampling simulations across 5 performance levels
 
 **Key Analyses:**
+
 - Simulation-based comparison of ROC vs PRC performance plots on balanced/imbalanced datasets
 - Literature meta-analysis of evaluation methods used in binary classification studies (2002-2012)
 - Re-analysis of published MiRFinder microRNA classifier using both ROC and PRC
@@ -220,12 +222,14 @@ None. All sources were successfully read.
 ### Impact on Field
 
 **High Impact Potential:**
+
 - Literature analysis shows 60-67% of imbalanced binary classification studies use ROC (Table 4, p.15)
 - PRC clearly reveals poor performance hidden by ROC in real re-analysis (Fig 7D vs 7C)
 - Findings recommend changing primary evaluation method for majority of life science studies with class imbalance
 - Provides practical guidance and tool recommendations (AUCCalculator + plotting software)
 
 **Practical Implications:**
+
 - Researchers working with imbalanced datasets should adopt PRC as primary evaluation
 - ROC can be misleading in low-prevalence scenarios (diagnostic screening, rare disease prediction, biomarker discovery)
 - Tools need improvement for accurate PRC interpolation (AUCCalculator recommended over ROCR)
@@ -240,6 +244,7 @@ None. All sources were successfully read.
 **Method:** Precision-Recall curve visualization with proper non-linear interpolation between points
 
 **Impact:**
+
 - **Critical for article's main finding**: PRC is superior to ROC for imbalanced data
 - **Widespread need**: 60-67% of binary classification studies with imbalanced data currently use ROC (per article's literature review)
 - **Clinical relevance**: Life sciences frequently deal with imbalanced data (disease screening, rare events, biomarker discovery)
@@ -247,6 +252,7 @@ None. All sources were successfully read.
 **Closest existing function:** `classification` - calculates Precision, Recall, F-score but lacks PRC curve visualization
 
 **Exact missing options:**
+
 - PRC curve plotting with Recall (x-axis) vs Precision (y-axis)
 - Non-linear interpolation formula: `y = (TP_A + x) / {TP_A + x + FP_A + ((FP_B - FP_A) × x)/(TP_B - TP_A)}`
 - Moving baseline visualization: horizontal line at y = P/(P+N)
@@ -259,6 +265,7 @@ None. All sources were successfully read.
 **Method:** Matthews Correlation Coefficient for balanced accuracy assessment
 
 **Impact:**
+
 - **Recommended for imbalanced data**: Article shows MCC changes between balanced/imbalanced (Table 2) unlike accuracy/sensitivity/specificity
 - **Single metric summary**: Captures all four confusion matrix cells
 - **Clinical relevance**: Provides balanced view of performance less sensitive to class imbalance than accuracy
@@ -266,6 +273,7 @@ None. All sources were successfully read.
 **Closest existing function:** `classification`, `enhancedROC` - calculate other confusion matrix metrics but not MCC
 
 **Exact missing options:**
+
 - MCC calculation: `(TP×TN - FP×FN) / √[(TP+FP)(TP+FN)(TN+FP)(TN+FN)]`
 - Confidence intervals for MCC (bootstrap or analytical)
 - MCC comparison across models
@@ -276,6 +284,7 @@ None. All sources were successfully read.
 **Method:** Concentrated ROC plots for early retrieval evaluation
 
 **Impact:**
+
 - **Early retrieval focus**: Critical when examining top-ranked predictions (e.g., drug discovery, prioritizing diagnostic workup)
 - **Better resolution**: Expands low FPR region where most clinical decisions occur
 - **Article's finding**: CROC shows differences between ER+ and ER- that standard ROC misses
@@ -283,6 +292,7 @@ None. All sources were successfully read.
 **Closest existing function:** `enhancedROC` with partial AUC option (evaluates specific FPR range but doesn't transform x-axis)
 
 **Exact missing options:**
+
 - Magnifier function: `f(x) = (1 - exp(-αx))/(1 - exp(-α))` with adjustable α parameter (typically α=7 or 8)
 - Transformed x-axis: f(FPR) vs TPR plotting
 - AUC(CROC) calculation
@@ -295,6 +305,7 @@ None. All sources were successfully read.
 **Method:** Cost curves showing normalized expected cost vs probability cost function
 
 **Impact:**
+
 - **Clinical decision framework**: Incorporates misclassification costs and class probabilities
 - **Operating point analysis**: Shows performance at different cost ratios
 - **Article's use**: Alternative to ROC when misclassification costs are known or estimable
@@ -302,6 +313,7 @@ None. All sources were successfully read.
 **Closest existing function:** `decisiongraph` - supports cost-effectiveness analysis but uses ICER/NMB framework, not PCF(+) vs NE[C] cost curves
 
 **Exact missing options:**
+
 - Probability Cost Function calculation: `PCF(+) = p(+)×C(-|+) / [p(+)×C(-|+) + p(-)×C(+|-)]`
 - Normalized Expected Cost calculation: `NE[C] = (FPR×p(-)×C(+|-) + FNR×p(+)×C(-|+)) / [p(+)×C(-|+) + p(-)×C(+|-)]`
 - Cost curve plotting (PCF(+) on x-axis, NE[C] on y-axis)
@@ -314,6 +326,7 @@ None. All sources were successfully read.
 **Method:** ROC convex hull for optimal achievable performance estimation
 
 **Impact:**
+
 - **Performance upper bound**: Shows best possible performance achievable by optimal threshold selection or ensemble methods
 - **Classifier improvement potential**: Difference between actual ROC and convex hull shows room for improvement
 - **Theoretical importance**: Represents achievable performance frontier
@@ -321,6 +334,7 @@ None. All sources were successfully read.
 **Closest existing function:** `enhancedROC` - plots full ROC curve but not convex hull
 
 **Exact missing options:**
+
 - Convex hull computation: select points where straight line connections maximize AUC
 - Convex hull overlay on standard ROC plot
 - AUC(convex hull) vs AUC(actual) comparison
@@ -332,6 +346,7 @@ None. All sources were successfully read.
 **Method:** Explicit control over tied score handling methods (upper bound, lower bound, average)
 
 **Impact:**
+
 - **Affects curve shape**: Choice can impact AUC calculation and visual interpretation
 - **Dataset-specific**: Many classifiers produce tied scores (discrete outputs, coarse probability bins)
 - **Transparency**: Users should be aware of and able to control tie-handling method
@@ -339,6 +354,7 @@ None. All sources were successfully read.
 **Closest existing function:** `enhancedROC` - likely uses default (average) method but doesn't expose options
 
 **Exact missing options:**
+
 - Tie-handling method selection:
   - Upper bound: Calculate all positives first (optimistic)
   - Lower bound: Calculate all negatives first (pessimistic)
@@ -352,6 +368,7 @@ None. All sources were successfully read.
 **Method:** Generate classifier scores from specified distributions for evaluation and comparison
 
 **Impact:**
+
 - **Teaching tool**: Demonstrates ROC/PRC behavior under different performance scenarios
 - **Method validation**: Allows testing of evaluation metrics on data with known properties
 - **Power analysis**: Estimate sample size needed to detect performance differences
@@ -359,6 +376,7 @@ None. All sources were successfully read.
 **Closest existing function:** None - jamovi currently lacks built-in simulation for classifier evaluation
 
 **Exact missing options:**
+
 - Score distribution specification:
   - Normal distribution N(μ, σ) for positives and negatives
   - Beta distribution Beta(α, β) for bounded [0,1] scores
@@ -374,6 +392,7 @@ None. All sources were successfully read.
 **Method:** Proper non-linear interpolation between PRC points
 
 **Impact:**
+
 - **Accuracy critical**: Linear interpolation (as in ROC) produces incorrect PRC curves and AUC estimates
 - **Article's emphasis**: Dedicates section to explaining PRC interpolation differs from ROC (p.6-7)
 - **Tool limitation**: ROCR package (popular R tool) lacks proper PRC interpolation
@@ -381,6 +400,7 @@ None. All sources were successfully read.
 **Closest existing function:** None - any PRC implementation would need this
 
 **Exact missing options:**
+
 - Non-linear interpolation implementation: `y = (TP_A + x) / {TP_A + x + FP_A + ((FP_B - FP_A) × x)/(TP_B - TP_A)}`
 - Validation against AUCCalculator reference implementation
 - Interpolation density control (number of points between measured points)
@@ -392,6 +412,7 @@ None. All sources were successfully read.
 **Method:** Quantitative metrics for early retrieval performance (top-ranked predictions)
 
 **Impact:**
+
 - **Practical relevance**: Often only top N predictions are examined (e.g., top 50 drug candidates, top 100 diagnostic alerts)
 - **Complements AUC**: AUC weights entire curve; ER metrics focus on high-priority region
 - **Article's use**: ER+ vs ER- comparison demonstrates performance differences missed by overall AUC
@@ -399,6 +420,7 @@ None. All sources were successfully read.
 **Closest existing function:** `enhancedROC` with partial AUC (evaluates specific range but not ER-specific metrics)
 
 **Exact missing options:**
+
 - ROC_N metrics: e.g., ROC₅₀ = number of TPs when FP=50
 - Recall at k: Recall when k items are retrieved (k=10, 50, 100, etc.)
 - Precision at k: Precision at top k retrieved items
@@ -412,6 +434,7 @@ None. All sources were successfully read.
 **Method:** Display and interpretation of class-imbalance-dependent PRC baseline
 
 **Impact:**
+
 - **Critical insight**: Unlike ROC (fixed diagonal baseline), PRC baseline = P/(P+N) changes with prevalence
 - **Interpretability**: Baseline represents random classifier performance; distance above baseline shows improvement
 - **Article's finding**: Lower baseline (e.g., 0.09 for 1:10 imbalance) immediately shows difficulty of classification task
@@ -419,6 +442,7 @@ None. All sources were successfully read.
 **Closest existing function:** None - PRC not implemented
 
 **Exact missing options:**
+
 - Horizontal baseline at y = P/(P+N)
 - Baseline calculation and display: "Random classifier baseline = P/(P+N) = [value]"
 - Color coding: baseline in contrasting color (e.g., gray dashed line)
@@ -431,6 +455,7 @@ None. All sources were successfully read.
 **Method:** Synchronized side-by-side ROC and PRC plots for same classifier(s)
 
 **Impact:**
+
 - **Article's key visualization**: Fig 5 (p.12) shows ROC unchanged, PRC changed between balanced/imbalanced
 - **Educational value**: Directly demonstrates why PRC is more informative for imbalanced data
 - **Clinical communication**: Helps explain to stakeholders why PRC should be preferred
@@ -438,6 +463,7 @@ None. All sources were successfully read.
 **Closest existing function:** `enhancedROC` supports multiple ROC curves; would need PRC equivalent
 
 **Exact missing options:**
+
 - Synchronized dual plotting: ROC (left panel) + PRC (right panel) for same data
 - Linked color coding: same classifier/model uses same color in both plots
 - Shared legends and annotations
@@ -450,6 +476,7 @@ None. All sources were successfully read.
 **Method:** Compare PRC curves across multiple classifiers with significance testing
 
 **Impact:**
+
 - **Model selection**: Choose best classifier for imbalanced data based on PRC rather than ROC
 - **Statistical rigor**: Quantify whether PRC differences are statistically significant
 - **Article's re-analysis**: Compares MiRFinder, miPred, RNAmicro, ProMiR, RNAfold on PRC (Fig 7B,D)
@@ -457,6 +484,7 @@ None. All sources were successfully read.
 **Closest existing function:** `enhancedROC` with DeLong, Bootstrap, Venkatraman tests for ROC; would need PRC equivalent
 
 **Exact missing options:**
+
 - PRC-specific comparison tests:
   - Bootstrap test for AUC(PRC) difference
   - Precision-Recall F-test
@@ -1229,11 +1257,13 @@ children:
 ```
 
 **Dependencies:**
+
 - No new R packages required beyond existing jamovi dependencies
 - Consider optional integration with `precrec` R package for validation
 - Or `PRROC` package for reference implementation
 
 **Validation Plan:**
+
 1. **Unit tests:**
    - Test non-linear interpolation against AUCCalculator reference
    - Verify AUC(PRC) calculation matches analytical formula for simple cases
@@ -1379,6 +1409,7 @@ refs:
 ```
 
 **Validation:**
+
 - Test MCC on balanced data: should equal Pearson correlation
 - Test on imbalanced data: verify MCC changes while accuracy may not (reproduce Table 2 from article)
 - Test perfect classifier: MCC = 1
@@ -1516,6 +1547,7 @@ refs:
 ```
 
 **Validation:**
+
 - Reproduce article's Figure 5B (CROC unchanged between balanced/imbalanced)
 - Verify early retrieval area expanded compared to standard ROC
 - Test alpha sensitivity: α=1 should approximate standard ROC, α=20 should heavily concentrate
@@ -1528,6 +1560,7 @@ refs:
 **Target:** New function implementing Cost Curves as described in article
 
 *Similar structure to PRC function above, implementing:*
+
 - PCF(+) = p(+)×C(-|+) / [p(+)×C(-|+) + p(-)×C(+|-)]
 - NE[C] = (FPR×p(-)×C(+|-) + FNR×p(+)×C(-|+)) / [p(+)×C(-|+) + p(-)×C(+|-)]
 - Cost curve plotting (PCF(+) on x-axis, NE[C] on y-axis)
@@ -1543,6 +1576,7 @@ refs:
 #### **3.1 Add ROC Convex Hull to `enhancedROC`**
 
 **Quick addition:**
+
 ```r
 private$.calculateConvexHull = function(roc) {
     # Compute convex hull of ROC points
@@ -1563,6 +1597,7 @@ private$.calculateConvexHull = function(roc) {
 #### **3.2 Expose Tied Score Handling Options in `enhancedROC`**
 
 **Add to .a.yaml:**
+
 ```yaml
 - name: tieMethod
   title: Tied Score Handling
@@ -1580,6 +1615,7 @@ private$.calculateConvexHull = function(roc) {
 #### **3.3 Add Early Retrieval Metrics to `enhancedROC`**
 
 **Add to .a.yaml:**
+
 ```yaml
 - name: earlyRetrieval
   title: Early Retrieval Metrics
@@ -1594,10 +1630,11 @@ private$.calculateConvexHull = function(roc) {
   default: 0.1
   description:
       R: >
-        Calculate performance at FPR ≤ threshold (e.g., 0.1 for top 10% FPR)
+        Calculate performance at FPR <= threshold (e.g., 0.1 for top 10% FPR)
 ```
 
 **Output in .b.R:**
+
 ```r
 if (self$options$earlyRetrieval) {
     # Partial AUC at FPR <= threshold
@@ -1893,6 +1930,7 @@ html <- paste0(
 **Example Warning Messages:**
 
 **Moderate Imbalance (3:1):**
+
 ```
 ⚠️ Class Imbalance Detected
 
@@ -1912,6 +1950,7 @@ Reference: Saito & Rehmsmeier (2015)...
 ```
 
 **Extreme Imbalance (10:1):**
+
 ```
 🚨 Severe Class Imbalance Detected
 
@@ -2042,12 +2081,14 @@ Reference: Saito & Rehmsmeier (2015)...
 ### Justification
 
 **Why minimal new dependencies:**
+
 - PRC interpolation: Mathematical formula, implement directly (no package needed)
 - MCC: Simple formula from confusion matrix
 - CROC: Exponential transformation of FPR, straightforward implementation
 - Cost Curves: PCF(+) and NE[C] formulas provided in article
 
 **Why optional packages useful:**
+
 - `precrec`: Authoritative implementation for validation, not required for function
 - Could use for unit test comparisons: "Our AUC(PRC) matches `precrec` within 0.001"
 
@@ -2073,6 +2114,7 @@ Reference: Saito & Rehmsmeier (2015)...
 | 10 | **ROC vs PRC Dashboard** | ⭐⭐ | Medium-High | Impressive visualization; replicates article's key finding |
 
 **Impact Legend:**
+
 - ⭐⭐⭐⭐⭐ Critical - Addresses major gap, widely applicable
 - ⭐⭐⭐⭐ High - Significant improvement, frequently useful
 - ⭐⭐⭐ Medium - Valuable addition, moderately useful
@@ -2081,6 +2123,7 @@ Reference: Saito & Rehmsmeier (2015)...
 **Implementation Order:**
 
 **Phase 1 (v1.0 - Core PRC): ✅ COMPLETE**
+
 1. ✅ `precisionrecall` function with non-linear interpolation, AUC(PRC), baseline, bootstrap CIs
    - Created jamovi/precisionrecall.{a,r,u}.yaml files
    - Implemented R/precisionrecall.b.R with full PRC calculation
@@ -2107,6 +2150,7 @@ Reference: Saito & Rehmsmeier (2015)...
 10. ROC vs PRC comparison dashboard
 
 **Phase 4 (v1.3 - Imbalance Detection & User Guidance): ✅ COMPLETE**
+
 - ✅ Class imbalance detection added to `enhancedROC`
 - ✅ Automatic detection with configurable threshold (default 3:1 ratio)
 - ✅ Styled warning HTML with color-coded severity levels
@@ -2117,6 +2161,7 @@ Reference: Saito & Rehmsmeier (2015)...
 - 🟡 psychopdaROC imbalance detection - TODO (optional enhancement)
 
 **Phase 5 (v1.4 - Integration & Documentation): ✅ COMPLETE**
+
 - ✅ PRC option added to `clinicalvalidation` function
 - ✅ MCC included in `modelperformance` model comparisons
 - ✅ Cross-function compatibility verified (successful compilation)
@@ -2137,6 +2182,7 @@ Reference: Saito & Rehmsmeier (2015)...
 ### Jamovi Coverage Assessment
 
 **Well Covered:**
+
 - ✅ ROC curve analysis (`enhancedROC`)
 - ✅ Class imbalance handling (`classification` with SMOTE, resampling)
 - ✅ Bootstrap confidence intervals (multiple functions)
@@ -2153,6 +2199,7 @@ Reference: Saito & Rehmsmeier (2015)...
 - ❌ **Non-linear PRC interpolation** - Would need custom implementation
 
 **Partial Coverage:**
+
 - 🟡 Cost-effectiveness: `decisiongraph` uses ICER/NMB, not PCF(+)/NE[C]
 - 🟡 F-score: Calculated but not emphasized for imbalanced data
 - 🟡 Early retrieval: Partial AUC available but no ER-specific metrics
@@ -2161,6 +2208,7 @@ Reference: Saito & Rehmsmeier (2015)...
 ### Implementation Roadmap Summary
 
 **Immediate Priority (Phase 1):**
+
 1. **`precisionrecall` function** - Full PRC implementation with proper interpolation, AUC, baseline, CIs
 2. **MCC in `classification`** - Add balanced metric for imbalanced data
 3. **Documentation** - Vignette on imbalanced data evaluation citing this article
@@ -2177,6 +2225,7 @@ Reference: Saito & Rehmsmeier (2015)...
 ### Strategic Value
 
 Implementing these features positions ClinicoPath as:
+
 - **Methodologically rigorous** - Supports best practices from high-impact research
 - **Imbalanced-data specialist** - Critical for medical diagnostics, rare diseases, screening
 - **Educational platform** - Can demonstrate why PRC > ROC through interactive tools
@@ -2201,6 +2250,7 @@ Implementing these features positions ClinicoPath as:
 ### ✅ Completed (Phases 1-5 - ALL PHASES COMPLETE!)
 
 **Phase 1: Core Precision-Recall Curve Implementation**
+
 - ✅ New `precisionrecall` function fully implemented and registered
 - ✅ PRC plotting with proper baseline (y = P/(P+N))
 - ✅ AUC(PRC) calculation
@@ -2211,6 +2261,7 @@ Implementing these features positions ClinicoPath as:
 - ✅ Located in: meddecide → Diagnostic Test Evaluation → Precision-Recall Curve
 
 **Phase 2: Matthews Correlation Coefficient**
+
 - ✅ MCC added to `classification` function
 - ✅ Formula: MCC = (TP×TN - FP×FN) / √[(TP+FP)(TP+FN)(TN+FP)(TN+FN)]
 - ✅ Automatic interpretation (Very strong to Negative correlation)
@@ -2219,6 +2270,7 @@ Implementing these features positions ClinicoPath as:
 - ✅ Properly handles binary classification only
 
 **Phase 3: Advanced ROC Features**
+
 - ✅ **CROC Analysis** added to `enhancedROC`
   - ✅ Exponential magnifier function: f(x) = (1 - exp(-αx))/(1 - exp(-α))
   - ✅ Configurable alpha parameter (default=7.0, range 1.0-20.0)
@@ -2244,12 +2296,14 @@ Implementing these features positions ClinicoPath as:
   - 🟡 TODO: Early retrieval dashboard view
 
 **Files Modified for Phase 3:**
+
 - `jamovi/enhancedROC.a.yaml` - Added crocAnalysis, crocAlpha, convexHull, tiedScoreHandling options
 - `jamovi/enhancedROC.r.yaml` - Added crocAnalysisTable, convexHullTable, crocCurvePlot, convexHullPlot
 - `jamovi/enhancedROC.u.yaml` - Added UI controls for CROC/convex hull options
 - `R/enhancedROC.b.R` - Implemented .calculateCROC(), .calculateConvexHull(), .plotCROC(), .plotConvexHull()
 
 **Phase 4: Imbalance Detection & User Guidance**
+
 - ✅ **Automatic Class Imbalance Detection** in `enhancedROC`
   - ✅ Detects when P:N ratio exceeds configurable threshold (default 3:1)
   - ✅ Calculates imbalance metrics: N positive, N negative, ratio, prevalence, PRC baseline
@@ -2277,12 +2331,14 @@ Implementing these features positions ClinicoPath as:
   - ✅ Positioned before Clinical Context for visibility
 
 **Files Modified for Phase 4:**
+
 - `jamovi/enhancedROC.a.yaml` - Added detectImbalance, imbalanceThreshold, showImbalanceWarning, recommendPRC options
 - `jamovi/enhancedROC.r.yaml` - Added imbalanceWarning (Html), imbalanceMetrics (Table)
 - `jamovi/enhancedROC.u.yaml` - Added Class Imbalance Detection collapse box with controls
 - `R/enhancedROC.b.R` - Implemented .checkClassImbalance(), .generateImbalanceWarning()
 
 **Phase 5: Integration & Documentation**
+
 - ✅ **PRC Option in `clinicalvalidation`**
   - ✅ Added `show_prc_curve` option with description citing Saito & Rehmsmeier (2015)
   - ✅ Created `prccurve` Image result with `.prc_curve_plot` render function
@@ -2304,6 +2360,7 @@ Implementing these features positions ClinicoPath as:
   - Would cover: PRC vs ROC, MCC interpretation, imbalance detection, best practices
 
 **Files Modified for Phase 5:**
+
 - `jamovi/clinicalvalidation.a.yaml` - Added show_prc_curve option
 - `jamovi/clinicalvalidation.r.yaml` - Added prccurve Image with Saito2015 ref
 - `jamovi/clinicalvalidation.u.yaml` - Added show_prc_curve checkbox
@@ -2311,7 +2368,7 @@ Implementing these features positions ClinicoPath as:
 - `jamovi/modelperformance.r.yaml` - Added mcc column with Matthews1975/Saito2015 refs
 - `jamovi/modelperformance.u.yaml` - Added showMCC checkbox
 
-### 🎉 ALL PHASES COMPLETE!
+### 🎉 ALL PHASES COMPLETE
 
 ---
 
@@ -2320,6 +2377,7 @@ Implementing these features positions ClinicoPath as:
 **Version 1.4** - Phase 5 implemented - 🎉 ALL PHASES COMPLETE!
 **Date:** 2025-10-05
 **Implemented:**
+
 - PRC option in `clinicalvalidation` function (complete)
   - show_prc_curve option with Saito & Rehmsmeier (2015) citation
   - prccurve Image result with dedicated render function
@@ -2336,6 +2394,7 @@ Implementing these features positions ClinicoPath as:
 **Version 1.3** - Phase 4 implemented
 **Date:** 2025-10-05
 **Implemented:**
+
 - Class Imbalance Detection & User Guidance in `enhancedROC` (complete)
   - Automatic detection of imbalanced datasets (configurable threshold)
   - Styled warning HTML with color-coded severity levels
@@ -2347,6 +2406,7 @@ Implementing these features positions ClinicoPath as:
 **Version 1.2** - Phase 3 implemented
 **Date:** 2025-10-05
 **Implemented:**
+
 - CROC (Concentrated ROC) analysis in `enhancedROC` (complete)
   - Exponential magnifier function with configurable alpha
   - CROC AUC calculation and early retrieval gain metric
@@ -2361,6 +2421,7 @@ Implementing these features positions ClinicoPath as:
 **Version 1.1** - Phases 1-2 implemented
 **Date:** 2025-10-05
 **Implemented:**
+
 - Precision-Recall Curve function (complete)
 - Matthews Correlation Coefficient in classification (complete)
 
@@ -2374,15 +2435,18 @@ Implementing these features positions ClinicoPath as:
 ## REFERENCES
 
 **Primary Article:**
-- Saito, T., & Rehmsmeier, M. (2015). The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets. *PLoS ONE*, 10(3), e0118432. https://doi.org/10.1371/journal.pone.0118432
+
+- Saito, T., & Rehmsmeier, M. (2015). The Precision-Recall Plot Is More Informative than the ROC Plot When Evaluating Binary Classifiers on Imbalanced Datasets. *PLoS ONE*, 10(3), e0118432. <https://doi.org/10.1371/journal.pone.0118432>
 
 **Cited Methods:**
+
 - Davis, J., & Goadrich, M. (2006). The relationship between Precision-Recall and ROC curves. *Proceedings of the 23rd International Conference on Machine Learning*, 233-240.
 - Swamidass, S. J., Azencott, C. A., Daily, K., & Baldi, P. (2010). A CROC stronger than ROC: measuring, visualizing and optimizing early retrieval. *Bioinformatics*, 26(10), 1348-1356.
 - Matthews, B. W. (1975). Comparison of the predicted and observed secondary structure of T4 phage lysozyme. *Biochimica et Biophysica Acta*, 405(2), 442-451.
 - Drummond, C., & Holte, R. C. (2000). Explicitly representing expected cost: An alternative to ROC representation. *KDD-2000*, 198-207.
 
 **Tools Mentioned:**
+
 - ROCR (R package): Sing, T., Sander, O., Beerenwinkel, N., & Lengauer, T. (2005). ROCR: visualizing classifier performance in R. *Bioinformatics*, 21(20), 3940-3941.
 - AUCCalculator: Davis & Goadrich (2006) - Java application for accurate PRC/ROC interpolation
 - CROC Python library: Swamidass et al. (2010)

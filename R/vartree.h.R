@@ -364,27 +364,6 @@ vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' summaries, and interpretation features. Consolidates functionality from 
 #' legacy versions with modern vtree capabilities.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic variable tree
-#' vartree(
-#'     data = mydata,
-#'     vars = c("var1", "var2", "var3"),
-#'     style = "default",
-#'     showInterpretation = TRUE
-#' )
-#'
-#' # Enhanced tree with statistical summaries
-#' vartree(
-#'     data = mydata,
-#'     vars = c("treatment", "response"),
-#'     summaryvar = "age",
-#'     summarylocation = "allnodes",
-#'     style = "clean",
-#'     showInterpretation = TRUE
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param vars Categorical variables for tree construction.
 #' @param percvar Variable for percentage calculations.

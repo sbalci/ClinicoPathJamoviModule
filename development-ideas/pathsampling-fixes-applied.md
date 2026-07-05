@@ -11,6 +11,7 @@
 ### Critical Fixes (Must Fix) - ✅ COMPLETE
 
 #### 1. PATCH 3: Variable Name Escaping
+
 **Issue:** No protection against variable names with spaces or special characters
 **Risk:** Function would crash with variables like "Total Cassettes" or "First Detection #"
 **Fix Applied:**
@@ -34,6 +35,7 @@ firstDetectionData <- jmvcore::toNumeric(data[[firstDetectionEsc]])
 ```
 
 **Impact:**
+
 - ✅ Prevents crashes with special characters
 - ✅ Handles spaces, punctuation, Unicode
 - ✅ Follows jamovi best practices
@@ -41,11 +43,13 @@ firstDetectionData <- jmvcore::toNumeric(data[[firstDetectionEsc]])
 ---
 
 #### 2. PATCH 8: Enhanced Validation and Error Handling
+
 **Issue:** Basic error handling, silent failures possible
 **Risk:** Poor user experience, unclear error messages
 **Fixes Applied:**
 
 **a) Target Confidence Validation:**
+
 ```r
 if (targetConf <= 0 || targetConf >= 1) {
     dataInfo <- self$results$dataInfo
@@ -58,6 +62,7 @@ if (targetConf <= 0 || targetConf >= 1) {
 ```
 
 **b) Labelled/Factor Handling:**
+
 ```r
 # Convert factors to numeric
 if (is.factor(totalSamplesData) || !is.null(attr(totalSamplesData, 'labels'))) {
@@ -66,6 +71,7 @@ if (is.factor(totalSamplesData) || !is.null(attr(totalSamplesData, 'labels'))) {
 ```
 
 **c) No Valid Cases Error:**
+
 ```r
 if (length(firstDetectionData) == 0) {
     dataInfo <- self$results$dataInfo
@@ -78,6 +84,7 @@ if (length(firstDetectionData) == 0) {
 ```
 
 **d) Small Sample Warning:**
+
 ```r
 if (length(firstDetectionData) < 10) {
     interpretText <- self$results$interpretText
@@ -86,13 +93,14 @@ if (length(firstDetectionData) < 10) {
         <p style='margin: 0; color: #856404;'><b>⚠ WARNING: Small Sample Size</b></p>
         <p style='margin: 5px 0 0 0; color: #856404;'>Only %d cases with detected lesions.
         Results may be unreliable. Consider collecting more cases for robust estimates
-        (recommended: n ≥ 30 for bootstrap analysis).</p></div>",
+        (recommended: n >= 30 for bootstrap analysis).</p></div>",
         length(firstDetectionData))
     interpretText$setContent(warningHtml)
 }
 ```
 
 **e) Invalid Data Detection:**
+
 ```r
 # Check for first detection > total samples (data entry errors)
 invalidCases <- firstDetectionData > totalSamplesData
@@ -110,6 +118,7 @@ if (any(invalidCases)) {
 ```
 
 **Impact:**
+
 - ✅ Clear, actionable error messages
 - ✅ Graceful handling of edge cases
 - ✅ User-friendly warnings for data quality
@@ -120,11 +129,13 @@ if (any(invalidCases)) {
 ### High Priority Fixes (Should Fix) - ✅ COMPLETE
 
 #### 3. PATCH 1: Remove Unused groupVar Option
+
 **Issue:** `groupVar` defined in .a.yaml but never used in .b.R
 **Risk:** Confusing to users, dead code
 **Fix Applied:**
 
 Removed from `pathsampling.a.yaml`:
+
 ```yaml
 # REMOVED:
 - name: groupVar
@@ -137,11 +148,13 @@ Removed from `pathsampling.a.yaml`:
 ```
 
 Removed from `pathsampling.u.yaml`:
+
 ```yaml
 # REMOVED the groupVar VariablesListBox
 ```
 
 **Impact:**
+
 - ✅ Cleaner UI
 - ✅ No unused options
 - ✅ Less confusing for users
@@ -150,6 +163,7 @@ Removed from `pathsampling.u.yaml`:
 ---
 
 #### 4. PATCH 2: Add clearWith to Tables
+
 **Issue:** Tables didn't clear when variables changed
 **Risk:** Stale results displayed
 **Fixes Applied:**
@@ -183,6 +197,7 @@ Removed from `pathsampling.u.yaml`:
 ```
 
 **Impact:**
+
 - ✅ Tables clear when inputs change
 - ✅ No stale/incorrect results
 - ✅ Better UX consistency
@@ -192,10 +207,12 @@ Removed from `pathsampling.u.yaml`:
 ### Medium Priority Improvements - ✅ COMPLETE
 
 #### 5. PATCH 7: Enhanced Welcome Message
+
 **Issue:** Basic instructions, not visually engaging
 **Fix Applied:**
 
 Added styled welcome message with:
+
 - Gradient header
 - Step-by-step instructions
 - Visual icons (🔬 📊 ⚙️ 📈)
@@ -203,6 +220,7 @@ Added styled welcome message with:
 - References to methods
 
 **Impact:**
+
 - ✅ More professional appearance
 - ✅ Better onboarding for new users
 - ✅ Clear guidance on using the function
@@ -213,7 +231,9 @@ Added styled welcome message with:
 ## Files Modified
 
 ### 1. R/pathsampling.b.R
+
 **Changes:**
+
 - Added `.escapeVar()` utility function
 - Enhanced validation in `.run()`
 - Added error messages for edge cases
@@ -226,7 +246,9 @@ Added styled welcome message with:
 ---
 
 ### 2. jamovi/pathsampling.a.yaml
+
 **Changes:**
+
 - Removed unused `groupVar` option
 
 **Lines changed:** -8 deletions
@@ -234,7 +256,9 @@ Added styled welcome message with:
 ---
 
 ### 3. jamovi/pathsampling.u.yaml
+
 **Changes:**
+
 - Removed `groupVar` UI element
 
 **Lines changed:** -5 deletions
@@ -242,7 +266,9 @@ Added styled welcome message with:
 ---
 
 ### 4. jamovi/pathsampling.r.yaml
+
 **Changes:**
+
 - Added `welcome` output item
 - Added `clearWith` to 4 tables
 
@@ -251,9 +277,11 @@ Added styled welcome message with:
 ---
 
 ### 5. data-raw/generate_pathsampling_testdata.R (NEW)
+
 **Purpose:** Generate comprehensive test datasets
 
 **Datasets created:**
+
 - Main datasets (3): Omentum, Lymph nodes, Serial sections
 - Edge cases (6): Small sample, Special chars, Missing values, Invalid data, Perfect detection, Late detection
 
@@ -264,12 +292,14 @@ Added styled welcome message with:
 ## Testing Checklist - ✅ VERIFIED
 
 ### Critical Tests
+
 - [x] **Variables with spaces/special chars** - Escaping function added
 - [x] **All outputs populated** - Already working, clearWith added
 - [x] **Empty dataset handling** - Error message implemented
 - [x] **prepare()/document() pass cleanly** - ✅ Compiled successfully
 
 ### Edge Case Tests (Datasets Created)
+
 - [x] **Small sample (n=5)** - Warning displays correctly
 - [x] **Special characters** - Variables escape properly
 - [x] **Missing values** - Validation handles gracefully
@@ -286,6 +316,7 @@ Rscript -e "jmvtools::prepare()"
 ```
 
 **Result:** ✅ SUCCESS
+
 ```
 wrote: pathsampling.h.R
 wrote: pathsampling.src.js
@@ -298,6 +329,7 @@ wrote: pathsampling.src.js
 ## Quality Score Improvement
 
 ### Before Fixes
+
 | Category | Score | Issues |
 |----------|-------|--------|
 | Functionality | 8/10 | Missing groupVar |
@@ -309,6 +341,7 @@ wrote: pathsampling.src.js
 | **OVERALL** | **7.7/10** | **Good foundation** |
 
 ### After Fixes
+
 | Category | Score | Improvement |
 |----------|-------|-------------|
 | Functionality | 9/10 | ✅ Cleaned up unused option |
@@ -324,12 +357,14 @@ wrote: pathsampling.src.js
 ## Next Steps (Optional Enhancements)
 
 ### Low Priority (Not Critical)
+
 1. **Beta-binomial estimation** - Add advanced heterogeneity modeling
 2. **Finite population correction** - Hypergeometric distribution
 3. **ROC curve analysis** - Optimal cutpoint determination
 4. **Cost-effectiveness** - ICER calculations
 
 ### Future Considerations
+
 1. **Stratified analysis** - Re-implement groupVar with proper logic
 2. **Export functionality** - Save results to Word/PDF
 3. **Interactive plots** - Plotly integration
@@ -340,12 +375,14 @@ wrote: pathsampling.src.js
 ## Documentation Updates Needed
 
 ### User Documentation
+
 - [ ] Add vignette: "Introduction to Pathology Sampling Analysis"
 - [ ] Add vignette: "Interpreting Bootstrap Results"
 - [ ] Add vignette: "Case Study: Omentum Sampling"
 - [ ] Update README with pathsampling example
 
 ### Developer Documentation
+
 - [x] Function check report (this document)
 - [ ] Add unit tests for edge cases
 - [ ] Add integration tests
@@ -360,22 +397,26 @@ wrote: pathsampling.src.js
 **CRITICAL STATISTICAL FIX:** The per-cassette detection probability calculation was corrected to account for right-censored data.
 
 **The Problem:**
+
 - Original calculation: `p = nCases / totalCassettes` (e.g., 60/327 = 0.1835)
 - This wrongly assumed ALL submitted cassettes were examined
 - In reality, cassettes after first detection are NOT examined (right-censored)
 
 **The Solution:**
+
 - Corrected calculation: `p = nCases / sum(firstDetectionData)` (e.g., 60/113 = 0.531)
 - Only counts cassettes actually examined (up to first detection)
 - Example: If tumor in cassette #4, only cassettes 1-4 are counted
 
 **Impact:**
+
 - **Before correction:** p = 0.1835 (18.4%) → predicted 55.6% at 4 cassettes (didn't match observed 95%)
 - **After correction:** p = 0.531 (53.1%) → predicted 95.2% at 4 cassettes (perfect match!)
 - Binomial predictions now align perfectly with observed data
 - Changes recommendation from 15 cassettes to 4-5 cassettes for 95% sensitivity
 
 **Files modified:**
+
 - `R/pathsampling.b.R` lines 248-249, 220, 234
 - Updated Data Summary to show both "submitted" and "examined" cassettes
 - Enhanced documentation explaining right-censored data concept
@@ -385,7 +426,9 @@ wrote: pathsampling.src.js
 ## Summary
 
 ### What Was Fixed
+
 ✅ **Critical Issues (3/3):**
+
 1. **Right-censored data calculation** - CORRECTED per-cassette probability (Oct 10, 2025)
 2. Variable escaping for special characters
 3. Enhanced validation and error handling
@@ -398,17 +441,20 @@ wrote: pathsampling.src.js
 6. Enhanced welcome message
 
 ### Impact
+
 - **Safety:** ✅ Crash-proof with special characters
 - **UX:** ✅ Clear errors, beautiful welcome
 - **Quality:** ✅ Production-ready code
 - **Testing:** ✅ Comprehensive test datasets
 
 ### Compilation
+
 - **Status:** ✅ SUCCESS
 - **Errors:** 0
 - **Warnings:** 0
 
 ### Ready for Production
+
 ✅ **YES** - All critical and high-priority issues resolved
 
 ---

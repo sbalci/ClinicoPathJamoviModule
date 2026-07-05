@@ -341,7 +341,7 @@ dynamicpredictionClass <- R6::R6Class(
                 # Create time-varying dataset
                 tv_data <- private$.createTimeVaryingData(data)
                 
-                # Fit time-varying Cox model — composeTerms backtick-escapes
+                # Fit time-varying Cox model - composeTerms backtick-escapes
                 # user column names; asFormula validates against jamovi's
                 # allow-list (Surv is allow-listed).
                 formula_vars <- c(self$options$baseline, self$options$longitudinal)

@@ -31,7 +31,7 @@ data_path2 <- "data/"
 
 ## Overview
 
-Firth's penalized likelihood regression adds a Jeffreys-prior penalty to the likelihood function, producing finite and bias-corrected coefficient estimates even when standard maximum likelihood fails. This is essential for clinical studies with small samples, rare events, or complete/quasi-complete separation -- situations where standard logistic or Cox regression produces infinite or severely biased estimates.
+Firth's penalized likelihood regression adds a Jeffreys-prior penalty to the likelihood function, producing finite and bias-corrected coefficient estimates even when standard maximum likelihood fails. This is essential for clinical studies with small samples, rare events, or complete/quasi-complete separation - situations where standard logistic or Cox regression produces infinite or severely biased estimates.
 
 Unlike LASSO (which selects variables by shrinking some to zero), Firth regression keeps all variables but corrects first-order bias. It provides profile likelihood confidence intervals (more accurate than Wald for small samples), penalized likelihood ratio test p-values, and automatic separation detection.
 
@@ -135,7 +135,7 @@ Compare the CI widths: profile CIs are typically asymmetric (reflecting the actu
 
 ### Data with complete separation
 
-The `firth_separation` dataset includes a variable (`margin_positive`) that perfectly predicts the outcome -- all positive-margin patients had recurrence. Standard logistic regression would produce infinite coefficients.
+The `firth_separation` dataset includes a variable (`margin_positive`) that perfectly predicts the outcome - all positive-margin patients had recurrence. Standard logistic regression would produce infinite coefficients.
 
 ```{r separation}
 separation <- read.csv(paste0(data_path, "firth_separation.csv"))

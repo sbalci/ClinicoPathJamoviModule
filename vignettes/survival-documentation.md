@@ -1,4 +1,4 @@
-# Survival Analysis -- Developer Documentation
+# Survival Analysis - Developer Documentation
 
 > **Function:** `survival`
 > **Module:** ClinicoPath (SurvivalT > ClinicoPath Survival)
@@ -31,21 +31,21 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| VariablesListBox | target | Time Elapsed | `elapsedtime` | Variable (numeric) | null | -- |
-| VariablesListBox | target | Outcome | `outcome` | Variable (factor/numeric) | null | -- |
+| VariablesListBox | target | Time Elapsed | `elapsedtime` | Variable (numeric) | null | - |
+| VariablesListBox | target | Outcome | `outcome` | Variable (factor/numeric) | null | - |
 | LevelSelector | selector | Event Level | `outcomeLevel` | Level | allowNone | `(outcome && !multievent)` |
-| VariablesListBox | target | Explanatory Variable | `explanatory` | Variable (factor) | null | -- |
+| VariablesListBox | target | Explanatory Variable | `explanatory` | Variable (factor) | null | - |
 
 ### CollapseBox: Advanced Elapsed Time Options (collapsed)
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Calculate time from dates | `tint` | Bool | false | -- |
-| VariablesListBox | target | Diagnosis Date | `dxdate` | Variable | null | -- |
-| VariablesListBox | target | Follow-up Date | `fudate` | Variable | null | -- |
+| CheckBox | checkbox | Calculate time from dates | `tint` | Bool | false | - |
+| VariablesListBox | target | Diagnosis Date | `dxdate` | Variable | null | - |
+| VariablesListBox | target | Follow-up Date | `fudate` | Variable | null | - |
 | ComboBox | dropdown | Input Time Type | `timetypedata` | List | ymd | `(tint)` |
 | ComboBox | dropdown | Output Time Type | `timetypeoutput` | List | months | `(tint)` |
-| CheckBox | checkbox | Use Landmark Time | `uselandmark` | Bool | false | -- |
+| CheckBox | checkbox | Use Landmark Time | `uselandmark` | Bool | false | - |
 | TextBox | number | Landmark Time | `landmark` | Integer | 3 | `(uselandmark)` |
 
 ### CollapseBox: Analysis with Multiple Outcomes (collapsed)
@@ -65,17 +65,17 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Proportional Hazards Test | `ph_cox` | Bool | false | -- |
-| CheckBox | checkbox | Stratified Cox Model | `stratified_cox` | Bool | false | -- |
-| CheckBox | checkbox | Residual Diagnostics | `residual_diagnostics` | Bool | false | -- |
-| CheckBox | checkbox | Log-Log Plot | `loglog` | Bool | false | -- |
-| VariablesListBox | target | Stratification Variable | `strata_variable` | Variable (factor) | null | -- |
+| CheckBox | checkbox | Proportional Hazards Test | `ph_cox` | Bool | false | - |
+| CheckBox | checkbox | Stratified Cox Model | `stratified_cox` | Bool | false | - |
+| CheckBox | checkbox | Residual Diagnostics | `residual_diagnostics` | Bool | false | - |
+| CheckBox | checkbox | Log-Log Plot | `loglog` | Bool | false | - |
+| VariablesListBox | target | Stratification Variable | `strata_variable` | Variable (factor) | null | - |
 
 **Age Adjustment:**
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Age-Adjusted Cox Regression | `age_adjustment` | Bool | false | -- |
+| CheckBox | checkbox | Age-Adjusted Cox Regression | `age_adjustment` | Bool | false | - |
 | VariablesListBox | target | Age Variable | `age_variable` | Variable (numeric) | null | `(age_adjustment)` |
 | CheckBox | checkbox | Test Age x Group Interaction | `age_interaction` | Bool | false | `(age_adjustment)` |
 | CheckBox | checkbox | Stratify Cox by Age Groups | `age_stratified_cox` | Bool | false | `(age_adjustment)` |
@@ -90,17 +90,17 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Calibration Curves | `calibration_curves` | Bool | false | -- |
+| CheckBox | checkbox | Calibration Curves | `calibration_curves` | Bool | false | - |
 | TextBox | number | Time Point (0 = median) | `calibration_timepoint` | Number | 0 | `(calibration_curves)` |
 | TextBox | number | Number of Risk Groups | `calibration_ngroups` | Integer | 5 | `(calibration_curves)` |
-| CheckBox | checkbox | Bootstrap Internal Validation | `bootstrapValidation` | Bool | false | -- |
+| CheckBox | checkbox | Bootstrap Internal Validation | `bootstrapValidation` | Bool | false | - |
 | TextBox | number | Bootstrap Resamples | `bootstrapValN` | Integer | 200 | `(bootstrapValidation)` |
 
 **Non-Linearity Assessment:**
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Restricted Cubic Splines | `rcs_analysis` | Bool | false | -- |
+| CheckBox | checkbox | Restricted Cubic Splines | `rcs_analysis` | Bool | false | - |
 | VariablesListBox | target | Continuous Variable for Spline | `rcs_variable` | Variable (numeric) | NULL | `(rcs_analysis)` |
 | TextBox | number | Number of Knots (3-7) | `rcs_knots` | Integer | 4 | `(rcs_analysis)` |
 
@@ -108,40 +108,40 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Perform Pairwise Comparisons | `pw` | Bool | false | -- |
+| CheckBox | checkbox | Perform Pairwise Comparisons | `pw` | Bool | false | - |
 | ComboBox | dropdown | P-value Adjustment Method | `padjustmethod` | List | holm | `(pw)` |
 
 **Weighted Log-Rank Tests:**
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Perform Weighted Log-Rank Tests | `weightedLogRank` | Bool | false | -- |
+| CheckBox | checkbox | Perform Weighted Log-Rank Tests | `weightedLogRank` | Bool | false | - |
 | ComboBox | dropdown | Test Type | `survivalTestType` | List | logrank | `(weightedLogRank)` |
 
 **Restricted Mean Survival Time:**
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | RMST Analysis | `rmst_analysis` | Bool | false | -- |
+| CheckBox | checkbox | RMST Analysis | `rmst_analysis` | Bool | false | - |
 | TextBox | number | Tau (Restriction Time) | `rmst_tau` | Number | 0 | `(rmst_analysis)` |
 
 ### CollapseBox: Survival Plots (collapsed)
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Survival Curves | `sc` | Bool | false | -- |
-| CheckBox | checkbox | KMunicate Plot | `kmunicate` | Bool | false | -- |
-| CheckBox | checkbox | Cumulative Events | `ce` | Bool | false | -- |
-| CheckBox | checkbox | Cumulative Hazard | `ch` | Bool | false | -- |
-| CheckBox | checkbox | 95% Confidence Intervals | `ci95` | Bool | false | -- |
-| CheckBox | checkbox | Risk Table | `risktable` | Bool | false | -- |
-| CheckBox | checkbox | Show Censored Points | `censored` | Bool | false | -- |
-| CheckBox | checkbox | Show P-values | `pplot` | Bool | false | -- |
-| ComboBox | dropdown | Median Survival Line | `medianline` | List | none | -- |
-| TextBox | number | Plot End Time | `endplot` | Integer | 60 | -- |
-| TextBox | number | Time Interval | `byplot` | Integer | 12 | -- |
-| TextBox | number | Y-axis Start | `ybegin_plot` | Number | 0.00 | -- |
-| TextBox | number | Y-axis End | `yend_plot` | Number | 1.00 | -- |
+| CheckBox | checkbox | Survival Curves | `sc` | Bool | false | - |
+| CheckBox | checkbox | KMunicate Plot | `kmunicate` | Bool | false | - |
+| CheckBox | checkbox | Cumulative Events | `ce` | Bool | false | - |
+| CheckBox | checkbox | Cumulative Hazard | `ch` | Bool | false | - |
+| CheckBox | checkbox | 95% Confidence Intervals | `ci95` | Bool | false | - |
+| CheckBox | checkbox | Risk Table | `risktable` | Bool | false | - |
+| CheckBox | checkbox | Show Censored Points | `censored` | Bool | false | - |
+| CheckBox | checkbox | Show P-values | `pplot` | Bool | false | - |
+| ComboBox | dropdown | Median Survival Line | `medianline` | List | none | - |
+| TextBox | number | Plot End Time | `endplot` | Integer | 60 | - |
+| TextBox | number | Time Interval | `byplot` | Integer | 12 | - |
+| TextBox | number | Y-axis Start | `ybegin_plot` | Number | 0.00 | - |
+| TextBox | number | Y-axis End | `yend_plot` | Number | 1.00 | - |
 
 ### CollapseBox: Survival Tables (collapsed)
 
@@ -153,15 +153,15 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Calculate Person-Time Rates | `person_time` | Bool | false | -- |
+| CheckBox | checkbox | Calculate Person-Time Rates | `person_time` | Bool | false | - |
 | TextBox | string | Time Intervals | `time_intervals` | String | '12, 36, 60' | `(person_time)` |
-| TextBox | number | Rate Multiplier | `rate_multiplier` | Integer | 100 | -- |
+| TextBox | number | Rate Multiplier | `rate_multiplier` | Integer | 100 | - |
 
 ### CollapseBox: Data Export Options (collapsed)
 
 | UI Control | Type | Label | Option | a.yaml Type | Enable Condition |
 |---|---|---|---|---|---|
-| Output | output | Export Estimated Survival | `export_survival_data` | Output | -- |
+| Output | output | Export Estimated Survival | `export_survival_data` | Output | - |
 | Output | output | Add Calculated Time to Data | `calculatedtime` | Output | `(tint)` |
 | Output | output | Add Redefined Outcome to Data | `outcomeredefined` | Output | `(multievent)` |
 
@@ -177,7 +177,7 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | UI Control | Type | Label | Option | a.yaml Type | Default | Enable Condition |
 |---|---|---|---|---|---|---|
-| CheckBox | checkbox | Enable Parametric Models | `use_parametric` | Bool | false | -- |
+| CheckBox | checkbox | Enable Parametric Models | `use_parametric` | Bool | false | - |
 | ComboBox | dropdown | Distribution | `parametric_distribution` | List | weibull | `(use_parametric)` |
 | CheckBox | checkbox | Include Covariates | `parametric_covariates` | Bool | true | `(use_parametric)` |
 | TextBox | number | Spline Knots | `spline_knots` | Integer | 3 | `(use_parametric)` |
@@ -197,7 +197,7 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 | Option | Type | Default | Description | Backend Impact |
 |--------|------|---------|-------------|----------------|
-| `data` | Data | -- | The dataset | `self$data` throughout |
+| `data` | Data | - | The dataset | `self$data` throughout |
 | `elapsedtime` | Variable (numeric) | null | Survival time column | Used in `.cleandata()` -> `.definemytime()` |
 | `outcome` | Variable (factor/numeric) | null | Event indicator | Used in `.cleandata()` -> `.definemyoutcome()` |
 | `outcomeLevel` | Level | allowNone | Which factor level = event | Drives binary recoding in `.definemyoutcome()` |
@@ -212,7 +212,7 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 | `fudate` | Variable | null | Follow-up date | Lubridate parsing per `timetypedata` |
 | `timetypedata` | List | ymd | Date format in data | Selects lubridate parser (ymd, dmy, mdy, etc.) |
 | `timetypeoutput` | List | months | Output time units | Conversion divisor in `.definemytime()`, axis labels in plots |
-| `calculatedtime` | Output | -- | Export calculated time | `.run()` writes to `self$results$calculatedtime` |
+| `calculatedtime` | Output | - | Export calculated time | `.run()` writes to `self$results$calculatedtime` |
 
 ### Multiple Outcome Options
 
@@ -221,7 +221,7 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 | `multievent` | Bool | false | Enable competing risks | Triggers outcome recoding; gates `analysistype` |
 | `dod`, `dooc`, `awd`, `awod` | Level | allowNone | Event level assignments | Map outcome factor levels to competing risk states |
 | `analysistype` | List | overall | overall/cause/compete | `"compete"` skips Cox, pairwise, RMST; uses `cmprsk` |
-| `outcomeredefined` | Output | -- | Export recoded outcome | `.run()` writes recoded outcome column |
+| `outcomeredefined` | Output | - | Export recoded outcome | `.run()` writes recoded outcome column |
 
 ### Landmark Analysis
 
@@ -323,7 +323,7 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 | `showExplanations` | Bool | false | Method explanations | Gates visibility of all `*Explanation` Html items |
 | `showSummaries` | Bool | false | Natural language summaries | Gates `*Summary` items + clinical interpretation |
 | `remark_checklist` | Bool | false | REMARK checklist | Gates `.generateRemarkChecklist()` |
-| `export_survival_data` | Output | -- | Export survival estimates | Gates `.exportSurvivalData()` |
+| `export_survival_data` | Output | - | Export survival estimates | Gates `.exportSurvivalData()` |
 
 ### Parametric Model Options (UI present, backend disabled)
 
@@ -349,25 +349,25 @@ Controls are grouped by CollapseBox sections in `survival.u.yaml`. Each row maps
 
 The `.run()` method orchestrates all analysis in this sequence, with `private$.checkpoint()` calls between each step for jamovi's cooperative multitasking:
 
-1. **Input validation** (`private$.validateInputs()`) -- checks required variables are assigned
-2. **Data cleaning** (`private$.cleandata()`) -- assembles time/outcome/factor, applies landmark, renames columns, sets plot state
-3. **Event count safety checks** -- blocks analysis if < 10 events, warns if 10-50
-4. **Median survival** (`private$.medianSurv(results)`) -- always runs
-5. **RMST** (`private$.calculateRMST(results, tau)`) -- if `rmst_analysis`
-6. **Cox regression** (`private$.cox(results)`) -- unless competing risk
-7. **Age-adjusted Cox** (`private$.ageAdjustedCox(results)`) -- if `age_adjustment` + `age_variable`
-8. **Age as time scale** (`private$.ageTimeScaleCox(results)`) -- if `age_time_scale`
-9. **Age standardization** (`private$.ageStandardization(results)`) -- if `age_standardization`
-10. **Survival probability table** (`private$.survTable(results)`) -- always runs
+1. **Input validation** (`private$.validateInputs()`) - checks required variables are assigned
+2. **Data cleaning** (`private$.cleandata()`) - assembles time/outcome/factor, applies landmark, renames columns, sets plot state
+3. **Event count safety checks** - blocks analysis if < 10 events, warns if 10-50
+4. **Median survival** (`private$.medianSurv(results)`) - always runs
+5. **RMST** (`private$.calculateRMST(results, tau)`) - if `rmst_analysis`
+6. **Cox regression** (`private$.cox(results)`) - unless competing risk
+7. **Age-adjusted Cox** (`private$.ageAdjustedCox(results)`) - if `age_adjustment` + `age_variable`
+8. **Age as time scale** (`private$.ageTimeScaleCox(results)`) - if `age_time_scale`
+9. **Age standardization** (`private$.ageStandardization(results)`) - if `age_standardization`
+10. **Survival probability table** (`private$.survTable(results)`) - always runs
 11. **Export survival data** (`private$.exportSurvivalData(results)`)
-12. **Calibration curves** (`private$.calculateCalibration(results)`) -- if `calibration_curves`
-13. **RCS non-linearity** (`private$.calculateRCS(results)`) -- if `rcs_analysis` + `rcs_variable`
-14. **Pairwise comparisons** (`private$.pairwise(results)`) -- if `pw`
-15. **Weighted log-rank** (`private$.calculateWeightedLogRank(results)`) -- if `weightedLogRank`
-16. **Bootstrap validation** (`private$.calculateBootstrapValidation(results)`) -- if `bootstrapValidation`
-17. **REMARK checklist** (`private$.generateRemarkChecklist(results)`) -- if `remark_checklist`
-18. **Person-time analysis** (`private$.personTimeAnalysis(results)`) -- if `person_time`
-19. **Calculated time/outcome export** -- if `tint`/`multievent` + output enabled
+12. **Calibration curves** (`private$.calculateCalibration(results)`) - if `calibration_curves`
+13. **RCS non-linearity** (`private$.calculateRCS(results)`) - if `rcs_analysis` + `rcs_variable`
+14. **Pairwise comparisons** (`private$.pairwise(results)`) - if `pw`
+15. **Weighted log-rank** (`private$.calculateWeightedLogRank(results)`) - if `weightedLogRank`
+16. **Bootstrap validation** (`private$.calculateBootstrapValidation(results)`) - if `bootstrapValidation`
+17. **REMARK checklist** (`private$.generateRemarkChecklist(results)`) - if `remark_checklist`
+18. **Person-time analysis** (`private$.personTimeAnalysis(results)`) - if `person_time`
+19. **Calculated time/outcome export** - if `tint`/`multievent` + output enabled
 20. **Explanations** (`private$.populateExplanations()`)
 21. **Clinical interpretation** (`private$.populateEnhancedClinicalContent()`)
 
@@ -380,9 +380,9 @@ Central formula constructor. Escapes variable names with backticks via `.escapeV
 
 **`.cleandata()`**
 Assembles the analysis dataset from three sub-methods:
-- `.definemytime()` -- handles date parsing (lubridate) and time unit conversion
-- `.definemyoutcome()` -- binary recoding for overall/cause-specific, multi-state for competing risks
-- `.definemyfactor()` -- extracts and validates the explanatory variable
+- `.definemytime()` - handles date parsing (lubridate) and time unit conversion
+- `.definemyoutcome()` - binary recoding for overall/cause-specific, multi-state for competing risks
+- `.definemyfactor()` - extracts and validates the explanatory variable
 
 Returns a named list with `cleanData`, `name1time`, `name2outcome`, `name3explanatory`, and labelled names. Also sets plot state via `image$setState(plotData)` for all five plot results.
 
@@ -451,25 +451,25 @@ All output items from `survival.r.yaml`:
 
 | Name | Type | Title | clearWith |
 |------|------|-------|-----------|
-| `subtitle` | Preformatted | Survival Analysis - ${explanatory} | -- |
+| `subtitle` | Preformatted | Survival Analysis - ${explanatory} | - |
 | `todo` | Html | To Do | explanatory, outcome, outcomeLevel, elapsedtime, ... |
-| `medianSurvivalHeading` | Preformatted | Median Survival Analysis | -- |
+| `medianSurvivalHeading` | Preformatted | Median Survival Analysis | - |
 | `medianTable` | Table | Median Survival Table: Levels for ${explanatory} | explanatory, outcome, ... |
-| `coxRegressionHeading` | Preformatted | Cox Regression Analysis | -- |
+| `coxRegressionHeading` | Preformatted | Cox Regression Analysis | - |
 | `coxTable` | Table | Cox Table - ${explanatory} | explanatory, outcome, ... |
 | `tCoxtext2` | Html | (Cox formatted output) | explanatory, outcome, ... |
-| `survivalTablesHeading` | Preformatted | Survival Probability Tables | -- |
+| `survivalTablesHeading` | Preformatted | Survival Probability Tables | - |
 | `survTable` | Table | 1, 3, 5 year Survival - ${explanatory} | explanatory, outcome, ... |
 
 ### Conditional on `showSummaries`
 
 | Name | Type | Title | Additional Condition |
 |------|------|-------|---------------------|
-| `medianSummary` | Preformatted | Median Survival Summary - ${explanatory} | -- |
-| `coxSummary` | Preformatted | Cox Regression Summary - ${explanatory} | -- |
-| `survTableSummary` | Preformatted | 1, 3, 5-yr Survival Summary - ${explanatory} | -- |
-| `clinicalInterpretationExplanation` | Html | Enhanced Clinical Interpretation | -- |
-| `copyReadySentencesExplanation` | Html | Copy-Ready Clinical Report Sentences | -- |
+| `medianSummary` | Preformatted | Median Survival Summary - ${explanatory} | - |
+| `coxSummary` | Preformatted | Cox Regression Summary - ${explanatory} | - |
+| `survTableSummary` | Preformatted | 1, 3, 5-yr Survival Summary - ${explanatory} | - |
+| `clinicalInterpretationExplanation` | Html | Enhanced Clinical Interpretation | - |
+| `copyReadySentencesExplanation` | Html | Copy-Ready Clinical Report Sentences | - |
 | `rmstSummary` | Preformatted | RMST Interpretation | `rmst_analysis` |
 | `pairwiseSummary` | Preformatted | Pairwise Comparison Summary - ${explanatory} | `pw` |
 | `weightedLogRankExplanation` | Html | Weighted Log-Rank Test Interpretation | `weightedLogRank` |
@@ -479,12 +479,12 @@ All output items from `survival.r.yaml`:
 
 | Name | Type | Title | Additional Condition |
 |------|------|-------|---------------------|
-| `medianSurvivalHeading3` | Preformatted | Median Survival Explanations | -- |
-| `medianSurvivalExplanation` | Html | Understanding Median Survival | -- |
-| `coxRegressionHeading3` | Preformatted | Cox Regression Explanations | -- |
-| `coxRegressionExplanation` | Html | Understanding Cox Regression | -- |
-| `survivalTablesHeading3` | Preformatted | Survival Tables Explanations | -- |
-| `survivalTablesExplanation` | Html | Understanding Survival Tables | -- |
+| `medianSurvivalHeading3` | Preformatted | Median Survival Explanations | - |
+| `medianSurvivalExplanation` | Html | Understanding Median Survival | - |
+| `coxRegressionHeading3` | Preformatted | Cox Regression Explanations | - |
+| `coxRegressionExplanation` | Html | Understanding Cox Regression | - |
+| `survivalTablesHeading3` | Preformatted | Survival Tables Explanations | - |
+| `survivalTablesExplanation` | Html | Understanding Survival Tables | - |
 | `survivalPlotsHeading3` | Preformatted | Survival Plots Explanations | `sc \|\| ce \|\| ch \|\| kmunicate \|\| loglog` |
 | `survivalPlotsExplanation` | Html | Understanding Survival Curves | (same) |
 | `personTimeExplanation` | Html | Understanding Person-Time | `person_time` |
@@ -494,27 +494,27 @@ All output items from `survival.r.yaml`:
 | `rcsInterpretation` | Html | Non-Linearity Interpretation | `rcs_analysis` |
 | `ageAdjustedExplanation` | Html | Understanding Age-Adjusted Analysis | `age_adjustment` |
 | `parametricModelsExplanation` | Html | Understanding Parametric Models | `use_parametric` |
-| `clinicalGlossaryExplanation` | Html | Clinical Terminology Glossary | -- |
+| `clinicalGlossaryExplanation` | Html | Clinical Terminology Glossary | - |
 
 ### Conditional Analysis Outputs
 
 | Name | Type | Visible Condition | renderFun |
 |------|------|-------------------|-----------|
-| `personTimeHeading` | Preformatted | `person_time` | -- |
-| `personTimeTable` | Table | `person_time` | -- |
-| `personTimeSummary` | Html | `person_time` | -- |
-| `rmstHeading` | Preformatted | `rmst_analysis` | -- |
-| `rmstTable` | Table | `rmst_analysis` | -- |
-| `cox_ph` | Preformatted | `ph_cox` | -- |
-| `phInterpretation` | Html | `ph_cox` | -- |
-| `pairwiseComparisonHeading` | Preformatted | `pw` | -- |
-| `pairwiseTable` | Table | `pw` | -- |
-| `weightedLogRankTable` | Table | `weightedLogRank` | -- |
-| `residualsTable` | Table | `residual_diagnostics` | -- |
-| `bootstrapValidationTable` | Table | `bootstrapValidation` | -- |
-| `calibrationTable` | Table | `calibration_curves` | -- |
-| `calibrationGroupTable` | Table | `calibration_curves` | -- |
-| `rcsTestTable` | Table | `rcs_analysis` | -- |
+| `personTimeHeading` | Preformatted | `person_time` | - |
+| `personTimeTable` | Table | `person_time` | - |
+| `personTimeSummary` | Html | `person_time` | - |
+| `rmstHeading` | Preformatted | `rmst_analysis` | - |
+| `rmstTable` | Table | `rmst_analysis` | - |
+| `cox_ph` | Preformatted | `ph_cox` | - |
+| `phInterpretation` | Html | `ph_cox` | - |
+| `pairwiseComparisonHeading` | Preformatted | `pw` | - |
+| `pairwiseTable` | Table | `pw` | - |
+| `weightedLogRankTable` | Table | `weightedLogRank` | - |
+| `residualsTable` | Table | `residual_diagnostics` | - |
+| `bootstrapValidationTable` | Table | `bootstrapValidation` | - |
+| `calibrationTable` | Table | `calibration_curves` | - |
+| `calibrationGroupTable` | Table | `calibration_curves` | - |
+| `rcsTestTable` | Table | `rcs_analysis` | - |
 
 ### Age Adjustment Outputs
 
@@ -693,8 +693,8 @@ flowchart TD
 
 | Option Changed | What Recalculates |
 |---|---|
-| `elapsedtime`, `outcome`, `outcomeLevel` | Everything -- full re-analysis |
-| `explanatory` | Everything -- full re-analysis |
+| `elapsedtime`, `outcome`, `outcomeLevel` | Everything - full re-analysis |
+| `explanatory` | Everything - full re-analysis |
 | `tint`, `dxdate`, `fudate` | Time calculation, then full re-analysis |
 | `multievent`, `analysistype`, `dod/dooc/awd/awod` | Outcome recoding, then full re-analysis |
 | `uselandmark`, `landmark` | Data filtering in `.cleandata()`, then full re-analysis |
@@ -805,8 +805,8 @@ The bootstrap validation uses `survival::concordance(cox_fit, reverse = TRUE)` b
 ### Event count safety thresholds
 
 Three tiers enforced in `.run()`:
-- **< 10 events**: `stop()` -- blocks analysis entirely with error message
-- **10-19 events**: `setNote("lowevents", ...)` -- caution warning
-- **20-49 events**: `setNote("moderateevents", ...)` -- informational note about limitations for complex analyses
+- **< 10 events**: `stop()` - blocks analysis entirely with error message
+- **10-19 events**: `setNote("lowevents", ...)` - caution warning
+- **20-49 events**: `setNote("moderateevents", ...)` - informational note about limitations for complex analyses
 
 These thresholds protect clinicians from drawing conclusions from statistically underpowered analyses.

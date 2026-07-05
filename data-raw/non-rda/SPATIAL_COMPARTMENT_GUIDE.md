@@ -7,21 +7,25 @@ The spatial compartment analysis feature allows you to compare IHC marker expres
 ## Clinical Applications
 
 ### 1. **Tumor Compartments (Matsuoka et al., 2011)**
+
 - **Central parts**: Superficial to deepest third of tumor
 - **Invasive fronts**: Deepest fourth of tumor (most aggressive region)
 - **Clinical significance**: Loss of adhesion molecules at invasive fronts predicts poor prognosis
 
 ### 2. **Disease Progression States**
+
 - **Preinvasive**: Dysplasia, carcinoma in situ
 - **Invasive**: Infiltrating carcinoma
 - **Clinical significance**: Identify markers that change during malignant transformation
 
 ### 3. **Primary vs Metastatic**
+
 - **Primary tumor**: Original site
 - **Metastatic**: Lymph node, distant organ metastases
 - **Clinical significance**: Understand clonal evolution and therapy resistance
 
 ### 4. **Tumor Microenvironment**
+
 - **Core**: Hypoxic center
 - **Periphery**: Well-vascularized edge
 - **Clinical significance**: Microenvironmental adaptation of tumor cells
@@ -29,10 +33,12 @@ The spatial compartment analysis feature allows you to compare IHC marker expres
 ## Data Structure
 
 Your data must include:
+
 1. **IHC marker variables** (categorical and/or continuous)
-2. **Spatial compartment variable** (factor with ≥2 levels)
+2. **Spatial compartment variable** (factor with >=2 levels)
 
 Example:
+
 ```csv
 CaseID,Compartment,ER,PR,HER2,Ki67_Percent
 BC001,Central,Positive,Positive,1+,12.5
@@ -44,23 +50,27 @@ BC002,Invasive,Positive,Negative,1+,18.9
 ## Analysis Modes
 
 ### Mode 1: "between" - Compare clusters between compartments
+
 - Clusters **all cases together** (central + invasive)
 - Compares cluster assignments **between compartments**
 - Answers: "Do central and invasive regions cluster differently?"
 - **Use when**: Same cases appear in multiple compartments
 
 ### Mode 2: "within" - Cluster each compartment separately
+
 - Performs **separate clustering** for each compartment
 - Answers: "What are the marker patterns within each compartment?"
 - **Use when**: Different cases in each compartment OR want compartment-specific patterns
 
 ### Mode 3: "both" - Comprehensive analysis
+
 - Performs both between and within analyses
 - **Recommended**: Most informative approach
 
 ## Statistical Methods
 
 ### 1. **Concordance Analysis**
+
 - **Metric**: Cohen's Kappa
 - **Interpretation** (Landis & Koch, 1977):
   - κ < 0: Poor agreement
@@ -71,43 +81,55 @@ BC002,Invasive,Positive,Negative,1+,18.9
   - κ = 0.8-1.0: Almost perfect agreement
 
 ### 2. **Marker Difference Testing**
+
 - **Continuous markers**: Mann-Whitney U test + Cohen's d
 - **Categorical markers**: Chi-square test + Cramér's V
 - **Purpose**: Identify which markers differ significantly between compartments
 
 ### 3. **Cluster Quality by Compartment**
+
 - **Silhouette width**: Cluster cohesion
-- **Quality ratings**: Excellent (>0.7), Good (>0.5), Fair (>0.25), Poor (≤0.25)
+- **Quality ratings**: Excellent (>0.7), Good (>0.5), Fair (>0.25), Poor (<=0.25)
 
 ## Output Tables
 
 ### 1. **Spatial Compartment Summary**
+
 Shows clustering quality for each compartment:
+
 - N cases per compartment
 - N clusters identified
 - Average silhouette width
 - Quality rating
 
 ### 2. **Inter-Compartment Cluster Concordance**
+
 Shows agreement between compartments:
+
 - Concordance percentage
 - Cohen's kappa
 - Interpretation
 
 ### 3. **Cluster Distribution by Compartment**
+
 Shows how clusters distribute across compartments:
+
 - Cluster frequencies
 - Percentages
 - Identifies compartment-specific clusters
 
 ### 4. **Marker Expression Differences by Compartment**
+
 Statistical tests for each marker:
+
 - Test statistic
 - p-value
 - Effect size (Cohen's d or Cramér's V)
 
 ### 5. **Spatial Compartment Heatmap**
+
 Visualizes:
+
 - Marker expression patterns
 - Compartment annotations (colored bars)
 - Cluster assignments
@@ -116,21 +138,27 @@ Visualizes:
 ## Clinical Interpretation Examples
 
 ### Example 1: Colorectal Cancer (Matsuoka et al., 2011)
+
 **Finding**: Loss of E-cadherin at invasive front
+
 - **Concordance**: κ = 0.35 (Fair agreement)
 - **Survival impact**: Independent predictor (HR=3.42, p<0.001)
 - **Interpretation**: Different biological behavior at invasive edge
 - **Clinical action**: Consider invasive front markers for prognosis
 
 ### Example 2: Breast Cancer Progression
+
 **Finding**: ER loss in invasive vs preinvasive regions
+
 - **Concordance**: κ = 0.58 (Moderate agreement)
 - **Effect size**: Cramér's V = 0.42 (medium effect)
 - **Interpretation**: Dedifferentiation during invasion
 - **Clinical action**: May need therapy escalation
 
 ### Example 3: Metastatic Evolution
+
 **Finding**: HER2 amplification in metastasis vs primary
+
 - **Concordance**: κ = 0.72 (Substantial agreement)
 - **Marker difference**: χ²=15.3, p<0.001, Cramér's V=0.51
 - **Interpretation**: Clonal selection or therapy pressure
@@ -165,6 +193,7 @@ Visualizes:
 ## Mathematical Soundness
 
 ### Cohen's Kappa Calculation
+
 ```
 κ = (p_observed - p_expected) / (1 - p_expected)
 
@@ -174,7 +203,9 @@ p_expected = expected agreement = Σ(row_i × col_i) / total²
 ```
 
 ### Effect Sizes
+
 **Cohen's d** (continuous):
+
 ```
 d = (μ₁ - μ₂) / σ_pooled
 
@@ -188,6 +219,7 @@ Interpretation:
 ```
 
 **Cramér's V** (categorical):
+
 ```
 V = √(χ² / (n × min(r-1, c-1)))
 
@@ -221,19 +253,23 @@ V > 0.5: large
 ## Troubleshooting
 
 ### Issue: "Spatial analysis requires at least 2 compartments"
-- **Solution**: Check that your compartment variable has ≥2 levels
+
+- **Solution**: Check that your compartment variable has >=2 levels
 - **Check**: `table(data$CompartmentVariable)`
 
 ### Issue: Kappa = NA in concordance table
+
 - **Cause**: Unequal number of clusters between compartments
 - **Solution**: Normal when cluster structures differ
 - **Action**: Focus on concordance percentage instead
 
 ### Issue: Empty compartment summary table
+
 - **Cause**: Too few cases per compartment (< k clusters)
 - **Solution**: Reduce number of clusters OR combine compartments
 
 ### Issue: All p-values = 1.0 in marker differences
+
 - **Cause**: No actual differences between compartments
 - **Action**: Review data quality OR compartment definition
 

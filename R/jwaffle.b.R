@@ -51,7 +51,7 @@
 #' **How Waffle Charts Work:**
 #' A waffle chart uses a grid of colored squares (typically 10x10 = 100 squares)
 #' where each square represents a fixed proportion of the total sample. This makes
-#' percentages immediately intuitive - each square ≈ 1% of the sample.
+#' percentages immediately intuitive - each square \u2248 1% of the sample.
 #'
 #' **Clinical Applications:**
 #' - **Disease Classification:** Show distribution of tumor grades, cancer stages,
@@ -71,7 +71,7 @@
 #' - Faceting enables subgroup comparisons
 #'
 #' **Statistical Considerations:**
-#' - Most effective with n≥30; smaller samples may show unstable proportions
+#' - Most effective with n\u226530; smaller samples may show unstable proportions
 #' - Works best when no single category dominates (>80%)
 #' - Each square represents approximately 1% of the sample
 #' - Categories with <5 cases may be statistically unreliable
@@ -144,8 +144,6 @@
 #' @import scales
 #' @importFrom rlang sym
 #' @importFrom digest digest
-#'
-#' @export
 
 
 jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -227,7 +225,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 combined_msg <- paste(private$.messages, collapse = "\n")
                 clean_msg <- gsub("<br>|<br/>|<hr>", "\n", combined_msg)
                 clean_msg <- gsub("<[^>]*>", "", clean_msg)
-                clean_msg <- gsub("&bull;", "•", clean_msg)
+                clean_msg <- gsub("&bull;", "\u2022", clean_msg)
                 clean_msg <- gsub("&nbsp;", " ", clean_msg)
                 clean_msg <- trimws(clean_msg)
 
@@ -630,7 +628,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # HTML-escape every user-controlled identifier (column names + factor labels)
             # before interpolating into the HTML summary. Column names and factor labels
-            # are arbitrary strings from the user's dataset — escape once at the boundary
+            # are arbitrary strings from the user's dataset - escape once at the boundary
             # so the rest of the function can stay readable.
             groups_var_safe <- htmltools::htmlEscape(groups_var)
             plotdata[[groups_var]] <- htmltools::htmlEscape(as.character(plotdata[[groups_var]]))
@@ -672,7 +670,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     max_proportion <- proportions[max_prop_idx]
 
                     summary_parts[[facet_level]] <- sprintf(
-                        "<b>Among %s %s</b> (n=%d): %s → <i>%s %s predominates (%.1f%%)</i>",
+                        "<b>Among %s %s</b> (n=%d): %s \u2192 <i>%s %s predominates (%.1f%%)</i>",
                         facet_var_safe, facet_level, facet_total, category_breakdown,
                         groups_var_safe, dominant_category, max_proportion
                     )
@@ -725,38 +723,38 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "<b>What is a Waffle Chart?</b><br>",
                 "A waffle chart is a visual representation of categorical data using a grid of colored squares, ",
                 "where each square represents a fixed proportion of the total sample. The chart typically uses ",
-                "a 10×10 grid (100 squares) to represent percentages intuitively.<br><br>",
+                "a 10\u00d710 grid (100 squares) to represent percentages intuitively.<br><br>",
                 
                 "<b>Clinical Applications:</b><br>",
-                "• <b>Disease Classification:</b> Show distribution of tumor grades, cancer stages, or pathological subtypes<br>",
-                "• <b>Treatment Outcomes:</b> Display response rates (complete/partial/no response) across patient cohorts<br>",
-                "• <b>Demographic Analysis:</b> Present patient characteristics, risk factors, or comorbidity patterns<br>",
-                "• <b>Quality Metrics:</b> Visualize compliance rates, diagnostic accuracy, or safety outcomes<br><br>",
+                "\u2022 <b>Disease Classification:</b> Show distribution of tumor grades, cancer stages, or pathological subtypes<br>",
+                "\u2022 <b>Treatment Outcomes:</b> Display response rates (complete/partial/no response) across patient cohorts<br>",
+                "\u2022 <b>Demographic Analysis:</b> Present patient characteristics, risk factors, or comorbidity patterns<br>",
+                "\u2022 <b>Quality Metrics:</b> Visualize compliance rates, diagnostic accuracy, or safety outcomes<br><br>",
                 
                 "<b>Advantages over Other Charts:</b><br>",
-                "• <b>Intuitive Interpretation:</b> Each square = 1% makes percentages immediately clear<br>",
-                "• <b>Part-to-Whole Clarity:</b> Better than pie charts for showing proportions<br>",
-                "• <b>Multiple Categories:</b> Handles many categories better than bar charts<br>",
-                "• <b>Visual Impact:</b> Effective for presentations and publications<br><br>",
+                "\u2022 <b>Intuitive Interpretation:</b> Each square = 1% makes percentages immediately clear<br>",
+                "\u2022 <b>Part-to-Whole Clarity:</b> Better than pie charts for showing proportions<br>",
+                "\u2022 <b>Multiple Categories:</b> Handles many categories better than bar charts<br>",
+                "\u2022 <b>Visual Impact:</b> Effective for presentations and publications<br><br>",
                 
                 "<b>Statistical Considerations:</b><br>",
-                "• <b>Sample Size:</b> Most effective with n≥30; smaller samples may show unstable proportions<br>",
-                "• <b>Category Balance:</b> Works best when no single category dominates (>80%)<br>",
-                "• <b>Precision:</b> Each square represents approximately 1% of the sample<br>",
-                "• <b>Statistical Testing:</b> Chi-square tests can evaluate proportion differences<br><br>",
+                "\u2022 <b>Sample Size:</b> Most effective with n\u226530; smaller samples may show unstable proportions<br>",
+                "\u2022 <b>Category Balance:</b> Works best when no single category dominates (>80%)<br>",
+                "\u2022 <b>Precision:</b> Each square represents approximately 1% of the sample<br>",
+                "\u2022 <b>Statistical Testing:</b> Chi-square tests can evaluate proportion differences<br><br>",
                 
                 "<b>Interpretation Guidelines:</b><br>",
-                "• <b>Dominant Patterns:</b> Categories with >60% suggest clear predominance<br>",
-                "• <b>Balanced Distributions:</b> No category >40% indicates diverse sample<br>",
-                "• <b>Rare Categories:</b> <5% of sample may represent clinically significant subgroups<br>",
-                "• <b>Comparative Analysis:</b> Use faceting to compare across patient groups or time periods<br><br>",
+                "\u2022 <b>Dominant Patterns:</b> Categories with >60% suggest clear predominance<br>",
+                "\u2022 <b>Balanced Distributions:</b> No category >40% indicates diverse sample<br>",
+                "\u2022 <b>Rare Categories:</b> <5% of sample may represent clinically significant subgroups<br>",
+                "\u2022 <b>Comparative Analysis:</b> Use faceting to compare across patient groups or time periods<br><br>",
                 
                 "<b>Best Practices for Clinical Research:</b><br>",
-                "• Use clear, standardized category labels (e.g., 'Grade 1', 'Grade 2', 'Grade 3')<br>",
-                "• Choose colorblind-friendly palettes for accessibility<br>",
-                "• Include sample sizes and confidence intervals when reporting<br>",
-                "• Consider combining rare categories (<5 cases) for statistical stability<br>",
-                "• Always report exact percentages and counts alongside visual representation"
+                "\u2022 Use clear, standardized category labels (e.g., 'Grade 1', 'Grade 2', 'Grade 3')<br>",
+                "\u2022 Choose colorblind-friendly palettes for accessibility<br>",
+                "\u2022 Include sample sizes and confidence intervals when reporting<br>",
+                "\u2022 Consider combining rare categories (<5 cases) for statistical stability<br>",
+                "\u2022 Always report exact percentages and counts alongside visual representation"
             )
             
             return(explanation)
@@ -1065,7 +1063,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Detecting the option by CLASS (not by name) means any variable option
             # added later is escaped automatically.
             #
-            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # Variables are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated them in the generated syntax (the "double
             # variables" bug). All non-variable options keep jmvcore's per-option
             # sourcify so formatting stays consistent with jamovi.

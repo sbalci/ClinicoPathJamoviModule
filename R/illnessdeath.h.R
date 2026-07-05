@@ -880,19 +880,6 @@ illnessdeathBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' times, and transition-specific hazard ratios with clinical interpretation 
 #' frameworks for evidence-based medicine.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- illnessdeath(
-#'     data = mydata,
-#'     time_entry = "entry_time",
-#'     time_exit = "exit_time",
-#'     state_from = "from_state",
-#'     state_to = "to_state",
-#'     covariates = c("age", "treatment", "stage"),
-#'     reversible_illness = FALSE
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time_entry Time of entry into the current state. For interval data,
 #'   this is the start time of the observation interval.

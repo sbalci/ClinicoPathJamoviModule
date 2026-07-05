@@ -363,7 +363,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
 
             n_nodes <- nrow(private$.model$frame)
             n_leaves <- sum(private$.model$frame$var == "<leaf>")
-            # TODO (cleanup): rpart:::tree.depth is an UNEXPORTED internal — `:::` is fragile
+            # TODO (cleanup): rpart:::tree.depth is an UNEXPORTED internal - `:::` is fragile
             #   across rpart versions and trips R CMD check. Compute depth from the public node
             #   ids instead: max(floor(log2(as.numeric(rownames(private$.model$frame)))))
             #   (rpart node ids encode depth as floor(log2(id))). Same issue tracked in treeadvanced.

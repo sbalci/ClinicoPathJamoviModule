@@ -25,6 +25,7 @@ This paper represents the **most sophisticated approach** to pathology sampling 
 ### Research Question
 
 **Dual objectives:**
+
 1. **Minimal:** What's the minimum number of lymph nodes to prevent understaging?
 2. **Optimal:** What's the optimal number to maximize survival?
 
@@ -47,7 +48,8 @@ This paper represents the **most sophisticated approach** to pathology sampling 
 | Optimal (TP) | 25 | Maximally selected log-rank | p=0.008 |
 
 **Survival impact:**
-- Optimal (≥20 LN): Median OS = **80.3 months**
+
+- Optimal (>=20 LN): Median OS = **80.3 months**
 - Suboptimal (<20 LN): Median OS = **37.2 months**
 - **Difference: 43.1 months** (p<0.001)
 
@@ -60,23 +62,25 @@ This paper represents the **most sophisticated approach** to pathology sampling 
 **This is BRILLIANT and we should adopt it!**
 
 **Minimal Threshold (Stage Migration):**
+
 - **Purpose:** Prevent false N0 classification
 - **Method:** Find maximum LN count where significant N+ difference observed
 - **Statistical test:** Chi-square test for nodal positivity
 - **Result:** 10 LN minimum
   - <10 LN: 23% N+ (5/22)
-  - ≥10 LN: 45% N+ (144/319)
+  - >=10 LN: 45% N+ (144/319)
   - **Difference: p=0.040**
 
 **Quote (lines 297-310):**
-> "Patients with <10 lymph nodes examined had significantly less nodal disease [node negative: n=17 (77%) and node positive: n=5 (23%)] compared to patients with ≥10 lymph nodes examined [node negative: n=175, (55%) and node positive: n=144 (45%)]. Beyond 10 lymph nodes harvested, no significant stage migration was observed."
+> "Patients with <10 lymph nodes examined had significantly less nodal disease [node negative: n=17 (77%) and node positive: n=5 (23%)] compared to patients with >=10 lymph nodes examined [node negative: n=175, (55%) and node positive: n=144 (45%)]. Beyond 10 lymph nodes harvested, no significant stage migration was observed."
 
 **Optimal Threshold (Survival Maximization):**
+
 - **Purpose:** Maximize survival benefit
 - **Method:** Maximally selected log-rank statistic
 - **Statistical test:** Find cutoff that maximizes log-rank chi-square
 - **Result:** 20 LN optimal
-  - ≥20 LN: OS = 80.3 months
+  - >=20 LN: OS = 80.3 months
   - <20 LN: OS = 37.2 months
   - **Difference: p<0.001**
 
@@ -87,12 +91,14 @@ This paper represents the **most sophisticated approach** to pathology sampling 
 **This is the KEY methodological advance!**
 
 **What it does:**
+
 - Tests EVERY possible cutoff value
 - Calculates log-rank statistic for each
 - Selects the cutoff with maximum separation in survival curves
 - Accounts for multiple testing with appropriate p-value adjustment
 
 **Visual from Figure 1:**
+
 ```
 Y-axis: Standardized Log-Rank Statistic (0-4)
 X-axis: Total Nodes Harvested (5-35)
@@ -108,12 +114,14 @@ Pattern observed:
 > "A maximally selected log-rank statistic, analogous to the lowest p-value method, was used to derive the optimal number of lymph nodes examined for overall survival (OS)."
 
 **Implementation in R (line 270):**
+
 ```r
 # Using R package "MaxStat"
 # Finds optimal cutoff maximizing survival difference
 ```
 
 **Why this is powerful:**
+
 - **Data-driven:** Not arbitrary cutoff
 - **Outcome-focused:** Based on actual survival, not just staging
 - **Statistically rigorous:** Accounts for multiple comparisons
@@ -128,15 +136,17 @@ Pattern observed:
 | LN Examined | N0 Rate | N+ Rate | Interpretation |
 |-------------|---------|---------|----------------|
 | <10 | 77% (17/22) | 23% (5/22) | **Understaging** |
-| ≥10 | 55% (175/319) | 45% (144/319) | Adequate |
+| >=10 | 55% (175/319) | 45% (144/319) | Adequate |
 
-**Absolute difference:** 22% more N+ detected with ≥10 LN (p=0.040)
+**Absolute difference:** 22% more N+ detected with >=10 LN (p=0.040)
 
 **Pairwise survival comparisons (Supplemental Table 1):**
-- N0 with <20 LN ≈ N1 with ≥20 LN (p=0.223)
-- N1 with <20 LN ≈ N2 with ≥20 LN (p=0.181)
+
+- N0 with <20 LN ≈ N1 with >=20 LN (p=0.223)
+- N1 with <20 LN ≈ N2 with >=20 LN (p=0.181)
 
 **This PROVES understaging:**
+
 - Patients classified as N0 with inadequate sampling
 - Actually have survival similar to N1 with adequate sampling
 - They were misclassified!
@@ -148,19 +158,23 @@ Pattern observed:
 **Optimal lymphadenectomy as independent prognostic factor:**
 
 **Overall Survival:**
+
 - **HR: 0.57** (95% CI: 0.39-0.83)
 - **P = 0.003**
 - Harrell's C-statistic: 0.76
 
 **Recurrence-Free Survival:**
+
 - **HR: 0.70** (95% CI: 0.51-0.97)
 - **P = 0.031**
 - Harrell's C-statistic: 0.73
 
 **Adjusted for:**
+
 - Age, CA19-9, N-stage, perineural invasion, adjuvant chemotherapy
 
 **This is CRITICAL validation:**
+
 - Optimal lymphadenectomy improves survival even after adjusting for nodal status
 - Suggests therapeutic benefit, not just better staging
 - Independent effect beyond N0/N1/N2 classification
@@ -170,15 +184,18 @@ Pattern observed:
 ### 5. Lymph Node Ratio (LNR) Analysis
 
 **LNR as predictor:**
+
 - Each 0.1 increase in LNR:
   - OS: HR 1.28 (1.15-1.43), p<0.001
   - RFS: HR 1.40 (1.27-1.54), p<0.001
 
 **This validates the importance of BOTH:**
+
 1. Number of positive nodes (numerator)
 2. Number examined nodes (denominator)
 
 **Application to omentum:**
+
 - Could calculate "cassette positivity ratio"
 - Positive cassettes / total cassettes
 - Likely similar prognostic value
@@ -207,6 +224,7 @@ Pattern observed:
 **We can calculate this NOW with existing data!**
 
 **Method:**
+
 ```r
 # Test for stage migration
 # Group by cassettes examined
@@ -227,6 +245,7 @@ chisq.test(detection_rate by group)
 ```
 
 **Expected result (from our data):**
+
 ```
 Group 1-2 cassettes: 76.7% detection (46/60)
 Group 3-4 cassettes: 95.0% detection (57/60)
@@ -239,6 +258,7 @@ Minimal threshold: 3 cassettes
 ```
 
 **Implementation in pathsampling:**
+
 ```r
 # In pathsampling.b.R, add minimal threshold analysis
 .calculateMinimalThreshold = function(totalSamplesData, firstDetectionData) {
@@ -246,7 +266,7 @@ Minimal threshold: 3 cassettes
     # Create groups by total cassettes
     groups <- cut(totalSamplesData,
                   breaks = c(0, 2, 4, 6, Inf),
-                  labels = c("1-2", "3-4", "5-6", "≥7"))
+                  labels = c("1-2", "3-4", "5-6", ">=7"))
 
     # Calculate detection rate by group
     detection_by_group <- sapply(levels(groups), function(grp) {
@@ -269,6 +289,7 @@ Minimal threshold: 3 cassettes
 **Requires survival data, but conceptually:**
 
 **If we had survival data:**
+
 ```r
 # Using R package "maxstat"
 library(maxstat)
@@ -293,6 +314,7 @@ plot(maxstat_result)
 ```
 
 **Expected result (hypothesis):**
+
 - Minimal: 3 cassettes (prevents missing metastases)
 - Optimal: 4-5 cassettes (maximizes therapeutic clearance + accurate staging)
 
@@ -303,15 +325,17 @@ plot(maxstat_result)
 **If we collect survival data, we could validate:**
 
 **Primary analysis:**
-1. Kaplan-Meier curves: <4 vs ≥4 cassettes
+
+1. Kaplan-Meier curves: <4 vs >=4 cassettes
 2. Log-rank test for difference
 3. Median OS comparison
 
 **Multivariable Cox regression:**
+
 ```r
 # Model 1: Optimal cassettes as predictor
 cox_model_1 <- coxph(Surv(os_time, os_event) ~
-                     adequate_sampling +  # <4 vs ≥4
+                     adequate_sampling +  # <4 vs >=4
                      age +
                      stage +
                      grade +
@@ -327,7 +351,8 @@ cox_model_2 <- coxph(Surv(os_time, os_event) ~
 ```
 
 **Expected findings:**
-- Adequate sampling (≥4 cassettes): HR < 1.0 (protective)
+
+- Adequate sampling (>=4 cassettes): HR < 1.0 (protective)
 - Higher cassette positivity ratio: HR > 1.0 (worse outcome)
 - Both independent of stage (like Habib found)
 
@@ -340,6 +365,7 @@ cox_model_2 <- coxph(Surv(os_time, os_event) ~
 **Problem:** How to find the "best" cutoff without p-hacking?
 
 **Traditional approach (WRONG):**
+
 ```r
 # Try many cutoffs, pick lowest p-value
 # This inflates Type I error!
@@ -357,6 +383,7 @@ best_cutoff <- cutoffs[which.min(p_values)]
 ```
 
 **Correct approach (Habib method):**
+
 ```r
 # Maximally selected log-rank statistic
 # Tests ALL possible cutoffs
@@ -377,6 +404,7 @@ result <- maxstat.test(
 ```
 
 **Why it works:**
+
 - Distribution of maximum statistic is known
 - P-value adjusted for "trying all cutoffs"
 - Valid inference despite data-driven cutoff selection
@@ -390,6 +418,7 @@ result <- maxstat.test(
 **Two different questions, two different methods:**
 
 **Question 1: Prevent understaging (Minimal threshold)**
+
 ```
 Method: Chi-square test for nodal positivity
 Question: "At what point do we stop detecting more positive cases?"
@@ -397,6 +426,7 @@ Answer: When additional specimens don't increase detection rate
 ```
 
 **Question 2: Maximize survival (Optimal threshold)**
+
 ```
 Method: Maximally selected log-rank statistic
 Question: "At what point does specimen count maximize survival difference?"
@@ -404,11 +434,13 @@ Answer: When log-rank statistic is maximized
 ```
 
 **These may be DIFFERENT numbers:**
+
 - Habib: Minimal = 10, Optimal = 20
 - Why different? Beyond adequate staging, therapeutic benefit
 - More extensive resection → better local disease clearance
 
 **For omentum:**
+
 - Minimal: Enough to detect metastases (prevent false N0)
 - Optimal: Enough to maximize survival (therapeutic + staging)
 - May be the same (4-5 cassettes) or different
@@ -420,9 +452,10 @@ Answer: When log-rank statistic is maximized
 **Brilliant way to demonstrate understaging:**
 
 **Habib's approach:**
+
 ```
 Compare 6 groups:
-1. N0 + optimal LN (≥20)
+1. N0 + optimal LN (>=20)
 2. N0 + suboptimal LN (<20)
 3. N1 + optimal LN
 4. N1 + suboptimal LN
@@ -440,16 +473,17 @@ Key findings:
 ```
 
 **Application to omentum:**
+
 ```
 Compare 4 groups:
-1. M0 + adequate cassettes (≥4)
+1. M0 + adequate cassettes (>=4)
 2. M0 + inadequate cassettes (<4)
 3. M1 + adequate cassettes
 4. M1 + inadequate cassettes
 
 Hypothesis:
 - Group 2 ≈ Group 3
-  "M0 with <4 cassettes" ≈ "M1 with ≥4 cassettes"
+  "M0 with <4 cassettes" ≈ "M1 with >=4 cassettes"
   → Understaging in Group 2
 
 Would PROVE inadequate sampling causes misclassification
@@ -495,7 +529,7 @@ Would PROVE inadequate sampling causes misclassification
     # Create cassette groups
     groups <- cut(totalSamplesData,
                   breaks = c(0, 2, 4, 6, Inf),
-                  labels = c("1-2", "3-4", "5-6", "≥7"))
+                  labels = c("1-2", "3-4", "5-6", ">=7"))
 
     # Calculate detection rate by group
     results <- data.frame()
@@ -540,6 +574,7 @@ Would PROVE inadequate sampling causes misclassification
 ```
 
 **Output example:**
+
 ```
 Minimal Sampling Threshold Analysis:
 ─────────────────────────────────────────────────────
@@ -548,7 +583,7 @@ Cassette Group | Cases | Detected | Rate    | P-value
 1-2            | 46    | 46       | 76.7%   | <0.001
 3-4            | 11    | 11       | 95.0%   | 0.24
 5-6            | 3     | 3        | 100%    | 1.00
-≥7             | 0     | 0        | -       | -
+>=7             | 0     | 0        | -       | -
 ─────────────────────────────────────────────────────
 
 Minimal threshold to prevent understaging: 3 cassettes
@@ -578,7 +613,7 @@ No significant stage migration beyond 3 cassettes (p=0.24)
     # Stratify by CPR
     cpr_groups <- cut(cpr,
                       breaks = c(0, 0.2, 0.4, 0.6, 1.0),
-                      labels = c("Low (≤20%)", "Moderate (20-40%)",
+                      labels = c("Low (<=20%)", "Moderate (20-40%)",
                                  "High (40-60%)", "Very High (>60%)"))
 
     # Summary statistics
@@ -593,6 +628,7 @@ No significant stage migration beyond 3 cassettes (p=0.24)
 ```
 
 **Like Habib's LNR analysis:**
+
 - Shows extent of tumor involvement
 - Prognostic stratification
 - Validates importance of both positive and total cassettes
@@ -658,6 +694,7 @@ No significant stage migration beyond 3 cassettes (p=0.24)
 ```
 
 **Output:**
+
 ```
 Optimal Sampling Threshold (Survival Analysis):
 ──────────────────────────────────────────────────
@@ -667,7 +704,7 @@ Standardized statistic: 3.85
 P-value (adjusted): 0.001
 
 Survival comparison:
-- ≥4 cassettes: Median OS = 78.5 months
+- >=4 cassettes: Median OS = 78.5 months
 - <4 cassettes: Median OS = 42.3 months
 - Difference: 36.2 months (p<0.001)
 ```
@@ -741,12 +778,14 @@ Survival comparison:
 **Why we should adopt it:**
 
 **Minimal threshold:**
+
 - Clinically: "Don't miss metastases"
 - Statistically: "Prevent false negatives"
 - Method: Stage migration analysis
 - For omentum: Likely 2-3 cassettes
 
 **Optimal threshold:**
+
 - Clinically: "Maximize patient benefit"
 - Statistically: "Maximize survival difference"
 - Method: Maximally selected log-rank
@@ -760,9 +799,9 @@ Survival comparison:
 
 **Habib proves it elegantly:**
 
-1. **Direct evidence:** <10 LN = 23% N+, ≥10 LN = 45% N+ (p=0.040)
+1. **Direct evidence:** <10 LN = 23% N+, >=10 LN = 45% N+ (p=0.040)
 
-2. **Pairwise comparison:** N0 with <20 LN ≈ N1 with ≥20 LN
+2. **Pairwise comparison:** N0 with <20 LN ≈ N1 with >=20 LN
    - Same survival outcomes
    - Suggests misclassification
    - The "N0" patients likely have undetected nodes
@@ -773,6 +812,7 @@ Survival comparison:
    - Therapeutic benefit of adequate sampling
 
 **For omentum:**
+
 - We can demonstrate #1 NOW (with existing data)
 - We could show #2 IF we had survival data
 - We could show #3 IF we had recurrence data
@@ -784,21 +824,25 @@ Survival comparison:
 **Habib's hierarchy of evidence:**
 
 **Level 1 (Minimal):** Stage migration analysis
+
 - Shows understaging occurs
 - Statistically valid
 - But doesn't prove clinical relevance
 
 **Level 2 (Optimal):** Maximally selected log-rank
+
 - Shows survival benefit
 - Clinically meaningful
 - Data-driven cutoff
 
 **Level 3 (Confirmation):** Multivariable Cox regression
+
 - Independent predictor
 - Adjusted for confounders
 - Proves it's not just staging
 
 **Our current status:**
+
 - We have empirical validation (prediction matches observation)
 - We DON'T have survival validation
 - This is the next frontier
@@ -818,11 +862,13 @@ Survival comparison:
 2. **Therapeutic benefit:** Remove more tissue → clear microscopic disease
 
 **Evidence for therapeutic:**
+
 - Survival benefit IN NODE-NEGATIVE PATIENTS (p=0.140, trend)
 - Less locoregional recurrence with optimal LN (9% vs 18%, p=0.053)
 - Effect independent of nodal status
 
 **Application to omentum:**
+
 - More cassettes sampled = more tissue examined
 - May detect AND remove microscopic disease
 - Could have therapeutic benefit beyond diagnosis
@@ -845,6 +891,7 @@ Survival comparison:
 | **Therapeutic benefit** | Remove micrometastases | Detect metastases |
 
 **Implications:**
+
 - Optimal threshold concept may not apply the same way
 - In metastatic disease, detection IS the goal (not clearance)
 - Therapeutic benefit less likely (disease already metastatic)
@@ -855,18 +902,21 @@ Survival comparison:
 ### 2. Specimen Type Differences
 
 **Lymph nodes:**
+
 - Discrete anatomic structures
 - Countable units
 - Each examined individually
 - Binary status (positive/negative)
 
 **Omental cassettes:**
+
 - Arbitrary tissue divisions
 - Not anatomically defined
 - Variable size and content
 - May contain multiple foci
 
 **Statistical implications:**
+
 - LN count is more "objective"
 - Cassette count depends on processing
 - May have more variability
@@ -877,6 +927,7 @@ Survival comparison:
 ### 3. Survival Data Requirements
 
 **What Habib needed:**
+
 - Overall survival time
 - Event indicator (death)
 - Recurrence data
@@ -884,12 +935,14 @@ Survival comparison:
 - Complete outcome data on 341 patients
 
 **For our omentum study:**
+
 - Would need to link to medical records
 - Follow patients for years
 - Ascertain outcomes
 - **Major undertaking!**
 
 **Alternative validation:**
+
 - Validate in independent cohort
 - External dataset with survival
 - Meta-analysis approach
@@ -952,7 +1005,7 @@ Survival comparison:
 >
 > **Minimal Threshold (Stage Migration Analysis):** To prevent understaging, we evaluated detection rates across cassette count groups using chi-square tests. The minimal threshold was defined as the maximum number of cassettes where a significant difference in detection rate was observed between groups.
 >
-> **Optimal Threshold (Detection Probability):** Per-cassette detection probability was estimated as p = n_positive / sum(first_detection_positions), accounting for right-censored data (cassettes after first detection are not evaluated). We employed two complementary approaches: (1) Binomial probability modeling using the formula P(detect ≥1) = 1-(1-p)^n, validated against empirical observations, and (2) Bootstrap resampling (10,000 iterations) following Skala and Hagemann to generate 95% confidence intervals without parametric assumptions.
+> **Optimal Threshold (Detection Probability):** Per-cassette detection probability was estimated as p = n_positive / sum(first_detection_positions), accounting for right-censored data (cassettes after first detection are not evaluated). We employed two complementary approaches: (1) Binomial probability modeling using the formula P(detect >=1) = 1-(1-p)^n, validated against empirical observations, and (2) Bootstrap resampling (10,000 iterations) following Skala and Hagemann to generate 95% confidence intervals without parametric assumptions.
 >
 > **Validation:** The binomial model predictions were compared to observed detection rates to verify accuracy. Stage migration was assessed by comparing detection rates among cassette count groups.
 
@@ -962,7 +1015,7 @@ Survival comparison:
 >
 > **Optimal Sampling Threshold:** The per-cassette detection probability was 0.531 (95% CI: 0.43-0.63), calculated from 60 positive cases across 113 examined cassettes. Binomial modeling predicted 4 cassettes would achieve 95.2% sensitivity, which closely matched the observed rate of 95.0% (difference 0.2%). Bootstrap analysis confirmed mean sensitivity of 95.1% (95% CI: 88.3-100.0%) for 4 cassettes and 100.0% (95% CI: 100.0-100.0%) for 5 cassettes.
 >
-> **Interpretation:** These findings suggest 4-5 cassettes are optimal for detecting omental metastases, balancing adequate sensitivity (≥95%) with practical feasibility. This is more efficient than lymph node sampling requirements in pancreatic cancer (20-21 nodes) due to higher per-specimen detection probability (53.1% vs 9-12%).
+> **Interpretation:** These findings suggest 4-5 cassettes are optimal for detecting omental metastases, balancing adequate sensitivity (>=95%) with practical feasibility. This is more efficient than lymph node sampling requirements in pancreatic cancer (20-21 nodes) due to higher per-specimen detection probability (53.1% vs 9-12%).
 
 ---
 
@@ -973,7 +1026,7 @@ Survival comparison:
 ```
 Title: Detection Rate by Cassette Count Groups
 
-X-axis: Cassette groups (1-2, 3-4, 5-6, ≥7)
+X-axis: Cassette groups (1-2, 3-4, 5-6, >=7)
 Y-axis: Detection rate (0-100%)
 Bars: Height = detection rate
 Error bars: 95% CI
@@ -1054,6 +1107,7 @@ Visual:
 ### Next Steps
 
 **Immediate:**
+
 1. ✅ Add stage migration analysis to pathsampling
 2. ✅ Update documentation with Habib citation
 3. ✅ Create comparison tables

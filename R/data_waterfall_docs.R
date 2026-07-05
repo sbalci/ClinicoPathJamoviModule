@@ -20,7 +20,7 @@
 #' }
 #'
 #' ## `waterfall_spider_test`
-#' Longitudinal data for spider plot testing (120 observations: 20 patients × 6 timepoints):
+#' Longitudinal data for spider plot testing (120 observations: 20 patients x 6 timepoints):
 #' \describe{
 #'   \item{patientID}{Character. Patient identifier (PT001-PT020)}
 #'   \item{treatment}{Character. Treatment group (Experimental, Standard)}
@@ -30,7 +30,7 @@
 #' }
 #'
 #' ## `waterfall_raw_test`
-#' Raw tumor measurements for percentage calculation (125 observations: 25 patients × 5 timepoints):
+#' Raw tumor measurements for percentage calculation (125 observations: 25 patients x 5 timepoints):
 #' \describe{
 #'   \item{patientID}{Character. Patient identifier (PT001-PT025)}
 #'   \item{time}{Numeric. Months from baseline (0, 1, 2, 4, 6)}
@@ -88,17 +88,17 @@
 #'   \item{cohort}{Character. Dose level (1, 2, 3)}
 #'   \item{age}{Numeric. Patient age (years)}
 #'   \item{ecog_ps}{Integer. ECOG performance status (0-2)}
-#'   \item{pdl1_status}{Character. PD-L1 expression level (<1%, 1-49%, ≥50%)}
+#'   \item{pdl1_status}{Character. PD-L1 expression level (<1%, 1-49%, >=50%)}
 #'   \item{time_on_treatment}{Numeric. Duration on treatment (months)}
 #' }
 #'
 #' @section RECIST v1.1 Criteria:
 #' Response categories are based on RECIST v1.1 thresholds:
 #' \itemize{
-#'   \item CR (Complete Response): ≤ -100% (complete disappearance)
+#'   \item CR (Complete Response): <= -100% (complete disappearance)
 #'   \item PR (Partial Response): -99% to -30% (significant shrinkage)
 #'   \item SD (Stable Disease): -29% to +19% (minimal change)
-#'   \item PD (Progressive Disease): ≥ +20% (tumor growth)
+#'   \item PD (Progressive Disease): >= +20% (tumor growth)
 #' }
 #'
 #' Clinical metrics:
@@ -133,10 +133,10 @@
 #' # Basic waterfall plot
 #' \dontrun{
 #' waterfall(
-#'   data = waterfall_test,
-#'   patientID = "patientID",
-#'   responseVar = "best_response",
-#'   inputType = "percentage"
+#'     data = waterfall_test,
+#'     patientID = "patientID",
+#'     responseVar = "best_response",
+#'     inputType = "percentage"
 #' )
 #' }
 #'
@@ -144,12 +144,12 @@
 #' \dontrun{
 #' data(waterfall_spider_test)
 #' waterfall(
-#'   data = waterfall_spider_test,
-#'   patientID = "patientID",
-#'   responseVar = "pct_change",
-#'   timeVar = "time",
-#'   showSpiderPlot = TRUE,
-#'   timeUnitLabel = "months"
+#'     data = waterfall_spider_test,
+#'     patientID = "patientID",
+#'     responseVar = "pct_change",
+#'     timeVar = "time",
+#'     showSpiderPlot = TRUE,
+#'     timeUnitLabel = "months"
 #' )
 #' }
 #'
@@ -157,12 +157,12 @@
 #' \dontrun{
 #' data(waterfall_raw_test)
 #' waterfall(
-#'   data = waterfall_raw_test,
-#'   patientID = "patientID",
-#'   responseVar = "tumor_size",
-#'   timeVar = "time",
-#'   inputType = "raw",
-#'   groupVar = "treatment"
+#'     data = waterfall_raw_test,
+#'     patientID = "patientID",
+#'     responseVar = "tumor_size",
+#'     timeVar = "time",
+#'     inputType = "raw",
+#'     groupVar = "treatment"
 #' )
 #' }
 #'
@@ -170,12 +170,12 @@
 #' \dontrun{
 #' data(waterfall_phase2)
 #' waterfall(
-#'   data = waterfall_phase2,
-#'   patientID = "patientID",
-#'   responseVar = "best_response",
-#'   groupVar = "cohort",
-#'   generateCopyReadyReport = TRUE,
-#'   showConfidenceIntervals = TRUE
+#'     data = waterfall_phase2,
+#'     patientID = "patientID",
+#'     responseVar = "best_response",
+#'     groupVar = "cohort",
+#'     generateCopyReadyReport = TRUE,
+#'     showConfidenceIntervals = TRUE
 #' )
 #' }
 #'

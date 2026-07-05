@@ -834,7 +834,7 @@ firthregressionClass <- R6::R6Class(
                     standard_value = as.character(std_ll)
                 ))
 
-                # Concordance (standard model only — coxphf doesn't directly provide it)
+                # Concordance (standard model only - coxphf doesn't directly provide it)
                 if (!is.null(standard_fit)) {
                     conc <- tryCatch({
                         c_val <- summary(standard_fit)$concordance

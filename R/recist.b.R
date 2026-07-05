@@ -19,21 +19,19 @@ recistClass <- R6::R6Class(
         .bestResponseData = NULL,
         .baselineData = NULL,
         .summaryStatus = list(
-             warnings = character(),
-             exclusions = character(),
-             n_patients = 0,
-             n_lesions_total = 0,
-             n_lesions_tracked = 0
+            warnings = character(),
+            exclusions = character(),
+            n_patients = 0,
+            n_lesions_total = 0,
+            n_lesions_tracked = 0
         ),
 
         # ---- Initialization ----
         .init = function() {
-
             if (is.null(self$options$patientId) ||
                 is.null(self$options$assessmentTime) ||
                 is.null(self$options$lesionId) ||
                 is.null(self$options$lesionType)) {
-
                 self$results$instructions$setContent(
                     "<h3>Welcome to RECIST 1.1 Multi-Lesion Aggregation</h3>
                     <p>This module automates the aggregation of individual lesion measurements into
@@ -72,10 +70,10 @@ recistClass <- R6::R6Class(
                     <p><b>RECIST 1.1 Criteria:</b></p>
                     <ul>
                     <li><b>CR:</b> All target lesions disappear</li>
-                    <li><b>PR:</b> ≥30% decrease in target lesion sum from baseline</li>
-                    <li><b>PD:</b> ≥20% increase in sum from nadir + 5mm absolute</li>
+                    <li><b>PR:</b> >=30% decrease in target lesion sum from baseline</li>
+                    <li><b>PD:</b> >=20% increase in sum from nadir + 5mm absolute</li>
                     <li><b>SD:</b> Neither PR nor PD criteria met (requires min duration, default 6 weeks)</li>
-                    <li><b>Confirmation:</b> CR/PR requires confirmation on ≥2 consecutive scans</li>
+                    <li><b>Confirmation:</b> CR/PR requires confirmation on >=2 consecutive scans</li>
                     </ul>
 
                     <p><b>Reference:</b> Eisenhauer EA, et al. New response evaluation criteria in solid tumours:
@@ -97,14 +95,14 @@ recistClass <- R6::R6Class(
                 self$options$stratifiedAnalysis && !is.null(self$options$groupVar)
             )
         },
-        
+
         # ---- Helper: Add Warning ----
         .addWarning = function(msg) {
-             private$.summaryStatus$warnings <- c(private$.summaryStatus$warnings, msg)
+            private$.summaryStatus$warnings <- c(private$.summaryStatus$warnings, msg)
         },
 
         # ---- Helper: Escape Variable Names ----
-        # TODO (cleanup): .escapeVar is dead code — defined here but never called anywhere
+        # TODO (cleanup): .escapeVar is dead code - defined here but never called anywhere
         # in recist.b.R. Remove it. If a future formula ever needs safe variable names, use
         # jmvcore::composeTerm()/toB64() rather than make.names() mangling (which can collide
         # distinct non-syntactic column names onto the same name).
@@ -115,7 +113,6 @@ recistClass <- R6::R6Class(
 
         # ---- Main Analysis ----
         .run = function() {
-
             if (is.null(self$options$patientId) ||
                 is.null(self$options$assessmentTime) ||
                 is.null(self$options$lesionId) ||
@@ -129,76 +126,79 @@ recistClass <- R6::R6Class(
             # They are never reset, so warnings/exclusions accumulate and duplicate across
             # successive runs (the scalar counts are overwritten each run, so only these two
             # leak). Reset both to character() here at the top of .run() before any append.
-            tryCatch({
-                private$.prepareData()
-                private$.selectTargetLesions()
-                private$.calculateTargetSums()
-                private$.classifyResponses()
-                private$.calculateBestResponse()
+            tryCatch(
+                {
+                    private$.prepareData()
+                    private$.selectTargetLesions()
+                    private$.calculateTargetSums()
+                    private$.classifyResponses()
+                    private$.calculateBestResponse()
 
-                # Populate results
-                private$.populateDataInfo()
+                    # Populate results
+                    private$.populateDataInfo()
 
-                if (self$options$showLesionTable) {
-                    private$.populateLesionTable()
+                    if (self$options$showLesionTable) {
+                        private$.populateLesionTable()
+                    }
+
+                    if (self$options$showTargetSumTable) {
+                        private$.populateTargetSumTable()
+                    }
+
+                    if (self$options$showResponseTable) {
+                        private$.populateResponseTable()
+                    }
+
+                    if (self$options$showBestResponse) {
+                        private$.populateBestResponseTable()
+                        private$.populateSummaryStats()
+                        private$.populateEfficacyMetrics()
+                    }
+
+                    if (self$options$stratifiedAnalysis && !is.null(self$options$groupVar)) {
+                        private$.populateStratifiedTable()
+                    }
+
+                    private$.populateClinicalInterpretation()
+
+                    if (self$options$showReference) {
+                        private$.populateReferenceInfo()
+                    }
+
+                    private$.populateRunSummary()
+
+                    if (self$options$exportLesionData) {
+                        private$.exportData()
+                    }
+                },
+                error = function(e) {
+                    self$results$instructions$setContent(
+                        paste0(
+                            "<div class='error'>",
+                            "<h4>Error in Analysis</h4>",
+                            "<p>", htmltools::htmlEscape(e$message), "</p>",
+                            "<p><b>Common issues:</b></p>",
+                            "<ul>",
+                            "<li>Ensure data is in long format (one row per lesion per assessment)</li>",
+                            "<li>Check lesion type values (should be: target, non-target, new)</li>",
+                            "<li>Verify diameter is numeric for target lesions</li>",
+                            "<li>Ensure each patient has baseline assessment (earliest time)</li>",
+                            "</ul></div>"
+                        )
+                    )
+                    jmvcore::reject(e$message)
                 }
-
-                if (self$options$showTargetSumTable) {
-                    private$.populateTargetSumTable()
-                }
-
-                if (self$options$showResponseTable) {
-                    private$.populateResponseTable()
-                }
-
-                if (self$options$showBestResponse) {
-                    private$.populateBestResponseTable()
-                    private$.populateSummaryStats()
-                    private$.populateEfficacyMetrics()
-                }
-
-                if (self$options$stratifiedAnalysis && !is.null(self$options$groupVar)) {
-                    private$.populateStratifiedTable()
-                }
-
-                private$.populateClinicalInterpretation()
-
-                if (self$options$showReference) {
-                    private$.populateReferenceInfo()
-                }
-
-                private$.populateRunSummary()
-
-                if (self$options$exportLesionData) {
-                    private$.exportData()
-                }
-
-            }, error = function(e) {
-                self$results$instructions$setContent(
-                    paste0("<div class='error'>",
-                           "<h4>Error in Analysis</h4>",
-                           "<p>", htmltools::htmlEscape(e$message), "</p>",
-                           "<p><b>Common issues:</b></p>",
-                           "<ul>",
-                           "<li>Ensure data is in long format (one row per lesion per assessment)</li>",
-                           "<li>Check lesion type values (should be: target, non-target, new)</li>",
-                           "<li>Verify diameter is numeric for target lesions</li>",
-                           "<li>Ensure each patient has baseline assessment (earliest time)</li>",
-                           "</ul></div>")
-                )
-                jmvcore::reject(e$message)
-            })
+            )
         },
 
         # ---- Data Preparation ----
         .prepareData = function() {
-
             mydata <- self$data
 
             # TODO (correctness): composeTerm() backtick-quotes non-syntactic names
             # (e.g. "Patient ID" -> `Patient ID`), so mydata[[composeTerm(...)]] returns NULL
             # for any column whose name contains spaces/special chars. composeTerm is for
-            # FORMULA terms, NOT data-frame indexing — index with the raw self$options$X.
+            # FORMULA terms, NOT data-frame indexing - index with the raw self$options$X.
             # Affects every composeTerm()+mydata[[...]] pair below in .prepareData()
             # (patientId, assessmentTime, lesionId, lesionType, lesionDiameter, organ,
             # nonTargetStatus) and the groupVar/patientId merge in .populateStratifiedTable().
@@ -247,9 +247,8 @@ recistClass <- R6::R6Class(
 
         # ---- Target Lesion Selection ----
         .selectTargetLesions = function() {
-
             data <- private$.rawData
-            
+
             # Reset status
             private$.summaryStatus$n_patients <- length(unique(data$patientId))
             private$.summaryStatus$n_lesions_total <- length(unique(data$lesionId[data$lesionType == "target"]))
@@ -273,16 +272,16 @@ recistClass <- R6::R6Class(
                 patient_baseline <- baseline %>%
                     filter(patientId == pid, lesionType == "target") %>%
                     arrange(desc(diameter))
-                
+
                 # Check if patient has NO target lesions at baseline
                 if (nrow(patient_baseline) == 0) {
-                     private$.addWarning(paste0("Patient ", pid, ": No target lesions found at baseline."))
-                     next
+                    private$.addWarning(paste0("Patient ", pid, ": No target lesions found at baseline."))
+                    next
                 }
 
                 selected <- character(0)
                 organs_count <- table(character(0))
-                
+
                 # Select up to max
                 for (i in 1:nrow(patient_baseline)) {
                     lesion <- patient_baseline$lesionId[i]
@@ -290,57 +289,56 @@ recistClass <- R6::R6Class(
 
                     # CAPS: Max Total
                     if (length(selected) >= self$options$maxTargetLesions) {
-                         data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max total lesions"
-                         next
+                        data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max total lesions"
+                        next
                     }
-                    
+
                     # CAPS: Max Per Organ
                     current_count <- organs_count[organ]
                     if (is.na(current_count)) current_count <- 0
-                    
+
                     if (current_count >= self$options$maxPerOrgan) {
-                         data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max per organ"
-                         next
+                        data$exclusionReason[data$patientId == pid & data$lesionId == lesion] <- "Exceeds max per organ"
+                        next
                     }
 
                     selected <- c(selected, lesion)
                     organs_count[organ] <- current_count + 1
-                    
+
                     # Track this lesion ID for this patient FOREVER
                     # (RECIST: "Target lesions should be selected at baseline and followed...")
                 }
-                
+
                 tracked_lesions_list[[pid]] <- selected
-                
+
                 # Mark selected matches in the FULL dataset
                 # Only mark if it MATCHES the ID selected at baseline
                 data$includedInSum[data$patientId == pid & data$lesionId %in% selected] <- TRUE
-                
+
                 # Identify non-selected target lesions (orphans or late appearances)
                 # Any target lesion for this patient NOT in 'selected' is excluded
                 # Note: This handles "new" lesions appearing as 'target' type incorrectly by user - they should be 'new' type.
                 # If they appear later with type='target', they are ignored from sum.
-                
+
                 # Log exclusions for baseline items
                 excluded_at_baseline <- patient_baseline$lesionId[!patient_baseline$lesionId %in% selected]
                 if (length(excluded_at_baseline) > 0) {
-                     msg <- paste0("Patient ", pid, ": Lesions excluded at baseline (max limits): ", paste(excluded_at_baseline, collapse=", "))
-                     private$.summaryStatus$exclusions <- c(private$.summaryStatus$exclusions, msg)
+                    msg <- paste0("Patient ", pid, ": Lesions excluded at baseline (max limits): ", paste(excluded_at_baseline, collapse = ", "))
+                    private$.summaryStatus$exclusions <- c(private$.summaryStatus$exclusions, msg)
                 }
             }
-            
+
             # Global check for target lesions appearing mid-stream that were NOT at baseline
             # (Valid targets must be present at baseline)
             # We already set includedInSum=TRUE only for those matching baseline IDs.
             # So any target lesion with includedInSum=FALSE is effectively excluded.
-            
-            private$.summaryStatus$n_lesions_tracked <- sum(data$includedInSum & data$assessmentTime == min(data$assessmentTime)) 
+
+            private$.summaryStatus$n_lesions_tracked <- sum(data$includedInSum & data$assessmentTime == min(data$assessmentTime))
             private$.lesionData <- data
         },
 
         # ---- Calculate Target Sums ----
         .calculateTargetSums = function() {
-
             data <- private$.lesionData
 
             # Calculate target sum per patient per assessment
@@ -348,7 +346,7 @@ recistClass <- R6::R6Class(
                 filter(includedInSum == TRUE) %>%
                 group_by(patientId, assessmentTime) %>%
                 summarise(
-                    targetSum = if(any(is.na(diameter))) NA_real_ else sum(diameter, na.rm=TRUE),
+                    targetSum = if (any(is.na(diameter))) NA_real_ else sum(diameter, na.rm = TRUE),
                     # NE Logic: If any expected target lesion is missing (NA), sum is suspect.
                     # We need to know if ALL tracked lesions are present.
                     # This simple group_by might miss lesions that are completely missing rows for a timepoint.
@@ -357,25 +355,26 @@ recistClass <- R6::R6Class(
                     numTargetLesions = n(),
                     .groups = "drop"
                 )
-            
-            # Post-hoc strictness: 
+
+            # Post-hoc strictness:
             # We need to look up how many lesions were tracked for each patient at baseline.
             baseline_counts <- data %>%
-                 filter(includedInSum == TRUE) %>%
-                 group_by(patientId) %>%
-                 summarise(n_tracked = length(unique(lesionId)), .groups="drop")
-            
+                filter(includedInSum == TRUE) %>%
+                group_by(patientId) %>%
+                summarise(n_tracked = length(unique(lesionId)), .groups = "drop")
+
             targetSums <- targetSums %>%
-                 left_join(baseline_counts, by="patientId") %>%
-                 mutate(
-                      is_missing_lesions = n_present < n_tracked,
-                      targetSum = ifelse(is_missing_lesions, NA_real_, targetSum)
-                 )
-            
-            if (any(targetSums$is_missing_lesions, na.rm=TRUE)) {
-                 affected <- unique(targetSums$patientId[which(targetSums$is_missing_lesions)])
-                 if (length(affected) > 0)
-                    private$.addWarning(paste0("Incomplete target lesion data (NE) for patients: ", paste(head(affected, 5), collapse=", ")))
+                left_join(baseline_counts, by = "patientId") %>%
+                mutate(
+                    is_missing_lesions = n_present < n_tracked,
+                    targetSum = ifelse(is_missing_lesions, NA_real_, targetSum)
+                )
+
+            if (any(targetSums$is_missing_lesions, na.rm = TRUE)) {
+                affected <- unique(targetSums$patientId[which(targetSums$is_missing_lesions)])
+                if (length(affected) > 0) {
+                    private$.addWarning(paste0("Incomplete target lesion data (NE) for patients: ", paste(head(affected, 5), collapse = ", ")))
+                }
             }
 
             # Count non-target lesions
@@ -430,21 +429,20 @@ recistClass <- R6::R6Class(
 
         # ---- Classify Responses ----
         .classifyResponses = function() {
-
             data <- private$.targetSumData
             lesionData <- private$.lesionData
 
             prThreshold <- -self$options$prThreshold
             pdThreshold <- self$options$pdThreshold
             pdAbsolute <- self$options$pdAbsolute
-            
+
             # Parse custom non-target status strings
             nt_cr_strings <- trimws(unlist(strsplit(self$options$nonTargetCR, ",")))
             nt_pd_strings <- trimws(unlist(strsplit(self$options$nonTargetPD, ",")))
-            
+
             if (length(nt_cr_strings) == 0) nt_cr_strings <- c("absent", "disappeared")
             if (length(nt_pd_strings) == 0) nt_pd_strings <- c("pd", "progression", "unequivocal")
-            
+
             nt_cr_strings <- tolower(nt_cr_strings)
             nt_pd_strings <- tolower(nt_pd_strings)
 
@@ -485,47 +483,44 @@ recistClass <- R6::R6Class(
                     nonTargetResponse = ifelse(is.na(nonTargetResponse), "N/A", nonTargetResponse)
                 )
 
-             data <- data %>%
-                 mutate(
+            data <- data %>%
+                mutate(
                     overallResponse = case_when(
                         # 1. New Lesions = PD ALWAYS
                         newLesions == "Yes" ~ "PD",
 
                         # 2. Non-target PD = PD ALWAYS
                         nonTargetResponse == "PD" ~ "PD",
-                        
+
                         # 3. Target PD = PD
                         targetResponse == "PD" ~ "PD",
-                        
+
                         # 4. If Target is NE, and no PD above -> NE
                         targetResponse == "NE" ~ "NE",
-                        
+
                         # 5. Non-target CR logic
                         targetResponse == "CR" & nonTargetResponse %in% c("CR", "N/A") ~ "CR",
-                        
+
                         # 6. PR
                         targetResponse == "PR" & nonTargetResponse %in% c("CR", "non-CR/non-PD", "N/A") ~ "PR",
-                        
+
                         # 7. SD
                         targetResponse %in% c("SD", "PR") & nonTargetResponse == "non-CR/non-PD" ~ "SD",
-                        
                         TRUE ~ "SD" # Fallback, usually implies target=SD and NT=missing/ok
                     ),
-                    
                     confirmed = "No"
-                 )
-                 
-                 # Apply confirmation logic if required
-                 if (self$options$requireConfirmation) {
-                      data <- private$.applyConfirmation(data)
-                 }
-                 
-                 private$.responseData <- data
+                )
+
+            # Apply confirmation logic if required
+            if (self$options$requireConfirmation) {
+                data <- private$.applyConfirmation(data)
+            }
+
+            private$.responseData <- data
         },
 
         # ---- Confirmation Logic ----
         .applyConfirmation = function(data) {
-
             confirmWindow <- self$options$confirmationWindow
 
             data <- data %>%
@@ -535,15 +530,12 @@ recistClass <- R6::R6Class(
                     nextTime = lead(assessmentTime),
                     nextResponse = lead(overallResponse),
                     timeDiff = nextTime - assessmentTime,
-
                     confirmed = case_when(
                         overallResponse %in% c("CR", "PR") &
                             !is.na(nextResponse) &
                             nextResponse == overallResponse &
                             timeDiff >= confirmWindow ~ "Yes",
-
                         overallResponse %in% c("CR", "PR") ~ "Pending",
-
                         TRUE ~ "-"
                     )
                 ) %>%
@@ -554,7 +546,6 @@ recistClass <- R6::R6Class(
 
         # ---- Best Overall Response ----
         .calculateBestResponse = function() {
-
             data <- private$.responseData
             sdMinDuration <- self$options$sdMinDuration
 
@@ -566,7 +557,7 @@ recistClass <- R6::R6Class(
                     bestResponse = {
                         # Get baseline time for this patient
                         baseline_t <- min(assessmentTime)
-                        
+
                         # Filter out baseline assessments for response evaluation
                         post_baseline <- data.frame(
                             response = overallResponse[assessmentTime > baseline_t],
@@ -574,23 +565,23 @@ recistClass <- R6::R6Class(
                             confirmed = confirmed[assessmentTime > baseline_t],
                             stringsAsFactors = FALSE
                         )
-                        
+
                         if (nrow(post_baseline) == 0) {
                             "NE"
                         } else {
                             # Check for PD
                             first_pd_idx <- which(post_baseline$response == "PD")[1]
-                            
+
                             # If PD exists, only consider responses BEFORE the first PD
                             # RECIST: Best response is the best response recorded from the start of the treatment until disease progression/recurrence.
                             if (!is.na(first_pd_idx)) {
-                                valid_window <- post_baseline[1:(first_pd_idx-1), ]
+                                valid_window <- post_baseline[1:(first_pd_idx - 1), ]
                                 has_pd <- TRUE
                             } else {
                                 valid_window <- post_baseline
                                 has_pd <- FALSE
                             }
-                            
+
                             # Logic for CR/PR confirmation
                             if (self$options$requireConfirmation) {
                                 # CR must be confirmed
@@ -601,22 +592,22 @@ recistClass <- R6::R6Class(
                                 has_cr <- any(valid_window$response == "CR")
                                 has_pr <- any(valid_window$response == "PR")
                             }
-                            
+
                             # Logic for SD duration
                             # SD must be met at least once at time >= sdMinDuration (from baseline)
                             # We consider all SDs in the valid window (before PD)
-                            # Note: We check if *any* assessment in the valid window is SD (or better? No, just SD/PR/CR qualify for stability) 
+                            # Note: We check if *any* assessment in the valid window is SD (or better? No, just SD/PR/CR qualify for stability)
                             # but specifically looking for SD classification here.
                             # Actually, if a patient has PR, they technically met SD criteria too, but PR trumps SD.
                             # We only care about SD if CR and PR are not achieved.
-                            
+
                             # Find assessments in valid window that are SD (or unconfirmed CR/PR which revert to SD if duration met?)
                             # Standard practice: Unconfirmed PR/CR -> SD if duration met.
                             # Simplification: Check if any "SD", "PR" (unconfirmed), "CR" (unconfirmed) exists >= min duration
-                            
+
                             candidates_for_sd <- valid_window[valid_window$response %in% c("SD", "PR", "CR"), ]
                             has_sd <- any(candidates_for_sd$time - baseline_t >= sdMinDuration)
-                            
+
                             if (has_cr) {
                                 "CR"
                             } else if (has_pr) {
@@ -630,12 +621,10 @@ recistClass <- R6::R6Class(
                             }
                         }
                     },
-
                     timeToResponse = {
                         idx <- which(overallResponse %in% c("CR", "PR"))
                         if (length(idx) > 0) assessmentTime[idx[1]] else NA
                     },
-
                     confirmed = {
                         if (bestResponse %in% c("CR", "PR") && self$options$requireConfirmation) {
                             # If BOR is CR/PR, it must have been confirmed based on logic above
@@ -649,9 +638,8 @@ recistClass <- R6::R6Class(
                     # min(..., na.rm=TRUE) emits a warning and returns Inf/-Inf, which then
                     # renders as Inf in nadirSum / bestPercentChange. Guard with an all-NA
                     # check (return NA_real_ when all values are NA).
-                    nadirSum = min(targetSum, na.rm=TRUE),
-                    bestPercentChange = min(changeFromBaseline, na.rm=TRUE),
-
+                    nadirSum = min(targetSum, na.rm = TRUE),
+                    bestPercentChange = min(changeFromBaseline, na.rm = TRUE),
                     .groups = "drop"
                 )
 
@@ -660,7 +648,6 @@ recistClass <- R6::R6Class(
 
         # ---- Populate Results ----
         .populateDataInfo = function() {
-
             table <- self$results$dataInfo
             data <- private$.rawData
 
@@ -682,13 +669,11 @@ recistClass <- R6::R6Class(
                 table$addRow(rowKey = row$metric, values = row)
             }
         },
-
         .populateLesionTable = function() {
-
             table <- self$results$lesionTable
             data <- private$.lesionData
 
-            for (i in 1:min(500, nrow(data))) {  # Limit to 500 rows
+            for (i in 1:min(500, nrow(data))) { # Limit to 500 rows
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     assessmentTime = data$assessmentTime[i],
@@ -702,9 +687,7 @@ recistClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = row)
             }
         },
-
         .populateTargetSumTable = function() {
-
             table <- self$results$targetSumTable
             data <- private$.targetSumData
 
@@ -723,9 +706,7 @@ recistClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = row)
             }
         },
-
         .populateResponseTable = function() {
-
             table <- self$results$responseTable
             data <- private$.responseData
 
@@ -743,9 +724,7 @@ recistClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = row)
             }
         },
-
         .populateBestResponseTable = function() {
-
             table <- self$results$bestResponseTable
             data <- private$.bestResponseData
 
@@ -762,9 +741,7 @@ recistClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = row)
             }
         },
-
         .populateSummaryStats = function() {
-
             table <- self$results$summaryStats
             data <- private$.bestResponseData
 
@@ -787,9 +764,7 @@ recistClass <- R6::R6Class(
                 table$addRow(rowKey = category, values = row)
             }
         },
-
         .populateEfficacyMetrics = function() {
-
             table <- self$results$efficacyMetrics
             data <- private$.bestResponseData
 
@@ -823,9 +798,7 @@ recistClass <- R6::R6Class(
                 ci_upper = ci_dcr[2] * 100
             ))
         },
-
         .populateStratifiedTable = function() {
-
             table <- self$results$stratifiedTable
             bestData <- private$.bestResponseData
 
@@ -847,12 +820,12 @@ recistClass <- R6::R6Class(
                 group_by(group) %>%
                 summarise(
                     n = n(),
-                    CR = sum(bestResponse == "CR", na.rm=TRUE) / n() * 100,
-                    PR = sum(bestResponse == "PR", na.rm=TRUE) / n() * 100,
-                    SD = sum(bestResponse == "SD", na.rm=TRUE) / n() * 100,
-                    PD = sum(bestResponse == "PD", na.rm=TRUE) / n() * 100,
-                    ORR = sum(bestResponse %in% c("CR", "PR"), na.rm=TRUE) / n() * 100,
-                    DCR = sum(bestResponse %in% c("CR", "PR", "SD"), na.rm=TRUE) / n() * 100,
+                    CR = sum(bestResponse == "CR", na.rm = TRUE) / n() * 100,
+                    PR = sum(bestResponse == "PR", na.rm = TRUE) / n() * 100,
+                    SD = sum(bestResponse == "SD", na.rm = TRUE) / n() * 100,
+                    PD = sum(bestResponse == "PD", na.rm = TRUE) / n() * 100,
+                    ORR = sum(bestResponse %in% c("CR", "PR"), na.rm = TRUE) / n() * 100,
+                    DCR = sum(bestResponse %in% c("CR", "PR", "SD"), na.rm = TRUE) / n() * 100,
                     .groups = "drop"
                 )
 
@@ -869,12 +842,12 @@ recistClass <- R6::R6Class(
                 ))
             }
         },
-
         .populateClinicalInterpretation = function() {
-
             data <- private$.bestResponseData
 
-            if (is.null(data) || nrow(data) == 0) return()
+            if (is.null(data) || nrow(data) == 0) {
+                return()
+            }
 
             total <- nrow(data)
             n_orr <- sum(data$bestResponse %in% c("CR", "PR"))
@@ -890,80 +863,72 @@ recistClass <- R6::R6Class(
                 "<li><b>Objective Response Rate (ORR):</b> ", orr, "% (", n_orr, "/", total, " patients)</li>",
                 "<li><b>Disease Control Rate (DCR):</b> ", dcr, "% (", n_dcr, "/", total, " patients)</li>",
                 "</ul>",
-
                 "<p><b>RECIST 1.1 Response Definitions:</b></p>",
                 "<ul>",
                 "<li><b>CR (Complete Response):</b> Disappearance of all target lesions + all non-target lesions</li>",
-                "<li><b>PR (Partial Response):</b> ≥30% decrease in target lesion sum from baseline</li>",
+                "<li><b>PR (Partial Response):</b> >=30% decrease in target lesion sum from baseline</li>",
                 "<li><b>SD (Stable Disease):</b> Neither PR nor PD criteria met</li>",
-                "<li><b>PD (Progressive Disease):</b> ≥20% increase in sum from nadir + 5mm, OR new lesions, OR unequivocal non-target PD</li>",
+                "<li><b>PD (Progressive Disease):</b> >=20% increase in sum from nadir + 5mm, OR new lesions, OR unequivocal non-target PD</li>",
                 "</ul>"
             )
 
             self$results$clinicalInterpretation$setContent(html)
         },
-
         .populateReferenceInfo = function() {
-
             html <- paste0(
                 "<h4>RECIST 1.1 Guidelines Reference</h4>",
                 "<p><b>Citation:</b> Eisenhauer EA, Therasse P, Bogaerts J, et al. ",
                 "New response evaluation criteria in solid tumours: revised RECIST guideline (version 1.1). ",
                 "<i>Eur J Cancer</i>. 2009;45(2):228-247.</p>",
-
                 "<p><b>Target Lesion Selection Rules:</b></p>",
                 "<ul>",
                 "<li>Maximum ", self$options$maxTargetLesions, " target lesions total</li>",
                 "<li>Maximum ", self$options$maxPerOrgan, " target lesions per organ</li>",
                 "<li>Select largest measurable lesions at baseline</li>",
-                "<li>Must be ≥10mm by CT (≥20mm by chest X-ray)</li>",
+                "<li>Must be >=10mm by CT (>=20mm by chest X-ray)</li>",
                 "</ul>",
-
                 "<p><b>Response Thresholds:</b></p>",
                 "<ul>",
                 "<li><b>PR:</b> ", self$options$prThreshold, "% decrease from baseline</li>",
                 "<li><b>PD:</b> ", self$options$pdThreshold, "% increase from nadir + ",
                 self$options$pdAbsolute, "mm absolute</li>",
-                "<li><b>Confirmation:</b> CR/PR requires ≥", self$options$confirmationWindow, " weeks between assessments</li>",
+                "<li><b>Confirmation:</b> CR/PR requires >=", self$options$confirmationWindow, " weeks between assessments</li>",
                 "</ul>"
             )
 
             self$results$referenceInfo$setContent(html)
         },
-
-        
         .populateRunSummary = function() {
-             
-             status <- private$.summaryStatus
-             
-             html <- paste0(
-                  "<div style='font-size: 13px;'>",
-                  "<h4>Analysis Summary</h4>",
-                  "<ul>",
-                  "<li><b>Patients Processed:</b> ", status$n_patients, "</li>",
-                  "<li><b>Total Lesions:</b> ", status$n_lesions_total, "</li>",
-                  "<li><b>Tracked Target Lesions:</b> ", status$n_lesions_tracked, "</li>",
-                  "</ul>"
-             )
-             
-             if (length(status$exclusions) > 0) {
-                  html <- paste0(html, "<h5 style='color: orange;'>Excluded Lesions (Rules)</h5><ul>")
-                  for(m in status$exclusions) {
-                       html <- paste0(html, "<li>", htmltools::htmlEscape(m), "</li>")
-                  }
-                  html <- paste0(html, "</ul>")
-             }
-             
-             if (length(status$warnings) > 0) {
-                  html <- paste0(html, "<h5 style='color: red;'>Warnings</h5><ul>")
-                  for(w in status$warnings) {
-                       html <- paste0(html, "<li>", htmltools::htmlEscape(w), "</li>")
-                  }
-                  html <- paste0(html, "</ul>")
-             }
-             
-             html <- paste0(html, "</div>")
-             self$results$runSummary$setContent(html)
+            status <- private$.summaryStatus
+
+            html <- paste0(
+                "<div style='font-size: 13px;'>",
+                "<h4>Analysis Summary</h4>",
+                "<ul>",
+                "<li><b>Patients Processed:</b> ", status$n_patients, "</li>",
+                "<li><b>Total Lesions:</b> ", status$n_lesions_total, "</li>",
+                "<li><b>Tracked Target Lesions:</b> ", status$n_lesions_tracked, "</li>",
+                "</ul>"
+            )
+
+            if (length(status$exclusions) > 0) {
+                html <- paste0(html, "<h5 style='color: orange;'>Excluded Lesions (Rules)</h5><ul>")
+                for (m in status$exclusions) {
+                    html <- paste0(html, "<li>", htmltools::htmlEscape(m), "</li>")
+                }
+                html <- paste0(html, "</ul>")
+            }
+
+            if (length(status$warnings) > 0) {
+                html <- paste0(html, "<h5 style='color: red;'>Warnings</h5><ul>")
+                for (w in status$warnings) {
+                    html <- paste0(html, "<li>", htmltools::htmlEscape(w), "</li>")
+                }
+                html <- paste0(html, "</ul>")
+            }
+
+            html <- paste0(html, "</div>")
+            self$results$runSummary$setContent(html)
         },
 
         # ---- Export Data ----
@@ -972,34 +937,42 @@ recistClass <- R6::R6Class(
             if (!is.null(data) && nrow(data) > 0) {
                 # TODO (security): writes recist_lesion_data.csv to getwd() as a .run() side
                 # effect. On multi-tenant cloud jamovi the cwd is shared/process-level and the
-                # user never chose it — a silent, unconfirmed write. Not RCE/exfiltration
+                # user never chose it - a silent, unconfirmed write. Not RCE/exfiltration
                 # (fixed filename, user's own data), but route exports through a jamovi
                 # Output/path option (or tempdir()) instead of getwd().
                 filepath <- file.path(getwd(), "recist_lesion_data.csv")
-                tryCatch({
-                    write.csv(data, filepath, row.names = FALSE)
-                    # Append export notification to run summary
-                    currentHtml <- self$results$runSummary$state
-                    if (is.null(currentHtml)) currentHtml <- ""
-                    newHtml <- paste0(currentHtml,
-                        "<p style='color: green;'><b> Data Exported:</b> ",
-                        htmltools::htmlEscape(filepath), "</p>")
-                    self$results$runSummary$setContent(newHtml)
-                }, error = function(e) {
-                    private$.addWarning(paste0("Failed to export data: ", e$message))
-                })
+                tryCatch(
+                    {
+                        write.csv(data, filepath, row.names = FALSE)
+                        # Append export notification to run summary
+                        currentHtml <- self$results$runSummary$state
+                        if (is.null(currentHtml)) currentHtml <- ""
+                        newHtml <- paste0(
+                            currentHtml,
+                            "<p style='color: green;'><b> Data Exported:</b> ",
+                            htmltools::htmlEscape(filepath), "</p>"
+                        )
+                        self$results$runSummary$setContent(newHtml)
+                    },
+                    error = function(e) {
+                        private$.addWarning(paste0("Failed to export data: ", e$message))
+                    }
+                )
             }
         },
 
         # ---- Plotting Functions ----
         .lesionPlot = function(image, ggtheme, theme, ...) {
-
-            if (is.null(private$.lesionData)) return()
+            if (is.null(private$.lesionData)) {
+                return()
+            }
 
             data <- private$.lesionData %>%
                 filter(includedInSum == TRUE, lesionType == "target")
 
-            if (nrow(data) == 0) return()
+            if (nrow(data) == 0) {
+                return()
+            }
 
             p <- ggplot(data, aes(x = assessmentTime, y = diameter, group = lesionId, color = patientId)) +
                 geom_line(alpha = 0.6) +
@@ -1015,10 +988,10 @@ recistClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .sumPlot = function(image, ggtheme, theme, ...) {
-
-            if (is.null(private$.targetSumData)) return()
+            if (is.null(private$.targetSumData)) {
+                return()
+            }
 
             data <- private$.targetSumData
 
@@ -1035,10 +1008,10 @@ recistClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .waterfallPlot = function(image, ggtheme, theme, ...) {
-
-            if (is.null(private$.bestResponseData)) return()
+            if (is.null(private$.bestResponseData)) {
+                return()
+            }
 
             data <- private$.bestResponseData %>%
                 arrange(bestPercentChange) %>%

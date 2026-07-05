@@ -131,9 +131,9 @@ plscoxClass <- R6::R6Class(
             has_factors <- any(sapply(pred_data, is.factor))
             if (has_factors) {
                 # Build model matrix (dummy encoding), removing intercept.
-                # Defense 1 — composeTerm backtick-escapes user column names safely
+                # Defense 1 - composeTerm backtick-escapes user column names safely
                 # (handles names containing backticks/special chars).
-                # Defense 2 — asFormula allow-list-validates the parsed formula
+                # Defense 2 - asFormula allow-list-validates the parsed formula
                 # against jamovi 2.7.27+'s hardened as.formula; as.factor() must
                 # be explicitly allow-listed since it's not in the default set.
                 rhs_terms <- sapply(predictors, function(v) {
@@ -328,7 +328,7 @@ plscoxClass <- R6::R6Class(
                     }
 
                 } else if (cv_method == "none" && component_selection %in% c("cv_loglik", "cv_cindex")) {
-                    # CV-based selection requested but CV disabled — fall back to manual
+                    # CV-based selection requested but CV disabled - fall back to manual
                     optimal_nt <- min(self$options$pls_components, max_components)
                     missing_note <- paste0(missing_note,
                         "<p><i>Note: CV-based component selection requires cross-validation to be enabled. ",
@@ -590,7 +590,7 @@ plscoxClass <- R6::R6Class(
                 risk_groups <- self$options$risk_groups
                 linear_pred <- predict(cox_model, type = "lp")
                 risk_quantiles <- quantile(linear_pred, probs = seq(0, 1, length.out = risk_groups + 1))
-                # Ensure unique breaks — collapse gracefully when too few unique values
+                # Ensure unique breaks - collapse gracefully when too few unique values
                 risk_quantiles <- unique(risk_quantiles)
                 risk_groups_actual <- length(risk_quantiles) - 1
                 if (risk_groups_actual < 2) {
@@ -1238,7 +1238,7 @@ plscoxClass <- R6::R6Class(
             p <- ncol(pred_matrix)
             event_rate <- n_events / n
 
-            # -- Check 1: Events-Per-Variable (EPV) --
+            # - Check 1: Events-Per-Variable (EPV) --
             epv <- n_events / p
             if (epv >= 10) {
                 checks$epv <- list(
@@ -1260,7 +1260,7 @@ plscoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 2: Regularization/Reduction Need --
+            # - Check 2: Regularization/Reduction Need --
             if (p >= n / 3) {
                 checks$regularization <- list(
                     color = "green", label = "Reduction Need",
@@ -1275,7 +1275,7 @@ plscoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 3: Sample Size --
+            # - Check 3: Sample Size --
             if (n >= 100) {
                 checks$sample_size <- list(
                     color = "green", label = "Sample Size",
@@ -1296,7 +1296,7 @@ plscoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 4: Event Rate --
+            # - Check 4: Event Rate --
             if (event_rate >= 0.20 && event_rate <= 0.80) {
                 checks$event_rate <- list(
                     color = "green", label = "Event Rate",
@@ -1311,7 +1311,7 @@ plscoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 5: Multicollinearity --
+            # - Check 5: Multicollinearity --
             tryCatch({
                 if (p <= 2000 && p >= 2) {
                     # Only calculate correlation on numeric columns to avoid failures
@@ -1343,7 +1343,7 @@ plscoxClass <- R6::R6Class(
                 NULL
             })
 
-            # -- Check 6: Data Quality --
+            # - Check 6: Data Quality --
             original_data <- self$data
             n_total <- nrow(original_data)
             n_missing <- n_total - n
@@ -1364,7 +1364,7 @@ plscoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Overall Verdict --
+            # - Overall Verdict --
             colors <- sapply(checks, function(x) x$color)
             if (any(colors == "red")) {
                 overall <- "red"

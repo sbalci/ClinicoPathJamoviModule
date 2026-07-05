@@ -13,22 +13,26 @@ Successfully implemented **hypergeometric probability model** in the pathsamplin
 ### What Was Added
 
 ✅ **Hypergeometric Probability Model**
+
 - Finite population sampling without replacement
 - Appropriate for lymph node dissection analysis
-- Calculates P(detect ≥k positives) for varying sample sizes
+- Calculates P(detect >=k positives) for varying sample sizes
 
 ✅ **New UI Options**
+
 - Model type selection (Binomial vs Hypergeometric)
 - Population size variable input
 - Success states variable input
 - Target detections parameter
 
 ✅ **New Output Tables**
+
 - Hypergeometric model predictions
 - Minimum samples for target confidence levels
 - Expected yield calculations
 
 ✅ **Documentation**
+
 - Comprehensive analysis of orange-peeling LN study
 - Methodological comparison to existing implementations
 - Clinical practice guidelines
@@ -95,7 +99,7 @@ Successfully implemented **hypergeometric probability model** in the pathsamplin
     - name: nSamples
       title: 'Number of Samples'
     - name: cumProb
-      title: 'P(detect ≥k)'
+      title: 'P(detect >=k)'
     - name: marginalGain
       title: 'Marginal Gain'
 
@@ -200,13 +204,13 @@ if (self$options$showHypergeometric && !is.null(self$options$totalPopulation) &&
 **Mathematical Formula**:
 
 ```
-P(X ≥ k | N, K, n) = 1 - Σ[i=0 to k-1] dhyper(i, K, N-K, n)
+P(X >= k | N, K, n) = 1 - Σ[i=0 to k-1] dhyper(i, K, N-K, n)
 
 Where:
 - N = Total population size (e.g., total LN in specimen)
 - K = Success states in population (e.g., metastatic LN)
 - n = Number of items sampled (LN examined)
-- k = Target detections (e.g., ≥1 for N1, ≥4 for N2)
+- k = Target detections (e.g., >=1 for N1, >=4 for N2)
 ```
 
 ---
@@ -224,12 +228,14 @@ Where:
 ### When to Use Hypergeometric Model
 
 **Use Hypergeometric Model For**:
+
 - ✅ Lymph node dissection (finite pool of nodes)
 - ✅ Fixed number of tissue cassettes (all will be examined)
 - ✅ Sampling fraction (n/N) > 10%
 - ✅ Exhaustive sampling (population depletes)
 
 **Use Binomial Model For**:
+
 - ✅ Omentum metastasis detection (large tissue area)
 - ✅ LVSI foci counting (many potential foci)
 - ✅ Sampling fraction (n/N) < 10%
@@ -266,8 +272,8 @@ Where:
    - ✅ Check "Show hypergeometric analysis"
    - Select "Hypergeometric (finite population)" from model type
    - Set target detections:
-     - 1 for N1 detection (≥1 metastatic LN)
-     - 4 for N2 detection (≥4 metastatic LN)
+     - 1 for N1 detection (>=1 metastatic LN)
+     - 4 for N2 detection (>=4 metastatic LN)
 
 5. **Interpret Results**:
 
@@ -276,7 +282,7 @@ Where:
 ```
 Hypergeometric Model Predictions
 ---------------------------------
-Number of Samples | P(detect ≥1) | Marginal Gain
+Number of Samples | P(detect >=1) | Marginal Gain
         5         |    45.2%     |     45.2%
        10         |    78.9%     |     33.7%
        12         |    87.3%     |      8.4%
@@ -293,9 +299,10 @@ Target Confidence | Min Samples | Expected Yield
 ```
 
 **Clinical Interpretation**:
-- For 90% confidence of detecting ≥1 metastatic LN: Examine ≥12 LN
-- For 95% confidence of detecting ≥1 metastatic LN: Examine ≥15 LN
-- For 95% confidence of detecting ≥4 metastatic LN: Set target=4, examine ≥18 LN
+
+- For 90% confidence of detecting >=1 metastatic LN: Examine >=12 LN
+- For 95% confidence of detecting >=1 metastatic LN: Examine >=15 LN
+- For 95% confidence of detecting >=4 metastatic LN: Set target=4, examine >=18 LN
 
 ---
 
@@ -310,24 +317,24 @@ Target Confidence | Min Samples | Expected Yield
 | Measure | Orange-Peeling | Conventional | p-value | Effect Size |
 |---------|----------------|--------------|---------|-------------|
 | **Total LN yield** | Median 23 | Median 16 | <0.001 | Cliff's δ = 0.424 |
-| **Adequacy (≥12 LN)** | 91.9% | 77.0% | <0.001 | OR = 3.37 |
+| **Adequacy (>=12 LN)** | 91.9% | 77.0% | <0.001 | OR = 3.37 |
 | **Metastatic LN** | Median 2 | Median 1 | 0.163 | Cliff's δ = 0.070 |
 | **Stage migration** | No difference | No difference | 0.497 | χ² = 1.40 |
 
 **Hypergeometric Analysis Results**:
 
-- To detect ≥1 positive LN with 95% confidence: **12 LN required**
-- To detect ≥4 positive LN with 95% confidence: **18 LN required**
+- To detect >=1 positive LN with 95% confidence: **12 LN required**
+- To detect >=4 positive LN with 95% confidence: **18 LN required**
 
-**Validation**: These thresholds align with NCCN guidelines (≥12 LN) and provide evidence-based adequacy criteria.
+**Validation**: These thresholds align with NCCN guidelines (>=12 LN) and provide evidence-based adequacy criteria.
 
 ---
 
 ### Comparison: Binomial vs Hypergeometric
 
-**Example**: N=20 total LN, K=4 metastatic LN, target ≥1 detection
+**Example**: N=20 total LN, K=4 metastatic LN, target >=1 detection
 
-| Samples (n) | Binomial P(≥1) | Hypergeometric P(≥1) | Difference |
+| Samples (n) | Binomial P(>=1) | Hypergeometric P(>=1) | Difference |
 |-------------|----------------|----------------------|------------|
 | 5           | 64.0%          | 66.7%                | +2.7%      |
 | 10          | 87.8%          | 91.3%                | +3.5%      |
@@ -351,11 +358,11 @@ Total lymph nodes examined: [XX]
 Metastatic lymph nodes identified: [XX]
 
 Adequacy Assessment:
-- NCCN Guideline: ≥12 LN required
+- NCCN Guideline: >=12 LN required
 - Hypergeometric Analysis:
-  * For 90% confidence (≥1 positive): ≥10 LN
-  * For 95% confidence (≥1 positive): ≥12 LN
-  * For 95% confidence (≥4 positive): ≥18 LN
+  * For 90% confidence (>=1 positive): >=10 LN
+  * For 95% confidence (>=1 positive): >=12 LN
+  * For 95% confidence (>=4 positive): >=18 LN
 
 Status: [✓] Adequate / [ ] Limited
 
@@ -372,7 +379,7 @@ vs 77.0% conventional (OR=3.37, p<0.001).
 
 **Pre-operative Planning**:
 
-- Aim for comprehensive LN dissection (target ≥15-18 LN for optimal staging)
+- Aim for comprehensive LN dissection (target >=15-18 LN for optimal staging)
 - Orange-peeling technique yields +6 LN on average (medium-large effect, δ=0.424)
 - No stage migration risk (more LN found, not more metastases)
 
@@ -380,8 +387,8 @@ vs 77.0% conventional (OR=3.37, p<0.001).
 
 - <10 LN: High risk of understaging
 - 10-12 LN: Marginal adequacy
-- ≥12 LN: Adequate (NCCN standard)
-- ≥18 LN: Excellent (95% confidence for N2 detection)
+- >=12 LN: Adequate (NCCN standard)
+- >=18 LN: Excellent (95% confidence for N2 detection)
 
 ---
 
@@ -394,12 +401,12 @@ vs 77.0% conventional (OR=3.37, p<0.001).
 | <10         | <90%              | <70%              | Possible understaging |
 | 10-12       | 90-95%            | 70-80%            | Marginal reliability |
 | 12-15       | 95-97%            | 80-90%            | Good (NCCN standard) |
-| ≥18         | >97%              | ≥95%              | Excellent reliability |
+| >=18         | >97%              | >=95%              | Excellent reliability |
 
 **Treatment Decisions**:
 
 - **pN0 with <12 LN**: Consider adjuvant therapy (possible understaging)
-- **pN0 with ≥12 LN**: Reliable N0 status
+- **pN0 with >=12 LN**: Reliable N0 status
 - **pN1 vs pN2 with <18 LN**: May be underestimated (use clinical judgment)
 
 ---
@@ -413,7 +420,7 @@ vs 77.0% conventional (OR=3.37, p<0.001).
 | **Tissue** | Pancreatic LN | Endometrium |
 | **Model** | Hypergeometric | ROC analysis |
 | **Optimal** | 12 LN (N1), 18 LN (N2) | 7 blocks |
-| **Threshold** | ≥1 (N1), ≥4 (N2) | ≥5 foci |
+| **Threshold** | >=1 (N1), >=4 (N2) | >=5 foci |
 | **Stage migration** | None | Yes (40% difference) |
 | **jamovi** | ✅ Implemented | ✅ Implemented |
 
@@ -454,6 +461,7 @@ vs 77.0% conventional (OR=3.37, p<0.001).
 **Add to pathsampling**:
 
 1. **Cliff's Delta** (non-parametric effect size)
+
 ```r
 cliff_delta <- function(x, y) {
     concordant <- sum(outer(x, y, ">"))
@@ -463,12 +471,14 @@ cliff_delta <- function(x, y) {
 }
 ```
 
-2. **Hodges-Lehmann Estimator** (median difference)
+1. **Hodges-Lehmann Estimator** (median difference)
+
 ```r
 hodges_lehmann <- median(outer(x, y, "-"))
 ```
 
-3. **OR/RR/RD for Adequacy**
+1. **OR/RR/RD for Adequacy**
+
 ```r
 OR <- (a * d) / (b * c)
 RR <- (a / (a + b)) / (c / (c + d))
@@ -486,12 +496,14 @@ RD <- (a / (a + b)) - (c / (c + d))
 **Outputs**:
 
 1. **LN Ratio Table**:
+
 ```
 Median LN ratio: 0.157
 Mean LN ratio: 0.213
 ```
 
-2. **Stage Distribution**:
+1. **Stage Distribution**:
+
 ```
 Stage | Cases | % | Mean Total LN | Mean Met LN
 ------|-------|---|---------------|------------
@@ -500,9 +512,10 @@ N1    | 64    | 31| 23.1          | 2.1
 N2    | 73    | 36| 24.8          | 6.3
 ```
 
-3. **Adequacy by Stage**:
+1. **Adequacy by Stage**:
+
 ```
-Stage | <12 LN | ≥12 LN | Adequacy %
+Stage | <12 LN | >=12 LN | Adequacy %
 ------|--------|--------|------------
 N0    | 8      | 60     | 88.2%
 N1    | 5      | 59     | 92.2%
@@ -521,7 +534,7 @@ N2    | 4      | 69     | 94.5%
    - Highlight when hypergeometric preferred (n/N > 10%)
 
 2. **Adequacy Achievement Plot**
-   - Bar chart: % cases achieving ≥12 LN by technique
+   - Bar chart: % cases achieving >=12 LN by technique
    - Error bars with confidence intervals
    - Stratified by institution/surgeon
 
@@ -538,6 +551,7 @@ N2    | 4      | 69     | 94.5%
 **File**: `orange-peeling-pancreatic-ln-analysis-insights.md`
 
 **Contents**:
+
 - Complete study analysis
 - Methodological validation
 - Comparison to existing literature
@@ -552,6 +566,7 @@ N2    | 4      | 69     | 94.5%
 **File**: `pathsampling-hypergeometric-implementation-summary.md`
 
 **Contents**:
+
 - Implementation overview
 - Files modified
 - Usage instructions
@@ -564,6 +579,7 @@ N2    | 4      | 69     | 94.5%
 ### 3. Previous Documentation (still valid)
 
 **Files**:
+
 - `ates-2025-lvsi-endometrial-analysis-insights.md` (34 pages)
 - `pathsampling-ates-2025-implementation-summary.md` (18 pages)
 - `omentum-enhanced-analysis-with-distribution-pattern.md` (18 pages)
@@ -596,7 +612,7 @@ N2    | 4      | 69     | 94.5%
 1. ✅ **Orange-peeling improves adequacy (91.9% vs 77.0%)**
    - Medium-large effect size (Cliff's δ = 0.424)
    - +6 LN on average (Hodges-Lehmann shift)
-   - OR = 3.37 for achieving ≥12 LN
+   - OR = 3.37 for achieving >=12 LN
 
 2. ✅ **No stage migration with improved technique**
    - More LN found, not more metastases
@@ -604,8 +620,8 @@ N2    | 4      | 69     | 94.5%
    - Reassuring for clinical implementation
 
 3. ✅ **Evidence-based adequacy thresholds**
-   - ≥12 LN for 95% confidence (≥1 detection)
-   - ≥18 LN for 95% confidence (≥4 detection)
+   - >=12 LN for 95% confidence (>=1 detection)
+   - >=18 LN for 95% confidence (>=4 detection)
    - Aligns with NCCN guidelines
 
 ---
@@ -644,11 +660,13 @@ N2    | 4      | 69     | 94.5%
 ### Multi-Tissue Validation
 
 **Completed**:
+
 - ✅ Omentum (binomial model, Skala 2015)
 - ✅ LVSI (binomial model + distribution pattern, Ates 2025)
 - ✅ Pancreatic LN (hypergeometric model, orange-peeling 2025)
 
 **Pending**:
+
 - Endometrial LN (validate hypergeometric vs binomial)
 - Colorectal LN (test adequacy thresholds)
 - Breast sentinel LN (finite pool application)
@@ -658,12 +676,14 @@ N2    | 4      | 69     | 94.5%
 ### Open-Source Contribution
 
 **Impact**:
+
 - **ONLY jamovi module** with hypergeometric sampling adequacy analysis
 - One of **FEW R packages** with integrated binomial + hypergeometric models
 - **Comprehensive** multi-tissue pathology sampling analysis
 - **Evidence-based** recommendations from peer-reviewed literature
 
 **Accessibility**:
+
 - Free, open-source
 - User-friendly GUI (jamovi)
 - No coding required
@@ -727,7 +747,7 @@ N2    | 4      | 69     | 94.5%
 Successfully implemented **hypergeometric probability model** in pathsampling jamovi function, enabling:
 
 1. ✅ **Finite population sampling analysis** (lymph node dissection)
-2. ✅ **Evidence-based adequacy thresholds** (≥12 LN for N1, ≥18 LN for N2)
+2. ✅ **Evidence-based adequacy thresholds** (>=12 LN for N1, >=18 LN for N2)
 3. ✅ **Integration with existing binomial model** (omentum, LVSI)
 4. ✅ **Comprehensive documentation** (86 pages across 5 documents)
 5. ✅ **No compilation errors** (production-ready)
@@ -764,14 +784,14 @@ Successfully implemented **hypergeometric probability model** in pathsampling ja
 
 ### Supporting Literature
 
-4. **Goess R, et al.** (2024) LN yield in endometrial cancer. *Gynecol Oncol* 180:134-141.
-5. **Habib JR, et al.** (2024) IPMN lymph nodes. *J Surg Oncol* 129:759-766.
+1. **Goess R, et al.** (2024) LN yield in endometrial cancer. *Gynecol Oncol* 180:134-141.
+2. **Habib JR, et al.** (2024) IPMN lymph nodes. *J Surg Oncol* 129:759-766.
 
 ### Methodological References
 
-6. **Agresti A.** (2002) Categorical Data Analysis. 2nd ed. Wiley.
-7. **Cliff N.** (1993) Dominance statistics. *Psych Bull* 114:494-509.
-8. **Hodges JL, Lehmann EL.** (1963) Estimates of location. *Ann Math Stat* 34:598-611.
+1. **Agresti A.** (2002) Categorical Data Analysis. 2nd ed. Wiley.
+2. **Cliff N.** (1993) Dominance statistics. *Psych Bull* 114:494-509.
+3. **Hodges JL, Lehmann EL.** (1963) Estimates of location. *Ann Math Stat* 34:598-611.
 
 ---
 

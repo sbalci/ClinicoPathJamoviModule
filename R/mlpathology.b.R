@@ -61,13 +61,13 @@ mlpathologyClass <- R6::R6Class(
             # them from the YAMLs to avoid misleading the user that the toggle does anything.
 
             # Validate variables
-            # TODO (UX): file-wide pattern — 9 validation guards use
+            # TODO (UX): file-wide pattern - 9 validation guards use
             # self$results$instructions$setContent("<error html>") + return() instead of
             # jmvcore::reject(). Sites: L60 (this one), L116, L147, plus the 5 tryCatch
             # error branches at L80/L91/L131/L163/L175 (those also write to instructions).
             # jmvcore::reject() surfaces a structured error in the jamovi UI and is the
             # idiomatic guard; setContent overwrites the welcome/instruction pane and can
-            # mask later analysis output. Defer to a dedicated UX pass — same pattern
+            # mask later analysis output. Defer to a dedicated UX pass - same pattern
             # observation as missingdata/modalitycomparison audits.
             if (is.null(actual_var) || is.null(predicted_var)) {
                 self$results$instructions$setContent(

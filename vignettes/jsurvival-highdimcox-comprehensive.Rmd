@@ -67,7 +67,7 @@ regression fails. Regularization adds a penalty to prevent overfitting.
 | **Elastic Net** | Mixed L1+L2 | 0.5 | Yes (grouped) | Correlated groups |
 | **Adaptive LASSO** | Weighted L1 | 1.0 | Yes (oracle) | Publication models |
 
-The **Elastic Net** (default, alpha=0.5) is the recommended starting point —
+The **Elastic Net** (default, alpha=0.5) is the recommended starting point - 
 it combines the variable selection of LASSO with the stability of Ridge.
 
 ---
@@ -83,7 +83,7 @@ it combines the variable selection of LASSO with the stability of Ridge.
 
 ## 1. LASSO Regularization
 
-Pure LASSO selects the sparsest model — ideal when you expect few true predictors.
+Pure LASSO selects the sparsest model - ideal when you expect few true predictors.
 
 ```{r create-genomic-data}
 # Simulate a genomic survival study (150 patients, 100 genes)
@@ -102,8 +102,10 @@ true_effects[c(5, 12, 27, 43, 68, 91)] <- c(0.8, -0.6, 0.5, -0.4, 0.7, -0.5)
 # Clinical variables
 age <- rnorm(n, 62, 10)
 gender <- factor(sample(c("Male", "Female"), n, replace = TRUE))
-stage <- factor(sample(c("I", "II", "III"), n, replace = TRUE,
-                       prob = c(0.3, 0.4, 0.3)))
+stage <- factor(sample(c("I", "II", "III"), n,
+  replace = TRUE,
+  prob = c(0.3, 0.4, 0.3)
+))
 grade <- factor(sample(1:3, n, replace = TRUE))
 treatment <- factor(sample(c("A", "B"), n, replace = TRUE))
 
@@ -113,7 +115,8 @@ surv_time <- rweibull(n, shape = 1.3, scale = 30 * exp(-as.numeric(lp) * 0.2))
 censor_time <- runif(n, 6, 48)
 time <- pmax(pmin(surv_time, censor_time), 0.1)
 event <- factor(ifelse(surv_time <= censor_time, "Dead", "Alive"),
-                levels = c("Alive", "Dead"))
+  levels = c("Alive", "Dead")
+)
 
 data_genomic <- data.frame(
   survival_months = time,
@@ -123,8 +126,10 @@ data_genomic <- data.frame(
   as.data.frame(gene_matrix)
 )
 
-cat("N:", n, "Events:", sum(event == "Dead"),
-    "Event rate:", round(mean(event == "Dead"), 2), "\n")
+cat(
+  "N:", n, "Events:", sum(event == "Dead"),
+  "Event rate:", round(mean(event == "Dead"), 2), "\n"
+)
 cat("Predictors:", ncol(data_genomic) - 2, "\n")
 ```
 
@@ -153,7 +158,7 @@ highdimcox(
 
 ## 2. Ridge Regularization
 
-Ridge keeps all variables but shrinks coefficients — better for prediction
+Ridge keeps all variables but shrinks coefficients - better for prediction
 when you believe many variables contribute small effects.
 
 ```{r ridge}
@@ -180,11 +185,13 @@ variables are retained. A table note explains this behavior.
 
 ## 3. Elastic Net (Default)
 
-The recommended starting point — combines LASSO selection with Ridge stability.
+The recommended starting point - combines LASSO selection with Ridge stability.
 
 ```{r elastic-net}
-pred_vars <- c("age", "gender", "stage",
-               paste0("GENE_", sprintf("%03d", 1:p_genes)))
+pred_vars <- c(
+  "age", "gender", "stage",
+  paste0("GENE_", sprintf("%03d", 1:p_genes))
+)
 
 highdimcox(
   data = data_genomic,
@@ -310,7 +317,7 @@ highdimcox(
 The choice of CV lambda selection affects model complexity.
 
 ```{r cv-min}
-# Minimum CV error — more variables, better fit but risk of overfitting
+# Minimum CV error - more variables, better fit but risk of overfitting
 highdimcox(
   data = data_genomic,
   elapsedtime = "survival_months",
@@ -327,7 +334,7 @@ highdimcox(
 ```
 
 ```{r cv-1se}
-# 1-SE rule — more parsimonious, better generalization
+# 1-SE rule - more parsimonious, better generalization
 highdimcox(
   data = data_genomic,
   elapsedtime = "survival_months",
@@ -349,12 +356,12 @@ highdimcox(
 
 The suitability check runs 6 diagnostics with traffic-light indicators:
 
-1. **Events-Per-Variable (EPV)** — green ≥10, yellow ≥1, red <1
-2. **Regularization Need** — green if p ≥ n/3
-3. **Sample Size** — green ≥100, yellow ≥30, red <30
-4. **Event Rate** — green 20–80%, yellow otherwise
-5. **Multicollinearity** — max pairwise |r| (skipped if p > 2000)
-6. **Data Quality** — missing data and constant predictors
+1. **Events-Per-Variable (EPV)** - green >=10, yellow >=1, red <1
+2. **Regularization Need** - green if p >= n/3
+3. **Sample Size** - green >=100, yellow >=30, red <30
+4. **Event Rate** - green 20 - 80%, yellow otherwise
+5. **Multicollinearity** - max pairwise |r| (skipped if p > 2000)
+6. **Data Quality** - missing data and constant predictors
 
 ```{r suitability}
 highdimcox(
@@ -405,7 +412,8 @@ surv_time2 <- rweibull(n2, shape = 1.1, scale = 24 * exp(-as.numeric(lp2) * 0.5)
 censor_time2 <- runif(n2, 6, 36)
 time2 <- pmax(pmin(surv_time2, censor_time2), 0.1)
 event2 <- factor(ifelse(surv_time2 <= censor_time2, "Dead", "Alive"),
-                 levels = c("Alive", "Dead"))
+  levels = c("Alive", "Dead")
+)
 
 data_proteomic <- data.frame(
   time = time2, status = event2,
@@ -415,13 +423,17 @@ data_proteomic <- data.frame(
   as.data.frame(prot_matrix)
 )
 
-cat("N:", n2, "Events:", sum(event2 == "Dead"),
-    "Event rate:", round(mean(event2 == "Dead"), 2), "\n")
+cat(
+  "N:", n2, "Events:", sum(event2 == "Dead"),
+  "Event rate:", round(mean(event2 == "Dead"), 2), "\n"
+)
 ```
 
 ```{r proteomic-run}
-prot_vars <- c("age", "sex", "tumor_size_cm",
-               paste0("PROT_", sprintf("%02d", 1:p_prot)))
+prot_vars <- c(
+  "age", "sex", "tumor_size_cm",
+  paste0("PROT_", sprintf("%02d", 1:p_prot))
+)
 
 highdimcox(
   data = data_proteomic,
@@ -449,8 +461,10 @@ highdimcox(
 Demonstrates automatic factor dummy-encoding for mixed predictor types.
 
 ```{r mixed-predictors}
-mixed_vars <- c("age", "gender", "stage", "grade", "treatment",
-                paste0("GENE_", sprintf("%03d", 1:20)))
+mixed_vars <- c(
+  "age", "gender", "stage", "grade", "treatment",
+  paste0("GENE_", sprintf("%03d", 1:20))
+)
 
 highdimcox(
   data = data_genomic,
@@ -589,7 +603,7 @@ highdimcox(
 |--------|---------|
 | Variable | Predictor name (or "Variable: Level" for factor dummies) |
 | Coefficient (β) | Regularized log hazard ratio |
-| Hazard Ratio (HR) | exp(coefficient) — HR > 1 = increased risk |
+| Hazard Ratio (HR) | exp(coefficient) - HR > 1 = increased risk |
 | Importance | Absolute coefficient value |
 
 ### Variable Importance Plot
@@ -609,7 +623,7 @@ Vertical lines mark lambda.min (red) and lambda.1se (green).
 
 ### Stability Selection
 
-Variables with selection probability ≥ threshold are marked as "stable".
+Variables with selection probability >= threshold are marked as "stable".
 Higher selection frequency = more reliable predictor.
 
 ---

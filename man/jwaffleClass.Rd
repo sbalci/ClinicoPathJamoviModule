@@ -50,7 +50,7 @@ safety outcomes
 
 \strong{Statistical Considerations:}
 \itemize{
-\item Most effective with n≥30; smaller samples may show unstable proportions
+\item Most effective with n>=30; smaller samples may show unstable proportions
 \item Works best when no single category dominates (>80\%)
 \item Each square represents approximately 1\% of the sample
 \item Categories with <5 cases may be statistically unreliable

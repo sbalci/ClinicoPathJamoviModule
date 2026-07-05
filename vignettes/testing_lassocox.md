@@ -19,7 +19,7 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 
 | # | Data | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 3 | `lassocox_breast_cancer` (n=120) | elapsedtime: `survival_months`, outcome: `death`, outcomeLevel: `Dead`, explanatory: age, stage, grade, er_status, her2_status, GENE_001–GENE_200 | 200+ predictors. `suitabilityCheck`: verify regularization strongly indicated (green). `lambda`: lambda.1se (should select sparse set). `nfolds`: 5 (small n). |
+| 3 | `lassocox_breast_cancer` (n=120) | elapsedtime: `survival_months`, outcome: `death`, outcomeLevel: `Dead`, explanatory: age, stage, grade, er_status, her2_status, GENE_001 - GENE_200 | 200+ predictors. `suitabilityCheck`: verify regularization strongly indicated (green). `lambda`: lambda.1se (should select sparse set). `nfolds`: 5 (small n). |
 | 3b | `lassocox_genomic` (n=80) | elapsedtime: survival time variable, outcome: event variable, outcomeLevel: appropriate level, explanatory: all 50 gene features | 50 gene features, p >> n. `suitabilityCheck`: verify EPV and regularization checks. `nfolds`: 3 or 5. |
 
 **Options covered:** High-dimensional scenario, automatic variable selection, sparse signal recovery
@@ -84,7 +84,7 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 | 13 | Any dataset with selected vars | `cv_plot = TRUE`: verify CV plot renders with error bars, lambda.min (blue) and lambda.1se (green) lines. |
 | 14 | Any dataset with selected vars | `coef_plot = TRUE`: verify coefficient bar chart renders with red (risk) / blue (protective) colors. |
 | 15 | Any dataset with selected vars | `survival_plot = TRUE`: verify KM survival curves by risk groups with risk table and p-value. |
-| 16 | Any dataset | Toggle each plot off: `cv_plot = FALSE`, `coef_plot = FALSE`, `survival_plot = FALSE` — verify plots are hidden. |
+| 16 | Any dataset | Toggle each plot off: `cv_plot = FALSE`, `coef_plot = FALSE`, `survival_plot = FALSE` - verify plots are hidden. |
 
 **Key verification:** All 3 plots should render without protobuf serialization errors. Previous bug: `setState(results)` passed glmnet objects with function references.
 
@@ -127,22 +127,22 @@ All test datasets are in `data-raw/` (CSV) or `data/` (RDA). Synthetic data can 
 
 ## COMPLETE OPTION COVERAGE CHECKLIST
 
-- [x] `elapsedtime` — all tests
-- [x] `outcome` — all tests
-- [x] `outcomeLevel` — all tests
-- [x] `explanatory` — all tests
-- [x] `lambda` (lambda.min / lambda.1se) — #11, #12
-- [x] `nfolds` (3 / 5 / 10) — #1, #3, #4, #5
-- [x] `standardize` (TRUE / FALSE) — #1
-- [x] `suitabilityCheck` (TRUE / FALSE) — #9, #10, all scenarios
-- [x] `cv_plot` — #13, #16
-- [x] `coef_plot` — #14, #16
-- [x] `survival_plot` — #15, #16
-- [x] `riskScore` — #28
-- [x] `showExplanations` — #17
-- [x] `showMethodologyNotes` — #18
-- [x] `includeClinicalGuidance` — #19
-- [x] `showVariableImportance` — #20
-- [x] `showSummary` — #21b
-- [x] `showModelComparison` — #21
-- [x] `random_seed` — #21c
+- [x] `elapsedtime` - all tests
+- [x] `outcome` - all tests
+- [x] `outcomeLevel` - all tests
+- [x] `explanatory` - all tests
+- [x] `lambda` (lambda.min / lambda.1se) - #11, #12
+- [x] `nfolds` (3 / 5 / 10) - #1, #3, #4, #5
+- [x] `standardize` (TRUE / FALSE) - #1
+- [x] `suitabilityCheck` (TRUE / FALSE) - #9, #10, all scenarios
+- [x] `cv_plot` - #13, #16
+- [x] `coef_plot` - #14, #16
+- [x] `survival_plot` - #15, #16
+- [x] `riskScore` - #28
+- [x] `showExplanations` - #17
+- [x] `showMethodologyNotes` - #18
+- [x] `includeClinicalGuidance` - #19
+- [x] `showVariableImportance` - #20
+- [x] `showSummary` - #21b
+- [x] `showModelComparison` - #21
+- [x] `random_seed` - #21c

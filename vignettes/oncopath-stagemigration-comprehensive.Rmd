@@ -35,7 +35,7 @@ When a new edition of the AJCC/TNM staging manual is released, pathologists and
 oncologists face a critical question: *Does the revised staging system actually
 provide better prognostic discrimination than the one it replaces?* This is not a
 trivial question. Patients who were Stage II under the old criteria may become
-Stage III under the new criteria -- or vice versa. If the reclassification
+Stage III under the new criteria - or vice versa. If the reclassification
 genuinely separates patients with different prognoses, the new system is an
 improvement. If it simply reshuffles patients without prognostic benefit, or worse,
 introduces the **Will Rogers phenomenon** (where survival appears to improve in
@@ -168,10 +168,10 @@ migrated. Above the diagonal = upstaged, below = downstaged.
 
 The `analysisType` option controls the scope of the analysis. There are four levels:
 
-- **basic** -- Migration matrices and distribution tables only
-- **standard** -- Adds C-index comparison and NRI
-- **comprehensive** -- All statistical methods (default)
-- **publication** -- Optimized output formatting for manuscripts
+- **basic** - Migration matrices and distribution tables only
+- **standard** - Adds C-index comparison and NRI
+- **comprehensive** - All statistical methods (default)
+- **publication** - Optimized output formatting for manuscripts
 
 ```{r standard-analysis}
 stagemigration(
@@ -490,7 +490,7 @@ Supported cancer types: `general`, `lung`, `breast`, `colorectal`, `prostate`,
 
 ## 12. Competing Risks Analysis
 
-In many oncology settings, patients face multiple possible events -- cancer-specific
+In many oncology settings, patients face multiple possible events - cancer-specific
 death and death from other causes. Standard survival analysis treats competing events
 as censored, which can bias estimates. The competing risks framework uses Fine-Gray
 subdistribution hazard models and Cumulative Incidence Functions (CIF) to properly
@@ -757,11 +757,11 @@ analysis.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `oldStage` | Variable | -- | Original TNM staging variable (factor) |
-| `newStage` | Variable | -- | Revised TNM staging variable (factor) |
-| `survivalTime` | Variable | -- | Follow-up time in months (numeric) |
-| `event` | Variable | -- | Event status indicator (numeric or factor) |
-| `eventLevel` | Level | -- | Level indicating event occurrence |
+| `oldStage` | Variable | - | Original TNM staging variable (factor) |
+| `newStage` | Variable | - | Revised TNM staging variable (factor) |
+| `survivalTime` | Variable | - | Follow-up time in months (numeric) |
+| `event` | Variable | - | Event status indicator (numeric or factor) |
+| `eventLevel` | Level | - | Level indicating event occurrence |
 
 ### Analysis Control
 

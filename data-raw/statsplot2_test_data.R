@@ -46,16 +46,16 @@ clinical_trial_data <- tibble(
   # ─────────────────────────────────────────────────────────
   # Tumor size reduction (mm) - normally distributed
   tumor_reduction = c(
-    rnorm(n_per_group, mean = 5, sd = 8),    # Placebo: small reduction
-    rnorm(n_per_group, mean = 15, sd = 10),  # Low Dose: moderate reduction
-    rnorm(n_per_group, mean = 25, sd = 12)   # High Dose: large reduction
+    rnorm(n_per_group, mean = 5, sd = 8), # Placebo: small reduction
+    rnorm(n_per_group, mean = 15, sd = 10), # Low Dose: moderate reduction
+    rnorm(n_per_group, mean = 25, sd = 12) # High Dose: large reduction
   ),
 
   # Pain score (0-100 VAS) - slightly skewed
   pain_score = c(
-    rbeta(n_per_group, 6, 3) * 100,  # Placebo: higher pain
-    rbeta(n_per_group, 4, 5) * 100,  # Low Dose: moderate pain
-    rbeta(n_per_group, 2, 6) * 100   # High Dose: lower pain
+    rbeta(n_per_group, 6, 3) * 100, # Placebo: higher pain
+    rbeta(n_per_group, 4, 5) * 100, # Low Dose: moderate pain
+    rbeta(n_per_group, 2, 6) * 100 # High Dose: lower pain
   ),
 
   # Quality of life score (0-100) - normal distribution
@@ -70,11 +70,17 @@ clinical_trial_data <- tibble(
   # ─────────────────────────────────────────────────────────
   response_status = c(
     sample(c("No Response", "Partial Response", "Complete Response"),
-           n_per_group, replace = TRUE, prob = c(0.6, 0.3, 0.1)),
+      n_per_group,
+      replace = TRUE, prob = c(0.6, 0.3, 0.1)
+    ),
     sample(c("No Response", "Partial Response", "Complete Response"),
-           n_per_group, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
+      n_per_group,
+      replace = TRUE, prob = c(0.3, 0.5, 0.2)
+    ),
     sample(c("No Response", "Partial Response", "Complete Response"),
-           n_per_group, replace = TRUE, prob = c(0.15, 0.35, 0.5))
+      n_per_group,
+      replace = TRUE, prob = c(0.15, 0.35, 0.5)
+    )
   ),
 
   # ─────────────────────────────────────────────────────────
@@ -82,17 +88,18 @@ clinical_trial_data <- tibble(
   # ─────────────────────────────────────────────────────────
   tumor_stage = rep(
     sample(c("Stage I-II", "Stage III-IV"), n_per_group * n_groups,
-           replace = TRUE, prob = c(0.4, 0.6))
+      replace = TRUE, prob = c(0.4, 0.6)
+    )
   ),
-
   sex = rep(
     sample(c("Male", "Female"), n_per_group * n_groups,
-           replace = TRUE, prob = c(0.55, 0.45))
+      replace = TRUE, prob = c(0.55, 0.45)
+    )
   ),
-
   age_group = rep(
     sample(c("<50", "50-65", ">65"), n_per_group * n_groups,
-           replace = TRUE, prob = c(0.2, 0.5, 0.3))
+      replace = TRUE, prob = c(0.2, 0.5, 0.3)
+    )
   ),
 
   # ─────────────────────────────────────────────────────────
@@ -123,7 +130,8 @@ clinical_trial_data <- clinical_trial_data %>%
   mutate(
     treatment = factor(treatment, levels = c("Placebo", "Low Dose", "High Dose")),
     response_status = factor(response_status,
-                             levels = c("No Response", "Partial Response", "Complete Response")),
+      levels = c("No Response", "Partial Response", "Complete Response")
+    ),
     tumor_stage = factor(tumor_stage),
     sex = factor(sex),
     age_group = factor(age_group, levels = c("<50", "50-65", ">65"))
@@ -211,7 +219,8 @@ repeated_measures_data <- repeated_measures_data %>%
   mutate(
     timepoint = factor(timepoint, levels = c("Baseline", "Week 4", "Week 12")),
     disease_status = factor(disease_status,
-                           levels = c("Active", "Moderate", "Mild", "Remission")),
+      levels = c("Active", "Moderate", "Mild", "Remission")
+    ),
     treatment_arm = factor(treatment_arm)
   )
 
@@ -279,14 +288,17 @@ save(statsplot2_skewed, file = here::here("data", "statsplot2_skewed.rda"))
 
 # 2. CSV format
 write.csv(statsplot2_test,
-          file = here::here("data", "statsplot2_test.csv"),
-          row.names = FALSE)
+  file = here::here("data", "statsplot2_test.csv"),
+  row.names = FALSE
+)
 write.csv(clinical_trial_data,
-          file = here::here("data", "statsplot2_clinical.csv"),
-          row.names = FALSE)
+  file = here::here("data", "statsplot2_clinical.csv"),
+  row.names = FALSE
+)
 write.csv(repeated_measures_data,
-          file = here::here("data", "statsplot2_repeated.csv"),
-          row.names = FALSE)
+  file = here::here("data", "statsplot2_repeated.csv"),
+  row.names = FALSE
+)
 
 # 3. Excel format (multiple sheets)
 writexl::write_xlsx(
@@ -301,8 +313,10 @@ writexl::write_xlsx(
 )
 
 # 4. Jamovi format (OMV)
-jmvReadWrite::write_omv(statsplot2_test,
-                        here::here("data", "statsplot2_test.omv"))
+jmvReadWrite::write_omv(
+  statsplot2_test,
+  here::here("data", "statsplot2_test.omv")
+)
 
 # ═══════════════════════════════════════════════════════════
 # Generate Data Summary Report
@@ -338,10 +352,10 @@ VARIABLE DESCRIPTIONS
 ---------------------
 
 Continuous Outcomes (for dep parameter):
-  • tumor_reduction [numeric, ≥0]: Tumor size reduction in mm
+  • tumor_reduction [numeric, >=0]: Tumor size reduction in mm
   • pain_score [numeric, 0-100]: Visual analog pain scale
   • qol_score [numeric, 0-100]: Quality of life score
-  • biomarker_level [numeric, ≥0]: Biomarker concentration
+  • biomarker_level [numeric, >=0]: Biomarker concentration
   • age [integer]: Patient age in years
   • bmi [numeric]: Body mass index
 

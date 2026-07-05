@@ -1,4 +1,4 @@
-# timeroc -- Developer Documentation
+# timeroc - Developer Documentation
 
 > Enhanced ROC Analysis for Clinical Research (Time-Dependent and Binary)
 
@@ -6,13 +6,13 @@
 **Menu:** SurvivalT > ClinicoPath Survival \
 **Version:** 1.1.0 \
 **Source files:**
-- `jamovi/timeroc.a.yaml` -- analysis definition (options)
-- `jamovi/timeroc.u.yaml` -- UI layout
-- `jamovi/timeroc.r.yaml` -- results definition
-- `R/timeroc.b.R` -- backend implementation
-- `R/timeroc.h.R` -- auto-generated header (do not edit)
-- `build/js/timeroc.src.js` -- auto-generated JS (do not edit)
-- `tests/testthat/test-timeroc.R` -- test suite
+- `jamovi/timeroc.a.yaml` - analysis definition (options)
+- `jamovi/timeroc.u.yaml` - UI layout
+- `jamovi/timeroc.r.yaml` - results definition
+- `R/timeroc.b.R` - backend implementation
+- `R/timeroc.h.R` - auto-generated header (do not edit)
+- `build/js/timeroc.src.js` - auto-generated JS (do not edit)
+- `tests/testthat/test-timeroc.R` - test suite
 
 ---
 
@@ -47,7 +47,7 @@ The table below maps every UI control (from `.u.yaml`) to its `.a.yaml` option a
 |---|---|---|---|---|---|
 | *Variable panel* | Time Elapsed | `elapsedtime` | Variable | `null` | `.cleanData()`, `.runTimeROC()` |
 | *Variable panel* | Outcome | `outcome` | Variable | `null` | `.cleanData()` |
-| *Variable panel* | Event Level | `outcomeLevel` | Level (of `outcome`) | -- | `.cleanData()` |
+| *Variable panel* | Event Level | `outcomeLevel` | Level (of `outcome`) | - | `.cleanData()` |
 | *Variable panel* | Marker Variable | `marker` | Variable | `null` | `.cleanData()`, all analysis methods |
 | *Top-level* | Analysis Type | `analysisType` | List: `timedep` / `binary` | `timedep` | `.init()`, `.run()`, all visibility rules |
 | Analysis Options | Evaluation Timepoints | `timepoints` | String | `"12, 36, 60"` | `.parseTimepoints()` |
@@ -115,7 +115,7 @@ When disabled:
 
 ---
 
-## 4. Backend Usage -- Code Locations and Result Population
+## 4. Backend Usage - Code Locations and Result Population
 
 ### Class structure
 
@@ -123,12 +123,12 @@ When disabled:
 timerocClass (R6)
   inherits: timerocBase (auto-generated from .h.R)
   private fields:
-    .data            -- cleaned data.frame with columns: time, status, marker
-    .fit             -- timeROC::timeROC result object (timedep mode)
-    .timepoints      -- parsed numeric vector of valid timepoints
-    .primary_roc     -- pROC::roc result object (binary mode)
-    .complete_rows   -- integer vector of row indices surviving NA removal
-    .noticeList      -- list of {type, title, content} notice entries
+    .data            - cleaned data.frame with columns: time, status, marker
+    .fit             - timeROC::timeROC result object (timedep mode)
+    .timepoints      - parsed numeric vector of valid timepoints
+    .primary_roc     - pROC::roc result object (binary mode)
+    .complete_rows   - integer vector of row indices surviving NA removal
+    .noticeList      - list of {type, title, content} notice entries
 ```
 
 ### Method call graph
@@ -192,7 +192,7 @@ Additional markers from `self$options$markers` are fetched from the original `se
 
 ---
 
-## 5. Results Definition -- Column Schemas
+## 5. Results Definition - Column Schemas
 
 ### `aucTable` (Time-dependent AUC)
 
@@ -334,15 +334,15 @@ flowchart TD
     UI --> OPT
     DATA --> OPT
     OPT --> CHK1
-    CHK1 -- No --> WELCOME
-    CHK1 -- Yes --> CHK2
-    CHK2 -- timedep & no time --> TIMEREQ
-    CHK2 -- OK --> CLEAN
+    CHK1 - No --> WELCOME
+    CHK1 - Yes --> CHK2
+    CHK2 - timedep & no time --> TIMEREQ
+    CHK2 - OK --> CLEAN
     CLEAN --> VAL --> CONV --> NA_RM --> STORE
 
     STORE --> DISPATCH
-    DISPATCH -- timedep --> TIMEDEP
-    DISPATCH -- binary --> BINARY
+    DISPATCH - timedep --> TIMEDEP
+    DISPATCH - binary --> BINARY
 
     TIMEDEP --> PARSE --> TROC
     TROC --> MSTATS
@@ -380,7 +380,7 @@ flowchart TD
 
 ## 7. Execution Sequences
 
-### 7a. Time-Dependent ROC -- Full Path
+### 7a. Time-Dependent ROC - Full Path
 
 ```mermaid
 sequenceDiagram
@@ -424,7 +424,7 @@ sequenceDiagram
     P->>P: ggplot2: AUC over time with CI ribbon
 ```
 
-### 7b. Binary ROC -- Full Path
+### 7b. Binary ROC - Full Path
 
 ```mermaid
 sequenceDiagram
@@ -529,13 +529,13 @@ Use this table to understand which files and outputs you must touch when changin
 | What changed | Files to update |
 |---|---|
 | New comparison method | `.a.yaml` (add to `rocComparison` options), `.b.R` (add case to `switch()` in `.runROCComparison()`) |
-| New marker alignment logic | `.b.R` `.runROCComparison()` and `.plotBinaryROC()` -- both use `.complete_rows` |
+| New marker alignment logic | `.b.R` `.runROCComparison()` and `.plotBinaryROC()` - both use `.complete_rows` |
 
 ### Visibility rule changes
 
 All visibility is declared in `.r.yaml`. The grammar is:
-- `(analysisType:timedep)` -- visible when option equals value
-- `(plotROC && analysisType:timedep)` -- AND logic
+- `(analysisType:timedep)` - visible when option equals value
+- `(plotROC && analysisType:timedep)` - AND logic
 - No OR logic is supported natively; use separate result items.
 
 ### clearWith dependencies (key patterns)
@@ -613,8 +613,8 @@ a$results$aucTable$asDF
 | Dataset | File | N | Markers | Use case |
 |---|---|---|---|---|
 | `timeroc_test` | `data/timeroc_test.rda` | 200 | Ki67, GeneScore, NoiseMarker | Primary test data (breast cancer simulation) |
-| `timeroc_cancer_biomarker` | `data/timeroc_cancer_biomarker.rda` | -- | -- | Legacy test data |
-| `timeroc_cardiovascular_risk` | `data/timeroc_cardiovascular_risk.rda` | -- | -- | Legacy test data |
+| `timeroc_cancer_biomarker` | `data/timeroc_cancer_biomarker.rda` | - | - | Legacy test data |
+| `timeroc_cardiovascular_risk` | `data/timeroc_cardiovascular_risk.rda` | - | - | Legacy test data |
 
 ---
 
@@ -639,9 +639,9 @@ Used consistently in both modes:
 | AUC range | Label |
 |---|---|
 | >= 0.90 | Excellent discrimination |
-| 0.80 - 0.89 | Good discrimination |
-| 0.70 - 0.79 | Fair discrimination |
-| 0.60 - 0.69 | Poor discrimination |
+| 0.80-0.89 | Good discrimination |
+| 0.70-0.79 | Fair discrimination |
+| 0.60-0.69 | Poor discrimination |
 | < 0.60 | No discrimination (random chance) |
 
 ### C. Known limitations and TODOs

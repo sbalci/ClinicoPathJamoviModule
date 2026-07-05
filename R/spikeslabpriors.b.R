@@ -48,7 +48,7 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     private$.populateResults(res)
                     
                     # 6. Store result for plots
-                    # TODO (correctness): I5 stale cache — private$.model_res is set here on success but
+                    # TODO (correctness): I5 stale cache - private$.model_res is set here on success but
                     #   never reset at the top of .run(); an early-return run (missing outcome/predictors
                     #   L13, missing BoomSpikeSlab L18, or missing Cox time/status L29) leaves the prior
                     #   model, which .plotInclusionProbabilities/.plotCoefficients still render (they gate
@@ -109,7 +109,7 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 )
             } else if (model_type == "cox") {
                 # BoomSpikeSlab does not have Cox. Fallback to penalized or suggest alternative.
-                # TODO (stub): the `cox` model_type is unimplemented — it stop()s here (caught by the
+                # TODO (stub): the `cox` model_type is unimplemented - it stop()s here (caught by the
                 #   .run tryCatch → reject). Either implement via spBayesSurv or remove "cox" from the
                 #   model_type options so users aren't offered an unsupported analysis.
                 stop("Cox proportional hazards is currently not supported by BoomSpikeSlab in this module. Support via spBayesSurv is planned.")

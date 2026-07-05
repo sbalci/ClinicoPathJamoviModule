@@ -80,7 +80,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -748,7 +748,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is.null(flow_data) || length(flow_data) == 0) return(FALSE)
 
-            # (ggplot2 is package-imported — bare ggplot()/geom_*/aes resolve; no library() so we
+            # (ggplot2 is package-imported - bare ggplot()/geom_*/aes resolve; no library() so we
             #  don't mutate the user search path / trip R CMD check.)
 
             # Get style parameters and color schemes

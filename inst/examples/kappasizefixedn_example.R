@@ -24,12 +24,12 @@ library(ClinicoPath)
 # Justification: Pilot study to determine if full validation feasible
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Melanoma vs benign
-  kappa0 = 0.40,          # Null hypothesis: fair agreement
-  props = "0.10, 0.90",   # 10% melanoma prevalence
-  raters = "2",           # Two dermatology residents
-  alpha = 0.05,           # 95% confidence
-  n = 30                  # FIXED: Only 30 cases available/affordable
+  outcome = "2", # Binary: Melanoma vs benign
+  kappa0 = 0.40, # Null hypothesis: fair agreement
+  props = "0.10, 0.90", # 10% melanoma prevalence
+  raters = "2", # Two dermatology residents
+  alpha = 0.05, # 95% confidence
+  n = 30 # FIXED: Only 30 cases available/affordable
 )
 
 # Clinical Interpretation:
@@ -48,12 +48,12 @@ kappaSizeFixedN(
 # Justification: Time pressure for protocol implementation
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Stroke present vs absent
-  kappa0 = 0.50,          # Null hypothesis: moderate agreement
-  props = "0.15, 0.85",   # 15% stroke prevalence in ED
-  raters = "2",           # Two emergency radiologists
-  alpha = 0.05,           # 95% confidence
-  n = 40                  # FIXED: 2-month capacity = 40 cases
+  outcome = "2", # Binary: Stroke present vs absent
+  kappa0 = 0.50, # Null hypothesis: moderate agreement
+  props = "0.15, 0.85", # 15% stroke prevalence in ED
+  raters = "2", # Two emergency radiologists
+  alpha = 0.05, # 95% confidence
+  n = 40 # FIXED: 2-month capacity = 40 cases
 )
 
 # Clinical Interpretation:
@@ -71,12 +71,12 @@ kappaSizeFixedN(
 # Justification: Rare disease limits case availability
 
 kappaSizeFixedN(
-  outcome = "3",                     # Three grades: low/moderate/high
-  kappa0 = 0.40,                    # Null hypothesis: fair agreement
-  props = "0.30, 0.40, 0.30",       # Grade distribution
-  raters = "2",                     # Two pathologists
-  alpha = 0.05,                     # 95% confidence
-  n = 35                            # FIXED: Annual case availability
+  outcome = "3", # Three grades: low/moderate/high
+  kappa0 = 0.40, # Null hypothesis: fair agreement
+  props = "0.30, 0.40, 0.30", # Grade distribution
+  raters = "2", # Two pathologists
+  alpha = 0.05, # 95% confidence
+  n = 35 # FIXED: Annual case availability
 )
 
 # Clinical Interpretation:
@@ -94,12 +94,12 @@ kappaSizeFixedN(
 # Justification: Educational resource limitations
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Adequate vs inadequate specimen
-  kappa0 = 0.50,          # Null hypothesis: moderate agreement
-  props = "0.25, 0.75",   # 25% inadequate specimens
-  raters = "3",           # Three pathology trainees
-  alpha = 0.05,           # 95% confidence
-  n = 50                  # FIXED: Training budget = 50 cases
+  outcome = "2", # Binary: Adequate vs inadequate specimen
+  kappa0 = 0.50, # Null hypothesis: moderate agreement
+  props = "0.25, 0.75", # 25% inadequate specimens
+  raters = "3", # Three pathology trainees
+  alpha = 0.05, # 95% confidence
+  n = 50 # FIXED: Training budget = 50 cases
 )
 
 # Clinical Interpretation:
@@ -117,12 +117,12 @@ kappaSizeFixedN(
 # Justification: Institutional QA protocol requirement
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Suspicious vs benign
-  kappa0 = 0.50,          # Null hypothesis: moderate agreement
-  props = "0.20, 0.80",   # 20% suspicious findings
-  raters = "2",           # Two breast radiologists
-  alpha = 0.05,           # 95% confidence
-  n = 100                 # FIXED: Standard annual QA sample
+  outcome = "2", # Binary: Suspicious vs benign
+  kappa0 = 0.50, # Null hypothesis: moderate agreement
+  props = "0.20, 0.80", # 20% suspicious findings
+  raters = "2", # Two breast radiologists
+  alpha = 0.05, # 95% confidence
+  n = 100 # FIXED: Standard annual QA sample
 )
 
 # Clinical Interpretation:
@@ -140,12 +140,12 @@ kappaSizeFixedN(
 # Justification: Regulatory compliance requirement
 
 kappaSizeFixedN(
-  outcome = "4",                          # Four grades
-  kappa0 = 0.50,                         # Null hypothesis
-  props = "0.25, 0.30, 0.30, 0.15",      # Grade distribution
-  raters = "2",                          # Two pathologists
-  alpha = 0.05,                          # 95% confidence
-  n = 120                                # FIXED: Regulatory minimum
+  outcome = "4", # Four grades
+  kappa0 = 0.50, # Null hypothesis
+  props = "0.25, 0.30, 0.30, 0.15", # Grade distribution
+  raters = "2", # Two pathologists
+  alpha = 0.05, # 95% confidence
+  n = 120 # FIXED: Regulatory minimum
 )
 
 # Clinical Interpretation:
@@ -163,12 +163,12 @@ kappaSizeFixedN(
 # Justification: Trial complete, retrospective agreement assessment
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Biomarker positive vs negative
-  kappa0 = 0.60,          # Null hypothesis: good agreement
-  props = "0.35, 0.65",   # 35% positive biomarker
-  raters = "2",           # Central vs local pathologist
-  alpha = 0.05,           # 95% confidence
-  n = 150                 # FIXED: Trial enrollment complete
+  outcome = "2", # Binary: Biomarker positive vs negative
+  kappa0 = 0.60, # Null hypothesis: good agreement
+  props = "0.35, 0.65", # 35% positive biomarker
+  raters = "2", # Central vs local pathologist
+  alpha = 0.05, # 95% confidence
+  n = 150 # FIXED: Trial enrollment complete
 )
 
 # Clinical Interpretation:
@@ -186,12 +186,12 @@ kappaSizeFixedN(
 # Justification: Operational resource limitation
 
 kappaSizeFixedN(
-  outcome = "5",                                # Five TNM stages
-  kappa0 = 0.60,                               # Null hypothesis
-  props = "0.20, 0.25, 0.25, 0.20, 0.10",      # Stage distribution
-  raters = "2",                                # Two oncologists
-  alpha = 0.05,                                # 95% confidence
-  n = 250                                      # FIXED: Annual registry capacity
+  outcome = "5", # Five TNM stages
+  kappa0 = 0.60, # Null hypothesis
+  props = "0.20, 0.25, 0.25, 0.20, 0.10", # Stage distribution
+  raters = "2", # Two oncologists
+  alpha = 0.05, # 95% confidence
+  n = 250 # FIXED: Annual registry capacity
 )
 
 # Clinical Interpretation:
@@ -209,12 +209,12 @@ kappaSizeFixedN(
 # Justification: Public health program requires rigorous standards
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Recall vs routine
-  kappa0 = 0.70,          # Null hypothesis: good agreement
-  props = "0.25, 0.75",   # 25% recall rate
-  raters = "2",           # Two screening radiologists
-  alpha = 0.01,           # 99% confidence (STRINGENT)
-  n = 300                 # FIXED: National program QA sample
+  outcome = "2", # Binary: Recall vs routine
+  kappa0 = 0.70, # Null hypothesis: good agreement
+  props = "0.25, 0.75", # 25% recall rate
+  raters = "2", # Two screening radiologists
+  alpha = 0.01, # 99% confidence (STRINGENT)
+  n = 300 # FIXED: National program QA sample
 )
 
 # Clinical Interpretation:
@@ -232,12 +232,12 @@ kappaSizeFixedN(
 # Justification: Expert labeling expensive, limits sample size
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: AI vs human classification
-  kappa0 = 0.60,          # Null hypothesis: moderate-good agreement
-  props = "0.30, 0.70",   # 30% positive findings
-  raters = "2",           # AI algorithm vs radiologist
-  alpha = 0.05,           # 95% confidence
-  n = 400                 # FIXED: Expert labeling budget
+  outcome = "2", # Binary: AI vs human classification
+  kappa0 = 0.60, # Null hypothesis: moderate-good agreement
+  props = "0.30, 0.70", # 30% positive findings
+  raters = "2", # AI algorithm vs radiologist
+  alpha = 0.05, # 95% confidence
+  n = 400 # FIXED: Expert labeling budget
 )
 
 # Clinical Interpretation:
@@ -255,12 +255,12 @@ kappaSizeFixedN(
 # Justification: Tissue availability constraint
 
 kappaSizeFixedN(
-  outcome = "4",                          # Four tumor grades
-  kappa0 = 0.65,                         # Null hypothesis
-  props = "0.30, 0.30, 0.25, 0.15",      # Grade distribution
-  raters = "2",                          # Two pathologists
-  alpha = 0.05,                          # 95% confidence
-  n = 500                                # FIXED: Available tissue samples
+  outcome = "4", # Four tumor grades
+  kappa0 = 0.65, # Null hypothesis
+  props = "0.30, 0.30, 0.25, 0.15", # Grade distribution
+  raters = "2", # Two pathologists
+  alpha = 0.05, # 95% confidence
+  n = 500 # FIXED: Available tissue samples
 )
 
 # Clinical Interpretation:
@@ -278,12 +278,12 @@ kappaSizeFixedN(
 # Justification: Trial design specified 3-rater consensus, n fixed
 
 kappaSizeFixedN(
-  outcome = "3",                     # Three endpoint levels
-  kappa0 = 0.60,                    # Null hypothesis
-  props = "0.35, 0.40, 0.25",       # Endpoint distribution
-  raters = "3",                     # Three independent assessors
-  alpha = 0.05,                     # 95% confidence
-  n = 200                           # FIXED: Trial enrollment
+  outcome = "3", # Three endpoint levels
+  kappa0 = 0.60, # Null hypothesis
+  props = "0.35, 0.40, 0.25", # Endpoint distribution
+  raters = "3", # Three independent assessors
+  alpha = 0.05, # 95% confidence
+  n = 200 # FIXED: Trial enrollment
 )
 
 # Clinical Interpretation:
@@ -301,12 +301,12 @@ kappaSizeFixedN(
 # Justification: Multi-center collaboration with predetermined contributions
 
 kappaSizeFixedN(
-  outcome = "3",                     # Three severity levels
-  kappa0 = 0.65,                    # Null hypothesis: good agreement
-  props = "0.30, 0.45, 0.25",       # Severity distribution
-  raters = "2",                     # Two pathologists
-  alpha = 0.01,                     # 99% confidence (stringent for consortium)
-  n = 800                           # FIXED: 8 centers × 100 cases each
+  outcome = "3", # Three severity levels
+  kappa0 = 0.65, # Null hypothesis: good agreement
+  props = "0.30, 0.45, 0.25", # Severity distribution
+  raters = "2", # Two pathologists
+  alpha = 0.01, # 99% confidence (stringent for consortium)
+  n = 800 # FIXED: 8 centers × 100 cases each
 )
 
 # Clinical Interpretation:
@@ -324,12 +324,12 @@ kappaSizeFixedN(
 # Justification: Survey methodology fixes sample size a priori
 
 kappaSizeFixedN(
-  outcome = "2",           # Binary: Disease present vs absent
-  kappa0 = 0.70,          # Null hypothesis: good agreement
-  props = "0.50, 0.50",   # Balanced prevalence
-  raters = "2",           # Two survey physicians
-  alpha = 0.05,           # 95% confidence
-  n = 1000                # FIXED: Survey design specification
+  outcome = "2", # Binary: Disease present vs absent
+  kappa0 = 0.70, # Null hypothesis: good agreement
+  props = "0.50, 0.50", # Balanced prevalence
+  raters = "2", # Two survey physicians
+  alpha = 0.05, # 95% confidence
+  n = 1000 # FIXED: Survey design specification
 )
 
 # Clinical Interpretation:
@@ -403,7 +403,7 @@ result_n300 <- kappaSizeFixedN(
 #    Example: If result is κ=0.65 with kappa0=0.50:
 #    - With your fixed n, you can detect whether agreement reaches κ=0.65
 #    - Differences smaller than (0.65 - 0.50) = 0.15 may not be detectable
-#    - Clinical Question: Is detecting κ≥0.65 adequate for your needs?
+#    - Clinical Question: Is detecting κ>=0.65 adequate for your needs?
 #
 #    Interpretation Framework:
 #    - Result much higher than kappa0 → Limited detection, consider more cases

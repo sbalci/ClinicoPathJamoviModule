@@ -55,6 +55,7 @@
 ## Task 1: Scaffold files + DESCRIPTION + 0000.yaml registration
 
 **Files:**
+
 - Create: `jamovi/latentbiomarker.a.yaml`, `jamovi/latentbiomarker.u.yaml`, `jamovi/latentbiomarker.r.yaml`, `R/latentbiomarker.b.R`
 - Modify: `jamovi/0000.yaml` (append analysis entry), `DESCRIPTION` (add `semPlot` Suggests)
 - Verify: `jmvtools::prepare()` succeeds and `R/latentbiomarker.h.R` is generated
@@ -117,7 +118,7 @@ options:
     variable: (dep_event)
 
   - name: indicators
-    title: "Indicators (≥3)"
+    title: "Indicators (>=3)"
     type: Variables
     suggested: [continuous, ordinal, nominal]
     permitted: [numeric, factor]
@@ -241,7 +242,7 @@ children:
             name: event_level
             label: Event level
       - type: TargetLayoutBox
-        label: Indicators (≥3)
+        label: Indicators (>=3)
         children:
           - type: VariablesListBox
             name: indicators
@@ -676,11 +677,13 @@ Run: `grep -n "Version:\|Suggests:" DESCRIPTION` to find lines.
 - [ ] **Step 1.7: Run `jmvtools::prepare()` and verify**
 
 Run:
+
 ```bash
 Rscript -e "jmvtools::prepare()" 2>&1 | tail -30
 ```
 
 Expected: no errors. `R/latentbiomarker.h.R` is created. The output may say "compiled <n> analyses". Confirm with:
+
 ```bash
 ls -la R/latentbiomarker.h.R
 ```
@@ -711,6 +714,7 @@ EOF
 ## Task 2: First integration test — reflective gate refuses
 
 **Files:**
+
 - Create: `tests/testthat/test-latentbiomarker.R`
 
 - [ ] **Step 2.1: Write the failing test**
@@ -761,6 +765,7 @@ test_that("G6 reflective confirmation: function proceeds when checked (no other 
 - [ ] **Step 2.2: Run test to verify the first test passes and the second indicates what's missing**
 
 Run:
+
 ```bash
 Rscript -e "devtools::test(filter='latentbiomarker')" 2>&1 | tail -20
 ```
@@ -786,6 +791,7 @@ EOF
 ## Task 3: Refusal-message dictionary + remaining hard gates (G1, G3)
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R` — add `private$.messages` and gate logic
 
 - [ ] **Step 3.1: Write failing tests for G1 and G3**
@@ -827,6 +833,7 @@ test_that("G3 hard gate: refuses fewer than 3 indicators", {
 - [ ] **Step 3.2: Run tests, confirm they fail**
 
 Run:
+
 ```bash
 Rscript -e "devtools::test(filter='latentbiomarker')" 2>&1 | tail -20
 ```
@@ -958,6 +965,7 @@ Then update the existing `.run` body so that the gate cascade replaces the curre
 - [ ] **Step 3.4: Regenerate `.h.R` and run tests**
 
 Run:
+
 ```bash
 Rscript -e "jmvtools::prepare()" 2>&1 | tail -5
 Rscript -e "devtools::test(filter='latentbiomarker')" 2>&1 | tail -20
@@ -985,6 +993,7 @@ EOF
 ## Task 4: Indicator-type detection + estimator selection
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 4.1: Write the failing test**
@@ -1119,6 +1128,7 @@ EOF
 ## Task 5: CPP gate (G2) + correlation gate (G5)
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 5.1: Write failing tests for G2 and G5**
@@ -1261,6 +1271,7 @@ EOF
 ## Task 6: CFA fit + fit-indices table + traffic-light interpretation
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 6.1: Write failing test for fit indices**
@@ -1425,6 +1436,7 @@ EOF
 ## Task 7: Loadings, reliability, and summary tables
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 7.1: Write failing test**
@@ -1559,6 +1571,7 @@ EOF
 ## Task 8: Factor scores + Cox table + G4 EPV gate
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 8.1: Write failing test**
@@ -1722,6 +1735,7 @@ EOF
 ## Task 9: KM plot + PH test
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 9.1: Write failing test**
@@ -1843,6 +1857,7 @@ EOF
 ## Task 10: Loadings plot + path diagram
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 10.1: Write failing test (render boolean)**
@@ -1971,6 +1986,7 @@ EOF
 ## Task 11: Modification indices + save-to-data + R code export
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 11.1: Write failing tests**
@@ -2152,6 +2168,7 @@ EOF
 These two diagnostics are surfaced as additional notices rather than dedicated tables (keeps the result pane lean). Both gated by `show_diagnostics = TRUE`.
 
 **Files:**
+
 - Modify: `R/latentbiomarker.b.R`
 
 - [ ] **Step 11b.1: Write failing test**
@@ -2277,11 +2294,13 @@ EOF
 ## Task 12: End-to-end test on `histopathology` dataset
 
 **Files:**
+
 - Modify: `tests/testthat/test-latentbiomarker.R`
 
 - [ ] **Step 12.1: Inspect `histopathology` to pick realistic indicators**
 
 Run:
+
 ```bash
 Rscript -e "data(histopathology, package='ClinicoPath'); str(histopathology)" 2>&1 | head -60
 ```
@@ -2348,11 +2367,13 @@ EOF
 ## Task 13: Vignette with worked scenarios
 
 **Files:**
+
 - Create: `vignettes/meddecide-99-latentbiomarker.qmd` (renumber per `updateModules_config.yaml` if a conflict exists)
 
 - [ ] **Step 13.1: Confirm vignette numbering**
 
 Run:
+
 ```bash
 ls vignettes/ | grep -E "^meddecide-" | head -20
 ```
@@ -2428,6 +2449,7 @@ The function deliberately refuses to run when the input is inappropriate. See th
 - [ ] **Step 13.3: Verify vignette builds**
 
 Run:
+
 ```bash
 Rscript -e "rmarkdown::render('vignettes/meddecide-99-latentbiomarker.qmd', quiet = TRUE)"
 ```
@@ -2451,6 +2473,7 @@ EOF
 ## Task 14: NEWS.md, version bump, JamoviTest promotion guard
 
 **Files:**
+
 - Modify: `NEWS.md`, `DESCRIPTION` (if not already bumped in Task 1)
 
 - [ ] **Step 14.1: Update `NEWS.md`**
@@ -2479,6 +2502,7 @@ Expected: both show `menuGroup: meddecideT` (with `T`). **Do not** strip the `T`
 - [ ] **Step 14.3: Final test sweep**
 
 Run:
+
 ```bash
 Rscript -e "jmvtools::prepare()" 2>&1 | tail -5
 Rscript -e "devtools::test(filter='latentbiomarker')" 2>&1 | tail -30

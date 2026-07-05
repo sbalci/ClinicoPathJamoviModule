@@ -13,6 +13,7 @@ Completed all recommended fixes from automated function check (`/check-function 
 **Problem**: Output defined in `r.yaml` but no render function existed in `.b.R`
 
 **Solution**: Implemented complete `.empiricalCumulativePlot()` function with:
+
 - Data validation checks (null data, zero positive cases)
 - Empirical conditional probability calculation (from actual data)
 - Binomial model comparison (theoretical prediction)
@@ -20,6 +21,7 @@ Completed all recommended fixes from automated function check (`/check-function 
 - Proper legend and axis labels
 
 **Key Features**:
+
 ```r
 .empiricalCumulativePlot = function(image, ggtheme, theme, ...) {
     # Validation
@@ -52,9 +54,10 @@ Completed all recommended fixes from automated function check (`/check-function 
 
 **Solution**: Complete reorganization into 7 logical sections:
 
-#### New UI Structure:
+#### New UI Structure
 
 **1. Core Analyses** (collapsed: false)
+
 - Show Clinical Summary
 - Show Guided Checklist
 - Show Binomial Model
@@ -63,21 +66,25 @@ Completed all recommended fixes from automated function check (`/check-function 
 - Show Sensitivity CI
 
 **2. Enhanced Detection** (collapsed: true)
+
 - Label: "Enhanced Detection (Requires Positive Count)"
 - Show Empirical Cumulative Detection
 - Show Incremental Diagnostic Yield
 - Show Population-Level Detection Rates
 
 **3. Spatial & Multifocal Analyses** (collapsed: true)
+
 - Label: "Spatial & Multifocal Analyses (Requires Sample List)"
 - Show Spatial Clustering Analysis
 - Show Multifocal Detection Analysis
 
 **4. Stratified Analyses** (collapsed: true)
+
 - Label: "Stratified Analyses (Requires Sample Type)"
 - Show Stratified Analysis by Sample Type
 
 **5. Tumor Burden & Stage Migration** (collapsed: true)
+
 - Variable suppliers for positiveCassettes and maxPositiveSingle
 - Show Tumor Burden Analysis
 - Show Stage Migration Analysis
@@ -85,6 +92,7 @@ Completed all recommended fixes from automated function check (`/check-function 
 - Show Distribution Pattern Analysis (with threshold control)
 
 **6. Specialized Models** (collapsed: true)
+
 - **Finite Population Models** sub-section
   - Model Type dropdown
   - Variable suppliers for totalPopulation and successStates
@@ -102,9 +110,11 @@ Completed all recommended fixes from automated function check (`/check-function 
   - Show Omentum Analysis
 
 **7. Advanced Options** (collapsed: true)
+
 - Set Random Seed (with seed value control)
 
 **Benefits**:
+
 - ✅ Clear visual hierarchy
 - ✅ Data requirements explicitly labeled
 - ✅ Core analyses immediately visible
@@ -127,6 +137,7 @@ Added 4 error validations and 1 warning with detailed user guidance.
 **Trigger**: `length(totalSamplesData) == 0` after filtering
 
 **Output**:
+
 - ❌ Error row in dataInfo table
 - ⚠️ Detailed HTML error message explaining:
   - All cases have missing total samples
@@ -134,6 +145,7 @@ Added 4 error validations and 1 warning with detailed user guidance.
 - Early return to prevent further processing
 
 **Example Message**:
+
 ```
 ⚠️ ERROR: No Valid Data
 
@@ -152,6 +164,7 @@ Required Actions:
 **Trigger**: All remaining cases have `firstDetection > totalSamples`
 
 **Output**:
+
 - ❌ Error row in dataInfo table
 - ⚠️ Detailed HTML error message explaining:
   - All cases have invalid data
@@ -160,6 +173,7 @@ Required Actions:
 - Early return
 
 **Example Message**:
+
 ```
 ⚠️ ERROR: Data Quality Issues
 
@@ -180,6 +194,7 @@ Recommendation: Review source data for consistency.
 **Trigger**: `nDetected == 0` after data cleaning
 
 **Output**:
+
 - Summary rows in dataInfo (total cases, positive cases = 0)
 - ❌ Error row explaining inability to estimate
 - ⚠️ Detailed HTML error message explaining:
@@ -189,6 +204,7 @@ Recommendation: Review source data for consistency.
 - Early return
 
 **Example Message**:
+
 ```
 ⚠️ ERROR: No Positive Cases
 
@@ -213,11 +229,13 @@ If no lesions are detected, estimation is not possible.
 **Trigger**: `nDetected < 3` when bootstrap analysis is enabled
 
 **Output**:
+
 - ⚠️ Error message in bootstrap text section
 - Recommendation to disable bootstrap or collect more cases
 - **Does NOT** early return - allows other analyses to continue
 
 **Example Message**:
+
 ```
 ⚠️ ERROR: Insufficient Data for Bootstrap
 
@@ -231,21 +249,23 @@ Recommendation: Disable bootstrap analysis or collect more positive cases.
 
 **Location**: Lines 633-655
 
-**Trigger**: `nDetected < 10` (but ≥ 1)
+**Trigger**: `nDetected < 10` (but >= 1)
 
 **Output**:
+
 - ⚠️ Warning message explaining unreliable results
 - Recommendations (collect more cases, interpret CI with caution, use 'Auto' method)
 - **Continues** with analysis
 
 **Example Message**:
+
 ```
 ⚠️ WARNING: Small Sample Size
 
 Only 7 cases with detected lesions. Results may be unreliable.
 
 Recommendations:
-• Collect more cases for robust estimates (recommended: n ≥ 30 for bootstrap analysis)
+• Collect more cases for robust estimates (recommended: n >= 30 for bootstrap analysis)
 • Interpret confidence intervals with caution
 • Consider using 'Auto' estimation method which adapts to sample size
 ```
@@ -255,10 +275,12 @@ Recommendations:
 ### 4. Existing Validation Enhanced
 
 **Warning 2: Extreme Confidence Level** (Lines 378-394)
+
 - Triggers when `targetConfidence > 0.98`
 - Warns about impractical sample sizes
 
 **Warning 3: Low Bootstrap Iterations** (Lines 396-412)
+
 - Triggers when `bootstrapIterations < 1000`
 - Warns about unstable confidence intervals
 
@@ -322,6 +344,7 @@ Created `test_pathsampling_validation.R` with 6 test scenarios:
 6. **Test 6**: Valid data (60 positive cases) → Success
 
 **Usage**:
+
 ```r
 source("test_pathsampling_validation.R")
 ```
@@ -343,7 +366,9 @@ source("test_pathsampling_validation.R")
 ## Files Modified
 
 ### 1. R/pathsampling.b.R
+
 **Lines modified**:
+
 - 485-514: Error 1 (no valid cases)
 - 535-566: Error 2 (all invalid)
 - 584-631: Error 3 (zero positive)
@@ -352,15 +377,18 @@ source("test_pathsampling_validation.R")
 - 1303: Close else block for bootstrap validation
 
 **Changes**:
+
 - Added 4 comprehensive error validations
 - Enhanced 1 warning with recommendations
 - All use modern HTML formatting with style constants
 - Consistent structure: error detection → dataInfo row → interpretText HTML → return
 
 ### 2. jamovi/pathsampling.u.yaml
+
 **Complete rewrite**: 285 lines
 
 **Changes**:
+
 - Reorganized into 7 logical CollapseBoxes
 - Added descriptive labels for data requirements
 - Core analyses visible by default
@@ -368,9 +396,11 @@ source("test_pathsampling_validation.R")
 - Sub-sections for specialized models
 
 ### 3. jamovi/pathsampling.r.yaml
+
 **No changes needed** - empiricalCumulativePlot already defined
 
 ### 4. Test Files Created
+
 - `test_pathsampling_validation.R` - comprehensive validation testing
 - `development-ideas/pathsampling-fixes-2025-10-14.md` (this document)
 
@@ -379,12 +409,13 @@ source("test_pathsampling_validation.R")
 ## Compilation Results
 
 ```bash
-$ Rscript -e "jmvtools::prepare('.')"
+Rscript -e "jmvtools::prepare('.')"
 ```
 
 **Status**: ✅ **SUCCESS** - No errors or warnings
 
 **Output**:
+
 - wrote: pathsampling.h.R
 - wrote: pathsampling.src.js
 - wrote: 0000.yaml
@@ -395,6 +426,7 @@ $ Rscript -e "jmvtools::prepare('.')"
 ## Benefits
 
 ### 1. User Experience
+
 - ✅ Clear, actionable error messages
 - ✅ Guidance on how to fix data issues
 - ✅ Warnings don't block analysis unnecessarily
@@ -402,6 +434,7 @@ $ Rscript -e "jmvtools::prepare('.')"
 - ✅ Data requirements explicitly labeled
 
 ### 2. Code Quality
+
 - ✅ Consistent validation pattern across all errors
 - ✅ Modern HTML formatting with style constants
 - ✅ Early returns prevent cascading errors
@@ -409,12 +442,14 @@ $ Rscript -e "jmvtools::prepare('.')"
 - ✅ Follows jamovi module architecture patterns
 
 ### 3. Robustness
+
 - ✅ Handles all edge cases gracefully
 - ✅ Prevents crashes from invalid data
 - ✅ Provides diagnostic information in errors
 - ✅ Allows partial analysis when possible
 
 ### 4. Maintainability
+
 - ✅ Clear separation of validation logic
 - ✅ Consistent error message structure
 - ✅ Well-documented validation thresholds
@@ -450,6 +485,7 @@ These are **optional enhancements** and do not affect core functionality.
 ## Architecture Patterns Used
 
 ### 1. Validation Pattern
+
 ```r
 # Check condition
 if (error_condition) {
@@ -482,6 +518,7 @@ if (error_condition) {
 ```
 
 ### 2. UI Organization Pattern
+
 ```yaml
 - type: CollapseBox
   label: Section Title (with data requirements)
@@ -494,6 +531,7 @@ if (error_condition) {
 ```
 
 ### 3. Plot Render Pattern
+
 ```r
 .plotName = function(image, ggtheme, theme, ...) {
     # 1. Validate data availability
@@ -558,17 +596,20 @@ Impact:
 ## References
 
 **Architecture Patterns**:
+
 - jamovi module R6 class structure
 - HTML style constants pattern from decisionpanel
 - CollapseBox UI organization
 
 **Validation Best Practices**:
+
 - Early return pattern for fatal errors
 - Detailed error messages with user guidance
 - Continue with warnings when possible
 
 **Statistical Validation**:
-- Bootstrap requires n ≥ 3 for meaningful resampling
+
+- Bootstrap requires n >= 3 for meaningful resampling
 - Small sample warning at n < 10 (rule of thumb)
 - CI interpretation requires caution with small n
 

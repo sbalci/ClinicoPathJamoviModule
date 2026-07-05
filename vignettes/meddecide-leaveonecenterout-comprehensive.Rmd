@@ -203,15 +203,15 @@ With 3 centers and small sample sizes, expect:
 | >= 0.80 (AUC/C-index) / >= 0.50 (R-squared) | Good | Good |
 | 0.70-0.80 / 0.20-0.50 | Acceptable | Moderate |
 | < 0.70 / < 0.20 | Poor | Poor |
-| -- / < 0.00 | -- | Very Poor |
+| - / < 0.00 | - | Very Poor |
 
 ### Heterogeneity
 
 | SD Range | Interpretation |
 |---|---|
-| <= 0.05 | Low heterogeneity -- consistent performance |
-| 0.05-0.10 | Moderate -- some variation across centers |
-| > 0.10 | High -- consider center-level covariates or stratification |
+| <= 0.05 | Low heterogeneity - consistent performance |
+| 0.05-0.10 | Moderate - some variation across centers |
+| > 0.10 | High - consider center-level covariates or stratification |
 
 ### Notice Types
 

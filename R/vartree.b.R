@@ -11,8 +11,6 @@
 #' @importFrom stats as.formula
 #' @importFrom grDevices rgb
 #'
-#' @export vartreeClass
-#'
 # Enhanced implementation supporting current CRAN vtree version 5.6.5
 # Consolidates functionality from legacy versions with modern vtree features
 
@@ -43,7 +41,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -124,7 +122,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # on dynamic interpolations.
             # TODO (forward-looking, perf): no `private$.checkpoint()` despite
             # `vtree::vtree` being the heaviest operation and producing
-            # exponential complexity in #vars × avg #levels. Add a
+            # exponential complexity in #vars x avg #levels. Add a
             # checkpoint immediately before the `vtree::vtree(...)` call
             # (~L444) so wide trees don't freeze the UI.
 
@@ -535,28 +533,28 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateInterpretation = function(results) {
             interp_parts <- c(
                 paste0("<b>", .("Variable Tree Interpretation:"), "</b><br>"),
-                paste0("• ", .("The tree displays hierarchical relationships between categorical variables"), "<br>"),
-                paste0("• ", .("Each node shows counts and percentages for variable combinations"), "<br>")
+                paste0("\u{2022} ", .("The tree displays hierarchical relationships between categorical variables"), "<br>"),
+                paste0("\u{2022} ", .("Each node shows counts and percentages for variable combinations"), "<br>")
             )
 
             if (self$options$pct) {
-                interp_parts <- c(interp_parts, paste0("• ", .("Percentages are calculated relative to parent nodes"), "<br>"))
+                interp_parts <- c(interp_parts, paste0("\u{2022} ", .("Percentages are calculated relative to parent nodes"), "<br>"))
             }
 
             if (!is.null(self$options$summaryvar)) {
-                interp_parts <- c(interp_parts, paste0("• ", .("Statistical summaries (mean, SD) are shown for the continuous variable"), "<br>"))
+                interp_parts <- c(interp_parts, paste0("\u{2022} ", .("Statistical summaries (mean, SD) are shown for the continuous variable"), "<br>"))
             }
 
             # CRITICAL FIX: Only claim percvar works if it's actually wired
             if (!is.null(self$options$percvar) && !is.null(self$options$percvarLevel)) {
-                interp_parts <- c(interp_parts, paste0("• ", .("Percentage calculated for '"), htmltools::htmlEscape(self$options$percvarLevel),
+                interp_parts <- c(interp_parts, paste0("\u{2022} ", .("Percentage calculated for '"), htmltools::htmlEscape(self$options$percvarLevel),
                                                        .("' level of '"), htmltools::htmlEscape(self$options$percvar), .("'"), "<br>"))
             }
 
             # Style-specific notes
             style_note <- switch(self$options$style,
-                "clean" = paste0("• ", .("Clean style applied: minimal colors, focus on data structure"), "<br>"),
-                "minimal" = paste0("• ", .("Minimal style applied: simplified layout with same-line presentation"), "<br>"),
+                "clean" = paste0("\u{2022} ", .("Clean style applied: minimal colors, focus on data structure"), "<br>"),
+                "minimal" = paste0("\u{2022} ", .("Minimal style applied: simplified layout with same-line presentation"), "<br>"),
                 NULL
             )
 
@@ -564,7 +562,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 interp_parts <- c(interp_parts, style_note)
             }
 
-            interp_parts <- c(interp_parts, paste0("• ", .("Tree structure helps identify patterns and relationships in categorical data"), "<br>"))
+            interp_parts <- c(interp_parts, paste0("\u{2022} ", .("Tree structure helps identify patterns and relationships in categorical data"), "<br>"))
 
             return(paste(interp_parts, collapse = ""))
         },
@@ -605,12 +603,12 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(self$options$vars) && length(self$options$vars) > 0) {
                 # Process each variable name to add backticks if they contain spaces
                 # jmvcore::composeTerm backtick-quotes any non-syntactic name (spaces, hyphens,
-                # parens, …), not just names with spaces — more correct for the generated vtree syntax.
+                # parens, ...), not just names with spaces - more correct for the generated vtree syntax.
                 vars_fixed <- sapply(self$options$vars, jmvcore::composeTerm)
                 
                 # Create properly formatted variable list
                 # TODO (cleanup): the `#' @importFrom stats as.formula` at L11 is a dead import
-                #   (no as.formula call in the body) — remove it.
+                #   (no as.formula call in the body) - remove it.
                 # deparse() emits valid R string literals with embedded quotes/backslashes escaped,
                 # so a column name like a"b cannot corrupt the generated syntax-pane code.
                 vars_syntax <- paste0("c(", paste(vapply(vars_fixed, deparse, character(1)), collapse = ", "), ")")
@@ -627,15 +625,15 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             summary_parts <- c(
                 paste0("<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #007bff; margin: 10px 0;'>"),
                 paste0("<b>", .("Clinical Summary:"), "</b><br>"),
-                paste0("• ", .("Variable trees help identify patient subgroups and treatment patterns"), "<br>"),
-                paste0("• ", .("Each branch represents a unique combination of patient characteristics"), "<br>"),
-                paste0("• ", .("Node sizes indicate patient counts - larger nodes represent more common patterns"), "<br>")
+                paste0("\u{2022} ", .("Variable trees help identify patient subgroups and treatment patterns"), "<br>"),
+                paste0("\u{2022} ", .("Each branch represents a unique combination of patient characteristics"), "<br>"),
+                paste0("\u{2022} ", .("Node sizes indicate patient counts - larger nodes represent more common patterns"), "<br>")
             )
             
             # Add specific guidance based on analysis setup
             if (!is.null(self$options$summaryvar)) {
                 summary_parts <- c(summary_parts,
-                    paste0("• ", .("Statistical summaries show mean and standard deviation for continuous measures"), "<br>"))
+                    paste0("\u{2022} ", .("Statistical summaries show mean and standard deviation for continuous measures"), "<br>"))
             }
 
             # CRITICAL FIX: Removed false percvar claim
@@ -650,10 +648,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             about_parts <- c(
                 paste0("<div style='background-color: #e8f4f8; padding: 10px; border-left: 4px solid #28a745; margin: 10px 0;'>"),
                 paste0("<b>", .("About This Analysis:"), "</b><br>"),
-                paste0("• <b>", .("Purpose:"), "</b> ", .("Explore relationships between categorical variables in clinical data"), "<br>"),
-                paste0("• <b>", .("Best for:"), "</b> ", .("Identifying patient subgroups, treatment patterns, and outcome associations"), "<br>"),
-                paste0("• <b>", .("Clinical Applications:"), "</b> ", .("Risk stratification, treatment selection, prognostic factor analysis"), "<br>"),
-                paste0("• <b>", .("Data Requirements:"), "</b> ", .("Categorical variables (diagnosis, treatment, stage, etc.)"), "<br>")
+                paste0("\u{2022} <b>", .("Purpose:"), "</b> ", .("Explore relationships between categorical variables in clinical data"), "<br>"),
+                paste0("\u{2022} <b>", .("Best for:"), "</b> ", .("Identifying patient subgroups, treatment patterns, and outcome associations"), "<br>"),
+                paste0("\u{2022} <b>", .("Clinical Applications:"), "</b> ", .("Risk stratification, treatment selection, prognostic factor analysis"), "<br>"),
+                paste0("\u{2022} <b>", .("Data Requirements:"), "</b> ", .("Categorical variables (diagnosis, treatment, stage, etc.)"), "<br>")
             )
 
             about_parts <- c(about_parts, "</div>")
@@ -716,15 +714,15 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             glossary_parts <- c(
                 paste0("<div style='background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0;'>"),
                 paste0("<b>", .("Tree Terminology Guide:"), "</b><br>"),
-                paste0("• <b>", .("Root Node:"), "</b> ", .("Top of tree showing total sample size (N) and starting point for all branches"), "<br>"),
-                paste0("• <b>", .("Branch:"), "</b> ", .("Path from root to leaf representing a sequence of variable splits"), "<br>"),
-                paste0("• <b>", .("Leaf Node:"), "</b> ", .("Terminal node with no further splits, representing a final patient subgroup"), "<br>"),
-                paste0("• <b>", .("Internal Node:"), "</b> ", .("Non-terminal node that splits into further branches"), "<br>"),
-                paste0("• <b>", .("Node Count:"), "</b> ", .("Number (n) of observations in that subgroup"), "<br>"),
-                paste0("• <b>", .("Node Percentage:"), "</b> ", .("Proportion of cases relative to parent node or total sample"), "<br>"),
-                paste0("• <b>", .("Pruning:"), "</b> ", .("Removing branches below certain conditions to simplify tree"), "<br>"),
-                paste0("• <b>", .("Pattern:"), "</b> ", .("Unique combination of variable values regardless of order"), "<br>"),
-                paste0("• <b>", .("Sequence:"), "</b> ", .("Ordered progression of variable values (order matters)"), "<br>"),
+                paste0("\u{2022} <b>", .("Root Node:"), "</b> ", .("Top of tree showing total sample size (N) and starting point for all branches"), "<br>"),
+                paste0("\u{2022} <b>", .("Branch:"), "</b> ", .("Path from root to leaf representing a sequence of variable splits"), "<br>"),
+                paste0("\u{2022} <b>", .("Leaf Node:"), "</b> ", .("Terminal node with no further splits, representing a final patient subgroup"), "<br>"),
+                paste0("\u{2022} <b>", .("Internal Node:"), "</b> ", .("Non-terminal node that splits into further branches"), "<br>"),
+                paste0("\u{2022} <b>", .("Node Count:"), "</b> ", .("Number (n) of observations in that subgroup"), "<br>"),
+                paste0("\u{2022} <b>", .("Node Percentage:"), "</b> ", .("Proportion of cases relative to parent node or total sample"), "<br>"),
+                paste0("\u{2022} <b>", .("Pruning:"), "</b> ", .("Removing branches below certain conditions to simplify tree"), "<br>"),
+                paste0("\u{2022} <b>", .("Pattern:"), "</b> ", .("Unique combination of variable values regardless of order"), "<br>"),
+                paste0("\u{2022} <b>", .("Sequence:"), "</b> ", .("Ordered progression of variable values (order matters)"), "<br>"),
                 "</div>"
             )
             return(paste(glossary_parts, collapse = ""))

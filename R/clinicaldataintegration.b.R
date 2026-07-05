@@ -41,7 +41,7 @@ clinicaldataintegrationClass <- R6::R6Class(
             # several options promise capabilities that are not implemented:
             #   - `dataSource` (jamovi/clinicaldataintegration.a.yaml:14-26):
             #     declared with csv/fhir/hl7/cdisc values, but no actual import
-            #     happens — `data <- self$data` just uses the pre-loaded jamovi
+            #     happens - `data <- self$data` just uses the pre-loaded jamovi
             #     dataset regardless of this option. Value is only used as a
             #     display string in .generateDataOverview and .generateExportSummary.
             #   - `terminologyMapping` (.a.yaml:78-90, values icd10/snomed/loinc/none):

@@ -24,7 +24,7 @@
 
 ### Purpose
 
-The `curemodels` function fits survival models that acknowledge a cured fraction -- a subpopulation of patients who will never experience the event of interest. Standard survival models (Cox, Kaplan-Meier) assume all patients will eventually fail given enough time. Cure models relax this assumption and are appropriate when the Kaplan-Meier curve plateaus at long follow-up, suggesting some patients are truly cured.
+The `curemodels` function fits survival models that acknowledge a cured fraction - a subpopulation of patients who will never experience the event of interest. Standard survival models (Cox, Kaplan-Meier) assume all patients will eventually fail given enough time. Cure models relax this assumption and are appropriate when the Kaplan-Meier curve plateaus at long follow-up, suggesting some patients are truly cured.
 
 ### Clinical Context
 
@@ -243,7 +243,7 @@ Errors and non-errors are routed to separate HTML outputs (`self$results$errors`
 
 | Option | Type | Default | Range | Notes |
 |--------|------|---------|-------|-------|
-| `bootstrap_ci` | Bool | `false` | — | Enables bootstrap variance estimation in smcure (`Var = TRUE`). |
+| `bootstrap_ci` | Bool | `false` | - | Enables bootstrap variance estimation in smcure (`Var = TRUE`). |
 | `n_bootstrap` | Integer | `1000` | 100-10000 | Number of bootstrap resamples. Displayed info notice when >= 500. |
 
 ### Advanced Options
@@ -251,7 +251,7 @@ Errors and non-errors are routed to separate HTML outputs (`self$results$errors`
 | Option | Type | Default | Range | Notes |
 |--------|------|---------|-------|-------|
 | `cure_threshold` | Number | `60` | >= 0 | Time point (months) for sensitivity analysis. Used to count patients/events beyond threshold. |
-| `sensitivity_analysis` | Bool | `false` | — | Shows threshold assessment and CI precision analysis. |
+| `sensitivity_analysis` | Bool | `false` | - | Shows threshold assessment and CI precision analysis. |
 
 ### Plot and Diagnostic Options
 
@@ -272,7 +272,7 @@ Errors and non-errors are routed to separate HTML outputs (`self$results$errors`
 
 | Option | Type | Default | Range | Notes |
 |--------|------|---------|-------|-------|
-| `npcure_covariate` | Variable | `null` | — | Single continuous covariate required for npcure. |
+| `npcure_covariate` | Variable | `null` | - | Single continuous covariate required for npcure. |
 | `npcure_bandwidth` | List | `auto` | `auto`, `small` (0.1), `medium` (0.3), `large` (0.5) | `auto` = cross-validation selected bandwidth. |
 | `npcure_time_points` | Integer | `100` | 50-500 | Number of covariate grid points for estimation. |
 
@@ -305,19 +305,19 @@ graph LR
 
 ### Table Schemas
 
-**modelTable** -- Cure Model Results (rows: 0, dynamically populated)
+**modelTable** - Cure Model Results (rows: 0, dynamically populated)
 
 | Column | Type | Format | Content |
 |--------|------|--------|---------|
-| `parameter` | text | — | Prefixed with "Cure:" or "Survival:" for smcure; parameter name for others |
-| `estimate` | number | — | Coefficient or cure probability |
-| `std_error` | number | — | SE from bootstrap (smcure) or profile likelihood (flexsurvcure) |
-| `z_value` | number | — | Wald z-statistic (estimate / SE) |
+| `parameter` | text | - | Prefixed with "Cure:" or "Survival:" for smcure; parameter name for others |
+| `estimate` | number | - | Coefficient or cure probability |
+| `std_error` | number | - | SE from bootstrap (smcure) or profile likelihood (flexsurvcure) |
+| `z_value` | number | - | Wald z-statistic (estimate / SE) |
 | `p_value` | number | `zto,pvalue` | Two-sided p-value |
-| `ci_lower` | number | — | 95% CI lower bound |
-| `ci_upper` | number | — | 95% CI upper bound |
+| `ci_lower` | number | - | 95% CI lower bound |
+| `ci_upper` | number | - | 95% CI upper bound |
 
-**cureTable** -- Cure Fraction Summary
+**cureTable** - Cure Fraction Summary
 
 | Column | Type | Content |
 |--------|------|---------|
@@ -327,7 +327,7 @@ graph LR
 | `cure_ci_upper` | number | 95% CI upper |
 | `uncured_median` | number | Median event time among uncured patients |
 
-**goodnessOfFit** -- Goodness of Fit Tests
+**goodnessOfFit** - Goodness of Fit Tests
 
 | Column | Type | Content |
 |--------|------|---------|
@@ -336,7 +336,7 @@ graph LR
 | `p_value` | number | p-value (usually NA for descriptive checks) |
 | `interpretation` | text | Plain-language assessment |
 
-**modelComparison** -- Model Comparison (visible only when `model_type == "all"`)
+**modelComparison** - Model Comparison (visible only when `model_type == "all"`)
 
 | Column | Type | Content |
 |--------|------|---------|
@@ -640,7 +640,7 @@ This mapping is handled by the `dist_map` list in `.fitNonMixtureCureModel()`.
 
 ### P4: npcure API Parameter Names
 
-The `npcure::probcure()` function uses non-standard parameter names (`x`, `t`, `d`, `x0`, `h`) rather than formula-based syntax. Documented as "FIX C3" in the source. It also only accepts a single continuous covariate -- not multiple predictors and not categorical variables.
+The `npcure::probcure()` function uses non-standard parameter names (`x`, `t`, `d`, `x0`, `h`) rather than formula-based syntax. Documented as "FIX C3" in the source. It also only accepts a single continuous covariate - not multiple predictors and not categorical variables.
 
 ### P5: Protobuf Serialization
 

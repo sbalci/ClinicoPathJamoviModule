@@ -53,7 +53,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -108,7 +108,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
-            # TODO (UX): File-wide — convert all `# REMOVED Notice:` blocks to HTML output items per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference). Affected sites in this file: 85, 260, 474, 492, 549, 643, 695, 754, 787. Currently these conditions fail silently, leaving the user with no feedback (e.g. NA weights skipped, plot generation errors swallowed in tryCatch).
+            # TODO (UX): File-wide convert all `# REMOVED Notice:` blocks to HTML output items per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference). Affected sites in this file: 85, 260, 474, 492, 549, 643, 695, 754, 787. Currently these conditions fail silently, leaving the user with no feedback (e.g. NA weights skipped, plot generation errors swallowed in tryCatch).
             # Check for NA weights
             n_na <- sum(is.na(weight_col))
             if (n_na > 0) {
@@ -424,7 +424,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.noticeList <- list()
 
-            # TODO (forward-looking): no `.()` wrapping anywhere in this file —
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file 
             # welcome HTML, error/warning HTML, plot captions, and the data
             # summary are English-only. Internationalise in a
             # /prepare-translation pass before the next i18n release.
@@ -558,11 +558,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     return()
                 }
 
-                # Configure plot aesthetics ----
+                # Configure plot aesthetics 
                 # Set color fill strategy for the alluvial flows.
                 # `fill` is a List keyword (first_variable/last_variable/all_flows/
                 # values) passed to alluvial_wide(fill_by=), NOT a formula term, so
-                # it must be used verbatim — do NOT run it through composeTerm().
+                # it must be used verbatim do NOT run it through composeTerm().
                 fill <- self$options$fill
 
                 # Configure bin labels with proper binning method
@@ -648,7 +648,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Generate plot based on selected engine ----
                 if (engine == "ggalluvial") {
                     # Use ggalluvial engine for manual control
-                    # TODO (correctness): `fillGgalluvial` is only checked for is.null — if the user picks a column that is NOT in `vars`, it won't be selected into `mydata`, and `rlang::sym(fill_var)` will resolve to a missing column at aes-evaluation time, producing an opaque ggplot error. Either include fillGgalluvial in `vars_to_select` (line ~540) or fall back to `varsName[1]` when fill_var is not present in mydata.
+                    # TODO (correctness): `fillGgalluvial` is only checked for is.null if the user picks a column that is NOT in `vars`, it won't be selected into `mydata`, and `rlang::sym(fill_var)` will resolve to a missing column at aes-evaluation time, producing an opaque ggplot error. Either include fillGgalluvial in `vars_to_select` (line ~540) or fall back to `varsName[1]` when fill_var is not present in mydata.
                     fill_var <- if (!is.null(self$options$fillGgalluvial)) {
                         self$options$fillGgalluvial
                     } else {

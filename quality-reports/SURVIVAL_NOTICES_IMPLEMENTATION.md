@@ -13,6 +13,7 @@
 **Result**: ✅ **Successfully implemented 6 critical Notices** covering all major user scenarios
 
 **Impact**:
+
 - ✅ Better user experience with clear, actionable error messages
 - ✅ Clinical safety warnings for small sample sizes
 - ✅ Statistical warnings for assumption violations
@@ -26,11 +27,13 @@
 ### Phase 1: Critical Safety Notices (COMPLETE ✅)
 
 #### 1. **Event Count Safety Notices** ✅
+
 **Location**: [R/survival.b.R:1285-1331](R/survival.b.R#L1285-L1331)
 
 **Purpose**: Clinical safety - prevent unreliable survival analysis with insufficient events
 
 **Implementation**:
+
 ```r
 # CRITICAL: < 10 events - ERROR (blocks analysis)
 if (n_events < 10) {
@@ -77,10 +80,11 @@ if (n_events >= 20 && n_events < 50) {
 ```
 
 **Thresholds**:
+
 - **< 10 events**: ERROR (blocks analysis) 🔴
 - **10-19 events**: STRONG_WARNING 🟠
 - **20-49 events**: WARNING 🟡
-- **≥ 50 events**: No notice (adequate) ✅
+- **>= 50 events**: No notice (adequate) ✅
 
 ---
 
@@ -89,9 +93,11 @@ if (n_events >= 20 && n_events < 50) {
 **Purpose**: Convert R crashes to user-friendly error messages
 
 ##### Fix 2.1: Invalid Date Format
+
 **Location**: [R/survival.b.R:786-798](R/survival.b.R#L786-L798)
 
 **Before**:
+
 ```r
 stop(sprintf(.("Unknown date format: %s. Supported formats are: %s"),
            timetypedata,
@@ -99,6 +105,7 @@ stop(sprintf(.("Unknown date format: %s. Supported formats are: %s"),
 ```
 
 **After**:
+
 ```r
 notice <- jmvcore::Notice$new(
     options = self$options,
@@ -115,14 +122,17 @@ return()
 ```
 
 ##### Fix 2.2: Mixed Date Types
+
 **Location**: [R/survival.b.R:801-809](R/survival.b.R#L801-L809)
 
 **Before**:
+
 ```r
 stop(.("Diagnosis date and follow-up date must be in the same format (both numeric or both text)"))
 ```
 
 **After**:
+
 ```r
 notice <- jmvcore::Notice$new(
     options = self$options,
@@ -135,14 +145,17 @@ return()
 ```
 
 ##### Fix 2.3: Time Calculation Failure
+
 **Location**: [R/survival.b.R:814-825](R/survival.b.R#L814-L825)
 
 **Before**:
+
 ```r
 stop(sprintf(.("Time difference cannot be calculated. Make sure that time type in variables are correct. Currently it is: %s"), self$options$timetypedata))
 ```
 
 **After**:
+
 ```r
 notice <- jmvcore::Notice$new(
     options = self$options,
@@ -160,11 +173,13 @@ return()
 ---
 
 #### 3. **Proportional Hazards Violation Notice** ✅
+
 **Location**: [R/survival.b.R:1965-1978](R/survival.b.R#L1965-L1978)
 
 **Purpose**: Warn users when Cox model assumptions are violated
 
 **Implementation**:
+
 ```r
 # Check for PH assumption violation and create Notice banner
 p_value <- zph$table[nrow(zph$table), "p"]  # Global test p-value
@@ -191,15 +206,18 @@ if (p_value < 0.05) {
 ### Phase 2: Convert Legacy Notes to Modern Notices (COMPLETE ✅)
 
 #### 4. **Landmark Analysis Exclusions** ✅
+
 **Location**: [R/survival.b.R:1036-1048](R/survival.b.R#L1036-L1048)
 
 **Before** (legacy table note):
+
 ```r
 jmvcore::note(self$results$medianTable,
               glue::glue("Landmark analysis removed {n_before - n_after} subject(s) with time < {landmark}."))
 ```
 
 **After** (modern WARNING Notice):
+
 ```r
 landmark_notice <- jmvcore::Notice$new(
     options = self$options,
@@ -218,9 +236,11 @@ self$results$insert(2, landmark_notice)
 ---
 
 #### 5. **Competing Risk Analysis Limitations** ✅
+
 **Location**: [R/survival.b.R:1383-1390](R/survival.b.R#L1383-L1390)
 
 **Before** (3 separate legacy table notes):
+
 ```r
 jmvcore::note(self$results$coxTable, "Cox model is not run for competing risk analyses in this module.")
 jmvcore::note(self$results$pairwiseTable, "Pairwise group tests are skipped for competing risk analyses.")
@@ -228,6 +248,7 @@ jmvcore::note(self$results$personTimeTable, "Person-time incidence rates are not
 ```
 
 **After** (single comprehensive INFO Notice):
+
 ```r
 competing_risk_notice <- jmvcore::Notice$new(
     options = self$options,
@@ -243,11 +264,13 @@ self$results$insert(2, competing_risk_notice)
 ---
 
 #### 6. **Analysis Completion Confirmation** ✅
+
 **Location**: [R/survival.b.R:1440-1452](R/survival.b.R#L1440-L1452)
 
 **Purpose**: Confirm successful analysis with key metrics
 
 **Implementation**:
+
 ```r
 # Analysis completion INFO Notice
 completion_notice <- jmvcore::Notice$new(
@@ -286,11 +309,13 @@ self$results$insert(999, completion_notice)
 **Critical Constraint**: Jamovi Notices MUST be single-line (no `\n` or line breaks)
 
 **Solution Implemented**:
+
 - Use bullet separator `•` instead of newlines
 - Keep detailed multi-line content in HTML outputs (e.g., `phInterpretation`)
 - Notices serve as **concise banners** pointing to detailed explanations below
 
 **Example**:
+
 ```r
 // ❌ WRONG (multi-line):
 notice$setContent("Warning:\nPH assumption violated\nConsider stratified model")
@@ -308,12 +333,12 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
 - [ ] **< 10 events** → Should show ERROR Notice and block analysis
 - [ ] **10-19 events** → Should show STRONG_WARNING Notice
 - [ ] **20-49 events** → Should show WARNING Notice
-- [ ] **≥ 50 events** → No event count notice (only completion)
+- [ ] **>= 50 events** → No event count notice (only completion)
 - [ ] **Invalid date format** → Should show ERROR Notice (not crash)
 - [ ] **Mixed date types** → Should show ERROR Notice (not crash)
 - [ ] **Time calc failure** → Should show ERROR Notice (not crash)
 - [ ] **PH violation (p < 0.05)** → Should show STRONG_WARNING Notice
-- [ ] **PH satisfied (p ≥ 0.05)** → No PH notice
+- [ ] **PH satisfied (p >= 0.05)** → No PH notice
 - [ ] **Landmark analysis** → Should show WARNING Notice with exclusion count
 - [ ] **Competing risk** → Should show INFO Notice about skipped analyses
 - [ ] **Successful analysis** → Should show INFO completion Notice at bottom
@@ -325,7 +350,9 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
 ## FILES MODIFIED
 
 ### R/survival.b.R
+
 **Lines Modified**:
+
 - 786-798: ERROR Notice for invalid date format
 - 801-809: ERROR Notice for mixed date types
 - 814-825: ERROR Notice for time calculation failure
@@ -344,12 +371,14 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
 ## WHAT REMAINS UNCHANGED
 
 **Intentionally Kept**:
+
 - `jmvcore::reject()` calls (lines 575-598) - Legacy validation API, functional
 - `warning()` calls in error handlers - Internal logging, not user-facing
 - HTML interpretations - Detailed multi-line content complements concise Notices
 - All statistical logic - Zero changes to calculations or methodology
 
 **Rationale**:
+
 - Focus on user-facing communication improvements
 - Maintain statistical integrity
 - Avoid breaking changes to working validation
@@ -374,11 +403,13 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
 ## CLINICAL SAFETY IMPROVEMENTS
 
 **Before**: Users could run survival analysis with:
+
 - 5 events → Meaningless results, no warning ❌
 - Violated PH assumption → Easy to miss in HTML ⚠️
 - Invalid dates → Cryptic R error messages ❌
 
 **After**:
+
 - < 10 events → Analysis blocked with clear explanation ✅
 - PH violation → Prominent banner warning at top ✅
 - Invalid dates → User-friendly error with solutions ✅
@@ -404,12 +435,14 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
 
 ## NEXT STEPS
 
-### Required Before Release:
+### Required Before Release
+
 1. ⏳ Test all scenarios in jamovi (when available)
 2. ⏳ Run `jmvtools::prepare()` to verify no errors
 3. ⏳ User acceptance testing with real clinical data
 
-### Optional Enhancements:
+### Optional Enhancements
+
 - Consider migrating `jmvcore::reject()` to Notice pattern (low priority - currently functional)
 - Add unit tests for Notice generation logic
 - Document Notice behavior in user manual
@@ -440,7 +473,7 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
    - < 10: Standard statistical minimum (Peduzzi rule of thumb: 10 events per variable)
    - 10-19: Bootstrap methods suggest instability
    - 20-49: Power considerations
-   - ≥ 50: Generally adequate for basic survival analysis
+   - >= 50: Generally adequate for basic survival analysis
 
 ---
 
@@ -449,6 +482,7 @@ notice$setContent('Proportional Hazards Assumption Violated (p=0.0234) • Cox m
 **Status**: ✅ **NOTICES IMPLEMENTATION COMPLETE**
 
 The survival module now implements modern jamovi Notice system with:
+
 - ✅ Clinical safety guardrails (event count checks)
 - ✅ User-friendly error messages (no R crashes)
 - ✅ Statistical warnings (PH assumption)

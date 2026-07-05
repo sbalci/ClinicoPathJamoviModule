@@ -30,7 +30,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
         .run = function() {
             # TODO (correctness): private$.meta_res is set only on a successful run (~L113) and
-            #   never cleared — after the user unselects a required variable or a run errors, the
+            #   never cleared - after the user unselects a required variable or a run errors, the
             #   6 plot callbacks (which gate only on is.null(.meta_res)) still render the PRIOR
             #   result while the tables go empty (stale plot/table desync). Reset
             #   private$.meta_res <- NULL here at the top of .run() to invalidate it each run.
@@ -111,7 +111,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 }
                 
             }, error = function(e) {
-                # TODO (cleanup): reject(paste(...)) is brace-fragile — if e$message contains
+                # TODO (cleanup): reject(paste(...)) is brace-fragile - if e$message contains
                 #   literal { } (some package errors do), jmvcore::format treats it as an
                 #   unfilled placeholder. Prefer reject("Meta-analysis error: {}", code = NULL, e$message).
                 jmvcore::reject(paste("Meta-analysis error: ", e$message))
@@ -427,7 +427,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         .populateMetaRegression = function(res) {
             if (length(self$options$moderator_vars) == 0) return()
 
-            # TODO (UX): silent try({}) swallows errors — a failed meta-regression leaves an
+            # TODO (UX): silent try({}) swallows errors - a failed meta-regression leaves an
             #   empty table with no user feedback. Same pattern in .populateSensitivity (L457),
             #   .populateTrimFill (L528), .populateInfluence (L561), .populateBayesian (L736),
             #   .populateCumulativeSummary (L795), .populateQualityAssessment (L829). Surface the

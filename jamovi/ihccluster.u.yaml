@@ -151,7 +151,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: Low Cutoff (≤)
+            label: Low Cutoff (<=)
           - type: TextBox
             name: ratioLowCutoff
             format: number
@@ -160,7 +160,7 @@ children:
         margin: large
         children:
           - type: Label
-            label: High Cutoff (≥)
+            label: High Cutoff (>=)
           - type: TextBox
             name: ratioHighCutoff
             format: number

@@ -103,7 +103,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # TODO (data hygiene): `as.numeric(factor)` here (L104) and at L115, L233, L640 returns level
             #   indices and ignores any jamovi `values` attribute on the factor. If a user supplies a status
             #   factor with non-default `values` (e.g., values = c("alive"=0, "dead"=1)), `jmvcore::toNumeric()`
-            #   would honor that mapping and produce different output. Behavior-risk migration — confirm
+            #   would honor that mapping and produce different output. Behavior-risk migration - confirm
             #   intended decoding (factor index vs. values attribute) before swapping.
             # TODO (UX): `stop()` validations at L106 / L110 / L92 / L96 are caught by tryCatch at L206-214
             #   and rerouted into `.addNotice()`. Working as designed for the project's structured-notice UX;
@@ -137,7 +137,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            # Reset state for each run (including model caches — otherwise switching model_type
+            # Reset state for each run (including model caches - otherwise switching model_type
             # leaves stale fits visible to .compareModels / .plotSurvival / .plotCureFraction)
             private$.noticeList <- list()
             private$.interpretation_html <- ""
@@ -436,7 +436,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = "Mixture Cure Model Convergence Failed",
                         content = paste0(
                             error_msg,
-                            " -- Try: (1) different link function, (2) fewer predictors, ",
+                            " - Try: (1) different link function, (2) fewer predictors, ",
                             "(3) check for collinear variables, (4) ensure adequate sample size and follow-up."
                         )
                     )
@@ -446,7 +446,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = "Matrix Computation Error in Mixture Cure Model",
                         content = paste0(
                             error_msg,
-                            " -- Try: (1) check for collinear predictors, ",
+                            " - Try: (1) check for collinear predictors, ",
                             "(2) remove variables with little variation, (3) ensure sufficient sample size."
                         )
                     )
@@ -587,7 +587,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = "cuRe Model Convergence Failed",
                         content = paste0(
                             error_msg,
-                            " -- Try: (1) different starting values, (2) check background hazard variable, ",
+                            " - Try: (1) different starting values, (2) check background hazard variable, ",
                             "(3) ensure adequate follow-up time."
                         )
                     )
@@ -597,7 +597,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = "Background Mortality Variable Error",
                         content = paste0(
                             error_msg,
-                            " -- Verify the background hazard variable exists, contains non-negative numeric values."
+                            " - Verify the background hazard variable exists, contains non-negative numeric values."
                         )
                     )
                 } else {
@@ -702,7 +702,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         title = "npcure Bandwidth Issue",
                         content = paste0(
                             error_msg,
-                            " -- Try: (1) 'auto' bandwidth, (2) different manual bandwidth, ",
+                            " - Try: (1) 'auto' bandwidth, (2) different manual bandwidth, ",
                             "(3) check covariate distribution."
                         )
                     )
@@ -1460,7 +1460,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "<p><strong>95% CI:</strong> ", round(ci_lower * 100, 1), "% to ",
                         round(ci_upper * 100, 1), "%</p>",
                         "<p><strong>CI width:</strong> ", round(ci_range * 100, 1), " percentage points ",
-                        if (is_precise) "(Relatively precise)" else "(Wide -- consider more data or bootstrap)", "</p>"
+                        if (is_precise) "(Relatively precise)" else "(Wide - consider more data or bootstrap)", "</p>"
                     )
                 } else {
                     sens_html <- paste0(sens_html,
@@ -1513,7 +1513,7 @@ curemodelsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     ))
                 }
 
-                # smcure does NOT provide AIC/BIC -- be honest about this
+                # smcure does NOT provide AIC/BIC - be honest about this
                 if (!is.null(mixture_model) && inherits(mixture_model, "smcure")) {
                     comp_table$addRow(rowKey = "mixture", values = list(
                         model = "Mixture Cure Model (smcure)",

@@ -57,7 +57,7 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # TODO (UX): the rows below emit the raw List-option `name` (e.g. "bayesian",
             # "sample_size") rather than the friendly `title` defined in the .a.yaml
             # ("Bayesian Adaptive", "Sample Size Re-estimation"). Look up the title via
-            # the option spec — for example:
+            # the option spec - for example:
             #   .titleFor <- function(opt_name) {
             #       opt <- self$analysis$options$get(opt_name)
             #       choice <- opt$value
@@ -71,7 +71,7 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             tableDesign$addRow(rowKey=3, values=list(parameter="Target Sample Size", value=as.character(self$options$planned_sample_size), justification="Planned total N"))
 
             # 4. Perform Analysis (Interim Analysis)
-            # Find the treatment levels — analysis assumes a binary (two-arm) comparison.
+            # Find the treatment levels - analysis assumes a binary (two-arm) comparison.
             levels <- levels(as.factor(mydata[[treatmentVar]]))
             if (length(levels) != 2) {
                 jmvcore::reject(

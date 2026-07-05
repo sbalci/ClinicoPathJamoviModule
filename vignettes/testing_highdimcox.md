@@ -1,4 +1,4 @@
-# Testing Guide: highdimcox — High-Dimensional Cox Regression
+# Testing Guide: highdimcox - High-Dimensional Cox Regression
 
 All test datasets are in `data/` (RDA). Generate them by running:
 
@@ -32,7 +32,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 1 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | All defaults (`regularization_method="elastic_net"`, `alpha_value=0.5`, `cv_method="cv_1se"`, `cv_folds=10`) |
+| 1 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001` - `GENE_100` | All defaults (`regularization_method="elastic_net"`, `alpha_value=0.5`, `cv_method="cv_1se"`, `cv_folds=10`) |
 
 **Expected:** Elastic Net (alpha=0.5), 10-fold CV, 1-SE lambda. Default outputs visible: variable importance plot, coefficients table, regularization metrics, model summary. Suitability report visible. Stability selection tables/plots hidden.
 
@@ -44,7 +44,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 2 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | `regularization_method="lasso"` |
+| 2 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001` - `GENE_100` | `regularization_method="lasso"` |
 
 **Check:**
 - Regularization Metrics table reports alpha = 1.0
@@ -57,7 +57,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 3 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | `regularization_method="ridge"` |
+| 3 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001` - `GENE_100` | `regularization_method="ridge"` |
 
 **Check:**
 - Alpha reported as 0.0
@@ -70,7 +70,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 4 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01`–`PROT_50` | `regularization_method="adaptive_lasso"` |
+| 4 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01` - `PROT_50` | `regularization_method="adaptive_lasso"` |
 
 **Check:**
 - Model runs without error
@@ -83,7 +83,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 5 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001`–`GENE_100` | `regularization_method="elastic_net"`, `alpha_value=0.8` |
+| 5 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `GENE_001` - `GENE_100` | `regularization_method="elastic_net"`, `alpha_value=0.8` |
 
 **Check:**
 - Alpha reported as 0.8 in Regularization Metrics
@@ -91,11 +91,11 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 ---
 
-### 6. CV Method — Minimum CV Error
+### 6. CV Method - Minimum CV Error
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 6 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01`–`PROT_50` | `cv_method="cv_min"` |
+| 6 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01` - `PROT_50` | `cv_method="cv_min"` |
 
 **Check:**
 - Selected Lambda matches Lambda Min in Regularization Metrics
@@ -120,7 +120,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 8 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01`–`PROT_50` | `regularization_method="lasso"`, `stability_selection=TRUE`, `subsampling_iterations=500`, `stability_threshold=0.8` |
+| 8 | `highdimcox_proteomic` | time: `follow_up_months`, event: `event_status`, predictors: `PROT_01` - `PROT_50` | `regularization_method="lasso"`, `stability_selection=TRUE`, `subsampling_iterations=500`, `stability_threshold=0.8` |
 
 **Check:**
 - Stability Selection Results table visible
@@ -130,7 +130,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 ---
 
-### 9. Stability Selection — Custom Parameters
+### 9. Stability Selection - Custom Parameters
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
@@ -160,7 +160,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 11 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `show_regularization_path=FALSE`, `show_cv_plot=FALSE`, `show_variable_importance=FALSE`, `show_model_diagnostics=FALSE` |
+| 11 | `highdimcox_genomic` | `GENE_001` - `GENE_100` | `show_regularization_path=FALSE`, `show_cv_plot=FALSE`, `show_variable_importance=FALSE`, `show_model_diagnostics=FALSE` |
 
 **Check:** No plot/image output. Tables still present.
 
@@ -170,7 +170,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 12 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `show_coefficients_table=FALSE` |
+| 12 | `highdimcox_genomic` | `GENE_001` - `GENE_100` | `show_coefficients_table=FALSE` |
 
 **Check:** `selectedVariables` table not visible.
 
@@ -180,7 +180,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 13 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `showSummaries=TRUE` |
+| 13 | `highdimcox_genomic` | `GENE_001` - `GENE_100` | `showSummaries=TRUE` |
 
 **Check:**
 - `analysisSummary` HTML output visible
@@ -192,7 +192,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 14 | `highdimcox_genomic` | `GENE_001`–`GENE_100` | `showExplanations=TRUE` |
+| 14 | `highdimcox_genomic` | `GENE_001` - `GENE_100` | `showExplanations=TRUE` |
 
 **Check:**
 - `methodExplanation` HTML output visible
@@ -204,7 +204,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 15 | `highdimcox_proteomic` | `PROT_01`–`PROT_50` | `stability_selection=TRUE`, `subsampling_iterations=200`, `showSummaries=TRUE`, `showExplanations=TRUE` |
+| 15 | `highdimcox_proteomic` | `PROT_01` - `PROT_50` | `stability_selection=TRUE`, `subsampling_iterations=200`, `showSummaries=TRUE`, `showExplanations=TRUE` |
 
 **Check:**
 - All tables, plots, summaries, and explanations render without error
@@ -216,7 +216,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 16 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `age`, `gender`, `stage`, `grade`, `treatment`, `GENE_001`–`GENE_020` | default |
+| 16 | `highdimcox_genomic` | time: `survival_months`, event: `vital_status`, predictors: `age`, `gender`, `stage`, `grade`, `treatment`, `GENE_001` - `GENE_020` | default |
 
 **Check:**
 - Factor variables dummy-encoded internally via `model.matrix()`
@@ -241,7 +241,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 18 | Modified `highdimcox_genomic` (all `vital_status = "Alive"`) | predictors: `GENE_001`–`GENE_050` | default |
+| 18 | Modified `highdimcox_genomic` (all `vital_status = "Alive"`) | predictors: `GENE_001` - `GENE_050` | default |
 
 **Check:**
 - Validation error: "No rows match event level 'Dead'"
@@ -253,7 +253,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 19 | Modified `highdimcox_genomic` (~5% events) | predictors: `GENE_001`–`GENE_050` | default |
+| 19 | Modified `highdimcox_genomic` (~5% events) | predictors: `GENE_001` - `GENE_050` | default |
 
 **Check:**
 - Warning about low events displayed in todo HTML
@@ -265,7 +265,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 20 | `highdimcox_proteomic[1:35, ]` | predictors: `PROT_01`–`PROT_10`, `cv_folds=5` | default |
+| 20 | `highdimcox_proteomic[1:35, ]` | predictors: `PROT_01` - `PROT_10`, `cv_folds=5` | default |
 
 **Check:**
 - Analysis runs (n=35 > MIN_OBSERVATIONS=30)
@@ -278,7 +278,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 21 | `highdimcox_proteomic[1:20, ]` | predictors: `PROT_01`–`PROT_05` | default |
+| 21 | `highdimcox_proteomic[1:20, ]` | predictors: `PROT_01` - `PROT_05` | default |
 
 **Check:**
 - Validation returns early with error about insufficient observations (<30)
@@ -294,8 +294,8 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 | 22b | `highdimcox_genomic` | `outcomeLevel="NonExistent"` | default |
 
 **Check:**
-- 22a: Validation error — levels must be different
-- 22b: Validation error — no rows match event level
+- 22a: Validation error - levels must be different
+- 22b: Validation error - no rows match event level
 
 ---
 
@@ -303,7 +303,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 23 | Modified `highdimcox_genomic` (20% NA in GENE_001–GENE_005) | all genes | default |
+| 23 | Modified `highdimcox_genomic` (20% NA in GENE_001 - GENE_005) | all genes | default |
 
 **Check:**
 - Rows with missing values excluded (complete-case analysis)
@@ -316,7 +316,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 24 | Modified `highdimcox_genomic` (GENE_001–GENE_005 all set to constant) | all genes | default |
+| 24 | Modified `highdimcox_genomic` (GENE_001 - GENE_005 all set to constant) | all genes | default |
 
 **Check:**
 - Constant columns removed before model fitting
@@ -329,7 +329,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 25 | `highdimcox_proteomic` | predictors: `PROT_01`–`PROT_50` | `regularization_method` = each of `lasso`, `ridge`, `elastic_net`, `adaptive_lasso` |
+| 25 | `highdimcox_proteomic` | predictors: `PROT_01` - `PROT_50` | `regularization_method` = each of `lasso`, `ridge`, `elastic_net`, `adaptive_lasso` |
 
 **Check:**
 - All four complete without error
@@ -342,7 +342,7 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
-| 26 | `highdimcox_proteomic` | predictors: `age`, `sex`, `tumor_size_cm`, `PROT_01`–`PROT_50` | `regularization_method="elastic_net"`, `alpha_value=0.7`, `cv_method="cv_min"`, `cv_folds=5`, `stability_selection=TRUE`, `subsampling_iterations=200`, `subsampling_ratio=0.6`, `stability_threshold=0.6`, all show_* = TRUE, `showSummaries=TRUE`, `showExplanations=TRUE`, `suitabilityCheck=TRUE` |
+| 26 | `highdimcox_proteomic` | predictors: `age`, `sex`, `tumor_size_cm`, `PROT_01` - `PROT_50` | `regularization_method="elastic_net"`, `alpha_value=0.7`, `cv_method="cv_min"`, `cv_folds=5`, `stability_selection=TRUE`, `subsampling_iterations=200`, `subsampling_ratio=0.6`, `stability_threshold=0.6`, all show_* = TRUE, `showSummaries=TRUE`, `showExplanations=TRUE`, `suitabilityCheck=TRUE` |
 
 **Check:**
 - Every output section populated
@@ -366,27 +366,27 @@ Automated tests (68 total) are in `tests/testthat/test-highdimcox-*.R`.
 
 ## COMPLETE OPTION COVERAGE CHECKLIST
 
-- [x] `elapsedtime` — all scenarios
-- [x] `outcome` — all scenarios
-- [x] `predictors` — all scenarios
-- [x] `outcomeLevel` — all scenarios, edge cases #18, #22
-- [x] `censorLevel` — #22a
-- [x] `suitabilityCheck` — #10a (true), #10b (false)
-- [x] `regularization_method` — #1 (elastic_net), #2 (lasso), #3 (ridge), #4 (adaptive_lasso), #25 (all four)
-- [x] `alpha_value` — #5 (0.8), #26 (0.7)
-- [x] `cv_method` — #1 (cv_1se), #6 (cv_min), #26 (cv_min)
-- [x] `cv_folds` — #7a (3), #7b (20), #20 (5), #26 (5)
-- [x] `stability_selection` — #8 (true), #9 (true), #15 (true), #26 (true)
-- [x] `subsampling_iterations` — #8 (500), #9 (100), #15 (200), #26 (200)
-- [x] `subsampling_ratio` — #9 (0.6), #26 (0.6)
-- [x] `stability_threshold` — #8 (0.8), #9 (0.5), #26 (0.6)
-- [x] `show_regularization_path` — #11 (false), #26 (true)
-- [x] `show_cv_plot` — #11 (false), #26 (true)
-- [x] `show_variable_importance` — #11 (false), default (true)
-- [x] `show_coefficients_table` — #12 (false), default (true)
-- [x] `show_model_diagnostics` — #11 (false), #26 (true)
-- [x] `showSummaries` — #13 (true), #15 (true), #26 (true)
-- [x] `showExplanations` — #14 (true), #15 (true), #26 (true)
+- [x] `elapsedtime` - all scenarios
+- [x] `outcome` - all scenarios
+- [x] `predictors` - all scenarios
+- [x] `outcomeLevel` - all scenarios, edge cases #18, #22
+- [x] `censorLevel` - #22a
+- [x] `suitabilityCheck` - #10a (true), #10b (false)
+- [x] `regularization_method` - #1 (elastic_net), #2 (lasso), #3 (ridge), #4 (adaptive_lasso), #25 (all four)
+- [x] `alpha_value` - #5 (0.8), #26 (0.7)
+- [x] `cv_method` - #1 (cv_1se), #6 (cv_min), #26 (cv_min)
+- [x] `cv_folds` - #7a (3), #7b (20), #20 (5), #26 (5)
+- [x] `stability_selection` - #8 (true), #9 (true), #15 (true), #26 (true)
+- [x] `subsampling_iterations` - #8 (500), #9 (100), #15 (200), #26 (200)
+- [x] `subsampling_ratio` - #9 (0.6), #26 (0.6)
+- [x] `stability_threshold` - #8 (0.8), #9 (0.5), #26 (0.6)
+- [x] `show_regularization_path` - #11 (false), #26 (true)
+- [x] `show_cv_plot` - #11 (false), #26 (true)
+- [x] `show_variable_importance` - #11 (false), default (true)
+- [x] `show_coefficients_table` - #12 (false), default (true)
+- [x] `show_model_diagnostics` - #11 (false), #26 (true)
+- [x] `showSummaries` - #13 (true), #15 (true), #26 (true)
+- [x] `showExplanations` - #14 (true), #15 (true), #26 (true)
 
 ---
 

@@ -71,7 +71,7 @@ constitutional symptoms, and treatment-specific events.
 \item Treatment group comparisons with statistical testing
 \item Time-to-event analysis and cumulative incidence
 \item System organ class summaries for regulatory reporting
-\item High-grade (≥3) adverse event analysis
+\item High-grade (>=3) adverse event analysis
 \item Dose-limiting toxicity assessment
 }
 }

@@ -1,14 +1,14 @@
-# Adaptive LASSO for Cox Models -- Documentation
+# Adaptive LASSO for Cox Models - Documentation
 
 This document provides a comprehensive overview of the Adaptive LASSO for Cox Models module, detailing its features, user interface elements, and the underlying R functions.
 
 ## Changelog
 
-- **2026-03-10**: Complete refresh — corrected all R method names to match actual `.b.R` code, removed non-existent `intercept` option and `brier`/`auc` cv_measure values, added missing `suitabilityCheck`/`event_level`/`lambda_custom_max`/`lambda_custom_min`/`lambda_single` features, updated option count to 42.
+- **2026-03-10**: Complete refresh - corrected all R method names to match actual `.b.R` code, removed non-existent `intercept` option and `brier`/`auc` cv_measure values, added missing `suitabilityCheck`/`event_level`/`lambda_custom_max`/`lambda_custom_min`/`lambda_single` features, updated option count to 42.
 
 ## Feature Summary
 
-The Adaptive LASSO module (`adaptivelasso`) performs penalized variable selection for Cox proportional hazards models using data-driven adaptive weights. Unlike standard LASSO, the adaptive LASSO achieves the oracle property -- consistent variable selection with asymptotically unbiased estimates for non-zero coefficients.
+The Adaptive LASSO module (`adaptivelasso`) performs penalized variable selection for Cox proportional hazards models using data-driven adaptive weights. Unlike standard LASSO, the adaptive LASSO achieves the oracle property - consistent variable selection with asymptotically unbiased estimates for non-zero coefficients.
 
 The module's features can be broadly categorized as follows:
 
@@ -29,11 +29,11 @@ The following table provides a detailed mapping of the module's features, from t
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Survival time | `time` | Time Variable | -- | `.prepareData` |
-| Event indicator | `event` | Event Indicator | -- | `.prepareData`, `.encodeEventIndicator` |
-| Event level selection | `event_level` | Event Level | -- | `.encodeEventIndicator` |
-| Candidate predictors | `predictors` | Predictor Variables | -- | `.prepareData` |
-| Stratification | `strata` | Stratification Variable (optional) | -- | `.prepareData`, `.fitAdaptiveLasso` |
+| Survival time | `time` | Time Variable | - | `.prepareData` |
+| Event indicator | `event` | Event Indicator | - | `.prepareData`, `.encodeEventIndicator` |
+| Event level selection | `event_level` | Event Level | - | `.encodeEventIndicator` |
+| Candidate predictors | `predictors` | Predictor Variables | - | `.prepareData` |
+| Stratification | `strata` | Stratification Variable (optional) | - | `.prepareData`, `.fitAdaptiveLasso` |
 | **Data Assessment** | | | | |
 | Suitability check | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` | `.assessSuitability` |
 | **Model Specification** | | | | |
@@ -76,12 +76,12 @@ The following table provides a detailed mapping of the module's features, from t
 | Diagnostic plots | `plot_diagnostics` | Diagnostic Plots | `diagnosticsPlot` | `.plotDiagnosticsData`, `.renderDiagnosticsPlot` |
 | **Advanced Options** | | | | |
 | Tied times handling | `tie_method` | Tied Times Method | `coefficients` | `.calculateDiagnostics` |
-| Predictor standardization | `standardize` | Standardize Predictors | -- | `.prepareData` |
-| Parallel computing | `parallel_computing` | Parallel Computing | -- | `.fitAdaptiveLasso` |
-| CPU cores | `n_cores` | Number of Cores | -- | `.fitAdaptiveLasso` |
-| Convergence criterion | `convergence_threshold` | Convergence Threshold | -- | `.fitAdaptiveLasso` |
-| Iteration limit | `max_iterations` | Maximum Iterations | -- | `.fitAdaptiveLasso` |
-| Reproducibility seed | `random_seed` | Random Seed | -- | `.fitAdaptiveLasso`, `.stabilitySelection` |
+| Predictor standardization | `standardize` | Standardize Predictors | - | `.prepareData` |
+| Parallel computing | `parallel_computing` | Parallel Computing | - | `.fitAdaptiveLasso` |
+| CPU cores | `n_cores` | Number of Cores | - | `.fitAdaptiveLasso` |
+| Convergence criterion | `convergence_threshold` | Convergence Threshold | - | `.fitAdaptiveLasso` |
+| Iteration limit | `max_iterations` | Maximum Iterations | - | `.fitAdaptiveLasso` |
+| Reproducibility seed | `random_seed` | Random Seed | - | `.fitAdaptiveLasso`, `.stabilitySelection` |
 
 ## Internal Architecture
 
@@ -138,11 +138,11 @@ Plot state uses only plain numeric vectors, character vectors, and base data.fra
 
 | Package | Usage |
 |---------|-------|
-| `glmnet` | `cv.glmnet()`, `glmnet()`, `stratifySurv()` -- Adaptive LASSO fitting with penalty.factor |
-| `survival` | `Surv()`, `coxph()`, `cox.zph()`, `survfit()`, `survdiff()`, `basehaz()` -- Survival objects, diagnostics, risk groups |
-| `parallel` | `detectCores()`, `makePSOCKcluster()`, `stopCluster()` -- Parallel computing |
-| `doParallel` | `registerDoParallel()` -- Parallel backend for glmnet CV |
-| `foreach` | `registerDoSEQ()` -- Sequential fallback after parallel |
+| `glmnet` | `cv.glmnet()`, `glmnet()`, `stratifySurv()` - Adaptive LASSO fitting with penalty.factor |
+| `survival` | `Surv()`, `coxph()`, `cox.zph()`, `survfit()`, `survdiff()`, `basehaz()` - Survival objects, diagnostics, risk groups |
+| `parallel` | `detectCores()`, `makePSOCKcluster()`, `stopCluster()` - Parallel computing |
+| `doParallel` | `registerDoParallel()` - Parallel backend for glmnet CV |
+| `foreach` | `registerDoSEQ()` - Sequential fallback after parallel |
 
 ### Weight Computation Methods
 

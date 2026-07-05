@@ -8,15 +8,16 @@ jas: '1.2'
 
 description:
     main: Group data by categorical variables and calculate summary statistics
-    R:
-        dontrun: true
-        usage: |
-            # Group by one or more categorical variables and sum numeric variables
-            groupsummary(
-                data = mydata,
-                groupVars = c("Category", "Group"),
-                sumVars = c("Value1", "Value2")
-            )
+    
+#     R:
+#         dontrun: true
+#         usage: |
+#             # Group by one or more categorical variables and sum numeric variables
+#             groupsummary(
+#                 data = mydata,
+#                 groupVars = c("Category", "Group"),
+#                 sumVars = c("Value1", "Value2")
+#             )
 
 options:
     - name: data

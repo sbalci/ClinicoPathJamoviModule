@@ -468,7 +468,7 @@ statistically strongest difference in survival occurred with an LNCP of 15 based
 1.00
 
 1.05
-≥15 LNs (n = 155) P < .001
+>=15 LNs (n = 155) P < .001
 <15 LNs (n = 995)
 
 1.00

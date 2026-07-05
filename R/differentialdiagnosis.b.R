@@ -544,7 +544,7 @@ differentialdiagnosisClass <- R6::R6Class(
             # (L555) and `.simulateLikelihoodRatio` (L609) call `runif()` against a fixed seed and
             # ignore `clinical_data` entirely; `.performBayesianReasoning`, `.analyzeUncertainty`,
             # `.analyzeClinicalContext`, `.performSensitivityTest`, `.calculateModelPerformance`
-            # all return hardcoded literal lists. Output does not reflect the user's data — the
+            # all return hardcoded literal lists. Output does not reflect the user's data - the
             # function as shipped is a UI mock, not a clinical tool. Before clinical release: either
             # (a) replace each stub helper with a real evidence-base/knowledge-graph integration, or
             # (b) gate the analysis behind a prominent ERROR/STRONG_WARNING notice declaring it as

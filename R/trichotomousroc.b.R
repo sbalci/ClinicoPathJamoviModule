@@ -273,7 +273,7 @@ trichotomousrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
         },
 
         # TODO (stub): all 4 plot renderers below (.plot3DSurface, .plotThresholdAnalysis,
-        #   .plotCategoryDistribution, .plotPairwiseROC) are empty stubs — if the .r.yaml/.u.yaml
+        #   .plotCategoryDistribution, .plotPairwiseROC) are empty stubs - if the .r.yaml/.u.yaml
         #   advertise these Image outputs, the user sees blank plot areas. Implement them or remove
         #   the corresponding results items. Also: .populatePerformanceSummary / .calculateVUS
         #   (~L224/L228) are dead "Handled in run" no-ops (safe to delete), and VUS bootstrap CIs are

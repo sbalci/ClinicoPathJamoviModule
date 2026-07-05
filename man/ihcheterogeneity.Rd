@@ -73,8 +73,8 @@ immunohistochemistry (Ki67, ER, PR), 10-20 percent for molecular assays,
 indicate more stringent quality requirements.}
 
 \item{correlation_threshold}{Minimum Spearman correlation between biopsy
-and whole section measurements. Clinical guidelines: ≥0.80 excellent
-agreement, ≥0.70 good agreement, ≥0.60 moderate agreement, <0.60 poor
+and whole section measurements. Clinical guidelines: >=0.80 excellent
+agreement, >=0.70 good agreement, >=0.60 moderate agreement, <0.60 poor
 agreement. Higher values indicate better representativeness of biopsy
 samples.}
 

@@ -221,7 +221,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$progress$setContent(progress_html)
 
             # TODO (cleanup): `Sys.sleep(0.1)` below is a "force UI update" workaround
-            # that adds 100ms latency to every progress update — multiplied across 5-9
+            # that adds 100ms latency to every progress update - multiplied across 5-9
             # steps that's ~1 second of pure sleep per run. jamovi UI doesn't poll
             # synchronously, so the sleep doesn't actually help responsiveness. Remove,
             # or replace with `private$.checkpoint()` for cooperative progress that
@@ -286,7 +286,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data[[surv_time_var]] <- as.numeric(data[[surv_time_var]])
                 # survival_status permits factor per .h.R:81-88; jmvcore::toNumeric
                 # honors the jamovi `values` attribute (returns user-coded 0/1 not level
-                # indices 1/2 like as.numeric(factor) does — same correctness bug as jointfrailty)
+                # indices 1/2 like as.numeric(factor) does - same correctness bug as jointfrailty)
                 data[[surv_status_var]] <- jmvcore::toNumeric(data[[surv_status_var]])
                 
                 # Store variable names
@@ -319,7 +319,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(data)
                 
             }, error = function(e) {
-                # htmlEscape e$message — nlme/JMbayes2/etc. errors may include user column-name fragments
+                # htmlEscape e$message - nlme/JMbayes2/etc. errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Data Preparation Error</h4>
@@ -377,7 +377,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Random effects formula. nlme's `~ form | group` uses the `|` conditioning
-                # bar (groupedData), which is not in jmvcore's default formula allowlist —
+                # bar (groupedData), which is not in jmvcore's default formula allowlist - 
                 # pass additional_allowed_functions = c("|") to permit.
                 if (random_effects == "intercept") {
                     random_formula <- jmvcore::asFormula(paste("~ 1 |", id_t), additional_allowed_functions = c("|"))
@@ -425,7 +425,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(long_model)
                 
             }, error = function(e) {
-                # htmlEscape e$message — nlme errors may include user column-name fragments
+                # htmlEscape e$message - nlme errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Longitudinal Model Fitting Error</h4>
@@ -457,7 +457,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
                 
             }, error = function(e) {
-                # htmlEscape e$message — JMbayes2/joineR errors may include user column-name fragments
+                # htmlEscape e$message - JMbayes2/joineR errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Joint Model Fitting Error</h4>
@@ -599,7 +599,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(surv_model)
                 
             }, error = function(e) {
-                # htmlEscape e$message — survival package errors may include user column-name fragments
+                # htmlEscape e$message - survival package errors may include user column-name fragments
                 error_msg <- paste0(
                     "<div style='color: red; background-color: #ffebee; padding: 15px; border-radius: 8px;'>
                     <h4>Survival Model Fitting Error</h4>
@@ -941,7 +941,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
         
-        # TODO (cleanup): `.parseFormulaVars` is dead code — defined here but never
+        # TODO (cleanup): `.parseFormulaVars` is dead code - defined here but never
         # called anywhere in this file (grep confirms 1 occurrence: the definition).
         # If a future need arises to decompose a formula into variable names, prefer
         # `jmvcore::decomposeFormula()` over hand-rolled regex parsing.

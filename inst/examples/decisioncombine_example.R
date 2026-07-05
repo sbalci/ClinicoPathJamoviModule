@@ -167,7 +167,7 @@ majority_rule <- decisioncombine(
 )
 
 # Interpretation:
-# - Majority rule: ≥2 of 3 tests positive → call positive
+# - Majority rule: >=2 of 3 tests positive → call positive
 # - Balances sensitivity and specificity
 # - Patterns: +/+/+, +/+/-, +/-/+, -/+/+ are positive
 # - Patterns: +/-/-, -/+/-, -/-/+, -/-/- are negative
@@ -501,14 +501,14 @@ mixed_only <- decisioncombine(
 # 3. Combination Strategies:
 #    - Parallel testing: Maximize sensitivity (screening)
 #      * Call positive if ANY test positive
-#      * Sensitivity ≥ individual test sensitivities
-#      * Specificity ≤ individual test specificities
+#      * Sensitivity >= individual test sensitivities
+#      * Specificity <= individual test specificities
 #    - Serial testing: Maximize specificity (confirmation)
 #      * Call positive only if ALL tests positive
-#      * Specificity ≥ individual test specificities
-#      * Sensitivity ≤ individual test sensitivities
+#      * Specificity >= individual test specificities
+#      * Sensitivity <= individual test sensitivities
 #    - Majority rule: Balance sensitivity and specificity
-#      * Applicable only with ≥3 tests
+#      * Applicable only with >=3 tests
 #      * Democratic decision reduces individual test errors
 
 # 4. Statistic Filtering Guidelines:
@@ -536,8 +536,8 @@ mixed_only <- decisioncombine(
 
 # 7. Sample Size Considerations:
 #    - Minimum 10-20 observations per pattern
-#    - With 2 tests (4 patterns): need ≥40-80 total observations
-#    - With 3 tests (8 patterns): need ≥80-160 total observations
+#    - With 2 tests (4 patterns): need >=40-80 total observations
+#    - With 3 tests (8 patterns): need >=80-160 total observations
 #    - Rare patterns may have unreliable estimates
 #    - Larger samples provide narrower confidence intervals
 

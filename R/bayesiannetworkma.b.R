@@ -15,7 +15,7 @@ bayesiannetworkmaClass <- R6::R6Class(
               #   - clinicalInterpretation (declared `type: Html` in
               #     jamovi/bayesiannetworkma.r.yaml, not yet populated)
               #   - render methods once implemented (cross-ref the stub TODO near
-              #     the end of this private list re: .plotNetwork etc. — plot text
+              #     the end of this private list re: .plotNetwork etc. - plot text
               #     labels built from user labels need composeTerm/escape)
               # Reference safe pattern: R/tableone.b.R:235, R/reportcat.b.R:278,
               # R/alluvial.b.R:214.
@@ -110,7 +110,7 @@ bayesiannetworkmaClass <- R6::R6Class(
                 description = "Total interventions compared"
             ))
             
-            # TODO (stub): hardcoded dummy values throughout this .run() — there is no
+            # TODO (stub): hardcoded dummy values throughout this .run() - there is no
             # real Bayesian network meta-analysis here. Sites:
             #   - treatmentEffects loop below (posterior_mean=0.5, sd=0.1,
             #     CrI=0.3-0.7, prob_superiority=0.8, evidence_type="Mixed")

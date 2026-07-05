@@ -11,7 +11,7 @@
 #' automated binning options suitable for clinical research workflows.
 #'
 #' Features:
-#' - Multiple binning methods (quantile, equal, manual, mean±SD, median split, Jenks)
+#' - Multiple binning methods (quantile, equal, manual, mean+/-SD, median split, Jenks)
 #' - Customizable labels and category names
 #' - Distribution visualization with break points
 #' - R code generation for reproducibility
@@ -298,7 +298,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            # TODO (forward-looking): no `.()` wrapping anywhere in this file —
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file 
             # the welcome HTML, error notice bodies (already migrated to HTML
             # boxes), assumption text, and the .noticeBox helper messages are
             # all English-only. Address in a /prepare-translation pass.

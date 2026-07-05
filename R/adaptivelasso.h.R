@@ -925,20 +925,6 @@ adaptivelassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' The method supports tie handling in refitted Cox models, optional 
 #' stratification for Cox modeling, and bootstrap-based stability selection.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- adaptivelasso(
-#'     data = mydata,
-#'     time = "time_to_event",
-#'     event = "event_indicator",
-#'     predictors = c("age", "stage", "biomarker1", "biomarker2"),
-#'     weight_method = "ridge",
-#'     cv_folds = 10,
-#'     stability_selection = TRUE,
-#'     alpha = 1.0
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

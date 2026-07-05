@@ -76,7 +76,7 @@ advancedimputationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             # In a real jamovi module, we might want to do this asynchronously or limit iterations
             # For this 'Improving' task, I'll implement the basic call.
             #
-            # TODO (stub): the entire MICE pipeline below is commented out — the function
+            # TODO (stub): the entire MICE pipeline below is commented out - the function
             # only renders the missing-data summary and the method-assignment table. End
             # users who toggle "Pool Results" see a placeholder note rather than actual
             # pooled imputation results, which is misleading.

@@ -25,11 +25,11 @@ markovmultistateClass <- R6::R6Class(
         
         .run = function() {
             # TODO (stub): all 6 `.fit*Model` branches at L114-132 return `.generateMockResults()`
-            # instead of fitting real msm/mstate models — output transition intensities, sojourn
+            # instead of fitting real msm/mstate models - output transition intensities, sojourn
             # times, covariate effects, and state probabilities are HARD-CODED MOCK DATA, not
             # derived from user data. Either implement real msm/mstate fits OR remove this
             # analysis from production menus. menuGroup `SurvivalD` is already D-suffixed
-            # (dev-routed) so production users do not see this function — but anyone running
+            # (dev-routed) so production users do not see this function - but anyone running
             # it via JamoviTest must understand the output is not real.
 
             # Check for required variables
@@ -37,11 +37,11 @@ markovmultistateClass <- R6::R6Class(
                 return()
             }
 
-            # STUB warning — displays prominently before any analysis runs so users do not
+            # STUB warning - displays prominently before any analysis runs so users do not
             # mistake mock output for real Markov model results.
             stub_warning <- paste0(
                 "<div class='alert alert-danger' style='border:3px solid #dc3545;padding:14px;margin-bottom:12px;'>",
-                "<h3 style='margin-top:0;color:#dc3545;'>", htmltools::htmlEscape(.("STUB IMPLEMENTATION — NOT FOR CLINICAL USE")), "</h3>",
+                "<h3 style='margin-top:0;color:#dc3545;'>", htmltools::htmlEscape(.("STUB IMPLEMENTATION - NOT FOR CLINICAL USE")), "</h3>",
                 "<p>", htmltools::htmlEscape(.("This analysis returns hard-coded mock results, not real multi-state model fits. All transition intensities, sojourn times, covariate effects, and state probabilities below are placeholders. Do not use the output for clinical interpretation, prognostic decisions, or research conclusions.")), "</p>",
                 "<p><strong>", htmltools::htmlEscape(.("Use 'Multistate Survival' (multistatesurvival) or 'Multi-State Cox' (jointmodeling) for real msm/mstate fits.")), "</strong></p>",
                 "</div>"

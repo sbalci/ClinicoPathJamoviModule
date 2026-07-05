@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-The `conditionalsurvival` analysis estimates **conditional survival probabilities** -- the probability of surviving beyond a future time point *t*, given that a patient has already survived to a conditioning time point *s*. The core formula is:
+The `conditionalsurvival` analysis estimates **conditional survival probabilities** - the probability of surviving beyond a future time point *t*, given that a patient has already survived to a conditioning time point *s*. The core formula is:
 
 ```
 CS(t | t0) = P(T > t) / P(T > t0)
@@ -21,7 +21,7 @@ This is clinically valuable for updating prognosis after a patient has survived 
 |---|---|---|---|
 | `km` | Kaplan-Meier Weights | `condSURV::KMW()` for weights, then weighted at-risk estimation; falls back to manual S(t)/S(t0) ratio | `condSURV` (optional), `survival` |
 | `landmark` | Landmark Approach | Subsets data to subjects with T >= condTime, refits KM on shifted times | `survival` |
-| `ipw` | Inverse Probability Weighting | **Stub** -- currently delegates to manual method (see `.calculateIPWCondSurv()` TODO) | `survival` |
+| `ipw` | Inverse Probability Weighting | **Stub** - currently delegates to manual method (see `.calculateIPWCondSurv()` TODO) | `survival` |
 | `pkm` | Presmoothed Kaplan-Meier | Falls through to manual method when `condSURV` is available; uses manual otherwise | `survival` |
 
 When the `condSURV` package is not installed, all methods fall back to `.runManualCondSurv()`, which computes the S(t)/S(s) ratio from a standard `survival::survfit` object with delta-method standard errors and Wald confidence intervals.
@@ -85,15 +85,15 @@ All 12 options defined in `conditionalsurvival.a.yaml` (excluding `data`), with 
 | 1 | `timeVar` | Variable | `null` | numeric; suggested: continuous | Mapped to `time` vector in `.run()`. Used in `survival::Surv(time, status)`. Drives all survival computations. |
 | 2 | `outcomeVar` | Variable | `null` | numeric, factor; suggested: ordinal, nominal | Converted to 0/1 status. If factor: must have exactly 2 levels (converted via `as.numeric() - 1`). If numeric: must contain only 0 and 1. |
 | 3 | `conditionVar` | Variable | `null` | numeric, factor; suggested: ordinal, nominal, continuous | When set: enables stratified analysis (loop over factor levels). Must have >= 2 levels. Groups with < 3 events are skipped. Drives `group` column visibility in `condsurvTable`. |
-| 4 | `conditionTime` | Number | `0` | any numeric | The time *s* to condition on. When 0 (or NA/NULL): automatically set to `median(time)`. Validated against `max(time)` -- rejected if `condTime >= maxTime`. |
+| 4 | `conditionTime` | Number | `0` | any numeric | The time *s* to condition on. When 0 (or NA/NULL): automatically set to `median(time)`. Validated against `max(time)` - rejected if `condTime >= maxTime`. |
 | 5 | `method` | List | `km` | `km`, `landmark`, `ipw`, `pkm` | Dispatches to different estimation strategies in `.computeCondSurv()`. Affects method label in report sentence and method explanation HTML. |
 | 6 | `bandwidth` | Number | `0` | any numeric | **Currently unused.** Read into local variable but not passed to any computation. Intended for kernel smoothing in `pkm` method. |
 | 7 | `confInt` | Number | `0.95` | 0.01--0.99 | Used to compute z-value for Wald CI: `z = qnorm(1 - (1 - confInt)/2)`. Affects `lower`/`upper` columns and report sentence. |
 | 8 | `timePoints` | String | `''` | comma-separated numbers | Parsed by `.parseTimePoints()` via `strsplit(str, ",")`. If empty: `.getDefaultTimePoints()` generates 5 evenly spaced points from `condTime` to `max(time)`. |
 | 9 | `plotType` | List | `curves` | `curves`, `probability`, `both` | **Not yet implemented.** Read but not acted upon in `.plot()`. Always renders step-function curves. |
-| 10 | `showTable` | Bool | `true` | -- | Controls visibility of `condsurvTable` via `visible: (showTable)`. |
-| 11 | `showPlot` | Bool | `true` | -- | Controls visibility of `survplot` via `visible: (showPlot)`. |
-| 12 | `showExplanations` | Bool | `true` | -- | Controls visibility of `methodExplanation` via `visible: (showExplanations)`. Also gates `.initMethodExplanation()` and `.updateMethodExplanation()` calls. |
+| 10 | `showTable` | Bool | `true` | - | Controls visibility of `condsurvTable` via `visible: (showTable)`. |
+| 11 | `showPlot` | Bool | `true` | - | Controls visibility of `survplot` via `visible: (showPlot)`. |
+| 12 | `showExplanations` | Bool | `true` | - | Controls visibility of `methodExplanation` via `visible: (showExplanations)`. Also gates `.initMethodExplanation()` and `.updateMethodExplanation()` calls. |
 
 ---
 
@@ -179,7 +179,7 @@ conditionalsurvivalClass (R6)
 
 | Column | Title | Type | Format | Visible |
 |---|---|---|---|---|
-| `group` | Group | text | -- | `(conditionVar)` -- only shown when stratification variable is set |
+| `group` | Group | text | - | `(conditionVar)` - only shown when stratification variable is set |
 | `time` | Time Point | number | `zto` | always |
 | `condtime` | Conditioning Time | number | `zto` | always |
 | `condprob` | Conditional Survival | number | `zto:4` (4 decimal places) | always |
@@ -349,7 +349,7 @@ sequenceDiagram
 9. If `conditionVar` is set: validate >= 2 levels, then loop over each level calling `.computeCondSurv()` per group. Groups with < 3 events are skipped. Combine results with `rbind`.
 10. If no `conditionVar`: single call to `.computeCondSurv()`, label group as "Overall".
 11. Populate all output items: table, explanation, report sentence, assumptions.
-12. Entire computation block is wrapped in `tryCatch()` -- errors add a footnote to the table.
+12. Entire computation block is wrapped in `tryCatch()` - errors add a footnote to the table.
 
 ### 7.3 Method Dispatch (`.computeCondSurv()`)
 
@@ -409,7 +409,7 @@ flowchart TD
 ```
 
 **Plot characteristics:**
-- **Unstratified:** Two step curves -- overall KM curve and conditional curve (normalized to start at 1.0 at `condTime`).
+- **Unstratified:** Two step curves - overall KM curve and conditional curve (normalized to start at 1.0 at `condTime`).
 - **Stratified:** One conditional step curve per group, colored by group name.
 - Both include a dashed vertical line at `condTime` with an annotation label.
 - Y-axis: 0--1 scale with `scales::percent` labels.

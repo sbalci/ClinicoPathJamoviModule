@@ -47,7 +47,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -61,11 +61,11 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
-        # TODO (cleanup): `.escapeVar` is dead code — defined here but never
+        # TODO (cleanup): `.escapeVar` is dead code - defined here but never
         # called anywhere in this file (grep confirms 1 occurrence: the
         # definition). Safe to delete. For any future formula-context need,
         # use `jmvcore::composeTerm()`; for symbol-context, use `rlang::sym()`
-        # directly (handles non-syntactic names natively) — do NOT resurrect
+        # directly (handles non-syntactic names natively) - do NOT resurrect
         # this helper.
         .escapeVar = function(x) {
             # Convert variable names with special characters to safe R names

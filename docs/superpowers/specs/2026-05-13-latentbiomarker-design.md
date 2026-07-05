@@ -92,7 +92,7 @@ Each stage emits its own result group; failures convert to HTML notices rather t
 | `dep_time` | Variable (continuous) | — | Follow-up time |
 | `dep_event` | Variable (factor, 2 levels) | — | Event indicator |
 | `event_level` | Level | — | Which factor level codes the event |
-| `indicators` | Variables (≥ 3) | — | Biomarker indicators |
+| `indicators` | Variables (>= 3) | — | Biomarker indicators |
 | `indicator_types` | List | `"auto"` | `"auto"` \| `"continuous"` \| `"ordinal"` |
 | `adjusters` | Variables (optional) | — | Cox covariates (age, stage, …) |
 | `reflective_confirmed` | Bool | `FALSE` | G6 hard gate; must be `TRUE` to run |
@@ -115,7 +115,7 @@ Each stage emits its own result group; failures convert to HTML notices rather t
 [ Variables ]
   Time            : [time var]
   Event           : [event var]    Event level: [dropdown of factor levels]
-  Indicators (≥3) : [variables list]
+  Indicators (>=3) : [variables list]
   Adjust for      : [variables list, optional]
 
 [ Measurement model ]
@@ -154,7 +154,7 @@ n, n events, K indicators, K parameters, cases-per-parameter ratio, estimator ch
 
 - **5.3a Loadings table** — indicator, λ (standardized + raw), SE, z, p, R² (communality)
 - **5.3b Reliability** — McDonald's ω, AVE
-- **5.3c Fit indices** — χ², df, p, CFI, TLI, RMSEA + 90% CI, SRMR; traffic-light interpretation (green/yellow/red) per conventional cutoffs (CFI ≥ 0.95, TLI ≥ 0.95, RMSEA ≤ 0.06, SRMR ≤ 0.08)
+- **5.3c Fit indices** — χ², df, p, CFI, TLI, RMSEA + 90% CI, SRMR; traffic-light interpretation (green/yellow/red) per conventional cutoffs (CFI >= 0.95, TLI >= 0.95, RMSEA <= 0.06, SRMR <= 0.08)
 - **5.3d Loadings plot** (`Image`) — horizontal forest of standardized loadings with 95% CIs
 - **5.3e Path diagram** (`Image`) — via `semPlot::semPaths`
 
@@ -185,7 +185,7 @@ Function emits an error notice and stops before fitting.
 | Gate | Condition | Refusal message (template) |
 |---|---|---|
 | **G1** | n < 100 | "SEM is data-hungry. With n < 100, factor loadings and fit indices are unreliable. Consider (1) a simpler z-score composite with conventional Cox regression, or (2) waiting for a larger cohort." |
-| **G2** | Cases-per-parameter < 5 (computed over **CFA** parameters: loadings + residual variances + factor variance) | "Your measurement model has K = {k} CFA parameters, requiring n ≥ {5k} (and ideally n ≥ {10k}). You have n = {n}, giving CPP = {cpp}. Options: (1) reduce indicators, (2) use a summary score with conventional Cox, or (3) collect more data. Note: this gate is about the CFA fit; the Cox stage is gated separately by G4." |
+| **G2** | Cases-per-parameter < 5 (computed over **CFA** parameters: loadings + residual variances + factor variance) | "Your measurement model has K = {k} CFA parameters, requiring n >= {5k} (and ideally n >= {10k}). You have n = {n}, giving CPP = {cpp}. Options: (1) reduce indicators, (2) use a summary score with conventional Cox, or (3) collect more data. Note: this gate is about the CFA fit; the Cox stage is gated separately by G4." |
 | **G3** | Indicators < 3 | "A reflective factor requires at least 3 indicators to be identified. With 2 indicators the model is under-identified and cannot be fit." |
 | **G6** | `reflective_confirmed == FALSE` | "CFA assumes indicators *reflect* an underlying latent construct (e.g., CD8/PD-L1/TIL all reflect 'immune activation'). If indicators *constitute* a composite where each adds independent information (e.g., a histologic grade summing nuclear grade + tubules + mitoses), CFA gives misleading results. Use `cSEM` or `seminr` for formative models, or compute the composite directly. Tick the confirmation box if your model is genuinely reflective." |
 
@@ -195,10 +195,10 @@ Function runs, but warnings are pinned at the top of the results pane.
 
 | Gate | Condition | Warning message |
 |---|---|---|
-| **G1**-soft | 100 ≤ n < 200 | "Sample size is modest for SEM. Results may be unstable; interpret loadings and CIs with caution." |
-| **G2**-soft | 5 ≤ CPP < 10 | "Cases-per-parameter ratio is {cpp}; recommended ≥ 10. Standard errors may be optimistic." |
+| **G1**-soft | 100 <= n < 200 | "Sample size is modest for SEM. Results may be unstable; interpret loadings and CIs with caution." |
+| **G2**-soft | 5 <= CPP < 10 | "Cases-per-parameter ratio is {cpp}; recommended >= 10. Standard errors may be optimistic." |
 | **G3**-soft | Exactly 3 indicators | "With 3 indicators and 1 factor, the model is just-identified (df = 0). CFI, RMSEA, and SRMR are not meaningful." |
-| **G4** | Events-per-Cox-variable < 10 | "Cox model has {epv} events per covariate; recommended ≥ 10 (Peduzzi/Concato). Consider reducing adjusters." |
+| **G4** | Events-per-Cox-variable < 10 | "Cox model has {epv} events per covariate; recommended >= 10 (Peduzzi/Concato). Consider reducing adjusters." |
 | **G5** | All inter-indicator correlations < 0.3 | "Indicators are weakly intercorrelated (max r = {rmax}). They may not reflect a common construct." |
 | Fit-poor | CFI < 0.95 OR RMSEA > 0.10 | "Single-factor model fits poorly (CFI = {cfi}, RMSEA = {rmsea}). Consider splitting into multiple constructs — `SEMLj` supports multi-factor SEM." |
 | PH-violated | Global `cox.zph` p < 0.05 | "Proportional-hazards assumption violated (p = {p}). HR is an average effect; consider stratification or time-dependent terms." |

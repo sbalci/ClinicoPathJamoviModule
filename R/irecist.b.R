@@ -22,14 +22,12 @@ irecistClass <- R6::R6Class(
         # Notice collection (single Preformatted plain-text output item; avoids the
         # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
         .noticeList = list(),
-
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type, title = title, content = content
             )
             private$.renderNotices()
         },
-
         .renderNotices = function() {
             if (length(private$.noticeList) == 0) {
                 self$results$notices$setContent("")
@@ -37,8 +35,11 @@ irecistClass <- R6::R6Class(
             }
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
-                    WARNING = "WARNING: ", "")
+                    ERROR = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ",
+                    ""
+                )
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
@@ -46,14 +47,12 @@ irecistClass <- R6::R6Class(
 
         # ---- Initialization ----
         .init = function() {
-
             # Display instructions if no variables selected
             if (is.null(self$options$patientId) ||
                 is.null(self$options$assessmentTime) ||
                 is.null(self$options$targetLesionSum)) {
-
                 # Add ERROR notice
-                private$.addNotice('ERROR', 'Required Variables Missing', "Required variables missing: Please select Patient ID, Assessment Time, Target Lesion Sum, and New Lesions to begin analysis.")
+                private$.addNotice("ERROR", "Required Variables Missing", "Required variables missing: Please select Patient ID, Assessment Time, Target Lesion Sum, and New Lesions to begin analysis.")
 
                 self$results$instructions$setContent(
                     "<h3>Welcome to iRECIST Analysis</h3>
@@ -91,7 +90,7 @@ irecistClass <- R6::R6Class(
                     <p><b>Clinical Interpretation:</b></p>
                     <ul>
                     <li><b>iUPD (unconfirmed PD):</b> Initial progression - may be pseudoprogression</li>
-                    <li><b>iCPD (confirmed PD):</b> Progression confirmed on next scan ≥4 weeks later</li>
+                    <li><b>iCPD (confirmed PD):</b> Progression confirmed on next scan >=4 weeks later</li>
                     <li><b>Pseudoprogression:</b> iUPD followed by iPR, iSD, or iCR</li>
                     </ul>
 
@@ -121,7 +120,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Main Analysis ----
         .run = function() {
-
             private$.noticeList <- list()
 
             # Check if variables are selected
@@ -133,136 +131,149 @@ irecistClass <- R6::R6Class(
 
             # Validate threshold parameters
             if (self$options$prThreshold < 0 || self$options$prThreshold > 100) {
-                private$.addNotice('ERROR', 'Invalid PR Threshold', "PR threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
+                private$.addNotice("ERROR", "Invalid PR Threshold", "PR threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             if (self$options$pdThreshold < 0 || self$options$pdThreshold > 100) {
-                private$.addNotice('ERROR', 'Invalid PD Threshold', "PD threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
+                private$.addNotice("ERROR", "Invalid PD Threshold", "PD threshold must be between 0-100%. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             if (self$options$pdAbsolute < 0) {
-                private$.addNotice('ERROR', 'Invalid PD Absolute Increase', "PD absolute increase must be non-negative. Please check iRECIST Criteria Settings.")
+                private$.addNotice("ERROR", "Invalid PD Absolute Increase", "PD absolute increase must be non-negative. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             if (self$options$confirmationWindow < 0 ||
                 self$options$confirmationWindowMax < self$options$confirmationWindow) {
-                private$.addNotice('ERROR', 'Invalid Confirmation Window', "Invalid confirmation window: maximum must be greater than minimum. Please check iRECIST Criteria Settings.")
+                private$.addNotice("ERROR", "Invalid Confirmation Window", "Invalid confirmation window: maximum must be greater than minimum. Please check iRECIST Criteria Settings.")
                 return()
             }
 
             # Prepare data
-            tryCatch({
-                private$.prepareData()
+            tryCatch(
+                {
+                    private$.prepareData()
 
-                # Check sample size and add warnings
-                nPatients <- length(unique(private$.processedData$patientId))
-                if (nPatients < 10) {
-                    private$.addNotice('ERROR', 'Critically Small Sample Size', paste0("Critically small sample size (N=", nPatients,
-                                         " patients). iRECIST analysis requires at least 10 patients for meaningful results."))
-                } else if (nPatients < 30) {
-                    private$.addNotice('STRONG_WARNING', 'Small Sample Size', paste0("Small sample size (N=", nPatients,
-                                         " patients). Results should be interpreted with caution. Consider this exploratory analysis."))
-                }
-
-                # Check minimum assessments per patient
-                assessmentsPerPatient <- private$.processedData %>%
-                    group_by(patientId) %>%
-                    summarise(nAssessments = n(), .groups = "drop")
-
-                if (all(assessmentsPerPatient$nAssessments == 1)) {
-                    private$.addNotice('ERROR', 'Only Baseline Assessments', "All patients have only baseline assessment. At least one follow-up assessment is required for response evaluation.")
-                    return()
-                }
-
-                private$.calculateBaseline()
-                private$.classifyResponses()
-                private$.calculateBestResponse()
-
-                if (self$options$trackPseudoprogression) {
-                    private$.trackPseudoprogression()
-                }
-
-                # Populate results
-                private$.populateDataInfo()
-
-                if (self$options$showResponseTable) {
-                    private$.populateResponseTable()
-                }
-
-                if (self$options$showBestResponse) {
-                    private$.populateBestResponseTable()
-                    private$.populateSummaryStats()
-                }
-
-                if (self$options$calculateORR || self$options$calculateDCR) {
-                    private$.populateEfficacyMetrics()
-                }
-
-                if (self$options$trackPseudoprogression && self$options$showPseudoprogressionRate) {
-                    private$.populatePseudoprogressionTable()
-                }
-
-                if (self$options$stratifiedAnalysis && !is.null(self$options$groupVar)) {
-                    private$.populateStratifiedAnalysis()
-                }
-
-                # Clinical interpretation
-                private$.populateClinicalInterpretation()
-
-                if (self$options$showReference) {
-                    private$.populateReferenceInfo()
-                }
-
-                if (self$options$showSummary) {
-                    private$.populateExecutiveSummary()
-                }
-
-                if (self$options$showGlossary) {
-                    private$.populateGlossary()
-                }
-
-                if (self$options$showAssumptions) {
-                    private$.populateAssumptions()
-                }
-
-                # Add clinical warnings for pending confirmations
-                if (self$options$trackPseudoprogression && !is.null(private$.responseData)) {
-                    pendingIUPD <- sum(private$.responseData$irecistCategory == "iUPD", na.rm = TRUE)
-                    if (pendingIUPD > 0) {
-                        private$.addNotice('WARNING', 'Pending iUPD Confirmation', paste0(pendingIUPD, " patient(s) have pending iUPD (unconfirmed progression) requiring confirmation scan ",
-                                             "within ", self$options$confirmationWindow, "-", self$options$confirmationWindowMax, " weeks per iRECIST guidelines."))
+                    # Check sample size and add warnings
+                    nPatients <- length(unique(private$.processedData$patientId))
+                    if (nPatients < 10) {
+                        private$.addNotice("ERROR", "Critically Small Sample Size", paste0(
+                            "Critically small sample size (N=", nPatients,
+                            " patients). iRECIST analysis requires at least 10 patients for meaningful results."
+                        ))
+                    } else if (nPatients < 30) {
+                        private$.addNotice("STRONG_WARNING", "Small Sample Size", paste0(
+                            "Small sample size (N=", nPatients,
+                            " patients). Results should be interpreted with caution. Consider this exploratory analysis."
+                        ))
                     }
+
+                    # Check minimum assessments per patient
+                    assessmentsPerPatient <- private$.processedData %>%
+                        group_by(patientId) %>%
+                        summarise(nAssessments = n(), .groups = "drop")
+
+                    if (all(assessmentsPerPatient$nAssessments == 1)) {
+                        private$.addNotice("ERROR", "Only Baseline Assessments", "All patients have only baseline assessment. At least one follow-up assessment is required for response evaluation.")
+                        return()
+                    }
+
+                    private$.calculateBaseline()
+                    private$.classifyResponses()
+                    private$.calculateBestResponse()
+
+                    if (self$options$trackPseudoprogression) {
+                        private$.trackPseudoprogression()
+                    }
+
+                    # Populate results
+                    private$.populateDataInfo()
+
+                    if (self$options$showResponseTable) {
+                        private$.populateResponseTable()
+                    }
+
+                    if (self$options$showBestResponse) {
+                        private$.populateBestResponseTable()
+                        private$.populateSummaryStats()
+                    }
+
+                    if (self$options$calculateORR || self$options$calculateDCR) {
+                        private$.populateEfficacyMetrics()
+                    }
+
+                    if (self$options$trackPseudoprogression && self$options$showPseudoprogressionRate) {
+                        private$.populatePseudoprogressionTable()
+                    }
+
+                    if (self$options$stratifiedAnalysis && !is.null(self$options$groupVar)) {
+                        private$.populateStratifiedAnalysis()
+                    }
+
+                    # Clinical interpretation
+                    private$.populateClinicalInterpretation()
+
+                    if (self$options$showReference) {
+                        private$.populateReferenceInfo()
+                    }
+
+                    if (self$options$showSummary) {
+                        private$.populateExecutiveSummary()
+                    }
+
+                    if (self$options$showGlossary) {
+                        private$.populateGlossary()
+                    }
+
+                    if (self$options$showAssumptions) {
+                        private$.populateAssumptions()
+                    }
+
+                    # Add clinical warnings for pending confirmations
+                    if (self$options$trackPseudoprogression && !is.null(private$.responseData)) {
+                        pendingIUPD <- sum(private$.responseData$irecistCategory == "iUPD", na.rm = TRUE)
+                        if (pendingIUPD > 0) {
+                            private$.addNotice("WARNING", "Pending iUPD Confirmation", paste0(
+                                pendingIUPD, " patient(s) have pending iUPD (unconfirmed progression) requiring confirmation scan ",
+                                "within ", self$options$confirmationWindow, "-", self$options$confirmationWindowMax, " weeks per iRECIST guidelines."
+                            ))
+                        }
+                    }
+
+                    # Add completion info notice
+                    nPatients <- length(unique(private$.processedData$patientId))
+                    nAssessments <- nrow(private$.processedData)
+                    private$.addNotice("INFO", "Analysis Complete", paste0(
+                        "Analysis complete: ", nPatients, " patients, ", nAssessments, " assessments. ",
+                        "Results follow iRECIST guidelines (Seymour et al. 2017)."
+                    ))
+                },
+                error = function(e) {
+                    # Add ERROR notice
+                    errorMsg <- paste0(
+                        "Analysis error: ", e$message,
+                        " Common issues: Data must be in long format (one row per assessment per patient); ",
+                        "assessment times must be numeric; target lesion sum must be numeric and positive; ",
+                        "new lesions variable must be binary (0/1)."
+                    )
+                    private$.addNotice("ERROR", "Analysis Error", errorMsg)
+                    stop(e)
                 }
-
-                # Add completion info notice
-                nPatients <- length(unique(private$.processedData$patientId))
-                nAssessments <- nrow(private$.processedData)
-                private$.addNotice('INFO', 'Analysis Complete', paste0("Analysis complete: ", nPatients, " patients, ", nAssessments, " assessments. ",
-                                     "Results follow iRECIST guidelines (Seymour et al. 2017)."))
-
-            }, error = function(e) {
-                # Add ERROR notice
-                errorMsg <- paste0("Analysis error: ", e$message,
-                                   " Common issues: Data must be in long format (one row per assessment per patient); ",
-                                   "assessment times must be numeric; target lesion sum must be numeric and positive; ",
-                                   "new lesions variable must be binary (0/1).")
-                private$.addNotice('ERROR', 'Analysis Error', errorMsg)
-                stop(e)
-            })
+            )
         },
 
         # ---- Data Preparation ----
         .prepareData = function() {
-
             # Get data
             mydata <- self$data
 
             # Helper to get correct column name (supports both R and Jamovi)
             getVarName <- function(name) {
-                if (is.null(name)) return(NULL)
+                if (is.null(name)) {
+                    return(NULL)
+                }
                 if (name %in% names(mydata)) {
                     return(name)
                 }
@@ -281,11 +292,16 @@ irecistClass <- R6::R6Class(
 
             # Helper to coerce new lesion indicator to binary (accepts 0/1, TRUE/FALSE, yes/no)
             parseNewLesions <- function(x) {
-                if (is.null(x)) return(rep(NA_real_, nrow(mydata)))
-                if (is.numeric(x)) return(x)
+                if (is.null(x)) {
+                    return(rep(NA_real_, nrow(mydata)))
+                }
+                if (is.numeric(x)) {
+                    return(x)
+                }
                 x <- tolower(as.character(x))
                 ifelse(x %in% c("1", "yes", "y", "true"), 1,
-                       ifelse(x %in% c("0", "no", "n", "false"), 0, NA_real_))
+                    ifelse(x %in% c("0", "no", "n", "false"), 0, NA_real_)
+                )
             }
 
             # Create working dataframe
@@ -313,7 +329,7 @@ irecistClass <- R6::R6Class(
 
             # Check for negative target lesion sum values
             if (any(data$targetSum < 0, na.rm = TRUE)) {
-                private$.addNotice('ERROR', 'Negative Target Lesion Sum', "Target lesion sum cannot be negative. Please check your data for errors.")
+                private$.addNotice("ERROR", "Negative Target Lesion Sum", "Target lesion sum cannot be negative. Please check your data for errors.")
                 stop("Negative target lesion sum detected")
             }
 
@@ -324,8 +340,10 @@ irecistClass <- R6::R6Class(
 
             # Notify user if data was removed
             if (nBefore > nAfter) {
-                private$.addNotice('WARNING', 'Assessments Removed', paste0(nBefore - nAfter, " assessment(s) removed due to missing data. ",
-                                     nAfter, " assessments retained for analysis."))
+                private$.addNotice("WARNING", "Assessments Removed", paste0(
+                    nBefore - nAfter, " assessment(s) removed due to missing data. ",
+                    nAfter, " assessments retained for analysis."
+                ))
             }
 
             # Sort by patient and time
@@ -336,7 +354,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Baseline Calculation ----
         .calculateBaseline = function() {
-
             data <- private$.processedData
 
             # Calculate baseline (first assessment for each patient)
@@ -352,7 +369,7 @@ irecistClass <- R6::R6Class(
 
             # Merge baseline back to data
             data <- merge(data, baseline, by = "patientId")
-            
+
             # Identify baseline rows in the full dataset
             data$isBaseline <- data$assessmentTime == data$baselineTime
 
@@ -373,7 +390,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Response Classification ----
         .classifyResponses = function() {
-
             data <- private$.processedData
 
             # Get thresholds
@@ -386,12 +402,14 @@ irecistClass <- R6::R6Class(
                 mutate(
                     # Protect against division by zero
                     changeFromBaseline = ifelse(baselineSum == 0,
-                                                NA_real_,
-                                                ((targetSum - baselineSum) / baselineSum) * 100),
+                        NA_real_,
+                        ((targetSum - baselineSum) / baselineSum) * 100
+                    ),
                     changeFromNadir = if (self$options$nadirReference) {
                         ifelse(nadirSum == 0,
-                               NA_real_,
-                               ((targetSum - nadirSum) / nadirSum) * 100)
+                            NA_real_,
+                            ((targetSum - nadirSum) / nadirSum) * 100
+                        )
                     } else {
                         NA_real_
                     },
@@ -405,7 +423,7 @@ irecistClass <- R6::R6Class(
             # Warn if any baseline/nadir = 0
             if (any(data$baselineSum == 0, na.rm = TRUE) ||
                 (self$options$nadirReference && any(data$nadirSum == 0, na.rm = TRUE))) {
-                private$.addNotice('WARNING', 'Zero Tumor Burden', "Some patients have zero tumor burden at baseline or nadir. Percentage changes cannot be calculated for these cases.")
+                private$.addNotice("WARNING", "Zero Tumor Burden", "Some patients have zero tumor burden at baseline or nadir. Percentage changes cannot be calculated for these cases.")
             }
 
             # Classify responses
@@ -435,7 +453,6 @@ irecistClass <- R6::R6Class(
                         # Stable disease (everything else)
                         TRUE ~ "iSD"
                     ),
-
                     irecistCategoryOrig = irecistCategory,
 
                     # Initially all responses are unconfirmed
@@ -464,7 +481,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Confirmation Logic ----
         .applyConfirmation = function(data) {
-
             confirmWindow <- self$options$confirmationWindow
             confirmWindowMax <- self$options$confirmationWindowMax
 
@@ -498,9 +514,7 @@ irecistClass <- R6::R6Class(
                             timeDiff >= confirmWindow &
                             timeDiff <= confirmWindowMax &
                             nextCategoryRaw %in% c("iPR", "iCR", "iSD") ~ "Yes (Confirmed)",
-
                         irecistCategory %in% c("iPR", "iCR") ~ "Requires 2nd scan",
-
                         TRUE ~ confirmed
                     ),
 
@@ -518,7 +532,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Best Overall Response ----
         .calculateBestResponse = function() {
-
             data <- private$.responseData
 
             # Calculate best response per patient (stop at first iCPD)
@@ -588,7 +601,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Pseudoprogression Tracking ----
         .trackPseudoprogression = function() {
-
             data <- private$.responseData
 
             # Filter for original iUPD events and track outcomes
@@ -607,7 +619,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Data Info ----
         .populateDataInfo = function() {
-
             table <- self$results$dataInfo
             data <- private$.processedData
 
@@ -621,8 +632,10 @@ irecistClass <- R6::R6Class(
                 list(metric = "Total Patients", value = as.character(nPatients)),
                 list(metric = "Total Assessments", value = as.character(nAssessments)),
                 list(metric = "Mean Assessments per Patient", value = as.character(meanAssessments)),
-                list(metric = "Assessment Time Range",
-                     value = paste0(round(assessmentRange[1], 1), " - ", round(assessmentRange[2], 1)))
+                list(
+                    metric = "Assessment Time Range",
+                    value = paste0(round(assessmentRange[1], 1), " - ", round(assessmentRange[2], 1))
+                )
             )
 
             for (row in rows) {
@@ -632,7 +645,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Response Table ----
         .populateResponseTable = function() {
-
             table <- self$results$responseTable
             data <- private$.responseData
 
@@ -655,7 +667,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Best Response Table ----
         .populateBestResponseTable = function() {
-
             table <- self$results$bestResponseTable
             data <- private$.bestResponseData
 
@@ -675,7 +686,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Summary Stats ----
         .populateSummaryStats = function() {
-
             table <- self$results$summaryStats
             data <- private$.bestResponseData
 
@@ -704,7 +714,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Efficacy Metrics ----
         .populateEfficacyMetrics = function() {
-
             table <- self$results$efficacyMetrics
             data <- private$.bestResponseData
 
@@ -761,7 +770,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Pseudoprogression Table ----
         .populatePseudoprogressionTable = function() {
-
             table <- self$results$pseudoprogressionTable
             data <- private$.pseudoprogressionData
 
@@ -784,7 +792,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Stratified Analysis ----
         .populateStratifiedAnalysis = function() {
-
             if (is.null(self$options$groupVar) || !self$options$stratifiedAnalysis) {
                 return()
             }
@@ -833,7 +840,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Clinical Interpretation ----
         .populateClinicalInterpretation = function() {
-
             data <- private$.bestResponseData
 
             if (is.null(data) || nrow(data) == 0) {
@@ -857,29 +863,29 @@ irecistClass <- R6::R6Class(
                 "<li><b>Disease Control Rate (DCR):</b> ", dcr, "% (", n_dcr, "/", total, " patients)</li>",
                 "<li><b>Pseudoprogression Rate:</b> ", pseudo_rate, "% (", n_pseudo, "/", total, " patients)</li>",
                 "</ul>",
-
                 "<p><b>iRECIST Categories:</b></p>",
                 "<ul>",
                 "<li><b>iCR (Immune Complete Response):</b> Disappearance of all target lesions</li>",
-                "<li><b>iPR (Immune Partial Response):</b> ≥30% decrease from baseline</li>",
+                "<li><b>iPR (Immune Partial Response):</b> >=30% decrease from baseline</li>",
                 "<li><b>iSD (Immune Stable Disease):</b> Neither PR nor PD criteria met</li>",
                 "<li><b>iUPD (Immune Unconfirmed PD):</b> Initial progression - may be pseudoprogression</li>",
-                "<li><b>iCPD (Immune Confirmed PD):</b> Progression confirmed on next scan ≥4 weeks later</li>",
+                "<li><b>iCPD (Immune Confirmed PD):</b> Progression confirmed on next scan >=4 weeks later</li>",
                 "</ul>",
-
                 "<p><b>Key Findings:</b></p>",
                 "<ul>"
             )
 
             if (n_pseudo > 0) {
-                html <- paste0(html,
+                html <- paste0(
+                    html,
                     "<li>Pseudoprogression detected in ", pseudo_rate, "% of patients - ",
                     "initial increase in tumor burden followed by response</li>"
                 )
             }
 
             if (n_orr > 0) {
-                html <- paste0(html,
+                html <- paste0(
+                    html,
                     "<li>Objective responses (iCR/iPR) observed in ", orr, "% of patients</li>"
                 )
             }
@@ -891,21 +897,18 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Reference Info ----
         .populateReferenceInfo = function() {
-
             html <- paste0(
                 "<h4>iRECIST Guidelines Reference</h4>",
                 "<p><b>Citation:</b> Seymour L, Bogaerts J, Perrone A, et al. ",
                 "iRECIST: guidelines for response criteria for use in trials testing immunotherapeutics. ",
                 "<i>Lancet Oncol</i>. 2017;18(3):e143-e152.</p>",
-
                 "<p><b>Key Differences from RECIST 1.1:</b></p>",
                 "<ul>",
                 "<li><b>Pseudoprogression:</b> Initial increase may be followed by response in immunotherapy</li>",
-                "<li><b>Confirmation Requirement:</b> Progression must be confirmed ≥4 weeks later</li>",
+                "<li><b>Confirmation Requirement:</b> Progression must be confirmed >=4 weeks later</li>",
                 "<li><b>iUPD Category:</b> New category for unconfirmed progression</li>",
                 "<li><b>Continue Treatment:</b> Patients with iUPD can continue therapy if clinically stable</li>",
                 "</ul>",
-
                 "<p><b>Implementation Notes:</b></p>",
                 "<ul>",
                 "<li>This analysis implements iRECIST v1.1 criteria</li>",
@@ -922,7 +925,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Executive Summary ----
         .populateExecutiveSummary = function() {
-
             data <- private$.bestResponseData
 
             if (is.null(data) || nrow(data) == 0) {
@@ -946,22 +948,18 @@ irecistClass <- R6::R6Class(
                 "<div style='background-color: #f0f8ff; padding: 15px; border-left: 4px solid #4682b4; margin: 10px 0;'>",
                 "<h4 style='margin-top: 0;'>Executive Summary</h4>",
                 "<p><b>Study Population:</b> ", total, " patients analyzed using iRECIST criteria (Seymour et al. 2017)</p>",
-
                 "<p><b>Key Efficacy Results:</b></p>",
                 "<ul>",
                 "<li><b>Objective Response Rate (ORR):</b> ", orr, "% (95% CI: ",
-                round(ci_orr[1] * 100, 1), "-", round(ci_orr[2] * 100, 1), "%) — ",
+                round(ci_orr[1] * 100, 1), "-", round(ci_orr[2] * 100, 1), "%) - ",
                 n_orr, "/", total, " patients achieved iCR or iPR</li>",
-
                 "<li><b>Disease Control Rate (DCR):</b> ", dcr, "% (95% CI: ",
-                round(ci_dcr[1] * 100, 1), "-", round(ci_dcr[2] * 100, 1), "%) — ",
+                round(ci_dcr[1] * 100, 1), "-", round(ci_dcr[2] * 100, 1), "%) - ",
                 n_dcr, "/", total, " patients achieved iCR, iPR, or iSD</li>",
-
                 "<li><b>Pseudoprogression:</b> ", pseudo_rate, "% (", n_pseudo, "/", total,
                 " patients) showed initial progression followed by response, ",
                 "highlighting the importance of confirmation scans per iRECIST guidelines</li>",
                 "</ul>",
-
                 "<p><b>Clinical Interpretation:</b> ",
                 if (orr >= 20) {
                     "The objective response rate suggests clinically meaningful activity."
@@ -971,8 +969,10 @@ irecistClass <- R6::R6Class(
                     "The objective response rate is low, though disease control may provide benefit."
                 },
                 if (pseudo_rate > 0) {
-                    paste0(" Pseudoprogression was observed in ", pseudo_rate,
-                           "% of patients, emphasizing the value of iRECIST over traditional RECIST 1.1 in immunotherapy trials.")
+                    paste0(
+                        " Pseudoprogression was observed in ", pseudo_rate,
+                        "% of patients, emphasizing the value of iRECIST over traditional RECIST 1.1 in immunotherapy trials."
+                    )
                 } else {
                     ""
                 },
@@ -985,46 +985,36 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Glossary ----
         .populateGlossary = function() {
-
             html <- paste0(
                 "<div style='background-color: #fff9e6; padding: 15px; border-left: 4px solid #ffa500; margin: 10px 0;'>",
                 "<h4 style='margin-top: 0;'>iRECIST Glossary</h4>",
-
                 "<dl>",
                 "<dt><b>iCR (Immune Complete Response)</b></dt>",
                 "<dd>Complete disappearance of all target lesions. Best possible outcome. ",
                 "Non-target lesions must also be absent or assessed as complete response.</dd>",
-
                 "<dt><b>iPR (Immune Partial Response)</b></dt>",
                 "<dd>At least 30% decrease in sum of target lesion diameters compared to baseline. ",
                 "Favorable response indicating meaningful tumor shrinkage.</dd>",
-
                 "<dt><b>iSD (Immune Stable Disease)</b></dt>",
                 "<dd>Neither sufficient shrinkage for iPR nor sufficient growth for iUPD/iCPD. ",
                 "Tumor burden is controlled but not significantly decreased.</dd>",
-
                 "<dt><b>iUPD (Immune Unconfirmed Progressive Disease)</b></dt>",
-                "<dd>Initial evidence of progression requiring confirmation scan ≥4 weeks later. ",
+                "<dd>Initial evidence of progression requiring confirmation scan >=4 weeks later. ",
                 "May represent true progression OR pseudoprogression (transient increase before response). ",
                 "Treatment may continue if patient is clinically stable.</dd>",
-
                 "<dt><b>iCPD (Immune Confirmed Progressive Disease)</b></dt>",
-                "<dd>Progression confirmed on follow-up scan performed ≥4 weeks after initial iUPD. ",
+                "<dd>Progression confirmed on follow-up scan performed >=4 weeks after initial iUPD. ",
                 "Represents true disease progression, not pseudoprogression.</dd>",
-
                 "<dt><b>Pseudoprogression</b></dt>",
                 "<dd>Paradoxical increase in tumor burden (iUPD) followed by subsequent response or stability. ",
                 "Occurs in ~5-10% of immunotherapy patients due to immune cell infiltration. ",
                 "Unique to immunotherapy, rare with chemotherapy.</dd>",
-
                 "<dt><b>ORR (Objective Response Rate)</b></dt>",
                 "<dd>Percentage of patients achieving iCR or iPR. Primary efficacy endpoint in most oncology trials. ",
-                "ORR ≥20% generally considered clinically significant for solid tumors.</dd>",
-
+                "ORR >=20% generally considered clinically significant for solid tumors.</dd>",
                 "<dt><b>DCR (Disease Control Rate)</b></dt>",
                 "<dd>Percentage achieving iCR, iPR, or iSD. Broader measure of clinical benefit. ",
                 "Captures patients with stable disease who may benefit from treatment.</dd>",
-
                 "<dt><b>Confirmation Window</b></dt>",
                 "<dd>Time interval (typically 4-12 weeks) required between initial iUPD and confirmation scan. ",
                 "Allows differentiation of pseudoprogression from true progression.</dd>",
@@ -1037,11 +1027,9 @@ irecistClass <- R6::R6Class(
 
         # ---- Populate Assumptions ----
         .populateAssumptions = function() {
-
             html <- paste0(
                 "<div style='background-color: #ffe6e6; padding: 15px; border-left: 4px solid #dc143c; margin: 10px 0;'>",
                 "<h4 style='margin-top: 0;'>Assumptions & Caveats</h4>",
-
                 "<p><b>Data Requirements:</b></p>",
                 "<ul>",
                 "<li><b>Format:</b> Longitudinal data in long format (one row per assessment per patient)</li>",
@@ -1049,28 +1037,25 @@ irecistClass <- R6::R6Class(
                 "<li><b>Required Variables:</b> Patient ID, assessment time, target lesion sum (mm), new lesions (0/1)</li>",
                 "<li><b>Time Units:</b> Assessment time should be in consistent units (weeks or months from baseline)</li>",
                 "</ul>",
-
                 "<p><b>Analysis Assumptions:</b></p>",
                 "<ul>",
                 "<li><b>Baseline Definition:</b> First recorded assessment for each patient is treated as baseline (time 0)</li>",
-                "<li><b>Missing Data:</b> Complete-case analysis — assessments with missing values are excluded</li>",
+                "<li><b>Missing Data:</b> Complete-case analysis - assessments with missing values are excluded</li>",
                 "<li><b>Nadir Reference:</b> When enabled, progressive disease is determined relative to nadir (lowest) value, not baseline</li>",
                 "<li><b>Confirmation Window:</b> Currently set to ", self$options$confirmationWindow, "-",
                 self$options$confirmationWindowMax, " weeks per iRECIST v1.1 guidelines</li>",
                 "<li><b>New Lesions:</b> Any new lesion triggers iUPD classification, even if target lesions decrease</li>",
                 "</ul>",
-
                 "<p><b>Statistical Methods:</b></p>",
                 "<ul>",
                 "<li><b>Response Rates:</b> Exact binomial confidence intervals (95% CI)</li>",
                 "<li><b>Best Response:</b> Determined by best confirmed response before iCPD or end of follow-up</li>",
                 "<li><b>Confirmation Logic:</b> Requires follow-up scan within confirmation window showing same/worse status</li>",
                 "</ul>",
-
                 "<p><b>Important Caveats:</b></p>",
                 "<ul>",
                 "<li><b>iRECIST vs RECIST 1.1:</b> Results may differ from traditional RECIST due to pseudoprogression handling</li>",
-                "<li><b>Clinical Context:</b> Response criteria alone do not determine treatment decisions — clinical status matters</li>",
+                "<li><b>Clinical Context:</b> Response criteria alone do not determine treatment decisions - clinical status matters</li>",
                 "<li><b>Informative Censoring:</b> Patients who progress may have shorter follow-up (early discontinuation)</li>",
                 "<li><b>Small Samples:</b> Results with N&lt;30 should be considered exploratory</li>",
                 "<li><b>Validation:</b> For regulatory submissions, consult protocol-specific iRECIST implementation details</li>",
@@ -1083,7 +1068,6 @@ irecistClass <- R6::R6Class(
 
         # ---- Plotting Functions ----
         .waterfallPlot = function(image, ggtheme, theme, ...) {
-
             if (is.null(private$.bestResponseData)) {
                 return()
             }
@@ -1142,9 +1126,7 @@ irecistClass <- R6::R6Class(
 
             TRUE
         },
-
         .swimmerPlot = function(image, ggtheme, theme, ...) {
-
             if (is.null(private$.responseData)) {
                 return()
             }
@@ -1168,7 +1150,8 @@ irecistClass <- R6::R6Class(
             # Create plot
             p <- ggplot(swimData, aes(y = factor(patientOrder))) +
                 geom_segment(aes(x = 0, xend = maxTime, yend = factor(patientOrder)),
-                            size = 3, color = "steelblue") +
+                    size = 3, color = "steelblue"
+                ) +
                 labs(
                     title = "Swimmer Plot - Time on Study",
                     x = "Time from Baseline",
@@ -1184,9 +1167,11 @@ irecistClass <- R6::R6Class(
             if (self$options$trackPseudoprogression) {
                 iupdData <- swimData %>% filter(hadIUPD)
                 if (nrow(iupdData) > 0) {
-                    p <- p + geom_point(data = iupdData,
-                                       aes(x = iupdTime, y = factor(patientOrder)),
-                                       color = "orange", size = 3, shape = 17)
+                    p <- p + geom_point(
+                        data = iupdData,
+                        aes(x = iupdTime, y = factor(patientOrder)),
+                        color = "orange", size = 3, shape = 17
+                    )
                 }
             }
 
@@ -1194,9 +1179,7 @@ irecistClass <- R6::R6Class(
 
             TRUE
         },
-
         .spiderPlot = function(image, ggtheme, theme, ...) {
-
             if (is.null(private$.processedData)) {
                 return()
             }
@@ -1221,9 +1204,7 @@ irecistClass <- R6::R6Class(
 
             TRUE
         },
-
         .timeToCPDPlot = function(image, ggtheme, theme, ...) {
-
             if (is.null(private$.bestResponseData)) {
                 return()
             }
@@ -1247,9 +1228,7 @@ irecistClass <- R6::R6Class(
 
             TRUE
         },
-
         .timelinePlot = function(image, ggtheme, theme, ...) {
-
             if (is.null(private$.responseData)) {
                 return()
             }

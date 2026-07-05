@@ -150,7 +150,7 @@ children:
             options:
               - title: Simple Majority (>50% agreement)
                 name: majority
-              - title: Supermajority (≥67% agreement)
+              - title: Supermajority (>=67% agreement)
                 name: super_majority
               - title: Unanimous Agreement (100%)
                 name: unanimous

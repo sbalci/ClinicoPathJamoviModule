@@ -91,15 +91,15 @@ options:
       title: Cumulative Probability Direction
       type: List
       options:
-        - title: Greater Than or Equal (≥)
+        - title: Greater Than or Equal (>=)
           name: geq
-        - title: Less Than or Equal (≤)
+        - title: Less Than or Equal (<=)
           name: leq
       default: geq
       description:
           R: >
-            Direction for cumulative probabilities. Use ≥ if higher predictor values
-            indicate higher severity (e.g., higher biomarker = worse grade). Use ≤ if
+            Direction for cumulative probabilities. Use >= if higher predictor values
+            indicate higher severity (e.g., higher biomarker = worse grade). Use <= if
             lower predictor values indicate higher severity.
 
     # Performance Metrics

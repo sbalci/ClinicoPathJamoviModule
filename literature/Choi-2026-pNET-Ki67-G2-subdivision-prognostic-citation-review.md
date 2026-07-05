@@ -5,7 +5,7 @@
 ## 📚 ARTICLE SUMMARY
 
 - **Title/Label**: Prognostic and recurrence implications of subdividing WHO grade 2 pancreatic neuroendocrine tumors at a 10% Ki-67 threshold
-- **Design & Cohort**: Retrospective single-center observational study; N=300 consecutive adults who underwent pancreatic resection for pNETs at Seoul National University Hospital (January 2010–December 2022). Groups: G1 (Ki-67 <3%, n=196), G2a (3–<10%, n=79), G2b (10–<20%, n=18), G3 (≥20%, n=7). Follow-up through December 31, 2024.
+- **Design & Cohort**: Retrospective single-center observational study; N=300 consecutive adults who underwent pancreatic resection for pNETs at Seoul National University Hospital (January 2010–December 2022). Groups: G1 (Ki-67 <3%, n=196), G2a (3–<10%, n=79), G2b (10–<20%, n=18), G3 (>=20%, n=7). Follow-up through December 31, 2024.
 - **Key Analyses**:
   - Student's t-test and ANOVA for continuous clinicopathological variables
   - Chi-square and Fisher's exact test for categorical variables
@@ -131,7 +131,7 @@
 | Model specification & confounding | 🔴 | Methods: Univariate p<0.05 screening; no DAG; Ki-67 and mitotic count highly correlated | Pre-specify covariates based on clinical knowledge; check VIF; consider LASSO-Cox; present DAG |
 | Missing data handling | 🔴 | Not mentioned anywhere in manuscript | Report missing data table; compare complete vs incomplete cases; use MICE if >5% missing |
 | Effect sizes & CIs | 🟡 | Tables 2–4: HRs with 95% CIs reported; but no effect sizes for group comparisons; no median survival CIs | Report Cohen's d for continuous, Cramér's V for categorical; median survival with CIs; RMST differences |
-| Validation & calibration | 🔴 | Absent | Bootstrap C-index (B≥200); calibration plot; compare against WHO grade alone and AJCC stage alone |
+| Validation & calibration | 🔴 | Absent | Bootstrap C-index (B>=200); calibration plot; compare against WHO grade alone and AJCC stage alone |
 | Reproducibility/transparency | 🔴 | Methods: SPSS 26.0 + R 4.2.3 stated, but no R packages specified; no data/code availability | Specify R packages; provide STROBE checklist; data availability statement; reproducible code |
 
 ### Scoring Rubric
@@ -163,6 +163,7 @@
 ### Critical Concern: Ki-67 Eyeballing Method
 
 The entire study classification relies on visual Ki-67 estimation — the least reproducible method available:
+
 - Inter-observer kappa ranges 0.45–0.72 across published studies
 - The 10% cutpoint (G2a vs G2b) is particularly difficult to estimate visually
 - WHO 2022 recommends digital image analysis or manual counting over visual estimation
@@ -174,23 +175,27 @@ The entire study classification relies on visual Ki-67 estimation — the least 
 ## 🔎 GAP ANALYSIS (WHAT'S MISSING)
 
 ### ~~Gap 1: Trend Test for Ordinal Groups~~ — NOW IMPLEMENTED
+
 - **Method**: Jonckheere-Terpstra trend test
 - **Impact**: G1→G2a→G2b→G3 is ordinal; testing for monotonic trends across ordered grades is more powerful and appropriate than omnibus ANOVA/Kruskal-Wallis
 - **Implementation**: Jonckheere-Terpstra test now fully implemented in `nonparametric` function (was a stub returning NA, now uses `DescTools::JonckheereTerpstraTest`). Also implemented: Median test, Van der Waerden test, Mood's Median test, Cochran's Q, Page's trend test, McNemar test, Sign test.
 - **Status**: COMPLETE — select `test_type = "jonckheere_terpstra"` in the nonparametric function
 
 ### ~~Gap 2: Restricted Mean Survival Time (RMST)~~ — ALREADY COVERED
+
 - **Method**: RMST difference between groups — PH-free alternative to HRs
 - **Impact**: When PH assumption is violated (likely in pNETs with heterogeneous natural history), RMST provides unbiased comparison
 - **ClinicoPath functions**: `rmst` (RMST tests) and `rmstregression` (RMST regression models) — both already exist as standalone functions
 - **Status**: No implementation needed
 
 ### ~~Gap 3: Sensitivity Analysis for Misclassification Bias~~ — NOW IMPLEMENTED
+
 - **Function**: `misclassificationbias` — NEW function for probabilistic bias analysis
 - **Features**: Non-differential and differential misclassification correction; OR/RR/RD bias-adjusted estimates with Monte Carlo CIs; sensitivity range analysis with heatmap plot; clinical interpretation
 - **Status**: COMPLETE
 
 ### Gap 4: DAG-Based Confounder Selection
+
 - **Method**: Visual causal diagram (DAG) for identifying confounders, mediators, and colliders
 - **Impact**: The study adjusts for LN metastasis, which may be a mediator (on the causal pathway from grade to outcome), causing overadjustment bias
 - **Closest existing function**: None
@@ -203,6 +208,7 @@ The entire study classification relies on visual Ki-67 estimation — the least 
 ### Target 1: Extend `nonparametric` with Jonckheere-Terpstra Trend Test
 
 **.a.yaml** (add option):
+
 ```yaml
 - name: trendTest
   title: "Trend Test for Ordered Groups"
@@ -221,6 +227,7 @@ The entire study classification relies on visual Ki-67 estimation — the least 
 ```
 
 **.b.R** (sketch):
+
 ```r
 if (self$options$trendTest && !is.null(self$options$group)) {
   # Ensure group is ordered factor
@@ -239,6 +246,7 @@ if (self$options$trendTest && !is.null(self$options$group)) {
 ```
 
 **.r.yaml** (add output):
+
 ```yaml
 - name: trendTable
   title: "Trend Test"
@@ -255,6 +263,7 @@ if (self$options$trendTest && !is.null(self$options$group)) {
 ```
 
 **.u.yaml** (UI toggle):
+
 ```yaml
 - type: CheckBox
   name: trendTest
@@ -270,22 +279,25 @@ if (self$options$trendTest && !is.null(self$options$group)) {
 
 ---
 
-### ~~Target 2: RMST~~ — Already implemented as `rmst` and `rmstregression` functions. No changes needed.
+### ~~Target 2: RMST~~ — Already implemented as `rmst` and `rmstregression` functions. No changes needed
 
 ---
 
 ## 🧪 TEST PLAN
 
 ### Unit Tests
+
 - **Trend test**: Simulated ordered groups (n=200, 80, 18, 7) with known monotonic effect; verify p < 0.05 and correct direction
 - **RMST**: Use `survival::veteran` dataset; verify RMST difference matches `survRM2::rmst2()` output
 - **Edge cases**: G3 with n=7 (all events vs all censored); ties in survival times; zero events in a group
 
 ### Assumption Reporting
+
 - Confirm `coxdiagnostics` correctly identifies PH violations in simulated data with time-varying HR
 - Verify `tableone` auto-selects non-parametric tests when group size < 30
 
 ### Reproducibility
+
 - Provide example scripts that reproduce all article analyses using ClinicoPath functions
 - Save options JSON for each analysis step
 

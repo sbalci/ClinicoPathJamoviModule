@@ -259,18 +259,18 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else if (correction == "bonferroni") {
                 adjusted_alpha <- 0.05 / num_endpoints
                 sprintf(
-                    .(" <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>• <strong>Adjusted significance threshold: α = %.4f</strong><br>• Compare each p-value from the plots below to %.4f (NOT 0.05)<br>• Only results with p < %.4f should be considered statistically significant<br>• Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
+                    .(" <strong>Bonferroni Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control family-wise error rate at 5%%:<br>\u2022 <strong>Adjusted significance threshold: \u03b1 = %.4f</strong><br>\u2022 Compare each p-value from the plots below to %.4f (NOT 0.05)<br>\u2022 Only results with p < %.4f should be considered statistically significant<br>\u2022 Example: If cholesterol shows p = 0.03, it is NOT significant (0.03 > %.4f)<br> <strong>IMPORTANT:</strong> This correction is not applied automatically. You must manually compare reported p-values to the adjusted threshold."),
                     num_endpoints, adjusted_alpha, adjusted_alpha, adjusted_alpha, adjusted_alpha
                 )
             } else if (correction == "holm") {
                 sprintf(
-                    .(" <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: α = 0.05/%d = %.4f<br>3. For the second smallest, use: α = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
+                    .(" <strong>Holm Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To apply Holm's step-down procedure:<br>1. Rank all p-values from smallest to largest<br>2. For the smallest p-value, use threshold: \u03b1 = 0.05/%d = %.4f<br>3. For the second smallest, use: \u03b1 = 0.05/%d = %.4f<br>4. Continue until a p-value fails to meet its threshold<br>5. All subsequent tests are considered non-significant<br> <strong>IMPORTANT:</strong> This correction requires manual application. Collect p-values from plots below and apply the step-down procedure."),
                     num_endpoints, num_endpoints, 0.05/num_endpoints,
                     num_endpoints - 1, 0.05/(num_endpoints - 1)
                 )
             } else if (correction == "fdr") {
                 sprintf(
-                    .(" <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p₁ ≤ p₂ ≤ ... ≤ p%d)<br>2. Find the largest i where: pᵢ ≤ (i/%d) × 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
+                    .(" <strong>FDR Correction Guidance (Manual Application Required):</strong><br>You are testing %d endpoints. To control false discovery rate at 5%% using Benjamini-Hochberg:<br>1. Rank all p-values from smallest to largest (p\u2081 \u2264 p\u2082 \u2264 ... \u2264 p%d)<br>2. Find the largest i where: p\u1d62 \u2264 (i/%d) \u00d7 0.05<br>3. Reject hypotheses 1 through i<br>4. Collect p-values from plots below and apply this procedure in external software (e.g., R's p.adjust() function)<br> <strong>IMPORTANT:</strong> FDR correction requires manual calculation. This analysis does not automatically adjust p-values."),
                     num_endpoints, num_endpoints, num_endpoints
                 )
             } else {
@@ -307,7 +307,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min_group_size <- min(group_counts)
 
                 if (min_group_size < 3) {
-                    warnings <- c(warnings, sprintf(.(" %s: Minimum group size is %d (recommend ≥3)"),
+                    warnings <- c(warnings, sprintf(.(" %s: Minimum group size is %d (recommend \u22653)"),
                                                     htmltools::htmlEscape(var), min_group_size))
                 }
 
@@ -336,7 +336,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         n_subset <- length(group_subset)
 
                         if (n_subset >= 3 && n_subset <= 200) {
-                            # Use Shapiro-Wilk for small-medium samples (n ≤ 200)
+                            # Use Shapiro-Wilk for small-medium samples (n \u2264 200)
                             p_val <- tryCatch(shapiro.test(group_subset)$p.value, error = function(e) 1)
                             if (p_val < 0.05) {
                                 warnings <- c(warnings, sprintf(
@@ -717,7 +717,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         multi_endpoint_note <- paste0(
             "<div style='background-color: #ffe5e5; border-left: 4px solid #dc3545; padding: 10px; margin: 10px 0;'>",
             "<p><strong> Multiple Endpoint Testing:</strong> You are analyzing ",
-            length(self$options$dep), " dependent variables. Each test uses the standard α = 0.05 threshold. ",
+            length(self$options$dep), " dependent variables. Each test uses the standard \u03b1 = 0.05 threshold. ",
             "The 'Multiple Endpoint Correction Guidance' option above provides instructions for manual p-value adjustment. ",
             "<strong>Important:</strong> Corrections are NOT applied automatically by this analysis.</p>",
             "</div>"
@@ -757,13 +757,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         "<p><strong>Statistical Significance:</strong></p>",
         "<ul>",
         "<li><strong>p < 0.05:</strong> Significant difference between groups.</li>",
-        "<li><strong>p ≥ 0.05:</strong> No significant difference detected.</li>",
+        "<li><strong>p \u2265 0.05:</strong> No significant difference detected.</li>",
         "</ul>",
         
         "<p><strong>Effect Size Interpretation:</strong></p>",
         "<ul>",
         "<li><strong>Cohen's d:</strong> 0.2 (small), 0.5 (medium), 0.8 (large) effect.</li>",
-        "<li><strong>Eta-squared (η²):</strong> 0.01 (small), 0.06 (medium), 0.14 (large) effect.</li>",
+        "<li><strong>Eta-squared (\u03b7\u00b2):</strong> 0.01 (small), 0.06 (medium), 0.14 (large) effect.</li>",
         "</ul>",
         
         "<p><strong>Clinical Context:</strong></p>",
@@ -822,13 +822,13 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   self$options$padjustmethod, " correction for multiple testing. ")
         } else "",
         
-        "Statistical significance was assessed at the α = ", (1 - self$options$conflevel), " level.",
+        "Statistical significance was assessed at the \u03b1 = ", (1 - self$options$conflevel), " level.",
         "</p>",
         
         "<h5>Results:</h5>",
         "<p>[Insert specific results here: test statistic, p-value, effect size with 95% CI]</p>",
         "<p>Example: \"The analysis revealed a statistically significant difference in [dependent variable] between the groups (",
-        "F(", n_groups - 1, ", ", n_total - n_groups, ") = [value], p = [value], η² = [value], 95% CI [lower, upper]). ",
+        "F(", n_groups - 1, ", ", n_total - n_groups, ") = [value], p = [value], \u03b7\u00b2 = [value], 95% CI [lower, upper]). ",
         "Post-hoc tests showed that Group A had significantly higher levels than Group B (p = [value]).\"</p>",
         
         "<h5>Conclusion:</h5>",

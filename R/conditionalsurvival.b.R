@@ -122,7 +122,7 @@ conditionalsurvivalClass <- R6::R6Class(
                 }
             }
 
-            # Run conditional survival analysis -- with optional stratification
+            # Run conditional survival analysis - with optional stratification
             tryCatch({
                 if (!is.null(conditionVar)) {
                     allResults <- list()
@@ -399,7 +399,7 @@ conditionalsurvivalClass <- R6::R6Class(
         },
 
         .calculateIPWCondSurv = function(time, status, condTime, timePoints) {
-            # TODO: IPW Conditional Survival -- Implement proper inverse probability
+            # TODO: IPW Conditional Survival - Implement proper inverse probability
             # weighting using IPCW estimator. Requires computing censoring weights
             # via Cox model on censoring distribution. See Beran (1981) or
             # condSURV package for reference implementation. Priority: LOW.
@@ -520,7 +520,7 @@ conditionalsurvivalClass <- R6::R6Class(
             # Clear all existing rows (no-arg form is the correct pattern)
             table$deleteRows()
 
-            # Add results -- include group column for stratified analyses
+            # Add results - include group column for stratified analyses
             for (i in seq_len(nrow(results))) {
                 vals <- list(
                     time = results$time[i],
@@ -692,7 +692,7 @@ conditionalsurvivalClass <- R6::R6Class(
             # Number at risk at conditioning time
             n_at_risk <- sum(time >= condTime, na.rm = TRUE)
 
-            # Build report sentences -- one per group
+            # Build report sentences - one per group
             groups <- unique(results$group)
             sentences <- character(0)
 

@@ -142,7 +142,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         time_var <- self$options$aval_var
                         event_var <- self$options$cnsr_var
                         # Convert CNSR to event (CNSR: 1=censored, 0=event -> EVENT: 1=event, 0=censored)
-                        # toNumeric handles factor CNSR (permitted: [factor, numeric] in .a.yaml) — honors `values` attribute
+                        # toNumeric handles factor CNSR (permitted: [factor, numeric] in .a.yaml) - honors `values` attribute
                         mydata[[paste0(event_var, '_event')]] <- 1 - jmvcore::toNumeric(mydata[[event_var]])
                         mydata$time_variable <- mydata[[time_var]]
                         mydata$event_variable <- mydata[[paste0(event_var, '_event')]]
@@ -370,7 +370,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Generate Table One using existing method
                 table_one <- self$.jtable_one(data)
 
-                # Convert to HTML for display (escape=TRUE — table cells include user column names and factor levels)
+                # Convert to HTML for display (escape=TRUE - table cells include user column names and factor levels)
                 html_table <- knitr::kable(table_one, format = 'html', escape = TRUE)
                 
                 # Cache and set results

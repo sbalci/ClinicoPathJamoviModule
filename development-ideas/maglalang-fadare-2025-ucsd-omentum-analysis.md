@@ -14,6 +14,7 @@
 This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are sufficient** for omentum sampling in gynecologic cancers when the omentum is either grossly normal or multifocally/diffusely abnormal. This represents a radical departure from current international guidelines (ISGyP, RCP, ICCR) recommending 4-10 blocks.
 
 **Critical Issues Identified**:
+
 1. **Retrospective design vulnerability**: 20+ years of heterogeneous practices with no standardization
 2. **Sampling bias**: Variable block submission by prosectors at different training levels
 3. **Statistical power limitations**: Grouping methodology masks detection sensitivity issues
@@ -21,6 +22,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 5. **False negative rate ignored**: Focus on MPR without addressing missed disease
 
 **Our Response**: The omentum study should provide **prospective validation** with:
+
 - Standardized sectioning protocols
 - Complete sampling as gold standard
 - False negative rate quantification
@@ -34,11 +36,13 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 ### Cohort Characteristics
 
 **Inclusion Criteria**:
+
 - Omentum resected for gynecologic cancer staging (2002-2024)
 - Borderline or malignant neoplasms of ovary, fallopian tube, or uterus
 - Epithelial, sarcomas, sex cord stromal tumors, metastases
 
 **Distribution**:
+
 - **n=536 (50.8%)**: Grossly normal omentum
 - **n=519 (49.2%)**: Grossly abnormal omentum
   - Focally abnormal: 13.2% (n=140)
@@ -46,11 +50,13 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
   - Diffusely abnormal: 6.0% (n=63)
 
 **Primary Sites**:
+
 - Tubo-ovarian/peritoneal: 71.9% (n=759)
 - Uterine: 18.0% (n=189)
 - Synchronous/metastatic: 10.1% (n=107)
 
 **Histotypes**:
+
 - Serous carcinoma: 43.7% (n=461, includes ovarian + uterine)
 - Borderline tumors: 11.1% (n=117)
 - Low-grade endometrioid: 8.1% (n=85)
@@ -66,7 +72,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
    - Yellow/tan/reddish lobulated cut surfaces
 
 2. **Focally Abnormal** (n=140):
-   - Single discrete abnormality ≤10% of specimen
+   - Single discrete abnormality <=10% of specimen
    - Fibrosis, nodule, mass, induration in one location
    - Includes separate "omental nodule" specimens
 
@@ -98,13 +104,14 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
    - 10% to <20%
    - 20% to <30%
    - 30% to <40%
-   - ≥40%
+   - >=40%
 
 **Formula**: Block-to-size ratio = (Number of blocks ÷ Widest omental dimension in cm) × 100%
 
 ### Outcome Measure
 
 **Microscopic Positivity Rate (MPR)**:
+
 - Definition: Percentage of cases with viable tumor cells on histology
 - Positive: Definitive viable tumor cells present
 - Negative: Acellular mucin, psammoma bodies, atypical cells, reactive changes (without tumor)
@@ -118,6 +125,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 **Overall MPR**: 8.0% (43/536 microscopic disease detected)
 
 **MPR by Number of Blocks**:
+
 - 1 block: 6.7% (10/149)
 - 2 blocks: 6.9% (5/72)
 - 3 blocks: 9.6% (5/52)
@@ -128,12 +136,14 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 - >10 blocks: 0% (0/6)
 
 **MPR by Block Groups**:
+
 - 1-2 blocks: 6.8% (15/221)
 - 3-4 blocks: 9.0% (6/67)
 - 5-6 blocks: 8.5% (19/224)
 - >6 blocks: 12.5% (3/24)
 
 **Statistical Analysis**:
+
 - **Pairwise comparisons**: P > .50 for all (NO significant differences)
 - **Cochran-Armitage trend test**: P = .88 (NO linear trend)
 - **Binomial logistic regression**:
@@ -142,11 +152,12 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 - **Fisher exact test**: P = .66 (no association between block groups and MPR)
 
 **Block-to-Size Ratio Analysis**:
+
 - 1% to <10%: 8.2% MPR (15/182)
 - 10% to <20%: 6.3% MPR (12/190)
 - 20% to <30%: 10.3% MPR (8/78)
 - 30% to <40%: 6.9% MPR (2/29)
-- ≥40%: 10.5% MPR (6/57)
+- >=40%: 10.5% MPR (6/57)
 - **P = .72** (no difference), **trend P = .39**
 
 **Authors' Conclusion for Normal Omentum**:
@@ -159,12 +170,14 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 **Overall MPR**: 85.2% (442/519 microscopic disease confirmed)
 
 **MPR by Subgroup**:
+
 - Focally abnormal: 66.4% (93/140)
 - Multifocally abnormal: 91.1% (288/316)
 - Diffusely abnormal: 96.8% (61/63)
 - Multifocal + diffuse: 92.1% (349/379)
 
 **MPR by Block Groups** (all abnormal):
+
 - 1-2 blocks: 88.0% (221/251)
 - 3-4 blocks: 87.1% (135/155)
 - 5-6 blocks: 81.2% (56/69)
@@ -173,6 +186,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 **Note**: The >6 blocks group had **significantly lower MPR** (P<.05), which authors attribute to sampling bias (prosectors over-sampling equivocally abnormal cases).
 
 **MPR for Multifocal + Diffuse** (most unequivocal):
+
 - 1-2 blocks: 95.5% (168/176)
 - 3-4 blocks: 91.5% (108/118)
 - 5-6 blocks: 85.45% (47/55)
@@ -186,6 +200,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 ### Neoadjuvant Chemotherapy Subanalysis
 
 **Special Finding** (grossly normal, tubo-ovarian/peritoneal, n=349):
+
 - **Post-neoadjuvant MPR**: 19.0% (4/21) with 1-2 blocks
 - **No neoadjuvant MPR**: 3.8% (4/104) with 1-2 blocks
 - **P = .03** (statistically significant)
@@ -193,6 +208,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 **Interpretation**: Neoadjuvant chemotherapy causes tumor regression → grossly normal appearance but microscopic residual disease remains.
 
 **MPR by Sampling Level** (post-neoadjuvant only):
+
 - 1-2 blocks: 19.0% (4/21)
 - 3-4 blocks: 7.1% (3/42)
 - 5-6 blocks: 7.4% (7/94)
@@ -208,10 +224,12 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 ### Tumor Type & Primary Site Effects
 
 **Gross Omental Involvement by Primary**:
+
 - Tubo-ovarian/peritoneal: 54.0% (410/759)
 - Uterine: 24.3% (46/189)
 
 **MPR for Grossly Abnormal by Primary**:
+
 - Tubo-ovarian/peritoneal: 86.8% (356/410)
 - Uterine: 71.7% (33/46)
 - **P = .009** (statistically significant)
@@ -220,6 +238,7 @@ This UCSD study by Maglalang & Fadare (2025) concludes that **1-2 blocks are suf
 Authors separately assessed uterine vs tubo-ovarian primaries for each block group. Results (not shown in detail) were "broadly consistent" with overall findings: **1-2 blocks not inferior to higher sampling**.
 
 **Variables Tested** (1-2 blocks, grossly normal):
+
 - Uterine vs tubo-ovarian: P = .34 (NS)
 - Size below vs above median: P = .63 (NS)
 - Neoadjuvant vs no neoadjuvant: P = .41 (NS overall cohort)
@@ -251,6 +270,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 | **Lester (Textbook)** | 2022 | Variable | Grossing manual<sup>23</sup> |
 
 **Institutional Variability** (from publicly available gross manuals):
+
 - Tubo-ovarian primary: **10 sections**
 - Endometrial primary: **4 sections**
 - General: **4-10 sections** range
@@ -264,6 +284,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 1. Retrospective Design Limitations
 
 **Heterogeneity Across 22 Years**:
+
 - Multiple prosectors: residents, PA students, experienced PAs
 - Variable gross descriptions ("interobserver variability")
 - No standardized sectioning protocol
@@ -279,12 +300,14 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 2. Sampling Bias & Circular Reasoning
 
 **The Paradox**:
+
 - Prosectors who submitted 6 blocks likely sectioned more tissue
 - If microscopic disease was **not** in those 6 blocks, it may not exist
 - Comparing 6-block MPR (7.9%) to 1-block MPR (6.7%) assumes **random sampling**
 - But prosectors may have **targeted** suspicious areas when submitting fewer blocks
 
 **Example**:
+
 - Grossly normal omentum, prosector sees subtle thickening
 - Submits 2 blocks targeting that area → detects disease
 - Another case: prosector sees truly normal omentum
@@ -301,23 +324,27 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 3. Inadequate Gold Standard
 
 **The MPR Trap**:
+
 - MPR = microscopic positivity rate among blocks submitted
 - **Does not measure**: how much disease was **missed**
 - No complete sampling to establish true disease burden
 
 **Example Scenario**:
+
 - Grossly normal omentum, 2 blocks submitted, MPR = 7%
 - What if complete sampling (100 blocks) would yield 15% MPR?
 - The 2-block approach misses **~50% of microscopic disease**
 - Study design **cannot detect this**
 
 **Correct Methodology** (not used here):
+
 1. Prosector submits initial blocks (e.g., 2 blocks)
 2. Study pathologist then **completely samples** remaining tissue
 3. Compare initial vs complete sampling MPR
 4. Calculate **false negative rate**
 
 **Skala & Hagemann 2015 Insight**:
+
 - Used 44 cases with **known microscopic disease** (gold standard)
 - Simulated random sampling: 5 blocks → 82% sensitivity, 10 blocks → 95%
 - Shows **sampling matters when disease is sparse**
@@ -327,6 +354,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 4. Statistical Power & Grouping Artifacts
 
 **Block Group Imbalance**:
+
 - 1-2 blocks: n=221 (41% of grossly normal)
 - 3-4 blocks: n=67 (12%)
 - 5-6 blocks: n=224 (42%)
@@ -335,11 +363,13 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 **Problem**: The 3-4 block group is **underpowered** (n=67, only 6 positive). A difference from 6.8% (1-2 blocks) to 9.0% (3-4 blocks) requires larger n to detect.
 
 **Effect Size Calculation** (not performed by authors):
+
 - To detect 3% absolute difference (6.8% vs 9.8%) with 80% power, α=.05:
 - Required n ≈ 1,500 per group
 - Study has n=221 and n=67 → **massively underpowered**
 
 **Wide Confidence Intervals** (not reported):
+
 - 1-2 blocks: 6.8% (15/221) → 95% CI: 4.0-11.0%
 - 5-6 blocks: 8.5% (19/224) → 95% CI: 5.4-13.0%
 - **Intervals overlap substantially** → cannot conclude equivalence
@@ -349,6 +379,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 5. Clinical Outcome Not Assessed
 
 **Missing Data**:
+
 - No survival analysis
 - No staging accuracy (understaged vs correctly staged)
 - No treatment change analysis (adjuvant therapy decisions)
@@ -358,12 +389,14 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 > If 1-2 blocks miss 5% of microscopic disease vs 5-6 blocks miss 2%, what is the **clinical impact**?
 
 **Potential Impacts**:
+
 - Stage IA → Stage IIIA upstaging affects adjuvant chemotherapy decisions
 - Microscopic omental disease in "early-stage" endometrial cancer → platinum-based chemo consideration
 - Survival: 2.3-3% early-stage ovarian cancers have occult disease (upstaged by omentectomy)<sup>6,7</sup>
 - Endometrial: 0.4-1.9% have microscopic omental involvement<sup>8,9</sup>
 
 **The Real Question**:
+
 - Not "Does MPR differ statistically?"
 - But "Does **understaging** from inadequate sampling harm patients?"
 
@@ -372,6 +405,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 6. Neoadjuvant Chemotherapy Findings Underemphasized
 
 **Significant Finding**:
+
 - Post-neoadjuvant grossly normal omenta: **19.0% MPR** (vs 3.8% without neoadjuvant)
 - **5× higher rate** of microscopic disease
 - Small sample size (n=21 with neoadjuvant, 1-2 blocks)
@@ -382,6 +416,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 **Problem**: This is **buried in the discussion** and contradicts the main conclusion. Neoadjuvant cases represent a growing proportion of ovarian cancer cohorts (NACT increasingly used in advanced disease).
 
 **Clinical Reality**:
+
 - NACT response assessment is critical for surgical planning
 - Gross appearance unreliable post-chemotherapy<sup>26</sup>
 - Higher sampling needed → **but study recommends 1-2 blocks universally**
@@ -391,6 +426,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 7. Focally Abnormal Group Paradox
 
 **Data**:
+
 - Focally abnormal overall MPR: 66.4% (93/140)
 - **1-2 blocks**: 70.1% (53/75)
 - **3-4 blocks**: 73.0% (27/37)
@@ -401,12 +437,14 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 > "This finding may reflect the wide variety of gross aberrations... large subsets of which are ultimately found to be devoid of microscopic abnormality."
 
 **Alternative Interpretation**:
+
 - Focal abnormalities are **high-risk** for false negatives
 - 33.6% (47/140) were grossly suspicious but **microscopically negative**
 - These are the **hardest to classify** cases
 - May require **more sampling**, not less
 
 **Clinical Scenario**:
+
 - Surgeon describes "questionable 2 cm nodule" on omentum
 - Pathologist submits 2 blocks from nodule → negative
 - Was the nodule benign (reactive)? Or did we **miss** disease in the other 98% of the omentum?
@@ -416,14 +454,17 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 8. Block-to-Size Ratio Misuse
 
 **Concept**:
+
 - Block-to-size ratio = blocks ÷ widest dimension
 - Example: 6 blocks ÷ 30 cm = 20%
 
 **Authors' Finding**:
+
 - No correlation between ratio and MPR (P=.72)
 - Ratios 1-10% vs 40%+ had similar MPR (~8-10%)
 
 **Problem**:
+
 - **Denominator is one-dimensional** (widest diameter)
 - Omentum is **three-dimensional** and irregular
 - Volume varies enormously (thin vs bulky)
@@ -432,6 +473,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 **Better Metric**: Blocks per gram or blocks per estimated volume (not used)
 
 **Surface Area Issue**:
+
 - Microscopic disease is **surface phenomenon** (peritoneal implants)
 - One-dimensional size (longest diameter) ignores surface area complexity
 
@@ -450,6 +492,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 | **Consensus building** | 12-16 LN from 3 studies | 1-2 blocks (conflicts with guidelines) |
 
 **Methodological Gold Standard** (from LN studies):
+
 1. **Binomial model**: P(detection) = 1 - (1 - prevalence)^n
    - Prevalence = disease rate per unit sampled
    - n = number of units sampled
@@ -464,6 +507,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
    - **Omentum equivalent**: With 2 blocks, what % of "negative" cases are false negatives?
 
 **Application to Omentum**:
+
 - Estimate disease burden per cubic centimeter (from complete sampling subset)
 - Model: How many blocks needed for 90%, 95%, 99% detection?
 - Compare to clinical outcomes (survival, stage accuracy)
@@ -475,16 +519,19 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 1. Power Analysis
 
 **Current Study Lacks**:
+
 - Prospective power calculation
 - Confidence intervals for MPR
 - Non-inferiority margin definition
 
 **Needed**:
-- Define clinically acceptable difference (e.g., ≤2% absolute MPR difference)
+
+- Define clinically acceptable difference (e.g., <=2% absolute MPR difference)
 - Calculate required sample size
 - Report 95% CI for all MPR estimates
 
 **Example**:
+
 - 1-2 blocks: 6.8% (95% CI: 4.0-11.0%)
 - 5-6 blocks: 8.5% (95% CI: 5.4-13.0%)
 - **Overlapping CI → cannot conclude non-inferiority**
@@ -494,18 +541,21 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 2. Equivalence Testing
 
 **Current Approach**: Null hypothesis significance testing (NHST)
+
 - H₀: MPR₁₋₂ = MPR₅₋₆
 - Result: P > .50 (fail to reject null)
 - **Problem**: Failing to reject null ≠ proving equivalence
 
 **Correct Approach**: Non-inferiority or equivalence testing
+
 - Define margin: Δ = 2% (clinically acceptable difference)
-- H₀: MPR₁₋₂ - MPR₅₋₆ ≥ Δ (inferior)
+- H₀: MPR₁₋₂ - MPR₅₋₆ >= Δ (inferior)
 - H₁: MPR₁₋₂ - MPR₅₋₆ < Δ (non-inferior)
 - Calculate one-sided 97.5% CI for difference
 - If upper CI < Δ → non-inferiority established
 
 **Why It Matters**:
+
 - Current study: "No difference found" = insufficient evidence
 - Proper test: "Proven non-inferior" = positive evidence
 
@@ -514,18 +564,21 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 3. Bayesian Reanalysis
 
 **Frequentist Limitation**:
+
 - P-value only addresses "if null true, how likely is this data?"
 - Doesn't answer "given this data, what's the probability 1-2 blocks are adequate?"
 
 **Bayesian Approach**:
+
 - Prior: ISGyP guidelines (4 blocks) based on expert consensus
 - Likelihood: Maglalang data (MPR by block groups)
 - Posterior: Updated probability that 1-2 blocks are adequate
 - Incorporate uncertainty, not just point estimates
 
 **Example Output**:
-- Probability that 1-2 blocks detect ≥90% of disease: 65%
-- Probability that 5-6 blocks detect ≥90% of disease: 85%
+
+- Probability that 1-2 blocks detect >=90% of disease: 65%
+- Probability that 5-6 blocks detect >=90% of disease: 85%
 - Decision: 5-6 blocks preferred (higher confidence)
 
 ---
@@ -533,6 +586,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### 4. Survival & Staging Outcome Analysis
 
 **Required Comparison**:
+
 | Outcome | 1-2 Blocks | 5-6 Blocks | P-value | HR (95% CI) |
 |---------|-----------|-----------|---------|-------------|
 | Upstaging rate | ? | ? | ? | ? |
@@ -552,6 +606,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 **Design**: Prospective, two-phase sampling study
 
 **Phase 1: Complete Sampling Gold Standard** (n=200 target)
+
 1. Surgeon performs omentectomy (standard practice)
 2. **Standardized grossing protocol**:
    - Measure dimensions (length, width, thickness)
@@ -570,6 +625,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
    - Compare: concordance, discordance, additional findings
 
 **Outcomes Measured**:
+
 - **Sensitivity**: 2-block sampling vs complete sampling (gold standard)
 - **False Negative Rate**: Negative on 2 blocks, positive on complete sampling
 - **Number Needed to Sample (NNS)**: How many blocks to achieve 90%, 95%, 99% sensitivity?
@@ -580,21 +636,25 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 **Phase 2: Probabilistic Modeling** (using Phase 1 data)
 
 **Binomial Detection Model**:
+
 - Estimate disease prevalence per block (p) from Phase 1
 - Calculate: P(detection) = 1 - (1 - p)^n
 - Derive minimum n for 95% confidence
 
 **Hypergeometric Model** (finite blocks):
+
 - Total blocks available: N
 - Diseased blocks: K
 - Blocks sampled: n
-- Probability of detecting ≥1 diseased block: P(X≥1)
+- Probability of detecting >=1 diseased block: P(X>=1)
 
 **Tissue Volume Model**:
+
 - Estimate disease burden per cm³
 - Calculate blocks needed based on specimen volume (not just linear dimension)
 
 **Clinical Cutoff Optimization**:
+
 - ROC curve: blocks sampled vs upstaging accuracy
 - Optimal cutoff: maximize Youden index (sensitivity + specificity - 1)
 
@@ -644,11 +704,13 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
    - Association between sampling adequacy and survival
 
 **Cox Regression Model**:
+
 - Covariates: age, stage, grade, histotype, residual disease, sampling adequacy
 - Primary exposure: "adequate sampling" (defined by study findings)
 - Outcome: OS, RFS
 
 **Hypothesis**:
+
 - **If Maglalang correct**: No survival difference between 2-block vs 6-block sampling
 - **If Maglalang incorrect**: Higher sampling → higher upstaging → appropriate adjuvant therapy → improved OS
 
@@ -659,11 +721,13 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 **Primary Endpoint**: Sensitivity of 2-block sampling vs complete sampling
 
 **Sample Size Calculation**:
+
 - Expected sensitivity: 85% (hypothesis: 2 blocks miss 15% of cases)
 - Precision: ±5% (95% CI)
 - Required n ≈ 200 grossly normal cases
 
 **Analysis**:
+
 1. **Sensitivity/Specificity**: 2 blocks vs gold standard
 2. **Predictive Values**: PPV/NPV of 2-block diagnosis
 3. **ROC Analysis**: Optimal block number (maximize AUC)
@@ -671,8 +735,9 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 5. **Survival Analysis**: Kaplan-Meier curves, log-rank test, Cox regression
 
 **Non-Inferiority Testing**:
+
 - Margin: 5% absolute decrease in sensitivity acceptable
-- H₀: Sensitivity₂ₐₗₒcₖₛ - Sensitivitycomplete ≤ -5%
+- H₀: Sensitivity₂ₐₗₒcₖₛ - Sensitivitycomplete <= -5%
 - α = 0.025 (one-sided)
 
 ---
@@ -680,23 +745,27 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### Innovations Beyond Maglalang Study
 
 **1. Three-Dimensional Tissue Mapping**:
+
 - Digitize gross specimen (photogrammetry)
 - Map each block location in 3D space
 - Correlate disease distribution with sampling strategy
 - Identify "cold spots" (missed areas)
 
 **2. Machine Learning Classification**:
+
 - Input: gross appearance, dimensions, weight, tumor type, neoadjuvant status
 - Output: predicted probability of microscopic disease
 - Use to triage sampling intensity (high-risk → more blocks)
 
 **3. Cost-Effectiveness Analysis**:
+
 - Cost: Additional histology (blocks, slides, pathologist time)
 - Benefit: Correct staging, appropriate treatment, survival gain
 - Outcome: Incremental cost-effectiveness ratio (ICER)
 - Compare: 2 blocks vs 6 blocks vs risk-stratified approach
 
 **4. International Collaboration**:
+
 - Multi-center validation (avoid single-institution bias)
 - Geographic diversity (surgical practices vary)
 - Larger sample size → greater power
@@ -724,16 +793,19 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### Key Messages
 
 **Methodological Critique**:
+
 1. "Retrospective designs without gold standard comparison cannot establish false negative rates."
 2. "MPR equivalence does not prove sampling adequacy—only prospective validation can."
 3. "Missing clinical outcome data (survival, staging accuracy) is a critical limitation."
 
 **Clinical Concerns**:
+
 1. "Early-stage gynecologic cancers rely on omentectomy for upstaging—missing microscopic disease has treatment consequences."
 2. "Post-neoadjuvant cases show 5× higher microscopic disease (19% vs 4%)—requires more sampling, not less."
 3. "Focally abnormal omenta (27% of abnormal cases) have 66% MPR—high false-positive concern demands adequate sampling."
 
 **Innovation**:
+
 1. "First prospective study with complete sampling gold standard."
 2. "Integration of binomial detection modeling from oncology staging literature."
 3. "Clinical outcome correlation (survival) addresses patient-centered endpoints."
@@ -750,6 +822,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 > Prospective Validation of Omentum Sampling Adequacy in Gynecologic Cancer Staging: A Complete Sampling Study with Clinical Outcome Correlation
 
 **Abstract Structure**:
+
 - **Background**: Cite Maglalang, note controversy
 - **Methods**: Prospective, complete sampling, 200 cases
 - **Results**: Sensitivity findings, false negative rate, predictors
@@ -764,6 +837,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 ### New Analysis: Omentum Adequacy Assessment
 
 **User Input Variables**:
+
 1. Omentum gross appearance (normal, focal, multifocal, diffuse)
 2. Number of blocks submitted
 3. Specimen dimensions (length, width, weight if available)
@@ -772,6 +846,7 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 6. Histologic diagnosis (tumor type)
 
 **Calculations**:
+
 1. **Block-to-size ratio** (blocks ÷ widest dimension)
 2. **Expected MPR** (based on Maglalang data + our validation data)
 3. **Estimated sensitivity** (from our prospective model)
@@ -779,17 +854,18 @@ Authors separately assessed uterine vs tubo-ovarian primaries for each block gro
 5. **Adequacy classification**:
    - **Inadequate**: <2 blocks or high false-negative risk scenario
    - **Marginal**: 2-3 blocks, intermediate risk
-   - **Adequate**: ≥4 blocks (guideline-concordant)
+   - **Adequate**: >=4 blocks (guideline-concordant)
    - **Excellent**: Risk-stratified approach (e.g., 6+ blocks post-neoadjuvant)
 
 **Risk Stratification Table**:
+
 | Scenario | Maglalang MPR | Our Sensitivity | Recommended Blocks | Rationale |
 |----------|--------------|----------------|-------------------|-----------|
-| Normal, no NACT, ovarian | 8.6% | TBD | ≥4 | ISGyP guideline |
-| Normal, post-NACT, ovarian | 19.0% | TBD | ≥6 | High false-negative risk |
+| Normal, no NACT, ovarian | 8.6% | TBD | >=4 | ISGyP guideline |
+| Normal, post-NACT, ovarian | 19.0% | TBD | >=6 | High false-negative risk |
 | Multifocal/diffuse abnormal | 92.1% | TBD | 2-3 | High pre-test probability |
-| Focal abnormal | 66.4% | TBD | ≥4 | Heterogeneous, high FP risk |
-| Normal, endometrial | 5.6% | TBD | ≥4 | Low pre-test, but staging critical |
+| Focal abnormal | 66.4% | TBD | >=4 | Heterogeneous, high FP risk |
+| Normal, endometrial | 5.6% | TBD | >=4 | Low pre-test, but staging critical |
 
 **Output Table** (similar to lymph node analysis):
 
@@ -830,16 +906,19 @@ References:
 ### Integration with Existing Module Features
 
 **Cross-Reference with LN Analysis**:
+
 - Similar binomial detection framework
 - Consistent adequacy terminology (inadequate, marginal, adequate, excellent)
 - Unified statistical methodology
 
 **Data Visualization**:
+
 - **Heatmap**: Sensitivity vs number of blocks (by gross appearance subgroup)
 - **Risk Calculator**: Interactive slider (block number → estimated sensitivity)
 - **Comparison Plot**: Maglalang data vs our validation data (side-by-side)
 
 **Export Options**:
+
 - PDF report for inclusion in pathology reports
 - CSV data for QA/QC tracking (institutional monitoring)
 
@@ -852,7 +931,7 @@ References:
 ```html
 <h4>Omentum Sampling Adequacy: Evidence Review</h4>
 
-<p><b>Background:</b> International guidelines (ISGyP, ICCR) recommend ≥4 blocks
+<p><b>Background:</b> International guidelines (ISGyP, ICCR) recommend >=4 blocks
 for grossly normal omentum in gynecologic cancer staging. A recent large
 retrospective study (Maglalang & Fadare 2025, n=1,055) suggested 1-2 blocks
 may be sufficient, but this conclusion lacks gold standard validation.</p>
@@ -869,10 +948,10 @@ may be sufficient, but this conclusion lacks gold standard validation.</p>
 
 <p><b>Consensus Recommendation:</b></p>
 <ul>
-    <li><b>Standard cases:</b> ≥4 blocks (ISGyP guideline-concordant)</li>
-    <li><b>Post-neoadjuvant:</b> ≥6 blocks (higher microscopic disease risk)</li>
+    <li><b>Standard cases:</b> >=4 blocks (ISGyP guideline-concordant)</li>
+    <li><b>Post-neoadjuvant:</b> >=6 blocks (higher microscopic disease risk)</li>
     <li><b>Multifocal/diffuse abnormal:</b> 2-3 blocks (high pre-test probability)</li>
-    <li><b>Focal abnormal:</b> ≥4 blocks (heterogeneous, requires thorough sampling)</li>
+    <li><b>Focal abnormal:</b> >=4 blocks (heterogeneous, requires thorough sampling)</li>
 </ul>
 
 <p><b>Key References:</b></p>
@@ -880,7 +959,7 @@ may be sufficient, but this conclusion lacks gold standard validation.</p>
     <li>Maglalang NA, Fadare O. <i>Am J Clin Pathol.</i> 2025. doi:10.1093/ajcp/aqaf082
         <br><i>n=1,055, retrospective, 1-2 blocks suggested but lacks gold standard</i></li>
     <li>Malpica A, et al. <i>Int J Gynecol Pathol.</i> 2019;38:S9-S24.
-        <br><i>ISGyP guideline: ≥4 blocks or 1 per 2-3 cm</i></li>
+        <br><i>ISGyP guideline: >=4 blocks or 1 per 2-3 cm</i></li>
     <li>Skala SL, Hagemann IS. <i>Int J Gynecol Pathol.</i> 2015;34:281-287.
         <br><i>Simulation model: 10 blocks → 95% sensitivity</i></li>
     <li>[Our study] - <i>Prospective validation with complete sampling</i></li>
@@ -892,30 +971,35 @@ may be sufficient, but this conclusion lacks gold standard validation.</p>
 ## Timeline & Resources
 
 **Phase 1: Study Approval & Setup** (Months 1-3)
+
 - IRB approval
 - Protocol finalization
 - Prosector training (standardized grossing)
 - Data collection forms
 
 **Phase 2: Enrollment & Data Collection** (Months 4-24)
+
 - Target: 200 cases (grossly normal)
 - Target: 100 cases (grossly abnormal, for comparison)
 - Complete sampling performed
 - Histologic review
 
 **Phase 3: Analysis & Manuscript** (Months 25-30)
+
 - Statistical analysis
 - Probabilistic modeling
 - Manuscript drafting
 - Submission to *Am J Clin Pathol*
 
 **Phase 4: Module Implementation** (Months 31-36)
+
 - Code omentum analysis feature
 - Validate calculations
 - User testing
 - Documentation
 
 **Resources Required**:
+
 - Pathologist time: histologic review (~5 min/case × 300 cases = 25 hours)
 - Histotechnologist time: additional blocks (~50 blocks/case × 300 = 15,000 blocks)
 - Data management: REDCap database, statistical analysis
@@ -928,12 +1012,14 @@ may be sufficient, but this conclusion lacks gold standard validation.</p>
 The Maglalang & Fadare 2025 study represents the largest cohort to date examining omentum sampling adequacy but suffers from critical methodological limitations inherent to retrospective designs. Their conclusion that 1-2 blocks are sufficient contradicts established international guidelines and lacks the gold standard comparison necessary to assess false negative rates.
 
 **Our prospective omentum study will**:
+
 1. Provide definitive sensitivity data using complete sampling as the gold standard
 2. Quantify false negative rates and clinical impact (staging, survival)
 3. Validate or refute Maglalang's findings with methodological rigor
 4. Establish evidence-based recommendations for pathology practice
 
 **The pathsampling module will**:
+
 1. Integrate omentum adequacy assessment alongside lymph node analysis
 2. Risk-stratify sampling recommendations based on clinical scenario
 3. Provide real-time feedback to pathologists during grossing

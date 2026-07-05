@@ -51,12 +51,10 @@ $1D
 
 (menuGroup:\s.*?)(T3|T2|T1|T)$
 
-gemini: /chat share log.json 
+gemini: /chat share log.json
 gemini: ctrl+s copy mode
 
 use gemini to make Readiness for Clinicians and Pathologists assessment and Use Case Example Generation for each function.
-
-
 
 You are an expert R-package and jamovi developer.
 You are an expert in biostatistics working with pathologists and clinicians.
@@ -64,7 +62,7 @@ Critically evaluate lassocox function.
 Is it mathematically and statistically accurate?
 Evaluate if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 Is it ready to be used by clinicians and pathologists?
-Is it ready for release? 
+Is it ready for release?
 Suggest improvements.
 Do not remove functionality.
 
@@ -108,13 +106,11 @@ prepare comprehensive test data generator under data-raw and prepare the data  a
 
 To lower the computation make all default checkboxes to be false in .a.yaml
 
-
 ! Rscript -e "jmvtools::prepare()"
 ! Rscript -e "devtools::document()"
 ! Rscript -e "devtools::load_all()"
 ! Rscript -e "devtools::check()"
 ! Rscript -e "pkgdown::build_site()"
-
 
 Rscript _updateModules.R
 
@@ -125,30 +121,23 @@ Rscript _updateModules.R
 /generate-test-data FUNC_NAME
 /update-refs FUNC_NAME
 /document-function FUNC_NAME
-/jamovify-function FUNC_NAME --apply 
+/jamovify-function FUNC_NAME --apply
 /security-audit-function FUNC_NAME
 
-
 fix issues, implement recommendations and enhancements
-
-
-
-
-
 
 ---
 <!-- prepare an agent team to work on functions: lassointro, lassocox, adaptivelasso, highdimcox, ncvregcox, plscox, grouplasso, sparsegrouplasso, pcacox: -->
 
-
-
 prepare an agent team to work on function: lassocox:
+
 - all agents are experts in R-package and jamovi development and biostatistics working with pathologists and clinicians.
-- lead agent will orchestrate the team, observe agent process, delegate next work, update the sonograph log file. Will make sure no functionality is removed and favor functionality. finally, it will check if jmvtools::prepare();devtools::document() is error free. 
+- lead agent will orchestrate the team, observe agent process, delegate next work, update the sonograph log file. Will make sure no functionality is removed and favor functionality. finally, it will check if jmvtools::prepare();devtools::document() is error free.
 - a sonograph function will record the team's process in a log file.
 - one agent will check if the function is mathematically and statistically accurate?
 - one agent will check if data flow is correct. Are arguments from .a.yaml correctly read. Is the data flow in .b.R correct. Are the results displayed in .r.yaml appropriately. Evaluate if .u.yaml is user friendly and contains all necessary options.
 - one agent will check if it is ready to be used by clinicians and pathologists?
-- one agent will check if it is ready for release? 
+- one agent will check if it is ready for release?
 - one agent will suggest improvements.
 - one agent will update .u.yaml to make it user friendly. make all relevant features to be together.
 - one agent will remove all dummy code and hardcoded values. make them all work with inputs. implement real function instead of placeholders.
@@ -174,14 +163,10 @@ prepare an agent team to work on function: lassocox:
 - one agent will run /social-media-promo with the function name and generate social media promotion text
 - one agent will run /update-refs with the function name and update references
 
-
 ---
 
-
-
-
-Always use available 'skills' when possible. Keep the output organized. 
-Use these skills to update qmd files, codes,text, analysis, and interpretations in the project: 
+Always use available 'skills' when possible. Keep the output organized.
+Use these skills to update qmd files, codes,text, analysis, and interpretations in the project:
   pubmed-database
   biopython
   biorxiv-database
@@ -225,11 +210,7 @@ Use these skills to update qmd files, codes,text, analysis, and interpretations 
   pydicom
   pytorch-lightning
 
-
-
-
-
-update DESCRIPTION, NEWS, README, and function Roxygen documentations after each implementation or daily. 
+update DESCRIPTION, NEWS, README, and function Roxygen documentations after each implementation or daily.
 
 ! Rscript -e "pkgdown::build_site()"
 ! Rscript -e "pkgdown::build_site(examples = FALSE, lazy = TRUE, preview = FALSE)"
@@ -266,7 +247,6 @@ This roadmap outlines planned enhancements for the ClinicoPath jamovi module eco
 - **Variable types**: Continuous (numeric), Nominal (factor), Ordinal (ordered factor)
 - **Case-by-case data** (no longitudinal/nested structures without reshaping)
 - **Single dataset per analysis** (no multi-table joins in UI)
-
 
 ---
 
@@ -317,7 +297,6 @@ Expected Data Format (one row per patient per strategy):
 
 ### **Phase 4: Advanced Features (Sprint 7+)**
 
-
 ---
 
 ---
@@ -340,11 +319,9 @@ Expected Data Format (one row per patient per strategy):
 
 ### **Phase 1: Competing Risks (Sprints 1-2)**
 
-
 ---
 
 ### **Phase 2: Model Validation (Sprints 3-4)**
-
 
 ---
 
@@ -546,7 +523,6 @@ Expected Data Format (one row per patient):
 
 ### **Phase 5: Non-PH Handling (Sprint 8)**
 
-
 ---
 
 ---
@@ -555,16 +531,13 @@ Expected Data Format (one row per patient):
 
 ### **Phase 1: Bug Fixes & Polish (Sprint 1)**
 
-
 ---
 
 ---
 
 ### **Phase 2: Feature Parity (Sprints 2-3)**
 
-
 ---
-
 
 ---
 
@@ -573,6 +546,7 @@ Expected Data Format (one row per patient):
 *User-controlled plot aesthetics*
 
 **⏳ Enhancement Opportunities (Future):**
+
 - ⏳ P-value symbol conversion (asterisks vs numeric)
 - ⏳ Font size controls (axis, title, annotation sliders)
 - ⏳ Font family selector (Arial, Times, Helvetica)
@@ -685,7 +659,6 @@ Required Variables:
 ## 📋 **4. ClinicoPathDescriptives Module Enhancements**
 
 ### **Phase 1: Effect Sizes & Statistical Rigor (Sprints 1-2)**
-
 
 ---
 
@@ -859,7 +832,7 @@ Expected Data Format (one row per patient):
 **Implementation**:
 
 - Summary panel:
-  - Positivity rates (using cutpoints: ER≥1%, PR≥1%, HER2+ per ASCO/CAP)
+  - Positivity rates (using cutpoints: ER>=1%, PR>=1%, HER2+ per ASCO/CAP)
   - Distribution plots (histogram + density) per biomarker
   - Missing data heatmap
 - Co-expression analysis:
@@ -1006,18 +979,15 @@ Required Variables:
 
 ### **Phase 1: Response Evaluation (Sprints 1-2)**
 
-
 ---
 
 ---
-
 
 ---
 
 ---
 
 ### **Phase 2: Timeline Integration (Sprint 3)**
-
 
 ---
 
@@ -1755,11 +1725,13 @@ When prioritizing features, consider:
 ### **Priority 1: Technical Debt & Code Quality**
 
 #### **[H] ⚠️ Notice Serialization Migration (URGENT)**
+
 **Status:** 34 of 364 files still using deprecated `insert(999, Notice)` pattern
 **Impact:** Serialization errors, potential data loss, unreliable notice display
 **Effort:** 2-3 weeks
 
 **Files requiring conversion (see CLAUDE.md for pattern):**
+
 ```bash
 # Identified files with insert(999, issues:
 - clinicalheatmap.b.R
@@ -1776,6 +1748,7 @@ When prioritizing features, consider:
 ```
 
 **Action items:**
+
 - [ ] Complete conversion using waterfall.b.R as reference template
 - [ ] Add `.noticeList`, `.addNotice()`, `.renderNotices()` helper methods
 - [ ] Convert Notice objects to HTML output items in .r.yaml
@@ -1787,16 +1760,17 @@ When prioritizing features, consider:
 ---
 
 #### **[H] ~~Resolve TODO/FIXME Technical Debt~~** ✅ RESOLVED
+
 **Status:** ✅ Verified 2026-01-04 - No TODO/FIXME/HACK comments found in R/ files
 **Audit Result:** All files clean, no unresolved technical debt markers
 
 ~~**Files identified:**~~
 *All previously listed files have been cleaned or the markers were false positives.*
 
-
 ---
 
 #### **[M] Automated Testing Infrastructure**
+
 **Status:** Test guides exist but limited automated unit tests
 **Coverage:** Unknown (estimate <20% based on testthat setup)
 **Effort:** 4-6 weeks ongoing
@@ -1808,6 +1782,7 @@ When prioritizing features, consider:
 - ❌ No coverage reporting
 
 **Recommendations:**
+
 ```yaml
 Phase 1 (Weeks 1-2): Core function testing
   - Add testthat tests for top 20 most-used functions
@@ -1831,6 +1806,7 @@ Phase 3 (Weeks 5-6): CI/CD integration
 ```
 
 **Example test structure:**
+
 ```r
 # tests/testthat/test-enhancedROC.R
 test_that("enhancedROC handles binary outcome correctly", {
@@ -1848,6 +1824,7 @@ test_that("enhancedROC handles binary outcome correctly", {
 ```
 
 **Priority test coverage:**
+
 1. enhancedROC - comprehensive ROC analysis
 2. survival - Kaplan-Meier and Cox regression
 3. decisioncurve - decision curve analysis
@@ -1859,11 +1836,13 @@ test_that("enhancedROC handles binary outcome correctly", {
 ### **Priority 2: Documentation & User Experience**
 
 #### **[H] ⚠️ Severe Documentation Gap**
+
 **Status:** Only 6 vignettes for 364 analysis functions (1.6% coverage!)
 **Impact:** Users cannot learn/use 98%+ of module features
 **Effort:** 8-12 weeks (phased approach required)
 
 **Current vignette inventory:**
+
 ```bash
 # Existing (6 total):
 - General vignettes (domain-based distribution working well)
@@ -1874,6 +1853,7 @@ test_that("enhancedROC handles binary outcome correctly", {
 
 **Phase 1 - High-Impact Quick Wins (Weeks 1-2):**
 Create comprehensive guides for top 10 most-used functions:
+
 ```
 Priority vignettes needed:
 1. enhancedROC-comprehensive.qmd - Diagnostic ROC analysis
@@ -1889,6 +1869,7 @@ Priority vignettes needed:
 ```
 
 **Phase 2 - Modular Function Groups (Weeks 3-6):**
+
 ```
 Survival module cluster (jsurvival-XX-*.qmd):
 - jsurvival-01-kaplan-meier.qmd
@@ -1906,6 +1887,7 @@ ROC/Diagnostic cluster (meddecide-XX-*.qmd):
 ```
 
 **Phase 3 - Workflow Tutorials (Weeks 7-8):**
+
 ```
 End-to-end clinical research workflows:
 - workflow-01-biomarker-validation.qmd
@@ -1919,6 +1901,7 @@ End-to-end clinical research workflows:
 ```
 
 **Vignette template structure:**
+
 ```markdown
 ---
 title: "Function Name - Comprehensive Guide"
@@ -1954,6 +1937,7 @@ vignette: >
 ```
 
 **Automation opportunities:**
+
 - Generate skeleton vignettes from .a.yaml analysis definitions
 - Auto-extract option descriptions from YAML to reduce manual writing
 - Use AI to draft initial content, human review for accuracy
@@ -1961,12 +1945,14 @@ vignette: >
 ---
 
 #### **[M] Clinical Presets System Expansion**
+
 **Status:** Only enhancedROC has clinicalPresets feature (massive success!)
 **Opportunity:** Expand to 15-20 additional high-value analyses
 **Impact:** Reduces cognitive load, prevents misconfiguration, speeds workflow
 **Effort:** 3-4 weeks
 
 **Current implementation (enhancedROC):**
+
 ```yaml
 # jamovi/enhancedROC.a.yaml
 - name: clinicalPresets
@@ -1987,6 +1973,7 @@ vignette: >
 **Target modules for preset expansion:**
 
 1. **survival.b.R** - Survival analysis presets:
+
    ```
    - Early-stage cancer (5-year follow-up focus)
    - Advanced cancer (short-term outcomes)
@@ -1995,6 +1982,7 @@ vignette: >
    ```
 
 2. **diagnosticmeta.b.R** - Meta-analysis presets:
+
    ```
    - QUADAS-C compliant (cancer screening)
    - High heterogeneity expected (subgroup focus)
@@ -2003,6 +1991,7 @@ vignette: >
    ```
 
 3. **decisioncurve.b.R** - Decision curve presets:
+
    ```
    - Screening decision (low threshold range 0.01-0.10)
    - Diagnostic decision (mid threshold 0.10-0.50)
@@ -2010,6 +1999,7 @@ vignette: >
    ```
 
 4. **conttables.b.R** - Table One presets:
+
    ```
    - Randomized trial (balance checking, SMD)
    - Observational study (full covariate adjustment)
@@ -2018,6 +2008,7 @@ vignette: >
    ```
 
 5. **oddsratio.b.R** - Logistic regression presets:
+
    ```
    - Prediction model development (calibration priority)
    - Risk factor identification (parsimonious model)
@@ -2025,6 +2016,7 @@ vignette: >
    ```
 
 **Implementation pattern (from enhancedROC.b.R):**
+
 ```r
 .applyClinicalPresets = function() {
   preset <- self$options$clinicalPresets
@@ -2044,6 +2036,7 @@ vignette: >
 ```
 
 **JavaScript UI automation** (see CLAUDE.md reference):
+
 ```javascript
 // jamovi/js/enhancedROC.events.js
 onUpdate: function(ui) {
@@ -2062,12 +2055,14 @@ onUpdate: function(ui) {
 ---
 
 #### **[M] Consistent Variable Name Handling**
+
 **Status:** Mixed implementation - some modules escape, others don't
 **Issue:** Variables with spaces/special characters break in plots/tables
 **Files affected:** Unknown (requires systematic audit)
 **Effort:** 2-3 weeks
 
 **Problem examples:**
+
 ```
 User variable names with issues:
 - "Age at Diagnosis" (space)
@@ -2077,6 +2072,7 @@ User variable names with issues:
 ```
 
 **Current best practice (from oddsratio.b.R):**
+
 ```r
 # Apply labelled variable logic to preserve original names
 .escapeVar = function(x) {
@@ -2092,6 +2088,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ```
 
 **Systematic fix required:**
+
 1. Audit all 364 .b.R files for variable name handling
 2. Implement `.escapeVar()` consistently across modules
 3. Preserve original names in output using `labelled` package
@@ -2104,6 +2101,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ### **Priority 3: Feature Enhancements**
 
 #### **[H] enhancedROC Feature Extensions**
+
 **Status:** Comprehensive but missing key clinical workflows
 **Opportunity:** Build on successful foundation
 **Effort:** 2-3 weeks
@@ -2111,6 +2109,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 **Proposed enhancements:**
 
 1. **Multi-marker combination strategies:**
+
    ```
    Options to add:
    - Simple sum/average of markers
@@ -2120,6 +2119,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 2. **Time-dependent ROC integration:**
+
    ```
    # Currently commented out in enhancedROC.a.yaml (lines 544-568)
    # IMPLEMENT THIS - high clinical value!
@@ -2131,6 +2131,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 3. **Automated reporting enhancements:**
+
    ```
    Current: Plain text summary
    Proposed:
@@ -2141,6 +2142,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 4. **Clinical decision integration:**
+
    ```
    Link to decisioncurve module:
    - "Calculate net benefit" button → pre-fills decisioncurve analysis
@@ -2149,6 +2151,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 5. **Expand clinical presets:**
+
    ```
    Additional presets needed:
    - PD-L1 scoring (ASCO/CAP guidelines)
@@ -2160,6 +2163,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ---
 
 #### **[M] Cross-Module Workflow Integration**
+
 **Status:** Modules work independently but no seamless handoffs
 **Opportunity:** Reduce copy-paste, errors, and user frustration
 **Effort:** 4-5 weeks
@@ -2167,6 +2171,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 **Proposed integration points:**
 
 1. **Descriptives → Survival:**
+
    ```
    crosstable.b.R / summary.b.R:
    - Add "Send to jSurvival" button
@@ -2175,6 +2180,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 2. **ROC → Decision Curves:**
+
    ```
    enhancedROC.b.R:
    - "Evaluate clinical utility" button
@@ -2183,6 +2189,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 3. **Swimmer → Survival:**
+
    ```
    swimmer.b.R:
    - "Generate KM curve" button
@@ -2191,6 +2198,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 4. **Table One → Export:**
+
    ```
    crosstable.b.R:
    - One-click DOCX export (CONSORT-style)
@@ -2199,6 +2207,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 **Implementation approach:**
+
 ```r
 # Add to .b.R files:
 .exportToModule = function(targetModule) {
@@ -2220,6 +2229,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ---
 
 #### **[L] Performance Optimization for Large Datasets**
+
 **Status:** No systematic optimization; users report slowness with >10k rows
 **Target:** Sub-2 second response for n=10,000; sub-10s for n=100,000
 **Effort:** 3-4 weeks
@@ -2227,6 +2237,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 **Optimization strategies:**
 
 1. **Lazy evaluation & caching:**
+
    ```r
    # Only recompute when options change
    private$.cache <- list()
@@ -2240,6 +2251,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 2. **Progress indicators for long operations:**
+
    ```r
    # For bootstrap, permutation, cross-validation
    .runBootstrap = function(nIter = 1000) {
@@ -2254,6 +2266,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 3. **Data.table for aggregation:**
+
    ```r
    # Replace dplyr for large datasets
    library(data.table)
@@ -2265,6 +2278,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 4. **Parallel processing for independence:**
+
    ```r
    # Use future/furrr for bootstrap
    library(future)
@@ -2282,6 +2296,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ### **Priority 4: Quality Assurance & Standards**
 
 #### **[H] Statistical Accuracy Validation**
+
 **Status:** No systematic validation against reference implementations
 **Risk:** Incorrect results damage reputation, mislead clinical decisions
 **Effort:** 3-4 weeks (one-time audit + ongoing testing)
@@ -2289,6 +2304,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 **Validation protocol:**
 
 1. **Benchmark against validated packages:**
+
    ```r
    # Test survival.b.R against survival package
    test_that("Cox regression matches survival::coxph", {
@@ -2311,6 +2327,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 2. **Validate against published datasets:**
+
    ```
    Use canonical datasets with known results:
    - Mayo Clinic lung cancer (survival analysis)
@@ -2322,6 +2339,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 3. **Edge case testing:**
+
    ```r
    test_that("survivalhandlesedgecases",{
      # Single event
@@ -2336,6 +2354,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ---
 
 #### **[M] UI/UX Consistency Audit**
+
 **Status:** 364 analyses created over time → inconsistent patterns
 **Impact:** Confusing for users, increases learning curve
 **Effort:** 2 weeks audit + 3-4 weeks fixes
@@ -2343,6 +2362,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
 **Inconsistencies to address:**
 
 1. **Option naming conventions:**
+
    ```
    Current problems:
    - Some use camelCase, others use snake_case
@@ -2357,6 +2377,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 2. **Checkbox defaults:**
+
    ```
    Current: Mixed (some analyses default to many outputs, causing slowness)
    Recommended:
@@ -2367,6 +2388,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 3. **CollapseBox organization:**
+
    ```
    Standard structure for all analyses:
    1. Variable Selection (always first, never collapsed)
@@ -2378,6 +2400,7 @@ rhs <- jmvcore::composeTerms(modelTerms)
    ```
 
 4. **Help text standardization:**
+
    ```
    Every option should have description in .a.yaml:
 
@@ -2395,11 +2418,13 @@ rhs <- jmvcore::composeTerms(modelTerms)
 ### **Priority 5: Community & Adoption**
 
 #### **[M] Example Dataset Repository**
+
 **Status:** Scattered example data, unclear provenance
 **Need:** Curated, documented, clinically realistic datasets
 **Effort:** 2-3 weeks
 
 **Proposed structure:**
+
 ```
 data/
 ├── README.md (dataset catalog)
@@ -2424,6 +2449,7 @@ data-raw/
 ```
 
 **Dataset requirements:**
+
 - Realistic clinical variable names (with spaces, special characters)
 - Missing data patterns typical of real studies
 - Adequate sample size for statistical power
@@ -2434,6 +2460,7 @@ data-raw/
 ---
 
 #### **[L] Video Tutorial Series**
+
 **Status:** No video content
 **Platform:** YouTube (ClinicoPath channel)
 **Effort:** 4-6 weeks (1-2 videos/week)
@@ -2496,6 +2523,7 @@ data-raw/
     - Publication-ready outputs
 
 **Recording setup:**
+
 - Screen recording (1080p minimum)
 - Clear narration with clinical context
 - Closed captions (accessibility)
@@ -2509,18 +2537,22 @@ data-raw/
 ### **Q1 2026 (Jan-Mar): Critical Fixes & Foundation**
 
 **Week 1-2:**
+
 - [ ] Complete notice serialization migration (34 remaining files)
 - [ ] Resolve critical TODO/FIXME issues (P0 bugs only)
 
 **Week 3-4:**
+
 - [ ] Create automated test framework
 - [ ] Write tests for top 5 functions (enhancedROC, survival, decisioncurve, crosstable, diagnosticmeta)
 
 **Week 5-8:**
+
 - [ ] Write 10 high-priority comprehensive vignettes
 - [ ] Launch first 2 video tutorials (Getting Started + Table One)
 
 **Week 9-12:**
+
 - [ ] Expand clinical presets to 5 additional modules
 - [ ] Implement cross-module integration (3 key workflows)
 - [ ] Curate and document 10 example datasets
@@ -2528,27 +2560,31 @@ data-raw/
 ### **Q2 2026 (Apr-Jun): Enhanced UX & Quality**
 
 **Week 1-3:**
+
 - [ ] UI/UX consistency audit across all 364 functions
 - [ ] Standardize option naming, defaults, help text
 - [ ] Implement consistent CollapseBox organization
 
 **Week 4-6:**
+
 - [ ] Statistical accuracy validation (benchmark top 20 functions)
 - [ ] Performance optimization (n=100k target)
 - [ ] Add progress indicators to long-running analyses
 
 **Week 7-9:**
+
 - [ ] Variable name handling standardization (all modules)
 - [ ] Systematic .escapeVar() implementation
 - [ ] Test with real pathology datasets (complex names)
 
 **Week 10-12:**
+
 - [ ] Complete remaining 8 video tutorials
 - [ ] Write 10 additional vignettes (cumulative: 20 total)
 - [ ] CI/CD integration with automated testing
 
-
 **Deliverables:**
+
 - [ ] Consistent UI/UX across all modules
 - [ ] 80% test coverage for statistical calculations
 - [ ] <2s response time for n=10,000 rows
@@ -2561,6 +2597,7 @@ data-raw/
 ## 📊 **SUCCESS METRICS (Updated 2026)**
 
 ### **Technical Quality**
+
 - [ ] **Zero** serialization errors in released version
 - [ ] **<5** open P0/P1 bugs at any time
 - [ ] **80%+** test coverage for core statistical functions
@@ -2568,18 +2605,21 @@ data-raw/
 - [ ] **All** 364 functions pass jmvtools::prepare()
 
 ### **Documentation**
+
 - [ ] **20+** comprehensive vignettes by Q2 2026 (target: 50+ by year-end)
 - [ ] **10** video tutorials by Q2 2026
 - [ ] **15+** curated example datasets
 - [ ] **100%** of new functions documented before release
 
 ### **User Experience**
+
 - [ ] **10+** modules with clinical presets
-- [ ] **<2s** analysis response for typical datasets (n ≤ 10,000)
+- [ ] **<2s** analysis response for typical datasets (n <= 10,000)
 - [ ] **Consistent** UI patterns across all modules
 - [ ] **5+** cross-module workflow integrations
 
 ### **Adoption & Impact**
+
 - [ ] **15k+** jamovi library downloads/year (up from 10k target)
 - [ ] **50+** citations in peer-reviewed literature
 - [ ] **100+** active forum discussions
@@ -2591,14 +2631,13 @@ data-raw/
 
 This roadmap provides a comprehensive, **jamovi-compatible** enhancement plan for the ClinicoPath module ecosystem. All features are designed to work within jamovi's tabular data structure, with clear specifications for variable types, data formats, and UI elements.
 
-
 **CRITICAL NEXT STEPS (Start Immediately):**
+
 1. [ ] Complete notice serialization migration (34 files)
 2. [ ] Write first 10 comprehensive vignettes
 3. [ ] Implement automated testing for top 20 functions
 4. [ ] Expand clinical presets to 5 key modules
 5. [ ] Create 10 curated example datasets
-
 
 **Key Principles**:
 
@@ -2620,12 +2659,12 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 ---
 
 ## Drafts / Next steps (to implement later)
+
 - jjoncoplot: expose a dedicated result for per-sample mutation burden (currently only in plot logic), and add UI enable/disable logic (e.g., enable `log10TransformTMB` only when `showTMB` is TRUE).
 
 ---
 
 ## chisqposttest Enhancements (Optional - Production-Ready Function)
-
 
 **Status**: Function is production-ready and clinically safe (5/5 stars)
 **Notice Pattern**: Recently refactored to use jmvcore::Notice (10 notices implemented)
@@ -2637,12 +2676,14 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 **Dependencies**: boot package (suggested, not required)
 
 **Implementation**:
+
 - Add `phi_ci` column to `posthocTable` in chisqposttest.r.yaml
 - Add `.calculatePhiCI()` private method in chisqposttest.b.R
 - Use BCa bootstrap (999 iterations) for accurate interval estimates
 - Handle small samples (n<20) gracefully with "n too small" message
 
 **Files to modify**:
+
 - `jamovi/chisqposttest.r.yaml` (line 127 - add phi_ci column)
 - `R/chisqposttest.b.R` (line 900 - add helper method, line 594 - compute CIs)
 
@@ -2658,12 +2699,14 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 **Dependencies**: None (pure HTML)
 
 **Implementation**:
+
 - Add `residualsGuidance` Html output to chisqposttest.r.yaml
 - Insert blue-bordered guidance panel before residuals table
 - Include clinical example: "If 'Grade 3 × Positive' has residual = +3.2..."
 - Explain positive vs negative residuals with cutoff value
 
 **Files to modify**:
+
 - `jamovi/chisqposttest.r.yaml` (line 82 - add new Html output)
 - `R/chisqposttest.b.R` (line 1220 - add guidance HTML before residuals)
 
@@ -2679,12 +2722,14 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 **Dependencies**: pwr package (suggested, not required)
 
 **Implementation**:
+
 - Detect underpowered studies (n<50) after assumptions check
 - Calculate required n for 80% power to detect medium effect (φ=0.3, Cohen 1988)
 - Add WARNING notice with required sample size
-- Fallback to heuristic (≥5 observations per cell) if pwr package unavailable
+- Fallback to heuristic (>=5 observations per cell) if pwr package unavailable
 
 **Files to modify**:
+
 - `R/chisqposttest.b.R` (line 1726 - add after low expected counts warning)
 - DESCRIPTION (add pwr to Suggests)
 
@@ -2694,12 +2739,12 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 
 ---
 
-
 ### Implementation Priority
 
 **High Priority (Next Release v0.0.32)**:
 
 **Medium Priority (Future Release)**:
+
 - ⏳ Enhancement 3: Power Analysis Warning (helps prevent Type II error misinterpretation)
 - ⏳ Enhancement 1: Bootstrap CIs (enhances reporting quality)
 
@@ -2708,7 +2753,6 @@ For questions or suggestions, please open an issue on the ClinicoPathJamoviModul
 **Note**: These are OPTIONAL enhancements for an already production-ready function. Current version (with Notice pattern) is ready for clinical use.
 
 ---
-
 
 ### Related Documentation
 
@@ -2737,6 +2781,7 @@ it is a separate analysis card, not an option on the standard
 multivariable Cox.
 
 **How to apply**:
+
 - `jamovi/multisurvival.a.yaml` — add a new `cluster` Variable option and a
   `cluster_method` List (`none` / `cluster_robust` / `frailty_gamma` /
   `frailty_gaussian` / `stratified`).
@@ -2759,6 +2804,7 @@ pipeline (cut-point search + variable screen + Cox fit) inside each
 resample. Critical for biomarker discovery papers like Balarajah 2026.
 
 **How to apply**:
+
 - `jamovi/survivalvalidation.a.yaml` — add `validation_strategy`
   (`bootstrap_apparent` / `bootstrap_optimism` / `cv_kfold`), `B` (default
   1000), and `include_cutpoint` (Bool, default true).
@@ -2779,6 +2825,7 @@ ClinicoPath has `advancedimputation` but no clean way to feed imputed
 datasets into a multivariable Cox.
 
 **How to apply**:
+
 - New helper: `R/utils-mi-cox.R` exporting `.miPooledCox(data, formula, m, method)`
   that runs `mice::mice` → `mice::with(coxph)` → `mice::pool` and returns a
   finalfit-compatible HR table.
@@ -2797,6 +2844,7 @@ months" or "5-yr survival 38 % vs 22 %" over "HR 0.45". Especially
 important when PH is questionable and HR misleads.
 
 **How to apply**:
+
 - `jamovi/multisurvival.r.yaml` — add `rmst_table` (columns: stratum,
   RMST, ΔRMST, 95 % CI). Gate behind a new `report_rmst` Bool option.
 - `jamovi/multisurvival.a.yaml` — `report_rmst` Bool + `rmst_landmarks`
@@ -2817,8 +2865,6 @@ important when PH is questionable and HR misleads.
    semantics.
 4. **#2 Bootstrap optimism** — highest impact for biomarker papers;
    largest effort because the pipeline must be reified to a callable.
-
-
 
 ## meddecide module audit follow-ups (2026-05-14)
 
@@ -2959,6 +3005,3 @@ out-of-scope findings from the same audit, deferred for separate work.
   keeping the R6 class definition slim.
 - This is a refactor, not a behaviour change. Defer until after the
   statistical-parity reviews above.
-
-
-

@@ -33,7 +33,7 @@ devtools::load_all(".")
 
 The **Lasso-Cox Regression** module (`lassocox`) performs automatic variable selection
 in survival analysis using L1-penalized Cox proportional hazards regression.
-It identifies the most important predictors while preventing overfitting —
+It identifies the most important predictors while preventing overfitting - 
 ideal for clinicopathological research with many candidate variables.
 
 Key features:
@@ -69,9 +69,9 @@ exactly zero, and only important predictors remain in the model.
 
 | Method | Penalty | Variable Selection | Best For |
 |--------|---------|-------------------|----------|
-| **Ridge** | $\lambda \sum \beta_j^2$ (L2) | No — shrinks but keeps all | Correlated predictors, all must stay |
-| **LASSO** | $\lambda \sum |\beta_j|$ (L1) | Yes — sets some to zero | Sparse models, feature selection |
-| **Elastic Net** | $\alpha \lambda \sum |\beta_j| + (1-\alpha) \lambda \sum \beta_j^2$ | Yes — grouped selection | Correlated groups should stay/go together |
+| **Ridge** | $\lambda \sum \beta_j^2$ (L2) | No - shrinks but keeps all | Correlated predictors, all must stay |
+| **LASSO** | $\lambda \sum |\beta_j|$ (L1) | Yes - sets some to zero | Sparse models, feature selection |
+| **Elastic Net** | $\alpha \lambda \sum |\beta_j| + (1-\alpha) \lambda \sum \beta_j^2$ | Yes - grouped selection | Correlated groups should stay/go together |
 
 In ClinicoPath: `lassocox` uses alpha=1 (pure LASSO). For Elastic Net or Ridge,
 use the **Penalized Cox Regression** module.
@@ -100,9 +100,9 @@ use the **Penalized Cox Regression** module.
 | Synthetic "collinear" | 100 | 45 | 4 (2 correlated) | Multicollinearity detection |
 | Synthetic "categorical" | 100 | 40 | 3 factors | All categorical predictors |
 | `histopathology` | 250 | ~100 | 8 mixed | Real clinical pathology data |
-| `lassocox_genomic` | 80 | -- | 50 gene features | High-dimensional genomic scenario |
-| `lassocox_multicollinear` | 180 | -- | 12 correlated | Multicollinearity stress test |
-| `lassocox_breast_cancer` | 250 | -- | 20 clinical | Breast cancer clinicopathological |
+| `lassocox_genomic` | 80 | - | 50 gene features | High-dimensional genomic scenario |
+| `lassocox_multicollinear` | 180 | - | 12 correlated | Multicollinearity stress test |
+| `lassocox_breast_cancer` | 250 | - | 20 clinical | Breast cancer clinicopathological |
 
 ---
 
@@ -180,9 +180,9 @@ lassocox(
 
 Expected suitability flags:
 
-- **EPV**: 25/5 = 5.0 (yellow — adequate for LASSO but interpret with caution)
-- **Sample size**: n=60 (yellow — small sample)
-- **Regularization**: yellow — standard Cox may be an alternative
+- **EPV**: 25/5 = 5.0 (yellow - adequate for LASSO but interpret with caution)
+- **Sample size**: n=60 (yellow - small sample)
+- **Regularization**: yellow - standard Cox may be an alternative
 
 ---
 
@@ -266,7 +266,7 @@ lassocox(
 The choice of lambda controls the trade-off between model complexity and parsimony.
 
 ```{r lambda-min}
-# lambda.min: minimum CV error — more variables, better in-sample fit
+# lambda.min: minimum CV error - more variables, better in-sample fit
 lassocox(
   data = data_green,
   elapsedtime = "time",
@@ -284,7 +284,7 @@ lassocox(
 ```
 
 ```{r lambda-1se}
-# lambda.1se: most regularized within 1 SE — fewer variables, better generalization
+# lambda.1se: most regularized within 1 SE - fewer variables, better generalization
 lassocox(
   data = data_green,
   elapsedtime = "time",
@@ -310,7 +310,7 @@ lassocox(
 
 ## 6. Suitability Check Toggle
 
-The suitability assessment is advisory — it never blocks the analysis.
+The suitability assessment is advisory - it never blocks the analysis.
 
 ```{r toggle-off}
 # Disable suitability assessment
@@ -429,7 +429,7 @@ where only LASSO-selected variables have non-zero coefficients.
 |--------|---------|
 | Variable | Predictor name |
 | Coefficient | Log hazard ratio (positive = risk, negative = protective) |
-| Hazard Ratio | exp(coefficient) — multiplicative effect on hazard |
+| Hazard Ratio | exp(coefficient) - multiplicative effect on hazard |
 | 95% CI (Lower/Upper) | Confidence interval from post-selection unpenalized Cox refit |
 | p | P-value from post-selection Cox refit (interpret with caution) |
 | Importance | Absolute coefficient value |
@@ -446,10 +446,10 @@ where only LASSO-selected variables have non-zero coefficients.
 
 | C-index | Discrimination | Clinical Utility |
 |---------|---------------|-----------------|
-| 0.50–0.60 | Poor | Limited |
-| 0.60–0.70 | Fair | May inform decisions |
-| 0.70–0.80 | Good | Useful for stratification |
-| 0.80–0.90 | Excellent | Strong utility |
+| 0.50-0.60 | Poor | Limited |
+| 0.60-0.70 | Fair | May inform decisions |
+| 0.70-0.80 | Good | Useful for stratification |
+| 0.80-0.90 | Excellent | Strong utility |
 | > 0.90 | Outstanding | May indicate overfitting |
 
 ---
@@ -458,9 +458,9 @@ where only LASSO-selected variables have non-zero coefficients.
 
 ### Pitfalls to Avoid
 
-1. **Using LASSO with too few events**: EPV < 2 produces unreliable results. Even with regularization, LASSO needs sufficient events — a common problem in small radiomics cohorts (e.g., 80 patients with 300 features).
+1. **Using LASSO with too few events**: EPV < 2 produces unreliable results. Even with regularization, LASSO needs sufficient events - a common problem in small radiomics cohorts (e.g., 80 patients with 300 features).
 
-2. **Not standardizing variables**: LASSO is sensitive to scale. A variable measured in 0–20,000 (e.g., tumor area) will dominate one measured in 0–100 (e.g., age) unless standardized. Use `standardize = TRUE` (the default).
+2. **Not standardizing variables**: LASSO is sensitive to scale. A variable measured in 0 - 20,000 (e.g., tumor area) will dominate one measured in 0 - 100 (e.g., age) unless standardized. Use `standardize = TRUE` (the default).
 
 3. **Interpreting coefficients as p-values**: LASSO performs *selection*, not *testing*. Incorrect: "LASSO identified Ki67 as statistically significant." Correct: "LASSO selected Ki67 as an important predictor."
 
@@ -471,15 +471,15 @@ where only LASSO-selected variables have non-zero coefficients.
    - Internal train/test split
    - External independent dataset (preferred)
 
-6. **Ignoring feature stability**: Radiomic or WSI features may change with scanner, staining protocol, segmentation method, or resolution. Before LASSO, features should be tested for robustness using intraclass correlation coefficient (ICC) or test–retest analysis.
+6. **Ignoring feature stability**: Radiomic or WSI features may change with scanner, staining protocol, segmentation method, or resolution. Before LASSO, features should be tested for robustness using intraclass correlation coefficient (ICC) or test - retest analysis.
 
 7. **Reporting only selected variables**: Good reporting requires: selected features, lambda value used, cross-validation method, coefficient values, and performance metrics. Follow the TRIPOD statement for transparent reporting.
 
 8. **Ignoring clinical variables**: Some radiomics papers include only image features. Combined models (clinical + pathological + radiomic + molecular) usually perform better.
 
-9. **Not assessing model performance properly**: Survival models should report C-index *and* calibration curves. High discrimination (C-index) alone is insufficient — the model must also be well-calibrated. Consider decision curve analysis for clinical utility.
+9. **Not assessing model performance properly**: Survival models should report C-index *and* calibration curves. High discrimination (C-index) alone is insufficient - the model must also be well-calibrated. Consider decision curve analysis for clinical utility.
 
-10. **No calibration analysis**: A model with high AUC/C-index but poor calibration makes systematically wrong predictions. Always check calibration plots and consider the Hosmer–Lemeshow test or calibration slope.
+10. **No calibration analysis**: A model with high AUC/C-index but poor calibration makes systematically wrong predictions. Always check calibration plots and consider the Hosmer-Lemeshow test or calibration slope.
 
 ### Best Practices
 
@@ -504,7 +504,7 @@ WSI / Imaging Data
        ↓
 Feature Extraction (e.g., texture, morphology, deep features)
        ↓
-Feature Stability Testing (ICC, test–retest)
+Feature Stability Testing (ICC, test - retest)
        ↓
 Feature Reduction (remove unstable/redundant features)
        ↓

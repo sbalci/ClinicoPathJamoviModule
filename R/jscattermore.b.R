@@ -25,10 +25,10 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         # TODO (correctness): the hash methods below are fragile:
-        # (1) `.calculateDataHash` uses `paste(nrow, ncol, var_names, range(...))` —
+        # (1) `.calculateDataHash` uses `paste(nrow, ncol, var_names, range(...))` - 
         #     mutations within the min/max range (row shuffling, value changes that
         #     preserve extremes) won't invalidate the cache → stale results possible.
-        # (2) `.calculateOptionsHash` uses `paste(options_list, collapse = "_")` —
+        # (2) `.calculateOptionsHash` uses `paste(options_list, collapse = "_")` - 
         #     option values with colliding string representations would yield same hash.
         # Recommend content-based invalidation matching jjpiestats/jjtreemap pattern:
         #   digest::digest(list(var_names, self$data[, var_names, drop = FALSE]), algo = "md5")
@@ -317,7 +317,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Create base ggplot (aes_string is deprecated and uses parse(text=)
-                # internally — RCE risk for user-controlled column names; use .data pronoun)
+                # internally - RCE risk for user-controlled column names; use .data pronoun)
                 p <- ggplot2::ggplot(data, ggplot2::aes(x = .data[[x_var]], y = .data[[y_var]]))
                 
                 # Add scattermore layer based on plot type

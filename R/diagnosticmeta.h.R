@@ -80,7 +80,8 @@ diagnosticmetaOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "nominal"),
                 permitted=list(
                     "numeric",
-                    "factor"))
+                    "factor"),
+                default=NULL)
             private$..bivariate_analysis <- jmvcore::OptionBool$new(
                 "bivariate_analysis",
                 bivariate_analysis,
@@ -738,7 +739,7 @@ diagnosticmeta <- function(
     false_positives,
     false_negatives,
     true_negatives,
-    covariate,
+    covariate = NULL,
     bivariate_analysis = TRUE,
     hsroc_analysis = FALSE,
     meta_regression = FALSE,

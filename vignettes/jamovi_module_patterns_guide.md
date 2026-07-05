@@ -78,16 +78,16 @@ analyses:
 The `DESCRIPTION` file declares the module's package dependencies. Two fields matter for
 non-CRAN packages:
 
-- **`Imports:`** — *declares* the dependency. This is where you list every package your
+- **`Imports:`** - *declares* the dependency. This is where you list every package your
   code actually needs at run time, regardless of where it lives.
-- **`Remotes:`** — *locates* the dependency. This tells the installer where to fetch a
+- **`Remotes:`** - *locates* the dependency. This tells the installer where to fetch a
   package that isn't on CRAN (e.g. a GitHub repo like `gastonstat/arcdiagram`).
 
 **A package can now appear in BOTH `Imports` and `Remotes`.**
 
 > **jmvtools change (current behavior):** You can list the same package in both `Imports`
 > and `Remotes`. Previously this was harmful: jmvtools would first try to install the
-> import from the CRAN mirror, *then* install it again from the remote — redundant at best,
+> import from the CRAN mirror, *then* install it again from the remote - redundant at best,
 > and a hard failure at worst when the package isn't on CRAN. The current jmvtools
 > **suppresses the CRAN-mirror download of an import when that package also appears in
 > `Remotes`**, fetching it only from the remote. This is the intended design:
@@ -109,7 +109,7 @@ Remotes:
 **Practical notes:**
 
 - Today there's no *functional* difference for installation if a dependency is listed only
-  in `Remotes` and omitted from `Imports` — it will still be installed. However, the
+  in `Remotes` and omitted from `Imports` - it will still be installed. However, the
   package reviewer ("claudia") may encourage you to add the package to `Imports` too, since
   `Imports` is the canonical place to declare what your code depends on.
 - Best practice going forward: **list every real run-time dependency in `Imports`**, and add

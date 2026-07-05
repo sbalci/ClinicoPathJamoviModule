@@ -1372,7 +1372,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="cumProb", 
-                        `title`="P(detect \u2265k | present in finite population)", 
+                        `title`="P(detect >=k | present in finite population)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -1425,7 +1425,7 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="cumProb", 
-                        `title`="P(detect \u2265k | heterogeneous population)", 
+                        `title`="P(detect >=k | heterogeneous population)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
@@ -1513,17 +1513,17 @@ pathsamplingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         `type`="integer"),
                     list(
                         `name`="detectOne", 
-                        `title`="P(\u22651 lesion)", 
+                        `title`="P(>=1 lesion)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="detectTwo", 
-                        `title`="P(\u22652 lesions)", 
+                        `title`="P(>=2 lesions)", 
                         `type`="number", 
                         `format`="pc"),
                     list(
                         `name`="detectThree", 
-                        `title`="P(\u22653 lesions)", 
+                        `title`="P(>=3 lesions)", 
                         `type`="number", 
                         `format`="pc"))))
             self$add(jmvcore::Html$new(

@@ -1,4 +1,4 @@
-# ncvregcox: SCAD/MCP Cox Regression -- Developer Documentation
+# ncvregcox: SCAD/MCP Cox Regression - Developer Documentation
 
 > **Version:** 0.0.31 | **Last updated:** 2026-03-12 | **Status:** Release-ready
 
@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-The `ncvregcox` function performs penalized Cox proportional hazards regression using **non-convex penalties only** -- SCAD (Smoothly Clipped Absolute Deviation) and MCP (Minimax Concave Penalty) -- for automatic variable selection in survival data. It targets high-dimensional clinicopathological data where identifying a parsimonious set of prognostic variables is the primary goal.
+The `ncvregcox` function performs penalized Cox proportional hazards regression using **non-convex penalties only** - SCAD (Smoothly Clipped Absolute Deviation) and MCP (Minimax Concave Penalty) - for automatic variable selection in survival data. It targets high-dimensional clinicopathological data where identifying a parsimonious set of prognostic variables is the primary goal.
 
 The function wraps the `ncvreg` package's `cv.ncvsurv()` and `ncvsurv()` functions within the standard jamovi 4-file architecture, providing cross-validated penalty tuning, model comparison (lambda.min vs lambda.1se), coefficient tables with hazard ratios, per-variable HR clinical interpretation, variable importance analysis, a data suitability assessment with 6 traffic-light checks, and three diagnostic plots.
 
@@ -42,7 +42,7 @@ The `.u.yaml` file defines the jamovi sidebar layout. Below is the exact mapping
 |-----------|------|-------------|-------|
 | Time Variable | VariablesListBox | `time` | maxItemCount: 1 |
 | Event Variable | VariablesListBox | `event` | maxItemCount: 1 |
-| Event Level | LevelSelector | `outcomeLevel` | enable: `(event)` -- only active when event is assigned |
+| Event Level | LevelSelector | `outcomeLevel` | enable: `(event)` - only active when event is assigned |
 | Censored Level | LevelSelector | `censorLevel` | enable: `(event)` |
 | Covariates | VariablesListBox | `covariates` | no maxItemCount (accepts many) |
 
@@ -84,26 +84,26 @@ There are **15 options** defined in `ncvregcox.a.yaml`. The implicit `data` opti
 
 | # | Name | Type | Default | Constraints | YAML Key | Description |
 |---|------|------|---------|-------------|----------|-------------|
-| 1 | `data` | Data | -- | -- | `data` | The dataset (implicit, always present) |
-| 2 | `time` | Variable | -- | suggested: continuous; permitted: numeric | `time` | Survival time variable |
-| 3 | `event` | Variable | -- | suggested: nominal; permitted: factor | `event` | Event/status indicator |
-| 4 | `outcomeLevel` | Level | -- | variable: `(event)` | `outcomeLevel` | Which level of `event` means "event occurred" |
-| 5 | `censorLevel` | Level | -- | variable: `(event)` | `censorLevel` | Which level of `event` means "censored" |
-| 6 | `covariates` | Variables | -- | suggested: continuous, nominal; permitted: numeric, factor | `covariates` | Predictor variables |
+| 1 | `data` | Data | - | - | `data` | The dataset (implicit, always present) |
+| 2 | `time` | Variable | - | suggested: continuous; permitted: numeric | `time` | Survival time variable |
+| 3 | `event` | Variable | - | suggested: nominal; permitted: factor | `event` | Event/status indicator |
+| 4 | `outcomeLevel` | Level | - | variable: `(event)` | `outcomeLevel` | Which level of `event` means "event occurred" |
+| 5 | `censorLevel` | Level | - | variable: `(event)` | `censorLevel` | Which level of `event` means "censored" |
+| 6 | `covariates` | Variables | - | suggested: continuous, nominal; permitted: numeric, factor | `covariates` | Predictor variables |
 | 7 | `penalty` | List | `"SCAD"` | options: `"SCAD"`, `"MCP"` | `penalty` | Non-convex penalty type |
 | 8 | `cv_folds` | Number | `10` | min: 3, max: 20 | `cv_folds` | K-fold cross-validation folds |
 | 9 | `lambda_type` | List | `"min"` | options: `"min"`, `"1se"` | `lambda_type` | Lambda selection strategy |
 | 10 | `alpha` | Number | `1.0` | min: 0.01, max: 1.0 | `alpha` | Elastic net mixing (1 = pure penalty, near 0 = ridge-like) |
 | 11 | `gamma` | Number | `3.7` | min: 1.1, max: 10.0 | `gamma` | Concavity tuning parameter |
-| 12 | `standardize` | Bool | `true` | -- | `standardize` | Standardize covariates before fitting |
-| 13 | `plot_path` | Bool | `true` | -- | `plot_path` | Show regularization path plot |
-| 14 | `plot_cv` | Bool | `true` | -- | `plot_cv` | Show CV error plot |
-| 15 | `variable_importance` | Bool | `true` | -- | `variable_importance` | Compute variable importance table + plot |
-| 16 | `suitabilityCheck` | Bool | `true` | -- | `suitabilityCheck` | Run data suitability assessment |
+| 12 | `standardize` | Bool | `true` | - | `standardize` | Standardize covariates before fitting |
+| 13 | `plot_path` | Bool | `true` | - | `plot_path` | Show regularization path plot |
+| 14 | `plot_cv` | Bool | `true` | - | `plot_cv` | Show CV error plot |
+| 15 | `variable_importance` | Bool | `true` | - | `variable_importance` | Compute variable importance table + plot |
+| 16 | `suitabilityCheck` | Bool | `true` | - | `suitabilityCheck` | Run data suitability assessment |
 
 ### Notes on Specific Options
 
-- **`outcomeLevel` / `censorLevel`**: If left empty, the backend resolves them automatically -- `outcomeLevel` defaults to the second observed level, `censorLevel` to the first. Rows matching neither level are excluded (strict two-level encoding).
+- **`outcomeLevel` / `censorLevel`**: If left empty, the backend resolves them automatically - `outcomeLevel` defaults to the second observed level, `censorLevel` to the first. Rows matching neither level are excluded (strict two-level encoding).
 - **`penalty`**: Only `"SCAD"` and `"MCP"` are available. Lasso is handled by the separate `lassocox` function.
 - **`gamma`**: When `penalty == "MCP"` and `gamma == 3.7` (the SCAD default), the backend auto-adjusts to 3.0 (MCP recommended default per Zhang 2010).
 - **`alpha`**: ncvreg requires `alpha > 0`. Pure ridge (`alpha = 0`) is not supported. Values near 0 blend toward ridge behavior, which helps with correlated predictors.
@@ -115,11 +115,11 @@ There are **15 options** defined in `ncvregcox.a.yaml`. The implicit `data` opti
 ### 4-File Structure
 
 ```
-jamovi/ncvregcox.a.yaml    -- Option definitions (16 options incl. data)
-jamovi/ncvregcox.r.yaml    -- Results definitions (6 tables, 3 images, 3 HTML)
-jamovi/ncvregcox.u.yaml    -- UI layout (1 VariableSupplier + 4 CollapseBoxes)
-R/ncvregcox.b.R            -- Backend R6 class (ncvregcoxClass)
-R/ncvregcox.h.R            -- Auto-generated from YAML (do not edit)
+jamovi/ncvregcox.a.yaml    - Option definitions (16 options incl. data)
+jamovi/ncvregcox.r.yaml    - Results definitions (6 tables, 3 images, 3 HTML)
+jamovi/ncvregcox.u.yaml    - UI layout (1 VariableSupplier + 4 CollapseBoxes)
+R/ncvregcox.b.R            - Backend R6 class (ncvregcoxClass)
+R/ncvregcox.h.R            - Auto-generated from YAML (do not edit)
 ```
 
 ### Class Hierarchy
@@ -400,9 +400,9 @@ User assigns variables in jamovi UI
     +-- .insertNotice(INFO) for analysis completion summary
 
 Render functions (called by jamovi image framework, after .run()):
-    .plot_regularization_path()  -- reads from image$state, not private fields
-    .plot_cv_error()             -- reads from image$state
-    .plot_variable_selection()   -- reads from image$state
+    .plot_regularization_path()  - reads from image$state, not private fields
+    .plot_cv_error()             - reads from image$state
+    .plot_variable_selection()   - reads from image$state
 ```
 
 ---
@@ -614,9 +614,9 @@ These map to entries in `jamovi/00refs.yaml` for citation generation.
 | # | Check | Green | Yellow | Red |
 |---|-------|-------|--------|-----|
 | 1 | Events-Per-Variable (EPV) | EPV >= 10 | 1 <= EPV < 10 | EPV < 1 (shown as yellow with "ultra-low" label) |
-| 2 | Regularization Need | p >= n/3 | p < n/3 | -- (no red level) |
+| 2 | Regularization Need | p >= n/3 | p < n/3 | - (no red level) |
 | 3 | Sample Size | n >= 100 | 30 <= n < 100 | n < 30 |
-| 4 | Event Rate | 20%-80% | Outside 20%-80% | -- (no red level) |
+| 4 | Event Rate | 20%-80% | Outside 20%-80% | - (no red level) |
 | 5 | Multicollinearity | max |r| < 0.7 | 0.7 <= max |r| < 0.9 | max |r| >= 0.9 |
 | 6 | Data Quality | No missing | 0% < missing <= 20% | missing > 20% |
 

@@ -145,7 +145,7 @@ options:
       type: List
       options:
           - name: 'gastric_cancer'
-            title: Gastric Cancer Standard (0 percent, ≤10 percent, >10 percent-≤50 percent, >50 percent-<90 percent, ≥90 percent)
+            title: Gastric Cancer Standard (0 percent, <=10 percent, >10 percent-<=50 percent, >50 percent-<90 percent, >=90 percent)
           - name: 'simplified'
             title: Simplified (Low, Moderate, High)
           - name: 'custom'

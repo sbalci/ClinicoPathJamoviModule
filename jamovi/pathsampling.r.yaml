@@ -640,7 +640,7 @@ items:
           title: 'Number of Samples'
           type: integer
         - name: cumProb
-          title: 'P(detect ≥k | present in finite population)'
+          title: 'P(detect >=k | present in finite population)'
           type: number
           format: 'pc'
         - name: marginalGain
@@ -688,7 +688,7 @@ items:
           title: 'Number of Samples'
           type: integer
         - name: cumProb
-          title: 'P(detect ≥k | heterogeneous population)'
+          title: 'P(detect >=k | heterogeneous population)'
           type: number
           format: 'pc'
         - name: marginalGain
@@ -767,15 +767,15 @@ items:
           title: 'Samples'
           type: integer
         - name: detectOne
-          title: 'P(≥1 lesion)'
+          title: 'P(>=1 lesion)'
           type: number
           format: 'pc'
         - name: detectTwo
-          title: 'P(≥2 lesions)'
+          title: 'P(>=2 lesions)'
           type: number
           format: 'pc'
         - name: detectThree
-          title: 'P(≥3 lesions)'
+          title: 'P(>=3 lesions)'
           type: number
           format: 'pc'
 

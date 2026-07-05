@@ -202,7 +202,7 @@ directregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 reg_data <- self$data[complete.cases(self$data[c(self$options$elapsedtime, self$options$outcome, explanatory_vars)]), ]
                 reg_data$pseudo_value <- pseudo_vals
                 
-                # Build formula — jmvcore helpers backtick-escape user column
+                # Build formula - jmvcore helpers backtick-escape user column
                 # names and validate the parsed formula against jamovi's allow-list.
                 if (length(explanatory_vars) > 0) {
                     formula_str <- jmvcore::constructFormula("pseudo_value", explanatory_vars)

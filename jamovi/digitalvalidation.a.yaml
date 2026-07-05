@@ -64,9 +64,9 @@ options:
       type: List
       options:
         - name: fda_strict
-          title: 'FDA Strict (r≥0.95, ICC≥0.90)'
+          title: 'FDA Strict (r>=0.95, ICC>=0.90)'
         - name: fda_standard
-          title: 'FDA Standard (r≥0.90, ICC≥0.75)'
+          title: 'FDA Standard (r>=0.90, ICC>=0.75)'
         - name: clsi_ep09
           title: 'CLSI EP09 Guidelines'
         - name: custom

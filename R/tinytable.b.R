@@ -176,7 +176,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 table_data <- private$.create_custom_table(data, vars, group_var)
             }
             
-            # Escape cell content and column names — tinytable does not HTML-escape by default
+            # Escape cell content and column names - tinytable does not HTML-escape by default
             table_data[] <- lapply(table_data, function(col)
                 if (is.character(col) || is.factor(col)) htmltools::htmlEscape(as.character(col)) else col)
             names(table_data) <- htmltools::htmlEscape(names(table_data))

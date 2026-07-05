@@ -20,6 +20,7 @@
 ## Tomlinson et al. 2007 (UCLA / SEER)
 
 ### Study Design
+
 - **Database**: SEER national cancer registry (1988-2002)
 - **Coverage**: 26% of US population
 - **Total cohort**: 3,505 pancreaticoduodenectomies
@@ -27,23 +28,26 @@
 - **Validation cohort**: 584 pN1a patients (single positive node)
 
 ### Methodology
+
 1. **Lymph Node Cut Point (LNCP) analysis**: Tested LNCPs 2-25, maximized log-rank χ²
 2. **Multivariate Cox regression**: Adjusted for age, sex, T stage
 3. **Continuous variable model**: Predicted marginal benefit per additional node
 4. **pN1a detection sensitivity**: Nodes needed to detect 90% of minimal disease
 
 ### Key Findings
+
 - **Optimal LNCP**: 15 lymph nodes (maximum χ²=14.49, P=0.0001)
 - **Median survival**:
-  - ≥15 nodes: 27 months
+  - >=15 nodes: 27 months
   - <15 nodes: 19 months
   - **Difference: 8 months** (P<0.001)
 - **Hazard Ratio**: 0.63 (95% CI: 0.49-0.80, P<0.0001) = **37% mortality reduction**
 - **Marginal benefit**: HR=0.88 per additional node → **diminishing returns after 15 nodes** (only 3% benefit per node beyond 15)
-- **Detection sensitivity**: 90% of pN1a disease found with ≤15 nodes
-- **Current performance**: Only 19% of SEER cases achieved ≥15 nodes (median=7)
+- **Detection sensitivity**: 90% of pN1a disease found with <=15 nodes
+- **Current performance**: Only 19% of SEER cases achieved >=15 nodes (median=7)
 
 ### Clinical Implications
+
 - **Proposed as quality measure** for pancreatic cancer surgery
 - **Achievable**: Major academic centers (Memorial, Hopkins, Fox Chase) routinely achieve 15-17 nodes
 - **Stage migration effect**: Inadequate sampling → understaging → worse survival
@@ -53,18 +57,21 @@
 ## Pu et al. 2021 (Johns Hopkins)
 
 ### Study Design
+
 - **Institution**: Johns Hopkins Hospital
 - **Sample size**: n=1,837 pancreatic adenocarcinoma patients
 - **Study type**: Single-institution retrospective cohort
 - **Focus**: Binomial probability validation + LNR classification
 
 ### Methodology
+
 1. **Binomial probability model**: P = 1 - (1-p)^n
-2. **95% confidence threshold**: Solve for n where P ≥ 0.95
+2. **95% confidence threshold**: Solve for n where P >= 0.95
 3. **LNR classification**: X-tile analysis with survival endpoints
 4. **Comparative analysis**: LNR vs AJCC N staging by ELN strata
 
 ### Key Findings
+
 - **minELN calculation**: Binomial model → n = 11.6, rounded to **12 nodes**
 - **LNR thresholds** (X-tile optimized):
   - LNR0: 0.000 (node-negative)
@@ -75,10 +82,11 @@
   - ELN <9: Inadequate (use simple N0 vs N+)
   - ELN 9-11: Marginal (possible understaging)
   - **ELN 12-28: LNR superior to AJCC N** for survival prediction
-  - ELN ≥29: AJCC N marginally superior
+  - ELN >=29: AJCC N marginally superior
 - **No stage migration in N0**: Unlike LVSI (Ates 2025) and endometrial LN (Goess 2024) studies
 
 ### Clinical Implications
+
 - **Validates binomial approach** for LN adequacy
 - **LNR classification** provides nuanced prognostic information beyond binary N0/N1
 - **12 nodes aligns with colon cancer standard** (widely accepted)
@@ -112,7 +120,7 @@
 | **Survival difference** | 8 months (27 vs 19 mo) | Not directly compared by ELN threshold |
 | **HR for adequacy** | 0.63 (37% mortality reduction) | LNR classification HRs |
 | **Marginal benefit analysis** | Yes (diminishing returns curve) | No |
-| **pN1a detection** | 90% with ≤15 nodes | Not analyzed |
+| **pN1a detection** | 90% with <=15 nodes | Not analyzed |
 | **LNR staging** | Not analyzed | Yes (thresholds 0.1, 0.3) |
 | **Quality measure proposal** | Explicit (15 nodes) | Implicit (12 nodes minimum) |
 
@@ -174,21 +182,24 @@
 9-11 ELN: Marginal - Possible understaging
 12-14 ELN: Adequate - Minimum (Pu2021: 12 nodes)
 15-28 ELN: Adequate - Quality Measure (Tomlinson2007: 15 nodes)
-≥29 ELN: Excellent - AJCC N marginally superior
+>=29 ELN: Excellent - AJCC N marginally superior
 ```
 
 #### Documentation Text (pathsampling.b.R)
 
 **LN Analysis Section** (lines 816-834):
+
 - Cites both Tomlinson 2007 and Pu 2021
 - Presents key findings from each study
 - States consensus: "12-15 lymph nodes optimal for accurate staging"
 
 **References Section** (lines 1164-1169):
+
 - Tomlinson JS, et al. *Arch Surg.* 2007 - minELN=15, HR=0.63
 - Pu N, et al. *J Natl Compr Canc Netw.* 2021 - minELN=12, LNR thresholds
 
 #### LNR Classification (Pu 2021)
+
 - LNR0: 0.000
 - LNR1: 0.001-0.100 (default threshold1 = 0.1)
 - LNR2: 0.101-0.300 (default threshold2 = 0.3)
@@ -199,17 +210,20 @@
 ## Broader Context: Comparison to Other GI Cancers
 
 ### Colon Cancer
+
 - **AJCC/UICC Standard**: Minimum 12 lymph nodes
 - **National Quality Forum**: Endorsed as accountability measure
 - **Pay-for-performance**: Used for reimbursement decisions
 - **Literature**: Smith 2005, Cserni 2002, Swanson 2003, Wong 2005
 
 ### Gastric Cancer
+
 - **Various thresholds**: 15-25 nodes depending on study
 - **Stage migration validated**: Smith 2005 (SEER analysis)
 - **Higher threshold** due to more extensive lymphadenectomy
 
 ### Pancreatic Cancer (This Analysis)
+
 - **Tomlinson 2007 (SEER)**: 15 nodes
 - **Pu 2021 (Hopkins)**: 12 nodes
 - **Consensus**: **12-15 nodes**
@@ -223,25 +237,29 @@
 ## Quality Improvement Implications
 
 ### Current Performance Gap (Tomlinson 2007 SEER Data)
+
 - **Median nodes examined**: 7 (range 1-54)
-- **% achieving ≥15 nodes**: Only 19%
-- **% achieving ≥12 nodes**: ~30-35% (estimated)
+- **% achieving >=15 nodes**: Only 19%
+- **% achieving >=12 nodes**: ~30-35% (estimated)
 - **Room for improvement**: 65-80% of cases could be improved
 
 ### Interventions to Improve Node Yield
 
 #### Surgical Factors
+
 1. **Extended lymphadenectomy** (but Yeo 2002 RCT: no survival benefit)
 2. **Standard vs pylorus-preserving** Whipple (latter includes gastric LN)
 3. **Surgeon-pathologist communication** (Dr. Byrd, Tomlinson discussion)
 
 #### Pathology Factors
+
 1. **Fat-clearing solutions** (acetone, xylene, etc.)
 2. **Dedicated pancreatic pathologist** (UCLA multidisciplinary conferences)
 3. **Extended dissection time** (labor-intensive but effective)
 4. **Pathology checklist** (Royal College of Pathologists UK: 10-20 nodes)
 
 #### System Factors
+
 1. **Quality measure adoption** (Tomlinson's proposed standard)
 2. **Feedback loops** (weekly conferences, surgeon-pathologist dialogue)
 3. **Benchmarking** (compare to academic center standards)
@@ -254,16 +272,19 @@
 ### Trial Design Considerations
 
 **Tomlinson 2007 GITSG Trial Example**:
+
 - 49 patients randomized (adjuvant chemoRT vs observation)
 - 72% pathologically node-negative
 - Reported 9-month median survival improvement
 - **Concern**: Inadequate nodal sampling → maldistribution of true pN0 (27mo survival) vs understaged pN1 (19mo survival)
 
 **Meta-analysis Implications** (Stocken 2005):
+
 - ~50% of adjuvant trial patients are node-negative
 - Without staging standardization, results may be confounded by understaging
 
 **Recommendations for Future Trials**:
+
 1. **Require minimum 12-15 nodes** as inclusion criterion
 2. **Stratify randomization** by ELN adequacy
 3. **Report node yield** as quality metric in methods
@@ -296,7 +317,7 @@
 
 4. **Stage migration effect validated**: Inadequate sampling → understaging → worse observed survival
 
-5. **Quality improvement opportunity**: Only 19% of SEER cases (1988-2002) achieved ≥15 nodes
+5. **Quality improvement opportunity**: Only 19% of SEER cases (1988-2002) achieved >=15 nodes
 
 6. **Achievability**: Major academic centers routinely achieve 15-17 nodes
 
@@ -305,13 +326,15 @@
 ### Recommendations for pathsampling Module
 
 ✅ **Implemented** (2025-10-10):
-- Refined adequacy thresholds: <9, 9-11, 12-14, 15-28, ≥29
+
+- Refined adequacy thresholds: <9, 9-11, 12-14, 15-28, >=29
 - Dual citation: Tomlinson 2007 + Pu 2021
 - Consensus statement: "12-15 lymph nodes optimal"
 - LNR classification (Pu 2021 thresholds: 0.1, 0.3)
 - Effect size measures for adequacy comparisons
 
 **Future Enhancements** (Optional):
+
 - Add graphical representation of diminishing returns curve (Tomlinson Figure 3)
 - Add pN1a detection sensitivity curve (Tomlinson Figure 4)
 - Add comparative survival curves (Kaplan-Meier by LNCP)
@@ -335,32 +358,32 @@
 
 ### Supporting Literature
 
-3. **Brennan MF**, Kattan MW, Klimstra D, Conlon K. Prognostic nomogram for patients undergoing resection for adenocarcinoma of the pancreas. *Ann Surg.* 2004;240(2):293-298.
+1. **Brennan MF**, Kattan MW, Klimstra D, Conlon K. Prognostic nomogram for patients undergoing resection for adenocarcinoma of the pancreas. *Ann Surg.* 2004;240(2):293-298.
    - Memorial Sloan-Kettering, median 15 nodes examined
 
-4. **Yeo CJ**, Cameron JL, Lillemoe KD, et al. Pancreaticoduodenectomy with or without distal gastrectomy and extended retroperitoneal lymphadenectomy for periampullary adenocarcinoma. *Ann Surg.* 2002;236(3):355-368.
+2. **Yeo CJ**, Cameron JL, Lillemoe KD, et al. Pancreaticoduodenectomy with or without distal gastrectomy and extended retroperitoneal lymphadenectomy for periampullary adenocarcinoma. *Ann Surg.* 2002;236(3):355-368.
    - Johns Hopkins RCT, mean 16 nodes
    - Extended lymphadenectomy: no survival benefit
 
-5. **Berger AC**, Watson JC, Ross EA, Hoffman JP. The metastatic/examined lymph node ratio is an important prognostic factor after pancreaticoduodenectomy. *Am Surg.* 2004;70(3):235-240.
+3. **Berger AC**, Watson JC, Ross EA, Hoffman JP. The metastatic/examined lymph node ratio is an important prognostic factor after pancreaticoduodenectomy. *Am Surg.* 2004;70(3):235-240.
    - Fox Chase, median 17 nodes
 
 ### Quality Measures & Guidelines
 
-6. **Royal College of Pathologists**. Minimum Dataset for Histopathological Reporting of Pancreatic Carcinoma. London, 2002.
+1. **Royal College of Pathologists**. Minimum Dataset for Histopathological Reporting of Pancreatic Carcinoma. London, 2002.
    - Guideline: 10-20 nodes should be available
 
-7. **Sobin LH**, Greene FL. TNM classification: clarification of number of regional lymph nodes for pNo. *Cancer.* 2001;92(2):452.
+2. **Sobin LH**, Greene FL. TNM classification: clarification of number of regional lymph nodes for pNo. *Cancer.* 2001;92(2):452.
    - AJCC/UICC: 12 nodes for colon cancer
 
-8. **National Quality Forum**. Quality measures for colon and rectal cancer.
-   - Endorsed ≥12 nodes as accountability measure
+3. **National Quality Forum**. Quality measures for colon and rectal cancer.
+   - Endorsed >=12 nodes as accountability measure
 
 ### Comparative GI Cancer Studies
 
-9. **Smith DD**, Schwarz RR, Schwarz RE. Impact of total lymph node count on staging and survival after gastrectomy for gastric cancer. *J Clin Oncol.* 2005;23(28):7114-7124.
+1. **Smith DD**, Schwarz RR, Schwarz RE. Impact of total lymph node count on staging and survival after gastrectomy for gastric cancer. *J Clin Oncol.* 2005;23(28):7114-7124.
 
-10. **Swanson RS**, Compton CC, Stewart AK, Bland KI. The prognosis of T3N0 colon cancer is dependent on the number of lymph nodes examined. *Ann Surg Oncol.* 2003;10(1):65-71.
+2. **Swanson RS**, Compton CC, Stewart AK, Bland KI. The prognosis of T3N0 colon cancer is dependent on the number of lymph nodes examined. *Ann Surg Oncol.* 2003;10(1):65-71.
 
 ---
 

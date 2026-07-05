@@ -225,7 +225,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                 data[[time_var]] <- as.numeric(data[[time_var]])
                 # TODO (correctness): status_var is permitted [factor, numeric] (.a.yaml). For a
                 # FACTOR status with levels c("0","1"), as.numeric() returns level INDICES c(1,2),
-                # not the 0/1 codes — consider jmvcore::toNumeric() (honors the jamovi `values`
+                # not the 0/1 codes - consider jmvcore::toNumeric() (honors the jamovi `values`
                 # attribute). ⚠ Behavior-risk: the 0/1-or-1/2 validation just below (~L237) already
                 # remaps 1/2→0/1, so the current path may yield correct results for binary factors;
                 # toNumeric changes which branch is taken. Verify against a 0/1-factor test dataset

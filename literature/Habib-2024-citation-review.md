@@ -26,7 +26,7 @@
 | Method / Model | Role (primary/secondary) | Variants & Options | Assumptions/Diagnostics | References (sec/page) |
 |---|---|---|---|---|
 | Maximally selected log-rank statistic | Primary | Used to derive optimal lymphadenectomy cutoff for overall survival | Requires continuous covariate, ordered risk groups | Methods (lines 231-236) |
-| Chi-squared test / Fisher's exact test | Primary | Compare categorical variables, stage migration analysis | Independence, expected frequencies ≥5 for chi-squared | Methods (lines 230, 238) |
+| Chi-squared test / Fisher's exact test | Primary | Compare categorical variables, stage migration analysis | Independence, expected frequencies >=5 for chi-squared | Methods (lines 230, 238) |
 | Mann-Whitney U test | Primary | Compare continuous variables between groups | Independent groups, ordinal data | Methods (line 242) |
 | Kaplan-Meier survival analysis | Primary | Time-to-event analysis for OS and RFS | Independent censoring, non-informative censoring | Methods (lines 249-250) |
 | Log-rank test | Primary | Compare survival curves between optimal and suboptimal lymphadenectomy groups | Proportional hazards (not tested), independent censoring | Methods (lines 250-251) |
@@ -95,6 +95,7 @@
 **Total Score**: 14/18 → Overall Badge: GOOD WITH RESERVATIONS
 
 **Red flags to note**:
+
 1. Proportional hazards assumption not tested - this is critical for Cox regression validity
 2. Multiple pairwise comparisons without correction (FWER ≈ 1 - 0.95^6 ≈ 26%)
 3. Operation-specific analysis (DP: N=74, cutoff=23, p=0.160 NS) may be statistically underpowered
@@ -108,6 +109,7 @@
 **Impact**: Moderate - important for controlling Type I error in exploratory pairwise survival comparisons
 **Closest existing function**: `comparingsurvival` (provides pairwise log-rank tests but no p-value adjustment)
 **Exact missing options**:
+
 - Automatic Bonferroni correction for pairwise survival comparisons
 - Holm step-down adjustment
 - Benjamini-Hochberg FDR control
@@ -118,6 +120,7 @@
 **Impact**: Low - workaround available via repeated manual analysis or lassocox
 **Closest existing function**: `lassocox` (automated variable selection via penalization)
 **Exact missing options**:
+
 - Traditional backwards elimination based on p-value threshold
 - AIC-based backwards selection
 - Display variable removal sequence
@@ -368,7 +371,7 @@ if (self$options$stepwiseSelection) {
 
 - **Habib 2024 replication dataset**:
   - Simulate N=341 IPMN-PDAC patients with LN counts (median=19, IQR=14-27)
-  - Generate survival outcomes with HR=0.57 for optimal lymphadenectomy (≥20 LN)
+  - Generate survival outcomes with HR=0.57 for optimal lymphadenectomy (>=20 LN)
   - Verify maxstat finds cutpoint between 18-22
   - Verify Harrell's C-statistic ≈ 0.76
 
@@ -476,24 +479,28 @@ style J fill:#c8e6c9
 **Article Analysis**: Multicenter study establishing optimal lymph node examination thresholds for IPMN-derived PDAC using gold-standard maximally selected rank statistics method.
 
 **Coverage Assessment**:
+
 - COVERED: 11/12 methods fully covered (92%)
 - PARTIAL: 1/12 method partial (backwards Cox regression - lassocox provides modern alternative)
 - MISSING: 0/12 methods missing
 - **Overall coverage: 96% (11.5/12)**
 
 **Critical Evaluation**:
+
 - Overall good methodology with minor reservations (14/18 points)
 - Appropriate use of maximally selected log-rank statistic (gold standard for cutpoint derivation)
 - Minor improvements needed in proportional hazards testing and multiple testing correction
 - Strong effect sizes and adequate sample size for primary analysis
 
 **Implementation Priority**:
+
 - Single high-value enhancement: automated multiple testing correction for pairwise survival comparisons
 - Estimated development time: 3-4 hours (implementation + testing)
 - High clinical utility for multi-group survival studies
 
 **Clinical Relevance**:
 This article validates the value of ClinicoPath's integrated pathology sampling adequacy tools:
+
 1. **Stage Migration**: `stagemigration` module identifies minimum 10 LN threshold
 2. **Optimal Cutpoint**: `optimalcutpoint` module derives 20 LN threshold using maxstat
 3. **Sampling Planning**: `pathsampling` module can be used prospectively to validate these thresholds with institutional data
@@ -503,6 +510,7 @@ This article validates the value of ClinicoPath's integrated pathology sampling 
 
 **Validation Example for Module Documentation**:
 This article provides an excellent real-world validation of the `optimalcutpoint` module's maxstat implementation. The identified cutpoint of 20 lymph nodes (95%CI not reported in text but derivable from maxstat output) can be used as a benchmark example in module vignettes, showing:
+
 - Input: Total lymph nodes examined (continuous)
 - Outcome: Overall survival (time-to-event)
 - Method: Maximally selected log-rank statistic
@@ -510,8 +518,9 @@ This article provides an excellent real-world validation of the `optimalcutpoint
 - Clinical interpretation: Threshold for "optimal lymphadenectomy"
 
 **Connection to Related Articles**:
+
 1. **Maglalang & Fadare 2025** (aqaf082): Omentum sampling with binomial probability model → covered by `pathsampling`
-2. **Goess et al. 2024**: PDAC lymph node adequacy (≥21 ELN) → similar maxstat application
-3. **Habib et al. 2024** (current): IPMN-PDAC lymph node adequacy (≥20 ELN) → demonstrates pathology-specific thresholds
+2. **Goess et al. 2024**: PDAC lymph node adequacy (>=21 ELN) → similar maxstat application
+3. **Habib et al. 2024** (current): IPMN-PDAC lymph node adequacy (>=20 ELN) → demonstrates pathology-specific thresholds
 
 All three articles collectively validate ClinicoPath's comprehensive sampling adequacy analysis pipeline.

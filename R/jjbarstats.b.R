@@ -40,7 +40,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                # Plain text only — notices avoid HTML by project convention; the Preformatted
+                # Plain text only - notices avoid HTML by project convention; the Preformatted
                 # output item renders this literally (no markup, no injection surface).
                 blocks <- vapply(private$.noticeList, function(notice) {
                     prefix <- switch(notice$type,
@@ -463,20 +463,20 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                                     "%) have expected counts < 5."
                                 ))
 
-                                # CRITICAL FIX: Auto-switch to Fisher for 2×2 tables
+                                # CRITICAL FIX: Auto-switch to Fisher for 2\u00d72 tables
                                 if (total_cells == 4 && all(dim(cross_table) == c(2, 2))) {
                                     use_fisher <- TRUE
                                     fisher_reason <- sprintf(
-                                        "Automatically switched to Fisher's Exact Test: %d of 4 cells (%.1f%%) have expected counts < 5 in this 2×2 table.",
+                                        "Automatically switched to Fisher's Exact Test: %d of 4 cells (%.1f%%) have expected counts < 5 in this 2\u00d72 table.",
                                         low_count_cells, pct_low
                                     )
                                     recommendations <- c(recommendations,
-                                        " <strong>Automatic Correction:</strong> Using Fisher's Exact Test for 2×2 table with low expected counts."
+                                        " <strong>Automatic Correction:</strong> Using Fisher's Exact Test for 2\u00d72 table with low expected counts."
                                     )
                                 } else {
-                                    # For non-2×2 tables, warn but don't auto-switch
+                                    # For non-2\u00d72 tables, warn but don't auto-switch
                                     recommendations <- c(recommendations,
-                                        " <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods. Fisher's exact test is only available for 2×2 tables."
+                                        " <strong>Recommendation:</strong> Consider combining categories or using non-parametric methods. Fisher's exact test is only available for 2\u00d72 tables."
                                     )
                                 }
                             }
@@ -500,7 +500,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<ul>",
                     "<li>Variables are categorical or ordinal</li>",
                     "<li>Observations are independent</li>",
-                    "<li>Expected cell counts ≥ 5 for chi-square validity</li>",
+                    "<li>Expected cell counts \u2265 5 for chi-square validity</li>",
                     if (self$options$paired) "<li>Paired observations (matched subjects)</li>" else "",
                     "</ul>",
 
@@ -534,12 +534,12 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>Statistical Significance:</strong></p>",
                     "<ul>",
                     "<li><strong>p < 0.05:</strong> Significant association between variables</li>",
-                    "<li><strong>p ≥ 0.05:</strong> No significant association detected</li>",
+                    "<li><strong>p \u2265 0.05:</strong> No significant association detected</li>",
                     "</ul>",
                     
                     "<p><strong>Effect Size Interpretation:</strong></p>",
                     "<ul>",
-                    "<li><strong>Cramér's V:</strong> 0.1 (small), 0.3 (medium), 0.5 (large) effect</li>",
+                    "<li><strong>Cram\u00e9r's V:</strong> 0.1 (small), 0.3 (medium), 0.5 (large) effect</li>",
                     "<li><strong>Odds Ratio:</strong> >1 (positive association), <1 (negative association)</li>",
                     "</ul>",
                     
@@ -615,14 +615,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                               self$options$padjustmethod, " correction for multiple testing. ")
                     } else "",
                     
-                    "Statistical significance was assessed at α = ", (1 - self$options$conflevel), " level. ",
+                    "Statistical significance was assessed at \u03b1 = ", (1 - self$options$conflevel), " level. ",
                     "Analysis included ", n_total, " observations across ", n_groups, " groups.",
                     "</p>",
                     
                     "<h5>Results:</h5>",
                     "<p>[Insert specific results here: test statistic, p-value, effect size with 95% CI]</p>",
                     "<p>Example: \"There was a statistically significant association between [variable 1] and [variable 2] ",
-                    "(χ² = [value], p = [value], Cramér's V = [value], 95% CI [lower, upper]). ",
+                    "(\u03c7\u00b2 = [value], p = [value], Cram\u00e9r's V = [value], 95% CI [lower, upper]). ",
                     "Post-hoc analysis revealed significant differences between [specific groups].\"</p>",
                     
                     "<h5>Conclusion:</h5>",
@@ -771,7 +771,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
             # CRITICAL SAFETY METHOD: Validate data is appropriate for paired/McNemar test
             .validatePairedData = function(data, dep_var) {
                 # McNemar's test requires:
-                # 1. A 2×2 contingency table
+                # 1. A 2\u00d72 contingency table
                 # 2. Paired/matched observations
 
                 if (is.null(self$options$group) || is.null(dep_var)) {
@@ -781,14 +781,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     ))
                 }
 
-                # Check if it's a 2×2 table
+                # Check if it's a 2\u00d72 table
                 cross_table <- private$.getWeightedTable(data, dep_var, self$options$group)
 
                 if (!all(dim(cross_table) == c(2, 2))) {
                     return(list(
                         valid = FALSE,
                         message = sprintf(
-                            "McNemar test requires a 2×2 table. Your data has %d×%d levels. Use unpaired analysis instead.",
+                            "McNemar test requires a 2\u00d72 table. Your data has %d\u00d7%d levels. Use unpaired analysis instead.",
                             nrow(cross_table), ncol(cross_table)
                         )
                     ))
@@ -800,7 +800,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     return(list(
                         valid = FALSE,
                         message = sprintf(
-                            "McNemar test requires adequate sample size. Current total: %d (recommend ≥10). Use Fisher exact test instead.",
+                            "McNemar test requires adequate sample size. Current total: %d (recommend \u226510). Use Fisher exact test instead.",
                             total_n
                         )
                     ))
@@ -841,8 +841,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 override_type <- self$options$typestatistics  # Start with user's choice
 
                 if (fisher_check$use_fisher && !self$options$paired) {
-                    # Auto-switch to Fisher for 2×2 tables with low expected counts
-                    # Note: "nonparametric" type in ggbarstats uses Fisher's exact test for 2×2 tables
+                    # Auto-switch to Fisher for 2\u00d72 tables with low expected counts
+                    # Note: "nonparametric" type in ggbarstats uses Fisher's exact test for 2\u00d72 tables
                     override_type <- "nonparametric"
 
                     # Notify user about automatic switch
@@ -1028,7 +1028,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         "<p><strong>Step 2:</strong> Choose a <strong>Group Variable</strong> (what you want to compare)</p>",
                         "<p><strong>Step 3:</strong> Pick a <strong>Clinical Analysis Preset</strong> for automatic configuration:</p>",
                         "<ul style='margin-left: 20px;'>",
-                        "<li> <strong>Diagnostic Test:</strong> 2×2 tables with sensitivity/specificity</li>",
+                        "<li> <strong>Diagnostic Test:</strong> 2\u00d72 tables with sensitivity/specificity</li>",
                         "<li> <strong>Treatment Response:</strong> Compare response rates across treatments</li>",
                         "<li> <strong>Biomarker Expression:</strong> Analyze expression patterns</li>",
                         "<li> <strong>Risk Factor Analysis:</strong> Examine risk factor relationships</li>",
@@ -1082,16 +1082,16 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # Additional info about analysis settings
                         analysis_info <- ""
                         if (self$options$paired) {
-                            analysis_info <- paste0(analysis_info, "<br>• Using paired/repeated measures design (McNemar's test)")
+                            analysis_info <- paste0(analysis_info, "<br>\u2022 Using paired/repeated measures design (McNemar's test)")
                         }
                         if (!is.null(self$options$counts)) {
-                            analysis_info <- paste0(analysis_info, "<br>• Using counts variable: ", htmltools::htmlEscape(self$options$counts))
+                            analysis_info <- paste0(analysis_info, "<br>\u2022 Using counts variable: ", htmltools::htmlEscape(self$options$counts))
                         }
                         if (!is.null(self$options$ratio) && nchar(trimws(self$options$ratio)) > 0) {
-                            analysis_info <- paste0(analysis_info, "<br>• Expected proportions: ", htmltools::htmlEscape(self$options$ratio))
+                            analysis_info <- paste0(analysis_info, "<br>\u2022 Expected proportions: ", htmltools::htmlEscape(self$options$ratio))
                         }
                         if (self$options$label != "percentage") {
-                            analysis_info <- paste0(analysis_info, "<br>• Label display: ", self$options$label)
+                            analysis_info <- paste0(analysis_info, "<br>\u2022 Label display: ", self$options$label)
                         }
 
                         todo <- glue::glue(
@@ -1160,10 +1160,10 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                             <br>{htmltools::htmlEscape(e$message)}<br>
                             {error_context}
                             <br><b>General Troubleshooting:</b><br>
-                            • Ensure dependent and grouping variables are categorical<br>
-                            • Check that selected variables exist in your dataset<br>
-                            • Verify sufficient sample sizes in each group (≥5 recommended)<br>
-                            • Confirm variables have adequate variation (≥2 categories)<br><hr>"
+                            \u2022 Ensure dependent and grouping variables are categorical<br>
+                            \u2022 Check that selected variables exist in your dataset<br>
+                            \u2022 Verify sufficient sample sizes in each group (\u22655 recommended)<br>
+                            \u2022 Confirm variables have adequate variation (\u22652 categories)<br><hr>"
                         )
                         self$results$todo$setContent(error_msg)
                         return()
@@ -1341,7 +1341,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 # Detecting the option by CLASS (not by name) means any variable option
                 # added later is escaped automatically.
                 #
-                # Variables are NOT re-emitted through private$.asArgs() — doing so
+                # Variables are NOT re-emitted through private$.asArgs() - doing so
                 # previously duplicated them in the generated syntax (the "double
                 # variables" bug). All non-variable options keep jmvcore's per-option
                 # sourcify so formatting stays consistent with jamovi.

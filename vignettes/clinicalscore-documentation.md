@@ -1,4 +1,4 @@
-# Clinical Scoring System Generator (`clinicalscore`) -- Developer Documentation
+# Clinical Scoring System Generator (`clinicalscore`) - Developer Documentation
 
 > **Module:** meddecide (menuGroup: `meddecideT`)
 > **Submenu:** Prediction Models
@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-`clinicalscore` builds validated integer-point clinical scoring systems from logistic or Cox regression models. It converts regression coefficients into simple point-based risk scores that clinicians can compute at the bedside without software -- analogous to how the Framingham Risk Score or the Wells Score work in practice.
+`clinicalscore` builds validated integer-point clinical scoring systems from logistic or Cox regression models. It converts regression coefficients into simple point-based risk scores that clinicians can compute at the bedside without software - analogous to how the Framingham Risk Score or the Wells Score work in practice.
 
 **Capabilities:**
 
@@ -90,29 +90,29 @@ The UI (`.u.yaml`) is organized into 6 collapsible panels plus top-level variabl
 
 | # | Name | Type | Default | Constraints | Description |
 |---|---|---|---|---|---|
-| 1 | `data` | Data | -- | -- | Input data frame |
+| 1 | `data` | Data | - | - | Input data frame |
 | 2 | `modelType` | List | `logistic` | logistic, cox | Regression model type |
-| 3 | `outcome` | Variable | -- | suggested: nominal/ordinal/continuous; permitted: factor/numeric | Outcome variable (binary or event indicator) |
-| 4 | `outcomeLevel` | Level | -- | variable: (outcome) | Event level; defaults to 2nd factor level |
+| 3 | `outcome` | Variable | - | suggested: nominal/ordinal/continuous; permitted: factor/numeric | Outcome variable (binary or event indicator) |
+| 4 | `outcomeLevel` | Level | - | variable: (outcome) | Event level; defaults to 2nd factor level |
 | 5 | `elapsedtime` | Variable | NULL | suggested: continuous; permitted: numeric | Time variable (required for Cox only) |
-| 6 | `explanatory` | Variables | -- | suggested: nominal/ordinal/continuous; permitted: factor/numeric | Predictor variables (min 2 required) |
-| 7 | `autoCategorize` | Bool | true | -- | Auto-convert continuous predictors to categories |
+| 6 | `explanatory` | Variables | - | suggested: nominal/ordinal/continuous; permitted: factor/numeric | Predictor variables (min 2 required) |
+| 7 | `autoCategorize` | Bool | true | - | Auto-convert continuous predictors to categories |
 | 8 | `categorizeMethod` | List | `median` | median, tertiles, quartiles, manual | Method for auto-categorization |
-| 9 | `customBreaks` | String | `""` | -- | Comma-separated cutpoints for manual mode (e.g., "3,10,20") |
+| 9 | `customBreaks` | String | `""` | - | Comma-separated cutpoints for manual mode (e.g., "3,10,20") |
 | 10 | `scoringMethod` | List | `schneeweiss` | schneeweiss, beta10, sullivan, compare | Point-assignment algorithm |
 | 11 | `maxPoints` | Integer | 10 | [3, 20] | Maximum points per feature (Beta10/Sullivan scale) |
-| 12 | `bootstrapValidation` | Bool | false | -- | Enable Harrell bootstrap optimism correction |
+| 12 | `bootstrapValidation` | Bool | false | - | Enable Harrell bootstrap optimism correction |
 | 13 | `bootstrapN` | Integer | 200 | [50, 1000] | Number of bootstrap iterations |
-| 14 | `scoreLookup` | Bool | true | -- | Generate score-to-probability lookup table |
-| 15 | `showNomogram` | Bool | true | -- | Generate rms nomogram |
-| 16 | `showCalibration` | Bool | true | -- | Show calibration plot (logistic only) |
+| 14 | `scoreLookup` | Bool | true | - | Generate score-to-probability lookup table |
+| 15 | `showNomogram` | Bool | true | - | Generate rms nomogram |
+| 16 | `showCalibration` | Bool | true | - | Show calibration plot (logistic only) |
 | 17 | `calibrationGroups` | Integer | 4 | [2, 10] | Number of risk groups for calibration |
-| 18 | `showDiscrimination` | Bool | true | -- | Show AUC/C-index and Brier score |
-| 19 | `showDecisionCurve` | Bool | false | -- | Decision curve analysis (logistic only) |
-| 20 | `showTRIPOD` | Bool | false | -- | TRIPOD Type 1b compliance checklist |
-| 21 | `suitabilityCheck` | Bool | true | -- | Run EPV and sample size checks |
-| 22 | `showSummary` | Bool | false | -- | Natural-language results summary |
-| 23 | `showExplanations` | Bool | false | -- | Static methodology explanations |
+| 18 | `showDiscrimination` | Bool | true | - | Show AUC/C-index and Brier score |
+| 19 | `showDecisionCurve` | Bool | false | - | Decision curve analysis (logistic only) |
+| 20 | `showTRIPOD` | Bool | false | - | TRIPOD Type 1b compliance checklist |
+| 21 | `suitabilityCheck` | Bool | true | - | Run EPV and sample size checks |
+| 22 | `showSummary` | Bool | false | - | Natural-language results summary |
+| 23 | `showExplanations` | Bool | false | - | Static methodology explanations |
 | 24 | `random_seed` | Integer | 42 | [1, 999999] | Seed for reproducibility |
 
 ---
@@ -152,29 +152,29 @@ The UI (`.u.yaml`) is organized into 6 collapsible panels plus top-level variabl
 
 | Option | Backend usage |
 |---|---|
-| `outcome` | `.prepareData()` -- extracts column, determines event/non-event coding |
-| `outcomeLevel` | `.prepareData()` -- sets positive class; if NULL/empty, uses 2nd factor level |
-| `elapsedtime` | `.prepareData()` -- required for Cox; converted via `jmvcore::toNumeric()` |
-| `explanatory` | `.prepareData()` -- builds predictor data frame; minimum 2 required |
-| `modelType` | `.prepareData()` + `.fitModel()` -- switches between `glm()` and `coxph()` |
-| `autoCategorize` | `.prepareData()` -- gate for continuous-to-factor conversion |
-| `categorizeMethod` | `.getBreaks()` -- selects median/tertiles/quartiles/manual |
-| `customBreaks` | `.getBreaks()` -- parsed when `categorizeMethod == "manual"` |
-| `scoringMethod` | `.populateScoringSystem()` -- selects primary method; `compare` triggers all three |
-| `maxPoints` | `.computePoints()` -- scale factor for Beta10 and Sullivan |
-| `bootstrapValidation` | `.run()` gate -- calls `.populateValidation()` |
-| `bootstrapN` | `.populateValidation()` -- loop iteration count |
-| `scoreLookup` | `.populateScoringSystem()` gate -- builds score-to-probability lookup |
-| `showNomogram` | r.yaml visibility -- nomogram plot rendered when true |
-| `showCalibration` | r.yaml visibility -- calibration plot rendered when true |
-| `calibrationGroups` | `.calibrationPlot()` -- number of quantile-based risk groups |
-| `showDiscrimination` | `.run()` gate -- calls `.populateDiscrimination()` |
-| `showDecisionCurve` | `.run()` gate -- calls `.populateDecisionCurve()` |
-| `showTRIPOD` | `.run()` gate -- calls `.populateTRIPOD()` |
-| `suitabilityCheck` | `.run()` gate -- calls `.assessSuitability()` |
-| `showSummary` | `.run()` gate -- calls `.populateSummary()` |
-| `showExplanations` | `.run()` gate -- calls `.populateExplanations()` |
-| `random_seed` | `.run()` -- `set.seed()` at top of execution |
+| `outcome` | `.prepareData()` - extracts column, determines event/non-event coding |
+| `outcomeLevel` | `.prepareData()` - sets positive class; if NULL/empty, uses 2nd factor level |
+| `elapsedtime` | `.prepareData()` - required for Cox; converted via `jmvcore::toNumeric()` |
+| `explanatory` | `.prepareData()` - builds predictor data frame; minimum 2 required |
+| `modelType` | `.prepareData()` + `.fitModel()` - switches between `glm()` and `coxph()` |
+| `autoCategorize` | `.prepareData()` - gate for continuous-to-factor conversion |
+| `categorizeMethod` | `.getBreaks()` - selects median/tertiles/quartiles/manual |
+| `customBreaks` | `.getBreaks()` - parsed when `categorizeMethod == "manual"` |
+| `scoringMethod` | `.populateScoringSystem()` - selects primary method; `compare` triggers all three |
+| `maxPoints` | `.computePoints()` - scale factor for Beta10 and Sullivan |
+| `bootstrapValidation` | `.run()` gate - calls `.populateValidation()` |
+| `bootstrapN` | `.populateValidation()` - loop iteration count |
+| `scoreLookup` | `.populateScoringSystem()` gate - builds score-to-probability lookup |
+| `showNomogram` | r.yaml visibility - nomogram plot rendered when true |
+| `showCalibration` | r.yaml visibility - calibration plot rendered when true |
+| `calibrationGroups` | `.calibrationPlot()` - number of quantile-based risk groups |
+| `showDiscrimination` | `.run()` gate - calls `.populateDiscrimination()` |
+| `showDecisionCurve` | `.run()` gate - calls `.populateDecisionCurve()` |
+| `showTRIPOD` | `.run()` gate - calls `.populateTRIPOD()` |
+| `suitabilityCheck` | `.run()` gate - calls `.assessSuitability()` |
+| `showSummary` | `.run()` gate - calls `.populateSummary()` |
+| `showExplanations` | `.run()` gate - calls `.populateExplanations()` |
+| `random_seed` | `.run()` - `set.seed()` at top of execution |
 
 ### 4.3 Plot State Management
 
@@ -204,8 +204,8 @@ Output: list(var = "er_status", cat = "Positive")
 
 | # | Name | Type | Visibility | Columns / Dimensions |
 |---|---|---|---|---|
-| 1 | `todo` | Html | always | -- (welcome instructions or error messages) |
-| 2 | `suitabilityReport` | Html | `suitabilityCheck` | -- (traffic-light HTML table) |
+| 1 | `todo` | Html | always | - (welcome instructions or error messages) |
+| 2 | `suitabilityReport` | Html | `suitabilityCheck` | - (traffic-light HTML table) |
 | 3 | `modelSummary` | Table | always | `statistic` (text), `value` (text) |
 | 4 | `coefficients` | Table | always | `variable` (text), `category` (text), `coefficient` (zto), `effectSize` (zto), `ci_lower` (zto), `ci_upper` (zto), `p_value` (zto,pvalue) |
 | 5 | `scoringTable` | Table | always | `variable` (text), `category` (text), `effectSize` (zto), `points` (integer) |
@@ -219,9 +219,9 @@ Output: list(var = "er_status", cat = "Positive")
 | 13 | `scoreDistPlot` | Image | always | 600x400, renderFun: `.scoreDistPlot` |
 | 14 | `decisionCurveTable` | Table | `showDecisionCurve` | `threshold` (zto), `net_benefit_model` (zto), `net_benefit_all` (zto) |
 | 15 | `decisionCurvePlot` | Image | `showDecisionCurve` | 600x500, renderFun: `.decisionCurvePlot` |
-| 16 | `tripodChecklist` | Html | `showTRIPOD` | -- (16-item checklist with pass/fail icons) |
-| 17 | `summaryText` | Html | `showSummary` | -- (natural-language paragraph) |
-| 18 | `explanations` | Html | `showExplanations` | -- (static methodology guide) |
+| 16 | `tripodChecklist` | Html | `showTRIPOD` | - (16-item checklist with pass/fail icons) |
+| 17 | `summaryText` | Html | `showSummary` | - (natural-language paragraph) |
+| 18 | `explanations` | Html | `showExplanations` | - (static methodology guide) |
 
 ### clearWith dependencies
 
@@ -279,17 +279,17 @@ graph TD
 
 ```
 list(
-  y              = numeric   -- 0/1 binary response (or event indicator)
-  predictors     = data.frame -- complete-case predictors (may include auto-categorized factors)
-  time           = numeric   -- survival time (NULL for logistic)
-  n              = integer   -- complete cases count
-  n_events       = integer   -- sum(y == 1)
-  n_nonevents    = integer   -- n - n_events
-  event_level    = character -- label of positive class
-  ref_level      = character -- label of reference class
-  model_type     = character -- "logistic" or "cox"
-  cat_info       = list      -- named list of {breaks, labels} for each categorized variable
-  expl_vars      = character -- original variable names from self$options$explanatory
+  y              = numeric   - 0/1 binary response (or event indicator)
+  predictors     = data.frame - complete-case predictors (may include auto-categorized factors)
+  time           = numeric   - survival time (NULL for logistic)
+  n              = integer   - complete cases count
+  n_events       = integer   - sum(y == 1)
+  n_nonevents    = integer   - n - n_events
+  event_level    = character - label of positive class
+  ref_level      = character - label of reference class
+  model_type     = character - "logistic" or "cox"
+  cat_info       = list      - named list of {breaks, labels} for each categorized variable
+  expl_vars      = character - original variable names from self$options$explanatory
 )
 ```
 
@@ -297,16 +297,16 @@ list(
 
 ```
 list(
-  model          = glm/coxph -- fitted model object
-  coefs          = named numeric -- coefficients (no intercept for logistic)
-  se             = numeric   -- standard errors
-  p_vals         = numeric   -- p-values
-  or_hr          = numeric   -- exp(coefs): odds ratios (logistic) or hazard ratios (Cox)
-  ci_lower       = numeric   -- exp(coef - 1.96*SE)
-  ci_upper       = numeric   -- exp(coef + 1.96*SE)
-  predicted      = numeric   -- predicted probabilities (logistic) or risk scores (Cox)
-  intercept      = numeric   -- model intercept (NA for Cox)
-  var_names      = character -- names(coefs): model term names
+  model          = glm/coxph - fitted model object
+  coefs          = named numeric - coefficients (no intercept for logistic)
+  se             = numeric   - standard errors
+  p_vals         = numeric   - p-values
+  or_hr          = numeric   - exp(coefs): odds ratios (logistic) or hazard ratios (Cox)
+  ci_lower       = numeric   - exp(coef - 1.96*SE)
+  ci_upper       = numeric   - exp(coef + 1.96*SE)
+  predicted      = numeric   - predicted probabilities (logistic) or risk scores (Cox)
+  intercept      = numeric   - model intercept (NA for Cox)
+  var_names      = character - names(coefs): model term names
 )
 ```
 
@@ -627,7 +627,7 @@ result <- clinicalscore(
 | Beta10 | 0.831 | 0.762 | 2.1 | Zhang et al. 2017 |
 | Schneeweiss | 0.842 | 0.776 | 0.8 | Mehta et al. 2016 |
 | Sullivan/D'Agostino | 0.831 | 0.762 | 2.1 | Sullivan et al. 2004 |
-| Full model (continuous) | 0.849 | -- | 0.0 | Reference |
+| Full model (continuous) | 0.849 | - | 0.0 | Reference |
 
 #### validationTable
 
@@ -642,7 +642,7 @@ Note: `corrected = apparent - mean(optimism)`. High optimism (>0.05) triggers a 
 | metric | estimate | ci_lower | ci_upper | interpretation |
 |---|---|---|---|---|
 | AUC | 0.849 | 0.789 | 0.909 | Good |
-| Brier Score | 0.172 | -- | -- | Good |
+| Brier Score | 0.172 | - | - | Good |
 
 AUC thresholds: >=0.9 Excellent, >=0.8 Good, >=0.7 Acceptable, <0.7 Poor.
 Brier thresholds: <0.1 Excellent, <0.2 Good, >=0.2 Poor.
@@ -665,7 +665,7 @@ Brier thresholds: <0.1 Excellent, <0.2 Good, >=0.2 Poor.
 | Events per variable (EPV) | >= 10 | 5-10 | < 5 |
 | Sample size (N) | >= 100 | 50-100 | < 50 |
 | Event count | >= 50 | 20-50 | < 20 |
-| Riley minimum N | N >= minimum | -- | N < minimum |
+| Riley minimum N | N >= minimum | - | N < minimum |
 
 Riley minimum formula: `max(10 * p / min(prevalence, 1-prevalence), 100)`
 
@@ -705,22 +705,22 @@ Simulates lung cancer survival scoring with stage-correlated endpoints.
 
 The TRIPOD checklist evaluates Type 1b compliance (development + internal validation):
 
-1. Title/Abstract -- study design identified
-2. Background -- context and rationale
-3. Objectives -- prediction model development
-4. Source of data -- multi-source, N reported
-5. Participants -- events and non-events counted
-6. Outcome -- binary classification described
-7. Predictors -- variable and term counts
-8. Sample size -- EPV adequacy
-9. Missing data -- complete case analysis noted
-10. Model development -- regression type reported
-11. Model specification -- predictor count in final model
-12. Discrimination -- AUC/C-index (requires `showDiscrimination`)
-13. Calibration -- plot generated (requires `showCalibration`)
-14. Internal validation -- bootstrap (requires `bootstrapValidation`)
-15. Clinical utility -- DCA (requires `showDecisionCurve`)
-16. Interpretation -- scoring system with lookup table
+1. Title/Abstract - study design identified
+2. Background - context and rationale
+3. Objectives - prediction model development
+4. Source of data - multi-source, N reported
+5. Participants - events and non-events counted
+6. Outcome - binary classification described
+7. Predictors - variable and term counts
+8. Sample size - EPV adequacy
+9. Missing data - complete case analysis noted
+10. Model development - regression type reported
+11. Model specification - predictor count in final model
+12. Discrimination - AUC/C-index (requires `showDiscrimination`)
+13. Calibration - plot generated (requires `showCalibration`)
+14. Internal validation - bootstrap (requires `bootstrapValidation`)
+15. Clinical utility - DCA (requires `showDecisionCurve`)
+16. Interpretation - scoring system with lookup table
 
 Reference: Collins GS et al. TRIPOD Statement. BMJ 2015;350:g7594
 

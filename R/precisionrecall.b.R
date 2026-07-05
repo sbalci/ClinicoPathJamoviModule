@@ -26,7 +26,7 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             if (is.null(self$options$outcome) || length(self$options$scores) == 0)
                 return()
 
-            # Save & restore RNG state — bootstrap loops in .bootstrapCI (L233)
+            # Save & restore RNG state - bootstrap loops in .bootstrapCI (L233)
             # and .comparePRC (L265) consume RNG via sample() but the file has
             # no set.seed, so each run would otherwise shift the user's
             # `.Random.seed`. Gated on the two options that trigger the loops

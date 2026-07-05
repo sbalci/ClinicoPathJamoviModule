@@ -12,6 +12,7 @@
 This paper addresses the **exact same statistical question** as our omentum sampling study but for lymph nodes in pancreatic cancer. The methodology, statistical approaches, and challenges are directly applicable to our pathsampling jamovi function.
 
 **Key parallels:**
+
 1. Both determine minimum specimens needed for adequate staging
 2. Both use binomial probability law for calculations
 3. Both address stage migration/misclassification issues
@@ -23,12 +24,14 @@ This paper addresses the **exact same statistical question** as our omentum samp
 ## Study Overview
 
 ### Research Question
+
 "What is the minimum number of examined lymph nodes (ELN) required for adequate staging and best prediction of survival in pancreatic ductal adenocarcinoma?"
 
 **This is IDENTICAL to our omentum question:**
 "What is the minimum number of examined cassettes required for adequate detection of omental metastases?"
 
 ### Study Design
+
 - **Population:** 466 patients, pancreatic cancer resection (2007-2018)
 - **Centers:** Two European university hospitals (Munich, Lyon)
 - **Operations:** Pancreaticoduodenectomy (66%), distal pancreatectomy (18%), total pancreatectomy (16%)
@@ -48,9 +51,10 @@ This paper addresses the **exact same statistical question** as our omentum samp
 | <10 ELN | 56% (13/23) | **Understaging** |
 | 10-19 ELN | 66% (108/164) | Still understaging |
 | 20-29 ELN | 79% (116/147) | Better |
-| ≥30 ELN | 79% (104/132) | Adequate |
+| >=30 ELN | 79% (104/132) | Adequate |
 
 **Why this matters for omentum:**
+
 - Same phenomenon likely occurs with omental cassette sampling
 - Fewer cassettes examined → higher chance of missing metastases → false N0 classification
 - Our 95% detection at 4 cassettes suggests we're avoiding this issue
@@ -60,14 +64,16 @@ This paper addresses the **exact same statistical question** as our omentum samp
 
 ---
 
-### 2. Binomial Probability Law - EXACT Same Method We Use!
+### 2. Binomial Probability Law - EXACT Same Method We Use
 
 **Their formula (lines 126-130):**
+
 ```
 P = 1 - (1 - lymph node ratio)^examined lymph nodes
 ```
 
 **Our formula:**
+
 ```
 P = 1 - (1 - p)^N
 ```
@@ -77,12 +83,14 @@ P = 1 - (1 - p)^N
 ### Their Calculation
 
 **Lymph node ratio (LNR):**
+
 - All patients: 0.09 (positive LN / examined LN)
 - Pancreaticoduodenectomy: 0.10
 - Distal pancreatectomy: 0.06
 - Total pancreatectomy: 0.06
 
-**To detect ≥1 positive LN with 95% probability:**
+**To detect >=1 positive LN with 95% probability:**
+
 ```
 0.95 = 1 - (1 - 0.09)^N
 0.05 = 0.91^N
@@ -94,6 +102,7 @@ But they report 21 nodes needed!
 **Wait - there's a discrepancy!** (See Analysis section below)
 
 ### Minimum ELN Calculated (line 764-766)
+
 - **All patients:** 21 ELN
 - Pancreaticoduodenectomy: 20 ELN
 - Distal pancreatectomy: 25 ELN
@@ -115,6 +124,7 @@ But they report 21 nodes needed!
 | N2 status | 2.57 | 1.88-3.51 | <0.001 |
 
 **Interpretation:**
+
 - <21 LN examined = independent negative prognostic factor
 - <22 LN examined = NOT significant
 - **Therefore, 21 is the optimal cutoff**
@@ -129,6 +139,7 @@ But they report 21 nodes needed!
 ### 4. Correlation Between Examined and Positive Nodes
 
 **Figure 2e shows:** Significant correlation (P < 0.001) between:
+
 - X-axis: Examined lymph nodes (0-85)
 - Y-axis: Positive lymph nodes (0-26)
 - **Linear relationship with scatter**
@@ -138,6 +149,7 @@ But they report 21 nodes needed!
 **This proves:** Inadequate sampling leads to false negatives
 
 **Application to omentum:**
+
 - Same principle applies to cassettes
 - More cassettes examined → higher chance of detecting metastases
 - Our data shows 55% detection in cassette #1, 76.7% by cassette #2
@@ -149,11 +161,12 @@ But they report 21 nodes needed!
 
 ### The Binomial Probability Approach
 
-**Purpose:** Calculate minimum specimens needed to detect ≥1 positive specimen with specified confidence (usually 95%)
+**Purpose:** Calculate minimum specimens needed to detect >=1 positive specimen with specified confidence (usually 95%)
 
 **Formula:**
+
 ```r
-P(detect ≥1 positive) = 1 - (1 - p)^N
+P(detect >=1 positive) = 1 - (1 - p)^N
 
 Where:
 p = per-specimen positivity rate
@@ -161,6 +174,7 @@ N = number of specimens examined
 ```
 
 **To find N for target probability P:**
+
 ```r
 N = log(1 - P) / log(1 - p)
 ```
@@ -168,11 +182,13 @@ N = log(1 - P) / log(1 - p)
 ### Why Their Calculation Seems Off
 
 **Reported values:**
+
 - LNR = 0.09 (9% of examined LN are positive)
 - Target probability = 95%
 - **Reported result: 21 nodes needed**
 
 **My calculation:**
+
 ```r
 N = log(1 - 0.95) / log(1 - 0.09)
 N = log(0.05) / log(0.91)
@@ -183,18 +199,22 @@ N = 31.8 ≈ 32 nodes
 **Why the discrepancy?**
 
 **Hypothesis 1: They used a different metric**
+
 - Maybe they used "lymph node ratio among positive cases only"
 - Or "probability of ANY node being positive" vs "probability per node"
 
 **Hypothesis 2: They used empirical data**
+
 - Calculated from actual detection curves (like our omentum analysis)
 - Not purely theoretical binomial
 
 **Hypothesis 3: Different interpretation of LNR**
+
 - LNR might be "positive LN per case with positive LN"
 - Not "positive LN per total examined LN"
 
 **For our omentum analysis:**
+
 - Our calculation: p = 60/113 = 0.531
 - For 95% detection: N = log(0.05)/log(0.469) = 4.0 cassettes ✓
 - Our empirical observation: 4 cassettes = 95% ✓
@@ -209,22 +229,25 @@ N = 31.8 ≈ 32 nodes
 **Application to omentum:**
 
 If we examined fewer cassettes:
+
 - <2 cassettes: 55% would be classified as N0 (false negatives)
 - <3 cassettes: 23% false N0
 - <4 cassettes: 5% false N0
-- **≥4 cassettes: <5% false N0 → adequate sampling**
+- **>=4 cassettes: <5% false N0 → adequate sampling**
 
 **This is EXACTLY analogous to lymph node study:**
+
 - <21 LN: Understaging, survival affected
-- ≥21 LN: Adequate staging, survival not affected by specimen count
+- >=21 LN: Adequate staging, survival not affected by specimen count
 
 ### 2. Validation Through Clinical Outcomes
 
 **Goess validation:** <21 LN = worse survival (independent of tumor characteristics)
 
 **Potential omentum validation:**
+
 - Could stratify by cassettes examined
-- Compare survival in patients with <4 vs ≥4 cassettes examined
+- Compare survival in patients with <4 vs >=4 cassettes examined
 - If <4 cassettes examined → worse survival → confirms inadequate sampling
 
 **This would be POWERFUL validation for our recommendation!**
@@ -234,6 +257,7 @@ If we examined fewer cassettes:
 **Goess finding:** More LN examined → more positive LN found (P < 0.001)
 
 **Application to omentum:**
+
 - If we had `positive_cassettes` data
 - Could correlate: examined cassettes vs positive cassettes
 - Would likely show: more examined → more positive
@@ -284,16 +308,19 @@ If we examined fewer cassettes:
 ### Why Omentum Needs FEWER Cassettes
 
 **Reason 1: Higher per-cassette probability**
+
 - Lymph nodes: p = 0.09 (9% positive) → need 21 nodes
 - Omentum: p = 0.531 (53% positive) → need 4-5 cassettes
 - **When p is higher, N needed is lower!**
 
 **Reason 2: Clustered distribution**
+
 - Omental metastases appear clustered (55% in cassette #1)
 - Lymph node metastases more scattered
 - Clustering = easier to detect = fewer specimens needed
 
 **Reason 3: Different clinical question**
+
 - Lymph nodes: Which specific nodes are positive? (staging)
 - Omentum: Is there ANY metastasis? (detection)
 - Detection is easier than detailed staging
@@ -305,12 +332,14 @@ If we examined fewer cassettes:
 ### 1. Multiple Statistical Approaches
 
 **Goess used:**
+
 1. Binomial probability law (theoretical)
 2. Cox regression (validation)
 3. Kaplan-Meier survival curves (visualization)
 4. Spearman correlation (examined vs positive)
 
 **We could implement:**
+
 1. ✅ Binomial probability (already done)
 2. ✅ Bootstrap resampling (already done)
 3. ⚠️ Could add: Cox regression (if survival data available)
@@ -319,11 +348,13 @@ If we examined fewer cassettes:
 ### 2. Stratified Analysis
 
 **Goess stratified by:**
+
 - Type of resection (PD vs DP vs TP)
 - Lymph node status (N0 vs N1 vs N2)
 - Center (Munich vs Lyon)
 
 **We could stratify by:**
+
 - Tumor type (serous vs endometrioid vs clear cell)
 - Macroscopic tumor presence (yes vs no)
 - Disease stage (early vs advanced)
@@ -332,37 +363,40 @@ If we examined fewer cassettes:
 ### 3. Misclassification Analysis
 
 **Goess approach:**
+
 ```
 Group patients by ELN examined:
 - Group I: <10 ELN
 - Group II: 10-19 ELN
 - Group III: 20-29 ELN
-- Group IV: ≥30 ELN
+- Group IV: >=30 ELN
 
 Show: N+ rate increases with more ELN examined
 Conclusion: Low ELN groups are understaged
 ```
 
 **We could do:**
+
 ```
 Group patients by cassettes examined:
 - Group I: 1-2 cassettes
 - Group II: 3-4 cassettes
 - Group III: 5-6 cassettes
-- Group IV: ≥7 cassettes
+- Group IV: >=7 cassettes
 
 Show: Detection rate vs cassettes examined
 Conclusion: Demonstrate adequacy of 4-5 cassettes
 ```
 
 **Implementation in jamovi:**
+
 ```r
 # In pathsampling.b.R, add stratified analysis option
 if (self$options$showStratified) {
     # Create groups by total_cassettes
     groups <- cut(totalSamplesData,
                   breaks = c(0, 2, 4, 6, Inf),
-                  labels = c("1-2", "3-4", "5-6", "≥7"))
+                  labels = c("1-2", "3-4", "5-6", ">=7"))
 
     # Calculate detection rate by group
     for (grp in levels(groups)) {
@@ -379,12 +413,14 @@ if (self$options$showStratified) {
 ### 4. Validation Through Outcomes
 
 **Goess validation:**
+
 - Multivariate Cox regression
 - Outcome: Overall survival
 - Covariates: T-stage, grading, R-status, N-status, ELN
 - **Finding: <21 ELN independently predicts worse survival**
 
 **We could add:**
+
 ```yaml
 # In pathsampling.a.yaml - optional survival analysis
 - name: survivalTime
@@ -405,7 +441,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
     library(survival)
 
     # Create adequacy variable
-    adequate_sampling <- ifelse(totalSamplesData >= 4, "≥4 cassettes", "<4 cassettes")
+    adequate_sampling <- ifelse(totalSamplesData >= 4, ">=4 cassettes", "<4 cassettes")
 
     # Cox regression
     cox_model <- coxph(Surv(survivalTime, survivalStatus) ~
@@ -437,6 +473,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
    - Useful for heterogeneous populations
 
 **Implementation:**
+
 ```yaml
 # pathsampling.a.yaml
 - name: stratifyBy
@@ -467,7 +504,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 3. **Extent classification**
    - Unifocal: 1 cassette positive
    - Oligofocal: 2-3 cassettes positive
-   - Multifocal: ≥4 cassettes positive
+   - Multifocal: >=4 cassettes positive
 
 ### Priority 3: Survival Validation (Future Research)
 
@@ -484,7 +521,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
    - Validate our recommendation empirically
 
 3. **Kaplan-Meier curves**
-   - Stratified by cassettes examined (<4 vs ≥4)
+   - Stratified by cassettes examined (<4 vs >=4)
    - Stratified by detection status
    - Log-rank test for differences
 
@@ -495,6 +532,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 ### 1. The Binomial Approach Works
 
 **Evidence from Goess:**
+
 - Used successfully for lymph node sampling
 - Published in high-impact journal (BJS Open)
 - Validated with survival analysis
@@ -503,11 +541,13 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 ### 2. Validation Is Critical
 
 **Goess didn't just calculate 21 nodes:**
+
 - They PROVED it with survival analysis
 - They SHOWED stage migration with inadequate sampling
 - They DEMONSTRATED the clinical relevance
 
 **We should consider:**
+
 - Empirical validation (we have: prediction matches observation)
 - Clinical validation (possible: survival analysis if data available)
 - External validation (future: test in independent cohort)
@@ -515,12 +555,14 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 ### 3. Context Matters
 
 **Different tissues, different requirements:**
+
 - Pancreatic lymph nodes: 21 nodes needed (p = 0.09)
 - Omental cassettes: 4-5 cassettes needed (p = 0.531)
 - Both calculated with same formula
 - **Different biology → different sampling requirements**
 
 **Why omentum is "easier":**
+
 - Higher per-cassette probability (53% vs 9%)
 - Clustered distribution (55% in first cassette)
 - Binary question (any metastasis vs detailed staging)
@@ -551,7 +593,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
    - Same methodology
 
 4. **International Study Group on Pancreatic Surgery (ISGPS)**
-   - Recommends ≥15 ELN
+   - Recommends >=15 ELN
    - Standard for practice guidelines
 
 ---
@@ -576,7 +618,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 | 3-4 | 60 | 57 (95.0%) | 95.0% | **Adequate** |
 | 5+ | 60 | 60 (100%) | 100% | Excellent |
 
-**Conclusion:** ≥3-4 cassettes prevents misclassification
+**Conclusion:** >=3-4 cassettes prevents misclassification
 
 ---
 
@@ -622,6 +664,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 > "The best cut-off value of ELN was determined when ELN had no significant impact on survival." (Lines 1175-1176)
 
 **This is the KEY validation principle:**
+
 - Below threshold: specimen count affects survival (inadequate)
 - At/above threshold: specimen count doesn't affect survival (adequate)
 
@@ -644,18 +687,21 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 ### Next Steps
 
 **For current omentum paper:**
+
 1. ✅ Current analysis is solid and publication-ready
 2. Add comparison with Goess lymph node study
 3. Add misclassification analysis (cassette groups)
 4. Emphasize perfect empirical validation
 
 **For jamovi enhancement:**
+
 1. Add stratified analysis option
 2. Add tumor burden analysis (if data available)
 3. Add survival analysis (future feature)
 4. Create vignette comparing lymph node and omentum sampling
 
 **For future research:**
+
 1. External validation in independent omentum cohort
 2. Collect survival data to validate prognostic significance
 3. Compare different tumor types (ovarian vs peritoneal vs metastatic)
@@ -668,6 +714,7 @@ if (!is.null(survivalTime) && !is.null(survivalStatus)) {
 **Goess et al. 2024 provides strong validation for our statistical approach to pathology sampling adequacy.**
 
 The paper demonstrates:
+
 - ✅ Binomial probability law is valid for specimen sampling
 - ✅ Inadequate sampling causes stage migration
 - ✅ Clinical outcomes validate minimum thresholds

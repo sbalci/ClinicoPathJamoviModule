@@ -68,7 +68,7 @@ analysis}
 
 \item{rater5}{Fifth rater for multi-rater agreement}
 
-\item{multi_rater_method}{Method for calculating multi-rater agreement (≥3
+\item{multi_rater_method}{Method for calculating multi-rater agreement (>=3
 raters)}
 
 \item{show_pairwise_kappa}{Show all pairwise kappa values between raters

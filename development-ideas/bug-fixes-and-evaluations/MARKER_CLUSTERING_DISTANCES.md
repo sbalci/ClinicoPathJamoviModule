@@ -11,6 +11,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ### For Categorical IHC Markers (pos/neg, 0/1/2/3, ordinal)
 
 #### 1. **Chi-squared Distance** ⭐ (Default)
+
 - **Method:** `chisquared`
 - **Best for:** General categorical associations
 - **How it works:** Uses chi-squared statistic from contingency tables
@@ -26,6 +27,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ---
 
 #### 2. **Jaccard Distance**
+
 - **Method:** `jaccard`
 - **Best for:** Binary markers, sparse data
 - **Formula:** `distance = 1 - (intersection / union)`
@@ -41,6 +43,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ---
 
 #### 3. **Hamming Distance**
+
 - **Method:** `hamming`
 - **Best for:** Simple mismatch counting
 - **Formula:** `distance = (number of mismatches) / (total comparisons)`
@@ -56,6 +59,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ---
 
 #### 4. **Cramér's V Distance**
+
 - **Method:** `cramer`
 - **Best for:** Normalized association strength
 - **Formula:** `distance = 1 - Cramér's V`
@@ -73,6 +77,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ### For Continuous IHC Markers (H-scores, % positivity)
 
 #### 5. **Euclidean Distance** ⭐ (Recommended)
+
 - **Method:** `euclidean`
 - **Best for:** Standard geometric distance
 - **Formula:** `sqrt(sum((x_i - y_i)^2))`
@@ -88,6 +93,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ---
 
 #### 6. **Manhattan Distance** (L1 norm)
+
 - **Method:** `manhattan`
 - **Best for:** Outlier-resistant distance
 - **Formula:** `sum(|x_i - y_i|)`
@@ -103,6 +109,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ---
 
 #### 7. **Correlation Distance**
+
 - **Method:** `correlation`
 - **Best for:** Pattern similarity (ignoring magnitude)
 - **Formula:** `distance = 1 - |correlation|`
@@ -120,6 +127,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ### For Mixed Data (Categorical + Continuous)
 
 #### 8. **Mutual Information Distance** ⭐ (Advanced)
+
 - **Method:** `mutual_info`
 - **Best for:** Non-linear relationships, any data type
 - **How it works:**
@@ -137,6 +145,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ---
 
 #### 9. **Mixed Distance** (Automatic)
+
 - **Method:** `mixed`
 - **Best for:** Automatic handling of mixed data
 - **How it works:**
@@ -171,31 +180,37 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 ## Recommendations by Use Case
 
 ### 1. **Differential Diagnosis Panels** (e.g., lung adenocarcinoma vs squamous)
+
 - **Recommended:** Chi-squared or Cramér's V
 - **Why:** Categorical markers (TTF1+/-, p40+/-), need statistical tests
 - **Output:** Identifies which markers provide redundant information
 
 ### 2. **Breast Cancer IHC Panel** (ER, PR, HER2, Ki67)
+
 - **Recommended:** Mixed distance
 - **Why:** Mix of binary (ER/PR/HER2) and continuous (Ki67 %)
 - **Output:** Shows ER-PR cluster, Ki67-HER2 relationships
 
 ### 3. **Immune Cell Quantification** (CD3, CD4, CD8, PD-L1 percentages)
+
 - **Recommended:** Euclidean or Manhattan
 - **Why:** All continuous percentages
 - **Output:** CD4-CD8 relationship, PD-L1 associations
 
 ### 4. **Multi-level Ordinal Markers** (intensity scoring 0/1+/2+/3+)
+
 - **Recommended:** Chi-squared or Hamming
 - **Why:** Ordinal categories with multiple levels
 - **Output:** Which intensity scores tend to coincide
 
 ### 5. **Sparse Binary Markers** (rare marker positivity)
+
 - **Recommended:** Jaccard
 - **Why:** Ignores frequent double-negatives, focuses on co-positivity
 - **Output:** Which rare markers co-occur
 
 ### 6. **Exploratory Analysis** (unknown relationships)
+
 - **Recommended:** Mutual Information
 - **Why:** Captures non-linear relationships, no assumptions
 - **Output:** Model-free marker associations
@@ -229,7 +244,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 | < 0.001 | > 0.5 | Very strong association |
 | < 0.01 | 0.3-0.5 | Strong association |
 | < 0.05 | 0.1-0.3 | Moderate association |
-| ≥ 0.05 | < 0.1 | Weak/No association |
+| >= 0.05 | < 0.1 | Weak/No association |
 
 ---
 
@@ -238,6 +253,7 @@ The `ihccluster` function now supports **9 different distance metrics** for mark
 **C4.5 is NOT a distance metric** - it's a machine learning algorithm for building decision trees (developed by Ross Quinlan).
 
 If you're interested in **entropy-based measures** (which C4.5 uses), you can:
+
 - Use **Mutual Information distance** (already implemented) - this IS based on entropy
 - Information Gain = what C4.5 uses to split trees
 - Could be adapted to distance, but MI is more standard
@@ -249,10 +265,12 @@ If you're interested in **entropy-based measures** (which C4.5 uses), you can:
 ### Distance vs. Similarity
 
 All metrics are converted to **distances**:
+
 - Distance = 0 → markers are identical/perfectly associated
 - Distance = 1 → markers are completely different/independent
 
 Some metrics naturally measure similarity (correlation, Cramér's V) and are converted:
+
 ```
 distance = 1 - similarity
 ```
@@ -267,6 +285,7 @@ distance = 1 - similarity
 ### Missing Data
 
 All methods handle missing data via:
+
 - Pairwise deletion (uses available cases for each pair)
 - No imputation is performed
 - Distances computed only on valid observations
@@ -287,11 +306,13 @@ All methods handle missing data via:
 ## Implementation Details
 
 **File locations:**
+
 - Options: `jamovi/ihccluster.a.yaml:298-321`
 - Backend: `R/ihccluster.b.R:3594-3906`
 - Output tables: `jamovi/ihccluster.r.yaml:622-731`
 
 **Function calls:**
+
 ```r
 # Chi-squared
 .computeChiSquaredDistance(df, catVars)
@@ -324,6 +345,7 @@ as.dist(1 - abs(cor(df[, contVars])))
 ## Quick Selection Guide
 
 **Start here:**
+
 ```
 📊 All categorical? → Chi-squared
 📊 Binary only? → Jaccard
@@ -332,6 +354,7 @@ as.dist(1 - abs(cor(df[, contVars])))
 ```
 
 **Special cases:**
+
 ```
 ⚠️ Outliers present? → Manhattan or Mutual Info
 ⚠️ Different scales? → Correlation or Mixed

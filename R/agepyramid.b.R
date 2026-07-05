@@ -17,7 +17,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = agepyramidBase,
     private = list(
         .run = function() {
-            # TODO (forward-looking): no `.()` wrapping anywhere in this file —
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file - 
             # the welcome HTML, error HTML, plot title fallback ("Age Pyramid"),
             # and the data-summary section in `.build_data_summary_html` are all
             # English-only. Address in a /prepare-translation pass for this
@@ -324,7 +324,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # TODO (cleanup): this nrow == 0 check duplicates validation already done by
             # .run() at L50 (which now uses jmvcore::reject). When .run() rejects, .plot()
-            # never gets meaningful plotData (image$state is NULL — caught by the L309
+            # never gets meaningful plotData (image$state is NULL - caught by the L309
             # `is.null(plotData)` guard below). The stop() here is therefore unreachable
             # in normal use; if it does fire it bypasses jamovi's structured error UI.
             # Either drop these two lines entirely (rely on the plotData NULL check at L309)

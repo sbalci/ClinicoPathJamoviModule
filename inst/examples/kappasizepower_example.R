@@ -42,13 +42,13 @@ library(ClinicoPath)
 # with 80% power at α=0.05?
 
 kappaSizePower(
-  outcome = "2",              # Binary: Pneumonia Present/Absent
-  kappa0 = 0.40,              # Current fair agreement
-  kappa1 = 0.70,              # Target good agreement
-  props = "0.25, 0.75",       # 25% pneumonia prevalence in ED
-  raters = "2",               # Two emergency physicians
-  alpha = 0.05,               # Standard significance level
-  power = 0.80                # Standard power
+  outcome = "2", # Binary: Pneumonia Present/Absent
+  kappa0 = 0.40, # Current fair agreement
+  kappa1 = 0.70, # Target good agreement
+  props = "0.25, 0.75", # 25% pneumonia prevalence in ED
+  raters = "2", # Two emergency physicians
+  alpha = 0.05, # Standard significance level
+  power = 0.80 # Standard power
 )
 
 # Clinical Interpretation:
@@ -83,9 +83,9 @@ kappaSizePower(
 
 kappaSizePower(
   outcome = "2",
-  kappa0 = 0.60,              # Pre-training substantial agreement
-  kappa1 = 0.80,              # Post-training expected improvement
-  props = "0.12, 0.88",       # 12% biopsy recommendation rate
+  kappa0 = 0.60, # Pre-training substantial agreement
+  kappa1 = 0.80, # Post-training expected improvement
+  props = "0.12, 0.88", # 12% biopsy recommendation rate
   raters = "2",
   alpha = 0.05,
   power = 0.80
@@ -125,10 +125,10 @@ kappaSizePower(
 
 kappaSizePower(
   outcome = "2",
-  kappa0 = 0.45,              # Trainee baseline
-  kappa1 = 0.70,              # Target: Expert-level agreement
-  props = "0.18, 0.82",       # 18% require biopsy
-  raters = "3",               # Three expert dermatologists
+  kappa0 = 0.45, # Trainee baseline
+  kappa1 = 0.70, # Target: Expert-level agreement
+  props = "0.18, 0.82", # 18% require biopsy
+  raters = "3", # Three expert dermatologists
   alpha = 0.05,
   power = 0.80
 )
@@ -164,9 +164,9 @@ kappaSizePower(
 # Sample size for validating new staging protocol?
 
 kappaSizePower(
-  outcome = "3",              # Three severity categories
-  kappa0 = 0.55,              # Current moderate agreement
-  kappa1 = 0.75,              # Target substantial agreement
+  outcome = "3", # Three severity categories
+  kappa0 = 0.55, # Current moderate agreement
+  kappa1 = 0.75, # Target substantial agreement
   props = "0.20, 0.50, 0.30", # Distribution: Mild, Moderate, Severe
   raters = "2",
   alpha = 0.05,
@@ -204,11 +204,11 @@ kappaSizePower(
 # How many tumor specimens needed to validate standardization?
 
 kappaSizePower(
-  outcome = "4",                      # Four tumor grades
-  kappa0 = 0.60,                      # Current substantial agreement
-  kappa1 = 0.80,                      # Target near-perfect
-  props = "0.15, 0.25, 0.35, 0.25",   # Grade distribution
-  raters = "3",                       # Three pathologists
+  outcome = "4", # Four tumor grades
+  kappa0 = 0.60, # Current substantial agreement
+  kappa1 = 0.80, # Target near-perfect
+  props = "0.15, 0.25, 0.35, 0.25", # Grade distribution
+  raters = "3", # Three pathologists
   alpha = 0.05,
   power = 0.80
 )
@@ -244,10 +244,10 @@ kappaSizePower(
 # Sample size for psychometric validation study?
 
 kappaSizePower(
-  outcome = "5",                              # Five-point severity scale
-  kappa0 = 0.45,                              # Pilot agreement
-  kappa1 = 0.65,                              # Target agreement
-  props = "0.10, 0.20, 0.35, 0.25, 0.10",     # Expected distribution
+  outcome = "5", # Five-point severity scale
+  kappa0 = 0.45, # Pilot agreement
+  kappa1 = 0.65, # Target agreement
+  props = "0.10, 0.20, 0.35, 0.25, 0.10", # Expected distribution
   raters = "2",
   alpha = 0.05,
   power = 0.80
@@ -288,10 +288,10 @@ kappaSizePower(
   outcome = "3",
   kappa0 = 0.60,
   kappa1 = 0.85,
-  props = "0.40, 0.35, 0.25",    # Severity distribution
+  props = "0.40, 0.35, 0.25", # Severity distribution
   raters = "3",
   alpha = 0.05,
-  power = 0.90                   # High power requirement
+  power = 0.90 # High power requirement
 )
 
 # Clinical Interpretation:
@@ -328,10 +328,10 @@ kappaSizePower(
   outcome = "2",
   kappa0 = 0.55,
   kappa1 = 0.80,
-  props = "0.60, 0.40",          # 60% ready for discharge
+  props = "0.60, 0.40", # 60% ready for discharge
   raters = "3",
-  alpha = 0.01,                  # Strict significance level
-  power = 0.85                   # Higher than standard
+  alpha = 0.01, # Strict significance level
+  power = 0.85 # Higher than standard
 )
 
 # Clinical Interpretation:
@@ -341,7 +341,7 @@ kappaSizePower(
 #   - Larger sample needed than standard α=0.05
 #
 # Regulatory Context:
-#   - FDA/EMA submissions often require α≤0.01
+#   - FDA/EMA submissions often require α<=0.01
 #   - Multiple comparisons may require Bonferroni correction
 #   - Pre-specified in protocol (no post-hoc changes)
 #
@@ -367,12 +367,12 @@ kappaSizePower(
 
 kappaSizePower(
   outcome = "2",
-  kappa0 = 0.70,                 # Already substantial baseline
-  kappa1 = 0.90,                 # Target near-perfect
+  kappa0 = 0.70, # Already substantial baseline
+  kappa1 = 0.90, # Target near-perfect
   props = "0.35, 0.65",
-  raters = "4",                  # Four pathologists
-  alpha = 0.01,                  # Strict testing
-  power = 0.90                   # High power
+  raters = "4", # Four pathologists
+  alpha = 0.01, # Strict testing
+  power = 0.90 # High power
 )
 
 # Clinical Interpretation:
@@ -407,7 +407,7 @@ kappaSizePower(
 kappaSizePower(
   outcome = "2",
   kappa0 = 0.50,
-  kappa1 = 0.55,                 # Small effect: 0.05
+  kappa1 = 0.55, # Small effect: 0.05
   props = "0.50, 0.50",
   raters = "2",
   alpha = 0.05,
@@ -419,7 +419,7 @@ kappaSizePower(
 kappaSizePower(
   outcome = "2",
   kappa0 = 0.30,
-  kappa1 = 0.70,                 # Large effect: 0.40
+  kappa1 = 0.70, # Large effect: 0.40
   props = "0.20, 0.80",
   raters = "2",
   alpha = 0.05,
@@ -456,7 +456,7 @@ kappaSizePower(
   outcome = "3",
   kappa0 = 0.55,
   kappa1 = 0.75,
-  props = "0.33, 0.33, 0.34",    # Perfectly balanced
+  props = "0.33, 0.33, 0.34", # Perfectly balanced
   raters = "2",
   alpha = 0.05,
   power = 0.80
@@ -468,7 +468,7 @@ kappaSizePower(
   outcome = "3",
   kappa0 = 0.55,
   kappa1 = 0.75,
-  props = "0.10, 0.20, 0.70",    # Highly imbalanced
+  props = "0.10, 0.20, 0.70", # Highly imbalanced
   raters = "2",
   alpha = 0.05,
   power = 0.80
@@ -501,11 +501,11 @@ kappaSizePower(
 kappaSizePower(
   outcome = "2",
   kappa0 = 0.40,
-  kappa1 = 0.60,                 # Realistic improvement
+  kappa1 = 0.60, # Realistic improvement
   props = "0.25, 0.75",
   raters = "2",
-  alpha = 0.10,                  # Relaxed significance
-  power = 0.70                   # Lower power acceptable
+  alpha = 0.10, # Relaxed significance
+  power = 0.70 # Lower power acceptable
 )
 
 # Pilot Study Rationale:
@@ -544,7 +544,7 @@ kappaSizePower(
   outcome = "4",
   kappa0 = 0.65,
   kappa1 = 0.85,
-  props = "0.40, 0.30, 0.20, 0.10",  # Most complications are minor
+  props = "0.40, 0.30, 0.20, 0.10", # Most complications are minor
   raters = "3",
   alpha = 0.05,
   power = 0.80
@@ -583,11 +583,11 @@ kappaSizePower(
 
 kappaSizePower(
   outcome = "5",
-  kappa0 = 0.60,                              # Inter-center baseline
-  kappa1 = 0.80,                              # Target standardization
-  props = "0.05, 0.15, 0.35, 0.35, 0.10",     # Expression distribution
-  raters = "2",                               # Conservative: 2 raters
-  alpha = 0.01,                               # Strict for multi-center
+  kappa0 = 0.60, # Inter-center baseline
+  kappa1 = 0.80, # Target standardization
+  props = "0.05, 0.15, 0.35, 0.35, 0.10", # Expression distribution
+  raters = "2", # Conservative: 2 raters
+  alpha = 0.01, # Strict for multi-center
   power = 0.85
 )
 
@@ -625,7 +625,8 @@ View(kappasizepower_scenarios_comprehensive)
 
 # Example: Use mammography screening scenario
 mammography <- kappasizepower_scenarios_comprehensive[
-  kappasizepower_scenarios_comprehensive$scenario_id == "mammography_screening_improvement", ]
+  kappasizepower_scenarios_comprehensive$scenario_id == "mammography_screening_improvement",
+]
 
 kappaSizePower(
   outcome = as.character(mammography$outcome_categories),
@@ -642,10 +643,11 @@ data(kappasizepower_relationship_cases)
 
 # Example: Compare effect sizes
 effect_size_cases <- kappasizepower_relationship_cases[
-  kappasizepower_relationship_cases$relationship_type == "effect_size", ]
+  kappasizepower_relationship_cases$relationship_type == "effect_size",
+]
 
 # Run each case
-for(i in 1:nrow(effect_size_cases)) {
+for (i in 1:nrow(effect_size_cases)) {
   cat("\n", effect_size_cases$case_name[i], "\n")
   cat(effect_size_cases$teaching_point[i], "\n\n")
 
@@ -665,7 +667,8 @@ data(kappasizepower_validation_cases)
 
 # Example: Test boundary conditions
 boundary_cases <- kappasizepower_validation_cases[
-  kappasizepower_validation_cases$test_type == "boundary", ]
+  kappasizepower_validation_cases$test_type == "boundary",
+]
 
 # ═══════════════════════════════════════════════════════════════════════════
 # KEY PRINCIPLES AND BEST PRACTICES

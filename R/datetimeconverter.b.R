@@ -103,7 +103,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = "No Valid Datetime Values Found",
-                    content = "All values in the selected variable are missing (NA). • Select a different variable or check your data source."
+                    content = "All values in the selected variable are missing (NA). \u2022 Select a different variable or check your data source."
                 )
                 return(list(format = "unsure", warnings = 'Auto-detection unavailable: all values missing.'))
             }
@@ -138,7 +138,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.addNotice(
                 type = "WARNING",
                 title = "Format Detection Failed",
-                content = "Could not reliably detect datetime format. • Format remains UNSURE; parsing will not proceed without manual selection. • Review preview and specify the correct format (e.g., DMY, MDY)."
+                content = "Could not reliably detect datetime format. \u2022 Format remains UNSURE; parsing will not proceed without manual selection. \u2022 Review preview and specify the correct format (e.g., DMY, MDY)."
             )
 
             return(list(format = "unsure", warnings = c(format_warnings, 'Auto-detection failed; specify format manually.')))
@@ -184,7 +184,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(character())
 
             msg <- sprintf(
-                'Ambiguous day/month order detected: %s and %s both parsed >80%% but produced different dates. Format set to %s—verify preview or choose explicitly.',
+                'Ambiguous day/month order detected: %s and %s both parsed >80%% but produced different dates. Format set to %s - verify preview or choose explicitly.',
                 private$.formatLabel(primary_fmt),
                 private$.formatLabel(alt_fmt),
                 private$.formatLabel(primary_fmt))
@@ -520,7 +520,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = "ERROR",
                         title = "Parsing Error",
                         content = sprintf(
-                            'Error parsing datetimes with format "%s". • Parser error: %s • Try selecting a different format. • Check that your data matches the selected format.',
+                            'Error parsing datetimes with format "%s". \u2022 Parser error: %s \u2022 Try selecting a different format. \u2022 Check that your data matches the selected format.',
                             format, e$message
                         )
                     )
@@ -937,7 +937,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Generate quality summary
             quality_summary <- if (quality$success_rate >= 95) {
-                "Excellent (≥95% success)"
+                "Excellent (\u226595% success)"
             } else if (quality$success_rate >= 80) {
                 "Good (80-94% success)"
             } else if (quality$success_rate >= 50) {
@@ -1282,7 +1282,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = "No Variable Selected",
-                    content = 'No datetime variable selected. • Please select a variable containing datetime information from the left panel. • Use the "DateTime Variable" dropdown to choose a column.'
+                    content = 'No datetime variable selected. \u2022 Please select a variable containing datetime information from the left panel. \u2022 Use the "DateTime Variable" dropdown to choose a column.'
                 )
                 private$.renderNotices()
                 return()
@@ -1301,7 +1301,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = "ERROR",
                     title = "Variable Not Found",
                     content = sprintf(
-                        'Selected variable "%s" not found in dataset. • The column may have been renamed or removed. • Please select a different variable from the left panel. • Available variables: %s',
+                        'Selected variable "%s" not found in dataset. \u2022 The column may have been renamed or removed. \u2022 Please select a different variable from the left panel. \u2022 Available variables: %s',
                         datetime_var,
                         available_preview
                     )
@@ -1314,7 +1314,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = "Empty Dataset",
-                    content = 'Dataset contains no rows. • Please ensure your dataset has at least one observation. • Check for data loading or filtering issues.'
+                    content = 'Dataset contains no rows. \u2022 Please ensure your dataset has at least one observation. \u2022 Check for data loading or filtering issues.'
                 )
                 private$.renderNotices()
                 return()
@@ -1331,7 +1331,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = "ERROR",
                     title = "All Values Missing",
                     content = sprintf(
-                        "All values in '%s' are missing (NA). • Please select a column with valid datetime entries before proceeding.",
+                        "All values in '%s' are missing (NA). \u2022 Please select a column with valid datetime entries before proceeding.",
                         datetime_var
                     )
                 )
@@ -1391,7 +1391,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = severity,
                         title = "Low Parsing Success Rate",
                         content = sprintf(
-                            'Low datetime parsing success rate: %.1f%% • Only %d of %d non-missing values were successfully parsed. • This may indicate incorrect format selection or data quality issues. • Recommendations: Try a different datetime format, Review failed samples in Quality Assessment, Check data source for systematic errors, Clinical analysis may be unreliable with <70%% success rate.',
+                            'Low datetime parsing success rate: %.1f%% \u2022 Only %d of %d non-missing values were successfully parsed. \u2022 This may indicate incorrect format selection or data quality issues. \u2022 Recommendations: Try a different datetime format, Review failed samples in Quality Assessment, Check data source for systematic errors, Clinical analysis may be unreliable with <70%% success rate.',
                             quality$success_rate,
                             quality$successfully_parsed,
                             (quality$total_observations - quality$original_missing)
@@ -1402,7 +1402,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         type = severity,
                         title = "Moderate Parsing Success Rate",
                         content = sprintf(
-                            'Moderate datetime parsing success rate: %.1f%% • %d of %d non-missing values were successfully parsed. • Review failed samples in Quality Assessment panel. • Consider manually specifying format if auto-detection is incorrect.',
+                            'Moderate datetime parsing success rate: %.1f%% \u2022 %d of %d non-missing values were successfully parsed. \u2022 Review failed samples in Quality Assessment panel. \u2022 Consider manually specifying format if auto-detection is incorrect.',
                             quality$success_rate,
                             quality$successfully_parsed,
                             (quality$total_observations - quality$original_missing)
@@ -1417,7 +1417,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.addNotice(
                     type = "INFO",
                     title = "Potential Data Quality Issues",
-                    content = paste(misuse_warnings, collapse = ' • ')
+                    content = paste(misuse_warnings, collapse = ' \u2022 ')
                 )
             }
 
@@ -1641,7 +1641,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     type = "INFO",
                     title = "Conversion Completed",
                     content = sprintf(
-                        'DateTime conversion completed. • Processed %d observations from variable "%s". • Successfully parsed %d datetimes (%.1f%%). • Added %d component column(s) to dataset. • Review preview tables before proceeding with analysis.',
+                        'DateTime conversion completed. \u2022 Processed %d observations from variable "%s". \u2022 Successfully parsed %d datetimes (%.1f%%). \u2022 Added %d component column(s) to dataset. \u2022 Review preview tables before proceeding with analysis.',
                         quality$total_observations, datetime_var,
                         quality$successfully_parsed, quality$success_rate,
                         components_added

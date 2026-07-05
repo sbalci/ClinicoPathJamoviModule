@@ -48,7 +48,6 @@ calculate_metrics <- function(TP, TN, FP, FN) {
 
 decisioncalculator_scenarios <- tibble(
   scenario_id = 1:15,
-
   scenario_name = c(
     "High Sensitivity Screening",
     "High Specificity Confirmatory",
@@ -73,7 +72,6 @@ decisioncalculator_scenarios <- tibble(
     "Screening", "Screening", "Gold Standard", "Poor", "Diagnostic",
     "Screening", "Imaging", "POC", "Laboratory", "Clinical"
   ),
-
   disease_type = c(
     "Cancer", "Infection", "Cardiac", "Cancer", "Infection",
     "Genetic", "Diabetes", "Any", "Any", "Sepsis",
@@ -122,11 +120,12 @@ decisioncalculator_scenarios <- tibble(
 
 # Add calculated metrics
 metrics_list <- mapply(calculate_metrics,
-                       decisioncalculator_scenarios$TP,
-                       decisioncalculator_scenarios$TN,
-                       decisioncalculator_scenarios$FP,
-                       decisioncalculator_scenarios$FN,
-                       SIMPLIFY = FALSE)
+  decisioncalculator_scenarios$TP,
+  decisioncalculator_scenarios$TN,
+  decisioncalculator_scenarios$FP,
+  decisioncalculator_scenarios$FN,
+  SIMPLIFY = FALSE
+)
 
 decisioncalculator_scenarios <- decisioncalculator_scenarios %>%
   mutate(
@@ -157,19 +156,18 @@ decisioncalculator_screening <- tibble(
   sample_size = 1000,
 
   # 2×2 counts (sensitivity ~90%, specificity ~85%)
-  TP = 45,   # 50 cases detected out of 50 with cancer
-  TN = 808,  # 950 healthy correctly identified
-  FP = 142,  # 142 false positives (recalls)
-  FN = 5,    # 5 cancers missed
+  TP = 45, # 50 cases detected out of 50 with cancer
+  TN = 808, # 950 healthy correctly identified
+  FP = 142, # 142 false positives (recalls)
+  FN = 5, # 5 cancers missed
 
   # Prevalence
   study_prevalence = 0.05,
-  population_prevalence = 0.005,  # Much lower in general population
+  population_prevalence = 0.005, # Much lower in general population
 
   # Expected metrics
   expected_sensitivity = 0.90,
   expected_specificity = 0.85,
-
   notes = "High sensitivity screening test designed to minimize false negatives"
 )
 
@@ -193,17 +191,15 @@ decisioncalculator_confirmatory <- tibble(
   sample_size = 150,
 
   # 2×2 counts (sensitivity ~85%, specificity ~98%)
-  TP = 85,   # 85 of 100 malignancies confirmed
-  TN = 49,   # 49 of 50 benign lesions correctly identified
-  FP = 1,    # 1 false positive (benign called malignant)
-  FN = 15,   # 15 malignancies missed
+  TP = 85, # 85 of 100 malignancies confirmed
+  TN = 49, # 49 of 50 benign lesions correctly identified
+  FP = 1, # 1 false positive (benign called malignant)
+  FN = 15, # 15 malignancies missed
 
-  study_prevalence = 0.67,  # Enriched sample (post-screening)
+  study_prevalence = 0.67, # Enriched sample (post-screening)
   population_prevalence = 0.05,
-
   expected_sensitivity = 0.85,
   expected_specificity = 0.98,
-
   notes = "Confirmatory test prioritizes ruling IN disease (high specificity)"
 )
 
@@ -227,17 +223,15 @@ decisioncalculator_biomarker <- tibble(
   sample_size = 500,
 
   # 2×2 counts (sensitivity ~95%, specificity ~92%)
-  TP = 95,   # 95 of 100 MI cases detected
-  TN = 368,  # 368 of 400 non-MI correctly identified
-  FP = 32,   # 32 false positives
-  FN = 5,    # 5 MI cases missed
+  TP = 95, # 95 of 100 MI cases detected
+  TN = 368, # 368 of 400 non-MI correctly identified
+  FP = 32, # 32 false positives
+  FN = 5, # 5 MI cases missed
 
   study_prevalence = 0.20,
   population_prevalence = 0.15,
-
   expected_sensitivity = 0.95,
   expected_specificity = 0.92,
-
   notes = "Excellent biomarker with high sensitivity and specificity"
 )
 
@@ -262,17 +256,16 @@ decisioncalculator_raredisease <- tibble(
 
   # 2×2 counts (excellent test, but rare disease)
   # Prevalence 1:10,000 = 0.0001, use 1:1000 for this dataset
-  TP = 9,      # 9 of 10 PKU cases detected (sens = 0.90)
-  TN = 9890,   # 9890 of 9990 healthy babies (spec = 0.99)
-  FP = 100,    # 100 false positives
-  FN = 1,      # 1 PKU case missed
+  TP = 9, # 9 of 10 PKU cases detected (sens = 0.90)
+  TN = 9890, # 9890 of 9990 healthy babies (spec = 0.99)
+  FP = 100, # 100 false positives
+  FN = 1, # 1 PKU case missed
 
   study_prevalence = 0.001,
   population_prevalence = 0.0001,
-
   expected_sensitivity = 0.90,
   expected_specificity = 0.99,
-  expected_ppv = 0.083,  # Low PPV despite excellent test
+  expected_ppv = 0.083, # Low PPV despite excellent test
 
   notes = "Demonstrates that PPV is low even with excellent test when disease is rare"
 )
@@ -292,7 +285,6 @@ cat("✓ Generated decisioncalculator_raredisease\n")
 
 decisioncalculator_prevalence <- tibble(
   scenario = c("High Prevalence (Pediatric)", "Low Prevalence (Adult)"),
-
   setting = c("Pediatric Clinic", "Adult Primary Care"),
 
   # Same test characteristics (sens=0.85, spec=0.95)
@@ -301,14 +293,12 @@ decisioncalculator_prevalence <- tibble(
   TN = c(133, 903),
   FP = c(7, 47),
   FN = c(15, 7),
-
   total_n = c(240, 1000),
   prevalence = c(0.417, 0.05),
 
   # Same test, different PPV/NPV due to prevalence
   expected_ppv = c(0.924, 0.478),
   expected_npv = c(0.899, 0.992),
-
   notes = c(
     "High prevalence: Excellent PPV and NPV",
     "Low prevalence: Poor PPV, excellent NPV"
@@ -330,20 +320,16 @@ cat("✓ Generated decisioncalculator_prevalence\n")
 decisioncalculator_perfect <- tibble(
   test_name = "Perfect Test (Theoretical)",
   condition = "Any Disease",
-
   TP = 50,
   TN = 150,
   FP = 0,
   FN = 0,
-
   total_n = 200,
   prevalence = 0.25,
-
   expected_sensitivity = 1.00,
   expected_specificity = 1.00,
   expected_ppv = 1.00,
   expected_npv = 1.00,
-
   notes = "Perfect test with 100% sensitivity and specificity (theoretical)"
 )
 
@@ -368,13 +354,10 @@ decisioncalculator_useless <- tibble(
   TN = 75,
   FP = 75,
   FN = 25,
-
   total_n = 200,
   prevalence = 0.25,
-
   expected_sensitivity = 0.50,
   expected_specificity = 0.50,
-
   notes = "No diagnostic value, equivalent to random guessing"
 )
 
@@ -394,15 +377,12 @@ decisioncalculator_small <- tibble(
   test_name = "Pilot Study Test",
   condition = "Pilot Evaluation",
   setting = "Small Validation Study",
-
   TP = 18,
   TN = 22,
   FP = 3,
   FN = 7,
-
   total_n = 50,
   prevalence = 0.50,
-
   notes = "Small sample, wide confidence intervals expected"
 )
 
@@ -420,8 +400,7 @@ cat("✓ Generated decisioncalculator_small\n")
 # Scenario: PSA testing with different cut-offs
 
 decisioncalculator_multiplecuts <- tibble(
-  cutoff_scenario = c("Conservative (PSA ≥10)", "Standard (PSA ≥4)", "Aggressive (PSA ≥2.5)"),
-
+  cutoff_scenario = c("Conservative (PSA >=10)", "Standard (PSA >=4)", "Aggressive (PSA >=2.5)"),
   cutoff_value = c(10, 4, 2.5),
 
   # Conservative: High specificity, lower sensitivity
@@ -431,14 +410,11 @@ decisioncalculator_multiplecuts <- tibble(
   TN = c(195, 180, 160),
   FP = c(5, 20, 40),
   FN = c(35, 15, 5),
-
   total_n = 300,
   diseased = 100,
   healthy = 200,
-
   sensitivity = c(0.65, 0.85, 0.95),
   specificity = c(0.975, 0.90, 0.80),
-
   clinical_strategy = c(
     "Minimize false positives, accept missing some cases",
     "Balanced approach, standard clinical practice",
@@ -462,18 +438,14 @@ decisioncalculator_imaging <- tibble(
   test_name = "CT Scan",
   condition = "Appendicitis",
   setting = "Emergency Department",
-
   TP = 88,
   TN = 180,
   FP = 20,
   FN = 12,
-
   total_n = 300,
   prevalence = 0.33,
-
   cost_per_test = 1200,
   radiation_exposure = "5-10 mSv",
-
   notes = "High-performance imaging with cost and radiation considerations"
 )
 
@@ -493,18 +465,14 @@ decisioncalculator_pointofcare <- tibble(
   test_name = "COVID-19 Rapid Antigen Test",
   condition = "SARS-CoV-2 Infection",
   setting = "Outpatient Clinic",
-
   TP = 92,
   TN = 185,
   FP = 15,
   FN = 8,
-
   total_n = 300,
   prevalence = 0.33,
-
   turnaround_time = "15 minutes",
   cost_per_test = 25,
-
   notes = "Fast, low-cost test with good performance for symptomatic patients"
 )
 

@@ -249,7 +249,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             #     implement a real tram fit (tram::Survreg/Coxph/BoxCox) or remove the branch,
             #     the notice, and the usage example.
             #   - `support` (read L214) is passed here and never used; `method` (L213) is
-            #     cosmetic — survreg always does ML, yet output echoes the choice (L574/L730/L818)
+            #     cosmetic - survreg always does ML, yet output echoes the choice (L574/L730/L818)
             #     while L821 hardcodes "Maximum likelihood" (self-contradiction). max_iterations /
             #     convergence_tolerance / bootstrap_ci / bootstrap_samples / weights_variable are
             #     declared in .a.yaml but never read/wired. Wire them through survreg.control() /
@@ -375,7 +375,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         .applyTransformation = function(data, transformation, lambda = NULL) {
 
             # TODO (correctness): this design transforms the response TIME then fits a fixed
-            #   parametric survreg AFT — it is NOT a linear/tram transformation model, so the
+            #   parametric survreg AFT - it is NOT a linear/tram transformation model, so the
             #   "unified framework / encompasses many models as special cases / robust" HTML
             #   (L824-829, L843-846, L877-884) overstates the method. Also loglog/probit/logit/
             #   cloglog (and boxcox with lambda<0, the default search floor) produce NON-POSITIVE
@@ -448,7 +448,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                         loglik = model$loglik[length(model$loglik)],
                         aic = AIC(model),
                         bic = BIC(model),
-                        # TODO (correctness): `model$iter < 100` is always TRUE — survreg's
+                        # TODO (correctness): `model$iter < 100` is always TRUE - survreg's
                         #   default maxiter is 30, so a non-converged fit (iter == maxiter) is
                         #   reported "converged". Flag via the survreg "Ran out of iterations"
                         #   warning or model$iter >= survreg.control()$maxiter / non-finite loglik.
@@ -481,7 +481,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             # Basic transformation validation tests
             # TODO (correctness): normality tests use type="response" residuals of a CENSORED
-            #   survreg AFT — censored obs enter as raw values, so even a correct model looks
+            #   survreg AFT - censored obs enter as raw values, so even a correct model looks
             #   "Non-normal". Use censoring-aware residuals (deviance / Cox-Snell vs unit-exp).
             #   Also ks.test(resid,"pnorm",mean,sd) estimates params from the same data
             #   (Lilliefors problem) → anti-conservative; use nortest::lillie.test or a QQ plot.

@@ -27,6 +27,7 @@
 The `jjscatterstats` function provides scatter plot visualization with correlation analysis using ggstatsplot and ggpubr packages. While the core statistical methods are sound (delegating to well-tested packages), the implementation contains **critical bugs** that will cause runtime crashes, lacks proper error handling using jamovi's Notices API, and is missing essential clinician-friendly features.
 
 **Critical Issues Requiring Immediate Fix**:
+
 1. 🔴 **SHOWSTOPPER BUG**: Dead code references removed `warnings` output (will crash application)
 2. 🔴 **NO VALIDATION**: Zero data quality checks (sample size, missing data, outliers)
 3. 🔴 **NO NOTICES**: Uses legacy `stop()` instead of jamovi Notices API
@@ -45,6 +46,7 @@ The `jjscatterstats` function provides scatter plot visualization with correlati
 The enhanced plot method (`.plot3`) contains code that writes warnings to `self$results$warnings`, but this output was **removed** in recent fixes (see JJSCATTERSTATS_FIXES_APPLIED.md). This creates a runtime error when users select robust or Bayesian correlation with enhanced plot aesthetics.
 
 **Affected Code**:
+
 ```r
 # Lines 521-531 - WILL CRASH
 if (!is.null(warning_msg)) {
@@ -68,6 +70,7 @@ self$results$warnings$setVisible(TRUE)                 # ❌ CRASH
 
 **User Impact**:
 When a user:
+
 1. Selects robust or Bayesian correlation
 2. Adds color/size/shape/alpha/label variables (triggers plot3)
 3. Runs analysis
@@ -76,6 +79,7 @@ Result: **Application crashes** with error about undefined results object.
 
 **Fix Required**:
 Replace with Notices API:
+
 ```r
 # CORRECT Implementation
 if (!is.null(warning_msg)) {
@@ -96,6 +100,7 @@ if (!is.null(warning_msg)) {
 
 **Problem**:
 Function performs NO validation of data quality:
+
 - ❌ No minimum sample size check (correlation unreliable with n < 20)
 - ❌ No missing data assessment
 - ❌ No outlier detection
@@ -103,6 +108,7 @@ Function performs NO validation of data quality:
 - ❌ No range/distribution checks
 
 **Current Validation**:
+
 ```r
 # Line 83 - ONLY validation
 if (nrow(self$data) == 0)
@@ -111,6 +117,7 @@ if (nrow(self$data) == 0)
 
 **Clinical Risk**:
 Clinicians may:
+
 - Trust correlations calculated from n=5 patients (statistically meaningless)
 - Miss that 80% of data is missing
 - Get distorted results from extreme outliers
@@ -133,7 +140,7 @@ if (n < 3) {
 if (n < 20) {
     notice <- jmvcore::Notice$new(
         type = jmvcore::NoticeType$STRONG_WARNING,
-        message = "Small sample size (n = {n}): Correlation estimates may be unstable. Results should be interpreted with caution. Recommend n ≥ 20 for reliable correlation analysis."
+        message = "Small sample size (n = {n}): Correlation estimates may be unstable. Results should be interpreted with caution. Recommend n >= 20 for reliable correlation analysis."
     )
     self$results$insert(50, notice)
 }
@@ -189,12 +196,14 @@ if (total_outliers > 0) {
 
 **Problem**:
 Function uses **ZERO** jamovi Notices API calls:
+
 - Uses legacy `stop()` on line 83
 - No ERROR notices for validation failures
 - No WARNING notices for data quality issues
 - No INFO notices for completion or guidance
 
 **Impact**:
+
 - Poor user experience (hard crashes vs. friendly notices)
 - Inconsistent with other jamovi modules
 - Missing opportunities for user education
@@ -219,12 +228,14 @@ self$options$ggpubrPalette <- "jco"
 ```
 
 **Issues**:
+
 1. **User Confusion**: "I didn't select nonparametric, why did it change?"
 2. **Unconventional**: Most jamovi modules don't mutate options after initialization
 3. **UI Sync**: jamovi UI may not reflect the mutated values
 4. **Reproducibility**: Saved analysis files may not capture preset application
 
 **Better Approach**:
+
 ```r
 # Option 1: Use preset-specific defaults in .a.yaml
 # Option 2: Create computed options based on preset
@@ -259,12 +270,14 @@ self$options$ggpubrPalette <- "jco"
 ### ✅ 1. Sound Statistical Foundation
 
 **What's Good**:
+
 - Delegates core statistics to **ggstatsplot** (well-tested, peer-reviewed package)
 - Correct correlation methods: Pearson, Spearman, robust (WRS2), Bayesian (BayesFactor)
 - Proper confidence interval handling via ggstatsplot
 - Correct smooth line methods: lm, loess, gam
 
 **Evidence**:
+
 ```r
 # Lines 201-222 - Proper argument passing to ggstatsplot
 .args <- list(
@@ -285,10 +298,12 @@ self$options$ggpubrPalette <- "jco"
 ### ✅ 2. Variable Name Safety (Recent Addition)
 
 **What's Good**:
+
 - Implements `.escapeVar()` helper for variables with special characters
 - Correctly applied to NSE contexts with `rlang::sym()`
 
 **Evidence**:
+
 ```r
 # Lines 13-20 - Helper method
 .escapeVar = function(varname) {
@@ -310,6 +325,7 @@ point_aes$colour <- rlang::sym(private$.escapeVar(self$options$colorvar))
 ### ✅ 3. Comprehensive Visualization Options
 
 **What's Good**:
+
 - Three plot types: basic (ggstatsplot), grouped (by factor), enhanced (multi-aesthetic)
 - ggpubr integration for publication-ready plots
 - Multiple aesthetic mappings: color, size, shape, alpha, labels
@@ -323,6 +339,7 @@ point_aes$colour <- rlang::sym(private$.escapeVar(self$options$colorvar))
 ### ✅ 4. Well-Organized Code Structure
 
 **What's Good**:
+
 - Clear separation of plot methods (`.plot`, `.plot2`, `.plot3`, `.plotGGPubr`, `.plotGGPubr2`)
 - Modular helper methods (`.applyClinicalPreset`, `.generateExplanations`, `.escapeVar`)
 - R6 class structure follows jamovi conventions
@@ -340,6 +357,7 @@ point_aes$colour <- rlang::sym(private$.escapeVar(self$options$colorvar))
 **Location**: [R/jjscatterstats.b.R:276-336](R/jjscatterstats.b.R#L276-L336)
 
 **Current Code** (61 lines duplicated):
+
 ```r
 # Lines 278-302 - First construction
 plot_call <- rlang::expr(
@@ -355,6 +373,7 @@ if (self$options$marginal) {
 ```
 
 **Improvement**:
+
 ```r
 # Build base arguments list
 base_args <- list(
@@ -389,6 +408,7 @@ plot <- eval(plot_call)
 **Location**: Multiple locations
 
 **Examples**:
+
 ```r
 # Line 92 - Magic string
 if (preset == "custom") {  # ❌ Hard-coded
@@ -407,6 +427,7 @@ smooth_method <- switch(
 ```
 
 **Improvement**:
+
 ```r
 # Define constants at top of private methods
 PRESET_CUSTOM <- "custom"
@@ -436,6 +457,7 @@ if (preset == PRESET_BIOMARKER) {
 **Location**: Throughout, especially `.plot3`
 
 **Examples Needing Comments**:
+
 ```r
 # Line 395-398 - Why use .data[[]] here?
 aes_mapping <- ggplot2::aes(
@@ -452,6 +474,7 @@ tryCatch({
 ```
 
 **Improvement**:
+
 ```r
 # Enhanced scatter plot uses direct data column access (.data[[]])
 # for base aesthetics to avoid NSE issues. Aesthetic mappings (color,
@@ -481,6 +504,7 @@ tryCatch({
 **Clinician Need**: Copy-paste ready text for pathology reports
 
 **Implementation**:
+
 ```r
 # Add to .r.yaml
 - name: reportSummary
@@ -551,6 +575,7 @@ tryCatch({
 **Clinician Need**: Understanding scatter plots and correlation
 
 **Implementation**:
+
 ```r
 # Add to .a.yaml
 - name: showAboutPanel
@@ -587,8 +612,8 @@ tryCatch({
         "<h4>Interpreting Correlation Strength</h4>",
         "<ul>",
         "<li><strong>|r| < 0.3</strong>: Weak correlation</li>",
-        "<li><strong>0.3 ≤ |r| < 0.7</strong>: Moderate correlation</li>",
-        "<li><strong>|r| ≥ 0.7</strong>: Strong correlation</li>",
+        "<li><strong>0.3 <= |r| < 0.7</strong>: Moderate correlation</li>",
+        "<li><strong>|r| >= 0.7</strong>: Strong correlation</li>",
         "</ul>",
 
         "<h4>Clinical Example</h4>",
@@ -628,6 +653,7 @@ tryCatch({
 **Clinician Need**: Understanding when results are valid
 
 **Implementation**:
+
 ```r
 # Add to .a.yaml
 - name: showAssumptions
@@ -732,6 +758,7 @@ tryCatch({
 **Clinician Need**: Confirmation that analysis completed + next steps
 
 **Implementation**:
+
 ```r
 # Add at end of .run()
 .run = function() {
@@ -770,6 +797,7 @@ tryCatch({
 **Recommendation**: Refactor preset system to avoid option mutation
 
 **Action**:
+
 - Remove direct `self$options` mutations in `.applyClinicalPreset()`
 - Use INFO notices to communicate preset recommendations
 - Let user manually select recommended settings
@@ -784,11 +812,13 @@ tryCatch({
 **Recommendation**: Fix correlation method handling in enhanced plot
 
 **Action**:
+
 1. Remove dead code referencing `self$results$warnings` (lines 521-531, 551-552)
 2. Implement Notices API for method fallback warnings
 3. Consider removing correlation annotation from plot3 entirely (ggstatsplot already handles it in plot1/plot2)
 
 **Code Fix**:
+
 ```r
 # OPTION A: Remove correlation from plot3 (RECOMMENDED)
 # Delete lines 467-553 entirely
@@ -812,6 +842,7 @@ if (!is.null(warning_msg)) {
 **Recommendation**: Implement comprehensive validation framework
 
 **Priority Actions**:
+
 1. ✅ **Sample size validation** (minimum n=3, warning n<20)
 2. ✅ **Missing data assessment** (warn if >20% missing)
 3. ✅ **Outlier detection** (IQR method, warn if present)
@@ -836,6 +867,7 @@ if (!is.null(warning_msg)) {
 | Guided Mode | LOW | High | Medium (complexity) |
 
 **Implementation Order**:
+
 1. Fix critical bugs (warnings references)
 2. Add data validation
 3. Implement Notices API
@@ -854,7 +886,7 @@ if (!is.null(warning_msg)) {
   - [ ] Either remove correlation from plot3 entirely
   - [ ] OR replace with Notices API (see code above)
 - [ ] **SAFETY**: Replace `stop()` on line 83 with ERROR Notice
-- [ ] **VALIDATION**: Implement minimum sample size check (n ≥ 3)
+- [ ] **VALIDATION**: Implement minimum sample size check (n >= 3)
 - [ ] **VALIDATION**: Implement constant variable check (SD > 0)
 - [ ] **TEST**: Verify no crashes when selecting robust/bayes with enhanced plot
 
@@ -991,12 +1023,14 @@ test_that("Clinical presets apply correctly", {
 **Status**: ❌ **NOT READY FOR RELEASE**
 
 **Minimum Requirements for Release**:
+
 1. ✅ Fix showstopper bug (remove warnings references)
-2. ✅ Add minimum data validation (n ≥ 3, SD > 0)
+2. ✅ Add minimum data validation (n >= 3, SD > 0)
 3. ✅ Replace stop() with ERROR Notice
 4. ✅ Test basic functionality without crashes
 
 **Recommended for Quality Release**:
+
 1. All minimum requirements above
 2. ✅ Comprehensive data validation (sample size, missing data, outliers)
 3. ✅ Full Notices API implementation
@@ -1005,6 +1039,7 @@ test_that("Clinical presets apply correctly", {
 6. ✅ Assumptions Panel for guidance
 
 **Next Steps**:
+
 1. Create feature branch: `fix/jjscatterstats-critical-bugs`
 2. Fix showstopper (lines 521-531, 551-552)
 3. Implement data validation
@@ -1026,6 +1061,7 @@ test_that("Clinical presets apply correctly", {
 ## Comparison with jjridges
 
 For reference, `jjridges` (recently enhanced) now includes:
+
 - ✅ Report Summary (copy-ready)
 - ✅ About Panel (educational)
 - ✅ Assumptions Panel (guidance)

@@ -664,21 +664,6 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' standard to identify optimal testing strategies. Calculates sensitivity,
 #' specificity, PPV, NPV, and accuracy for each pattern combination.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Two-test combination analysis
-#' result <- decisioncombine(
-#'   data = histopathology,
-#'   gold = "Golden Standart",
-#'   goldPositive = "1",
-#'   test1 = "New Test",
-#'   test1Positive = "1",
-#'   test2 = "Rater 1",
-#'   test2Positive = "1",
-#'   showIndividual = TRUE
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param gold The gold standard reference variable representing true disease
 #'   status.

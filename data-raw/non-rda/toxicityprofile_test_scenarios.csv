@@ -1,7 +1,7 @@
 "Scenario","Dataset","Analysis_Type","Variables","Expected_Result"
 "Basic Toxicity Profile","toxicityprofile_oncology_trial","Basic frequency and grade distribution","patient_id, adverse_event, toxicity_grade","Frequency tables and grade distribution plots"
 "Treatment Comparison","toxicityprofile_oncology_trial","Group comparison with statistical tests","patient_id, adverse_event, toxicity_grade, treatment_group","Risk ratios, p-values, and comparison plots"
-"High Grade Events Analysis","toxicityprofile_immunotherapy","High grade (≥3) event analysis","patient_id, adverse_event, toxicity_grade (filter ≥3)","Focus on serious adverse events only"
+"High Grade Events Analysis","toxicityprofile_immunotherapy","High grade (>=3) event analysis","patient_id, adverse_event, toxicity_grade (filter >=3)","Focus on serious adverse events only"
 "System Organ Class Analysis","toxicityprofile_targeted_therapy","SOC-based toxicity summary","patient_id, adverse_event, toxicity_grade, system_organ_class","Toxicity profile by organ system"
 "Time-to-Event Analysis","toxicityprofile_oncology_trial","Cumulative incidence over time","patient_id, adverse_event, toxicity_grade, time_to_event","Time-to-event curves and cumulative incidence"
 "Dose-Response Relationship","toxicityprofile_dose_escalation","Dose-dependent toxicity analysis","patient_id, adverse_event, toxicity_grade, treatment_group (dose levels)","Dose-toxicity relationship visualization"

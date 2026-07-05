@@ -14,7 +14,7 @@
 source("data-raw/data_save_helpers.R")
 
 library(survival)
-set.seed(42)  # Reproducible results
+set.seed(42) # Reproducible results
 
 # ===================================================================
 # HELPER FUNCTIONS
@@ -25,7 +25,6 @@ set.seed(42)  # Reproducible results
 #' @param stage_type Type of staging system ("7th", "8th", "custom")
 #' @param cancer_type Cancer type affecting stage distribution
 generate_tnm_stages <- function(n, stage_type = "7th", cancer_type = "lung") {
-
     # Define stage probabilities by cancer type and staging system
     stage_probs <- list(
         "7th" = list(
@@ -34,12 +33,18 @@ generate_tnm_stages <- function(n, stage_type = "7th", cancer_type = "lung") {
             "colon" = c("I" = 0.20, "II" = 0.30, "III" = 0.35, "IV" = 0.15)
         ),
         "8th" = list(
-            "lung" = c("IA" = 0.08, "IB" = 0.12, "IIA" = 0.10, "IIB" = 0.15,
-                      "IIIA" = 0.20, "IIIB" = 0.10, "IIIC" = 0.05, "IV" = 0.20),
-            "breast" = c("IA" = 0.15, "IB" = 0.15, "IIA" = 0.20, "IIB" = 0.20,
-                        "IIIA" = 0.15, "IIIB" = 0.05, "IIIC" = 0.05, "IV" = 0.05),
-            "colon" = c("I" = 0.20, "IIA" = 0.15, "IIB" = 0.15, "IIC" = 0.05,
-                       "IIIA" = 0.15, "IIIB" = 0.15, "IIIC" = 0.05, "IV" = 0.10)
+            "lung" = c(
+                "IA" = 0.08, "IB" = 0.12, "IIA" = 0.10, "IIB" = 0.15,
+                "IIIA" = 0.20, "IIIB" = 0.10, "IIIC" = 0.05, "IV" = 0.20
+            ),
+            "breast" = c(
+                "IA" = 0.15, "IB" = 0.15, "IIA" = 0.20, "IIB" = 0.20,
+                "IIIA" = 0.15, "IIIB" = 0.05, "IIIC" = 0.05, "IV" = 0.05
+            ),
+            "colon" = c(
+                "I" = 0.20, "IIA" = 0.15, "IIB" = 0.15, "IIC" = 0.05,
+                "IIIA" = 0.15, "IIIB" = 0.15, "IIIC" = 0.05, "IV" = 0.10
+            )
         )
     )
 
@@ -53,15 +58,20 @@ generate_tnm_stages <- function(n, stage_type = "7th", cancer_type = "lung") {
 #' @param stages Vector of TNM stages
 #' @param cancer_type Cancer type affecting survival
 generate_survival_times <- function(stages, cancer_type = "lung") {
-
     # Median survival by stage (months)
     median_survival <- list(
-        "lung" = list("I" = 60, "IA" = 70, "IB" = 55, "II" = 36, "IIA" = 40, "IIB" = 32,
-                     "III" = 18, "IIIA" = 20, "IIIB" = 16, "IIIC" = 14, "IV" = 8),
-        "breast" = list("I" = 120, "IA" = 130, "IB" = 120, "II" = 96, "IIA" = 100, "IIB" = 90,
-                       "III" = 60, "IIIA" = 65, "IIIB" = 55, "IIIC" = 45, "IV" = 24),
-        "colon" = list("I" = 100, "II" = 80, "IIA" = 85, "IIB" = 75, "IIC" = 70,
-                      "III" = 48, "IIIA" = 55, "IIIB" = 45, "IIIC" = 40, "IV" = 20)
+        "lung" = list(
+            "I" = 60, "IA" = 70, "IB" = 55, "II" = 36, "IIA" = 40, "IIB" = 32,
+            "III" = 18, "IIIA" = 20, "IIIB" = 16, "IIIC" = 14, "IV" = 8
+        ),
+        "breast" = list(
+            "I" = 120, "IA" = 130, "IB" = 120, "II" = 96, "IIA" = 100, "IIB" = 90,
+            "III" = 60, "IIIA" = 65, "IIIB" = 55, "IIIC" = 45, "IV" = 24
+        ),
+        "colon" = list(
+            "I" = 100, "II" = 80, "IIA" = 85, "IIB" = 75, "IIC" = 70,
+            "III" = 48, "IIIA" = 55, "IIIB" = 45, "IIIC" = 40, "IV" = 20
+        )
     )
 
     surv_params <- median_survival[[cancer_type]]
@@ -72,7 +82,7 @@ generate_survival_times <- function(stages, cancer_type = "lung") {
     for (i in seq_along(stages)) {
         stage <- stages[i]
         median_time <- surv_params[[stage]]
-        if (is.null(median_time)) median_time <- 24  # Default
+        if (is.null(median_time)) median_time <- 24 # Default
 
         # Convert median to rate parameter for exponential distribution
         rate <- log(2) / median_time
@@ -93,13 +103,17 @@ generate_events <- function(survival_times, followup_time = 60) {
     # Censor some events randomly (lost to follow-up)
     censoring_rate <- 0.15
     censor_indices <- sample(seq_along(events),
-                           size = floor(length(events) * censoring_rate))
+        size = floor(length(events) * censoring_rate)
+    )
     events[censor_indices] <- 0
 
     # Adjust survival times for censored cases
-    survival_times[events == 0] <- pmin(survival_times[events == 0],
-                                       runif(sum(events == 0),
-                                            min = 6, max = followup_time))
+    survival_times[events == 0] <- pmin(
+        survival_times[events == 0],
+        runif(sum(events == 0),
+            min = 6, max = followup_time
+        )
+    )
 
     list(times = pmax(survival_times, 0.5), events = events)
 }
@@ -108,7 +122,6 @@ generate_events <- function(survival_times, followup_time = 60) {
 #' @param old_stages Old staging system stages
 #' @param cancer_type Cancer type
 create_stage_migration <- function(old_stages, cancer_type = "lung") {
-
     # Define migration patterns (old -> new probabilities)
     migration_patterns <- list(
         "lung" = list(
@@ -155,7 +168,6 @@ create_stage_migration <- function(old_stages, cancer_type = "lung") {
 #' @param n Number of patients
 #' @param cancer_type Cancer type
 generate_covariates <- function(n, cancer_type = "lung") {
-
     # Age distribution by cancer type
     age_params <- list(
         "lung" = list(mean = 65, sd = 12),
@@ -168,17 +180,23 @@ generate_covariates <- function(n, cancer_type = "lung") {
 
     data.frame(
         age = pmax(pmin(rnorm(n, age_param$mean, age_param$sd), 90), 18),
-        gender = sample(c("Male", "Female"), n, replace = TRUE,
-                       prob = if(cancer_type == "breast") c(0.01, 0.99) else c(0.55, 0.45)),
-        smoking_status = if(cancer_type == "lung") {
-            sample(c("Never", "Former", "Current"), n, replace = TRUE,
-                  prob = c(0.20, 0.45, 0.35))
+        gender = sample(c("Male", "Female"), n,
+            replace = TRUE,
+            prob = if (cancer_type == "breast") c(0.01, 0.99) else c(0.55, 0.45)
+        ),
+        smoking_status = if (cancer_type == "lung") {
+            sample(c("Never", "Former", "Current"), n,
+                replace = TRUE,
+                prob = c(0.20, 0.45, 0.35)
+            )
         } else {
-            sample(c("Never", "Former", "Current"), n, replace = TRUE,
-                  prob = c(0.60, 0.30, 0.10))
+            sample(c("Never", "Former", "Current"), n,
+                replace = TRUE,
+                prob = c(0.60, 0.30, 0.10)
+            )
         },
         performance_status = sample(0:2, n, replace = TRUE, prob = c(0.60, 0.30, 0.10)),
-        comorbidity_score = rpois(n, lambda = if(cancer_type == "lung") 1.5 else 1.0)
+        comorbidity_score = rpois(n, lambda = if (cancer_type == "lung") 1.5 else 1.0)
     )
 }
 
@@ -192,10 +210,9 @@ generate_covariates <- function(n, cancer_type = "lung") {
 #' @param followup_months Maximum follow-up time in months
 #' @param migration_scenario Migration scenario ("typical", "major_revision", "minor_update")
 generate_stagemigration_data <- function(n = 500,
-                                        cancer_type = "lung",
-                                        followup_months = 60,
-                                        migration_scenario = "typical") {
-
+                                         cancer_type = "lung",
+                                         followup_months = 60,
+                                         migration_scenario = "typical") {
     message(paste("Generating", n, "patient", cancer_type, "cancer staging migration dataset..."))
 
     # Generate patient IDs
@@ -246,10 +263,10 @@ generate_stagemigration_data <- function(n = 500,
     )
 
     # Add some derived variables for testing advanced features
-    dataset$AgeBinary <- ifelse(dataset$Age >= 65, "≥65", "<65")
+    dataset$AgeBinary <- ifelse(dataset$Age >= 65, ">=65", "<65")
     dataset$HighRisk <- as.numeric((dataset$PerformanceStatus >= 1) |
-                                  (dataset$ComorbidityScore >= 2) |
-                                  (dataset$Age >= 70))
+        (dataset$ComorbidityScore >= 2) |
+        (dataset$Age >= 70))
 
     # Add some missingness for robustness testing
     missing_rate <- 0.05

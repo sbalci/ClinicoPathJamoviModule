@@ -627,7 +627,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
                 "<em>", 
                 switch(outlier_method,
-                    "iqr" = "IQR Method: Values beyond 1.5 × IQR from Q1/Q3",
+                    "iqr" = "IQR Method: Values beyond 1.5 \u00d7 IQR from Q1/Q3",
                     "zscore" = "Z-Score Method: |Z| > 3",
                     "modified_zscore" = "Modified Z-Score Method: |Modified Z| > 3.5"
                 ),
@@ -791,7 +791,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 
                 test_stat <- round(kw_result$statistic, 4)
                 p_value <- round(kw_result$p.value, 4)
-                test_details <- paste0("χ² = ", test_stat, ", df = ", kw_result$parameter)
+                test_details <- paste0("\u03c7\u00b2 = ", test_stat, ", df = ", kw_result$parameter)
             }
             p_adj <- if (adjust_method != "none") p.adjust(p_value, method = adjust_method) else p_value
             
@@ -886,8 +886,8 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                            if (p_value < 0.05) "significant" else "not significant"
 
             # `groups` is `levels(data[[group_var]])` (user factor labels) at the
-            # caller — escape once here since they reach HTML <p> via report_text
-            # below, then concatenated into comparison_html → setContent.
+            # caller - escape once here since they reach HTML <p> via report_text
+            # below, then concatenated into comparison_html \u2192 setContent.
             groups <- htmltools::htmlEscape(groups)
 
             report_text <- sprintf(

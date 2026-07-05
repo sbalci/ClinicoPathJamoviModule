@@ -103,7 +103,7 @@ Look for: group structure table showing `ecog` (3 dummy vars in one group) and `
 
 ---
 
-## 3. Alpha Parameter -- Group vs Individual Sparsity
+## 3. Alpha Parameter - Group vs Individual Sparsity
 
 ### alpha = 0.3 (group-heavy)
 
@@ -147,7 +147,7 @@ Compare the two: lower alpha tends to select/exclude entire groups, higher alpha
 
 ## 4. Model Selection Criteria
 
-### AIC -- moderate parsimony
+### AIC - moderate parsimony
 
 ```{r criterion-aic}
 sparsegrouplasso(
@@ -165,7 +165,7 @@ sparsegrouplasso(
 )
 ```
 
-### BIC -- strong parsimony
+### BIC - strong parsimony
 
 ```{r criterion-bic}
 sparsegrouplasso(
@@ -214,7 +214,7 @@ Format: semicolons separate groups, commas separate variable indices within grou
 
 ### Ridge-based adaptive weights
 
-Uses initial ridge Cox estimates to weight the penalty -- variables with stronger initial effects get less penalization.
+Uses initial ridge Cox estimates to weight the penalty - variables with stronger initial effects get less penalization.
 
 ```{r adaptive-ridge}
 sparsegrouplasso(

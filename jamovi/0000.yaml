@@ -3077,8 +3077,8 @@ analyses:
       economic evaluations requiring extrapolation • Time-varying treatment
       effects • Relative survival analysis with population mortality
 
-      REQUIREMENTS: • Minimum 30 events (preferably ≥50) • Follow-up covering
-      the period of interest • For df>4: need ≥100 events to avoid overfitting
+      REQUIREMENTS: • Minimum 30 events (preferably >=50) • Follow-up covering
+      the period of interest • For df>4: need >=100 events to avoid overfitting
 
       KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
       predictions at specific time points • Model fit statistics (AIC,

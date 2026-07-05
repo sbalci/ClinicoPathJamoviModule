@@ -81,7 +81,7 @@ assayoptimizationClass <- R6::R6Class(
             # Get the data
             data <- self$data
             
-            # TODO (jamovify): File-wide — error display via `self$results$<table>$setContent("Error: ...")` is non-standard. Affected sites: 84 (this), 91-94, 107, 151, plus the per-handler tryCatch error setContent calls at 292, 366, 468, 557, 632, 734. The jamovi-idiomatic form is `jmvcore::reject("Error: ...")`, which surfaces a banner at the top of the analysis. Skipped during jamovify because it's a UX behavior change — needs explicit decision.
+            # TODO (jamovify): File-wide - error display via `self$results$<table>$setContent("Error: ...")` is non-standard. Affected sites: 84 (this), 91-94, 107, 151, plus the per-handler tryCatch error setContent calls at 292, 366, 468, 557, 632, 734. The jamovi-idiomatic form is `jmvcore::reject("Error: ...")`, which surfaces a banner at the top of the analysis. Skipped during jamovify because it's a UX behavior change - needs explicit decision.
             # Check for missing response variable
             if (!(response_var %in% names(data))) {
                 self$results$design_summary$setContent("Error: Response variable not found in data.")

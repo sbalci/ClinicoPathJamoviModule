@@ -716,7 +716,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 "<h5>Comparison with Apparent Performance</h5>",
                 "<p>The LOOCV pooled ", metric_label, " is typically lower than the apparent ",
                 "(training) ", metric_label, ". The difference represents the <strong>optimism</strong> ",
-                "— the degree to which training-set performance overestimates true performance. ",
+                " - the degree to which training-set performance overestimates true performance. ",
                 "LOOCV provides a more honest estimate than standard bootstrap or k-fold CV ",
                 "because each test set comes from a genuinely separate institution.</p>",
                 "<p><em>Reference: Debray TPA et al. A new framework to enhance the interpretation ",

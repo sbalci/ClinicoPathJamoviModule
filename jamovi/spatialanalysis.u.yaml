@@ -157,5 +157,5 @@ children:
         format: number
         label: "Minimum Points Required"
       - type: Label
-        label: "Minimum number of cells needed for reliable spatial analysis (recommended: ≥10)"
+        label: "Minimum number of cells needed for reliable spatial analysis (recommended: >=10)"
         margin: small

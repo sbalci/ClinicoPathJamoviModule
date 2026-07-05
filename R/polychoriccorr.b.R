@@ -49,7 +49,7 @@ polychoriccorrClass <- R6::R6Class(
                 frequencies <- self$results$frequencies
                 for (i in 1:(n_vars - 1)) {
                     for (j in (i + 1):n_vars) {
-                        # htmlEscape both names — pair_name becomes the Array
+                        # htmlEscape both names - pair_name becomes the Array
                         # item key and the .r.yaml `title: $key` substitution
                         # renders it as live HTML in the panel heading.
                         pair_name <- paste(htmltools::htmlEscape(vars[i]), "×",
@@ -267,7 +267,7 @@ polychoriccorrClass <- R6::R6Class(
                     
                     # Add columns for each level of var2.
                     # title is rendered as HTML; name is a programmatic key used
-                    # at the values-list lookup below — leave it unwrapped.
+                    # at the values-list lookup below - leave it unwrapped.
                     col_names <- colnames(ct)
                     for (col_name in col_names) {
                         freq_table$addColumn(name = col_name,

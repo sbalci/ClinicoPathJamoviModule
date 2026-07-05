@@ -47,6 +47,7 @@ lr_both_pos <- test1_plr * test2_plr
 ```
 
 **Test 1 Positive Only**:
+
 ```r
 lr_t1_only <- test1_plr * test2_nlr
 
@@ -74,14 +75,16 @@ This implements the **Gardner and Altman (1989)** formula for correlated binary 
 
 - For two correlated binary variables with marginal probabilities p₁ and p₂
 - Joint probability with correlation ρ:
+
   ```
   P(X=1, Y=1) = p₁×p₂ + ρ×√(p₁(1-p₁)×p₂(1-p₂))
   ```
 
 **Properties**:
+
 - When ρ = 0: P(X=1, Y=1) = p₁×p₂ (independence)
 - When ρ = 1: Maximum feasible joint probability
-- Constraints: max(0, p₁+p₂-1) ≤ P(X=1, Y=1) ≤ min(p₁, p₂) **(Fréchet-Hoeffding bounds)**
+- Constraints: max(0, p₁+p₂-1) <= P(X=1, Y=1) <= min(p₁, p₂) **(Fréchet-Hoeffding bounds)**
 
 **Bounds Implementation** (Lines 455-458):
 
@@ -105,6 +108,7 @@ postest_prob_both <- postest_odds_both / (1 + postest_odds_both)
 **Mathematical Verification**:
 
 Bayes' theorem in odds form:
+
 - **Odds form**: Post-test odds = Pre-test odds × Likelihood ratio
 - **Probability conversion**: P = Odds / (1 + Odds)
 
@@ -122,6 +126,7 @@ p_either_pos_nD <- 1 - (test1_spec * test2_spec)
 **Mathematical Verification**:
 
 Using De Morgan's Law:
+
 - P(T1+ or T2+) = 1 - P(T1- and T2-)
 - For independent tests: = 1 - P(T1-) × P(T2-)
 - Given disease: = 1 - (1-Sens1) × (1-Sens2)
@@ -137,6 +142,7 @@ p_either_pos_D <- test1_sens + test2_sens - (test1_sens * test2_sens + cond_dep_
 **Mathematical Verification**:
 
 Inclusion-Exclusion Principle:
+
 - P(A ∪ B) = P(A) + P(B) - P(A ∩ B)
 - Where P(A ∩ B) uses correlation-adjusted formula
 
@@ -215,6 +221,7 @@ test_that("cotest calculates post-test probabilities correctly", {
 ### Likelihood Ratio Calculation Test (Lines 175-192)
 
 **Validates**:
+
 - Test 1: PLR = 0.8/0.1 = 8 ✅
 - Test 1: NLR = 0.2/0.9 = 0.222... ✅
 - Test 2: PLR = 0.9/0.05 = 18 ✅
@@ -225,6 +232,7 @@ test_that("cotest calculates post-test probabilities correctly", {
 ### Conditional Dependence Tests (Lines 277-313)
 
 **Test Coverage**:
+
 - Moderate dependence (ρ = 0.20, 0.15) ✅
 - Minimal dependence (ρ = 0.01, 0.01) ✅
 - Validates all probabilities are finite and within [0, 1] ✅
@@ -240,6 +248,7 @@ test_that("cotest calculates post-test probabilities correctly", {
 Six evidence-based clinical scenarios with published parameters:
 
 #### HPV + Pap Smear (Cervical Cancer Screening)
+
 ```r
 hpv_pap = list(
     test1_sens = 0.95, test1_spec = 0.85,  # HPV test
@@ -251,11 +260,13 @@ hpv_pap = list(
 ```
 
 **Clinical Justification**:
+
 - HPV and Pap smear both assess cervical abnormalities
 - Dependent because both affected by same biological process
 - Co-testing recommended in ASCCP guidelines
 
 #### PSA + DRE (Prostate Cancer Screening)
+
 ```r
 psa_dre = list(
     test1_sens = 0.70, test1_spec = 0.90,  # PSA
@@ -267,11 +278,13 @@ psa_dre = list(
 ```
 
 **Clinical Justification**:
+
 - Both tests detect prostate abnormalities
 - DRE can detect PSA-negative cancers
 - Dependent due to same anatomical target
 
 #### Troponin + ECG (Acute Coronary Syndrome)
+
 ```r
 troponin_ecg = list(
     test1_sens = 0.90, test1_spec = 0.95,  # High-sensitivity troponin
@@ -283,11 +296,13 @@ troponin_ecg = list(
 ```
 
 **Clinical Justification**:
+
 - Troponin measures myocardial injury (biochemical)
 - ECG measures electrical activity (physiological)
 - Independent mechanisms justify indep = TRUE
 
 #### Mammogram + Ultrasound (Breast Cancer Screening)
+
 ```r
 mammogram_ultrasound = list(
     test1_sens = 0.85, test1_spec = 0.90,  # Mammography
@@ -299,6 +314,7 @@ mammogram_ultrasound = list(
 ```
 
 #### COVID-19 Antigen + PCR
+
 ```r
 covid_antigen_pcr = list(
     test1_sens = 0.70, test1_spec = 0.98,  # Rapid antigen
@@ -310,6 +326,7 @@ covid_antigen_pcr = list(
 ```
 
 #### Tuberculosis Chest X-ray + Sputum Culture
+
 ```r
 tb_xray_sputum = list(
     test1_sens = 0.75, test1_spec = 0.85,  # Chest X-ray
@@ -389,18 +406,21 @@ Generates manuscript-ready sentence:
 ### Critical Calculation Workflow
 
 **Step 1**: Input Validation
+
 ```r
 private$.validateInputParameters(test1_sens, test1_spec, test2_sens, test2_spec,
                                  prevalence, indep, cond_dep_pos, cond_dep_neg)
 ```
 
 **Step 2**: Calculate Likelihood Ratios (Independent Tests)
+
 ```r
 test1_plr <- private$.calculateLikelihoodRatio(test1_sens, (1 - test1_spec), "Test 1 Positive LR")
 test1_nlr <- private$.calculateLikelihoodRatio((1 - test1_sens), test1_spec, "Test 1 Negative LR")
 ```
 
 **Step 3**: Calculate Post-Test Probabilities
+
 ```r
 if (indep) {
     lr_both_pos <- test1_plr * test2_plr
@@ -413,6 +433,7 @@ if (indep) {
 ```
 
 **Step 4**: Calculate "Either Test Positive" (Parallel Rule)
+
 ```r
 if (indep) {
     p_either_pos_D <- 1 - ((1 - test1_sens) * (1 - test2_sens))
@@ -430,6 +451,7 @@ if (indep) {
 ### 1. Comprehensive Welcome Instructions (Lines 21-55)
 
 **Includes**:
+
 - Purpose statement
 - Quick start guide (5 steps)
 - Key clinical scenarios explained
@@ -439,6 +461,7 @@ if (indep) {
 ### 2. Validation Notices System (Lines 729-762)
 
 **User-Friendly Feedback**:
+
 ```r
 .addNotice = function(message, level = "warning") {
     icon <- switch(level,
@@ -451,6 +474,7 @@ if (indep) {
 ```
 
 **Example Notices**:
+
 - ⚠️ "Test 1 has low discriminatory power (sensitivity + specificity < 1.1)"
 - ℹ️ "Very high Positive Likelihood Ratio (145.2) - indicates highly informative test"
 - ⚠️ "Very low prevalence (< 0.1%) may lead to unstable results"
@@ -458,6 +482,7 @@ if (indep) {
 ### 3. Educational Content
 
 **Dependence Explanation** (Lines 765-835):
+
 - What is conditional independence vs. dependence?
 - Mathematical formulation with formulas
 - When to use dependent vs. independent models
@@ -479,6 +504,7 @@ if (indep) {
 | classification | ⭐⭐⭐⭐ High | High (600 lines) | ✅ Fixed | 7 tests | ✅ Production |
 
 **What Sets cotest Apart**:
+
 - Handles both independent AND dependent test scenarios
 - Six evidence-based clinical presets
 - Comprehensive educational content about test dependence
@@ -496,6 +522,7 @@ if (indep) {
 **Recommendation**: Add test case with known dependent test parameters and manually verified results.
 
 **Example Test**:
+
 ```r
 test_that("cotest calculates dependent probabilities correctly", {
   # Use moderate dependence with simple parameters
@@ -527,6 +554,7 @@ test_that("cotest calculates dependent probabilities correctly", {
 **Purpose**: Allow users to assess impact of uncertainty in dependence parameters.
 
 **Implementation**:
+
 ```r
 cotest(
     test1_sens = 0.85, test1_spec = 0.90,
@@ -548,11 +576,13 @@ cotest(
 **Use Case**: When tests are performed sequentially rather than simultaneously.
 
 **Example**:
+
 - Perform Test 1 first
 - If positive, perform Test 2 for confirmation
 - If negative, stop testing
 
 **Implementation**:
+
 ```r
 cotest(
     ...,
@@ -563,6 +593,7 @@ cotest(
 ```
 
 **Output**:
+
 - Probability of disease after Test 1 only
 - Probability of disease after Test 1 + Test 2
 - Expected number of tests per patient
@@ -577,6 +608,7 @@ cotest(
 ### Weakness 1: Numerical Test for Dependent Case
 
 **Issue**: While the independent test case has numerical validation with pre-calculated values (test-cotest.R:251-275), the dependent test case (test-cotest.R:277-313) only validates that:
+
 - Results are finite ✅
 - Probabilities are between 0 and 1 ✅
 
@@ -596,6 +628,7 @@ But does NOT validate against manually calculated expected values for a dependen
 **Impact**: Low (users can use presets or sensitivity analysis)
 
 **Recommendation**: Add vignette showing:
+
 1. How to estimate ρ from paired test data
 2. How to perform sensitivity analysis when ρ unknown
 3. Typical ρ values from literature for different test types
@@ -607,6 +640,7 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Mathematical/Statistical Accuracy
 
 ✅ **EXCELLENT**
+
 - Independent test formulas are mathematically correct ✅
 - Dependent test correlation adjustment uses standard Gardner-Altman formula ✅
 - Fréchet-Hoeffding bounds correctly implemented ✅
@@ -616,6 +650,7 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Clinical Readiness
 
 ✅ **OUTSTANDING**
+
 - Six evidence-based clinical presets ✅
 - Comprehensive user instructions ✅
 - Clinical interpretation helpers ✅
@@ -625,6 +660,7 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Code Quality
 
 ✅ **HIGH**
+
 - Well-structured modular design ✅
 - Clear separation of concerns ✅
 - Comprehensive error handling and validation ✅
@@ -634,6 +670,7 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Test Coverage
 
 ✅ **COMPREHENSIVE**
+
 - 22 tests covering all major scenarios ✅
 - Numerical accuracy validated for independent tests ✅
 - Boundary value testing ✅
@@ -647,6 +684,7 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Is it mathematically and statistically accurate? ✅ YES
 
 **Evidence**:
+
 1. Independent test formulas verified against probability theory ✅
 2. Dependent test correlation adjustment uses established Gardner-Altman formula ✅
 3. Fréchet-Hoeffding bounds ensure valid joint probabilities ✅
@@ -657,6 +695,7 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Is it ready for use by clinicians and pathologists? ✅ YES
 
 **Evidence**:
+
 1. Six clinical presets with evidence-based parameters ✅
 2. Comprehensive user instructions and guidance ✅
 3. Clinical interpretation built-in (PLR interpretation, significance assessment) ✅
@@ -669,6 +708,7 @@ But does NOT validate against manually calculated expected values for a dependen
 **Release Status**: **READY FOR IMMEDIATE RELEASE**
 
 **Strengths**:
+
 - Mathematically rigorous implementation ✅
 - Comprehensive clinical utility features ✅
 - Excellent user experience ✅
@@ -676,6 +716,7 @@ But does NOT validate against manually calculated expected values for a dependen
 - Numerical stability safeguards ✅
 
 **Minor Weakness** (not a blocker):
+
 - Lacks numerical validation test for dependent case (can be added post-release)
 
 ---
@@ -695,17 +736,20 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Immediate Actions (Optional)
 
 **Action 1**: Add Numerical Validation for Dependent Tests
+
 - Create test case with pre-calculated dependent probabilities
 - Validates correlation adjustment formula
 - Priority: Medium (nice-to-have, not required for release)
 
 **Action 2**: Create Usage Vignette
+
 - Show real-world clinical examples
 - Demonstrate preset usage
 - Explain when to use dependent vs. independent models
 - Priority: High (enhances user adoption)
 
 **Action 3**: Highlight in Package
+
 - Feature prominently in package description
 - Include in "Getting Started" guide
 - Showcase clinical presets as key feature
@@ -713,11 +757,13 @@ But does NOT validate against manually calculated expected values for a dependen
 ### Future Enhancements (Post-Release)
 
 **Phase 1**: Sensitivity Analysis Feature (3-6 months)
+
 - Allow testing multiple dependence parameter values
 - Output table showing probability ranges
 - Help users assess impact of parameter uncertainty
 
 **Phase 2**: Sequential Testing Mode (6-12 months)
+
 - Support test-then-confirm workflows
 - Calculate expected number of tests
 - Cost-effectiveness analysis option

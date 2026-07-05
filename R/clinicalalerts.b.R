@@ -232,7 +232,7 @@ clinicalalertsClass <- R6::R6Class(
             # TODO (stub): several UI options are exposed but not wired to behavior.
             # Either wire them up or hide them from the .u.yaml until implemented:
             #   - `custom_thresholds` option (jamovi/clinicalalerts.a.yaml:103-108):
-            #     toggling it currently has no effect — this method always falls
+            #     toggling it currently has no effect - this method always falls
             #     through to .getClinicalDefaults() regardless of the toggle.
             #   - `confidence_level` option (jamovi/clinicalalerts.a.yaml:124-131):
             #     declared but never read in .run() or any helper.

@@ -51,7 +51,7 @@ None — PDF was readable and all 10 pages extracted successfully.
 | **Paired Wilcoxon signed-rank test** | Primary — comparison of PI error and TAT between AI and no-AI conditions | Two-sided, significance p < 0.05; applied per-case and overall | Shapiro-Wilk normality test indicated non-normal distributions → nonparametric test chosen | Methods p.4; Results Tables 1, 3 |
 | **ICC (Two-way random, single measures)** | Primary — inter-rater agreement for continuous PI scores | ICC(2,1) model; 95% CIs reported | All cases evaluated by all raters (fully crossed design) | Methods p.4; Results p.4 |
 | **Krippendorff's alpha** | Primary — inter-rater agreement (continuous) | Chosen for adaptability with continuous data; 95% CIs reported | — | Methods p.4; Results p.4 |
-| **Fleiss' kappa** | Primary — inter-rater agreement on binarized data | Binarized at 20% cutoff (≥20% = 1, <20% = 0); 95% CIs | Assumes nominal categories; all raters rate all cases | Methods p.4; Table 2 |
+| **Fleiss' kappa** | Primary — inter-rater agreement on binarized data | Binarized at 20% cutoff (>=20% = 1, <20% = 0); 95% CIs | Assumes nominal categories; all raters rate all cases | Methods p.4; Table 2 |
 | **Percent agreement** | Secondary — categorical agreement | Binarized at 20% PI cutoff | — | Table 2, p.6 |
 | **Bland-Altman analysis** | Primary — method comparison (pathologist vs. ground truth) | Mean bias, 95% limits of agreement (mean ± 1.96 SD) | Assumes differences are approximately normally distributed | Methods p.4; Fig. 3B,D |
 | **Linear regression** | Secondary — correlation of pathologist scores with ground truth | Pearson's r, slope, intercept, SSE reported | Assumes linearity; visual inspection via scatter plots | Methods p.4; Fig. 3A,C |
@@ -169,6 +169,7 @@ None — PDF was readable and all 10 pages extracted successfully.
 Alternatively, this could be a standalone function or an option in `jjhistostats`.
 
 **.a.yaml** (add option to agreement):
+
 ```yaml
 - name: multipleTestCorrection
   title: "Multiple Testing Correction"
@@ -190,6 +191,7 @@ Alternatively, this could be a standalone function or an option in `jjhistostats
 ```
 
 **.b.R** (sketch):
+
 ```r
 if (self$options$multipleTestCorrection != "none") {
     adjusted_p <- p.adjust(raw_p_values, method = self$options$multipleTestCorrection)
@@ -198,6 +200,7 @@ if (self$options$multipleTestCorrection != "none") {
 ```
 
 **.r.yaml** (add column):
+
 ```yaml
 - name: p_adjusted
   title: 'Adjusted p'
@@ -211,6 +214,7 @@ if (self$options$multipleTestCorrection != "none") {
 **Target**: New option in `agreement` or standalone function for comparing two measurement conditions using a mixed-effects model.
 
 **.a.yaml**:
+
 ```yaml
 - name: conditionVariable
   title: "Condition/Method Variable"
@@ -234,6 +238,7 @@ if (self$options$multipleTestCorrection != "none") {
 ```
 
 **.b.R** (sketch):
+
 ```r
 if (self$options$mixedEffectsComparison && !is.null(self$options$conditionVariable)) {
     # Reshape to long format with condition variable
@@ -245,6 +250,7 @@ if (self$options$mixedEffectsComparison && !is.null(self$options$conditionVariab
 ```
 
 **.r.yaml**:
+
 ```yaml
 - name: mixedEffectsTable
   title: "Mixed-Effects Condition Comparison"
@@ -283,6 +289,7 @@ if (self$options$mixedEffectsComparison && !is.null(self$options$conditionVariab
 This is lower priority as it's a visualization rather than core statistical method.
 
 **.a.yaml** (new function sketch):
+
 ```yaml
 name: likertplot
 title: "Likert Scale Plot"
@@ -315,6 +322,7 @@ options:
 **Target**: Extend `methodcomparison` to include calibration metrics.
 
 **.a.yaml** (add options):
+
 ```yaml
 - name: calibrationAnalysis
   title: "Calibration Analysis"
@@ -327,6 +335,7 @@ options:
 ```
 
 **.b.R** (sketch):
+
 ```r
 if (self$options$calibrationAnalysis) {
     cal_model <- lm(observed ~ predicted, data = cal_df)
@@ -341,20 +350,24 @@ if (self$options$calibrationAnalysis) {
 ## 🧪 TEST PLAN
 
 ### Unit Tests
+
 - **Agreement metrics**: Generate synthetic data with 5 raters × 20 cases, known ICC = 0.80; verify `agreement` ICC output within 0.1 of known value
 - **Paired Wilcoxon**: Generate paired data with known shift; verify p-value matches `wilcox.test(paired=TRUE)` output
 - **Bland-Altman**: Generate data with known mean bias = 2.0, SD = 3.0; verify LoA ≈ [−3.88, 7.88]
 
 ### Assumption Checks
+
 - Shapiro-Wilk normality test already reported in agreement function
 - Check ICC model assumption: all raters rate all cases (fully crossed)
 
 ### Edge Cases
+
 - Single rater remaining after exclusions → graceful error
 - All scores identical → zero variance → handle singular ICC
 - Perfect agreement → kappa = 1.0, ICC = 1.0
 
 ### Reproducibility
+
 - Example dataset: 10-case, 5-rater Ki-67 scoring data with AI/no-AI conditions
 - Saved options JSON for agreement function with hierarchical kappa enabled
 
@@ -372,6 +385,7 @@ All currently in DESCRIPTION — **no new dependencies needed** for core coverag
 | `stats` | Wilcoxon test, Shapiro-Wilk, p.adjust | ✅ Base R |
 
 **Potential new dependency for Likert plots**:
+
 | Package | Use | Status |
 |---------|-----|--------|
 | `likert` | Dedicated Likert scale visualization | ❌ Not imported; could use custom ggplot2 instead |

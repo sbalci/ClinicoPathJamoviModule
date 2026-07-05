@@ -1,105 +1,103 @@
-
 diagnosticsamplesizeClass <- R6::R6Class(
     "diagnosticsamplesizeClass",
     inherit = diagnosticsamplesizeBase,
     private = list(
         .results_cache = NULL,
-
         .init = function() {
             if (self$options$show_methodology) private$.setMethodology()
             if (self$options$show_references) private$.setReferences()
         },
-
         .run = function() {
-            tryCatch({
-                # Get parameters
-                sens <- self$options$target_sensitivity
-                spec <- self$options$target_specificity
-                prev <- self$options$prevalence
-                width <- self$options$ci_width
-                alpha <- self$options$alpha
-                nonresp <- self$options$nonresponse_rate / 100
-                purpose <- self$options$study_purpose
+            tryCatch(
+                {
+                    # Get parameters
+                    sens <- self$options$target_sensitivity
+                    spec <- self$options$target_specificity
+                    prev <- self$options$prevalence
+                    width <- self$options$ci_width
+                    alpha <- self$options$alpha
+                    nonresp <- self$options$nonresponse_rate / 100
+                    purpose <- self$options$study_purpose
 
-                # Calculate sample sizes for sensitivity
-                n_sens <- private$.calculate_n_for_ci_width(
-                    p = sens,
-                    width = width,
-                    alpha = alpha
-                )
-                n_sens_total <- ceiling(n_sens / prev)
+                    # Calculate sample sizes for sensitivity
+                    n_sens <- private$.calculate_n_for_ci_width(
+                        p = sens,
+                        width = width,
+                        alpha = alpha
+                    )
+                    n_sens_total <- ceiling(n_sens / prev)
 
-                # Calculate sample sizes for specificity
-                n_spec <- private$.calculate_n_for_ci_width(
-                    p = spec,
-                    width = width,
-                    alpha = alpha
-                )
-                n_spec_total <- ceiling(n_spec / (1 - prev))
+                    # Calculate sample sizes for specificity
+                    n_spec <- private$.calculate_n_for_ci_width(
+                        p = spec,
+                        width = width,
+                        alpha = alpha
+                    )
+                    n_spec_total <- ceiling(n_spec / (1 - prev))
 
-                # Determine required N based on study purpose
-                if (purpose == "diagnostic") {
-                    # Both sens and spec need to be high - take maximum
-                    n_required <- max(n_sens_total, n_spec_total)
-                    limiting_factor <- if (n_sens_total > n_spec_total) "Sensitivity" else "Specificity"
-                } else if (purpose == "screening_sens") {
-                    # Emphasize sensitivity
-                    n_required <- n_sens_total
-                    limiting_factor <- "Sensitivity (screening emphasis)"
-                } else {
-                    # Emphasize specificity
-                    n_required <- n_spec_total
-                    limiting_factor <- "Specificity (screening emphasis)"
+                    # Determine required N based on study purpose
+                    if (purpose == "diagnostic") {
+                        # Both sens and spec need to be high - take maximum
+                        n_required <- max(n_sens_total, n_spec_total)
+                        limiting_factor <- if (n_sens_total > n_spec_total) "Sensitivity" else "Specificity"
+                    } else if (purpose == "screening_sens") {
+                        # Emphasize sensitivity
+                        n_required <- n_sens_total
+                        limiting_factor <- "Sensitivity (screening emphasis)"
+                    } else {
+                        # Emphasize specificity
+                        n_required <- n_spec_total
+                        limiting_factor <- "Specificity (screening emphasis)"
+                    }
+
+                    # Adjust for non-response
+                    n_final <- if (nonresp > 0) {
+                        ceiling(n_required / (1 - nonresp))
+                    } else {
+                        n_required
+                    }
+
+                    # Cache results
+                    private$.results_cache <- list(
+                        n_sens = n_sens,
+                        n_sens_total = n_sens_total,
+                        n_spec = n_spec,
+                        n_spec_total = n_spec_total,
+                        n_required = n_required,
+                        n_final = n_final,
+                        limiting_factor = limiting_factor,
+                        sens = sens,
+                        spec = spec,
+                        prev = prev,
+                        width = width,
+                        alpha = alpha,
+                        nonresp = nonresp,
+                        purpose = purpose
+                    )
+
+                    # Populate tables
+                    private$.populateTables()
+
+                    # Generate statement
+                    if (self$options$show_statement) {
+                        private$.generateStatement()
+                    }
+
+                    # Generate comparison table if requested
+                    if (self$options$show_comparison_table) {
+                        private$.generateComparisonTable()
+                    }
+
+                    # Generate method comparison if requested
+                    if (self$options$show_method_comparison) {
+                        private$.generateMethodComparison()
+                    }
+                },
+                error = function(e) {
+                    self$setError(paste("Error:", e$message))
                 }
-
-                # Adjust for non-response
-                n_final <- if (nonresp > 0) {
-                    ceiling(n_required / (1 - nonresp))
-                } else {
-                    n_required
-                }
-
-                # Cache results
-                private$.results_cache <- list(
-                    n_sens = n_sens,
-                    n_sens_total = n_sens_total,
-                    n_spec = n_spec,
-                    n_spec_total = n_spec_total,
-                    n_required = n_required,
-                    n_final = n_final,
-                    limiting_factor = limiting_factor,
-                    sens = sens,
-                    spec = spec,
-                    prev = prev,
-                    width = width,
-                    alpha = alpha,
-                    nonresp = nonresp,
-                    purpose = purpose
-                )
-
-                # Populate tables
-                private$.populateTables()
-
-                # Generate statement
-                if (self$options$show_statement) {
-                    private$.generateStatement()
-                }
-
-                # Generate comparison table if requested
-                if (self$options$show_comparison_table) {
-                    private$.generateComparisonTable()
-                }
-
-                # Generate method comparison if requested
-                if (self$options$show_method_comparison) {
-                    private$.generateMethodComparison()
-                }
-
-            }, error = function(e) {
-                self$setError(paste("Error:", e$message))
-            })
+            )
         },
-
         .calculate_n_for_ci_width = function(p, width, alpha) {
             # Binary search for minimum N such that Clopper-Pearson CI width <= target
             # Using exact binomial confidence interval (Clopper-Pearson method)
@@ -113,7 +111,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
             # Binary search
             while (n_max - n_min > 1) {
                 n <- ceiling((n_min + n_max) / 2)
-                x <- round(n * p)  # Expected number of successes
+                x <- round(n * p) # Expected number of successes
 
                 # Calculate Clopper-Pearson CI
                 ci <- private$.clopper_pearson_ci(x, n, conf_level)
@@ -144,7 +142,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
 
             return(n_max)
         },
-
         .clopper_pearson_ci = function(x, n, conf_level) {
             # Clopper-Pearson exact binomial confidence interval
             # Based on beta distribution quantiles
@@ -165,7 +162,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
 
             list(lower = lower, upper = upper)
         },
-
         .populateTables = function() {
             res <- private$.results_cache
 
@@ -205,7 +201,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 ))
             }
         },
-
         .generateStatement = function() {
             res <- private$.results_cache
 
@@ -253,22 +248,27 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 res$n_sens_total, res$n_sens,
                 res$n_spec_total, res$n_spec,
                 res$n_required, res$limiting_factor,
-                if (res$nonresp > 0) sprintf(
-                    "<li><strong>Final sample size adjusted for %.0f%% non-response: %d subjects</strong></li>",
-                    res$nonresp * 100, res$n_final
-                ) else ""
+                if (res$nonresp > 0) {
+                    sprintf(
+                        "<li><strong>Final sample size adjusted for %.0f%% non-response: %d subjects</strong></li>",
+                        res$nonresp * 100, res$n_final
+                    )
+                } else {
+                    ""
+                }
             )
 
             self$results$sample_size_statement$setContent(html)
         },
-
         .generateComparisonTable = function() {
             # Parse prevalence values
             prev_string <- self$options$comparison_prevalences
             prev_values <- as.numeric(unlist(strsplit(prev_string, ",")))
             prev_values <- prev_values[!is.na(prev_values)]
 
-            if (length(prev_values) == 0) return()
+            if (length(prev_values) == 0) {
+                return()
+            }
 
             res <- private$.results_cache
             table <- self$results$prevalence_table
@@ -301,7 +301,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 ))
             }
         },
-
         .generateMethodComparison = function() {
             res <- private$.results_cache
             table <- self$results$method_comparison
@@ -344,7 +343,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
 
                 # Calculate relative efficiency (compared to Clopper-Pearson)
                 if (i == 1) {
-                    rel_eff <- 100  # Reference method
+                    rel_eff <- 100 # Reference method
                 } else {
                     rel_eff <- (n_values[[1]] / n_total) * 100
                 }
@@ -358,7 +357,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 ))
             }
         },
-
         .calculate_n_for_method = function(p, width, alpha, method) {
             # Calculate minimum N for specified CI method to achieve target width
             conf_level <- 1 - alpha
@@ -384,7 +382,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
 
             return(n_max)
         },
-
         .calculate_ci_method = function(x, n, conf_level, method) {
             if (method == "clopper_pearson") {
                 return(private$.clopper_pearson_ci(x, n, conf_level))
@@ -396,31 +393,29 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 return(private$.wald_ci(x, n, conf_level))
             }
         },
-
         .wilson_ci = function(x, n, conf_level) {
             # Wilson score confidence interval
             alpha <- 1 - conf_level
-            z <- qnorm(1 - alpha/2)
+            z <- qnorm(1 - alpha / 2)
             p_hat <- x / n
 
-            denominator <- 1 + z^2/n
-            center <- (p_hat + z^2/(2*n)) / denominator
-            margin <- z * sqrt((p_hat*(1-p_hat)/n + z^2/(4*n^2))) / denominator
+            denominator <- 1 + z^2 / n
+            center <- (p_hat + z^2 / (2 * n)) / denominator
+            margin <- z * sqrt((p_hat * (1 - p_hat) / n + z^2 / (4 * n^2))) / denominator
 
             list(
                 lower = max(0, center - margin),
                 upper = min(1, center + margin)
             )
         },
-
         .agresti_coull_ci = function(x, n, conf_level) {
             # Agresti-Coull confidence interval
             alpha <- 1 - conf_level
-            z <- qnorm(1 - alpha/2)
+            z <- qnorm(1 - alpha / 2)
 
             # Add z^2/2 to both successes and sample size
             n_tilde <- n + z^2
-            x_tilde <- x + z^2/2
+            x_tilde <- x + z^2 / 2
             p_tilde <- x_tilde / n_tilde
 
             # Standard Wald on adjusted values
@@ -432,11 +427,10 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 upper = min(1, p_tilde + margin)
             )
         },
-
         .wald_ci = function(x, n, conf_level) {
             # Normal approximation (Wald) confidence interval
             alpha <- 1 - conf_level
-            z <- qnorm(1 - alpha/2)
+            z <- qnorm(1 - alpha / 2)
             p_hat <- x / n
             se <- sqrt(p_hat * (1 - p_hat) / n)
             margin <- z * se
@@ -446,7 +440,6 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 upper = min(1, p_hat + margin)
             )
         },
-
         .setMethodology = function() {
             html <- "
 <h3>Diagnostic Test Sample Size Methodology (Bujang 2023)</h3>
@@ -466,15 +459,15 @@ or small sample sizes.</p>
 
 <p><strong>1. Diagnostic Purpose (High Sensitivity AND Specificity)</strong></p>
 <ul>
-<li>Both sensitivity and specificity should be ≥0.70 (preferably ≥0.80)</li>
+<li>Both sensitivity and specificity should be >=0.70 (preferably >=0.80)</li>
 <li>Sample size is determined by the <strong>maximum</strong> of sensitivity and specificity requirements</li>
 <li>Example: Clinical diagnostic test replacing gold standard</li>
 </ul>
 
 <p><strong>2. Screening Purpose (Emphasize Sensitivity OR Specificity)</strong></p>
 <ul>
-<li>High sensitivity screening: Sens ≥0.70, Spec ≥0.50 (acceptable to sacrifice specificity)</li>
-<li>High specificity screening: Spec ≥0.70, Sens ≥0.50 (acceptable to sacrifice sensitivity)</li>
+<li>High sensitivity screening: Sens >=0.70, Spec >=0.50 (acceptable to sacrifice specificity)</li>
+<li>High specificity screening: Spec >=0.70, Sens >=0.50 (acceptable to sacrifice sensitivity)</li>
 <li>Example: Population screening where false negatives/positives have different costs</li>
 </ul>
 
@@ -501,10 +494,10 @@ or small sample sizes.</p>
 </ul>
 
 <h4>Sample Size Formula</h4>
-<p>For <strong>sensitivity</strong>: Find minimum N such that Clopper-Pearson CI width ≤ target width,
+<p>For <strong>sensitivity</strong>: Find minimum N such that Clopper-Pearson CI width <= target width,
 then <code>N_total = ceiling(N_diseased / prevalence)</code></p>
 
-<p>For <strong>specificity</strong>: Find minimum N such that Clopper-Pearson CI width ≤ target width,
+<p>For <strong>specificity</strong>: Find minimum N such that Clopper-Pearson CI width <= target width,
 then <code>N_total = ceiling(N_non-diseased / (1 - prevalence))</code></p>
 
 <p><strong>Final N</strong>: Take maximum of N_sensitivity and N_specificity (for diagnostic purpose)
@@ -517,7 +510,6 @@ or specific N based on screening emphasis</p>
 "
             self$results$methodology$setContent(html)
         },
-
         .setReferences = function() {
             html <- "
 <h3>References</h3>

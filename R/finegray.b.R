@@ -958,7 +958,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Detecting the option by CLASS (not by name) means any variable option
             # added later is escaped automatically.
             #
-            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # Variables are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated them in the generated syntax (the "double
             # variables" bug). All non-variable options keep jmvcore's per-option
             # sourcify so formatting stays consistent with jamovi.

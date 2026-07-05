@@ -89,7 +89,7 @@ ncvregcoxClass <- R6::R6Class(
                 # Also add a Notice banner for convergence warnings
                 n_warn <- length(unique(private$.warnings_collected))
                 private$.addNotice('WARNING', 'Convergence Warnings',
-                    sprintf('%d warning(s) during model fitting -- see Model Interpretation section for details.', n_warn))
+                    sprintf('%d warning(s) during model fitting - see Model Interpretation section for details.', n_warn))
             }
 
             # Completion info notice
@@ -780,7 +780,7 @@ ncvregcoxClass <- R6::R6Class(
                     'No variables selected at the chosen lambda. Try lambda_type="min" or increase alpha toward 1.')
             }
 
-            # C-INDEX BELOW 0.5 (worse than random) — use cached value
+            # C-INDEX BELOW 0.5 (worse than random) - use cached value
             cindex <- private$.cindex_cached
 
             if (!is.na(cindex) && cindex < 0.5) {
@@ -842,7 +842,7 @@ ncvregcoxClass <- R6::R6Class(
                     html <- paste0(html,
                         "<li><strong>", htmltools::htmlEscape(var_names[idx]),
                         ":</strong> HR = ", sprintf("%.3f", hr_val),
-                        " — a one-unit increase is associated with ",
+                        " - a one-unit increase is associated with ",
                         direction, " hazard by ", pct_change, "%.</li>"
                     )
                 }
@@ -952,7 +952,7 @@ ncvregcoxClass <- R6::R6Class(
             p <- length(private$.covariates)
             event_rate <- n_events / n
 
-            # -- Check 1: Events-Per-Variable (EPV) --
+            # - Check 1: Events-Per-Variable (EPV) --
             epv <- n_events / p
             if (epv >= 10) {
                 checks$epv <- list(
@@ -974,7 +974,7 @@ ncvregcoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 2: Regularization Need --
+            # - Check 2: Regularization Need --
             if (p >= n / 3) {
                 checks$regularization <- list(
                     color = "green", label = "Regularization Need",
@@ -989,7 +989,7 @@ ncvregcoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 3: Sample Size --
+            # - Check 3: Sample Size --
             if (n >= 100) {
                 checks$sample_size <- list(
                     color = "green", label = "Sample Size",
@@ -1010,7 +1010,7 @@ ncvregcoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 4: Event Rate --
+            # - Check 4: Event Rate --
             if (event_rate >= 0.20 && event_rate <= 0.80) {
                 checks$event_rate <- list(
                     color = "green", label = "Event Rate",
@@ -1025,7 +1025,7 @@ ncvregcoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Check 5: Multicollinearity --
+            # - Check 5: Multicollinearity --
             tryCatch({
                 if (p <= 2000 && p >= 2) {
                     cov_data <- data[, private$.covariates, drop = FALSE]
@@ -1060,7 +1060,7 @@ ncvregcoxClass <- R6::R6Class(
                 NULL
             })
 
-            # -- Check 6: Data Quality --
+            # - Check 6: Data Quality --
             original_data <- self$data
             n_total <- nrow(original_data)
             n_missing <- n_total - n
@@ -1081,7 +1081,7 @@ ncvregcoxClass <- R6::R6Class(
                 )
             }
 
-            # -- Overall Verdict --
+            # - Overall Verdict --
             colors <- sapply(checks, function(x) x$color)
             if (any(colors == "red")) {
                 overall <- "red"

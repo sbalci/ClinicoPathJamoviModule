@@ -312,7 +312,7 @@ result_epiweek <- datetimeconverter(
 
 # Clinical Context:
 # CDC Epidemiological Week (MMWR Week):
-# - Week 1: First week with ≥4 days in new year
+# - Week 1: First week with >=4 days in new year
 # - Used for disease surveillance (flu, COVID-19)
 # - Standardized reporting to public health agencies
 # - Outbreak detection and response

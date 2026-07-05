@@ -29,7 +29,7 @@ NULL
 #'   \item{sex}{Factor. Patient sex ("Male", "Female")}
 #'   \item{treatment_group}{Factor. Treatment assignment ("Control", "Treatment A", "Treatment B")}
 #'   \item{study_site}{Factor. Study enrollment site ("Site_A" to "Site_F")}
-#'   \item{bmi}{Numeric. Body mass index (16-45 kg/m²) with ~3% missing values}
+#'   \item{bmi}{Numeric. Body mass index (16-45 kg/m^2) with ~3% missing values}
 #'   \item{systolic_bp}{Integer. Systolic blood pressure (90-200 mmHg)}
 #'   \item{diastolic_bp}{Integer. Diastolic blood pressure (60-120 mmHg)}
 #'   \item{diabetes}{Factor. Diabetes status ("No", "Type 1", "Type 2")}
@@ -99,10 +99,10 @@ NULL
 #'   \item{visit_date}{Date. Date of laboratory assessment}
 #'   \item{lab_category}{Factor. Clinical interpretation ("Normal", "Borderline", "Abnormal")}
 #'   \item{urgency}{Factor. Test urgency ("Routine", "STAT", "Priority")}
-#'   \item{wbc}{Numeric. White blood cell count (2.0-15.0 × 10³/μL)}
-#'   \item{rbc}{Numeric. Red blood cell count (3.5-6.0 × 10⁶/μL)}
+#'   \item{wbc}{Numeric. White blood cell count (2.0-15.0 x 10^3/uL)}
+#'   \item{rbc}{Numeric. Red blood cell count (3.5-6.0 x 10^6/uL)}
 #'   \item{hematocrit}{Numeric. Hematocrit percentage (30-55%)}
-#'   \item{platelets}{Integer. Platelet count (100-500 × 10³/μL)}
+#'   \item{platelets}{Integer. Platelet count (100-500 x 10^3/uL)}
 #'   \item{sodium}{Integer. Serum sodium (130-150 mEq/L)}
 #'   \item{potassium}{Numeric. Serum potassium (3.0-5.5 mEq/L)}
 #'   \item{creatinine}{Numeric. Serum creatinine (0.5-3.0 mg/dL)}

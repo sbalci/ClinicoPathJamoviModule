@@ -399,7 +399,7 @@ ihcdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   performance estimates. Recommended for clinical validation but takes longer
 #'   to compute.
 #' @param minimumGroupSize Minimum number of cases required per diagnostic
-#'   group. Groups with fewer cases will trigger a warning (recommend ≥10).
+#'   group. Groups with fewer cases will trigger a warning (recommend >=10).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr

@@ -6,7 +6,7 @@ This document describes the comprehensive test suite created for the `chisqpostt
 
 ## Reviewer Recommendations Addressed
 
-### Original Concern (from reviewer evaluation):
+### Original Concern (from reviewer evaluation)
 
 > "While a test file exists, it should be enhanced to numerically validate the outputs. The tests should create a known contingency table, run the analysis, and then use expect_equal() to assert that the calculated chi-squared value, p-value, and adjusted post-hoc p-values match the results from a trusted external package."
 
@@ -21,17 +21,20 @@ We created **56 comprehensive tests** organized into 7 categories that directly 
 **Purpose**: Validate that the omnibus chi-squared test matches `stats::chisq.test()`
 
 **Tests**:
+
 1. **2x2 table validation** - Validates chi-squared statistic, p-value, and degrees of freedom
 2. **3x2 table validation** - Tests with 3 row groups and 2 column outcomes
 3. **4x3 table validation** - Tests larger contingency tables
 
 **Key Findings**:
+
 - ✅ All chi-squared statistics match `stats::chisq.test(correct=FALSE)` exactly (tolerance: 1e-6)
 - ✅ All p-values match reference implementation exactly
 - ✅ Degrees of freedom calculated correctly as `(rows-1) × (cols-1)`
 
 **Note on Continuity Correction**:
 The chisqposttest function uses `correct=FALSE` (no Yates continuity correction). This is appropriate because:
+
 - Continuity correction is primarily recommended for 2x2 tables with small expected frequencies
 - For post-hoc analysis and larger tables, uncorrected values are standard
 - This matches common practice in clinical research software
@@ -41,16 +44,19 @@ The chisqposttest function uses `correct=FALSE` (no Yates continuity correction)
 **Purpose**: Validate that individual 2×2 subtable tests are performed correctly
 
 **Tests**:
+
 1. **Manual pairwise validation** - Extracts specific subtables and validates against manual `chisq.test()`
 2. **P-value range validation** - Ensures all pairwise p-values are between 0 and 1
 
 **Key Findings**:
+
 - ✅ Pairwise comparisons match manual chi-squared tests on extracted subtables
 - ✅ Implementation correctly performs both row-wise and column-wise comparisons
-- ✅ All p-values are valid (0 ≤ p ≤ 1)
+- ✅ All p-values are valid (0 <= p <= 1)
 
 **Implementation Behavior**:
 For a 3×2 table (3 row groups, 2 column outcomes), the function generates:
+
 - **Row comparisons**: A vs B, A vs C, B vs C (3 comparisons)
 - **Column comparisons**: Outcome1 vs Outcome2 (1 comparison)
 - **Total**: 4 pairwise comparisons
@@ -62,18 +68,21 @@ This is non-standard but documented behavior. Most post-hoc implementations only
 **Purpose**: Validate that Bonferroni, Holm, and FDR corrections match `p.adjust()`
 
 **Tests**:
+
 1. **Bonferroni correction** - Validates against `p.adjust(method="bonferroni")`
 2. **Holm correction** - Validates against `p.adjust(method="holm")`
 3. **FDR correction** - Validates against `p.adjust(method="fdr")`
-4. **Conservativeness comparison** - Verifies Bonferroni ≥ FDR for all comparisons
+4. **Conservativeness comparison** - Verifies Bonferroni >= FDR for all comparisons
 
 **Key Findings**:
+
 - ✅ **Bonferroni** adjusted p-values match `p.adjust()` exactly (tolerance: 1e-10)
 - ✅ **Holm** adjusted p-values match `p.adjust()` exactly (tolerance: 1e-10)
 - ✅ **FDR** adjusted p-values match `p.adjust()` exactly (tolerance: 1e-10)
 - ✅ Bonferroni is always more conservative than FDR (as expected)
 
 **Formula Validation**:
+
 ```r
 # For k comparisons:
 Bonferroni: p_adj = min(p_unadj × k, 1)
@@ -88,11 +97,13 @@ All formulas validated against R's `p.adjust()` implementation.
 **Purpose**: Validate that post-hoc tests only run when statistically appropriate
 
 **Tests**:
-1. **Non-significant omnibus** - Verifies post-hoc is NOT performed when p ≥ 0.05
+
+1. **Non-significant omnibus** - Verifies post-hoc is NOT performed when p >= 0.05
 2. **Significant omnibus** - Verifies post-hoc IS performed when p < 0.05
 3. **posthoc='none'** - Verifies all pairwise testing is disabled when user selects 'none'
 
 **Key Findings**:
+
 - ✅ **Prevents data dredging**: Post-hoc comparisons only run if omnibus test is significant
 - ✅ **Respects user choice**: `posthoc='none'` completely disables pairwise testing
 - ✅ **Clear messaging**: Appropriate warnings shown when post-hoc is not performed
@@ -107,17 +118,20 @@ This protection is critical for maintaining scientific rigor in clinical researc
 **Purpose**: Validate handling of challenging data scenarios
 
 **Tests**:
+
 1. **2×2 table handling** - Verifies behavior with minimal table size
 2. **Small sample sizes** - Tests graceful handling of sparse data
 3. **Sparse contingency tables** - Tables with zero cells
 
 **Key Findings**:
+
 - ✅ **2×2 tables**: Implementation performs row and column comparisons (non-standard but documented)
 - ✅ **Small samples**: No errors; may trigger Fisher's exact test for subtables
 - ✅ **Sparse tables**: Handles zero cells appropriately without crashing
 
 **Note on 2×2 Tables**:
 The implementation generates comparisons even for 2×2 tables:
+
 - Row comparison: A vs B
 - Column comparison: X vs Y
 
@@ -128,15 +142,18 @@ This is non-standard (typically no post-hoc needed for 2×2), but matches the im
 **Purpose**: Validate against well-known benchmark datasets with established results
 
 **Tests**:
+
 1. **UCBAdmissions dataset** - Classic UC Berkeley admissions data (2×2 collapsed)
 2. **HairEyeColor dataset** - Hair color vs eye color (4×4 table)
 
 **Key Findings**:
+
 - ✅ **UCBAdmissions**: Chi-squared = 92.21, matches reference within tolerance
 - ✅ **HairEyeColor**: All statistics match reference implementation
 - ✅ Provides confidence the function works on real-world datasets
 
 **Benchmark Sources**:
+
 - Built-in R datasets with well-documented statistical properties
 - Frequently used in statistics textbooks and papers
 - Provides reproducible validation anyone can verify
@@ -146,16 +163,19 @@ This is non-standard (typically no post-hoc needed for 2×2), but matches the im
 **Purpose**: Ensure all required output components are generated correctly
 
 **Tests**:
+
 1. **Output completeness** - Validates all tables are created
 2. **Column structure** - Validates post-hoc table has required columns
 
 **Key Findings**:
+
 - ✅ Chi-squared table generated with value, p, df columns
 - ✅ Contingency table populated correctly
 - ✅ Post-hoc table contains: comparison, test_method, p, padj, sig columns
 - ✅ Result object inherits correct class (`chisqposttestResults`)
 
 **Required Output Structure**:
+
 ```r
 result$chisqTable        # Omnibus chi-squared test
 result$contingencyTable  # Observed frequencies
@@ -172,6 +192,7 @@ result$posthocTable      # Pairwise comparisons
 ### Old Test File (test-chisqposttest-integration.R)
 
 **What it tested**:
+
 - ✅ Omnibus significance prerequisite enforced
 - ✅ Post-hoc runs when appropriate
 - ✅ `posthoc='none'` disables testing
@@ -179,6 +200,7 @@ result$posthocTable      # Pairwise comparisons
 - ✅ Basic behavioral validation
 
 **What it DIDN'T test**:
+
 - ❌ Numerical accuracy of chi-squared statistics
 - ❌ Exact p-value validation against reference
 - ❌ Multiple testing correction formula accuracy
@@ -190,6 +212,7 @@ result$posthocTable      # Pairwise comparisons
 ### New Test File (test-chisqposttest-comprehensive.R)
 
 **What it tests**:
+
 - ✅ **All 8 items from old test file** (behavioral validation)
 - ✅ **Numerical accuracy**: Chi-squared statistics match `stats::chisq.test()` exactly
 - ✅ **P-value accuracy**: All p-values validated against reference implementation
@@ -200,6 +223,7 @@ result$posthocTable      # Pairwise comparisons
 - ✅ **Output completeness**: All required components generated
 
 **Improvement**:
+
 - **Old**: 7 tests (behavioral only)
 - **New**: 56 tests (behavioral + numerical validation)
 - **Coverage**: Complete validation against trusted R packages
@@ -261,6 +285,7 @@ expect_equal(posthoc_table$padj, expected_bonf)
 **Behavior**: `chisq.test(correct=FALSE)` is used throughout
 
 **Rationale**:
+
 - Yates continuity correction primarily benefits 2×2 tables with small expected frequencies
 - For post-hoc analysis, uncorrected values are standard
 - Matches common practice in clinical research software (SPSS, SAS, Stata)
@@ -274,6 +299,7 @@ expect_equal(posthoc_table$padj, expected_bonf)
 **Behavior**: Pairwise comparisons performed for both dimensions
 
 **Example**: For 3×2 table (groups A, B, C × outcomes Yes, No):
+
 - **Standard approach**: Only compare A vs B, A vs C, B vs C (3 comparisons)
 - **This implementation**: Also compares Yes vs No (1 additional comparison, total 4)
 
@@ -308,6 +334,7 @@ testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
 ```
 
 **Expected Output**:
+
 ```
 ✓ |  56 | test-chisqposttest-comprehensive
 
@@ -337,6 +364,7 @@ testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
 
 **Package**: `stats` (R Core Team)
 **Functions Used**:
+
 - `chisq.test()` - Chi-squared test
 - `fisher.test()` - Fisher's exact test (for small samples)
 - `p.adjust()` - Multiple testing correction
@@ -344,6 +372,7 @@ testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
 **Validation Level**: ✅ **Exact match** (tolerance: 1e-6 to 1e-10)
 
 **What This Proves**:
+
 - Chi-squared statistics are mathematically correct
 - P-value calculations are accurate
 - Multiple testing corrections follow standard algorithms
@@ -351,12 +380,14 @@ testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
 ### Benchmark Datasets
 
 **Datasets Used**:
+
 - `UCBAdmissions` - UC Berkeley admissions data
 - `HairEyeColor` - Hair and eye color frequencies
 
 **Validation Level**: ✅ **Matches published results**
 
 **What This Proves**:
+
 - Function works correctly on real-world data
 - Results are reproducible
 - Statistical properties are preserved
@@ -366,6 +397,7 @@ testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
 ### Maintaining the Test Suite
 
 1. **Run tests after code changes**:
+
    ```r
    testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
    ```
@@ -387,6 +419,7 @@ testthat::test_file("tests/testthat/test-chisqposttest-comprehensive.R")
 **Current status**: ✅ **RESOLVED**
 
 **Evidence**:
+
 - 56 comprehensive tests
 - All chi-squared statistics validated against `stats::chisq.test()`
 - All p-value adjustments validated against `p.adjust()`

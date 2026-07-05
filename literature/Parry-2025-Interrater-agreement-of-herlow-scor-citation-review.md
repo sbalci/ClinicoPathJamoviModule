@@ -5,6 +5,7 @@
 **Title**: Inter-rater agreement of HER2-low scores between expert breast pathologists and the Visiopharm digital image analysis application (HER2 APP, CE2797)
 
 **Design & Cohort**:
+
 - Study type: Inter-observer concordance study (methodological, diagnostic agreement)
 - N = 50 breast cancer samples (1 resection, 49 core biopsies)
 - 16 expert breast pathologists + 1 digital image analysis (DIA) system
@@ -12,6 +13,7 @@
 - Each case scored by all raters independently using whole slide images (WSIs)
 
 **Key Analyses**:
+
 - Primary: Inter-rater agreement using Cohen's weighted kappa and Fleiss' kappa
 - Secondary: Comparison of consensus scores vs. DIA scores
 - Proportion analysis of tumor cells in each HER2 category
@@ -37,6 +39,7 @@
 **Authors**: Suzanne Parry¹, Lila Zabaglo¹, Abeer M Shaaban²'³, Andrew Dodson¹*
 
 **Affiliations**:
+
 1. UK National External Quality Assessment Scheme for Immunocytochemistry and In-Situ Hybridisation, London, UK
 2. Department of Cancer and Genomic Sciences, University of Birmingham, Birmingham, UK
 3. Cellular Pathology, Queen Elizabeth Hospital Birmingham, Birmingham, UK
@@ -54,7 +57,7 @@
 | **Percentage agreement** | Secondary | Raw agreement without chance correction | Simple concordance measure | Lines 551-556 |
 | **Consensus scoring** | Data aggregation | Majority rule for pathologists' scores | Agreement threshold (>50%) | Lines 195-203, 766-768 |
 | **Contingency table analysis** | Descriptive | 4×4 table (VP APP vs consensus) | Concordant/discordant case identification | Table 3, lines 1088-1139 |
-| **Level of Agreement (LoA) categorization** | Descriptive | Categories: None, Poor (≤8/16), Low (9-11/16), High (12-15/16), Absolute (16/16) | Ordinal classification of agreement levels | Lines 142-149, 766-768 |
+| **Level of Agreement (LoA) categorization** | Descriptive | Categories: None, Poor (<=8/16), Low (9-11/16), High (12-15/16), Absolute (16/16) | Ordinal classification of agreement levels | Lines 142-149, 766-768 |
 | **Confidence intervals (95% CI)** | Precision estimation | Normal approximation for kappa | Large sample approximation | Table 4, lines 1217-1280 |
 | **Proportional cell analysis** | Exploratory | DIA enumeration of cells in each HER2 category | Cell membrane completeness and intensity | Lines 1211-1216, Figure 2, Tables 2 |
 
@@ -167,7 +170,7 @@
 3. **Apply multiplicity correction**: Use Bonferroni (conservative: α = 0.05/4 = 0.0125) or Benjamini-Hochberg FDR for subset analyses. Alternatively, designate primary (all cases) vs. exploratory (subsets) analyses.
 4. **Consider weighted kappa alternatives**: For ordinal scales, explore Krippendorff's alpha with ordinal weighting or ordinal ICC. These account for distance between categories.
 5. **Improve reproducibility**: (a) Cite R packages (`irr`, `ggplot2`, etc.), (b) share code on GitHub/OSF, (c) deposit anonymized data, (d) report exact SPSS/Excel procedures.
-6. **Sensitivity analysis**: Test robustness of consensus scores by varying agreement threshold (e.g., ≥60% vs. ≥75% agreement).
+6. **Sensitivity analysis**: Test robustness of consensus scores by varying agreement threshold (e.g., >=60% vs. >=75% agreement).
 7. **Generalizability statement**: Explicitly note that enriched sampling (88% HER2-low) limits generalizability to routine practice.
 
 ---
@@ -183,7 +186,7 @@
 - **Exact missing options**:
   - Automatic modal (majority) category calculation across raters
   - Tie-breaking rules (e.g., exclude case, weighted voting, senior rater as tiebreaker)
-  - Consensus threshold (e.g., ≥50%, ≥75%, unanimous)
+  - Consensus threshold (e.g., >=50%, >=75%, unanimous)
   - Output: New consensus variable added to dataset
 
 ---
@@ -196,7 +199,7 @@
 - **Closest existing function**: None. Requires post-hoc calculation.
 - **Exact missing options**:
   - Count of agreeing raters per case
-  - Automatic categorization based on user-defined thresholds (e.g., ≥75% = High)
+  - Automatic categorization based on user-defined thresholds (e.g., >=75% = High)
   - Filtering/subsetting by LoA category for downstream analyses
 
 ---
@@ -233,7 +236,7 @@
 - **Method**: Analyze kappa separately for subsets:
   - All cases (N=50)
   - HER2-low cases only (N=44: consensus = 0, 1+, or 2+)
-  - High agreement cases (N=24: ≥13/17 raters agree)
+  - High agreement cases (N=24: >=13/17 raters agree)
   - HER2-low + high agreement (N=20)
 - **Impact**: Lines 1200-1209. Shows kappa improves dramatically in high-agreement cases (0.638 → 0.916).
 - **Clinical relevance**: Understanding where reliability is good vs. poor. Identifies challenging cases.
@@ -267,7 +270,7 @@
 - **Exact missing options**:
   - Asymptotic Z-test for two kappas (H0: κ₁ = κ₂)
   - Bootstrap test for kappa difference
-  - Non-inferiority/equivalence margin specification (e.g., H0: κ₁ - κ₂ ≥ -0.10)
+  - Non-inferiority/equivalence margin specification (e.g., H0: κ₁ - κ₂ >= -0.10)
 
 ---
 
@@ -296,7 +299,7 @@
   options:
     - title: Simple Majority (>50%)
       name: majority
-    - title: Supermajority (≥75%)
+    - title: Supermajority (>=75%)
       name: supermajority
     - title: Unanimous
       name: unanimous
@@ -424,6 +427,7 @@ if (self$options$consensusVar) {
 ```
 
 **Validation**:
+
 - Test with HER2 data (16 raters, 50 cases)
 - Verify ties handled correctly (Case #31 in article: 8-8 split → NA)
 - Check majority vs. supermajority vs. unanimous rules
@@ -585,6 +589,7 @@ private$.interpretKappa <- function(kappa) {
 ```
 
 **Validation**:
+
 - Reproduce Table 5 from article (16 pathologists + VP APP vs. consensus)
 - Verify ranking matches article (P11 = 0.854 [1st], VP APP = 0.638 [12th], P15 = 0.412 [17th])
 - Check CI calculations
@@ -631,7 +636,7 @@ private$.interpretKappa <- function(kappa) {
   max: 99
   description:
       R: >
-        Minimum % agreement for "High" LoA (e.g., 75% = ≥12/16 raters for N=16).
+        Minimum % agreement for "High" LoA (e.g., 75% = >=12/16 raters for N=16).
 
 - name: loaLowThreshold
   title: "Low LoA Threshold (%)"
@@ -641,7 +646,7 @@ private$.interpretKappa <- function(kappa) {
   max: 75
   description:
       R: >
-        Minimum % agreement for "Low" LoA (e.g., 56% = ≥9/16 raters).
+        Minimum % agreement for "Low" LoA (e.g., 56% = >=9/16 raters).
 
 - name: loaVarName
   title: "LoA Variable Name"
@@ -747,11 +752,12 @@ if (self$options$loaVariable) {
 ```
 
 **Validation**:
+
 - Reproduce LoA categories from article (lines 766-768)
   - Absolute: 16/16 (3 cases)
   - High: 12-15/16 (21 cases)
   - Low: 9-11/16 (22 cases)
-  - Poor: ≤8/16 (4 cases)
+  - Poor: <=8/16 (4 cases)
 - Verify computed variable is added to dataset
 - Check filtering works for subset analyses
 
@@ -802,6 +808,7 @@ if (self$options$loaVariable) {
 ```
 
 **Validation**:
+
 - Compare unweighted Fleiss' (κ=0.433) vs. ordinal Krippendorff's alpha on HER2 data
 - Verify ordinal weighting increases agreement when most disagreements are adjacent (1+ vs. 2+)
 - Check against R `irr::kripp.alpha()` reference
@@ -809,6 +816,7 @@ if (self$options$loaVariable) {
 **Dependencies**: `irr` (already required)
 
 **Note**: Krippendorff's alpha is **already implemented** in jamovi `agreement.b.R:735-822`. Just need to:
+
 1. Change default `krippMethod` to `ordinal` in `.a.yaml`
 2. Improve UI label to emphasize this is the weighted multi-rater alternative
 3. Add educational tooltip/help text
@@ -831,12 +839,12 @@ if (self$options$loaVariable) {
 
 3. **LoA categorization**:
    - Reproduce article's LoA distribution: Absolute=3, High=21, Low=22, Poor=4
-   - Verify thresholds: High ≥75% (≥12/16), Low ≥56% (≥9/16), Poor <56%
+   - Verify thresholds: High >=75% (>=12/16), Low >=56% (>=9/16), Poor <56%
    - Test filtering: subset to High LoA cases (N=24)
 
 4. **Krippendorff's alpha (ordinal)**:
    - Compare unweighted Fleiss' (κ=0.433) vs. ordinal α
-   - Verify ordinal α ≥ unweighted when disagreements cluster adjacent categories
+   - Verify ordinal α >= unweighted when disagreements cluster adjacent categories
 
 ### Assumptions Checks
 
@@ -874,17 +882,17 @@ if (self$options$loaVariable) {
 
 ### Required Packages (already in DESCRIPTION)
 
-- `irr` (≥0.84.1): Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement
-- `jmvcore` (≥2.0): Jamovi infrastructure
-- `R6` (≥2.5): Class system
-- `dplyr` (≥1.0): Data manipulation
-- `magrittr` (≥2.0): Pipe operator
+- `irr` (>=0.84.1): Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement
+- `jmvcore` (>=2.0): Jamovi infrastructure
+- `R6` (>=2.5): Class system
+- `dplyr` (>=1.0): Data manipulation
+- `magrittr` (>=2.0): Pipe operator
 
 ### New Suggested Packages
 
-- `irrCAC` (≥1.0): Gwet's AC1/AC2 (already implemented, optional)
-- `psych` (≥2.0): ICC calculations for CCC (already implemented, optional)
-- `lme4` (≥1.1): Hierarchical/multilevel kappa (already implemented, optional)
+- `irrCAC` (>=1.0): Gwet's AC1/AC2 (already implemented, optional)
+- `psych` (>=2.0): ICC calculations for CCC (already implemented, optional)
+- `lme4` (>=1.1): Hierarchical/multilevel kappa (already implemented, optional)
 
 ### Justification
 
@@ -920,6 +928,7 @@ Ranked by impact × feasibility:
 ### Implementation Order
 
 **Phase 1 (High Priority, Low Effort)**: Quick Wins
+
 1. Pairwise kappa (each vs. reference) – 4 hours
 2. LoA categorization – 3 hours
 3. Improve Krippendorff's alpha UI – 1 hour
@@ -963,6 +972,7 @@ flowchart TD
 ```
 
 **Legend**:
+
 - 🔴 Red (C, D, F): Missing features requiring implementation
 - 🟢 Green (G): Workaround available (manual filtering)
 
@@ -1028,6 +1038,7 @@ flowchart TD
 | **Continuous** | Ki-67%, mitotic count | Lin's CCC, Bland-Altman, ICC | Kappa not applicable. |
 
 **This Article's Choice**: Unweighted Fleiss' kappa despite ordinal HER2 scale (0 < 1+ < 2+ < 3+). Justifiable because:
+
 - Fleiss' kappa has no standard weighted version
 - Clinical decision thresholds are discrete (0/1+ = HER2-negative, 2+ = equivocal, 3+ = positive)
 - Adjacent disagreements (1+ vs. 2+) **are clinically significant** (determines FISH testing)
@@ -1050,11 +1061,13 @@ flowchart TD
 | 0.81 - 1.00 | Almost perfect | Excellent. Suitable for regulatory approval. |
 
 **This Article's Results**:
+
 - Overall: κ=0.433 (Moderate) – **Borderline acceptable**
 - High agreement cases: κ=0.916 (VP APP) – **Excellent**
 - Interpretation: Agreement is good when cases are unambiguous, poor when cases are borderline (near cut-points like 10% threshold for 1+ vs. 0).
 
 **Context Matters**:
+
 - Kappa is affected by prevalence (high for common categories, low for rare)
 - HER2 3+ (N=5) has κ=0.803 (almost perfect) despite small N
 - HER2 1+ (N=24) has κ=0.292 (fair) – most challenging category

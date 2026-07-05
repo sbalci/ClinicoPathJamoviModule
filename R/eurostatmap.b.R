@@ -10,7 +10,7 @@
 #' @import dplyr
 #' @import giscoR
 
-# Package-local cache environment — avoids assigning to .GlobalEnv
+# Package-local cache environment - avoids assigning to .GlobalEnv
 .eurostat_pkg_cache <- new.env(parent = emptyenv())
 
 eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(

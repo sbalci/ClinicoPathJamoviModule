@@ -264,24 +264,24 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
             ))
         },
         
-        # TODO (stub): the four .plot methods below (.doseResponsePlot, .partialEffectPlot, .comparisonPlot, .categorizedPlot) are placeholders — no actual ggplot construction. They now safely return FALSE so jamovi renders an empty plot pane rather than crashing or showing whatever the device last contained. Each method needs a real ggplot2 implementation (the existing `image$state` is already wired with plotData for .doseResponsePlot).
+        # TODO (stub): the four .plot methods below (.doseResponsePlot, .partialEffectPlot, .comparisonPlot, .categorizedPlot) are placeholders - no actual ggplot construction. They now safely return FALSE so jamovi renders an empty plot pane rather than crashing or showing whatever the device last contained. Each method needs a real ggplot2 implementation (the existing `image$state` is already wired with plotData for .doseResponsePlot).
         .doseResponsePlot = function(image, ggtheme, theme, ...) {
-            # Stub — return FALSE until a real ggplot is built (see TODO above).
+            # Stub - return FALSE until a real ggplot is built (see TODO above).
             return(FALSE)
         },
         
         .partialEffectPlot = function(image, ggtheme, theme, ...) {
-            # Stub — see TODO above.
+            # Stub - see TODO above.
             return(FALSE)
         },
         
         .comparisonPlot = function(image, ggtheme, theme, ...) {
-            # Stub — see TODO above.
+            # Stub - see TODO above.
             return(FALSE)
         },
         
         .categorizedPlot = function(image, ggtheme, theme, ...) {
-            # Stub — see TODO above.
+            # Stub - see TODO above.
             return(FALSE)
         }
     )

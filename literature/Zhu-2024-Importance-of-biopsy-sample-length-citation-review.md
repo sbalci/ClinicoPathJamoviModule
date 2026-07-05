@@ -25,18 +25,21 @@
 ## Study Context and Clinical Relevance
 
 ### Background
+
 - Trans-perineal prostate biopsy is gaining acceptance as alternative to trans-rectal approach
 - Previous studies showed biopsy sample length affects cancer detection rates
 - No consensus on minimum acceptable sample length for trans-perineal biopsies
 - Study aimed to determine optimal minimum biopsy length threshold
 
 ### Clinical Variables Examined
+
 - **Patient characteristics:** Age, PSA level, prostate volume
 - **Imaging:** mp-MRI findings (PI-RADS scores)
 - **Biopsy characteristics:** Sample length, number of cores, biopsy approach
 - **Outcome:** Cancer detection (yes/no)
 
 ### Statistical Challenges Addressed
+
 1. **Group imbalance:** Patients with different characteristics between cancer-detected and non-detected groups
 2. **Confounding:** Multiple patient/disease factors potentially affecting detection rate
 3. **Optimal threshold determination:** Need to balance sensitivity/specificity for clinical utility
@@ -47,17 +50,21 @@
 ## Extracted Statistical Methods
 
 ### 1. Descriptive Statistics
+
 **Location in article:** Patient characteristics table
 **Purpose:** Baseline comparison between cancer-detected and non-detected groups
 **Methods used:**
+
 - Mean ± SD for continuous variables (age, PSA, prostate volume, sample length)
 - Frequency counts and percentages for categorical variables (mp-MRI findings)
 - Group comparisons (pre-matching)
 
 ### 2. Univariate Logistic Regression
+
 **Location in article:** Initial screening of predictors
 **Purpose:** Identify individual factors associated with cancer detection
 **Methods used:**
+
 - Binary logistic regression for each predictor separately
 - Outcome: Cancer detection (0/1)
 - Predictors tested individually:
@@ -69,9 +76,11 @@
 - Output: Odds ratios with 95% CIs, p-values
 
 ### 3. Propensity Score Matching
+
 **Location in article:** Methods section - controlling for confounding
 **Purpose:** Create balanced groups for fair comparison
 **Specific details:**
+
 - **Matching ratio:** 1:1
 - **Tolerance:** 0.02 (caliper width)
 - **Method:** Not explicitly stated (likely nearest neighbor)
@@ -79,9 +88,11 @@
 - **Assessment:** Checked balance after matching (standardized mean differences)
 
 ### 4. Multivariate Logistic Regression
+
 **Location in article:** Main analysis after PS matching
 **Purpose:** Identify independent predictors of cancer detection after controlling for confounders
 **Methods used:**
+
 - Binary logistic regression with multiple predictors
 - Outcome: Cancer detection (0/1)
 - Predictors entered simultaneously:
@@ -93,36 +104,44 @@
 - Output: Adjusted odds ratios with 95% CIs, p-values
 
 ### 5. Pearson Correlation Analysis
+
 **Location in article:** Exploring relationships between continuous variables
 **Purpose:** Examine linear relationships between sample length and other continuous variables
 **Variables correlated:**
+
 - Biopsy sample length vs. age
 - Biopsy sample length vs. PSA level
 - Biopsy sample length vs. prostate volume
 - Output: Correlation coefficients (r) and p-values
 
 ### 6. ROC Curve Analysis
+
 **Location in article:** Determining optimal threshold
 **Purpose:** Evaluate discriminative ability of biopsy sample length for cancer detection
 **Methods used:**
+
 - Plot ROC curve (sensitivity vs. 1-specificity)
 - Calculate Area Under Curve (AUC)
 - Trapezoidal rule for AUC calculation
 - 95% CI for AUC (method not specified, likely DeLong)
 
 ### 7. Youden Index for Optimal Cutoff
+
 **Location in article:** Threshold determination
 **Purpose:** Identify optimal minimum sample length threshold
 **Method:**
+
 - Youden Index = Sensitivity + Specificity - 1
 - Calculate for all possible thresholds
 - Select threshold maximizing Youden Index
 - **Result:** 11.00mm identified as optimal (sensitivity 98.3%, specificity 67.4%)
 
 ### 8. Sensitivity and Specificity Analysis
+
 **Location in article:** Performance evaluation of 11.00mm threshold
 **Purpose:** Quantify diagnostic performance at optimal cutoff
 **Calculations:**
+
 - Sensitivity = True Positives / (True Positives + False Negatives)
 - Specificity = True Negatives / (True Negatives + False Positives)
 - 2×2 confusion matrix at 11.00mm threshold
@@ -132,6 +151,7 @@
 ## ClinicoPath Jamovi Module Coverage Matrix
 
 ### Legend
+
 - ✅ **Fully Covered:** Function exists with required features
 - 🟡 **Partially Covered:** Function exists but missing some specific features
 - ❌ **Not Covered:** No suitable function available
@@ -162,6 +182,7 @@
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - Mean ± SD for continuous variables
 - Frequency (%) for categorical variables
 - Group comparisons with statistical tests
@@ -171,6 +192,7 @@
 - Non-parametric alternatives
 
 **Workflow for Zhu et al. analysis:**
+
 ```
 Variables: Age, PSA, Prostate Volume, mp-MRI findings, Biopsy Length
 Grouping Variable: Cancer Detection (Yes/No)
@@ -189,6 +211,7 @@ Output: Publication-ready Table 1
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - Binary logistic regression
 - Multiple predictors (can be analyzed one at a time)
 - Odds ratios with 95% CIs
@@ -198,6 +221,7 @@ Output: Publication-ready Table 1
 - ROC curves
 
 **Workflow for Zhu et al. univariate analysis:**
+
 ```
 Outcome: Cancer Detection (0/1)
 Predictors (run separately):
@@ -210,6 +234,7 @@ Output: OR, 95% CI, p-value for each predictor
 ```
 
 **Notes:**
+
 - Can run each predictor separately to replicate univariate analysis
 - Option to control for covariates available for adjusted analysis
 
@@ -222,6 +247,7 @@ Output: OR, 95% CI, p-value for each predictor
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - Propensity score estimation (multiple methods: GLM, GAM, GBM, random forest)
 - 1:1 matching with caliper (tolerance specification)
 - Balance assessment:
@@ -238,6 +264,7 @@ Output: OR, 95% CI, p-value for each predictor
 - Sensitivity analysis
 
 **Workflow for Zhu et al. PS matching:**
+
 ```
 Treatment Variable: Biopsy Sample Length (dichotomized at some threshold)
 or Cancer Detection (for creating matched groups)
@@ -270,6 +297,7 @@ Output:
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - Full multivariate logistic regression
 - Multiple predictors entered simultaneously
 - Adjusted odds ratios with 95% CIs
@@ -283,6 +311,7 @@ Output:
 - Influential case detection
 
 **Workflow for Zhu et al. multivariate analysis:**
+
 ```
 Outcome: Cancer Detection (0/1)
 
@@ -302,6 +331,7 @@ Output:
 ```
 
 **Advanced Features:**
+
 - Can run analysis on matched dataset from step #3
 - Interaction terms available if needed
 - Polynomial terms for non-linear relationships
@@ -316,6 +346,7 @@ Output:
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - Pearson correlation coefficient
 - Spearman and Kendall alternatives
 - Correlation matrix for multiple variables
@@ -330,6 +361,7 @@ Output:
   - Confidence ellipses
 
 **Workflow for Zhu et al. correlation analysis:**
+
 ```
 Variables:
   - Biopsy sample length
@@ -359,6 +391,7 @@ Output:
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - ROC curve plotting
 - AUC calculation with 95% CI
 - Multiple CI methods:
@@ -375,6 +408,7 @@ Output:
 - Confidence bands for ROC curve
 
 **Workflow for Zhu et al. ROC analysis:**
+
 ```
 Predictor: Biopsy Sample Length (continuous)
 Outcome: Cancer Detection (0/1)
@@ -391,6 +425,7 @@ Output:
 ```
 
 **Advanced Features:**
+
 - Can compare ROC curves for different predictors
 - Time-dependent ROC available via `timeroc` for survival outcomes
 - Multi-class extension via `multiclassroc`
@@ -404,6 +439,7 @@ Output:
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available:**
+
 - Multiple cutoff selection criteria:
   - **Youden Index (J = Sensitivity + Specificity - 1)** ← Exact match to article
   - Sensitivity = Specificity point
@@ -426,6 +462,7 @@ Output:
 - Multiple cutoff comparison
 
 **Workflow for Zhu et al. optimal cutoff:**
+
 ```
 Predictor: Biopsy Sample Length (continuous)
 Outcome: Cancer Detection (0/1)
@@ -454,6 +491,7 @@ Output:
 ### 8. Sensitivity/Specificity at Threshold → Multiple Functions
 
 **Jamovi Functions:**
+
 - `optimalcutpoint` (primary)
 - `enhancedROC` (secondary)
 - `confusionmatrix` (validation)
@@ -461,6 +499,7 @@ Output:
 **Coverage Assessment:** ✅ **FULLY COVERED**
 
 **Features Available (`optimalcutpoint`):**
+
 - Sensitivity and specificity at any user-defined threshold
 - Sensitivity and specificity at optimal threshold (Youden or other criteria)
 - Full 2×2 confusion matrix
@@ -477,13 +516,14 @@ Output:
 - Visualization of performance across thresholds
 
 **Workflow for Zhu et al. threshold evaluation:**
+
 ```
 Predictor: Biopsy Sample Length (continuous)
 Outcome: Cancer Detection (0/1)
 Threshold: 11.00mm (from Youden analysis)
 
 Analysis:
-  - Dichotomize sample length: <11mm vs ≥11mm
+  - Dichotomize sample length: <11mm vs >=11mm
   - Create 2×2 table
   - Calculate sensitivity/specificity
 
@@ -495,6 +535,7 @@ Expected Output:
 ```
 
 **Alternative (`confusionmatrix`):**
+
 - Can manually dichotomize variable at 11mm
 - Create confusion matrix
 - Get all performance metrics
@@ -504,6 +545,7 @@ Expected Output:
 ## Critical Evaluation of Statistical Methods
 
 ### Evaluation Framework
+
 Using 9-dimension scoring rubric (0-2 points each, max 18):
 
 | Dimension | Score | Justification |
@@ -646,6 +688,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **All statistical methods used in Zhu et al. 2024 are fully covered by ClinicoPath jamovi module.**
 
 ### Coverage Summary
+
 - **8/8 methods FULLY COVERED** (100%)
 - **0 methods PARTIALLY COVERED**
 - **0 methods NOT COVERED**
@@ -653,6 +696,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 ### Detailed Gap Analysis by Priority
 
 #### Priority 1 (HIGH) - Methods Used in Article: ✅ ALL COVERED
+
 1. ✅ Univariate logistic regression → `classification`
 2. ✅ Multivariate logistic regression → `classification`
 3. ✅ Propensity score matching (1:1, caliper 0.02) → `treatmenteffects`
@@ -692,15 +736,18 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Description:** Flexible modeling of non-linear relationships without pre-specifying polynomial terms
 
 **Use Case:**
+
 - Testing non-linear effect of biopsy sample length on cancer detection
 - More flexible than quadratic/cubic polynomials
 - Common in clinical prediction models
 
 **Current Workaround:**
+
 - Manually create polynomial terms (length², length³) and add to model
 - Use GAM in R (outside jamovi)
 
 **Implementation Complexity:** Medium
+
 - Would require adding rms package integration to `classification` module
 - UI changes to add "Add spline terms" checkbox
 
@@ -715,20 +762,24 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Description:** Optimism-corrected performance metrics using bootstrap resampling
 
 **Use Case:**
+
 - Estimate optimism in model performance (AUC, calibration)
 - Assess overfitting
 - Provide more honest performance estimates
 
 **Current Coverage:**
+
 - `optimalcutpoint` has bootstrap CIs for cutoff performance
 - `clinicalvalidation` has some validation metrics
 - **Missing:** Integrated bootstrap validation in `classification` module
 
 **Current Workaround:**
+
 - Use `clinicalvalidation` module separately
 - External validation in holdout sample
 
 **Implementation Complexity:** Medium
+
 - Would require adding bootstrap loop to `classification` module
 - Computational intensity (may be slow for large datasets)
 
@@ -743,18 +794,22 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Description:** Handling missing data through multiple imputation (MI)
 
 **Current Coverage:**
+
 - ❌ No MI implementation in ClinicoPath
 - Users must handle missing data before analysis (complete case or external imputation)
 
 **Use Case:**
+
 - Reduce bias from complete case analysis when data MCAR/MAR
 - Increase efficiency (larger effective sample size)
 
 **Current Workaround:**
+
 - Complete case analysis (jamovi default)
 - Perform MI in R using mice package, then import complete datasets
 
 **Implementation Complexity:** HIGH
+
 - Would require major new module for MI workflow
 - Complex UI for specifying imputation models
 - Need to handle pooling of results across imputations
@@ -773,18 +828,22 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Description:** Semi-parametric regression allowing flexible non-linear effects
 
 **Use Case:**
+
 - Exploring complex non-linear relationships
 - Alternative to pre-specifying polynomial/spline terms
 
 **Current Coverage:**
+
 - ❌ Not available in jamovi
 - Can use polynomial terms in `classification` as simpler alternative
 
 **Current Workaround:**
+
 - Use polynomial terms
 - Use GAM in R directly (mgcv package)
 
 **Implementation Complexity:** HIGH
+
 - Would require new module
 - Complex UI for smoothing parameter selection
 - Interpretation more challenging for clinical users
@@ -800,6 +859,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 ### Priority Assessment: ✅ **NO IMPLEMENTATION NEEDED**
 
 **Rationale:**
+
 - All 8 statistical methods used in Zhu et al. 2024 are FULLY COVERED
 - The 4 minor gaps identified are:
   1. Not used in the article
@@ -808,6 +868,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   4. Have acceptable workarounds
 
 **Recommendation:**
+
 - **No new development required to replicate Zhu et al. analysis**
 - ClinicoPath module is fully capable of conducting identical analysis
 - Minor gaps could be considered for future enhancement but are NOT blocking
@@ -817,14 +878,17 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 ### If Future Enhancement Desired (Low Priority)
 
 #### Phase 1: Quick Wins (If Desired)
+
 **None - all core functionality exists**
 
 #### Phase 2: Model Diagnostics Enhancement (Optional)
+
 **Target:** Integrate advanced diagnostics into `classification` module
 
 **Estimated Effort:** 2-3 days
 
 **Features to add:**
+
 1. Restricted cubic spline terms (using rms::rcs())
    - Add UI checkbox "Use spline terms for continuous predictors"
    - Add option for number of knots (default: 3)
@@ -884,16 +948,19 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 ```
 
 **Expected Impact:**
+
 - Enhanced modeling flexibility
 - Better assessment of overfitting
 - More rigorous performance estimates
 
 #### Phase 3: Missing Data Handling (Future Consideration)
+
 **Target:** New module for multiple imputation workflow
 
 **Estimated Effort:** 1-2 weeks
 
 **Not recommended for near-term development:**
+
 - High complexity
 - Users can handle MI externally if needed
 - Low frequency of need in typical jamovi workflows
@@ -905,7 +972,9 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 ### Complete Step-by-Step Guide
 
 #### **Step 1: Data Preparation**
+
 **Required variables:**
+
 - `age` (continuous)
 - `psa_level` (continuous)
 - `prostate_volume` (continuous)
@@ -914,6 +983,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 - `cancer_detected` (binary: 0 = No, 1 = Yes)
 
 **Data cleaning:**
+
 - Check for missing data (if >5%, consider external imputation)
 - Check for outliers (boxplots)
 - Verify variable types (continuous vs categorical)
@@ -927,6 +997,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Navigation:** ClinicoPath Descriptives → Table One
 
 **Settings:**
+
 - Variables: Age, PSA Level, Prostate Volume, mp-MRI Findings, Biopsy Length
 - Grouping Variable: Cancer Detected
 - Statistics:
@@ -938,6 +1009,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 - Effect Sizes: ✓ Include (Cohen's d for continuous)
 
 **Output:**
+
 - Table 1 with baseline characteristics
 - P-values for group differences
 
@@ -954,6 +1026,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **For each predictor separately (run 5 times):**
 
 **Model 1 - Age:**
+
 - Outcome: `cancer_detected`
 - Predictors: `age`
 - Options:
@@ -961,22 +1034,27 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   - ✓ Wald test for coefficients
 
 **Model 2 - PSA:**
+
 - Outcome: `cancer_detected`
 - Predictors: `psa_level`
 
 **Model 3 - Prostate Volume:**
+
 - Outcome: `cancer_detected`
 - Predictors: `prostate_volume`
 
 **Model 4 - mp-MRI:**
+
 - Outcome: `cancer_detected`
 - Predictors: `mpmri_findings`
 
 **Model 5 - Biopsy Length:**
+
 - Outcome: `cancer_detected`
 - Predictors: `biopsy_length`
 
 **Output from each model:**
+
 - OR with 95% CI
 - Wald p-value
 - Deviance, AIC
@@ -992,8 +1070,9 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Navigation:** Medical Decision Analysis → Treatment Effects / Propensity Scores
 
 **Settings:**
+
 - Treatment Variable: Define based on study design
-  - Option A: Dichotomize biopsy length (e.g., <11mm vs ≥11mm) if comparing groups by length
+  - Option A: Dichotomize biopsy length (e.g., <11mm vs >=11mm) if comparing groups by length
   - Option B: Use cancer_detected as treatment (to balance groups for comparison)
 - Confounders (for PS model):
   - `age`
@@ -1011,6 +1090,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   - Target: SMD < 0.1 for good balance
 
 **Output:**
+
 - Matched dataset (save as new dataset)
 - Balance diagnostics table
 - Love plot showing before/after matching
@@ -1027,6 +1107,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Use:** Matched dataset from Step 4
 
 **Settings:**
+
 - Outcome: `cancer_detected`
 - Predictors (all entered simultaneously):
   - `age`
@@ -1043,6 +1124,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   - ✓ Residual diagnostics
 
 **Output:**
+
 - Adjusted OR for each predictor with 95% CI
 - Wald p-values
 - Overall model test (likelihood ratio)
@@ -1051,6 +1133,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 - Hosmer-Lemeshow p-value (>0.05 indicates good fit)
 
 **Expected Result:**
+
 - Independent effect of biopsy length on cancer detection
 - OR > 1 indicates longer samples increase detection probability
 
@@ -1063,6 +1146,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Navigation:** ClinicoPath Descriptives → Correlation Analysis → Correlation Matrix
 
 **Settings:**
+
 - Variables:
   - `biopsy_length`
   - `age`
@@ -1077,12 +1161,14 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   - ✓ Correlation heatmap
 
 **Output:**
+
 - Correlation matrix with r values
 - P-values for each correlation
 - 95% CIs
 - Scatterplots with regression lines
 
 **Expected Result:**
+
 - Examine relationships between sample length and other variables
 - Identify potential multicollinearity issues
 
@@ -1095,6 +1181,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Navigation:** Medical Decision Analysis → ROC Curves → Enhanced ROC Analysis
 
 **Settings:**
+
 - Predictor: `biopsy_length` (continuous)
 - Outcome: `cancer_detected` (binary, code 1 = cancer)
 - Options:
@@ -1105,11 +1192,13 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   - ✓ Identify optimal cutoff (see Step 8)
 
 **Output:**
+
 - ROC curve plot
 - AUC with 95% CI (expect >0.80 for good discrimination)
 - Sensitivity/specificity table across thresholds
 
 **Expected Result:**
+
 - AUC indicating discriminative ability of sample length
 - Visual assessment of model performance
 
@@ -1122,6 +1211,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Navigation:** Medical Decision Analysis → Optimal Cutpoint Analysis
 
 **Settings:**
+
 - Predictor: `biopsy_length` (continuous)
 - Outcome: `cancer_detected` (binary)
 - Optimization Criterion: **Youden Index** (Sensitivity + Specificity - 1)
@@ -1133,6 +1223,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
   - ✓ Performance table across thresholds
 
 **Output:**
+
 - **Optimal cutoff:** Expected 11.00mm (or close)
 - **Youden Index (J):** Maximum value
 - **Sensitivity:** Expected ~98.3%
@@ -1146,6 +1237,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 - Performance across threshold range
 
 **Expected Result:**
+
 - Cutoff of ~11mm with high sensitivity and moderate specificity
 - Matches article finding of 11.00mm threshold
 
@@ -1156,6 +1248,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 **Module:** `confusionmatrix` (optional validation)
 
 **Settings:**
+
 1. Create dichotomous variable:
    - Transform → Compute Variable
    - `length_adequate = ifelse(biopsy_length >= 11, 1, 0)`
@@ -1165,6 +1258,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
    - Actual: `cancer_detected`
 
 **Output:**
+
 - 2×2 confusion matrix
 - Sensitivity = True Positives / (TP + FN)
 - Specificity = True Negatives / (TN + FP)
@@ -1226,6 +1320,7 @@ Using 9-dimension scoring rubric (0-2 points each, max 18):
 ### Statistical Method Quality: 🟡 **ADEQUATE (11/18)**
 
 The article uses appropriate core methods but could be strengthened with:
+
 - Model diagnostic reporting (VIF, linearity checks)
 - Missing data assessment
 - Calibration evaluation
@@ -1249,6 +1344,7 @@ However, these limitations do not prevent replication in ClinicoPath.
 Zhu et al. (2024). The Importance of Biopsy Sample Length: Effects of Trans-Perineal Prostate Biopsy Length on Cancer Detection Rate. [Journal information not provided in text file]
 
 **Relevant ClinicoPath Functions:**
+
 - `tableone` (jamovi/tableone.a.yaml, R/tableone.b.R)
 - `classification` (jamovi/classification.a.yaml, R/classification.b.R)
 - `treatmenteffects` (jamovi/treatmenteffects.a.yaml, R/treatmenteffects.b.R)
@@ -1258,6 +1354,7 @@ Zhu et al. (2024). The Importance of Biopsy Sample Length: Effects of Trans-Peri
 - `confusionmatrix` (jamovi/confusionmatrix.a.yaml, R/confusionmatrix.b.R)
 
 **Statistical References:**
+
 - DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L. (1988). Comparing the areas under two or more correlated receiver operating characteristic curves. Biometrics, 44(3), 837-845.
 - Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
 - Rosenbaum, P. R., & Rubin, D. B. (1983). The central role of the propensity score in observational studies for causal effects. Biometrika, 70(1), 41-55.
@@ -1269,6 +1366,7 @@ Zhu et al. (2024). The Importance of Biopsy Sample Length: Effects of Trans-Peri
 ## Appendix: Function Catalog from Jamovi Module
 
 ### ROC Curve Analysis Functions
+
 - `enhancedROC` - Comprehensive ROC analysis with multiple CI methods
 - `ordinalroc` - Ordinal outcome ROC curves
 - `multiclassroc` - Multi-class classification ROC
@@ -1277,27 +1375,33 @@ Zhu et al. (2024). The Importance of Biopsy Sample Length: Effects of Trans-Peri
 - `precisionrecall` - Precision-recall curves
 
 ### Correlation Analysis Functions
+
 - `jcorrelation` - Correlation matrix with multiple methods
 - `enhancedcorrelation` - Advanced correlation with ggstatsplot
 - `partialcorrelation` - Partial and semi-partial correlations
 
 ### Logistic Regression Functions
+
 - `classification` - Binary/multinomial logistic regression
 - `clinicalvalidation` - Model validation and calibration
 - `directregression` - General linear models
 
 ### Propensity Score / Causal Inference Functions
+
 - `treatmenteffects` - Comprehensive PS analysis with matching
 
 ### Model Performance Functions
+
 - `modelperformance` - Model fit statistics and diagnostics
 - `concordanceindex` - C-index for prediction models
 
 ### Optimal Cutoff Functions
+
 - `optimalcutpoint` - Multiple optimization criteria including Youden
 - `enhancedROC` - Includes optimal cutoff identification
 
 ### Confusion Matrix Functions
+
 - `confusionmatrix` - Binary classification performance metrics
 
 ---

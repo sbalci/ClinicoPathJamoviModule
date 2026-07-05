@@ -5,6 +5,7 @@
 **Title/Label**: s13000-025-01708-0.pdf  
 **Design & Cohort**: Retrospective cross-sectional study, N=124 MIBC patients, 4 molecular subtypes  
 **Key Analyses**:
+
 - IHC-based molecular subtyping using GATA3, CK5/6, and p16 markers
 - PD-1 and PD-L1 expression analysis across molecular subtypes  
 - Chi-square and Fisher's exact tests for categorical variables
@@ -30,9 +31,9 @@
 
 | Method / Model | Role (primary/secondary) | Variants & Options | Assumptions/Diagnostics | References (sec/page) |
 |---|---|---|---|---|
-| Chi-Square test | Primary | Standard Pearson chi-square | Independence, expected frequency ≥5 | Statistical analysis (p3) |
+| Chi-Square test | Primary | Standard Pearson chi-square | Independence, expected frequency >=5 | Statistical analysis (p3) |
 | Fisher's exact test | Primary | Non-parametric alternative | Used when appropriate for small samples | Statistical analysis (p3) |
-| Immunohistochemical scoring | Primary | Cut-off thresholds: GATA3/CK5/6 ≥20%, p16 ≥70% | Standardized pathologist evaluation | Methods (p3) |
+| Immunohistochemical scoring | Primary | Cut-off thresholds: GATA3/CK5/6 >=20%, p16 >=70% | Standardized pathologist evaluation | Methods (p3) |
 | PD-L1 Combined Positive Score (CPS) | Primary | Tumor + immune cells / total viable tumor cells | Specific to PD-L1 assessment | Methods (p3) |
 | Multiple cut-off analysis | Secondary | 1% and 10% positivity thresholds | Comparative analysis approach | Results (p4-5) |
 | Descriptive statistics | Primary | Frequencies, percentages, mean ± SD | Standard descriptive measures | Results (p3) |
@@ -60,7 +61,8 @@ Legend: ✅ covered · 🟡 partial · ❌ not covered
 **Method**: Integrated molecular subtyping workflow for bladder cancer  
 **Impact**: Critical for translational pathology research; enables classification of tumors for therapeutic guidance  
 **Closest existing function**: `ihcscoring` (provides IHC analysis but not integrated classification)  
-**Exact missing options**: 
+**Exact missing options**:
+
 - Automated molecular subtype classification based on marker combinations
 - MIBC-specific classification rules (luminal unstable, luminal papillary, basal, other)
 - Integration of multiple IHC markers into single classification output
@@ -69,7 +71,8 @@ Legend: ✅ covered · 🟡 partial · ❌ not covered
 **Method**: Advanced post-hoc testing for categorical variables  
 **Impact**: Important for multiple comparisons in molecular subtype studies  
 **Closest existing function**: `crosstable`  
-**Exact missing options**: 
+**Exact missing options**:
+
 - Standardized residuals analysis
 - Bonferroni correction for pairwise comparisons
 - Games-Howell equivalent for categorical data
@@ -80,6 +83,7 @@ Legend: ✅ covered · 🟡 partial · ❌ not covered
 ### **Target**: Extend `ihcscoring` to include molecular subtyping workflow
 
 **.a.yaml** (add molecular classification options):
+
 ```yaml
 options:
   - name: molecular_classification
@@ -137,6 +141,7 @@ options:
 ```
 
 **.b.R** (implementation sketch):
+
 ```r
 # Add molecular classification logic
 if (self$options$molecular_classification) {
@@ -194,6 +199,7 @@ classify_mibc_subtypes <- function(gata3_pos, ck56_pos, p16_pos) {
 ```
 
 **.r.yaml** (add classification results):
+
 ```yaml
 items:
   - name: classification_table
@@ -235,6 +241,7 @@ items:
 ```
 
 **.u.yaml** (add classification UI):
+
 ```yaml
 - type: LayoutBox
   margin: large
@@ -259,6 +266,7 @@ items:
 ### **Target**: Enhance `crosstable` with advanced post-hoc testing
 
 **.a.yaml** (add advanced post-hoc options):
+
 ```yaml
 options:
   - name: posthoc_method
@@ -306,6 +314,7 @@ options:
 ## 📦 DEPENDENCIES
 
 **New R packages**:
+
 - `ComplexHeatmap` (for molecular subtype visualization)
 - `corrplot` (correlation matrices between markers)
 - `DescTools` (advanced categorical statistics)
@@ -313,6 +322,7 @@ options:
 - `vcd` (visualizing categorical data)
 
 **Enhanced existing dependencies**:
+
 - `ggplot2` (molecular subtype distribution plots)
 - `dplyr` (data manipulation for classification)
 - `tidyr` (reshaping classification results)

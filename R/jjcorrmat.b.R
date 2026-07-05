@@ -84,8 +84,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br>4. Use partial correlations (3+ variables) to control for confounding effects
                 <br><br>
                 <strong>Correlation Types:</strong>
-                <br>• <strong>Zero-order (regular):</strong> Direct relationship between two variables
-                <br>• <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
+                <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
+                <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
                 <br><br>
                 This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
                 <br>
@@ -125,7 +125,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Optimized data preparation with caching
         .prepareData = function(force_refresh = FALSE) {
-            # Hash-based invalidation — mirrors .options_hash pattern.
+            # Hash-based invalidation - mirrors .options_hash pattern.
             # Without this, stale filtered data could be returned when dep/grvar/
             # naHandling change between .run() invocations on the same R6 instance.
             current_data_hash <- digest::digest(list(
@@ -512,10 +512,10 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                      interpretation <- paste0(
                         "<h4>", .("Correlation Analysis Summary"), "</h4>",
                         "<p><strong>", .("Analysis Details:"), "</strong><br>",
-                        "• ", sprintf(.("Variables analyzed: %d"), length(options_data$myvars)), "<br>",
-                        "• ", sprintf(.("Sample size: %d observations"), nrow(cor_data)), "<br>",
-                        "• ", sprintf(.("Method: %s correlation"), method_display), "<br>",
-                        "• ", sprintf(.("Correlation type: %s"), if(options_data$partial && length(options_data$myvars) >= 3) .("Partial") else .("Zero-order")), "</p>",
+                        "\u2022 ", sprintf(.("Variables analyzed: %d"), length(options_data$myvars)), "<br>",
+                        "\u2022 ", sprintf(.("Sample size: %d observations"), nrow(cor_data)), "<br>",
+                        "\u2022 ", sprintf(.("Method: %s correlation"), method_display), "<br>",
+                        "\u2022 ", sprintf(.("Correlation type: %s"), if(options_data$partial && length(options_data$myvars) >= 3) .("Partial") else .("Zero-order")), "</p>",
                         
                         "<p><strong>", .("Note:"), "</strong> ", 
                         .("Detailed correlation coefficients and p-values for Robust and Bayesian methods are visualized in the plot. Text summary is limited for these methods."), "</p>"
@@ -538,33 +538,33 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (options_data$partial && n_vars >= 3) {
                     correlation_type_info <- paste0(
                         "<p><strong>", .("Partial Correlations Explained:"), "</strong><br>",
-                        "• ", .("Partial correlations show the relationship between two variables while controlling for all other variables in the analysis"), "<br>",
-                        "• ", .("Unlike zero-order (regular) correlations, partial correlations remove the influence of confounding variables"), "<br>",
-                        "• ", .("Values closer to zero indicate that the relationship is largely explained by other variables"), "<br>",
-                        "• ", .("Strong partial correlations suggest a direct relationship that persists even after controlling for other factors"), "</p>"
+                        "\u2022 ", .("Partial correlations show the relationship between two variables while controlling for all other variables in the analysis"), "<br>",
+                        "\u2022 ", .("Unlike zero-order (regular) correlations, partial correlations remove the influence of confounding variables"), "<br>",
+                        "\u2022 ", .("Values closer to zero indicate that the relationship is largely explained by other variables"), "<br>",
+                        "\u2022 ", .("Strong partial correlations suggest a direct relationship that persists even after controlling for other factors"), "</p>"
                     )
                 } else if (options_data$partial && n_vars < 3) {
                     correlation_type_info <- paste0(
                         "<p><strong>", .("Partial Correlations Note:"), "</strong><br>",
-                        "• ", .("Partial correlations require at least 3 variables to control for confounding effects"), "<br>",
-                        "• ", .("With fewer than 3 variables, regular (zero-order) correlations are computed instead"), "</p>"
+                        "\u2022 ", .("Partial correlations require at least 3 variables to control for confounding effects"), "<br>",
+                        "\u2022 ", .("With fewer than 3 variables, regular (zero-order) correlations are computed instead"), "</p>"
                     )
                 }
 
                 interpretation <- paste0(
                     "<h4>", .("Correlation Analysis Summary"), "</h4>",
                     "<p><strong>", .("Analysis Details:"), "</strong><br>",
-                    "• ", sprintf(.("Variables analyzed: %d"), n_vars), "<br>",
-                    "• ", sprintf(.("Sample size: %d observations"), n_obs), "<br>",
-                    "• ", sprintf(.("Method: %s correlation"), method_display), "<br>",
-                    "• ", sprintf(.("Correlation type: %s"), if(options_data$partial && n_vars >= 3) .("Partial") else .("Zero-order")), "<br>",
-                    "• ", sprintf(.("Total correlations: %d"), n_correlations), "</p>",
+                    "\u2022 ", sprintf(.("Variables analyzed: %d"), n_vars), "<br>",
+                    "\u2022 ", sprintf(.("Sample size: %d observations"), n_obs), "<br>",
+                    "\u2022 ", sprintf(.("Method: %s correlation"), method_display), "<br>",
+                    "\u2022 ", sprintf(.("Correlation type: %s"), if(options_data$partial && n_vars >= 3) .("Partial") else .("Zero-order")), "<br>",
+                    "\u2022 ", sprintf(.("Total correlations: %d"), n_correlations), "</p>",
                     
                     correlation_type_info,
 
                     "<p><strong>", .("Key Findings:"), "</strong><br>",
-                    "• ", sprintf(.("Strong correlations (|r| ≥ 0.5): %d"), length(strong_corrs)), "<br>",
-                    "• ", sprintf(.("Significant correlations (p < 0.05): %d"), length(significant_corrs)), "</p>"
+                    "\u2022 ", sprintf(.("Strong correlations (|r| \u2265 0.5): %d"), length(strong_corrs)), "<br>",
+                    "\u2022 ", sprintf(.("Significant correlations (p < 0.05): %d"), length(significant_corrs)), "</p>"
                 )
 
                 # Add details for strongest correlations
@@ -598,14 +598,14 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     interpretation,
                     "<p><strong>", .("Clinical Recommendations:"), "</strong><br>",
                     if (length(significant_corrs) > 0) {
-                        .("• Consider these correlations in your clinical interpretation and hypothesis generation.")
+                        .("\u2022 Consider these correlations in your clinical interpretation and hypothesis generation.")
                     } else {
-                        .("• No significant correlations found. Consider larger sample size or different variables.")
+                        .("\u2022 No significant correlations found. Consider larger sample size or different variables.")
                     },
-                    "<br>• ", .("Remember that correlation does not imply causation."),
-                    "<br>• ", .("Consider potential confounding variables in your analysis."),
+                    "<br>\u2022 ", .("Remember that correlation does not imply causation."),
+                    "<br>\u2022 ", .("Consider potential confounding variables in your analysis."),
                     if (options_data$partial && n_vars >= 3) {
-                        paste0("<br>• ", .("Partial correlations help identify direct relationships by controlling for confounding variables in your dataset."))
+                        paste0("<br>\u2022 ", .("Partial correlations help identify direct relationships by controlling for confounding variables in your dataset."))
                     } else {
                         ""
                     }
@@ -617,7 +617,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 #     interpretation <- paste0(
                 #         interpretation,
                 #         "<br><br><strong>", .("Clinical Preset Guidance:"), "</strong><br>",
-                #         "• ", private$.preset_recommendations
+                #         "\u2022 ", private$.preset_recommendations
                 #     )
                 # }
 
@@ -652,8 +652,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         <br>4. Use partial correlations (3+ variables) to control for confounding effects
         <br><br>
         <strong>Correlation Types:</strong>
-        <br>• <strong>Zero-order (regular):</strong> Direct relationship between two variables
-        <br>• <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
+        <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
+        <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
         <br><br>
         This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
         <br>
@@ -1033,7 +1033,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Detecting the option by CLASS (not by name) means any variable option
             # added later is escaped automatically.
             #
-            # Variables are NOT re-emitted through private$.asArgs() — doing so
+            # Variables are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated them in the generated syntax (the "double
             # variables" bug). All non-variable options keep jmvcore's per-option
             # sourcify so formatting stays consistent with jamovi.

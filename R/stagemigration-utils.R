@@ -295,7 +295,7 @@ stagemigration_buildFormula <- function(time_var, event_var, predictors, interac
 
     # Build RHS (right-hand side)
     if (length(predictors) == 0) {
-        return(as.formula(paste(lhs, "~ 1")))
+        return(stats::as.formula(paste(lhs, "~ 1")))
     }
 
     # Escape predictor names
@@ -312,7 +312,7 @@ stagemigration_buildFormula <- function(time_var, event_var, predictors, interac
     }
 
     formula_str <- paste(lhs, "~", rhs)
-    return(as.formula(formula_str))
+    return(stats::as.formula(formula_str))
 }
 
 # =============================================================================
@@ -478,7 +478,7 @@ stagemigration_dataQualityReport <- function(data, old_stage, new_stage,
         event_data <- data[[event_var]][!is.na(data[[event_var]])]
 
         report$survival_summary <- list(
-            median_followup = median(time_data, na.rm = TRUE),
+            median_followup = stats::median(time_data, na.rm = TRUE),
             max_followup = max(time_data, na.rm = TRUE),
             n_events = sum(event_data == 1, na.rm = TRUE),
             event_rate = mean(event_data == 1, na.rm = TRUE)

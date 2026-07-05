@@ -97,7 +97,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
       
       # Main analysis execution
       .run = function() {
-        # Early validation — display via todo HTML (no Notice objects)
+        # Early validation - display via todo HTML (no Notice objects)
         validation <- private$.validateInputs()
         if (!validation$valid) {
           self$results$todo$setContent(paste0(
@@ -305,7 +305,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           return(NULL)
         }
         
-        # Handle outcome variable — two-level encoding
+        # Handle outcome variable - two-level encoding
         # Rows matching event_level → 1, censor_level → 0, anything else → NA (excluded)
         event_data <- self$data[[event_var]]
         event_level <- as.character(self$options$outcomeLevel)
@@ -359,7 +359,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           pred_matrix <- as.matrix(pred_data)
         }
 
-        # Remove constant predictors (zero variance) — glmnet cannot handle them
+        # Remove constant predictors (zero variance) - glmnet cannot handle them
         col_vars <- apply(pred_matrix, 2, function(col) var(col, na.rm = TRUE))
         constant_cols <- which(col_vars == 0 | is.na(col_vars))
         if (length(constant_cols) > 0) {
@@ -483,7 +483,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         var_importance <- abs(coefficients)
         names(var_importance) <- data_prep$var_names
 
-        # Calculate concordance index (C-index) — training set (optimistic)
+        # Calculate concordance index (C-index) - training set (optimistic)
         # Note: higher risk score = worse prognosis, so reverse = TRUE
         # This is a re-substitution estimate; external validation is needed
         concordance_val <- tryCatch({
@@ -565,7 +565,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           y_boot <- y[boot_indices]
 
           tryCatch({
-            # Fit glmnet path (NOT cv.glmnet) — much faster per iteration
+            # Fit glmnet path (NOT cv.glmnet) - much faster per iteration
             fit_boot <- glmnet::glmnet(
               x = X_boot, y = y_boot, family = "cox",
               alpha = stab_alpha, standardize = TRUE
@@ -663,7 +663,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
           return()
         }
-        # Ridge retains all variables — add clarifying note
+        # Ridge retains all variables - add clarifying note
         if (self$options$regularization_method == "ridge" &&
             model_results$n_selected == data_prep$n_vars) {
           self$results$selectedVariables$setNote(
@@ -1013,7 +1013,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         p <- data_prep$n_vars
         event_rate <- n_events / n
 
-        # -- Check 1: Events-Per-Variable (EPV) --
+        # - Check 1: Events-Per-Variable (EPV) --
         epv <- n_events / p
         if (epv >= 10) { # Adjusted for high dim
           checks$epv <- list(
@@ -1035,7 +1035,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
         }
 
-        # -- Check 2: Regularization Need --
+        # - Check 2: Regularization Need --
         if (p >= n / 3) {
           checks$regularization <- list(
             color = "green", label = "Regularization Need",
@@ -1050,7 +1050,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
         }
 
-        # -- Check 3: Sample Size --
+        # - Check 3: Sample Size --
         if (n >= 100) {
           checks$sample_size <- list(
             color = "green", label = "Sample Size",
@@ -1071,7 +1071,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
         }
 
-        # -- Check 4: Event Rate --
+        # - Check 4: Event Rate --
         if (event_rate >= 0.20 && event_rate <= 0.80) {
           checks$event_rate <- list(
             color = "green", label = "Event Rate",
@@ -1086,7 +1086,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           )
         }
 
-        # -- Check 5: Multicollinearity --
+        # - Check 5: Multicollinearity --
         tryCatch({
           # Due to potentially high dimensionality, we only check collinearity on a subset or skip heavy logic
           if (p <= 2000) {
@@ -1126,7 +1126,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           NULL
         })
 
-        # -- Check 6: Data Quality --
+        # - Check 6: Data Quality --
         original_data <- self$data
         pred_vars <- self$options$predictors
         n_total <- nrow(original_data)
@@ -1154,7 +1154,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             )
         }
 
-        # -- Overall Verdict --
+        # - Overall Verdict --
         colors <- sapply(checks, function(x) x$color)
         if (any(colors == "red")) {
             overall <- "red"
@@ -1330,7 +1330,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         }, error = function(e) FALSE)
       },
 
-      # Render function for model diagnostics — coefficient forest plot (ggplot2)
+      # Render function for model diagnostics - coefficient forest plot (ggplot2)
       .plot_model_diagnostics = function(image, ggtheme, theme, ...) {
         plot_data <- image$state
         if (is.null(plot_data)) return(FALSE)

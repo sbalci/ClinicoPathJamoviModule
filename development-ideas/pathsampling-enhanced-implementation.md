@@ -35,7 +35,7 @@ The enhanced pathsampling function addresses three complementary questions:
 
 ### Optional Variables
 
-3. **positiveCassettes** (numeric) - NEW
+1. **positiveCassettes** (numeric) - NEW
    - Title: "Number of cassettes with tumor (optional)"
    - Description: Total count of positive cassettes across all examined samples
    - Example: If cassettes 2, 4, 5, 7 are positive, value = 4
@@ -79,23 +79,27 @@ The enhanced pathsampling function addresses three complementary questions:
 
 **Method**: Binomial probability model with bootstrap validation
 
-**Formula**: P(detect ≥1 in n samples) = 1 - (1-p)^n
+**Formula**: P(detect >=1 in n samples) = 1 - (1-p)^n
 
 **Per-sample probability estimation**:
+
 ```r
 p = n_positive_cases / sum(first_detection_positions)
 ```
 
 **Critical Correction Applied** (October 10, 2025):
+
 - ❌ WRONG: p = cases / total_cassettes (includes unexamined cassettes)
 - ✅ CORRECT: p = cases / sum(first_detection) (only examined cassettes)
 
 **Bootstrap Method**:
+
 - Resample cases with replacement (10,000 iterations)
 - Calculate empirical sensitivity for each sample count
 - 95% CI using percentile method
 
 **References**:
+
 - Skala & Hagemann (2015) - Pathologic Sampling of the Omentum
 - Buderer (1996) - Statistical methodology for diagnostic test sample size
 
@@ -106,6 +110,7 @@ p = n_positive_cases / sum(first_detection_positions)
 **Formula**: CPR = positive_cassettes / total_cassettes (per case)
 
 **Outputs**:
+
 1. Mean CPR (SD)
 2. Median CPR
 3. Overall positivity rate
@@ -115,6 +120,7 @@ p = n_positive_cases / sum(first_detection_positions)
    - Multifocal: 4+ positive cassettes
 
 **Clinical Significance**:
+
 - Higher CPR indicates more extensive disease
 - Distribution pattern may predict prognosis
 - Useful for assessing tumor heterogeneity
@@ -124,23 +130,27 @@ p = n_positive_cases / sum(first_detection_positions)
 **Method**: Detection rate comparison by sample count groups
 
 **Approach**:
+
 1. Split cases by median cassette count
 2. Calculate positivity rate in each group
 3. Compare rates (absolute difference)
 
 **Example Output**:
+
 | Cassettes Examined | Cases | Positive | Rate |
 |-------------------|-------|----------|------|
 | <6 | 30 | 15 | 50% |
-| ≥6 | 30 | 27 | 90% |
+| >=6 | 30 | 27 | 90% |
 | Difference | - | - | 40% |
 
 **Interpretation**:
+
 - Large difference (>15%) indicates stage migration
 - Higher rates with more samples = understaging with fewer samples
 - Validates minimum sampling recommendations
 
 **References**:
+
 - Habib et al. (2024) - IPMN lymph node analysis
 - Goess et al. (2024) - Median analysis for lymph node adequacy
 
@@ -151,6 +161,7 @@ p = n_positive_cases / sum(first_detection_positions)
 **Formula**: ρ = correlation(total_cassettes, positive_cassettes)
 
 **Interpretation**:
+
 - ρ > 0, p < 0.05: More sampling → more detection (supports thoroughness)
 - ρ ≈ 0: No relationship (may indicate sampling bias or clustered disease)
 - ρ < 0: Unexpected pattern (investigate data quality)
@@ -180,22 +191,22 @@ p = n_positive_cases / sum(first_detection_positions)
 
 ### New Tables
 
-4. **Cassette Positivity Statistics** (NEW)
+1. **Cassette Positivity Statistics** (NEW)
    - Mean cassette positivity ratio (SD)
    - Median cassette positivity ratio
    - Overall cassette positivity (n/N = %)
 
-5. **Tumor Distribution Pattern** (NEW)
+2. **Tumor Distribution Pattern** (NEW)
    - Unifocal: count, percentage
    - Oligofocal: count, percentage
    - Multifocal: count, percentage
 
-6. **Detection Rates by Cassette Groups** (NEW)
+3. **Detection Rates by Cassette Groups** (NEW)
    - Group (<median): cases, positive, rate
-   - Group (≥median): cases, positive, rate
+   - Group (>=median): cases, positive, rate
    - Absolute difference in rates
 
-7. **Correlation Statistics** (NEW)
+4. **Correlation Statistics** (NEW)
    - Spearman's rho
    - p-value
    - Interpretation (significant/not significant)
@@ -219,7 +230,7 @@ p = n_positive_cases / sum(first_detection_positions)
 
 ### New Plots
 
-3. **Correlation Plot: Examined vs Positive** (NEW)
+1. **Correlation Plot: Examined vs Positive** (NEW)
    - X-axis: Total cassettes examined
    - Y-axis: Number of positive cassettes
    - Points: Individual cases (blue, semi-transparent)
@@ -285,11 +296,13 @@ p = n_positive_cases / sum(first_detection_positions)
 ### Example 1: Basic Minimum Sampling Analysis
 
 **Data**:
+
 - 60 cases with omental metastases
 - `totalSamples`: cassettes submitted per case
 - `firstDetection`: cassette where tumor first seen
 
 **Settings**:
+
 - Target confidence: 95%
 - Max samples: 10
 - Bootstrap iterations: 10,000
@@ -299,21 +312,25 @@ p = n_positive_cases / sum(first_detection_positions)
 ### Example 2: Enhanced Analysis with Tumor Burden
 
 **Data** (same as Example 1, plus):
+
 - `positiveCassettes`: total positive cassettes per case
 
 **Settings** (additional):
+
 - ✅ Show tumor burden analysis
 - ✅ Show stage migration analysis
 - ✅ Show correlation analysis
 
 **Results**:
+
 1. Mean CPR: 0.287 (28.7% of cassettes positive)
 2. Distribution: 45% unifocal, 35% oligofocal, 20% multifocal
-3. Stage migration: <6 cassettes → 50% detection, ≥6 cassettes → 90% detection (40% difference!)
+3. Stage migration: <6 cassettes → 50% detection, >=6 cassettes → 90% detection (40% difference!)
 4. Correlation: ρ = 0.62, p < 0.001 (significant positive correlation)
 
 **Interpretation**:
-- Extensive sampling (≥6 cassettes) critical to prevent understaging
+
+- Extensive sampling (>=6 cassettes) critical to prevent understaging
 - Strong positive correlation validates thoroughness principle
 - High multifocal rate (20%) suggests aggressive disease pattern
 
@@ -363,21 +380,25 @@ p = n_positive_cases / sum(first_detection_positions)
 ### Interpretation Guidelines
 
 **Minimum Sampling (Binomial + Bootstrap)**:
+
 - Target: 95% sensitivity (diagnostic test standard)
 - Point of diminishing returns: Where marginal gain <5%
 - Consider feasibility vs. incremental benefit
 
 **Tumor Burden**:
+
 - Low CPR (<0.2): Limited disease, may represent micro-metastases
 - Moderate CPR (0.2-0.5): Substantial involvement
 - High CPR (>0.5): Extensive disease, poor prognosis likely
 
 **Stage Migration**:
+
 - Difference <10%: Minimal understaging risk
 - Difference 10-20%: Moderate risk, consider guideline adherence
 - Difference >20%: High risk, inadequate sampling significantly impacts staging
 
 **Correlation**:
+
 - Positive correlation (ρ > 0.3, p < 0.05): More sampling → more detection (good)
 - No correlation (p > 0.05): May indicate sampling limitations or clustered disease
 - Negative correlation: Data quality issue - investigate immediately
@@ -461,6 +482,7 @@ p = n_positive_cases / sum(first_detection_positions)
 ### Dependencies
 
 Required R packages (auto-loaded by jamovi):
+
 - `ggplot2`: Plotting
 - `scales`: Percentage formatting
 - `stats`: cor.test, quantile
@@ -518,6 +540,7 @@ Required R packages (auto-loaded by jamovi):
 The enhanced pathsampling function provides a comprehensive framework for pathology sampling adequacy analysis. By combining minimum sampling requirements (original), tumor burden assessment, and stage migration analysis, it addresses multiple clinical questions while maintaining statistical rigor and ease of use.
 
 **Key Strengths**:
+
 - ✅ Evidence-based (validated against multiple publications)
 - ✅ Statistically rigorous (bootstrap CIs, non-parametric methods)
 - ✅ Clinically relevant (addresses real-world questions)

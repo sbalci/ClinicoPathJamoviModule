@@ -1,4 +1,4 @@
-# PCA Cox Regression -- Feature Mapping
+# PCA Cox Regression - Feature Mapping
 
 This document provides a comprehensive overview of the PCA Cox module, detailing its features, user interface elements, and the underlying R functions.
 
@@ -15,12 +15,12 @@ Key users include pathologists analyzing multi-marker panels, oncologists evalua
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Survival time | `time` | Survival Time | -- | `.run()` |
-| Event status | `status` | Event Status | -- | `.run()` |
-| Event level | `outcomeLevel` | Event Level | -- | `.run()` (two-level encoding) |
-| Censored level | `censorLevel` | Censored Level | -- | `.run()` (two-level encoding) |
-| High-dim predictors | `predictors` | High-Dimensional Predictors | -- | `.performPCA()` |
-| Clinical variables | `clinical_vars` | Clinical Variables | -- | `.fitPCCoxModel()` |
+| Survival time | `time` | Survival Time | - | `.run()` |
+| Event status | `status` | Event Status | - | `.run()` |
+| Event level | `outcomeLevel` | Event Level | - | `.run()` (two-level encoding) |
+| Censored level | `censorLevel` | Censored Level | - | `.run()` (two-level encoding) |
+| High-dim predictors | `predictors` | High-Dimensional Predictors | - | `.performPCA()` |
+| Clinical variables | `clinical_vars` | Clinical Variables | - | `.fitPCCoxModel()` |
 | **Data Assessment** | | | | |
 | Suitability check | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` | `.assessSuitability()` |
 | **PCA Configuration** | | | | |
@@ -28,12 +28,12 @@ Key users include pathologists analyzing multi-marker panels, oncologists evalua
 | Component count | `n_components` | Number of Components | `pcaSummary` | `.selectComponents()` |
 | Selection method | `component_selection` | Component Selection Method | `crossValidation` | `.selectComponents()` |
 | CV folds | `cv_folds` | Cross-Validation Folds | `crossValidation` | `.performCVSelection()` |
-| Variance threshold | `variance_threshold` | Variance Threshold | -- | `.selectComponents()` |
-| Sparse parameter | `sparse_parameter` | Sparsity Parameter | -- | `.performSparsePCA()` |
+| Variance threshold | `variance_threshold` | Variance Threshold | - | `.selectComponents()` |
+| Sparse parameter | `sparse_parameter` | Sparsity Parameter | - | `.performSparsePCA()` |
 | **Preprocessing** | | | | |
 | Scale variables | `scaling` | Scale Variables | `technicalDetails` | `.performPCA()` |
 | Center variables | `centering` | Center Variables | `technicalDetails` | `.performPCA()` |
-| Survival weighting | `survival_weighting` | Survival-Based Weighting | -- | `.performSupervisedPCA()` |
+| Survival weighting | `survival_weighting` | Survival-Based Weighting | - | `.performSupervisedPCA()` |
 | **Confidence & Validation** | | | | |
 | Confidence level | `confidence_level` | Confidence Level | `coxResults`, `modelPerformance` | `.formatCoxResults()`, `.calculateModelPerformance()` |
 | Permutation test | `permutation_test` | Permutation Test | `permutationTest` | `.performPermutationTest()` |
@@ -41,13 +41,13 @@ Key users include pathologists analyzing multi-marker panels, oncologists evalua
 | Bootstrap validation | `bootstrap_validation` | Bootstrap Validation | `bootstrapValidation` | `.performBootstrapValidation()` |
 | Bootstrap count | `n_bootstrap` | Bootstrap Samples | `bootstrapValidation` | `.performBootstrapValidation()` |
 | **Core Results** | | | | |
-| PCA summary | -- | -- | `pcaSummary` | `.populatePCASummary()` |
-| Cox model | -- | -- | `coxResults` | `.formatCoxResults()` |
-| Component loadings | -- | -- | `componentLoadings` | PCA method internals |
-| Model performance | -- | -- | `modelPerformance` | `.calculateModelPerformance()` |
-| Analysis summary | -- | -- | `summary` | `.generateSummary()` |
-| Technical details | -- | -- | `technicalDetails` | `.populateTechnicalDetails()` |
-| Clinical interpretation | -- | -- | `clinicalInterpretation` | `.populateClinicalInterpretation()` |
+| PCA summary | - | - | `pcaSummary` | `.populatePCASummary()` |
+| Cox model | - | - | `coxResults` | `.formatCoxResults()` |
+| Component loadings | - | - | `componentLoadings` | PCA method internals |
+| Model performance | - | - | `modelPerformance` | `.calculateModelPerformance()` |
+| Analysis summary | - | - | `summary` | `.generateSummary()` |
+| Technical details | - | - | `technicalDetails` | `.populateTechnicalDetails()` |
+| Clinical interpretation | - | - | `clinicalInterpretation` | `.populateClinicalInterpretation()` |
 | **Additional Analyses** | | | | |
 | Feature importance | `feature_importance` | Feature Importance | `featureImportance` | `.calculateFeatureImportance()` |
 | Risk score | `risk_score` | Calculate Risk Score | `riskScore` | `.calculateRiskScore()` |

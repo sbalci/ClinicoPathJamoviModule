@@ -67,7 +67,7 @@ install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-
 
 - Use `R >= 4.5.0`
 - Install jamovi from https://www.jamovi.org/download.html
-- Install `jmvtools`. It is **not on CRAN** — it must be installed from the jamovi
+- Install `jmvtools`. It is **not on CRAN** - it must be installed from the jamovi
   repository, along with its `node` dependency:
 
 ```r
@@ -2174,7 +2174,7 @@ Serdar Balci  4:48 PM
  I think I am getting familiar with the codes :)
 QuickTime Movie
 JamoviModule.mov
-4 MB QuickTime Movie— Click to download
+4 MB QuickTime Movie - Click to download
 ```
 
 

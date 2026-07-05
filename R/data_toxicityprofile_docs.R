@@ -1,8 +1,8 @@
 #' Enhanced Treatment Toxicity Profile Test Datasets
 #'
 #' Comprehensive collection of test datasets designed for validating enhanced treatment toxicity
-#' profile analysis functions. Each dataset represents different clinical trial scenarios, 
-#' therapeutic modalities, and safety monitoring challenges commonly encountered in 
+#' profile analysis functions. Each dataset represents different clinical trial scenarios,
+#' therapeutic modalities, and safety monitoring challenges commonly encountered in
 #' pharmaceutical development, regulatory submissions, and clinical practice.
 #'
 #' @name toxicityprofile_datasets
@@ -69,7 +69,7 @@ NULL
 #' - Treatment group comparisons with statistical testing
 #' - Time-to-event analysis and cumulative incidence
 #' - System organ class summaries for regulatory reporting
-#' - High-grade (≥3) adverse event analysis
+#' - High-grade (>=3) adverse event analysis
 #' - Dose-limiting toxicity assessment
 #'
 #' @source Simulated data generated using create_toxicityprofile_test_data.R
@@ -79,39 +79,39 @@ NULL
 #' \dontrun{
 #' # Load the dataset
 #' data(toxicityprofile_oncology_trial)
-#' 
+#'
 #' # Basic toxicity profile analysis
 #' result <- toxicityprofile(
-#'   data = toxicityprofile_oncology_trial,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   plotType = "stacked_bar",
-#'   showHighGradeOnly = FALSE
+#'     data = toxicityprofile_oncology_trial,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     plotType = "stacked_bar",
+#'     showHighGradeOnly = FALSE
 #' )
-#' 
+#'
 #' # Treatment comparison analysis
 #' result_comparison <- toxicityprofile(
-#'   data = toxicityprofile_oncology_trial,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event", 
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   systemOrganClass = "system_organ_class",
-#'   groupComparison = TRUE,
-#'   showConfidenceIntervals = TRUE
+#'     data = toxicityprofile_oncology_trial,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     systemOrganClass = "system_organ_class",
+#'     groupComparison = TRUE,
+#'     showConfidenceIntervals = TRUE
 #' )
-#' 
+#'
 #' # Time-to-event analysis
 #' result_time <- toxicityprofile(
-#'   data = toxicityprofile_oncology_trial,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade", 
-#'   timeToEvent = "time_to_event",
-#'   plotType = "time_to_event",
-#'   cumulativeIncidence = TRUE
+#'     data = toxicityprofile_oncology_trial,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     timeToEvent = "time_to_event",
+#'     plotType = "time_to_event",
+#'     cumulativeIncidence = TRUE
 #' )
 #' }
 "toxicityprofile_oncology_trial"
@@ -182,36 +182,36 @@ NULL
 #' \dontrun{
 #' # Load the dataset
 #' data(toxicityprofile_immunotherapy)
-#' 
+#'
 #' # Immune-related AE analysis
 #' result <- toxicityprofile(
-#'   data = toxicityprofile_immunotherapy,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   systemOrganClass = "system_organ_class",
-#'   plotType = "heatmap"
+#'     data = toxicityprofile_immunotherapy,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     systemOrganClass = "system_organ_class",
+#'     plotType = "heatmap"
 #' )
-#' 
+#'
 #' # High-grade irAE analysis
 #' result_serious <- toxicityprofile(
-#'   data = toxicityprofile_immunotherapy,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   showHighGradeOnly = TRUE,
-#'   minIncidence = 1
+#'     data = toxicityprofile_immunotherapy,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     showHighGradeOnly = TRUE,
+#'     minIncidence = 1
 #' )
-#' 
+#'
 #' # Time-to-onset analysis
 #' result_timing <- toxicityprofile(
-#'   data = toxicityprofile_immunotherapy,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   timeToEvent = "time_to_event",
-#'   plotType = "time_to_event"
+#'     data = toxicityprofile_immunotherapy,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     timeToEvent = "time_to_event",
+#'     plotType = "time_to_event"
 #' )
 #' }
 "toxicityprofile_immunotherapy"
@@ -280,38 +280,40 @@ NULL
 #' \dontrun{
 #' # Load the dataset
 #' data(toxicityprofile_targeted_therapy)
-#' 
+#'
 #' # Targeted therapy toxicity profile
 #' result <- toxicityprofile(
-#'   data = toxicityprofile_targeted_therapy,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   plotType = "stacked_bar",
-#'   sortBy = "frequency"
+#'     data = toxicityprofile_targeted_therapy,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     plotType = "stacked_bar",
+#'     sortBy = "frequency"
 #' )
-#' 
+#'
 #' # Dermatologic toxicity focus
-#' dermatologic_data <- subset(toxicityprofile_targeted_therapy, 
-#'                            system_organ_class == "Skin and subcutaneous tissue disorders")
-#' result_derm <- toxicityprofile(
-#'   data = dermatologic_data,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   plotType = "dot_plot",
-#'   showConfidenceIntervals = TRUE
+#' dermatologic_data <- subset(
+#'     toxicityprofile_targeted_therapy,
+#'     system_organ_class == "Skin and subcutaneous tissue disorders"
 #' )
-#' 
+#' result_derm <- toxicityprofile(
+#'     data = dermatologic_data,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     plotType = "dot_plot",
+#'     showConfidenceIntervals = TRUE
+#' )
+#'
 #' # Early onset pattern analysis
 #' result_timing <- toxicityprofile(
-#'   data = toxicityprofile_targeted_therapy,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   timeToEvent = "time_to_event",
-#'   plotType = "time_to_event"
+#'     data = toxicityprofile_targeted_therapy,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     timeToEvent = "time_to_event",
+#'     plotType = "time_to_event"
 #' )
 #' }
 "toxicityprofile_targeted_therapy"
@@ -386,37 +388,37 @@ NULL
 #' \dontrun{
 #' # Load the dataset
 #' data(toxicityprofile_dose_escalation)
-#' 
+#'
 #' # Dose-response analysis
 #' result <- toxicityprofile(
-#'   data = toxicityprofile_dose_escalation,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   plotType = "stacked_bar",
-#'   sortBy = "high_grade"
+#'     data = toxicityprofile_dose_escalation,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     plotType = "stacked_bar",
+#'     sortBy = "high_grade"
 #' )
-#' 
+#'
 #' # High-grade toxicity by dose level
 #' result_dlts <- toxicityprofile(
-#'   data = toxicityprofile_dose_escalation,
-#'   patientID = "patient_id", 
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   showHighGradeOnly = TRUE,
-#'   groupComparison = FALSE
+#'     data = toxicityprofile_dose_escalation,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     showHighGradeOnly = TRUE,
+#'     groupComparison = FALSE
 #' )
-#' 
+#'
 #' # Dose level comparison
 #' result_comparison <- toxicityprofile(
-#'   data = toxicityprofile_dose_escalation,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event", 
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   plotType = "heatmap"
+#'     data = toxicityprofile_dose_escalation,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     plotType = "heatmap"
 #' )
 #' }
 "toxicityprofile_dose_escalation"
@@ -485,40 +487,44 @@ NULL
 #' \dontrun{
 #' # Load the dataset
 #' data(toxicityprofile_pediatric)
-#' 
+#'
 #' # Pediatric safety profile
 #' result <- toxicityprofile(
-#'   data = toxicityprofile_pediatric,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   plotType = "dot_plot",
-#'   showConfidenceIntervals = TRUE
+#'     data = toxicityprofile_pediatric,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     plotType = "dot_plot",
+#'     showConfidenceIntervals = TRUE
 #' )
-#' 
+#'
 #' # Behavioral toxicity focus
-#' behavioral_events <- c("Irritability", "Sleep disturbance", "Mood changes", 
-#'                       "Attention difficulties", "Hyperactivity")
-#' behavioral_data <- subset(toxicityprofile_pediatric, 
-#'                          adverse_event %in% behavioral_events)
-#' result_behavioral <- toxicityprofile(
-#'   data = behavioral_data,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   groupComparison = TRUE
+#' behavioral_events <- c(
+#'     "Irritability", "Sleep disturbance", "Mood changes",
+#'     "Attention difficulties", "Hyperactivity"
 #' )
-#' 
+#' behavioral_data <- subset(
+#'     toxicityprofile_pediatric,
+#'     adverse_event %in% behavioral_events
+#' )
+#' result_behavioral <- toxicityprofile(
+#'     data = behavioral_data,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     groupComparison = TRUE
+#' )
+#'
 #' # Age-stratified analysis
 #' adolescent_data <- subset(toxicityprofile_pediatric, patient_age >= 13)
 #' result_adolescent <- toxicityprofile(
-#'   data = adolescent_data,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   plotType = "stacked_bar"
+#'     data = adolescent_data,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     plotType = "stacked_bar"
 #' )
 #' }
 "toxicityprofile_pediatric"
@@ -591,43 +597,43 @@ NULL
 #' \dontrun{
 #' # Load the dataset
 #' data(toxicityprofile_small_sample)
-#' 
+#'
 #' # Minimal sample analysis
 #' result <- toxicityprofile(
-#'   data = toxicityprofile_small_sample,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   plotType = "stacked_bar"
+#'     data = toxicityprofile_small_sample,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     plotType = "stacked_bar"
 #' )
-#' 
+#'
 #' # Edge case testing with group comparison
 #' result_comparison <- toxicityprofile(
-#'   data = toxicityprofile_small_sample,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   treatment = "treatment_group",
-#'   groupComparison = TRUE,
-#'   showConfidenceIntervals = TRUE
+#'     data = toxicityprofile_small_sample,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     treatment = "treatment_group",
+#'     groupComparison = TRUE,
+#'     showConfidenceIntervals = TRUE
 #' )
-#' 
+#'
 #' # Minimal visualization testing
 #' result_minimal <- toxicityprofile(
-#'   data = toxicityprofile_small_sample,
-#'   patientID = "patient_id",
-#'   adverseEvent = "adverse_event",
-#'   grade = "toxicity_grade",
-#'   plotType = "dot_plot",
-#'   minIncidence = 1
+#'     data = toxicityprofile_small_sample,
+#'     patientID = "patient_id",
+#'     adverseEvent = "adverse_event",
+#'     grade = "toxicity_grade",
+#'     plotType = "dot_plot",
+#'     minIncidence = 1
 #' )
 #' }
 "toxicityprofile_small_sample"
 
 #' Treatment Toxicity Profile Dataset Collection Summary
 #'
-#' Summary table providing comprehensive overview of all enhanced toxicityprofile test 
+#' Summary table providing comprehensive overview of all enhanced toxicityprofile test
 #' datasets including adverse event counts, patient numbers, unique events, clinical
 #' contexts, key features, and recommended usage scenarios for comprehensive safety
 #' analysis validation.
@@ -690,7 +696,7 @@ NULL
 #' **Core Analysis Types Tested:**
 #' - **Basic Toxicity Profiling**: Frequency distributions and grade analysis
 #' - **Treatment Comparisons**: Statistical testing and risk assessment
-#' - **High-Grade Event Analysis**: Focus on serious adverse events (Grade ≥3)
+#' - **High-Grade Event Analysis**: Focus on serious adverse events (Grade >=3)
 #' - **System Organ Class Analysis**: Regulatory reporting by organ system
 #' - **Time-to-Event Analysis**: Cumulative incidence and timing patterns
 #' - **Dose-Response Analysis**: Dose-dependent toxicity relationships

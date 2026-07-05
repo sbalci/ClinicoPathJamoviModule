@@ -90,6 +90,7 @@ options:
       permitted:
           - numeric
           - factor
+      default: NULL
       description:
           R: Optional covariate for meta-regression analysis
 

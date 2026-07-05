@@ -97,7 +97,7 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                 # only into a clintools data-frame column reference and into
                 # jmvcore::reject {} placeholders (both safe paths). If any
                 # future feature renders these names into an HTML setContent
-                # panel — e.g. a "Variables Analyzed: X, Y, Z" summary — wrap
+                # panel - e.g. a "Variables Analyzed: X, Y, Z" summary - wrap
                 # each value in htmltools::htmlEscape() at construction. See
                 # the cross-module idiom at R/clinicalvalidation.b.R:1148-1150.
                 # Prepare variables list for clintools

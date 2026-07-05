@@ -88,7 +88,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 outcome <- self$options$outcome
                 predictors <- self$options$predictors
 
-                # Build formula — Defense 1: composeTerm/Terms backtick-escapes
+                # Build formula - Defense 1: composeTerm/Terms backtick-escapes
                 # user column names safely (handles names containing backticks
                 # or special chars). Defense 2: jmvcore::asFormula allow-list-
                 # validates the parsed formula against jamovi 2.7.27+'s
@@ -99,7 +99,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                     jmvcore::composeTerms(as.list(predictors))
                 ))
                 # deparse1 emits user column names verbatim inside backticks.
-                # Backticks are R-syntax armor but NOT HTML armor — wrap with
+                # Backticks are R-syntax armor but NOT HTML armor - wrap with
                 # htmltools::htmlEscape so a predictor named `<img src=x
                 # onerror=alert(1)>` doesn't render as live HTML when
                 # formula_str lands inside the <pre> block below.
@@ -298,7 +298,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
 
                 # Save & restore RNG state so the bootstrap sample() loop below
                 # doesn't leak `.Random.seed` mutations into the user's session.
-                # No set.seed in this file — without this wrapper, every call
+                # No set.seed in this file - without this wrapper, every call
                 # to .bootstrapValidation shifts the user's RNG by
                 # min(n_boot, 50) draws. Mirrors optimalcutpoint.b.R:765-772.
                 old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {

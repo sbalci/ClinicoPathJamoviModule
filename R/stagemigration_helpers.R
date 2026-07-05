@@ -13,8 +13,8 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
     event_var <- "event_binary"
 
     # Fit Cox models
-    old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
-    new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
+    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
     tryCatch({
         if (!is.null(checkpoint_callback)) checkpoint_callback()
@@ -39,8 +39,8 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
 
         # --- CORRECTION FOR INDEPENDENCE ASSUMPTION ---
         
-        old_lp <- predict(old_cox, type = "lp")
-        new_lp <- predict(new_cox, type = "lp")
+        old_lp <- stats::predict(old_cox, type = "lp")
+        new_lp <- stats::predict(new_cox, type = "lp")
         surv_obj <- survival::Surv(data[[time_var]], data[[event_var]])
         
         # Default values
@@ -106,11 +106,11 @@ stagemigration_calculateAdvancedMetrics <- function(data, options, checkpoint_ca
         bic_improvement <- bic_old - bic_new
 
         lr_test <- tryCatch({
-            combined_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `",
+            combined_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `",
                                                 old_stage, "` + `", new_stage, "`", sep=""))
             combined_cox <- survival::coxph(combined_formula, data = data)
             lr_new <- 2 * (combined_cox$loglik[2] - new_cox$loglik[2])
-            df_new <- length(coef(combined_cox)) - length(coef(new_cox))
+            df_new <- length(stats::coef(combined_cox)) - length(stats::coef(new_cox))
             p_new <- pchisq(lr_new, df_new, lower.tail = FALSE)
             lr_old <- 2 * (combined_cox$loglik[2] - old_cox$loglik[2])
             list(lr_stat = lr_new - lr_old, df = df_new, p_value = p_new)
@@ -161,8 +161,8 @@ stagemigration_compareBootstrapCIndex <- function(data, old_stage, new_stage, ti
         n <- nrow(data)
         c_diffs <- numeric(n_boot)
 
-        old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
-        new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
+        old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+        new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
         # Calculate original difference
         old_cox_orig <- survival::coxph(old_formula, data = data)
@@ -261,8 +261,8 @@ stagemigration_calculatePseudoR2 <- function(old_cox, new_cox, data, options) {
         ll_null <- old_cox$loglik[1] 
         
         n <- nrow(data)
-        p_old <- length(coef(old_cox))
-        p_new <- length(coef(new_cox))
+        p_old <- length(stats::coef(old_cox))
+        p_new <- length(stats::coef(new_cox))
         
         safe_divide <- function(num, den) if (is.na(den) || den == 0) NA else num / den
         safe_exp <- function(x) if (is.na(x) || !is.finite(x)) NA else exp(x)
@@ -333,8 +333,8 @@ stagemigration_calculateNRI <- function(data, options, time_points = NULL, check
     }
     if (length(time_points) == 0) time_points <- c(12, 24, 60)
 
-    old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
-    new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
+    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
     tryCatch({
         cox_original <- survival::coxph(old_formula, data = data)
@@ -347,7 +347,7 @@ stagemigration_calculateNRI <- function(data, options, time_points = NULL, check
         surv_fit <- survival::survfit(model)
         idx <- findInterval(t, surv_fit$time)
         S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
-        lp <- predict(model, newdata = newdata, type = "lp")
+        lp <- stats::predict(model, newdata = newdata, type = "lp")
         1 - (S0_t ^ exp(lp))
     }
 
@@ -435,8 +435,8 @@ stagemigration_calculateIDI <- function(data, options, checkpoint_callback = NUL
     time_var <- options$survivalTime
     event_var <- "event_binary"
 
-    old_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
-    new_formula <- as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
+    old_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", old_stage, "`", sep=""))
+    new_formula <- stats::as.formula(paste("survival::Surv(`", time_var, "`, `", event_var, "`) ~ `", new_stage, "`", sep=""))
 
     tryCatch({
         old_cox <- survival::coxph(old_formula, data = data)
@@ -459,7 +459,7 @@ stagemigration_calculateIDI <- function(data, options, checkpoint_callback = NUL
             surv_fit <- survival::survfit(model)
             idx <- findInterval(t, surv_fit$time)
             S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
-            lp <- predict(model, newdata = newdata, type = "lp")
+            lp <- stats::predict(model, newdata = newdata, type = "lp")
             1 - (S0_t ^ exp(lp))
         }
 
@@ -543,7 +543,7 @@ stagemigration_bootstrapIDI <- function(data, old_formula, new_formula, reps = 2
                 surv_fit <- survival::survfit(model)
                 idx <- findInterval(t, surv_fit$time)
                 S0_t <- if (idx == 0) 1 else surv_fit$surv[idx]
-                lp <- predict(model, newdata = newdata, type = "lp")
+                lp <- stats::predict(model, newdata = newdata, type = "lp")
                 1 - (S0_t ^ exp(lp))
             }
             

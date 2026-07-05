@@ -77,7 +77,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 covariates <- data[self$options$covariates]
             }
 
-            # TODO (cleanup): File-wide — leftover debug `print()` calls spam the R console during normal use. Affected sites: 81, 82, 84 (this block), 250-251 (`print("Posterior names:") / print(names(posterior))`), 323 (`print(paste("Metafor input lengths..."))`). Remove or guard with a debug flag.
+            # TODO (cleanup): File-wide - leftover debug `print()` calls spam the R console during normal use. Affected sites: 81, 82, 84 (this block), 250-251 (`print("Posterior names:") / print(names(posterior))`), 323 (`print(paste("Metafor input lengths..."))`). Remove or guard with a debug flag.
             # Perform the Bayesian meta-analysis based on model type
             tryCatch({
                 print(paste("EffectSize len:", length(effectSize)))

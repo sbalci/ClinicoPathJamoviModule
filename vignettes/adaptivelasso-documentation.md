@@ -1,13 +1,13 @@
-# Adaptive LASSO for Cox Models — Developer Documentation
+# Adaptive LASSO for Cox Models - Developer Documentation
 
 ## 1. Overview
 
 - **Function**: `adaptivelasso`
 - **Files**:
-  - `jamovi/adaptivelasso.u.yaml` — UI
-  - `jamovi/adaptivelasso.a.yaml` — Options (42 total)
-  - `R/adaptivelasso.b.R` — Backend (~1810 lines)
-  - `jamovi/adaptivelasso.r.yaml` — Results (8 tables, 6 plots, 3 HTML)
+  - `jamovi/adaptivelasso.u.yaml` - UI
+  - `jamovi/adaptivelasso.a.yaml` - Options (42 total)
+  - `R/adaptivelasso.b.R` - Backend (~1810 lines)
+  - `jamovi/adaptivelasso.r.yaml` - Results (8 tables, 6 plots, 3 HTML)
 - **Summary**: Adaptive LASSO for Cox proportional hazards models with data-driven penalty weights for consistent variable selection (oracle property). Supports 5 weight methods (ridge, univariate Cox, full Cox, correlation, equal), cross-validation with 2 performance measures (deviance, C-index), stability selection, model diagnostics (PH test, influence, GOF), risk stratification, baseline survival estimation, and 6 plot types.
 
 ## 1a. Changelog
@@ -28,10 +28,10 @@
 
 | UI Control | Type | Binds to Option | Defaults & Constraints | Visibility/Enable |
 |-----------|------|----------------|----------------------|-------------------|
-| `time` | VariablesListBox (max 1) | `time` | — | Always |
-| `event` | VariablesListBox (max 1) | `event` | — | Always |
-| `predictors` | VariablesListBox | `predictors` | — | Always |
-| `strata` | VariablesListBox (max 1) | `strata` | — | Always |
+| `time` | VariablesListBox (max 1) | `time` | - | Always |
+| `event` | VariablesListBox (max 1) | `event` | - | Always |
+| `predictors` | VariablesListBox | `predictors` | - | Always |
+| `strata` | VariablesListBox (max 1) | `strata` | - | Always |
 | `event_level` | LevelSelector | `event_level` | Levels from `event` var | Always |
 
 ### Model Parameters (collapsed: false)
@@ -39,9 +39,9 @@
 | UI Control | Type | Binds to Option | Defaults & Constraints | Visibility/Enable |
 |-----------|------|----------------|----------------------|-------------------|
 | `weight_method` | ComboBox | `weight_method` | Default: `ridge`. Options: ridge/univariate/cox/correlation/equal | Always |
-| `alpha` | TextBox (number) | `alpha` | Default: 1.0, Range: 0.0–1.0 | Always |
-| `gamma` | TextBox (number) | `gamma` | Default: 1.0, Range: 0.1–5.0 | Always |
-| `cv_folds` | TextBox (number) | `cv_folds` | Default: 10, Range: 3–20 | Always |
+| `alpha` | TextBox (number) | `alpha` | Default: 1.0, Range: 0.0-1.0 | Always |
+| `gamma` | TextBox (number) | `gamma` | Default: 1.0, Range: 0.1-5.0 | Always |
+| `cv_folds` | TextBox (number) | `cv_folds` | Default: 10, Range: 3-20 | Always |
 | `cv_measure` | ComboBox | `cv_measure` | Default: `deviance`. Options: deviance/C | Always |
 
 ### Stability Selection (collapsed: true)
@@ -49,15 +49,15 @@
 | UI Control | Type | Binds to Option | Defaults & Constraints | Visibility/Enable |
 |-----------|------|----------------|----------------------|-------------------|
 | `stability_selection` | CheckBox | `stability_selection` | Default: false | Always |
-| `stability_threshold` | TextBox (number) | `stability_threshold` | Default: 0.6, Range: 0.5–0.95 | Enable: `(stability_selection)` |
-| `bootstrap_samples` | TextBox (number) | `bootstrap_samples` | Default: 100, Range: 50–1000 | Enable: `(stability_selection)` |
-| `subsampling_ratio` | TextBox (number) | `subsampling_ratio` | Default: 0.8, Range: 0.5–0.95 | Enable: `(stability_selection)` |
+| `stability_threshold` | TextBox (number) | `stability_threshold` | Default: 0.6, Range: 0.5-0.95 | Enable: `(stability_selection)` |
+| `bootstrap_samples` | TextBox (number) | `bootstrap_samples` | Default: 100, Range: 50-1000 | Enable: `(stability_selection)` |
+| `subsampling_ratio` | TextBox (number) | `subsampling_ratio` | Default: 0.8, Range: 0.5-0.95 | Enable: `(stability_selection)` |
 
 ### Risk Groups and Predictions (collapsed: true)
 
 | UI Control | Type | Binds to Option | Defaults & Constraints | Visibility/Enable |
 |-----------|------|----------------|----------------------|-------------------|
-| `risk_groups` | TextBox (number) | `risk_groups` | Default: 3, Range: 2–10 | Always |
+| `risk_groups` | TextBox (number) | `risk_groups` | Default: 3, Range: 2-10 | Always |
 | `time_points` | TextBox (string) | `time_points` | Default: "1, 2, 5" | Enable: `(baseline_survival)` |
 | `baseline_survival` | CheckBox | `baseline_survival` | Default: true | Always |
 
@@ -95,18 +95,18 @@
 | UI Control | Type | Binds to Option | Defaults & Constraints | Visibility/Enable |
 |-----------|------|----------------|----------------------|-------------------|
 | `lambda_sequence` | ComboBox | `lambda_sequence` | Default: `auto`. Options: auto/custom/single | Always |
-| `lambda_min_ratio` | TextBox (number) | `lambda_min_ratio` | Default: 0.001, Range: 1e-6–0.1 | Always |
-| `n_lambda` | TextBox (number) | `n_lambda` | Default: 100, Range: 10–500 | Always |
-| `lambda_custom_max` | TextBox (number) | `lambda_custom_max` | Default: 1.0, Range: 1e-6–1000 | Enable: `(lambda_sequence:custom)` |
-| `lambda_custom_min` | TextBox (number) | `lambda_custom_min` | Default: 0.001, Range: 1e-8–100 | Enable: `(lambda_sequence:custom)` |
-| `lambda_single` | TextBox (number) | `lambda_single` | Default: 0.01, Range: 1e-8–1000 | Enable: `(lambda_sequence:single)` |
+| `lambda_min_ratio` | TextBox (number) | `lambda_min_ratio` | Default: 0.001, Range: 1e-6-0.1 | Always |
+| `n_lambda` | TextBox (number) | `n_lambda` | Default: 100, Range: 10-500 | Always |
+| `lambda_custom_max` | TextBox (number) | `lambda_custom_max` | Default: 1.0, Range: 1e-6-1000 | Enable: `(lambda_sequence:custom)` |
+| `lambda_custom_min` | TextBox (number) | `lambda_custom_min` | Default: 0.001, Range: 1e-8-100 | Enable: `(lambda_sequence:custom)` |
+| `lambda_single` | TextBox (number) | `lambda_single` | Default: 0.01, Range: 1e-8-1000 | Enable: `(lambda_sequence:single)` |
 | `tie_method` | ComboBox | `tie_method` | Default: `breslow`. Options: breslow/efron | Always |
 | `standardize` | CheckBox | `standardize` | Default: true | Always |
-| `convergence_threshold` | TextBox (number) | `convergence_threshold` | Default: 1e-7, Range: 1e-10–1e-4 | Always |
-| `max_iterations` | TextBox (number) | `max_iterations` | Default: 10000, Range: 1000–100000 | Always |
-| `random_seed` | TextBox (number) | `random_seed` | Default: 123, Range: 1–999999 | Always |
+| `convergence_threshold` | TextBox (number) | `convergence_threshold` | Default: 1e-7, Range: 1e-10 - 1e-4 | Always |
+| `max_iterations` | TextBox (number) | `max_iterations` | Default: 10000, Range: 1000-100000 | Always |
+| `random_seed` | TextBox (number) | `random_seed` | Default: 123, Range: 1-999999 | Always |
 | `parallel_computing` | CheckBox | `parallel_computing` | Default: false | Always |
-| `n_cores` | TextBox (number) | `n_cores` | Default: 2, Range: 1–8 | Enable: `(parallel_computing)` |
+| `n_cores` | TextBox (number) | `n_cores` | Default: 2, Range: 1-8 | Enable: `(parallel_computing)` |
 
 ---
 
@@ -116,12 +116,12 @@
 
 | Name | Type | Default | Description | Downstream Effects |
 |------|------|---------|------------|-------------------|
-| `data` | Data | — | Data frame | Used in `.prepareData()` |
-| `time` | Variable | — | Time to event (numeric) | Used in `.prepareData()` to create `Surv` object |
-| `event` | Variable | — | Event indicator (factor/numeric) | Processed by `.encodeEventIndicator()` |
-| `event_level` | Level | — | Level treated as event | Used in `.encodeEventIndicator()` for binary encoding |
-| `predictors` | Variables | — | Candidate predictors | Used in `.prepareData()` to build `model.matrix` |
-| `strata` | Variable | — | Stratification variable | Used in `.prepareData()` and passed to `glmnet::stratifySurv()` |
+| `data` | Data | - | Data frame | Used in `.prepareData()` |
+| `time` | Variable | - | Time to event (numeric) | Used in `.prepareData()` to create `Surv` object |
+| `event` | Variable | - | Event indicator (factor/numeric) | Processed by `.encodeEventIndicator()` |
+| `event_level` | Level | - | Level treated as event | Used in `.encodeEventIndicator()` for binary encoding |
+| `predictors` | Variables | - | Candidate predictors | Used in `.prepareData()` to build `model.matrix` |
+| `strata` | Variable | - | Stratification variable | Used in `.prepareData()` and passed to `glmnet::stratifySurv()` |
 
 ### Model Specification (4)
 
@@ -281,8 +281,8 @@ Orchestrates all output population:
 - Generates notices via `.addNotice()` + `.renderNotices()`
 
 ### Notice System
-- `.addNotice(type, title, content)` — Appends to `.noticeList` (types: ERROR, STRONG_WARNING, WARNING, INFO)
-- `.renderNotices()` — Generates styled HTML and sets `self$results$notices$setContent()`
+- `.addNotice(type, title, content)` - Appends to `.noticeList` (types: ERROR, STRONG_WARNING, WARNING, INFO)
+- `.renderNotices()` - Generates styled HTML and sets `self$results$notices$setContent()`
 - **Notices generated**: No variables selected, low EPV, PH violation, bootstrap failures, analysis complete summary
 
 ---
@@ -446,18 +446,18 @@ flowchart TD
 6. **`.assessSuitability()`** → If `suitabilityCheck=TRUE`, compute EPV, check missing data, render HTML report
 7. **`.fitAdaptiveLasso()`**:
    a. Setup parallel computing if enabled
-   b. `.calculateAdaptiveWeights()` — compute penalty.factor based on `weight_method`
-   c. `.buildLambdaSequence()` — generate lambda grid based on `lambda_sequence`
+   b. `.calculateAdaptiveWeights()` - compute penalty.factor based on `weight_method`
+   c. `.buildLambdaSequence()` - generate lambda grid based on `lambda_sequence`
    d. Fit model via `cv.glmnet()` (or `glmnet()` for single lambda)
    e. Extract `lambda.min`, `lambda.1se`, coefficients
-   f. `.calculateDiagnostics()` — refit unpenalized Cox, PH test, influence
-   g. `.stabilitySelection()` — if enabled, run bootstrap loop
+   f. `.calculateDiagnostics()` - refit unpenalized Cox, PH test, influence
+   g. `.stabilitySelection()` - if enabled, run bootstrap loop
 8. **`.populateResults()`**:
    a. Fill 8 tables based on display toggles
    b. Set plot states (data.frames only, protobuf-safe)
    c. Generate notices (EPV warnings, PH violations, completion info)
    d. Call `.renderNotices()` to generate HTML
-9. **Render functions called lazily** — `.renderPathPlot()`, `.renderCVPlot()`, etc. read from `image$state`
+9. **Render functions called lazily** - `.renderPathPlot()`, `.renderCVPlot()`, etc. read from `image$state`
 
 ### Decision Logic
 
@@ -492,7 +492,7 @@ flowchart TD
 | `gamma` | Adaptive weights only | coefficients, all dependent tables | Low |
 | `cv_folds` | CV only | cvResults, selectionPath | Linear with folds |
 | `cv_measure` | CV metric only | cvResults, selectionPath notes | Negligible |
-| `stability_selection` | Bootstrap loop | stabilityResults, stabilityPlot | **High** — O(bootstrap_samples * cv_folds) glmnet fits |
+| `stability_selection` | Bootstrap loop | stabilityResults, stabilityPlot | **High** - O(bootstrap_samples * cv_folds) glmnet fits |
 | `risk_groups` | Risk stratification | riskGroups, survivalPlot | Low |
 | `lambda_sequence` | Lambda grid | cvResults, selectionPath, pathPlot | Varies |
 | `parallel_computing` | CV/stability parallelism | None (same results) | Reduces wall time |
@@ -501,7 +501,7 @@ flowchart TD
 
 - **`cv_measure: C` with few events**: C-index can be unstable; prefer deviance
 - **`weight_method: cox` with p > n/3**: Falls back to ridge silently
-- **`alpha: 0`**: Pure ridge — no variable selection occurs (all variables retained)
+- **`alpha: 0`**: Pure ridge - no variable selection occurs (all variables retained)
 - **`stability_selection` + large `bootstrap_samples`**: Very slow; use `parallel_computing`
 - **`lambda_sequence: single`**: No CV curve available; cvPlot shows "Single lambda mode" message
 - **`risk_groups` > unique LP values**: Groups collapse; note added to riskGroups table
@@ -562,7 +562,7 @@ plot_stability: true
 ### coefficients
 | Column | Type | Format | Source |
 |--------|------|--------|--------|
-| variable | text | — | `cox_data$pred_names[idx]` |
+| variable | text | - | `cox_data$pred_names[idx]` |
 | coefficient | number | zto | `diag$cox_coefs[j]` (from refitted Cox) |
 | exp_coefficient | number | zto | `exp(coef_val)` |
 | std_error | number | zto | `diag$cox_se[j]` |
@@ -575,18 +575,18 @@ plot_stability: true
 ### stabilityResults
 | Column | Type | Format | Source |
 |--------|------|--------|--------|
-| variable | text | — | Variable name |
+| variable | text | - | Variable name |
 | selection_frequency | number | pc | `colMeans(selection_matrix)` |
 | stability_score | number | zto | `freq / threshold` |
-| stable_selection | text | — | "Stable" if freq >= threshold |
+| stable_selection | text | - | "Stable" if freq >= threshold |
 | error_bound | number | zto | PFER = q^2 / ((2*threshold-1)*p) |
 
 ### performanceMetrics
 | Column | Type | Format | Source |
 |--------|------|--------|--------|
-| metric | text | — | Metric name |
+| metric | text | - | Metric name |
 | value | number | zto | Metric value |
-| confidence_interval | text | — | "[lower, upper]" for C-index |
-| description | text | — | Interpretation text |
+| confidence_interval | text | - | "[lower, upper]" for C-index |
+| description | text | - | Interpretation text |
 
 **Note**: "The C-index evaluates performance on the same data used for variable selection, which may overestimate true out-of-sample performance due to optimism."

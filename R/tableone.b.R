@@ -1,6 +1,6 @@
 #' @title Table One
 #'
-#' @description This function creates a “Table One” – a descriptive summary table commonly used in clinicopathological research.
+#' @description This function creates a "Table One" - a descriptive summary table commonly used in clinicopathological research.
 #' It offers several output styles using different packages (tableone, gtsummary, arsenal, and janitor).
 #'
 #' @return A formatted table according to the chosen style.
@@ -18,8 +18,6 @@
 #' @importFrom grDevices rgb
 #' @importFrom htmltools htmlEscape
 #'
-#' @export tableoneClass
-#'
 tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "tableoneClass",
     inherit = tableoneBase,
@@ -32,14 +30,14 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # - NoticeType$STRONG_WARNING for data quality issues
             # - NoticeType$WARNING for recommendations
             # - NoticeType$INFO for confirmations
-            # TODO (forward-looking): no `.()` wrapping in this file — HTML
+            # TODO (forward-looking): no `.()` wrapping in this file - HTML
             # messages, table titles ("Data Quality Check", "Analysis
             # Summary"), and report-sentence text are English-only. The
             # function is otherwise architecturally clean (good checkpoint
             # coverage, htmlEscape usage, asSource method). Address in a
             # /prepare-translation pass.
             # TODO (forward-looking): `kableExtra::kable(..., escape=FALSE)`
-            # at L163 (arsenal branch) is intentional — `arsenal::summary`
+            # at L163 (arsenal branch) is intentional - `arsenal::summary`
             # already returns escaped HTML. If a future maintainer
             # substitutes arsenal output for a renderer that does NOT escape,
             # XSS becomes possible. Add a comment near L163 explaining the
@@ -371,7 +369,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 
                 <p><strong>Variable types:</strong></p>
                 <ul>
-                    <li><em>Continuous:</em> Age, weight, lab values (shown as mean ± SD or median [IQR])</li>
+                    <li><em>Continuous:</em> Age, weight, lab values (shown as mean \u{B1} SD or median [IQR])</li>
                     <li><em>Categorical:</em> Sex, diagnosis, treatment groups (shown as N (%))</li>
                     <li><em>Ordinal:</em> Tumor grade, ECOG status (shown as N (%) by level)</li>
                 </ul>

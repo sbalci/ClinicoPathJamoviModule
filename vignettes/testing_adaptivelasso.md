@@ -209,72 +209,72 @@ All test datasets are in `data/` (RDA) or `data-raw/` (CSV/scripts). Synthetic d
 ## COMPLETE OPTION COVERAGE CHECKLIST
 
 ### Input Variables
-- [x] `time` -- all tests
-- [x] `event` -- all tests
-- [x] `event_level` -- #55, #56
-- [x] `predictors` -- all tests
-- [x] `strata` -- #2, #58, #66
+- [x] `time` - all tests
+- [x] `event` - all tests
+- [x] `event_level` - #55, #56
+- [x] `predictors` - all tests
+- [x] `strata` - #2, #58, #66
 
 ### Data Assessment
-- [x] `suitabilityCheck` (TRUE/FALSE) -- #52, #53, #54
+- [x] `suitabilityCheck` (TRUE/FALSE) - #52, #53, #54
 
 ### Model Specification
-- [x] `weight_method` (ridge) -- #1, #3
-- [x] `weight_method` (univariate) -- #4, #67
-- [x] `weight_method` (cox) -- #5
-- [x] `weight_method` (correlation) -- #6
-- [x] `weight_method` (equal) -- #7
-- [x] `alpha` (0.0, 0.5, 1.0) -- #8, #9, #10
-- [x] `gamma` (0.5, 1.0, 2.0, 5.0) -- #11, #12, #13
+- [x] `weight_method` (ridge) - #1, #3
+- [x] `weight_method` (univariate) - #4, #67
+- [x] `weight_method` (cox) - #5
+- [x] `weight_method` (correlation) - #6
+- [x] `weight_method` (equal) - #7
+- [x] `alpha` (0.0, 0.5, 1.0) - #8, #9, #10
+- [x] `gamma` (0.5, 1.0, 2.0, 5.0) - #11, #12, #13
 
 ### Cross-Validation
-- [x] `cv_folds` (3, 5, 10, 20) -- #14, #15, #16, #57
-- [x] `cv_measure` (deviance) -- #1, #14
-- [x] `cv_measure` (C) -- #15, #67
-- [x] `lambda_sequence` (auto) -- #1
-- [x] `lambda_sequence` (custom) -- #17, #18
-- [x] `lambda_sequence` (single) -- #19, #20, #64
-- [x] `lambda_custom_max` -- #17, #18
-- [x] `lambda_custom_min` -- #17, #18
-- [x] `lambda_single` -- #19, #20, #64
-- [x] `lambda_min_ratio` -- #18
-- [x] `n_lambda` -- #17
+- [x] `cv_folds` (3, 5, 10, 20) - #14, #15, #16, #57
+- [x] `cv_measure` (deviance) - #1, #14
+- [x] `cv_measure` (C) - #15, #67
+- [x] `lambda_sequence` (auto) - #1
+- [x] `lambda_sequence` (custom) - #17, #18
+- [x] `lambda_sequence` (single) - #19, #20, #64
+- [x] `lambda_custom_max` - #17, #18
+- [x] `lambda_custom_min` - #17, #18
+- [x] `lambda_single` - #19, #20, #64
+- [x] `lambda_min_ratio` - #18
+- [x] `n_lambda` - #17
 
 ### Stability Selection
-- [x] `stability_selection` (TRUE/FALSE) -- #21, #59
-- [x] `stability_threshold` (0.5, 0.6, 0.9) -- #21, #22, #23
-- [x] `bootstrap_samples` (50, 100, 200) -- #21, #24, #59
-- [x] `subsampling_ratio` (0.6, 0.8) -- #21, #24
+- [x] `stability_selection` (TRUE/FALSE) - #21, #59
+- [x] `stability_threshold` (0.5, 0.6, 0.9) - #21, #22, #23
+- [x] `bootstrap_samples` (50, 100, 200) - #21, #24, #59
+- [x] `subsampling_ratio` (0.6, 0.8) - #21, #24
 
 ### Diagnostics
-- [x] `proportional_hazards` (TRUE/FALSE) -- #25, #27
-- [x] `influence_diagnostics` (TRUE/FALSE) -- #26, #27
-- [x] `goodness_of_fit` (TRUE/FALSE) -- #25, #27
+- [x] `proportional_hazards` (TRUE/FALSE) - #25, #27
+- [x] `influence_diagnostics` (TRUE/FALSE) - #26, #27
+- [x] `goodness_of_fit` (TRUE/FALSE) - #25, #27
 
 ### Risk & Predictions
-- [x] `risk_groups` (2, 3, 5, 10) -- #28, #29, #30, #31
-- [x] `time_points` (custom, empty) -- #32, #33
-- [x] `baseline_survival` (TRUE/FALSE) -- #32, #34
+- [x] `risk_groups` (2, 3, 5, 10) - #28, #29, #30, #31
+- [x] `time_points` (custom, empty) - #32, #33
+- [x] `baseline_survival` (TRUE/FALSE) - #32, #34
 
 ### Output Tables
-- [x] `show_coefficients` (TRUE/FALSE) -- #38, #39
-- [x] `show_selection_path` (TRUE/FALSE) -- #38, #40
-- [x] `show_cv_results` (TRUE/FALSE) -- #38, #41
-- [x] `show_diagnostics` (TRUE/FALSE) -- #38, #42
+- [x] `show_coefficients` (TRUE/FALSE) - #38, #39
+- [x] `show_selection_path` (TRUE/FALSE) - #38, #40
+- [x] `show_cv_results` (TRUE/FALSE) - #38, #41
+- [x] `show_diagnostics` (TRUE/FALSE) - #38, #42
 
 ### Plots
-- [x] `plot_selection_path` (TRUE/FALSE) -- #35, #36, #37
-- [x] `plot_cv_curve` (TRUE/FALSE) -- #35, #36, #37
-- [x] `plot_stability` (TRUE/FALSE) -- #35, #36, #37
-- [x] `plot_survival_curves` (TRUE/FALSE) -- #35, #36, #37
-- [x] `plot_baseline_hazard` (TRUE/FALSE) -- #35, #36, #37
-- [x] `plot_diagnostics` (TRUE/FALSE) -- #35, #36, #37
+- [x] `plot_selection_path` (TRUE/FALSE) - #35, #36, #37
+- [x] `plot_cv_curve` (TRUE/FALSE) - #35, #36, #37
+- [x] `plot_stability` (TRUE/FALSE) - #35, #36, #37
+- [x] `plot_survival_curves` (TRUE/FALSE) - #35, #36, #37
+- [x] `plot_baseline_hazard` (TRUE/FALSE) - #35, #36, #37
+- [x] `plot_diagnostics` (TRUE/FALSE) - #35, #36, #37
 
 ### Advanced
-- [x] `tie_method` (breslow, efron) -- #43, #44
-- [x] `standardize` (TRUE/FALSE) -- #1, #45
-- [x] `parallel_computing` (TRUE/FALSE) -- #50, #51
-- [x] `n_cores` (2, 4) -- #50, #51
-- [x] `convergence_threshold` -- #46, #47
-- [x] `max_iterations` -- #46, #47
-- [x] `random_seed` -- #48, #49, #68
+- [x] `tie_method` (breslow, efron) - #43, #44
+- [x] `standardize` (TRUE/FALSE) - #1, #45
+- [x] `parallel_computing` (TRUE/FALSE) - #50, #51
+- [x] `n_cores` (2, 4) - #50, #51
+- [x] `convergence_threshold` - #46, #47
+- [x] `max_iterations` - #46, #47
+- [x] `random_seed` - #48, #49, #68

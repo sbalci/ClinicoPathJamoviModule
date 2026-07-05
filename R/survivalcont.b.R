@@ -133,7 +133,7 @@
 #' to the hazard ratio for the design and analysis of randomized trials with a
 #' time-to-event outcome. BMC Medical Research Methodology, 13(1), 152.
 #'
-#' Morris, T. P., et al. (2019). Proposals on Kaplan–Meier plots in medical research
+#' Morris, T. P., et al. (2019). Proposals on Kaplan-Meier plots in medical research
 #' and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
 #'
 #' @importFrom R6 R6Class
@@ -321,7 +321,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 # Sample size checks
                 n <- nrow(data)
                 if (n < 30) {
-                    warnings <- append(warnings, .('Very small sample size (n = {n}). Results may be unreliable. Recommend n ≥ 50 for stable cut-off analysis.'))
+                    warnings <- append(warnings, .('Very small sample size (n = {n}). Results may be unreliable. Recommend n \u2265 50 for stable cut-off analysis.'))
                 } else if (n < 50) {
                     warnings <- append(warnings, .('Small sample size (n = {n}). Consider larger sample for more reliable cut-off analysis.'))
                 }
@@ -3083,7 +3083,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                         overall_pval <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
 
                         # Set the log-rank test results as text
-                        logrank_text <- paste0("Overall Log-rank Test: χ² = ", round(overall_chisq, 3),
+                        logrank_text <- paste0("Overall Log-rank Test: \u03c7\u00b2 = ", round(overall_chisq, 3),
                                              " (df = ", length(logrank_test$n) - 1, "), p = ",
                                              ifelse(overall_pval < 0.001, "< 0.001", round(overall_pval, 3)))
 
@@ -3437,7 +3437,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
 
                             # Fallback for edge cases (insufficient variance information)
                             if (is.na(se_rmst) || se_rmst == 0 || !is.finite(se_rmst)) {
-                                # Use bootstrap-based approximation: SE ≈ SD(survival times) / sqrt(n)
+                                # Use bootstrap-based approximation: SE ~ SD(survival times) / sqrt(n)
                                 se_rmst <- sd(group_data[[mytime]], na.rm = TRUE) / sqrt(nrow(group_data))
 
                                 private$.addHtmlMessage(
@@ -3482,7 +3482,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 if (length(rmst_results) > 0) {
                     summary_text <- paste0(
                         "Restricted Mean Survival Time (RMST) Analysis\n",
-                        "Time horizon (τ): ", round(tau, 1), " ", self$options$timetypeoutput, "\n\n",
+                        "Time horizon (\u03c4): ", round(tau, 1), " ", self$options$timetypeoutput, "\n\n",
                         "The RMST represents the average time a patient can expect to survive up to the specified time horizon.\n",
                         "This metric is particularly useful when the survival curves do not reach 50% (median undefined).\n\n"
                     )
@@ -3828,7 +3828,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <p style="margin: 5px 0;">Protein X HR = 0.98 (95% CI: 0.96-0.99, p=0.02)</p>
                             <ul style="margin: 5px 0; padding-left: 20px;">
                                 <li><strong>Protective factor:</strong> Higher protein X levels reduce death risk by 2% per unit</li>
-                                <li><strong>Range effect:</strong> 20-point increase → 0.98^20 = 33% risk reduction</li>
+                                <li><strong>Range effect:</strong> 20-point increase \u2192 0.98^20 = 33% risk reduction</li>
                             </ul>
                         </div>
                     </div>
@@ -3912,9 +3912,9 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                             <strong> Clinical Example:</strong>
                             <p style="margin: 5px 0;">Biomarker X optimal cut-off = 25.3 ng/mL</p>
                             <ul style="margin: 5px 0; padding-left: 20px;">
-                                <li>High group (≥25.3): 40% 5-year survival</li>
+                                <li>High group (\u226525.3): 40% 5-year survival</li>
                                 <li>Low group (<25.3): 75% 5-year survival</li>
-                                <li>Clinical use: "Patients with Biomarker X ≥25.3 need intensive monitoring"</li>
+                                <li>Clinical use: "Patients with Biomarker X \u226525.3 need intensive monitoring"</li>
                             </ul>
                         </div>
                     </div>
@@ -3975,7 +3975,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 private$.setExplanationContent("rmstExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
                     <h4 style="margin-top: 0; color: #2c3e50;">Understanding Restricted Mean Survival Time (RMST)</h4>
-                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (τ).</p>
+                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4).</p>
                     <ul>
                         <li><strong>Time-Limited Analysis:</strong> Mean survival within a defined observation period</li>
                         <li><strong>Group Comparison:</strong> Difference in RMST between risk groups</li>

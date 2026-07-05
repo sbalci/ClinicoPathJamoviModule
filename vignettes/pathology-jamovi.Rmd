@@ -27,7 +27,7 @@ In this page I am going to collect the most common statistical methods used in p
 
 - Recommendations for reporting histopathology studies: a proposal
 
-Virchows Arch (2015) 466:611–615 DOI 10.1007/s00428-015-1762-3
+Virchows Arch (2015) 466:611 - 615 DOI 10.1007/s00428-015-1762-3
 
 
 

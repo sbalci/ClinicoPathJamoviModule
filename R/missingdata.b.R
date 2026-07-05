@@ -154,7 +154,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             package_status <- private$.check_package_dependencies()
             if (!package_status$all_available) {
                 # TODO (UX): three validation paths in .run() use the `setContent("<error html>") + return()` pattern
-                # instead of `jmvcore::reject()` — here (L156), L163 (validate_and_prepare_data error), and L434
+                # instead of `jmvcore::reject()` - here (L156), L163 (validate_and_prepare_data error), and L434
                 # (imputation tryCatch). Converting to jmvcore::reject() would surface a structured red banner instead
                 # of replacing one result panel with HTML. Behavior-risk: jmvcore::reject() stops the whole .run(),
                 # so any side-output the user expects (e.g. interpretation guide still rendering) would disappear.
@@ -774,7 +774,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             high_missing_vars <- names(missing_percentages)[missing_percentages > 90]
             
             if (length(high_missing_vars) > 0) {
-                # TODO (correctness): `warning_msg` is built here but never reaches any setContent call —
+                # TODO (correctness): `warning_msg` is built here but never reaches any setContent call - 
                 # the comment below ("Add warning but continue analysis") describes intended behavior that
                 # was never implemented. Either prepend warning_msg to the pattern_table HTML before returning
                 # valid=TRUE, or drop this dead branch. htmlEscape already applied defensively for future wiring.

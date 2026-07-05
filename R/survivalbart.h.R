@@ -822,20 +822,6 @@ survivalbartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' formulations
 #' with comprehensive posterior inference and model diagnostics.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- survivalbart(
-#'     data = mydata,
-#'     time = "time_to_event",
-#'     event = "event_indicator",
-#'     predictors = c("age", "stage", "biomarker1", "biomarker2"),
-#'     model_type = "aft",
-#'     n_trees = 200,
-#'     n_burn = 1000,
-#'     n_post = 2000
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

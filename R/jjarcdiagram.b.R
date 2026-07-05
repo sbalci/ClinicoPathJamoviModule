@@ -1,7 +1,6 @@
 #' @title Arc Diagram
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import arcdiagram
 #' @import igraph
 #' @import grDevices
 #' @import RColorBrewer
@@ -590,9 +589,10 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Get colors
             colors <- private$.getColors(network_data)
 
-            # Create the plot with proper namespacing
+            # Create the plot using the vendored arcplot (see R/arcdiagram_vendored.R);
+            # arcdiagram is GitHub-only and cannot be installed by jamovi, so it is bundled.
             private$.checkpoint(flush = FALSE)  # Before arcplot rendering
-            arcdiagram::arcplot(
+            arcplot(
                 network_data$edgelist,
                 ordering = ord,
                 horizontal = self$options$horizontal,
@@ -957,7 +957,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 .("<h4> Interpretation Notes:</h4>"),
                 "<ul style='margin-left: 20px;'>",
-                .("<li><strong>Network Density:</strong> 0-0.2 (sparse), 0.2-0.5 (moderate), >0.5 (dense). Aggregating duplicate edges ensures density ≤ 1.0</li>"),
+                .("<li><strong>Network Density:</strong> 0-0.2 (sparse), 0.2-0.5 (moderate), >0.5 (dense). Aggregating duplicate edges ensures density \u2264 1.0</li>"),
                 .("<li><strong>Degree Centrality:</strong> Number of direct connections (hub identification). For weighted networks, uses strength (sum of weights)</li>"),
                 .("<li><strong>Betweenness Centrality:</strong> Importance as a bridge between network regions. Accounts for weight interpretation mode</li>"),
                 .("<li><strong>Closeness Centrality:</strong> Average distance to all other nodes. May be Inf for disconnected graphs (auto-filtered)</li>"),
@@ -1083,7 +1083,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 "<dt style='font-weight: bold; margin-top: 10px;'>", .("Directed vs. Undirected"), "</dt>",
                 "<dd style='margin-left: 20px; margin-bottom: 8px;'>",
-                .("<strong>Directed:</strong> Edges have direction (A→B is different from B→A), suitable for regulatory relationships or causal pathways. <strong>Undirected:</strong> Edges are bidirectional (A-B same as B-A), suitable for similarity or co-occurrence networks. <strong>Note:</strong> Arc diagrams do not display arrows even for directed networks."),
+                .("<strong>Directed:</strong> Edges have direction (A\u2192B is different from B\u2192A), suitable for regulatory relationships or causal pathways. <strong>Undirected:</strong> Edges are bidirectional (A-B same as B-A), suitable for similarity or co-occurrence networks. <strong>Note:</strong> Arc diagrams do not display arrows even for directed networks."),
                 "</dd>",
 
                 "<dt style='font-weight: bold; margin-top: 10px;'>", .("Isolated Node"), "</dt>",

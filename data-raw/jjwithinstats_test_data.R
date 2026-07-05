@@ -39,12 +39,12 @@ for (i in 1:n) {
   base_value <- jjwithinstats_test$baseline[i]
 
   # Week 4: Individual response + overall treatment effect
-  individual_response <- rnorm(1, mean = -8, sd = 5)  # Average reduction -8mm
+  individual_response <- rnorm(1, mean = -8, sd = 5) # Average reduction -8mm
   jjwithinstats_test$week4[i] <- base_value + individual_response
 
   # Week 12: Further improvement with correlation to Week 4
   week4_value <- jjwithinstats_test$week4[i]
-  additional_change <- rnorm(1, mean = -5, sd = 4)  # Additional -5mm reduction
+  additional_change <- rnorm(1, mean = -5, sd = 4) # Additional -5mm reduction
   jjwithinstats_test$week12[i] <- week4_value + additional_change
 }
 
@@ -336,9 +336,9 @@ VARIABLE DESCRIPTIONS
 ---------------------
 
 Main Dataset (Tumor Size):
-  • baseline [numeric, ≥5]: Baseline tumor size in mm
-  • week4 [numeric, ≥3]: Week 4 tumor size
-  • week12 [numeric, ≥2]: Week 12 tumor size
+  • baseline [numeric, >=5]: Baseline tumor size in mm
+  • week4 [numeric, >=3]: Week 4 tumor size
+  • week12 [numeric, >=2]: Week 12 tumor size
 
 Biomarker Dataset:
   • month0 [numeric, >0]: Baseline biomarker (log-normal)

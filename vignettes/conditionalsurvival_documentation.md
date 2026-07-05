@@ -25,41 +25,41 @@ The analysis accepts both numeric (0/1) and factor (2-level) outcome variables, 
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Survival time | `timeVar` (Variable, suggested: continuous, permitted: numeric) | Time Variable | Used in all results | `.run()` -- `data[[timeVar]]` |
-| Event indicator | `outcomeVar` (Variable, suggested: ordinal/nominal, permitted: numeric/factor) | Event/Status Variable | Used in all results | `.run()` -- handles factor (2-level) and numeric (0/1) |
-| Grouping variable | `conditionVar` (Variable, suggested: ordinal/nominal/continuous, permitted: numeric/factor) | Conditioning Variable (optional) | `condsurvTable` group column visible when set | `.run()` -- stratified loop over `levels(as.factor(...))` |
+| Survival time | `timeVar` (Variable, suggested: continuous, permitted: numeric) | Time Variable | Used in all results | `.run()` - `data[[timeVar]]` |
+| Event indicator | `outcomeVar` (Variable, suggested: ordinal/nominal, permitted: numeric/factor) | Event/Status Variable | Used in all results | `.run()` - handles factor (2-level) and numeric (0/1) |
+| Grouping variable | `conditionVar` (Variable, suggested: ordinal/nominal/continuous, permitted: numeric/factor) | Conditioning Variable (optional) | `condsurvTable` group column visible when set | `.run()` - stratified loop over `levels(as.factor(...))` |
 | **Analysis Options** | | | | |
-| Conditioning time | `conditionTime` (Number, default: 0) | Conditioning Time Point | `condsurvTable` condtime column | `.run()` -- 0/NULL/NA uses `median(time)` |
+| Conditioning time | `conditionTime` (Number, default: 0) | Conditioning Time Point | `condsurvTable` condtime column | `.run()` - 0/NULL/NA uses `median(time)` |
 | Estimation method | `method` (List: km/landmark/ipw/pkm, default: km) | Estimation Method | `methodExplanation` | `.computeCondSurv()` dispatches to `.runCondSurv()` or `.runManualCondSurv()` |
-| Smoothing bandwidth | `bandwidth` (Number, default: 0) | Bandwidth (for smoothing methods) | N/A (read but unused) | `.run()` -- reserved for future PKM smoothing |
-| Confidence level | `confInt` (Number, default: 0.95, min: 0.01, max: 0.99) | Confidence Level | `condsurvTable` lower/upper columns | `.runManualCondSurv()` -- `qnorm(1 - (1-confInt)/2)` |
-| Custom time points | `timePoints` (String, default: '') | Specific Time Points | `condsurvTable` time column | `.parseTimePoints()` -- comma-separated, falls back to `.getDefaultTimePoints()` |
-| Plot style | `plotType` (List: curves/probability/both, default: curves) | Plot Type | `survplot` clearWith | `.plot()` -- TODO: always draws curves style |
+| Smoothing bandwidth | `bandwidth` (Number, default: 0) | Bandwidth (for smoothing methods) | N/A (read but unused) | `.run()` - reserved for future PKM smoothing |
+| Confidence level | `confInt` (Number, default: 0.95, min: 0.01, max: 0.99) | Confidence Level | `condsurvTable` lower/upper columns | `.runManualCondSurv()` - `qnorm(1 - (1-confInt)/2)` |
+| Custom time points | `timePoints` (String, default: '') | Specific Time Points | `condsurvTable` time column | `.parseTimePoints()` - comma-separated, falls back to `.getDefaultTimePoints()` |
+| Plot style | `plotType` (List: curves/probability/both, default: curves) | Plot Type | `survplot` clearWith | `.plot()` - TODO: always draws curves style |
 | **Core Results** | | | | |
 | Getting started guide | N/A | N/A | `todo` (Html, always visible) | `.initTodo()` |
 | Conditional survival table | N/A | N/A | `condsurvTable` (Table, 7 columns: group/time/condtime/condprob/se/lower/upper) | `.populateCondSurvTable()` |
-| Survival plot | N/A | N/A | `survplot` (Image, 600x450, renderFun: `.plot`) | `.createCondSurvPlot()` -- ggplot2 step plot |
+| Survival plot | N/A | N/A | `survplot` (Image, 600x450, renderFun: `.plot`) | `.createCondSurvPlot()` - ggplot2 step plot |
 | **Display Options** | | | | |
 | Show results table | `showTable` (Bool, default: true) | Show Results Table | `condsurvTable` visible: `(showTable)` | N/A (visibility only) |
 | Show survival plot | `showPlot` (Bool, default: true) | Show Survival Plot | `survplot` visible: `(showPlot)` | N/A (visibility only) |
 | Show explanations | `showExplanations` (Bool, default: true) | Show Explanations | `methodExplanation` visible: `(showExplanations)` | `.init()` calls `.initMethodExplanation()` when true |
 | **Explanatory Output** | | | | |
-| Method explanation | N/A | N/A | `methodExplanation` (Html) | `.updateMethodExplanation()` -- method-specific description + summary stats |
-| Report sentence | N/A | N/A | `reportSentence` (Html, always visible) | `.generateReportSentence()` -- copy-ready text with CI |
-| Assumptions panel | N/A | N/A | `assumptions` (Html, always visible) | `.populateAssumptions()` -- 5 bullet points |
+| Method explanation | N/A | N/A | `methodExplanation` (Html) | `.updateMethodExplanation()` - method-specific description + summary stats |
+| Report sentence | N/A | N/A | `reportSentence` (Html, always visible) | `.generateReportSentence()` - copy-ready text with CI |
+| Assumptions panel | N/A | N/A | `assumptions` (Html, always visible) | `.populateAssumptions()` - 5 bullet points |
 
 ## Method Dispatch Logic
 
 | `method` value | `condSURV` available | Actual path |
 |----------------|---------------------|-------------|
-| `km` | Yes | `.runCondSurv()` -- `condSURV::KMW()` then `.calculateCondSurvFromWeights()` |
-| `km` | No | `.runManualCondSurv()` -- S(t)/S(s) ratio from `survival::survfit()` |
-| `landmark` | Yes | `.runCondSurv()` -- subsets data to T >= condTime, refits KM on adjusted times |
-| `landmark` | No | `.runManualCondSurv()` -- fallback |
-| `ipw` | Yes | `.runCondSurv()` -- `.calculateIPWCondSurv()` (stub, falls back to manual) |
-| `ipw` | No | `.runManualCondSurv()` -- fallback |
-| `pkm` | Yes | `.runCondSurv()` -- falls through to `.runManualCondSurv()` (not yet implemented) |
-| `pkm` | No | `.runManualCondSurv()` -- fallback |
+| `km` | Yes | `.runCondSurv()` - `condSURV::KMW()` then `.calculateCondSurvFromWeights()` |
+| `km` | No | `.runManualCondSurv()` - S(t)/S(s) ratio from `survival::survfit()` |
+| `landmark` | Yes | `.runCondSurv()` - subsets data to T >= condTime, refits KM on adjusted times |
+| `landmark` | No | `.runManualCondSurv()` - fallback |
+| `ipw` | Yes | `.runCondSurv()` - `.calculateIPWCondSurv()` (stub, falls back to manual) |
+| `ipw` | No | `.runManualCondSurv()` - fallback |
+| `pkm` | Yes | `.runCondSurv()` - falls through to `.runManualCondSurv()` (not yet implemented) |
+| `pkm` | No | `.runManualCondSurv()` - fallback |
 
 ## Validation Rules
 

@@ -34,7 +34,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -1336,7 +1336,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # TODO (correctness): This helper mutates options via the
         #   `self$options$option("name")$value <- ...` pattern (L1312-1314, L1322-1324,
-        #   L1332-1334). jamovi options are read-only at runtime — this workaround may
+        #   L1332-1334). jamovi options are read-only at runtime - this workaround may
         #   silently no-op or raise a runtime error in newer jamovi. Same correctness
         #   concern as jjbarstats/jjcoefstats/jjhistostats `.applyClinicalPreset`.
         #   Recommended fix: compute derived option values in a helper that returns

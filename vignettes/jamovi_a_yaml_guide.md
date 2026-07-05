@@ -81,23 +81,26 @@ options:
 ### Core Identification Properties
 
 #### `name` (Required)
+
 - **Type**: String (single word, no spaces)
 - **Purpose**: Unique identifier for the analysis within the module
 - **Rules**: Must match the corresponding `.r.yaml`, `.u.yaml`, and `.b.R` filenames
 - **Example**: `name: advancedsurvival`
 
 #### `title` (Required)
+
 - **Type**: String
 - **Purpose**: Human-readable title displayed in jamovi menus and results
-- **Guidelines**: Should be descriptive but concise (≤50 characters)
+- **Guidelines**: Should be descriptive but concise (<=50 characters)
 - **Example**: `title: Advanced Survival Analysis with Cox Regression`
 
 ### Menu Organization Properties
 
 #### `menuGroup` (Required)
+
 - **Type**: String
 - **Purpose**: Main menu category where analysis appears
-- **Common Values**: 
+- **Common Values**:
   - `SurvivalD` - Survival analysis
   - `ExplorationD` - Exploratory data analysis  
   - `RegressionD` - Regression methods
@@ -106,11 +109,13 @@ options:
 - **Example**: `menuGroup: SurvivalD`
 
 #### `menuSubgroup` (Optional)
+
 - **Type**: String
 - **Purpose**: Subcategory within the main menu group
 - **Example**: `menuSubgroup: Advanced Methods`
 
-#### `menuSubtitle` (Optional) 
+#### `menuSubtitle` (Optional)
+
 - **Type**: String
 - **Purpose**: Additional descriptive text in menu
 - **Example**: `menuSubtitle: Cox Regression with Extensions`
@@ -118,12 +123,14 @@ options:
 ### Version and Specification Properties
 
 #### `version` (Required)
+
 - **Type**: String (quoted)
 - **Purpose**: Analysis version for tracking changes
 - **Format**: Semantic versioning (major.minor.patch)
 - **Example**: `version: '0.0.3'`
 
 #### `jas` (Required)
+
 - **Type**: String (quoted)
 - **Purpose**: jamovi Analysis Specification version
 - **Current Standard**: `'1.2'`
@@ -132,6 +139,7 @@ options:
 ### Documentation Properties
 
 #### `description` (Recommended)
+
 - **Type**: Object with `main` and `R` properties
 - **Purpose**: Provides detailed documentation for users and developers
 
@@ -181,18 +189,21 @@ options:
 These properties can be used with any option type:
 
 #### `name` (Required)
+
 - **Type**: String
 - **Purpose**: Internal identifier used in R code to access the option value
 - **Rules**: Must be valid R variable name (no spaces, starts with letter)
 - **Example**: `name: survivalTime`
 
 #### `title` (Recommended)
+
 - **Type**: String  
 - **Purpose**: Label displayed to users in the jamovi interface
 - **Guidelines**: Should be clear and descriptive
 - **Example**: `title: Survival Time Variable`
 
 #### `description` (Optional)
+
 - **Type**: String or Object
 - **Purpose**: Provides help text and documentation
 
@@ -207,6 +218,7 @@ description:
 ```
 
 #### `default` (Optional)
+
 - **Type**: Varies by option type
 - **Purpose**: Default value when analysis is first loaded
 - **Example**: `default: true` (for Bool), `default: 0.05` (for Number)
@@ -218,6 +230,7 @@ description:
 ### Core Data Types
 
 #### `Data`
+
 The dataset option - required for every analysis.
 
 ```yaml
@@ -227,12 +240,14 @@ The dataset option - required for every analysis.
       R: The data as a data frame.
 ```
 
-**Properties**: 
+**Properties**:
+
 - No additional properties needed
 - Always required as first option
 - Provides access to the dataset in R code
 
 #### `Variable`
+
 Single variable selection from the dataset.
 
 ```yaml
@@ -248,11 +263,13 @@ Single variable selection from the dataset.
 ```
 
 **Properties**:
+
 - `suggested: [continuous, ordinal, nominal]` - Variable types to highlight
 - `permitted: [numeric, factor]` - Variable types allowed
 - `default: NULL` - Use NULL for optional variables
 
 #### `Variables`
+
 Multiple variable selection from the dataset.
 
 ```yaml
@@ -267,11 +284,13 @@ Multiple variable selection from the dataset.
 ```
 
 **Properties**:
+
 - Same `suggested` and `permitted` as Variable
 - Returns vector of variable names in R
 - Users can select multiple variables
 
 #### `Level`
+
 Specific level selection from a factor variable.
 
 ```yaml
@@ -285,12 +304,14 @@ Specific level selection from a factor variable.
 ```
 
 **Properties**:
+
 - `variable: (variableName)` - Must reference another Variable option
 - Dynamically populated based on selected variable's levels
 
 ### Numeric Input Types
 
 #### `Number`
+
 Numeric input with decimal precision.
 
 ```yaml
@@ -306,11 +327,13 @@ Numeric input with decimal precision.
 ```
 
 **Properties**:
+
 - `min: value` - Minimum allowed value
 - `max: value` - Maximum allowed value  
 - `default: value` - Default numeric value
 
 #### `Integer`
+
 Whole number input only.
 
 ```yaml
@@ -326,12 +349,14 @@ Whole number input only.
 ```
 
 **Properties**:
+
 - Same as Number but restricts to integers
 - Useful for counts, repetitions, sample sizes
 
 ### Text Input Types
 
 #### `String`
+
 Short text input field.
 
 ```yaml
@@ -345,12 +370,14 @@ Short text input field.
 ```
 
 **Properties**:
+
 - `default: ""` - Usually empty string
 - Best for short labels, titles, custom text
 
 ### Boolean Types
 
 #### `Bool`
+
 Checkbox for true/false options.
 
 ```yaml
@@ -364,6 +391,7 @@ Checkbox for true/false options.
 ```
 
 **Properties**:
+
 - `default: true` or `default: false`
 - Creates checkbox in interface
 - Returns logical value in R
@@ -371,6 +399,7 @@ Checkbox for true/false options.
 ### Selection Types
 
 #### `List`
+
 Single selection from predefined options.
 
 ```yaml
@@ -393,12 +422,14 @@ Single selection from predefined options.
 ```
 
 **Properties**:
+
 - `options:` - List of available choices
   - `name:` - Internal value passed to R
   - `title:` - Display text shown to user
 - `default:` - Must match one of the option names
 
 #### `NMXList`
+
 Multiple selection list (Non-Mutual eXclusive).
 
 ```yaml
@@ -421,6 +452,7 @@ Multiple selection list (Non-Mutual eXclusive).
 ```
 
 **Properties**:
+
 - Same structure as List but allows multiple selections
 - `default:` - Array of selected option names
 - Returns character vector in R
@@ -428,6 +460,7 @@ Multiple selection list (Non-Mutual eXclusive).
 ### Output Types
 
 #### `Output`
+
 Creates new columns in the dataset.
 
 ```yaml
@@ -440,6 +473,7 @@ Creates new columns in the dataset.
 ```
 
 **Properties**:
+
 - No additional properties needed
 - User specifies name for new variable
 - Analysis can write results to this column
@@ -471,6 +505,7 @@ Options can be made conditional based on other option values (implemented in `.u
 ### Complex Data Structures
 
 #### Hierarchical Options
+
 For complex analyses with multiple levels:
 
 ```yaml
@@ -504,6 +539,7 @@ For complex analyses with multiple levels:
 ### Professional Configuration Patterns
 
 #### Time-Based Options
+
 ```yaml
 - name: timePoints
   title: Analysis Time Points (months)
@@ -522,6 +558,7 @@ For complex analyses with multiple levels:
 ```
 
 #### Clinical Decision Parameters
+
 ```yaml
 - name: riskThresholds
   title: Clinical Risk Thresholds
@@ -539,6 +576,7 @@ For complex analyses with multiple levels:
 ```
 
 #### Advanced Statistical Controls
+
 ```yaml
 - name: multipleTestingCorrection
   title: Multiple Testing Correction
@@ -560,6 +598,7 @@ For complex analyses with multiple levels:
 ### Validation and Constraints
 
 #### Range Validation
+
 ```yaml
 - name: confidenceLevel
   title: Confidence Level
@@ -572,6 +611,7 @@ For complex analyses with multiple levels:
 ```
 
 #### Multi-Variable Dependencies
+
 ```yaml
 - name: primaryEndpoint
   title: Primary Endpoint
@@ -790,6 +830,7 @@ options:
 ### Organization and Structure
 
 #### 1. Logical Grouping
+
 Group related options together and order them logically:
 
 ```yaml
@@ -819,6 +860,7 @@ options:
 ```
 
 #### 2. Clear Naming Conventions
+
 - Use descriptive, consistent names
 - Follow camelCase convention
 - Make purpose obvious from the name
@@ -838,6 +880,7 @@ options:
 ```
 
 #### 3. Comprehensive Descriptions
+
 Provide helpful descriptions for complex options:
 
 ```yaml
@@ -860,6 +903,7 @@ Provide helpful descriptions for complex options:
 ### User Experience Design
 
 #### 4. Sensible Defaults
+
 Choose defaults that work for most common use cases:
 
 ```yaml
@@ -883,6 +927,7 @@ Choose defaults that work for most common use cases:
 ```
 
 #### 5. Appropriate Constraints
+
 Set reasonable min/max values:
 
 ```yaml
@@ -901,6 +946,7 @@ Set reasonable min/max values:
 ```
 
 #### 6. Progressive Disclosure
+
 Structure options from basic to advanced:
 
 ```yaml
@@ -927,6 +973,7 @@ Structure options from basic to advanced:
 ### Technical Best Practices
 
 #### 7. Validation Strategy
+
 Include options that validate analysis assumptions:
 
 ```yaml
@@ -947,6 +994,7 @@ Include options that validate analysis assumptions:
 ```
 
 #### 8. Flexible Configuration
+
 Allow customization while maintaining simplicity:
 
 ```yaml
@@ -966,6 +1014,7 @@ Allow customization while maintaining simplicity:
 ```
 
 #### 9. Clinical Relevance
+
 Include clinically meaningful parameters:
 
 ```yaml
@@ -986,9 +1035,11 @@ Include clinically meaningful parameters:
 ### Common Issues and Solutions
 
 #### Issue 1: Analysis Not Appearing in Menu
+
 **Symptoms**: Analysis missing from jamovi interface
 
 **Causes & Solutions**:
+
 ```yaml
 # Problem: Missing required properties
 name: myanalysis    # ✓ Required
@@ -1010,9 +1061,11 @@ name: myanalysis    # ✓ Correct
 ```
 
 #### Issue 2: Options Not Working
+
 **Symptoms**: Options don't appear or behave incorrectly
 
 **Debugging Checklist**:
+
 ```yaml
 # Check required properties
 - name: option1      # ✓ Required for all options
@@ -1034,7 +1087,9 @@ name: myanalysis    # ✓ Correct
 ```
 
 #### Issue 3: Default Values Not Working
+
 **Common Problems**:
+
 ```yaml
 # Problem: Wrong data type
 - name: significance
@@ -1066,13 +1121,16 @@ name: myanalysis    # ✓ Correct
 ### Validation Tools
 
 #### YAML Syntax Validation
+
 Use online YAML validators or:
+
 ```bash
 # Command line validation
 python -c "import yaml; yaml.safe_load(open('analysis.a.yaml'))"
 ```
 
 #### jamovi Module Testing
+
 ```r
 # In R, test module loading
 devtools::install()
@@ -1087,6 +1145,7 @@ jmv::YourModule::youranalysis(data = data.frame())
 ## 10. Complete Examples
 
 ### Example 1: Simple Analysis
+
 Basic two-sample t-test with essential options:
 
 ```yaml
@@ -1151,6 +1210,7 @@ options:
 ```
 
 ### Example 2: Intermediate Analysis
+
 Survival analysis with multiple options:
 
 ```yaml
@@ -1274,6 +1334,7 @@ options:
 ```
 
 ### Example 3: Complex Analysis
+
 Advanced analysis with multiple subsections:
 
 ```yaml
@@ -1556,12 +1617,13 @@ This comprehensive guide covers all aspects of writing `.a.yaml` files for jamov
 ### Additional Resources
 
 - [Official jamovi Developer Documentation](https://dev.jamovi.org/api_analysis-definition.html)
-- [jamovi Module Examples](https://github.com/jamovi/jmv/tree/master/jamovi) 
+- [jamovi Module Examples](https://github.com/jamovi/jmv/tree/master/jamovi)
 - [ClinicoPath Module Examples](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/jamovi)
 
 ### Next Steps
 
 After mastering `.a.yaml` files, explore:
+
 - `.r.yaml` files for results definition
 - `.u.yaml` files for interface layout
 - `.b.R` files for R implementation  

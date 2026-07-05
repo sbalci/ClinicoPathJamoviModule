@@ -8,45 +8,45 @@ context("waterfall RECIST Categorization Validation")
 
 # Test 1: RECIST Boundary Values ----
 test_that("RECIST boundaries are correctly implemented", {
-  skip_if_not_installed('jmvReadWrite')
+  skip_if_not_installed("jmvReadWrite")
   # Create test data with exact boundary values and representative samples
   test_data <- data.frame(
     PatientID = paste0("PT", sprintf("%02d", 1:14)),
     Response = c(
-      -150,  # PT01: Should be CR (≤-100%)
-      -100,  # PT02: Should be CR (exact boundary)
-      -99,   # PT03: Should be PR (> -100%)
-      -60,   # PT04: Should be PR
-      -30,   # PT05: Should be PR (exact boundary)
-      -29,   # PT06: Should be SD (> -30%)
-      -10,   # PT07: Should be SD
-      0,     # PT08: Should be SD
-      10,    # PT09: Should be SD
-      20,    # PT10: Should be SD (exact boundary)
-      21,    # PT11: Should be PD (> +20%)
-      50,    # PT12: Should be PD
-      100,   # PT13: Should be PD
-      NA     # PT14: Should be Unknown (missing value)
+      -150, # PT01: Should be CR (<=-100%)
+      -100, # PT02: Should be CR (exact boundary)
+      -99, # PT03: Should be PR (> -100%)
+      -60, # PT04: Should be PR
+      -30, # PT05: Should be PR (exact boundary)
+      -29, # PT06: Should be SD (> -30%)
+      -10, # PT07: Should be SD
+      0, # PT08: Should be SD
+      10, # PT09: Should be SD
+      20, # PT10: Should be SD (exact boundary)
+      21, # PT11: Should be PD (> +20%)
+      50, # PT12: Should be PD
+      100, # PT13: Should be PD
+      NA # PT14: Should be Unknown (missing value)
     )
   )
 
   # Expected categories based on corrected RECIST boundaries:
-  # CR: ≤-100%, PR: -99% to -30%, SD: -29% to +20%, PD: >+20%
+  # CR: <=-100%, PR: -99% to -30%, SD: -29% to +20%, PD: >+20%
   expected_categories <- c(
-    "CR",       # PT01: -150% ≤ -100%
-    "CR",       # PT02: -100% ≤ -100%
-    "PR",       # PT03: -99% > -100% AND ≤ -30%
-    "PR",       # PT04: -60% in PR range
-    "PR",       # PT05: -30% ≤ -30% (exact boundary)
-    "SD",       # PT06: -29% > -30% AND ≤ +20%
-    "SD",       # PT07: -10% in SD range
-    "SD",       # PT08: 0% in SD range
-    "SD",       # PT09: +10% in SD range
-    "SD",       # PT10: +20% ≤ +20% (exact boundary)
-    "PD",       # PT11: +21% > +20%
-    "PD",       # PT12: +50% in PD range
-    "PD",       # PT13: +100% in PD range
-    "Unknown"   # PT14: NA value
+    "CR", # PT01: -150% <= -100%
+    "CR", # PT02: -100% <= -100%
+    "PR", # PT03: -99% > -100% AND <= -30%
+    "PR", # PT04: -60% in PR range
+    "PR", # PT05: -30% <= -30% (exact boundary)
+    "SD", # PT06: -29% > -30% AND <= +20%
+    "SD", # PT07: -10% in SD range
+    "SD", # PT08: 0% in SD range
+    "SD", # PT09: +10% in SD range
+    "SD", # PT10: +20% <= +20% (exact boundary)
+    "PD", # PT11: +21% > +20%
+    "PD", # PT12: +50% in PD range
+    "PD", # PT13: +100% in PD range
+    "Unknown" # PT14: NA value
   )
 
   # Note: We cannot easily test the internal categorization without running the full function
@@ -81,7 +81,8 @@ test_that("RECIST boundaries are correctly implemented", {
   })
 
   expect_equal(manual_categories, expected_categories,
-               info = "Manual RECIST categorization should match expected categories")
+    info = "Manual RECIST categorization should match expected categories"
+  )
 })
 
 
@@ -91,16 +92,16 @@ test_that("ORR and DCR calculations are mathematically correct", {
   test_data <- data.frame(
     PatientID = paste0("PT", sprintf("%02d", 1:10)),
     Response = c(
-      -100,  # CR
-      -60,   # PR
-      -30,   # PR (boundary)
-      -10,   # SD
-      0,     # SD
-      10,    # SD
-      20,    # SD (boundary)
-      21,    # PD
-      50,    # PD
-      100    # PD
+      -100, # CR
+      -60, # PR
+      -30, # PR (boundary)
+      -10, # SD
+      0, # SD
+      10, # SD
+      20, # SD (boundary)
+      21, # PD
+      50, # PD
+      100 # PD
     )
   )
 
@@ -164,7 +165,8 @@ test_that("Edge cases are handled correctly", {
   })
 
   expect_true(all(all_cr_categories == "CR"),
-              info = "All values ≤-100% should be CR")
+    info = "All values <=-100% should be CR"
+  )
 
   # Test with all PD
   all_pd_data <- data.frame(
@@ -178,7 +180,8 @@ test_that("Edge cases are handled correctly", {
   })
 
   expect_true(all(all_pd_categories == "PD"),
-              info = "All values >+20% should be PD")
+    info = "All values >+20% should be PD"
+  )
 
   # Test with exactly at boundaries
   boundary_data <- data.frame(
@@ -221,9 +224,11 @@ test_that("Binomial confidence intervals are correctly calculated", {
   manual_test <- binom.test(n_responders, n_total)
 
   expect_equal(manual_test$conf.int[1], expected_ci[1],
-               tolerance = 0.001, info = "Lower CI bound should match")
+    tolerance = 0.001, info = "Lower CI bound should match"
+  )
   expect_equal(manual_test$conf.int[2], expected_ci[2],
-               tolerance = 0.001, info = "Upper CI bound should match")
+    tolerance = 0.001, info = "Upper CI bound should match"
+  )
 
   # Test edge case: 0 responders
   ci_zero <- binom.test(0, 20)$conf.int
@@ -240,7 +245,7 @@ test_that("Binomial confidence intervals are correctly calculated", {
 # Test 5: Previous Bug Verification ----
 test_that("Previous RECIST categorization bug is fixed", {
   # This test documents the bug that was fixed
-  # BEFORE FIX: response <= 20 ~ "SD" would assign SD to ALL values ≤20%,
+  # BEFORE FIX: response <= 20 ~ "SD" would assign SD to ALL values <=20%,
   # including -50% which should be PR
 
   test_value <- -50
@@ -261,17 +266,20 @@ test_that("Previous RECIST categorization bug is fixed", {
   }
 
   expect_equal(correct_category, "PR",
-               info = "-50% should be categorized as PR, not SD (bug fix verification)")
+    info = "-50% should be categorized as PR, not SD (bug fix verification)"
+  )
 
   # Verify the bug would have occurred with old logic
   # OLD BUGGY LOGIC: if (response <= 20) "SD"
   buggy_category <- if (test_value <= 20) "SD" else "Other"
   expect_equal(buggy_category, "SD",
-               info = "Old buggy logic incorrectly assigned SD to -50%")
+    info = "Old buggy logic incorrectly assigned SD to -50%"
+  )
 
   # Confirm the fix prevents the bug
   expect_false(correct_category == buggy_category,
-                info = "Fixed logic should differ from buggy logic for -50%")
+    info = "Fixed logic should differ from buggy logic for -50%"
+  )
 })
 
 # Test 6: Complete Workflow Reference Dataset ----
@@ -320,13 +328,14 @@ test_that("Complete workflow produces expected results", {
 
   # Calculate metrics
   n_total <- length(reference_data$Response)
-  orr <- ((2 + 5) / n_total) * 100  # CR + PR = 7/20 = 35%
-  dcr <- ((2 + 5 + 8) / n_total) * 100  # CR + PR + SD = 15/20 = 75%
+  orr <- ((2 + 5) / n_total) * 100 # CR + PR = 7/20 = 35%
+  dcr <- ((2 + 5 + 8) / n_total) * 100 # CR + PR + SD = 15/20 = 75%
 
   expect_equal(orr, 35, info = "ORR should be 35%")
   expect_equal(dcr, 75, info = "DCR should be 75%")
 
   # Verify no "Unknown" categories in complete data
   expect_false("Unknown" %in% categories,
-               info = "Complete data should have no Unknown categories")
+    info = "Complete data should have no Unknown categories"
+  )
 })

@@ -12,7 +12,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
     private = list(
         .run = function() {
 
-            # Save & restore RNG state — several helper functions in this file
+            # Save & restore RNG state - several helper functions in this file
             # currently call runif/rnorm to produce placeholder values (see the
             # stub TODO below). The save/restore prevents demo RNG draws from
             # leaking into the user's session RNG.
@@ -39,18 +39,18 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             #   - .calculateRegionalHealthScore returns runif(1, 60, 90)  <-- random
             #   - .calculateDisparityIndex      returns runif(1, 0.1, 0.5) <-- random
             #   - .calculateQualityMetric       returns runif(1, 60, 85)   <-- random
-            #   - .createTimePeriods returns rep("Period 1", ...) — single hardcoded
+            #   - .createTimePeriods returns rep("Period 1", ...) - single hardcoded
             #   - .calculateTrendStatistics / .calculateHealthDisparity /
             #     .createPredictiveModel / .createSurveillanceIndicator /
             #     .calculateQualityMetric all return hardcoded list literals.
             #   - .performInterventionAnalysis and .performResourceAllocationAnalysis
             #     are 100% fabricated demonstration data.
             #   - All 7 plot functions build their own data.frame(...) with
-            #     rnorm/runif/sin/cos — the user's `data` argument is never used.
+            #     rnorm/runif/sin/cos - the user's `data` argument is never used.
             # This function presents glossy, gradient-styled HTML and Table outputs
             # to clinicians as if they were real analysis, but the numbers and
             # categorizations are fabricated. menuGroup is `ClinicoPathD`
-            # (dev-routed) — DO NOT promote to production menu until every helper
+            # (dev-routed) - DO NOT promote to production menu until every helper
             # actually consumes the user's data.
 
             # Basic data validation

@@ -397,7 +397,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Add diagnostic information about the recoding
                         other_val <- setdiff(unique_vals, outcomeLevel)
                         diagnostics$binary_check <- sprintf(
-                            "Outcome recoded: '%s' (event) → 1, '%s' (non-event) → 0. Original coding was NOT 0/1.",
+                            "Outcome recoded: '%s' (event) \u2192 1, '%s' (non-event) \u2192 0. Original coding was NOT 0/1.",
                             outcomeLevel, other_val
                         )
                     }
@@ -692,7 +692,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <dd>Time to disease progression only. Deaths without progression are censored.</dd>
 
                 <dt><b>Multistate Model</b></dt>
-                <dd>Models transitions between health states (e.g., healthy → disease → death).</dd>
+                <dd>Models transitions between health states (e.g., healthy \u2192 disease \u2192 death).</dd>
 
                 <dt><b>Censoring</b></dt>
                 <dd>Incomplete observation of survival time (patient still alive, lost to follow-up, or event not observed).</dd>

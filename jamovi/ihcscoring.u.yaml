@@ -18,13 +18,13 @@ children:
             name: guided_biomarker
             options:
               - name: er_pr
-                title: "ER/PR (Breast Cancer) - H-score ≥100 recommended"
+                title: "ER/PR (Breast Cancer) - H-score >=100 recommended"
               - name: her2
-                title: "HER2 (Breast Cancer) - H-score ≥150 recommended"
+                title: "HER2 (Breast Cancer) - H-score >=150 recommended"
               - name: ki67
-                title: "Ki-67 (Proliferation) - H-score ≥100 recommended"
+                title: "Ki-67 (Proliferation) - H-score >=100 recommended"
               - name: pdl1
-                title: "PD-L1 (Immunotherapy) - TPS ≥1% recommended"
+                title: "PD-L1 (Immunotherapy) - TPS >=1% recommended"
               - name: manual
                 title: "Manual Configuration"
           - type: Label
@@ -92,11 +92,11 @@ children:
               - type: Label
                 label: " Common Clinical Cutpoints:"
               - type: Label
-                label: "• ER/PR: H-score ≥100 (FDA approved)"
+                label: "• ER/PR: H-score >=100 (FDA approved)"
               - type: Label
-                label: "• HER2: H-score ≥150 (research standard)"
+                label: "• HER2: H-score >=150 (research standard)"
               - type: Label
-                label: "• Ki-67: H-score ≥100 (proliferation index)"
+                label: "• Ki-67: H-score >=100 (proliferation index)"
               - type: TextBox
                 name: binary_cutpoint
                 label: "H-score Cutoff for Positive/Negative"

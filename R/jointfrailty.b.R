@@ -183,7 +183,7 @@ jointfrailtyClass <- R6::R6Class(
                 }
                 # TODO (correctness): `as.numeric(factor) - 1` only works correctly for
                 # binary 2-level factors (produces 0/1). Multi-level factors get coded as
-                # sequential integers (0, 1, 2, ...) which treats them as ordinal-numeric —
+                # sequential integers (0, 1, 2, ...) which treats them as ordinal-numeric - 
                 # losing nominal-factor semantics. Better: let frailtypack's formula
                 # construction handle factors via `model.matrix` one-hot encoding (pass
                 # the factor column through unchanged), or use `jmvcore::toNumeric` which
@@ -315,7 +315,7 @@ jointfrailtyClass <- R6::R6Class(
                 return(fit)
                 
             }, error = function(e) {
-                # htmlEscape e$message — frailtypack errors may include user column-name fragments
+                # htmlEscape e$message - frailtypack errors may include user column-name fragments
                 error_msg <- paste("Joint frailty model fitting error:", htmltools::htmlEscape(e$message))
                 self$results$todo$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
                 return(NULL)

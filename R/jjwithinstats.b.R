@@ -152,8 +152,6 @@
 #' @importFrom digest digest
 #' @importFrom ggstatsplot ggwithinstats theme_ggstatsplot
 #' @importFrom ggpubr ggpaired ggboxplot ggviolin ggline stat_compare_means theme_pubr
-#'
-#' @export
 
 
 jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -170,16 +168,16 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Notice collection list for HTML-based notices (avoids serialization errors)
         .noticeList = list(),
 
-        # TODO (cleanup): `.escapeVar` is dead code — defined here but never
+        # TODO (cleanup): `.escapeVar` is dead code - defined here but never
         # called anywhere in this file (grep confirms 1 occurrence: the
         # definition). The inline `if (grepl("[^A-Za-z0-9_]", v)) jmvcore::composeTerm(v) else v`
         # patterns at L525/L574/L1163 already do this work without the helper
-        # — and they could simplify to just `jmvcore::composeTerm(v)` which
+        # - and they could simplify to just `jmvcore::composeTerm(v)` which
         # already handles syntactic names by returning them unwrapped. Remove
         # this helper.
         #
         # TODO (cleanup): `.safeHtmlOutput` at L290 is a roll-your-own
-        # htmlEscape with extra `/` → `&#x2F;` substitution. Functionally
+        # htmlEscape with extra `/` \u2192 `&#x2F;` substitution. Functionally
         # correct but non-standard. Replace with `htmltools::htmlEscape()` to
         # match the convention used in other audited files (jjridges,
         # jjsegmentedtotalbar). Drop-in replacement at the helper site only;
@@ -238,9 +236,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         This tool generates Violin Plots for repeated measurements (e.g., biomarker levels over time, treatment responses).<br><br>
                         <strong>Data Format:</strong> Wide format required - each row = one subject, columns = separate time points/measurements.<br><br>
                         <strong>Requirements:</strong><br>
-                        • Select at least 2 measurements (First and Second Measurement fields)<br>
-                        • No missing values allowed<br>
-                        • Use for comparing 2-4 measurements from the same subjects<br><br>
+                        \u2022 Select at least 2 measurements (First and Second Measurement fields)<br>
+                        \u2022 No missing values allowed<br>
+                        \u2022 Use for comparing 2-4 measurements from the same subjects<br><br>
                         See documentation: <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
                         Please cite jamovi and packages as instructed.<br><hr>"
                 
@@ -851,7 +849,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # What to look for
-            guidance <- .(" <strong>What to look for:</strong><br>• Statistical significance (p < 0.05) indicates real changes over time<br>• Effect sizes show practical importance<br>• Individual trajectories reveal response patterns<br>• Outliers may indicate treatment non-responders or measurement errors")
+            guidance <- .(" <strong>What to look for:</strong><br>\u2022 Statistical significance (p < 0.05) indicates real changes over time<br>\u2022 Effect sizes show practical importance<br>\u2022 Individual trajectories reveal response patterns<br>\u2022 Outliers may indicate treatment non-responders or measurement errors")
             
             interpretation_parts <- list(
                 paste0("<div style='background-color:#f8f9fa;padding:15px;margin:10px 0;border-left:4px solid #007bff;'>"),
@@ -950,9 +948,9 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         This tool generates Violin Plots for repeated measurements (e.g., biomarker levels over time, treatment responses).<br><br>
                         <strong>Data Format:</strong> Wide format required - each row = one subject, columns = separate time points/measurements.<br><br>
                         <strong>Requirements:</strong><br>
-                        • Select at least 2 measurements (First and Second Measurement fields)<br>
-                        • No missing values allowed<br>
-                        • Use for comparing 2-4 measurements from the same subjects<br><br>
+                        \u2022 Select at least 2 measurements (First and Second Measurement fields)<br>
+                        \u2022 No missing values allowed<br>
+                        \u2022 Use for comparing 2-4 measurements from the same subjects<br><br>
                         See documentation: <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
                         Please cite jamovi and packages as instructed.<br><hr>"
 
@@ -1145,14 +1143,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 TRUE
                 
             }, error = function(e) {
-                # htmlEscape e$message — ggwithinstats errors may include user column-name fragments
+                # htmlEscape e$message - ggwithinstats errors may include user column-name fragments
                 error_msg <- paste0(
                     .("<br>Error creating within-subjects plot: "), private$.safeHtmlOutput(e$message),
                     .("<br><br>Please check that:"),
-                    .("<br>• All measurement variables contain numeric values"),
-                    .("<br>• Data has at least 2 complete rows"),
-                    .("<br>• Variables have sufficient variance for statistical tests"),
-                    .("<br>• No extreme outliers that might affect analysis"),
+                    .("<br>\u2022 All measurement variables contain numeric values"),
+                    .("<br>\u2022 Data has at least 2 complete rows"),
+                    .("<br>\u2022 Variables have sufficient variance for statistical tests"),
+                    .("<br>\u2022 No extreme outliers that might affect analysis"),
                     .("<br><hr>")
                 )
                 self$results$todo$setContent(error_msg)
@@ -1318,7 +1316,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # by class (rather than by name) means any variable option added later
             # is escaped automatically.
             #
-            # dep1..dep4 are NOT re-emitted through private$.asArgs() — doing so
+            # dep1..dep4 are NOT re-emitted through private$.asArgs() - doing so
             # previously duplicated the dep variables in the generated syntax (the
             # "double variables" bug). All non-variable options keep jmvcore's
             # per-option sourcify so formatting stays consistent with jamovi.

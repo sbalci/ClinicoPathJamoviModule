@@ -11,12 +11,15 @@ These features enable **evidence-based marker selection** and **quality control*
 ## New Diagnostic Features
 
 ### 1. **Marker Performance Metrics** ✅
+
 Calculate sensitivity, specificity, PPV, NPV, and accuracy for each marker against known diagnoses.
 
 ### 2. **Optimal Antibody Panel Selection** ✅
+
 Identify minimal marker combinations (2-marker or 3-marker panels) with maximum diagnostic discrimination.
 
 ### 3. **Outlier Detection & Flagging** ✅
+
 Automatically identify cases with atypical/ambiguous immunoprofiles that require molecular confirmation.
 
 ---
@@ -24,9 +27,11 @@ Automatically identify cases with atypical/ambiguous immunoprofiles that require
 ## Feature 1: Marker Performance Metrics
 
 ### Purpose
+
 Quantify how well each IHC marker distinguishes between diagnostic categories in your dataset.
 
 ### When to Use
+
 - Building diagnostic IHC panels
 - Validating marker performance in your laboratory
 - Comparing results to published literature
@@ -65,12 +70,14 @@ Fli1      Ewing_Sarcoma        63%          78%          55%    82%    74%
 ### Interpretation Example
 
 **CK7 for Synovial Sarcoma:**
+
 - Sensitivity: 52% → Detects about half of synovial sarcomas
 - Specificity: 100% → Never false-positive in other sarcomas
 - PPV: 100% → If CK7+, always synovial sarcoma
 - **Clinical use:** Excellent confirmatory marker (high specificity/PPV), but not for screening (low sensitivity)
 
 **Nestin for MPNST:**
+
 - Sensitivity: 78% → Detects most MPNSTs
 - Specificity: 96% → Rarely false-positive
 - PPV: 86% → If nestin+, 86% chance of MPNST
@@ -81,9 +88,11 @@ Fli1      Ewing_Sarcoma        63%          78%          55%    82%    74%
 ## Feature 2: Optimal Antibody Panel Selection
 
 ### Purpose
+
 Identify the **best marker combinations** for distinguishing diagnostic categories, following Olsen et al.'s methodology.
 
 ### Key Findings from Olsen 2006
+
 - **Synovial Sarcoma:** EMA + CK7 (100% specificity, 52% sensitivity)
 - **MPNST:** S100 + Nestin (100% specificity, 48% sensitivity)
 - **Ewing Sarcoma:** Membranous CD99 + Fli-1 (96% specificity, 56% sensitivity)
@@ -120,9 +129,9 @@ Rank  Panel               Target Diagnosis      Sensitivity  Specificity  PPV   
 
 | Score Range | Specificity | PPV | Recommendation |
 |-------------|-------------|-----|----------------|
-| ≥0.90 | ≥95% | ≥90% | **Excellent** - highly specific panel |
-| 0.80-0.90 | ≥90% | ≥80% | **Good** - reliable for diagnosis |
-| 0.70-0.80 | ≥80% | ≥50% | **Moderate** - use with caution |
+| >=0.90 | >=95% | >=90% | **Excellent** - highly specific panel |
+| 0.80-0.90 | >=90% | >=80% | **Good** - reliable for diagnosis |
+| 0.70-0.80 | >=80% | >=50% | **Moderate** - use with caution |
 | <0.70 | <80% | - | **Limited utility** - consider alternatives |
 
 ### Clinical Application
@@ -130,6 +139,7 @@ Rank  Panel               Target Diagnosis      Sensitivity  Specificity  PPV   
 **Scenario:** Core biopsy differential: Synovial sarcoma vs MPNST vs Ewing sarcoma
 
 **Order of testing:**
+
 1. **First-line panel** (top 3 ranked combinations):
    - EMA + CK7 (for synovial sarcoma)
    - S100 + Nestin (for MPNST)
@@ -144,11 +154,13 @@ Rank  Panel               Target Diagnosis      Sensitivity  Specificity  PPV   
 ## Feature 3: Outlier Detection & Flagging
 
 ### Purpose
+
 Identify cases with **atypical immunoprofiles** that don't fit well into any cluster, mimicking Olsen's finding of 13/73 (18%) outliers.
 
 ### Clinical Significance
 
 **From Olsen et al. 2006:**
+
 - 13 cases (18%) were outliers that didn't cluster with defined groups
 - 3 Ewing sarcomas clustered with wrong tumor types
 - Recommendation: **Molecular confirmation** for outliers
@@ -192,6 +204,7 @@ Case_45  Cluster 3         0.18        0.82                Cluster 1            
 ### Example Case
 
 **Case_13:**
+
 - Diagnosed as Ewing sarcoma by molecular testing (EWS-FLI1 fusion confirmed)
 - But IHC profile: CD99+, Fli1-, bcl-2+ (atypical for Ewing)
 - Clustered with synovial sarcomas (negative silhouette)
@@ -206,10 +219,12 @@ Case_45  Cluster 3         0.18        0.82                Cluster 1            
 **Goal:** Validate IHC panel for distinguishing synovial sarcoma, MPNST, and Ewing sarcoma
 
 **Dataset:**
+
 - 73 cases with known diagnoses (confirmed by molecular testing)
 - 9 IHC markers: EMA, CK7, bcl-2, CD56, S100, Nestin, NGFR, CD99, Fli-1
 
 **Step 1: Initial Clustering**
+
 ```
 Input variables:
 - Categorical markers: All 9 markers
@@ -225,6 +240,7 @@ Run analysis
 **Step 2: Review Marker Performance**
 
 *Marker Performance Table shows:*
+
 - **Best synovial sarcoma markers:** CK7 (100% spec), EMA (91% sens)
 - **Best MPNST markers:** Nestin (96% spec, 78% sens), S100 (moderate)
 - **Best Ewing markers:** CD99 (93% sens), Fli-1 (moderate spec)
@@ -232,6 +248,7 @@ Run analysis
 **Step 3: Identify Optimal Panels**
 
 *Optimal Panel Table recommends:*
+
 1. EMA + CK7 → Synovial sarcoma (100% specific)
 2. S100 + Nestin → MPNST (100% specific)
 3. CD99 + Fli-1 → Ewing sarcoma (96% specific)
@@ -239,6 +256,7 @@ Run analysis
 **Step 4: Review Outliers**
 
 *Outlier Table identifies:*
+
 - 12 cases (16%) with silhouette < 0.25
 - 3 cases with negative silhouette (misclassified)
 - All 3 misclassified cases were Ewing sarcomas with atypical IHC
@@ -246,6 +264,7 @@ Run analysis
 **Step 5: Clinical Implementation**
 
 **Diagnostic Algorithm:**
+
 ```
 For spindle cell sarcoma core biopsy:
 
@@ -281,6 +300,7 @@ For spindle cell sarcoma core biopsy:
 | **Test Negative**  | FN             | TN             |
 
 ✅ **Formulas:**
+
 - Sensitivity = TP / (TP + FN)
 - Specificity = TN / (TN + FP)
 - PPV = TP / (TP + FP)
@@ -294,6 +314,7 @@ For spindle cell sarcoma core biopsy:
 ✅ **Formula:** Score = (Sensitivity × Specificity × PPV)^(1/3)
 
 **Why geometric mean?**
+
 - Arithmetic mean would allow poor performance in one metric to be offset by high performance in another
 - Geometric mean penalizes imbalanced performance
 - Forces panels to be good across all three metrics
@@ -305,10 +326,12 @@ For spindle cell sarcoma core biopsy:
 ✅ **Formula:** s(i) = (b(i) - a(i)) / max(a(i), b(i))
 
 Where:
+
 - a(i) = average distance to cases in same cluster
 - b(i) = average distance to cases in nearest different cluster
 
 **Range:** -1 to +1
+
 - +1 = perfect cluster membership
 - 0 = on the border between clusters
 - -1 = assigned to wrong cluster
@@ -332,27 +355,32 @@ Where:
 ## Limitations & Considerations
 
 ### 1. **Sample Size Requirements**
+
 - Minimum 10 cases per diagnosis for reliable metrics
 - Olsen used 23-27 per group
 - Smaller samples → wider confidence intervals
 
 ### 2. **Binary Marker Conversion**
+
 - Categorical markers: Positive vs Negative
 - Continuous markers: Above vs Below median
 - May not capture intensity/pattern nuances
 - Consider creating intensity-based variables (e.g., "Strong_EMA")
 
 ### 3. **Panel Positivity Criterion**
+
 - Current: **Both/all markers must be positive**
 - Alternative: **Any marker positive** (implement manually)
 - May need disease-specific criteria
 
 ### 4. **Molecular Confirmation Gold Standard**
+
 - Performance metrics assume known diagnosis is correct
 - In Olsen study: RT-PCR (synovial), FISH (Ewing)
 - Your dataset should have molecularly confirmed cases
 
 ### 5. **Population Specificity**
+
 - Metrics valid for your specific diagnostic differential
 - May not generalize to other tumor types
 - Re-validate with your laboratory's cases
@@ -366,12 +394,14 @@ Where:
 **Goal:** Create cost-effective panel for sarcoma diagnosis
 
 **Approach:**
+
 1. Retrospectively analyze 100+ cases
 2. Calculate performance metrics for 20 candidate markers
 3. Identify top 6-8 markers with complementary performance
 4. Validate with prospective cases
 
 **Expected outcome:**
+
 - Evidence-based marker selection
 - Reduction from 20 → 6 markers (cost savings)
 - Published institutional diagnostic algorithm
@@ -381,12 +411,14 @@ Where:
 **Goal:** Monitor IHC interpretation consistency
 
 **Approach:**
+
 1. Quarterly review of all soft tissue sarcomas
 2. Flag outliers (atypical immunoprofiles)
 3. Review flagged cases at tumor board
 4. Track molecular confirmation rate
 
 **Expected outcome:**
+
 - Identify problematic cases early
 - Improve molecular testing utilization
 - Reduce diagnostic errors
@@ -396,11 +428,13 @@ Where:
 **Goal:** Compare your results to published studies
 
 **Approach:**
+
 1. Apply same markers as Olsen et al.
 2. Calculate performance metrics
 3. Compare sensitivity/specificity to published values
 
 **Expected outcome:**
+
 - Validation of literature findings in your population
 - Identification of population-specific differences
 - Contribution to diagnostic pathology evidence base
@@ -434,10 +468,12 @@ Where:
 3. ✅ **Outlier Flagging** - Automatically detect atypical cases requiring molecular confirmation
 
 **All features are:**
+
 - Mathematically sound
 - Clinically validated (Olsen et al. 2006)
 - Applicable to any diagnostic IHC clustering scenario
 - Ready for use in research and clinical validation studies
 
 **Next enhancement (future):**
+
 - Diagnostic prediction for unknown cases (machine learning classifier)

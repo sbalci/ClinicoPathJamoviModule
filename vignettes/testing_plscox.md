@@ -31,8 +31,8 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 | 4 | `plscox_metabolomics` | `component_selection`: `bic`. Bayesian Information Criterion. Does NOT require CV (works with `cross_validation`: `none`). Should favor more parsimonious models (fewer components) than CV methods. Verify cv_score column shows BIC values. |
 | 5 | `plscox_metabolomics` | `component_selection`: `aic`. Akaike Information Criterion. Less penalizing than BIC, may select more components. Compare with BIC result. |
 | 6 | `plscox_metabolomics` | `component_selection`: `manual` with `pls_components`: 3. No automatic selection; uses exactly 3 components. Verify componentSelection table shows a note (not a data table). |
-| 7 | `plscox_metabolomics` | `component_selection`: `manual` with `pls_components`: 1. Minimal model -- single component. Loadings plot should show bar chart (not scatter). |
-| 8 | `plscox_metabolomics` | `component_selection`: `manual` with `pls_components`: 15. Large number -- verify model handles max_components clamping gracefully. |
+| 7 | `plscox_metabolomics` | `component_selection`: `manual` with `pls_components`: 1. Minimal model - single component. Loadings plot should show bar chart (not scatter). |
+| 8 | `plscox_metabolomics` | `component_selection`: `manual` with `pls_components`: 15. Large number - verify model handles max_components clamping gracefully. |
 | 9 | `plscox_metabolomics` | `component_selection`: `cv_loglik` with `cross_validation`: `none`. CV-based selection but CV disabled. Verify fallback to manual with warning note in modelSummary. |
 
 **Key verification:** BIC/AIC should work even with `cross_validation`: `none`. CV-based methods with `cross_validation=none` should fall back to manual selection with a warning note.
@@ -47,7 +47,7 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 | 11 | `plscox_metabolomics` | `cross_validation`: `k5`. 5-fold CV. Less computation, more bias. |
 | 12 | `plscox_small` | `cross_validation`: `loo`. Leave-one-out CV. Appropriate for small n=50. Higher variance but lower bias. Verify it completes (may be slow). Variables: time: `time_months`, status: `status`, outcomeLevel: `Dead`, censorLevel: `Alive`, predictors: `MARKER_01`..`MARKER_25`. |
 | 13 | `plscox_metabolomics` | `cross_validation`: `none`. No CV. Must use `component_selection`: `bic` or `aic` or `manual`. Verify validationPlot still renders if cv_results is available (from BIC/AIC). |
-| 14 | `plscox_small` | `cross_validation`: `k10` on small dataset (n=50). Each fold has only 5 observations -- verify stability. |
+| 14 | `plscox_small` | `cross_validation`: `k10` on small dataset (n=50). Each fold has only 5 observations - verify stability. |
 
 **Key verification:** LOO should only be practical for small datasets. `none` should still allow model fitting via information criteria or manual selection. The validationPlot requires cv_results (present for BIC/AIC but not for manual with no CV).
 
@@ -61,7 +61,7 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 | 16 | `plscox_metabolomics` | `scaling_method`: `unit_variance`. Scale to unit variance only (no centering). Compare loadings with standardize. |
 | 17 | `plscox_metabolomics` | `scaling_method`: `minmax`. Min-max scaling to [0,1]. All predictors on same scale. |
 | 18 | `plscox_metabolomics` | `scaling_method`: `none`. No scaling. Metabolites with larger variance will dominate. |
-| 19 | `plscox_small` | `scaling_method`: `none` vs `standardize`. Compare variable loadings -- without scaling, high-variance markers should dominate component loadings. |
+| 19 | `plscox_small` | `scaling_method`: `none` vs `standardize`. Compare variable loadings - without scaling, high-variance markers should dominate component loadings. |
 
 **Key verification:** Standardize delegates to plsRcox (`scaleX=TRUE`); other methods pre-scale in R then pass `scaleX=FALSE`. No scaling should produce different loadings biased toward high-variance predictors.
 
@@ -78,9 +78,9 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 | 24 | `plscox_metabolomics` | `tie_method`: `breslow`. Alternative tie handling. Compare model performance. |
 | 25 | `plscox_metabolomics` | `sparse_pls`: TRUE. Enable sparse PLS. Verify model still produces scores (check for NULL scores fallback path). May select fewer effective variables. |
 | 26 | `plscox_metabolomics` | `limQ2set`: 0.0975 (default). PLS stopping criterion. |
-| 27 | `plscox_metabolomics` | `limQ2set`: 0.5. Higher threshold -- may stop PLS extraction earlier. |
+| 27 | `plscox_metabolomics` | `limQ2set`: 0.5. Higher threshold - may stop PLS extraction earlier. |
 | 28 | `plscox_metabolomics` | `pvals_expli`: TRUE, `alpha_pvals_expli`: 0.05. Enable p-value based predictor selection during PLS fitting. |
-| 29 | `plscox_metabolomics` | `pvals_expli`: TRUE, `alpha_pvals_expli`: 0.001. Very strict p-value threshold -- may exclude most predictors from components. |
+| 29 | `plscox_metabolomics` | `pvals_expli`: TRUE, `alpha_pvals_expli`: 0.001. Very strict p-value threshold - may exclude most predictors from components. |
 
 **Key verification:** Sparse PLS may produce NULL scores via the `$tt` field; the backend falls back to `$variatesX` then `$scores`. If all are NULL, an error message should appear. The tolerance parameter is passed as `tol_Xi` to plsRcox.
 
@@ -92,7 +92,7 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 |---|------|-----------------|
 | 30 | `plscox_metabolomics` | `bootstrap_validation`: TRUE, `n_bootstrap`: 50 (minimum). Verify bootstrapResults HTML appears with apparent C-index, mean optimism, corrected C-index, and 95% CI. |
 | 31 | `plscox_metabolomics` | `bootstrap_validation`: TRUE, `n_bootstrap`: 200 (default). Standard bootstrap. Corrected C-index should be lower than apparent. |
-| 32 | `plscox_small` | `bootstrap_validation`: TRUE, `n_bootstrap`: 100. Small dataset -- expect wider CIs and more optimism correction. Variables: time: `time_months`, status: `status`, outcomeLevel: `Dead`, censorLevel: `Alive`. |
+| 32 | `plscox_small` | `bootstrap_validation`: TRUE, `n_bootstrap`: 100. Small dataset - expect wider CIs and more optimism correction. Variables: time: `time_months`, status: `status`, outcomeLevel: `Dead`, censorLevel: `Alive`. |
 | 33 | `plscox_metabolomics` | `bootstrap_validation`: FALSE. Verify bootstrapResults HTML is hidden. |
 
 **Key verification:** Bootstrap uses Harrell's optimism-corrected method. Optimism = boot apparent C - boot test C. Corrected C = apparent C - mean optimism. Bootstrap should not change primary model results. Uses `concordance(reverse=TRUE)` because higher LP = worse prognosis.
@@ -145,7 +145,7 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 | 47 | `plscox_metabolomics` | `risk_groups`: 4. Quartile stratification. Verify 4 rows. |
 | 48 | `plscox_metabolomics` | `risk_groups`: 5. Quintile stratification. With n=120, each group has ~24 patients. |
 | 49 | `plscox_small` | `risk_groups`: 2. Small dataset, binary split. Variables: time: `time_months`, status: `status`. |
-| 50 | `plscox_small` | `risk_groups`: 5. Small dataset (n=50), 5 groups = ~10/group. May produce unstable HR estimates -- verify graceful handling. |
+| 50 | `plscox_small` | `risk_groups`: 5. Small dataset (n=50), 5 groups = ~10/group. May produce unstable HR estimates - verify graceful handling. |
 
 **Key verification:** Each risk group should have at least some events. Hazard ratios vs low risk group should show monotonic trend (higher risk groups have higher HR). Risk Group 1 always has HR = 1.0 (reference). Uses `quantile()` for breakpoints with `unique()` to collapse when too few unique LP values.
 
@@ -211,35 +211,35 @@ All test datasets are in `data/` (RDA) and `data-raw/` (CSV). Synthetic data can
 
 All 29 user-facing options from `.a.yaml`:
 
-- [x] `time` -- all tests
-- [x] `status` -- all tests
-- [x] `outcomeLevel` -- all tests (explicit in #1, #12, #53, #69)
-- [x] `censorLevel` -- all tests (explicit in #1, #12, #53, #69)
-- [x] `predictors` -- all tests
-- [x] `pls_components` (1, 3, 5, 10, 15) -- #1, #6, #7, #8, #61, #62, #68
-- [x] `cross_validation` (loo / k10 / k5 / none) -- #10, #11, #12, #13, #73
-- [x] `component_selection` (cv_loglik / cv_cindex / bic / aic / manual) -- #2, #3, #4, #5, #6, #9
-- [x] `scaling_method` (standardize / unit_variance / minmax / none) -- #15, #16, #17, #18, #19
-- [x] `tolerance` (1e-03, 1e-06, 1e-10) -- #20, #21, #22, #76
-- [x] `tie_method` (efron / breslow) -- #23, #24, #76
-- [x] `sparse_pls` (TRUE / FALSE) -- #25, #75, #76
-- [x] `limQ2set` (0.0975, 0.5) -- #26, #27, #76
-- [x] `pvals_expli` (TRUE / FALSE) -- #28, #29, #76
-- [x] `alpha_pvals_expli` (0.05, 0.001, 0.01) -- #28, #29, #76
-- [x] `bootstrap_validation` (TRUE / FALSE) -- #30, #31, #32, #33
-- [x] `n_bootstrap` (50, 100, 200) -- #30, #31, #32
-- [x] `permutation_test` (TRUE / FALSE) -- #34, #35, #36, #37
-- [x] `n_permutations` (50, 100, 200) -- #34, #35, #36
-- [x] `plot_components` (TRUE / FALSE) -- #38, #39
-- [x] `plot_loadings` (TRUE / FALSE) -- #38, #40
-- [x] `plot_scores` (TRUE / FALSE) -- #38, #41
-- [x] `plot_validation` (TRUE / FALSE) -- #38, #42
-- [x] `plot_survival` (TRUE / FALSE) -- #38, #43
-- [x] `risk_groups` (2, 3, 4, 5) -- #45, #46, #47, #48, #49, #50
-- [x] `confidence_intervals` (TRUE / FALSE) -- #57, #58
-- [x] `feature_importance` (TRUE / FALSE) -- #55, #56
-- [x] `prediction_accuracy` (TRUE / FALSE) -- #59, #60
-- [x] `suitabilityCheck` (TRUE / FALSE) -- #51, #52, #53, #54
+- [x] `time` - all tests
+- [x] `status` - all tests
+- [x] `outcomeLevel` - all tests (explicit in #1, #12, #53, #69)
+- [x] `censorLevel` - all tests (explicit in #1, #12, #53, #69)
+- [x] `predictors` - all tests
+- [x] `pls_components` (1, 3, 5, 10, 15) - #1, #6, #7, #8, #61, #62, #68
+- [x] `cross_validation` (loo / k10 / k5 / none) - #10, #11, #12, #13, #73
+- [x] `component_selection` (cv_loglik / cv_cindex / bic / aic / manual) - #2, #3, #4, #5, #6, #9
+- [x] `scaling_method` (standardize / unit_variance / minmax / none) - #15, #16, #17, #18, #19
+- [x] `tolerance` (1e-03, 1e-06, 1e-10) - #20, #21, #22, #76
+- [x] `tie_method` (efron / breslow) - #23, #24, #76
+- [x] `sparse_pls` (TRUE / FALSE) - #25, #75, #76
+- [x] `limQ2set` (0.0975, 0.5) - #26, #27, #76
+- [x] `pvals_expli` (TRUE / FALSE) - #28, #29, #76
+- [x] `alpha_pvals_expli` (0.05, 0.001, 0.01) - #28, #29, #76
+- [x] `bootstrap_validation` (TRUE / FALSE) - #30, #31, #32, #33
+- [x] `n_bootstrap` (50, 100, 200) - #30, #31, #32
+- [x] `permutation_test` (TRUE / FALSE) - #34, #35, #36, #37
+- [x] `n_permutations` (50, 100, 200) - #34, #35, #36
+- [x] `plot_components` (TRUE / FALSE) - #38, #39
+- [x] `plot_loadings` (TRUE / FALSE) - #38, #40
+- [x] `plot_scores` (TRUE / FALSE) - #38, #41
+- [x] `plot_validation` (TRUE / FALSE) - #38, #42
+- [x] `plot_survival` (TRUE / FALSE) - #38, #43
+- [x] `risk_groups` (2, 3, 4, 5) - #45, #46, #47, #48, #49, #50
+- [x] `confidence_intervals` (TRUE / FALSE) - #57, #58
+- [x] `feature_importance` (TRUE / FALSE) - #55, #56
+- [x] `prediction_accuracy` (TRUE / FALSE) - #59, #60
+- [x] `suitabilityCheck` (TRUE / FALSE) - #51, #52, #53, #54
 
 **Total test scenarios:** 76 (covering all 29 user-facing options with multiple value combinations)
 
@@ -249,20 +249,20 @@ All 29 user-facing options from `.a.yaml`:
 
 All 17 output items from `.r.yaml`:
 
-- [x] `todo` (Html) -- #1 (hidden when variables selected)
-- [x] `suitabilityReport` (Html) -- #51, #52, #53, #54
-- [x] `modelSummary` (Html) -- all tests
-- [x] `componentSelection` (Table) -- #2, #3, #4, #5, #6
-- [x] `modelCoefficients` (Table) -- #1, #57, #58
-- [x] `variableLoadings` (Table) -- #55, #56
-- [x] `modelPerformance` (Table) -- #59, #60
-- [x] `riskStratification` (Table) -- #45, #46, #47, #48
-- [x] `componentPlot` (Image) -- #38, #39
-- [x] `loadingsPlot` (Image) -- #38, #40
-- [x] `scoresPlot` (Image) -- #38, #41
-- [x] `validationPlot` (Image) -- #38, #42
-- [x] `survivalPlot` (Image) -- #38, #43
-- [x] `bootstrapResults` (Html) -- #30, #31, #32, #33
-- [x] `permutationResults` (Html) -- #34, #35, #36, #37
-- [x] `clinicalGuidance` (Html) -- #1
-- [x] `technicalNotes` (Html) -- #1
+- [x] `todo` (Html) - #1 (hidden when variables selected)
+- [x] `suitabilityReport` (Html) - #51, #52, #53, #54
+- [x] `modelSummary` (Html) - all tests
+- [x] `componentSelection` (Table) - #2, #3, #4, #5, #6
+- [x] `modelCoefficients` (Table) - #1, #57, #58
+- [x] `variableLoadings` (Table) - #55, #56
+- [x] `modelPerformance` (Table) - #59, #60
+- [x] `riskStratification` (Table) - #45, #46, #47, #48
+- [x] `componentPlot` (Image) - #38, #39
+- [x] `loadingsPlot` (Image) - #38, #40
+- [x] `scoresPlot` (Image) - #38, #41
+- [x] `validationPlot` (Image) - #38, #42
+- [x] `survivalPlot` (Image) - #38, #43
+- [x] `bootstrapResults` (Html) - #30, #31, #32, #33
+- [x] `permutationResults` (Html) - #34, #35, #36, #37
+- [x] `clinicalGuidance` (Html) - #1
+- [x] `technicalNotes` (Html) - #1

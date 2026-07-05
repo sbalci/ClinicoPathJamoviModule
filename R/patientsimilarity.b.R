@@ -74,7 +74,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -129,7 +129,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             # but renders stale projections alongside fresh notice text. Defense-in-depth:
             # `private$.projectionData <- NULL` at the very top of `.run()`.
 
-            # Set seed for reproducibility — save and restore global RNG state so subsequent
+            # Set seed for reproducibility - save and restore global RNG state so subsequent
             # random draws elsewhere in the user's session are not affected by our seed.
             # Rtsne/umap/kmeans/dbscan all consume the RNG, so the seed effectively propagates
             # downstream without the restore; H4 hygiene fix mirrors optimalcutpoint.b.R:765-772.
@@ -751,7 +751,7 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             # Bare `Surv` (not `survival::Surv`) is globally allow-listed by jmvcore::asFormula.
             # `.asSurvivalFormula` is the project wrapper around jmvcore::asFormula with the
             # survival helper allow-list applied. `survtime`/`event`/`clusters` are internal
-            # local variables, not user column names — composeTerm not needed.
+            # local variables, not user column names - composeTerm not needed.
             surv_formula <- .asSurvivalFormula("Surv(survtime, event) ~ clusters")
             fit <- survival::survfit(surv_formula)
 

@@ -7,16 +7,16 @@
 #' @name advancedraincloud_datasets
 #' @aliases advancedraincloud_data advancedraincloud_baseline advancedraincloud_endpoint advancedraincloud_change
 #'
-#' @format 
+#' @format
 #' \describe{
-#'   \item{advancedraincloud_data}{Longitudinal dataset with 900 rows (300 patients × 3 visits) and 15 variables}
+#'   \item{advancedraincloud_data}{Longitudinal dataset with 900 rows (300 patients x 3 visits) and 15 variables}
 #'   \item{advancedraincloud_baseline}{Cross-sectional baseline data with 300 rows and 13 variables}
 #'   \item{advancedraincloud_endpoint}{Cross-sectional endpoint data with 300 rows and 13 variables}
 #'   \item{advancedraincloud_change}{Change score data with 130 complete cases and 6 variables}
 #' }
 #'
 #' @section Variables:
-#' 
+#'
 #' **Patient Identifiers:**
 #' \describe{
 #'   \item{patient_id}{Unique patient identifier (PT001-PT300)}
@@ -24,17 +24,17 @@
 #'   \item{time_point}{Visit timepoint - factor with levels "Baseline", "Week 4", "Week 12"}
 #'   \item{visit_number}{Numeric visit number (1-3)}
 #' }
-#' 
+#'
 #' **Demographics:**
 #' \describe{
 #'   \item{age}{Patient age in years (normally distributed, mean=55, sd=12)}
 #'   \item{gender}{Patient gender - factor with levels "Female", "Male"}
 #'   \item{disease_stage}{Disease stage - factor with levels "Early", "Advanced"}
 #'   \item{biomarker_status}{Biomarker status - factor with levels "Negative", "Positive"}
-#'   \item{age_group}{Age stratification - factor "< 65 years", "≥ 65 years"}
+#'   \item{age_group}{Age stratification - factor "< 65 years", ">= 65 years"}
 #'   \item{baseline_biomarker_high}{Baseline biomarker level - factor "High", "Normal"}
 #' }
-#' 
+#'
 #' **Primary Outcomes:**
 #' \describe{
 #'   \item{tumor_size_change}{Percent change in tumor size from baseline (negative = shrinkage)}
@@ -42,7 +42,7 @@
 #'   \item{qol_score}{Quality of life score (0-100 scale, higher = better)}
 #'   \item{pain_score}{Pain intensity score - ordered factor (0-10 scale, higher = worse pain)}
 #' }
-#' 
+#'
 #' **Derived Variables:**
 #' \describe{
 #'   \item{tumor_responder}{Response classification - factor with levels:
@@ -50,10 +50,10 @@
 #'       \item "Progressive Disease" (>10% increase)
 #'       \item "Stable Disease" (-10% to +10%)
 #'       \item "Partial Response" (-30% to -10%)
-#'       \item "Complete Response" (≤-30%)
+#'       \item "Complete Response" (<=-30%)
 #'     }}
 #' }
-#' 
+#'
 #' **Change Score Variables (advancedraincloud_change only):**
 #' \describe{
 #'   \item{tumor_change}{Change in tumor size (Week 12 - Baseline)}
@@ -85,35 +85,35 @@
 #'
 #' @section Testing Features:
 #' These datasets are designed to test all Advanced Raincloud Plot features:
-#' 
+#'
 #' **Clinical Significance:**
 #' \itemize{
 #'   \item Clinical cutoffs (e.g., tumor_size_change = -30 for response)
 #'   \item Reference ranges (e.g., biomarker_level: 10-50 normal range)
 #'   \item MCID values (e.g., qol_score MCID = 10 points)
 #' }
-#' 
+#'
 #' **Effect Size Analysis:**
 #' \itemize{
 #'   \item Between-group comparisons (Drug A vs Placebo)
 #'   \item Cohen's d, Hedges' g, Glass's delta calculations
 #'   \item Multiple timepoint comparisons
 #' }
-#' 
+#'
 #' **Change Score Analysis:**
 #' \itemize{
 #'   \item Longitudinal change from baseline
 #'   \item Responder classifications (20% threshold default)
 #'   \item Missing data handling
 #' }
-#' 
+#'
 #' **Biomarker Features:**
 #' \itemize{
 #'   \item Log-normal distribution requiring transformation
 #'   \item Outliers (10 extreme values) for outlier handling tests
 #'   \item CV bands for assay variability assessment
 #' }
-#' 
+#'
 #' **Publication Features:**
 #' \itemize{
 #'   \item Sample size annotations
@@ -123,7 +123,7 @@
 #' }
 #'
 #' @section Usage Examples:
-#' 
+#'
 #' \preformatted{
 #' # Basic raincloud plot with clinical cutoff
 #' advancedraincloud(
@@ -133,7 +133,7 @@
 #'   clinical_cutoff = 100,
 #'   show_sample_size = TRUE
 #' )
-#' 
+#'
 #' # Longitudinal analysis with change scores
 #' advancedraincloud(
 #'   data = advancedraincloud_data,
@@ -147,7 +147,7 @@
 #'   clinical_cutoff = -30,
 #'   show_effect_size = TRUE
 #' )
-#' 
+#'
 #' # Biomarker analysis with log transformation
 #' advancedraincloud(
 #'   data = advancedraincloud_endpoint,
@@ -160,7 +160,7 @@
 #'   show_cv_bands = TRUE,
 #'   journal_style = "nature"
 #' )
-#' 
+#'
 #' # Quality of life with MCID analysis
 #' advancedraincloud(
 #'   data = advancedraincloud_data,
@@ -172,7 +172,7 @@
 #'   show_change_scores = TRUE,
 #'   generate_report = TRUE
 #' )
-#' 
+#'
 #' # Likert scale analysis for pain scores
 #' advancedraincloud(
 #'   data = advancedraincloud_data,
@@ -195,8 +195,8 @@
 #' }
 #'
 #' @source Generated using the script in data-raw/create_advancedraincloud_testdata.R
-#' 
-#' @seealso 
+#'
+#' @seealso
 #' \itemize{
 #'   \item \code{\link{advancedraincloud}} for the analysis function
 #'   \item \code{vignette("advancedraincloud_examples")} for detailed examples
@@ -206,31 +206,35 @@
 #' @examples
 #' # Load the datasets
 #' data("advancedraincloud_data")
-#' data("advancedraincloud_baseline") 
+#' data("advancedraincloud_baseline")
 #' data("advancedraincloud_endpoint")
 #' data("advancedraincloud_change")
-#' 
+#'
 #' # Explore the structure
 #' str(advancedraincloud_data)
 #' summary(advancedraincloud_baseline)
-#' 
+#'
 #' # Check missing data patterns
-#' table(is.na(advancedraincloud_data$tumor_size_change), 
-#'       advancedraincloud_data$time_point,
-#'       advancedraincloud_data$treatment_arm)
-#' 
+#' table(
+#'     is.na(advancedraincloud_data$tumor_size_change),
+#'     advancedraincloud_data$time_point,
+#'     advancedraincloud_data$treatment_arm
+#' )
+#'
 #' # View response rates by treatment
-#' with(advancedraincloud_endpoint, 
-#'      table(tumor_responder, treatment_arm, useNA = "ifany"))
-#' 
+#' with(
+#'     advancedraincloud_endpoint,
+#'     table(tumor_responder, treatment_arm, useNA = "ifany")
+#' )
+#'
 #' # Check change score completeness
-#' nrow(advancedraincloud_change)  # Complete cases for change analysis
+#' nrow(advancedraincloud_change) # Complete cases for change analysis
 NULL
 
 #' @rdname advancedraincloud_datasets
 "advancedraincloud_data"
 
-#' @rdname advancedraincloud_datasets  
+#' @rdname advancedraincloud_datasets
 "advancedraincloud_baseline"
 
 #' @rdname advancedraincloud_datasets

@@ -41,7 +41,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -154,7 +154,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     invokeRestart("muffleWarning")
                 }
             )
-            # TODO (cleanup): File-wide pattern — many commented-out jmvcore::Notice
+            # TODO (cleanup): File-wide pattern - many commented-out jmvcore::Notice
             #   blocks preserved as dead code. Sites: L122-130 (here), L401-408,
             #   L425-434, L676-691, L832-839, L1108-1119, L1209-1218, L1226-1240,
             #   L1353-1364, L1373-1386. Either delete or revive. If revived, the
@@ -179,7 +179,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .getPlotTheme = function() {
-            # Hash-based invalidation — without this, toggling `originaltheme`
+            # Hash-based invalidation - without this, toggling `originaltheme`
             # between .run() invocations on the same R6 instance returns a stale theme.
             current_originaltheme <- isTRUE(self$options$originaltheme)
             if (is.null(private$.plotTheme) ||
@@ -259,10 +259,10 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             glue::glue(
                 "<h4>{summary_title}</h4>
-                <p>• {dep_info}</p>
-                <p>• {group_info}</p>
-                <p>• {method_info}</p>
-                <p>• {sample_info}</p>
+                <p>\u2022 {dep_info}</p>
+                <p>\u2022 {group_info}</p>
+                <p>\u2022 {method_info}</p>
+                <p>\u2022 {sample_info}</p>
                 <hr>",
                 summary_title = .('Analysis Configuration'),
                 sample_info = paste(.('Sample size:'), nrow(self$data), .('observations'))
@@ -335,23 +335,23 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .generateInterpretationContent = function() {
             method_guidance <- switch(self$options$typestatistics,
-                "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: χ²(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
+                "parametric" = .('Chi-square test results show whether group differences are statistically significant. Look for p-values < 0.05 for significant associations. Example: \u03c7\u00b2(1) = 5.2, p = 0.023 indicates significant difference between groups.'),
                 "nonparametric" = .('Fisher\'s exact test provides precise p-values for small samples. Recommended when expected cell counts are < 5. Example: p = 0.031 (two-sided) indicates significant association, with odds ratio quantifying effect strength.'),
                 "robust" = .('Robust methods provide reliable results even with outliers or non-normal distributions. Example: Robust estimate = 0.45 [0.32, 0.58] shows effect with 95% confidence interval.'),
-                "bayes" = .('Bayesian analysis provides evidence for or against group differences. Bayes factors > 3 suggest evidence for differences. Example: BF₁₀ = 5.2 indicates data are 5.2 times more likely under alternative hypothesis than null.'),
+                "bayes" = .('Bayesian analysis provides evidence for or against group differences. Bayes factors > 3 suggest evidence for differences. Example: BF\u2081\u2080 = 5.2 indicates data are 5.2 times more likely under alternative hypothesis than null.'),
                 .('Statistical analysis will be performed based on your data characteristics.')
             )
 
             clinical_context <- switch(self$options$clinicalpreset %||% "custom",
                 "diagnostic" = .('For diagnostic tests: Focus on sensitivity (true positive rate) and specificity (true negative rate). Example: Sensitivity = 85% means test correctly identifies 85 out of 100 diseased patients. Specificity = 92% means test correctly identifies 92 out of 100 healthy individuals. PPV and NPV depend on disease prevalence in your population.'),
-                "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cramér\'s V = 0.31) indicates moderate effect size with clinical relevance. Consider absolute risk reduction (20%) and number needed to treat (NNT = 5).'),
+                "treatment" = .('For treatment response: Look for significant differences between treatment arms. Example: 45% response in Treatment A vs 25% in Treatment B (p = 0.012, Cram\u00e9r\'s V = 0.31) indicates moderate effect size with clinical relevance. Consider absolute risk reduction (20%) and number needed to treat (NNT = 5).'),
                 "biomarker" = .('For biomarker analysis: Examine distribution patterns across patient groups. Example: High biomarker expression in 65% of responders vs 30% in non-responders (p < 0.001, OR = 4.3 [2.1-8.7]) suggests biomarker may predict treatment response. Consider biological mechanisms and validation cohorts.'),
-                .('Interpret results in the context of your specific research question and clinical setting. Focus on effect sizes (Cramér\'s V, odds ratios) alongside p-values for clinical significance assessment.')
+                .('Interpret results in the context of your specific research question and clinical setting. Focus on effect sizes (Cram\u00e9r\'s V, odds ratios) alongside p-values for clinical significance assessment.')
             )
 
             # Effect size interpretation guide
             effect_size_guide <- paste0(
-                "<p><strong>", .('Effect Size Interpretation (Cramér\'s V):'), "</strong></p>",
+                "<p><strong>", .('Effect Size Interpretation (Cram\u00e9r\'s V):'), "</strong></p>",
                 "<ul>",
                 "<li>", .('Small effect: V = 0.10 (subtle association, may require large samples to detect)'), "</li>",
                 "<li>", .('Medium effect: V = 0.30 (noticeable association, clinically relevant in many contexts)'), "</li>",
@@ -370,7 +370,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 method_title = .('Statistical Method'),
                 clinical_title = .('Clinical Context'),
                 general_title = .('General Guidance'),
-                general_guidance = .('Pie charts show proportions visually - larger slices represent higher frequencies. Statistical tests determine if observed differences are likely due to chance or represent true group differences. Always report both statistical significance (p-values) and effect sizes (Cramér\'s V, odds ratios) for complete interpretation.')
+                general_guidance = .('Pie charts show proportions visually - larger slices represent higher frequencies. Statistical tests determine if observed differences are likely due to chance or represent true group differences. Always report both statistical significance (p-values) and effect sizes (Cram\u00e9r\'s V, odds ratios) for complete interpretation.')
             )
         },
         
@@ -383,7 +383,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .('statistical analysis')
             )
             
-            # TODO (correctness): paste() with named args is broken here — the
+            # TODO (correctness): paste() with named args is broken here - the
             #   `{outcome}/{groups}/{method}` placeholders are NEVER interpolated.
             #   paste() only respects `sep`/`collapse`; other named args are treated
             #   as positional values and concatenated with default sep=" ". Result is
@@ -662,7 +662,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(
                     valid = FALSE,
                     message = sprintf(
-                        .('McNemar test requires a 2×2 contingency table. Your data has %d×%d levels (%s: %d levels, %s: %d levels). For paired data with more than 2 categories, use Cochran Q test or marginal homogeneity test instead. Consider dichotomizing your outcome variable or use parametric/nonparametric options instead of paired analysis.'),
+                        .('McNemar test requires a 2\u00d72 contingency table. Your data has %d\u00d7%d levels (%s: %d levels, %s: %d levels). For paired data with more than 2 categories, use Cochran Q test or marginal homogeneity test instead. Consider dichotomizing your outcome variable or use parametric/nonparametric options instead of paired analysis.'),
                         nrow(cross_table), ncol(cross_table),
                         dep_var, nrow(cross_table),
                         group_var, ncol(cross_table)
@@ -697,7 +697,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(
                 valid = TRUE,
                 message = sprintf(
-                    .('Data structure validated for McNemar test: 2×2 table with %d paired observations.'),
+                    .('Data structure validated for McNemar test: 2\u00d72 table with %d paired observations.'),
                     total_n
                 )
             ))
@@ -1102,16 +1102,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <br>{htmltools::htmlEscape(e$message)}<br>
                         {error_context}
                         <br><b>{troubleshoot_title}:</b><br>
-                        • {check1}<br>
-                        • {check2}<br>
-                        • {check3}<br>
-                        • {check4}<br><hr>",
+                        \u2022 {check1}<br>
+                        \u2022 {check2}<br>
+                        \u2022 {check3}<br>
+                        \u2022 {check4}<br><hr>",
                         error_title = .('Error in Pie Chart Analysis'),
                         troubleshoot_title = .('General Troubleshooting'),
                         check1 = .('Ensure dependent variable is categorical'),
                         check2 = .('Check that selected variables exist in your dataset'),
-                        check3 = .('Verify sufficient sample sizes in each category (≥5 recommended)'),
-                        check4 = .('Confirm variables have adequate variation (≥2 categories)')
+                        check3 = .('Verify sufficient sample sizes in each category (\u22655 recommended)'),
+                        check4 = .('Confirm variables have adequate variation (\u22652 categories)')
                     )
                     self$results$todo$setContent(error_msg)
                     stop(e)
@@ -1290,7 +1290,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     #     type = jmvcore::NoticeType$INFO
                     # )
                     # notice$setContent(sprintf(
-                    #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
+                    #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2\u00d72 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
                     #     fisher_check$low_count_cells,
                     #     fisher_check$total_cells,
                     #     fisher_check$pct_low
@@ -1436,7 +1436,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         #     type = jmvcore::NoticeType$INFO
                         # )
                         # notice$setContent(sprintf(
-                        #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2×2 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
+                        #     .('Automatically switched to Fisher\'s Exact Test: %d of %d cells (%.1f%%) have expected counts < 5 (chi-square assumption violated). For 2\u00d72 tables, Fisher\'s exact test provides more reliable p-values when expected counts are low.'),
                         #     fisher_check$low_count_cells,
                         #     fisher_check$total_cells,
                         #     fisher_check$pct_low

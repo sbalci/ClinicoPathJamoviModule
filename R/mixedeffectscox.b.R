@@ -253,7 +253,7 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             randomEffectsInfo <- list()
             
             # Extract frailty variance information (simplified)
-            # TODO (stub): frailty_var is hardcoded to 1 — the random-effects table reports a fake
+            # TODO (stub): frailty_var is hardcoded to 1 - the random-effects table reports a fake
             # variance (1), std_dev (1), proportion-of-total, and ICC for every random effect
             # regardless of what the model actually estimated. Extract the real value from the
             # fitted coxph model via model$frail (per-group BLUPs, var = var(model$frail[[var_name]]))

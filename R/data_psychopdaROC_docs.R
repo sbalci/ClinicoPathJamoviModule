@@ -286,7 +286,7 @@
 #' }
 #'
 #' @details
-#' False negative cost is 10× higher than false positive cost, representing
+#' False negative cost is 10x higher than false positive cost, representing
 #' clinical scenarios where missing a case is much more costly than a false alarm.
 #' Enables cost-ratio optimal cutpoint method.
 #'

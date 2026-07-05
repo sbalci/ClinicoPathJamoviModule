@@ -183,7 +183,7 @@ options:
       default: 0.2
       description:
           R: >
-            EWMA smoothing parameter lambda (0 < λ ≤ 1)
+            EWMA smoothing parameter lambda (0 < lambda <= 1)
 
     - name: sigma_calculation
       title: Sigma Metrics Calculation
@@ -313,7 +313,7 @@ options:
       default: 20
       description:
           R: >
-            Number of days for precision study (CLSI EP5-A3 recommends ≥20 days)
+            Number of days for precision study (CLSI EP5-A3 recommends >=20 days)
 
     - name: replicates_per_day
       title: Replicates per Day

@@ -1144,7 +1144,7 @@ options:
       options:
         - title: 'Simple Majority (>50 percent)'
           name: majority
-        - title: 'Supermajority (≥75 percent)'
+        - title: 'Supermajority (>=75 percent)'
           name: supermajority
         - title: 'Unanimous (100 percent)'
           name: unanimous
@@ -1152,7 +1152,7 @@ options:
       description:
           R: >
             Rule for defining consensus. Simple majority = modal category with >50 percent of votes.
-            Supermajority requires ≥75 percent agreement. Unanimous requires 100 percent agreement.
+            Supermajority requires >=75 percent agreement. Unanimous requires 100 percent agreement.
             Cases not meeting threshold are set to NA in consensus variable.
 
     - name: tieBreaker
@@ -1197,7 +1197,7 @@ options:
       default: detailed
       description:
           R: >
-            Simple mode: All Agreed (100 percent), Majority Agreed (≥threshold percent), No Agreement (<threshold percent).
+            Simple mode: All Agreed (100 percent), Majority Agreed (>=threshold percent), No Agreement (<threshold percent).
             Detailed mode: Absolute (100 percent), High, Moderate, Low, Poor (based on custom/data-driven thresholds).
             Simple mode replicates the former "Agreement Status" feature.
 
@@ -1237,8 +1237,8 @@ options:
       description:
           R: >
             For Detailed mode with Custom thresholds only:
-            Minimum  percent for "High" classification (e.g., 75 percent = ≥12/16 raters).
-            Cases ≥ this threshold are "High Agreement".
+            Minimum  percent for "High" classification (e.g., 75 percent = >=12/16 raters).
+            Cases >= this threshold are "High Agreement".
 
     - name: loaLowThreshold
       title: "Low Threshold ( percent) - Detailed Mode"
@@ -1249,7 +1249,7 @@ options:
       description:
           R: >
             For Detailed mode with Custom thresholds only:
-            Minimum  percent for "Low" classification (e.g., 56 percent = ≥9/16 raters).
+            Minimum  percent for "Low" classification (e.g., 56 percent = >=9/16 raters).
             Below = "Poor", between Low and High = "Moderate".
 
     - name: loaVariableName

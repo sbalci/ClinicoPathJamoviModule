@@ -34,27 +34,32 @@ All 5 critical issues identified in the initial review have been fully resolved:
 Added comprehensive `.validateStatistics()` method (lines 295-349) that checks:
 
 #### Sample Size Validation
+
 - **Minimum n=30 recommended** for stable correlation estimates
 - Warning issued if n < 30
 - Example warning: *"Sample size (n=25) is below recommended minimum (n=30) for stable correlation estimates. Results should be interpreted with extreme caution."*
 
 #### Outlier Detection
+
 - Uses ±3 SD threshold for outlier detection
 - Counts outliers in both X and Y variables
 - Warning issued if outliers detected
 - Example: *"Potential outliers detected (5 observations >3 SD from mean). Correlation may be influenced by extreme values."*
 
 #### Non-linearity Detection
+
 - Compares linear vs. quadratic model fit using ANOVA
 - Warning if p < 0.05 for quadratic term
 - Example: *"Non-linear relationship detected. Linear correlation (r) and R² may not adequately describe this relationship."*
 
 #### Normality Assumption Testing
-- Shapiro-Wilk tests for both variables (when n ≥ 10)
+
+- Shapiro-Wilk tests for both variables (when n >= 10)
 - Warning if normality assumption violated
 - Example: *"Non-normal distribution detected. Pearson correlation assumes bivariate normality; consider Spearman's correlation for non-normal data."*
 
 #### Exploratory Statistics Disclaimer
+
 - **Mandatory warning** when show_statistics is enabled:
   > *"Correlation and R² displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation."*
 
@@ -71,16 +76,19 @@ Added comprehensive `.validateStatistics()` method (lines 295-349) that checks:
 Added `.validateVariableNames()` method (lines 146-177) that detects:
 
 #### Duplicate Name Detection
+
 - Identifies duplicate variable names in original data
 - Warning with specific duplicate names listed
 - Example: *"Duplicate variable names detected: Age, Gender. This may cause incorrect variable mapping."*
 
 #### Cleaning Conflict Detection
+
 - Checks if cleaning process creates duplicate names
 - Warning if cleaned names are not unique
 - Example: *"Variable name cleaning created duplicate names. Some variables may be incorrectly mapped."*
 
 #### Name Change Notification
+
 - Reports how many variable names were modified
 - Informational notice to user
 - Example: *"3 variable name(s) were cleaned to ensure compatibility. Original labels are preserved."*
@@ -98,19 +106,22 @@ Added `.validateVariableNames()` method (lines 146-177) that detects:
 Added `.checkSampleSize()` method (lines 255-293) that:
 
 #### Transparent Sample Size Reporting
+
 - Tracks initial vs. final sample size
 - Reports number of observations removed
 - Calculates and displays percentage of data loss
 
 #### Data Loss Severity Levels
+
 - **INFO** (< 20% loss): Normal informational notice
   - Example: *"Sample size: 180 observations retained from 200 total (20 removed due to missing values, 10.0% data loss)."*
 
-- **WARNING** (≥ 20% loss): Elevated concern
+- **WARNING** (>= 20% loss): Elevated concern
   - Example: *"Sample size: 150 observations retained from 200 total (50 removed due to missing values, 25.0% data loss)."*
   - Additional warning: *"Substantial data loss (>20%) may indicate data quality issues or inappropriate variable selection."*
 
 #### Small Sample Size Warnings
+
 - Warning if final n < 30
 - Example: *"Small sample size (n=25). Results may be unstable and should be interpreted with caution."*
 
@@ -127,23 +138,29 @@ Added `.checkSampleSize()` method (lines 255-293) that:
 Added `.validateDataTypes()` method (lines 179-253) that validates:
 
 #### Continuous Variable Requirements
+
 For scatter, line, histogram, density plots:
+
 - Checks X variable is numeric
 - Warning if categorical variable used
 - Example: *"Plot type 'histogram' typically requires a continuous X variable, but 'Category' appears to be categorical. Results may be misleading."*
 
 #### Categorical Variable Appropriateness
+
 For bar plots:
+
 - Detects if numeric variable has too many unique values (>20)
 - Suggests histogram instead
 - Example: *"Variable 'Age' has many unique values (45). Consider using a histogram instead of a bar plot for continuous data."*
 
 #### Y Variable Validation
+
 - Ensures Y variable is continuous when required
 - Warning if categorical
 - Example: *"Y variable 'Group' should be continuous but appears to be categorical."*
 
 #### Grouping Variable Validation
+
 - **Too many groups**: Warning if > 10 groups
   - Example: *"Grouping variable 'Hospital' has 15 levels. Plots may be difficult to interpret with many groups."*
 
@@ -161,6 +178,7 @@ For bar plots:
 **Solution Implemented:**
 
 #### Prominent Disclaimer in Instructions
+
 Added highly visible warning panel at top of instructions (lines 59-70):
 
 ```html
@@ -179,12 +197,14 @@ always use appropriate statistical methods with proper validation.
 ```
 
 **Visual Design:**
+
 - Yellow/amber background (#fff3cd)
 - Orange left border (#ff9800)
 - Bold red text for key restrictions
 - Impossible to miss or overlook
 
 #### Dynamic Warning System
+
 - New `warningNotice` HTML output in results
 - Collects all validation warnings during analysis
 - Color-coded by severity:
@@ -193,6 +213,7 @@ always use appropriate statistical methods with proper validation.
   - ℹ️ **INFO** (blue) - Informational notices
 
 **Code Locations:**
+
 - Disclaimer: R/basegraphics.b.R:59-70
 - Warning system: R/basegraphics.b.R:106-144
 - Results definition: jamovi/basegraphics.r.yaml:12-15
@@ -243,24 +264,29 @@ private = list(
 ## Validation Test Results
 
 ### Module Compilation
+
 ✅ **PASSED** - Module compiled successfully with jmvtools::prepare()
 
 **Output:**
+
 ```
 wrote: basegraphics.h.R
 wrote: basegraphics.src.js
 ```
 
 ### Documentation Generation
+
 ✅ **PASSED** - Documentation generated with devtools::document()
 
 **Output:**
+
 ```
 ℹ Updating ClinicoPath documentation
 ℹ Loading ClinicoPath
 ```
 
 ### Code Quality
+
 - ✅ All R6 methods properly implemented
 - ✅ Proper inheritance from basegraphicsBase
 - ✅ Warning system fully integrated
@@ -276,7 +302,7 @@ wrote: basegraphics.src.js
 
 1. **Statistical Validity**
    - ❌ *"No sample size, distributional assumptions, or non-linearity checks"*
-   - ✅ **Comprehensive validation**: n≥30 check, outlier detection, linearity tests, normality assumptions
+   - ✅ **Comprehensive validation**: n>=30 check, outlier detection, linearity tests, normality assumptions
 
 2. **Variable Name Mismatches**
    - ❌ *"Cleaning can silently mismatch columns"*
@@ -297,6 +323,7 @@ wrote: basegraphics.src.js
 ### Clinical Use Recommendations
 
 #### ✅ **APPROVED FOR:**
+
 - Exploratory data analysis
 - Data quality assessment
 - Preliminary relationship visualization
@@ -304,12 +331,14 @@ wrote: basegraphics.src.js
 - Hypothesis generation
 
 #### ⚠️ **NOT APPROVED FOR:**
+
 - Formal statistical inference
 - Clinical decision-making (without additional validation)
 - Publication-quality statistical reporting
 - Diagnostic/treatment decisions
 
 #### 📋 **REQUIREMENTS FOR CLINICAL USE:**
+
 1. Users must read and acknowledge disclaimer
 2. All warnings must be reviewed and documented
 3. Statistical overlays should be verified with formal tests
@@ -353,6 +382,7 @@ if (options$plot_type %in% c("scatter", "line") && !is.null(data$y)) {
 ```
 
 **Issues:**
+
 - ❌ No sample size check
 - ❌ No outlier detection
 - ❌ No linearity test
@@ -385,7 +415,8 @@ if (self$options$show_statistics) {
 ```
 
 **Improvements:**
-- ✅ Sample size validation (n≥30)
+
+- ✅ Sample size validation (n>=30)
 - ✅ Outlier detection (±3 SD)
 - ✅ Non-linearity testing (ANOVA)
 - ✅ Normality testing (Shapiro-Wilk)
@@ -396,6 +427,7 @@ if (self$options$show_statistics) {
 ## User Experience Flow
 
 ### Step 1: Initial Instructions
+
 User sees prominent disclaimer immediately:
 
 ```
@@ -410,6 +442,7 @@ NOT intended for:
 ```
 
 ### Step 2: Variable Selection
+
 As user selects variables, validation occurs:
 
 ```
@@ -421,6 +454,7 @@ As user selects variables, validation occurs:
 ```
 
 ### Step 3: Plot Type Selection
+
 Data type validation provides guidance:
 
 ```
@@ -429,6 +463,7 @@ Data type validation provides guidance:
 ```
 
 ### Step 4: Statistics Display (if enabled)
+
 Comprehensive warnings about validity:
 
 ```
@@ -479,6 +514,7 @@ Comprehensive warnings about validity:
 ## Maintenance and Future Enhancements
 
 ### Completed Enhancements
+
 ✅ Statistical validation system
 ✅ Variable name validation
 ✅ Sample size reporting

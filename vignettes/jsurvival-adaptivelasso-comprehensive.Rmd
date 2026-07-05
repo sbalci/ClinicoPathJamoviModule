@@ -35,7 +35,7 @@ The **Adaptive LASSO Cox Regression** module (`adaptivelasso`) performs penalize
 variable selection for Cox proportional hazards models using data-driven adaptive
 weights. Unlike standard LASSO, the adaptive LASSO assigns differential penalties
 to each coefficient based on an initial estimate of their importance. This achieves
-the **oracle property** -- meaning that asymptotically, it selects the true model
+the **oracle property** - meaning that asymptotically, it selects the true model
 as if the true sparse structure were known in advance.
 
 This matters in practice because standard LASSO can over-shrink large coefficients
@@ -114,7 +114,7 @@ The package includes three test datasets designed for adaptive LASSO analysis:
 |---------|---|--------|------------|------------|--------|-------------|
 | `adaptivelasso_test_data` | 180 | 122 | 68% | 12 (6 numeric + 6 factor) | `center` (3 levels) | Standard clinical scenario |
 | `adaptivelasso_small_data` | 40 | 11 | 28% | 6 (2 numeric + 4 factor) | `center` (2 levels) | Small sample / edge case |
-| `adaptivelasso_highdim_data` | 80 | 61 | 76% | 17 (9 numeric + 8 factor) | -- | High-dimensional with genomic features |
+| `adaptivelasso_highdim_data` | 80 | 61 | 76% | 17 (9 numeric + 8 factor) | - | High-dimensional with genomic features |
 
 ---
 
@@ -290,7 +290,7 @@ adaptivelasso(
 
 ### 2.5 Equal Weights (Standard LASSO)
 
-Setting weights to equal recovers the standard LASSO -- no adaptation. This is
+Setting weights to equal recovers the standard LASSO - no adaptation. This is
 useful as a baseline comparison to see how much the adaptive weighting changes
 the variable selection.
 
@@ -316,7 +316,7 @@ adaptivelasso(
 **What to compare across methods:** The "Adaptive Weight" column in the coefficients
 table shows how aggressively each variable is penalized. Variables with small weights
 are protected from shrinkage; variables with large weights are strongly penalized.
-Different weight methods may select different variables -- this is expected and
+Different weight methods may select different variables - this is expected and
 informative about which predictors are robust across estimation strategies.
 
 ---
@@ -372,7 +372,7 @@ adaptivelasso(
 )
 ```
 
-**Alpha = 0.0 (Pure Ridge):** No variable selection -- all coefficients are
+**Alpha = 0.0 (Pure Ridge):** No variable selection - all coefficients are
 shrunk but none set exactly to zero. This is not typically the goal of adaptive
 LASSO, but it is useful as a comparison.
 
@@ -501,7 +501,7 @@ adaptivelasso(
 )
 ```
 
-**C-index (Harrell's concordance):** Optimizes discrimination ability -- the
+**C-index (Harrell's concordance):** Optimizes discrimination ability - the
 probability that for a random pair of patients, the one with the higher risk score
 has the earlier event. This focuses on ranking rather than calibration.
 
@@ -676,7 +676,7 @@ The stability results table shows:
 
 ### 5.2 Varying Threshold
 
-A higher threshold is more conservative -- fewer variables are declared "stably
+A higher threshold is more conservative - fewer variables are declared "stably
 selected" but you have more confidence in those that are. A lower threshold is
 more liberal.
 
@@ -1242,7 +1242,7 @@ adaptivelasso(
 
 Expected suitability flags:
 
-- **EPV**: 11 events / 6 predictors = 1.8 (likely red -- very low)
+- **EPV**: 11 events / 6 predictors = 1.8 (likely red - very low)
 - **Sample size**: n=40 (likely yellow or red)
 - **Event rate**: 28% (acceptable but low event count)
 
@@ -1313,7 +1313,7 @@ adaptivelasso(
 )
 ```
 
-The suitability assessment never blocks the analysis -- it is advisory. Even with
+The suitability assessment never blocks the analysis - it is advisory. Even with
 red flags, the model will still run, but results should be interpreted accordingly.
 
 ### 10.4 Minimal Predictors
@@ -1347,7 +1347,7 @@ adaptivelasso(
 |--------|---------|
 | Variable | Predictor name (with dummy level for factors) |
 | Coefficient | Log hazard ratio (positive = increased risk, negative = protective) |
-| Hazard Ratio | exp(coefficient) -- multiplicative effect on hazard per unit change |
+| Hazard Ratio | exp(coefficient) - multiplicative effect on hazard per unit change |
 | SE | Standard error from post-selection unpenalized Cox refit |
 | Lower CI / Upper CI | 95% confidence interval for the hazard ratio |
 | Adaptive Weight | The penalty weight applied to this variable (smaller = less penalized) |
@@ -1412,17 +1412,17 @@ adaptivelasso(
 
 ### Best Practices
 
-1. **Use ridge weights as the default** -- they are stable across data dimensions.
+1. **Use ridge weights as the default** - they are stable across data dimensions.
 2. **Always run suitability check** before interpreting results.
 3. **Use stability selection** for confirmatory analysis to strengthen variable
    selection evidence.
-4. **Compare weight methods** -- if the same variables are selected across methods,
+4. **Compare weight methods** - if the same variables are selected across methods,
    you have stronger evidence.
 5. **Report the full specification:** weight method, alpha, gamma, lambda selection
    rule, CV folds, seed.
 6. **Validate externally** when possible. Internal CV performance is optimistic.
 7. **Follow TRIPOD guidelines** for transparent reporting of prediction models.
-8. **Combine with clinical knowledge** -- adaptive LASSO selects statistically
+8. **Combine with clinical knowledge** - adaptive LASSO selects statistically
    important variables, but clinical relevance requires domain expertise.
 
 ---

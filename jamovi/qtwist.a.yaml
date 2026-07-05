@@ -121,7 +121,7 @@ options:
       description: >-
         Time to disease progression, relapse, or death (whichever comes first).
         Must be in the same units as overall survival time.
-        PFS time should be ≤ OS time for each patient.
+        PFS time should be <= OS time for each patient.
 
     - name: event_pfs
       title: 'PFS Event Indicator'
@@ -294,7 +294,7 @@ options:
       description: >-
         Quality-of-life utility weight for time without symptoms or toxicity.
         Typically set to 1.0 (perfect health) as the reference state.
-        Should generally be ≥ utility_tox and ≥ utility_rel.
+        Should generally be >= utility_tox and >= utility_rel.
 
     - name: utility_rel
       title: 'Utility Weight for REL State (μ_REL)'

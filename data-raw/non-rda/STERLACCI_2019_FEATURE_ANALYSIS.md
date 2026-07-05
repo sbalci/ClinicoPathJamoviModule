@@ -5,6 +5,7 @@
 This document provides a comprehensive gap analysis between the Sterlacci et al. (2019) NSCLC IHC clustering methodology and the current ClinicoPath `ihccluster` implementation. The analysis identifies 8 major missing features that should be implemented to support this important research paradigm.
 
 **Priority Classification:**
+
 - **High Priority (P1):** Core methodology differences affecting clustering results
 - **Medium Priority (P2):** Statistical validation and quality metrics
 - **Low Priority (P3):** Visualization enhancements and convenience features
@@ -16,6 +17,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 **Title:** "Tissue Microarray-Based Cluster Analysis Identifies Distinct IHC Phenotypes in Non-Small Cell Lung Cancer: Correlation with Histotype and Clinical Outcomes"
 
 **Study Design:**
+
 - **Sample:** 365 NSCLC cases (218 ACA, 125 SCC, 22 LCC)
 - **Markers:** 70+ IHC markers (structural, immune, stemness, signaling)
 - **Platform:** Tissue microarray (TMA)
@@ -23,6 +25,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 - **Validation:** Random split + Cohen's kappa for reproducibility testing
 
 **Key Findings:**
+
 1. **Three unsupervised clusters** identified across all NSCLC:
    - **Cluster 1 (n=206):** ACA-like phenotype (CK7+, TTF1+, EGFR+, E-cadherin+)
    - **Cluster 2 (n=105):** SCC-like phenotype (CK5/6+, p63+, CD44+, SOX2+)
@@ -40,7 +43,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 
 ## Current ihccluster Implementation Status
 
-### ✅ Features Already Implemented:
+### ✅ Features Already Implemented
 
 1. **Multiple clustering algorithms:**
    - PAM (k-medoids) on Gower distance
@@ -91,24 +94,29 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 1. **Jaccard Distance for Binary Markers** [MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - Jaccard distance for binary marker data
 - Formula: `d(A,B) = 1 - (|A ∩ B| / |A ∪ B|)`
 - Specifically designed for binary data (presence/absence)
 - Better than Gower for pure binary datasets
 
 **Current ihccluster:**
+
 - Uses Gower distance for all data types
 - Gower distance formula for binary: `d = 1 - s` where `s = similarity`
 - Similar but not identical to Jaccard
 
 **Why It Matters:**
+
 - Jaccard distance treats "both negative" differently than "both positive"
 - For IHC with many negatives, this affects clustering sensitivity
 - Standard method in published IHC clustering studies
 - Allows direct replication of Sterlacci methodology
 
 **Implementation Requirements:**
+
 - Add `distanceMethod` option to `ihccluster.a.yaml`:
+
   ```yaml
   - name: distanceMethod
     title: 'Distance Metric'
@@ -126,6 +134,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 
 - Add validation: Jaccard requires binary data only
 - Implement in `.run()`:
+
   ```r
   if (self$options$distanceMethod == "jaccard") {
       # Check all markers are binary
@@ -146,23 +155,28 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 2. **Complete Linkage Hierarchical Clustering** [MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - Complete linkage (furthest neighbor)
 - Distance between clusters = maximum distance between any pair of points
 - Formula: `D(A,B) = max{d(a,b) : a ∈ A, b ∈ B}`
 
 **Current ihccluster:**
+
 - Uses Ward linkage only
 - Ward minimizes within-cluster variance
 - Different cluster shapes and sizes
 
 **Why It Matters:**
+
 - Complete linkage produces more compact, spherical clusters
 - Better for identifying distinct immunoprofile groups
 - Standard method in IHC clustering literature
 - Ward can merge large clusters prematurely
 
 **Implementation Requirements:**
+
 - Add `linkageMethod` option when `method = hierarchical`:
+
   ```yaml
   - name: linkageMethod
     title: 'Linkage Method'
@@ -181,6 +195,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Modify hierarchical clustering code:
+
   ```r
   if (method == "hierarchical") {
       if (self$options$linkageMethod == "complete") {
@@ -202,29 +217,35 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 3. **Reproducibility Testing via Random Split + Cohen's Kappa** [MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - Split dataset randomly into 2 equal groups (Group A, Group B)
 - Cluster each group independently
 - Measure agreement using Cohen's kappa (κ)
 - κ interpretation: <0.21 (poor), 0.21-0.40 (fair), 0.41-0.60 (moderate), 0.61-0.80 (substantial), 0.81-1.0 (almost perfect)
 
 **Results from Study:**
+
 - κ = 0.733 for ACA-like cluster (substantial reproducibility)
 - κ = 0.692 for SCC-like cluster (substantial reproducibility)
 - κ = 0.371 for immune cluster (fair reproducibility - smaller n)
 
 **Current ihccluster:**
+
 - Has consensus clustering (bootstrap resampling)
 - Has Cohen's kappa code fragments (line 3137, 3210) but NOT for reproducibility testing
 - No random split validation
 
 **Why It Matters:**
+
 - Demonstrates cluster stability across independent samples
 - More interpretable than silhouette scores for clinicians
 - Standard validation method in diagnostic clustering
 - Identifies which clusters are robust vs unstable
 
 **Implementation Requirements:**
+
 - Add option:
+
   ```yaml
   - name: reproducibilityTest
     title: 'Reproducibility Testing'
@@ -242,6 +263,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Implement function:
+
   ```r
   .testReproducibility = function() {
       kappa_values <- numeric(self$options$nSplits)
@@ -271,6 +293,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Add results table:
+
   ```yaml
   - name: reproducibility
     title: Cluster Reproducibility
@@ -295,6 +318,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 4. **Supervised Clustering Within Known Diagnoses** [MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - After unsupervised clustering, performed **separate clustering within each histotype**
 - Example: Cluster only the ACA cases to find ACA subgroups
 - Identified prognostically relevant subgroups within SCC
@@ -304,17 +328,21 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 **Figure 3 (sterlacci2019-3.png):** Shows 3 SCC subclusters, with one showing immune infiltration
 
 **Current ihccluster:**
+
 - No supervised clustering option
 - Can compare clusters to known diagnosis but doesn't cluster within diagnosis groups
 
 **Why It Matters:**
+
 - Discovers clinically relevant subtypes within established diagnoses
 - Example: "Low-grade" vs "high-grade" immunoprofile patterns within same tumor type
 - Identifies heterogeneity that may predict treatment response
 - Two-stage approach: (1) discover major groups, (2) refine within groups
 
 **Implementation Requirements:**
+
 - Add option:
+
   ```yaml
   - name: supervisedClustering
     title: 'Supervised Clustering'
@@ -333,6 +361,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Implement function:
+
   ```r
   .supervisedClustering = function() {
       # Get grouping variable
@@ -372,24 +401,29 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 5. **Bonferroni Correction for Multiple Testing** [MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - When testing marker-cluster associations, applied Bonferroni correction
 - **Unsupervised analysis:** P < 0.000055 (0.05 / 70 markers = 0.00007, rounded to 0.000055)
 - **Supervised analysis:** Separate correction within each histotype
 - Example SCC: P < 0.000018 for 26 markers
 
 **Current ihccluster:**
+
 - Reports p-values for marker-cluster associations
 - No multiple testing correction applied
 - May report false positive associations
 
 **Why It Matters:**
+
 - Essential for studies with many markers (30+)
 - Prevents spurious marker associations
 - Standard practice in high-dimensional biomarker studies
 - Increases confidence in reported marker patterns
 
 **Implementation Requirements:**
+
 - Add option:
+
   ```yaml
   - name: multipleTestingCorrection
     title: 'Multiple Testing Correction'
@@ -408,6 +442,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Modify association testing:
+
   ```r
   # Current code (line ~2500-2600)
   pvals <- sapply(markers, function(m) {
@@ -432,6 +467,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Add note to results:
+
   ```r
   note <- sprintf("Bonferroni-corrected significance threshold: P < %.6f (%d markers tested)",
                   bonf_threshold, length(markers))
@@ -446,21 +482,26 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 6. **CD4/CD8 Ratio Calculation** [MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - Calculated CD4/CD8 ratio as a derived marker
 - Low CD4/CD8 ratio defined immune signature cluster
 - SCC prognostic subgroup defined by CD4/CD8 ratio + granzyme B+ TIL
 
 **Current ihccluster:**
+
 - No derived marker calculation
 - Users must pre-compute ratios
 
 **Why It Matters:**
+
 - CD4/CD8 ratio is standard immune contexture metric
 - Ratios can be more informative than individual markers
 - Convenience feature for immunopathology studies
 
 **Implementation Requirements:**
+
 - Add option:
+
   ```yaml
   - name: calculateRatios
     title: 'Calculate Marker Ratios'
@@ -491,6 +532,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Implement:
+
   ```r
   if (self$options$calculateRatios) {
       num <- df[[self$options$ratioNumerator]]
@@ -514,22 +556,27 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 7. **Binary Heatmap Visualization with Custom Colors** [PARTIALLY MISSING]
 
 **What Sterlacci 2019 Used:**
+
 - Binary heatmap (yellow = negative, green = positive)
 - No continuous color scale for categorical markers
 - Clear visual distinction
 
 **Current ihccluster:**
+
 - Heatmap with continuous color scales (typically red-white-blue or yellow-blue)
 - Scales categorical markers as 0/1/2 with gradients
 - May be harder to read for binary data
 
 **Why It Matters:**
+
 - Binary heatmaps are easier to interpret for clinicians
 - Matches traditional IHC reporting (positive/negative)
 - Reduces cognitive load
 
 **Implementation Requirements:**
+
 - Add option:
+
   ```yaml
   - name: heatmapType
     title: 'Heatmap Type'
@@ -555,6 +602,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Modify heatmap generation:
+
   ```r
   if (self$options$heatmapType == "binary") {
       # Convert to binary matrix
@@ -587,21 +635,26 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 #### 8. **TIL (Tumor-Infiltrating Lymphocyte) Marker Classification** [MISSING]
 
 **What Sterlacci 2019 Found:**
+
 - Immune signature cluster defined by TIL markers (CD4, CD8, PD1, PDL1, FoxP3, granzyme B, TIA1)
 - TIL markers can define clusters independent of tumor markers
 - Clinically relevant for immunotherapy patient selection
 
 **Current ihccluster:**
+
 - Treats all markers equally
 - No special handling of immune markers
 
 **Why It Matters:**
+
 - Identifies patients with high immune infiltration (immunotherapy candidates)
 - Conceptually different from tumor intrinsic markers
 - May want separate clustering on TIL markers only
 
 **Implementation Requirements:**
+
 - Add option:
+
   ```yaml
   - name: tilMarkers
     title: 'TIL/Immune Markers (optional)'
@@ -623,6 +676,7 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
   ```
 
 - Implement:
+
   ```r
   if (self$options$performTILClustering && !is.null(self$options$tilMarkers)) {
       # Cluster using only TIL markers
@@ -662,29 +716,35 @@ This document provides a comprehensive gap analysis between the Sterlacci et al.
 ## Implementation Priority Recommendation
 
 ### Phase 1 (Core Methodology) - Implement First
+
 **Effort:** ~4-5 hours
 **Features:** #1 (Jaccard), #2 (Complete linkage), #5 (Bonferroni)
 
 **Rationale:**
+
 - Enables direct replication of Sterlacci methodology
 - Low implementation effort
 - High scientific rigor impact
 - Required for publication-quality results
 
 ### Phase 2 (Advanced Validation) - Implement Second
+
 **Effort:** ~14-18 hours
 **Features:** #3 (Reproducibility), #4 (Supervised clustering)
 
 **Rationale:**
+
 - Significantly enhances scientific validity
 - Standard methods in diagnostic clustering papers
 - Higher effort but essential for comprehensive analysis
 
 ### Phase 3 (Enhancements) - Implement Last
+
 **Effort:** ~8-13 hours
 **Features:** #6 (CD4/CD8 ratio), #7 (Binary heatmap), #8 (TIL markers)
 
 **Rationale:**
+
 - Convenience and specialized features
 - Can be added incrementally
 - Nice-to-have but not critical
@@ -717,6 +777,7 @@ d_J(A,B) = 1 - 0.5 = 0.5
 ```
 
 R implementation:
+
 ```r
 # Using proxy package
 dist_matrix <- proxy::dist(binary_matrix, method = "Jaccard")
@@ -743,6 +804,7 @@ Where:
 ```
 
 R implementation:
+
 ```r
 hc <- stats::hclust(dist_matrix, method = "complete")
 ```
@@ -765,6 +827,7 @@ Where p_i^A and p_i^B are proportions of cases in cluster i for groupings A and 
 ```
 
 Interpretation:
+
 - κ < 0.21: Poor
 - κ = 0.21-0.40: Fair
 - κ = 0.41-0.60: Moderate
@@ -772,6 +835,7 @@ Interpretation:
 - κ = 0.81-1.00: Almost perfect
 
 R implementation:
+
 ```r
 # Using irr package
 library(irr)
@@ -813,6 +877,7 @@ Study used α* < 0.000055 (more conservative)
 ```
 
 R implementation:
+
 ```r
 # p.adjust function
 pvals_adj <- p.adjust(pvals, method = "bonferroni")
@@ -1138,6 +1203,7 @@ if (self$options$multipleTestingCorrection != "none") {
 To validate these implementations, create test datasets:
 
 ### 1. NSCLC-like dataset (Sterlacci replication)
+
 - 100-150 cases
 - 20-30 binary IHC markers
 - 3 known histotypes (ACA, SCC, LCC)
@@ -1145,12 +1211,14 @@ To validate these implementations, create test datasets:
 - Expected: 3 unsupervised clusters (ACA-like, SCC-like, immune)
 
 ### 2. Small binary dataset (Jaccard validation)
+
 - 50 cases
 - 10 binary markers
 - Known ground truth clusters
 - Compare Jaccard vs Gower results
 
 ### 3. Supervised clustering dataset
+
 - 90 cases from 3 diagnoses (30 each)
 - 15 markers
 - Each diagnosis should have 2-3 subtypes
@@ -1160,7 +1228,7 @@ To validate these implementations, create test datasets:
 
 ## Documentation Requirements
 
-### User Guide Updates:
+### User Guide Updates
 
 1. **When to use Jaccard vs Gower:**
    - Jaccard: Pure binary data (positive/negative only)
@@ -1173,7 +1241,7 @@ To validate these implementations, create test datasets:
    - Single: Chains, not recommended
 
 3. **Reproducibility testing interpretation:**
-   - Run with ≥10 splits for stable estimate
+   - Run with >=10 splits for stable estimate
    - κ > 0.61 = substantial reproducibility (publishable)
    - κ < 0.40 = poor reproducibility (consider more markers or fewer clusters)
 
@@ -1182,12 +1250,12 @@ To validate these implementations, create test datasets:
    - Step 2: Supervised clustering within each diagnosis
    - Interpretation: Subtypes within established diagnoses
 
-### Technical Notes:
+### Technical Notes
 
 - Jaccard distance is undefined when both vectors are all-negative (returns 0)
 - Complete linkage is sensitive to outliers (produces more outlier cases)
-- Reproducibility testing requires sufficient sample size (n ≥ 50 recommended)
-- Supervised clustering requires ≥10 cases per group
+- Reproducibility testing requires sufficient sample size (n >= 50 recommended)
+- Supervised clustering requires >=10 cases per group
 
 ---
 

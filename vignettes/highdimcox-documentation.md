@@ -1,14 +1,14 @@
-# highdimcox — High-Dimensional Cox Regression: Developer Documentation
+# highdimcox - High-Dimensional Cox Regression: Developer Documentation
 
 ## 1. Overview
 
 - **Function**: `highdimcox`
 - **Menu**: SurvivalT > Penalized Cox Regression > Elastic Net Cox
 - **Files**:
-  - `jamovi/highdimcox.u.yaml` — UI
-  - `jamovi/highdimcox.a.yaml` — Options
-  - `R/highdimcox.b.R` — Backend
-  - `jamovi/highdimcox.r.yaml` — Results
+  - `jamovi/highdimcox.u.yaml` - UI
+  - `jamovi/highdimcox.a.yaml` - Options
+  - `R/highdimcox.b.R` - Backend
+  - `jamovi/highdimcox.r.yaml` - Results
 
 **Summary**: Performs regularized Cox proportional hazards regression for survival data with many predictors (p close to or exceeding n). Supports four regularization strategies (LASSO, Ridge, Elastic Net, Adaptive LASSO), cross-validated lambda selection, optional stability selection via bootstrap subsampling, and comprehensive diagnostic visualizations. Designed for genomic, proteomic, and other high-throughput biomedical datasets.
 
@@ -30,27 +30,27 @@
 
 | UI Control | Type | Label | Binds to Option | Default | Constraints | Visibility/Enable |
 |---|---|---|---|---|---|---|
-| `elapsedtime` | VariablesListBox | Time Variable | `elapsedtime` | — | maxItemCount: 1, numeric | always |
-| `outcome` | VariablesListBox | Event Variable | `outcome` | — | maxItemCount: 1, factor/numeric | always |
-| `predictors` | VariablesListBox | High-Dimensional Predictors | `predictors` | — | multiple, numeric/factor | always |
-| `outcomeLevel` | ComboBox | Event Level | `outcomeLevel` | — | Level of `outcome` | always |
-| `censorLevel` | ComboBox | Censored Level | `censorLevel` | — | Level of `outcome` | always |
-| `suitabilityCheck` | CheckBox | Data Suitability Assessment | `suitabilityCheck` | `true` | — | CollapseBox: "Data Suitability" |
+| `elapsedtime` | VariablesListBox | Time Variable | `elapsedtime` | - | maxItemCount: 1, numeric | always |
+| `outcome` | VariablesListBox | Event Variable | `outcome` | - | maxItemCount: 1, factor/numeric | always |
+| `predictors` | VariablesListBox | High-Dimensional Predictors | `predictors` | - | multiple, numeric/factor | always |
+| `outcomeLevel` | ComboBox | Event Level | `outcomeLevel` | - | Level of `outcome` | always |
+| `censorLevel` | ComboBox | Censored Level | `censorLevel` | - | Level of `outcome` | always |
+| `suitabilityCheck` | CheckBox | Data Suitability Assessment | `suitabilityCheck` | `true` | - | CollapseBox: "Data Suitability" |
 | `regularization_method` | ComboBox | Regularization Method | `regularization_method` | `elastic_net` | lasso, ridge, elastic_net, adaptive_lasso | CollapseBox: "Regularization Settings" |
 | `alpha_value` | TextBox (number) | Elastic Net Alpha (0=Ridge, 1=LASSO) | `alpha_value` | `0.5` | min: 0, max: 1 | `enable: (regularization_method:elastic_net)` |
 | `cv_method` | ComboBox | Cross-Validation Method | `cv_method` | `cv_1se` | cv_1se, cv_min | CollapseBox: "Regularization Settings" |
 | `cv_folds` | TextBox (number) | Number of CV Folds | `cv_folds` | `10` | min: 3, max: 20 | CollapseBox: "Regularization Settings" |
-| `stability_selection` | CheckBox | Perform Stability Selection | `stability_selection` | `false` | — | CollapseBox: "Stability Selection" |
+| `stability_selection` | CheckBox | Perform Stability Selection | `stability_selection` | `false` | - | CollapseBox: "Stability Selection" |
 | `subsampling_iterations` | TextBox (number) | Subsampling Iterations | `subsampling_iterations` | `500` | min: 100, max: 1000 | `enable: (stability_selection)` |
-| `subsampling_ratio` | TextBox (number) | Subsampling Ratio (0.1–0.9) | `subsampling_ratio` | `0.5` | min: 0.1, max: 0.9 | `enable: (stability_selection)` |
+| `subsampling_ratio` | TextBox (number) | Subsampling Ratio (0.1-0.9) | `subsampling_ratio` | `0.5` | min: 0.1, max: 0.9 | `enable: (stability_selection)` |
 | `stability_threshold` | TextBox (number) | Stability Threshold | `stability_threshold` | `0.8` | min: 0.5, max: 1.0 | `enable: (stability_selection)` |
-| `show_regularization_path` | CheckBox | Show Regularization Path | `show_regularization_path` | `false` | — | CollapseBox: "Display Options" |
-| `show_cv_plot` | CheckBox | Show Cross-Validation Plot | `show_cv_plot` | `false` | — | CollapseBox: "Display Options" |
-| `show_variable_importance` | CheckBox | Show Variable Importance | `show_variable_importance` | `true` | — | CollapseBox: "Display Options" |
-| `show_coefficients_table` | CheckBox | Show Coefficients Table | `show_coefficients_table` | `true` | — | CollapseBox: "Display Options" |
-| `show_model_diagnostics` | CheckBox | Show Model Diagnostics | `show_model_diagnostics` | `false` | — | CollapseBox: "Display Options" |
-| `showSummaries` | CheckBox | Analysis Summaries | `showSummaries` | `false` | — | CollapseBox: "Display Options" |
-| `showExplanations` | CheckBox | Method Explanations | `showExplanations` | `false` | — | CollapseBox: "Display Options" |
+| `show_regularization_path` | CheckBox | Show Regularization Path | `show_regularization_path` | `false` | - | CollapseBox: "Display Options" |
+| `show_cv_plot` | CheckBox | Show Cross-Validation Plot | `show_cv_plot` | `false` | - | CollapseBox: "Display Options" |
+| `show_variable_importance` | CheckBox | Show Variable Importance | `show_variable_importance` | `true` | - | CollapseBox: "Display Options" |
+| `show_coefficients_table` | CheckBox | Show Coefficients Table | `show_coefficients_table` | `true` | - | CollapseBox: "Display Options" |
+| `show_model_diagnostics` | CheckBox | Show Model Diagnostics | `show_model_diagnostics` | `false` | - | CollapseBox: "Display Options" |
+| `showSummaries` | CheckBox | Analysis Summaries | `showSummaries` | `false` | - | CollapseBox: "Display Options" |
+| `showExplanations` | CheckBox | Method Explanations | `showExplanations` | `false` | - | CollapseBox: "Display Options" |
 
 ---
 
@@ -58,12 +58,12 @@
 
 | Name | Type | Default | Description | Downstream Effects |
 |---|---|---|---|---|
-| `data` | Data | — | The data frame | Used throughout |
-| `elapsedtime` | Variable | — | Survival time (numeric) | `.prepareData()`: extracts time vector |
-| `outcome` | Variable | — | Event indicator (factor/numeric) | `.prepareData()`: encodes as 0/1 via level matching |
-| `predictors` | Variables | — | High-dimensional predictors (numeric/factor) | `.prepareData()`: builds predictor matrix, dummy-encodes factors |
-| `outcomeLevel` | Level | — | Level indicating event occurred | `.prepareData()`: maps to 1 in binary event vector |
-| `censorLevel` | Level | — | Level indicating censored | `.prepareData()`: maps to 0 in binary event vector |
+| `data` | Data | - | The data frame | Used throughout |
+| `elapsedtime` | Variable | - | Survival time (numeric) | `.prepareData()`: extracts time vector |
+| `outcome` | Variable | - | Event indicator (factor/numeric) | `.prepareData()`: encodes as 0/1 via level matching |
+| `predictors` | Variables | - | High-dimensional predictors (numeric/factor) | `.prepareData()`: builds predictor matrix, dummy-encodes factors |
+| `outcomeLevel` | Level | - | Level indicating event occurred | `.prepareData()`: maps to 1 in binary event vector |
+| `censorLevel` | Level | - | Level indicating censored | `.prepareData()`: maps to 0 in binary event vector |
 | `regularization_method` | List | `elastic_net` | Regularization strategy | `.performHighDimCoxRegression()`: sets alpha (lasso→1, ridge→0, adaptive_lasso→1+weights) |
 | `alpha_value` | Number | `0.5` | Elastic net mixing (0=ridge, 1=lasso) | Used only when `regularization_method == "elastic_net"` |
 | `cv_method` | List | `cv_1se` | Lambda selection rule | `cv_min` → `lambda.min`; `cv_1se` → `lambda.1se` |
@@ -71,7 +71,7 @@
 | `stability_selection` | Bool | `false` | Enable bootstrap stability selection | Gates `.performStabilitySelection()`, stability table/plot |
 | `subsampling_iterations` | Integer | `500` | Bootstrap iterations | Loop count in `.performStabilitySelection()` |
 | `subsampling_ratio` | Number | `0.5` | Subsample proportion | `floor(n_obs * ratio)` per iteration |
-| `stability_threshold` | Number | `0.8` | Stability probability cutoff | Variables with prob ≥ threshold flagged as "stable" |
+| `stability_threshold` | Number | `0.8` | Stability probability cutoff | Variables with prob >= threshold flagged as "stable" |
 | `show_regularization_path` | Bool | `false` | Show coefficient path plot | Gates `.createRegularizationPath()` and `regularizationPath` Image |
 | `show_cv_plot` | Bool | `false` | Show CV error plot | Gates `.createCVPlot()` and `cvPlot` Image |
 | `show_variable_importance` | Bool | `true` | Show importance plot | Gates `.createVariableImportancePlot()` and `variableImportance` Image |
@@ -89,13 +89,13 @@
 
 | Field | Purpose |
 |---|---|
-| `.glmnet_model` | Stored glmnet model object (unused in current code — results passed via lists) |
-| `.cv_results` | Stored CV results (unused — passed via lists) |
-| `.selected_lambda` | Selected lambda (unused — passed via lists) |
-| `.selected_variables` | Selected variable indices (unused — passed via lists) |
-| `.stability_results` | Stability results (unused — passed via lists) |
-| `.variable_importance` | Variable importance (unused — passed via lists) |
-| `.screening_results` | Screening results (unused — passed via lists) |
+| `.glmnet_model` | Stored glmnet model object (unused in current code - results passed via lists) |
+| `.cv_results` | Stored CV results (unused - passed via lists) |
+| `.selected_lambda` | Selected lambda (unused - passed via lists) |
+| `.selected_variables` | Selected variable indices (unused - passed via lists) |
+| `.stability_results` | Stability results (unused - passed via lists) |
+| `.variable_importance` | Variable importance (unused - passed via lists) |
+| `.screening_results` | Screening results (unused - passed via lists) |
 | `.var_display_names` | Active: maps model.matrix column names → user-friendly display names |
 
 ### Constants
@@ -111,11 +111,13 @@
 ### Method-by-Method Reference
 
 #### `.init()`
+
 - Sets `todo` HTML with introductory instructions
 - Early returns if no data or validation fails
 - Calls `.initializeResultTables()` (currently a no-op)
 
 #### `.run()`
+
 - **Validation**: `.validateInputs()` → error HTML in `todo` on failure
 - **Package check**: verifies `glmnet` and `survival` are installed
 - **Warning collection**: `withCallingHandlers` + `tryCatch` pattern collects all `warning()` calls into `collected_warnings` vector
@@ -124,12 +126,14 @@
 - **Success**: displays success message with counts and warnings in `todo` HTML
 
 #### `.validateInputs()`
-- Checks: `elapsedtime` not null/empty, `outcome` not null/empty, `predictors` has ≥1 element
+
+- Checks: `elapsedtime` not null/empty, `outcome` not null/empty, `predictors` has >=1 element
 - Checks: `nrow(data) >= MIN_OBSERVATIONS` (30)
 - Checks: `outcomeLevel` and `censorLevel` are set, distinct, and have matching rows in data
 - Returns `list(valid, message)`
 
 #### `.prepareData()`
+
 - Extracts time (must be numeric), encodes event as 0/1 via level matching
 - Rows not matching either level → `NA` → excluded
 - **Complete-case filter BEFORE `model.matrix()`** (critical: avoids row-drop mismatch)
@@ -139,6 +143,7 @@
 - Returns list with: `survival`, `predictors`, `time`, `event`, `n_obs`, `n_vars`, `var_names`, `n_excluded_outcome`, `n_na_outcome`, `n_constant_removed`
 
 #### `.performHighDimCoxRegression(data_prep)`
+
 - Sets `alpha` based on `regularization_method`:
   - `lasso` → 1.0
   - `ridge` → 0.0
@@ -151,34 +156,42 @@
 - Returns list: `cv_fit`, `final_fit`, `selected_lambda`, `coefficients`, `selected_variables`, `variable_importance`, `alpha`, `n_selected`, `concordance`
 
 #### `.performStabilitySelection(data_prep)`
+
 - Uses fixed lambda from full-data CV (Meinshausen & Buhlmann 2010)
 - Ridge method bumped to `alpha=0.5` (ridge has no selection)
 - Subsamples `floor(n * subsampling_ratio)` observations without replacement
-- Fits `glmnet::glmnet()` (not cv.glmnet — faster) per iteration at fixed lambda
+- Fits `glmnet::glmnet()` (not cv.glmnet - faster) per iteration at fixed lambda
 - Computes selection probabilities from successful iterations
 - Returns list: `selection_probabilities`, `stable_variables`, `stability_threshold`, `n_bootstrap`, `n_successful`, `n_stable`, `alpha_used`
 
 #### `.clearAnalysisOutputs()`
+
 - Deletes rows from `selectedVariables`, `regularizationMetrics`, `stabilityResults` tables
 
 #### `.populateResults(model_results, data_prep, stability_results)`
+
 - Delegates to: `.populateModelSummary()`, `.populateVariablesTable()`, `.populateRegularizationMetrics()`, `.populateStabilityResults()`
 
 #### `.populateModelSummary(model_results, data_prep)`
+
 - Writes HTML to `modelSummary` with regularization method, alpha, lambda, variable counts, C-index
 
 #### `.populateVariablesTable(model_results, data_prep)`
+
 - Writes rows to `selectedVariables` table: variable name, coefficient, hazard ratio, importance score
 - Adds notes for empty selection or ridge (all retained)
 
 #### `.populateRegularizationMetrics(model_results)`
+
 - Writes 7 metric rows to `regularizationMetrics` table: selected lambda, lambda.min, lambda.1se, CV deviance, training C-index, n_selected, method description
 
 #### `.populateStabilityResults(stability_results, data_prep)`
+
 - Writes rows to `stabilityResults` table: stable variables first, then top 5 unstable for comparison
 - Columns: variable, selection_probability, stable (Yes/No), importance_rank
 
 #### `.assessSuitability(data_prep)`
+
 - 6 checks with traffic-light colors (green/yellow/red):
   1. Events-Per-Variable (EPV)
   2. Regularization Need (p/n ratio)
@@ -211,9 +224,11 @@ All follow the same pattern: extract plain numeric/character vectors, store in `
 | `.plot_stability()` | `stabilityPlot` | ggplot2 horizontal bar chart of selection frequencies with threshold line |
 
 #### `.generateSummaries(model_results, stability_results)`
+
 - Writes natural language HTML to `analysisSummary`: method, lambda, variable counts, C-index, stability results (if available)
 
 #### `.generateExplanations()`
+
 - Writes static methodology HTML to `methodExplanation`: overview, 4 regularization methods, CV, stability selection, clinical interpretation
 
 ---
@@ -352,8 +367,8 @@ flowchart TD
 1. **User assigns variables** in UI → `.a.yaml` options updated
 2. **`.init()`** runs: sets introductory `todo` HTML, validates inputs, calls `.initializeResultTables()`
 3. **`.run()`** begins:
-   a. `.validateInputs()` — if invalid, shows error in `todo` and returns
-   b. Package availability check — if missing, shows error in `todo` and returns
+   a. `.validateInputs()` - if invalid, shows error in `todo` and returns
+   b. Package availability check - if missing, shows error in `todo` and returns
    c. Clears `todo`, sets up warning collection via `withCallingHandlers`
 4. **`.prepareData()`**: extracts time/event/predictors, encodes event, complete-case filter, dummy encoding, removes constant columns, builds display name mapping
 5. **`.assessSuitability()`** (if `suitabilityCheck`): 6 checks → traffic-light HTML in `suitabilityReport`
@@ -419,7 +434,7 @@ graph TD
 | `stability_threshold` | "Stable" flag only | Negligible | Does not re-run bootstrap; just re-classifies |
 | `show_*` options | Plot/table visibility | Negligible | Plots are created regardless; visibility just toggles display |
 | `showSummaries` / `showExplanations` | HTML generation | Negligible | Light text generation |
-| `suitabilityCheck` | Suitability report | Light (correlation matrix for p≤2000) | Skips collinearity check when p > 2000 |
+| `suitabilityCheck` | Suitability report | Light (correlation matrix for p<=2000) | Skips collinearity check when p > 2000 |
 
 ---
 

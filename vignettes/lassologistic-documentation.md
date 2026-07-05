@@ -1,4 +1,4 @@
-# LASSO Logistic Regression (`lassologistic`) -- Developer Documentation
+# LASSO Logistic Regression (`lassologistic`) - Developer Documentation
 
 > **Module:** meddecide (menuGroup: `meddecideT`)
 > **Submenu:** Prediction Models
@@ -17,7 +17,7 @@
 |---|---|
 | Penalty types | LASSO (L1), Ridge (L2), Elastic Net |
 | Lambda selection | Minimum CV error or 1SE rule (more parsimonious) |
-| Scoring systems | Beta10, Schneeweiss, Sullivan/D'Agostino -- with compare mode |
+| Scoring systems | Beta10, Schneeweiss, Sullivan/D'Agostino - with compare mode |
 | Lookup table | Maps total integer scores to predicted probabilities |
 | Validation | Bootstrap optimism-corrected AUC and Brier score (Harrell method) |
 | Diagnostics | Suitability assessment (EPV, sample size, class balance, collinearity) |
@@ -86,33 +86,33 @@ The UI (`.u.yaml`) is organized into 8 collapsible panels. The table below maps 
 
 | # | Name | Type | Default | Constraints | Description |
 |---|---|---|---|---|---|
-| 1 | `data` | Data | -- | -- | Input data frame |
-| 2 | `outcome` | Variable | -- | suggested: ordinal/nominal; permitted: factor/numeric | Binary outcome to classify |
-| 3 | `outcomeLevel` | Level | -- | variable: (outcome) | Positive class level; defaults to 2nd level for factors |
-| 4 | `explanatory` | Variables | -- | suggested: nominal/ordinal/continuous; permitted: factor/numeric | Candidate predictors (min 2) |
+| 1 | `data` | Data | - | - | Input data frame |
+| 2 | `outcome` | Variable | - | suggested: ordinal/nominal; permitted: factor/numeric | Binary outcome to classify |
+| 3 | `outcomeLevel` | Level | - | variable: (outcome) | Positive class level; defaults to 2nd level for factors |
+| 4 | `explanatory` | Variables | - | suggested: nominal/ordinal/continuous; permitted: factor/numeric | Candidate predictors (min 2) |
 | 5 | `penalty` | List | `lasso` | lasso, ridge, elasticnet | Regularization type |
 | 6 | `alpha` | Number | 0.5 | [0.01, 0.99] | Elastic net mixing parameter |
 | 7 | `lambda` | List | `lambda.1se` | lambda.min, lambda.1se | Lambda selection method |
 | 8 | `nfolds` | Integer | 10 | min 3 | CV fold count; auto-reduced if n is small |
 | 9 | `random_seed` | Integer | 123456 | [1, 999999] | Seed for reproducibility |
-| 10 | `standardize` | Bool | true | -- | Pre-standardize predictors |
-| 11 | `suitabilityCheck` | Bool | true | -- | Run data quality checks |
-| 12 | `bootstrapValidation` | Bool | false | -- | Enable Harrell bootstrap validation |
+| 10 | `standardize` | Bool | true | - | Pre-standardize predictors |
+| 11 | `suitabilityCheck` | Bool | true | - | Run data quality checks |
+| 12 | `bootstrapValidation` | Bool | false | - | Enable Harrell bootstrap validation |
 | 13 | `bootstrapN` | Integer | 200 | [50, 1000] | Bootstrap iteration count |
-| 14 | `cv_plot` | Bool | true | -- | Show CV deviance plot |
-| 15 | `coef_plot` | Bool | true | -- | Show coefficient bar chart |
-| 16 | `roc_plot` | Bool | true | -- | Show ROC curve |
-| 17 | `scoringSystem` | Bool | false | -- | Generate integer scoring system |
+| 14 | `cv_plot` | Bool | true | - | Show CV deviance plot |
+| 15 | `coef_plot` | Bool | true | - | Show coefficient bar chart |
+| 16 | `roc_plot` | Bool | true | - | Show ROC curve |
+| 17 | `scoringSystem` | Bool | false | - | Generate integer scoring system |
 | 18 | `scoringMethod` | List | `schneeweiss` | beta10, schneeweiss, sullivan, compare | Scoring conversion method |
 | 19 | `scoringMaxPoints` | Integer | 10 | [3, 20] | Max points per feature (Beta10/Sullivan) |
-| 20 | `scoreLookupTable` | Bool | true | -- | Generate score-to-probability lookup |
-| 21 | `predictions` | Output | -- | -- | Save predicted probabilities to dataset |
-| 22 | `showSummary` | Bool | false | -- | Natural-language results summary |
-| 23 | `showExplanations` | Bool | false | -- | LASSO methodology explanation |
-| 24 | `showMethodologyNotes` | Bool | false | -- | Technical regularization notes |
-| 25 | `includeClinicalGuidance` | Bool | false | -- | Clinical interpretation guidance |
-| 26 | `showVariableImportance` | Bool | false | -- | Variable importance across lambda path |
-| 27 | `showModelComparison` | Bool | false | -- | Compare LASSO vs standard logistic |
+| 20 | `scoreLookupTable` | Bool | true | - | Generate score-to-probability lookup |
+| 21 | `predictions` | Output | - | - | Save predicted probabilities to dataset |
+| 22 | `showSummary` | Bool | false | - | Natural-language results summary |
+| 23 | `showExplanations` | Bool | false | - | LASSO methodology explanation |
+| 24 | `showMethodologyNotes` | Bool | false | - | Technical regularization notes |
+| 25 | `includeClinicalGuidance` | Bool | false | - | Clinical interpretation guidance |
+| 26 | `showVariableImportance` | Bool | false | - | Variable importance across lambda path |
+| 27 | `showModelComparison` | Bool | false | - | Compare LASSO vs standard logistic |
 
 ---
 
@@ -151,32 +151,32 @@ The UI (`.u.yaml`) is organized into 8 collapsible panels. The table below maps 
 
 | Option | Backend usage |
 |---|---|
-| `outcome` | `.cleanData()` -- extracts column, determines event coding |
-| `outcomeLevel` | `.cleanData()` -- sets positive class; if NULL, uses 2nd factor level or max numeric |
-| `explanatory` | `.cleanData()` -- builds predictor data frame, removes constants |
-| `penalty` | `.fitLasso()` -- maps to alpha: lasso=1, ridge=0, elasticnet=user alpha |
-| `alpha` | `.fitLasso()` -- used only when `penalty == "elasticnet"` |
-| `lambda` | `.fitLasso()` -- selects `cv_fit$lambda.min` or `cv_fit$lambda.1se` |
-| `nfolds` | `.fitLasso()` -- passed to `cv.glmnet()`; clamped to `[3, n-1]` |
-| `random_seed` | `.run()` -- `set.seed()` at top of execution |
-| `standardize` | `.cleanData()` -- `scale(X)` applied before model fitting; `glmnet(standardize=FALSE)` |
-| `suitabilityCheck` | `.run()` gate -- calls `.suitabilityAssessment()` |
-| `bootstrapValidation` | `.run()` gate -- calls `.bootstrapValidation()` |
-| `bootstrapN` | `.bootstrapValidation()` -- loop iteration count |
+| `outcome` | `.cleanData()` - extracts column, determines event coding |
+| `outcomeLevel` | `.cleanData()` - sets positive class; if NULL, uses 2nd factor level or max numeric |
+| `explanatory` | `.cleanData()` - builds predictor data frame, removes constants |
+| `penalty` | `.fitLasso()` - maps to alpha: lasso=1, ridge=0, elasticnet=user alpha |
+| `alpha` | `.fitLasso()` - used only when `penalty == "elasticnet"` |
+| `lambda` | `.fitLasso()` - selects `cv_fit$lambda.min` or `cv_fit$lambda.1se` |
+| `nfolds` | `.fitLasso()` - passed to `cv.glmnet()`; clamped to `[3, n-1]` |
+| `random_seed` | `.run()` - `set.seed()` at top of execution |
+| `standardize` | `.cleanData()` - `scale(X)` applied before model fitting; `glmnet(standardize=FALSE)` |
+| `suitabilityCheck` | `.run()` gate - calls `.suitabilityAssessment()` |
+| `bootstrapValidation` | `.run()` gate - calls `.bootstrapValidation()` |
+| `bootstrapN` | `.bootstrapValidation()` - loop iteration count |
 | `cv_plot` | `.savePlotData()` + `.cvPlot()` render |
 | `coef_plot` | `.savePlotData()` + `.coefPlot()` render |
 | `roc_plot` | `.savePlotData()` + `.rocPlot()` render |
-| `scoringSystem` | `.run()` gate -- calls `.populateScoringSystem()` |
-| `scoringMethod` | `.populateScoringSystem()` -- selects primary method; `compare` triggers all three |
-| `scoringMaxPoints` | `.computePoints()` -- cap for Beta10 and Sullivan methods |
-| `scoreLookupTable` | `.populateScoringSystem()` gate -- calls `.populateLookupTable()` |
-| `predictions` | `.run()` step 8 -- writes predicted probabilities to Output column |
-| `showSummary` | `.run()` gate -- calls `.populateSummary()` |
-| `showExplanations` | `.run()` gate -- calls `.populateExplanations()` |
-| `showMethodologyNotes` | `.run()` gate -- calls `.populateMethodologyNotes()` |
-| `includeClinicalGuidance` | `.run()` gate -- calls `.populateClinicalGuidance()` |
-| `showVariableImportance` | `.run()` gate -- calls `.populateVariableImportance()` |
-| `showModelComparison` | `.run()` gate -- calls `.populateModelComparison()` |
+| `scoringSystem` | `.run()` gate - calls `.populateScoringSystem()` |
+| `scoringMethod` | `.populateScoringSystem()` - selects primary method; `compare` triggers all three |
+| `scoringMaxPoints` | `.computePoints()` - cap for Beta10 and Sullivan methods |
+| `scoreLookupTable` | `.populateScoringSystem()` gate - calls `.populateLookupTable()` |
+| `predictions` | `.run()` step 8 - writes predicted probabilities to Output column |
+| `showSummary` | `.run()` gate - calls `.populateSummary()` |
+| `showExplanations` | `.run()` gate - calls `.populateExplanations()` |
+| `showMethodologyNotes` | `.run()` gate - calls `.populateMethodologyNotes()` |
+| `includeClinicalGuidance` | `.run()` gate - calls `.populateClinicalGuidance()` |
+| `showVariableImportance` | `.run()` gate - calls `.populateVariableImportance()` |
+| `showModelComparison` | `.run()` gate - calls `.populateModelComparison()` |
 
 ### 4.3 Plot State Management
 
@@ -185,7 +185,7 @@ Plots use `.savePlotData()` to extract plain numeric vectors/data frames from `g
 | Plot | State structure | Key fields |
 |---|---|---|
 | `cv_plot` | Named list | `lambda`, `cvm`, `cvsd`, `cvup`, `cvlo`, `lambda_min`, `lambda_1se`, `nzero` |
-| `coef_plot` | Named list | `var_names` (character), `coef_values` (numeric) -- sorted by abs value |
+| `coef_plot` | Named list | `var_names` (character), `coef_values` (numeric) - sorted by abs value |
 | `roc_plot` | `data.frame` | `y` (integer 0/1), `probabilities` (numeric) |
 
 **Render functions** receive `(image, ggtheme, theme, ...)` and read from `image$state`. They return `TRUE` on success, `FALSE` to skip rendering.
@@ -196,8 +196,8 @@ Plots use `.savePlotData()` to extract plain numeric vectors/data frames from `g
 
 | # | Name | Type | Visibility | Columns |
 |---|---|---|---|---|
-| 1 | `todo` | Html | always | -- |
-| 2 | `suitabilityReport` | Html | `suitabilityCheck` | -- |
+| 1 | `todo` | Html | always | - |
+| 2 | `suitabilityReport` | Html | `suitabilityCheck` | - |
 | 3 | `modelSummary` | Table | always | `statistic` (text), `value` (text) |
 | 4 | `coefficients` | Table | always | `variable` (text), `coefficient` (zto), `oddsRatio` (zto), `ci_lower` (zto), `ci_upper` (zto), `importance` (zto) |
 | 5 | `performance` | Table | always | `metric` (text), `value` (text), `interpretation` (text) |
@@ -210,10 +210,10 @@ Plots use `.savePlotData()` to extract plain numeric vectors/data frames from `g
 | 12 | `coef_plot` | Image | `coef_plot` | 600x400, renderFun: `.coefPlot`, refs: glmnet |
 | 13 | `roc_plot` | Image | `roc_plot` | 600x500, renderFun: `.rocPlot`, refs: pROC |
 | 14 | `predictions` | Output | always | measureType: continuous |
-| 15 | `summaryText` | Html | `showSummary` | -- |
-| 16 | `lassoExplanation` | Html | `showExplanations` | -- |
-| 17 | `methodologyNotes` | Html | `showMethodologyNotes` | -- |
-| 18 | `clinicalGuidance` | Html | `includeClinicalGuidance` | -- |
+| 15 | `summaryText` | Html | `showSummary` | - |
+| 16 | `lassoExplanation` | Html | `showExplanations` | - |
+| 17 | `methodologyNotes` | Html | `showMethodologyNotes` | - |
+| 18 | `clinicalGuidance` | Html | `includeClinicalGuidance` | - |
 | 19 | `variableImportance` | Table | `showVariableImportance` | `variable` (text), `importance_score` (zto), `selection_frequency` (pc), `stability_rank` (int) |
 | 20 | `modelComparison` | Table | `showModelComparison` | `model_type` (text), `n_variables` (int), `auc` (zto), `aic` (zto), `brier` (zto) |
 
@@ -267,17 +267,17 @@ graph TD
 
 ```
 list(
-  X              = matrix   -- design matrix (no intercept), optionally scaled
-  y              = numeric  -- 0/1 binary response
-  n              = integer  -- complete cases count
-  n_events       = integer  -- sum(y == 1)
-  n_nonevents    = integer  -- sum(y == 0)
-  p              = integer  -- ncol(X)
-  complete_idx   = integer  -- row indices in original data
-  event_level    = character -- label of positive class
-  ref_level      = character -- label of reference class
-  explanatory_vars = character -- variable names after constant removal
-  col_names      = character -- colnames(X), may include dummy-coded names
+  X              = matrix   - design matrix (no intercept), optionally scaled
+  y              = numeric  - 0/1 binary response
+  n              = integer  - complete cases count
+  n_events       = integer  - sum(y == 1)
+  n_nonevents    = integer  - sum(y == 0)
+  p              = integer  - ncol(X)
+  complete_idx   = integer  - row indices in original data
+  event_level    = character - label of positive class
+  ref_level      = character - label of reference class
+  explanatory_vars = character - variable names after constant removal
+  col_names      = character - colnames(X), may include dummy-coded names
 )
 ```
 
@@ -287,14 +287,14 @@ list(
 list(
   cv_fit         = cv.glmnet object
   final_model    = glmnet object (single lambda)
-  lambda         = numeric  -- selected lambda value
-  alpha          = numeric  -- effective alpha (1, 0, or user-specified)
-  intercept      = numeric  -- model intercept
-  beta           = named numeric -- all coefficients (including zeros)
-  selected       = character -- names of non-zero coefficient variables
-  selected_coefs = numeric  -- non-zero coefficient values
-  probabilities  = numeric  -- predicted P(Y=1) for complete cases
-  nfolds         = integer  -- effective fold count
+  lambda         = numeric  - selected lambda value
+  alpha          = numeric  - effective alpha (1, 0, or user-specified)
+  intercept      = numeric  - model intercept
+  beta           = named numeric - all coefficients (including zeros)
+  selected       = character - names of non-zero coefficient variables
+  selected_coefs = numeric  - non-zero coefficient values
+  probabilities  = numeric  - predicted P(Y=1) for complete cases
+  nfolds         = integer  - effective fold count
 )
 ```
 
@@ -506,7 +506,7 @@ result$lookupTable$asDF
 ```r
 data(lassologistic_small, package = "ClinicoPath")
 
-# EPV = 20/8 = 2.5 -- should trigger suitability warnings
+# EPV = 20/8 = 2.5 - should trigger suitability warnings
 result <- lassologistic(
     data = lassologistic_small,
     outcome = "outcome",
@@ -590,7 +590,7 @@ Note: For Brier score, optimism is typically negative (apparent underestimates t
 | Events per variable (EPV) | >= 10 | 5-10 | < 5 |
 | Sample size (N) | >= 100 | 50-100 | < 50 |
 | Class balance (minority %) | >= 30% | 10-30% | < 10% |
-| Predictor count (n/p ratio) | p <= n/5 | p > n/5 | -- |
+| Predictor count (n/p ratio) | p <= n/5 | p > n/5 | - |
 | Collinearity (max \|r\|) | < 0.7 | 0.7-0.9 | >= 0.9 |
 
 ### C. Test Dataset Reference

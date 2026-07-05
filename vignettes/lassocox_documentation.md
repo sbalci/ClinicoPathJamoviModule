@@ -23,23 +23,23 @@ The following table provides a detailed mapping of the module's features, from t
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Survival time | `elapsedtime` | Time Elapsed | — | `.cleanData` |
-| Event status | `outcome` | Outcome | — | `.cleanData` |
-| Event level | `outcomeLevel` | Event Level | — | `.cleanData` |
-| Candidate predictors | `explanatory` | Explanatory Variables | — | `.cleanData` |
+| Survival time | `elapsedtime` | Time Elapsed | - | `.cleanData` |
+| Event status | `outcome` | Outcome | - | `.cleanData` |
+| Event level | `outcomeLevel` | Event Level | - | `.cleanData` |
+| Candidate predictors | `explanatory` | Explanatory Variables | - | `.cleanData` |
 | **Data Suitability** | | | | |
 | Suitability assessment | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` | `.assessSuitability` |
-| Suitability HTML report | — | — | `suitabilityReport` | `.generateSuitabilityHtml` |
+| Suitability HTML report | - | - | `suitabilityReport` | `.generateSuitabilityHtml` |
 | **Model Options** | | | | |
 | Lambda selection | `lambda` | Lambda Selection Method | `modelSummary` | `.fitModel` |
 | CV folds | `nfolds` | Number of CV Folds | `modelSummary` | `.fitModel` |
-| Standardization | `standardize` | Standardize Variables | — | `.cleanData` |
+| Standardization | `standardize` | Standardize Variables | - | `.cleanData` |
 | **Core Results** | | | | |
-| Model summary | — | Model Summary | `modelSummary` | `.populateModelSummary` |
-| Selected variables | — | Selected Variables | `coefficients` | `.populateCoefficients` |
-| Performance metrics | — | Model Performance | `performance` | `.populatePerformance` |
-| C-index interpretation | — | — | `performance` | `.interpretCindex` |
-| Hazard ratio interpretation | — | — | `performance` | `.interpretHazardRatio` |
+| Model summary | - | Model Summary | `modelSummary` | `.populateModelSummary` |
+| Selected variables | - | Selected Variables | `coefficients` | `.populateCoefficients` |
+| Performance metrics | - | Model Performance | `performance` | `.populatePerformance` |
+| C-index interpretation | - | - | `performance` | `.interpretCindex` |
+| Hazard ratio interpretation | - | - | `performance` | `.interpretHazardRatio` |
 | **Plots** | | | | |
 | CV plot | `cv_plot` | Cross-validation Plot | `cv_plot` | `.cvPlot` |
 | Coefficient plot | `coef_plot` | Coefficient Plot | `coef_plot` | `.coefPlot` |
@@ -64,9 +64,9 @@ The data suitability assessment (`.assessSuitability`) evaluates 7 dimensions:
 | Check | Green | Yellow | Red |
 |-------|-------|--------|-----|
 | Events-Per-Variable (EPV) | EPV >= 20 | 2 <= EPV < 20 | EPV < 2 |
-| Regularization Need | p >= n/3 (LASSO indicated) | p <= 10 && EPV >= 20 (standard Cox may suffice) | — |
+| Regularization Need | p >= n/3 (LASSO indicated) | p <= 10 && EPV >= 20 (standard Cox may suffice) | - |
 | Sample Size | n >= 100 | 20 <= n < 100 | n < 20 |
-| Event Rate | 20%–80% | 10%–20% or 80%–90% | <10% or >90% |
+| Event Rate | 20% - 80% | 10% - 20% or 80% - 90% | <10% or >90% |
 | Multicollinearity | max \|r\| < 0.7 | 0.7 <= max \|r\| < 0.99 | max \|r\| >= 0.99 |
 | Data Quality | No issues | <5% missing | >5% missing or constant predictors |
 | Proportional Hazards | Global p >= 0.05 | 0.01 <= p < 0.05 | p < 0.01 |
@@ -104,9 +104,9 @@ Plot state uses only plain numeric vectors/data frames to avoid serialization er
 
 | Package | Usage |
 |---------|-------|
-| `glmnet` | `cv.glmnet()`, `glmnet()` — LASSO fitting |
+| `glmnet` | `cv.glmnet()`, `glmnet()` - LASSO fitting |
 | `survival` | `Surv()`, `survfit()`, `survdiff()`, `coxph()`, `concordance()` |
-| `survminer` | `ggsurvplot()` — enhanced survival plots |
+| `survminer` | `ggsurvplot()` - enhanced survival plots |
 | `grid` | Fallback plot error messages |
 | `ggplot2` | CV and coefficient plots |
 

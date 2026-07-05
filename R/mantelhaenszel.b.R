@@ -1,15 +1,12 @@
-
 mantelhaenszelClass <- R6::R6Class(
     "mantelhaenszelClass",
     inherit = mantelhaenszelBase,
     private = list(
         .results_cache = NULL,
-
         .init = function() {
             if (self$options$show_methodology) private$.setMethodology()
             if (self$options$show_references) private$.setReferences()
         },
-
         .run = function() {
             # Check if all variables are selected
             if (is.null(self$options$rows) || is.null(self$options$cols) ||
@@ -17,39 +14,40 @@ mantelhaenszelClass <- R6::R6Class(
                 return()
             }
 
-            tryCatch({
-                # Get data
-                rows_var <- self$data[[self$options$rows]]
-                cols_var <- self$data[[self$options$cols]]
-                strata_var <- self$data[[self$options$strata]]
+            tryCatch(
+                {
+                    # Get data
+                    rows_var <- self$data[[self$options$rows]]
+                    cols_var <- self$data[[self$options$cols]]
+                    strata_var <- self$data[[self$options$strata]]
 
-                # Remove missing values
-                complete_cases <- complete.cases(rows_var, cols_var, strata_var)
-                rows_var <- rows_var[complete_cases]
-                cols_var <- cols_var[complete_cases]
-                strata_var <- strata_var[complete_cases]
+                    # Remove missing values
+                    complete_cases <- complete.cases(rows_var, cols_var, strata_var)
+                    rows_var <- rows_var[complete_cases]
+                    cols_var <- cols_var[complete_cases]
+                    strata_var <- strata_var[complete_cases]
 
-                # Convert to factors
-                rows_var <- as.factor(rows_var)
-                cols_var <- as.factor(cols_var)
-                strata_var <- as.factor(strata_var)
+                    # Convert to factors
+                    rows_var <- as.factor(rows_var)
+                    cols_var <- as.factor(cols_var)
+                    strata_var <- as.factor(strata_var)
 
-                # Check for binary variables
-                if (nlevels(rows_var) != 2 || nlevels(cols_var) != 2) {
-                    self$setError("Rows and Columns variables must be binary (2 levels)")
-                    return()
+                    # Check for binary variables
+                    if (nlevels(rows_var) != 2 || nlevels(cols_var) != 2) {
+                        self$setError("Rows and Columns variables must be binary (2 levels)")
+                        return()
+                    }
+
+                    # Perform analyses
+                    private$.performAnalysis(rows_var, cols_var, strata_var)
+                    private$.populateTables()
+                    private$.setInterpretation()
+                },
+                error = function(e) {
+                    self$setError(paste("Error:", e$message))
                 }
-
-                # Perform analyses
-                private$.performAnalysis(rows_var, cols_var, strata_var)
-                private$.populateTables()
-                private$.setInterpretation()
-
-            }, error = function(e) {
-                self$setError(paste("Error:", e$message))
-            })
+            )
         },
-
         .performAnalysis = function(rows, cols, strata) {
             # Create stratified tables
             strata_levels <- levels(strata)
@@ -57,11 +55,11 @@ mantelhaenszelClass <- R6::R6Class(
 
             # Initialize storage
             stratum_results <- list()
-            a <- numeric(n_strata)  # Exposed cases
-            b <- numeric(n_strata)  # Exposed non-cases
-            c <- numeric(n_strata)  # Unexposed cases
-            d <- numeric(n_strata)  # Unexposed non-cases
-            n <- numeric(n_strata)  # Total per stratum
+            a <- numeric(n_strata) # Exposed cases
+            b <- numeric(n_strata) # Exposed non-cases
+            c <- numeric(n_strata) # Unexposed cases
+            d <- numeric(n_strata) # Unexposed non-cases
+            n <- numeric(n_strata) # Total per stratum
 
             # Calculate stratum-specific statistics
             for (i in 1:n_strata) {
@@ -74,24 +72,24 @@ mantelhaenszelClass <- R6::R6Class(
                 }
 
                 # Extract cell counts (assuming rows=exposure, cols=outcome)
-                a[i] <- tab[1, 1]  # Exposed, outcome+
-                b[i] <- tab[1, 2]  # Exposed, outcome-
-                c[i] <- tab[2, 1]  # Unexposed, outcome+
-                d[i] <- tab[2, 2]  # Unexposed, outcome-
+                a[i] <- tab[1, 1] # Exposed, outcome+
+                b[i] <- tab[1, 2] # Exposed, outcome-
+                c[i] <- tab[2, 1] # Unexposed, outcome+
+                d[i] <- tab[2, 2] # Unexposed, outcome-
                 n[i] <- sum(tab)
 
                 # Stratum-specific odds ratio
                 or_i <- (a[i] * d[i]) / (b[i] * c[i])
 
                 # Confidence interval using Woolf method
-                se_log_or <- sqrt(1/a[i] + 1/b[i] + 1/c[i] + 1/d[i])
+                se_log_or <- sqrt(1 / a[i] + 1 / b[i] + 1 / c[i] + 1 / d[i])
                 log_or <- log(or_i)
-                ci_lower <- exp(log_or - qnorm(1 - self$options$alpha/2) * se_log_or)
-                ci_upper <- exp(log_or + qnorm(1 - self$options$alpha/2) * se_log_or)
+                ci_lower <- exp(log_or - qnorm(1 - self$options$alpha / 2) * se_log_or)
+                ci_upper <- exp(log_or + qnorm(1 - self$options$alpha / 2) * se_log_or)
 
                 # Chi-square test for stratum
                 chisq_i <- sum((tab - outer(rowSums(tab), colSums(tab)) / n[i])^2 /
-                               outer(rowSums(tab), colSums(tab)) / n[i])
+                    outer(rowSums(tab), colSums(tab)) / n[i])
                 p_value_i <- 1 - pchisq(chisq_i, 1)
 
                 stratum_results[[i]] <- list(
@@ -117,11 +115,11 @@ mantelhaenszelClass <- R6::R6Class(
             V <- sum((b + c) * b * c / n^2)
 
             se_log_mh_or <- sqrt((P / (2 * R^2)) + ((Q + U) / (2 * R * S)) + (V / (2 * S^2)))
-            mh_or_lower <- exp(log(mh_or) - qnorm(1 - self$options$alpha/2) * se_log_mh_or)
-            mh_or_upper <- exp(log(mh_or) + qnorm(1 - self$options$alpha/2) * se_log_mh_or)
+            mh_or_lower <- exp(log(mh_or) - qnorm(1 - self$options$alpha / 2) * se_log_mh_or)
+            mh_or_upper <- exp(log(mh_or) + qnorm(1 - self$options$alpha / 2) * se_log_mh_or)
 
             # Mantel-Haenszel chi-square test
-            E_a <- (a + b) * (a + c) / n  # Expected value of a under H0
+            E_a <- (a + b) * (a + c) / n # Expected value of a under H0
             Var_a <- ((a + b) * (c + d) * (a + c) * (b + d)) / (n^2 * (n - 1))
 
             if (self$options$continuity_correction) {
@@ -135,8 +133,8 @@ mantelhaenszelClass <- R6::R6Class(
             crude_tab <- table(rows, cols)
             crude_or <- (crude_tab[1, 1] * crude_tab[2, 2]) / (crude_tab[1, 2] * crude_tab[2, 1])
             se_crude_log_or <- sqrt(sum(1 / crude_tab))
-            crude_or_lower <- exp(log(crude_or) - qnorm(1 - self$options$alpha/2) * se_crude_log_or)
-            crude_or_upper <- exp(log(crude_or) + qnorm(1 - self$options$alpha/2) * se_crude_log_or)
+            crude_or_lower <- exp(log(crude_or) - qnorm(1 - self$options$alpha / 2) * se_crude_log_or)
+            crude_or_upper <- exp(log(crude_or) + qnorm(1 - self$options$alpha / 2) * se_crude_log_or)
 
             # Assess confounding (>10% change in OR)
             pct_change <- abs((crude_or - mh_or) / crude_or) * 100
@@ -148,8 +146,8 @@ mantelhaenszelClass <- R6::R6Class(
 
             # Woolf test for homogeneity
             weights <- 1 / sapply(stratum_results, function(x) {
-                1/a[as.numeric(x$stratum)] + 1/b[as.numeric(x$stratum)] +
-                1/c[as.numeric(x$stratum)] + 1/d[as.numeric(x$stratum)]
+                1 / a[as.numeric(x$stratum)] + 1 / b[as.numeric(x$stratum)] +
+                    1 / c[as.numeric(x$stratum)] + 1 / d[as.numeric(x$stratum)]
             })
             log_ors <- sapply(stratum_results, function(x) log(x$estimate))
             woolf_chisq <- sum(weights * (log_ors - log(mh_or))^2)
@@ -177,8 +175,8 @@ mantelhaenszelClass <- R6::R6Class(
                 }
 
                 bd_chisq <- bd_chisq + (a[i] - a_exp)^2 /
-                            (1/a_exp + 1/(n[i] - a_exp - c[i]) + 1/(a[i] + b[i] - a_exp) +
-                             1/(c[i] + d[i] - n[i] + a_exp + a[i] + b[i] - a_exp))
+                    (1 / a_exp + 1 / (n[i] - a_exp - c[i]) + 1 / (a[i] + b[i] - a_exp) +
+                        1 / (c[i] + d[i] - n[i] + a_exp + a[i] + b[i] - a_exp))
             }
             bd_p <- 1 - pchisq(bd_chisq, n_strata - 1)
             bd_interp <- if (bd_p < 0.05) {
@@ -209,7 +207,6 @@ mantelhaenszelClass <- R6::R6Class(
                 n_strata = n_strata
             )
         },
-
         .populateTables = function() {
             res <- private$.results_cache
 
@@ -265,7 +262,6 @@ mantelhaenszelClass <- R6::R6Class(
                 }
             }
         },
-
         .setInterpretation = function() {
             res <- private$.results_cache
 
@@ -328,7 +324,6 @@ mantelhaenszelClass <- R6::R6Class(
 
             self$results$interpretation$setContent(html)
         },
-
         .setMethodology = function() {
             html <- "
 <h3>Mantel-Haenszel Stratified Analysis Methodology</h3>
@@ -377,7 +372,7 @@ under the assumption of a common odds ratio. More robust when sample sizes are s
 <p><strong>Interpretation:</strong></p>
 <ul>
 <li>p < 0.05 → Heterogeneous (ORs differ across strata; MH common OR may be misleading)</li>
-<li>p ≥ 0.05 → Homogeneous (ORs are similar; MH common OR is appropriate)</li>
+<li>p >= 0.05 → Homogeneous (ORs are similar; MH common OR is appropriate)</li>
 </ul>
 
 <h4>Confounding Assessment</h4>
@@ -385,14 +380,14 @@ under the assumption of a common odds ratio. More robust when sample sizes are s
 <ul>
 <li><strong>Percent change = |(Crude OR - MH OR) / Crude OR| × 100</strong></li>
 <li>>10% change → Confounding is present</li>
-<li>≤10% change → Minimal confounding</li>
+<li><=10% change → Minimal confounding</li>
 </ul>
 
 <h4>Assumptions</h4>
 <ul>
 <li>Binary exposure and outcome variables</li>
 <li>Independent observations (no clustering)</li>
-<li>Adequate sample size in each stratum (expected cell counts ≥5)</li>
+<li>Adequate sample size in each stratum (expected cell counts >=5)</li>
 <li><strong>Homogeneity assumption:</strong> Odds ratios should be similar across strata</li>
 </ul>
 
@@ -415,7 +410,6 @@ under the assumption of a common odds ratio. More robust when sample sizes are s
 "
             self$results$methodology$setContent(html)
         },
-
         .setReferences = function() {
             html <- "
 <h3>References</h3>

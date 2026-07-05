@@ -22,10 +22,10 @@ data(outlierdetection_test)
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild', 'creatinine_extreme', 'sodium_symmetric'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore_robust',
-  zscore_threshold = 3.29,  # 99.9% confidence
+  vars = c("hemoglobin_mild", "creatinine_extreme", "sodium_symmetric"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust",
+  zscore_threshold = 3.29, # 99.9% confidence
   show_outlier_table = TRUE,
   show_visualization = TRUE
 )
@@ -38,10 +38,10 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('age_clean', 'glucose_clean'),  # Clean normal distributions
-  method_category = 'univariate',
-  univariate_methods = 'zscore',
-  zscore_threshold = 3.0,  # 99.7% confidence
+  vars = c("age_clean", "glucose_clean"), # Clean normal distributions
+  method_category = "univariate",
+  univariate_methods = "zscore",
+  zscore_threshold = 3.0, # 99.7% confidence
   show_outlier_table = TRUE
 )
 
@@ -53,10 +53,10 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('alt_asymmetric', 'crp_skewed', 'psa_heavy_tail'),
-  method_category = 'univariate',
-  univariate_methods = 'iqr',
-  iqr_multiplier = 1.7,  # Conservative (default 1.5 is more sensitive)
+  vars = c("alt_asymmetric", "crp_skewed", "psa_heavy_tail"),
+  method_category = "univariate",
+  univariate_methods = "iqr",
+  iqr_multiplier = 1.7, # Conservative (default 1.5 is more sensitive)
   show_outlier_table = TRUE,
   show_visualization = TRUE
 )
@@ -69,10 +69,10 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('temperature_symmetric', 'potassium_clinical'),
-  method_category = 'univariate',
-  univariate_methods = 'eti',
-  confidence_level = 0.999,  # 99.9%
+  vars = c("temperature_symmetric", "potassium_clinical"),
+  method_category = "univariate",
+  univariate_methods = "eti",
+  confidence_level = 0.999, # 99.9%
   show_outlier_table = TRUE
 )
 
@@ -84,9 +84,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('ddimer_asymmetric', 'ca125_biomarker'),
-  method_category = 'univariate',
-  univariate_methods = 'hdi',
+  vars = c("ddimer_asymmetric", "ca125_biomarker"),
+  method_category = "univariate",
+  univariate_methods = "hdi",
   confidence_level = 0.999,
   show_outlier_table = TRUE,
   show_interpretation = TRUE
@@ -104,9 +104,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('biomarker1_multivar', 'biomarker2_multivar', 'biomarker3_multivar'),
-  method_category = 'multivariate',
-  multivariate_methods = 'mahalanobis',
+  vars = c("biomarker1_multivar", "biomarker2_multivar", "biomarker3_multivar"),
+  method_category = "multivariate",
+  multivariate_methods = "mahalanobis",
   show_outlier_table = TRUE,
   show_visualization = TRUE,
   show_interpretation = TRUE
@@ -120,9 +120,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('biomarker1_multivar', 'biomarker2_multivar', 'biomarker3_multivar'),
-  method_category = 'multivariate',
-  multivariate_methods = 'mahalanobis_robust',
+  vars = c("biomarker1_multivar", "biomarker2_multivar", "biomarker3_multivar"),
+  method_category = "multivariate",
+  multivariate_methods = "mahalanobis_robust",
   show_outlier_table = TRUE,
   show_method_comparison = TRUE
 )
@@ -135,9 +135,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild', 'wbc_extreme', 'platelets_clinical'),
-  method_category = 'multivariate',
-  multivariate_methods = 'mcd',
+  vars = c("hemoglobin_mild", "wbc_extreme", "platelets_clinical"),
+  method_category = "multivariate",
+  multivariate_methods = "mcd",
   show_outlier_table = TRUE
 )
 
@@ -149,9 +149,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('cholesterol_bimodal', 'hba1c_biomarker'),
-  method_category = 'multivariate',
-  multivariate_methods = 'optics',
+  vars = c("cholesterol_bimodal", "hba1c_biomarker"),
+  method_category = "multivariate",
+  multivariate_methods = "optics",
   show_outlier_table = TRUE,
   show_visualization = TRUE
 )
@@ -164,9 +164,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('height_errors', 'weight_errors'),
-  method_category = 'multivariate',
-  multivariate_methods = 'lof',
+  vars = c("height_errors", "weight_errors"),
+  method_category = "multivariate",
+  multivariate_methods = "lof",
   show_outlier_table = TRUE,
   show_exclusion_summary = TRUE
 )
@@ -179,14 +179,16 @@ outlierdetection(
 # EXAMPLE 11: Composite Detection (Default Threshold 0.5)
 # ───────────────────────────────────────────────────────────
 # Best for: Robust consensus across multiple methods
-# Identifies observations flagged by ≥50% of methods
+# Identifies observations flagged by >=50% of methods
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild', 'creatinine_extreme', 'wbc_extreme',
-           'troponin_extreme'),
-  method_category = 'composite',
-  composite_threshold = 0.5,  # 50% agreement required
+  vars = c(
+    "hemoglobin_mild", "creatinine_extreme", "wbc_extreme",
+    "troponin_extreme"
+  ),
+  method_category = "composite",
+  composite_threshold = 0.5, # 50% agreement required
   show_outlier_table = TRUE,
   show_method_comparison = TRUE,
   show_visualization = TRUE
@@ -199,9 +201,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('alt_asymmetric', 'ddimer_asymmetric', 'ca125_biomarker'),
-  method_category = 'composite',
-  composite_threshold = 0.7,  # 70% agreement (more conservative)
+  vars = c("alt_asymmetric", "ddimer_asymmetric", "ca125_biomarker"),
+  method_category = "composite",
+  composite_threshold = 0.7, # 70% agreement (more conservative)
   show_outlier_table = TRUE,
   show_method_comparison = TRUE,
   show_exclusion_summary = TRUE
@@ -214,9 +216,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('temperature_symmetric', 'sodium_symmetric', 'potassium_clinical'),
-  method_category = 'composite',
-  composite_threshold = 0.3,  # 30% agreement (more sensitive)
+  vars = c("temperature_symmetric", "sodium_symmetric", "potassium_clinical"),
+  method_category = "composite",
+  composite_threshold = 0.3, # 30% agreement (more sensitive)
   show_outlier_table = TRUE,
   show_visualization = TRUE
 )
@@ -233,8 +235,8 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild', 'creatinine_extreme', 'sodium_symmetric'),
-  method_category = 'all',
+  vars = c("hemoglobin_mild", "creatinine_extreme", "sodium_symmetric"),
+  method_category = "all",
   show_outlier_table = TRUE,
   show_method_comparison = TRUE,
   show_exclusion_summary = TRUE,
@@ -253,10 +255,10 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild', 'wbc_extreme', 'platelets_clinical'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore_robust',
-  zscore_threshold = 3.29,  # Clinical QC standard
+  vars = c("hemoglobin_mild", "wbc_extreme", "platelets_clinical"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust",
+  zscore_threshold = 3.29, # Clinical QC standard
   show_outlier_table = TRUE,
   show_exclusion_summary = TRUE,
   show_interpretation = TRUE
@@ -269,10 +271,10 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('sodium_symmetric', 'potassium_clinical', 'creatinine_extreme'),
-  method_category = 'univariate',
-  univariate_methods = 'iqr',
-  iqr_multiplier = 1.5,  # Sensitive detection for critical values
+  vars = c("sodium_symmetric", "potassium_clinical", "creatinine_extreme"),
+  method_category = "univariate",
+  univariate_methods = "iqr",
+  iqr_multiplier = 1.5, # Sensitive detection for critical values
   show_outlier_table = TRUE,
   show_exclusion_summary = TRUE
 )
@@ -284,9 +286,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('troponin_extreme'),
-  method_category = 'univariate',
-  univariate_methods = 'hdi',  # Asymmetric distribution
+  vars = c("troponin_extreme"),
+  method_category = "univariate",
+  univariate_methods = "hdi", # Asymmetric distribution
   confidence_level = 0.999,
   show_outlier_table = TRUE,
   show_visualization = TRUE
@@ -299,9 +301,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('alt_asymmetric'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore_robust',  # Robust to skewness
+  vars = c("alt_asymmetric"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust", # Robust to skewness
   zscore_threshold = 3.0,
   show_outlier_table = TRUE,
   show_interpretation = TRUE
@@ -314,8 +316,8 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('ca125_biomarker', 'psa_heavy_tail'),
-  method_category = 'composite',
+  vars = c("ca125_biomarker", "psa_heavy_tail"),
+  method_category = "composite",
   composite_threshold = 0.6,
   show_outlier_table = TRUE,
   show_method_comparison = TRUE,
@@ -329,9 +331,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('height_errors', 'weight_errors'),
-  method_category = 'multivariate',
-  multivariate_methods = 'lof',  # Detects unusual combinations
+  vars = c("height_errors", "weight_errors"),
+  method_category = "multivariate",
+  multivariate_methods = "lof", # Detects unusual combinations
   show_outlier_table = TRUE,
   show_exclusion_summary = TRUE
 )
@@ -343,9 +345,9 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('glucose_clean', 'hba1c_biomarker'),
-  method_category = 'multivariate',
-  multivariate_methods = 'mahalanobis',
+  vars = c("glucose_clean", "hba1c_biomarker"),
+  method_category = "multivariate",
+  multivariate_methods = "mahalanobis",
   show_outlier_table = TRUE,
   show_visualization = TRUE
 )
@@ -357,10 +359,10 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('temperature_symmetric', 'systolic_bp_mild'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore',
-  zscore_threshold = 2.5,  # More sensitive for vital signs
+  vars = c("temperature_symmetric", "systolic_bp_mild"),
+  method_category = "univariate",
+  univariate_methods = "zscore",
+  zscore_threshold = 2.5, # More sensitive for vital signs
   show_outlier_table = TRUE,
   show_exclusion_summary = TRUE
 )
@@ -372,8 +374,8 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('biomarker1_multivar', 'biomarker2_multivar', 'biomarker3_multivar'),
-  method_category = 'all',  # Compare all methods
+  vars = c("biomarker1_multivar", "biomarker2_multivar", "biomarker3_multivar"),
+  method_category = "all", # Compare all methods
   show_outlier_table = TRUE,
   show_method_comparison = TRUE,
   show_visualization = TRUE
@@ -386,8 +388,8 @@ outlierdetection(
 
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('ddimer_asymmetric', 'platelets_clinical'),
-  method_category = 'composite',
+  vars = c("ddimer_asymmetric", "platelets_clinical"),
+  method_category = "composite",
   composite_threshold = 0.5,
   show_outlier_table = TRUE,
   show_exclusion_summary = TRUE
@@ -404,30 +406,30 @@ outlierdetection(
 # Standard screening (3.0 SD)
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore_robust',
-  zscore_threshold = 3.0,  # 99.7% confidence (~0.3% outliers)
+  vars = c("hemoglobin_mild"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust",
+  zscore_threshold = 3.0, # 99.7% confidence (~0.3% outliers)
   show_outlier_table = TRUE
 )
 
 # Stringent clinical QC (3.29 SD)
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore_robust',
-  zscore_threshold = 3.29,  # 99.9% confidence (~0.1% outliers)
+  vars = c("hemoglobin_mild"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust",
+  zscore_threshold = 3.29, # 99.9% confidence (~0.1% outliers)
   show_outlier_table = TRUE
 )
 
 # Sensitive research screening (2.5 SD)
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('hemoglobin_mild'),
-  method_category = 'univariate',
-  univariate_methods = 'zscore_robust',
-  zscore_threshold = 2.5,  # 98.8% confidence (~1.2% outliers)
+  vars = c("hemoglobin_mild"),
+  method_category = "univariate",
+  univariate_methods = "zscore_robust",
+  zscore_threshold = 2.5, # 98.8% confidence (~1.2% outliers)
   show_outlier_table = TRUE
 )
 
@@ -438,30 +440,30 @@ outlierdetection(
 # Tukey's standard (1.5)
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('crp_skewed'),
-  method_category = 'univariate',
-  univariate_methods = 'iqr',
-  iqr_multiplier = 1.5,  # Standard, more sensitive (~0.7% if normal)
+  vars = c("crp_skewed"),
+  method_category = "univariate",
+  univariate_methods = "iqr",
+  iqr_multiplier = 1.5, # Standard, more sensitive (~0.7% if normal)
   show_outlier_table = TRUE
 )
 
 # Conservative clinical (1.7)
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('crp_skewed'),
-  method_category = 'univariate',
-  univariate_methods = 'iqr',
-  iqr_multiplier = 1.7,  # Recommended default
+  vars = c("crp_skewed"),
+  method_category = "univariate",
+  univariate_methods = "iqr",
+  iqr_multiplier = 1.7, # Recommended default
   show_outlier_table = TRUE
 )
 
 # Very conservative (2.0)
 outlierdetection(
   data = outlierdetection_test,
-  vars = c('crp_skewed'),
-  method_category = 'univariate',
-  univariate_methods = 'iqr',
-  iqr_multiplier = 2.0,  # For critical biomarkers
+  vars = c("crp_skewed"),
+  method_category = "univariate",
+  univariate_methods = "iqr",
+  iqr_multiplier = 2.0, # For critical biomarkers
   show_outlier_table = TRUE
 )
 

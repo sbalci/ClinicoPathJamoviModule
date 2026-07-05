@@ -10,7 +10,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # ── Internal storage ──────────────────────────────────────────────
         # TODO (cleanup): .plot_data / .excess_plot_data / .prepared_data / .rate_table are
-        # dead stores — written in .run()/.generatePlotData/.calculateExcessMortality but never
+        # dead stores - written in .run()/.generatePlotData/.calculateExcessMortality but never
         # read back as fields (plots read image$state via setState; data/rate_table flow via
         # function args). They're harmless (no stale-cache bug since never read) but should be
         # dropped, or wired up if intended. .noticeList is the only field actually read (reset L92).
@@ -1415,8 +1415,8 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<div style='", style,
                     "padding:4px 8px;margin:4px 0;background:#fafafa;'>",
                     # TODO (security): n$title / n$content are interpolated into notices HTML
-                    # unescaped. No live XSS today — every .addNotice() call passes developer
-                    # literals or numeric scalars — but if a future .addNotice ever passes a
+                    # unescaped. No live XSS today - every .addNotice() call passes developer
+                    # literals or numeric scalars - but if a future .addNotice ever passes a
                     # column name, factor label, or e$message, wrap title/content in
                     # htmltools::htmlEscape() here (defense-in-depth at the render boundary).
                     "<b>", icon, " ", n$title, ":</b> ", n$content,

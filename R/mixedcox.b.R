@@ -224,7 +224,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           }
 
           # TODO (jamovify): consider `jmvcore::naOmit(data[all_vars])` instead of `complete.cases` +
-          # boolean indexing — preserves jamovi column attributes (measureType, values, labels) that
+          # boolean indexing - preserves jamovi column attributes (measureType, values, labels) that
           # downstream coxme/survival modeling may rely on for labelled-factor handling.
           complete_rows <- complete.cases(data[all_vars])
           
@@ -250,7 +250,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           ))
           
         }, error = function(e) {
-          # TODO (UX): file-wide pattern — `.prepareData` / `.calculateTimeFromDates` / `.fitMixedCox`
+          # TODO (UX): file-wide pattern - `.prepareData` / `.calculateTimeFromDates` / `.fitMixedCox`
           # surface validation + runtime errors by writing raw HTML into `self$results$todo`. This
           # mixes the "instructions" surface with the "error" surface and bypasses jamovi's structured
           # error UI. Prefer `jmvcore::reject(...)` for user-facing failures so the analysis is marked

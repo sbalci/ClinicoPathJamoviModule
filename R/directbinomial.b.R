@@ -391,7 +391,7 @@ directbinomialClass <- R6::R6Class(
             
             # Create placeholder plot
             # In practice, this would generate cumulative incidence plots
-            # ggplot2 is in DESCRIPTION's Imports — no need to attach via library().
+            # ggplot2 is in DESCRIPTION's Imports - no need to attach via library().
 
             plot_data <- data.frame(
                 time = seq(0, 10, 0.1),
@@ -425,7 +425,7 @@ directbinomialClass <- R6::R6Class(
             if (is.null(private$.model)) return()
             
             # Create placeholder residual plot
-            # ggplot2 is in DESCRIPTION's Imports — no need to attach via library().
+            # ggplot2 is in DESCRIPTION's Imports - no need to attach via library().
 
             residual_data <- data.frame(
                 fitted = rnorm(100, 0.2, 0.1),

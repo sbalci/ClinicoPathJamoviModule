@@ -114,7 +114,7 @@ TE
 to determine hazard ratios (HR) with 95% confidence intervals (95%CI).
 
 Results: In 341 patients with resected IPMN-derived PDAC, the minimum number of LNs
-needed to ensure accurate nodal staging was 10 (p=0.040), whereas ≥20 LNs was the optimal
+needed to ensure accurate nodal staging was 10 (p=0.040), whereas >=20 LNs was the optimal
 
 EP
 
@@ -300,7 +300,7 @@ A cut-off of 10 nodes examined was determined to be the minimum number of lymph 
 D
 
 nodes examined had significantly less nodal disease [node negative: n=17 (77%) and node
-positive: n=5 (23%)] compared to patients with ≥10 lymph nodes examined [node negative:
+positive: n=5 (23%)] compared to patients with >=10 lymph nodes examined [node negative:
 
 significant stage migration was observed.
 
@@ -324,7 +324,7 @@ A cut-off of 20 harvested lymph nodes was the optimal cut-off based on survival 
 AC
 
 (Figure 1, p<0.001), which was achieved in 160 out of 341 (47%) patients. Comparisons of
-baseline characteristics for optimal lymphadenectomy (≥20 harvested lymph nodes) versus
+baseline characteristics for optimal lymphadenectomy (>=20 harvested lymph nodes) versus
 suboptimal lymphadenectomy (<20 harvested lymph nodes) are presented in Table 1. Briefly,
 total pancreatectomy was more common in the optimal lymphadenectomy group (24% vs. 10%,
 
@@ -575,7 +575,7 @@ harvested nodes is the likelihood of identifying a positive node increases as mo
 D
 
 examined. Our study supports a stage migration at a cut-off of 10 nodes harvested as
-demonstrated by a higher proportion of nodal disease detected in patients with ≥10 lymph nodes
+demonstrated by a higher proportion of nodal disease detected in patients with >=10 lymph nodes
 
 TE
 
@@ -603,7 +603,7 @@ harvested.
 This study also found LNR, which is a function of both nodal disease and lymphadenectomy, to
 be a robust and independent predictor of OS and RFS. A binational study between Massachusetts
 General Hospital and Verona University on 104 patients with IPMN-derived PDAC also reported
-similar findings observing 5-year RFS rates in patients with LNR = 0, >0 - ≤0.2, and >0.2 of
+similar findings observing 5-year RFS rates in patients with LNR = 0, >0 - <=0.2, and >0.2 of
 86.5%, 34.4%, and 11.1%, respectively.30 The robustness of LNR as a factor associated with
 
 outcomes is also well documented in PanIN-derived PDAC.6, 22 Collectively, in both IPMN and
@@ -1040,7 +1040,7 @@ Male
 Age > 65
 CA-199 (U/ml)
 Normal (<37)
-Elevated (≥37)
+Elevated (>=37)
 Non-secreter (<5)
 Unknown
 Type of Surgery

@@ -34,7 +34,7 @@ devtools::load_all(".")
 The **PLS Cox Regression** module (`plscox`) combines Partial Least Squares (PLS)
 dimensionality reduction with Cox proportional hazards modeling for high-dimensional
 survival data. Instead of selecting individual variables like LASSO, PLS creates
-**latent components** -- weighted combinations of all predictors that maximally
+**latent components** - weighted combinations of all predictors that maximally
 explain covariance with the survival outcome.
 
 Key features:

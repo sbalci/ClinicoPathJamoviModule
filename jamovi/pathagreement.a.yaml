@@ -195,9 +195,9 @@ options:
       title: Consensus Method
       type: List
       options:
-        - title: Majority Rule (≥50 percent)
+        - title: Majority Rule (>=50 percent)
           name: majority
-        - title: Super Majority (≥2/3)
+        - title: Super Majority (>=2/3)
           name: super_majority
         - title: Unanimous Only
           name: unanimous

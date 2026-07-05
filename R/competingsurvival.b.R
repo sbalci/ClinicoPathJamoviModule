@@ -8,7 +8,7 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = competingsurvivalBase,
     private = list(
 
-        # TODO: Validation -- Test against Klein & Moeschberger BMT dataset
+        # TODO: Validation - Test against Klein & Moeschberger BMT dataset
         # to verify CIF estimates, Gray's test p-values, and Fine-Gray HRs
         # match published reference values. Priority: HIGH before moving
         # from Drafts to production menu.
@@ -30,7 +30,7 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$todo$setContent("")
         },
 
-        # TODO (forward-looking): .getData() does an original-name → janitor::clean_names() → labelled::var_label() roundtrip to recover the cleaned column name for each option. The standard jamovi pattern is to call jmvcore::composeTerm(self$options$X) directly on the user's column name and let composeTerm handle backticking. The roundtrip is also load-bearing for the security story (janitor cleaning removes function-call shapes from column names before they reach finalfit) — refactoring must preserve that defense, e.g. by keeping janitor or by validating each column name matches `^[A-Za-z_][A-Za-z0-9_.]*$` before use.
+        # TODO (forward-looking): .getData() does an original-name → janitor::clean_names() → labelled::var_label() roundtrip to recover the cleaned column name for each option. The standard jamovi pattern is to call jmvcore::composeTerm(self$options$X) directly on the user's column name and let composeTerm handle backticking. The roundtrip is also load-bearing for the security story (janitor cleaning removes function-call shapes from column names before they reach finalfit) - refactoring must preserve that defense, e.g. by keeping janitor or by validating each column name matches `^[A-Za-z_][A-Za-z0-9_.]*$` before use.
         .getData = function() {
             # Clean and label data following survival module pattern
             mydata <- self$data
@@ -212,7 +212,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 private$.formatSurvivalResults(result, "Overall Survival")
                 
             }, error = function(e) {
-                # TODO (security): the three tryCatch blocks at L213, L252, L436 all interpolate `e$message` into a jmvcore::reject() format string. jamovi's reject UI typically renders as plain analysis-error text (no HTML), so the risk is lower than for setContent paths — but third-party error messages from finalfit / cmprsk / survival can echo factor labels or column names from user data. If the reject surface ever gains HTML rendering, these need wrapping with htmltools::htmlEscape(). Defense-in-depth.
+                # TODO (security): the three tryCatch blocks at L213, L252, L436 all interpolate `e$message` into a jmvcore::reject() format string. jamovi's reject UI typically renders as plain analysis-error text (no HTML), so the risk is lower than for setContent paths - but third-party error messages from finalfit / cmprsk / survival can echo factor labels or column names from user data. If the reject surface ever gains HTML rendering, these need wrapping with htmltools::htmlEscape(). Defense-in-depth.
                 jmvcore::reject("Overall survival analysis failed: {}", e$message)
             })
         },
@@ -375,7 +375,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 )
                 
                 # Risk set display beneath the CIF plot
-                # TODO: Risk Table -- Implement proper risk table beneath CIF plot using
+                # TODO: Risk Table - Implement proper risk table beneath CIF plot using
                 # survminer::ggrisktable() or custom ggplot2 annotation layer.
                 # Current implementation shows summary counts only.
                 # Priority: MEDIUM (user-facing feature gap).
@@ -406,7 +406,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                 cuminc_names <- names(cuminc_result)
                 for (.cn in cuminc_names) {
                     if (.cn == "Tests") {
-                        # Tests is a matrix -- convert to data.frame
+                        # Tests is a matrix - convert to data.frame
                         cuminc_serializable[["Tests"]] <- as.data.frame(cuminc_result$Tests)
                     } else {
                         # Each event-group element has $time, $est, $var vectors

@@ -186,9 +186,9 @@ CD4/CD8 ratio)}
 \item{ratioClassification}{Classify ratio as Low/Intermediate/High using
 cutoffs}
 
-\item{ratioLowCutoff}{Values ≤ this are classified as Low}
+\item{ratioLowCutoff}{Values <= this are classified as Low}
 
-\item{ratioHighCutoff}{Values ≥ this are classified as High}
+\item{ratioHighCutoff}{Values >= this are classified as High}
 
 \item{exportClusters}{Save cluster assignments to dataset}
 

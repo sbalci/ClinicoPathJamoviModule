@@ -5,12 +5,14 @@
 ## Issue
 
 User reported:
+
 ```
 CRITICAL: Only 0 events detected
 Minimum 10 events required for reliable survival analysis
 ```
 
 Even though their data had:
+
 - ✓ Numeric outcome with values 0 and 1
 - ✓ Sufficient events (>10)
 - ✓ Suitable for survival analysis
@@ -28,6 +30,7 @@ The function incorrectly counted 0 events regardless of actual data.
 The event counting code used a hardcoded column name that no longer existed:
 
 **Lines 1113-1118:** Outcome column gets renamed
+
 ```r
 cleanData <- cleanData %>%
     dplyr::rename(
@@ -38,12 +41,14 @@ cleanData <- cleanData %>%
 ```
 
 **Line 1333:** Event counting tries to access old column name
+
 ```r
 n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
 #                      ^^^^^^^^^ This column doesn't exist anymore!
 ```
 
 **What happened:**
+
 1. Column `myoutcome` renamed to `Outcome` (or whatever user's variable was named)
 2. Event counting looks for `myoutcome` column
 3. `mydata$myoutcome` returns `NULL`
@@ -57,12 +62,14 @@ n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
 **Changed line 1333-1334:**
 
 **Before (WRONG):**
+
 ```r
 mydata <- results$cleanData
 n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)  # ← Uses hardcoded name
 ```
 
 **After (CORRECT):**
+
 ```r
 mydata <- results$cleanData
 outcome_col <- results$name2outcome  # ← Get actual column name
@@ -70,6 +77,7 @@ n_events <- sum(mydata[[outcome_col]] == 1, na.rm = TRUE)  # ← Use correct nam
 ```
 
 **Key changes:**
+
 1. Retrieve the actual outcome column name from `results$name2outcome`
 2. Use bracket notation `[[outcome_col]]` instead of hardcoded `$myoutcome`
 3. Correctly counts events from the renamed column
@@ -79,11 +87,13 @@ n_events <- sum(mydata[[outcome_col]] == 1, na.rm = TRUE)  # ← Use correct nam
 ## Impact
 
 ### Before Fix
+
 - ❌ Always counted 0 events, regardless of data
 - ❌ Blocked all analyses with "minimum 10 events" error
 - ❌ Even datasets with 100+ events were rejected
 
 ### After Fix
+
 - ✅ Correctly counts events from renamed column
 - ✅ Appropriate warnings for low event counts
 - ✅ Allows analyses with sufficient events to proceed
@@ -95,30 +105,37 @@ n_events <- sum(mydata[[outcome_col]] == 1, na.rm = TRUE)  # ← Use correct nam
 The survival analysis implements a tiered warning system:
 
 ### CRITICAL ERROR: < 10 events
+
 ```
 CRITICAL: Only X events detected
 Minimum 10 events required for reliable survival analysis
 Results cannot be computed
 ```
+
 **Action:** Analysis blocked (returns early)
 
 ### STRONG WARNING: 10-19 events
+
 ```
 ⚠️ WARNING: Only X events detected
 Minimum 20 events recommended for reliable analysis
 Proceed with caution - results may be unstable
 ```
+
 **Action:** Analysis continues with warning
 
 ### MODERATE WARNING: 20-49 events
+
 ```
 ℹ️ INFO: X events detected
 Recommended minimum: 50+ events for robust estimates
 Current sample adequate for preliminary analysis
 ```
+
 **Action:** Analysis continues with info notice
 
-### Adequate: ≥ 50 events
+### Adequate: >= 50 events
+
 No warnings issued.
 
 ---
@@ -128,11 +145,13 @@ No warnings issued.
 ### Test Case: Dataset with 25 Events
 
 **Before fix:**
+
 ```
 ERROR: Only 0 events detected
 ```
 
 **After fix:**
+
 ```
 ⚠️ WARNING: Only 25 events detected
 Minimum 20 events recommended for reliable analysis
@@ -165,6 +184,7 @@ The function should now correctly report "25 events detected" instead of "0 even
 ## Status
 
 ✅ **Fixed and Validated**
+
 - Bug identified and resolved
 - Syntax checked: No errors
 - Correctly uses renamed column name
@@ -181,6 +201,7 @@ This is the **third bug** fixed in the survival analysis function today:
 3. ✅ Event counting using wrong column name → Fixed (lines 1333-1334)
 
 All fixes are documented in:
+
 - `tests/SURVIVAL_OUTCOME_FIXES.md`
 - `tests/SURVIVAL_NA_FIX_SUMMARY.md`
 - `tests/SURVIVAL_EVENT_COUNT_BUG.md` (this file)

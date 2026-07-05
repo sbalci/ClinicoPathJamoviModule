@@ -78,7 +78,7 @@ CORRECTION METHODS AVAILABLE:
 ASSUMPTIONS:
   ✓ Categorical (nominal or ordinal) variables
   ✓ Independent observations
-  ✓ Expected frequencies ≥ 5 in each cell (for χ²)
+  ✓ Expected frequencies >= 5 in each cell (for χ²)
   ✓ If expected < 5: Use Fisher's exact test
 
 RESIDUALS ANALYSIS:
@@ -481,7 +481,7 @@ cat("     • Example: 3×4 table → df = (3-1)×(4-1) = 6\n\n")
 
 cat("   p-value interpretation:\n")
 cat("     • p < 0.05: Variables ARE associated (reject H₀)\n")
-cat("     • p ≥ 0.05: No evidence of association (fail to reject H₀)\n")
+cat("     • p >= 0.05: No evidence of association (fail to reject H₀)\n")
 cat("     • Post-hoc tests ONLY run if p < α\n\n")
 
 cat("2. POST-HOC PAIRWISE COMPARISONS:\n\n")
@@ -536,7 +536,7 @@ cat("5. ASSUMPTIONS AND VALIDITY:\n\n")
 
 cat("   Chi-square assumptions:\n")
 cat("     ✓ Independent observations (no repeated measures)\n")
-cat("     ✓ Expected frequency ≥ 5 in each cell (80% rule)\n")
+cat("     ✓ Expected frequency >= 5 in each cell (80% rule)\n")
 cat("     ✓ Categorical (nominal or ordinal) variables\n")
 cat("     ✓ Mutually exclusive categories\n\n")
 
@@ -548,7 +548,7 @@ cat("     ✓ Or collapse sparse categories\n\n")
 cat("   Sample size guidelines:\n")
 cat("     • Minimum: n > 5 × (rows × cols)\n")
 cat("     • Adequate: n > 10 × (rows × cols)\n")
-cat("     • Ideal: Expected ≥ 10 in all cells\n\n")
+cat("     • Ideal: Expected >= 10 in all cells\n\n")
 
 cat("6. CHOOSING CORRECTION METHOD:\n\n")
 
@@ -587,9 +587,9 @@ cat("     ✓ Which pairwise comparisons were significant\n\n")
 
 cat("   Example reporting:\n")
 cat('     \"A chi-square test revealed a significant association between\n')
-cat('     treatment group and response (χ²(6) = 45.2, p < 0.001, V = 0.38).\n')
-cat('     Post-hoc pairwise comparisons with Bonferroni correction showed\n')
-cat('     Drug A produced significantly better response than Control\n')
+cat("     treatment group and response (χ²(6) = 45.2, p < 0.001, V = 0.38).\n")
+cat("     Post-hoc pairwise comparisons with Bonferroni correction showed\n")
+cat("     Drug A produced significantly better response than Control\n")
 cat('     (p_adj = 0.003) and Drug B (p_adj = 0.012).\"\n\n')
 
 cat("8. COMMON PITFALLS:\n\n")
@@ -617,12 +617,12 @@ cat("═════════════════════════
 cat("Post-hoc Workflow (Proper Statistical Practice):\n\n")
 
 cat("Step 1: Run overall chi-square test\n")
-cat("  → If p ≥ α: STOP. No pairwise testing justified.\n")
+cat("  → If p >= α: STOP. No pairwise testing justified.\n")
 cat("  → If p < α: Proceed to Step 2.\n\n")
 
 cat("Step 2: Check expected frequencies\n")
 cat("  → If any expected < 5: Consider Fisher's exact\n")
-cat("  → If all expected ≥ 5: Chi-square valid\n\n")
+cat("  → If all expected >= 5: Chi-square valid\n\n")
 
 cat("Step 3: Run pairwise comparisons\n")
 cat("  → For each pair: 2×2 chi-square or Fisher's exact\n")
@@ -635,7 +635,7 @@ cat("  → FDR: Benjamini-Hochberg procedure\n\n")
 
 cat("Step 5: Interpret adjusted p-values\n")
 cat("  → p_adj < α: Pairwise difference is significant\n")
-cat("  → p_adj ≥ α: No evidence of pairwise difference\n\n")
+cat("  → p_adj >= α: No evidence of pairwise difference\n\n")
 
 cat("Type I vs Type II Error Trade-off:\n")
 cat("  • More conservative correction → fewer Type I errors\n")

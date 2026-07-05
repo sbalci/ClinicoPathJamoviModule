@@ -72,7 +72,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             covariates <- self$options$covariates
             time_covariates <- self$options$time_covariates
             
-            # Clean data — c() already drops NULL elements from its inputs, so no
+            # Clean data - c() already drops NULL elements from its inputs, so no
             # additional NULL filter is needed (and is.null() is not vectorized over a
             # vector of names anyway).
             analysis_vars <- c(subject_var, time_var, state_var, covariates, time_covariates)

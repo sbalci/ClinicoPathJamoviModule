@@ -32,8 +32,8 @@ devtools::load_all(".")
 ## Overview
 
 The **SCAD/MCP Cox Regression** module (`ncvregcox`) performs variable selection using
-non-convex penalties -- **SCAD** (Smoothly Clipped Absolute Deviation) and **MCP**
-(Minimax Concave Penalty) -- for Cox proportional hazards models. These penalties
+non-convex penalties - **SCAD** (Smoothly Clipped Absolute Deviation) and **MCP**
+(Minimax Concave Penalty) - for Cox proportional hazards models. These penalties
 solve a fundamental problem with LASSO: **over-penalization of large coefficients**.
 
 Key features:
@@ -52,7 +52,7 @@ Key features:
 LASSO applies a constant penalty rate regardless of coefficient size, which means:
 
 - Small (noise) coefficients: shrunk to zero (good)
-- Large (true) coefficients: also over-shrunk (bad -- introduces bias)
+- Large (true) coefficients: also over-shrunk (bad - introduces bias)
 
 **SCAD** and **MCP** use penalties that flatten out for large coefficients, solving
 this problem. The key insight is that once a coefficient is clearly non-zero, there
@@ -107,7 +107,7 @@ if the true model were known in advance.
 | Building a model for publication (unbiased coefficients) | **SCAD recommended** |
 | Want oracle property without two-stage procedure | **SCAD or MCP** |
 | Moderate number of predictors | **MCP** (more aggressive selection) |
-| Very high dimensional (p >> n) | Consider `lassocox` -- LASSO may be more stable |
+| Very high dimensional (p >> n) | Consider `lassocox` - LASSO may be more stable |
 | Need guaranteed convexity for optimization | Use `lassocox` |
 
 ---
@@ -158,12 +158,12 @@ x20 (-0.4). The remaining 26 variables are noise with block-correlated structure
 Before running the penalized regression, the module performs a comprehensive
 suitability check with a traffic-light system (green/yellow/red) across 6 dimensions:
 
-1. **Events-Per-Variable (EPV)** -- are there enough events relative to predictors?
-2. **Regularization Need** -- is the dimensionality high enough to warrant penalization?
-3. **Sample Size** -- is n adequate for stable cross-validation?
-4. **Event Rate** -- is the event/censoring balance reasonable?
-5. **Multicollinearity** -- are predictors highly correlated?
-6. **Data Quality** -- how much missing data exists?
+1. **Events-Per-Variable (EPV)** - are there enough events relative to predictors?
+2. **Regularization Need** - is the dimensionality high enough to warrant penalization?
+3. **Sample Size** - is n adequate for stable cross-validation?
+4. **Event Rate** - is the event/censoring balance reasonable?
+5. **Multicollinearity** - are predictors highly correlated?
+6. **Data Quality** - how much missing data exists?
 
 ```{r suitability-clinical}
 # Run with suitability check enabled (default)
@@ -195,7 +195,7 @@ see mostly green indicators.
 
 ## 3. SCAD Penalty (Default)
 
-SCAD is the recommended starting point -- it provides nearly unbiased estimates
+SCAD is the recommended starting point - it provides nearly unbiased estimates
 for truly important variables while setting noise variables to zero.
 
 ```{r scad-clinical}
@@ -230,7 +230,7 @@ coefficient estimates.
 
 ## 4. MCP Penalty
 
-MCP is more aggressive than SCAD -- it transitions to zero penalty more quickly,
+MCP is more aggressive than SCAD - it transitions to zero penalty more quickly,
 leading to sparser models.
 
 ```{r mcp-clinical}
@@ -271,7 +271,7 @@ The gamma parameter controls how quickly the penalty flattens:
 - **MCP**: gamma must be > 1. Default 3.0. Lower gamma = more aggressive selection
 
 ```{r gamma-scad-low}
-# SCAD with lower gamma (more aggressive -- penalty flattens sooner)
+# SCAD with lower gamma (more aggressive - penalty flattens sooner)
 ncvregcox(
   data = ncvregcox_clinical,
   time = "time",
@@ -291,7 +291,7 @@ ncvregcox(
 ```
 
 ```{r gamma-scad-high}
-# SCAD with higher gamma (less aggressive -- closer to LASSO-like behavior)
+# SCAD with higher gamma (less aggressive - closer to LASSO-like behavior)
 ncvregcox(
   data = ncvregcox_clinical,
   time = "time",
@@ -322,11 +322,11 @@ compromise.
 The cross-validation procedure identifies the optimal penalty strength (lambda).
 Two strategies are available:
 
-- **min**: Lambda that minimizes CV error -- selects more variables
-- **1se**: Lambda within 1 SE of minimum -- more parsimonious (Breiman's rule)
+- **min**: Lambda that minimizes CV error - selects more variables
+- **1se**: Lambda within 1 SE of minimum - more parsimonious (Breiman's rule)
 
 ```{r lambda-min}
-# Minimum CV error -- selects more variables
+# Minimum CV error - selects more variables
 ncvregcox(
   data = ncvregcox_clinical,
   time = "time",
@@ -345,7 +345,7 @@ ncvregcox(
 ```
 
 ```{r lambda-1se}
-# One SE rule -- more parsimonious
+# One SE rule - more parsimonious
 ncvregcox(
   data = ncvregcox_clinical,
   time = "time",
@@ -373,7 +373,7 @@ is genuinely simpler and may generalize better.
 ## 7. Sparse Scenario (Many Noise Variables)
 
 The `ncvregcox_sparse` dataset has 30 covariates but only 4 true signals.
-This is where non-convex penalties shine -- SCAD/MCP should recover the true
+This is where non-convex penalties shine - SCAD/MCP should recover the true
 model more accurately than LASSO would.
 
 ```{r sparse-scad}
@@ -400,7 +400,7 @@ ncvregcox(
 ```
 
 ```{r sparse-mcp}
-# MCP comparison -- often sparser than SCAD
+# MCP comparison - often sparser than SCAD
 ncvregcox(
   data = ncvregcox_sparse,
   time = "time",
@@ -523,7 +523,7 @@ ncvregcox(
 
 - **Sample Size**: Yellow or red (n=25 is small)
 - **EPV**: Likely yellow (few events relative to 5 covariates)
-- **Regularization Need**: Yellow (low dimensionality -- standard Cox may suffice)
+- **Regularization Need**: Yellow (low dimensionality - standard Cox may suffice)
 
 With only 25 observations, cross-validation folds should be reduced (e.g., 5
 instead of 10) to ensure each fold has enough events for reliable estimation.
@@ -657,9 +657,9 @@ The traffic-light table provides a quick pre-analysis diagnostic:
 
 | Color | Meaning |
 |-------|---------|
-| Green | No concerns -- proceed with confidence |
+| Green | No concerns - proceed with confidence |
 | Yellow | Usable but review the flagged item |
-| Red | Potential issue -- results may be unreliable |
+| Red | Potential issue - results may be unreliable |
 
 ---
 
@@ -687,7 +687,7 @@ you have strong evidence of a robust signal.
 
 2. **Comparing SCAD/MCP coefficients directly to LASSO**: SCAD/MCP coefficients
    are less biased. A SCAD coefficient of 0.8 is not "bigger" than a LASSO
-   coefficient of 0.5 for the same variable -- the LASSO version is just more shrunk.
+   coefficient of 0.5 for the same variable - the LASSO version is just more shrunk.
 
 3. **Not reporting the penalty type**: Always specify whether you used SCAD or MCP,
    along with the gamma value and lambda selection method.

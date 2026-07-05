@@ -12,6 +12,7 @@
 **SANITIZED_FN:** `jjpiestats`
 
 ### Files Found
+
 ✅ **jamovi/jjpiestats.a.yaml** - Options definition (10 parameters)  
 ✅ **jamovi/jjpiestats.u.yaml** - User interface controls  
 ✅ **jamovi/jjpiestats.r.yaml** - Results definition (4 output items)  
@@ -58,6 +59,7 @@ Progress messages and user guidance content:
 ### 2.3 YAML Files (Auto-extracted)
 
 YAML strings are automatically extracted by jamovi's i18n system:
+
 - **10 option titles** in `.a.yaml`
 - **8 UI control labels** in `.u.yaml`  
 - **4 result titles** in `.r.yaml`
@@ -119,14 +121,15 @@ YAML strings are automatically extracted by jamovi's i18n system:
 | new | "General Troubleshooting" | "Genel Sorun Giderme" |
 | new | "Ensure dependent variable is categorical" | "Bağımlı değişkenin kategorik olduğundan emin olun" |
 | new | "Check that selected variables exist in your dataset" | "Seçilen değişkenlerin veri setinizde mevcut olduğunu kontrol edin" |
-| new | "Verify sufficient sample sizes in each category (≥5 recommended)" | "Her kategoride yeterli örneklem büyüklüğü olduğunu doğrulayın (≥5 önerilir)" |
-| new | "Confirm variables have adequate variation (≥2 categories)" | "Değişkenlerin yeterli varyasyona sahip olduğunu onaylayın (≥2 kategori)" |
+| new | "Verify sufficient sample sizes in each category (>=5 recommended)" | "Her kategoride yeterli örneklem büyüklüğü olduğunu doğrulayın (>=5 önerilir)" |
+| new | "Confirm variables have adequate variation (>=2 categories)" | "Değişkenlerin yeterli varyasyona sahip olduğunu onaylayın (>=2 kategori)" |
 
 ---
 
 ## 4) Clinical Terminology Consistency (TR)
 
 ### 4.1 Statistical Terms
+
 ```text
 Pie Chart → Pasta Grafiği
 Chi-square test → Ki-kare testi
@@ -140,6 +143,7 @@ Statistical significance → İstatistiksel anlamlılık
 ```
 
 ### 4.2 Data Analysis Terms
+
 ```text
 Variable → Değişken
 Observation → Gözlem
@@ -152,6 +156,7 @@ Proportion → Oran
 ```
 
 ### 4.3 User Interface Terms
+
 ```text
 Analysis → Analiz
 Settings → Ayarlar
@@ -203,6 +208,7 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
 ## 6) QA Checklist
 
 ### 6.1 Technical Validation
+
 - ✅ All user-visible strings wrapped with `.()` in R backend
 - ✅ NAMESPACE imports translation helper `.`
 - ✅ All jamovi files present and valid
@@ -210,6 +216,7 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
 - ✅ Error messages preserve technical context
 
 ### 6.2 Translation Quality
+
 - ✅ Turkish translations use clinical terminology
 - ✅ Medical terms consistent with Turkish medical literature  
 - ✅ User-friendly language for pathologists/clinicians
@@ -217,6 +224,7 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
 - ✅ Placeholder variables preserved in translations
 
 ### 6.3 Clinical Context
+
 - ✅ Statistical method names translated appropriately
 - ✅ Error messages provide actionable guidance
 - ✅ UI terminology consistent with medical practice
@@ -227,6 +235,7 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
 ## 7) Weblate Integration Steps
 
 ### 7.1 Repository Setup
+
 1. Create dedicated repo: `ClinicoPathJamoviModule-i18n`
 2. Add files:
    - `catalog.pot` (template)
@@ -234,6 +243,7 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
    - `LICENSE` (same as main project)
 
 ### 7.2 Weblate Configuration
+
 1. **Collaborators** → Add Weblate bot
 2. **Webhooks** → Add:
    - Payload URL: `https://hosted.weblate.org/hooks/github/`
@@ -245,16 +255,19 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
 ## 8) Implementation Priority
 
 ### Phase 1: Core Messages (High Priority)
+
 - Error messages (validation, data issues)
 - Welcome and status messages  
 - Basic troubleshooting tips
 
 ### Phase 2: UI Enhancement (Medium Priority)
+
 - Advanced option descriptions
 - Detailed help content
 - Performance guidance
 
 ### Phase 3: Documentation (Low Priority)
+
 - Extended tooltips
 - Statistical method explanations
 - Citation information
@@ -264,12 +277,14 @@ jamovi-compiler --check jamovi/jjpiestats.*.yaml
 ## 9) Maintenance Guidelines
 
 ### 9.1 Adding New Strings
+
 1. Always wrap with `.()` in R code
 2. Use `{placeholder}` format for variables
 3. Update translation catalogs with `jmvtools::i18nUpdate()`
 4. Test with Turkish locale before release
 
 ### 9.2 Translation Updates
+
 1. Review clinical accuracy regularly
 2. Update terminology based on user feedback
 3. Maintain consistency across all jamovi functions

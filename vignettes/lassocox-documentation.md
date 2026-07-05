@@ -1,13 +1,13 @@
-# Lasso-Cox Regression -- Developer Documentation
+# Lasso-Cox Regression - Developer Documentation
 
 ## 1. Overview
 
 - **Function**: `lassocox`
 - **Files**:
-  - `jamovi/lassocox.u.yaml` -- UI
-  - `jamovi/lassocox.a.yaml` -- Options
-  - `R/lassocox.b.R` -- Backend
-  - `jamovi/lassocox.r.yaml` -- Results
+  - `jamovi/lassocox.u.yaml` - UI
+  - `jamovi/lassocox.a.yaml` - Options
+  - `R/lassocox.b.R` - Backend
+  - `jamovi/lassocox.r.yaml` - Results
 - **Menu**: SurvivalT > Penalized Cox Regression > LASSO Cox
 - **Summary**: Performs L1-penalized (LASSO) Cox proportional hazards regression for automatic variable selection in survival analysis. Accepts a time variable, a binary outcome, and two or more candidate explanatory variables; fits a cross-validated LASSO model via `glmnet`; and returns selected variables with coefficients, model performance metrics (C-index, log-rank, hazard ratio), risk scores, and three plots (cross-validation, coefficient bar chart, risk-group survival curves). An advisory traffic-light data suitability assessment and optional educational outputs round out the module.
 
@@ -48,10 +48,10 @@
 
 | UI Control (id / type) | Label | Binds to Option | Defaults & Constraints | Visibility / Enable Rules |
 |---|---|---|---|---|
-| `elapsedtime` / VariablesListBox | Time Elapsed | `elapsedtime` (Variable) | -- | Always visible; maxItemCount=1 |
-| `outcome` / VariablesListBox | Outcome | `outcome` (Variable) | -- | Always visible; maxItemCount=1 |
+| `elapsedtime` / VariablesListBox | Time Elapsed | `elapsedtime` (Variable) | - | Always visible; maxItemCount=1 |
+| `outcome` / VariablesListBox | Outcome | `outcome` (Variable) | - | Always visible; maxItemCount=1 |
 | `outcomeLevel` / LevelSelector | Event Level | `outcomeLevel` (Level) | Levels from `outcome` | Enabled when `outcome` is set |
-| `explanatory` / VariablesListBox | Explanatory Variables | `explanatory` (Variables) | -- | Always visible |
+| `explanatory` / VariablesListBox | Explanatory Variables | `explanatory` (Variables) | - | Always visible |
 | `suitabilityCheck` / CheckBox | Data Suitability Assessment | `suitabilityCheck` (Bool) | default: `true` | Inside "Data Suitability" CollapseBox (expanded by default) |
 | `lambda` / ComboBox | Lambda Selection | `lambda` (List) | default: `lambda.1se`; options: `lambda.min`, `lambda.1se` | Inside "Model Options" CollapseBox (collapsed) |
 | `nfolds` / TextBox | Number of CV Folds | `nfolds` (Integer) | default: `10`; min: `3` | Inside "Model Options" CollapseBox (collapsed) |
@@ -60,7 +60,7 @@
 | `coef_plot` / CheckBox | Coefficient Plot | `coef_plot` (Bool) | default: `true` | Inside "Plots" CollapseBox (collapsed) |
 | `survival_plot` / CheckBox | Risk Group Survival Plot | `survival_plot` (Bool) | default: `true` | Inside "Plots" CollapseBox (collapsed) |
 | `random_seed` / TextBox | Random Seed | `random_seed` (Integer) | default: `123456`; min: `1`; max: `999999` | Inside bottom LayoutBox, always visible |
-| `riskScore` / Output | Add Risk Score to Data | `riskScore` (Output) | -- | Inside "Output Options" CollapseBox (collapsed) |
+| `riskScore` / Output | Add Risk Score to Data | `riskScore` (Output) | - | Inside "Output Options" CollapseBox (collapsed) |
 | `showExplanations` / CheckBox | Show Method Explanations | `showExplanations` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
 | `showMethodologyNotes` / CheckBox | Detailed Methodology Notes | `showMethodologyNotes` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
 | `includeClinicalGuidance` / CheckBox | Clinical Interpretation Guidance | `includeClinicalGuidance` (Bool) | default: `false` | Inside "Explanatory Output" CollapseBox (collapsed) |
@@ -74,11 +74,11 @@
 
 | Name | Type | Default | Description | Downstream Effects (.b.R) |
 |---|---|---|---|---|
-| `data` | Data | -- | The input data frame | Accessed as `self$data` throughout |
-| `elapsedtime` | Variable | -- | Numeric follow-up time | `.cleanData`: extracted, validated (non-negative, no NA); used to create `Surv()` object |
-| `outcome` | Variable | -- | Binary event status (factor or numeric) | `.cleanData`: validated for exactly 2 levels; compared with `outcomeLevel` to create binary status |
-| `outcomeLevel` | Level | -- | Which level of `outcome` = event | `.cleanData`: `status <- as.numeric(outcome == outcomeLevel)` |
-| `explanatory` | Variables | -- | Candidate predictors (>=2 required) | `.cleanData`: checked for constants, create design matrix via `model.matrix()`; column count drives suitability checks |
+| `data` | Data | - | The input data frame | Accessed as `self$data` throughout |
+| `elapsedtime` | Variable | - | Numeric follow-up time | `.cleanData`: extracted, validated (non-negative, no NA); used to create `Surv()` object |
+| `outcome` | Variable | - | Binary event status (factor or numeric) | `.cleanData`: validated for exactly 2 levels; compared with `outcomeLevel` to create binary status |
+| `outcomeLevel` | Level | - | Which level of `outcome` = event | `.cleanData`: `status <- as.numeric(outcome == outcomeLevel)` |
+| `explanatory` | Variables | - | Candidate predictors (>=2 required) | `.cleanData`: checked for constants, create design matrix via `model.matrix()`; column count drives suitability checks |
 | `lambda` | List | `lambda.1se` | Lambda selection method (`lambda.min` or `lambda.1se`) | `.fitModel`: `switch(self$options$lambda, ...)` selects optimal lambda from `cv.glmnet` |
 | `nfolds` | Integer | `10` (min: 3) | Number of CV folds | `.fitModel`: capped at `n/3`; passed to `cv.glmnet(nfolds=...)` |
 | `random_seed` | Integer | `123456` (min: 1, max: 999999) | Random seed for reproducible CV fold assignment | `.fitModel`: passed to `set.seed()` and `.makeStratifiedFoldId()` for deterministic fold creation |
@@ -87,7 +87,7 @@
 | `cv_plot` | Bool | `true` | Show cross-validation plot | `.savePlotData`: gates `setState` on `cv_plot` image; `.cvPlot` render function checks this flag |
 | `coef_plot` | Bool | `true` | Show coefficient bar plot | `.savePlotData`: gates `setState` on `coef_plot` image; `.coefPlot` render function checks this flag |
 | `survival_plot` | Bool | `true` | Show risk-group survival curves | `.savePlotData`: gates `setState` on `survival_plot` image; `.survivalPlot` render function checks this flag |
-| `riskScore` | Output | -- | Save calculated risk scores to dataset | `.savePlotData`: `self$results$riskScore$setValues(full_risk_scores)` |
+| `riskScore` | Output | - | Save calculated risk scores to dataset | `.savePlotData`: `self$results$riskScore$setValues(full_risk_scores)` |
 | `showSummary` | Bool | `false` | Display natural-language summary of results | `.savePlotData`: gates `.populateSummary(results)` |
 | `showExplanations` | Bool | `false` | Display LASSO methodology explanation | `.initializeExplanations`: gates `.populateLassoExplanation()`; `.savePlotData`: gates CV/reg-path/risk-score explanations |
 | `showMethodologyNotes` | Bool | `false` | Display technical methodology notes | `.initializeExplanations`: gates `.populateMethodologyNotes()` |
@@ -110,13 +110,13 @@
 1. **Early exit** if data is null/empty or required variables are missing.
 2. **Hide welcome** (`todo` set invisible); **show results** (`modelSummary`, `coefficients`, `performance` set visible).
 3. **Pipeline** (inside `tryCatch`):
-   - `private$.cleanData()` -- returns validated list or `NULL`
-   - `private$.assessSuitability(data)` -- if `suitabilityCheck` is true
-   - `private$.fitModel(data)` -- returns results list or `NULL`
+   - `private$.cleanData()` - returns validated list or `NULL`
+   - `private$.assessSuitability(data)` - if `suitabilityCheck` is true
+   - `private$.fitModel(data)` - returns results list or `NULL`
    - `private$.populateModelSummary(results)`
    - `private$.populateCoefficients(results)`
    - `private$.populatePerformance(results)`
-   - `private$.savePlotData(results)` -- sets plot states, populates explanations/importance/comparison, sets risk score output
+   - `private$.savePlotData(results)` - sets plot states, populates explanations/importance/comparison, sets risk score output
 4. **Error handling**: On error, writes message to `todo` HTML and makes it visible.
 
 ### 4.3 `.cleanData()`
@@ -140,9 +140,9 @@ Returns: `list(time, status, X, n, n_events, n_censored, variable_names, origina
 | `self$options$lambda` | `switch()` to pick `lambda.min` or `lambda.1se` from CV result |
 
 Key steps:
-1. `survival::Surv(data$time, data$status)` -- create survival object
-2. `glmnet::cv.glmnet(x=data$X, y=y, family="cox", alpha=1, nfolds=nfolds)` -- cross-validated LASSO
-3. `glmnet::glmnet(x=data$X, y=y, family="cox", alpha=1, lambda=lambda_optimal)` -- final model
+1. `survival::Surv(data$time, data$status)` - create survival object
+2. `glmnet::cv.glmnet(x=data$X, y=y, family="cox", alpha=1, nfolds=nfolds)` - cross-validated LASSO
+3. `glmnet::glmnet(x=data$X, y=y, family="cox", alpha=1, lambda=lambda_optimal)` - final model
 4. Extract coefficients; if no variables selected, fall back to `lambda.min`
 5. Calculate risk scores via `predict(..., type="link")`
 6. Call `.calculatePerformanceMetrics()` for C-index, log-rank, hazard ratio
@@ -194,7 +194,7 @@ All plot functions check their respective boolean option first and return early 
 | `cv_plot` | Image | Cross-validation Plot | `(cv_plot)` | cv_plot + model options |
 | `coef_plot` | Image | Coefficient Plot | `(coef_plot)` | coef_plot + model options |
 | `survival_plot` | Image | Risk Group Survival Plot | `(survival_plot)` | survival_plot + model options |
-| `riskScore` | Output | Add Risk Score to Data | -- | model options |
+| `riskScore` | Output | Add Risk Score to Data | - | model options |
 | `summaryText` | Html | Results Summary | `(showSummary)` | showSummary + input vars + model options |
 | `lassoExplanation` | Html | Understanding LASSO Cox Regression | `(showExplanations)` | showExplanations |
 | `methodologyNotes` | Html | LASSO Cox Methodology Notes | `(showMethodologyNotes)` | showMethodologyNotes |
@@ -218,13 +218,13 @@ All plot functions check their respective boolean option first and return early 
 
 | Column | Title | Type | Format | SuperTitle |
 |---|---|---|---|---|
-| `variable` | Variable | text | -- | -- |
-| `coefficient` | Coefficient | number | zto | -- |
-| `hazardRatio` | Hazard Ratio | number | zto | -- |
+| `variable` | Variable | text | - | - |
+| `coefficient` | Coefficient | number | zto | - |
+| `hazardRatio` | Hazard Ratio | number | zto | - |
 | `ci_lower` | Lower | number | zto | 95% CI |
 | `ci_upper` | Upper | number | zto | 95% CI |
-| `p_value` | p | number | zto,pvalue | -- |
-| `importance` | Importance | number | zto | -- |
+| `p_value` | p | number | zto,pvalue | - |
+| `importance` | Importance | number | zto | - |
 
 **performance**
 
@@ -238,17 +238,17 @@ All plot functions check their respective boolean option first and return early 
 
 | Column | Title | Type | Format |
 |---|---|---|---|
-| `variable` | Variable | text | -- |
+| `variable` | Variable | text | - |
 | `importance_score` | Importance Score | number | zto |
 | `selection_frequency` | Path Inclusion Proportion | number | pc |
-| `stability_rank` | Importance Rank | integer | -- |
+| `stability_rank` | Importance Rank | integer | - |
 
 **modelComparison**
 
 | Column | Title | Type | Format |
 |---|---|---|---|
-| `model_type` | Model Type | text | -- |
-| `n_variables` | N Variables | integer | -- |
+| `model_type` | Model Type | text | - |
+| `n_variables` | N Variables | integer | - |
 | `cindex` | C-index | number | zto |
 | `aic` | AIC | number | zto |
 | `log_likelihood` | Log-Likelihood | number | zto |
@@ -399,14 +399,14 @@ flowchart TD
 
 ### Step-by-step execution flow
 
-1. **User interacts with UI controls** -- drags variables into target boxes, adjusts options in collapse panels.
-2. **Backend validation (`.init()`)** -- checks package dependencies; if variables are missing, shows welcome message and hides result panes.
-3. **Data cleaning (`.cleanData()`)** -- validates time (non-negative, no NA), outcome (binary), explanatory (>=2, no constants), creates design matrix, optionally standardizes.
-4. **Suitability assessment (`.assessSuitability()`)** -- if enabled, runs 7 checks (EPV, regularization need, sample size, event rate, multicollinearity, data quality, proportional hazards) and generates traffic-light HTML. Advisory only, never blocks analysis.
-5. **Model fitting (`.fitModel()`)** -- runs `cv.glmnet()` with alpha=1, selects lambda, fits final model, extracts coefficients, calculates risk scores, computes performance metrics.
-6. **Results population** -- fills `modelSummary` (up to 9 rows), `coefficients` (per selected variable), `performance` (C-index, log-rank, HR). Saves protobuf-safe plot states. Populates optional tables and explanatory HTML.
-7. **Plot rendering** -- jamovi calls `.cvPlot()`, `.coefPlot()`, `.survivalPlot()` with saved state; each builds a ggplot2 or survminer plot.
-8. **Display** -- jamovi applies `.r.yaml` visibility rules to show/hide outputs.
+1. **User interacts with UI controls** - drags variables into target boxes, adjusts options in collapse panels.
+2. **Backend validation (`.init()`)** - checks package dependencies; if variables are missing, shows welcome message and hides result panes.
+3. **Data cleaning (`.cleanData()`)** - validates time (non-negative, no NA), outcome (binary), explanatory (>=2, no constants), creates design matrix, optionally standardizes.
+4. **Suitability assessment (`.assessSuitability()`)** - if enabled, runs 7 checks (EPV, regularization need, sample size, event rate, multicollinearity, data quality, proportional hazards) and generates traffic-light HTML. Advisory only, never blocks analysis.
+5. **Model fitting (`.fitModel()`)** - runs `cv.glmnet()` with alpha=1, selects lambda, fits final model, extracts coefficients, calculates risk scores, computes performance metrics.
+6. **Results population** - fills `modelSummary` (up to 9 rows), `coefficients` (per selected variable), `performance` (C-index, log-rank, HR). Saves protobuf-safe plot states. Populates optional tables and explanatory HTML.
+7. **Plot rendering** - jamovi calls `.cvPlot()`, `.coefPlot()`, `.survivalPlot()` with saved state; each builds a ggplot2 or survminer plot.
+8. **Display** - jamovi applies `.r.yaml` visibility rules to show/hide outputs.
 
 ### Option to Output Dependency Map
 
@@ -558,7 +558,7 @@ showModelComparison: false
 
 ## 10. Appendix (Schemas & Snippets)
 
-### A. Data Cleaning -- Key Snippet
+### A. Data Cleaning - Key Snippet
 
 ```r
 # Binary status creation from outcomeLevel
@@ -578,7 +578,7 @@ if (self$options$standardize) {
 }
 ```
 
-### B. Model Fitting -- Key Snippet
+### B. Model Fitting - Key Snippet
 
 ```r
 # Cross-validated LASSO Cox
@@ -597,7 +597,7 @@ lambda_optimal <- switch(self$options$lambda,
 )
 ```
 
-### C. Protobuf-Safe State -- Key Snippet
+### C. Protobuf-Safe State - Key Snippet
 
 ```r
 # CV plot: only plain numerics
@@ -633,7 +633,7 @@ cindex_result <- survival::concordance(y ~ risk_scores, reverse = TRUE)
 | Check | Green | Yellow | Red |
 |---|---|---|---|
 | Events-Per-Variable (EPV) | EPV >= 20 | 2 <= EPV < 20 | EPV < 2 |
-| Regularization Need | p >= n/3 (LASSO indicated) | p <= 10 && EPV >= 20 (standard Cox may suffice) | -- |
+| Regularization Need | p >= n/3 (LASSO indicated) | p <= 10 && EPV >= 20 (standard Cox may suffice) | - |
 | Sample Size | n >= 100 | 20 <= n < 100 | n < 20 |
 | Event Rate | 20%-80% | 10%-20% or 80%-90% | <10% or >90% |
 | Multicollinearity | max abs(r) < 0.7 | 0.7 <= max abs(r) < 0.9 (moderate) or 0.9 <= max abs(r) < 0.99 (high) | max abs(r) >= 0.99 |
@@ -645,9 +645,9 @@ Overall verdict: worst individual color, except if only regularization check is 
 
 | Package | Usage |
 |---|---|
-| `glmnet` | `cv.glmnet()`, `glmnet()` -- LASSO fitting |
+| `glmnet` | `cv.glmnet()`, `glmnet()` - LASSO fitting |
 | `survival` | `Surv()`, `survfit()`, `survdiff()`, `coxph()`, `concordance()` |
-| `survminer` | `ggsurvplot()` -- enhanced survival plots |
+| `survminer` | `ggsurvplot()` - enhanced survival plots |
 | `ggplot2` | CV and coefficient plots |
 | `grid` | Fallback plot error/warning messages |
 | `survcomp` | (optional) AUC calculation at time points |

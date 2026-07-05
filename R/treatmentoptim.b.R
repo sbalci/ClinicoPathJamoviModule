@@ -30,7 +30,7 @@ treatmentoptimClass <- R6::R6Class(
         },
 
         .run = function() {
-            # TODO (stub): RELEASE-BLOCKING — this analysis is a non-functional placeholder that
+            # TODO (stub): RELEASE-BLOCKING - this analysis is a non-functional placeholder that
             #   presents FABRICATED / hardcoded output as personalized clinical decision support.
             #   None of the sub-analyses use the patient data:
             #     - .predictTreatmentResponse (L347): rnorm()-fabricated response/risk/benefit; patient_data ignored.
@@ -40,7 +40,7 @@ treatmentoptimClass <- R6::R6Class(
             #     - .optimizeDoses (L427) / .assessSafety (L451): hardcoded doses/safety; lab/comorbidity data ignored.
             #     - .compareTreatments (L481): hardcoded "65%/72%" + fake p-values (p = 0.032).
             #     - .createTreatmentPlots/.createInteractionNetwork/.createDoseResponsePlots (L297/307/317):
-            #       setState a text string only — no plot is drawn (.plot renderers absent).
+            #       setState a text string only - no plot is drawn (.plot renderers absent).
             #   Implement real models or gate the analysis behind a clear "demonstration only" notice
             #   before any clinical release. A clinician could be seriously misled by the current output.
 
@@ -226,12 +226,12 @@ treatmentoptimClass <- R6::R6Class(
             }
             
             # Populate interaction table
-            # TODO (cleanup): 1:nrow / 1:length are zero-length-unsafe — with
+            # TODO (cleanup): 1:nrow / 1:length are zero-length-unsafe - with
             #   interaction_severity == "critical_only" the severity filter (above) drops all rows,
             #   so 1:nrow(interactions) becomes 1:0 = c(1,0) and writes spurious interaction_1 /
             #   interaction_0 rows. Use seq_len(nrow(interactions)). Same anti-pattern at the
             #   1:length() loops L186/260/283/304 (currently safe only because those lists are
-            #   hardcoded non-empty) — switch all to seq_len()/seq_along().
+            #   hardcoded non-empty) - switch all to seq_len()/seq_along().
             interactionTable <- self$results$drugInteractions
             for (i in 1:nrow(interactions)) {
                 interactionTable$addRow(rowKey = paste0("interaction_", i), values = list(
@@ -370,7 +370,7 @@ treatmentoptimClass <- R6::R6Class(
             #   breaking reproducibility of any other analysis in the same jamovi session. If a
             #   local seed is genuinely needed, save/restore via withr::with_seed() or
             #   on.exit(assign(".Random.seed", old, envir=.GlobalEnv)). (Moot once .predictTreatmentResponse
-            #   is replaced with a real model — see the stub TODO at the top of .run.)
+            #   is replaced with a real model - see the stub TODO at the top of .run.)
             set.seed(42)  # For reproducible results
             
             base_response <- switch(treatment,

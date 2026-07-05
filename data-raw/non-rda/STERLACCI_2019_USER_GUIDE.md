@@ -5,6 +5,7 @@
 This guide explains how to use the new Phase 1 features implemented from Sterlacci et al. (2019) study on NSCLC IHC clustering. These features enable replication of their methodology for analyzing immunohistochemistry marker patterns.
 
 **Implemented Features (Phase 1):**
+
 1. Jaccard distance for binary markers
 2. Complete linkage hierarchical clustering
 3. Bonferroni correction for multiple testing
@@ -16,11 +17,13 @@ This guide explains how to use the new Phase 1 features implemented from Sterlac
 ### When to Use
 
 **Use Jaccard distance when:**
+
 - All your IHC markers are **binary** (Positive/Negative only)
 - You want to replicate published studies using Jaccard distance
 - You're analyzing tissue microarray (TMA) data with categorical scoring
 
 **Use Gower distance (default) when:**
+
 - You have **mixed data types** (categorical + continuous markers)
 - You have ordinal scales (0/1+/2+/3+)
 - You have H-scores or percentage positivity values
@@ -28,15 +31,18 @@ This guide explains how to use the new Phase 1 features implemented from Sterlac
 ### Mathematical Background
 
 **Jaccard distance formula:**
+
 ```
 d(A,B) = 1 - (|A ∩ B| / |A ∪ B|)
 ```
 
 Where:
+
 - A ∩ B = markers positive in both cases
 - A ∪ B = markers positive in either case
 
 **Example:**
+
 ```
 Case 1: EMA+, CK7+, TTF1-, p63-, CD99+
 Case 2: EMA+, CK7-, TTF1+, p63-, CD99+
@@ -57,6 +63,7 @@ Jaccard distance = 1 - 0.5 = 0.5
 6. Run analysis
 
 **Important Notes:**
+
 - Continuous markers (H-scores, percentages) will be automatically converted to binary using median split
 - The analysis will report: "Using Jaccard distance (binary conversion applied)"
 - For truly binary data, this is more appropriate than Gower distance
@@ -95,12 +102,14 @@ results <- ihccluster(
 ### When to Use
 
 **Use Complete linkage when:**
+
 - Replicating Sterlacci 2019 or similar studies
 - You want **compact, spherical clusters**
 - You expect distinct immunoprofile groups
 - Outliers should form separate clusters
 
 **Use Ward linkage (default) when:**
+
 - You want **balanced cluster sizes**
 - Minimizing within-cluster variance is priority
 - Standard exploratory analysis
@@ -108,6 +117,7 @@ results <- ihccluster(
 ### Mathematical Background
 
 **Complete linkage formula:**
+
 ```
 D(Cluster A, Cluster B) = max{distance(a,b) : a ∈ A, b ∈ B}
 ```
@@ -115,6 +125,7 @@ D(Cluster A, Cluster B) = max{distance(a,b) : a ∈ A, b ∈ B}
 The distance between two clusters = the **maximum** distance between any two points in the clusters.
 
 **Comparison:**
+
 - **Ward:** Minimizes variance, tends to create equal-sized clusters
 - **Complete:** Creates compact clusters, sensitive to outliers
 - **Average:** Intermediate between Ward and Complete
@@ -168,12 +179,14 @@ table(Ward = results_ward$clusters, Complete = results_complete$clusters)
 ### Expected Differences
 
 **Complete linkage typically produces:**
+
 - More outlier cases (cases that don't fit any cluster well)
 - Tighter, more homogeneous clusters
 - Potentially unbalanced cluster sizes
 - Better separation of distinct phenotypes
 
 **Ward linkage typically produces:**
+
 - More balanced cluster sizes
 - Fewer outliers
 - Gradual transitions between clusters
@@ -185,17 +198,20 @@ table(Ward = results_ward$clusters, Complete = results_complete$clusters)
 ### When to Use
 
 **Use Bonferroni correction when:**
-- Testing **many markers** (≥10) for associations with clusters
+
+- Testing **many markers** (>=10) for associations with clusters
 - You need **strict control** of Type I error (false positives)
 - Publishing results in peer-reviewed journals
 - Replicating Sterlacci 2019 methodology
 
 **Use FDR (Benjamini-Hochberg) when:**
+
 - You want **less conservative** correction than Bonferroni
-- You have **very many tests** (≥50 markers)
+- You have **very many tests** (>=50 markers)
 - Discovery phase (exploratory analysis)
 
 **Use no correction when:**
+
 - **Few markers** (<5)
 - Purely exploratory analysis
 - P-values are descriptive only
@@ -203,6 +219,7 @@ table(Ward = results_ward$clusters, Complete = results_complete$clusters)
 ### Mathematical Background
 
 **Bonferroni correction:**
+
 ```
 Adjusted significance threshold = α / n_tests
 
@@ -213,11 +230,13 @@ Example (Sterlacci 2019):
 ```
 
 **Interpretation:**
+
 - With 70 markers and α=0.05, we expect ~3.5 false positives by chance
 - Bonferroni ensures overall false positive rate stays at 5%
 - Each marker must reach p < 0.000714 to be "significant"
 
 **Adjusted p-values:**
+
 ```
 p_adjusted = p_raw × n_tests
 
@@ -243,6 +262,7 @@ Example:
 
 **Output:**
 The association table will show:
+
 - **p-value** (raw, unadjusted)
 - **Adjusted p** (Bonferroni-corrected)
 - A note explaining the threshold: "Bonferroni-corrected significance threshold: p < 0.002500 (α=0.05 / 20 markers)"
@@ -297,11 +317,13 @@ print(significant)
 **Note:** Bonferroni-corrected significance threshold: p < 0.0017 (α=0.05 / 30 markers)
 
 **Interpretation:**
+
 - **CK7 and TTF1**: Significantly associated with clusters even after correction (adjusted p < 0.05)
 - **EMA**: Raw p-value suggests association (p=0.002), but not significant after correction (adjusted p=0.060)
 - **CD99**: No association detected
 
 **Clinical Meaning:**
+
 - CK7 and TTF1 are **robust cluster-defining markers**
 - EMA shows a trend but may be a **false positive**
 - CD99 is **not associated** with the clustering pattern
@@ -329,14 +351,17 @@ To fully replicate the Sterlacci et al. 2019 methodology:
 ### Expected Results (Sterlacci-like)
 
 **Cluster 1: ACA-like phenotype**
+
 - CK7+, TTF1+, EGFR+, E-cadherin+
 - CK5/6-, p63-, CD44-
 
 **Cluster 2: SCC-like phenotype**
+
 - CK5/6+, p63+, CD44+, SOX2+
 - CK7-, TTF1-, EGFR-
 
 **Cluster 3: Immune signature**
+
 - High CD8+ TIL
 - Low CD4/CD8 ratio
 - PD1+, PDL1+
@@ -395,6 +420,7 @@ print(results$associationTests[results$associationTests$p_adjusted < 0.05, ])
 ### Error: "Package 'proxy' required for Jaccard distance"
 
 **Solution:** Install the proxy package:
+
 ```r
 install.packages("proxy")
 ```
@@ -404,6 +430,7 @@ install.packages("proxy")
 **Cause:** You selected Jaccard distance but have continuous markers.
 
 **Solution:**
+
 - Option 1: Use Gower distance instead
 - Option 2: The function will automatically convert continuous markers to binary (median split) and proceed
 
@@ -412,6 +439,7 @@ install.packages("proxy")
 **Cause:** Too many markers tested, Bonferroni is very conservative.
 
 **Solution:** Try less conservative correction:
+
 - Use **FDR (Benjamini-Hochberg)** instead
 - Or reduce number of markers to most clinically relevant ones
 
@@ -420,6 +448,7 @@ install.packages("proxy")
 **This is expected behavior.** Complete linkage emphasizes cluster compactness over balance.
 
 **Options:**
+
 - If unbalanced clusters are problematic, use Ward linkage
 - If you want to identify outliers, complete linkage is working correctly
 
@@ -431,9 +460,10 @@ install.packages("proxy")
 Sterlacci W, Savic S, Schmid T, Oberaigner W, Auberger J, Fiegl M. Tissue microarray based analysis of immunohistochemical expression patterns of molecular targets in NSCLC: correlation with patient outcome and comparison between adenocarcinoma and squamous cell carcinoma. *Histol Histopathol*. 2019.
 
 **Implementation:**
-ClinicoPath R Package for jamovi. https://github.com/sbalci/ClinicoPathJamoviModule
+ClinicoPath R Package for jamovi. <https://github.com/sbalci/ClinicoPathJamoviModule>
 
 **Additional Documentation:**
+
 - Full feature analysis: `STERLACCI_2019_FEATURE_ANALYSIS.md`
 - IHC prediction workflow: `IHC_PREDICTION_PATHOLOGIST_GUIDE.md`
 - Diagnostic clustering guide: `DIAGNOSTIC_CLUSTERING_GUIDE.md`

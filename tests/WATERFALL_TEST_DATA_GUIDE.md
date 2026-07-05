@@ -17,7 +17,9 @@ This guide provides comprehensive documentation for testing the waterfall functi
 ## Test Data Files
 
 ### Location
+
 All test data files are available in multiple formats:
+
 - **CSV files**: `/data/*.csv` - Human-readable, easy to inspect
 - **RDA files**: `/data/*.rda` - R binary format for programmatic use
 - **OMV files**: `/data/*.omv` - jamovi native format for GUI testing
@@ -25,9 +27,11 @@ All test data files are available in multiple formats:
 ### Available Test Datasets
 
 #### 1. `waterfall_percentage_basic.csv`
+
 **Purpose**: Basic percentage change data for simple waterfall plots
 
 **Structure**:
+
 ```csv
 PatientID,Response,Treatment
 PT01,-100,Drug A          # Complete Response (CR)
@@ -40,17 +44,20 @@ PT20,50,Drug B            # Progressive Disease (PD)
 ```
 
 **Use Cases**:
+
 - Basic waterfall plot visualization
 - RECIST categorization validation
 - Treatment group comparison
 - Color scheme testing
 
 **Variables**:
+
 - `PatientID`: Unique patient identifier (character)
 - `Response`: Percentage change from baseline (numeric, -100 to 100+)
 - `Treatment`: Treatment group (factor: Drug A, Drug B)
 
 **Key Features**:
+
 - 20 patients total
 - Covers all RECIST categories (CR, PR, SD, PD)
 - Two treatment groups for comparison
@@ -60,9 +67,11 @@ PT20,50,Drug B            # Progressive Disease (PD)
 ---
 
 #### 2. `waterfall_raw_longitudinal.csv`
+
 **Purpose**: Raw tumor measurements over time for spider plot generation
 
 **Structure**:
+
 ```csv
 PatientID,Time,Measurement
 PT01,0,50              # Baseline measurement
@@ -73,6 +82,7 @@ PT01,6,20              # Month 6 (best response)
 ```
 
 **Use Cases**:
+
 - Spider plot generation
 - Longitudinal response tracking
 - Time-to-response analysis
@@ -80,11 +90,13 @@ PT01,6,20              # Month 6 (best response)
 - Person-time metrics calculation
 
 **Variables**:
+
 - `PatientID`: Unique patient identifier (character)
 - `Time`: Time point in months (numeric, 0 = baseline)
 - `Measurement`: Tumor size measurement (numeric, mm or cm)
 
 **Key Features**:
+
 - 15 patients total
 - 4 time points per patient (baseline + 3 follow-ups)
 - All patients have baseline (Time = 0)
@@ -98,9 +110,11 @@ PT01,6,20              # Month 6 (best response)
 ---
 
 #### 3. `waterfall_oncology_trial.csv`
+
 **Purpose**: Realistic clinical trial data with demographics and covariates
 
 **Structure**:
+
 ```csv
 PatientID,Response,Age,Gender,Stage,Treatment
 PT001,-100,45,Male,II,Experimental
@@ -110,6 +124,7 @@ PT050,26,40,Male,III,Experimental
 ```
 
 **Use Cases**:
+
 - Publication-ready analysis
 - Clinical reporting
 - Subgroup analysis
@@ -117,6 +132,7 @@ PT050,26,40,Male,III,Experimental
 - Statistical power assessment
 
 **Variables**:
+
 - `PatientID`: Patient ID (character)
 - `Response`: Percentage change from baseline (numeric)
 - `Age`: Patient age in years (numeric, 40-79)
@@ -125,6 +141,7 @@ PT050,26,40,Male,III,Experimental
 - `Treatment`: Treatment arm (factor: Experimental, Control)
 
 **Key Features**:
+
 - 50 patients (realistic trial sample size)
 - Balanced treatment arms (25 each)
 - Realistic age distribution (40-79 years)
@@ -136,9 +153,11 @@ PT050,26,40,Male,III,Experimental
 ---
 
 #### 4. `waterfall_edge_cases.csv`
+
 **Purpose**: Test edge cases and data validation
 
 **Structure**:
+
 ```csv
 PatientID,Response
 PT1,-150         # Invalid shrinkage (should be capped at -100%)
@@ -148,12 +167,14 @@ PT4,20           # Exact SD/PD boundary
 ```
 
 **Use Cases**:
+
 - Data validation testing
 - Boundary value testing
 - Warning message validation
 - Extreme value handling
 
 **Key Features**:
+
 - Invalid tumor shrinkage (<-100%)
 - Extremely large growth values
 - Exact RECIST boundary values
@@ -162,15 +183,18 @@ PT4,20           # Exact SD/PD boundary
 ---
 
 #### 5. `waterfall_single_patient.csv`
+
 **Purpose**: Single patient edge case
 
 **Structure**:
+
 ```csv
 PatientID,Response
 PT001,-45
 ```
 
 **Use Cases**:
+
 - Minimum viable data testing
 - Warning message for single-patient analysis
 - Plot generation with n=1
@@ -178,9 +202,11 @@ PT001,-45
 ---
 
 #### 6. `waterfall_missing_baseline.csv`
+
 **Purpose**: Missing baseline measurements (should fail validation)
 
 **Structure**:
+
 ```csv
 PatientID,Time,Measurement
 PT1,2,30         # Missing time=0 (baseline)
@@ -190,6 +216,7 @@ PT2,4,40
 ```
 
 **Use Cases**:
+
 - Validation error testing
 - Missing baseline detection
 - Error message clarity
@@ -199,9 +226,11 @@ PT2,4,40
 ---
 
 #### 7. `waterfall_time_to_event.csv`
+
 **Purpose**: Time-to-event data for person-time analysis
 
 **Structure**:
+
 ```csv
 PatientID,Time,Response,Event,EventTime
 PT01,0,-60,1,4.5      # Responder, event at 4.5 months
@@ -211,12 +240,14 @@ PT03,0,15,0,12.0      # Non-responder, censored at 12 months
 ```
 
 **Use Cases**:
+
 - Person-time metrics
 - Time-to-response analysis
 - Duration of response
 - Survival-style analysis of response durability
 
 **Variables**:
+
 - `PatientID`: Patient ID
 - `Time`: Measurement time point
 - `Response`: Percentage change
@@ -230,9 +261,11 @@ PT03,0,15,0,12.0      # Non-responder, censored at 12 months
 ### Test Suite Organization
 
 #### 1. `tests/testthat/test-waterfall.R`
+
 **Comprehensive main test suite**
 
 **Test Coverage** (12 test blocks):
+
 - ✅ Data validation (empty data, missing columns)
 - ✅ RECIST categorization (CR, PR, SD, PD boundaries)
 - ✅ Data processing (percentage and raw formats)
@@ -247,6 +280,7 @@ PT03,0,15,0,12.0      # Non-responder, censored at 12 months
 - ✅ Integration tests (full workflows)
 
 **Running the tests**:
+
 ```r
 # Run all waterfall tests
 testthat::test_file("tests/testthat/test-waterfall.R")
@@ -258,14 +292,17 @@ testthat::test_that("Data validation works correctly", { ... })
 ---
 
 #### 2. `tests/testthat/test-waterfall-groups.R`
+
 **Group-based coloring and comparison tests**
 
 **Test Coverage** (3 test blocks):
+
 - ✅ Default RECIST coloring
 - ✅ Group-based coloring with comparison tables
 - ✅ Graceful fallback when group variable missing
 
 **Key Test Scenarios**:
+
 ```r
 # Test 1: Default RECIST coloring
 colorBy = "recist"  # Should categorize by CR/PR/SD/PD
@@ -280,9 +317,11 @@ colorBy = "group", groupVar = NULL  # Should fall back to RECIST
 ---
 
 #### 3. `tests/testthat/test-waterfall-recist-validation.R`
+
 **Mathematical validation of RECIST boundaries**
 
 **Test Coverage** (6 test blocks):
+
 - ✅ RECIST boundary values (exact boundaries, edge cases)
 - ✅ ORR and DCR calculation accuracy
 - ✅ Edge cases (all CR, all PD, boundary values)
@@ -291,14 +330,16 @@ colorBy = "group", groupVar = NULL  # Should fall back to RECIST
 - ✅ Complete workflow reference dataset
 
 **RECIST Boundaries Tested**:
+
 ```r
-CR:  ≤ -100%  (Complete Response)
-PR:  > -100% AND ≤ -30%  (Partial Response)
-SD:  > -30% AND ≤ +20%  (Stable Disease)
+CR:  <= -100%  (Complete Response)
+PR:  > -100% AND <= -30%  (Partial Response)
+SD:  > -30% AND <= +20%  (Stable Disease)
 PD:  > +20%  (Progressive Disease)
 ```
 
 **Critical Test Cases**:
+
 - `-150%` → CR (capped at -100%)
 - `-100%` → CR (exact boundary)
 - `-99%` → PR
@@ -311,11 +352,13 @@ PD:  > +20%  (Progressive Disease)
 ---
 
 #### 4. `tests/verify_waterfall.R`
+
 **Manual verification script for development**
 
 **Purpose**: Quick manual testing during development
 
 **Test Scenarios**:
+
 1. Basic percentage analysis
 2. Raw data analysis with spider plot
 3. Grouped analysis with custom colors
@@ -323,6 +366,7 @@ PD:  > +20%  (Progressive Disease)
 5. Clinical reporting features
 
 **Usage**:
+
 ```bash
 cd /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule
 Rscript tests/verify_waterfall.R
@@ -335,6 +379,7 @@ Rscript tests/verify_waterfall.R
 ### Testing in jamovi GUI
 
 #### Quick Start
+
 1. Open jamovi
 2. Load test data: `File → Open → data/waterfall_percentage_basic.omv`
 3. Navigate to: `Analyses → OncoPathT → Patient Follow-Up Plots → Treatment Response Analysis`
@@ -347,6 +392,7 @@ Rscript tests/verify_waterfall.R
 #### Recommended Test Sequence
 
 **Test 1: Basic Percentage Analysis**
+
 - Data: `waterfall_percentage_basic.omv`
 - Settings:
   - Input Type: Percentage Changes
@@ -356,6 +402,7 @@ Rscript tests/verify_waterfall.R
 - Expected: Clear waterfall plot with 4 RECIST categories, threshold lines at -30% and +20%
 
 **Test 2: Raw Measurements with Spider Plot**
+
 - Data: `waterfall_raw_longitudinal.omv`
 - Settings:
   - Input Type: Raw Measurements
@@ -366,6 +413,7 @@ Rscript tests/verify_waterfall.R
 - Expected: Both waterfall and spider plots, automatic percentage calculation
 
 **Test 3: Clinical Trial Analysis**
+
 - Data: `waterfall_oncology_trial.csv`
 - Settings:
   - Group Variable: `Treatment`
@@ -376,6 +424,7 @@ Rscript tests/verify_waterfall.R
 - Expected: Group comparison tables, ORR/DCR with CIs, publication-ready text
 
 **Test 4: Edge Cases**
+
 - Data: `waterfall_edge_cases.csv`
 - Expected: Warning notices for:
   - Values <-100% (capped at -100%)
@@ -383,6 +432,7 @@ Rscript tests/verify_waterfall.R
   - Boundary value handling
 
 **Test 5: Error Validation**
+
 - Data: `waterfall_missing_baseline.csv`
 - Settings: Input Type = Raw Measurements
 - Expected: ERROR notice about missing baseline measurements
@@ -392,6 +442,7 @@ Rscript tests/verify_waterfall.R
 ### Testing in R Console
 
 #### Basic Usage
+
 ```r
 library(ClinicoPath)
 
@@ -412,6 +463,7 @@ print(result$clinicalMetrics$asDF)
 ```
 
 #### Advanced Testing
+
 ```r
 # Test with raw longitudinal data
 data("waterfall_raw_longitudinal")
@@ -431,6 +483,7 @@ print(result$personTimeTable$asDF)
 ```
 
 #### Group Comparison
+
 ```r
 # Test group-based analysis
 data("waterfall_oncology_trial")
@@ -454,6 +507,7 @@ print(result$groupComparisonTable$asDF)
 ## Test Coverage Summary
 
 ### Data Formats Tested
+
 - ✅ Percentage changes (pre-calculated)
 - ✅ Raw measurements (automatic calculation)
 - ✅ Longitudinal data (multiple time points)
@@ -461,13 +515,15 @@ print(result$groupComparisonTable$asDF)
 - ✅ Grouped data (treatment arms, stages)
 
 ### RECIST Categories Tested
-- ✅ Complete Response (CR): ≤ -100%
+
+- ✅ Complete Response (CR): <= -100%
 - ✅ Partial Response (PR): -99% to -30%
 - ✅ Stable Disease (SD): -29% to +20%
 - ✅ Progressive Disease (PD): > +20%
 - ✅ Unknown: Missing values
 
 ### Clinical Metrics Tested
+
 - ✅ Objective Response Rate (ORR) = (CR + PR) / N
 - ✅ Disease Control Rate (DCR) = (CR + PR + SD) / N
 - ✅ Exact binomial confidence intervals
@@ -476,6 +532,7 @@ print(result$groupComparisonTable$asDF)
 - ✅ Person-time metrics
 
 ### Edge Cases Tested
+
 - ✅ Invalid shrinkage (<-100%)
 - ✅ Extreme growth (>500%)
 - ✅ Single patient (n=1)
@@ -485,6 +542,7 @@ print(result$groupComparisonTable$asDF)
 - ✅ All same category (all CR, all PD)
 
 ### Plot Types Tested
+
 - ✅ Waterfall plot (bar chart)
 - ✅ Spider plot (line chart)
 - ✅ RECIST threshold lines
@@ -493,6 +551,7 @@ print(result$groupComparisonTable$asDF)
 - ✅ Patient labels for outliers
 
 ### Color Schemes Tested
+
 - ✅ jamovi (default theme)
 - ✅ RECIST (Red/Blue/Green)
 - ✅ Simple (Red/Green)
@@ -500,6 +559,7 @@ print(result$groupComparisonTable$asDF)
 - ✅ Colorblind-safe (Okabe-Ito palette)
 
 ### Validation Tested
+
 - ✅ Empty data detection
 - ✅ Missing required columns
 - ✅ Missing baseline (time=0) for raw data
@@ -513,7 +573,9 @@ print(result$groupComparisonTable$asDF)
 ## Adding New Test Cases
 
 ### When to Add New Tests
+
 Add new test cases when:
+
 1. A bug is discovered (regression test)
 2. New features are added
 3. Edge cases are identified in real-world usage
@@ -522,6 +584,7 @@ Add new test cases when:
 ### How to Add Test Data
 
 #### Step 1: Create CSV File
+
 ```csv
 # Save to data/waterfall_new_scenario.csv
 PatientID,Response,Group
@@ -531,6 +594,7 @@ PT2,30,B
 ```
 
 #### Step 2: Convert to RDA and OMV
+
 ```r
 # Load CSV
 waterfall_new_scenario <- read.csv("data/waterfall_new_scenario.csv")
@@ -543,6 +607,7 @@ jmvReadWrite::write_omv(waterfall_new_scenario, "data/waterfall_new_scenario.omv
 ```
 
 #### Step 3: Add to Test Suite
+
 ```r
 # In tests/testthat/test-waterfall.R
 test_that("New scenario works correctly", {
@@ -564,6 +629,7 @@ test_that("New scenario works correctly", {
 ```
 
 #### Step 4: Document the Dataset
+
 Add documentation to this file under "Available Test Datasets"
 
 ---
@@ -571,6 +637,7 @@ Add documentation to this file under "Available Test Datasets"
 ## Running All Tests
 
 ### From R Console
+
 ```r
 # Run all waterfall tests
 testthat::test_dir("tests/testthat", filter = "waterfall")
@@ -583,6 +650,7 @@ testthat::test_file("tests/testthat/test-waterfall.R", reporter = "progress")
 ```
 
 ### From Command Line
+
 ```bash
 # Run all tests
 cd /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule
@@ -593,6 +661,7 @@ Rscript tests/verify_waterfall.R
 ```
 
 ### Using devtools
+
 ```r
 library(devtools)
 
@@ -625,15 +694,18 @@ When creating or validating test data:
 ## References
 
 ### RECIST v1.1 Criteria
+
 - Eisenhauer EA, et al. (2009). "New response evaluation criteria in solid tumours: Revised RECIST guideline (version 1.1)." European Journal of Cancer, 45(2), 228-247.
 
 ### Response Categories
-- **CR (Complete Response)**: Disappearance of all target lesions (≤-100%)
-- **PR (Partial Response)**: ≥30% decrease in sum of diameters (-99% to -30%)
+
+- **CR (Complete Response)**: Disappearance of all target lesions (<=-100%)
+- **PR (Partial Response)**: >=30% decrease in sum of diameters (-99% to -30%)
 - **SD (Stable Disease)**: Neither PR nor PD criteria met (-29% to +20%)
-- **PD (Progressive Disease)**: ≥20% increase in sum of diameters (>+20%)
+- **PD (Progressive Disease)**: >=20% increase in sum of diameters (>+20%)
 
 ### Clinical Metrics
+
 - **ORR (Objective Response Rate)**: Proportion of patients achieving CR or PR
 - **DCR (Disease Control Rate)**: Proportion of patients achieving CR, PR, or SD
 - **Exact Binomial CI**: Clopper-Pearson confidence intervals for proportions
@@ -643,7 +715,8 @@ When creating or validating test data:
 ## Contact & Support
 
 For questions or issues with test data:
-1. Check existing issues: https://github.com/sbalci/ClinicoPathJamoviModule/issues
+
+1. Check existing issues: <https://github.com/sbalci/ClinicoPathJamoviModule/issues>
 2. Review this guide and test files
 3. Create new issue with reproducible example
 

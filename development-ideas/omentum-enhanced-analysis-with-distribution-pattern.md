@@ -15,20 +15,23 @@ This document presents an **enhanced conceptual analysis** of omental metastasis
 **Key Finding**: 4 cassettes achieve 95% detection probability for omental metastasis in ovarian cancer staging.
 
 **Methodology**:
+
 - Bootstrap resampling with right-censored data correction
 - Binomial probability model: P(detect) = 1 - (1-p)^n
 - Focused on **first detection** (presence/absence)
 
 **Clinical Application**:
+
 - Sampling adequacy guidelines
 - Quality assurance metrics
 - Stage migration analysis
 
 ### Ates et al. (2025) LVSI Enhancement
 
-**Key Finding**: Among cases with ≥5 LVSI foci:
-- **≥5 on single slide** → Worse overall survival (P = .023)
-- **≥5 only when summed** → Better prognosis
+**Key Finding**: Among cases with >=5 LVSI foci:
+
+- **>=5 on single slide** → Worse overall survival (P = .023)
+- **>=5 only when summed** → Better prognosis
 - No difference in lymph node metastasis rates
 
 **Clinical Implication**: HOW you reach the threshold matters for prognosis!
@@ -38,11 +41,13 @@ This document presents an **enhanced conceptual analysis** of omental metastasis
 **Research Question**: Does the distribution pattern of omental metastasis (concentrated vs distributed) have prognostic implications?
 
 **Hypothesis**: Omental metastases concentrated on a single cassette may indicate:
+
 - Higher local tumor burden
 - More aggressive disease biology
 - Potentially worse prognosis
 
 **Evidence Needed**: Survival analysis comparing:
+
 - Substantial metastasis on single cassette
 - Substantial metastasis only when summed across cassettes
 
@@ -58,6 +63,7 @@ From `/Users/serdarbalci/Desktop/omentum/omentum_03102025.csv`:
 2. **`kaç.numaralı.kasette.ilk.tümör.görüldü`** → First cassette with metastasis
 
 This allows:
+
 - ✅ First detection probability analysis
 - ✅ Binomial model predictions
 - ✅ Bootstrap sensitivity estimates
@@ -67,11 +73,11 @@ This allows:
 
 **Additional Variables Needed**:
 
-3. **`Pozitif.kaset.sayısı`** (Number of cassettes with metastasis)
+1. **`Pozitif.kaset.sayısı`** (Number of cassettes with metastasis)
    - Example: 6 out of 10 cassettes positive
    - Allows calculation of Cassette Positivity Ratio (CPR)
 
-4. **`Maksimum.odak.sayısı.tek.kasette`** (Maximum metastatic foci on single cassette)
+2. **`Maksimum.odak.sayısı.tek.kasette`** (Maximum metastatic foci on single cassette)
    - Example: Cassette 3 had 8 foci (highest among all cassettes)
    - **Critical for distribution pattern analysis**
 
@@ -99,8 +105,8 @@ This allows:
 **Classification Logic** (using threshold = 5):
 
 - **Focal**: Positive cassettes < 5
-- **Substantial-single**: Max foci on single cassette ≥ 5
-- **Substantial-summed**: Positive cassettes ≥ 5 BUT max foci < 5
+- **Substantial-single**: Max foci on single cassette >= 5
+- **Substantial-summed**: Positive cassettes >= 5 BUT max foci < 5
 
 ---
 
@@ -123,6 +129,7 @@ This allows:
 **Recommendation**: **4 cassettes** achieve 78.9% detection (close to 80% threshold)
 
 **Clinical Interpretation**:
+
 - Examining 4 cassettes captures most omental metastases
 - Diminishing returns after 4 cassettes
 - Plateau effect visible (marginal gain decreases)
@@ -136,14 +143,14 @@ This allows:
 | Distribution Pattern                                      | Cases | Percentage |
 |----------------------------------------------------------|-------|------------|
 | Focal (<5 positive cassettes)                            | 58    | 27.9%      |
-| Substantial on single cassette (≥5 foci on ≥1 cassette)  | 124   | 59.6%      |
-| Substantial only when summed (≥5 cassettes, <5 max foci) | 26    | 12.5%      |
+| Substantial on single cassette (>=5 foci on >=1 cassette)  | 124   | 59.6%      |
+| Substantial only when summed (>=5 cassettes, <5 max foci) | 26    | 12.5%      |
 
 **Single vs Summed Comparison**:
 
 | Measure                                          | Value                           |
 |-------------------------------------------------|----------------------------------|
-| Cases with substantial metastasis (≥5 cassettes) | 150 (72.1%)                     |
+| Cases with substantial metastasis (>=5 cassettes) | 150 (72.1%)                     |
 | - Met on single cassette                         | 124 (82.7% of substantial)      |
 | - Met only by summing                            | 26 (17.3% of substantial)       |
 | Mean max foci per cassette (single group)        | 15.3 foci                       |
@@ -152,11 +159,11 @@ This allows:
 
 **Prognostic Hypothesis** (based on Ates LVSI findings):
 
-- **High Risk** (Substantial-single): Concentrated omental metastasis (≥5 foci on single cassette)
+- **High Risk** (Substantial-single): Concentrated omental metastasis (>=5 foci on single cassette)
   - Potential worse survival (requires validation)
   - Consider aggressive cytoreduction + systemic therapy
 
-- **Moderate Risk** (Substantial-summed): Distributed omental metastasis (≥5 cassettes but <5 max foci)
+- **Moderate Risk** (Substantial-summed): Distributed omental metastasis (>=5 cassettes but <5 max foci)
   - Potential better prognosis than substantial-single
   - Standard treatment protocols
 
@@ -184,7 +191,7 @@ This allows:
 | Isolated (1 cassette)        | 45    | 21.6%      |
 | Focal (2-4 cassettes)        | 87    | 41.8%      |
 | Extensive (5-7 cassettes)    | 52    | 25.0%      |
-| Diffuse (≥8 cassettes)       | 24    | 11.5%      |
+| Diffuse (>=8 cassettes)       | 24    | 11.5%      |
 
 ---
 
@@ -204,9 +211,10 @@ This allows:
 - **Relative risk**: 1.72 (96.1% / 55.9%)
 
 **Interpretation**:
+
 - Cases with <4 cassettes examined miss ~40% of metastases
 - Inadequate sampling → understaging → undertreatment
-- Quality assurance: Ensure ≥4 cassettes routinely examined
+- Quality assurance: Ensure >=4 cassettes routinely examined
 
 ---
 
@@ -221,6 +229,7 @@ This allows:
 | 95% CI              | [0.58, 0.74] |
 
 **Interpretation**:
+
 - Strong positive correlation between cassettes examined and found positive
 - More thorough sampling → higher detection rates
 - Supports adequacy of 4-cassette recommendation
@@ -250,13 +259,13 @@ Sampling Information:
 - Maximum foci on single cassette: [XX]
 
 Sampling Adequacy:
-□ Adequate (≥4 cassettes examined) - 95% detection confidence
+□ Adequate (>=4 cassettes examined) - 95% detection confidence
 □ Limited (<4 cassettes examined) - Stage migration risk
 
-Distribution Pattern Analysis (if ≥5 foci threshold):
+Distribution Pattern Analysis (if >=5 foci threshold):
 □ Focal (<5 positive cassettes) - Minimal burden
-□ Substantial on single cassette (≥5 foci on ≥1 cassette) - Concentrated, possible high risk
-□ Substantial only when summed (≥5 cassettes but <5 max foci) - Distributed, possible moderate risk
+□ Substantial on single cassette (>=5 foci on >=1 cassette) - Concentrated, possible high risk
+□ Substantial only when summed (>=5 cassettes but <5 max foci) - Distributed, possible moderate risk
 
 Cassette Positivity Ratio: [XX.X]% ([XX] positive / [XX] examined)
 
@@ -277,10 +286,10 @@ References:
 
 | Risk Level | Criteria | Clinical Implications |
 |-----------|----------|----------------------|
-| **Low** | Focal (<5 cassettes) OR first detection late (cassette ≥5) | Standard treatment may suffice |
-| **Moderate** | Substantial-summed (≥5 cassettes, <5 max foci) | Standard aggressive treatment |
-| **High** | Substantial-single (≥5 foci on single cassette) | Consider intensified treatment |
-| **Very High** | Diffuse (≥8 cassettes positive) + Substantial-single | Maximum cytoreduction + systemic therapy |
+| **Low** | Focal (<5 cassettes) OR first detection late (cassette >=5) | Standard treatment may suffice |
+| **Moderate** | Substantial-summed (>=5 cassettes, <5 max foci) | Standard aggressive treatment |
+| **High** | Substantial-single (>=5 foci on single cassette) | Consider intensified treatment |
+| **Very High** | Diffuse (>=8 cassettes positive) + Substantial-single | Maximum cytoreduction + systemic therapy |
 
 **Treatment Considerations**:
 
@@ -297,14 +306,14 @@ References:
 
 | Metric | Target | Rationale |
 |--------|--------|-----------|
-| Mean cassettes examined | ≥4.0 | Skala 2015: 4 cassettes = 95% detection |
-| % cases with ≥4 cassettes | ≥80% | Quality threshold |
+| Mean cassettes examined | >=4.0 | Skala 2015: 4 cassettes = 95% detection |
+| % cases with >=4 cassettes | >=80% | Quality threshold |
 | % cases with first detection documented | 100% | Essential for adequacy calculation |
-| % cases with max foci documented | ≥90% | Required for distribution pattern analysis |
+| % cases with max foci documented | >=90% | Required for distribution pattern analysis |
 
 **Audit Questions**:
 
-1. Are we examining enough cassettes? (Mean ≥4?)
+1. Are we examining enough cassettes? (Mean >=4?)
 2. Are we documenting first detection cassette? (Essential!)
 3. Are we quantifying metastatic foci? (Enables distribution pattern analysis)
 4. Are cases with <4 cassettes justified? (Small omentum, limited tissue)
@@ -316,8 +325,9 @@ References:
 ### At Grossing (Pathology Assistant / Pathologist)
 
 **Standard Protocol**:
+
 1. Measure and weigh omentum
-2. Submit representative sections (≥4 cassettes recommended)
+2. Submit representative sections (>=4 cassettes recommended)
 3. **Document cassette numbering system** (sequential: 1, 2, 3, etc.)
 4. Record gross tumor involvement (if visible)
 
@@ -331,16 +341,19 @@ References:
 ### At Microscopy (Pathologist)
 
 **Standard Protocol**:
+
 1. Examine all cassettes microscopically
 2. **Document first cassette with metastasis** (critical!)
 3. Record presence/absence of metastasis (binary)
 
 **Enhanced Protocol** (for distribution pattern analysis):
 4. **Count metastatic foci in each positive cassette**
-   - Separate tumor deposits
-   - Surface vs deep omental metastasis
+
+- Separate tumor deposits
+- Surface vs deep omental metastasis
+
 5. **Identify cassette with maximum foci** (e.g., "Omentum-3: 8 foci")
-6. **Note distribution pattern** (clustered vs scattered)
+2. **Note distribution pattern** (clustered vs scattered)
 
 **Example Microscopy Notes**:
 
@@ -359,7 +372,7 @@ Summary:
 - Positive cassettes: 3 (cassettes 2, 3, 4)
 - Maximum foci on single cassette: 8 (cassette 3)
 - Cassette Positivity Ratio: 50% (3/6)
-- Distribution pattern: Substantial on single cassette (≥5 foci on cassette 3)
+- Distribution pattern: Substantial on single cassette (>=5 foci on cassette 3)
 ```
 
 ---
@@ -378,6 +391,7 @@ Summary:
 | `Gross_Tumor` | Visible tumor grossly? | Yes/No | Optional |
 
 **CSV Format**:
+
 ```csv
 Case_ID,Total_Cassettes,First_Detection,Positive_Cassettes,Max_Foci_Single,CPR,Distribution_Pattern
 OV-2025-001,6,2,3,8,0.50,Substantial-single
@@ -392,12 +406,14 @@ OV-2025-003,8,3,6,4,0.75,Substantial-summed
 ### Primary Analysis (Already Implemented)
 
 **1. First Detection Probability** ✅
+
 - Binomial model: P(detect) = 1 - (1-p)^n
 - Bootstrap resampling with 10,000 iterations
 - 95% confidence intervals
 - Diagnostic yield curve
 
 **2. Sampling Adequacy Recommendation** ✅
+
 - Minimum cassettes for 95% confidence
 - Plateau detection (diminishing returns)
 
@@ -406,19 +422,22 @@ OV-2025-003,8,3,6,4,0.75,Substantial-summed
 ### Enhanced Analyses (Newly Implemented)
 
 **3. Distribution Pattern Classification** ✅ (NEW)
+
 - Three-way classification:
   - Focal (<5 positive cassettes)
-  - Substantial-single (≥5 foci on ≥1 cassette)
-  - Substantial-summed (≥5 cassettes, <5 max foci)
+  - Substantial-single (>=5 foci on >=1 cassette)
+  - Substantial-summed (>=5 cassettes, <5 max foci)
 - Proportions and percentages
 - Mean max foci by group
 
 **4. Tumor Burden Quantification** ✅
+
 - Cassette Positivity Ratio (CPR)
 - Distribution patterns
 - Correlation analysis
 
 **5. Stage Migration Analysis** ✅
+
 - Detection rates by sampling intensity
 - Absolute and relative differences
 - Quality assurance implications
@@ -428,19 +447,22 @@ OV-2025-003,8,3,6,4,0.75,Substantial-summed
 ### Future Analyses (Require Follow-up Data)
 
 **6. Survival Analysis** (planned)
+
 - Kaplan-Meier curves by distribution pattern
 - Log-rank test for survival differences
 - Hypothesis: Substantial-single → worse survival?
 
 **7. Multivariate Analysis** (planned)
+
 - Cox proportional hazards regression
 - Adjust for stage, grade, residual disease, age
 - Distribution pattern as independent predictor?
 
 **8. Optimal Threshold Determination** (planned)
+
 - ROC analysis for metastatic foci cutoff
 - Maximally selected log-rank statistic
-- Validate ≥5 foci threshold for omentum (currently based on Ates LVSI)
+- Validate >=5 foci threshold for omentum (currently based on Ates LVSI)
 
 ---
 
@@ -455,7 +477,7 @@ OV-2025-003,8,3,6,4,0.75,Substantial-summed
 | **Optimal samples** | 7 blocks | 4 cassettes |
 | **Method** | ROC analysis | Binomial + bootstrap |
 | **Key innovation** | Single vs summed | Adapted single vs summed |
-| **Cutoff** | ≥5 foci | ≥5 foci (to be validated) |
+| **Cutoff** | >=5 foci | >=5 foci (to be validated) |
 | **Survival data** | Yes (P = .023) | **Needed for validation** |
 | **Jamovi implementation** | ✅ Complete | ✅ Complete (awaiting data) |
 
@@ -472,6 +494,7 @@ OV-2025-003,8,3,6,4,0.75,Substantial-summed
 - **Omentum**: Analyzes metastasis detection (metastasis not present in all cases)
 
 This means:
+
 - Omentum analysis has **two components**:
   1. Detection adequacy (presence/absence) ← Original
   2. Burden distribution (among positive cases) ← NEW
@@ -484,22 +507,23 @@ This means:
 
 **Does the distribution pattern of omental metastasis (concentrated vs distributed) predict survival in ovarian cancer?**
 
-**Hypothesis**: Cases with ≥5 metastatic foci on a single omentum cassette have worse overall survival than cases with ≥5 foci only when summed across cassettes.
+**Hypothesis**: Cases with >=5 metastatic foci on a single omentum cassette have worse overall survival than cases with >=5 foci only when summed across cassettes.
 
 **Study Design**:
+
 - Retrospective cohort of ovarian cancer with omentectomy
 - Enhanced pathology data collection (4 variables required)
 - Survival analysis (Kaplan-Meier, Cox regression)
-- n ≥ 200 recommended (based on Ates sample size)
+- n >= 200 recommended (based on Ates sample size)
 
 ---
 
 ### Secondary Research Questions
 
 1. **What is the optimal foci threshold for omentum?**
-   - Ates used ≥5 for LVSI (validated by ROC)
-   - Is ≥5 also optimal for omental metastasis?
-   - Alternative cutoffs: ≥3, ≥4, ≥6, ≥10?
+   - Ates used >=5 for LVSI (validated by ROC)
+   - Is >=5 also optimal for omental metastasis?
+   - Alternative cutoffs: >=3, >=4, >=6, >=10?
 
 2. **Does Cassette Positivity Ratio (CPR) predict outcomes?**
    - CPR = Positive cassettes / Total cassettes
@@ -512,7 +536,7 @@ This means:
    - Greater vs lesser omentum involvement?
 
 4. **Is there stage migration with inadequate sampling?**
-   - Compare outcomes: <4 cassettes vs ≥4 cassettes
+   - Compare outcomes: <4 cassettes vs >=4 cassettes
    - Understaging → undertreatment → worse survival?
 
 ---
@@ -530,6 +554,7 @@ The enhanced pathsampling function is **fully implemented and compiled** with di
 **Step 1: Prepare Data**
 
 Required columns in CSV/Excel file:
+
 1. `Total_Cassettes` (numeric)
 2. `First_Detection` (numeric)
 3. `Positive_Cassettes` (numeric) ← NEW
@@ -546,6 +571,7 @@ Required columns in CSV/Excel file:
 Navigate to: **OncoPathT → ClinicoPath Descriptives → Pathology Sampling Adequacy Analysis**
 
 **Select Variables**:
+
 - Total number of samples taken → `Total_Cassettes`
 - Sample number where lesion first detected → `First_Detection`
 - Number of cassettes with tumor (optional) → `Positive_Cassettes`
@@ -554,6 +580,7 @@ Navigate to: **OncoPathT → ClinicoPath Descriptives → Pathology Sampling Ade
 **Step 4: Enable Distribution Pattern Analysis**
 
 Under **"Tumor Burden Analysis"** collapse box:
+
 - ✅ Check "Show tumor burden analysis"
 - ✅ Check "Show distribution pattern analysis (single vs summed)"
 - Set threshold (default: 5, based on Ates 2025)
@@ -561,6 +588,7 @@ Under **"Tumor Burden Analysis"** collapse box:
 **Step 5: Interpret Results**
 
 Review output tables:
+
 1. **Binomial Model Predictions** - Sampling adequacy (original)
 2. **Cassette Positivity Statistics** - Tumor burden summary
 3. **Distribution Pattern Classification** - Focal vs Substantial-single vs Substantial-summed (NEW)
@@ -576,8 +604,8 @@ Review output tables:
 Distribution Pattern                                      | Cases | Percentage
 ----------------------------------------------------------|-------|------------
 Focal (<5 positive cassettes)                             | 58    | 27.9%
-Substantial on single cassette (≥5 foci on ≥1 cassette)   | 124   | 59.6%
-Substantial only when summed (≥5 cassettes, <5 max foci)  | 26    | 12.5%
+Substantial on single cassette (>=5 foci on >=1 cassette)   | 124   | 59.6%
+Substantial only when summed (>=5 cassettes, <5 max foci)  | 26    | 12.5%
 ```
 
 **Single vs Summed Comparison**:
@@ -585,7 +613,7 @@ Substantial only when summed (≥5 cassettes, <5 max foci)  | 26    | 12.5%
 ```
 Measure                                          | Value
 -------------------------------------------------|---------------------------
-Cases with ≥5 foci (substantial)                 | 150 (72.1%)
+Cases with >=5 foci (substantial)                 | 150 (72.1%)
   - Met on single cassette                       | 124 (82.7% of substantial)
   - Met only by summing                          | 26 (17.3% of substantial)
 Mean max foci per cassette (single group)        | 15.3
@@ -616,13 +644,13 @@ Clinical significance                            | To be determined by survival 
 ### Short-Term Research (6-12 months)
 
 1. **Validate Distribution Pattern Prognostic Value**
-   - Retrospective cohort study (n ≥ 200)
+   - Retrospective cohort study (n >= 200)
    - Collect survival data (overall survival, progression-free survival)
    - Kaplan-Meier analysis by distribution pattern
    - Cox regression adjusting for confounders
 
 2. **Optimize Foci Threshold**
-   - ROC analysis for various cutoffs (≥3, ≥4, ≥5, ≥6, ≥10)
+   - ROC analysis for various cutoffs (>=3, >=4, >=5, >=6, >=10)
    - Maximally selected log-rank statistic
    - External validation in independent cohort
 
@@ -662,7 +690,7 @@ Clinical significance                            | To be determined by survival 
 ### For Pathologists
 
 1. **Current Practice (Adequate for Detection)**:
-   - Examine ≥4 omentum cassettes (Skala 2015 recommendation)
+   - Examine >=4 omentum cassettes (Skala 2015 recommendation)
    - Document first cassette with metastasis
    - Binary reporting (present/absent)
 
@@ -674,7 +702,7 @@ Clinical significance                            | To be determined by survival 
 
 3. **Reporting Template**:
    - Include sampling adequacy statement
-   - Report distribution pattern (when ≥5 foci)
+   - Report distribution pattern (when >=5 foci)
    - Provide clinical context (Ates 2025 reference)
 
 ---
@@ -682,7 +710,7 @@ Clinical significance                            | To be determined by survival 
 ### For Clinicians
 
 1. **Sampling Adequacy Matters**:
-   - Ensure ≥4 omentum cassettes examined
+   - Ensure >=4 omentum cassettes examined
    - Inadequate sampling → stage migration → undertreatment
    - Quality metric for institutional practice
 
@@ -755,7 +783,7 @@ This document presents an **enhanced omentum sampling adequacy analysis** that i
    - Ates validated for LVSI
    - Omentum hypothesis requires testing
 
-3. **Threshold (≥5 foci) based on LVSI literature**
+3. **Threshold (>=5 foci) based on LVSI literature**
    - May not be optimal for omentum
    - ROC analysis needed
 
@@ -802,24 +830,24 @@ This represents a significant advancement in pathology sampling adequacy analysi
 
 ### Supporting Literature
 
-3. **Goess R, et al.** Lymph node yield and survival in early-stage endometrial cancer. *Gynecol Oncol.* 2024;180:134-141.
+1. **Goess R, et al.** Lymph node yield and survival in early-stage endometrial cancer. *Gynecol Oncol.* 2024;180:134-141.
    - **Contribution**: Stage migration analysis, median-based comparison
 
-4. **Habib JR, et al.** Minimum lymph node yield in intraductal papillary mucinous neoplasm: How many is enough? *J Surg Oncol.* 2024;129(4):759-766.
+2. **Habib JR, et al.** Minimum lymph node yield in intraductal papillary mucinous neoplasm: How many is enough? *J Surg Oncol.* 2024;129(4):759-766.
    - **Contribution**: Dual-threshold methodology, maximally selected log-rank statistic
 
-5. **FIGO Committee.** FIGO staging for endometrial cancer 2023. *Int J Gynaecol Obstet.* 2023;162(2):383-394.
-   - **Contribution**: ≥5 LVSI foci threshold adoption
+3. **FIGO Committee.** FIGO staging for endometrial cancer 2023. *Int J Gynaecol Obstet.* 2023;162(2):383-394.
+   - **Contribution**: >=5 LVSI foci threshold adoption
 
 ### Methodological References
 
-6. **Efron B, Tibshirani RJ.** An Introduction to the Bootstrap. Chapman & Hall/CRC; 1994.
+1. **Efron B, Tibshirani RJ.** An Introduction to the Bootstrap. Chapman & Hall/CRC; 1994.
    - **Contribution**: Bootstrap methodology foundation
 
-7. **Therneau TM, Grambsch PM.** Modeling Survival Data: Extending the Cox Model. Springer; 2000.
+2. **Therneau TM, Grambsch PM.** Modeling Survival Data: Extending the Cox Model. Springer; 2000.
    - **Contribution**: Cox regression and survival analysis methods
 
-8. **Hosmer DW, Lemeshow S, May S.** Applied Survival Analysis: Regression Modeling of Time-to-Event Data. 2nd ed. Wiley; 2008.
+3. **Hosmer DW, Lemeshow S, May S.** Applied Survival Analysis: Regression Modeling of Time-to-Event Data. 2nd ed. Wiley; 2008.
    - **Contribution**: Survival analysis practical methods
 
 ---

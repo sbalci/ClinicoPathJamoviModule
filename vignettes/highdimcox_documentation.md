@@ -27,7 +27,7 @@ events-per-variable ratio, regularization need, sample size, event rate,
 multicollinearity, and data quality before running the main analysis.
 
 All plot rendering uses protobuf-safe state serialization (plain numeric vectors
-only — no model objects stored in state) to avoid jamovi serialization errors.
+only - no model objects stored in state) to avoid jamovi serialization errors.
 
 ---
 
@@ -39,11 +39,11 @@ from the user interface to the underlying R functions.
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Time variable | `elapsedtime` | Time Variable | — (input) | `survival::Surv()` |
-| Event variable | `outcome` | Event Variable | — (input) | `survival::Surv()` |
-| Predictor variables | `predictors` | High-Dimensional Predictors | — (input) | predictor matrix / `model.matrix()` |
-| Event level | `outcomeLevel` | Event Level | — (input) | factor → binary (1) encoding |
-| Censored level | `censorLevel` | Censored Level | — (input) | factor → binary (0) encoding |
+| Time variable | `elapsedtime` | Time Variable | - (input) | `survival::Surv()` |
+| Event variable | `outcome` | Event Variable | - (input) | `survival::Surv()` |
+| Predictor variables | `predictors` | High-Dimensional Predictors | - (input) | predictor matrix / `model.matrix()` |
+| Event level | `outcomeLevel` | Event Level | - (input) | factor → binary (1) encoding |
+| Censored level | `censorLevel` | Censored Level | - (input) | factor → binary (0) encoding |
 | **Data Quality** | | | | |
 | Suitability check | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` (Html) | `.assessSuitability()` → `.generateSuitabilityHtml()` |
 | **Regularization Settings** | | | | |
@@ -58,13 +58,13 @@ from the user interface to the underlying R functions.
 | **Stability Selection** | | | | |
 | Enable stability | `stability_selection` | Perform Stability Selection | `stabilityResults` (Table), `stabilityPlot` (Image) | `.performStabilitySelection()` |
 | Subsampling iterations | `subsampling_iterations` | Subsampling Iterations | `stabilityResults` | bootstrap loop count |
-| Subsampling ratio | `subsampling_ratio` | Subsampling Ratio (0.1–0.9) | `stabilityResults` | `floor(n * ratio)` per iteration |
+| Subsampling ratio | `subsampling_ratio` | Subsampling Ratio (0.1 - 0.9) | `stabilityResults` | `floor(n * ratio)` per iteration |
 | Stability threshold | `stability_threshold` | Stability Threshold | `stabilityResults` | selection probability cutoff |
 | **Core Results** | | | | |
-| Model summary | — (computed) | — | `modelSummary` (Html) | `.populateModelSummary()` |
-| Selected variables | — (computed) | — | `selectedVariables` (Table) | `.populateVariablesTable()` |
-| Regularization metrics | — (computed) | — | `regularizationMetrics` (Table) | `.populateRegularizationMetrics()` |
-| Stability results | — (computed) | — | `stabilityResults` (Table) | `.populateStabilityResults()` |
+| Model summary | - (computed) | - | `modelSummary` (Html) | `.populateModelSummary()` |
+| Selected variables | - (computed) | - | `selectedVariables` (Table) | `.populateVariablesTable()` |
+| Regularization metrics | - (computed) | - | `regularizationMetrics` (Table) | `.populateRegularizationMetrics()` |
+| Stability results | - (computed) | - | `stabilityResults` (Table) | `.populateStabilityResults()` |
 | **Plots** | | | | |
 | Regularization path | `show_regularization_path` | Show Regularization Path | `regularizationPath` (Image) | `.createRegularizationPath()` → `.plot_regularization_path()` |
 | CV error plot | `show_cv_plot` | Show Cross-Validation Plot | `cvPlot` (Image) | `.createCVPlot()` → `.plot_cv()` |
@@ -165,7 +165,7 @@ storing R6/environment/function references in state.
 Key rules:
 
 1. Always wrap in `tryCatch` so a single plot failure does not crash the analysis.
-2. Cast every value to `as.numeric()` or `as.character()` — never store raw model objects.
+2. Cast every value to `as.numeric()` or `as.character()` - never store raw model objects.
 3. Do not store the full `cv.glmnet` or `glmnet` object in state.
 
 ---

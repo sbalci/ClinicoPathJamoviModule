@@ -1,6 +1,7 @@
 # IHC Diagnostic Prediction: Step-by-Step Guide for Pathologists
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Before You Begin](#before-you-begin)
 3. [Phase 1: Training Dataset Preparation](#phase-1-training-dataset-preparation)
@@ -17,6 +18,7 @@
 ## Overview
 
 This two-phase workflow allows you to:
+
 1. **Train** a diagnostic model using cases with known (molecularly confirmed) diagnoses
 2. **Predict** diagnoses for new cases with unknown diagnoses based on their IHC patterns
 
@@ -29,18 +31,21 @@ This two-phase workflow allows you to:
 ### Required Materials
 
 ✅ **Training dataset:**
+
 - 30-100 cases with **molecularly confirmed** diagnoses
 - Same IHC panel performed on all cases
 - Standardized scoring method (e.g., binary pos/neg, H-score, % positivity)
 - Case IDs for tracking
 
 ✅ **Query dataset:**
+
 - New cases awaiting diagnosis
 - Same IHC markers as training dataset
 - Same scoring method
 - Case IDs for tracking
 
 ✅ **Software:**
+
 - jamovi statistical software (free download from jamovi.org)
 - ClinicoPath module installed
 
@@ -65,11 +70,13 @@ Select cases that meet **all** of these criteria:
 ✅ Representative of the diagnostic differential you want to address
 
 **Minimum requirements:**
+
 - **At least 10 cases per diagnosis category**
 - **Recommended: 20-30 cases per diagnosis**
 - **Ideal: 50+ cases per diagnosis**
 
 **Example Diagnostic Differential:**
+
 ```
 Soft Tissue Sarcoma Panel:
 - Synovial Sarcoma (n=25 with SYT-SSX fusion confirmed)
@@ -82,11 +89,13 @@ Soft Tissue Sarcoma Panel:
 Open Excel/Google Sheets and create a table with this structure:
 
 **Required columns:**
+
 - `CaseID`: Unique identifier for each case
 - `Diagnosis`: Confirmed diagnosis (must be exact text, no typos)
 - One column per IHC marker with standardized values
 
 **Column Naming Rules:**
+
 - No spaces in marker names (use underscores: `CK7` not `CK 7`)
 - Consistent spelling (don't mix `ER` and `ERalpha`)
 - Use descriptive names if needed (`Ki67_Percent`, `AR_Hscore`)
@@ -106,15 +115,18 @@ EWS002,Ewing_Sarcoma,Negative,Negative,Negative,Negative,Negative,Negative,Negat
 ### Step 1.3: Standardize IHC Scoring
 
 **For categorical markers (Positive/Negative):**
+
 - Use consistent terminology: `Positive` or `Negative` (not `pos`/`neg`, `+`/`-`)
 - Define your cutoff (e.g., >10% nuclear staining = Positive)
 - Apply same cutoff to ALL cases
 
 **For ordinal markers (0/1+/2+/3+):**
+
 - Use consistent notation: `0`, `1`, `2`, `3` (not `1+`, `++`)
 - Document interpretation (e.g., 2+ = moderate intensity)
 
 **For continuous markers (H-score, % positivity):**
+
 - H-score: Range 0-300 (% positive × intensity)
 - Percentage: Range 0-100
 - Use decimals for precision (15.5 not 15 or 16)
@@ -130,6 +142,7 @@ Before proceeding, verify:
 ✅ All molecularly confirmed cases have molecular test results documented
 
 **Common Errors to Avoid:**
+
 - ❌ Mixing "Synovial Sarcoma" and "Synovial_Sarcoma" → Pick one format
 - ❌ Using "pos"/"neg" in some cases and "Positive"/"Negative" in others
 - ❌ Including training cases without molecular confirmation
@@ -156,6 +169,7 @@ Before proceeding, verify:
 6. Check that continuous markers are **Continuous**
 
 **If data types are wrong:**
+
 - Click on column header
 - Change **Data Type** dropdown
 - Click **Measure Type** dropdown to change Nominal/Ordinal/Continuous
@@ -170,14 +184,17 @@ Before proceeding, verify:
 **Basic Settings:**
 
 **Categorical IHC Markers:**
+
 - Select all binary markers (Positive/Negative)
 - Examples: EMA, CK7, bcl2, CD56, S100, Nestin, NGFR, CD99, Fli1
 
 **Continuous IHC Markers:**
+
 - Select all quantitative markers
 - Examples: Ki67_Percent, AR_Hscore
 
 **Case ID:** (Optional but recommended)
+
 - Select your case identifier column
 - Helps with tracking specific cases
 
@@ -188,13 +205,16 @@ Before proceeding, verify:
 ✅ **Known Diagnosis (optional):** Select your `Diagnosis` column
 
 ✅ **Calculate Marker Performance Metrics:** Check this box
+
 - This calculates sensitivity, specificity, PPV, NPV for each marker
 
 ✅ **Identify Optimal Antibody Panels:** Check this box
+
 - Panel Size: Select `Both 2 and 3-marker panels`
 - This finds best marker combinations
 
 ✅ **Flag Atypical Cases:** Check this box (should be default)
+
 - Outlier Threshold: Leave at 0.25
 - Flags cases requiring molecular confirmation
 
@@ -203,10 +223,12 @@ Before proceeding, verify:
 Once analysis completes, review these key outputs:
 
 **1. Analysis Summary:**
+
 - Optimal number of clusters identified
 - Cluster sizes and quality metrics
 
 **2. Marker Diagnostic Performance Table:**
+
 ```
 Marker    Diagnosis            Sensitivity  Specificity  PPV    NPV    Accuracy
 EMA       Synovial_Sarcoma     91%          82%          68%    96%    85%
@@ -218,11 +240,13 @@ Fli1      Ewing_Sarcoma        63%          78%          55%    82%    74%
 ```
 
 **Key Insights:**
+
 - CK7 has 100% specificity for Synovial Sarcoma (never false positive)
 - Nestin is excellent for MPNST (high sensitivity + specificity)
 - CD99 alone is insufficient for Ewing Sarcoma (low PPV)
 
 **3. Optimal Antibody Panel Recommendations:**
+
 ```
 Rank  Panel               Target Diagnosis      Sensitivity  Specificity  PPV    Performance  Recommendation
 1     EMA + CK7           Synovial_Sarcoma      52%          100%         100%   0.803        Excellent - highly specific panel
@@ -231,11 +255,13 @@ Rank  Panel               Target Diagnosis      Sensitivity  Specificity  PPV   
 ```
 
 **Clinical Interpretation:**
+
 - Best panel for Synovial Sarcoma: EMA + CK7 (if both positive → 100% PPV)
 - Best panel for MPNST: S100 + Nestin
 - Best panel for Ewing Sarcoma: CD99 + Fli1
 
 **4. Cases with Atypical Immunoprofiles:**
+
 ```
 Case ID    Assigned Cluster  Silhouette  Quality Flag              Recommendation
 SS015      Cluster 2         -0.05       Poor - misclassified      Strong outlier - review IHC, consider molecular testing
@@ -244,6 +270,7 @@ EWS022     Cluster 3         0.18        Low - atypical            Borderline ca
 ```
 
 **Action Items:**
+
 - Review these cases' IHC slides
 - Verify staining quality
 - Check if molecular testing was truly confirmatory
@@ -275,6 +302,7 @@ Select cases that meet **all** criteria:
 ✅ Belong to same diagnostic differential
 
 **DO NOT include:**
+
 - ❌ Cases already in training dataset
 - ❌ Cases with different IHC markers
 - ❌ Cases outside your diagnostic differential
@@ -283,6 +311,7 @@ Select cases that meet **all** criteria:
 ### Step 3.2: Create Query Data Spreadsheet
 
 **Required columns:**
+
 - `CaseID`: Unique identifier
 - **Exact same marker columns as training dataset**
 - **Do NOT include Diagnosis column** (this is what we're predicting)
@@ -350,25 +379,31 @@ Query_005,Negative,Negative,Negative,Negative,Positive,Negative,Positive,Negativ
 ### Step 4.3: Configure Analysis Settings
 
 **Model Source:**
+
 - Select: `Load training data from CSV file`
 - (Stored model option not yet implemented)
 
 **Training Data File (CSV):**
+
 - Enter full path to training CSV file
 - Example: `/Users/yourname/Documents/sarcoma_training_2025.csv`
 - Use quotes if path contains spaces
 
 **Diagnosis Column in Training Data:**
+
 - Leave as `Diagnosis` (unless you named it differently)
 
 **Categorical IHC Markers:**
+
 - Select **exact same markers** as in ihccluster analysis
 - Must be in same order (not required but helpful)
 
 **Continuous IHC Markers:**
+
 - Select **exact same continuous markers**
 
 **Case ID (optional):**
+
 - Select your case identifier column
 - Helps track which predictions belong to which cases
 
@@ -398,6 +433,7 @@ Query_005,Negative,Negative,Negative,Negative,Positive,Negative,Positive,Negativ
    - Good for well-separated groups
 
 **Hybrid Method Weights:** (Advanced - leave defaults unless expert)
+
 - Panel Match Weight: 0.5 (rule-based evidence)
 - Distance Weight: 0.3 (similarity evidence)
 - Cluster Quality Weight: 0.2 (membership evidence)
@@ -405,12 +441,14 @@ Query_005,Negative,Negative,Negative,Negative,Positive,Negative,Positive,Negativ
 ### Step 4.5: Set Confidence Thresholds
 
 **Default Settings (Recommended):**
+
 - High Confidence Threshold: 0.75
 - Minimum Confidence Threshold: 0.50
 - Low Confidence Threshold: 0.25
 
 **Interpretation:**
-- ≥0.75 = High confidence → Accept diagnosis
+>
+- >=0.75 = High confidence → Accept diagnosis
 - 0.50-0.74 = Moderate confidence → Consider molecular testing
 - 0.25-0.49 = Low confidence → Recommend molecular testing
 - <0.25 = Very low confidence → Mandatory molecular testing
@@ -418,19 +456,24 @@ Query_005,Negative,Negative,Negative,Negative,Positive,Negative,Positive,Negativ
 ### Step 4.6: Enable Output Options
 
 ✅ **Show Alternative Diagnoses:** Check (default)
+
 - Number of Alternatives: 3
 - Shows differential diagnosis
 
 ✅ **Show Prediction Evidence:** Check (default)
+
 - Explains WHY each diagnosis was predicted
 
 ✅ **Flag Low Confidence Cases:** Check (default)
+
 - Creates separate table for problematic cases
 
 ✅ **Show Marker Comparison:** Check (default)
+
 - Shows how query markers compare to expected values
 
 ✅ **Validate Marker Consistency:** Check (default)
+
 - Automatically checks for mismatches
 
 **Plots:**
@@ -442,6 +485,7 @@ Query_005,Negative,Negative,Negative,Negative,Positive,Negative,Positive,Negativ
 Click anywhere outside option panels to trigger analysis.
 
 **Analysis will:**
+
 1. Load training data
 2. Validate marker consistency
 3. Calculate predictions for each query case
@@ -474,10 +518,12 @@ AR_Hscore      YES              YES           YES              OK
 ```
 
 **If you see WARNING or ERROR:**
+
 - ERROR = Analysis cannot proceed (missing required marker)
 - WARNING = Analysis will proceed but may be less accurate (extra marker or minor mismatch)
 
 **Action if errors:**
+
 1. Check spelling of marker names
 2. Verify data types match
 3. Ensure query dataset has all training markers
@@ -499,24 +545,28 @@ Query_005   MPNST                  0.18        Very Low         hybrid  Mandator
 **How to Read This Table:**
 
 **Query_001: Synovial Sarcoma, Confidence 0.88 (High)**
+
 - **Interpretation:** Strong evidence for Synovial Sarcoma
 - **Action:** Accept this diagnosis
 - **Next steps:** Proceed with staging, treatment planning
 - **Molecular testing:** Not mandatory, but consider for academic/research purposes
 
 **Query_002: MPNST, Confidence 0.72 (Moderate)**
+
 - **Interpretation:** Reasonable evidence for MPNST
 - **Action:** Probable MPNST, but not definitive
 - **Next steps:** Consider clinical context, imaging findings
 - **Molecular testing:** Recommended if diagnosis impacts treatment decisions
 
 **Query_004: Synovial Sarcoma, Confidence 0.45 (Low)**
+
 - **Interpretation:** Weak evidence for Synovial Sarcoma
 - **Action:** Uncertain diagnosis
 - **Next steps:** Molecular testing strongly recommended
 - **Differential:** Check alternative diagnoses table
 
 **Query_005: MPNST, Confidence 0.18 (Very Low)**
+
 - **Interpretation:** Insufficient evidence, atypical profile
 - **Action:** Do NOT accept algorithmic prediction
 - **Next steps:** **Mandatory molecular testing**
@@ -538,6 +588,7 @@ Query_005   2     Ewing_Sarcoma           0.12        0.06
 **How to Read This:**
 
 **Query_004:**
+
 - Primary prediction: Synovial Sarcoma (0.45)
 - Alternative #1: MPNST (0.38) - **very close!**
 - Difference: Only 0.07 (7% confidence difference)
@@ -545,6 +596,7 @@ Query_005   2     Ewing_Sarcoma           0.12        0.06
 - **Action:** Molecular testing mandatory to distinguish
 
 **Query_005:**
+
 - Primary prediction: MPNST (0.18)
 - Alternative #1: Synovial Sarcoma (0.15) - **nearly tied!**
 - Alternative #2: Ewing Sarcoma (0.12) - **also similar!**
@@ -567,6 +619,7 @@ Query_005  MPNST              None           NA         Cluster 2         90%   
 **How to Read This:**
 
 **Query_001 Evidence:**
+
 - ✅ Matched optimal panel: EMA + CK7 (both positive)
 - ✅ Panel has 100% PPV in training data
 - ✅ Close to Cluster 1 centroid (distance = 0.12, very close)
@@ -574,12 +627,14 @@ Query_005  MPNST              None           NA         Cluster 2         90%   
 - **Conclusion:** Multiple lines of evidence support Synovial Sarcoma
 
 **Query_004 Evidence:**
+
 - ❌ No optimal panel match
 - ⚠️ Assigned to Cluster 1, but far from centroid (distance = 0.55)
 - ❌ Poor silhouette score (0.22) - borderline cluster membership
 - **Conclusion:** Weak evidence, atypical immunoprofile
 
 **Query_005 Evidence:**
+
 - ❌ No optimal panel match
 - ❌ Very far from centroid (distance = 0.78)
 - ❌ Negative silhouette (-0.05) - **assigned to wrong cluster!**
@@ -596,6 +651,7 @@ Query_005  MPNST                0.18        Very low - ambiguous      Poor clust
 ```
 
 **This table requires immediate attention:**
+
 - These cases should be discussed at tumor board
 - Molecular testing is mandatory or strongly recommended
 - Review IHC slides for technical issues
@@ -619,6 +675,7 @@ Ki67_Percent   25.1         18.5                           Different
 ```
 
 **Interpretation:**
+
 - Query case is **CK7 negative** but Synovial Sarcoma typically CK7 positive
 - Query case shows **Nestin positivity** which is unusual for Synovial Sarcoma
 - These mismatches explain the low confidence score
@@ -641,11 +698,13 @@ Median Confidence       0.720
 ```
 
 **Interpretation:**
+
 - 40% of predictions are high confidence (acceptable rate)
 - 40% require molecular testing (low + very low)
 - Mean confidence 0.628 suggests moderate overall certainty
 
 **If mean confidence < 0.50:**
+
 - Training dataset may not represent query cases well
 - Consider expanding training dataset
 - Verify IHC protocols are consistent
@@ -662,6 +721,7 @@ Ewing_Sarcoma         1        0.91             0.91               0.91  0.91  1
 ```
 
 **Interpretation:**
+
 - Ewing Sarcoma predictions are most confident (0.91 mean)
 - MPNST predictions are least confident (0.45 mean)
 - May indicate MPNST has more variable immunoprofiles
@@ -676,8 +736,8 @@ Ewing_Sarcoma         1        0.91             0.91               0.91  0.91  1
 ```
 START: Review Prediction for Case
 │
-├─ Confidence ≥0.75 (High)
-│  ├─ Panel Match = Yes, PPV ≥90%
+├─ Confidence >=0.75 (High)
+│  ├─ Panel Match = Yes, PPV >=90%
 │  │  └─ ACTION: Accept diagnosis, proceed with treatment
 │  │
 │  └─ Panel Match = No
@@ -736,6 +796,7 @@ START: Review Prediction for Case
 ### When to Order Molecular Testing
 
 **MANDATORY (Do not proceed without):**
+
 - ✅ Any Very Low Confidence prediction (<0.25)
 - ✅ Negative silhouette score
 - ✅ Primary and alternative diagnoses within 0.10 confidence of each other
@@ -743,18 +804,21 @@ START: Review Prediction for Case
 - ✅ Atypical marker expression pattern
 
 **STRONGLY RECOMMENDED:**
+
 - ⚠️ Low Confidence (0.25-0.49)
 - ⚠️ No optimal panel match
 - ⚠️ Multiple marker mismatches with expected profile
 - ⚠️ Clinically unexpected result
 
 **CONSIDER:**
+
 - 🤔 Moderate Confidence (0.50-0.74) with treatment implications
 - 🤔 Academic/research setting requiring confirmation
 - 🤔 Medico-legal case requiring documentation
 
 **NOT REQUIRED:**
-- ✅ High Confidence (≥0.75) with optimal panel match
+
+- ✅ High Confidence (>=0.75) with optimal panel match
 - ✅ Perfect match to expected marker profile
 - ✅ Silhouette >0.50
 - ✅ Clinical presentation consistent with prediction
@@ -794,6 +858,7 @@ START: Review Prediction for Case
 **Cause:** File path is incorrect or file was moved/renamed
 
 **Solutions:**
+
 1. Check file path spelling (copy-paste is safer than typing)
 2. Use forward slashes `/` even on Windows
 3. Put path in quotes if it contains spaces: `"/Users/name/my folder/file.csv"`
@@ -805,6 +870,7 @@ START: Review Prediction for Case
 **Cause:** Mismatch between training and query markers
 
 **Solutions:**
+
 1. Check spelling of marker names (case-sensitive)
 2. Verify data type (categorical vs continuous)
 3. Ensure query has ALL training markers
@@ -814,12 +880,14 @@ START: Review Prediction for Case
 ### Problem 3: All predictions have very low confidence
 
 **Causes:**
+
 - Query cases are very different from training cases
 - Different IHC protocols/antibodies used
 - Different scoring methods
 - Training dataset too small
 
 **Solutions:**
+
 1. Review whether query cases belong to same diagnostic differential
 2. Verify IHC antibodies and protocols match
 3. Check that scoring methods are identical
@@ -831,6 +899,7 @@ START: Review Prediction for Case
 **Example:** Algorithm predicts Ewing Sarcoma but morphology shows spindle cells
 
 **Actions:**
+
 1. **Trust morphology over algorithm** - algorithms complement, don't replace, pathologist expertise
 2. Review IHC slides for staining artifacts
 3. Check if case might be outside training differential
@@ -841,11 +910,13 @@ START: Review Prediction for Case
 ### Problem 5: No optimal panel match for any cases
 
 **Causes:**
+
 - Query cases have different marker patterns
 - Training dataset doesn't capture all variants
 - Scoring cutoffs differ between datasets
 
 **Solutions:**
+
 1. Review marker comparison table for patterns
 2. Consider expanding training dataset with more diverse cases
 3. Verify scoring consistency (e.g., same % cutoff for "Positive")
@@ -863,6 +934,7 @@ START: Review Prediction for Case
 **Goal:** Improve diagnostic accuracy for core biopsies with spindle cell sarcomas
 
 **Diagnostic Differential:**
+
 - Synovial Sarcoma
 - Malignant Peripheral Nerve Sheath Tumor (MPNST)
 - Ewing Sarcoma (rare spindle cell variant)
@@ -872,12 +944,14 @@ START: Review Prediction for Case
 **Time Period:** 2020-2024 (4 years of archival cases)
 
 **Inclusion Criteria:**
+
 - Core needle biopsy or resection specimen
 - Molecular confirmation (RT-PCR, FISH, or NGS)
 - IHC panel completed with interpretable results
 - Sufficient tissue for all stains
 
 **Cases Collected:**
+
 ```
 Diagnosis            N    Molecular Confirmation
 Synovial Sarcoma     28   SYT-SSX fusion (RT-PCR)
@@ -888,6 +962,7 @@ Total                75
 ```
 
 **IHC Panel (9 markers):**
+
 - EMA (epithelial membrane antigen)
 - CK7 (cytokeratin 7)
 - bcl-2
@@ -899,9 +974,11 @@ Total                75
 - Fli-1
 
 **Continuous Markers:**
+
 - Ki-67 proliferation index (% positive nuclei)
 
 **Time Invested:**
+
 - Data extraction: 2 weeks (pulling cases, reviewing slides)
 - IHC scoring: 1 week (re-reviewing all stains for consistency)
 - Dataset creation: 2 days
@@ -931,6 +1008,7 @@ Total                75
    - 3 Ewing Sarcomas with weak CD99 or Fli-1 negativity
 
 **Actions Taken:**
+
 - Reviewed all 11 outlier cases
 - Verified molecular testing results → all confirmed correct
 - Documented these as "known variants"
@@ -943,6 +1021,7 @@ Total                75
 **Design:** Retrospective validation with held-out test set
 
 **Method:**
+
 1. Split 75 training cases into:
    - Training: 60 cases (80%)
    - Validation: 15 cases (20%)
@@ -971,19 +1050,21 @@ Val_14           Synovial_Sarcoma    Synovial_Sarcoma     0.91        ✅ YES
 Val_15           MPNST               MPNST                0.75        ✅ YES
 ────────────────────────────────────────────────────────────────────────
 Overall Accuracy: 13/15 (87%)
-High Confidence Accuracy (≥0.75): 9/9 (100%)
+High Confidence Accuracy (>=0.75): 9/9 (100%)
 Moderate/Low Confidence Accuracy: 4/6 (67%)
 ```
 
 **Analysis of Errors:**
 
 **Val_06: True MPNST → Predicted Synovial Sarcoma (0.55)**
+
 - Review showed: EMA+ (unusual for MPNST), S100+ (typical)
 - Molecular: Confirmed MPNST (H3K27me3 loss)
 - **Lesson:** Some MPNSTs can be aberrantly EMA+
 - **Action:** Added case to training set with annotation
 
 **Val_13: True Ewing Sarcoma → Predicted MPNST (0.48)**
+
 - Review showed: CD99+ but Fli-1 negative (rare variant)
 - Molecular: Confirmed Ewing with EWSR1-FLI1 fusion
 - **Lesson:** Some Ewing variants lack Fli-1 nuclear expression
@@ -996,6 +1077,7 @@ Moderate/Low Confidence Accuracy: 4/6 (67%)
 **Date:** May 2025 - Present
 
 **Protocol:**
+
 1. All spindle cell sarcoma core biopsies receive standard IHC panel
 2. After pathologist review, cases entered into prediction algorithm
 3. Algorithmic prediction reviewed alongside morphology
@@ -1008,7 +1090,7 @@ Moderate/Low Confidence Accuracy: 4/6 (67%)
 
 ```
 Confidence Level     N Cases  Molecular Testing Done  Final Dx Concordance
-High (≥0.75)         12       2 (for research)        12/12 (100%)
+High (>=0.75)         12       2 (for research)        12/12 (100%)
 Moderate (0.50-0.74) 5        4 (clinical request)    5/5 (100%)
 Low (0.25-0.49)      2        2 (mandatory)           2/2 (100%)
 Very Low (<0.25)     1        1 (mandatory)           0/1 (0%) *
@@ -1054,18 +1136,21 @@ Total                20       9 (45%)                 19/20 (95%)
 ### Lessons Learned
 
 ✅ **What Worked Well:**
+
 1. Validation study built confidence before implementation
 2. Automatic flagging of low-confidence cases prevented errors
 3. Cost savings from reduced molecular testing gained administrative support
 4. Integration into tumor board discussions improved multidisciplinary care
 
 ⚠️ **What Could Be Improved:**
+
 1. Initial training set could have been larger (75 → aim for 100+)
 2. Should have included more rare variants
 3. Documentation in pathology reports needed standardization
 4. Staff training required more time than expected
 
 🎯 **Future Plans:**
+
 1. Expand training set to 150+ cases (2025-2026)
 2. Add additional diagnoses (leiomyosarcoma, dermatofibrosarcoma, fibrosarcoma)
 3. Develop multi-institutional validation study
@@ -1086,6 +1171,7 @@ This IHC diagnostic prediction workflow represents a powerful tool for diagnosti
 **The algorithm is a decision support tool, not a diagnostic replacement. Pathologist expertise, morphology, clinical context, and molecular confirmation remain the cornerstones of diagnostic accuracy.**
 
 **When used appropriately, computational IHC analysis can:**
+
 - ✅ Improve diagnostic accuracy
 - ✅ Reduce unnecessary molecular testing
 - ✅ Accelerate turnaround time
@@ -1093,6 +1179,7 @@ This IHC diagnostic prediction workflow represents a powerful tool for diagnosti
 - ✅ Enhance trainee education
 
 **Remember:**
+
 - High confidence predictions with optimal panel matches are reliable
 - Low confidence predictions require molecular testing
 - Outliers teach us about biological variability
@@ -1106,4 +1193,3 @@ This IHC diagnostic prediction workflow represents a powerful tool for diagnosti
 **Last Updated:** 2025-01-15
 **Author:** ClinicoPath Development Team
 **For questions:** Consult jamovi community forums or ClinicoPath GitHub repository
-

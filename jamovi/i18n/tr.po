@@ -1637,7 +1637,7 @@ msgid "<strong>R² = 0.25-0.49:</strong> Medium effect - moderate clinical relev
 msgstr ""
 
 #: R/linechart.b.R
-msgid "<strong>R² ≥ 0.50:</strong> Large effect - clinically significant relationship"
+msgid "<strong>R² >= 0.50:</strong> Large effect - clinically significant relationship"
 msgstr ""
 
 #: bayesdca/options/directionIndicator/>=.title
@@ -1646,11 +1646,11 @@ msgid ">= (higher values indicate positive class)"
 msgstr ""
 
 #: bayesdca/ui[2][0][0]/directionLE.label
-msgid "≤ (lower values indicate positive class)"
+msgid "<= (lower values indicate positive class)"
 msgstr ""
 
 #: bayesdca/ui[2][0][0]/directionGE.label
-msgid "≥ (higher values indicate positive class)"
+msgid ">= (higher values indicate positive class)"
 msgstr ""
 
 #: agreement/ui[11][0]/showProgressIndicators.label
@@ -1690,7 +1690,7 @@ msgid "⚠️ {var}: Data may not be normally distributed in group '{level}' (co
 msgstr ""
 
 #: R/jjbetweenstats.b.R
-msgid "⚠️ {var}: Minimum group size is {size} (recommend ≥3)"
+msgid "⚠️ {var}: Minimum group size is {size} (recommend >=3)"
 msgstr ""
 
 #: agreement/ui[3][1]/showAssumptions.label
@@ -1730,7 +1730,7 @@ msgid "⚠️ Potential non-linear relationship detected. Consider polynomial or
 msgstr ""
 
 #: R/linechart.b.R
-msgid "⚠️ Residuals may not be normally distributed (Shapiro-Wilk p ≤ 0.05). Consider robust methods."
+msgid "⚠️ Residuals may not be normally distributed (Shapiro-Wilk p <= 0.05). Consider robust methods."
 msgstr ""
 
 #: R/decision.b.R
@@ -1962,7 +1962,7 @@ msgid "👥👥 Fleiss' Kappa (3 or more raters)"
 msgstr ""
 
 #: agreement/ui[6][0]/consensus_method/super_majority.title
-msgid "👥👥 Supermajority (≥67% agreement)"
+msgid "👥👥 Supermajority (>=67% agreement)"
 msgstr ""
 
 #: agreement/ui[6][0]/tie_breaking/arbitration.title
@@ -6394,7 +6394,7 @@ msgid "All Evidence Levels"
 msgstr ""
 
 #: R/crosstable.b.R
-msgid "All expected counts ≥ {min}. Chi-square test appropriate."
+msgid "All expected counts >= {min}. Chi-square test appropriate."
 msgstr ""
 
 #: enhancedfactorvariable/results/results/combinedFactorAnalysis.description
@@ -6442,7 +6442,7 @@ msgid "All observations excluded due to missing ID values. Longitudinal connecti
 msgstr ""
 
 #: R/multisurvival.b.R
-msgid "all p-values ≥ 0.05"
+msgid "all p-values >= 0.05"
 msgstr ""
 
 #: bayesiannetworkma/results/pairwiseComparisons.title
@@ -21419,7 +21419,7 @@ msgid "configured for categorical flow visualization"
 msgstr ""
 
 #: R/jjpiestats.b.R
-msgid "Confirm variables have adequate variation (≥2 categories)"
+msgid "Confirm variables have adequate variation (>=2 categories)"
 msgstr ""
 
 #: psychopdaROC/options/clinicalPreset/confirmation.title
@@ -25638,7 +25638,7 @@ msgid "Cut-off #"
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid "Cut-off = 3.5 means patients with values ≥3.5 are in the high-risk group"
+msgid "Cut-off = 3.5 means patients with values >=3.5 are in the high-risk group"
 msgstr ""
 
 #: survivalcont/results/cutoffAnalysisHeading3.title
@@ -28614,7 +28614,7 @@ msgid "Diagnostic Utility"
 msgstr ""
 
 #: R/nogoldstandard.b.R
-msgid "Diagnostic validation studies with 3+ tests and N≥100"
+msgid "Diagnostic validation studies with 3+ tests and N>=100"
 msgstr ""
 
 #: bayesianma/results/mcmcDiagnostics.columns.title
@@ -36512,11 +36512,11 @@ msgid "FDA Guidelines (US)"
 msgstr ""
 
 #: digitalvalidation/options/acceptance_criteria/fda_standard.title
-msgid "FDA Standard (r≥0.90, ICC≥0.75)"
+msgid "FDA Standard (r>=0.90, ICC>=0.75)"
 msgstr ""
 
 #: digitalvalidation/options/acceptance_criteria/fda_strict.title
-msgid "FDA Strict (r≥0.95, ICC≥0.90)"
+msgid "FDA Strict (r>=0.95, ICC>=0.90)"
 msgstr ""
 
 #: chisqposttest/options/posthoc/fdr.title
@@ -38925,7 +38925,7 @@ msgid "Gap Time Predictions vs Observed"
 msgstr ""
 
 #: pathologycomposition/options/quantitative_categories/gastric_cancer.title
-msgid "Gastric Cancer Standard (0%, ≤10%, >10%-≤50%, >50%-<90%, ≥90%)"
+msgid "Gastric Cancer Standard (0%, <=10%, >10%-<=50%, >50%-<90%, >=90%)"
 msgstr ""
 
 #: jggstats/options/family/gaussian.title
@@ -42103,7 +42103,7 @@ msgid "High Grade (%)"
 msgstr ""
 
 #: toxicityprofile/options/sortBy/high_grade.title
-msgid "High Grade Frequency (≥3)"
+msgid "High Grade Frequency (>=3)"
 msgstr ""
 
 #: R/crosstable.b.R
@@ -50211,7 +50211,7 @@ msgid "LR+ (Positive Likelihood Ratio)"
 msgstr ""
 
 #: R/decision.b.R
-msgid "LR+ ≥ 10, LR- ≤ 0.1"
+msgid "LR+ >= 10, LR- <= 0.1"
 msgstr ""
 
 #: R/decision.b.R
@@ -50363,7 +50363,7 @@ msgid "Majority"
 msgstr ""
 
 #: R/agreement.b.R
-msgid "Majority (≥50%)"
+msgid "Majority (>=50%)"
 msgstr ""
 
 #: decisionpanel/options/parallelRules/majority.title
@@ -50371,7 +50371,7 @@ msgid "Majority positive"
 msgstr ""
 
 #: agreement/options/consensus_method/majority.title
-msgid "Majority Rule (≥50%)"
+msgid "Majority Rule (>=50%)"
 msgstr ""
 
 #: agepyramid/results/pyramidTable.columns.title
@@ -57850,7 +57850,7 @@ msgid "No Scaling"
 msgstr ""
 
 #: R/crosstable.b.R
-msgid "No significant associations detected (all p ≥ 0.05)."
+msgid "No significant associations detected (all p >= 0.05)."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -57858,11 +57858,11 @@ msgid "No significant associations found in Cox regression analysis."
 msgstr ""
 
 #: R/enhancedROC.b.R
-msgid "No significant difference (p ≥ 0.05)"
+msgid "No significant difference (p >= 0.05)"
 msgstr ""
 
 #: R/linechart.b.R
-msgid "No significant differences between groups detected (p ≥ 0.05). "
+msgid "No significant differences between groups detected (p >= 0.05). "
 msgstr ""
 
 #: R/riverplot.b.R
@@ -59812,7 +59812,7 @@ msgid "Numeric Variable Statistics"
 msgstr ""
 
 #: R/decisiongraph.b.R
-msgid "Numeric variables (≥0) for monetary costs"
+msgid "Numeric variables (>=0) for monetary costs"
 msgstr ""
 
 #: R/decisiongraph.b.R
@@ -61853,7 +61853,7 @@ msgid "Overall C-Index"
 msgstr ""
 
 #: R/chisqposttest.b.R
-msgid "Overall chi-square test is not significant (p ≥ 0.05). Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, but detailed tables are shown below for educational purposes."
+msgid "Overall chi-square test is not significant (p >= 0.05). Post-hoc pairwise comparisons are not recommended when the overall test is non-significant, but detailed tables are shown below for educational purposes."
 msgstr ""
 
 #: R/chisqposttest.b.R
@@ -68959,7 +68959,7 @@ msgid "predictor(s) showed statistically significant associations (p < 0.05)"
 msgstr ""
 
 #: R/multisurvival.b.R
-msgid "predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05)."
+msgid "predictor(s) showed statistically significant associations with the outcome (all p >= 0.05)."
 msgstr ""
 
 #: penalizedcoxregression/options/predictors.title
@@ -72333,7 +72333,7 @@ msgid "RECIST v1.1 Categories:"
 msgstr ""
 
 #: R/waterfall.b.R
-msgid "RECIST v1.1 thresholds: CR ≤-100%, PR ≤-30%, PD >+20%"
+msgid "RECIST v1.1 thresholds: CR <=-100%, PR <=-30%, PD >+20%"
 msgstr ""
 
 #: netreclassification/results/reclassification.title
@@ -73945,7 +73945,7 @@ msgid "Responder threshold"
 msgstr ""
 
 #: R/advancedraincloud.b.R
-msgid "Responders (≥"
+msgid "Responders (>="
 msgstr ""
 
 #: classification/results/confusion/matrix.columns.title
@@ -77834,7 +77834,7 @@ msgid "Sensitivity: Proportion of diseased patients correctly identified (TP rat
 msgstr ""
 
 #: R/decision.b.R
-msgid "Sensitivity/Specificity ≥ 90%"
+msgid "Sensitivity/Specificity >= 90%"
 msgstr ""
 
 #: R/decision.b.R
@@ -79577,7 +79577,7 @@ msgid "Show Heterogeneity Statistics"
 msgstr ""
 
 #: toxicityprofile/options/showHighGradeOnly.title
-msgid "Show High Grade Only (≥3)"
+msgid "Show High Grade Only (>=3)"
 msgstr ""
 
 #: bbcplots/options/horizontal_gridlines.title
@@ -85467,7 +85467,7 @@ msgid "strong"
 msgstr ""
 
 #: R/jjcorrmat.b.R
-msgid "Strong correlations (|r| ≥ 0.5): %d"
+msgid "Strong correlations (|r| >= 0.5): %d"
 msgstr ""
 
 #: R/enhancedROC.b.R
@@ -86476,7 +86476,7 @@ msgstr ""
 
 #: R/agreement.b.R
 #: agreement/options/consensus_method/super_majority.title
-msgid "Super Majority (≥2/3)"
+msgid "Super Majority (>=2/3)"
 msgstr ""
 
 #: landmarkanalysis/options/supermodel.title
@@ -89582,7 +89582,7 @@ msgid "The null hypothesis value of kappa."
 msgstr ""
 
 #: R/chisqposttest.b.R
-msgid "The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts ≥ 5."
+msgid "The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts >= 5."
 msgstr ""
 
 #: R/survivalcont.b.R
@@ -97619,7 +97619,7 @@ msgid "Verification Status"
 msgstr ""
 
 #: R/jjpiestats.b.R
-msgid "Verify sufficient sample sizes in each category (≥5 recommended)"
+msgid "Verify sufficient sample sizes in each category (>=5 recommended)"
 msgstr ""
 
 #: R/linechart.b.R
@@ -97717,7 +97717,7 @@ msgid "Very small sample size (n = {n}). Results may be unreliable."
 msgstr ""
 
 #: R/survivalcont.b.R
-msgid "Very small sample size (n = {n}). Results may be unreliable. Recommend n ≥ 50 for stable cut-off analysis."
+msgid "Very small sample size (n = {n}). Results may be unreliable. Recommend n >= 50 for stable cut-off analysis."
 msgstr ""
 
 #: R/reportcat.b.R

@@ -104,7 +104,7 @@ p = n_positive_cases / examined_cassettes
 p = 60 / 113 = 0.531
 
 # Detection probability for N cassettes
-P(detect ≥1 in N cassettes) = 1 - (1-p)^N
+P(detect >=1 in N cassettes) = 1 - (1-p)^N
 ```
 
 **Pros:**
@@ -156,7 +156,7 @@ p_avg = mean(p_case)
 # Average p = 0.311
 
 # Detection probability
-P(detect ≥1 in N cassettes) = 1 - (1-p_avg)^N
+P(detect >=1 in N cassettes) = 1 - (1-p_avg)^N
 ```
 
 **Pros:**
@@ -579,7 +579,7 @@ Results: Among 60 cases with omental metastases:
 - Median 2 cassettes positive (IQR: 1-3)
 - Unifocal (1 cassette): 35 cases (58%)
 - Oligofocal (2-3 cassettes): 15 cases (25%)
-- Multifocal (≥4 cassettes): 10 cases (17%)
+- Multifocal (>=4 cassettes): 10 cases (17%)
 
 Interpretation: The high first-cassette detection rate (55%)
 combined with multifocal involvement in 42% of cases suggests
@@ -762,13 +762,13 @@ if (!is.null(self$options$positiveCassettes)) {
 
 **For Methods Section:**
 
-> Pathology Sampling Adequacy Analysis: We analyzed 60 cases with microscopic omental metastases to determine the minimum number of cassettes required for 95% sensitivity. Per-cassette detection probability was calculated as p = n_positive_cases / sum(first_detection_positions), where the denominator represents the total number of cassettes examined up to first detection across all cases. This approach accounts for the clinical reality that detecting at least one tumor focus is sufficient for diagnosis. We employed two complementary statistical approaches: (1) Binomial probability modeling to calculate theoretical detection curves P(detect ≥1 in N cassettes) = 1-(1-p)^N, and (2) Bootstrap resampling (10,000 iterations with replacement) following Skala and Hagemann (2015) to empirically estimate sensitivity and 95% confidence intervals. The binomial model predictions were validated against observed detection rates.
+> Pathology Sampling Adequacy Analysis: We analyzed 60 cases with microscopic omental metastases to determine the minimum number of cassettes required for 95% sensitivity. Per-cassette detection probability was calculated as p = n_positive_cases / sum(first_detection_positions), where the denominator represents the total number of cassettes examined up to first detection across all cases. This approach accounts for the clinical reality that detecting at least one tumor focus is sufficient for diagnosis. We employed two complementary statistical approaches: (1) Binomial probability modeling to calculate theoretical detection curves P(detect >=1 in N cassettes) = 1-(1-p)^N, and (2) Bootstrap resampling (10,000 iterations with replacement) following Skala and Hagemann (2015) to empirically estimate sensitivity and 95% confidence intervals. The binomial model predictions were validated against observed detection rates.
 
 ### Approach 2: Tumor Burden (If Enhanced)
 
 **For Methods Section:**
 
-> Tumor Burden Analysis: Among cases with omental metastases, we quantified the extent of involvement by recording the number of cassettes containing tumor deposits. Per-case tumor burden was calculated as the proportion of examined cassettes with tumor. We stratified cases as unifocal (1 cassette), oligofocal (2-3 cassettes), or multifocal (≥4 cassettes) to assess heterogeneity in disease extent. Correlation between tumor burden and first detection position was assessed using Spearman correlation.
+> Tumor Burden Analysis: Among cases with omental metastases, we quantified the extent of involvement by recording the number of cassettes containing tumor deposits. Per-case tumor burden was calculated as the proportion of examined cassettes with tumor. We stratified cases as unifocal (1 cassette), oligofocal (2-3 cassettes), or multifocal (>=4 cassettes) to assess heterogeneity in disease extent. Correlation between tumor burden and first detection position was assessed using Spearman correlation.
 
 ### Approach 3: Spatial Clustering (If Advanced Analysis)
 
@@ -800,7 +800,7 @@ if (!is.null(self$options$positiveCassettes)) {
 
 ### Relevant to Spatial Analysis
 
-5. **Weng WH, et al.** Spatial analysis of tumor heterogeneity in colorectal cancer. *Nat Commun.* 2020;11:4889.
+1. **Weng WH, et al.** Spatial analysis of tumor heterogeneity in colorectal cancer. *Nat Commun.* 2020;11:4889.
    - Spatial clustering methods
    - Heterogeneity quantification
 

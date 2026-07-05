@@ -4,28 +4,28 @@
 
 - **Function**: `leaveonecenterout`
 - **Files**:
-  - `jamovi/leaveonecenterout.u.yaml` -- UI
-  - `jamovi/leaveonecenterout.a.yaml` -- Options
-  - `R/leaveonecenterout.b.R` -- Backend
-  - `jamovi/leaveonecenterout.r.yaml` -- Results
+  - `jamovi/leaveonecenterout.u.yaml` - UI
+  - `jamovi/leaveonecenterout.a.yaml` - Options
+  - `R/leaveonecenterout.b.R` - Backend
+  - `jamovi/leaveonecenterout.r.yaml` - Results
 - **Summary**: Performs leave-one-center-out cross-validation (LOOCV) for multi-institutional prediction models. Trains on all-but-one center, evaluates on the held-out center, and repeats for each center. Supports logistic, Cox, and linear regression with optional LASSO regularization. Implements the internal-external validation framework recommended by TRIPOD (Debray et al., 2015).
 
 ## 2. UI Controls to Options Map
 
 | UI Control | Type | Label | Binds to Option | Default | Enable/Visibility |
 |---|---|---|---|---|---|
-| outcome | VariablesListBox | Outcome Variable | `outcome` | (none) | -- |
+| outcome | VariablesListBox | Outcome Variable | `outcome` | (none) | - |
 | outcomeLevel | LevelSelector | Event Level | `outcomeLevel` | (auto) | `enable: (outcome)` |
-| predictors | VariablesListBox | Predictor Variables | `predictors` | (none) | -- |
-| centerVariable | VariablesListBox | Center / Institution Variable | `centerVariable` | (none) | -- |
-| elapsedtime | VariablesListBox | Time Variable (Cox only) | `elapsedtime` | (none) | -- |
-| modelType | ComboBox | Model Type | `modelType` | logistic | -- |
-| useLasso | CheckBox | Use LASSO Regularization | `useLasso` | false | -- |
+| predictors | VariablesListBox | Predictor Variables | `predictors` | (none) | - |
+| centerVariable | VariablesListBox | Center / Institution Variable | `centerVariable` | (none) | - |
+| elapsedtime | VariablesListBox | Time Variable (Cox only) | `elapsedtime` | (none) | - |
+| modelType | ComboBox | Model Type | `modelType` | logistic | - |
+| useLasso | CheckBox | Use LASSO Regularization | `useLasso` | false | - |
 | lambdaMethod | ComboBox | Lambda Selection | `lambdaMethod` | lambda.1se | `enable: (useLasso)` |
-| pooledPerformance | CheckBox | Show Pooled Performance | `pooledPerformance` | true | -- |
-| forestPlot | CheckBox | Forest Plot | `forestPlot` | true | -- |
-| calibrationCheck | CheckBox | Calibration Assessment | `calibrationCheck` | false | -- |
-| random_seed | TextBox | Random Seed | `random_seed` | 42 | -- |
+| pooledPerformance | CheckBox | Show Pooled Performance | `pooledPerformance` | true | - |
+| forestPlot | CheckBox | Forest Plot | `forestPlot` | true | - |
+| calibrationCheck | CheckBox | Calibration Assessment | `calibrationCheck` | false | - |
+| random_seed | TextBox | Random Seed | `random_seed` | 42 | - |
 
 ### UI Layout
 
@@ -53,34 +53,34 @@ TextBox [random_seed]
 
 | Option | Type | Default | Constraints | Downstream Effects |
 |---|---|---|---|---|
-| `outcome` | Variable | -- | factor or numeric | Gates `.run()`; binary encoding for logistic/cox, numeric for linear |
+| `outcome` | Variable | - | factor or numeric | Gates `.run()`; binary encoding for logistic/cox, numeric for linear |
 | `outcomeLevel` | Level | (auto) | variable: (outcome) | Determines which factor level = event (coded as 1) |
-| `predictors` | Variables | -- | factor or numeric | Model matrix columns; sanitized via `make.names()` |
-| `centerVariable` | Variable | -- | factor | Defines CV folds; min 3 unique levels required |
-| `elapsedtime` | Variable | -- | numeric | Survival time for Cox; required when modelType=cox |
+| `predictors` | Variables | - | factor or numeric | Model matrix columns; sanitized via `make.names()` |
+| `centerVariable` | Variable | - | factor | Defines CV folds; min 3 unique levels required |
+| `elapsedtime` | Variable | - | numeric | Survival time for Cox; required when modelType=cox |
 | `modelType` | List | logistic | logistic/cox/linear | Routes to `.fitGLM`/`.fitCox`/`.fitLinear` (or LASSO variants) |
-| `useLasso` | Bool | false | -- | Routes to LASSO fit methods; warning if linear+LASSO |
+| `useLasso` | Bool | false | - | Routes to LASSO fit methods; warning if linear+LASSO |
 | `lambdaMethod` | List | lambda.1se | lambda.min/lambda.1se | Selects optimal lambda from `cv.glmnet` |
 | `random_seed` | Integer | 42 | 1-999999 | `set.seed()` before LOOCV loop |
-| `pooledPerformance` | Bool | true | -- | Controls pooled table visibility and computation |
-| `forestPlot` | Bool | true | -- | Controls forest plot visibility |
-| `calibrationCheck` | Bool | false | -- | Shows/hides Brier score column |
+| `pooledPerformance` | Bool | true | - | Controls pooled table visibility and computation |
+| `forestPlot` | Bool | true | - | Controls forest plot visibility |
+| `calibrationCheck` | Bool | false | - | Shows/hides Brier score column |
 
 ## 4. Backend Usage (.b.R)
 
 ### Execution Flow
 
-1. **`.init()`** -- Shows welcome HTML if required variables not set
-2. **`.run()`** -- Main orchestrator:
-   - `.prepareData()` -- Encodes outcome, filters complete cases, validates centers
+1. **`.init()`** - Shows welcome HTML if required variables not set
+2. **`.run()`** - Main orchestrator:
+   - `.prepareData()` - Encodes outcome, filters complete cases, validates centers
    - Pre-analysis notices (small centers, EPV, event level, LASSO+linear)
-   - `.populateDesignSummary(prepared)` -- Study design table
-   - `.runLOOCV(prepared)` -- Main CV loop over centers
-   - `.populatePerCenterResults(cv_results)` -- Per-center results table
-   - `.populatePooledPerformance(cv_results)` -- Pooled metrics (if enabled)
-   - `.populateInterpretation(prepared, cv_results)` -- Rich HTML interpretation
+   - `.populateDesignSummary(prepared)` - Study design table
+   - `.runLOOCV(prepared)` - Main CV loop over centers
+   - `.populatePerCenterResults(cv_results)` - Per-center results table
+   - `.populatePooledPerformance(cv_results)` - Pooled metrics (if enabled)
+   - `.populateInterpretation(prepared, cv_results)` - Rich HTML interpretation
    - Post-analysis notices (discrimination, heterogeneity, completion)
-   - `.renderNotices()` -- Renders accumulated notices as HTML
+   - `.renderNotices()` - Renders accumulated notices as HTML
 
 ### Model Fitting Methods
 
@@ -244,8 +244,8 @@ flowchart TD
 
 ### Test Datasets
 
-- `data/loocv_multicenter.rda` -- N=200, 5 centers, 12 variables (logistic, cox, linear)
-- `data/loocv_small.rda` -- N=45, 3 centers, 9 variables (edge cases)
+- `data/loocv_multicenter.rda` - N=200, 5 centers, 12 variables (logistic, cox, linear)
+- `data/loocv_small.rda` - N=45, 3 centers, 9 variables (edge cases)
 
 ### R Wrapper Call
 

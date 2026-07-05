@@ -292,7 +292,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 self$results$infoMessages$setVisible(FALSE)
             },
 
-            # Unified survival formula builder — always escapes variable names
+            # Unified survival formula builder - always escapes variable names
             .buildSurvFormula = function(time_var, outcome_var, group_var = NULL, ns_prefix = TRUE) {
                 esc_time <- .escapeVariableNames(time_var)
                 esc_outcome <- .escapeVariableNames(outcome_var)
@@ -2071,7 +2071,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
 
                     self$results$cox_ph$setContent(print(zph))
 
-                    # PH assumption violation notice — rendered as HTML to avoid Notice protobuf issues
+                    # PH assumption violation notice - rendered as HTML to avoid Notice protobuf issues
                     tryCatch({
                         ph_p <- zph$table[, "p"]
                         ph_p <- ph_p[!is.na(ph_p)]
@@ -2197,7 +2197,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         html <- paste0(html,
                             "<div style='background-color: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 15px 0; border-radius: 4px;'>",
                             "<strong style='color: #155724;'> Proportional Hazards Assumption Appears Satisfied</strong><br/>",
-                            sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p ≥ 0.05)</p>", p_value),
+                            sprintf("<p style='margin: 10px 0 0 0;'>Global test p-value = %.4f (p \u2265 0.05)</p>", p_value),
                             "</div>"
                         )
                     }
@@ -3796,7 +3796,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <tr style="background-color: #ffebee;">
                             <td style="padding: 8px;"><strong>HR = 2.0</strong></td>
                             <td style="padding: 8px;">Doubled risk</td>
-                            <td style="padding: 8px;">Group has 2× higher risk of event</td>
+                            <td style="padding: 8px;">Group has 2\u00d7 higher risk of event</td>
                         </tr>
                         <tr style="background-color: #e8f5e9;">
                             <td style="padding: 8px;"><strong>HR = 0.5</strong></td>
@@ -3806,7 +3806,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         <tr style="background-color: #ffebee;">
                             <td style="padding: 8px;"><strong>HR = 3.0</strong></td>
                             <td style="padding: 8px;">Tripled risk</td>
-                            <td style="padding: 8px;">Group has 3× higher risk of event</td>
+                            <td style="padding: 8px;">Group has 3\u00d7 higher risk of event</td>
                         </tr>
                         <tr style="background-color: #e8f5e9;">
                             <td style="padding: 8px;"><strong>HR = 0.25</strong></td>
@@ -3932,10 +3932,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.setExplanationContent("rmstExplanation", '
                 <div style="margin-bottom: 20px; padding: 15px; background-color: #e2e3e5; border-left: 4px solid #6c757d;">
                     <h4>Understanding Restricted Mean Survival Time (RMST)</h4>
-                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (τ).</p>
+                    <p><strong>RMST:</strong> Average survival time up to a specified time horizon (\u03c4).</p>
                     <ul>
                         <li><strong>Interpretation:</strong> Mean survival time within the observation period</li>
-                        <li><strong>Time Horizon (τ):</strong> Maximum follow-up time considered</li>
+                        <li><strong>Time Horizon (\u03c4):</strong> Maximum follow-up time considered</li>
                         <li><strong>Robust Measure:</strong> Less affected by tail behavior than median survival</li>
                         <li><strong>Difference in RMST:</strong> Directly interpretable as difference in mean survival time</li>
                     </ul>
@@ -4023,7 +4023,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                             <td style="padding: 8px;">High early event rate</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; background-color: #f3e5f5;"><strong>→ Flat plateau</strong></td>
+                            <td style="padding: 8px; background-color: #f3e5f5;"><strong>\u2192 Flat plateau</strong></td>
                             <td style="padding: 8px;">Stable period (few events)</td>
                         </tr>
                     </table>
@@ -4573,7 +4573,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         extra_term <- jmvcore::composeTerm(rcs_var)
                     }
 
-                    # Need Cox model — fit it
+                    # Need Cox model - fit it
                     rhs <- myfactor
                     if (!is.null(extra_term)) {
                         rhs <- paste0(myfactor, ' + ', extra_term)
@@ -4617,7 +4617,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     effective_groups <- min(n_groups, n_unique_pred)
                     if (effective_groups < 2) {
                         self$results$calibrationTable$setNote("error",
-                            "Cannot create risk groups — too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
+                            "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
                         return()
                     }
                     breaks <- quantile(pred_surv, probs = seq(0, 1, length.out = effective_groups + 1),
@@ -4626,7 +4626,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     breaks <- unique(breaks)
                     if (length(breaks) < 3) {
                         self$results$calibrationTable$setNote("error",
-                            "Cannot create risk groups — too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
+                            "Cannot create risk groups - too little variation in predicted survival. Add continuous covariates for meaningful calibration.")
                         return()
                     }
                     breaks[1] <- breaks[1] - 0.001
@@ -4823,7 +4823,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             }
 
             # ================================================================
-            # Restricted Cubic Splines — Non-Linearity Assessment (Gap 8)
+            # Restricted Cubic Splines - Non-Linearity Assessment (Gap 8)
             # ================================================================
             ,
             .calculateRCS = function(results) {
@@ -5735,7 +5735,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         self$results$ageAdjustedCoxHeading$setContent(heading_text)
 
                     } else {
-                        # Age as covariate — use finalfit for side-by-side table
+                        # Age as covariate - use finalfit for side-by-side table
                         safe_age_name <- jmvcore::composeTerm(age_col_name)
                         rhs_adjusted <- c(myfactor, safe_age_name)
                         if (!is.null(existing_strata_var)) {
@@ -6328,7 +6328,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # Adjusted Survival Curves (Phase 1A)
             # ================================================================
             # Shows KM-style curves adjusted for age using the Cox model.
-            # Uses survminer::ggadjustedcurves() — the #1 most requested
+            # Uses survminer::ggadjustedcurves() - the #1 most requested
             # survival feature in jamovi forums.
             # ================================================================
             ,

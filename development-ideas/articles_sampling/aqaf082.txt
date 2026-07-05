@@ -622,7 +622,7 @@ Any abnormality
 
 21/23 (91.3)
 
-≥40%
+>=40%
 
 6/57 (10.5)
 
@@ -673,11 +673,11 @@ did not show any linear trend between increasing block groups
 and MPR (P = .88), as well as Fisher exact tests for the group as a
 whole, showing no statistically significant association between
 block groups and MPR (P = .66). The block to size ratio was analyzed as approximate deciles (1% to <10%, 10% to <20%, 20% to
-<30%, 30% to <40%, and ≥40%) ( Table 2 ). The MPR was comparable at all levels of sampling for each category (P = .72), and there
+<30%, 30% to <40%, and >=40%) ( Table 2 ). The MPR was comparable at all levels of sampling for each category (P = .72), and there
 was no statistically significant linear trend in MPR as a function
 of block groups (P = .882) or block to size ratio. (Cases with 0% to
 <10% [n = 15], 10% to <20% [n = 12], 20% to <30% [n = 8], 30% to
-<40% [n = 2], and ≥40% [n = 6] sampling showed MPRs of 8.2%,
+<40% [n = 2], and >=40% [n = 6] sampling showed MPRs of 8.2%,
 6.3%, 10.3%, 6.9%, and 10.5%, respectively; P = .39).
 Finally, a binomial logistic regression analysis confirmed that
 neither block groups (odds ratio, 1.144 [95% CI, 0.794-1.648];

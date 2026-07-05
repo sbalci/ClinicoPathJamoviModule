@@ -58,7 +58,7 @@
 #' regression results tables and plots when modelling. R package version 0.9.7.
 #'
 #' @author ClinicoPath Development Team
-#' @seealso \code{\link{finalfit}}, \code{\link{rms}}
+#' @seealso \code{\link[finalfit]{finalfit}}, \code{\link[rms]{rms}}
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
@@ -382,10 +382,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     (e.g., 'Dead', 'Event', 'Yes', 'Positive').
                     <br><br>
                     This is required for correct calculation of:
-                    <br>• Odds ratios interpretation
-                    <br>• Likelihood ratios
-                    <br>• Sensitivity and specificity
-                    <br>• Diagnostic test performance metrics
+                    <br>\u2022 Odds ratios interpretation
+                    <br>\u2022 Likelihood ratios
+                    <br>\u2022 Sensitivity and specificity
+                    <br>\u2022 Diagnostic test performance metrics
                     <br><br>
                     Use the dropdown menu below the outcome variable to make your selection.
                 ")
@@ -421,7 +421,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
                 # TODO (correctness): `private$.formatErrorMessage` is NOT defined in this
-                # file — it lives in R/multisurvival.b.R:561 and is not shared via inheritance.
+                # file - it lives in R/multisurvival.b.R:561 and is not shared via inheritance.
                 # The two call sites here (this line and L452 below) will crash with
                 # "attempt to apply non-function" before reaching jmvcore::reject, so the
                 # empty-data and validation-failure error paths never display the intended
@@ -608,10 +608,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         if (epv < 5) {
                             # Use STRONG_WARNING for critically low EPV
                             private$.addNotice(jmvcore::NoticeType$STRONG_WARNING,
-                                glue::glue("Low events-per-variable (EPV ≈ {round(epv,2)}). Odds ratios may be unstable; consider penalized/Firth logistic regression."))
+                                glue::glue("Low events-per-variable (EPV \u2248 {round(epv,2)}). Odds ratios may be unstable; consider penalized/Firth logistic regression."))
                         } else if (epv < 10) {
                             extra_warnings <- c(extra_warnings,
-                                glue::glue("Borderline events-per-variable (EPV ≈ {round(epv,2)}). Interpret odds ratios with caution."))
+                                glue::glue("Borderline events-per-variable (EPV \u2248 {round(epv,2)}). Interpret odds ratios with caution."))
                         }
                     }
 
@@ -658,8 +658,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         # Use our custom Firth implementation that mimics finalfit structure
                         tOdds <- private$.fitFirthModel(
                             .data = mydata,
-                            dependent = formulaDependent,
-                            explanatory = formulaExplanatory
+                            dependent = dependent_variable_name_from_label,
+                            explanatory = explanatory_variable_names
                         )
                         
                         private$.addNotice(jmvcore::NoticeType$INFO,
@@ -1041,9 +1041,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(assumption_check$recommendations) > 0) {
                 recommendations_list <- lapply(assumption_check$recommendations, function(rec) {
                     if (is.list(rec)) {
-                        paste0("• <b>", rec$test, ":</b> ", rec$reason, " (Use: ", rec$code, ")")
+                        paste0("\u2022 <b>", rec$test, ":</b> ", rec$reason, " (Use: ", rec$code, ")")
                     } else {
-                        paste0("• ", rec)
+                        paste0("\u2022 ", rec)
                     }
                 })
                 
@@ -1085,9 +1085,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "Positive outcome level: '", positive_outcome_level, "' (", outcome_determination_method, ")\n",
                 "Positive predictor level: '", positive_predictor_level, "' (", predictor_determination_method, ")\n",
                 "Contingency table:\n",
-                "  ", predictor_levels[1], " → ", outcome_levels[1], ": ", cont_table[1,1],
+                "  ", predictor_levels[1], " \u2192 ", outcome_levels[1], ": ", cont_table[1,1],
                 " | ", outcome_levels[2], ": ", cont_table[1,2], "\n",
-                "  ", predictor_levels[2], " → ", outcome_levels[1], ": ", cont_table[2,1],
+                "  ", predictor_levels[2], " \u2192 ", outcome_levels[1], ": ", cont_table[2,1],
                 " | ", outcome_levels[2], ": ", cont_table[2,2], "\n",
                 "True Positives: ", tp, ", False Positives: ", fp, ", False Negatives: ", fn, ", True Negatives: ", tn
             )
@@ -1113,13 +1113,11 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Prepares data and fits logistic regression model for nomogram creation
         # Uses rms package to create datadist object and fit lrm model
-        # TODO (correctness): API inconsistency with sibling .fitFirthModel (L1714).
-        # .prepareRmsNomogram takes RAW variable names and escapes internally
-        # (composeTerm/composeTerms at L1119); .fitFirthModel takes PRE-ESCAPED strings
-        # produced upstream by jmvcore::constructFormula + composeTerms (L626/L629/L650-654).
-        # Future maintainers can easily get this wrong — pick one convention
-        # (preferably: always pass raw names + escape inside each helper) and update both
-        # sites so the formula construction is uniform.
+        # Convention: both this helper and .fitFirthModel take RAW variable names and escape
+        # them internally via jmvcore::composeTerm/composeTerms. Keep any new formula-building
+        # helper consistent with this (pass raw names in, escape inside) so callers never have
+        # to reason about whether a name is already escaped. (Verified equivalent to the former
+        # constructFormula/composeTerms caller-side escaping across names with spaces/./()// .)
         .prepareRmsNomogram = function(data, dependent, explanatory) {
             tryCatch({
                 # First create datadist object
@@ -1146,20 +1144,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste("Technical error:", e$message),
                     "",
                     " Common causes and solutions:",
-                    "• Perfect separation: Some variable levels perfectly predict the outcome",
-                    "  → Try combining categories or removing problematic variables",
-                    "• Convergence issues: Model failed to converge",
-                    "  → Check for multicollinearity or try simpler model",
-                    "• Insufficient data: Too few observations per variable",
-                    "  → Increase sample size or reduce number of variables",
-                    "• Missing values: Incomplete data after cleaning",
-                    "  → Review data preprocessing steps",
+                    "\u2022 Perfect separation: Some variable levels perfectly predict the outcome",
+                    "  \u2192 Try combining categories or removing problematic variables",
+                    "\u2022 Convergence issues: Model failed to converge",
+                    "  \u2192 Check for multicollinearity or try simpler model",
+                    "\u2022 Insufficient data: Too few observations per variable",
+                    "  \u2192 Increase sample size or reduce number of variables",
+                    "\u2022 Missing values: Incomplete data after cleaning",
+                    "  \u2192 Review data preprocessing steps",
                     "",
                     " Suggested next steps:",
-                    "• Check model summary for convergence warnings",
-                    "• Review variable distributions for separation issues",
-                    "• Consider using fewer explanatory variables",
-                    "• Verify data quality and completeness",
+                    "\u2022 Check model summary for convergence warnings",
+                    "\u2022 Review variable distributions for separation issues",
+                    "\u2022 Consider using fewer explanatory variables",
+                    "\u2022 Verify data quality and completeness",
                     sep = "\n"
                 )
                 warning(detailed_error)
@@ -1212,7 +1210,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Creates forest plot for odds ratios using finalfit
         ,
         .plot = function(image, ggtheme, theme, ...) {
-          # -- the plot function ----
+          # - the plot function ----
                     # plotData <- image$state
                     if (is.null(self$options$explanatory) || is.null(self$options$outcome))
                 return()
@@ -1221,7 +1219,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # TODO (cleanup): the dead commented block immediately below (early
             # outcome-validation drafts and pre-jmvcore formula builders) was superseded
             # by the .validateInputs path at L176 and the constructFormula/composeTerms
-            # upstream — safe to delete on a future cleanup pass.
+            # upstream - safe to delete on a future cleanup pass.
             # Check if outcome variable is suitable or stop
             # myoutcome2 <- self$options$outcome
             # myoutcome2 <- self$data[[myoutcome2]]
@@ -1336,7 +1334,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <p><strong>Odds Ratio (OR):</strong> The measure calculated by this analysis.</p>
                 <ul>
                     <li><strong>Definition:</strong> Ratio of the odds of outcome in exposed vs unexposed groups</li>
-                    <li><strong>Formula:</strong> OR = (a/b) / (c/d) where a,b,c,d are from 2×2 contingency table</li>
+                    <li><strong>Formula:</strong> OR = (a/b) / (c/d) where a,b,c,d are from 2\u00d72 contingency table</li>
                     <li><strong>Interpretation:</strong> OR = 2.0 means the odds of outcome are twice as high in exposed group</li>
                     <li><strong>Use case:</strong> Logistic regression, case-control studies, cross-sectional studies</li>
                 </ul>
@@ -1448,7 +1446,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 </ul>
 
                 <p><strong>Why Binary Only?</strong></p>
-                <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2×2 contingency table:</p>
+                <p>Diagnostic test performance metrics (sensitivity, specificity, likelihood ratios) are calculated from a 2\u00d72 contingency table:</p>
 
                 <table style="border-collapse: collapse; margin: 10px 0; font-size: 0.9em;">
                     <tr><th style="border: 1px solid #ddd; padding: 5px;"></th>
@@ -1616,9 +1614,9 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     " Large Dataset Warning: Dataset size is ", round(current_memory, 1), " MB. ",
                     "This may cause performance issues or memory problems during ", operation, ". ",
                     "Consider:\n",
-                    "• Working with a representative sample\n",
-                    "• Reducing the number of variables\n", 
-                    "• Checking available system memory"
+                    "\u2022 Working with a representative sample\n",
+                    "\u2022 Reducing the number of variables\n", 
+                    "\u2022 Checking available system memory"
                 ))
                 return("critical")
             } else if (current_memory > warning_threshold) {
@@ -1637,13 +1635,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Configure positive indicators by language
             if (language == "auto") {
                 # Detect language from levels or use default
-                language <- if (any(grepl("[ıüğşçöİÜĞŞÇÖ]", levels))) "tr" else "en"
+                language <- if (any(grepl("[\u0131\u00fc\u011f\u015f\u00e7\u00f6\u0130\u00dc\u011e\u015e\u00c7\u00d6]", levels))) "tr" else "en"
             }
             
             # Positive indicators by language
             indicators <- switch(language,
                 "en" = c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "1", "TRUE", "Bad", "Dead", "Event"),
-                "tr" = c("Pozitif", "Evet", "Mevcut", "Maruz", "Yüksek", "Anormal", "1", "DOĞRU", "Kötü", "Ölü", "Olay", 
+                "tr" = c("Pozitif", "Evet", "Mevcut", "Maruz", "Y\u00fcksek", "Anormal", "1", "DO\u011eRU", "K\u00f6t\u00fc", "\u00d6l\u00fc", "Olay", 
                         "Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "TRUE", "Bad", "Dead", "Event"), # Fallback to English
                 c("Positive", "Yes", "Present", "Exposed", "High", "Abnormal", "1", "TRUE", "Bad", "Dead", "Event") # Default
             )
@@ -1727,9 +1725,13 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Mimics the output structure of finalfit::finalfit for compatibility
         ,
         .fitFirthModel = function(.data, dependent, explanatory) {
-            # Construct formula
-            # finalfit's 'dependent' is the variable name, 'explanatory' is a vector of names
-            f <- .asSurvivalFormula(paste(dependent, "~", paste(explanatory, collapse = " + ")))
+            # Construct formula. Convention (unified with .prepareRmsNomogram): callers pass
+            # RAW variable names; this helper escapes them via jmvcore::composeTerm/composeTerms,
+            # so names with spaces or special characters are handled safely and callers never
+            # have to reason about whether a name is already escaped.
+            f <- .asSurvivalFormula(paste(
+                jmvcore::composeTerm(dependent), "~",
+                paste(jmvcore::composeTerms(as.list(explanatory)), collapse = " + ")))
             
             # Fit Firth model using logistf
             # logistf doesn't directly support data frames in the same way for labels

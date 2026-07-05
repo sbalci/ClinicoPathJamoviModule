@@ -554,7 +554,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     paste0(.("Significant differences between groups detected (p < 0.05). "),
                           .("Post-hoc testing recommended to identify specific group differences."))
                 } else {
-                    paste0(.("No significant differences between groups detected (p ≥ 0.05). "),
+                    paste0(.("No significant differences between groups detected (p \u2265 0.05). "),
                           .("Groups show similar mean values."))
                 }
 
@@ -751,7 +751,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             if (shapiro_result$p.value > 0.05) {
                                 .(" Residuals appear normally distributed (Shapiro-Wilk p > 0.05).")
                             } else {
-                                .(" Residuals may not be normally distributed (Shapiro-Wilk p ≤ 0.05). Consider robust methods.")
+                                .(" Residuals may not be normally distributed (Shapiro-Wilk p \u2264 0.05). Consider robust methods.")
                             }
                         } else {
                             .("Unable to test normality of residuals.")
@@ -791,10 +791,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<div class='card-body'>",
                 "<h6>", .("Effect Size Interpretation:"), "</h6>",
                 "<ul>",
-                "<li>", .("<strong>R² ≥ 0.50:</strong> Large effect - clinically significant relationship"), "</li>",
-                "<li>", .("<strong>R² = 0.25-0.49:</strong> Medium effect - moderate clinical relevance"), "</li>",
-                "<li>", .("<strong>R² = 0.10-0.24:</strong> Small effect - limited clinical significance"), "</li>",
-                "<li>", .("<strong>R² < 0.10:</strong> Very small effect - minimal clinical importance"), "</li>",
+                "<li>", .("<strong>R\u00b2 \u2265 0.50:</strong> Large effect - clinically significant relationship"), "</li>",
+                "<li>", .("<strong>R\u00b2 = 0.25-0.49:</strong> Medium effect - moderate clinical relevance"), "</li>",
+                "<li>", .("<strong>R\u00b2 = 0.10-0.24:</strong> Small effect - limited clinical significance"), "</li>",
+                "<li>", .("<strong>R\u00b2 < 0.10:</strong> Very small effect - minimal clinical importance"), "</li>",
                 "</ul>",
                 "<h6>", .("Confidence Intervals:"), "</h6>",
                 "<p>", .("When displayed, confidence intervals show the uncertainty around trend lines. Wider intervals indicate greater uncertainty."), "</p>",
@@ -1082,7 +1082,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     summary_text <- paste0(summary_text,
                         "<p><strong>", .("Trend:"), "</strong> ", trend_strength, " ", trend_direction, " ", .("trend detected"),
-                        " (R² = ", round(correlation_stats$r_squared, 3), ")</p>"
+                        " (R\u00b2 = ", round(correlation_stats$r_squared, 3), ")</p>"
                     )
                 }
             }
@@ -1105,7 +1105,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             # Find relevant suggestion
-            # TODO (forward-looking): this string-match dispatch on e$message is fragile —
+            # TODO (forward-looking): this string-match dispatch on e$message is fragile - 
             #   any rewording of the validation rejects in .cleanData() / .checkDependencies()
             #   silently breaks the mapping. Now that those sites use jmvcore::reject(),
             #   pass a stable `code = "..."` argument from each reject() site and switch

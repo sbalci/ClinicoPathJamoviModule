@@ -11,12 +11,12 @@
 - **Title/Label**: Clinico-pathological diagnostic and prognostic biomarkers for duodenal adenocarcinoma from a UK retrospective cohort study
 - **Design & Cohort**: Retrospective multi-centre cohort/cross-sectional/case-control hybrid; UK Duodenal Cancer Study Group (UKDCSG); 7 NHS centres; resection patients 2005–2015. Recruitment 161 → histology QC 147 → tissue QC 102 → follow-up QC → **final analytical cohort n = 98**. Median follow-up 37.5 months (IQR 16–75); median OS 43 months (95% CI 38–84). Reporting per **STROBE** + **REMARK** + **STROCSS**.
 - **Key Analyses**:
-  - Tissue micro-array (TMA) construction with 1 mm cores, ≥3 representative cores per patient, plus matched normal duodenum and orientation controls.
+  - Tissue micro-array (TMA) construction with 1 mm cores, >=3 representative cores per patient, plus matched normal duodenum and orientation controls.
   - **IHC** quantitation with QuPath: percent positivity × intensity → **modified H-score (0–300)** per core, median per patient.
   - **Immunofluorescence** classifier-based positive cell quantitation (CD3/CD20, CD8/CD4) with batch analysis.
   - **X-tile** software for unbiased optimal cut-off identification (3-group low/moderate/high for diagnostic markers; 2-group neg/pos for prognostic markers) with **Monte-Carlo corrected p-values**.
   - **Kaplan–Meier** estimation with **Mantel-Cox log-rank** test.
-  - **Cox proportional hazards** regression — univariate, then **stepwise** multivariable (entry threshold p ≤ 0.05).
+  - **Cox proportional hazards** regression — univariate, then **stepwise** multivariable (entry threshold p <= 0.05).
   - **Wilcoxon matched-pairs signed rank** for paired tumour vs adjacent-normal H-score and infiltrate comparisons.
   - **Kruskal–Wallis with Dunn's post-hoc** for immune infiltrate stratified by MMR status.
   - Software: GraphPad Prism 10 + SPSS v30 (IBM). No code or seeds shared.
@@ -71,7 +71,7 @@
 | Kaplan–Meier estimator | Primary | OS, by stratum (T-stage, MMR, marker high/low) | Non-informative censoring assumed; not discussed | Fig 1B, 2E, 3, 4H–I, 6 |
 | Log-rank (Mantel-Cox) test | Primary | Two-group comparisons | PH assumption not formally tested; no stratified log-rank | Throughout |
 | Cox PH regression — **univariate** | Primary | Per clinicopathological variable; per biomarker | PH assumption / Schoenfeld residuals not reported | Fig 1C, 3D, Tables 1A/1B |
-| Cox PH regression — **multivariable** | Primary | Stepwise / univariate-screen entry (p ≤ 0.05) | EPV not stated; no PH check; no collinearity check; no shrinkage / penalisation | Fig 1C, Tables 1A/1B |
+| Cox PH regression — **multivariable** | Primary | Stepwise / univariate-screen entry (p <= 0.05) | EPV not stated; no PH check; no collinearity check; no shrinkage / penalisation | Fig 1C, Tables 1A/1B |
 | Hazard ratios with 95% CI | Primary | Reported throughout | — | Tables / figures |
 | **X-tile optimal cut-off** | Primary | 3-tier (low/moderate/high) for diagnostic; 2-tier (neg/pos) for prognostic | Multiple cut-points searched on same dataset | Fig 4C, 6A; Methods §2.7 |
 | **Monte-Carlo corrected p-value** | Primary | Within-marker correction for cut-point search | Cross-marker multiplicity NOT addressed | Methods §2.7; Fig 4C, 6A |
@@ -81,7 +81,7 @@
 | Descriptive proportions / pie charts | Secondary | n=98 categorical biomarker categories | — | Fig 2C/D, 4E/G, 6C/D/H/I |
 | Software | — | GraphPad Prism 10; SPSS v30 (IBM); QuPath; X-tile | No package/version for R; no seed; no code deposit | Methods §2.7 |
 
-> **Notes on non-standard reporting**: The methods say "stepwise manner" but operationally the multivariable model includes only variables passing a univariate p ≤ 0.05 screen. This is *not* full forward/backward stepwise but a **two-stage univariate-screening pipeline**, which is mechanistically distinct (and similarly biased toward optimism). The article uses **complete-case analysis**: every table footnotes "[n=X]" for unknown counts (e.g., age unknown in 22/98, MMR unknown in 5/98, adjuvant chemotherapy unknown in 37/98). No imputation, no missingness mechanism discussed.
+> **Notes on non-standard reporting**: The methods say "stepwise manner" but operationally the multivariable model includes only variables passing a univariate p <= 0.05 screen. This is *not* full forward/backward stepwise but a **two-stage univariate-screening pipeline**, which is mechanistically distinct (and similarly biased toward optimism). The article uses **complete-case analysis**: every table footnotes "[n=X]" for unknown counts (e.g., age unknown in 22/98, MMR unknown in 5/98, adjuvant chemotherapy unknown in 37/98). No imputation, no missingness mechanism discussed.
 
 ---
 
@@ -164,7 +164,7 @@
 5. **Adjuvant chemotherapy is a major effect modifier with 38% missingness** — yet reported only as a univariate covariate (HR 0.697) and not in multivariable modelling. This is the strongest candidate confounder of biomarker–OS associations.
 6. **Counter-intuitive directionality of CD20** — Low B-cell infiltrate associated with **better** OS (HR 0.45) contradicts most of the immune-infiltrate literature in solid tumours. The authors discuss it briefly but do not test e.g. interaction with stage / MMR or perform sensitivity analyses for the cut-point.
 7. **Software stack opacity** — Prism + SPSS + X-tile + QuPath, no code, no seed for X-tile's permutation/Monte-Carlo. Cannot be reproduced from the paper alone.
-8. **Events-per-variable** — Multivariable Cox in Table 1A includes 5 covariates, in Table 1B includes 6–7 covariates. With ~55 deaths estimated from the KM at-risk table (98 → 4 over 216 months) the effective EPV is ≤8–11, below the conventional ≥10 threshold for stable Cox estimates.
+8. **Events-per-variable** — Multivariable Cox in Table 1A includes 5 covariates, in Table 1B includes 6–7 covariates. With ~55 deaths estimated from the KM at-risk table (98 → 4 over 216 months) the effective EPV is <=8–11, below the conventional >=10 threshold for stable Cox estimates.
 
 ---
 
@@ -183,7 +183,7 @@ For each gap below, **Method**: what's missing → **Impact**: where it would he
    - **Missing options**: post-fit BH / BY / Bonferroni / Storey q-value across marker p-values; companion forest plot of adjusted HRs.
 
 3. **Centre / cluster-level frailty in survival**
-   - **Impact**: Multi-centre cohorts (≥4 sites) require either stratification or random-effect frailty.
+   - **Impact**: Multi-centre cohorts (>=4 sites) require either stratification or random-effect frailty.
    - **Closest function**: `frailtysurvival`, `multisurvival`
    - **Missing options**: a one-click "Cluster variable" picker in `multisurvival` that adds `+ frailty(cluster, dist="gaussian")` to the formula; report variance of frailty + LR test.
 
@@ -221,6 +221,7 @@ For each gap below, **Method**: what's missing → **Impact**: where it would he
 ### 1. Add Miller–Halpern + Monte-Carlo to `optimalcutpoint`
 
 **`.a.yaml` (additions)**
+
 ```yaml
 options:
   - name: method
@@ -248,6 +249,7 @@ options:
 ```
 
 **`.b.R` (sketch)**
+
 ```r
 .run = function() {
   if (self$options$method == "miller_halpern") {
@@ -274,6 +276,7 @@ options:
 ### 2. Cross-marker FDR in `ihcsurvival`
 
 **`.a.yaml` (additions)**
+
 ```yaml
 options:
   - name: fdr_method
@@ -283,6 +286,7 @@ options:
 ```
 
 **`.b.R` (sketch)**
+
 ```r
 ps <- vapply(markers, function(m) cox_p(m), numeric(1))
 ps_adj <- p.adjust(ps, method = self$options$fdr_method)
@@ -298,6 +302,7 @@ for (i in seq_along(markers))
 ### 3. Centre frailty in `multisurvival`
 
 **`.a.yaml` (additions)**
+
 ```yaml
 options:
   - name: cluster
@@ -312,6 +317,7 @@ options:
 ```
 
 **`.b.R` (sketch)**
+
 ```r
 rhs <- jmvcore::composeTerms(modelTerms)
 if (!is.null(self$options$cluster)) {
@@ -350,6 +356,7 @@ fit <- survival::coxph(reformulate(rhs, response = lhs), data = df)
 ### 5. Default Schoenfeld output in Cox tables
 
 In `multisurvival.r.yaml`, add:
+
 ```yaml
 - name: ph_test
   type: Table
@@ -362,6 +369,7 @@ In `multisurvival.r.yaml`, add:
 ```
 
 In `.b.R`:
+
 ```r
 zph <- survival::cox.zph(fit)
 for (i in rownames(zph$table))
@@ -397,8 +405,8 @@ Sketch: full pipeline (cut-point + univariate screen + Cox fit) re-run per resam
 
 - **Unit tests** (deterministic seed):
   - `optimalcutpoint`: recover known cut-point on simulated step-hazard biomarker (n=200, true cut at q=0.4); Miller–Halpern p-value distribution under H0 is approx uniform.
-  - `multisurvival` with `cluster=`: SE of HR ≥ naïve-Cox SE on 7-cluster simulation with frailty variance 0.3.
-  - `multisurvival` EPV notice: triggers at EPV<10, silent at EPV≥10.
+  - `multisurvival` with `cluster=`: SE of HR >= naïve-Cox SE on 7-cluster simulation with frailty variance 0.3.
+  - `multisurvival` EPV notice: triggers at EPV<10, silent at EPV>=10.
   - `ihcsurvival` panel FDR: BH q-values match `p.adjust(method="BH")` exactly.
 - **Regression tests against the article** (golden table):
   - With public toy DA data, reproduce: T-stage HR ≈0.41, LVI HR ≈0.46, low-CD20 HR ≈0.45 (within rounding).
@@ -452,7 +460,7 @@ flowchart TD
     F --> G
     G --> H[KM + log-rank by stratum]
     G --> I[Univariate Cox per marker]
-    I -->|p ≤ 0.05| J[Multivariable Cox<br/>5–7 covariates]
+    I -->|p <= 0.05| J[Multivariable Cox<br/>5–7 covariates]
     H --> K[Wilcoxon signed-rank<br/>tumour vs paired normal]
     H --> L[Kruskal-Wallis + Dunn<br/>by MMR status]
     J --> M[Reported HRs<br/>Tables 1A 1B Fig 1C 3D]

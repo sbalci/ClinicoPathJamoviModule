@@ -507,7 +507,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # TODO (correctness): private$.add_warning() is called here and at three other
                     # sites (multi-format detection + large-dataset sampling) but is NEVER defined on
-                    # this R6 class — these branches raise "could not find function" at runtime if
+                    # this R6 class - these branches raise "could not find function" at runtime if
                     # reached. Define .add_warning (append to a warnings field rendered via
                     # .show_warnings) or remove the calls.
                     private$.add_warning("Multi-format support: Detected and converted source-target format to long format")
@@ -600,7 +600,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add misuse detection warnings
             tryCatch({
                 # TODO (correctness): .detect_misuse() returns list(errors, warnings) but this
-                # treats the whole list as a flat warnings vector — $errors is silently dropped
+                # treats the whole list as a flat warnings vector - $errors is silently dropped
                 # and the c() concatenation is malformed. Use res <- private$.detect_misuse();
                 # warnings <- c(warnings, res$warnings) and surface res$errors appropriately.
                 misuse_warnings <- private$.detect_misuse()
@@ -2556,7 +2556,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         # Generate comprehensive validation report
         # TODO (security): this panel and .generate_clinical_insights_panel are defined but
-        # NEVER called from .run() (not currently reachable) — yet both inject user-controlled
+        # NEVER called from .run() (not currently reachable) - yet both inject user-controlled
         # data into setContent HTML unescaped: the strata_var column name in this method's
         # validation_issues sprintf, and factor-level values (top_flow$from_category/to_category,
         # bottleneck) in .generate_clinical_insights_panel. BEFORE wiring either into .run(),

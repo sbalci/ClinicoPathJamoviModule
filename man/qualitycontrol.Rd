@@ -78,7 +78,7 @@ limits method)}
 
 \item{cusum_h_value}{CUSUM decision interval h (typically 4-5 * sigma)}
 
-\item{ewma_lambda}{EWMA smoothing parameter lambda (0 < λ ≤ 1)}
+\item{ewma_lambda}{EWMA smoothing parameter lambda (0 < λ <= 1)}
 
 \item{sigma_calculation}{Method for calculating laboratory sigma metrics}
 
@@ -106,7 +106,7 @@ assess}
 laboratory standards}
 
 \item{replicate_days}{Number of days for precision study (CLSI EP5-A3
-recommends ≥20 days)}
+recommends >=20 days)}
 
 \item{replicates_per_day}{Number of replicates per day for precision study}
 

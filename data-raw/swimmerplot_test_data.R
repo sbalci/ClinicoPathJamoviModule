@@ -29,8 +29,10 @@ swimmerplot_test <- tibble(
   TreatmentDuration = sample(30:365, n_patients, replace = TRUE),
 
   # Response assessment (CR/PR/SD/PD)
-  Response = sample(c("CR", "PR", "SD", "PD"), n_patients, replace = TRUE,
-                   prob = c(0.15, 0.35, 0.30, 0.20)),
+  Response = sample(c("CR", "PR", "SD", "PD"), n_patients,
+    replace = TRUE,
+    prob = c(0.15, 0.35, 0.30, 0.20)
+  ),
 
   # Milestone 1: Treatment Start (always at 0)
   TreatmentStart = 0,
@@ -69,7 +71,8 @@ swimmerplot_test <- tibble(
 
   # Adverse events (multiple possible)
   AdverseEvent = sample(c("None", "Grade 1-2", "Grade 3-4"), n_patients,
-                       replace = TRUE, prob = c(0.4, 0.4, 0.2)),
+    replace = TRUE, prob = c(0.4, 0.4, 0.2)
+  ),
 
   # Event time (when adverse event occurred, NA if none)
   EventTime = sapply(1:n_patients, function(i) {
@@ -97,8 +100,8 @@ swimmerplot_immuno <- tibble(
   # Immunotherapy duration (often longer for responders)
   EndTime = c(
     sample(180:730, 10, replace = TRUE), # Durable responders (>6 months)
-    sample(60:180, 10, replace = TRUE),  # Moderate responders
-    sample(30:90, 5, replace = TRUE)     # Non-responders
+    sample(60:180, 10, replace = TRUE), # Moderate responders
+    sample(30:90, 5, replace = TRUE) # Non-responders
   ),
 
   # Response (higher CR/PR rate for immunotherapy)
@@ -125,8 +128,9 @@ swimmerplot_immuno <- tibble(
 
   # Immune-related adverse events
   irAE = sample(c("None", "Skin", "GI", "Endocrine", "Pneumonitis"),
-               n_immuno, replace = TRUE, prob = c(0.4, 0.2, 0.15, 0.15, 0.1)),
-
+    n_immuno,
+    replace = TRUE, prob = c(0.4, 0.2, 0.15, 0.15, 0.1)
+  ),
   irAE_Time = sapply(1:n_immuno, function(i) {
     if (irAE[i] != "None") {
       sample(14:EndTime[i], 1)
@@ -136,9 +140,10 @@ swimmerplot_immuno <- tibble(
   }),
 
   # PD-L1 status grouping
-  PDL1_Status = sample(c("Negative", "Low (1-49%)", "High (≥50%)"),
-                      n_immuno, replace = TRUE, prob = c(0.3, 0.4, 0.3)),
-
+  PDL1_Status = sample(c("Negative", "Low (1-49%)", "High (>=50%)"),
+    n_immuno,
+    replace = TRUE, prob = c(0.3, 0.4, 0.3)
+  ),
   Censored = ifelse(Response %in% c("CR", "PR"), 1, 0)
 )
 
@@ -158,7 +163,9 @@ swimmerplot_surgery <- tibble(
 
   # Outcome
   Outcome = sample(c("No Complications", "Minor Complications", "Major Complications"),
-                  n_surgery, replace = TRUE, prob = c(0.6, 0.25, 0.15)),
+    n_surgery,
+    replace = TRUE, prob = c(0.6, 0.25, 0.15)
+  ),
 
   # Surgery date (day 0)
   SurgeryDate = 0,
@@ -189,12 +196,15 @@ swimmerplot_surgery <- tibble(
 
   # Surgery type grouping
   SurgeryType = sample(c("Abdominal", "Thoracic", "Vascular"),
-                      n_surgery, replace = TRUE),
+    n_surgery,
+    replace = TRUE
+  ),
 
   # ASA score grouping
   ASA_Score = sample(c("ASA I-II", "ASA III", "ASA IV"),
-                    n_surgery, replace = TRUE, prob = c(0.4, 0.4, 0.2)),
-
+    n_surgery,
+    replace = TRUE, prob = c(0.4, 0.4, 0.2)
+  ),
   Censored = 1 # All followed to end
 )
 
@@ -209,18 +219,14 @@ swimmerplot_milestones <- tibble(
   PatientID = paste0("ML", sprintf("%03d", 1:n_complex)),
   StartTime = 0,
   EndTime = sample(180:540, n_complex, replace = TRUE),
-
   Response = sample(c("CR", "PR", "SD", "PD"), n_complex, replace = TRUE),
 
   # All 5 milestones with clinical relevance
   Diagnosis = 0,
-
   Surgery = sample(14:42, n_complex, replace = TRUE),
-
   ChemoStart = sapply(1:n_complex, function(i) {
     Surgery[i] + sample(14:28, 1)
   }),
-
   Recurrence = sapply(1:n_complex, function(i) {
     if (runif(1) < 0.5) {
       sample(90:EndTime[i], 1)
@@ -228,7 +234,6 @@ swimmerplot_milestones <- tibble(
       NA_real_
     }
   }),
-
   Death = sapply(1:n_complex, function(i) {
     if (runif(1) < 0.3) {
       EndTime[i]
@@ -239,8 +244,9 @@ swimmerplot_milestones <- tibble(
 
   # Event markers
   EventType = sample(c("None", "Toxicity", "Hospitalization", "Secondary Surgery"),
-                    n_complex, replace = TRUE, prob = c(0.4, 0.3, 0.2, 0.1)),
-
+    n_complex,
+    replace = TRUE, prob = c(0.4, 0.3, 0.2, 0.1)
+  ),
   EventTime = sapply(1:n_complex, function(i) {
     if (EventType[i] != "None") {
       sample(30:EndTime[i], 1)
@@ -248,10 +254,10 @@ swimmerplot_milestones <- tibble(
       NA_real_
     }
   }),
-
   Stage = sample(c("Stage I", "Stage II", "Stage III", "Stage IV"),
-                n_complex, replace = TRUE),
-
+    n_complex,
+    replace = TRUE
+  ),
   Censored = ifelse(is.na(Death), 1, 0)
 )
 
@@ -266,16 +272,15 @@ swimmerplot_events <- tibble(
   PatientID = paste0("EV", sprintf("%03d", 1:n_events)),
   StartTime = 0,
   EndTime = sample(180:365, n_events, replace = TRUE),
-
   Response = sample(c("PR", "SD", "PD"), n_events, replace = TRUE),
-
   TreatmentStart = 0,
 
   # Multiple events possible
   Event1_Type = sample(c("Lab Abnormality", "Dose Reduction", "Treatment Delay"),
-                      n_events, replace = TRUE),
+    n_events,
+    replace = TRUE
+  ),
   Event1_Time = sample(14:60, n_events, replace = TRUE),
-
   Event2_Type = sapply(1:n_events, function(i) {
     if (runif(1) < 0.7) {
       sample(c("Lab Abnormality", "Dose Reduction", "Treatment Delay"), 1)
@@ -290,7 +295,6 @@ swimmerplot_events <- tibble(
       NA_real_
     }
   }),
-
   Event3_Type = sapply(1:n_events, function(i) {
     if (runif(1) < 0.4) {
       sample(c("Hospitalization", "ER Visit"), 1)
@@ -307,10 +311,10 @@ swimmerplot_events <- tibble(
       NA_real_
     }
   }),
-
   TreatmentLine = sample(c("First Line", "Second Line", "Third Line+"),
-                        n_events, replace = TRUE),
-
+    n_events,
+    replace = TRUE
+  ),
   Censored = 1
 )
 
@@ -323,14 +327,11 @@ swimmerplot_small <- tibble(
   StartTime = c(0, 0, 0, 0, 0),
   EndTime = c(90, 180, 45, 270, 150),
   Response = c("CR", "PR", "PD", "SD", "PR"),
-
   Milestone1 = c(0, 0, 0, 0, 0),
   Milestone2 = c(30, 42, 21, 56, 35),
   Milestone3 = c(60, 90, NA, 120, 90),
-
   EventVar = c("AE Grade 2", "None", "AE Grade 3", "AE Grade 1", "None"),
   EventTime = c(15, NA, 10, 80, NA),
-
   Group = c("A", "B", "A", "B", "A"),
   Censored = c(1, 1, 0, 1, 1)
 )
@@ -357,7 +358,6 @@ swimmerplot_dates <- tibble(
   # Calculate numeric time from dates
   StartTime = 0,
   EndTime = follow_up_days,
-
   Response = sample(c("CR", "PR", "SD", "PD"), n_dates, replace = TRUE),
 
   # Milestone dates
@@ -372,17 +372,16 @@ swimmerplot_dates <- tibble(
       NA_real_
     }
   }),
-
   ProgressionDate = enrollment_dates + ProgressionDays,
 
   # Convert milestone dates to numeric days from enrollment
   Milestone1_Days = 0,
   Milestone2_Days = as.numeric(FirstResponseDate - EnrollmentDate),
   Milestone3_Days = ProgressionDays,
-
   Cohort = sample(c("Cohort 1", "Cohort 2", "Cohort 3"),
-                 n_dates, replace = TRUE),
-
+    n_dates,
+    replace = TRUE
+  ),
   Censored = ifelse(is.na(ProgressionDate), 1, 0)
 ) %>%
   select(-ProgressionDays) # Remove temporary column
@@ -401,25 +400,19 @@ swimmerplot_grouped <- tibble(
   # Group A: Better outcomes (longer duration)
   # Group B: Worse outcomes (shorter duration)
   Group = rep(c("Experimental", "Control"), each = 12),
-
   EndTime = c(
     sample(180:450, 12, replace = TRUE), # Experimental: 6-15 months
-    sample(60:240, 12, replace = TRUE)   # Control: 2-8 months
+    sample(60:240, 12, replace = TRUE) # Control: 2-8 months
   ),
-
   Response = c(
     sample(c("CR", "PR", "SD"), 12, replace = TRUE, prob = c(0.3, 0.5, 0.2)),
     sample(c("PR", "SD", "PD"), 12, replace = TRUE, prob = c(0.2, 0.4, 0.4))
   ),
-
   TreatmentStart = 0,
-
   FirstAssessment = sample(42:84, n_grouped, replace = TRUE),
-
   BestResponse = sapply(1:n_grouped, function(i) {
-    sample(84:EndTime[i]/2, 1)
+    sample(84:EndTime[i] / 2, 1)
   }),
-
   Progression = sapply(1:n_grouped, function(i) {
     if (Group[i] == "Experimental") {
       if (runif(1) < 0.4) sample(180:EndTime[i], 1) else NA_real_
@@ -427,10 +420,10 @@ swimmerplot_grouped <- tibble(
       if (runif(1) < 0.7) sample(90:EndTime[i], 1) else NA_real_
     }
   }),
-
   AdverseEvent = sample(c("None", "Grade 1-2", "Grade 3+"),
-                       n_grouped, replace = TRUE),
-
+    n_grouped,
+    replace = TRUE
+  ),
   EventTime = sapply(1:n_grouped, function(i) {
     if (AdverseEvent[i] != "None") {
       sample(7:EndTime[i], 1)
@@ -438,9 +431,7 @@ swimmerplot_grouped <- tibble(
       NA_real_
     }
   }),
-
   Biomarker = sample(c("Positive", "Negative"), n_grouped, replace = TRUE),
-
   Censored = ifelse(is.na(Progression), 1, 0)
 )
 
@@ -469,22 +460,27 @@ for (name in names(datasets)) {
 # Save as .csv files
 for (name in names(datasets)) {
   write.csv(datasets[[name]],
-           here::here("data", paste0(name, ".csv")),
-           row.names = FALSE)
+    here::here("data", paste0(name, ".csv")),
+    row.names = FALSE
+  )
   message("✓ Saved ", name, ".csv")
 }
 
 # Save as .xlsx files
 for (name in names(datasets)) {
-  writexl::write_xlsx(datasets[[name]],
-                     here::here("data", paste0(name, ".xlsx")))
+  writexl::write_xlsx(
+    datasets[[name]],
+    here::here("data", paste0(name, ".xlsx"))
+  )
   message("✓ Saved ", name, ".xlsx")
 }
 
 # Save as .omv files (jamovi format)
 for (name in names(datasets)) {
-  jmvReadWrite::write_omv(datasets[[name]],
-                         here::here("data", paste0(name, ".omv")))
+  jmvReadWrite::write_omv(
+    datasets[[name]],
+    here::here("data", paste0(name, ".omv"))
+  )
   message("✓ Saved ", name, ".omv")
 }
 

@@ -241,7 +241,7 @@ ordinalrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
 
         .populateCategorySpecificAUC = function(predictor, outcome) {
-            # TODO (stub): 6 unimplemented helpers in this file — .populateCategorySpecificAUC
+            # TODO (stub): 6 unimplemented helpers in this file - .populateCategorySpecificAUC
             # (this line), .testProportionalOdds (L240), .populateModelCoefficients (L245),
             # .populateOptimalThresholds (L250), .plotOrdinalROC (L255), .plotCumulativeROC (L260),
             # .plotCategoryDistributions (L264), .plotCumulativeProbabilities (L269). All have

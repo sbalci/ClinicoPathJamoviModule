@@ -76,7 +76,7 @@ test_that("waterfall handles missing patientID values", {
 # EXTREME VALUES
 # ═══════════════════════════════════════════════════════════
 
-test_that("waterfall handles complete response (≤ -100%)", {
+test_that("waterfall handles complete response (<= -100%)", {
   result <- waterfall(
     data = waterfall_extreme,
     patientID = "patientID",
@@ -115,7 +115,7 @@ test_that("waterfall handles extreme progressive disease (> 200%)", {
 
 test_that("waterfall handles zero response values", {
   zero_data <- waterfall_test
-  zero_data$best_response <- 0  # All stable disease
+  zero_data$best_response <- 0 # All stable disease
 
   result <- waterfall(
     data = zero_data,
@@ -289,7 +289,7 @@ test_that("waterfall handles variables with special characters", {
 
 test_that("waterfall handles constant response values", {
   const_data <- waterfall_test
-  const_data$best_response <- -30  # All exactly PR threshold
+  const_data$best_response <- -30 # All exactly PR threshold
 
   result <- waterfall(
     data = const_data,
@@ -363,12 +363,12 @@ test_that("waterfall handles exact RECIST threshold values", {
   threshold_data <- tibble::tibble(
     patientID = paste0("PT", 1:6),
     best_response = c(
-      -100,  # Exactly CR threshold
-      -30,   # Exactly PR threshold (lower bound)
+      -100, # Exactly CR threshold
+      -30, # Exactly PR threshold (lower bound)
       -29.9, # Just above PR threshold (SD)
-      19.9,  # Just below PD threshold (SD)
-      20,    # Exactly PD threshold
-      20.1   # Just above PD threshold
+      19.9, # Just below PD threshold (SD)
+      20, # Exactly PD threshold
+      20.1 # Just above PD threshold
     )
   )
 
@@ -492,7 +492,7 @@ test_that("waterfall handles boundary minResponseForLabel values", {
 test_that("waterfall handles negative time values", {
   data(waterfall_spider_test, package = "ClinicoPath")
   neg_time_data <- waterfall_spider_test
-  neg_time_data$time <- neg_time_data$time - 5  # Shift so some are negative
+  neg_time_data$time <- neg_time_data$time - 5 # Shift so some are negative
 
   # Should handle or warn about negative times
   expect_condition(
@@ -509,7 +509,7 @@ test_that("waterfall handles negative time values", {
 test_that("waterfall handles non-zero baseline time", {
   data(waterfall_raw_test, package = "ClinicoPath")
   nonzero_baseline <- waterfall_raw_test
-  nonzero_baseline$time <- nonzero_baseline$time + 10  # Shift all times
+  nonzero_baseline$time <- nonzero_baseline$time + 10 # Shift all times
 
   # May need to identify baseline differently
   result <- waterfall(

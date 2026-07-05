@@ -549,8 +549,8 @@ ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   20-30 percent for heterogeneous markers (HER2, PD-L1). Lower values
 #'   indicate more stringent quality requirements.
 #' @param correlation_threshold Minimum Spearman correlation between biopsy
-#'   and whole section measurements. Clinical guidelines: ≥0.80 excellent
-#'   agreement, ≥0.70 good agreement, ≥0.60 moderate agreement, <0.60 poor
+#'   and whole section measurements. Clinical guidelines: >=0.80 excellent
+#'   agreement, >=0.70 good agreement, >=0.60 moderate agreement, <0.60 poor
 #'   agreement. Higher values indicate better representativeness of biopsy
 #'   samples.
 #' @param show_variability_plots display plots showing sampling variability

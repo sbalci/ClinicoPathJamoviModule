@@ -57,7 +57,7 @@
 #' \itemize{
 #'   \item Survival times follow exponential distribution
 #'   \item Event rates are clinically realistic (55-65%)
-#'   \item Prognostic correlations built in (advanced stage → shorter survival)
+#'   \item Prognostic correlations built in (advanced stage -> shorter survival)
 #'   \item Both systems have predictive value but differ in discrimination
 #'   \item Sufficient events per variable (EPV > 10) for Cox models
 #' }
@@ -153,7 +153,7 @@
 #' \itemize{
 #'   \item Non-negative survival times
 #'   \item Appropriate event rates (55-65%)
-#'   \item Stage-survival correlation (advanced stage → worse prognosis)
+#'   \item Stage-survival correlation (advanced stage -> worse prognosis)
 #'   \item Sufficient EPV (events per variable > 10) for Cox models
 #'   \item Realistic clinical distributions
 #'   \item Proper factor level ordering for ordinal staging

@@ -327,7 +327,7 @@ A
 All patients with upfront surgery
 n = 808
 Patients
-with retrieved LNs ≥ 2
+with retrieved LNs >= 2
 
 n = 802
 
@@ -349,7 +349,7 @@ True Node Positive
 All patients with upfront surgery
 n = 444
 Patients
-with retrieved LNs ≥ 2
+with retrieved LNs >= 2
 
 n = 438
 
@@ -893,11 +893,11 @@ LN, lymph node
 
 A
 
-P(FN)≤20%
+P(FN)<=20%
 
-P(FN)≤15%
+P(FN)<=15%
 
-P(FN)≤10%
+P(FN)<=10%
 
 16
 
@@ -913,7 +913,7 @@ B
 
 19
 
-P(FN)≤10%
+P(FN)<=10%
 
 C
 
@@ -948,7 +948,7 @@ Number of retrieved lymph nodes
 0.2
 10
 
-P(FN)≤10%
+P(FN)<=10%
 25
 
 19
@@ -959,7 +959,7 @@ Probability of 5-year overall survival
 
 0.4
 
-P(FN)≤20% P(FN)≤15%
+P(FN)<=20% P(FN)<=15%
 
 25
 
@@ -969,7 +969,7 @@ Probability of 5-year overall survival
 
 Probability of 5-year overall survival
 
-P(FN)≤20% P(FN)≤15%
+P(FN)<=20% P(FN)<=15%
 
 10
 

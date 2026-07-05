@@ -976,7 +976,7 @@ segmentationmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   segmentation performance (excellent/good/acceptable/poor) based on Dice/IoU
 #'   values.
 #' @param dice_threshold_excellent Dice coefficient threshold for "excellent"
-#'   segmentation quality. Typical: ≥0.90 for clinical deployment.
+#'   segmentation quality. Typical: >=0.90 for clinical deployment.
 #' @param dice_threshold_good Dice coefficient threshold for "good"
 #'   segmentation quality.
 #' @param dice_threshold_acceptable Dice coefficient threshold for minimally

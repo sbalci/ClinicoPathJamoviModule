@@ -39,12 +39,12 @@ result_km <- survival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   explanatory = "treatment",
-  sc = TRUE,           # Generate survival curves
-  risktable = TRUE,    # Include number at risk table
-  ci95 = TRUE,         # Show 95% confidence intervals
-  censored = TRUE,     # Mark censored observations
-  pplot = TRUE,        # Display p-value on plot
-  medianline = "hv"    # Show median survival lines
+  sc = TRUE, # Generate survival curves
+  risktable = TRUE, # Include number at risk table
+  ci95 = TRUE, # Show 95% confidence intervals
+  censored = TRUE, # Mark censored observations
+  pplot = TRUE, # Display p-value on plot
+  medianline = "hv" # Show median survival lines
 )
 
 # Clinical Application:
@@ -68,13 +68,13 @@ data(survival_dates, package = "ClinicoPath")
 
 result_dates <- survival(
   data = survival_dates,
-  tint = TRUE,                # Use dates to calculate time
-  dxdate = "dxdate",          # Diagnosis date
-  fudate = "fudate",          # Follow-up/event date
+  tint = TRUE, # Use dates to calculate time
+  dxdate = "dxdate", # Diagnosis date
+  fudate = "fudate", # Follow-up/event date
   outcome = "outcome",
   explanatory = "treatment",
-  timetypedata = "ymd",       # Date format: YYYY-MM-DD
-  timetypeoutput = "months"   # Output time in months
+  timetypedata = "ymd", # Date format: YYYY-MM-DD
+  timetypeoutput = "months" # Output time in months
 )
 
 # Clinical Context:
@@ -102,16 +102,16 @@ result_competing <- survival(
   data = survival_competing,
   elapsedtime = "elapsedtime",
   outcome = "outcome",
-  outcomeLevel = "Dead of Disease",  # Event of interest
-  dod = "Dead of Disease",           # Disease-specific death
-  dooc = "Dead of Other",            # Death from other causes
-  awd = "Alive w Disease",           # Alive with disease
-  awod = "Alive w/o Disease",        # Alive without disease
-  analysistype = "compete",          # Competing risk analysis
+  outcomeLevel = "Dead of Disease", # Event of interest
+  dod = "Dead of Disease", # Disease-specific death
+  dooc = "Dead of Other", # Death from other causes
+  awd = "Alive w Disease", # Alive with disease
+  awod = "Alive w/o Disease", # Alive without disease
+  analysistype = "compete", # Competing risk analysis
   multievent = TRUE,
   explanatory = "treatment",
   sc = TRUE,
-  ce = TRUE                          # Cumulative events plot
+  ce = TRUE # Cumulative events plot
 )
 
 # Clinical Application:
@@ -143,7 +143,7 @@ result_landmark <- survival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   uselandmark = TRUE,
-  landmark = 6,  # 6-month landmark time
+  landmark = 6, # 6-month landmark time
   explanatory = "response_6mo"
 )
 
@@ -190,9 +190,9 @@ result_stratified <- survival(
   data = survival_stratified,
   elapsedtime = "elapsedtime",
   outcome = "outcome",
-  explanatory = "treatment",  # Variable of interest (must satisfy PH)
+  explanatory = "treatment", # Variable of interest (must satisfy PH)
   stratified_cox = TRUE,
-  strata_variable = "sex"     # Stratify on variable violating PH
+  strata_variable = "sex" # Stratify on variable violating PH
 )
 
 # Clinical Context:
@@ -226,8 +226,8 @@ result_person_time <- survival(
   outcome = "outcome",
   explanatory = "risk_category",
   person_time = TRUE,
-  time_intervals = "12, 36, 60",  # 0-12, 12-36, 36-60, 60+ months
-  rate_multiplier = 100           # Events per 100 person-years
+  time_intervals = "12, 36, 60", # 0-12, 12-36, 36-60, 60+ months
+  rate_multiplier = 100 # Events per 100 person-years
 )
 
 # Clinical Application:
@@ -267,7 +267,7 @@ result_rmst <- survival(
   outcome = "outcome",
   explanatory = "treatment",
   rmst_analysis = TRUE,
-  rmst_tau = 48  # 48-month time horizon
+  rmst_tau = 48 # 48-month time horizon
 )
 
 # Clinical Context:
@@ -304,14 +304,14 @@ result_pairwise <- survival(
   data = survival_test,
   elapsedtime = "elapsedtime",
   outcome = "outcome",
-  explanatory = "treatment",  # 3 groups: 3 pairwise comparisons
+  explanatory = "treatment", # 3 groups: 3 pairwise comparisons
   pw = TRUE,
-  padjustmethod = "holm",     # Holm-Bonferroni correction
+  padjustmethod = "holm", # Holm-Bonferroni correction
   sc = TRUE
 )
 
 # Clinical Application:
-# When comparing ≥3 groups:
+# When comparing >=3 groups:
 # - Overall log-rank test: Any difference between groups?
 # - Pairwise comparisons: Which groups differ?
 # - Multiple testing correction prevents inflated Type I error
@@ -374,8 +374,8 @@ result_cumulative <- survival(
   elapsedtime = "elapsedtime",
   outcome = "outcome",
   explanatory = "treatment",
-  ce = TRUE,  # Cumulative events (1 - survival)
-  ch = TRUE   # Cumulative hazard
+  ce = TRUE, # Cumulative events (1 - survival)
+  ch = TRUE # Cumulative hazard
 )
 
 # Clinical Interpretation:
@@ -486,7 +486,7 @@ result_primary <- survival(
   ci95 = TRUE,
   pplot = TRUE,
   medianline = "hv",
-  cutp = "12, 36, 60",  # 1, 3, 5-year survival
+  cutp = "12, 36, 60", # 1, 3, 5-year survival
   pw = TRUE,
   padjustmethod = "holm"
 )
@@ -680,4 +680,3 @@ result_old <- survival(
 # 8. Pre-specify primary endpoint and subgroups
 # 9. Use landmark analysis for time-dependent covariates
 # 10. Consider RMST when PH assumption violated
-

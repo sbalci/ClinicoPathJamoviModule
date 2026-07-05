@@ -291,28 +291,6 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' and robust statistical summaries. Time intervals form the  foundation of 
 #' person-time follow-up calculations, capturing both participant counts and  
 #' observation duration for accurate incidence rate calculations.
-#'
-#' @examples
-#' \donttest{
-#' # Basic time interval calculation:
-#' timeinterval(
-#'   data = study_data,
-#'   dx_date = "diagnosis_date",
-#'   fu_date = "followup_date",
-#'   time_format = "ymd",
-#'   output_unit = "months"
-#' )
-#'
-#' # With landmark analysis:
-#' timeinterval(
-#'   data = study_data,
-#'   dx_date = "start_date",
-#'   fu_date = "end_date",
-#'   use_landmark = TRUE,
-#'   landmark_time = 6,
-#'   output_unit = "months"
-#' )
-#'}
 #' @param data The data as a data frame containing date columns for interval
 #'   calculation.
 #' @param dx_date Column containing start dates (e.g., diagnosis date, study

@@ -29,7 +29,7 @@ nonparametricClass <- R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -435,7 +435,7 @@ nonparametricClass <- R6::R6Class(
             outcome <- data$outcome
             groups <- data$groups
             
-            # Test independence (simplified — not testable statistically)
+            # Test independence (simplified - not testable statistically)
             assump_table$addRow(rowKey = paste(dep_var, "independence", sep = "_"), values = list(
                 variable = dep_var,
                 assumption = .("Independence"),
@@ -657,7 +657,7 @@ nonparametricClass <- R6::R6Class(
                                                      exact = use_exact,
                                                      correct = continuity_corr)
                         } else if (nlevels(groups) == 2) {
-                            # No pairing variable provided — warn and use positional fallback
+                            # No pairing variable provided - warn and use positional fallback
                             private$.addNotice('WARNING', 'No Pairing Variable',
                                 .('No paired/subject variable specified. Using positional pairing (row order). Add a subject ID variable for correct paired analysis.'))
 
@@ -1666,7 +1666,7 @@ nonparametricClass <- R6::R6Class(
                 effect_sizes <- numeric(n_pairs)
 
                 if (method == "dunn" && requireNamespace("dunn.test", quietly = TRUE)) {
-                    # Dunn's test — method must be lowercase for dunn.test package
+                    # Dunn's test - method must be lowercase for dunn.test package
                     dunn_method <- tolower(p_adjust)
                     res <- dunn.test::dunn.test(outcome, groups, method = dunn_method, alpha = 0.05, kw = FALSE)
                     comparisons <- res$comparisons

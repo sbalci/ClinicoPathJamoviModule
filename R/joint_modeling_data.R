@@ -97,7 +97,7 @@
 #'   \item{hypertension}{Factor. Hypertension status (No, Yes)}
 #'   \item{baseline_proteinuria}{Numeric. Baseline proteinuria (g/day)}
 #'   \item{visit_time}{Numeric. Time of eGFR measurement (months from baseline)}
-#'   \item{egfr}{Numeric. Estimated glomerular filtration rate (mL/min/1.73m²)}
+#'   \item{egfr}{Numeric. Estimated glomerular filtration rate (mL/min/1.73m^2)}
 #'   \item{survival_time}{Numeric. Time to ESRD/death or last follow-up (months)}
 #'   \item{esrd_death_status}{Numeric. Event indicator (0 = censored, 1 = ESRD, 2 = death)}
 #' }
@@ -120,7 +120,7 @@
 #' ggplot(kidney_joint_data, aes(x = visit_time, y = egfr, color = diabetes)) +
 #'   geom_smooth(method = "loess") +
 #'   labs(title = "eGFR Decline by Diabetes Status", 
-#'        x = "Time (months)", y = "eGFR (mL/min/1.73m²)")
+#'        x = "Time (months)", y = "eGFR (mL/min/1.73m^2)")
 #' 
 #' @source Simulated data based on chronic kidney disease cohort studies
 "kidney_joint_data"

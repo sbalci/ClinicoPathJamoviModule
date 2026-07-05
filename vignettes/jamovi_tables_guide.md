@@ -771,7 +771,7 @@ paragraph break. A single `\n` is collapsed like ordinary HTML whitespace and do
 produce a visible break.
 
 Any other HTML (links, lists, headings, tables, colours, `<br>`, etc.) is **not** in the
-allow-list — do not rely on it.
+allow-list - do not rely on it.
 
 ```r
 # Bold / italic emphasis
@@ -789,7 +789,7 @@ table$setNote("multiline", paste0(
 ```
 
 > **Note vs Notice:** this limited-HTML support applies to table footnotes set with
-> `setNote()`. It is distinct from `jmvcore::Notice` content — see the
+> `setNote()`. It is distinct from `jmvcore::Notice` content - see the
 > [notices guide](jamovi_notices_guide.md) for those rules.
 
 ### Dynamic Column Addition

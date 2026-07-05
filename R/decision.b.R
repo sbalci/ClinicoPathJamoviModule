@@ -34,14 +34,14 @@ decisionClass <- if (requireNamespace("jmvcore"))
             # Constants for maintainability
             NOMOGRAM_LABEL_SIZE = 14/5,
 
-            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [SECURITY/D-HIGH] FIXED 2026-05-14 — test_name/gold_name now wrapped via private$.safeHtmlOutput
+            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [SECURITY/D-HIGH] FIXED 2026-05-14 - test_name/gold_name now wrapped via private$.safeHtmlOutput
             #     before sprintf in .generateNaturalLanguageSummary (~L625) and .generateReportTemplate (~L666)
             #   [hygiene/notices] consolidate the custom private$.addNotice system (parallels jmvcore::Notice)
             #     into jmvcore::Notice; reference impl: decisioncalculator.b.R (17 uses)
-            #   [hygiene/jmvcore] some bare stop()/na.omit() in helpers — /jamovify-function decision --pattern=error,na
-            #   [integration] 68 declared outputs vs 32 setters (2.1×); verify each show* flag — /check-function-full decision
-            #   [statistical-validation] /review-function decision — Wilson vs Clopper-Pearson CIs; post-test prob direction
+            #   [hygiene/jmvcore] some bare stop()/na.omit() in helpers - /jamovify-function decision --pattern=error,na
+            #   [integration] 68 declared outputs vs 32 setters (2.1×); verify each show* flag - /check-function-full decision
+            #   [statistical-validation] /review-function decision - Wilson vs Clopper-Pearson CIs; post-test prob direction
             #   [i18n] 91 .() wraps but no .po catalog; bootstrap jamovi/i18n/
 
             .init = function() {

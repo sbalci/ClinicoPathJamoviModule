@@ -255,7 +255,7 @@ characteristics and relationship with VI and EMVI
 status are summarised in Table 1. Both VI and
 EMVI were significantly associated with T-stage, Nstage, AJCC stage, tumour deposits, perineural invasion and resection margin status. In addition, EMVI
 (but not VI) was significantly associated with tumour
-size ≥ 5.0 cm, tumour grade and number of tumour
+size >= 5.0 cm, tumour grade and number of tumour
 blocks stained with an elastin stain.
 VI DETECTION AND ASSOCIATION WITH
 SUBMITTED TUMOUR BLOCKS
@@ -271,7 +271,7 @@ for six blocks and 97% for seven blocks; EMVI = 35%
 for one block, 73% for three blocks, 89% for five
 blocks and 96% for six and seven blocks; Figure 4.A,
 B). Similar trends were observed when the
-analysis was restricted to tumours ≥ 5.0 cm in maximum dimension (n = 84) (Figure 5A,B), tumours
+analysis was restricted to tumours >= 5.0 cm in maximum dimension (n = 84) (Figure 5A,B), tumours
 < 5.0 cm in maximum dimension (n = 133)
 (Figure 5C,D), stage 2 CRC (n = 84) (Figure 5E,F) and
 patients not receiving neoadjuvant therapy (n = 171)
@@ -625,7 +625,7 @@ Site, n (%)
 
 0.058
 
-Tumour size ≥ 5, n
+Tumour size >= 5, n
 (%)
 0.052
 

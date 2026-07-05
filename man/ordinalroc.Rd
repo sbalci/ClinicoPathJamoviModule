@@ -63,9 +63,9 @@ uses observed cumulative distributions (non-parametric), binormal assumes
 normal distributions within categories, proportional odds uses logistic
 regression framework.}
 
-\item{cumulative_direction}{Direction for cumulative probabilities. Use ≥
+\item{cumulative_direction}{Direction for cumulative probabilities. Use >=
 if higher predictor values indicate higher severity (e.g., higher biomarker
-= worse grade). Use ≤ if lower predictor values indicate higher severity.}
+= worse grade). Use <= if lower predictor values indicate higher severity.}
 
 \item{calculate_auc}{Calculate area under the ordinal ROC curve. For
 ordinal outcomes, this is often called the concordance probability or

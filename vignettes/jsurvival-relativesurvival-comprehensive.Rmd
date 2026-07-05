@@ -712,27 +712,27 @@ relativesurvival(
 
 | # | Option | Type | Default | Range/Choices | Section Demonstrated |
 |---|--------|------|---------|---------------|---------------------|
-| 1 | `time` | Variable (numeric) | -- | continuous | 1. Basic Analysis |
-| 2 | `status` | Variable (factor/numeric) | -- | binary 0/1 | 1. Basic Analysis |
-| 3 | `age` | Variable (numeric) | -- | 0-120 | 1. Basic Analysis |
-| 4 | `sex` | Variable (factor) | -- | male/female mappings | 1. Basic Analysis |
-| 5 | `year` | Variable (numeric) | -- | 1900-2100 | 1. Basic Analysis |
-| 6 | `covariates` | Variables (numeric/factor) | -- | any | 8. Regression Models |
+| 1 | `time` | Variable (numeric) | - | continuous | 1. Basic Analysis |
+| 2 | `status` | Variable (factor/numeric) | - | binary 0/1 | 1. Basic Analysis |
+| 3 | `age` | Variable (numeric) | - | 0-120 | 1. Basic Analysis |
+| 4 | `sex` | Variable (factor) | - | male/female mappings | 1. Basic Analysis |
+| 5 | `year` | Variable (numeric) | - | 1900-2100 | 1. Basic Analysis |
+| 6 | `covariates` | Variables (numeric/factor) | - | any | 8. Regression Models |
 | 7 | `ratetable` | List | `us` | us/mn/fr/slovenia/turkey/germany/uk/italy/japan/spain/brazil/south_korea/china/india/custom | 3. Rate Tables |
 | 8 | `method` | List | `poharperme` | poharperme/ederer1/ederer2/hakulinen | 2. Estimation Methods |
 | 9 | `time_scale` | List | `years` | years/months/days | 9. Time Scales |
-| 10 | `net_survival` | Bool | `true` | -- | 4. Net Survival |
-| 11 | `excess_mortality` | Bool | `true` | -- | 4. Excess Mortality |
-| 12 | `crude_probability` | Bool | `true` | -- | 5. Crude Probabilities |
-| 13 | `age_standardized` | Bool | `false` | -- | 6. Age Standardization |
-| 14 | `period_analysis` | Bool | `false` | -- | 7. Period Analysis |
+| 10 | `net_survival` | Bool | `true` | - | 4. Net Survival |
+| 11 | `excess_mortality` | Bool | `true` | - | 4. Excess Mortality |
+| 12 | `crude_probability` | Bool | `true` | - | 5. Crude Probabilities |
+| 13 | `age_standardized` | Bool | `false` | - | 6. Age Standardization |
+| 14 | `period_analysis` | Bool | `false` | - | 7. Period Analysis |
 | 15 | `cohort_year` | String | `""` | e.g., "2010-2015" | 7b. Cohort Definition |
 | 16 | `regression_model` | List | `none` | none/additive/multiplicative/flexible | 8. Regression Models |
 | 17 | `spline_df` | Integer | `4` | 1-10 | 8c. Flexible Parametric |
-| 18 | `plot_observed` | Bool | `true` | -- | 1. Basic Analysis |
-| 19 | `plot_expected` | Bool | `true` | -- | 1. Basic Analysis |
-| 20 | `plot_relative` | Bool | `true` | -- | 1. Basic Analysis |
-| 21 | `plot_excess` | Bool | `true` | -- | 4b. Excess Mortality |
+| 18 | `plot_observed` | Bool | `true` | - | 1. Basic Analysis |
+| 19 | `plot_expected` | Bool | `true` | - | 1. Basic Analysis |
+| 20 | `plot_relative` | Bool | `true` | - | 1. Basic Analysis |
+| 21 | `plot_excess` | Bool | `true` | - | 4b. Excess Mortality |
 | 22 | `confidence_level` | Number | `0.95` | 0.50-0.99 | 10b. Custom Confidence |
 
 All 22 `.a.yaml` options are covered in the examples above.

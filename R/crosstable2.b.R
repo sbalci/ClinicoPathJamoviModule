@@ -11,7 +11,7 @@
 #' @details
 #' The function cleans variable names and applies original labels. It then builds
 #' a formula based on the cleaned data and performs the appropriate statistical
-#' test (e.g. chi-square or Fisher’s exact test). Detailed user guidance is provided
+#' test (e.g. chi-square or Fisher's exact test). Detailed user guidance is provided
 #' via HTML to-do messages.
 #'
 #' @param data A data frame containing the study data.
@@ -259,7 +259,7 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
                 # Detecting the option by CLASS (not by name) means any variable option
                 # added later is escaped automatically.
                 #
-                # Variables are NOT re-emitted through private$.asArgs() — doing so
+                # Variables are NOT re-emitted through private$.asArgs() - doing so
                 # previously duplicated them in the generated syntax (the "double
                 # variables" bug). All non-variable options keep jmvcore's per-option
                 # sourcify so formatting stays consistent with jamovi.

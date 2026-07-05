@@ -14,9 +14,9 @@
 #'   \item{total_points}{Integer. Total number of grid points examined (100)}
 #'   \item{boundary_intersections}{Integer. Grid line intersections with vessel boundaries}
 #'   \item{object_count}{Integer. Number of discrete vessels counted}
-#'   \item{reference_area}{Numeric. Total reference area examined (μm²)}
-#'   \item{grid_spacing}{Numeric. Distance between grid lines (μm)}
-#'   \item{section_thickness}{Numeric. Histological section thickness (μm)}
+#'   \item{reference_area}{Numeric. Total reference area examined (um^2)}
+#'   \item{grid_spacing}{Numeric. Distance between grid lines (um)}
+#'   \item{section_thickness}{Numeric. Histological section thickness (um)}
 #'   \item{Aa}{Numeric. Calculated area density (fraction)}
 #'   \item{Vv}{Numeric. Calculated volume density (fraction)}
 #' }
@@ -24,10 +24,10 @@
 #' @details
 #' **Study Design:**
 #' - 50 histological images from 3 diagnostic groups
-#' - Systematic 10×10 grid overlay (100 points per image)
-#' - Grid spacing: 10 μm
-#' - Reference area: 1000×1000 μm (1 mm²)
-#' - Section thickness: 5 μm (standard histology)
+#' - Systematic 10x10 grid overlay (100 points per image)
+#' - Grid spacing: 10 um
+#' - Reference area: 1000x1000 um (1 mm^2)
+#' - Section thickness: 5 um (standard histology)
 #'
 #' **Clinical Context:**
 #' Vessel density is a critical parameter in tumor pathology. Malignant tumors
@@ -53,7 +53,7 @@
 #'    - Use: 3D estimate from 2D sections
 #'
 #' 3. **Boundary Density (Ba)**
-#'    - Formula: Ba = (2 × boundary_intersections) / line_length
+#'    - Formula: Ba = (2 x boundary_intersections) / line_length
 #'    - Meaning: Vessel boundary length per unit area
 #'    - Use: Measure of vessel complexity
 #'
@@ -63,7 +63,7 @@
 #'    - Use: Vessel count density
 #'
 #' 5. **Surface Density (Sv)**
-#'    - Formula: Sv = 2 × Ba
+#'    - Formula: Sv = 2 x Ba
 #'    - Meaning: Vessel surface area per unit volume
 #'    - Use: Exchange surface quantification
 #'
@@ -129,7 +129,7 @@
 #' - Statistical tests should show significant differences between groups
 #'
 #' **Quality Control:**
-#' - Grid spacing appropriate for vessel size (10 μm)
+#' - Grid spacing appropriate for vessel size (10 um)
 #' - Adequate number of points per image (100 points)
 #' - Multiple images per diagnosis (16-17 per group)
 #' - Systematic random sampling approach

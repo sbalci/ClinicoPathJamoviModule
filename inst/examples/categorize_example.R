@@ -102,8 +102,8 @@ LABEL OPTIONS:
 
 INTERVAL NOTATION:
 
-• (a, b] → Right-closed: a < x ≤ b (default)
-• [a, b) → Left-closed: a ≤ x < b
+• (a, b] → Right-closed: a < x <= b (default)
+• [a, b) → Left-closed: a <= x < b
 • include.lowest controls first interval
 
 ═══════════════════════════════════════════════════════════
@@ -405,10 +405,12 @@ cat("\n\nMethod 3: MEAN±SD (statistical)\n")
 categorize(data = categorize_test, var = "age", method = "meansd", sdmult = 1)
 
 cat("\n\nMethod 4: MANUAL (clinically defined)\n")
-categorize(data = categorize_test, var = "age", method = "manual",
-          breaks = "20, 40, 65, 90",
-          labels = "custom",
-          customlabels = "Young Adult, Middle Aged, Senior")
+categorize(
+  data = categorize_test, var = "age", method = "manual",
+  breaks = "20, 40, 65, 90",
+  labels = "custom",
+  customlabels = "Young Adult, Middle Aged, Senior"
+)
 
 # ═══════════════════════════════════════════════════════════
 # CLINICAL RESEARCH SCENARIOS

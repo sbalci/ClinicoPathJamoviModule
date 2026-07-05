@@ -1,4 +1,3 @@
-
 stereologyClass <- R6::R6Class(
     "stereologyClass",
     inherit = stereologyBase,
@@ -36,31 +35,32 @@ stereologyClass <- R6::R6Class(
             }
 
             # Extract and prepare data
-            tryCatch({
-                private$.prepareData()
+            tryCatch(
+                {
+                    private$.prepareData()
 
-                # Calculate stereological parameters
-                private$.calculateStereology()
+                    # Calculate stereological parameters
+                    private$.calculateStereology()
 
-                # Populate tables
-                private$.populateDescriptives()
-                private$.populateStereologyTable()
+                    # Populate tables
+                    private$.populateDescriptives()
+                    private$.populateStereologyTable()
 
-                # Group comparison if requested
-                if (self$options$showGroupComparison && !is.null(self$options$groupVar)) {
-                    private$.performGroupComparison()
+                    # Group comparison if requested
+                    if (self$options$showGroupComparison && !is.null(self$options$groupVar)) {
+                        private$.performGroupComparison()
+                    }
+
+                    # Create plot
+                    if (self$options$showPlot && self$results$plot$isNotFilled()) {
+                        private$.preparePlotData()
+                    }
+                },
+                error = function(e) {
+                    self$setError(paste("Error in stereology analysis:", e$message))
                 }
-
-                # Create plot
-                if (self$options$showPlot && self$results$plot$isNotFilled()) {
-                    private$.preparePlotData()
-                }
-
-            }, error = function(e) {
-                self$setError(paste("Error in stereology analysis:", e$message))
-            })
+            )
         },
-
         .prepareData = function() {
             # Extract variables
             raw_data <- self$data
@@ -174,7 +174,6 @@ stereologyClass <- R6::R6Class(
 
             private$.results_cache <- results
         },
-
         .addConfidenceIntervals = function(results) {
             n_boot <- self$options$bootstrapIterations
 
@@ -203,12 +202,10 @@ stereologyClass <- R6::R6Class(
             table <- self$results$descriptives
             table$setRow(rowNo = 1, values = list())
         },
-
         .initStereologyTable = function() {
             table <- self$results$stereologyTable
             # Rows will be added dynamically based on selected parameters
         },
-
         .initGroupTables = function() {
             if (!self$options$showGroupComparison || is.null(self$options$groupVar)) {
                 return()
@@ -229,7 +226,6 @@ stereologyClass <- R6::R6Class(
                 mean_ref_area = as.numeric(mean(data$ref_area, na.rm = TRUE))
             ))
         },
-
         .populateStereologyTable = function() {
             table <- self$results$stereologyTable
             results <- private$.results_cache
@@ -255,7 +251,6 @@ stereologyClass <- R6::R6Class(
                 row_num <- row_num + 1
             }
         },
-
         .performGroupComparison = function() {
             data <- private$.data
             results <- private$.results_cache
@@ -317,7 +312,6 @@ stereologyClass <- R6::R6Class(
             # Statistical tests between groups
             private$.performGroupTests(test_table)
         },
-
         .performGroupTests = function(table) {
             data <- private$.data
 
@@ -371,7 +365,6 @@ stereologyClass <- R6::R6Class(
 
             private$.plot_data <- results
         },
-
         .plot = function(image, ggtheme, theme, ...) {
             if (is.null(private$.plot_data) || length(private$.plot_data) == 0) {
                 return()
@@ -394,9 +387,11 @@ stereologyClass <- R6::R6Class(
                     parameter = param,
                     mean = param_data$mean,
                     lower = ifelse(self$options$showConfidenceIntervals,
-                                 param_data$lower, param_data$mean),
+                        param_data$lower, param_data$mean
+                    ),
                     upper = ifelse(self$options$showConfidenceIntervals,
-                                 param_data$upper, param_data$mean),
+                        param_data$upper, param_data$mean
+                    ),
                     stringsAsFactors = FALSE
                 ))
             }
@@ -406,7 +401,8 @@ stereologyClass <- R6::R6Class(
                 p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = parameter, y = mean)) +
                     ggplot2::geom_col(fill = "#4D94CC", alpha = 0.7) +
                     ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper),
-                                         width = 0.2, linewidth = 1) +
+                        width = 0.2, linewidth = 1
+                    ) +
                     ggplot2::labs(
                         x = "Stereological Parameter",
                         y = "Estimated Value",
@@ -419,7 +415,8 @@ stereologyClass <- R6::R6Class(
                 p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = parameter, y = mean)) +
                     ggplot2::geom_point(size = 3, color = "#4D94CC") +
                     ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper),
-                                         width = 0.2) +
+                        width = 0.2
+                    ) +
                     ggplot2::labs(
                         x = "Stereological Parameter",
                         y = "Estimated Value"
@@ -430,7 +427,8 @@ stereologyClass <- R6::R6Class(
                 p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = parameter, y = mean)) +
                     ggplot2::geom_point(size = 3, color = "#4D94CC") +
                     ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper),
-                                         width = 0.2) +
+                        width = 0.2
+                    ) +
                     ggplot2::labs(
                         x = "Stereological Parameter",
                         y = "Estimated Value"
@@ -523,7 +521,7 @@ histological sections using systematic sampling methods. It provides unbiased es
 <h4>Quality Control</h4>
 <ul>
 <li>Use systematic uniform random sampling</li>
-<li>Ensure adequate number of grid points (typically ≥100)</li>
+<li>Ensure adequate number of grid points (typically >=100)</li>
 <li>Verify grid spacing relative to object size</li>
 <li>Check for systematic bias in section orientation</li>
 <li>Calculate confidence intervals to assess precision</li>
@@ -531,7 +529,6 @@ histological sections using systematic sampling methods. It provides unbiased es
 "
             self$results$methodology$setContent(html)
         },
-
         .setReferences = function() {
             html <- "
 <h3>References</h3>

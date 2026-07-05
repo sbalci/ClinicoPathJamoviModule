@@ -15,10 +15,12 @@ Based on the comprehensive code review, **4 critical patches** and **1 enhanceme
 ## CRITICAL FIX #1: RMST Standard Error Calculation ✅
 
 ### Issue
+
 **SEVERITY**: CRITICAL (Mathematical/Statistical Correctness)  
 **Location**: [R/survivalcont.b.R:3335-3351](R/survivalcont.b.R:3335-3351)
 
-**Problem**: 
+**Problem**:
+
 - Used ad-hoc SE approximation: `sqrt(sum(km_fit$std.err^2)) * tau / max(km_fit$time)`
 - 10% fallback was arbitrary and statistically invalid
 - Resulted in **incorrect confidence intervals** for RMST
@@ -26,9 +28,11 @@ Based on the comprehensive code review, **4 critical patches** and **1 enhanceme
 **Clinical Impact**: CIs could be misleading, affecting clinical decisions
 
 ### Fix Applied
+
 **Location**: [R/survivalcont.b.R:3341-3405](R/survivalcont.b.R:3341-3405)
 
 **Implementation**:
+
 ```r
 # Calculate proper RMST variance using Greenwood's formula
 # Based on Andersen et al. (1993) and Uno et al. (2014)
@@ -67,6 +71,7 @@ ci_upper <- min(tau, rmst + 1.96 * se_rmst)
 ```
 
 **Key Improvements**:
+
 - ✅ Proper Greenwood-based variance for RMST (Andersen et al. 1993, Uno et al. 2014)
 - ✅ Weighted integration over survival curve variance
 - ✅ Fallback with user notification (WARNING notice)
@@ -74,6 +79,7 @@ ci_upper <- min(tau, rmst + 1.96 * se_rmst)
 - ✅ Added notices for insufficient data or fallback SE
 
 **Table Note Updated**:
+
 ```r
 rmst_table$setNote("method", .("RMST calculated using trapezoidal integration with Greenwood-based variance (Andersen et al. 1993, Uno et al. 2014). For two-group comparisons, consider survRM2::rmst2() for additional inference statistics."))
 ```
@@ -83,10 +89,12 @@ rmst_table$setNote("method", .("RMST calculated using trapezoidal integration wi
 ## CRITICAL FIX #2: Proportional Hazards Assumption Testing ✅
 
 ### Issue
+
 **SEVERITY**: CRITICAL (Missing Assumption Validation)  
 **Location**: Cox regression method ([R/survivalcont.b.R:1575-1665](R/survivalcont.b.R:1575-1665))
 
 **Problem**:
+
 - No statistical test for proportional hazards assumption
 - Users could violate assumptions unknowingly
 - Cox HR estimates unreliable when PH violated
@@ -94,9 +102,11 @@ rmst_table$setNote("method", .("RMST calculated using trapezoidal integration wi
 **Clinical Impact**: Invalid inference if PH assumption violated
 
 ### Fix Applied
+
 **Location**: [R/survivalcont.b.R:1630-1689](R/survivalcont.b.R:1630-1689)
 
 **Implementation**:
+
 ```r
 # Test Proportional Hazards Assumption using cox.zph() ----
 # This is critical for validating Cox model assumptions
@@ -150,6 +160,7 @@ tryCatch({
 ```
 
 **Key Features**:
+
 - ✅ Global PH test with Schoenfeld residuals
 - ✅ Individual covariate PH tests
 - ✅ STRONG_WARNING when PH violated (p<0.05)
@@ -161,15 +172,18 @@ tryCatch({
 ## CRITICAL FIX #3: Remove Debug message() Calls ✅
 
 ### Issue
+
 **SEVERITY**: CRITICAL (Production Code Quality)  
 **Location**: Multiple locations throughout file
 
 **Problem**:
+
 - Debug `message()` calls in production code
 - Clutter user console
 - Unprofessional output
 
 **Locations Removed**:
+
 1. [R/survivalcont.b.R:2714-2722](R/survivalcont.b.R:2714-2722) - Multiple cutoffs debug
 2. [R/survivalcont.b.R:3019-3029](R/survivalcont.b.R:3019-3029) - Table population debug
 3. [R/survivalcont.b.R:3079](R/survivalcont.b.R:3079) - Log-rank error message
@@ -181,6 +195,7 @@ tryCatch({
 ### Fix Applied
 
 **All debug messages removed**:
+
 ```r
 # BEFORE
 message(.('Data columns: {cols}'), cols = paste(names(mydata), collapse = ", "))
@@ -192,6 +207,7 @@ message(.('Debug survival for {group}...'))
 ```
 
 **Memory monitoring converted to INFO notice** ([R/survivalcont.b.R:4145-4153](R/survivalcont.b.R:4145-4153)):
+
 ```r
 # Large dataset detected - only notify for very large (>100k rows)
 if (n_rows > 100000) {
@@ -205,6 +221,7 @@ if (n_rows > 100000) {
 ```
 
 **Error handlers cleaned**:
+
 ```r
 # BEFORE
 message(.('Warning in {context}: {warning}'), context, warning)
@@ -221,10 +238,12 @@ suppressWarnings(analysis_function())
 ## CRITICAL FIX #4: Small Group Size Guards After Cut-Off ✅
 
 ### Issue
+
 **SEVERITY**: HIGH (Misuse Detection)  
 **Location**: After cut-off creation ([R/survivalcont.b.R:1419](R/survivalcont.b.R:1419))
 
 **Problem**:
+
 - No validation of group sizes after cut-off
 - Small groups → unreliable log-rank tests, Cox regression
 - No warning for few events per group
@@ -232,9 +251,11 @@ suppressWarnings(analysis_function())
 **Clinical Impact**: Invalid statistical tests with small groups
 
 ### Fix Applied
+
 **Location**: [R/survivalcont.b.R:1421-1467](R/survivalcont.b.R:1421-1467)
 
 **Implementation**:
+
 ```r
 ## Validate group sizes after cut-off ----
 if (!is.null(cutoffdata) && !is.null(results$name3contexpl)) {
@@ -281,6 +302,7 @@ if (!is.null(cutoffdata) && !is.null(results$name3contexpl)) {
 ```
 
 **Key Features**:
+
 - ✅ Validates all groups created by cut-off
 - ✅ STRONG_WARNING for n<10 (unreliable tests)
 - ✅ WARNING for n=10-19 (limited power)
@@ -295,13 +317,14 @@ if (!is.null(cutoffdata) && !is.null(results$name3contexpl)) {
 **Location**: [R/survivalcont.b.R:3397-3405](R/survivalcont.b.R:3397-3405)
 
 **Added**:
+
 ```r
 # Insufficient data for RMST calculation
 if (length(times) < 2) {
     private$.addNotice(
         name = paste0('insufficientRMST_', gsub("[^a-zA-Z0-9]", "", as.character(group))),
         type = jmvcore::NoticeType$WARNING,
-        message = sprintf('Group "%s" has insufficient follow-up events for reliable RMST. Requires ≥2 distinct event times.', as.character(group)),
+        message = sprintf('Group "%s" has insufficient follow-up events for reliable RMST. Requires >=2 distinct event times.', as.character(group)),
         position = 3
     )
 }
@@ -312,12 +335,14 @@ if (length(times) < 2) {
 ## Testing & Validation
 
 ### Syntax Validation
+
 ```bash
 Rscript -e "source('R/survivalcont.b.R')"
 ✓ No syntax errors detected
 ```
 
 ### Changes Summary
+
 - **Files Modified**: 1 ([R/survivalcont.b.R](R/survivalcont.b.R))
 - **Lines Added**: ~150
 - **Lines Removed**: ~40
@@ -326,6 +351,7 @@ Rscript -e "source('R/survivalcont.b.R')"
 - **Debug Messages Removed**: 13
 
 ### Code Quality Improvements
+
 - ✅ Mathematically correct RMST SE (Greenwood-based)
 - ✅ Proper PH assumption testing
 - ✅ Production-ready (no debug output)
@@ -342,6 +368,7 @@ Rscript -e "source('R/survivalcont.b.R')"
 **Updated Total**: 38 notices
 
 ### Breakdown by Type
+
 - **ERROR**: 11 (unchanged)
 - **STRONG_WARNING**: 8 (+5: PH violations, small groups, few events)
 - **WARNING**: 14 (+3: small groups, RMST fallback, insufficient RMST)
@@ -352,6 +379,7 @@ Rscript -e "source('R/survivalcont.b.R')"
 ## Clinical Readiness Assessment
 
 ### Before Patches
+
 - ❌ RMST SE incorrect (blocking issue)
 - ❌ No PH assumption testing
 - ⚠️ Debug messages in production
@@ -360,6 +388,7 @@ Rscript -e "source('R/survivalcont.b.R')"
 **Status**: NEEDS_VALIDATION
 
 ### After Patches
+
 - ✅ RMST SE mathematically correct
 - ✅ PH assumption tested automatically
 - ✅ Production-ready code (no debug output)
@@ -373,6 +402,7 @@ Rscript -e "source('R/survivalcont.b.R')"
 ## Remaining Recommendations (Optional)
 
 ### High Priority (Not Blocking)
+
 1. **Validation against reference datasets**
    - Compare RMST to survRM2::rmst2()
    - Compare Cox to reference survival analyses
@@ -384,12 +414,14 @@ Rscript -e "source('R/survivalcont.b.R')"
    - Add clinical examples
 
 ### Medium Priority (Enhancements)
+
 1. **Add glossary panel** (planned from code review)
 2. **Add copy-ready report sentences** (planned from code review)
 3. **Add color-blind safe palettes** (accessibility)
 4. **Add guided mode wizard** (user experience)
 
 ### Low Priority (Future)
+
 1. Unit tests for RMST variance calculation
 2. Performance optimization (cache KM fits)
 3. Internationalization (TR/EN)
@@ -399,21 +431,25 @@ Rscript -e "source('R/survivalcont.b.R')"
 ## References
 
 **RMST Variance**:
+
 - Andersen PK, et al. (1993). Statistical Models Based on Counting Processes. Springer.
 - Uno H, et al. (2014). Moving beyond the hazard ratio in quantifying the between-group difference in survival analysis. JCO.
 
 **Proportional Hazards Testing**:
+
 - Schoenfeld D (1982). Partial residuals for the proportional hazards regression model. Biometrika.
 - Grambsch PM, Therneau TM (1994). Proportional hazards tests and diagnostics based on weighted residuals. Biometrika.
 
 **Events Per Variable**:
+
 - Peduzzi P, et al. (1996). A simulation study of the number of events per variable in logistic regression analysis. J Clin Epidemiol.
 - Vittinghoff E, McCulloch CE (2007). Relaxing the rule of ten events per variable. Am J Epidemiol.
 
 ---
 
 **Completion Date**: 2025-12-20  
-**Next Steps**: 
+**Next Steps**:
+
 1. Validate with reference datasets
 2. Independent statistical review
 3. Clinical user testing

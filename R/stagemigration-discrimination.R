@@ -63,8 +63,8 @@ stagemigration_calculateConcordance <- function(data, old_stage, new_stage,
             # (Same patients measured with two staging systems)
             # ===================================================================
 
-            old_lp <- predict(old_cox, type = "lp")
-            new_lp <- predict(new_cox, type = "lp")
+            old_lp <- stats::predict(old_cox, type = "lp")
+            new_lp <- stats::predict(new_cox, type = "lp")
 
             # Calculate correlation between linear predictors
             valid_idx <- complete.cases(old_lp, new_lp)
@@ -152,7 +152,7 @@ stagemigration_calculateConcordance <- function(data, old_stage, new_stage,
 
                 # LR test: new vs combined
                 lr_new <- 2 * (combined_cox$loglik[2] - new_cox$loglik[2])
-                df_new <- length(coef(combined_cox)) - length(coef(new_cox))
+                df_new <- length(stats::coef(combined_cox)) - length(stats::coef(new_cox))
                 p_new <- pchisq(lr_new, df_new, lower.tail = FALSE)
 
                 # LR test: old vs combined

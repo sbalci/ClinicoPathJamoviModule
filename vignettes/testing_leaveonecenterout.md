@@ -44,7 +44,7 @@
 | 2.1 | LASSO logistic 1SE | logistic | true | lambda.1se | Results with LASSO variable selection |
 | 2.2 | LASSO logistic min | logistic | true | lambda.min | Different lambda, potentially different AUCs |
 | 2.3 | LASSO Cox | cox | true | lambda.1se | C-index from penalized Cox |
-| 2.4 | LASSO + linear | linear | true | -- | Warning notice: LASSO not available for linear |
+| 2.4 | LASSO + linear | linear | true | - | Warning notice: LASSO not available for linear |
 
 ### 3. Option Toggles
 

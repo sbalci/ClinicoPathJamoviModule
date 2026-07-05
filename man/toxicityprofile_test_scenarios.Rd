@@ -34,7 +34,7 @@ toxicity profile analysis capabilities and validation requirements:
 \itemize{
 \item \strong{Basic Toxicity Profiling}: Frequency distributions and grade analysis
 \item \strong{Treatment Comparisons}: Statistical testing and risk assessment
-\item \strong{High-Grade Event Analysis}: Focus on serious adverse events (Grade ≥3)
+\item \strong{High-Grade Event Analysis}: Focus on serious adverse events (Grade >=3)
 \item \strong{System Organ Class Analysis}: Regulatory reporting by organ system
 \item \strong{Time-to-Event Analysis}: Cumulative incidence and timing patterns
 \item \strong{Dose-Response Analysis}: Dose-dependent toxicity relationships

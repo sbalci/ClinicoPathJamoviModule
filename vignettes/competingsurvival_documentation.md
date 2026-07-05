@@ -6,7 +6,7 @@ The `competingsurvival` function provides clinicians and pathologists with a sin
 
 The function supports **overall survival** (all deaths are events), **cause-specific survival** (only disease deaths are events, competing deaths are censored), and **competing risks analysis** (cumulative incidence functions that properly account for the impossibility of experiencing the event of interest after experiencing a competing event). The competing risks mode offers Gray's test for group comparisons, Fine-Gray subdistribution hazard regression, cumulative incidence estimation at user-specified timepoints, and three visualization types: CIF curves, stacked probability plots, and 1-KM vs CIF bias comparison plots.
 
-All analyses are built on established R packages -- `survival` and `finalfit` for standard survival, `cmprsk` for competing risks -- and present results through jamovi's structured table, plot, and HTML output system. The function resides in the SurvivalD > Drafts menu pending validation against published reference datasets.
+All analyses are built on established R packages - `survival` and `finalfit` for standard survival, `cmprsk` for competing risks - and present results through jamovi's structured table, plot, and HTML output system. The function resides in the SurvivalD > Drafts menu pending validation against published reference datasets.
 
 ## Feature Details
 
@@ -55,14 +55,14 @@ All analyses are built on established R packages -- `survival` and `finalfit` fo
 
 | Feature | YAML Argument | UI Label | Results Section | R Function |
 |---|---|---|---|---|
-| Welcome / instructions panel | (auto) | -- | `todo` (Html) | `.run()` sets welcome HTML when `outcome` or `overalltime` is NULL |
-| Analysis summary | (auto) | -- | `summary` (Html) | `.formatSurvivalResults()` or `.formatEnhancedCompetingRisksResults()` builds HTML |
-| Survival / HR table | (auto) | -- | `survivalTable` (Table) | `.formatSurvivalResults()` parses finalfit HR text; `.formatEnhancedCompetingRisksResults()` adds CR and Fine-Gray rows |
-| Cumulative incidence table | (auto) | -- | `cuminc` (Table, visible when compete) | `.formatCumulativeIncidence()` populates from cuminc result at specified timepoints |
-| CIF curves plot | (auto) | -- | `comprisksPlot` (700x400 Image, visible when compete) | `.plotCompetingRisks()` converts serialized cuminc to long-format df; `ggplot2::geom_step()` |
-| Fine-Gray coefficient table | (auto) | -- | `fineGrayTable` (Table, visible when subdistribution) | `.formatEnhancedCompetingRisksResults()` extracts `summary(crr_model)$coef` |
-| Clinical interpretation | (auto) | -- | `interpretation` (Html) | `.generateInterpretation()` switch on analysis_type |
-| Assumptions & caveats | (auto) | -- | `assumptions` (Html) | `.generateInterpretation()` sets fixed competing risks assumptions HTML |
+| Welcome / instructions panel | (auto) | - | `todo` (Html) | `.run()` sets welcome HTML when `outcome` or `overalltime` is NULL |
+| Analysis summary | (auto) | - | `summary` (Html) | `.formatSurvivalResults()` or `.formatEnhancedCompetingRisksResults()` builds HTML |
+| Survival / HR table | (auto) | - | `survivalTable` (Table) | `.formatSurvivalResults()` parses finalfit HR text; `.formatEnhancedCompetingRisksResults()` adds CR and Fine-Gray rows |
+| Cumulative incidence table | (auto) | - | `cuminc` (Table, visible when compete) | `.formatCumulativeIncidence()` populates from cuminc result at specified timepoints |
+| CIF curves plot | (auto) | - | `comprisksPlot` (700x400 Image, visible when compete) | `.plotCompetingRisks()` converts serialized cuminc to long-format df; `ggplot2::geom_step()` |
+| Fine-Gray coefficient table | (auto) | - | `fineGrayTable` (Table, visible when subdistribution) | `.formatEnhancedCompetingRisksResults()` extracts `summary(crr_model)$coef` |
+| Clinical interpretation | (auto) | - | `interpretation` (Html) | `.generateInterpretation()` switch on analysis_type |
+| Assumptions & caveats | (auto) | - | `assumptions` (Html) | `.generateInterpretation()` sets fixed competing risks assumptions HTML |
 
 ## Complete Options-to-Results Matrix
 
@@ -94,7 +94,7 @@ The table below shows which options affect which result items. An "X" means the 
 | Event definition | dod=1, dooc=1 | dod=1, dooc=0 | dod=1, dooc=2 |
 | Required levels | dod or dooc | dod | dod and dooc |
 | R engine | `finalfit::finalfit()` or `survfit()~1` | `finalfit::finalfit()` or `survfit()~1` | `cmprsk::cuminc()` + `finalfit::crrmulti()` |
-| Optional models | -- | -- | Gray's test, Fine-Gray (`cmprsk::crr()`) |
+| Optional models | - | - | Gray's test, Fine-Gray (`cmprsk::crr()`) |
 | survivalTable content | Cox HR from finalfit | Cox HR from finalfit | Standard CR HR + optional Fine-Gray HR |
 | cuminc table | hidden | hidden | CIF estimates at timepoints |
 | Plots | hidden | hidden | CIF curves + optional stacked + optional KM vs CIF |

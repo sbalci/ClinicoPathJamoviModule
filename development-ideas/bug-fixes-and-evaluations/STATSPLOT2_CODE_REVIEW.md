@@ -15,6 +15,7 @@
 **User Experience**: GOOD (Clinical: NEEDS_WORK)
 
 ### Quick Stats
+
 - **Lines of Code**: 1,143 (.b.R)
 - **Functions**: 15 private methods
 - **Complexity**: Medium-High
@@ -28,6 +29,7 @@
 ### 1. **Excellent Architecture & Design** ⭐⭐⭐⭐⭐
 
 **R6 Class Structure** (lines 8-1142):
+
 ```r
 statsplot2Class <- if (requireNamespace('jmvcore'))
     R6::R6Class(
@@ -36,11 +38,13 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
         private = list(...)
     )
 ```
+
 - Clean inheritance from jamovi base class
 - Well-organized private methods with clear responsibilities
 - Proper separation of concerns (detection, validation, plotting, fallback)
 
 **Method Organization**:
+
 - `.detectAnalysisType()` - Type detection with caching (lines 130-194)
 - `.validatePlotData()` - Centralized validation (lines 29-127)
 - `.prepareDataForPlot()` - Data preprocessing (lines 693-726)
@@ -50,6 +54,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 ### 2. **Robust Error Handling & Validation** ⭐⭐⭐⭐⭐
 
 **Multi-Layer Validation** (lines 29-127):
+
 ```r
 .validatePlotData = function(prepared_data, plot_type) {
     # Basic data validation
@@ -63,7 +68,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             "Insufficient data for {plot_type}.\n",
             "• Variables: {y_var} by {x_var}\n",
             "• Found: {nrow(data)} observation(s)\n",
-            "• Required: ≥2 observations\n",
+            "• Required: >=2 observations\n",
             "• Check your data filtering."
         ))
         self$results$insert(1, notice)
@@ -74,12 +79,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 ```
 
 **Contextual Error Messages**:
+
 - Variable names included in every error
 - Expected vs. actual values clearly stated
 - Actionable suggestions provided
 - Hierarchical notice system (ERROR → STRONG_WARNING → WARNING → INFO)
 
 **Examples of Excellence**:
+
 - Lines 41-49: Insufficient data with specific counts
 - Lines 64-71: Missing values detection per variable
 - Lines 98-105: Factor level validation with data preview
@@ -88,6 +95,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 ### 3. **Smart Caching & Performance** ⭐⭐⭐⭐
 
 **Analysis Type Caching** (lines 14, 130-194):
+
 ```r
 # Cache for analysis results to avoid redundant calculations
 .cached_analysis = NULL,
@@ -104,6 +112,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 ```
 
 **Large Dataset Sampling** (lines 704-709):
+
 ```r
 if (self$options$sampleLarge && original_nrow > 10000) {
     set.seed(42)  # For reproducible sampling
@@ -115,6 +124,7 @@ if (self$options$sampleLarge && original_nrow > 10000) {
 ```
 
 **Checkpoint Integration**:
+
 - Lines 775, 794, 813, 835, 856, 902, 998, 1087, 1127: Strategic checkpoints before expensive operations
 - Proper `flush = FALSE` for data aggregation (line 902)
 
@@ -123,6 +133,7 @@ if (self$options$sampleLarge && original_nrow > 10000) {
 **Statistical Assumption Validation** (lines 297-424):
 
 **Sample Size Warnings** (lines 304-318):
+
 ```r
 total_n <- sum(!is.na(dep_data) & !is.na(group_data))
 if (total_n < 30) {
@@ -136,6 +147,7 @@ if (total_n < 30) {
 ```
 
 **Outlier Detection** (lines 322-342):
+
 ```r
 Q1 <- quantile(dep_data, 0.25, na.rm = TRUE)
 Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
@@ -152,6 +164,7 @@ if (extreme_outliers > 0) {
 ```
 
 **Group Balance Checks** (lines 362-398):
+
 - Unbalanced design detection (>4:1 ratio)
 - Very small group warnings (<5 per group)
 - Complete pair validation for repeated measures
@@ -159,6 +172,7 @@ if (extreme_outliers > 0) {
 ### 5. **Graceful Degradation with Fallback** ⭐⭐⭐⭐⭐
 
 **Fallback Plot System** (lines 609-690):
+
 ```r
 .plotFallback = function(prepared_data, analysis_info) {
     # Determine the most appropriate basic plot
@@ -177,6 +191,7 @@ if (extreme_outliers > 0) {
 ```
 
 **Error Recovery** (lines 740-763):
+
 ```r
 plot <- tryCatch({
     switch(analysis_info$plot_type,
@@ -199,6 +214,7 @@ if (is.null(plot)) {
 ### 6. **Dynamic Plot Sizing** ⭐⭐⭐⭐
 
 **Intelligent Size Adjustment** (lines 16-21, 1093-1124):
+
 ```r
 .PLOT_DIMENSIONS = list(
     default = list(width = 800, height = 600),
@@ -228,6 +244,7 @@ if (!is.null(prepared_data$grvar)) {
 ### 7. **Good Documentation Practices** ⭐⭐⭐⭐
 
 **Clear Variable Descriptions** (.a.yaml lines 48-71):
+
 ```yaml
 - name: dep
   title: 'Outcome - Dependent Variable (y-axis)'
@@ -241,6 +258,7 @@ if (!is.null(prepared_data$grvar)) {
 ```
 
 **Informative Welcome Message** (lines 441-454):
+
 ```r
 todo <- glue::glue("
     <br>Welcome to ClinicoPath
@@ -261,6 +279,7 @@ todo <- glue::glue("
 **Issue**: Zero unit tests found for statsplot2.
 
 **Impact**:
+
 - No automated regression testing
 - Refactoring risk is high
 - Edge cases may be untested
@@ -269,6 +288,7 @@ todo <- glue::glue("
 **Location**: `tests/testthat/` directory
 
 **Recommended Tests**:
+
 ```r
 # tests/testthat/test-statsplot2.R
 test_that("statsplot2 detects variable types correctly", {
@@ -358,6 +378,7 @@ test_that("statsplot2 caching works correctly", {
 ### 2. **⚠️ Missing Clinical Interpretation Features** - SEVERITY: MEDIUM
 
 **Issue**: While the function generates **technical** explanations (lines 196-254, 257-294), it lacks:
+
 - ✅ Clinical interpretation exists (lines 257-294) - **GOOD**
 - ❌ No user-controlled visibility toggles for explanations
 - ❌ No glossary of statistical terms
@@ -367,6 +388,7 @@ test_that("statsplot2 caching works correctly", {
 - ❌ No TR/EN language support
 
 **Current Implementation** (lines 257-294):
+
 ```r
 .generateClinicalInterpretation = function(analysis_info) {
     interpretation <- switch(analysis_info$plot_type,
@@ -385,6 +407,7 @@ test_that("statsplot2 caching works correctly", {
 **Problem**: This is **ALWAYS** shown in `ExplanationMessage` (.r.yaml line 21), not user-controlled.
 
 **Missing UI Controls** (.u.yaml should have):
+
 ```yaml
 - type: CollapseBox
   label: Output Options
@@ -405,6 +428,7 @@ test_that("statsplot2 caching works correctly", {
 ```
 
 **Missing .r.yaml Outputs**:
+
 ```yaml
 items:
   - name: summary
@@ -429,6 +453,7 @@ items:
 ```
 
 **Missing .b.R Logic**:
+
 ```r
 .run = function() {
     // ... existing code ...
@@ -459,6 +484,7 @@ items:
 ### 3. **⚠️ Incomplete Package Dependency Handling** - SEVERITY: MEDIUM
 
 **Issue** (lines 533-549):
+
 ```r
 .init = function() {
     required_packages <- c("ggstatsplot", "ggalluvial", "dplyr",
@@ -478,6 +504,7 @@ items:
 ```
 
 **Problems**:
+
 1. **Packages listed as "optional" but are actually required for core features**:
    - `ggstatsplot` - REQUIRED for all statistical plots (lines 777, 796, 815, 840, 858)
    - `ggalluvial` - REQUIRED for alluvial plots (line 888)
@@ -492,6 +519,7 @@ items:
    - Should be `WARNING` for truly optional ones (patchwork, cowplot, easyalluvial)
 
 **Recommended Fix**:
+
 ```r
 .init = function() {
     # REQUIRED packages (core functionality)
@@ -544,6 +572,7 @@ items:
 ### 4. **⚠️ Repeated Measures Validation Incomplete** - SEVERITY: MEDIUM
 
 **Issue** (lines 400-421):
+
 ```r
 # Repeated measures specific checks
 if (analysis_info$direction == "repeated") {
@@ -556,12 +585,14 @@ if (analysis_info$direction == "repeated") {
 ```
 
 **Problems**:
+
 1. **Only checks for 2-level factors** - what about 3+ timepoints?
 2. **Doesn't verify actual pairing structure** - needs subject ID
 3. **No check for independence violation** - user might select wrong design
 4. **No guidance on how to structure repeated measures data**
 
 **Recommended Enhancement**:
+
 ```r
 # Repeated measures specific checks
 if (analysis_info$direction == "repeated") {
@@ -645,6 +676,7 @@ if (analysis_info$direction == "repeated") {
 **Issue**: Multiple hardcoded thresholds scattered in code.
 
 **Examples**:
+
 - Line 305: `if (total_n < 30)`
 - Line 327: `extreme_outliers <- sum(dep_data < (Q1 - 3.5 * IQR_val)...)`
 - Line 345: `if (total_n < 100)`
@@ -654,6 +686,7 @@ if (analysis_info$direction == "repeated") {
 - Line 706: `sample_size <- 5000`
 
 **Recommended Refactoring**:
+
 ```r
 # Add to top of class
 .THRESHOLDS = list(
@@ -687,6 +720,7 @@ if (extreme_outliers > 0) {
 ```
 
 **Benefits**:
+
 - Single source of truth for thresholds
 - Easy to tune for clinical context
 - Self-documenting code
@@ -695,27 +729,30 @@ if (extreme_outliers > 0) {
 ### 2. **Extract Message Generation to Templates** - MAINTAINABILITY
 
 **Issue**: Error/warning messages are embedded in code, making them:
+
 - Hard to maintain
 - Difficult to translate (i18n)
 - Not reusable
 
 **Current** (lines 41-49):
+
 ```r
 notice$setContent(glue::glue(
     "Insufficient data for {plot_type}.\n",
     "• Variables: {y_var} by {x_var}\n",
     "• Found: {nrow(data)} observation(s)\n",
-    "• Required: ≥2 observations\n",
+    "• Required: >=2 observations\n",
     "• Check your data filtering."
 ))
 ```
 
 **Recommended**:
+
 ```r
 # Add message templates
 .MESSAGES = list(
     errors = list(
-        insufficient_data = "Insufficient data for {plot_type}.\n• Variables: {y_var} by {x_var}\n• Found: {n_obs} observation(s)\n• Required: ≥{required_obs} observations\n• Check your data filtering.",
+        insufficient_data = "Insufficient data for {plot_type}.\n• Variables: {y_var} by {x_var}\n• Found: {n_obs} observation(s)\n• Required: >={required_obs} observations\n• Check your data filtering.",
         empty_dataset = "No data available for analysis.\n• Variables selected: dependent='{dep_name}', grouping='{group_name}'\n• Check data loading and variable selection\n• Verify dataset is not empty",
         // ... more templates
     ),
@@ -750,11 +787,12 @@ notice$setContent(private$.formatMessage(
 ```
 
 **Benefits for i18n**:
+
 ```r
 # Future enhancement: language support
 .MESSAGES_TR = list(  # Turkish translations
     errors = list(
-        insufficient_data = "Yetersiz veri: {plot_type}.\n• Değişkenler: {y_var} ve {x_var}\n• Bulunan: {n_obs} gözlem\n• Gerekli: ≥{required_obs} gözlem\n• Veri filtrelemenizi kontrol edin.",
+        insufficient_data = "Yetersiz veri: {plot_type}.\n• Değişkenler: {y_var} ve {x_var}\n• Bulunan: {n_obs} gözlem\n• Gerekli: >={required_obs} gözlem\n• Veri filtrelemenizi kontrol edin.",
         // ...
     )
 ),
@@ -769,6 +807,7 @@ notice$setContent(private$.formatMessage(
 ### 3. **Improve Grouped Plot Error Handling** - ROBUSTNESS
 
 **Issue** (lines 984-990):
+
 ```r
 empty_levels <- sapply(grvar_levels, function(level) {
     sum(grvar_col == level, na.rm = TRUE) == 0
@@ -780,12 +819,14 @@ if (any(empty_levels)) {
 ```
 
 **Problems**:
+
 1. `warning()` is printed to console, not shown in UI
 2. Should use `Notice` system for consistency
 3. Should track which levels were skipped
 4. Doesn't handle case where ALL levels are empty
 
 **Recommended**:
+
 ```r
 # Check for empty levels after filtering
 grvar_col <- prepared_data$data[[prepared_data$grvar]]
@@ -839,6 +880,7 @@ if (length(grvar_levels) == 0) {
 **Current**: Silent checkpoint calls don't inform user of progress.
 
 **Recommended Enhancement**:
+
 ```r
 .plotGrouped = function(analysis_info, prepared_data) {
     grvar_levels <- unique(prepared_data$data[[prepared_data$grvar]])
@@ -887,6 +929,7 @@ if (length(grvar_levels) == 0) {
 **Issue**: Assumption checks run on full dataset even for large samples.
 
 **Current** (lines 304, 323):
+
 ```r
 total_n <- sum(!is.na(dep_data) & !is.na(group_data))
 // ... many statistical calculations on full data
@@ -895,6 +938,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Optimization for Large Datasets**:
+
 ```r
 .checkAssumptions = function(analysis_info, data) {
     dep_data <- data[[analysis_info$dep_var]]
@@ -941,6 +985,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 #### A. Plain-Language Summary (TOGGLE-CONTROLLED)
 
 **Add to .a.yaml**:
+
 ```yaml
 - name: showSummary
   title: Show Plain-Language Summary
@@ -952,6 +997,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .r.yaml**:
+
 ```yaml
 - name: summary
   title: "Plain-Language Summary"
@@ -965,6 +1011,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .b.R**:
+
 ```r
 .generatePlainLanguageSummary = function(analysis_info, stats_results = NULL) {
     # Only generate when user enables this option
@@ -1024,6 +1071,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 #### B. Statistical Glossary (TOGGLE-CONTROLLED)
 
 **Add to .a.yaml**:
+
 ```yaml
 - name: showGlossary
   title: Show Statistical Glossary
@@ -1035,6 +1083,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .r.yaml**:
+
 ```yaml
 - name: glossary
   title: "Statistical Terms Guide"
@@ -1043,6 +1092,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .b.R**:
+
 ```r
 .generateGlossary = function(analysis_info) {
     if (!isTRUE(self$options$showGlossary)) {
@@ -1098,6 +1148,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 #### C. Copy-Ready Report Sentence
 
 **Add to .r.yaml**:
+
 ```yaml
 - name: reportSentence
   title: "Report Sentence (Copy-Ready)"
@@ -1106,6 +1157,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .b.R**:
+
 ```r
 .generateReportSentence = function(analysis_info) {
     design_text <- ifelse(analysis_info$direction == "independent",
@@ -1157,6 +1209,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 4. **Continuous variable treated as categorical**
 
 **Implementation**:
+
 ```r
 .detectMisuse = function(analysis_info, data) {
     misuse_notices <- list()
@@ -1247,6 +1300,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ### 3. **Add How-To Guide** - DOCUMENTATION
 
 **Add to .a.yaml**:
+
 ```yaml
 - name: showHowTo
   title: Show Usage Guide
@@ -1255,6 +1309,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .r.yaml**:
+
 ```yaml
 - name: howto
   title: "How to Use This Analysis"
@@ -1263,6 +1318,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ```
 
 **Add to .b.R**:
+
 ```r
 .generateHowToGuide = function() {
     if (!isTRUE(self$options$showHowTo)) {
@@ -1328,6 +1384,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 ## ACTION ITEMS
 
 ### High Priority (Must Do)
+
 - [ ] **Create comprehensive test suite** (test-statsplot2.R)
   - Variable type detection tests
   - Validation error handling tests
@@ -1355,6 +1412,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
   - Warn about continuous variables in RM design
 
 ### Medium Priority (Should Do)
+
 - [ ] **Extract magic numbers to constants** (.THRESHOLDS)
 - [ ] **Create message templates** (.MESSAGES, .MESSAGES_TR for i18n)
 - [ ] **Enhance grouped plot error handling** (use Notice system)
@@ -1363,6 +1421,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 - [ ] **Add progress indicators** for multi-level grouped plots
 
 ### Low Priority (Nice to Have)
+
 - [ ] **Performance optimization**: Sample for assumption checks on huge datasets (>50k)
 - [ ] **Add language support** (TR/EN) using message templates
 - [ ] **Create guided wizard mode** (step-by-step UI flow)
@@ -1384,7 +1443,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
     EN = list(
         errors = list(
             insufficient_data = list(
-                template = "Insufficient data for {plot_type}.\n• Variables: {y_var} by {x_var}\n• Found: {n_obs} observation(s)\n• Required: ≥{required_obs} observations\n• Check your data filtering.",
+                template = "Insufficient data for {plot_type}.\n• Variables: {y_var} by {x_var}\n• Found: {n_obs} observation(s)\n• Required: >={required_obs} observations\n• Check your data filtering.",
                 params = c("plot_type", "y_var", "x_var", "n_obs", "required_obs")
             ),
             // ... more error messages
@@ -1400,7 +1459,7 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
     TR = list(  # Turkish translations
         errors = list(
             insufficient_data = list(
-                template = "Yetersiz veri: {plot_type}.\n• Değişkenler: {y_var} ve {x_var}\n• Bulunan: {n_obs} gözlem\n• Gerekli: ≥{required_obs} gözlem",
+                template = "Yetersiz veri: {plot_type}.\n• Değişkenler: {y_var} ve {x_var}\n• Bulunan: {n_obs} gözlem\n• Gerekli: >={required_obs} gözlem",
                 params = c("plot_type", "y_var", "x_var", "n_obs", "required_obs")
             )
         )
@@ -1548,11 +1607,13 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 | ❌ Guidance links/examples | NO | LOW | Add to documentation |
 
 ### Critical Gap: USER-CONTROLLED VISIBILITY
+
 **The function already generates clinical interpretations but shows them ALWAYS.** This violates the prompt requirement:
 
 > Natural‑language summaries and educational/explanatory outputs must render **only when** the corresponding UI options are enabled by the user (see the `.u.yaml` checkboxes below). Keep these sections hidden by default unless selected.
 
 **Fix Required**:
+
 1. Add `.a.yaml` options: `showSummary`, `showGlossary`, `showHowTo` (all `default: false`)
 2. Add `.r.yaml` items with `visible: (optionName)` rules
 3. Modify `.b.R` to check `if (isTRUE(self$options$showSummary))` before populating
@@ -1581,22 +1642,25 @@ Q3 <- quantile(dep_data, 0.75, na.rm = TRUE)
 
 ## FINAL RECOMMENDATIONS
 
-### Must Implement (For 5-Star Rating):
+### Must Implement (For 5-Star Rating)
+
 1. **Add comprehensive test suite** - Highest priority for maintainability
 2. **Implement toggle-controlled explanatory content** - Critical UX requirement from prompt
 3. **Fix package dependency validation** - Prevents runtime errors
 4. **Add glossary and plain-language summary** - Core clinical-friendliness feature
 
-### Should Implement (For Production Readiness):
-5. **Message template system** - Enables i18n and easier maintenance
-6. **Extract magic numbers to constants** - Improves code quality
-7. **Enhanced repeated measures validation** - Prevents common user errors
-8. **Copy-ready report sentence** - High-value clinical feature
+### Should Implement (For Production Readiness)
 
-### Nice to Have (Future Enhancements):
+5. **Message template system** - Enables i18n and easier maintenance
+2. **Extract magic numbers to constants** - Improves code quality
+3. **Enhanced repeated measures validation** - Prevents common user errors
+4. **Copy-ready report sentence** - High-value clinical feature
+
+### Nice to Have (Future Enhancements)
+
 9. **Guided wizard mode** - Improved first-time user experience
-10. **TR/EN language support** - Broader accessibility
-11. **Color-blind safe palettes** - Better accessibility
-12. **Performance optimizations** - For very large datasets (>100k rows)
+2. **TR/EN language support** - Broader accessibility
+3. **Color-blind safe palettes** - Better accessibility
+4. **Performance optimizations** - For very large datasets (>100k rows)
 
 **Status**: Excellent foundation, ready for production **after** implementing critical toggles for educational content and adding test coverage.

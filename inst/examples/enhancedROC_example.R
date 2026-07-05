@@ -102,7 +102,7 @@ screening_roc <- enhancedROC(
   predictors = c("sensitive_marker", "imaging_marker", "panel_score"),
   analysisType = "comparative",
   clinicalContext = "screening",
-  sensitivityThreshold = 0.95,  # Require ≥95% sensitivity
+  sensitivityThreshold = 0.95, # Require >=95% sensitivity
   youdenOptimization = TRUE,
   rocCurve = TRUE,
   cutoffTable = TRUE,
@@ -132,13 +132,13 @@ confirmatory_roc <- enhancedROC(
   predictors = c("specific_marker", "pathology_score", "molecular_signature"),
   analysisType = "comparative",
   clinicalContext = "diagnosis",
-  specificityThreshold = 0.95,  # Require ≥95% specificity
+  specificityThreshold = 0.95, # Require >=95% specificity
   youdenOptimization = TRUE,
   rocCurve = TRUE,
   cutoffTable = TRUE,
   diagnosticMetrics = TRUE,
   clinicalMetrics = TRUE,
-  prevalence = 0.45  # Enriched population (post-screening)
+  prevalence = 0.45 # Enriched population (post-screening)
 )
 
 # Interpretation:
@@ -158,11 +158,11 @@ custom_cutoff_roc <- enhancedROC(
   outcome = "disease_status",
   positiveClass = "Disease",
   predictors = "biomarker1",
-  customCutoffs = "10, 15, 18, 20, 25, 30",  # Clinical cutoffs of interest
+  customCutoffs = "10, 15, 18, 20, 25, 30", # Clinical cutoffs of interest
   cutoffTable = TRUE,
   diagnosticMetrics = TRUE,
   clinicalMetrics = TRUE,
-  prevalence = 0.15,  # Expected disease prevalence
+  prevalence = 0.15, # Expected disease prevalence
   rocCurve = TRUE,
   showCutoffPoints = TRUE
 )
@@ -185,7 +185,7 @@ bootstrap_roc <- enhancedROC(
   predictors = c("biomarker1", "biomarker2"),
   useBootstrap = TRUE,
   bootstrapSamples = 1000,
-  bootstrapMethod = "bca",  # Bias-corrected and accelerated (most accurate)
+  bootstrapMethod = "bca", # Bias-corrected and accelerated (most accurate)
   bootstrapCutoffCI = TRUE,
   rocCurve = TRUE,
   showConfidenceBands = TRUE,
@@ -211,14 +211,14 @@ imbalanced_roc <- enhancedROC(
   positiveClass = "Positive",
   predictors = c("screening_marker", "confirmatory_marker", "combined_risk"),
   detectImbalance = TRUE,
-  imbalanceThreshold = 3.0,  # Flag if ratio >3:1 or <1:3
+  imbalanceThreshold = 3.0, # Flag if ratio >3:1 or <1:3
   showImbalanceWarning = TRUE,
-  stratifiedBootstrap = TRUE,  # Maintain class proportions in bootstrap
+  stratifiedBootstrap = TRUE, # Maintain class proportions in bootstrap
   useBootstrap = TRUE,
   bootstrapSamples = 1000,
   rocCurve = TRUE,
   clinicalMetrics = TRUE,
-  useObservedPrevalence = TRUE  # Use actual 5% prevalence for PPV/NPV
+  useObservedPrevalence = TRUE # Use actual 5% prevalence for PPV/NPV
 )
 
 # Interpretation:
@@ -241,7 +241,7 @@ partial_auc_roc <- enhancedROC(
   analysisType = "comparative",
   partialAuc = TRUE,
   partialAucType = "specificity",
-  partialRange = "0.90,1.00",  # Focus on high specificity (90-100%)
+  partialRange = "0.90,1.00", # Focus on high specificity (90-100%)
   bootstrapPartialAUC = TRUE,
   useBootstrap = TRUE,
   bootstrapSamples = 500,
@@ -324,8 +324,8 @@ multiclass_roc <- enhancedROC(
   outcome = "disease_severity",
   predictors = c("biomarker_A", "biomarker_B", "imaging_severity_score"),
   multiClassROC = TRUE,
-  multiClassStrategy = "ovr",  # One-vs-Rest
-  multiClassAveraging = "macro",  # Unweighted average
+  multiClassStrategy = "ovr", # One-vs-Rest
+  multiClassAveraging = "macro", # Unweighted average
   rocCurve = TRUE,
   aucTable = TRUE
 )
@@ -496,7 +496,7 @@ high_prev_roc <- enhancedROC(
 #    - Clinical: consider costs of false positives vs false negatives
 
 # 4. Bootstrap Recommendations:
-#    - Use ≥1000 samples for publication (2000 for BCa method)
+#    - Use >=1000 samples for publication (2000 for BCa method)
 #    - BCa method preferred when sample size allows (more accurate)
 #    - Stratified bootstrap for imbalanced data
 #    - Bootstrap for cutoff CI when validating optimal thresholds

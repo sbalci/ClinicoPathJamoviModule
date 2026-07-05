@@ -224,7 +224,7 @@ Likelihood Ratio -:   0.20
 **Interpretation:**
 
 ✅ **Cutpoint = 52.3**
-- Scores ≥52.3 → Classify as HER2-positive
+- Scores >=52.3 → Classify as HER2-positive
 - Scores <52.3 → Classify as HER2-negative
 
 ✅ **Balanced Performance:**
@@ -233,7 +233,7 @@ Likelihood Ratio -:   0.20
 - Youden Index 0.653 → Excellent balance
 
 ✅ **Positive Predictive Value (PPV) = 81.8%**
-- If test is positive (≥52.3), 82% chance truly HER2-positive
+- If test is positive (>=52.3), 82% chance truly HER2-positive
 - Depends on prevalence (50% in this study)
 
 ✅ **Negative Predictive Value (NPV) = 83.6%**

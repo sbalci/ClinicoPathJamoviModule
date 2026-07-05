@@ -7,7 +7,7 @@
 
 ## Overview
 
-The PLS Cox module (`plscox`) performs Partial Least Squares dimensionality reduction combined with Cox proportional hazards modeling for high-dimensional survival data. Unlike LASSO, which selects individual variables, PLS creates **latent components** -- weighted linear combinations of all predictors that maximally explain covariance with the survival outcome.
+The PLS Cox module (`plscox`) performs Partial Least Squares dimensionality reduction combined with Cox proportional hazards modeling for high-dimensional survival data. Unlike LASSO, which selects individual variables, PLS creates **latent components** - weighted linear combinations of all predictors that maximally explain covariance with the survival outcome.
 
 The module uses the `plsRcox` package as its core engine and supports:
 
@@ -28,11 +28,11 @@ The following table maps every UI element (from `.u.yaml`) to the corresponding 
 
 | UI Section | UI Widget Type | UI Label | YAML Option | Type | Default |
 |---|---|---|---|---|---|
-| *Variable Supplier* | VariablesListBox | Time Variable | `time` | Variable | -- |
-| *Variable Supplier* | VariablesListBox | Status Variable | `status` | Variable | -- |
-| *Variable Supplier* | LevelSelector | Event Level | `outcomeLevel` | Level | -- |
-| *Variable Supplier* | LevelSelector | Censored Level | `censorLevel` | Level | -- |
-| *Variable Supplier* | VariablesListBox | High-dimensional Predictors | `predictors` | Variables | -- |
+| *Variable Supplier* | VariablesListBox | Time Variable | `time` | Variable | - |
+| *Variable Supplier* | VariablesListBox | Status Variable | `status` | Variable | - |
+| *Variable Supplier* | LevelSelector | Event Level | `outcomeLevel` | Level | - |
+| *Variable Supplier* | LevelSelector | Censored Level | `censorLevel` | Level | - |
+| *Variable Supplier* | VariablesListBox | High-dimensional Predictors | `predictors` | Variables | - |
 | Data Suitability | CheckBox | Data Suitability Assessment | `suitabilityCheck` | Bool | `true` |
 | PLS Model Settings | ComboBox | Component Selection Method | `component_selection` | List | `cv_loglik` |
 | PLS Model Settings | TextBox | Number of PLS Components | `pls_components` | Integer | `5` |
@@ -73,7 +73,7 @@ The following table maps every UI element (from `.u.yaml`) to the corresponding 
 
 | Option | Type | Constraints | Description |
 |---|---|---|---|
-| `data` | Data | -- | The data frame (implicit, not user-selected). |
+| `data` | Data | - | The data frame (implicit, not user-selected). |
 | `time` | Variable | Numeric, continuous | Follow-up time variable. Must be positive. |
 | `status` | Variable | Factor or numeric | Event/censoring indicator. |
 | `outcomeLevel` | Level | From `status` | Level that represents the event of interest. |
@@ -93,20 +93,20 @@ The following table maps every UI element (from `.u.yaml`) to the corresponding 
 
 | Option | Type | Range | Default | plsRcox Default | Description |
 |---|---|---|---|---|---|
-| `tolerance` | Number | 1e-10 -- 1e-03 | 1e-06 | 1e-12 | Convergence tolerance passed to `tol_Xi` in `plsRcox::plsRcox()`. |
+| `tolerance` | Number | 1e-10 - 1e-03 | 1e-06 | 1e-12 | Convergence tolerance passed to `tol_Xi` in `plsRcox::plsRcox()`. |
 | `tie_method` | List | efron / breslow | efron | efron | Tie handling in Cox partial likelihood. Efron is more accurate. |
-| `sparse_pls` | Bool | -- | false | false | Enable sparse PLS for automatic variable selection within components. |
-| `limQ2set` | Number | 0.0 -- 1.0 | 0.0975 | 0.0975 | Q-squared threshold for PLS component stopping criterion. |
-| `pvals_expli` | Bool | -- | false | false | Use p-value based predictor selection during PLS fitting. |
-| `alpha_pvals_expli` | Number | 0.001 -- 0.50 | 0.05 | 0.05 | Significance level for p-value based variable selection. |
+| `sparse_pls` | Bool | - | false | false | Enable sparse PLS for automatic variable selection within components. |
+| `limQ2set` | Number | 0.0-1.0 | 0.0975 | 0.0975 | Q-squared threshold for PLS component stopping criterion. |
+| `pvals_expli` | Bool | - | false | false | Use p-value based predictor selection during PLS fitting. |
+| `alpha_pvals_expli` | Number | 0.001-0.50 | 0.05 | 0.05 | Significance level for p-value based variable selection. |
 
 ### Validation
 
 | Option | Type | Range | Default | Description |
 |---|---|---|---|---|
-| `bootstrap_validation` | Bool | -- | false | Perform Harrell's optimism-corrected bootstrap validation. |
+| `bootstrap_validation` | Bool | - | false | Perform Harrell's optimism-corrected bootstrap validation. |
 | `n_bootstrap` | Integer | 50--2000 | 200 | Number of bootstrap replications. |
-| `permutation_test` | Bool | -- | false | Perform permutation test for overall model significance. |
+| `permutation_test` | Bool | - | false | Perform permutation test for overall model significance. |
 | `n_permutations` | Integer | 50--1000 | 100 | Number of permutations. |
 
 ### Risk Stratification & Output
@@ -114,10 +114,10 @@ The following table maps every UI element (from `.u.yaml`) to the corresponding 
 | Option | Type | Range | Default | Description |
 |---|---|---|---|---|
 | `risk_groups` | Integer | 2--5 | 3 | Number of risk groups for quantile-based stratification. |
-| `confidence_intervals` | Bool | -- | true | Show HR confidence intervals in model coefficients table. |
-| `feature_importance` | Bool | -- | true | Show variable loadings and Cox-weighted importance scores. |
-| `prediction_accuracy` | Bool | -- | true | Show model performance metrics (C-index, R-squared, AIC, BIC). |
-| `suitabilityCheck` | Bool | -- | true | Run data suitability assessment before analysis. |
+| `confidence_intervals` | Bool | - | true | Show HR confidence intervals in model coefficients table. |
+| `feature_importance` | Bool | - | true | Show variable loadings and Cox-weighted importance scores. |
+| `prediction_accuracy` | Bool | - | true | Show model performance metrics (C-index, R-squared, AIC, BIC). |
+| `suitabilityCheck` | Bool | - | true | Run data suitability assessment before analysis. |
 
 ### Plot Toggles
 
@@ -201,23 +201,23 @@ All items from `plscox.r.yaml` (17 total):
 
 | # | Item Name | Type | Dimensions | Visibility | Render Function |
 |---|---|---|---|---|---|
-| 1 | `todo` | Html | -- | always (hidden when vars selected) | -- (set in `.init`) |
-| 2 | `suitabilityReport` | Html | -- | `(suitabilityCheck)` | -- |
-| 3 | `modelSummary` | Html | -- | always | -- |
-| 4 | `componentSelection` | Table | 5 columns | always | -- |
-| 5 | `modelCoefficients` | Table | 8 columns | always | -- |
-| 6 | `variableLoadings` | Table | 5 columns | `(feature_importance)` | -- |
-| 7 | `modelPerformance` | Table | 5 columns | `(prediction_accuracy)` | -- |
-| 8 | `riskStratification` | Table | 7 columns | always | -- |
+| 1 | `todo` | Html | - | always (hidden when vars selected) | - (set in `.init`) |
+| 2 | `suitabilityReport` | Html | - | `(suitabilityCheck)` | - |
+| 3 | `modelSummary` | Html | - | always | - |
+| 4 | `componentSelection` | Table | 5 columns | always | - |
+| 5 | `modelCoefficients` | Table | 8 columns | always | - |
+| 6 | `variableLoadings` | Table | 5 columns | `(feature_importance)` | - |
+| 7 | `modelPerformance` | Table | 5 columns | `(prediction_accuracy)` | - |
+| 8 | `riskStratification` | Table | 7 columns | always | - |
 | 9 | `componentPlot` | Image | 800x600 | `(plot_components)` | `.plotComponents` |
 | 10 | `loadingsPlot` | Image | 800x600 | `(plot_loadings)` | `.plotLoadings` |
 | 11 | `scoresPlot` | Image | 800x600 | `(plot_scores)` | `.plotScores` |
 | 12 | `validationPlot` | Image | 800x500 | `(plot_validation)` | `.plotValidation` |
 | 13 | `survivalPlot` | Image | 800x600 | `(plot_survival)` | `.plotSurvival` |
-| 14 | `bootstrapResults` | Html | -- | `(bootstrap_validation)` | -- |
-| 15 | `permutationResults` | Html | -- | `(permutation_test)` | -- |
-| 16 | `clinicalGuidance` | Html | -- | always | -- |
-| 17 | `technicalNotes` | Html | -- | always | -- |
+| 14 | `bootstrapResults` | Html | - | `(bootstrap_validation)` | - |
+| 15 | `permutationResults` | Html | - | `(permutation_test)` | - |
+| 16 | `clinicalGuidance` | Html | - | always | - |
+| 17 | `technicalNotes` | Html | - | always | - |
 
 ### Table Column Details
 
@@ -238,8 +238,8 @@ All items from `plscox.r.yaml` (17 total):
 ```mermaid
 flowchart TD
     A[".init()"] --> B{"Variables selected?"}
-    B -- No --> C["Show welcome HTML in todo"]
-    B -- Yes --> D["Hide todo, enter .run()"]
+    B - No --> C["Show welcome HTML in todo"]
+    B - Yes --> D["Hide todo, enter .run()"]
 
     D --> E["Check required packages<br>(survival, plsRcox)"]
     E --> F["Extract & validate data"]
@@ -252,14 +252,14 @@ flowchart TD
     F6 --> G["Apply scaling method"]
 
     G --> H{"suitabilityCheck?"}
-    H -- Yes --> H1[".assessSuitability()<br>6 checks, traffic-light HTML"]
-    H -- No --> I
+    H - Yes --> H1[".assessSuitability()<br>6 checks, traffic-light HTML"]
+    H - No --> I
     H1 --> I
 
     I --> J{"component_selection"}
-    J -- manual --> K["Use pls_components directly"]
-    J -- cv_loglik / cv_cindex --> L["cv.plsRcox() with nfold"]
-    J -- bic / aic --> M["Fit 1..max models,<br>pick by IC"]
+    J - manual --> K["Use pls_components directly"]
+    J - cv_loglik / cv_cindex --> L["cv.plsRcox() with nfold"]
+    J - bic / aic --> M["Fit 1..max models,<br>pick by IC"]
 
     K --> N["plsRcox::plsRcox() with optimal_nt"]
     L --> N
@@ -281,11 +281,11 @@ flowchart TD
     V --> W
 
     W --> X{"bootstrap_validation?"}
-    X -- Yes --> X1["Harrell optimism-corrected<br>bootstrap loop"]
-    X -- No --> Y
+    X - Yes --> X1["Harrell optimism-corrected<br>bootstrap loop"]
+    X - No --> Y
     X1 --> Y{"permutation_test?"}
-    Y -- Yes --> Y1["Permutation loop<br>with p-value"]
-    Y -- No --> Z
+    Y - Yes --> Y1["Permutation loop<br>with p-value"]
+    Y - No --> Z
     Y1 --> Z["Set clinicalGuidance & technicalNotes HTML"]
 
     Z --> AA["Done"]

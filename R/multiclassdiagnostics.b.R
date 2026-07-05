@@ -1,5 +1,5 @@
 # Multi-class Diagnostic Performance Evaluation
-# Backend implementation (.b.R) — hand-written.
+# Backend implementation (.b.R) - hand-written.
 # (Only the matching .h.R is auto-generated.)
 
 multiclassdiagnosticsClass <- R6::R6Class(
@@ -310,11 +310,11 @@ multiclassdiagnosticsClass <- R6::R6Class(
         
         .compareModels = function(predicted1, predicted2, actual) {
             # TODO (stub): `modelNames` is declared as `OptionString` (free-text) in .a.yaml /
-            # .h.R but never read here — `modelComparison` and `mcnemarResults`/`deLongResults`
+            # .h.R but never read here - `modelComparison` and `mcnemarResults`/`deLongResults`
             # tables hardcode "Model 1" / "Model 2" labels. Intended usage: parse comma-
             # separated `self$options$modelNames` (e.g., "Logistic, RF"), wire into the
             # `comparison`/`metric` cells. SECURITY NOTE: when wired, the value is HIGH-source
-            # free text — if it ever reaches an HTML pane via setContent, wrap with
+            # free text - if it ever reaches an HTML pane via setContent, wrap with
             # `htmltools::htmlEscape`. Currently only flows to jamovi typed `text` cells
             # (UI auto-escapes), so escape is needed only if HTML output is added.
             compTable <- self$results$modelComparison
@@ -372,7 +372,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
                     # `as.numeric(factor) - 1` here and at L351/L352 maps the alphabetically
                     # first factor level to 0 and the second to 1. For outcomes like
                     # `case`/`control` this silently inverts the AUC interpretation
-                    # (case=0=non-event, control=1=event) — same Category I concern as the
+                    # (case=0=non-event, control=1=event) - same Category I concern as the
                     # modelval audit fix.
                     # NOTE: a `positiveClass` `OptionLevel` is already declared in .a.yaml /
                     # .h.R but never read in this .b.R (stub option). Wiring is straightforward:

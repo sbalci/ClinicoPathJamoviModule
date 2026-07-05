@@ -537,29 +537,6 @@ causalmediationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Applications: Understanding pathways in cancer biology, clinical trials,
 #' epidemiology, and precision medicine research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Basic mediation
-#' causalmediation(
-#'     data = mydata,
-#'     outcome = 'survival_time',
-#'     treatment = 'drug_exposure',
-#'     mediator = 'biomarker_level',
-#'     covariates = c('age', 'stage'),
-#'     mediation_tier = 'basic'
-#' )
-#'
-#' # Example: High-dimensional mediation with omics
-#' causalmediation(
-#'     data = omics_data,
-#'     outcome = 'disease_status',
-#'     treatment = 'environmental_exposure',
-#'     mediators = methylation_probes,  # 50,000 probes
-#'     mediation_tier = 'hd',
-#'     hd_method = 'hdmax2'
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param outcome Outcome variable (Y)
 #' @param treatment Treatment or exposure variable (X)

@@ -188,15 +188,15 @@ advancedtrialsClass <- R6::R6Class(
             # .performBiomarkerDrivenDesign at L441, .calculateSampleSize at L573,
             # .generateOperatingCharacteristics at L704) wraps its work in a tryCatch whose
             # error handler is just `message("...failed: ", e$message)`. message() writes to
-            # the R console — which the jamovi end user never sees. End result: when an
+            # the R console - which the jamovi end user never sees. End result: when an
             # analysis errors out, the corresponding result table stays empty with no
             # indication anything went wrong, the user assumes "no result available".
             # Replace each handler with one of:
             #   (a) private$.addNotice("WARNING", "Group sequential design failed",
             #                          htmltools::htmlEscape(e$message))
-            #       — preferred for non-fatal failures, lets the rest of the analysis run.
+            #       - preferred for non-fatal failures, lets the rest of the analysis run.
             #   (b) jmvcore::reject("...failed: {}", e$message)
-            #       — for fatal failures that should halt the whole .run().
+            #       - for fatal failures that should halt the whole .run().
             # Apply consistently across all 6 handlers.
             tryCatch({
 

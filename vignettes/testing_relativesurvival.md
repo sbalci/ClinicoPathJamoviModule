@@ -415,9 +415,9 @@ Tests already implemented in `tests/testthat/test-relativesurvival.R`:
 **Total tests currently: 18 (covering ~40% of the checklist above)**
 
 ### Priority gaps for new tests:
-1. Period analysis + cohort_year (sections 4E, 12) -- no coverage at all
-2. Plot state serialization (section 7.10) -- protobuf risk area
-3. Remaining WHO rate tables (section 3.5-3.14) -- data availability
-4. Flexible parametric regression (section 5D) -- rstpm2 dependency
-5. Timepoint edge cases (section 11.5-11.12) -- parser robustness
-6. Confidence level propagation (section 8.7) -- cross-table consistency
+1. Period analysis + cohort_year (sections 4E, 12) - no coverage at all
+2. Plot state serialization (section 7.10) - protobuf risk area
+3. Remaining WHO rate tables (section 3.5-3.14) - data availability
+4. Flexible parametric regression (section 5D) - rstpm2 dependency
+5. Timepoint edge cases (section 11.5-11.12) - parser robustness
+6. Confidence level propagation (section 8.7) - cross-table consistency

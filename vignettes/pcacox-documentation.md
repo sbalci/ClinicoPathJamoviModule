@@ -1,4 +1,4 @@
-# PCA Cox Regression -- Developer Documentation
+# PCA Cox Regression - Developer Documentation
 
 ## 1. Overview
 
@@ -6,10 +6,10 @@
 - **Menu**: SurvivalT > Dimension Reduction Cox > PCA Cox
 - **Version**: 0.0.3 (Draft)
 - **Files**:
-  - `jamovi/pcacox.u.yaml` -- UI
-  - `jamovi/pcacox.a.yaml` -- Options (28 options excl. data)
-  - `R/pcacox.b.R` -- Backend (~1400 lines)
-  - `jamovi/pcacox.r.yaml` -- Results (20 outputs)
+  - `jamovi/pcacox.u.yaml` - UI
+  - `jamovi/pcacox.a.yaml` - Options (28 options excl. data)
+  - `R/pcacox.b.R` - Backend (~1400 lines)
+  - `jamovi/pcacox.r.yaml` - Results (20 outputs)
 
 **Summary**: Principal Component Cox regression reduces high-dimensional predictor sets (e.g., gene expression, proteomics) into uncorrelated principal components for Cox proportional hazards modeling. Supports 4 PCA methods (supervised via superpc, standard via prcomp, sparse via sparsepca, kernel via kernlab) with automatic fallback chains. Includes CV-based component selection, bootstrap optimism-corrected validation, permutation testing, risk stratification, feature importance ranking, and model comparison.
 
@@ -21,12 +21,12 @@
 
 | UI Control | Type | Binds to Option | Default | Enable |
 |------------|------|-----------------|---------|--------|
-| `time` | VariablesListBox | `time` | -- | Always |
-| `status` | VariablesListBox | `status` | -- | Always |
-| `outcomeLevel` | LevelSelector | `outcomeLevel` | -- | `(status)` |
-| `censorLevel` | LevelSelector | `censorLevel` | -- | `(status)` |
-| `predictors` | VariablesListBox | `predictors` | -- | Always |
-| `clinical_vars` | VariablesListBox | `clinical_vars` | -- | Always |
+| `time` | VariablesListBox | `time` | - | Always |
+| `status` | VariablesListBox | `status` | - | Always |
+| `outcomeLevel` | LevelSelector | `outcomeLevel` | - | `(status)` |
+| `censorLevel` | LevelSelector | `censorLevel` | - | `(status)` |
+| `predictors` | VariablesListBox | `predictors` | - | Always |
+| `clinical_vars` | VariablesListBox | `clinical_vars` | - | Always |
 
 ### Data Suitability (CollapseBox, collapsed: false)
 
@@ -143,17 +143,17 @@ flowchart TD
 
 ## 7. Execution Sequence
 
-1. **`.init()`** -- Show welcome HTML if variables missing
-2. **`.run()`** -- Validate inputs, encode outcomes, check time/events
-3. **`.assessSuitability()`** -- EPV, missing data assessment
-4. **`.performPCA()`** -- Extract design matrix, scale/center, dispatch to PCA method
-5. **PCA method** -- supervised (superpc with CV threshold) / standard (prcomp) / sparse (sparsepca) / kernel (kernlab) with fallback
-6. **`.selectComponents()`** -- fixed / variance threshold / CV selection
-7. **`.fitPCCoxModel()`** -- `survival::coxph()` on selected PCs + clinical vars
-8. **Results population** -- Summary, Cox table, performance, feature importance, risk score
-9. **Validation** -- Bootstrap optimism-correction, permutation test
-10. **Plots** -- ggplot2 scree, loadings, biplot, survival KM curves
-11. **Clinical notices** -- Event count, discrimination assessment, completion summary
+1. **`.init()`** - Show welcome HTML if variables missing
+2. **`.run()`** - Validate inputs, encode outcomes, check time/events
+3. **`.assessSuitability()`** - EPV, missing data assessment
+4. **`.performPCA()`** - Extract design matrix, scale/center, dispatch to PCA method
+5. **PCA method** - supervised (superpc with CV threshold) / standard (prcomp) / sparse (sparsepca) / kernel (kernlab) with fallback
+6. **`.selectComponents()`** - fixed / variance threshold / CV selection
+7. **`.fitPCCoxModel()`** - `survival::coxph()` on selected PCs + clinical vars
+8. **Results population** - Summary, Cox table, performance, feature importance, risk score
+9. **Validation** - Bootstrap optimism-correction, permutation test
+10. **Plots** - ggplot2 scree, loadings, biplot, survival KM curves
+11. **Clinical notices** - Event count, discrimination assessment, completion summary
 
 ---
 

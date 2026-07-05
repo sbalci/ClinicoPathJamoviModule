@@ -234,7 +234,7 @@ options:
           name: simple
         - title: Colorful (Group Colors)
           name: colorful
-        - title: Colorblind-Safe (Okabe–Ito)
+        - title: Colorblind-Safe (Okabe-Ito)
           name: colorblind
       default: jamovi
       description:
@@ -315,7 +315,7 @@ options:
           name: jamovi
         - title: Colorful (for groups)
           name: colorful
-        - title: Colorblind-Safe (Okabe–Ito)
+        - title: Colorblind-Safe (Okabe-Ito)
           name: colorblind
       default: classic
       description:

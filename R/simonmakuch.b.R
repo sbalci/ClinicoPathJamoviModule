@@ -123,7 +123,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     event_binary <- as.numeric(event_data == self$options$eventLevel)
                 } else {
                     # TODO (correctness): event_data may be a factor here (eventLevel is NULL). as.numeric()
-                    #   returns LEVEL INDICES (1,2…), not 0/1 — and a naive jmvcore::toNumeric() swap is
+                    #   returns LEVEL INDICES (1,2…), not 0/1 - and a naive jmvcore::toNumeric() swap is
                     #   unsafe (it honors the factor's `values`/labels, yielding 0/1 or NA for
                     #   character-level factors, which can change/break the Surv() event coding that
                     #   currently tolerates 1/2). Rework: require/derive the event level (as in the
@@ -834,7 +834,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Parse landmark times
                 # TODO (stub): the sibling free-text OptionString `plotTimeRange` (declared in
-                #   .a.yaml/.h.R) is never read anywhere in this backend — wire it into the plot
+                #   .a.yaml/.h.R) is never read anywhere in this backend - wire it into the plot
                 #   x-axis range (parse like landmark_times below) or remove it from the options.
                 landmark_times_str <- self$options$landmarkTimes
                 landmark_times <- as.numeric(unlist(strsplit(landmark_times_str, ",")))

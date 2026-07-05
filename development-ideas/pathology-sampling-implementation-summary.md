@@ -7,6 +7,7 @@ I've analyzed your omentum sampling data and implemented a complete jamovi funct
 ## Your Data Analysis Results
 
 ### Dataset Characteristics
+
 - **Total cases analyzed:** 1,097 cases
 - **Cases with microscopic metastasis detected:** 60 cases (5.5%)
 - **Mean cassettes per case:** 4.0 (median: 5)
@@ -15,6 +16,7 @@ I've analyzed your omentum sampling data and implemented a complete jamovi funct
 ### Statistical Analysis Results
 
 #### 1. Observed Cumulative Detection Rates
+
 - **1 cassette:** 55.0% (33/60 cases)
 - **2 cassettes:** 76.7% (46/60 cases) - Marginal gain: +21.7%
 - **3 cassettes:** 85.0% (51/60 cases) - Marginal gain: +8.3%
@@ -22,16 +24,19 @@ I've analyzed your omentum sampling data and implemented a complete jamovi funct
 - **5 cassettes:** 100.0% (60/60 cases) - Marginal gain: +5.0%
 
 #### 2. Binomial Probability Model
+
 - **Estimated per-cassette detection probability (p):** 0.1835
 - Based on 60 positive cases / 327 total cassettes examined
 
 **Predicted detection probabilities:**
+
 - 4 cassettes: 55.6%
 - 8 cassettes: 80.2%
 - 12 cassettes: 90.0%
 - 15 cassettes: 95.0%
 
 **Minimum cassettes for target confidence:**
+
 - 80% confidence: 8 cassettes
 - 90% confidence: 12 cassettes
 - 95% confidence: 15 cassettes
@@ -54,6 +59,7 @@ Following Skala & Hagemann 2015 methodology:
 **Recommended minimum: 4-5 cassettes for 95% sensitivity**
 
 This is the **point of diminishing returns** where:
+
 - 95% sensitivity threshold is achieved (standard for diagnostic protocols)
 - Additional cassettes provide minimal marginal gain (<5%)
 - Balances diagnostic accuracy with laboratory workload
@@ -84,8 +90,9 @@ Based on the literature review and your research question, here are the recommen
 ### 1. **Binary Outcomes (Lesion Detection)**
 
 #### A. Binomial Probability Models
+
 - **Best for:** Calculating theoretical minimum samples
-- **Formula:** P(detect ≥ 1) = 1 - (1-p)^n
+- **Formula:** P(detect >= 1) = 1 - (1-p)^n
   - p = per-sample detection probability
   - n = number of samples
 - **Applications:**
@@ -94,6 +101,7 @@ Based on the literature review and your research question, here are the recommen
   - Omentum sampling protocols
 
 #### B. Bootstrap Resampling
+
 - **Best for:** Empirical sensitivity estimates with confidence intervals
 - **Method:** Resample cases with replacement (10,000+ iterations)
 - **Advantages:**
@@ -103,6 +111,7 @@ Based on the literature review and your research question, here are the recommen
 - **Reference:** Skala & Hagemann 2015
 
 #### C. Beta-Binomial Distribution
+
 - **Best for:** Accounting for patient-level heterogeneity
 - **When to use:**
   - High variability in lesion distribution between patients
@@ -112,6 +121,7 @@ Based on the literature review and your research question, here are the recommen
 - **Reference:** Gönen et al. 2009; Zhou et al. 2022
 
 #### D. Logistic Regression
+
 - **Best for:** Modeling detection probability vs number of samples
 - **Advantages:**
   - Can incorporate covariates (tumor stage, type, etc.)
@@ -121,18 +131,21 @@ Based on the literature review and your research question, here are the recommen
 
 ### 2. **Study Design & Sample Size Calculation**
 
-#### For Validation Studies:
+#### For Validation Studies
+
 - **Buderer's formula (1996):**
   - Calculates patients needed to estimate sensitivity/specificity
   - Accounts for disease prevalence
   - Adjusts for desired precision (margin of error)
 
-#### Power Analysis:
+#### Power Analysis
+
 - **Conventional targets:** 80-90% power, 95% confidence
 - **For comparing protocols:** Use power.prop.test or similar
 - **Bayesian approaches:** For incorporating prior knowledge
 
 ### 3. **Survival Analysis Integration**
+
 - **Kaplan-Meier curves:** Stratified by sampling adequacy
 - **Cox regression:** Assess prognostic significance
 - **Maximally selected rank statistics:** Find optimal cutpoint for outcomes
@@ -144,11 +157,13 @@ Based on the literature review and your research question, here are the recommen
 The new jamovi function provides comprehensive pathology sampling analysis:
 
 #### 1. **Data Requirements**
+
 - **Total number of samples:** Number of blocks/cassettes/nodes examined per case
 - **First detection sample:** Sample number where lesion first observed (NA if not detected)
 - **Optional grouping:** For stratified analysis
 
 #### 2. **Statistical Methods Implemented**
+
 1. **Binomial Probability Model**
    - Estimates per-sample detection probability
    - Calculates cumulative detection curves
@@ -170,6 +185,7 @@ The new jamovi function provides comprehensive pathology sampling analysis:
    - Point of diminishing returns identification
 
 #### 3. **Output Tables**
+
 1. Data Summary
 2. Binomial Model Predictions
 3. Minimum Samples for Target Confidence
@@ -217,6 +233,7 @@ data <- read.csv("data/omentum_sampling.csv")
 ### Example Data Created
 
 Created `data/omentum_sampling.rds` and `data/omentum_sampling.csv`:
+
 - 60 cases with detected metastasis
 - Variables: case_id, total_cassettes, first_detection_cassette, tumor_type, macroscopic_tumor
 - Realistic distribution matching your actual data patterns
@@ -247,12 +264,12 @@ Created `data/omentum_sampling.rds` and `data/omentum_sampling.csv`:
 
 ### Methodological Reviews
 
-5. **Lyapichev K, et al. (2019)**
+1. **Lyapichev K, et al. (2019)**
    - *Modern Pathology*, 32(6):834-843
    - Mathematical models for minimum sections
    - Breast implant-associated lymphoma example
 
-6. **Vermeulen P (2020)**
+2. **Vermeulen P (2020)**
    - PhD Thesis, University of Amsterdam
    - Simulation for 3D tissue analysis
    - Sufficient sections determination
@@ -262,29 +279,33 @@ Created `data/omentum_sampling.rds` and `data/omentum_sampling.csv`:
 This statistical framework and jamovi function can be applied to:
 
 ### 1. **Lymph Node Dissection**
+
 - Minimum nodes for adequate staging
 - Colorectal cancer (current: 12 nodes, but stage-dependent)
 - Endometrial cancer (current: ~25 nodes optimal)
 - Lung cancer (station-based vs count-based)
 
 ### 2. **Serial Sectioning**
+
 - Sentinel lymph node evaluation (150-200 μm spacing)
 - Detecting micrometastases (<2mm)
 - Isolated tumor cells (<0.2mm)
 
 ### 3. **Biopsy Adequacy**
+
 - Endoscopic biopsies (gastric cancer: 3-4 biopsies optimal)
-- Liver biopsies (≥25mm length recommended)
+- Liver biopsies (>=25mm length recommended)
 - Endometrial biopsies (no consensus - this method could help!)
 
 ### 4. **Digital Pathology Validation**
+
 - Minimum image fields for biomarker quantification
 - Tissue microarray adequacy
 - Whole slide imaging validation
 
 ## Recommendations for Your Research
 
-### For the Omentum Data:
+### For the Omentum Data
 
 1. **Primary Analysis**
    - Run the `pathsampling` function on your full dataset
@@ -311,20 +332,20 @@ resampling (10,000 iterations), following the methodology of Skala
 and Hagemann. Per-cassette detection probability was estimated as
 the ratio of cases with detected metastasis to total cassettes examined.
 Cumulative detection probability for n cassettes was calculated as
-P(detect ≥ 1) = 1 - (1-p)^n. Bootstrap resampling provided empirical
+P(detect >= 1) = 1 - (1-p)^n. Bootstrap resampling provided empirical
 sensitivity estimates with 95% confidence intervals (percentile method).
 The recommended minimum was defined as the smallest number of cassettes
-achieving ≥95% sensitivity (the standard threshold for diagnostic tests).
+achieving >=95% sensitivity (the standard threshold for diagnostic tests).
 Statistical analyses were performed using ClinicoPath package for jamovi
 (version X.X.X) and R version 4.x.x.
 ```
 
-4. **Additional Analyses to Consider**
+1. **Additional Analyses to Consider**
    - Logistic regression: detection probability ~ number of blocks + covariates
    - ROC analysis: optimal cutpoint for different clinical scenarios
    - Cost-effectiveness: incremental cost per additional % sensitivity
 
-### For Future Studies:
+### For Future Studies
 
 1. **Prospective Validation**
    - Design study with predefined sampling protocol
@@ -344,12 +365,14 @@ Statistical analyses were performed using ClinicoPath package for jamovi
 ## Statistical Software Implementation
 
 ### Current Implementation
+
 - Jamovi function: `pathsampling` (ready to use)
 - R backend using jmvcore framework
 - Automatic plots using ggplot2
 - Bootstrap using base R (reproducible with seed)
 
 ### Potential Enhancements
+
 1. Add beta-binomial estimation (using VGAM or emdbook packages)
 2. Implement finite population correction (hypergeometric)
 3. Add power analysis for comparing protocols
@@ -359,6 +382,7 @@ Statistical analyses were performed using ClinicoPath package for jamovi
 ## Files Created/Modified
 
 ### New Files
+
 1. `jamovi/pathsampling.a.yaml`
 2. `jamovi/pathsampling.r.yaml`
 3. `jamovi/pathsampling.u.yaml`
@@ -368,9 +392,11 @@ Statistical analyses were performed using ClinicoPath package for jamovi
 7. `development-ideas/pathology-sampling-implementation-summary.md` (this file)
 
 ### Modified Files
+
 1. `jamovi/0000.yaml` - Added pathsampling function registration
 
 ### Existing Documentation Reviewed
+
 1. `development-ideas/pathology-sampling-chatGPT.md`
 2. `development-ideas/pathology-sampling-diagnostic-tresholds-claude.md`
 3. `development-ideas/pathology-sampling-gemini.md`
@@ -401,6 +427,7 @@ Statistical analyses were performed using ClinicoPath package for jamovi
 ### Your Data-Specific Finding
 
 **For omentum sampling to detect microscopic metastasis:**
+
 - **Recommendation: 4-5 cassettes achieve 95% sensitivity**
 - More efficient than Skala & Hagemann 2015 (who needed 10 blocks)
 - Possibly due to different:

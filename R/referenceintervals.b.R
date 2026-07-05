@@ -58,7 +58,7 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             if (length(probs) < 2) probs <- c(0.025, 0.975)
             # TODO (correctness): a malformed reference_percentiles entry (e.g. "abc" or "2.5,x")
             # parses to NA via as.numeric(); the length<2 guard above does NOT catch NA values, so
-            # quantile(x, probs = c(NA, ...)) errors later. Validate here — drop/reject NAs and
+            # quantile(x, probs = c(NA, ...)) errors later. Validate here - drop/reject NAs and
             # values outside [0,1], fall back to c(0.025, 0.975), and surface a user notice.
 
             method <- self$options$ri_method
@@ -75,7 +75,7 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 method_desc <- "Non-parametric (Percentiles)"
             } else if (method == "parametric") {
                 # Mean +/- Z * SD
-                # TODO (correctness): z_val is computed from confidence_level but never used — the
+                # TODO (correctness): z_val is computed from confidence_level but never used - the
                 # parametric branch hardcodes 1.96 below, so the confidence_level option is ignored.
                 # Decide whether the RI should use fixed population coverage (1.96 for 95%) or the
                 # user's confidence_level, then apply one consistently (and drop the dead z_val).
@@ -91,7 +91,7 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 method_desc <- "Parametric (Mean ± 1.96 SD)"
             } else {
                 # TODO (stub): the DEFAULT ri_method is "robust_nonparametric", but it (and
-                # "bootstrap"/"box_cox"/"log_normal") is NOT implemented — all fall through to this
+                # "bootstrap"/"box_cox"/"log_normal") is NOT implemented - all fall through to this
                 # basic percentile branch, labelled "<method> (Basic Implementation)". A default run
                 # therefore silently returns plain percentiles, not the advertised robust method.
                 # Many declared options are also never read by .run(): outlier_detection,
@@ -145,7 +145,7 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 <p>Establishing reference intervals is a fundamental task in laboratory medicine. 
                 CLSI EP28-A3c provides the standard guidelines for this process.</p>
                 <ul>
-                    <li>CLSI. Defining, Establishing, and Verifying Reference Intervals in the Clinical Laboratory; Approved Guideline—Third Edition. CLSI document EP28-A3c. Wayne, PA: Clinical and Laboratory Standards Institute; 2008.</li>
+                    <li>CLSI. Defining, Establishing, and Verifying Reference Intervals in the Clinical Laboratory; Approved Guideline - Third Edition. CLSI document EP28-A3c. Wayne, PA: Clinical and Laboratory Standards Institute; 2008.</li>
                 </ul>
             "
             self$results$referencePaths$setContent(refs)

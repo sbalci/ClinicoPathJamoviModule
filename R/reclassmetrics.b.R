@@ -378,7 +378,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .bootstrapNRI = function(outcome, old_prob, new_prob, cutoffs) {
             # TODO (UX): nBootstrap is hard-capped at 500 here (and identically in
             # .bootstrapContinuousNRI and .bootstrapIDI), but reclassmetrics.a.yaml lets the user
-            # set up to 2000 — any value above 500 is silently ignored. Either honour the option
+            # set up to 2000 - any value above 500 is silently ignored. Either honour the option
             # (drop the min(), or cap at the .a.yaml max) or lower the .a.yaml max to 500.
             n_boot <- min(self$options$nBootstrap, 500)
             n <- length(outcome)
@@ -468,7 +468,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .calculateSurvivalMetrics = function() {
-            # TODO (stub): unimplemented surface that is advertised in the UI/results —
+            # TODO (stub): unimplemented surface that is advertised in the UI/results - 
             #   (1) survival outcome path (this method) rejects; implement via survIDINRI / nricens.
             #   (2) .reclassPlot renders an "under development" placeholder.
             #   (3) reclassTable (showReclassTable) and calibrationComparison (showCalibrationComparison)

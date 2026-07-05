@@ -165,7 +165,7 @@ segmentation performance (excellent/good/acceptable/poor) based on Dice/IoU
 values.}
 
 \item{dice_threshold_excellent}{Dice coefficient threshold for "excellent"
-segmentation quality. Typical: ≥0.90 for clinical deployment.}
+segmentation quality. Typical: >=0.90 for clinical deployment.}
 
 \item{dice_threshold_good}{Dice coefficient threshold for "good"
 segmentation quality.}

@@ -227,7 +227,7 @@ onChange_bootstrapSamples: function(ui) {
         guidance = "⚠️ Too few samples - may be unreliable";
         ui.bootstrap_samples.setValue(500);  // Auto-correct
     } else if (samples < 1000) {
-        guidance = "⚠️ Consider increasing to ≥1000 for stable estimates";
+        guidance = "⚠️ Consider increasing to >=1000 for stable estimates";
     } else if (samples > 3000) {
         guidance = "ℹ️ High computational cost - consider reducing";
     } else {
@@ -843,7 +843,7 @@ onChange_primary: function(ui) {
 
 ### BrawStats Module Implementation
 
-5. **brawsim.events.js**: Ultra-comprehensive system with 1147 lines
+1. **brawsim.events.js**: Ultra-comprehensive system with 1147 lines
    - **Mathematical validation**: Complex effect size constraints with auto-correction
    - **Multi-demo coordination**: Coordinated button systems with state tracking
    - **Factory patterns**: Variable and range generation systems
@@ -858,7 +858,8 @@ onChange_primary: function(ui) {
 
 **As of jamovi 2.6+, jQuery is being removed from the jamovi platform.** If your module uses jQuery or any of the following deprecated elements, you'll need to make adjustments:
 
-#### Deprecated jQuery Elements:
+#### Deprecated jQuery Elements
+
 - `$el`
 - `$addButton`
 - `$label`
@@ -869,11 +870,13 @@ onChange_primary: function(ui) {
 - `$buttons`
 - Any usage of `$()` or `jQuery()`
 
-#### Migration Resources:
-- **Alternative patterns**: https://youmightnotneedjquery.com/
+#### Migration Resources
+
+- **Alternative patterns**: <https://youmightnotneedjquery.com/>
 - **Vanilla JavaScript replacements** for common jQuery operations
 
-#### ✅ Recommended Approach:
+#### ✅ Recommended Approach
+
 **Use jamovi's native UI API instead of direct DOM manipulation:**
 
 ```javascript
@@ -899,14 +902,15 @@ const events = {
 };
 ```
 
-#### Migration Checklist:
+#### Migration Checklist
+
 - [ ] Replace all `$()` calls with vanilla JavaScript or jamovi UI API
 - [ ] Remove references to `$el`, `$addButton`, etc.
 - [ ] Use `ui.controlName.value()` and `ui.controlName.setValue()` instead
 - [ ] Test thoroughly in jamovi 2.6+
 - [ ] Ensure error handling for missing UI elements
 
-#### Example Migration:
+#### Example Migration
 
 ```javascript
 // Before (jQuery - deprecated):
@@ -990,7 +994,8 @@ JavaScript in jamovi modules enables sophisticated user interactions beyond stat
 7. **Test thoroughly** - edge cases, null values, event chains
 8. **Stay jQuery-free** - use vanilla JavaScript with jamovi API
 
-### Future-Proofing Your Code:
+### Future-Proofing Your Code
+
 - ✅ Use `ui.controlName.value()` and `ui.controlName.setValue()`
 - ✅ Implement proper error handling for missing UI elements
 - ✅ Follow modern JavaScript patterns (const, let, arrow functions)

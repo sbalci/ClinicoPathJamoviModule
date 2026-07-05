@@ -7,6 +7,7 @@
 **Title**: Impact of tissue sampling on detection of venous invasion in colorectal cancer: a prospective analysis
 
 **Design & Cohort**: Prospective observational cohort study with standardized tissue sampling protocol
+
 - **N = 217** consecutive CRC surgical resections
 - **Setting**: Single institution (Mount Sinai Hospital, Toronto, Canada)
 - **Period**: November 2016 – June 2019
@@ -22,6 +23,7 @@
   - Association between linear spiculation (LS) and EMVI
 
 **Key Analyses**:
+
 - Standardized tissue sampling protocol (minimum 8 tumor blocks, perpendicular sectioning)
 - Elastin trichrome staining on all tumor blocks
 - Sequential block analysis to determine cumulative VI/EMVI detection sensitivity
@@ -58,7 +60,7 @@
 
 | Method / Model | Role (primary/secondary) | Variants & Options | Assumptions/Diagnostics | References (sec/page) |
 |---|---|---|---|---|
-| **Chi-square test (χ²)** | Primary comparison | Standard Pearson χ² for categorical associations | Expected cell counts ≥5 (not explicitly verified) | Methods: Statistical Analysis (p.3/line 229) |
+| **Chi-square test (χ²)** | Primary comparison | Standard Pearson χ² for categorical associations | Expected cell counts >=5 (not explicitly verified) | Methods: Statistical Analysis (p.3/line 229) |
 | **Student's t-test** | Primary comparison | Independent samples t-test for continuous variables | Normality, equal variances (not verified) | Methods: Statistical Analysis (p.3/line 229) |
 | **One-way ANOVA** | Primary comparison | Used for continuous variables across multiple groups | Normality, homogeneity of variance (not verified) | Methods: Statistical Analysis (p.3/line 229) |
 | **Sensitivity calculation** | Primary outcome | Cumulative sensitivity as proportion detected by N blocks / total detected | Assumes 8 blocks = 100% reference standard | Methods: Determining Sensitivity (p.3/lines 193-216) |
@@ -66,6 +68,7 @@
 | **P-value threshold** | Decision criterion | P < 0.05 defined as statistically significant | None stated | Methods: Statistical Analysis (p.3/line 231) |
 
 **Key methodological notes**:
+
 - No multiplicity correction despite multiple comparisons across Table 1 (>30 tests)
 - No effect size reporting (OR, RR, Cohen's d, Cramér's V)
 - No confidence intervals for proportions or sensitivity estimates
@@ -131,7 +134,7 @@
 | Aspect | Assessment | Evidence (section/page) | Recommendation |
 |---|:--:|---|---|
 | **Design–method alignment** | 🟢 Good | Prospective cohort with standardized protocol matches research question (p.2/lines 124-130) | ✓ Appropriate choice of study design for sampling optimization |
-| **Assumptions & diagnostics** | 🔴 Major gap | Methods state χ², t-test, ANOVA used (p.3/line 229), but NO assumption checks reported | • Report Shapiro-Wilk/Kolmogorov-Smirnov for normality<br>• Levene's test for variance homogeneity<br>• Verify χ² expected cell counts ≥5<br>• Consider non-parametric alternatives if violated |
+| **Assumptions & diagnostics** | 🔴 Major gap | Methods state χ², t-test, ANOVA used (p.3/line 229), but NO assumption checks reported | • Report Shapiro-Wilk/Kolmogorov-Smirnov for normality<br>• Levene's test for variance homogeneity<br>• Verify χ² expected cell counts >=5<br>• Consider non-parametric alternatives if violated |
 | **Sample size & power** | 🟡 Moderate | N=217, stage II n=84 (relevant for adjuvant decisions), but NO a priori power calculation | • Post-hoc power for χ² tests with observed effect sizes<br>• Justify N=217 adequacy for detecting LS-EMVI association (observed 71% vs 29%, P<0.001 suggests adequate power retrospectively) |
 | **Multiplicity control** | 🔴 Major gap | Table 1 contains >30 hypothesis tests; no correction mentioned | • Apply Bonferroni, Holm, or Benjamini-Hochberg FDR<br>• With Bonferroni (α=0.05/30=0.00167), several P-values (e.g., 0.006, 0.035, 0.052) would become non-significant<br>• At minimum, distinguish "primary" vs "exploratory" comparisons |
 | **Model specification & confounding** | 🔴 Major gap | Only univariate comparisons performed; no multivariable adjustment | • Logistic regression for VI/EMVI ~ T-stage + N-stage + size + grade + neoadjuvant therapy<br>• Adjust for confounders when assessing LS-EMVI association<br>• Test for effect modification (e.g., does neoadjuvant therapy modify LS-EMVI relationship?) |
@@ -191,36 +194,36 @@
 3. **Multivariable adjustment**:
    - Build **logistic regression model**:
      - Outcome: VI present/absent
-     - Predictors: T-stage, N-stage, tumor size (≥5 cm), grade, neoadjuvant therapy, number of blocks examined
+     - Predictors: T-stage, N-stage, tumor size (>=5 cm), grade, neoadjuvant therapy, number of blocks examined
      - Report adjusted ORs with 95% CIs
    - Assess whether association between **LS and EMVI** persists after adjusting for T-stage and tumor size
 
 #### **MEDIUM PRIORITY (enhances robustness)**
 
-4. **Check parametric assumptions**:
+1. **Check parametric assumptions**:
    - **Normality**: Shapiro-Wilk test for continuous variables (age, tumor size, number of blocks)
    - **Variance homogeneity**: Levene's test for t-tests/ANOVA
-   - **Expected counts**: Verify all cells in χ² tables have expected count ≥5
+   - **Expected counts**: Verify all cells in χ² tables have expected count >=5
    - If violated, use **non-parametric alternatives** (Mann-Whitney U, Kruskal-Wallis, Fisher's exact test)
 
-5. **Precision estimates for sensitivity**:
+2. **Precision estimates for sensitivity**:
    - Calculate **95% CIs** for cumulative sensitivity at each block count
    - Use **exact binomial** or **Wilson score** method
    - Example re-analysis: "At 6 blocks, sensitivity = 95% (95% CI 89-98%; 113/119 VI+ cases detected)"
 
-6. **Sample size justification**:
+3. **Sample size justification**:
    - Provide **retrospective power calculation** for key comparisons:
      - LS-EMVI association: 71% vs 29% (n=47 LS+, n=124 LS-) → >99% power to detect this effect
      - Sensitivity at 6 blocks: 95% sensitivity (n=119 VI+) → 95% CI width ≈±6% (adequate precision)
 
 #### **LOW PRIORITY (good practice)**
 
-7. **Software & reproducibility**:
+1. **Software & reproducibility**:
    - Update to **current SPSS version** (v29 as of 2023) or **open-source alternative** (R, jamovi)
    - Deposit **anonymized data** in public repository (many journals now require this)
    - Provide **analysis script** (SPSS syntax or R code) in supplementary materials
 
-8. **Missing data transparency**:
+2. **Missing data transparency**:
    - Report proportion missing for each variable in Table 1
    - Sensitivity analysis comparing characteristics of excluded cases (n=27) vs included (n=217)
 
@@ -233,25 +236,28 @@
 **Method**: Prospective sampling adequacy analysis for tumor block submission with cumulative sensitivity curves
 
 **Impact**:
+
 - Central to the article's primary research question (lines 26-27: "determine the number of tumour blocks required to optimise VI detection")
 - Highly relevant to pathology protocols (CAP, RCPath, RCPA guidelines lack evidence-based block submission numbers)
 - Generalizable to other sampling contexts: lymph nodes, omentum, margin assessment, tumor budding
 
 **Closest existing function**: `pathsampling` (R/pathsampling.b.R, jamovi/pathsampling.a.yaml)
+
 - **Current scope**: Lymph node adequacy, omentum sampling (for ovarian/gastric cancer), uses hypergeometric distribution
 - **Gap**: Does NOT support tumor block sampling optimization or VI/EMVI detection sensitivity analysis
 
 **Exact missing options**:
+
 1. **Input variables**:
    - Number of blocks examined per case (integer, 1-20)
    - Outcome detected per block (binary: VI present/absent in each block)
    - Outcome type selector: VI, EMVI, perineural invasion, tumor budding, margin involvement
-   - Optional stratification: tumor size (<5 cm, ≥5 cm), stage, neoadjuvant therapy
+   - Optional stratification: tumor size (<5 cm, >=5 cm), stage, neoadjuvant therapy
 
 2. **Outputs**:
    - **Cumulative sensitivity curve** (x-axis: number of blocks, y-axis: % cases detected)
    - **Table**: Sensitivity with 95% CI at each block count (1-8+)
-   - **Recommendation**: Optimal block count to achieve ≥90%, ≥95% sensitivity
+   - **Recommendation**: Optimal block count to achieve >=90%, >=95% sensitivity
    - **Diagnostic yield plot**: Incremental yield (% additional cases detected per additional block)
    - **Stratified analysis**: Separate curves by tumor size/stage
 
@@ -267,15 +273,18 @@
 **Method**: Multiple χ² tests with family-wise error rate (FWER) or false discovery rate (FDR) control
 
 **Impact**:
+
 - Table 1 contains >30 hypothesis tests (VI vs 15+ variables, EMVI vs 15+ variables)
 - Without correction, expected ~1.5 false positives (0.05 × 30 = 1.5)
 - Several marginal P-values (0.052, 0.035, 0.006) would become non-significant with Bonferroni
 
 **Closest existing function**: `crosstable`, `enhancedcrosstable`
+
 - **Current scope**: Single χ² test with post-hoc pairwise comparisons (if >2×2)
 - **Gap**: No option for **multiple independent tests** with FWER/FDR control
 
 **Exact missing options**:
+
 1. **Multiple outcome correction**:
    - Option to analyze ONE predictor against MULTIPLE outcomes (e.g., T-stage vs [VI, EMVI, PNI, tumor deposits])
    - Correction methods: Bonferroni, Holm, Hochberg, Benjamini-Hochberg (FDR), Benjamini-Yekutieli (dependent tests)
@@ -292,14 +301,17 @@
 **Method**: Odds ratios, risk ratios, Cohen's d, Cramér's V in cross-tabulations
 
 **Impact**:
+
 - Current jamovi crosstable functions report χ² P-values but not always effect sizes
 - ORs/RRs critical for clinical interpretation (e.g., "T4 tumors have 3× odds of VI vs T1-2")
 
 **Closest existing function**: `crosstable`, `enhancedcrosstable`
+
 - **Current scope**: Reports Cramér's V, φ, contingency coefficient
 - **Gap**: Does NOT report **odds ratios** or **risk ratios** with confidence intervals for 2×2 tables
 
 **Exact missing options**:
+
 1. **Automatic OR/RR calculation** for 2×2 tables:
    - Odds ratio with 95% CI (Woolf or exact method)
    - Risk ratio with 95% CI (Koopman or log method)
@@ -316,14 +328,17 @@
 **Method**: Automated checks for χ², t-test, ANOVA assumptions with warnings/recommendations
 
 **Impact**:
+
 - Many pathology studies apply parametric tests without verification
 - Violations → invalid P-values → incorrect conclusions
 
 **Closest existing function**: `jjbetweenstats`, `advancedanova`
+
 - **Current scope**: Include Levene's test, Shapiro-Wilk (optional), Q-Q plots
 - **Gap**: Not systematically enforced; users must manually enable assumption checks
 
 **Exact missing options**:
+
 1. **Mandatory assumption checks** (with option to override):
    - For χ²: Automatically report expected cell counts; warn if any <5; suggest Fisher's exact
    - For t-test: Shapiro-Wilk for normality (both groups); Levene's test; recommend Mann-Whitney if violated
@@ -340,14 +355,17 @@
 **Method**: Wilson, exact, Agresti-Coull CIs for proportions (e.g., VI detection rate 55%, EMVI 37%)
 
 **Impact**:
+
 - Article reports point estimates (35%, 66%, 84%, 95%, 97%) without precision
 - Impossible to assess whether 95% at 6 blocks differs meaningfully from 97% at 7 blocks
 
 **Closest existing function**: `cisingle`, `ppv`, `enhancedroc`
+
 - **Current scope**: `cisingle` computes CIs for single proportions; `enhancedroc` includes sensitivity/specificity CIs
 - **Gap**: NOT integrated into table/plot output for sequential sensitivity analysis
 
 **Exact missing options**:
+
 1. **In pathsampling module**: Automatic CI calculation for sensitivity at each block count
    - Method selector: Wilson (default, good coverage), Exact (Clopper-Pearson), Agresti-Coull, Jeffreys
    - Display CIs in both table and plot (error bars on sensitivity curve)
@@ -362,14 +380,17 @@
 **Method**: Logistic regression with multiple predictors, adjusted ORs, model diagnostics
 
 **Impact**:
+
 - Essential for assessing independent associations after confounder adjustment
 - Pathology articles often lack multivariable analysis
 
 **Closest existing function**: `clinicalprediction`, `decision`, `jjpubr`
+
 - **Current scope**: These modules include logistic regression, but interfaces are complex/not tailored for Table 1-style association analyses
 - **Gap**: No simple "Table 1 with adjusted ORs" workflow
 
 **Exact missing options**:
+
 1. **"Table 1 Plus" module**:
    - Input: Outcome (binary: VI yes/no), Predictors (T-stage, N-stage, size, grade, etc.)
    - Output: Side-by-side table with **univariate ORs** (crude) and **multivariable ORs** (adjusted)
@@ -474,7 +495,7 @@ if (self$options$analysisType == 'tumorblock') {
   self$results$sensitivityTable$setContent(results$table)
   self$results$sensitivityPlot$setState(results$plot)
   self$results$recommendation$setContent(
-    glue::glue("To achieve ≥95% sensitivity for {outcomeType}, ",
+    glue::glue("To achieve >=95% sensitivity for {outcomeType}, ",
                "submit at least {results$optimal_blocks} tumor blocks.")
   )
 }
@@ -512,7 +533,7 @@ calculate_block_sensitivity <- function(data, numBlocks, outcomeType, stratifyBy
 
   sensitivity_df <- do.call(rbind, sensitivity_results)
 
-  # Determine optimal block count (first N achieving ≥95% sensitivity)
+  # Determine optimal block count (first N achieving >=95% sensitivity)
   optimal <- sensitivity_df$num_blocks[sensitivity_df$sensitivity >= 0.95][1]
 
   # Create plot (ggplot2)
@@ -525,7 +546,7 @@ calculate_block_sensitivity <- function(data, numBlocks, outcomeType, stratifyBy
       title = glue::glue("Cumulative Sensitivity of {outcomeType} Detection"),
       x = "Number of Tumor Blocks Examined",
       y = "Sensitivity (95% CI)",
-      caption = glue::glue("Optimal block count: {optimal} (≥95% sensitivity)")
+      caption = glue::glue("Optimal block count: {optimal} (>=95% sensitivity)")
     ) +
     scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
     scale_x_continuous(breaks = 1:max_blocks) +
@@ -592,14 +613,16 @@ Update UI to include new options (similar structure to existing sections).
 #### 5. Validation Plan
 
 **Test cases**:
+
 1. **Duan 2023 dataset**: Reproduce Figure 4A (VI sensitivity: 35%, 66%, 84%, 95%, 97%) with 95% CIs
 2. **Edge cases**:
    - All cases positive in first block (sensitivity = 100% at N=1)
    - No cases detected until block 8 (sensitivity curve flat then jumps)
    - Small sample size (n=10) → wide CIs
-3. **Stratified analysis**: Compare sensitivity curves for tumor size <5 cm vs ≥5 cm (reproduce Figure 5C,D)
+3. **Stratified analysis**: Compare sensitivity curves for tumor size <5 cm vs >=5 cm (reproduce Figure 5C,D)
 
 **Comparison to R reference**:
+
 ```r
 # Manual calculation in R
 library(binom)
@@ -628,6 +651,7 @@ ci_results <- lapply(seq_along(blocks), function(i) {
 Create vignette: `clinicopath-descriptives-030-pathsampling-tumorblock-comprehensive.qmd`
 
 Content:
+
 - Example dataset (simulated from Duan 2023)
 - Step-by-step workflow in jamovi
 - Interpretation of sensitivity curve and optimal block recommendation
@@ -695,6 +719,7 @@ Add column for adjusted P-values:
 #### 4. Validation
 
 Test with Table 1 from Duan 2023:
+
 - 15 predictors × 2 outcomes (VI, EMVI) = 30 tests
 - Apply Bonferroni: α = 0.05/30 = 0.00167
 - Verify that P=0.006 (grade-EMVI), P=0.035 become non-significant
@@ -752,6 +777,7 @@ if (self$options$effectSize %in% c('rr', 'both')) {
 #### 4. Validation
 
 Test case (from Duan 2023 Table 1, VI vs T-stage):
+
 - T4 vs T1-3: VI+ = 46/63 (73%), VI- = 17/63 (27%)
 - Calculate OR manually: (46×154)/(17×63) ≈ 6.6
 - Verify jamovi output matches
@@ -819,10 +845,12 @@ Add warnings output section:
    - Rationale: Widely used in epidemiology; handles edge cases (zero cells)
 
 **Existing packages** (already in ClinicoPath DESCRIPTION):
+
 - `ggplot2`, `glue`, `dplyr` (for Priority 1 plotting/text)
 - `stats` (for `p.adjust()` in Priority 2)
 
 **Performance considerations**:
+
 - Priority 1 (tumor block sensitivity): Computationally light (O(n × m), where n=cases, m=max blocks)
 - Priority 2-4: Negligible overhead (single function calls)
 

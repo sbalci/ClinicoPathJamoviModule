@@ -286,7 +286,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                 return()
             }
 
-            # Complete formula — lme4 random-effects bar `|` requires allow-list extension
+            # Complete formula - lme4 random-effects bar `|` requires allow-list extension
             formula_str <- paste0(dep_term, " ~ ", paste(formula_parts, collapse = " + "), " + ",
                                   paste(random_parts, collapse = " + "))
             lmer_formula <- jmvcore::asFormula(formula_str, additional_allowed_functions = c("|"))

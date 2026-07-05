@@ -10,7 +10,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
     "comprehensiveSurvivalPowerClass",
     inherit = comprehensiveSurvivalPowerBase,
     private = list(
-        # TODO (cleanup): four Html result items are declared in jamovi/comprehensiveSurvivalPower.r.yaml — `studyDesign`, `protocolSummary`, `regulatoryNotes`, `technicalDetails` — but never populated by this backend (only `instructions` and `clinicalInterpretation` are set via setContent). Either implement the corresponding .populate*() helpers or remove the four unused result entries from the .r.yaml so the UI doesn't render empty panels.
+        # TODO (cleanup): four Html result items are declared in jamovi/comprehensiveSurvivalPower.r.yaml - `studyDesign`, `protocolSummary`, `regulatoryNotes`, `technicalDetails` - but never populated by this backend (only `instructions` and `clinicalInterpretation` are set via setContent). Either implement the corresponding .populate*() helpers or remove the four unused result entries from the .r.yaml so the UI doesn't render empty panels.
         .init = function() {
             # Initialize instructions
             private$.populateInstructions()

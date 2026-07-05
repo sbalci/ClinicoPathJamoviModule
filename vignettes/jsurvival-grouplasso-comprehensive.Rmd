@@ -85,7 +85,7 @@ Look for: The suitability report (EPV, sample size, multicollinearity), group su
 
 ## 2. Penalty Type Comparison
 
-### Group MCP — non-convex penalty with less bias
+### Group MCP - non-convex penalty with less bias
 
 Group MCP provides less shrinkage for large coefficients, potentially selecting fewer but more confident groups.
 
@@ -228,7 +228,7 @@ grouplasso(
 )
 ```
 
-### Custom weights — penalize treatment group more heavily
+### Custom weights - penalize treatment group more heavily
 
 ```{r weights-custom}
 grouplasso(
@@ -423,7 +423,7 @@ Look for: The suitability report should flag the small sample size. The model ma
 
 ---
 
-## 12. Minimal Input — Factor-Based Grouping
+## 12. Minimal Input - Factor-Based Grouping
 
 ### Using factor_based grouping method
 

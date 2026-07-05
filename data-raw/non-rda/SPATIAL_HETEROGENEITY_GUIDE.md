@@ -26,9 +26,11 @@ Both modules now support flexible spatial/compartment analysis for understanding
 ## ihccluster: Multi-Marker Spatial Analysis
 
 ### Purpose
+
 Identify distinct molecular subtypes and compare their distribution across tumor compartments.
 
 ### Key Features
+
 - ✅ Cluster cases based on multiple IHC markers
 - ✅ Compare cluster assignments between compartments (e.g., Central vs Invasive)
 - ✅ Test marker expression differences by compartment
@@ -36,12 +38,14 @@ Identify distinct molecular subtypes and compare their distribution across tumor
 - ✅ Visualize spatial patterns with annotated heatmaps
 
 ### When to Use
+
 - **Tumor subtyping studies**: Define molecular subtypes (e.g., Luminal A/B, Triple-negative)
 - **Spatial evolution**: Track how marker patterns change from center to invasive front
 - **Metastatic progression**: Compare primary tumor vs metastases
 - **Microenvironment effects**: Understand marker changes in hypoxic vs vascularized regions
 
 ### Example Workflow
+
 ```
 1. Select categorical markers: ER, PR, HER2, CK5/6, EGFR
 2. Select continuous markers: Ki67_Percent, AR_Hscore, p53_Percent
@@ -59,6 +63,7 @@ Results:
 ```
 
 ### Output Tables
+
 1. **Spatial Compartment Summary** - Clustering quality per compartment
 2. **Inter-Compartment Cluster Concordance** - Cohen's κ between regions
 3. **Cluster Distribution by Compartment** - Subtype frequencies
@@ -70,9 +75,11 @@ Results:
 ## ihcheterogeneity: Single-Marker Spatial Analysis
 
 ### Purpose
+
 Quantify intra-tumoral heterogeneity and assess sampling reliability across compartments.
 
 ### Key Features
+
 - ✅ Calculate ICC (Intraclass Correlation) by compartment
 - ✅ Calculate CV (Coefficient of Variation) by compartment
 - ✅ Test if heterogeneity differs significantly between compartments
@@ -80,12 +87,14 @@ Quantify intra-tumoral heterogeneity and assess sampling reliability across comp
 - ✅ Provide compartment-specific sampling recommendations
 
 ### When to Use
+
 - **Biopsy sampling studies**: Assess whether central biopsies represent invasive front
 - **Quality control**: Validate reproducibility across tumor regions
 - **Minimal sampling design**: Determine which compartment requires more samples
 - **Heterogeneity characterization**: Quantify region-specific marker variability
 
 ### Example Workflow
+
 ```
 1. Select reference measurement: Ki67_WholeSlide (0-100%)
 2. Select regional measurements: Ki67_Central, Ki67_Invasive, Ki67_Periphery
@@ -103,6 +112,7 @@ Results:
 ```
 
 ### Output Tables
+
 1. **Spatial Heterogeneity Analysis** - ICC, CV, mean by region
 2. **Compartment Heterogeneity Comparison** - Metrics with 95% CIs
 3. **Statistical Tests for Compartment Differences** - Levene's & Kruskal-Wallis tests
@@ -114,11 +124,13 @@ Results:
 ### Scenario: Comprehensive Spatial Characterization
 
 **Step 1: Use `ihccluster` for subtyping**
+
 - Input: Multiple IHC markers (ER, PR, HER2, Ki67, etc.)
 - Output: Identify 3 molecular subtypes (Luminal, HER2+, Triple-negative)
 - Spatial analysis: Subtypes shift from central (70% Luminal) to invasive (40% Luminal)
 
 **Step 2: Use `ihcheterogeneity` for each marker**
+
 - Input: Individual markers (Ki67_Percent) across regions
 - Output: Ki67 heterogeneity is highest at invasive front (CV=32%)
 - Sampling recommendation: Use 5 measurements at invasive front vs 3 centrally
@@ -131,53 +143,65 @@ Results:
 ## Clinical Applications by Disease
 
 ### 1. **Colorectal Cancer** (Matsuoka et al., 2011)
+
 **Compartments**: Central parts vs Invasive fronts
 
 **`ihccluster` Use:**
+
 - Markers: Claudin-1, Claudin-4, E-cadherin, β-catenin (membranous/nuclear)
 - Finding: 3 prognostic groups (good/intermediate/poor)
 - Spatial: Loss of E-cadherin at invasive front → independent predictor (HR=3.42)
 
 **`ihcheterogeneity` Use:**
+
 - Marker: E-cadherin H-score
 - Finding: CV=22% at invasive front vs 12% central (p<0.001)
 - Action: Recommend 4-5 measurements at invasive front for reliable scoring
 
 ### 2. **Breast Cancer**
+
 **Compartments**: DCIS (preinvasive) vs Invasive carcinoma
 
 **`ihccluster` Use:**
+
 - Markers: ER, PR, HER2, Ki67, AR, p53
 - Finding: Luminal A DCIS → 30% convert to Luminal B invasive
 - Spatial: κ=0.58 (moderate agreement) → dedifferentiation during invasion
 
 **`ihcheterogeneity` Use:**
+
 - Marker: Ki67 percentage
 - Finding: ICC_DCIS=0.82 vs ICC_Invasive=0.65 → invasion increases heterogeneity
 - Action: Recommend separate Ki67 scoring for DCIS and invasive components
 
 ### 3. **Gastric Cancer**
+
 **Compartments**: Superficial vs Deep invasion layers
 
 **`ihccluster` Use:**
+
 - Markers: CDX2, MUC2, MUC5AC, MUC6 (intestinal/gastric markers)
 - Finding: Phenotype switching from intestinal (superficial) to gastric (deep)
 - Spatial: κ=0.35 (fair agreement) → significant phenotypic shift
 
 **`ihcheterogeneity` Use:**
+
 - Marker: PD-L1 TPS (Tumor Proportion Score)
 - Finding: CV_Deep=45% vs CV_Superficial=22% → deep layer is more heterogeneous
 - Action: Deep layer biopsies are more reliable for PD-L1 status
 
 ### 4. **Lung Cancer - Primary vs Metastatic**
+
 **Compartments**: Primary tumor vs Brain metastasis
 
 **`ihccluster` Use:**
+
 - Markers: TTF-1, Napsin A, CK7, CK20, p40
 - Finding: Maintain adenocarcinoma profile in both sites (κ=0.78)
 - Spatial: No significant subtype shift → clonal metastasis
 
 **`ihcheterogeneity` Use:**
+
 - Marker: PD-L1 CPS (Combined Positive Score)
 - Finding: ICC_Primary=0.71 vs ICC_Metastasis=0.62 → similar heterogeneity
 - Action: Both sites require 3-4 measurements for reliable PD-L1 scoring
@@ -189,6 +213,7 @@ Results:
 ### ihccluster Spatial Statistics
 
 #### 1. **Cohen's Kappa** (Inter-compartment concordance)
+
 ```
 κ = (p_observed - p_expected) / (1 - p_expected)
 
@@ -202,16 +227,19 @@ Interpretation (Landis & Koch 1977):
 ```
 
 #### 2. **Mann-Whitney U** (Continuous marker differences)
+
 - Non-parametric test for distributional differences
 - Reports: U statistic, p-value, Cohen's d effect size
 
 #### 3. **Chi-square / Fisher's exact** (Categorical marker differences)
+
 - Tests association between compartment and marker level
 - Reports: χ² statistic, p-value, Cramér's V effect size
 
 ### ihcheterogeneity Spatial Statistics
 
 #### 1. **Intraclass Correlation Coefficient (ICC)**
+
 ```
 ICC(2,1) = (BMS - WMS) / (BMS + (k-1)×WMS)
 
@@ -228,6 +256,7 @@ ICC > 0.9: Excellent
 ```
 
 #### 2. **Coefficient of Variation (CV)**
+
 ```
 CV = (SD / Mean) × 100%
 
@@ -239,6 +268,7 @@ CV > 30%: Very high variability
 ```
 
 #### 3. **Levene's Test** (Variance equality across compartments)
+
 ```
 Tests H₀: σ²₁ = σ²₂ = ... = σ²ₖ
 
@@ -246,6 +276,7 @@ If p < 0.05: Heterogeneity differs significantly between compartments
 ```
 
 #### 4. **Kruskal-Wallis Test** (Distributional differences)
+
 ```
 Tests H₀: Distributions are identical across compartments
 
@@ -258,6 +289,7 @@ Follow up with post-hoc pairwise comparisons
 ## Data Structure Requirements
 
 ### ihccluster Requirements
+
 ```csv
 CaseID,Compartment,ER,PR,HER2,Ki67_Percent,AR_Hscore
 BC001,Central,Positive,Positive,1+,12.5,200
@@ -265,11 +297,13 @@ BC001,Invasive,Negative,Negative,2+,35.2,100
 BC002,Central,Positive,Positive,0,8.1,250
 BC002,Invasive,Positive,Negative,1+,18.9,180
 ```
+
 - **Format**: Long format (one row per case-compartment combination)
-- **Compartment variable**: Factor with ≥2 levels
+- **Compartment variable**: Factor with >=2 levels
 - **Markers**: Mix of categorical and continuous
 
 ### ihcheterogeneity Requirements
+
 ```csv
 CaseID,Region,Ki67_WholeSlide,Ki67_Region1,Ki67_Region2,Ki67_Region3
 BC001,Central,15.2,14.8,15.6,15.1
@@ -277,6 +311,7 @@ BC002,Central,22.1,21.5,23.2,21.8
 BC003,Invasive,28.5,22.1,31.8,32.2
 BC004,Invasive,35.2,29.5,38.1,37.8
 ```
+
 - **Format**: Wide format (one row per case)
 - **Reference**: Optional whole-slide or hotspot measurement
 - **Regional measurements**: 2-10 measurements per case
@@ -324,18 +359,22 @@ BC004,Invasive,35.2,29.5,38.1,37.8
 ### Common Issues
 
 **Issue**: "Spatial analysis requires at least 2 compartments"
-- **Check**: `table(data$CompartmentVariable)` has ≥2 levels
+
+- **Check**: `table(data$CompartmentVariable)` has >=2 levels
 - **Solution**: Ensure your grouping variable is correctly formatted as factor
 
 **Issue**: Kappa = NA in ihccluster
+
 - **Cause**: Different numbers of clusters in each compartment
 - **Solution**: Normal - focus on concordance percentage instead
 
 **Issue**: All ICC values = NA in ihcheterogeneity
+
 - **Cause**: <2 measurements per case or no variation
 - **Solution**: Need multiple measurements per case within each compartment
 
 **Issue**: Levene's test p-value = 1.0
+
 - **Cause**: Equal variances (no heterogeneity difference)
 - **Action**: Report that compartments have similar reliability
 
@@ -365,12 +404,14 @@ BC004,Invasive,35.2,29.5,38.1,37.8
 - **`ihcheterogeneity`**: Single-marker sampling reliability with compartment-specific recommendations
 
 **Both modules share:**
+
 - Flexible compartment definition (not limited to center/periphery)
 - Statistically sound methods (Cohen's κ, ICC, Levene's test)
 - Clinical interpretation guidelines
 - Publication-ready output tables
 
 **Use together for:**
+
 - Comprehensive spatial characterization
 - Subtype identification + marker reliability
 - Optimize sampling protocols for specific compartments

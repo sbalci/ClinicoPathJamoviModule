@@ -13,7 +13,6 @@ qtwistClass <- R6::R6Class(
     "qtwistClass",
     inherit = qtwistBase,
     private = list(
-
         # Store calculated results
         .state_partition_results = NULL,
         .qtwist_results = NULL,
@@ -24,7 +23,6 @@ qtwistClass <- R6::R6Class(
         # INITIALIZATION
         # ========================================
         .init = function() {
-
             # Populate welcome message
             private$.populateWelcomeMessage()
 
@@ -53,7 +51,6 @@ qtwistClass <- R6::R6Class(
         # WELCOME MESSAGE & TODO
         # ========================================
         .populateWelcomeMessage = function() {
-
             # Check variable selection status
             has_os_time <- !is.null(self$options$time_os)
             has_os_event <- !is.null(self$options$event_os)
@@ -64,7 +61,7 @@ qtwistClass <- R6::R6Class(
             # Determine toxicity status
             tox_method <- self$options$toxicity_method
             has_toxicity <- if (tox_method == "fixed_window") {
-                TRUE  # Always available for fixed window
+                TRUE # Always available for fixed window
             } else if (tox_method == "individual_duration") {
                 !is.null(self$options$toxicity_duration_var)
             } else if (tox_method == "time_period") {
@@ -75,10 +72,8 @@ qtwistClass <- R6::R6Class(
 
             html_content <- paste0(
                 "<div style='font-family: Arial, sans-serif; padding: 20px;'>",
-
                 "<h2 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
                 "Q-TWiST Analysis: Quality-Adjusted Survival</h2>",
-
                 "<div style='background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #2c3e50;'> What is Q-TWiST?</h3>",
                 "<p><strong>Q-TWiST</strong> (Quality-adjusted Time Without Symptoms or Toxicity) ",
@@ -91,11 +86,9 @@ qtwistClass <- R6::R6Class(
                 "<p style='margin-top: 10px;'><strong>Formula:</strong> ",
                 "Q-TWiST = μ<sub>TOX</sub> × E[TOX] + μ<sub>TWiST</sub> × E[TWiST] + μ<sub>REL</sub> × E[REL]</p>",
                 "</div>",
-
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #856404;'> IMPORTANT: Time Variables Required</h3>",
                 "<p><strong>Q-TWiST analysis requires PRECALCULATED time durations</strong> (in months), not dates.</p>",
-
                 "<h4 style='color: #856404; margin-top: 15px;'>If you have DATES instead of durations:</h4>",
                 "<ol style='margin: 10px 0; line-height: 1.8;'>",
                 "<li>Use the <strong style='color: #d63031;'>Time Interval Calculator</strong> function FIRST</li>",
@@ -105,7 +98,6 @@ qtwistClass <- R6::R6Class(
                 "<li>Save the calculated time variables in your dataset</li>",
                 "<li>Then return to Q-TWiST analysis and select these time variables</li>",
                 "</ol>",
-
                 "<div style='background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px;'>",
                 "<strong>Example:</strong>",
                 "<ul style='margin: 5px 0; list-style-type: none;'>",
@@ -116,7 +108,6 @@ qtwistClass <- R6::R6Class(
                 "</ul>",
                 "</div>",
                 "</div>",
-
                 "<h3 style='color: #2c3e50; margin-top: 20px;'> Variable Selection Checklist:</h3>",
                 "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
                 "<tr style='background-color: #f8f9fa;'>",
@@ -124,7 +115,6 @@ qtwistClass <- R6::R6Class(
                 "<th style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>Status</th>",
                 "<th style='text-align: left; padding: 8px; border: 1px solid #dee2e6;'>Notes</th>",
                 "</tr>",
-
                 "<tr>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Overall Survival Time</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
@@ -132,7 +122,6 @@ qtwistClass <- R6::R6Class(
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Time to death or censoring (months)</td>",
                 "</tr>",
-
                 "<tr style='background-color: #f8f9fa;'>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>OS Event Indicator</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
@@ -140,7 +129,6 @@ qtwistClass <- R6::R6Class(
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>1 = death, 0 = censored (or factor)</td>",
                 "</tr>",
-
                 "<tr>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>PFS Time</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
@@ -148,7 +136,6 @@ qtwistClass <- R6::R6Class(
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Time to progression/death (months)</td>",
                 "</tr>",
-
                 "<tr style='background-color: #f8f9fa;'>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>PFS Event Indicator</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
@@ -156,7 +143,6 @@ qtwistClass <- R6::R6Class(
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>1 = progression/death, 0 = censored</td>",
                 "</tr>",
-
                 "<tr>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Treatment Variable</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
@@ -164,7 +150,6 @@ qtwistClass <- R6::R6Class(
                 "</td>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'>Exactly 2 treatment groups required</td>",
                 "</tr>",
-
                 "<tr style='background-color: #f8f9fa;'>",
                 "<td style='padding: 8px; border: 1px solid #dee2e6;'><strong>Toxicity Definition</strong></td>",
                 "<td style='text-align: center; padding: 8px; border: 1px solid #dee2e6;'>",
@@ -175,7 +160,6 @@ qtwistClass <- R6::R6Class(
                 "</td>",
                 "</tr>",
                 "</table>",
-
                 "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #155724;'> Key Features:</h3>",
                 "<ul style='margin: 10px 0; line-height: 1.6;'>",
@@ -187,7 +171,6 @@ qtwistClass <- R6::R6Class(
                 "<li>Threshold analysis for clinical decision-making</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #0c5460;'> Clinical Applications:</h3>",
                 "<ul style='margin: 10px 0; line-height: 1.6;'>",
@@ -198,7 +181,6 @@ qtwistClass <- R6::R6Class(
                 "<li><strong>Cost-Effectiveness:</strong> QALY-like measure for economic evaluation</li>",
                 "</ul>",
                 "</div>",
-
                 ifelse(has_os_time && has_os_event && has_pfs_time && has_pfs_event && has_treatment && has_toxicity,
                     paste0(
                         "<div style='background-color: #d4edda; padding: 15px; border: 2px solid #28a745; margin: 15px 0; border-radius: 5px;'>",
@@ -214,7 +196,6 @@ qtwistClass <- R6::R6Class(
                         "</div>"
                     )
                 ),
-
                 "<hr style='margin: 20px 0; border: none; border-top: 1px solid #dee2e6;'>",
                 "<p style='font-size: 0.9em; color: #6c757d; margin: 10px 0;'>",
                 "<strong>Need Help?</strong> See the <em>Methodology Explanation</em> section below ",
@@ -230,20 +211,15 @@ qtwistClass <- R6::R6Class(
         # METHODOLOGY EXPLANATION
         # ========================================
         .populateMethodologyExplanation = function() {
-
             html_content <- paste0(
                 "<div style='font-family: Arial, sans-serif; padding: 20px;'>",
-
                 "<h2 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
                 "Q-TWiST Methodology</h2>",
-
                 "<h3 style='color: #2c3e50;'>Statistical Foundation</h3>",
                 "<p>Q-TWiST was developed by Gelber and Goldhirsch (1986) to evaluate cancer treatments ",
                 "that may extend survival but with different quality-of-life profiles. The method recognizes ",
                 "that not all survival time is equivalent in quality.</p>",
-
                 "<h3 style='color: #2c3e50;'>Three Health States</h3>",
-
                 "<div style='margin: 15px 0;'>",
                 "<h4 style='color: #e74c3c; margin-bottom: 5px;'>1. TOX (Toxicity State)</h4>",
                 "<p style='margin-left: 20px;'>Time experiencing significant treatment-related toxicity ",
@@ -252,7 +228,6 @@ qtwistClass <- R6::R6Class(
                 "<p style='margin-left: 20px;'><strong>Utility weight (μ<sub>TOX</sub>):</strong> ",
                 "Typically 0.3-0.7, representing reduced quality of life during toxic treatment.</p>",
                 "</div>",
-
                 "<div style='margin: 15px 0;'>",
                 "<h4 style='color: #27ae60; margin-bottom: 5px;'>2. TWiST (Time Without Symptoms or Toxicity)</h4>",
                 "<p style='margin-left: 20px;'>The 'good quality' survival time - patient is alive, ",
@@ -261,7 +236,6 @@ qtwistClass <- R6::R6Class(
                 "<p style='margin-left: 20px;'><strong>Utility weight (μ<sub>TWiST</sub>):</strong> ",
                 "Typically 1.0 (perfect health), used as the reference state.</p>",
                 "</div>",
-
                 "<div style='margin: 15px 0;'>",
                 "<h4 style='color: #f39c12; margin-bottom: 5px;'>3. REL (Relapse/Progression State)</h4>",
                 "<p style='margin-left: 20px;'>Time after disease relapse or progression. ",
@@ -269,9 +243,7 @@ qtwistClass <- R6::R6Class(
                 "<p style='margin-left: 20px;'><strong>Utility weight (μ<sub>REL</sub>):</strong> ",
                 "Typically 0.3-0.6, representing reduced quality due to disease symptoms.</p>",
                 "</div>",
-
                 "<h3 style='color: #2c3e50; margin-top: 25px;'>Mathematical Framework</h3>",
-
                 "<div style='background-color: #f8f9fa; padding: 15px; margin: 15px 0; border-left: 4px solid #6c757d;'>",
                 "<h4 style='margin-top: 0;'>Step 1: Partition Overall Survival</h4>",
                 "<p>Using restricted mean survival time (RMST) methodology:</p>",
@@ -289,7 +261,6 @@ qtwistClass <- R6::R6Class(
                 "<li>E[TWiST] = E[PFS] - E[TOX] (good quality time)</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #e8f4f8; padding: 15px; margin: 15px 0; border-left: 4px solid #3498db;'>",
                 "<h4 style='margin-top: 0;'>Step 2: Apply Utility Weights</h4>",
                 "<p style='font-family: monospace; font-size: 1.1em; margin: 10px 0;'>",
@@ -298,37 +269,31 @@ qtwistClass <- R6::R6Class(
                 "<p>Each health state's duration is weighted by its quality-of-life utility, ",
                 "producing a single quality-adjusted survival metric in months.</p>",
                 "</div>",
-
                 "<div style='background-color: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ffc107;'>",
                 "<h4 style='margin-top: 0;'>Step 3: Compare Treatments</h4>",
                 "<p style='font-family: monospace;'>Δ Q-TWiST = Q-TWiST<sub>Treatment A</sub> - Q-TWiST<sub>Treatment B</sub></p>",
                 "<p>Positive Δ Q-TWiST indicates Treatment A provides more quality-adjusted survival.</p>",
                 "<p><strong>Bootstrap confidence intervals</strong> provide robust inference about treatment differences.</p>",
                 "</div>",
-
                 "<h3 style='color: #2c3e50; margin-top: 25px;'>Toxicity Assessment Methods</h3>",
-
                 "<div style='margin: 15px 0;'>",
                 "<h4>Method 1: Fixed Time Window (Most Common)</h4>",
                 "<p style='margin-left: 20px;'>All patients assessed for toxicity during the same time period ",
                 "(e.g., first 3 months). Simple and clinically interpretable.</p>",
                 "<p style='margin-left: 20px;'><strong>E[TOX] = </strong> Duration of window × Probability of grade 3-4 toxicity</p>",
                 "</div>",
-
                 "<div style='margin: 15px 0;'>",
                 "<h4>Method 2: Individual Toxicity Durations</h4>",
                 "<p style='margin-left: 20px;'>Each patient has specific toxicity duration recorded. ",
                 "More precise but requires detailed toxicity tracking.</p>",
                 "<p style='margin-left: 20px;'><strong>E[TOX] = </strong> Mean of individual toxicity durations</p>",
                 "</div>",
-
                 "<div style='margin: 15px 0;'>",
                 "<h4>Method 3: Time Period with Start/End</h4>",
                 "<p style='margin-left: 20px;'>Toxicity periods defined by start and end times for each patient. ",
                 "Allows for varying toxicity timing.</p>",
                 "<p style='margin-left: 20px;'><strong>E[TOX] = </strong> Mean of (toxicity_end - toxicity_start)</p>",
                 "</div>",
-
                 "<h3 style='color: #2c3e50; margin-top: 25px;'>Sensitivity Analysis</h3>",
                 "<p>Because utility weights are subjective, Q-TWiST analysis includes sensitivity analysis ",
                 "to examine how results vary across different utility assumptions. This shows:</p>",
@@ -337,9 +302,7 @@ qtwistClass <- R6::R6Class(
                 "<li><strong>Threshold values:</strong> At what utility weights does treatment preference change?</li>",
                 "<li><strong>Clinical relevance:</strong> Even if statistically significant, is Δ Q-TWiST clinically meaningful?</li>",
                 "</ul>",
-
                 "<h3 style='color: #2c3e50; margin-top: 25px;'>Interpretation Guidelines</h3>",
-
                 "<div style='background-color: #d4edda; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745;'>",
                 "<h4 style='margin-top: 0; color: #155724;'>Clinical Significance</h4>",
                 "<p>A difference of <strong>1-2 months</strong> in Q-TWiST is generally considered ",
@@ -351,7 +314,6 @@ qtwistClass <- R6::R6Class(
                 "<li>Patient preferences</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #d1ecf1; padding: 15px; margin: 15px 0; border-left: 4px solid #17a2b8;'>",
                 "<h4 style='margin-top: 0; color: #0c5460;'>Statistical Inference</h4>",
                 "<ul>",
@@ -360,23 +322,18 @@ qtwistClass <- R6::R6Class(
                 "<li><strong>Two-sided tests:</strong> Tests whether Δ Q-TWiST differs from zero</li>",
                 "</ul>",
                 "</div>",
-
                 "<h3 style='color: #2c3e50; margin-top: 25px;'>Key References</h3>",
                 "<ol style='line-height: 1.8;'>",
                 "<li>Gelber RD, Goldhirsch A (1986). A new endpoint for the assessment of adjuvant therapy ",
                 "in postmenopausal women with operable breast cancer. <em>J Clin Oncol</em>, 4(12):1772-1779.</li>",
-
                 "<li>Glasziou PP, Simes RJ, Gelber RD (1990). Quality adjusted survival analysis. ",
                 "<em>Statistics in Medicine</em>, 9(11):1259-1276.</li>",
-
                 "<li>Cole BF, Gelber RD, Goldhirsch A (2004). Cox regression models for quality adjusted survival analysis. ",
                 "<em>Statistics in Medicine</em>, 23(21):3319-3337.</li>",
-
                 "<li>Revicki DA, Feeny D, Hunt TL, Cole BF (2006). Analyzing oncology clinical trial data using ",
                 "the Q-TWiST method: clinical importance and sources of information. ",
                 "<em>Quality of Life Research</em>, 15(3):411-423.</li>",
                 "</ol>",
-
                 "</div>"
             )
 
@@ -387,15 +344,14 @@ qtwistClass <- R6::R6Class(
         # MAIN RUN FUNCTION
         # ========================================
         .run = function() {
-
             # Reset cached state so the 15 jmvcore::reject early-rejects in
             # .run() / .processQTWISTData / .calculateStatePartitions /
             # .calculateToxicityDuration / .calculateTreatmentDifference don't
             # leave stale plots and tables from a previous valid run.
             private$.state_partition_results <- NULL
-            private$.qtwist_results          <- NULL
-            private$.bootstrap_results       <- NULL
-            private$.sensitivity_results     <- NULL
+            private$.qtwist_results <- NULL
+            private$.bootstrap_results <- NULL
+            private$.sensitivity_results <- NULL
 
             # Check if required variables are selected
             if (is.null(self$options$time_os) ||
@@ -478,83 +434,85 @@ qtwistClass <- R6::R6Class(
         # DATA PREPARATION
         # ========================================
         .prepareData = function() {
+            tryCatch(
+                {
+                    # Get raw data
+                    raw_data <- self$data
 
-            tryCatch({
-                # Get raw data
-                raw_data <- self$data
+                    # Extract variables
+                    time_os <- jmvcore::toNumeric(raw_data[[self$options$time_os]])
+                    event_os <- raw_data[[self$options$event_os]]
+                    time_pfs <- jmvcore::toNumeric(raw_data[[self$options$time_pfs]])
+                    event_pfs <- raw_data[[self$options$event_pfs]]
+                    treatment <- raw_data[[self$options$treatment]]
 
-                # Extract variables
-                time_os <- jmvcore::toNumeric(raw_data[[self$options$time_os]])
-                event_os <- raw_data[[self$options$event_os]]
-                time_pfs <- jmvcore::toNumeric(raw_data[[self$options$time_pfs]])
-                event_pfs <- raw_data[[self$options$event_pfs]]
-                treatment <- raw_data[[self$options$treatment]]
-
-                # Handle event indicators (factor or numeric)
-                if (is.factor(event_os)) {
-                    if (!is.null(self$options$event_os_level)) {
-                        event_os_binary <- as.numeric(event_os == self$options$event_os_level)
+                    # Handle event indicators (factor or numeric)
+                    if (is.factor(event_os)) {
+                        if (!is.null(self$options$event_os_level)) {
+                            event_os_binary <- as.numeric(event_os == self$options$event_os_level)
+                        } else {
+                            jmvcore::reject("Please specify the death event level for the OS event variable")
+                        }
                     } else {
-                        jmvcore::reject("Please specify the death event level for the OS event variable")
+                        event_os_binary <- as.numeric(event_os)
                     }
-                } else {
-                    event_os_binary <- as.numeric(event_os)
-                }
 
-                if (is.factor(event_pfs)) {
-                    if (!is.null(self$options$event_pfs_level)) {
-                        event_pfs_binary <- as.numeric(event_pfs == self$options$event_pfs_level)
+                    if (is.factor(event_pfs)) {
+                        if (!is.null(self$options$event_pfs_level)) {
+                            event_pfs_binary <- as.numeric(event_pfs == self$options$event_pfs_level)
+                        } else {
+                            jmvcore::reject("Please specify the progression/death event level for the PFS event variable")
+                        }
                     } else {
-                        jmvcore::reject("Please specify the progression/death event level for the PFS event variable")
+                        event_pfs_binary <- as.numeric(event_pfs)
                     }
-                } else {
-                    event_pfs_binary <- as.numeric(event_pfs)
+
+                    # Create clean dataset
+                    clean_data <- data.frame(
+                        time_os = time_os,
+                        event_os = event_os_binary,
+                        time_pfs = time_pfs,
+                        event_pfs = event_pfs_binary,
+                        treatment = as.factor(treatment),
+                        stringsAsFactors = FALSE
+                    )
+
+                    # Remove rows with missing values
+                    clean_data <- clean_data[complete.cases(clean_data), ]
+
+                    # Validate data
+                    if (nrow(clean_data) < 10) {
+                        jmvcore::reject("Insufficient data after removing missing values. At least 10 complete cases required.")
+                    }
+
+                    # Validate PFS <= OS
+                    pfs_gt_os <- clean_data$time_pfs > clean_data$time_os
+                    if (any(pfs_gt_os, na.rm = TRUE)) {
+                        n_violations <- sum(pfs_gt_os, na.rm = TRUE)
+                        warning(paste(
+                            n_violations, "patients have PFS time > OS time. ",
+                            "These will be corrected by setting PFS = OS."
+                        ))
+                        clean_data$time_pfs[pfs_gt_os] <- clean_data$time_os[pfs_gt_os]
+                    }
+
+                    # Validate all times are positive
+                    if (any(clean_data$time_os <= 0, na.rm = TRUE) || any(clean_data$time_pfs <= 0, na.rm = TRUE)) {
+                        jmvcore::reject("All survival times must be positive (> 0)")
+                    }
+
+                    return(clean_data)
+                },
+                error = function(e) {
+                    jmvcore::reject("Error preparing data: {}", htmltools::htmlEscape(conditionMessage(e)))
                 }
-
-                # Create clean dataset
-                clean_data <- data.frame(
-                    time_os = time_os,
-                    event_os = event_os_binary,
-                    time_pfs = time_pfs,
-                    event_pfs = event_pfs_binary,
-                    treatment = as.factor(treatment),
-                    stringsAsFactors = FALSE
-                )
-
-                # Remove rows with missing values
-                clean_data <- clean_data[complete.cases(clean_data), ]
-
-                # Validate data
-                if (nrow(clean_data) < 10) {
-                    jmvcore::reject("Insufficient data after removing missing values. At least 10 complete cases required.")
-                }
-
-                # Validate PFS <= OS
-                pfs_gt_os <- clean_data$time_pfs > clean_data$time_os
-                if (any(pfs_gt_os, na.rm = TRUE)) {
-                    n_violations <- sum(pfs_gt_os, na.rm = TRUE)
-                    warning(paste(n_violations, "patients have PFS time > OS time. ",
-                                "These will be corrected by setting PFS = OS."))
-                    clean_data$time_pfs[pfs_gt_os] <- clean_data$time_os[pfs_gt_os]
-                }
-
-                # Validate all times are positive
-                if (any(clean_data$time_os <= 0, na.rm = TRUE) || any(clean_data$time_pfs <= 0, na.rm = TRUE)) {
-                    jmvcore::reject("All survival times must be positive (> 0)")
-                }
-
-                return(clean_data)
-
-            }, error = function(e) {
-                jmvcore::reject("Error preparing data: {}", htmltools::htmlEscape(conditionMessage(e)))
-            })
+            )
         },
 
         # ========================================
         # DETERMINE TAU (Time Horizon)
         # ========================================
         .determineTau = function(data) {
-
             tau_method <- self$options$tau_selection
 
             if (tau_method == "user_specified") {
@@ -575,9 +533,11 @@ qtwistClass <- R6::R6Class(
             }
 
             if (tau > max(data$time_os, na.rm = TRUE)) {
-                warning(paste("Specified tau (", round(tau, 2),
-                            ") exceeds maximum observed follow-up (",
-                            round(max(data$time_os, na.rm = TRUE), 2), ")"))
+                warning(paste(
+                    "Specified tau (", round(tau, 2),
+                    ") exceeds maximum observed follow-up (",
+                    round(max(data$time_os, na.rm = TRUE), 2), ")"
+                ))
             }
 
             return(tau)
@@ -592,75 +552,75 @@ qtwistClass <- R6::R6Class(
         # RMST CALCULATION
         # ========================================
         .calculateRMST = function(time, event, tau, treatment_arm = NULL) {
+            tryCatch(
+                {
+                    # Restrict data to tau
+                    time_restricted <- pmin(time, tau)
+                    event_restricted <- ifelse(time > tau, 0, event)
 
-            tryCatch({
-                # Restrict data to tau
-                time_restricted <- pmin(time, tau)
-                event_restricted <- ifelse(time > tau, 0, event)
+                    # Fit Kaplan-Meier curve
+                    km_fit <- survival::survfit(
+                        survival::Surv(time_restricted, event_restricted) ~ 1
+                    )
 
-                # Fit Kaplan-Meier curve
-                km_fit <- survival::survfit(
-                    survival::Surv(time_restricted, event_restricted) ~ 1
-                )
+                    # Calculate RMST as area under KM curve up to tau
+                    # RMST = integral of S(t) from 0 to tau
 
-                # Calculate RMST as area under KM curve up to tau
-                # RMST = integral of S(t) from 0 to tau
+                    # Get survival times and probabilities
+                    times <- c(0, km_fit$time)
+                    surv <- c(1, km_fit$surv)
 
-                # Get survival times and probabilities
-                times <- c(0, km_fit$time)
-                surv <- c(1, km_fit$surv)
+                    # Restrict to tau
+                    times <- times[times <= tau]
+                    surv <- surv[1:length(times)]
 
-                # Restrict to tau
-                times <- times[times <= tau]
-                surv <- surv[1:length(times)]
+                    # Add tau if not already present
+                    if (max(times) < tau) {
+                        times <- c(times, tau)
+                        # Last survival probability extends to tau
+                        surv <- c(surv, surv[length(surv)])
+                    }
 
-                # Add tau if not already present
-                if (max(times) < tau) {
-                    times <- c(times, tau)
-                    # Last survival probability extends to tau
-                    surv <- c(surv, surv[length(surv)])
+                    # Calculate RMST as area under curve (trapezoidal rule)
+                    rmst <- 0
+                    for (i in 1:(length(times) - 1)) {
+                        width <- times[i + 1] - times[i]
+                        height <- (surv[i] + surv[i + 1]) / 2
+                        rmst <- rmst + width * height
+                    }
+
+                    # Calculate SE using Greenwood's formula
+                    # SE(RMST) = sqrt(Var(RMST))
+                    # Using numerical integration of variance
+
+                    # Get Greenwood variance from survfit
+                    if (length(km_fit$std.err) > 0) {
+                        # Approximate SE of RMST
+                        # This is a simplified approach; full calculation is complex
+                        se_rmst <- sqrt(sum(km_fit$std.err^2 * diff(c(0, km_fit$time, tau))^2, na.rm = TRUE))
+                    } else {
+                        se_rmst <- NA
+                    }
+
+                    return(list(
+                        rmst = rmst,
+                        se = se_rmst,
+                        tau = tau,
+                        km_fit = km_fit,
+                        n_events = sum(event_restricted),
+                        n_total = length(time)
+                    ))
+                },
+                error = function(e) {
+                    jmvcore::reject("Error calculating RMST: {}", htmltools::htmlEscape(conditionMessage(e)))
                 }
-
-                # Calculate RMST as area under curve (trapezoidal rule)
-                rmst <- 0
-                for (i in 1:(length(times) - 1)) {
-                    width <- times[i + 1] - times[i]
-                    height <- (surv[i] + surv[i + 1]) / 2
-                    rmst <- rmst + width * height
-                }
-
-                # Calculate SE using Greenwood's formula
-                # SE(RMST) = sqrt(Var(RMST))
-                # Using numerical integration of variance
-
-                # Get Greenwood variance from survfit
-                if (length(km_fit$std.err) > 0) {
-                    # Approximate SE of RMST
-                    # This is a simplified approach; full calculation is complex
-                    se_rmst <- sqrt(sum(km_fit$std.err^2 * diff(c(0, km_fit$time, tau))^2, na.rm = TRUE))
-                } else {
-                    se_rmst <- NA
-                }
-
-                return(list(
-                    rmst = rmst,
-                    se = se_rmst,
-                    tau = tau,
-                    km_fit = km_fit,
-                    n_events = sum(event_restricted),
-                    n_total = length(time)
-                ))
-
-            }, error = function(e) {
-                jmvcore::reject("Error calculating RMST: {}", htmltools::htmlEscape(conditionMessage(e)))
-            })
+            )
         },
 
         # ========================================
         # TOXICITY CALCULATION
         # ========================================
         .handleToxicity = function(data, tau) {
-
             tox_method <- self$options$toxicity_method
 
             if (tox_method == "fixed_window") {
@@ -675,7 +635,6 @@ qtwistClass <- R6::R6Class(
 
                 # Same for all patients
                 data$tox_duration <- effective_window * tox_prob
-
             } else if (tox_method == "individual_duration") {
                 # Method 2: Individual patient-specific durations
                 if (is.null(self$options$toxicity_duration_var)) {
@@ -707,7 +666,6 @@ qtwistClass <- R6::R6Class(
                 }
 
                 e_tox <- mean(data$tox_duration, na.rm = TRUE)
-
             } else if (tox_method == "time_period") {
                 # Method 3: Time periods with start and end times
                 if (is.null(self$options$toxicity_start_var) || is.null(self$options$toxicity_end_var)) {
@@ -726,7 +684,6 @@ qtwistClass <- R6::R6Class(
 
                 data$tox_duration <- tox_duration
                 e_tox <- mean(tox_duration, na.rm = TRUE)
-
             } else {
                 jmvcore::reject("Invalid toxicity method specified")
             }
@@ -751,129 +708,135 @@ qtwistClass <- R6::R6Class(
         # STATE PARTITION CALCULATION
         # ========================================
         .calculateStatePartitions = function(data, tau) {
+            tryCatch(
+                {
+                    # Get treatment levels
+                    treatment_levels <- levels(data$treatment)
+                    if (length(treatment_levels) != 2) {
+                        treatment_levels <- unique(data$treatment)
+                    }
 
-            tryCatch({
-                # Get treatment levels
-                treatment_levels <- levels(data$treatment)
-                if (length(treatment_levels) != 2) {
-                    treatment_levels <- unique(data$treatment)
+                    results <- list()
+
+                    for (trt in treatment_levels) {
+                        # Subset data for this treatment
+                        trt_data <- data[data$treatment == trt, ]
+
+                        # Calculate RMST for OS
+                        rmst_os <- private$.calculateRMST(
+                            time = trt_data$time_os,
+                            event = trt_data$event_os,
+                            tau = tau
+                        )
+
+                        # Calculate RMST for PFS
+                        rmst_pfs <- private$.calculateRMST(
+                            time = trt_data$time_pfs,
+                            event = trt_data$event_pfs,
+                            tau = tau
+                        )
+
+                        # Calculate toxicity duration
+                        tox_results <- private$.handleToxicity(trt_data, tau)
+
+                        # Q-TWiST partition:
+                        # E[TOX] = mean toxicity duration
+                        # E[REL] = E[OS] - E[PFS] (time after progression)
+                        # E[TWiST] = E[PFS] - E[TOX] (good quality time)
+
+                        e_tox <- tox_results$e_tox
+                        e_rel <- rmst_os$rmst - rmst_pfs$rmst
+                        e_twist <- rmst_pfs$rmst - e_tox
+
+                        # Validate partition
+                        total_rmst <- e_tox + e_twist + e_rel
+                        partition_error <- abs(total_rmst - rmst_os$rmst)
+
+                        if (partition_error > 0.001) {
+                            warning(paste(
+                                "Partition validation warning for", trt,
+                                ": E[TOX] + E[TWiST] + E[REL] =", round(total_rmst, 3),
+                                "vs E[OS] =", round(rmst_os$rmst, 3)
+                            ))
+                        }
+
+                        # Ensure non-negative values
+                        if (e_twist < 0) {
+                            warning(paste(
+                                "Negative TWiST detected for", trt,
+                                "(E[TWiST] =", round(e_twist, 3), "). ",
+                                "This may indicate toxicity duration exceeds PFS. ",
+                                "Setting E[TWiST] to 0 and adjusting E[TOX]."
+                            ))
+                            e_tox <- rmst_pfs$rmst
+                            e_twist <- 0
+                        }
+
+                        if (e_rel < 0) {
+                            warning(paste(
+                                "Negative REL detected for", trt,
+                                "(E[REL] =", round(e_rel, 3), "). ",
+                                "This suggests PFS > OS, which should have been corrected earlier."
+                            ))
+                            e_rel <- 0
+                        }
+
+                        # Store results for this treatment
+                        results[[as.character(trt)]] <- list(
+                            treatment = trt,
+                            n = nrow(trt_data),
+
+                            # RMST components
+                            rmst_os = rmst_os$rmst,
+                            rmst_os_se = rmst_os$se,
+                            rmst_pfs = rmst_pfs$rmst,
+                            rmst_pfs_se = rmst_pfs$se,
+
+                            # State partition
+                            e_tox = e_tox,
+                            e_twist = e_twist,
+                            e_rel = e_rel,
+                            total_rmst = e_tox + e_twist + e_rel,
+
+                            # Proportions
+                            tox_percent = e_tox / rmst_os$rmst,
+                            twist_percent = e_twist / rmst_os$rmst,
+                            rel_percent = e_rel / rmst_os$rmst,
+
+                            # Event counts
+                            os_events = sum(trt_data$event_os),
+                            pfs_events = sum(trt_data$event_pfs),
+                            os_event_rate = mean(trt_data$event_os),
+                            pfs_event_rate = mean(trt_data$event_pfs),
+
+                            # Median survival
+                            median_os = median(trt_data$time_os),
+                            median_pfs = median(trt_data$time_pfs),
+
+                            # Store KM fits for plotting
+                            km_os = rmst_os$km_fit,
+                            km_pfs = rmst_pfs$km_fit,
+
+                            # Tau
+                            tau = tau
+                        )
+                    }
+
+                    return(results)
+                },
+                error = function(e) {
+                    jmvcore::reject("Error calculating state partitions: {}", htmltools::htmlEscape(conditionMessage(e)))
                 }
-
-                results <- list()
-
-                for (trt in treatment_levels) {
-                    # Subset data for this treatment
-                    trt_data <- data[data$treatment == trt, ]
-
-                    # Calculate RMST for OS
-                    rmst_os <- private$.calculateRMST(
-                        time = trt_data$time_os,
-                        event = trt_data$event_os,
-                        tau = tau
-                    )
-
-                    # Calculate RMST for PFS
-                    rmst_pfs <- private$.calculateRMST(
-                        time = trt_data$time_pfs,
-                        event = trt_data$event_pfs,
-                        tau = tau
-                    )
-
-                    # Calculate toxicity duration
-                    tox_results <- private$.handleToxicity(trt_data, tau)
-
-                    # Q-TWiST partition:
-                    # E[TOX] = mean toxicity duration
-                    # E[REL] = E[OS] - E[PFS] (time after progression)
-                    # E[TWiST] = E[PFS] - E[TOX] (good quality time)
-
-                    e_tox <- tox_results$e_tox
-                    e_rel <- rmst_os$rmst - rmst_pfs$rmst
-                    e_twist <- rmst_pfs$rmst - e_tox
-
-                    # Validate partition
-                    total_rmst <- e_tox + e_twist + e_rel
-                    partition_error <- abs(total_rmst - rmst_os$rmst)
-
-                    if (partition_error > 0.001) {
-                        warning(paste("Partition validation warning for", trt,
-                                    ": E[TOX] + E[TWiST] + E[REL] =", round(total_rmst, 3),
-                                    "vs E[OS] =", round(rmst_os$rmst, 3)))
-                    }
-
-                    # Ensure non-negative values
-                    if (e_twist < 0) {
-                        warning(paste("Negative TWiST detected for", trt,
-                                    "(E[TWiST] =", round(e_twist, 3), "). ",
-                                    "This may indicate toxicity duration exceeds PFS. ",
-                                    "Setting E[TWiST] to 0 and adjusting E[TOX]."))
-                        e_tox <- rmst_pfs$rmst
-                        e_twist <- 0
-                    }
-
-                    if (e_rel < 0) {
-                        warning(paste("Negative REL detected for", trt,
-                                    "(E[REL] =", round(e_rel, 3), "). ",
-                                    "This suggests PFS > OS, which should have been corrected earlier."))
-                        e_rel <- 0
-                    }
-
-                    # Store results for this treatment
-                    results[[as.character(trt)]] <- list(
-                        treatment = trt,
-                        n = nrow(trt_data),
-
-                        # RMST components
-                        rmst_os = rmst_os$rmst,
-                        rmst_os_se = rmst_os$se,
-                        rmst_pfs = rmst_pfs$rmst,
-                        rmst_pfs_se = rmst_pfs$se,
-
-                        # State partition
-                        e_tox = e_tox,
-                        e_twist = e_twist,
-                        e_rel = e_rel,
-                        total_rmst = e_tox + e_twist + e_rel,
-
-                        # Proportions
-                        tox_percent = e_tox / rmst_os$rmst,
-                        twist_percent = e_twist / rmst_os$rmst,
-                        rel_percent = e_rel / rmst_os$rmst,
-
-                        # Event counts
-                        os_events = sum(trt_data$event_os),
-                        pfs_events = sum(trt_data$event_pfs),
-                        os_event_rate = mean(trt_data$event_os),
-                        pfs_event_rate = mean(trt_data$event_pfs),
-
-                        # Median survival
-                        median_os = median(trt_data$time_os),
-                        median_pfs = median(trt_data$time_pfs),
-
-                        # Store KM fits for plotting
-                        km_os = rmst_os$km_fit,
-                        km_pfs = rmst_pfs$km_fit,
-
-                        # Tau
-                        tau = tau
-                    )
-                }
-
-                return(results)
-
-            }, error = function(e) {
-                jmvcore::reject("Error calculating state partitions: {}", htmltools::htmlEscape(conditionMessage(e)))
-            })
+            )
         },
 
         # ========================================
         # Q-TWiST SCORE CALCULATION
         # ========================================
         .calculateQTWISTScores = function(state_results,
-                                         utility_tox = NULL,
-                                         utility_twist = NULL,
-                                         utility_rel = NULL) {
-
+                                          utility_tox = NULL,
+                                          utility_twist = NULL,
+                                          utility_rel = NULL) {
             # Use provided utilities or default to options
             if (is.null(utility_tox)) utility_tox <- self$options$utility_tox
             if (is.null(utility_twist)) utility_twist <- self$options$utility_twist
@@ -887,15 +850,15 @@ qtwistClass <- R6::R6Class(
                 # Calculate Q-TWiST
                 # Q-TWiST = μ_TOX × E[TOX] + μ_TWiST × E[TWiST] + μ_REL × E[REL]
                 qtwist <- (utility_tox * state$e_tox) +
-                         (utility_twist * state$e_twist) +
-                         (utility_rel * state$e_rel)
+                    (utility_twist * state$e_twist) +
+                    (utility_rel * state$e_rel)
 
                 # Calculate SE of Q-TWiST (simplified)
                 # More accurate SE would require bootstrap
                 # For now, use propagation of error from RMST SEs
                 se_qtwist <- sqrt(
                     (utility_twist^2 * state$rmst_pfs_se^2) +
-                    (utility_rel^2 * (state$rmst_os_se^2 + state$rmst_pfs_se^2))
+                        (utility_rel^2 * (state$rmst_os_se^2 + state$rmst_pfs_se^2))
                 )
 
                 # Calculate CI (using normal approximation)
@@ -927,7 +890,6 @@ qtwistClass <- R6::R6Class(
         # TREATMENT DIFFERENCE CALCULATION
         # ========================================
         .calculateTreatmentDifference = function(state_results, qtwist_scores, data, tau) {
-
             treatment_names <- names(state_results)
             if (length(treatment_names) != 2) {
                 jmvcore::reject("Treatment difference requires exactly 2 treatment groups")
@@ -971,11 +933,11 @@ qtwistClass <- R6::R6Class(
 
             # Clinical significance
             clinical_sig <- if (abs(delta_qtwist) >= 2.0) {
-                "Large difference (≥2 months)"
+                "Large difference (>=2 months)"
             } else if (abs(delta_qtwist) >= 1.0) {
-                "Moderate difference (≥1 month)"
+                "Moderate difference (>=1 month)"
             } else if (abs(delta_qtwist) >= 0.5) {
-                "Small difference (≥0.5 months)"
+                "Small difference (>=0.5 months)"
             } else {
                 "Minimal difference (<0.5 months)"
             }
@@ -1008,7 +970,6 @@ qtwistClass <- R6::R6Class(
         # BOOTSTRAP CONFIDENCE INTERVALS
         # ========================================
         .bootstrapQTWIST = function(data, tau) {
-
             n_boot <- self$options$bootstrap_samples
 
             # Save & restore RNG state so the bootstrap sample() loop below
@@ -1016,14 +977,19 @@ qtwistClass <- R6::R6Class(
             # the user's session. Mirrors optimalcutpoint.b.R:765-772.
             old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
                 get(".Random.seed", envir = .GlobalEnv)
-            } else NULL
-            on.exit({
-                if (is.null(old_seed)) {
-                    suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
-                } else {
-                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
-                }
-            }, add = TRUE)
+            } else {
+                NULL
+            }
+            on.exit(
+                {
+                    if (is.null(old_seed)) {
+                        suppressWarnings(rm(".Random.seed", envir = .GlobalEnv))
+                    } else {
+                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                    }
+                },
+                add = TRUE
+            )
             set.seed(self$options$bootstrap_seed)
 
             treatment_names <- levels(data$treatment)
@@ -1072,7 +1038,6 @@ qtwistClass <- R6::R6Class(
         # SENSITIVITY ANALYSIS
         # ========================================
         .performSensitivityAnalysis = function(state_results) {
-
             # Parse utility ranges
             tox_range <- as.numeric(strsplit(self$options$utility_range_tox, ",")[[1]])
             rel_range <- as.numeric(strsplit(self$options$utility_range_rel, ",")[[1]])
@@ -1137,7 +1102,6 @@ qtwistClass <- R6::R6Class(
         # THRESHOLD ANALYSIS
         # ========================================
         .performThresholdAnalysis = function(state_results) {
-
             treatment_names <- names(state_results)
             trt1 <- treatment_names[1]
             trt2 <- treatment_names[2]
@@ -1146,47 +1110,53 @@ qtwistClass <- R6::R6Class(
             # This is a simplified implementation
 
             # For TOX utility (holding REL constant)
-            threshold_tox <- tryCatch({
-                # Difference in TOX durations
-                delta_tox <- state_results[[trt2]]$e_tox - state_results[[trt1]]$e_tox
-                delta_twist <- state_results[[trt2]]$e_twist - state_results[[trt1]]$e_twist
-                delta_rel <- state_results[[trt2]]$e_rel - state_results[[trt1]]$e_rel
+            threshold_tox <- tryCatch(
+                {
+                    # Difference in TOX durations
+                    delta_tox <- state_results[[trt2]]$e_tox - state_results[[trt1]]$e_tox
+                    delta_twist <- state_results[[trt2]]$e_twist - state_results[[trt1]]$e_twist
+                    delta_rel <- state_results[[trt2]]$e_rel - state_results[[trt1]]$e_rel
 
-                u_rel <- self$options$utility_rel
+                    u_rel <- self$options$utility_rel
 
-                # Solve for u_tox where delta_qtwist = 0
-                # 0 = u_tox * delta_tox + 1.0 * delta_twist + u_rel * delta_rel
-                # u_tox = -(delta_twist + u_rel * delta_rel) / delta_tox
+                    # Solve for u_tox where delta_qtwist = 0
+                    # 0 = u_tox * delta_tox + 1.0 * delta_twist + u_rel * delta_rel
+                    # u_tox = -(delta_twist + u_rel * delta_rel) / delta_tox
 
-                if (abs(delta_tox) > 0.001) {
-                    u_tox_threshold <- -(delta_twist + u_rel * delta_rel) / delta_tox
-                    # Constrain to [0, 1]
-                    u_tox_threshold <- max(0, min(1, u_tox_threshold))
-                } else {
-                    u_tox_threshold <- NA
-                }
+                    if (abs(delta_tox) > 0.001) {
+                        u_tox_threshold <- -(delta_twist + u_rel * delta_rel) / delta_tox
+                        # Constrain to [0, 1]
+                        u_tox_threshold <- max(0, min(1, u_tox_threshold))
+                    } else {
+                        u_tox_threshold <- NA
+                    }
 
-                u_tox_threshold
-            }, error = function(e) NA)
+                    u_tox_threshold
+                },
+                error = function(e) NA
+            )
 
             # For REL utility (holding TOX constant)
-            threshold_rel <- tryCatch({
-                delta_tox <- state_results[[trt2]]$e_tox - state_results[[trt1]]$e_tox
-                delta_twist <- state_results[[trt2]]$e_twist - state_results[[trt1]]$e_twist
-                delta_rel <- state_results[[trt2]]$e_rel - state_results[[trt1]]$e_rel
+            threshold_rel <- tryCatch(
+                {
+                    delta_tox <- state_results[[trt2]]$e_tox - state_results[[trt1]]$e_tox
+                    delta_twist <- state_results[[trt2]]$e_twist - state_results[[trt1]]$e_twist
+                    delta_rel <- state_results[[trt2]]$e_rel - state_results[[trt1]]$e_rel
 
-                u_tox <- self$options$utility_tox
+                    u_tox <- self$options$utility_tox
 
-                # Solve for u_rel where delta_qtwist = 0
-                if (abs(delta_rel) > 0.001) {
-                    u_rel_threshold <- -(delta_twist + u_tox * delta_tox) / delta_rel
-                    u_rel_threshold <- max(0, min(1, u_rel_threshold))
-                } else {
-                    u_rel_threshold <- NA
-                }
+                    # Solve for u_rel where delta_qtwist = 0
+                    if (abs(delta_rel) > 0.001) {
+                        u_rel_threshold <- -(delta_twist + u_tox * delta_tox) / delta_rel
+                        u_rel_threshold <- max(0, min(1, u_rel_threshold))
+                    } else {
+                        u_rel_threshold <- NA
+                    }
 
-                u_rel_threshold
-            }, error = function(e) NA)
+                    u_rel_threshold
+                },
+                error = function(e) NA
+            )
 
             threshold_results <- list(
                 list(
@@ -1195,8 +1165,10 @@ qtwistClass <- R6::R6Class(
                     ci_lower = NA,
                     ci_upper = NA,
                     interpretation = if (!is.na(threshold_tox)) {
-                        paste0("Treatment preference changes when toxicity utility crosses ",
-                              round(threshold_tox, 3))
+                        paste0(
+                            "Treatment preference changes when toxicity utility crosses ",
+                            round(threshold_tox, 3)
+                        )
                     } else {
                         "Threshold not identifiable (no TOX duration difference)"
                     }
@@ -1207,8 +1179,10 @@ qtwistClass <- R6::R6Class(
                     ci_lower = NA,
                     ci_upper = NA,
                     interpretation = if (!is.na(threshold_rel)) {
-                        paste0("Treatment preference changes when relapse utility crosses ",
-                              round(threshold_rel, 3))
+                        paste0(
+                            "Treatment preference changes when relapse utility crosses ",
+                            round(threshold_rel, 3)
+                        )
                     } else {
                         "Threshold not identifiable (no REL duration difference)"
                     }
@@ -1222,60 +1196,44 @@ qtwistClass <- R6::R6Class(
         # CLINICAL GUIDANCE
         # ========================================
         .populateClinicalGuidance = function() {
-
             html_content <- paste0(
                 "<div style='font-family: Arial, sans-serif; padding: 20px;'>",
-
                 "<h2 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
                 "Clinical Interpretation of Q-TWiST Results</h2>",
-
                 "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #155724;'> Interpreting Q-TWiST Differences</h3>",
-
                 "<h4>What is a Clinically Meaningful Difference?</h4>",
                 "<ul style='line-height: 1.8;'>",
-                "<li><strong>Large Difference (≥2 months):</strong> Strongly favors one treatment; ",
+                "<li><strong>Large Difference (>=2 months):</strong> Strongly favors one treatment; ",
                 "likely to influence clinical decision-making regardless of utility assumptions</li>",
-
                 "<li><strong>Moderate Difference (1-2 months):</strong> Clinically relevant; ",
                 "treatment choice may depend on patient preferences and toxicity tolerance</li>",
-
                 "<li><strong>Small Difference (0.5-1 month):</strong> May be meaningful in some settings; ",
                 "consider treatment burden, costs, and patient-specific factors</li>",
-
                 "<li><strong>Minimal Difference (<0.5 months):</strong> Unlikely to be clinically important; ",
                 "treatments may be considered equivalent in quality-adjusted benefit</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #d1ecf1; padding: 15px; border-left: 4px solid #17a2b8; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #0c5460;'> Analyzing Health State Contributions</h3>",
-
                 "<p><strong>Look at the state-specific differences table to understand WHY treatments differ:</strong></p>",
-
                 "<h4>Scenario 1: Treatment A has more TWiST</h4>",
                 "<p style='margin-left: 20px;'>→ Treatment A provides better quality survival<br>",
                 "→ Strong argument for Treatment A in most patients</p>",
-
                 "<h4>Scenario 2: Treatment A has longer OS but more TOX</h4>",
                 "<p style='margin-left: 20px;'>→ Survival benefit comes with toxicity burden<br>",
                 "→ Q-TWiST accounts for this trade-off<br>",
                 "→ Patient preferences critical</p>",
-
                 "<h4>Scenario 3: Similar Q-TWiST but different state distributions</h4>",
                 "<p style='margin-left: 20px;'>→ Treatments achieve similar quality-adjusted survival through different paths<br>",
                 "→ Consider patient-specific tolerance for toxicity vs. risk of relapse</p>",
                 "</div>",
-
                 "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #856404;'> Role of Sensitivity Analysis</h3>",
-
                 "<p><strong>Sensitivity analysis is essential because utility weights are subjective.</strong></p>",
-
                 "<h4>Robust Treatment Advantage</h4>",
                 "<p style='margin-left: 20px;'>If one treatment is favored across ALL reasonable utility combinations, ",
                 "the conclusion is robust to subjective assumptions.</p>",
-
                 "<h4>Utility-Dependent Preference</h4>",
                 "<p style='margin-left: 20px;'>If treatment preference changes based on utilities, ",
                 "identify the threshold values. This helps with shared decision-making:</p>",
@@ -1284,10 +1242,8 @@ qtwistClass <- R6::R6Class(
                 "<li>Patients tolerating toxicity well → higher μ<sub>TOX</sub></li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #e8f4f8; padding: 15px; border-left: 4px solid #3498db; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #0c5460;'> Clinical Application Examples</h3>",
-
                 "<h4>Adjuvant Chemotherapy Decision</h4>",
                 "<p style='margin-left: 20px;'><em>Scenario:</em> Standard chemo vs. dose-dense regimen</p>",
                 "<ul style='margin-left: 40px;'>",
@@ -1295,14 +1251,12 @@ qtwistClass <- R6::R6Class(
                 "<li>Q-TWiST quantifies whether survival benefit justifies toxicity burden</li>",
                 "<li>Threshold analysis: At what toxicity tolerance is dose-dense preferred?</li>",
                 "</ul>",
-
                 "<h4>Maintenance Therapy</h4>",
                 "<p style='margin-left: 20px;'><em>Scenario:</em> Maintenance vs. observation</p>",
                 "<ul style='margin-left: 40px;'>",
                 "<li>Maintenance: Extended PFS but ongoing low-grade toxicity</li>",
                 "<li>Q-TWiST shows whether delayed progression offsets reduced quality during treatment</li>",
                 "</ul>",
-
                 "<h4>Targeted Therapy vs. Chemotherapy</h4>",
                 "<p style='margin-left: 20px;'><em>Scenario:</em> Newer targeted agent vs. standard chemo</p>",
                 "<ul style='margin-left: 40px;'>",
@@ -1310,29 +1264,20 @@ qtwistClass <- R6::R6Class(
                 "<li>Q-TWiST can demonstrate quality-of-life advantage even without OS benefit</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #721c24;'> Important Caveats</h3>",
-
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Utility weights are subjective:</strong> Always perform sensitivity analysis</li>",
-
                 "<li><strong>Time horizon matters:</strong> Results may differ at different tau values</li>",
-
                 "<li><strong>Toxicity definition:</strong> Ensure consistent grading (typically grade 3-4 only)</li>",
-
                 "<li><strong>Patient heterogeneity:</strong> Consider stratified analysis by risk groups</li>",
-
                 "<li><strong>Not a replacement for OS:</strong> Q-TWiST complements, not replaces, OS analysis</li>",
-
                 "<li><strong>Statistical significance ≠ clinical importance:</strong> ",
                 "A statistically significant difference of 0.2 months may not be clinically meaningful</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #d4edda; padding: 15px; border-left: 4px solid #28a745; margin: 15px 0;'>",
                 "<h3 style='margin-top: 0; color: #155724;'> Reporting Q-TWiST Results</h3>",
-
                 "<p><strong>A complete Q-TWiST report should include:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
                 "<li>Overall survival and PFS estimates for context</li>",
@@ -1344,7 +1289,6 @@ qtwistClass <- R6::R6Class(
                 "<li>Statement about robustness of conclusions</li>",
                 "</ol>",
                 "</div>",
-
                 "</div>"
             )
 
@@ -1355,55 +1299,38 @@ qtwistClass <- R6::R6Class(
         # STATISTICAL FORMULAS
         # ========================================
         .populateFormulas = function() {
-
             html_content <- paste0(
                 "<div style='font-family: Arial, sans-serif; padding: 20px;'>",
-
                 "<h2 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
                 "Q-TWiST Statistical Formulas</h2>",
-
                 "<div style='background-color: #f8f9fa; padding: 15px; margin: 15px 0;'>",
                 "<h3 style='color: #2c3e50;'>1. Restricted Mean Survival Time (RMST)</h3>",
-
                 "<p><strong>Definition:</strong> Area under the Kaplan-Meier survival curve up to time τ</p>",
-
                 "<p style='font-family: monospace; font-size: 1.1em; margin: 15px 0;'>",
                 "RMST(τ) = ∫<sub>0</sub><sup>τ</sup> S(t) dt</p>",
-
                 "<p>Where S(t) is the Kaplan-Meier survival probability at time t</p>",
-
                 "<p><strong>Computation:</strong> Trapezoidal rule for numerical integration</p>",
                 "</div>",
-
                 "<div style='background-color: #e8f4f8; padding: 15px; margin: 15px 0;'>",
                 "<h3 style='color: #2c3e50;'>2. Health State Partition</h3>",
-
                 "<p><strong>Overall Survival RMST:</strong></p>",
                 "<p style='font-family: monospace; margin-left: 20px;'>E[OS] = RMST<sub>OS</sub>(τ)</p>",
-
                 "<p><strong>Progression-Free Survival RMST:</strong></p>",
                 "<p style='font-family: monospace; margin-left: 20px;'>E[PFS] = RMST<sub>PFS</sub>(τ)</p>",
-
                 "<p><strong>Toxicity Duration:</strong></p>",
                 "<p style='font-family: monospace; margin-left: 20px;'>E[TOX] = Mean toxicity duration (method-dependent)</p>",
-
                 "<p><strong>Relapse/Progression Time:</strong></p>",
                 "<p style='font-family: monospace; margin-left: 20px;'>E[REL] = E[OS] - E[PFS]</p>",
-
                 "<p><strong>Time Without Symptoms or Toxicity:</strong></p>",
                 "<p style='font-family: monospace; margin-left: 20px;'>E[TWiST] = E[PFS] - E[TOX]</p>",
-
                 "<p><strong>Partition Identity:</strong></p>",
                 "<p style='font-family: monospace; font-size: 1.1em; margin: 15px 20px;'>",
                 "E[TOX] + E[TWiST] + E[REL] = E[OS]</p>",
                 "</div>",
-
                 "<div style='background-color: #fff3cd; padding: 15px; margin: 15px 0;'>",
                 "<h3 style='color: #2c3e50;'>3. Q-TWiST Calculation</h3>",
-
                 "<p style='font-family: monospace; font-size: 1.2em; margin: 15px 0; padding: 10px; background-color: white;'>",
                 "Q-TWiST = μ<sub>TOX</sub> × E[TOX] + μ<sub>TWiST</sub> × E[TWiST] + μ<sub>REL</sub> × E[REL]</p>",
-
                 "<p>Where:</p>",
                 "<ul>",
                 "<li>μ<sub>TOX</sub> ∈ [0, 1]: Utility weight for toxicity state</li>",
@@ -1411,32 +1338,24 @@ qtwistClass <- R6::R6Class(
                 "<li>μ<sub>REL</sub> ∈ [0, 1]: Utility weight for relapse state</li>",
                 "</ul>",
                 "</div>",
-
                 "<div style='background-color: #d4edda; padding: 15px; margin: 15px 0;'>",
                 "<h3 style='color: #2c3e50;'>4. Treatment Comparison</h3>",
-
                 "<p><strong>Q-TWiST Difference:</strong></p>",
                 "<p style='font-family: monospace; margin: 15px 20px;'>",
                 "Δ Q-TWiST = Q-TWiST<sub>B</sub> - Q-TWiST<sub>A</sub></p>",
-
                 "<p><strong>Standard Error (parametric):</strong></p>",
                 "<p style='font-family: monospace; margin: 15px 20px;'>",
                 "SE(Δ Q-TWiST) = √[SE(Q-TWiST<sub>A</sub>)<sup>2</sup> + SE(Q-TWiST<sub>B</sub>)<sup>2</sup>]</p>",
-
                 "<p><strong>Test Statistic:</strong></p>",
                 "<p style='font-family: monospace; margin: 15px 20px;'>",
                 "Z = Δ Q-TWiST / SE(Δ Q-TWiST)</p>",
-
                 "<p><strong>Two-sided p-value:</strong></p>",
                 "<p style='font-family: monospace; margin: 15px 20px;'>",
                 "p = 2 × [1 - Φ(|Z|)]</p>",
-
                 "<p>Where Φ is the standard normal CDF</p>",
                 "</div>",
-
                 "<div style='background-color: #d1ecf1; padding: 15px; margin: 15px 0;'>",
                 "<h3 style='color: #2c3e50;'>5. Bootstrap Confidence Intervals</h3>",
-
                 "<p><strong>Algorithm:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
                 "<li>Resample data with replacement (B bootstrap samples)</li>",
@@ -1449,12 +1368,10 @@ qtwistClass <- R6::R6Class(
                 "</li>",
                 "<li>Calculate percentile CI from bootstrap distribution</li>",
                 "</ol>",
-
                 "<p><strong>Percentile CI (α = 0.05 for 95% CI):</strong></p>",
                 "<p style='font-family: monospace; margin: 15px 20px;'>",
                 "CI = [Δ Q-TWiST<sub>(α/2)</sub>, Δ Q-TWiST<sub>(1-α/2)</sub>]</p>",
                 "</div>",
-
                 "</div>"
             )
 
@@ -1465,106 +1382,80 @@ qtwistClass <- R6::R6Class(
         # REFERENCES
         # ========================================
         .populateReferences = function() {
-
             html_content <- paste0(
                 "<div style='font-family: Arial, sans-serif; padding: 20px;'>",
-
                 "<h2 style='color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;'>",
                 "Key References for Q-TWiST Analysis</h2>",
-
                 "<div style='line-height: 1.8;'>",
-
                 "<h3 style='color: #2c3e50;'>Original Q-TWiST Methodology</h3>",
                 "<ol style='line-height: 2.0;'>",
-
                 "<li>Gelber RD, Goldhirsch A. <strong>A new endpoint for the assessment of adjuvant therapy ",
                 "in postmenopausal women with operable breast cancer.</strong> ",
                 "<em>Journal of Clinical Oncology</em>, 1986; 4(12):1772-1779. ",
                 "<a href='https://doi.org/10.1200/JCO.1986.4.12.1772' target='_blank'>DOI: 10.1200/JCO.1986.4.12.1772</a>",
                 "<br><em>The seminal paper introducing Q-TWiST methodology.</em></li>",
-
                 "<li>Glasziou PP, Simes RJ, Gelber RD. <strong>Quality adjusted survival analysis.</strong> ",
                 "<em>Statistics in Medicine</em>, 1990; 9(11):1259-1276. ",
                 "<a href='https://doi.org/10.1002/sim.4780091106' target='_blank'>DOI: 10.1002/sim.4780091106</a>",
                 "<br><em>Statistical foundations and extensions of Q-TWiST.</em></li>",
-
                 "</ol>",
-
                 "<h3 style='color: #2c3e50;'>Statistical Methods & Extensions</h3>",
                 "<ol start='3' style='line-height: 2.0;'>",
-
                 "<li>Cole BF, Gelber RD, Goldhirsch A. <strong>Cox regression models for quality adjusted survival analysis.</strong> ",
                 "<em>Statistics in Medicine</em>, 2004; 23(21):3319-3337. ",
                 "<a href='https://doi.org/10.1002/sim.1915' target='_blank'>DOI: 10.1002/sim.1915</a>",
                 "<br><em>Regression-based Q-TWiST for covariate adjustment.</em></li>",
-
                 "<li>Revicki DA, Feeny D, Hunt TL, Cole BF. <strong>Analyzing oncology clinical trial data using ",
                 "the Q-TWiST method: clinical importance and sources of information.</strong> ",
                 "<em>Quality of Life Research</em>, 2006; 15(3):411-423. ",
                 "<a href='https://doi.org/10.1007/s11136-005-1579-9' target='_blank'>DOI: 10.1007/s11136-005-1579-9</a>",
                 "<br><em>Practical guidance for Q-TWiST implementation in clinical trials.</em></li>",
-
                 "</ol>",
-
                 "<h3 style='color: #2c3e50;'>Clinical Applications</h3>",
                 "<ol start='5' style='line-height: 2.0;'>",
-
                 "<li>Goldhirsch A, Gelber RD, Simes RJ, Glasziou P, Coates AS. <strong>Costs and benefits of ",
                 "adjuvant therapy in breast cancer: a quality-adjusted survival analysis.</strong> ",
                 "<em>Journal of Clinical Oncology</em>, 1989; 7(1):36-44. ",
                 "<a href='https://doi.org/10.1200/JCO.1989.7.1.36' target='_blank'>DOI: 10.1200/JCO.1989.7.1.36</a>",
                 "<br><em>Landmark application of Q-TWiST in breast cancer adjuvant therapy.</em></li>",
-
                 "<li>Gelber RD, Cole BF, Goldhirsch A, et al. <strong>Adjuvant chemotherapy plus tamoxifen compared ",
                 "with tamoxifen alone for postmenopausal breast cancer: meta-analysis of quality-adjusted survival.</strong> ",
                 "<em>The Lancet</em>, 1996; 347(9008):1066-1071. ",
                 "<a href='https://doi.org/10.1016/S0140-6736(96)90281-X' target='_blank'>DOI: 10.1016/S0140-6736(96)90281-X</a>",
                 "<br><em>Meta-analysis using Q-TWiST methodology.</em></li>",
-
                 "</ol>",
-
                 "<h3 style='color: #2c3e50;'>RMST Methodology (Underlying Calculation)</h3>",
                 "<ol start='7' style='line-height: 2.0;'>",
-
                 "<li>Royston P, Parmar MKB. <strong>Restricted mean survival time: an alternative to the hazard ratio ",
                 "for the design and analysis of randomized trials with a time-to-event outcome.</strong> ",
                 "<em>BMC Medical Research Methodology</em>, 2013; 13:152. ",
                 "<a href='https://doi.org/10.1186/1471-2288-13-152' target='_blank'>DOI: 10.1186/1471-2288-13-152</a>",
                 "<br><em>Comprehensive review of RMST methods.</em></li>",
-
                 "<li>Uno H, Claggett B, Tian L, et al. <strong>Moving beyond the hazard ratio in quantifying the ",
                 "between-group difference in survival analysis.</strong> ",
                 "<em>Journal of Clinical Oncology</em>, 2014; 32(22):2380-2385. ",
                 "<a href='https://doi.org/10.1200/JCO.2014.55.2208' target='_blank'>DOI: 10.1200/JCO.2014.55.2208</a>",
                 "<br><em>Practical application of RMST in clinical trials.</em></li>",
-
                 "</ol>",
-
                 "<h3 style='color: #2c3e50;'>Regulatory Perspective</h3>",
                 "<ol start='9' style='line-height: 2.0;'>",
-
                 "<li>U.S. Food and Drug Administration. <strong>Clinical Trial Endpoints for the Approval of Cancer Drugs ",
                 "and Biologics: Guidance for Industry.</strong> 2018. ",
                 "<a href='https://www.fda.gov/regulatory-information/search-fda-guidance-documents/' target='_blank'>FDA Guidance</a>",
                 "<br><em>FDA perspective on quality-of-life adjusted endpoints.</em></li>",
-
                 "<li>European Medicines Agency. <strong>Guideline on the evaluation of anticancer medicinal products in man.</strong> ",
                 "2017. EMA/CHMP/205/95 Rev.5. ",
                 "<a href='https://www.ema.europa.eu/en/documents/scientific-guideline/' target='_blank'>EMA Guideline</a>",
                 "<br><em>EMA perspective on quality-adjusted survival endpoints.</em></li>",
-
                 "</ol>",
-
                 "<div style='background-color: #e8f4f8; padding: 15px; margin-top: 30px; border-left: 4px solid #3498db;'>",
                 "<h3 style='margin-top: 0; color: #0c5460;'> Additional Resources</h3>",
-
                 "<p><strong>R Packages:</strong></p>",
                 "<ul>",
                 "<li><strong>survival:</strong> Kaplan-Meier estimation and survival analysis</li>",
                 "<li><strong>survRM2:</strong> RMST calculation and inference</li>",
                 "<li><strong>QTWiST:</strong> Dedicated Q-TWiST package (if available on CRAN)</li>",
                 "</ul>",
-
                 "<p><strong>Tutorials and Reviews:</strong></p>",
                 "<ul>",
                 "<li>Gelber RD, Bonetti M, Castiglione-Gertsch M, et al. Quality of life in clinical trials. ",
@@ -1573,7 +1464,6 @@ qtwistClass <- R6::R6Class(
                 "<em>Quality of Life Research</em>, 2003; 12(5):547-558.</li>",
                 "</ul>",
                 "</div>",
-
                 "</div>",
                 "</div>"
             )
@@ -1586,7 +1476,6 @@ qtwistClass <- R6::R6Class(
         # ========================================
 
         .populateDescriptiveStats = function(data) {
-
             treatment_levels <- levels(data$treatment)
             table <- self$results$descriptiveStats
 
@@ -1607,9 +1496,7 @@ qtwistClass <- R6::R6Class(
                 table$addRow(rowKey = trt, values = row)
             }
         },
-
         .populateRMSTComponents = function(state_results) {
-
             table <- self$results$rmstComponents
 
             for (trt in names(state_results)) {
@@ -1627,9 +1514,7 @@ qtwistClass <- R6::R6Class(
                 table$addRow(rowKey = trt, values = row)
             }
         },
-
         .populateStatePartition = function(state_results) {
-
             table <- self$results$statePartition
 
             for (trt in names(state_results)) {
@@ -1650,9 +1535,7 @@ qtwistClass <- R6::R6Class(
                 table$addRow(rowKey = trt, values = row)
             }
         },
-
         .populateQTWISTScoresTable = function(qtwist_scores) {
-
             table <- self$results$qtwistScores
 
             for (trt in names(qtwist_scores)) {
@@ -1672,9 +1555,7 @@ qtwistClass <- R6::R6Class(
                 table$addRow(rowKey = trt, values = row)
             }
         },
-
         .populateTreatmentDifference = function(diff_results) {
-
             table <- self$results$treatmentDifference
 
             row <- list(
@@ -1690,9 +1571,7 @@ qtwistClass <- R6::R6Class(
 
             table$addRow(rowKey = "difference", values = row)
         },
-
         .populateStateDifferences = function(state_results) {
-
             treatment_names <- names(state_results)
             trt1 <- treatment_names[1]
             trt2 <- treatment_names[2]
@@ -1707,7 +1586,7 @@ qtwistClass <- R6::R6Class(
             se_twist <- sqrt(state_results[[trt1]]$rmst_pfs_se^2 + state_results[[trt2]]$rmst_pfs_se^2)
             se_rel <- sqrt(
                 (state_results[[trt1]]$rmst_os_se^2 + state_results[[trt2]]$rmst_os_se^2) +
-                (state_results[[trt1]]$rmst_pfs_se^2 + state_results[[trt2]]$rmst_pfs_se^2)
+                    (state_results[[trt1]]$rmst_pfs_se^2 + state_results[[trt2]]$rmst_pfs_se^2)
             )
 
             table <- self$results$stateDifferences
@@ -1775,9 +1654,7 @@ qtwistClass <- R6::R6Class(
                 Interpretation = interp_rel
             ))
         },
-
         .populateSensitivityTable = function(sens_results) {
-
             table <- self$results$sensitivityTable
 
             for (i in seq_along(sens_results)) {
@@ -1796,9 +1673,7 @@ qtwistClass <- R6::R6Class(
                 table$addRow(rowKey = paste0("sens_", i), values = row)
             }
         },
-
         .populateThresholdAnalysis = function(threshold_results) {
-
             table <- self$results$thresholdAnalysis
 
             for (i in seq_along(threshold_results)) {
@@ -1821,7 +1696,6 @@ qtwistClass <- R6::R6Class(
         # ========================================
 
         .plotPartitionedSurvival = function(image, ...) {
-
             if (is.null(private$.state_partition_results)) {
                 return(FALSE)
             }
@@ -1852,11 +1726,13 @@ qtwistClass <- R6::R6Class(
                 # Create cumulative values for stacking
                 df <- data.frame(
                     Treatment = trt,
-                    Time = c(0, state$tau/2, state$tau),
+                    Time = c(0, state$tau / 2, state$tau),
                     TOX = c(state$e_tox, state$e_tox, state$e_tox),
-                    TWIST = c(state$e_tox + state$e_twist,
-                            state$e_tox + state$e_twist,
-                            state$e_tox + state$e_twist),
+                    TWIST = c(
+                        state$e_tox + state$e_twist,
+                        state$e_tox + state$e_twist,
+                        state$e_tox + state$e_twist
+                    ),
                     Total = c(state$total_rmst, state$total_rmst, state$total_rmst)
                 )
 
@@ -1889,13 +1765,15 @@ qtwistClass <- R6::R6Class(
                     ggplot2::aes(x = Time, ymin = TWIST, ymax = Cumulative, fill = "REL", group = Treatment),
                     alpha = 0.7
                 ) +
-                ggplot2::facet_wrap(~ Treatment, ncol = 2) +
+                ggplot2::facet_wrap(~Treatment, ncol = 2) +
                 ggplot2::scale_fill_manual(
                     name = "Health State",
                     values = colors,
-                    labels = c("TOX" = "TOX (Toxicity)",
-                              "TWiST" = "TWiST (Good Quality)",
-                              "REL" = "REL (Relapse)")
+                    labels = c(
+                        "TOX" = "TOX (Toxicity)",
+                        "TWiST" = "TWiST (Good Quality)",
+                        "REL" = "REL (Relapse)"
+                    )
                 ) +
                 ggplot2::labs(
                     title = "Partitioned Survival by Health State",
@@ -1914,9 +1792,7 @@ qtwistClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .plotQTWISTComparison = function(image, ...) {
-
             if (is.null(private$.qtwist_results)) {
                 return(FALSE)
             }
@@ -1959,16 +1835,20 @@ qtwistClass <- R6::R6Class(
                 ggplot2::scale_fill_manual(
                     name = "Health State",
                     values = colors,
-                    labels = c("TOX" = "TOX (Toxicity)",
-                              "TWiST" = "TWiST (Good Quality)",
-                              "REL" = "REL (Relapse)")
+                    labels = c(
+                        "TOX" = "TOX (Toxicity)",
+                        "TWiST" = "TWiST (Good Quality)",
+                        "REL" = "REL (Relapse)"
+                    )
                 ) +
                 ggplot2::labs(
                     title = "Q-TWiST Component Comparison",
-                    subtitle = sprintf("Utility weights: μ_TOX=%.2f, μ_TWiST=%.2f, μ_REL=%.2f",
-                                     plot_data$Utility[plot_data$Component == "TOX"][1],
-                                     plot_data$Utility[plot_data$Component == "TWiST"][1],
-                                     plot_data$Utility[plot_data$Component == "REL"][1]),
+                    subtitle = sprintf(
+                        "Utility weights: μ_TOX=%.2f, μ_TWiST=%.2f, μ_REL=%.2f",
+                        plot_data$Utility[plot_data$Component == "TOX"][1],
+                        plot_data$Utility[plot_data$Component == "TWiST"][1],
+                        plot_data$Utility[plot_data$Component == "REL"][1]
+                    ),
                     x = "Treatment",
                     y = "Quality-Adjusted Survival Time (months)",
                     caption = "Higher bars indicate better quality-adjusted survival"
@@ -1982,9 +1862,7 @@ qtwistClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .plotSensitivity = function(image, ...) {
-
             if (!self$options$sensitivity_analysis || is.null(private$.sensitivity_results)) {
                 return(FALSE)
             }
@@ -2034,9 +1912,7 @@ qtwistClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .plotKMCurves = function(image, ...) {
-
             if (is.null(private$.state_partition_results)) {
                 return(FALSE)
             }
@@ -2076,7 +1952,7 @@ qtwistClass <- R6::R6Class(
 
             p <- ggplot2::ggplot(km_data_combined, ggplot2::aes(x = Time, y = Survival, color = Treatment)) +
                 ggplot2::geom_step(linewidth = 1) +
-                ggplot2::facet_wrap(~ Type, ncol = 2) +
+                ggplot2::facet_wrap(~Type, ncol = 2) +
                 ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
                 ggplot2::labs(
                     title = "Kaplan-Meier Survival Curves",
@@ -2095,9 +1971,7 @@ qtwistClass <- R6::R6Class(
             print(p)
             TRUE
         },
-
         .plotForest = function(image, ...) {
-
             # Simplified forest plot - would need stratified analysis implementation
             # This is a placeholder for future stratified analysis feature
 
@@ -2108,6 +1982,5 @@ qtwistClass <- R6::R6Class(
             # For now, just return FALSE as stratified analysis not yet implemented
             return(FALSE)
         }
-
     )
 )

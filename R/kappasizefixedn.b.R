@@ -8,8 +8,8 @@ kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
     inherit = kappaSizeFixedNBase,
     private = list(
 
-        # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-        #   [hygiene/jmvcore] bare stop() in validation paths — /jamovify-function kappasizefixedn --pattern=error --apply
+        # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+        #   [hygiene/jmvcore] bare stop() in validation paths - /jamovify-function kappasizefixedn --pattern=error --apply
         #   [hygiene/notices] 0 jmvcore::Notice uses; add ERROR for malformed props + INFO summary
         #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappasizefixedn
         #   [architecture] code duplication across 4 outcome branches (Binary/3Cats/4Cats/5Cats);

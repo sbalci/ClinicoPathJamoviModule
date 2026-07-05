@@ -298,7 +298,7 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             # This is a simulation of what would happen with real deep learning
             # In production, this would train actual PyTorch models
 
-            # Save & restore RNG state — set.seed() at L306/L354/L434 would otherwise
+            # Save & restore RNG state - set.seed() at L306/L354/L434 would otherwise
             # leak fixed seeds (42, 123, 456) into the user's R session and pin
             # subsequent unrelated analyses to deterministic output.
             old_seed <- if (exists(".Random.seed", envir = globalenv())) {

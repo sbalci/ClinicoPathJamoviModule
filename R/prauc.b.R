@@ -48,7 +48,7 @@ praucClass <- R6::R6Class(
             # Convert to binary (1 = positive, 0 = negative)
             y_true <- as.integer(outcome == positive_level)
 
-            # Set random seed — save & restore RNG state so the bootstrap
+            # Set random seed - save & restore RNG state so the bootstrap
             # loop in .bootstrapPRAUC (sample() called n_boot times per CI
             # request) doesn't leak the post-loop `.Random.seed` into the
             # user's session RNG. Mirrors optimalcutpoint.b.R:765-772.

@@ -5,7 +5,7 @@
 ## ARTICLE SUMMARY
 
 - **Title/Label**: Fully Automated Artificial Intelligence Solution for Human Epidermal Growth Factor Receptor 2 Immunohistochemistry Scoring in Breast Cancer: A Multireader Study
-- **Design & Cohort**: Prospective two-arm multireader crossover study; N = 120 HER2 IHC whole-slide images from 4 laboratories in 3 countries (US, France, Israel); 4 general surgical pathologists (readers) scored without AI (arm A) and with AI (arm B); Ground truth (GT) established by 5 international expert breast pathologists; High-confidence GT defined as agreement of ≥4/5 experts (n = 92 slides).
+- **Design & Cohort**: Prospective two-arm multireader crossover study; N = 120 HER2 IHC whole-slide images from 4 laboratories in 3 countries (US, France, Israel); 4 general surgical pathologists (readers) scored without AI (arm A) and with AI (arm B); Ground truth (GT) established by 5 international expert breast pathologists; High-confidence GT defined as agreement of >=4/5 experts (n = 92 slides).
 - **Key Analyses**:
   - Interobserver agreement (percent agreement with 95% CI) among GT experts and among readers
   - Intraclass correlation coefficient (ICC) for overall GT expert agreement
@@ -47,7 +47,7 @@
 | Percent agreement (pairwise) | Primary — interobserver concordance | Average of all pair agreement rates; per HER2 score and overall | Assumes nominal/ordinal categories (HER2 0/1+/2+/3+) | Statistical Analysis (p4), Results (p4-6) |
 | 95% Confidence intervals (for percent agreement) | Primary — precision estimate | Not specified if exact binomial, normal approximation, or bootstrap | — | Statistical Analysis (p4), Figs 4A-E |
 | Intraclass correlation coefficient (ICC) | Secondary — GT expert agreement summary | ICC = 0.86 (95% CI 0.82–0.89) reported for 5 GT experts; model type not specified | Assumes continuous/interval scale for ordinal scores (0/1+/2+/3+ treated as 0/1/2/3); ICC model type (one-way, two-way) not specified | Results (p4) |
-| Accuracy (% agreement with GT) | Primary — AI and reader performance | Mean accuracy across 4 readers; per-score and binary (0 vs 1+) | Reference standard = high-confidence GT (≥4/5 expert agreement) | Results (p5-6) |
+| Accuracy (% agreement with GT) | Primary — AI and reader performance | Mean accuracy across 4 readers; per-score and binary (0 vs 1+) | Reference standard = high-confidence GT (>=4/5 expert agreement) | Results (p5-6) |
 | Statistical significance test | Primary — comparing arms | P < .05 threshold mentioned; specific test not named (likely McNemar, paired proportion test, or chi-square) | Paired data (same readers, same slides, crossover design) | Statistical Analysis (p4), Results (p5) |
 | Sample size calculation | Design — power analysis | Referenced in Data Supplement; details not in main text | — | Materials and Methods (p2) |
 | Descriptive statistics | Secondary | Mean, SD for continuous; count, % for categorical | — | Statistical Analysis (p4) |
@@ -116,6 +116,7 @@
 **Total Score**: 10/18 → Overall Badge: 🟡 Moderate
 
 **Red flags noted:**
+
 - Primary metric is percent agreement without chance correction — inflated by prevalence distribution
 - ICC applied to ordinal 4-category scores (0/1+/2+/3+) as if interval — methodological concern
 - Specific statistical test for arm A vs B comparison is not named — could be chi-square, McNemar, or bootstrap test
@@ -128,24 +129,28 @@
 ## GAP ANALYSIS (WHAT'S MISSING)
 
 ### Gap 1: Paired Comparison of Agreement Rates Between Two Conditions
+
 - **Method**: Formal statistical test comparing interobserver agreement between arm A and arm B (e.g., bootstrap test for difference in kappa, permutation test for agreement improvement)
 - **Impact**: Central analysis of this paper — determines if AI significantly improves agreement
 - **Closest existing function**: `agreement` computes agreement for one set of raters; no built-in comparison of two conditions
 - **Exact missing options**: Need a "condition comparison" or "paired agreement test" that takes two sets of ratings (same raters, same cases, different conditions) and tests if agreement differs significantly
 
 ### Gap 2: Sample Size Calculation for Agreement Studies
+
 - **Method**: Power/sample size for kappa-based or ICC-based agreement studies
 - **Impact**: Essential for designing biomarker agreement studies in pathology; this paper references a sample size calculation
 - **Closest existing function**: `survivalPower`, `diagnosticsamplesize` exist but not for agreement
 - **Exact missing options**: `agreementSampleSize` function with inputs: expected kappa, null kappa, number of raters, number of categories, alpha, power
 
 ### Gap 3: Agreement Comparison Across Clustering Variables (Multi-Site)
+
 - **Method**: Testing whether agreement differs across laboratories, antibodies, or scanners — requires stratified agreement with formal homogeneity test
 - **Impact**: This study used slides from 4 labs with 3 antibodies and 2 scanners; a formal test of agreement heterogeneity across these factors would strengthen the analysis
 - **Closest existing function**: `agreement` has `hierarchicalKappa` with `testClusterHomogeneity` and `agreementBySubgroup`
 - **Exact missing options**: Already implemented (hierarchical kappa with homogeneity test) — this is ✅ covered but the study didn't use it
 
 ### Gap 4: STARD-AI Reporting Compliance Checker
+
 - **Method**: Automated checklist validation against STARD-AI (Standards for Reporting Diagnostic Accuracy Studies — AI extension) reporting guidelines
 - **Impact**: Regulatory and publication requirement for AI diagnostic studies
 - **Closest existing function**: None
@@ -162,6 +167,7 @@
 **Note**: The `mixedEffectsComparison` feature (implemented 2026-02-08) already supports condition comparison for continuous measures. For categorical agreement (kappa), a bootstrap-based comparison is needed.
 
 **Approach**: Add a "Paired Agreement Comparison" option that:
+
 1. Takes two sets of rater columns (condition A columns and condition B columns)
 2. Computes kappa/agreement for each condition
 3. Uses bootstrap to test if the difference is significant
@@ -284,6 +290,7 @@
 **Dependencies**: None new (bootstrap is base R).
 
 **Validation**:
+
 - Simulate crossover study: same 100 cases, 4 raters, condition A (random agreement ~60%) vs condition B (boosted agreement ~80%). Verify bootstrap test detects significance.
 - Compare bootstrap CI coverage with parametric methods.
 - Edge case: identical ratings in both conditions → difference = 0, p = 1.
@@ -295,8 +302,9 @@
 **Target**: New function `agreementSampleSize` or extend `diagnosticsamplesize`.
 
 **Approach**: Implement sample size formulas for:
-1. **Kappa-based**: Testing H0: kappa ≤ kappa_0 vs H1: kappa ≥ kappa_1 (Donner & Eliasziw 1992; Sim & Wright 2005)
-2. **ICC-based**: Testing H0: ICC ≤ rho_0 vs H1: ICC ≥ rho_1 (Walter et al. 1998)
+
+1. **Kappa-based**: Testing H0: kappa <= kappa_0 vs H1: kappa >= kappa_1 (Donner & Eliasziw 1992; Sim & Wright 2005)
+2. **ICC-based**: Testing H0: ICC <= rho_0 vs H1: ICC >= rho_1 (Walter et al. 1998)
 
 **.a.yaml** (sketch):
 
@@ -402,6 +410,7 @@
 **Dependencies**: None new (base R `qnorm`).
 
 **Validation**:
+
 - Compare with published tables (Sim & Wright 2005).
 - Verify with simulation: generate kappa-distributed data, check empirical power matches formula.
 
@@ -410,24 +419,29 @@
 ## TEST PLAN
 
 ### Unit Tests
+
 - **Paired agreement comparison**: Simulate 50 cases, 3 raters, two conditions with known kappa improvement. Verify bootstrap CI contains true difference. Use seed = 42.
 - **Sample size for kappa**: Compare output against known published values (e.g., Sim & Wright 2005 Table 2).
 - **ICC model specification**: Verify ICC type reported matches input specification.
 
 ### Assumption Tests
+
 - Ordinal data: Verify weighted kappa uses appropriate weights (linear vs quadratic).
 - ICC on ordinal: Flag warning when ICC is requested for data with < 5 unique values.
 
 ### Edge Cases
+
 - All raters agree perfectly (kappa = 1): CIs should be [1, 1] or handle degeneracy.
 - Single category cases: Division-by-zero protection for per-category agreement.
 - Small samples (n < 10): Bootstrap should warn about instability.
 - Unequal categories across conditions: Validation error if categories don't match.
 
 ### Performance
+
 - N = 10,000 cases, 10 raters, 2000 bootstrap replications: Should complete < 30 seconds.
 
 ### Reproducibility
+
 - All bootstrap methods use `set.seed(42)` for deterministic results.
 - Example analysis script with the study's reported values as expected outputs.
 

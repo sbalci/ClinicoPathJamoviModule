@@ -47,8 +47,8 @@ lesions are assessed qualitatively (present/absent/progressed).}
 \item{location}{Anatomic site of lesion (e.g., Liver, Lung, Lymph_Node).
 Used to enforce RECIST rule: max 2 target lesions per organ.}
 
-\item{diameter}{Longest diameter of target lesions in millimeters (≥10mm
-for non-lymph nodes, ≥15mm for lymph nodes). For non-target lesions, can be
+\item{diameter}{Longest diameter of target lesions in millimeters (>=10mm
+for non-lymph nodes, >=15mm for lymph nodes). For non-target lesions, can be
 NA (qualitative assessment only).}
 
 \item{isNewLesion}{Binary indicator (0 = baseline/existing, 1 = new lesion
@@ -60,7 +60,7 @@ Progressive Disease (PD) per RECIST v1.1.}
 
 \item{confirmationInterval}{Minimum time interval (weeks) for response
 confirmation per RECIST v1.1. CR and PR must be confirmed by repeat
-assessment ≥4 weeks after initial documentation.}
+assessment >=4 weeks after initial documentation.}
 
 \item{maxTargetLesions}{Maximum number of target lesions per patient
 (RECIST v1.1 default = 5).}

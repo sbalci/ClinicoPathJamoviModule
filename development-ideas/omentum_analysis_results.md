@@ -260,13 +260,13 @@ detection probability and cumulative detection rates.
 The per-cassette detection probability was estimated as the ratio
 of cases with detected metastasis to total cassettes examined.
 Cumulative detection probability for n cassettes was calculated
-using the binomial formula: P(detect ≥1) = 1 - (1-p)^n, where p
+using the binomial formula: P(detect >=1) = 1 - (1-p)^n, where p
 represents the per-cassette detection probability.
 
 Bootstrap resampling (10,000 iterations with replacement) provided
 empirical sensitivity estimates with 95% confidence intervals using
 the percentile method. The recommended minimum sampling was defined
-as the smallest number of cassettes achieving ≥95% sensitivity,
+as the smallest number of cassettes achieving >=95% sensitivity,
 the standard threshold for diagnostic test adequacy.
 
 Point of diminishing returns was identified where additional cassettes
@@ -297,7 +297,7 @@ for 4 cassettes. The point of diminishing returns was identified at
 4 cassettes, where the marginal gain from additional sampling was
 <5% (Table X, Figure Y).
 
-Stratified analysis revealed that 4 cassettes achieved ≥95% sensitivity
+Stratified analysis revealed that 4 cassettes achieved >=95% sensitivity
 regardless of macroscopic tumor presence (with macroscopic tumor: 93.3%;
 without macroscopic tumor: 100%). Among tumor types, serous carcinomas
 achieved 92.1% detection with 4 cassettes (n=38).

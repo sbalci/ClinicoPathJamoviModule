@@ -12,13 +12,13 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
             NUMERICAL_TOLERANCE = 1e-10,
             POPULATION_SIZE = NULL,
 
-            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
             #   Audit verdict: best-engineered function in meddecide; 24 jmvcore::Notice paths covering
             #   low-performance / extreme-prevalence / near-perfect / similar-names / wrong-direction.
             #   Open items below are minor:
-            #   [hygiene/notices] independence note buried in HTML body — also surface as top INFO banner
+            #   [hygiene/notices] independence note buried in HTML body - also surface as top INFO banner
             #   [i18n] 0 .() wraps (surprising given otherwise exemplary quality); /prepare-translation sequentialtests
-            #   [statistical-validation] /review-function sequentialtests — final parallel-test combined PPV math check
+            #   [statistical-validation] /review-function sequentialtests - final parallel-test combined PPV math check
             #   [testing] no tests/testthat/test-sequentialtests.R
 
             .init = function() {
@@ -1600,7 +1600,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                # Plain text only — notices avoid HTML by project convention; the Preformatted
+                # Plain text only - notices avoid HTML by project convention; the Preformatted
                 # output item renders this literally (no markup, no injection surface).
                 blocks <- vapply(private$.noticeList, function(notice) {
                     prefix <- switch(notice$type,
@@ -1615,7 +1615,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
             },
 
             # HTML sanitization for security (used by Html output items: plain_summary,
-            # explanation_text, clinical_guidance — NOT the plain-text notices sink)
+            # explanation_text, clinical_guidance - NOT the plain-text notices sink)
             .safeHtmlOutput = function(text) {
                 if (is.null(text) || length(text) == 0) return("")
                 text <- as.character(text)

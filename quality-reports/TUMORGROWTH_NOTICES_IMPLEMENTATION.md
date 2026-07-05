@@ -17,12 +17,14 @@ Applied comprehensive Notices API migration and critical fixes to the `tumorgrow
 ## Summary of Changes
 
 ### CRITICAL FIXES (Blocking Release)
+
 1. ✅ **Migrated ALL error handling to jamovi Notices API** (14 Notices total)
 2. ✅ **Fixed mcmcSamples hardcoding** in Bayesian models
 3. ✅ **Added NLME minimum sample size guard** (prevents unreliable mixed-effects modeling)
 4. ✅ **Documented plotWidth/plotHeight limitation** (jamovi doesn't support dynamic dimensions in .r.yaml)
 
 ### VERIFICATION
+
 ✅ **Compilation:** Passed `jmvtools::prepare()` with no errors
 
 ---
@@ -41,7 +43,7 @@ Replaced ALL legacy error handling (`stop()`, `warning()`, `message()`) with mod
 | `missingPackages` | Required R package not installed | R/tumorgrowth.b.R:30-40 | 'Required R package(s) not installed: {packages}. Install using: install.packages(c({packages}))' |
 | `insufficientData` | < 10 observations after filtering | R/tumorgrowth.b.R:65-76 | 'Insufficient data for tumor growth modeling: {n} observations after removing missing values. Minimum 10 complete observations required (time, tumor size{, patient ID}).' |
 | `insufficientLongitudinalStructure` | NLME with < 5 patients or avg < 2.5 obs/patient | R/tumorgrowth.b.R:95-103 | 'Insufficient longitudinal structure for NLME: {n} patients, avg {avg} obs/patient. Minimum 5 patients with avg 2.5 obs/patient required. Switch to NLS approach or collect more data.' |
-| `invalidTumorSize` | Tumor size ≤ 0 | R/tumorgrowth.b.R:1302-1310 | 'Invalid tumor size data: {n} measurement(s) are zero or negative. Tumor size must be positive. Check data quality and remove invalid entries.' |
+| `invalidTumorSize` | Tumor size <= 0 | R/tumorgrowth.b.R:1302-1310 | 'Invalid tumor size data: {n} measurement(s) are zero or negative. Tumor size must be positive. Check data quality and remove invalid entries.' |
 | `invalidTimeValues` | Time < 0 | R/tumorgrowth.b.R:1315-1323 | 'Invalid time data: {n} value(s) are negative. Time must be non-negative (days/weeks/months from baseline). Check data entry.' |
 | `noTimeVariation` | All time values identical | R/tumorgrowth.b.R:1328-1336 | 'All time measurements are identical. Tumor growth modeling requires variation in time. Ensure longitudinal data with multiple timepoints per patient.' |
 
@@ -108,6 +110,7 @@ warning(glue::glue("Time is not monotonically increasing for patient(s): {patien
 ```
 
 **User Experience:**
+
 - ❌ Jamovi freezes when errors occur
 - ❌ Critical warnings never seen
 - ❌ Calculation failures result in mysterious empty tables
@@ -162,6 +165,7 @@ if (size_cv < 0.05) {
 ```
 
 **User Experience:**
+
 - ✅ Jamovi stays responsive, shows clear error banner
 - ✅ Warnings visible at top of results with severity color-coding
 - ✅ Calculation failures explained with actionable suggestions
@@ -174,6 +178,7 @@ if (size_cv < 0.05) {
 **Problem:** User selects "MCMC Samples = 10,000" but some Bayesian models ignore it and use hardcoded 2,000 iterations
 
 #### **Before**
+
 ```r
 # R/tumorgrowth.b.R:162 - CORRECT
 iter_val <- max(self$options$mcmcSamples %||% 2000, 1000)
@@ -188,6 +193,7 @@ model <- brm(bform,
 ```
 
 #### **After**
+
 ```r
 # R/tumorgrowth.b.R:162 - Already correct
 iter_val <- max(self$options$mcmcSamples %||% 2000, 1000)
@@ -233,6 +239,7 @@ if (model_approach == "nlme" && !is.null(patient_var)) {
 ```
 
 **Thresholds:**
+
 - Minimum 5 patients (random effects need >= 5 levels for reliable estimation)
 - Average >= 2.5 observations per patient (ensures sufficient within-patient variation)
 
@@ -251,6 +258,7 @@ if (model_approach == "nlme" && !is.null(patient_var)) {
 **Resolution:** Reverted to hardcoded dimensions. `plotWidth` and `plotHeight` options in `.a.yaml` are non-functional and should be **removed in future** or noted as unsupported.
 
 **Current State:**
+
 ```yaml
 # jamovi/tumorgrowth.r.yaml (Static dimensions required)
 - name: growthCurvesPlot
@@ -267,6 +275,7 @@ if (model_approach == "nlme" && !is.null(patient_var)) {
 ### R/tumorgrowth.b.R
 
 **Changes:**
+
 1. Lines 18-41: Replaced package check with ERROR Notice
 2. Lines 36-44: Replaced missing variable check with ERROR Notice (removed welcome HTML)
 3. Lines 65-76: Replaced `stop()` with ERROR Notice for insufficient data
@@ -289,9 +298,11 @@ if (model_approach == "nlme" && !is.null(patient_var)) {
 **Total Changes:** 18 sections modified, ~100 lines added/modified
 
 ### jamovi/tumorgrowth.a.yaml
+
 **No changes** - `plotWidth` and `plotHeight` options remain defined but non-functional (documented limitation)
 
 ### jamovi/tumorgrowth.r.yaml
+
 **No changes** - Plot dimensions remain hardcoded (jamovi limitation)
 
 ---
@@ -299,6 +310,7 @@ if (model_approach == "nlme" && !is.null(patient_var)) {
 ## Verification
 
 ### Compilation Test
+
 ```bash
 Rscript -e "jmvtools::prepare('.')"
 ```
@@ -306,6 +318,7 @@ Rscript -e "jmvtools::prepare('.')"
 **Result:** ✅ **PASSED** - No errors or warnings
 
 **Output:**
+
 ```
 wrote: tumorgrowth.h.R
 wrote: tumorgrowth.src.js
@@ -336,6 +349,7 @@ All `.h.R` and `.src.js` files regenerated successfully.
 ## Clinical Safety Improvements
 
 ### Before
+
 - ❌ No detection of sparse longitudinal data → unreliable treatment effects
 - ❌ No warning for low size variation → unstable parameter estimates
 - ❌ No detection of non-monotonic time → invalid model assumptions
@@ -343,12 +357,14 @@ All `.h.R` and `.src.js` files regenerated successfully.
 - ❌ Silent calculation failures → users unaware of missing critical metrics (doubling time, R²)
 
 **Clinical Risk:** High - Potential for:
+
 - False positive treatment effects (sparse data + NLME)
 - Unreliable growth predictions (low variation)
 - Invalid kinetics (non-monotonic time)
 - Misinterpretation of model quality (missing fit statistics)
 
 ### After
+
 - ✅ ERROR Notice blocks NLME with < 5 patients or avg < 2.5 obs/patient
 - ✅ STRONG_WARNING Notice alerts to low variation (CV < 5%) with specific threshold
 - ✅ STRONG_WARNING Notice detects non-monotonic time with patient examples
@@ -356,6 +372,7 @@ All `.h.R` and `.src.js` files regenerated successfully.
 - ✅ WARNING Notices explain calculation failures, suggest alternatives
 
 **Clinical Risk:** Low - Users are:
+
 - Prevented from using unreliable methods
 - Warned about data quality issues with quantified metrics
 - Guided to appropriate alternative approaches
@@ -366,29 +383,35 @@ All `.h.R` and `.src.js` files regenerated successfully.
 ## Remaining Limitations (Documented)
 
 ### 1. Plot Dimensions Options (Non-Critical)
+
 **Issue:** `plotWidth` and `plotHeight` options defined in `.a.yaml` but cannot be connected to `.r.yaml` (jamovi limitation)
 
 **Recommendation:**
+
 - **Option A:** Remove from `.a.yaml` to avoid confusion
 - **Option B:** Keep as placeholder for future jamovi support (document in help text)
 
 **Impact:** Low - users can still view plots at reasonable default sizes (700×500, 700×400, 700×450)
 
 ### 2. Treatment Time Option (Non-Critical)
+
 **Issue:** `treatmentTime` option defined in `.a.yaml:100-109` but completely unused in `.b.R`
 
 **Recommendation:**
+
 - **Option A:** Remove from `.a.yaml`
 - **Option B:** Implement treatment start time modeling (future enhancement)
 
 **Impact:** Low - treatment effect analysis still works without this refinement
 
 ### 3. Convergence Detection (Future Enhancement)
+
 **Status:** Not yet implemented (deferred from CRITICAL to recommended)
 
 **What's Missing:** Detection of NLME/Bayesian convergence failures
 
 **Recommended Implementation:**
+
 ```r
 # After model fitting
 if (inherits(model_fit, "try-error") || (inherits(model_fit, "nlme") && !model_fit$converge)) {
@@ -410,6 +433,7 @@ if (inherits(model_fit, "try-error") || (inherits(model_fit, "nlme") && !model_f
 Before deploying to production, verify:
 
 ### Error Handling Tests
+
 - [x] ✅ Test with no variables selected → `missingVariables` ERROR Notice
 - [x] ✅ Test with < 10 observations → `insufficientData` ERROR Notice
 - [x] ✅ Test with NLME + 3 patients → `insufficientLongitudinalStructure` ERROR Notice
@@ -418,12 +442,14 @@ Before deploying to production, verify:
 - [x] ✅ Test with identical times → `noTimeVariation` ERROR Notice
 
 ### Warning Tests
+
 - [ ] Test with CV < 5% → `lowSizeVariation` STRONG_WARNING Notice
 - [ ] Test with < 3 obs/patient → `sparsePatientData` WARNING Notice
 - [ ] Test with non-monotonic time → `nonMonotonicTime` STRONG_WARNING Notice
 - [ ] Test treatment without patient ID → `treatmentNeedsPatientID` WARNING Notice
 
 ### Functional Tests
+
 - [ ] Test all 6 growth models (exponential, gompertz, logistic, bertalanffy, linear, power)
 - [ ] Test all 3 approaches (nlme, nls, bayesian)
 - [ ] Verify mcmcSamples affects Bayesian iterations (set to 10,000, check convergence diagnostics)
@@ -431,6 +457,7 @@ Before deploying to production, verify:
 - [ ] Verify completion INFO Notice appears on success
 
 ### Integration Tests
+
 - [ ] Test with real tumor measurement data
 - [ ] Verify doubling time calculations
 - [ ] Verify treatment effect estimates
@@ -444,6 +471,7 @@ Before deploying to production, verify:
 The `tumorgrowth` module has been successfully migrated to jamovi Notices API and all CRITICAL blocking issues have been resolved. The module is now **production-ready** for clinical use with the following improvements:
 
 ✅ **Strengths:**
+
 - Complete Notices API implementation (14 Notices)
 - Jamovi-compliant error handling (no crashes)
 - User-facing warnings for data quality issues
@@ -453,6 +481,7 @@ The `tumorgrowth` module has been successfully migrated to jamovi Notices API an
 - Clinical interpretation guidance already excellent
 
 🟡 **Minor Limitations (Documented):**
+
 - Plot dimensions options non-functional (jamovi limitation)
 - Treatment time option unused (remove or implement)
 - Convergence detection not yet implemented (future enhancement)
@@ -462,6 +491,7 @@ The `tumorgrowth` module has been successfully migrated to jamovi Notices API an
 **Estimated Effort:** 6 hours implementation + testing
 
 **Recommended Next Steps:**
+
 1. Add convergence failure detection (HIGH PRIORITY)
 2. Remove or implement `treatmentTime` option
 3. Remove `plotWidth`/`plotHeight` options or document limitation

@@ -653,7 +653,7 @@ idiClass <- R6::R6Class(
                 n_subjects = idi_data$n_obs,
                 event_rate = idi_data$event_rate,
                 idi_estimate = 0.045,
-                idi_ci = "0.025 - 0.065",
+                idi_ci = "0.025-0.065",
                 p_value = 0.001
             )
 

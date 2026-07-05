@@ -153,6 +153,6 @@ options:
       description:
           R: >
             Minimum number of cases required per diagnostic group.
-            Groups with fewer cases will trigger a warning (recommend ≥10).
+            Groups with fewer cases will trigger a warning (recommend >=10).
 
 ...

@@ -59,11 +59,11 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # TODO (stub): 6 options declared in .a.yaml / .h.R but never read in .b.R:
-            # `absorbing_states` (OptionString HIGH — if wired into HTML rendering of
+            # `absorbing_states` (OptionString HIGH - if wired into HTML rendering of
             # the transition matrix, wrap with htmltools::htmlEscape at the sink),
             # `competing_risks` (OptionBool), `time_varying` (OptionBool),
             # `bootstrap_ci` (OptionBool), `plot_individual` (OptionBool),
-            # `stratified` (OptionVariable — column ref, MEDIUM). UI shows these
+            # `stratified` (OptionVariable - column ref, MEDIUM). UI shows these
             # controls but they have no effect. Either wire them into the analysis
             # or remove from the YAMLs to avoid misleading users.
             # Get data and prepare for analysis
@@ -196,7 +196,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 n_states <- length(all_states)
 
                 # Check for custom transition matrix
-                # TODO (stub): file-wide pattern — 5 helper methods are CALLED but
+                # TODO (stub): file-wide pattern - 5 helper methods are CALLED but
                 # not DEFINED in this .b.R: `.parseTransitionMatrix` (this site),
                 # `.displayTransitionProbabilities` (L356), `.displayStateProbabilities`
                 # (L405), `.displaySojournTimes` (L442), `.interpretHazardRatios` (L473).
@@ -205,7 +205,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # silently `message(...)`'d (no UI feedback); .parseTransitionMatrix
                 # propagates to the L237 setContent error path. SECURITY NOTE: when
                 # .parseTransitionMatrix is implemented, treat `self$options$transition_matrix`
-                # (OptionString HIGH free-text) as fully user-controlled — parse
+                # (OptionString HIGH free-text) as fully user-controlled - parse
                 # structurally (strsplit + validate), never eval(parse(...)) or coerce
                 # to a formula. Same caution for `absorbing_states` (HIGH) below if wired.
                 if (self$options$transition_matrix != "auto") {

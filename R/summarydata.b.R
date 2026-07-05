@@ -528,7 +528,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             report_html <- paste0(
                 "<div style='padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 10px 0; border-radius: 4px;'>",
                 "<h4 style='margin-top: 0; color: #856404;'>", .("Outlier Detection Results"), "</h4>",
-                "<p>", .("Outliers detected using IQR method (values beyond Q1-1.5×IQR or Q3+1.5×IQR):"), "</p>"
+                "<p>", .("Outliers detected using IQR method (values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR):"), "</p>"
             )
             
             for (var in variables) {
@@ -584,7 +584,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 # Basic descriptive sentence (use plain text var name for clinical reports)
                 sentence <- paste0(
                     "For ", var, ", analysis of ", n, " observations showed mean ", 
-                    mean_val, " ± ", sd_val, " (median ", median_val, 
+                    mean_val, " \u{B1} ", sd_val, " (median ", median_val, 
                     ", range ", min_val, "-", max_val, ")"
                 )
                 
@@ -653,7 +653,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     paste0(
                         "<div style='margin-bottom: 10px; padding-top: 10px; border-top: 1px solid #d1d5db;'>",
                         "<strong>", .("Outlier Detection"), ":</strong><br>",
-                        "<strong>", .("IQR Method"), ":</strong> ", .("Values beyond Q1-1.5×IQR or Q3+1.5×IQR are considered outliers."), "<br>",
+                        "<strong>", .("IQR Method"), ":</strong> ", .("Values beyond Q1-1.5\u{D7}IQR or Q3+1.5\u{D7}IQR are considered outliers."), "<br>",
                         "<strong>", .("Q1, Q3"), ":</strong> ", .("First and third quartiles (25th and 75th percentiles)."), "<br>",
                         "</div>"
                     )

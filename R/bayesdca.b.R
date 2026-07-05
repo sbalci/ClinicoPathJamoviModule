@@ -81,7 +81,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 thresholds <- seq(thresholdMin, thresholdMax, length.out = thresholdPoints)
                 private$.thresholds <- thresholds
 
-                # TODO (data hygiene): `as.integer(data[[outcomeVar]])` at line 89 strips factor coding — for jamovi-coded factors with a `values` attribute (level → 0/1 mapping), this returns level indices (1, 2) instead of original codes (0, 1), causing the `%in% c(0, 1, NA)` check to spuriously reject valid binary outcomes. Use `jmvcore::toNumeric(data[[outcomeVar]])` which honors the values attribute. ⚠ Behavior risk: differs from current path when `values` attribute is unset; verify against test data with both attribute states before applying.
+                # TODO (data hygiene): `as.integer(data[[outcomeVar]])` at line 89 strips factor coding - for jamovi-coded factors with a `values` attribute (level → 0/1 mapping), this returns level indices (1, 2) instead of original codes (0, 1), causing the `%in% c(0, 1, NA)` check to spuriously reject valid binary outcomes. Use `jmvcore::toNumeric(data[[outcomeVar]])` which honors the values attribute. ⚠ Behavior risk: differs from current path when `values` attribute is unset; verify against test data with both attribute states before applying.
                 # Prepare outcome variable
                 if (!is.null(self$options$outcomePos)) {
                     outcomePosLevel <- self$options$outcomePos
@@ -93,7 +93,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                     }
                 }
 
-                # TODO (UX): File-wide — `warning(paste(...))` calls don't surface in the jamovi UI; the user gets no feedback. Affected sites: 97 (this), 128, 131, 151, 156, 162, 171. Convert to HTML output items via `private$.addNotice()` per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R reference) so soft warnings (missing-value removal, extreme prevalence, sparse cases, predictor distribution issues) are visible to the user.
+                # TODO (UX): File-wide - `warning(paste(...))` calls don't surface in the jamovi UI; the user gets no feedback. Affected sites: 97 (this), 128, 131, 151, 156, 162, 171. Convert to HTML output items via `private$.addNotice()` per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R reference) so soft warnings (missing-value removal, extreme prevalence, sparse cases, predictor distribution issues) are visible to the user.
                 # Validate and handle missing values
                 if (sum(is.na(outcomes)) > 0) {
                     warning(paste("Removing", sum(is.na(outcomes)), "cases with missing outcome values"))
@@ -273,7 +273,7 @@ bayesdcaClass <- if (requireNamespace("jmvcore"))
                 for (pred_idx in seq_along(predictorVars)) {
                     predictor <- predictorVars[pred_idx]
                     
-                    # TODO (cleanup): `message()` calls at this site, line ~299, and line ~1151 are R console logging that doesn't reach the jamovi UI. Either remove (dead progress reporting) or wire into a real progress mechanism if the analysis is slow enough to need one (jamovi has `private$.checkpoint()` for that — see CLAUDE.md).
+                    # TODO (cleanup): `message()` calls at this site, line ~299, and line ~1151 are R console logging that doesn't reach the jamovi UI. Either remove (dead progress reporting) or wire into a real progress mechanism if the analysis is slow enough to need one (jamovi has `private$.checkpoint()` for that - see CLAUDE.md).
                     # Progress indication for multiple predictors
                     if (total_predictors > 1) {
                         message(sprintf("Processing predictor %d/%d: %s", pred_idx, total_predictors, predictor))

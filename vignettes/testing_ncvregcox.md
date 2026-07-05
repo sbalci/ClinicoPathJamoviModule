@@ -21,8 +21,8 @@ Four datasets are provided in `data/`:
 
 | Variable | Type | True Effect | Notes |
 |----------|------|-------------|-------|
-| `time` | numeric | -- | Survival time in months |
-| `event` | factor (0/1) | -- | Event indicator |
+| `time` | numeric | - | Survival time in months |
+| `event` | factor (0/1) | - | Event indicator |
 | `age` | numeric | Weak (+) | Mean 62, SD 11 |
 | `bmi` | numeric | None (noise) | Mean 26.5 |
 | `tumor_diameter` | numeric | Strong (+) | Log-normal, correlated with LDH |
@@ -159,7 +159,7 @@ lambda_type: min
 ```
 Same as 3a, but lambda_type: 1se
 ```
-**Expected:** Sparser model. Selects the lambda within one standard error of the minimum -- sacrifices a tiny amount of predictive accuracy for a simpler model. Should retain only the strongest effects (tumor_diameter, t_stage T3/T4, n_stage N2).
+**Expected:** Sparser model. Selects the lambda within one standard error of the minimum - sacrifices a tiny amount of predictive accuracy for a simpler model. Should retain only the strongest effects (tumor_diameter, t_stage T3/T4, n_stage N2).
 
 **Comparison check:** The Model Comparison table should show both lambda.min and lambda.1se models side by side with their CV errors, number of variables, and C-index.
 
@@ -191,7 +191,7 @@ alpha: 0.5
 penalty: SCAD
 alpha: 0.01
 ```
-**Expected:** Almost pure ridge penalty. Very little variable selection -- most coefficients will be non-zero but shrunken. The Selected Variables table should show nearly all 30 variables.
+**Expected:** Almost pure ridge penalty. Very little variable selection - most coefficients will be non-zero but shrunken. The Selected Variables table should show nearly all 30 variables.
 
 #### Test 4d: Alpha with clinical data
 ```
@@ -387,7 +387,7 @@ suitabilityCheck: true
 **Expected:** The `suitabilityReport` HTML output appears. It should contain:
 - Sample size adequacy check (n=200 with 14 covariates should pass)
 - Events-per-variable ratio (should be adequate)
-- Multicollinearity assessment (tumor_diameter and ldh_level are correlated -- may flag)
+- Multicollinearity assessment (tumor_diameter and ldh_level are correlated - may flag)
 - Whether regularization is needed (with 14 covariates and n=200, regularization is recommended)
 
 #### Test 10b: Suitability check disabled
@@ -538,12 +538,12 @@ All 15 options from `ncvregcox.a.yaml` are covered:
 
 | Option | YAML Name | Type | Default | Range/Values | Tested In |
 |--------|-----------|------|---------|--------------|-----------|
-| Data | `data` | Data | -- | -- | All tests |
-| Time Variable | `time` | Variable (numeric) | -- | -- | All tests |
-| Event Variable | `event` | Variable (factor) | -- | -- | All tests |
+| Data | `data` | Data | - | - | All tests |
+| Time Variable | `time` | Variable (numeric) | - | - | All tests |
+| Event Variable | `event` | Variable (factor) | - | - | All tests |
 | Event Level | `outcomeLevel` | Level | (auto) | Levels of event | Tests 9a-9e |
 | Censored Level | `censorLevel` | Level | (auto) | Levels of event | Tests 9a-9e |
-| Covariates | `covariates` | Variables (numeric/factor) | -- | -- | All tests |
+| Covariates | `covariates` | Variables (numeric/factor) | - | - | All tests |
 | Penalty Function | `penalty` | List | SCAD | SCAD / MCP | Tests 1a-1b |
 | CV Folds | `cv_folds` | Number | 10 | 3-20 | Tests 8a-8d, 11a-11c |
 | Lambda Selection | `lambda_type` | List | min | min / 1se | Tests 3a-3b |

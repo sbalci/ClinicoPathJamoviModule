@@ -58,7 +58,7 @@ clinical trial scenarios with various outcome measures and missing data patterns
 \item{gender}{Patient gender - factor with levels "Female", "Male"}
 \item{disease_stage}{Disease stage - factor with levels "Early", "Advanced"}
 \item{biomarker_status}{Biomarker status - factor with levels "Negative", "Positive"}
-\item{age_group}{Age stratification - factor "< 65 years", "≥ 65 years"}
+\item{age_group}{Age stratification - factor "< 65 years", ">= 65 years"}
 \item{baseline_biomarker_high}{Baseline biomarker level - factor "High", "Normal"}
 }
 
@@ -77,7 +77,7 @@ clinical trial scenarios with various outcome measures and missing data patterns
 \item "Progressive Disease" (>10\% increase)
 \item "Stable Disease" (-10\% to +10\%)
 \item "Partial Response" (-30\% to -10\%)
-\item "Complete Response" (≤-30\%)
+\item "Complete Response" (<=-30\%)
 }}
 }
 

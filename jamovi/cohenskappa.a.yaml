@@ -187,7 +187,7 @@ options:
           - title: 'Auto (Select based on data)'
             name: auto
       default: auto
-      description: 'Method for calculating multi-rater agreement (≥3 raters)'
+      description: 'Method for calculating multi-rater agreement (>=3 raters)'
 
     - name: show_pairwise_kappa
       title: 'Show Pairwise Kappa Matrix'

@@ -18,20 +18,20 @@ data(summarydata_test)
 # Example 1: Single Variable Summary
 summarydata(
   data = summarydata_test,
-  vars = 'age_normal'
+  vars = "age_normal"
 )
 
 # Example 2: Multiple Variables
 summarydata(
   data = summarydata_test,
-  vars = c('age_normal', 'weight_normal', 'cholesterol_normal')
+  vars = c("age_normal", "weight_normal", "cholesterol_normal")
 )
 
 # Example 3: With Custom Decimal Places (Default: 2)
 summarydata(
   data = summarydata_test,
-  vars = c('troponin', 'creatinine_lab'),
-  decimal_places = 3  # High precision for sensitive assays
+  vars = c("troponin", "creatinine_lab"),
+  decimal_places = 3 # High precision for sensitive assays
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -41,37 +41,39 @@ summarydata(
 # Example 4: Normal Distribution (Pass Shapiro-Wilk)
 summarydata(
   data = summarydata_test,
-  vars = 'age_normal',
-  distr = TRUE  # Enable distribution diagnostics
+  vars = "age_normal",
+  distr = TRUE # Enable distribution diagnostics
 )
 
 # Example 5: Right-Skewed Distribution
 summarydata(
   data = summarydata_test,
-  vars = c('psa_mild_skew', 'crp_moderate_skew', 'income_strong_skew'),
+  vars = c("psa_mild_skew", "crp_moderate_skew", "income_strong_skew"),
   distr = TRUE
 )
 
 # Example 6: Left-Skewed Distribution
 summarydata(
   data = summarydata_test,
-  vars = c('test_score_mild_left', 'age_at_diagnosis_left'),
+  vars = c("test_score_mild_left", "age_at_diagnosis_left"),
   distr = TRUE
 )
 
 # Example 7: Bimodal Distribution
 summarydata(
   data = summarydata_test,
-  vars = c('bimodal_biomarker', 'trimodal_response'),
+  vars = c("bimodal_biomarker", "trimodal_response"),
   distr = TRUE
 )
 
 # Example 8: Kurtosis Variations
 summarydata(
   data = summarydata_test,
-  vars = c('uniform_var',      # Platykurtic (light tails)
-           'mesokurtic_var',   # Normal tails
-           'leptokurtic_var'), # Heavy tails
+  vars = c(
+    "uniform_var", # Platykurtic (light tails)
+    "mesokurtic_var", # Normal tails
+    "leptokurtic_var"
+  ), # Heavy tails
   distr = TRUE
 )
 
@@ -82,21 +84,21 @@ summarydata(
 # Example 9: Variable with Few Outliers (5%)
 summarydata(
   data = summarydata_test,
-  vars = 'hemoglobin_few_outliers',
+  vars = "hemoglobin_few_outliers",
   outliers = TRUE
 )
 
 # Example 10: Variable with Many Outliers (15%)
 summarydata(
   data = summarydata_test,
-  vars = 'glucose_many_outliers',
+  vars = "glucose_many_outliers",
   outliers = TRUE
 )
 
 # Example 11: Variable with Extreme Outliers
 summarydata(
   data = summarydata_test,
-  vars = 'creatinine_extreme',
+  vars = "creatinine_extreme",
   outliers = TRUE,
   distr = TRUE
 )
@@ -104,7 +106,7 @@ summarydata(
 # Example 12: Clean Data (No Outliers)
 summarydata(
   data = summarydata_test,
-  vars = 'albumin_no_outliers',
+  vars = "albumin_no_outliers",
   outliers = TRUE
 )
 
@@ -115,14 +117,14 @@ summarydata(
 # Example 13: Generate Clinical Report Sentences
 summarydata(
   data = summarydata_test,
-  vars = c('age_normal', 'weight_normal', 'cholesterol_normal'),
+  vars = c("age_normal", "weight_normal", "cholesterol_normal"),
   report_sentences = TRUE
 )
 
 # Example 14: Complete Clinical Report
 summarydata(
   data = summarydata_test,
-  vars = c('hemoglobin_lab', 'wbc_count', 'platelet_count'),
+  vars = c("hemoglobin_lab", "wbc_count", "platelet_count"),
   report_sentences = TRUE,
   decimal_places = 1
 )
@@ -134,7 +136,7 @@ summarydata(
 # Example 15: Comprehensive Analysis
 summarydata(
   data = summarydata_test,
-  vars = c('age_normal', 'psa_mild_skew'),
+  vars = c("age_normal", "psa_mild_skew"),
   distr = TRUE,
   outliers = TRUE,
   report_sentences = TRUE,
@@ -148,45 +150,47 @@ summarydata(
 # Example 16: Complete Data (0% Missing)
 summarydata(
   data = summarydata_test,
-  vars = 'bmi_complete',
+  vars = "bmi_complete",
   distr = TRUE
 )
 
 # Example 17: Low Missing (3%)
 summarydata(
   data = summarydata_test,
-  vars = 'systolic_bp_low_missing',
+  vars = "systolic_bp_low_missing",
   distr = TRUE
 )
 
 # Example 18: Moderate Missing (15%)
 summarydata(
   data = summarydata_test,
-  vars = 'ldl_moderate_missing',
+  vars = "ldl_moderate_missing",
   distr = TRUE
 )
 
 # Example 19: High Missing (35%)
 summarydata(
   data = summarydata_test,
-  vars = 'vitamin_d_high_missing',
+  vars = "vitamin_d_high_missing",
   distr = TRUE
 )
 
 # Example 20: Very High Missing (60%)
 summarydata(
   data = summarydata_test,
-  vars = 'genetic_score_very_high_missing',
+  vars = "genetic_score_very_high_missing",
   distr = TRUE
 )
 
 # Example 21: Compare Variables with Different Missing %
 summarydata(
   data = summarydata_test,
-  vars = c('bmi_complete',                      # 0%
-           'systolic_bp_low_missing',           # 3%
-           'ldl_moderate_missing',              # 15%
-           'vitamin_d_high_missing'),           # 35%
+  vars = c(
+    "bmi_complete", # 0%
+    "systolic_bp_low_missing", # 3%
+    "ldl_moderate_missing", # 15%
+    "vitamin_d_high_missing"
+  ), # 35%
   distr = TRUE
 )
 
@@ -197,7 +201,7 @@ summarydata(
 # Example 22: High Precision Values (3 Decimals)
 summarydata(
   data = summarydata_test,
-  vars = 'troponin',
+  vars = "troponin",
   decimal_places = 3,
   distr = TRUE
 )
@@ -205,7 +209,7 @@ summarydata(
 # Example 23: Medium Precision (1 Decimal)
 summarydata(
   data = summarydata_test,
-  vars = 'hemoglobin_lab',
+  vars = "hemoglobin_lab",
   decimal_places = 1,
   outliers = TRUE
 )
@@ -213,7 +217,7 @@ summarydata(
 # Example 24: Integer Values (0 Decimals)
 summarydata(
   data = summarydata_test,
-  vars = c('wbc_count', 'platelet_count'),
+  vars = c("wbc_count", "platelet_count"),
   decimal_places = 0,
   outliers = TRUE
 )
@@ -221,7 +225,7 @@ summarydata(
 # Example 25: Complete Blood Count Panel
 summarydata(
   data = summarydata_test,
-  vars = c('hemoglobin_lab', 'wbc_count', 'platelet_count'),
+  vars = c("hemoglobin_lab", "wbc_count", "platelet_count"),
   decimal_places = 1,
   distr = TRUE,
   outliers = TRUE
@@ -235,14 +239,14 @@ summarydata(
 # Expected: Warning about zero variance
 summarydata(
   data = summarydata_test,
-  vars = 'constant_var',
+  vars = "constant_var",
   distr = TRUE
 )
 
 # Example 27: Nearly Constant (Minimal Variance)
 summarydata(
   data = summarydata_test,
-  vars = 'nearly_constant',
+  vars = "nearly_constant",
   distr = TRUE,
   decimal_places = 3
 )
@@ -250,14 +254,14 @@ summarydata(
 # Example 28: Extreme Range (Millions)
 summarydata(
   data = summarydata_test,
-  vars = 'extreme_range',
+  vars = "extreme_range",
   decimal_places = 0
 )
 
 # Example 29: Negative Values Allowed
 summarydata(
   data = summarydata_test,
-  vars = 'profit_loss',
+  vars = "profit_loss",
   decimal_places = 0,
   distr = TRUE
 )
@@ -266,7 +270,7 @@ summarydata(
 # Expected: Error or warning
 summarydata(
   data = summarydata_test,
-  vars = 'all_missing'
+  vars = "all_missing"
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -276,14 +280,14 @@ summarydata(
 # Example 31: Small Sample (n=10)
 summarydata(
   data = summarydata_test,
-  vars = 'small_sample_var',
+  vars = "small_sample_var",
   distr = TRUE
 )
 
 # Example 32: Minimum Sample for Shapiro-Wilk (n=3)
 summarydata(
   data = summarydata_test,
-  vars = 'tiny_sample_var',
+  vars = "tiny_sample_var",
   distr = TRUE
 )
 
@@ -291,7 +295,7 @@ summarydata(
 # Expected: "Normality test not applicable"
 summarydata(
   data = summarydata_test,
-  vars = 'insufficient_sample_var',
+  vars = "insufficient_sample_var",
   distr = TRUE
 )
 
@@ -302,7 +306,7 @@ summarydata(
 # Example 34: Anthropometric Measurements
 summarydata(
   data = summarydata_test,
-  vars = c('height_cm', 'weight_kg', 'bmi_calculated'),
+  vars = c("height_cm", "weight_kg", "bmi_calculated"),
   decimal_places = 1,
   distr = TRUE
 )
@@ -310,7 +314,7 @@ summarydata(
 # Example 35: Vital Signs
 summarydata(
   data = summarydata_test,
-  vars = c('diastolic_bp', 'heart_rate'),
+  vars = c("diastolic_bp", "heart_rate"),
   decimal_places = 0,
   outliers = TRUE
 )
@@ -322,7 +326,7 @@ summarydata(
 # Example 36: Tumor Markers
 summarydata(
   data = summarydata_test,
-  vars = 'ca19_9',
+  vars = "ca19_9",
   decimal_places = 1,
   distr = TRUE,
   outliers = TRUE
@@ -331,7 +335,7 @@ summarydata(
 # Example 37: Metabolic Markers
 summarydata(
   data = summarydata_test,
-  vars = c('hba1c', 'ferritin', 'tsh'),
+  vars = c("hba1c", "ferritin", "tsh"),
   decimal_places = 1,
   distr = TRUE
 )
@@ -343,7 +347,7 @@ summarydata(
 # Scenario 1: Baseline Patient Characteristics
 summarydata(
   data = summarydata_test,
-  vars = c('age_normal', 'weight_normal', 'height_cm', 'bmi_calculated'),
+  vars = c("age_normal", "weight_normal", "height_cm", "bmi_calculated"),
   decimal_places = 1,
   distr = TRUE,
   report_sentences = TRUE
@@ -352,7 +356,7 @@ summarydata(
 # Scenario 2: Laboratory Values Quality Control
 summarydata(
   data = summarydata_test,
-  vars = c('hemoglobin_lab', 'wbc_count', 'platelet_count', 'creatinine_lab'),
+  vars = c("hemoglobin_lab", "wbc_count", "platelet_count", "creatinine_lab"),
   decimal_places = 1,
   outliers = TRUE,
   distr = TRUE
@@ -361,7 +365,7 @@ summarydata(
 # Scenario 3: Biomarker Distribution Assessment
 summarydata(
   data = summarydata_test,
-  vars = c('psa_mild_skew', 'crp_moderate_skew', 'ca19_9'),
+  vars = c("psa_mild_skew", "crp_moderate_skew", "ca19_9"),
   decimal_places = 2,
   distr = TRUE,
   outliers = TRUE
@@ -370,19 +374,23 @@ summarydata(
 # Scenario 4: Data Quality Assessment (Missing Data)
 summarydata(
   data = summarydata_test,
-  vars = c('bmi_complete',
-           'systolic_bp_low_missing',
-           'ldl_moderate_missing',
-           'vitamin_d_high_missing',
-           'genetic_score_very_high_missing'),
+  vars = c(
+    "bmi_complete",
+    "systolic_bp_low_missing",
+    "ldl_moderate_missing",
+    "vitamin_d_high_missing",
+    "genetic_score_very_high_missing"
+  ),
   decimal_places = 1
 )
 
 # Scenario 5: Vital Signs Monitoring
 summarydata(
   data = summarydata_test,
-  vars = c('systolic_bp_low_missing', 'diastolic_bp',
-           'heart_rate', 'temperature_normal'),
+  vars = c(
+    "systolic_bp_low_missing", "diastolic_bp",
+    "heart_rate", "temperature_normal"
+  ),
   decimal_places = 1,
   outliers = TRUE
 )
@@ -390,7 +398,7 @@ summarydata(
 # Scenario 6: Metabolic Panel
 summarydata(
   data = summarydata_test,
-  vars = c('glucose_many_outliers', 'hba1c', 'cholesterol_normal', 'ldl_moderate_missing'),
+  vars = c("glucose_many_outliers", "hba1c", "cholesterol_normal", "ldl_moderate_missing"),
   decimal_places = 1,
   distr = TRUE,
   outliers = TRUE,
@@ -400,7 +408,7 @@ summarydata(
 # Scenario 7: Renal Function Assessment
 summarydata(
   data = summarydata_test,
-  vars = c('creatinine_lab', 'creatinine_extreme'),
+  vars = c("creatinine_lab", "creatinine_extreme"),
   decimal_places = 2,
   outliers = TRUE,
   distr = TRUE
@@ -409,8 +417,10 @@ summarydata(
 # Scenario 8: Hematology Panel
 summarydata(
   data = summarydata_test,
-  vars = c('hemoglobin_lab', 'hemoglobin_few_outliers',
-           'wbc_count', 'platelet_count'),
+  vars = c(
+    "hemoglobin_lab", "hemoglobin_few_outliers",
+    "wbc_count", "platelet_count"
+  ),
   decimal_places = 1,
   outliers = TRUE
 )
@@ -429,7 +439,7 @@ summarydata(
 # 2. **Distribution Diagnostics** (when distr = TRUE):
 #    - Shapiro-Wilk p-value:
 #      - p > 0.05: Data appears normally distributed
-#      - p ≤ 0.05: Data does not appear normal
+#      - p <= 0.05: Data does not appear normal
 #    - Skewness:
 #      - ~0: Symmetric
 #      - >0: Right-skewed (long right tail)

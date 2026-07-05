@@ -167,7 +167,7 @@ smoothhazardClass <- R6::R6Class(
 
                 # TODO (stub): covariates are added to analysis_data and drive the complete.cases
                 #   filtering below, but the smooth-hazard model (Surv(time, status), ~L279) never
-                #   uses them — selecting covariates silently narrows the sample without adjusting the
+                #   uses them - selecting covariates silently narrows the sample without adjusting the
                 #   hazard. Either model them or drop the option / document the filtering-only behavior.
                 # Add covariates if specified
                 if (length(covariates) > 0) {
@@ -200,7 +200,7 @@ smoothhazardClass <- R6::R6Class(
 
                 # TODO (correctness): if status is an unordered 2-level FACTOR, max(unique(status))
                 #   below errors (caught by the outer tryCatch -> silent NULL, blank analysis). The
-                #   `== max()` recoding assumes numeric/orderable status — coerce via as.character()/
+                #   `== max()` recoding assumes numeric/orderable status - coerce via as.character()/
                 #   levels() or require a numeric 0/1 status before this branch.
                 if (!all(analysis_data$status %in% c(0, 1), na.rm = TRUE)) {
                     # Try to convert status to 0/1

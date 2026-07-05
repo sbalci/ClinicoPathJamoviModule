@@ -9,13 +9,12 @@
 #' @importFrom scales percent_format
 #' @importFrom rlang .data
 
-decisioncombineClass <- if (requireNamespace("jmvcore"))
+decisioncombineClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
         "decisioncombineClass",
         inherit = decisioncombineBase,
         private = list(
             .noticeList = list(),
-
             .addNotice = function(type, title, content) {
                 notice <- list(
                     type = type,
@@ -24,7 +23,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 )
                 private$.noticeList[[length(private$.noticeList) + 1]] <- notice
             },
-
             .renderNotices = function() {
                 if (length(private$.noticeList) == 0) {
                     self$results$notices$setContent("")
@@ -35,37 +33,38 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 for (notice in private$.noticeList) {
                     if (notice$type == "ERROR") {
                         color <- "#d9534f"
-                        icon <- "&#x26A0;"  # Warning sign
+                        icon <- "&#x26A0;" # Warning sign
                     } else if (notice$type == "WARNING") {
                         color <- "#f0ad4e"
                         icon <- "&#x26A0;"
-                    } else {  # INFO
+                    } else { # INFO
                         color <- "#5bc0de"
-                        icon <- "&#x2139;"  # Info sign
+                        icon <- "&#x2139;" # Info sign
                     }
 
-                    html <- paste0(html,
+                    html <- paste0(
+                        html,
                         '<div style="background-color: ', color, '; color: white; padding: 10px; margin: 5px 0; border-radius: 4px;">',
-                        '<strong>', icon, ' ', htmltools::htmlEscape(notice$title), ':</strong> ',
+                        "<strong>", icon, " ", htmltools::htmlEscape(notice$title), ":</strong> ",
                         htmltools::htmlEscape(notice$content),
-                        '</div>'
+                        "</div>"
                     )
                 }
-                html <- paste0(html, '</div>')
+                html <- paste0(html, "</div>")
 
                 self$results$notices$setContent(html)
             },
 
-            # TODO [meddecide audit 2026-05-14] — see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice — consolidate
+            # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
+            #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice - consolidate
             #     reference impl: decisioncalculator.b.R (17 jmvcore::Notice uses)
-            #   [hygiene/jmvcore] ~5 bare stop() calls — /jamovify-function decisioncombine --pattern=error --apply
-            #   [hygiene/term] private$.escapeVariableNames (~L59) is similar to jmvcore::composeTerm — swap to jmvcore
-            #   [integration] 72 declared outputs vs 21 setters (3.4×) — many pattern-specific placeholders
+            #   [hygiene/jmvcore] ~5 bare stop() calls - /jamovify-function decisioncombine --pattern=error --apply
+            #   [hygiene/term] private$.escapeVariableNames (~L59) is similar to jmvcore::composeTerm - swap to jmvcore
+            #   [integration] 72 declared outputs vs 21 setters (3.4×) - many pattern-specific placeholders
             #     run /check-function-full decisioncombine to verify 2-test/3-test scenarios
-            #   [hygiene/notices] low-cell-count STRONG_WARNING is not quantified — add actual counts
+            #   [hygiene/notices] low-cell-count STRONG_WARNING is not quantified - add actual counts
             #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation decisioncombine
-            #   [statistical-validation] /review-function decisioncombine — pattern enumeration math
+            #   [statistical-validation] /review-function decisioncombine - pattern enumeration math
             #   [testing] no tests/testthat/test-decisioncombine.R
 
             .init = function() {
@@ -87,7 +86,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 hasTest3 <- !is.null(self$options$test3) && self$options$test3 != ""
                 self$results$individualTest3$setVisible(showIndividual && hasTest3)
             },
-
             .run = function() {
                 # Main analysis flow - fail fast approach
 
@@ -99,7 +97,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # Step 1: Validate inputs (will stop on errors)
                 validation_result <- private$.validateInputs()
                 if (!validation_result) {
-                    return()  # Halt execution if validation failed
+                    return() # Halt execution if validation failed
                 }
 
                 # Step 2: Prepare data
@@ -144,7 +142,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # Step 8: Render all notices
                 private$.renderNotices()
             },
-
             .hasRequiredVars = function() {
                 # Check if minimum required variables are selected
                 # Returns FALSE to silently skip analysis, not throw error
@@ -171,7 +168,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 return(TRUE)
             },
-
             .validateInputs = function() {
                 # Strict validation with clear error messages using HTML notices
                 # Returns TRUE if validation passes, FALSE otherwise
@@ -226,9 +222,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     return(FALSE)
                 }
 
-                return(TRUE)  # All validation checks passed
+                return(TRUE) # All validation checks passed
             },
-
             .prepareData = function() {
                 # Data preparation following decision.b.R pattern
 
@@ -278,9 +273,13 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 for (rl in required_levels) {
                     if (!rl$level %in% levels(mydata[[rl$var]])) {
-                        private$.addNotice("ERROR", "Missing Level",
-                            sprintf('The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
-                                    rl$level, rl$var, rl$label))
+                        private$.addNotice(
+                            "ERROR", "Missing Level",
+                            sprintf(
+                                'The specified positive level "%s" is not present in variable "%s" (%s). Please select a level that exists in the data.',
+                                rl$level, rl$var, rl$label
+                            )
+                        )
                         return(NULL)
                     }
                 }
@@ -345,14 +344,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 return(mydata)
             },
-
             .analyzeIndividualTest = function(data_prep, test_num) {
                 # Analyze individual test performance
 
                 # Check if epiR package is available
                 if (!requireNamespace("epiR", quietly = TRUE)) {
-                    private$.addNotice("ERROR", "epiR Package Missing",
-                        'epiR package is required for diagnostic test analysis. Install with install.packages("epiR") or disable "Show Individual Test Statistics" option.')
+                    private$.addNotice(
+                        "ERROR", "epiR Package Missing",
+                        'epiR package is required for diagnostic test analysis. Install with install.packages("epiR") or disable "Show Individual Test Statistics" option.'
+                    )
                     return()
                 }
 
@@ -378,15 +378,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Validate counts
                 if (any(is.na(c(tp, fp, fn, tn))) || any(c(tp, fp, fn, tn) < 0)) {
-                    private$.addNotice("WARNING", "Invalid Counts",
-                        sprintf('Invalid counts detected for Test %d. Skipping individual analysis.', test_num))
+                    private$.addNotice(
+                        "WARNING", "Invalid Counts",
+                        sprintf("Invalid counts detected for Test %d. Skipping individual analysis.", test_num)
+                    )
                     return()
                 }
 
                 # Check if all counts are zero
                 if (tp == 0 && fp == 0 && fn == 0 && tn == 0) {
-                    private$.addNotice("WARNING", "All Zero Counts",
-                        sprintf('No valid observations for Test %d. Skipping individual analysis.', test_num))
+                    private$.addNotice(
+                        "WARNING", "All Zero Counts",
+                        sprintf("No valid observations for Test %d. Skipping individual analysis.", test_num)
+                    )
                     return()
                 }
 
@@ -398,11 +402,14 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     fn_adj <- fn + 0.5
                     tn_adj <- tn + 0.5
                     cont_table_for_epi <- matrix(c(tp_adj, fp_adj, fn_adj, tn_adj),
-                                                 nrow = 2, byrow = TRUE,
-                                                 dimnames = list(c("Positive", "Negative"), c("Positive", "Negative")))
+                        nrow = 2, byrow = TRUE,
+                        dimnames = list(c("Positive", "Negative"), c("Positive", "Negative"))
+                    )
 
-                    private$.addNotice("INFO", "Continuity Correction",
-                        sprintf('Continuity correction (+0.5) applied to Test %d due to zero cell count(s).', test_num))
+                    private$.addNotice(
+                        "INFO", "Continuity Correction",
+                        sprintf("Continuity correction (+0.5) applied to Test %d due to zero cell count(s).", test_num)
+                    )
                 } else {
                     cont_table_for_epi <- cont_table
                 }
@@ -468,28 +475,33 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     estimate = npv
                 ))
             },
-
             .analyzeCombinations = function(data_prep) {
                 # Generate and analyze all test combinations
 
                 # Check if epiR package is available for combination analysis
                 if (!requireNamespace("epiR", quietly = TRUE)) {
-                    private$.addNotice("ERROR", "epiR Package Missing",
-                        'epiR package is required for combination analysis. Install with install.packages("epiR").')
+                    private$.addNotice(
+                        "ERROR", "epiR Package Missing",
+                        'epiR package is required for combination analysis. Install with install.packages("epiR").'
+                    )
                     return()
                 }
 
                 # Inform users that PPV/NPV are based on sample prevalence
-                private$.addNotice("INFO", "PPV/NPV Interpretation",
-                    'Positive/Negative Predictive Values are calculated using the sample prevalence. Interpret cautiously if your sample does not reflect the target clinical population.')
+                private$.addNotice(
+                    "INFO", "PPV/NPV Interpretation",
+                    "Positive/Negative Predictive Values are calculated using the sample prevalence. Interpret cautiously if your sample does not reflect the target clinical population."
+                )
 
                 has_test2 <- "test2Variable2" %in% names(data_prep)
                 has_test3 <- "test3Variable2" %in% names(data_prep)
 
                 if (!has_test2) {
                     # Single test only - no combinations
-                    private$.analyzeSinglePattern(data_prep, "Test 1",
-                                                 data_prep$test1Variable2 == "Positive")
+                    private$.analyzeSinglePattern(
+                        data_prep, "Test 1",
+                        data_prep$test1Variable2 == "Positive"
+                    )
                     return()
                 }
 
@@ -505,14 +517,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     private$.addThreeTestStrategies(data_prep)
                 }
             },
-
             .calcWilsonCI = function(x, n, conf.level = 0.95) {
                 # Wilson score confidence interval
                 # More accurate than normal approximation, especially for small samples
-                if (is.na(x) || n == 0) return(c(NA, NA))
+                if (is.na(x) || n == 0) {
+                    return(c(NA, NA))
+                }
 
                 p <- x / n
-                z <- qnorm((1 + conf.level) / 2)  # 1.96 for 95% CI
+                z <- qnorm((1 + conf.level) / 2) # 1.96 for 95% CI
 
                 # Wilson score formula
                 denominator <- 1 + (z^2 / n)
@@ -522,7 +535,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # Return bounds, constrained to [0, 1]
                 c(max(0, centre - half_width), min(1, centre + half_width))
             },
-
             .analyzeSinglePattern = function(data_prep, pattern_name, condition) {
                 # Analyze a single test pattern
 
@@ -548,15 +560,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
 
                 # Validate counts - check for negative values
                 if (any(is.na(c(tp, fp, fn, tn))) || any(c(tp, fp, fn, tn) < 0)) {
-                    private$.addNotice("WARNING", "Invalid Counts",
-                        sprintf('Invalid counts detected for pattern "%s". Skipping this combination.', pattern_name))
+                    private$.addNotice(
+                        "WARNING", "Invalid Counts",
+                        sprintf('Invalid counts detected for pattern "%s". Skipping this combination.', pattern_name)
+                    )
                     return()
                 }
 
                 # Check if all counts are zero
                 if (tp == 0 && fp == 0 && fn == 0 && tn == 0) {
-                    private$.addNotice("WARNING", "All Zero Counts",
-                        sprintf('No observations found for pattern "%s". Skipping this combination.', pattern_name))
+                    private$.addNotice(
+                        "WARNING", "All Zero Counts",
+                        sprintf('No observations found for pattern "%s". Skipping this combination.', pattern_name)
+                    )
                     return()
                 }
 
@@ -569,8 +585,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     fn_adj <- fn + 0.5
                     tn_adj <- tn + 0.5
                     # Post informative notice
-                    private$.addNotice("INFO", "Continuity Correction",
-                        sprintf('Continuity correction (+0.5) applied to pattern "%s" due to zero cell count(s).', pattern_name))
+                    private$.addNotice(
+                        "INFO", "Continuity Correction",
+                        sprintf('Continuity correction (+0.5) applied to pattern "%s" due to zero cell count(s).', pattern_name)
+                    )
                 } else {
                     tp_adj <- tp
                     fp_adj <- fp
@@ -694,7 +712,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     log_lr_pos <- log(lr_pos)
                     # Standard SE for log(LR+) using adjusted counts
                     se_log_lr_pos <- sqrt((1 / tp_adj) - (1 / (tp_adj + fn_adj)) +
-                                          (1 / fp_adj) - (1 / (fp_adj + tn_adj)))
+                        (1 / fp_adj) - (1 / (fp_adj + tn_adj)))
                     lr_pos_lower <- exp(log_lr_pos - 1.96 * se_log_lr_pos)
                     lr_pos_upper <- exp(log_lr_pos + 1.96 * se_log_lr_pos)
                 } else {
@@ -714,7 +732,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     log_lr_neg <- log(lr_neg)
                     # Standard SE for log(LR-) using adjusted counts
                     se_log_lr_neg <- sqrt((1 / fn_adj) - (1 / (tp_adj + fn_adj)) +
-                                          (1 / tn_adj) - (1 / (fp_adj + tn_adj)))
+                        (1 / tn_adj) - (1 / (fp_adj + tn_adj)))
                     lr_neg_lower <- exp(log_lr_neg - 1.96 * se_log_lr_neg)
                     lr_neg_upper <- exp(log_lr_neg + 1.96 * se_log_lr_neg)
                 } else {
@@ -733,7 +751,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 if (!is.na(dor) && dor > 0) {
                     log_dor <- log(dor)
                     # Approximate SE for log(DOR) using adjusted counts
-                    se_log_dor <- sqrt(1/tp_adj + 1/fp_adj + 1/fn_adj + 1/tn_adj)
+                    se_log_dor <- sqrt(1 / tp_adj + 1 / fp_adj + 1 / fn_adj + 1 / tn_adj)
                     dor_lower <- exp(log_dor - 1.96 * se_log_dor)
                     dor_upper <- exp(log_dor + 1.96 * se_log_dor)
                 } else {
@@ -748,7 +766,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     upper = dor_upper
                 ))
             },
-
             .analyzeTwoTestPatterns = function(data_prep) {
                 # Generate 4 patterns for 2-test combinations
 
@@ -763,69 +780,66 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     private$.analyzeSinglePattern(data_prep, pattern_name, patterns[[pattern_name]])
                 }
             },
-
             .analyzeThreeTestPatterns = function(data_prep) {
                 # Generate 8 patterns for 3-test combinations
 
                 patterns <- list(
                     "+/+/+" = data_prep$test1Variable2 == "Positive" &
-                              data_prep$test2Variable2 == "Positive" &
-                              data_prep$test3Variable2 == "Positive",
+                        data_prep$test2Variable2 == "Positive" &
+                        data_prep$test3Variable2 == "Positive",
                     "+/+/-" = data_prep$test1Variable2 == "Positive" &
-                              data_prep$test2Variable2 == "Positive" &
-                              data_prep$test3Variable2 == "Negative",
+                        data_prep$test2Variable2 == "Positive" &
+                        data_prep$test3Variable2 == "Negative",
                     "+/-/+" = data_prep$test1Variable2 == "Positive" &
-                              data_prep$test2Variable2 == "Negative" &
-                              data_prep$test3Variable2 == "Positive",
+                        data_prep$test2Variable2 == "Negative" &
+                        data_prep$test3Variable2 == "Positive",
                     "+/-/-" = data_prep$test1Variable2 == "Positive" &
-                              data_prep$test2Variable2 == "Negative" &
-                              data_prep$test3Variable2 == "Negative",
+                        data_prep$test2Variable2 == "Negative" &
+                        data_prep$test3Variable2 == "Negative",
                     "-/+/+" = data_prep$test1Variable2 == "Negative" &
-                              data_prep$test2Variable2 == "Positive" &
-                              data_prep$test3Variable2 == "Positive",
+                        data_prep$test2Variable2 == "Positive" &
+                        data_prep$test3Variable2 == "Positive",
                     "-/+/-" = data_prep$test1Variable2 == "Negative" &
-                              data_prep$test2Variable2 == "Positive" &
-                              data_prep$test3Variable2 == "Negative",
+                        data_prep$test2Variable2 == "Positive" &
+                        data_prep$test3Variable2 == "Negative",
                     "-/-/+" = data_prep$test1Variable2 == "Negative" &
-                              data_prep$test2Variable2 == "Negative" &
-                              data_prep$test3Variable2 == "Positive",
+                        data_prep$test2Variable2 == "Negative" &
+                        data_prep$test3Variable2 == "Positive",
                     "-/-/-" = data_prep$test1Variable2 == "Negative" &
-                              data_prep$test2Variable2 == "Negative" &
-                              data_prep$test3Variable2 == "Negative"
+                        data_prep$test2Variable2 == "Negative" &
+                        data_prep$test3Variable2 == "Negative"
                 )
 
                 for (pattern_name in names(patterns)) {
                     private$.analyzeSinglePattern(data_prep, pattern_name, patterns[[pattern_name]])
                 }
             },
-
             .addTwoTestStrategies = function(data_prep) {
                 # Add clinical strategy rows for 2-test combinations
 
                 # Parallel strategy: Positive if ANY test is positive (high sensitivity)
                 parallel_condition <- data_prep$test1Variable2 == "Positive" |
-                                    data_prep$test2Variable2 == "Positive"
-                private$.analyzeSinglePattern(data_prep, "Parallel (≥1 pos)", parallel_condition)
+                    data_prep$test2Variable2 == "Positive"
+                private$.analyzeSinglePattern(data_prep, "Parallel (>=1 pos)", parallel_condition)
 
                 # Serial strategy: Positive only if BOTH tests are positive (high specificity)
                 serial_condition <- data_prep$test1Variable2 == "Positive" &
-                                  data_prep$test2Variable2 == "Positive"
+                    data_prep$test2Variable2 == "Positive"
                 private$.analyzeSinglePattern(data_prep, "Serial (all pos)", serial_condition)
             },
-
             .addThreeTestStrategies = function(data_prep) {
                 # Add clinical strategy rows for 3-test combinations
 
                 # Parallel strategy: Positive if ANY test is positive (high sensitivity)
                 parallel_condition <- data_prep$test1Variable2 == "Positive" |
-                                    data_prep$test2Variable2 == "Positive" |
-                                    data_prep$test3Variable2 == "Positive"
-                private$.analyzeSinglePattern(data_prep, "Parallel (≥1 pos)", parallel_condition)
+                    data_prep$test2Variable2 == "Positive" |
+                    data_prep$test3Variable2 == "Positive"
+                private$.analyzeSinglePattern(data_prep, "Parallel (>=1 pos)", parallel_condition)
 
                 # Serial strategy: Positive only if ALL tests are positive (high specificity)
                 serial_condition <- data_prep$test1Variable2 == "Positive" &
-                                  data_prep$test2Variable2 == "Positive" &
-                                  data_prep$test3Variable2 == "Positive"
+                    data_prep$test2Variable2 == "Positive" &
+                    data_prep$test3Variable2 == "Positive"
                 private$.analyzeSinglePattern(data_prep, "Serial (all pos)", serial_condition)
 
                 # Majority rule: Positive if at least 2 of 3 tests are positive (balanced)
@@ -833,9 +847,8 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 t2_pos <- data_prep$test2Variable2 == "Positive"
                 t3_pos <- data_prep$test3Variable2 == "Positive"
                 majority_condition <- (as.integer(t1_pos) + as.integer(t2_pos) + as.integer(t3_pos)) >= 2
-                private$.analyzeSinglePattern(data_prep, "Majority (≥2/3 pos)", majority_condition)
+                private$.analyzeSinglePattern(data_prep, "Majority (>=2/3 pos)", majority_condition)
             },
-
             .populateFrequencyTables = function(data_prep) {
                 # Gold standard frequency
                 goldTable <- self$results$goldFreqTable
@@ -855,7 +868,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 has_test2 <- "test2Variable2" %in% names(data_prep)
                 has_test3 <- "test3Variable2" %in% names(data_prep)
 
-                if (!has_test2) return()
+                if (!has_test2) {
+                    return()
+                }
 
                 # Generate patterns
                 if (!has_test3) {
@@ -891,10 +906,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     ))
                 }
             },
-
             .populateRecommendation = function() {
                 combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) return()
+                if (combTable$rowCount == 0) {
+                    return()
+                }
 
                 # Convert to data frame
                 table_df <- combTable$asDF()
@@ -904,7 +920,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 table_df$min_cell <- apply(table_df[, c("tp", "fp", "fn", "tn")], 1, min)
                 stable_df <- table_df[table_df$min_cell >= 5, ]
                 if (nrow(stable_df) == 0) {
-                    stable_df <- table_df  # fallback to all if none meet threshold
+                    stable_df <- table_df # fallback to all if none meet threshold
                     stability_note <- "No pattern meets the minimum cell count of 5; recommendation is based on all patterns (may be unstable). "
                 } else {
                     stability_note <- ""
@@ -940,7 +956,6 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     rationale = rationale
                 ))
             },
-
             .addPatternColumn = function(data_prep) {
                 has_test2 <- "test2Variable2" %in% names(data_prep)
                 has_test3 <- "test3Variable2" %in% names(data_prep)
@@ -964,10 +979,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 # Add column to original dataset
                 self$results$setColumn("test_pattern", pattern_values)
             },
-
             .plotBarChart = function(image, ...) {
                 combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) return(FALSE)
+                if (combTable$rowCount == 0) {
+                    return(FALSE)
+                }
 
                 table_df <- combTable$asDF()
 
@@ -983,7 +999,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 pattern_filter <- self$options$filterPattern
                 filtered_df <- private$.applyPatternFilter(table_df, pattern_filter)
 
-                if (nrow(filtered_df) == 0) return(FALSE)
+                if (nrow(filtered_df) == 0) {
+                    return(FALSE)
+                }
 
                 # Create long format
                 plot_data <- data.frame()
@@ -1014,16 +1032,19 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 print(p)
                 return(TRUE)
             },
-
             .plotHeatmap = function(image, ...) {
                 combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) return(FALSE)
+                if (combTable$rowCount == 0) {
+                    return(FALSE)
+                }
 
                 table_df <- combTable$asDF()
                 pattern_filter <- self$options$filterPattern
                 filtered_df <- private$.applyPatternFilter(table_df, pattern_filter)
 
-                if (nrow(filtered_df) == 0) return(FALSE)
+                if (nrow(filtered_df) == 0) {
+                    return(FALSE)
+                }
 
                 # Select metrics for heatmap
                 metrics <- c("sens", "spec", "ppv", "npv", "acc", "balancedAccuracy", "youden")
@@ -1047,10 +1068,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 print(p)
                 return(TRUE)
             },
-
             .plotForest = function(image, ...) {
                 ciTable <- self$results$combinationTableCI
-                if (ciTable$rowCount == 0) return(FALSE)
+                if (ciTable$rowCount == 0) {
+                    return(FALSE)
+                }
 
                 table_df <- ciTable$asDF()
 
@@ -1060,7 +1082,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                     table_df <- table_df[table_df$statistic == stat_filter, ]
                 }
 
-                if (nrow(table_df) == 0) return(FALSE)
+                if (nrow(table_df) == 0) {
+                    return(FALSE)
+                }
 
                 p <- ggplot2::ggplot(table_df, ggplot2::aes(x = estimate, y = pattern, color = statistic)) +
                     ggplot2::geom_point(size = 3) +
@@ -1076,10 +1100,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 print(p)
                 return(TRUE)
             },
-
             .plotDecisionTree = function(image, ...) {
                 combTable <- self$results$combinationTable
-                if (combTable$rowCount == 0) return(FALSE)
+                if (combTable$rowCount == 0) {
+                    return(FALSE)
+                }
 
                 table_df <- combTable$asDF()
 
@@ -1102,9 +1127,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 print(p)
                 return(TRUE)
             },
-
             .applyPatternFilter = function(data, filter_type) {
-                if (filter_type == "all") return(data)
+                if (filter_type == "all") {
+                    return(data)
+                }
 
                 # Pattern filtering logic
                 if (filter_type == "allPositive") {
@@ -1135,23 +1161,26 @@ decisioncombineClass <- if (requireNamespace("jmvcore"))
                 test1 <- self$options$test1
                 test2 <- self$options$test2
 
-                if (is.null(gold) || is.null(test1) || is.null(test2))
-                    return('')
+                if (is.null(gold) || is.null(test1) || is.null(test2)) {
+                    return("")
+                }
 
                 # Get arguments
-                args <- ''
+                args <- ""
                 if (!is.null(private$.asArgs)) {
                     args <- private$.asArgs(incData = FALSE)
                 }
-                if (args != '')
-                    args <- paste0(',\n    ', args)
+                if (args != "") {
+                    args <- paste0(",\n    ", args)
+                }
 
                 # Get package name dynamically
                 pkg_name <- utils::packageName()
-                if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath" # fallback
 
                 # Build complete function call
-                paste0(pkg_name, '::decisioncombine(\n    data = data', args, ')')
+                paste0(pkg_name, "::decisioncombine(\n    data = data", args, ")")
             }
         ) # End of public list
     )
+}

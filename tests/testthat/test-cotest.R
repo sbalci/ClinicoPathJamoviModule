@@ -1,4 +1,3 @@
-
 test_that("cotest module loads correctly", {
   expect_true(exists("cotestClass"))
   expect_true(is.function(cotest))
@@ -73,7 +72,7 @@ test_that("cotest validates input parameters", {
     "test1_sens must be between 0.01 and 0.99 (is 1.2)"
   )
 
-  # Test invalid sensitivity (≤ 0)
+  # Test invalid sensitivity (<= 0)
   expect_error(
     cotest(test1_sens = 0),
     "test1_sens must be between 0.01 and 0.99 (is 0)"
@@ -85,7 +84,7 @@ test_that("cotest validates input parameters", {
     "test1_spec must be between 0.01 and 0.99 (is 1.1)"
   )
 
-  # Test invalid specificity (≤ 0)
+  # Test invalid specificity (<= 0)
   expect_error(
     cotest(test2_spec = -0.1),
     "test2_spec must be between 0.01 and 0.99 (is -0.1)"
@@ -97,7 +96,7 @@ test_that("cotest validates input parameters", {
     "prevalence must be between 0.001 and 0.999 (is 1.5)"
   )
 
-  # Test invalid prevalence (≤ 0)
+  # Test invalid prevalence (<= 0)
   expect_error(
     cotest(prevalence = 0),
     "prevalence must be between 0.001 and 0.999 (is 0)"
@@ -118,9 +117,12 @@ test_that("cotest validates conditional dependence parameters", {
   )
 
   # Test valid boundary values
-  expect_error({
-    result <- cotest(indep = FALSE, cond_dep_pos = 0, cond_dep_neg = 1)
-  }, NA)  # Should not error
+  expect_error(
+    {
+      result <- cotest(indep = FALSE, cond_dep_pos = 0, cond_dep_neg = 1)
+    },
+    NA
+  ) # Should not error
 })
 
 test_that("cotest handles extreme parameter values", {
@@ -174,9 +176,9 @@ test_that("cotest handles different prevalence scenarios", {
 test_that("cotest calculates likelihood ratios correctly", {
   # Test with known values for manual verification
   result <- cotest(
-    test1_sens = 0.80,  # PLR = 0.8/0.1 = 8, NLR = 0.2/0.9 = 0.222
+    test1_sens = 0.80, # PLR = 0.8/0.1 = 8, NLR = 0.2/0.9 = 0.222
     test1_spec = 0.90,
-    test2_sens = 0.90,  # PLR = 0.9/0.05 = 18, NLR = 0.1/0.95 = 0.105
+    test2_sens = 0.90, # PLR = 0.9/0.05 = 18, NLR = 0.1/0.95 = 0.105
     test2_spec = 0.95,
     prevalence = 0.10
   )
@@ -339,26 +341,32 @@ test_that("cotest comprehensive test with all options", {
 
 test_that("cotest handles perfect and poor test scenarios", {
   # Perfect tests scenario
-  expect_error({
-    result_perfect <- cotest(
-      test1_sens = 0.99,
-      test1_spec = 0.99,
-      test2_sens = 0.99,
-      test2_spec = 0.99,
-      prevalence = 0.10
-    )
-  }, NA)  # Should not error
+  expect_error(
+    {
+      result_perfect <- cotest(
+        test1_sens = 0.99,
+        test1_spec = 0.99,
+        test2_sens = 0.99,
+        test2_spec = 0.99,
+        prevalence = 0.10
+      )
+    },
+    NA
+  ) # Should not error
 
   # Poor tests scenario
-  expect_error({
-    result_poor <- cotest(
-      test1_sens = 0.55,
-      test1_spec = 0.60,
-      test2_sens = 0.58,
-      test2_spec = 0.65,
-      prevalence = 0.10
-    )
-  }, NA)  # Should not error
+  expect_error(
+    {
+      result_poor <- cotest(
+        test1_sens = 0.55,
+        test1_spec = 0.60,
+        test2_sens = 0.58,
+        test2_spec = 0.65,
+        prevalence = 0.10
+      )
+    },
+    NA
+  ) # Should not error
 })
 
 test_that("cotest mathematical consistency checks", {
@@ -403,36 +411,42 @@ test_that("cotest reproducibility", {
 
 test_that("cotest boundary value testing", {
   # Test at exact boundaries of allowed ranges
-  expect_error({
-    cotest(
-      test1_sens = 0.01,
-      test1_spec = 0.01,
-      test2_sens = 0.99,
-      test2_spec = 0.99,
-      prevalence = 0.001
-    )
-  }, NA)
+  expect_error(
+    {
+      cotest(
+        test1_sens = 0.01,
+        test1_spec = 0.01,
+        test2_sens = 0.99,
+        test2_spec = 0.99,
+        prevalence = 0.001
+      )
+    },
+    NA
+  )
 
-  expect_error({
-    cotest(
-      test1_sens = 0.99,
-      test1_spec = 0.99,
-      test2_sens = 0.01,
-      test2_spec = 0.01,
-      prevalence = 0.999
-    )
-  }, NA)
+  expect_error(
+    {
+      cotest(
+        test1_sens = 0.99,
+        test1_spec = 0.99,
+        test2_sens = 0.01,
+        test2_spec = 0.01,
+        prevalence = 0.999
+      )
+    },
+    NA
+  )
 })
 
 test_that("cotest clinical scenario examples", {
   # Scenario 1: COVID-19 screening with antigen + PCR
   covid_screening <- cotest(
-    test1_sens = 0.68,  # Antigen test
+    test1_sens = 0.68, # Antigen test
     test1_spec = 0.99,
-    test2_sens = 0.95,  # PCR test
+    test2_sens = 0.95, # PCR test
     test2_spec = 0.99,
-    prevalence = 0.05,  # Community prevalence
-    indep = FALSE,      # Tests may be dependent
+    prevalence = 0.05, # Community prevalence
+    indep = FALSE, # Tests may be dependent
     cond_dep_pos = 0.10,
     cond_dep_neg = 0.05
   )
@@ -441,12 +455,12 @@ test_that("cotest clinical scenario examples", {
 
   # Scenario 2: Cancer screening with imaging + biopsy
   cancer_screening <- cotest(
-    test1_sens = 0.88,  # Imaging
+    test1_sens = 0.88, # Imaging
     test1_spec = 0.92,
-    test2_sens = 0.95,  # Biopsy
+    test2_sens = 0.95, # Biopsy
     test2_spec = 0.98,
-    prevalence = 0.02,  # Cancer prevalence in screening
-    indep = FALSE,      # Tests likely dependent
+    prevalence = 0.02, # Cancer prevalence in screening
+    indep = FALSE, # Tests likely dependent
     cond_dep_pos = 0.25,
     cond_dep_neg = 0.15,
     fagan = TRUE
@@ -456,12 +470,12 @@ test_that("cotest clinical scenario examples", {
 
   # Scenario 3: Cardiac biomarkers
   cardiac_biomarkers <- cotest(
-    test1_sens = 0.92,  # Troponin
+    test1_sens = 0.92, # Troponin
     test1_spec = 0.89,
-    test2_sens = 0.85,  # CK-MB
+    test2_sens = 0.85, # CK-MB
     test2_spec = 0.94,
-    prevalence = 0.25,  # Emergency department patients
-    indep = FALSE,      # Biomarkers likely correlated
+    prevalence = 0.25, # Emergency department patients
+    indep = FALSE, # Biomarkers likely correlated
     cond_dep_pos = 0.30,
     cond_dep_neg = 0.20,
     fnote = TRUE

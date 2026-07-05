@@ -13,20 +13,24 @@ description:
         test result patterns (2-test: 4 patterns, 3-test: 8 patterns) against a gold
         standard to identify optimal testing strategies. Calculates sensitivity,
         specificity, PPV, NPV, and accuracy for each pattern combination.
-    R:
-        dontrun: true
-        usage: |
-            # Two-test combination analysis
-            result <- decisioncombine(
-              data = histopathology,
-              gold = "Golden Standart",
-              goldPositive = "1",
-              test1 = "New Test",
-              test1Positive = "1",
-              test2 = "Rater 1",
-              test2Positive = "1",
-              showIndividual = TRUE
-            )
+        
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Two-test combination analysis (no third test)
+    #         # test3Positive is a required wrapper argument; pass NULL when
+    #         # only two tests are combined.
+    #         result <- decisioncombine(
+    #           data = histopathology,
+    #           gold = "Golden Standart",
+    #           goldPositive = "1",
+    #           test1 = "New Test",
+    #           test1Positive = "1",
+    #           test2 = "Rater 1",
+    #           test2Positive = "1",
+    #           test3Positive = NULL,
+    #           showIndividual = TRUE
+    #         )
 
 options:
     - name: data

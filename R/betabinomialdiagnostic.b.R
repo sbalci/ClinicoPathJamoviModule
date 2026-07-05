@@ -169,9 +169,9 @@ betabinomialdiagnosticClass <- R6::R6Class(
             private$.populateStudyLevelResults(study_data)
 
             # TODO (forward-looking): no private$.checkpoint() calls anywhere in
-            # this file. The optional analyses below — heterogeneity tests
+            # this file. The optional analyses below - heterogeneity tests
             # (line ~175), subgroup analysis (line ~180), influence diagnostics
-            # (line ~184), publication bias (line ~188) — and the upstream
+            # (line ~184), publication bias (line ~188) - and the upstream
             # beta-binomial fitting can be slow on large meta-analysis datasets.
             # Add private$.checkpoint() before each optional branch (and inside
             # any per-study loops) so jamovi can interrupt long-running runs and
@@ -206,7 +206,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
                     # TODO (correctness): `as.numeric(variable) - 1` assumes the
                     # factor's internal codes are 1,2 (level indices) and shifts
                     # to 0,1. This breaks for jamovi-labelled factors that carry
-                    # a `values=c(0,1)` attribute — those return 0,1 from level
+                    # a `values=c(0,1)` attribute - those return 0,1 from level
                     # coercion via jmvcore::toNumeric, and `- 1` would yield
                     # -1,0. Decide intended semantics: if the goal is "positive
                     # class = second level", use `as.numeric(variable ==

@@ -964,7 +964,7 @@ clinicalnomogramsClass <- R6::R6Class(
                         # L<this>+~310 maps factor LEVEL INDICES {1,2} to {0,1} for
                         # downstream binary modelling. This is fragile if jmvcore
                         # or a caller hands in a factor with a `values` attribute
-                        # like c(0,1) — the subtraction would produce {-1,0}. Migrate
+                        # like c(0,1) - the subtraction would produce {-1,0}. Migrate
                         # to a robust binary encoder, e.g.:
                         #   outcome = as.integer(data[[vars$outcome]] == levels(data[[vars$outcome]])[2])
                         # which always returns {0,1} regardless of values attribute.

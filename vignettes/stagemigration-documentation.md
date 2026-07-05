@@ -1,4 +1,4 @@
-# stagemigration -- Developer Documentation
+# stagemigration - Developer Documentation
 
 > **Function:** `stagemigration`
 > **Menu:** OncoPathT > Stage Migration Analysis
@@ -17,17 +17,17 @@
 
 Given two staging variables applied to the same patient cohort with survival follow-up, the function computes:
 
-- **Migration matrix** -- cross-tabulation showing how patients move between staging systems
-- **C-index comparison** -- Harrell's concordance index for old vs. new staging
-- **NRI / IDI** -- Net Reclassification Improvement and Integrated Discrimination Improvement
-- **Will Rogers phenomenon detection** -- identifies apparent survival improvement caused by stage migration rather than true treatment benefit
-- **Bootstrap validation** -- optimism-corrected performance estimates
-- **Decision Curve Analysis (DCA)** -- clinical utility at various threshold probabilities
-- **Time-dependent ROC** -- AUC at multiple time points
-- **Calibration analysis** -- Hosmer-Lemeshow, spline-based, and LOWESS calibration
-- **Competing risks** -- Fine-Gray models, cause-specific hazards, CIF
-- **Random survival forests** -- variable importance, SHAP values
-- **15+ additional methods** -- RMST, cure models, frailty models, multi-state models, interval censoring, informative censoring, concordance probability, win ratio, optimal cutpoint determination
+- **Migration matrix** - cross-tabulation showing how patients move between staging systems
+- **C-index comparison** - Harrell's concordance index for old vs. new staging
+- **NRI / IDI** - Net Reclassification Improvement and Integrated Discrimination Improvement
+- **Will Rogers phenomenon detection** - identifies apparent survival improvement caused by stage migration rather than true treatment benefit
+- **Bootstrap validation** - optimism-corrected performance estimates
+- **Decision Curve Analysis (DCA)** - clinical utility at various threshold probabilities
+- **Time-dependent ROC** - AUC at multiple time points
+- **Calibration analysis** - Hosmer-Lemeshow, spline-based, and LOWESS calibration
+- **Competing risks** - Fine-Gray models, cause-specific hazards, CIF
+- **Random survival forests** - variable importance, SHAP values
+- **15+ additional methods** - RMST, cure models, frailty models, multi-state models, interval censoring, informative censoring, concordance probability, win ratio, optimal cutpoint determination
 
 ### Scale
 
@@ -196,8 +196,8 @@ Controls the overall analysis scope and clinical context.
 | Option | Type | Default |
 |--------|------|---------|
 | `performClinicalUtilityAnalysis` | Bool | `false` |
-| `clinicalUtilityPrevalence` | Number | -- |
-| `clinicalUtilityTimePoint` | Number | -- |
+| `clinicalUtilityPrevalence` | Number | - |
+| `clinicalUtilityTimePoint` | Number | - |
 | `clinicalUtilityNNT` | Bool | `false` |
 | `clinicalUtilityComparison` | Bool | `false` |
 | `clinicalUtilityCostEffectiveness` | Bool | `false` |
@@ -208,17 +208,17 @@ Controls the overall analysis scope and clinical context.
 
 This section contains 7 sub-modules, several marked **[Experimental]**:
 
-1. **RMST Analysis** -- `calculateRMST`, `plotTimeRange`
-2. **Optimal Cutpoint** -- `performOptimalCutpoint`, `continuousStageVariable`, `cutpointMethod` (maxstat, contal_oquigley, minp), `validateCutpoint`, `cutpointBootstrap`, `generateStagingSystem`
-3. **SHAP Analysis** -- `performSHAPAnalysis`, `shapAnalysisType`, `shapCovariates`, `shapSampleSize`, `shapInteractionAnalysis`
-4. **Advanced Competing Risks** -- `performCompetingRisksAdvanced`, Fine-Gray / cause-specific methods
-5. **[Experimental] Multi-State Models** -- `performMultiStateAnalysis`, `multiStateModel` (illness_death, etc.), `stateVariable`, `transitionTimeVariable`, `calculateTransitionProbabilities`, `generateTransitionMatrix`
-6. **[Experimental] Interval Censoring** -- `performIntervalCensoringAnalysis`, `intervalCensoringLeftTime`, `intervalCensoringRightTime`, NPMLE + parametric
-7. **[Experimental] Frailty Models** -- `performFrailtyModelsAnalysis`, `frailtyClusterVariable`, `frailtyDistribution` (gamma, etc.)
-8. **[Experimental] Cure Models** -- `performCureModelAnalysis`, `cureModelType` (mixture), `cureDistribution` (weibull), cure fraction estimation
-9. **[Experimental] Informative Censoring** -- `performInformativeCensoringAnalysis`, IPW adjustment, sensitivity analysis
-10. **Concordance Probability** -- `performConcordanceProbabilityAnalysis`, time-dependent concordance, robustness
-11. **[Experimental] Win Ratio** -- `performWinRatioAnalysis`, hierarchical endpoints, generalized pairwise comparison
+1. **RMST Analysis** - `calculateRMST`, `plotTimeRange`
+2. **Optimal Cutpoint** - `performOptimalCutpoint`, `continuousStageVariable`, `cutpointMethod` (maxstat, contal_oquigley, minp), `validateCutpoint`, `cutpointBootstrap`, `generateStagingSystem`
+3. **SHAP Analysis** - `performSHAPAnalysis`, `shapAnalysisType`, `shapCovariates`, `shapSampleSize`, `shapInteractionAnalysis`
+4. **Advanced Competing Risks** - `performCompetingRisksAdvanced`, Fine-Gray / cause-specific methods
+5. **[Experimental] Multi-State Models** - `performMultiStateAnalysis`, `multiStateModel` (illness_death, etc.), `stateVariable`, `transitionTimeVariable`, `calculateTransitionProbabilities`, `generateTransitionMatrix`
+6. **[Experimental] Interval Censoring** - `performIntervalCensoringAnalysis`, `intervalCensoringLeftTime`, `intervalCensoringRightTime`, NPMLE + parametric
+7. **[Experimental] Frailty Models** - `performFrailtyModelsAnalysis`, `frailtyClusterVariable`, `frailtyDistribution` (gamma, etc.)
+8. **[Experimental] Cure Models** - `performCureModelAnalysis`, `cureModelType` (mixture), `cureDistribution` (weibull), cure fraction estimation
+9. **[Experimental] Informative Censoring** - `performInformativeCensoringAnalysis`, IPW adjustment, sensitivity analysis
+10. **Concordance Probability** - `performConcordanceProbabilityAnalysis`, time-dependent concordance, robustness
+11. **[Experimental] Win Ratio** - `performWinRatioAnalysis`, hierarchical endpoints, generalized pairwise comparison
 
 ---
 
@@ -244,8 +244,8 @@ This section contains 7 sub-modules, several marked **[Experimental]**:
 | `cancerType` | List | `general` | general, lung, breast, colorectal, + others |
 | `confidenceLevel` | Number | `0.95` | 0.80--0.99 |
 | `preferredLanguage` | List | `en` | en, tr, de, fr, es |
-| `useOptimismCorrection` | Bool | `false` | -- |
-| `optimizeForLargeDatasets` | Bool | `false` | -- |
+| `useOptimismCorrection` | Bool | `false` | - |
+| `optimizeForLargeDatasets` | Bool | `false` | - |
 
 ### 3.3 UX / Guided Mode (5 options)
 
@@ -413,7 +413,7 @@ Key: `performFrailtyModelsAnalysis`, `frailtyClusterVariable`, `frailtyDistribut
 
 ---
 
-## 4. Backend Usage -- Key Private Methods
+## 4. Backend Usage - Key Private Methods
 
 ### 4.1 Lifecycle Methods
 
@@ -423,20 +423,20 @@ Sets visibility of the welcome message based on whether core variables are selec
 #### `.run()` (line 2892)
 Main execution entry point. Orchestrates the full pipeline:
 
-1. **Guard** -- checks core variables, shows welcome if missing
-2. **Validate dependencies** -- `private$.validateOptionDependencies()`
-3. **Apply clinical preset** -- `private$.applyClinicalPreset()`
-4. **Validate data** -- `private$.validateData()` (delegates to `stagemigration_validateData()`)
-5. **Clinical safety check** -- warns if <10, <20, or <50 events
-6. **Memory optimization** -- `private$.optimizeMemoryUsage(data)`
+1. **Guard** - checks core variables, shows welcome if missing
+2. **Validate dependencies** - `private$.validateOptionDependencies()`
+3. **Apply clinical preset** - `private$.applyClinicalPreset()`
+4. **Validate data** - `private$.validateData()` (delegates to `stagemigration_validateData()`)
+5. **Clinical safety check** - warns if <10, <20, or <50 events
+6. **Memory optimization** - `private$.optimizeMemoryUsage(data)`
 7. **Core analyses** (always run):
-   - `.calculateBasicMigration(data)` -- migration matrix, rates, upstaging/downstaging
-   - `.calculateAdvancedMetrics(data)` -- C-index, Cox models (delegated to helpers)
+   - `.calculateBasicMigration(data)` - migration matrix, rates, upstaging/downstaging
+   - `.calculateAdvancedMetrics(data)` - C-index, Cox models (delegated to helpers)
 8. **Conditional analyses** (gated by options):
    - Cross-validation, NRI, IDI, ROC, calibration, DCA, bootstrap, homogeneity, Will Rogers, multifactorial, competing risks, clinical interpretation
-9. **Populate results** -- `private$.populateResults(all_results, data)`
-10. **Copy-ready report** -- `private$.generateCopyReadyReport(all_results)`
-11. **Guided mode completion** -- progress indicator
+9. **Populate results** - `private$.populateResults(all_results, data)`
+10. **Copy-ready report** - `private$.generateCopyReadyReport(all_results)`
+11. **Guided mode completion** - progress indicator
 
 ### 4.2 Data Pipeline
 
@@ -493,10 +493,10 @@ Computes four pseudo R-squared measures: Nagelkerke, Cox-Snell, McFadden, and Ro
 
 #### `.performAdvancedMigrationAnalysis(all_results)` (line 6778)
 The master orchestrator for Will Rogers and advanced analyses. Called when `advancedMigrationAnalysis` is enabled. Runs:
-- `.analyzeWillRogers(data, all_results)` -- core Will Rogers detection
-- `.performAdvancedWillRogersAssessment()` -- simulation-based evidence
-- `.performEnhancedWillRogersAnalysis()` -- stage-by-stage breakdown
-- `.performDetailedWillRogersAnalysis()` -- comprehensive detail tables
+- `.analyzeWillRogers(data, all_results)` - core Will Rogers detection
+- `.performAdvancedWillRogersAssessment()` - simulation-based evidence
+- `.performEnhancedWillRogersAnalysis()` - stage-by-stage breakdown
+- `.performDetailedWillRogersAnalysis()` - comprehensive detail tables
 - Stage-specific C-index, enhanced pseudo R2, enhanced reclassification
 - Landmark analysis, advanced calibration, monotonicity checks
 - SME, RMST, competing risks (if enabled)
@@ -941,7 +941,7 @@ Eight `.rda` files are available under `data/`:
 | `stagemigration_small_sample.rda` | `small_sample_data` | Edge case: small N |
 | `stagemigration_large_performance.rda` | `large_performance_data` | Performance testing |
 | `stagemigration_problematic.rda` | `problematic_data` | Edge cases, missing data |
-| `stagemigration_summary_stats.rda` | -- | Summary statistics |
+| `stagemigration_summary_stats.rda` | - | Summary statistics |
 
 ### R Wrapper Usage
 
@@ -1032,7 +1032,7 @@ Additional experimental toggles that are not top-level gates but further sub-gat
 | File | Lines | Purpose |
 |------|-------|---------|
 | `stagemigration_helpers.R` | 563 | Delegated calculations: `calculateAdvancedMetrics`, `compareBootstrapCIndex`, `calculateNRI`, `calculateIDI` |
-| `stagemigration-validation.R` | 521 | `stagemigration_validateData()` -- data cleaning, event binary creation, covariate handling |
+| `stagemigration-validation.R` | 521 | `stagemigration_validateData()` - data cleaning, event binary creation, covariate handling |
 | `stagemigration-utils.R` | 570 | Shared utility functions |
 | `stagemigration-discrimination.R` | 301 | Discrimination metric calculations |
 | `stagemigration-competing-risks.R` | 524 | Competing risks analysis helpers |

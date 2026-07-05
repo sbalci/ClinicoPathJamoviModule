@@ -127,7 +127,6 @@ Imports:
     xts,
     htmltools,
     htmlwidgets,
-    arcdiagram,
     tidyheatmaps,
     factoextra,
     cluster,
@@ -297,7 +296,6 @@ VignetteBuilder:
 Remotes:
     jthomasmock/gtExtras,
     grantmcdermott/parttree,
-    gastonstat/arcdiagram,
     hrbrmstr/ggeconodist,
     jbengler/tidyplots,
     CHOP-CGTInformatics/ggswim,
@@ -356,6 +354,7 @@ Collate:
     'adaptivelasso.h.R'
     'adaptivetrialdesign.b.R'
     'adaptivetrialdesign.h.R'
+    'arcdiagram_vendored.R'
     'advancedSurvivalPower.b.R'
     'advancedSurvivalPower.h.R'
     'advancedanova.b.R'

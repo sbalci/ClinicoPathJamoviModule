@@ -13,7 +13,7 @@
 #'
 #' Key diagnostic plot types:
 #' - Martingale residuals: Detect non-linear relationships and outliers
-#' - Deviance residuals: Identify poorly fitted observations  
+#' - Deviance residuals: Identify poorly fitted observations
 #' - Score residuals: Assess influential observations
 #' - Schoenfeld residuals: Test proportional hazards assumption
 #' - DFBeta plots: Evaluate influence of individual observations
@@ -42,731 +42,783 @@
 #' @import magrittr
 #'
 
-coxdiagnosticsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "coxdiagnosticsClass",
-    inherit = coxdiagnosticsBase,
-    private = list(
-        
-        # Internal data storage
-        .processed_data = NULL,
-        .cox_model = NULL,
-        .zph_test = NULL,
-        
-        .init = function() {
-            # Initialize instructions
-            instructions_html <- paste(
-                "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
-                "<h3 style='color: #1565c0; margin-top: 0;'>Cox Proportional Hazards Model Diagnostics</h3>",
-                "<div style='margin: 10px 0;'>",
-                "<h4 style='color: #1976d2; margin: 10px 0 5px 0;'>Essential Model Validation:</h4>",
-                "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
-                "<li><strong>Martingale Residuals:</strong> Detect non-linear relationships and outliers</li>",
-                "<li><strong>Deviance Residuals:</strong> Identify poorly fitted observations</li>",
-                "<li><strong>Score Residuals:</strong> Assess influential observations</li>",
-                "<li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption</li>",
-                "<li><strong>DFBeta Plots:</strong> Evaluate influence of individual observations</li>",
-                "<li><strong>VIF Analysis:</strong> Detect multicollinearity among covariates</li>",
-                "</ul>",
-                "</div>",
-                "<div style='margin: 10px 0;'>",
-                "<h4 style='color: #1976d2; margin: 10px 0 5px 0;'>Quick Start:</h4>",
-                "<ol style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
-                "<li><strong>Select Time Variable:</strong> Choose survival time variable</li>",
-                "<li><strong>Select Event Variable:</strong> Choose event indicator (1=event, 0=censored)</li>",
-                "<li><strong>Select Covariates:</strong> Choose variables for Cox model</li>",
-                "<li><strong>Choose Diagnostics:</strong> Select which diagnostic plots to generate</li>",
-                "<li><strong>Review Results:</strong> Examine plots and statistical tests</li>",
-                "</ol>",
-                "</div>",
-                "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
-                "<p style='margin: 0; color: #ef6c00;'><strong>Clinical Note:</strong> These diagnostics are essential for validating Cox model assumptions in clinical research. Violations may require model adjustments or alternative analytical approaches.</p>",
-                "</div>",
-                "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements the diagnostic capabilities from GitHub Issue #61 using survminer's ggcoxdiagnostics.</p>",
-                "</div>"
-            )
-            
-            self$results$instructions$setContent(instructions_html)
-        },
-        
-        .run = function() {
-            # Clear instructions if analysis is ready
-            if (!is.null(self$options$time) && !is.null(self$options$event) && !is.null(self$options$covariates)) {
-                self$results$instructions$setContent("")
-            }
-            
-            # Early validation
-            if (is.null(self$options$time)) {
-                return()
-            }
-            
-            if (is.null(self$options$event)) {
-                return()
-            }
-            
-            if (is.null(self$options$covariates) || length(self$options$covariates) == 0) {
-                return()
-            }
-            
-            # Data validation
-            if (nrow(self$data) == 0) {
-                jmvcore::reject("Data contains no (complete) rows")
-            }
-            
-            # Package requirements check
-            if (!requireNamespace("survival", quietly = TRUE)) {
-                error_msg <- "Package 'survival' is required for Cox regression analysis."
-                self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                return()
-            }
-            
-            if (!requireNamespace("survminer", quietly = TRUE)) {
-                error_msg <- "Package 'survminer' is required for Cox diagnostic plots."
-                self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                return()
-            }
-            
-            # Process data
-            private$.processed_data <- private$.process_data()
-            
-            # Fit Cox model
-            private$.fit_cox_model()
-            
-            # Generate model summary
-            if (self$options$show_model_summary) {
-                private$.generate_model_summary()
-            }
-            
-            # Generate proportional hazards test
-            if (self$options$show_ph_test) {
-                private$.generate_ph_test()
-            }
-            
-            # Generate VIF analysis
-            if (self$options$show_vif) {
-                private$.generate_vif_analysis()
-            }
-            
-            # Set plot states for rendering
-            if (self$options$show_martingale) {
-                self$results$martingale_plot$setState(private$.cox_model)
-            }
-            
-            if (self$options$show_deviance) {
-                self$results$deviance_plot$setState(private$.cox_model)
-            }
-            
-            if (self$options$show_score) {
-                self$results$score_plot$setState(private$.cox_model)
-            }
-            
-            if (self$options$show_schoenfeld) {
-                self$results$schoenfeld_plot$setState(private$.cox_model)
-            }
-            
-            if (self$options$show_dfbeta) {
-                self$results$dfbeta_plot$setState(private$.cox_model)
-            }
-            
-            # Generate interpretation
-            if (self$options$show_interpretation) {
-                private$.generate_interpretation()
-            }
-        },
-        
-        .process_data = function() {
-            mydata <- self$data
-            
-            # Store original names and labels
-            original_names <- names(mydata)
-            labels <- setNames(original_names, original_names)
-            
-            # Clean variable names
-            mydata <- mydata %>% janitor::clean_names()
-            
-            # Restore labels to cleaned names
-            corrected_labels <- setNames(original_names, names(mydata))
-            mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
-            
-            # Handle missing values if requested
-            if (self$options$exclude_missing) {
-                selected_vars <- c(self$options$time, self$options$event, self$options$covariates)
-                if (!is.null(self$options$strata_var)) {
-                    selected_vars <- c(selected_vars, self$options$strata_var)
+coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
+    R6::R6Class(
+        "coxdiagnosticsClass",
+        inherit = coxdiagnosticsBase,
+        private = list(
+            # Internal data storage
+            .processed_data = NULL,
+            .cox_model = NULL,
+            .zph_test = NULL,
+            .init = function() {
+                # Initialize instructions
+                instructions_html <- paste(
+                    "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
+                    "<h3 style='color: #1565c0; margin-top: 0;'>Cox Proportional Hazards Model Diagnostics</h3>",
+                    "<div style='margin: 10px 0;'>",
+                    "<h4 style='color: #1976d2; margin: 10px 0 5px 0;'>Essential Model Validation:</h4>",
+                    "<ul style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
+                    "<li><strong>Martingale Residuals:</strong> Detect non-linear relationships and outliers</li>",
+                    "<li><strong>Deviance Residuals:</strong> Identify poorly fitted observations</li>",
+                    "<li><strong>Score Residuals:</strong> Assess influential observations</li>",
+                    "<li><strong>Schoenfeld Residuals:</strong> Test proportional hazards assumption</li>",
+                    "<li><strong>DFBeta Plots:</strong> Evaluate influence of individual observations</li>",
+                    "<li><strong>VIF Analysis:</strong> Detect multicollinearity among covariates</li>",
+                    "</ul>",
+                    "</div>",
+                    "<div style='margin: 10px 0;'>",
+                    "<h4 style='color: #1976d2; margin: 10px 0 5px 0;'>Quick Start:</h4>",
+                    "<ol style='margin: 5px 0; padding-left: 20px; line-height: 1.6;'>",
+                    "<li><strong>Select Time Variable:</strong> Choose survival time variable</li>",
+                    "<li><strong>Select Event Variable:</strong> Choose event indicator (1=event, 0=censored)</li>",
+                    "<li><strong>Select Covariates:</strong> Choose variables for Cox model</li>",
+                    "<li><strong>Choose Diagnostics:</strong> Select which diagnostic plots to generate</li>",
+                    "<li><strong>Review Results:</strong> Examine plots and statistical tests</li>",
+                    "</ol>",
+                    "</div>",
+                    "<div style='background-color: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
+                    "<p style='margin: 0; color: #ef6c00;'><strong>Clinical Note:</strong> These diagnostics are essential for validating Cox model assumptions in clinical research. Violations may require model adjustments or alternative analytical approaches.</p>",
+                    "</div>",
+                    "<p style='margin: 10px 0 0 0; color: #666; font-style: italic;'> This module implements the diagnostic capabilities from GitHub Issue #61 using survminer's ggcoxdiagnostics.</p>",
+                    "</div>"
+                )
+
+                self$results$instructions$setContent(instructions_html)
+            },
+            .run = function() {
+                # Clear instructions if analysis is ready
+                if (!is.null(self$options$time) && !is.null(self$options$event) && !is.null(self$options$covariates)) {
+                    self$results$instructions$setContent("")
                 }
-                # Convert to cleaned names
-                selected_vars_clean <- janitor::make_clean_names(selected_vars)
-                mydata <- mydata[complete.cases(mydata[selected_vars_clean]), ]
-            }
-            
-            return(mydata)
-        },
-        
-        .fit_cox_model = function() {
-            mydata <- private$.processed_data
-            
-            # Convert variable names to cleaned versions
-            time_clean <- janitor::make_clean_names(self$options$time)
-            event_clean <- janitor::make_clean_names(self$options$event)
-            covariates_clean <- janitor::make_clean_names(self$options$covariates)
-            
-            tryCatch({
-                # Build formula
-                if (!is.null(self$options$strata_var)) {
-                    strata_clean <- janitor::make_clean_names(self$options$strata_var)
-                    formula_str <- paste0("Surv(", time_clean, ", ", event_clean, ") ~ ",
-                                        paste(covariates_clean, collapse = " + "),
-                                        " + strata(", strata_clean, ")")
-                } else {
-                    formula_str <- paste0("Surv(", time_clean, ", ", event_clean, ") ~ ",
-                                        paste(covariates_clean, collapse = " + "))
+
+                # Early validation
+                if (is.null(self$options$time)) {
+                    return()
                 }
-                
+
+                if (is.null(self$options$event)) {
+                    return()
+                }
+
+                if (is.null(self$options$covariates) || length(self$options$covariates) == 0) {
+                    return()
+                }
+
+                # Data validation
+                if (nrow(self$data) == 0) {
+                    jmvcore::reject("Data contains no (complete) rows")
+                }
+
+                # Package requirements check
+                if (!requireNamespace("survival", quietly = TRUE)) {
+                    error_msg <- "Package 'survival' is required for Cox regression analysis."
+                    self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    return()
+                }
+
+                if (!requireNamespace("survminer", quietly = TRUE)) {
+                    error_msg <- "Package 'survminer' is required for Cox diagnostic plots."
+                    self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    return()
+                }
+
+                # Process data
+                private$.processed_data <- private$.process_data()
+
                 # Fit Cox model
-                formula_obj <- jmvcore::asFormula(formula_str)
-                private$.cox_model <- survival::coxph(formula_obj, data = mydata)
-                
+                private$.fit_cox_model()
+
+                # Generate model summary
+                if (self$options$show_model_summary) {
+                    private$.generate_model_summary()
+                }
+
                 # Generate proportional hazards test
-                private$.zph_test <- survival::cox.zph(private$.cox_model)
-                
-            }, error = function(e) {
-                error_msg <- paste("Error fitting Cox model:", htmltools::htmlEscape(e$message))
-                self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-            })
-        },
-
-        .generate_model_summary = function() {
-            if (is.null(private$.cox_model)) return()
-            
-            tryCatch({
-                cox_summary <- summary(private$.cox_model)
-                
-                # Create HTML summary
-                summary_html <- "<h4>Cox Proportional Hazards Model Summary</h4>"
-                summary_html <- paste0(summary_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
-                
-                # Model information
-                summary_html <- paste0(summary_html, "<p><strong>Model Formula:</strong> ", deparse(private$.cox_model$formula), "</p>")
-                summary_html <- paste0(summary_html, "<p><strong>Number of observations:</strong> ", private$.cox_model$n, "</p>")
-                summary_html <- paste0(summary_html, "<p><strong>Number of events:</strong> ", private$.cox_model$nevent, "</p>")
-                
-                # Likelihood ratio test
-                summary_html <- paste0(summary_html, "<p><strong>Likelihood ratio test:</strong> ")
-                summary_html <- paste0(summary_html, "χ² = ", round(cox_summary$logtest["test"], 3), 
-                                     ", df = ", cox_summary$logtest["df"], 
-                                     ", p = ", format.pval(cox_summary$logtest["pvalue"], digits = 3))
-                summary_html <- paste0(summary_html, "</p>")
-                
-                # Concordance
-                if (!is.null(cox_summary$concordance)) {
-                    summary_html <- paste0(summary_html, "<p><strong>Concordance:</strong> ", 
-                                         round(cox_summary$concordance[1], 3), 
-                                         " (SE = ", round(cox_summary$concordance[2], 3), ")</p>")
+                if (self$options$show_ph_test) {
+                    private$.generate_ph_test()
                 }
-                
-                summary_html <- paste0(summary_html, "</div>")
-                
-                # Coefficients table
-                if (nrow(cox_summary$coefficients) > 0) {
-                    summary_html <- paste0(summary_html, "<h5>Model Coefficients</h5>")
-                    summary_html <- paste0(summary_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 800px;'>")
-                    summary_html <- paste0(summary_html, "<thead><tr>")
-                    summary_html <- paste0(summary_html, "<th>Variable</th><th>Coef</th><th>Exp(coef)</th><th>SE(coef)</th><th>z</th><th>Pr(>|z|)</th>")
-                    summary_html <- paste0(summary_html, "</tr></thead><tbody>")
-                    
-                    for (i in 1:nrow(cox_summary$coefficients)) {
-                        row_name <- rownames(cox_summary$coefficients)[i]
-                        coef <- round(cox_summary$coefficients[i, "coef"], 3)
-                        exp_coef <- round(cox_summary$coefficients[i, "exp(coef)"], 3)
-                        se_coef <- round(cox_summary$coefficients[i, "se(coef)"], 3)
-                        z_val <- round(cox_summary$coefficients[i, "z"], 3)
-                        p_val <- format.pval(cox_summary$coefficients[i, "Pr(>|z|)"], digits = 3)
-                        
-                        summary_html <- paste0(summary_html, "<tr>")
-                        summary_html <- paste0(summary_html, "<td><strong>", row_name, "</strong></td>")
-                        summary_html <- paste0(summary_html, "<td>", coef, "</td>")
-                        summary_html <- paste0(summary_html, "<td>", exp_coef, "</td>")
-                        summary_html <- paste0(summary_html, "<td>", se_coef, "</td>")
-                        summary_html <- paste0(summary_html, "<td>", z_val, "</td>")
-                        summary_html <- paste0(summary_html, "<td>", p_val, "</td>")
-                        summary_html <- paste0(summary_html, "</tr>")
+
+                # Generate VIF analysis
+                if (self$options$show_vif) {
+                    private$.generate_vif_analysis()
+                }
+
+                # Set plot states for rendering
+                if (self$options$show_martingale) {
+                    self$results$martingale_plot$setState(private$.cox_model)
+                }
+
+                if (self$options$show_deviance) {
+                    self$results$deviance_plot$setState(private$.cox_model)
+                }
+
+                if (self$options$show_score) {
+                    self$results$score_plot$setState(private$.cox_model)
+                }
+
+                if (self$options$show_schoenfeld) {
+                    self$results$schoenfeld_plot$setState(private$.cox_model)
+                }
+
+                if (self$options$show_dfbeta) {
+                    self$results$dfbeta_plot$setState(private$.cox_model)
+                }
+
+                # Generate interpretation
+                if (self$options$show_interpretation) {
+                    private$.generate_interpretation()
+                }
+            },
+            .process_data = function() {
+                mydata <- self$data
+
+                # Store original names and labels
+                original_names <- names(mydata)
+                labels <- setNames(original_names, original_names)
+
+                # Clean variable names
+                mydata <- mydata %>% janitor::clean_names()
+
+                # Restore labels to cleaned names
+                corrected_labels <- setNames(original_names, names(mydata))
+                mydata <- labelled::set_variable_labels(.data = mydata, .labels = corrected_labels)
+
+                # Handle missing values if requested
+                if (self$options$exclude_missing) {
+                    selected_vars <- c(self$options$time, self$options$event, self$options$covariates)
+                    if (!is.null(self$options$strata_var)) {
+                        selected_vars <- c(selected_vars, self$options$strata_var)
                     }
-                    
-                    summary_html <- paste0(summary_html, "</tbody></table>")
+                    # Convert to cleaned names
+                    selected_vars_clean <- janitor::make_clean_names(selected_vars)
+                    mydata <- mydata[complete.cases(mydata[selected_vars_clean]), ]
                 }
-                
-                self$results$model_summary$setContent(summary_html)
-                
-            }, error = function(e) {
-                error_msg <- paste("Error generating model summary:", htmltools::htmlEscape(e$message))
-                self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-            })
-        },
-        
-        .generate_ph_test = function() {
-            if (is.null(private$.zph_test)) return()
-            
-            tryCatch({
-                zph <- private$.zph_test
-                
-                # Create HTML for proportional hazards test
-                ph_html <- "<h4>Proportional Hazards Assumption Test</h4>"
-                ph_html <- paste0(ph_html, "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
-                
-                ph_html <- paste0(ph_html, "<p><strong>Schoenfeld Residuals Test (cox.zph):</strong></p>")
-                ph_html <- paste0(ph_html, "<p>Tests the null hypothesis that hazards are proportional over time.</p>")
-                
-                # Test results table
-                ph_html <- paste0(ph_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 600px;'>")
-                ph_html <- paste0(ph_html, "<thead><tr><th>Variable</th><th>Chi-square</th><th>df</th><th>p-value</th></tr></thead><tbody>")
-                
-                for (i in 1:nrow(zph$table)) {
-                    var_name <- rownames(zph$table)[i]
-                    chisq <- round(zph$table[i, "chisq"], 3)
-                    df <- zph$table[i, "df"]
-                    p_val <- format.pval(zph$table[i, "p"], digits = 3)
 
-                    # Color code p-values
-                    p_color <- if (zph$table[i, "p"] < 0.05) "color: red; font-weight: bold;" else "color: green;"
+                return(mydata)
+            },
+            .fit_cox_model = function() {
+                mydata <- private$.processed_data
 
-                    # var_name comes from rownames(zph$table), which derive
-                    # from the formula's variable names — ultimately from
-                    # user-supplied column names. Escape before HTML insert.
-                    safe_var <- htmltools::htmlEscape(var_name)
-                    ph_html <- paste0(ph_html, "<tr>")
-                    ph_html <- paste0(ph_html, "<td><strong>", safe_var, "</strong></td>")
-                    ph_html <- paste0(ph_html, "<td>", chisq, "</td>")
-                    ph_html <- paste0(ph_html, "<td>", df, "</td>")
-                    ph_html <- paste0(ph_html, "<td style='", p_color, "'>", p_val, "</td>")
-                    ph_html <- paste0(ph_html, "</tr>")
-                }
-                
-                ph_html <- paste0(ph_html, "</tbody></table>")
-                
-                # Interpretation
-                any_violation <- any(zph$table[, "p"] < 0.05, na.rm = TRUE)
-                if (any_violation) {
-                    ph_html <- paste0(ph_html, "<p style='color: red; font-weight: bold;'> Warning: Proportional hazards assumption may be violated (p < 0.05).</p>")
-                    ph_html <- paste0(ph_html, "<p>Consider stratification, time-dependent covariates, or alternative models.</p>")
-                } else {
-                    ph_html <- paste0(ph_html, "<p style='color: green; font-weight: bold;'> Proportional hazards assumption appears to hold (all p ≥ 0.05).</p>")
-                }
-                
-                ph_html <- paste0(ph_html, "</div>")
-                
-                self$results$ph_test_results$setContent(ph_html)
-                
-            }, error = function(e) {
-                error_msg <- paste("Error generating proportional hazards test:", htmltools::htmlEscape(e$message))
-                self$results$ph_test_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-            })
-        },
-        
-        .generate_vif_analysis = function() {
-            if (is.null(private$.cox_model)) return()
-            
-            tryCatch({
-                # Check if car package is available
-                if (!requireNamespace("car", quietly = TRUE)) {
-                    error_msg <- "Package 'car' is required for VIF analysis."
-                    self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                    return()
-                }
-                
-                # Check minimum number of covariates for VIF
-                if (length(self$options$covariates) < 2) {
-                    info_msg <- "VIF analysis requires at least 2 covariates. Current model has only 1 covariate."
-                    self$results$vif_results$setContent(paste("<p style='color: orange;'>", info_msg, "</p>"))
-                    return()
-                }
-                
-                # Check for aliased coefficients (perfect multicollinearity)
-                if (any(is.na(coef(private$.cox_model)))) {
-                    error_msg <- "Cannot calculate VIF because some coefficients are aliased (NA). This indicates perfect multicollinearity."
-                    self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                    return()
-                }
-                
-                # Calculate VIF
-                vif_values <- car::vif(private$.cox_model)
-                
-                # Handle different VIF output formats
-                if (is.matrix(vif_values)) {
-                    # For models with factors, VIF returns a matrix
-                    vif_df <- data.frame(
-                        Variable = rownames(vif_values),
-                        VIF = vif_values[, "GVIF"],
-                        stringsAsFactors = FALSE
-                    )
-                } else {
-                    # For simple numeric variables, VIF returns a named vector
-                    vif_df <- data.frame(
-                        Variable = names(vif_values),
-                        VIF = as.numeric(vif_values),
-                        stringsAsFactors = FALSE
-                    )
-                }
-                
-                # Create HTML for VIF results
-                vif_html <- "<h4>Variance Inflation Factor (VIF) Analysis</h4>"
-                vif_html <- paste0(vif_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
-                
-                vif_html <- paste0(vif_html, "<p><strong>Multicollinearity Assessment:</strong></p>")
-                vif_html <- paste0(vif_html, "<p>VIF measures how much the variance of coefficient estimates increases due to collinearity.</p>")
-                
-                # VIF results table
-                vif_html <- paste0(vif_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 500px;'>")
-                vif_html <- paste0(vif_html, "<thead><tr><th>Variable</th><th>VIF</th><th>Status</th></tr></thead><tbody>")
-                
-                max_vif <- max(vif_df$VIF, na.rm = TRUE)
-                threshold <- self$options$vif_threshold
-                
-                for (i in 1:nrow(vif_df)) {
-                    var_name <- vif_df$Variable[i]
-                    vif_val <- round(vif_df$VIF[i], 3)
-                    
-                    # Determine status and color
-                    if (vif_val >= threshold) {
-                        status <- " High"
-                        color <- "color: red; font-weight: bold;"
-                    } else if (vif_val >= 2.5) {
-                        status <- " Moderate"
-                        color <- "color: orange; font-weight: bold;"
-                    } else {
-                        status <- " Low"
-                        color <- "color: green;"
+                # Convert variable names to cleaned versions
+                time_clean <- janitor::make_clean_names(self$options$time)
+                event_clean <- janitor::make_clean_names(self$options$event)
+                covariates_clean <- janitor::make_clean_names(self$options$covariates)
+
+                tryCatch(
+                    {
+                        # Build formula
+                        if (!is.null(self$options$strata_var)) {
+                            strata_clean <- janitor::make_clean_names(self$options$strata_var)
+                            formula_str <- paste0(
+                                "Surv(", time_clean, ", ", event_clean, ") ~ ",
+                                paste(covariates_clean, collapse = " + "),
+                                " + strata(", strata_clean, ")"
+                            )
+                        } else {
+                            formula_str <- paste0(
+                                "Surv(", time_clean, ", ", event_clean, ") ~ ",
+                                paste(covariates_clean, collapse = " + ")
+                            )
+                        }
+
+                        # Fit Cox model
+                        formula_obj <- jmvcore::asFormula(formula_str)
+                        private$.cox_model <- survival::coxph(formula_obj, data = mydata)
+
+                        # Generate proportional hazards test
+                        private$.zph_test <- survival::cox.zph(private$.cox_model)
+                    },
+                    error = function(e) {
+                        error_msg <- paste("Error fitting Cox model:", htmltools::htmlEscape(e$message))
+                        self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
                     }
-                    
-                    # Same lineage as the cox.zph table above; escape.
-                    safe_var <- htmltools::htmlEscape(var_name)
-                    vif_html <- paste0(vif_html, "<tr>")
-                    vif_html <- paste0(vif_html, "<td><strong>", safe_var, "</strong></td>")
-                    vif_html <- paste0(vif_html, "<td>", vif_val, "</td>")
-                    vif_html <- paste0(vif_html, "<td style='", color, "'>", status, "</td>")
-                    vif_html <- paste0(vif_html, "</tr>")
-                }
-                
-                vif_html <- paste0(vif_html, "</tbody></table>")
-                
-                # Overall interpretation
-                vif_html <- paste0(vif_html, "<h5>Interpretation Guidelines:</h5>")
-                vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-                vif_html <- paste0(vif_html, "<li><strong>VIF < 2.5:</strong> Low multicollinearity (acceptable)</li>")
-                vif_html <- paste0(vif_html, "<li><strong>VIF 2.5-", threshold, ":</strong> Moderate multicollinearity (monitor)</li>")
-                vif_html <- paste0(vif_html, "<li><strong>VIF ≥ ", threshold, ":</strong> High multicollinearity (problematic)</li>")
-                vif_html <- paste0(vif_html, "</ul>")
-                
-                # Clinical recommendations
-                if (max_vif >= threshold) {
-                    vif_html <- paste0(vif_html, "<p style='color: red; font-weight: bold;'> Warning: High multicollinearity detected!</p>")
-                    vif_html <- paste0(vif_html, "<p><strong>Recommendations:</strong></p>")
-                    vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-                    vif_html <- paste0(vif_html, "<li>Consider removing highly correlated variables</li>")
-                    vif_html <- paste0(vif_html, "<li>Use principal component analysis (PCA)</li>")
-                    vif_html <- paste0(vif_html, "<li>Apply regularization techniques (ridge/lasso)</li>")
-                    vif_html <- paste0(vif_html, "<li>Combine correlated variables into composite scores</li>")
-                    vif_html <- paste0(vif_html, "</ul>")
-                } else if (max_vif >= 2.5) {
-                    vif_html <- paste0(vif_html, "<p style='color: orange; font-weight: bold;'> Moderate multicollinearity detected. Monitor carefully.</p>")
-                } else {
-                    vif_html <- paste0(vif_html, "<p style='color: green; font-weight: bold;'> No significant multicollinearity detected.</p>")
-                }
-                
-                vif_html <- paste0(vif_html, "</div>")
-                
-                self$results$vif_results$setContent(vif_html)
-                
-            }, error = function(e) {
-                error_msg <- paste("Error calculating VIF:", htmltools::htmlEscape(e$message))
-                # Provide specific guidance for common VIF errors
-                if (grepl("aliased coefficients", e$message)) {
-                    error_msg <- paste(error_msg, "This may indicate perfect multicollinearity or linear dependencies between variables.")
-                }
-                self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-            })
-        },
-        
-        .generate_interpretation = function() {
-            interp_html <- "<h4>Cox Model Diagnostic Interpretation Guide</h4>"
-            interp_html <- paste0(interp_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
-            
-            interp_html <- paste0(interp_html, "<h5>Diagnostic Plot Interpretation:</h5>")
-            
-            interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
-            interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>Martingale Residuals:</h6>")
-            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-            interp_html <- paste0(interp_html, "<li>Should be randomly scattered around zero</li>")
-            interp_html <- paste0(interp_html, "<li>Patterns suggest non-linear relationships</li>")
-            interp_html <- paste0(interp_html, "<li>Extreme values indicate potential outliers</li>")
-            interp_html <- paste0(interp_html, "</ul>")
-            interp_html <- paste0(interp_html, "</div>")
-            
-            interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
-            interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>Deviance Residuals:</h6>")
-            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-            interp_html <- paste0(interp_html, "<li>More symmetric than martingale residuals</li>")
-            interp_html <- paste0(interp_html, "<li>Values > 2 or < -2 indicate poorly fitted observations</li>")
-            interp_html <- paste0(interp_html, "<li>Should be approximately normally distributed</li>")
-            interp_html <- paste0(interp_html, "</ul>")
-            interp_html <- paste0(interp_html, "</div>")
-            
-            interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
-            interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>Schoenfeld Residuals:</h6>")
-            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-            interp_html <- paste0(interp_html, "<li>Test proportional hazards assumption</li>")
-            interp_html <- paste0(interp_html, "<li>Should show no trend over time</li>")
-            interp_html <- paste0(interp_html, "<li>Slopes indicate time-varying effects</li>")
-            interp_html <- paste0(interp_html, "</ul>")
-            interp_html <- paste0(interp_html, "</div>")
-            
-            interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
-            interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>DFBeta Plots:</h6>")
-            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-            interp_html <- paste0(interp_html, "<li>Assess influence of individual observations</li>")
-            interp_html <- paste0(interp_html, "<li>Values > 2/√n suggest influential observations</li>")
-            interp_html <- paste0(interp_html, "<li>Consider removing/investigating extreme values</li>")
-            interp_html <- paste0(interp_html, "</ul>")
-            interp_html <- paste0(interp_html, "</div>")
-            
-            interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
-            interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>VIF (Variance Inflation Factor):</h6>")
-            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-            interp_html <- paste0(interp_html, "<li>VIF < 2.5: No multicollinearity concern</li>")
-            interp_html <- paste0(interp_html, "<li>VIF 2.5-5: Moderate multicollinearity (monitor)</li>")
-            interp_html <- paste0(interp_html, "<li>VIF ≥ 5: High multicollinearity (problematic)</li>")
-            interp_html <- paste0(interp_html, "<li>Consider variable removal or regularization for high VIF</li>")
-            interp_html <- paste0(interp_html, "</ul>")
-            interp_html <- paste0(interp_html, "</div>")
-            
-            interp_html <- paste0(interp_html, "<h5 style='color: #4a148c;'>Clinical Recommendations:</h5>")
-            interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
-            interp_html <- paste0(interp_html, "<li><strong>Model violations:</strong> Consider stratification or time-dependent covariates</li>")
-            interp_html <- paste0(interp_html, "<li><strong>Outliers:</strong> Investigate extreme residuals for data quality</li>")
-            interp_html <- paste0(interp_html, "<li><strong>Non-linearity:</strong> Consider splines or transformations</li>")
-            interp_html <- paste0(interp_html, "<li><strong>Multicollinearity:</strong> Remove correlated variables or use regularization</li>")
-            interp_html <- paste0(interp_html, "<li><strong>Documentation:</strong> Report diagnostic results in publications</li>")
-            interp_html <- paste0(interp_html, "</ul>")
-            
-            interp_html <- paste0(interp_html, "</div>")
-            
-            self$results$interpretation$setContent(interp_html)
-        },
-        
-        # Plot rendering functions
-        .plot_martingale = function(image, ggtheme, theme, ...) {
-            if (!self$options$show_martingale) return()
-            
-            cox_model <- image$state
-            if (is.null(cox_model)) return()
-            
-            tryCatch({
-                plot <- survminer::ggcoxdiagnostics(
-                    cox_model,
-                    type = "martingale",
-                    ox.scale = self$options$ox_scale,
-                    point.size = self$options$point_size,
-                    point.alpha = self$options$alpha_level
                 )
-                
-                if (self$options$add_reference) {
-                    plot <- plot + ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7)
+            },
+            .generate_model_summary = function() {
+                if (is.null(private$.cox_model)) {
+                    return()
                 }
-                
-                plot <- plot + ggtheme
-                plot <- plot + ggplot2::ggtitle("Martingale Residuals")
-                
-                print(plot)
-                TRUE
-            }, error = function(e) {
-                # Fallback to basic plot if ggcoxdiagnostics fails
-                warning("ggcoxdiagnostics failed, using basic residual plot")
-                residuals_mart <- residuals(cox_model, type = "martingale")
-                linear_pred <- predict(cox_model, type = "lp")
-                
-                plot_data <- data.frame(
-                    x = linear_pred,
-                    y = residuals_mart
+
+                tryCatch(
+                    {
+                        cox_summary <- summary(private$.cox_model)
+
+                        # Create HTML summary
+                        summary_html <- "<h4>Cox Proportional Hazards Model Summary</h4>"
+                        summary_html <- paste0(summary_html, "<div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+
+                        # Model information
+                        summary_html <- paste0(summary_html, "<p><strong>Model Formula:</strong> ", deparse(private$.cox_model$formula), "</p>")
+                        summary_html <- paste0(summary_html, "<p><strong>Number of observations:</strong> ", private$.cox_model$n, "</p>")
+                        summary_html <- paste0(summary_html, "<p><strong>Number of events:</strong> ", private$.cox_model$nevent, "</p>")
+
+                        # Likelihood ratio test
+                        summary_html <- paste0(summary_html, "<p><strong>Likelihood ratio test:</strong> ")
+                        summary_html <- paste0(
+                            summary_html, "χ² = ", round(cox_summary$logtest["test"], 3),
+                            ", df = ", cox_summary$logtest["df"],
+                            ", p = ", format.pval(cox_summary$logtest["pvalue"], digits = 3)
+                        )
+                        summary_html <- paste0(summary_html, "</p>")
+
+                        # Concordance
+                        if (!is.null(cox_summary$concordance)) {
+                            summary_html <- paste0(
+                                summary_html, "<p><strong>Concordance:</strong> ",
+                                round(cox_summary$concordance[1], 3),
+                                " (SE = ", round(cox_summary$concordance[2], 3), ")</p>"
+                            )
+                        }
+
+                        summary_html <- paste0(summary_html, "</div>")
+
+                        # Coefficients table
+                        if (nrow(cox_summary$coefficients) > 0) {
+                            summary_html <- paste0(summary_html, "<h5>Model Coefficients</h5>")
+                            summary_html <- paste0(summary_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 800px;'>")
+                            summary_html <- paste0(summary_html, "<thead><tr>")
+                            summary_html <- paste0(summary_html, "<th>Variable</th><th>Coef</th><th>Exp(coef)</th><th>SE(coef)</th><th>z</th><th>Pr(>|z|)</th>")
+                            summary_html <- paste0(summary_html, "</tr></thead><tbody>")
+
+                            for (i in 1:nrow(cox_summary$coefficients)) {
+                                row_name <- rownames(cox_summary$coefficients)[i]
+                                coef <- round(cox_summary$coefficients[i, "coef"], 3)
+                                exp_coef <- round(cox_summary$coefficients[i, "exp(coef)"], 3)
+                                se_coef <- round(cox_summary$coefficients[i, "se(coef)"], 3)
+                                z_val <- round(cox_summary$coefficients[i, "z"], 3)
+                                p_val <- format.pval(cox_summary$coefficients[i, "Pr(>|z|)"], digits = 3)
+
+                                summary_html <- paste0(summary_html, "<tr>")
+                                summary_html <- paste0(summary_html, "<td><strong>", row_name, "</strong></td>")
+                                summary_html <- paste0(summary_html, "<td>", coef, "</td>")
+                                summary_html <- paste0(summary_html, "<td>", exp_coef, "</td>")
+                                summary_html <- paste0(summary_html, "<td>", se_coef, "</td>")
+                                summary_html <- paste0(summary_html, "<td>", z_val, "</td>")
+                                summary_html <- paste0(summary_html, "<td>", p_val, "</td>")
+                                summary_html <- paste0(summary_html, "</tr>")
+                            }
+
+                            summary_html <- paste0(summary_html, "</tbody></table>")
+                        }
+
+                        self$results$model_summary$setContent(summary_html)
+                    },
+                    error = function(e) {
+                        error_msg <- paste("Error generating model summary:", htmltools::htmlEscape(e$message))
+                        self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    }
                 )
-                
-                plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
-                    ggplot2::geom_point(size = self$options$point_size, alpha = self$options$alpha_level) +
-                    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-                    ggplot2::labs(
-                        title = "Martingale Residuals",
-                        x = "Linear Predictor",
-                        y = "Martingale Residuals"
-                    ) +
-                    ggtheme
-                
-                if (self$options$add_smooth) {
-                    plot <- plot + ggplot2::geom_smooth(se = TRUE, color = "blue")
+            },
+            .generate_ph_test = function() {
+                if (is.null(private$.zph_test)) {
+                    return()
                 }
-                
-                print(plot)
-                TRUE
-            })
-        },
-        
-        .plot_deviance = function(image, ggtheme, theme, ...) {
-            if (!self$options$show_deviance) return()
-            
-            cox_model <- image$state
-            if (is.null(cox_model)) return()
-            
-            tryCatch({
-                plot <- survminer::ggcoxdiagnostics(
-                    cox_model,
-                    type = "deviance",
-                    ox.scale = self$options$ox_scale,
-                    point.size = self$options$point_size,
-                    point.alpha = self$options$alpha_level
+
+                tryCatch(
+                    {
+                        zph <- private$.zph_test
+
+                        # Create HTML for proportional hazards test
+                        ph_html <- "<h4>Proportional Hazards Assumption Test</h4>"
+                        ph_html <- paste0(ph_html, "<div style='background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+
+                        ph_html <- paste0(ph_html, "<p><strong>Schoenfeld Residuals Test (cox.zph):</strong></p>")
+                        ph_html <- paste0(ph_html, "<p>Tests the null hypothesis that hazards are proportional over time.</p>")
+
+                        # Test results table
+                        ph_html <- paste0(ph_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 600px;'>")
+                        ph_html <- paste0(ph_html, "<thead><tr><th>Variable</th><th>Chi-square</th><th>df</th><th>p-value</th></tr></thead><tbody>")
+
+                        for (i in 1:nrow(zph$table)) {
+                            var_name <- rownames(zph$table)[i]
+                            chisq <- round(zph$table[i, "chisq"], 3)
+                            df <- zph$table[i, "df"]
+                            p_val <- format.pval(zph$table[i, "p"], digits = 3)
+
+                            # Color code p-values
+                            p_color <- if (zph$table[i, "p"] < 0.05) "color: red; font-weight: bold;" else "color: green;"
+
+                            # var_name comes from rownames(zph$table), which derive
+                            # from the formula's variable names - ultimately from
+                            # user-supplied column names. Escape before HTML insert.
+                            safe_var <- htmltools::htmlEscape(var_name)
+                            ph_html <- paste0(ph_html, "<tr>")
+                            ph_html <- paste0(ph_html, "<td><strong>", safe_var, "</strong></td>")
+                            ph_html <- paste0(ph_html, "<td>", chisq, "</td>")
+                            ph_html <- paste0(ph_html, "<td>", df, "</td>")
+                            ph_html <- paste0(ph_html, "<td style='", p_color, "'>", p_val, "</td>")
+                            ph_html <- paste0(ph_html, "</tr>")
+                        }
+
+                        ph_html <- paste0(ph_html, "</tbody></table>")
+
+                        # Interpretation
+                        any_violation <- any(zph$table[, "p"] < 0.05, na.rm = TRUE)
+                        if (any_violation) {
+                            ph_html <- paste0(ph_html, "<p style='color: red; font-weight: bold;'> Warning: Proportional hazards assumption may be violated (p < 0.05).</p>")
+                            ph_html <- paste0(ph_html, "<p>Consider stratification, time-dependent covariates, or alternative models.</p>")
+                        } else {
+                            ph_html <- paste0(ph_html, "<p style='color: green; font-weight: bold;'> Proportional hazards assumption appears to hold (all p >= 0.05).</p>")
+                        }
+
+                        ph_html <- paste0(ph_html, "</div>")
+
+                        self$results$ph_test_results$setContent(ph_html)
+                    },
+                    error = function(e) {
+                        error_msg <- paste("Error generating proportional hazards test:", htmltools::htmlEscape(e$message))
+                        self$results$ph_test_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    }
                 )
-                
-                if (self$options$add_reference) {
-                    plot <- plot + ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7)
+            },
+            .generate_vif_analysis = function() {
+                if (is.null(private$.cox_model)) {
+                    return()
                 }
-                
-                plot <- plot + ggtheme
-                plot <- plot + ggplot2::ggtitle("Deviance Residuals")
-                
-                print(plot)
-                TRUE
-            }, error = function(e) {
-                # Fallback plot
-                residuals_dev <- residuals(cox_model, type = "deviance")
-                linear_pred <- predict(cox_model, type = "lp")
-                
-                plot_data <- data.frame(
-                    x = linear_pred,
-                    y = residuals_dev
+
+                tryCatch(
+                    {
+                        # Check if car package is available
+                        if (!requireNamespace("car", quietly = TRUE)) {
+                            error_msg <- "Package 'car' is required for VIF analysis."
+                            self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                            return()
+                        }
+
+                        # Check minimum number of covariates for VIF
+                        if (length(self$options$covariates) < 2) {
+                            info_msg <- "VIF analysis requires at least 2 covariates. Current model has only 1 covariate."
+                            self$results$vif_results$setContent(paste("<p style='color: orange;'>", info_msg, "</p>"))
+                            return()
+                        }
+
+                        # Check for aliased coefficients (perfect multicollinearity)
+                        if (any(is.na(coef(private$.cox_model)))) {
+                            error_msg <- "Cannot calculate VIF because some coefficients are aliased (NA). This indicates perfect multicollinearity."
+                            self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                            return()
+                        }
+
+                        # Calculate VIF
+                        vif_values <- car::vif(private$.cox_model)
+
+                        # Handle different VIF output formats
+                        if (is.matrix(vif_values)) {
+                            # For models with factors, VIF returns a matrix
+                            vif_df <- data.frame(
+                                Variable = rownames(vif_values),
+                                VIF = vif_values[, "GVIF"],
+                                stringsAsFactors = FALSE
+                            )
+                        } else {
+                            # For simple numeric variables, VIF returns a named vector
+                            vif_df <- data.frame(
+                                Variable = names(vif_values),
+                                VIF = as.numeric(vif_values),
+                                stringsAsFactors = FALSE
+                            )
+                        }
+
+                        # Create HTML for VIF results
+                        vif_html <- "<h4>Variance Inflation Factor (VIF) Analysis</h4>"
+                        vif_html <- paste0(vif_html, "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+
+                        vif_html <- paste0(vif_html, "<p><strong>Multicollinearity Assessment:</strong></p>")
+                        vif_html <- paste0(vif_html, "<p>VIF measures how much the variance of coefficient estimates increases due to collinearity.</p>")
+
+                        # VIF results table
+                        vif_html <- paste0(vif_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 500px;'>")
+                        vif_html <- paste0(vif_html, "<thead><tr><th>Variable</th><th>VIF</th><th>Status</th></tr></thead><tbody>")
+
+                        max_vif <- max(vif_df$VIF, na.rm = TRUE)
+                        threshold <- self$options$vif_threshold
+
+                        for (i in 1:nrow(vif_df)) {
+                            var_name <- vif_df$Variable[i]
+                            vif_val <- round(vif_df$VIF[i], 3)
+
+                            # Determine status and color
+                            if (vif_val >= threshold) {
+                                status <- " High"
+                                color <- "color: red; font-weight: bold;"
+                            } else if (vif_val >= 2.5) {
+                                status <- " Moderate"
+                                color <- "color: orange; font-weight: bold;"
+                            } else {
+                                status <- " Low"
+                                color <- "color: green;"
+                            }
+
+                            # Same lineage as the cox.zph table above; escape.
+                            safe_var <- htmltools::htmlEscape(var_name)
+                            vif_html <- paste0(vif_html, "<tr>")
+                            vif_html <- paste0(vif_html, "<td><strong>", safe_var, "</strong></td>")
+                            vif_html <- paste0(vif_html, "<td>", vif_val, "</td>")
+                            vif_html <- paste0(vif_html, "<td style='", color, "'>", status, "</td>")
+                            vif_html <- paste0(vif_html, "</tr>")
+                        }
+
+                        vif_html <- paste0(vif_html, "</tbody></table>")
+
+                        # Overall interpretation
+                        vif_html <- paste0(vif_html, "<h5>Interpretation Guidelines:</h5>")
+                        vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                        vif_html <- paste0(vif_html, "<li><strong>VIF < 2.5:</strong> Low multicollinearity (acceptable)</li>")
+                        vif_html <- paste0(vif_html, "<li><strong>VIF 2.5-", threshold, ":</strong> Moderate multicollinearity (monitor)</li>")
+                        vif_html <- paste0(vif_html, "<li><strong>VIF >= ", threshold, ":</strong> High multicollinearity (problematic)</li>")
+                        vif_html <- paste0(vif_html, "</ul>")
+
+                        # Clinical recommendations
+                        if (max_vif >= threshold) {
+                            vif_html <- paste0(vif_html, "<p style='color: red; font-weight: bold;'> Warning: High multicollinearity detected!</p>")
+                            vif_html <- paste0(vif_html, "<p><strong>Recommendations:</strong></p>")
+                            vif_html <- paste0(vif_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                            vif_html <- paste0(vif_html, "<li>Consider removing highly correlated variables</li>")
+                            vif_html <- paste0(vif_html, "<li>Use principal component analysis (PCA)</li>")
+                            vif_html <- paste0(vif_html, "<li>Apply regularization techniques (ridge/lasso)</li>")
+                            vif_html <- paste0(vif_html, "<li>Combine correlated variables into composite scores</li>")
+                            vif_html <- paste0(vif_html, "</ul>")
+                        } else if (max_vif >= 2.5) {
+                            vif_html <- paste0(vif_html, "<p style='color: orange; font-weight: bold;'> Moderate multicollinearity detected. Monitor carefully.</p>")
+                        } else {
+                            vif_html <- paste0(vif_html, "<p style='color: green; font-weight: bold;'> No significant multicollinearity detected.</p>")
+                        }
+
+                        vif_html <- paste0(vif_html, "</div>")
+
+                        self$results$vif_results$setContent(vif_html)
+                    },
+                    error = function(e) {
+                        error_msg <- paste("Error calculating VIF:", htmltools::htmlEscape(e$message))
+                        # Provide specific guidance for common VIF errors
+                        if (grepl("aliased coefficients", e$message)) {
+                            error_msg <- paste(error_msg, "This may indicate perfect multicollinearity or linear dependencies between variables.")
+                        }
+                        self$results$vif_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
+                    }
                 )
-                
-                plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
-                    ggplot2::geom_point(size = self$options$point_size, alpha = self$options$alpha_level) +
-                    ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
-                    ggplot2::labs(
-                        title = "Deviance Residuals",
-                        x = "Linear Predictor", 
-                        y = "Deviance Residuals"
-                    ) +
-                    ggtheme
-                
-                if (self$options$add_smooth) {
-                    plot <- plot + ggplot2::geom_smooth(se = TRUE, color = "blue")
+            },
+            .generate_interpretation = function() {
+                interp_html <- "<h4>Cox Model Diagnostic Interpretation Guide</h4>"
+                interp_html <- paste0(interp_html, "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 5px; margin: 10px 0;'>")
+
+                interp_html <- paste0(interp_html, "<h5>Diagnostic Plot Interpretation:</h5>")
+
+                interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>Martingale Residuals:</h6>")
+                interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                interp_html <- paste0(interp_html, "<li>Should be randomly scattered around zero</li>")
+                interp_html <- paste0(interp_html, "<li>Patterns suggest non-linear relationships</li>")
+                interp_html <- paste0(interp_html, "<li>Extreme values indicate potential outliers</li>")
+                interp_html <- paste0(interp_html, "</ul>")
+                interp_html <- paste0(interp_html, "</div>")
+
+                interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>Deviance Residuals:</h6>")
+                interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                interp_html <- paste0(interp_html, "<li>More symmetric than martingale residuals</li>")
+                interp_html <- paste0(interp_html, "<li>Values > 2 or < -2 indicate poorly fitted observations</li>")
+                interp_html <- paste0(interp_html, "<li>Should be approximately normally distributed</li>")
+                interp_html <- paste0(interp_html, "</ul>")
+                interp_html <- paste0(interp_html, "</div>")
+
+                interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>Schoenfeld Residuals:</h6>")
+                interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                interp_html <- paste0(interp_html, "<li>Test proportional hazards assumption</li>")
+                interp_html <- paste0(interp_html, "<li>Should show no trend over time</li>")
+                interp_html <- paste0(interp_html, "<li>Slopes indicate time-varying effects</li>")
+                interp_html <- paste0(interp_html, "</ul>")
+                interp_html <- paste0(interp_html, "</div>")
+
+                interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>DFBeta Plots:</h6>")
+                interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                interp_html <- paste0(interp_html, "<li>Assess influence of individual observations</li>")
+                interp_html <- paste0(interp_html, "<li>Values > 2/√n suggest influential observations</li>")
+                interp_html <- paste0(interp_html, "<li>Consider removing/investigating extreme values</li>")
+                interp_html <- paste0(interp_html, "</ul>")
+                interp_html <- paste0(interp_html, "</div>")
+
+                interp_html <- paste0(interp_html, "<div style='margin: 10px 0;'>")
+                interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>VIF (Variance Inflation Factor):</h6>")
+                interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                interp_html <- paste0(interp_html, "<li>VIF < 2.5: No multicollinearity concern</li>")
+                interp_html <- paste0(interp_html, "<li>VIF 2.5-5: Moderate multicollinearity (monitor)</li>")
+                interp_html <- paste0(interp_html, "<li>VIF >= 5: High multicollinearity (problematic)</li>")
+                interp_html <- paste0(interp_html, "<li>Consider variable removal or regularization for high VIF</li>")
+                interp_html <- paste0(interp_html, "</ul>")
+                interp_html <- paste0(interp_html, "</div>")
+
+                interp_html <- paste0(interp_html, "<h5 style='color: #4a148c;'>Clinical Recommendations:</h5>")
+                interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
+                interp_html <- paste0(interp_html, "<li><strong>Model violations:</strong> Consider stratification or time-dependent covariates</li>")
+                interp_html <- paste0(interp_html, "<li><strong>Outliers:</strong> Investigate extreme residuals for data quality</li>")
+                interp_html <- paste0(interp_html, "<li><strong>Non-linearity:</strong> Consider splines or transformations</li>")
+                interp_html <- paste0(interp_html, "<li><strong>Multicollinearity:</strong> Remove correlated variables or use regularization</li>")
+                interp_html <- paste0(interp_html, "<li><strong>Documentation:</strong> Report diagnostic results in publications</li>")
+                interp_html <- paste0(interp_html, "</ul>")
+
+                interp_html <- paste0(interp_html, "</div>")
+
+                self$results$interpretation$setContent(interp_html)
+            },
+
+            # Plot rendering functions
+            .plot_martingale = function(image, ggtheme, theme, ...) {
+                if (!self$options$show_martingale) {
+                    return()
                 }
-                
-                print(plot)
-                TRUE
-            })
-        },
-        
-        .plot_score = function(image, ggtheme, theme, ...) {
-            if (!self$options$show_score) return()
-            
-            cox_model <- image$state
-            if (is.null(cox_model)) return()
-            
-            tryCatch({
-                plot <- survminer::ggcoxdiagnostics(
-                    cox_model,
-                    type = "score",
-                    ox.scale = self$options$ox_scale,
-                    point.size = self$options$point_size,
-                    point.alpha = self$options$alpha_level
-                )
-                
-                plot <- plot + ggtheme
-                plot <- plot + ggplot2::ggtitle("Score Residuals")
-                
-                print(plot)
-                TRUE
-            }, error = function(e) {
-                # Score residuals fallback
-                message("Score residuals plot not available with current data")
-                plot <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                    label = "Score residuals plot not available\nwith current data", 
-                                    hjust = 0.5, vjust = 0.5, size = 6) +
-                    ggplot2::theme_void() +
-                    ggtheme
-                
-                print(plot)
-                TRUE
-            })
-        },
-        
-        .plot_schoenfeld = function(image, ggtheme, theme, ...) {
-            if (!self$options$show_schoenfeld) return()
-            
-            cox_model <- image$state
-            if (is.null(cox_model)) return()
-            
-            tryCatch({
-                plot <- survminer::ggcoxdiagnostics(
-                    cox_model,
-                    type = "schoenfeld",
-                    ox.scale = "time",
-                    point.size = self$options$point_size,
-                    point.alpha = self$options$alpha_level
-                )
-                
-                plot <- plot + ggtheme
-                plot <- plot + ggplot2::ggtitle("Schoenfeld Residuals")
-                
-                print(plot)
-                TRUE
-            }, error = function(e) {
-                # Alternative: use ggcoxzph if available
-                if (!is.null(private$.zph_test)) {
-                    plot <- survminer::ggcoxzph(private$.zph_test)
-                    plot <- plot + ggtheme
-                    print(plot)
-                    TRUE
-                } else {
-                    plot <- ggplot2::ggplot() +
-                        ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                        label = "Schoenfeld residuals plot not available", 
-                                        hjust = 0.5, vjust = 0.5, size = 6) +
-                        ggplot2::theme_void() +
-                        ggtheme
-                    print(plot)
-                    TRUE
+
+                cox_model <- image$state
+                if (is.null(cox_model)) {
+                    return()
                 }
-            })
-        },
-        
-        .plot_dfbeta = function(image, ggtheme, theme, ...) {
-            if (!self$options$show_dfbeta) return()
-            
-            cox_model <- image$state
-            if (is.null(cox_model)) return()
-            
-            tryCatch({
-                plot <- survminer::ggcoxdiagnostics(
-                    cox_model,
-                    type = "dfbeta",
-                    ox.scale = self$options$ox_scale,
-                    point.size = self$options$point_size,
-                    point.alpha = self$options$alpha_level
+
+                tryCatch(
+                    {
+                        plot <- survminer::ggcoxdiagnostics(
+                            cox_model,
+                            type = "martingale",
+                            ox.scale = self$options$ox_scale,
+                            point.size = self$options$point_size,
+                            point.alpha = self$options$alpha_level
+                        )
+
+                        if (self$options$add_reference) {
+                            plot <- plot + ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7)
+                        }
+
+                        plot <- plot + ggtheme
+                        plot <- plot + ggplot2::ggtitle("Martingale Residuals")
+
+                        print(plot)
+                        TRUE
+                    },
+                    error = function(e) {
+                        # Fallback to basic plot if ggcoxdiagnostics fails
+                        warning("ggcoxdiagnostics failed, using basic residual plot")
+                        residuals_mart <- residuals(cox_model, type = "martingale")
+                        linear_pred <- predict(cox_model, type = "lp")
+
+                        plot_data <- data.frame(
+                            x = linear_pred,
+                            y = residuals_mart
+                        )
+
+                        plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
+                            ggplot2::geom_point(size = self$options$point_size, alpha = self$options$alpha_level) +
+                            ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+                            ggplot2::labs(
+                                title = "Martingale Residuals",
+                                x = "Linear Predictor",
+                                y = "Martingale Residuals"
+                            ) +
+                            ggtheme
+
+                        if (self$options$add_smooth) {
+                            plot <- plot + ggplot2::geom_smooth(se = TRUE, color = "blue")
+                        }
+
+                        print(plot)
+                        TRUE
+                    }
                 )
-                
-                plot <- plot + ggtheme
-                plot <- plot + ggplot2::ggtitle("DFBeta Influence Diagnostics")
-                
-                print(plot)
-                TRUE
-            }, error = function(e) {
-                # DFBeta fallback
-                message("DFBeta plot not available with current data")
-                plot <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
-                                    label = "DFBeta influence plot not available\nwith current data", 
-                                    hjust = 0.5, vjust = 0.5, size = 6) +
-                    ggplot2::theme_void() +
-                    ggtheme
-                
-                print(plot)
-                TRUE
-            })
-        }
+            },
+            .plot_deviance = function(image, ggtheme, theme, ...) {
+                if (!self$options$show_deviance) {
+                    return()
+                }
+
+                cox_model <- image$state
+                if (is.null(cox_model)) {
+                    return()
+                }
+
+                tryCatch(
+                    {
+                        plot <- survminer::ggcoxdiagnostics(
+                            cox_model,
+                            type = "deviance",
+                            ox.scale = self$options$ox_scale,
+                            point.size = self$options$point_size,
+                            point.alpha = self$options$alpha_level
+                        )
+
+                        if (self$options$add_reference) {
+                            plot <- plot + ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red", alpha = 0.7)
+                        }
+
+                        plot <- plot + ggtheme
+                        plot <- plot + ggplot2::ggtitle("Deviance Residuals")
+
+                        print(plot)
+                        TRUE
+                    },
+                    error = function(e) {
+                        # Fallback plot
+                        residuals_dev <- residuals(cox_model, type = "deviance")
+                        linear_pred <- predict(cox_model, type = "lp")
+
+                        plot_data <- data.frame(
+                            x = linear_pred,
+                            y = residuals_dev
+                        )
+
+                        plot <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
+                            ggplot2::geom_point(size = self$options$point_size, alpha = self$options$alpha_level) +
+                            ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+                            ggplot2::labs(
+                                title = "Deviance Residuals",
+                                x = "Linear Predictor",
+                                y = "Deviance Residuals"
+                            ) +
+                            ggtheme
+
+                        if (self$options$add_smooth) {
+                            plot <- plot + ggplot2::geom_smooth(se = TRUE, color = "blue")
+                        }
+
+                        print(plot)
+                        TRUE
+                    }
+                )
+            },
+            .plot_score = function(image, ggtheme, theme, ...) {
+                if (!self$options$show_score) {
+                    return()
+                }
+
+                cox_model <- image$state
+                if (is.null(cox_model)) {
+                    return()
+                }
+
+                tryCatch(
+                    {
+                        plot <- survminer::ggcoxdiagnostics(
+                            cox_model,
+                            type = "score",
+                            ox.scale = self$options$ox_scale,
+                            point.size = self$options$point_size,
+                            point.alpha = self$options$alpha_level
+                        )
+
+                        plot <- plot + ggtheme
+                        plot <- plot + ggplot2::ggtitle("Score Residuals")
+
+                        print(plot)
+                        TRUE
+                    },
+                    error = function(e) {
+                        # Score residuals fallback
+                        message("Score residuals plot not available with current data")
+                        plot <- ggplot2::ggplot() +
+                            ggplot2::annotate("text",
+                                x = 0.5, y = 0.5,
+                                label = "Score residuals plot not available\nwith current data",
+                                hjust = 0.5, vjust = 0.5, size = 6
+                            ) +
+                            ggplot2::theme_void() +
+                            ggtheme
+
+                        print(plot)
+                        TRUE
+                    }
+                )
+            },
+            .plot_schoenfeld = function(image, ggtheme, theme, ...) {
+                if (!self$options$show_schoenfeld) {
+                    return()
+                }
+
+                cox_model <- image$state
+                if (is.null(cox_model)) {
+                    return()
+                }
+
+                tryCatch(
+                    {
+                        plot <- survminer::ggcoxdiagnostics(
+                            cox_model,
+                            type = "schoenfeld",
+                            ox.scale = "time",
+                            point.size = self$options$point_size,
+                            point.alpha = self$options$alpha_level
+                        )
+
+                        plot <- plot + ggtheme
+                        plot <- plot + ggplot2::ggtitle("Schoenfeld Residuals")
+
+                        print(plot)
+                        TRUE
+                    },
+                    error = function(e) {
+                        # Alternative: use ggcoxzph if available
+                        if (!is.null(private$.zph_test)) {
+                            plot <- survminer::ggcoxzph(private$.zph_test)
+                            plot <- plot + ggtheme
+                            print(plot)
+                            TRUE
+                        } else {
+                            plot <- ggplot2::ggplot() +
+                                ggplot2::annotate("text",
+                                    x = 0.5, y = 0.5,
+                                    label = "Schoenfeld residuals plot not available",
+                                    hjust = 0.5, vjust = 0.5, size = 6
+                                ) +
+                                ggplot2::theme_void() +
+                                ggtheme
+                            print(plot)
+                            TRUE
+                        }
+                    }
+                )
+            },
+            .plot_dfbeta = function(image, ggtheme, theme, ...) {
+                if (!self$options$show_dfbeta) {
+                    return()
+                }
+
+                cox_model <- image$state
+                if (is.null(cox_model)) {
+                    return()
+                }
+
+                tryCatch(
+                    {
+                        plot <- survminer::ggcoxdiagnostics(
+                            cox_model,
+                            type = "dfbeta",
+                            ox.scale = self$options$ox_scale,
+                            point.size = self$options$point_size,
+                            point.alpha = self$options$alpha_level
+                        )
+
+                        plot <- plot + ggtheme
+                        plot <- plot + ggplot2::ggtitle("DFBeta Influence Diagnostics")
+
+                        print(plot)
+                        TRUE
+                    },
+                    error = function(e) {
+                        # DFBeta fallback
+                        message("DFBeta plot not available with current data")
+                        plot <- ggplot2::ggplot() +
+                            ggplot2::annotate("text",
+                                x = 0.5, y = 0.5,
+                                label = "DFBeta influence plot not available\nwith current data",
+                                hjust = 0.5, vjust = 0.5, size = 6
+                            ) +
+                            ggplot2::theme_void() +
+                            ggtheme
+
+                        print(plot)
+                        TRUE
+                    }
+                )
+            }
+        )
     )
-)
+}

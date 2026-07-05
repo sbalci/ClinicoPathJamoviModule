@@ -334,7 +334,7 @@ options:
       description:
           R: >
             Dice coefficient threshold for "excellent" segmentation quality.
-            Typical: ≥0.90 for clinical deployment.
+            Typical: >=0.90 for clinical deployment.
 
     - name: dice_threshold_good
       title: Dice Threshold - Good

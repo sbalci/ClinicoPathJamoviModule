@@ -59,88 +59,88 @@ labcontrolchartsClass <- R6::R6Class(
                 )
                 return()
             }
-            
+
             # Set method explanation
             private$.setMethodExplanation()
         },
-        
         .run = function() {
             if (is.null(self$options$measurement) || is.null(self$options$run_number)) {
                 return()
             }
-            
+
             # Get data and validate
             data <- self$data
             measurement_var <- self$options$measurement
             run_var <- self$options$run_number
-            
+
             if (!(measurement_var %in% names(data)) || !(run_var %in% names(data))) {
                 return()
             }
-            
+
             measurement_data <- data[[measurement_var]]
             run_data <- data[[run_var]]
-            
+
             if (all(is.na(measurement_data)) || all(is.na(run_data))) {
                 return()
             }
-            
+
             # Remove NAs and order by run number
             valid_indices <- !is.na(measurement_data) & !is.na(run_data)
             measurement_clean <- measurement_data[valid_indices]
             run_clean <- run_data[valid_indices]
-            
+
             # Order by run number
             order_idx <- order(run_clean)
             measurement_ordered <- measurement_clean[order_idx]
             run_ordered <- run_clean[order_idx]
-            
+
             # Populate data information
             private$.populateDataInfo(measurement_ordered, run_ordered)
-            
+
             # Calculate control limits
             private$.calculateControlLimits(measurement_ordered)
-            
+
             # Perform analyses based on options
             if (self$options$violation_detection) {
                 private$.detectViolations(measurement_ordered, run_ordered)
             }
-            
+
             if (self$options$trend_analysis) {
                 private$.analyzeTrends(measurement_ordered, run_ordered)
             }
-            
+
             if (self$options$shift_detection) {
                 private$.detectShifts(measurement_ordered, run_ordered)
             }
-            
+
             if (self$options$performance_metrics) {
                 private$.calculatePerformanceMetrics(measurement_ordered)
             }
-            
+
             if (self$options$qc_summary) {
                 private$.calculateQCStatistics(measurement_ordered)
             }
-            
+
             if (self$options$corrective_actions) {
                 private$.generateCorrectiveActions()
             }
-            
+
             # Populate Westgard rules interpretation
             private$.populateWestgardInterpretation()
         },
-        
         .populateDataInfo = function(measurements, runs) {
             n_total <- length(measurements)
             n_runs <- length(unique(runs))
             mean_val <- mean(measurements)
             sd_val <- sd(measurements)
             cv_val <- (sd_val / mean_val) * 100
-            
+
             info_data <- data.frame(
-                characteristic = c("Total Measurements", "Number of Runs", "Mean Value", 
-                                 "Standard Deviation", "Coefficient of Variation (%)",
-                                 "Data Range", "Baseline Period"),
+                characteristic = c(
+                    "Total Measurements", "Number of Runs", "Mean Value",
+                    "Standard Deviation", "Coefficient of Variation (%)",
+                    "Data Range", "Baseline Period"
+                ),
                 value = c(
                     as.character(n_total),
                     as.character(n_runs),
@@ -152,28 +152,27 @@ labcontrolchartsClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$dataInfo$setData(info_data)
         },
-        
         .calculateControlLimits = function(measurements) {
             chart_type <- self$options$chart_type
             control_limits <- self$options$control_limits
             baseline_runs <- min(self$options$baseline_runs, length(measurements))
-            
+
             # Use baseline period or provided values
             if (self$options$target_mean != 0) {
                 center_line <- self$options$target_mean
             } else {
                 center_line <- mean(measurements[1:baseline_runs])
             }
-            
+
             if (self$options$target_sd != 0) {
                 sigma <- self$options$target_sd
             } else {
                 sigma <- sd(measurements[1:baseline_runs])
             }
-            
+
             # Calculate limits based on method
             if (control_limits == "3sigma") {
                 ucl <- center_line + 3 * sigma
@@ -192,7 +191,7 @@ labcontrolchartsClass <- R6::R6Class(
                 uwl <- center_line + 2 * sigma
                 lwl <- center_line - 2 * sigma
             }
-            
+
             limits_data <- data.frame(
                 chart_type = chart_type,
                 center_line = center_line,
@@ -202,22 +201,21 @@ labcontrolchartsClass <- R6::R6Class(
                 lower_warning_limit = lwl,
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$controlLimits$setData(limits_data)
         },
-        
         .detectViolations = function(measurements, runs) {
             # Get control limits
             baseline_runs <- min(self$options$baseline_runs, length(measurements))
             center_line <- mean(measurements[1:baseline_runs])
             sigma <- sd(measurements[1:baseline_runs])
-            
+
             # Initialize violation tracking
             violations <- list()
-            
+
             # Apply Westgard rules
             westgard_rules <- unlist(strsplit(self$options$westgard_rules, ","))
-            
+
             for (rule in westgard_rules) {
                 rule <- trimws(rule)
                 if (rule == "13s") {
@@ -229,7 +227,7 @@ labcontrolchartsClass <- R6::R6Class(
                     side <- sign(measurements - center_line)
                     violations[["22s"]] <- c()
                     for (i in 2:length(measurements)) {
-                        if (outside_2s[i] && outside_2s[i-1] && side[i] == side[i-1]) {
+                        if (outside_2s[i] && outside_2s[i - 1] && side[i] == side[i - 1]) {
                             violations[["22s"]] <- c(violations[["22s"]], i)
                         }
                     }
@@ -237,7 +235,7 @@ labcontrolchartsClass <- R6::R6Class(
                     # Range exceeds 4 sigma within run
                     violations[["R4s"]] <- c()
                     for (i in 2:length(measurements)) {
-                        if (i > 1 && abs(measurements[i] - measurements[i-1]) > 4 * sigma) {
+                        if (i > 1 && abs(measurements[i] - measurements[i - 1]) > 4 * sigma) {
                             violations[["R4s"]] <- c(violations[["R4s"]], i)
                         }
                     }
@@ -247,7 +245,7 @@ labcontrolchartsClass <- R6::R6Class(
                     side <- sign(measurements - center_line)
                     violations[["41s"]] <- c()
                     for (i in 4:length(measurements)) {
-                        if (all(outside_1s[(i-3):i]) && length(unique(side[(i-3):i])) == 1) {
+                        if (all(outside_1s[(i - 3):i]) && length(unique(side[(i - 3):i])) == 1) {
                             violations[["41s"]] <- c(violations[["41s"]], i)
                         }
                     }
@@ -256,16 +254,16 @@ labcontrolchartsClass <- R6::R6Class(
                     side <- sign(measurements - center_line)
                     violations[["10x"]] <- c()
                     for (i in 10:length(measurements)) {
-                        if (length(unique(side[(i-9):i])) == 1 && side[i] != 0) {
+                        if (length(unique(side[(i - 9):i])) == 1 && side[i] != 0) {
                             violations[["10x"]] <- c(violations[["10x"]], i)
                         }
                     }
                 }
             }
-            
+
             # Create violation summary
             summary_data <- data.frame()
-            
+
             for (rule in names(violations)) {
                 if (length(violations[[rule]]) > 0) {
                     violation_runs <- runs[violations[[rule]]]
@@ -281,7 +279,7 @@ labcontrolchartsClass <- R6::R6Class(
                     summary_data <- rbind(summary_data, summary_row)
                 }
             }
-            
+
             if (nrow(summary_data) == 0) {
                 summary_data <- data.frame(
                     rule = "None",
@@ -293,9 +291,9 @@ labcontrolchartsClass <- R6::R6Class(
                     stringsAsFactors = FALSE
                 )
             }
-            
+
             self$results$violationSummary$setData(summary_data)
-            
+
             # Create detailed violation list if requested
             if (self$options$export_violations && length(unlist(violations)) > 0) {
                 details_data <- data.frame()
@@ -317,23 +315,22 @@ labcontrolchartsClass <- R6::R6Class(
                 self$results$violationDetails$setData(details_data)
             }
         },
-        
         .analyzeTrends = function(measurements, runs) {
             n <- length(measurements)
-            
+
             # Linear trend test
             lm_fit <- lm(measurements ~ runs)
             slope <- coef(lm_fit)[2]
             p_value <- summary(lm_fit)$coefficients[2, 4]
-            
+
             # Runs test for randomness
             median_val <- median(measurements)
             above <- measurements > median_val
             n_runs <- 1
             for (i in 2:n) {
-                if (above[i] != above[i-1]) n_runs <- n_runs + 1
+                if (above[i] != above[i - 1]) n_runs <- n_runs + 1
             }
-            
+
             # Expected runs
             n1 <- sum(above)
             n2 <- n - n1
@@ -341,7 +338,7 @@ labcontrolchartsClass <- R6::R6Class(
             var_runs <- (2 * n1 * n2 * (2 * n1 * n2 - n)) / (n^2 * (n - 1))
             z_runs <- (n_runs - expected_runs) / sqrt(var_runs)
             p_runs <- 2 * pnorm(-abs(z_runs))
-            
+
             trend_data <- data.frame(
                 trend_type = c("Linear Trend", "Cyclic Pattern", "Random Walk"),
                 detected = c(
@@ -359,21 +356,20 @@ labcontrolchartsClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$trendAnalysis$setData(trend_data)
         },
-        
         .detectShifts = function(measurements, runs) {
             n <- length(measurements)
-            
+
             # Simple change point detection (simplified)
             best_shift <- NA
             best_stat <- 0
-            
-            for (i in round(n/4):(n - round(n/4))) {
+
+            for (i in round(n / 4):(n - round(n / 4))) {
                 before <- measurements[1:i]
-                after <- measurements[(i+1):n]
-                
+                after <- measurements[(i + 1):n]
+
                 # t-test for shift
                 if (length(before) > 1 && length(after) > 1) {
                     t_test <- t.test(before, after)
@@ -383,12 +379,12 @@ labcontrolchartsClass <- R6::R6Class(
                     }
                 }
             }
-            
+
             if (!is.na(best_shift)) {
                 before <- measurements[1:best_shift]
-                after <- measurements[(best_shift+1):n]
+                after <- measurements[(best_shift + 1):n]
                 t_test <- t.test(before, after)
-                
+
                 shift_data <- data.frame(
                     shift_point = runs[best_shift],
                     shift_magnitude = mean(after) - mean(before),
@@ -411,32 +407,35 @@ labcontrolchartsClass <- R6::R6Class(
                     stringsAsFactors = FALSE
                 )
             }
-            
+
             self$results$shiftDetection$setData(shift_data)
         },
-        
         .calculatePerformanceMetrics = function(measurements) {
             baseline_runs <- min(self$options$baseline_runs, length(measurements))
             sigma <- sd(measurements[1:baseline_runs])
-            
+
             # Average Run Length (ARL) - simplified calculation
             # For 3-sigma limits
-            p_in_control <- pnorm(3) - pnorm(-3)  # Probability within limits
+            p_in_control <- pnorm(3) - pnorm(-3) # Probability within limits
             arl_in_control <- 1 / (1 - p_in_control)
-            
+
             # For 1-sigma shift
             p_out_1sigma <- 1 - (pnorm(2) - pnorm(-4))
             arl_1sigma <- 1 / p_out_1sigma
-            
+
             # Power to detect shifts
             power_1sigma <- 1 - pnorm(2) + pnorm(-4)
             power_2sigma <- 1 - pnorm(1) + pnorm(-5)
-            
+
             metrics_data <- data.frame(
-                metric = c("ARL (in-control)", "ARL (1σ shift)", "Power (1σ shift)", 
-                          "Power (2σ shift)", "False Alarm Rate", "Sigma Level"),
-                value = c(arl_in_control, arl_1sigma, power_1sigma * 100, 
-                         power_2sigma * 100, (1 - p_in_control) * 100, 3),
+                metric = c(
+                    "ARL (in-control)", "ARL (1σ shift)", "Power (1σ shift)",
+                    "Power (2σ shift)", "False Alarm Rate", "Sigma Level"
+                ),
+                value = c(
+                    arl_in_control, arl_1sigma, power_1sigma * 100,
+                    power_2sigma * 100, (1 - p_in_control) * 100, 3
+                ),
                 interpretation = c(
                     sprintf("Expected %.0f runs between false alarms", arl_in_control),
                     sprintf("Shift detected in ~%.0f runs", arl_1sigma),
@@ -448,39 +447,42 @@ labcontrolchartsClass <- R6::R6Class(
                 acceptable_range = c(">200", "<10", ">50%", ">90%", "<1%", "2-3σ"),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$performanceMetrics$setData(metrics_data)
         },
-        
         .calculateQCStatistics = function(measurements) {
             mean_val <- mean(measurements)
             sd_val <- sd(measurements)
             cv_val <- (sd_val / mean_val) * 100
-            
+
             # Process capability indices (simplified)
             baseline_runs <- min(self$options$baseline_runs, length(measurements))
             center_line <- mean(measurements[1:baseline_runs])
             sigma <- sd(measurements[1:baseline_runs])
-            
+
             ucl <- center_line + 3 * sigma
             lcl <- center_line - 3 * sigma
-            
+
             # Cp and Cpk (assuming specs at control limits)
             cp <- (ucl - lcl) / (6 * sd_val)
             cpk <- min((ucl - mean_val) / (3 * sd_val), (mean_val - lcl) / (3 * sd_val))
-            
+
             # Bias
             bias <- mean_val - center_line
             bias_pct <- (bias / center_line) * 100
-            
+
             # Total error
             total_error <- abs(bias_pct) + 1.65 * cv_val
-            
+
             qc_data <- data.frame(
-                statistic = c("Mean", "Standard Deviation", "CV%", "Bias", "Bias%", 
-                            "Total Error", "Cp", "Cpk", "Sigma Level"),
-                value = c(mean_val, sd_val, cv_val, bias, bias_pct, 
-                         total_error, cp, cpk, 6 * cpk),
+                statistic = c(
+                    "Mean", "Standard Deviation", "CV%", "Bias", "Bias%",
+                    "Total Error", "Cp", "Cpk", "Sigma Level"
+                ),
+                value = c(
+                    mean_val, sd_val, cv_val, bias, bias_pct,
+                    total_error, cp, cpk, 6 * cpk
+                ),
                 interpretation = c(
                     "Central tendency",
                     "Measurement precision",
@@ -494,10 +496,9 @@ labcontrolchartsClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$qcStatistics$setData(qc_data)
         },
-        
         .generateCorrectiveActions = function() {
             # Based on violations detected, generate recommendations
             actions_data <- data.frame(
@@ -516,16 +517,19 @@ labcontrolchartsClass <- R6::R6Class(
                     "Review pipetting technique, check instrument precision",
                     "Optimize method, review quality specifications"
                 ),
-                timeframe = c("Immediate", "Within 24 hours", "Within 24 hours", 
-                             "Next maintenance", "Next method review"),
-                responsible_party = c("Operator", "Supervisor", "Supervisor", 
-                                    "QC Coordinator", "Laboratory Director"),
+                timeframe = c(
+                    "Immediate", "Within 24 hours", "Within 24 hours",
+                    "Next maintenance", "Next method review"
+                ),
+                responsible_party = c(
+                    "Operator", "Supervisor", "Supervisor",
+                    "QC Coordinator", "Laboratory Director"
+                ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$correctiveActions$setData(actions_data)
         },
-        
         .populateWestgardInterpretation = function() {
             westgard_data <- data.frame(
                 rule = c("13s", "22s", "R4s", "41s", "10x"),
@@ -552,10 +556,9 @@ labcontrolchartsClass <- R6::R6Class(
                 ),
                 stringsAsFactors = FALSE
             )
-            
+
             self$results$westgardInterpretation$setData(westgard_data)
         },
-        
         .setMethodExplanation = function() {
             self$results$methodExplanation$setContent(
                 "<html>
@@ -571,22 +574,22 @@ labcontrolchartsClass <- R6::R6Class(
                 <body>
                 <div class='main'>
                     <h3>Statistical Process Control in Clinical Laboratories</h3>
-                    
+
                     <div class='formula'>
                         <h4>Control Chart Formulas</h4>
                         <b>Shewhart Chart:</b><br>
                         UCL = μ + 3σ, LCL = μ - 3σ<br>
                         UWL = μ + 2σ, LWL = μ - 2σ<br><br>
-                        
+
                         <b>CUSUM Chart:</b><br>
                         C⁺ᵢ = max(0, xᵢ - (μ₀ + k) + C⁺ᵢ₋₁)<br>
                         C⁻ᵢ = max(0, (μ₀ - k) - xᵢ + C⁻ᵢ₋₁)<br><br>
-                        
+
                         <b>EWMA Chart:</b><br>
                         zᵢ = λxᵢ + (1 - λ)zᵢ₋₁<br>
                         UCL = μ₀ + L·σ·√(λ/(2-λ)[1-(1-λ)²ⁱ])
                     </div>
-                    
+
                     <div class='interpretation'>
                         <h4>Westgard Multi-Rule System</h4>
                         <b>Common Rules:</b><br>
@@ -595,12 +598,12 @@ labcontrolchartsClass <- R6::R6Class(
                         • <b>R₄ₛ:</b> Reject rule - range exceeds 4SD within run<br>
                         • <b>4₁ₛ:</b> Reject rule - four consecutive exceed ±1SD (same side)<br>
                         • <b>10ₓ:</b> Reject rule - ten consecutive on same side of mean<br><br>
-                        
+
                         <b>Error Detection:</b><br>
                         • Random errors: 1₃ₛ, R₄ₛ<br>
                         • Systematic errors: 2₂ₛ, 4₁ₛ, 10ₓ
                     </div>
-                    
+
                     <div class='clinical'>
                         <h4>Clinical Laboratory Applications</h4>
                         <b>Laboratory Accreditation Requirements:</b><br>
@@ -608,19 +611,19 @@ labcontrolchartsClass <- R6::R6Class(
                         • Statistical evaluation of QC data<br>
                         • Defined acceptance criteria<br>
                         • Corrective action procedures<br><br>
-                        
+
                         <b>Six Sigma Metrics:</b><br>
                         • Sigma = (TEa - |Bias|) / CV<br>
-                        • World-class: ≥6 sigma<br>
+                        • World-class: >=6 sigma<br>
                         • Excellent: 5-6 sigma<br>
                         • Good: 4-5 sigma<br>
                         • Acceptable: 3-4 sigma<br>
                         • Poor: <3 sigma
                     </div>
-                    
+
                     <div class='warning'>
                         <h4>Important Considerations</h4>
-                        • Establish baseline with ≥20 data points<br>
+                        • Establish baseline with >=20 data points<br>
                         • Review control limits monthly<br>
                         • Document all QC failures and actions<br>
                         • Consider biological variation in limit setting<br>
@@ -632,84 +635,104 @@ labcontrolchartsClass <- R6::R6Class(
                 </html>"
             )
         },
-        
         .plotShewhart = function(image, ggtheme, theme, ...) {
             if (!self$options$control_plots || is.null(self$options$measurement)) {
                 return()
             }
-            
+
             # Placeholder for Shewhart chart
-            plot <- ggplot2::ggplot() + 
-                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, 
-                                                   label = "Shewhart Control Chart\n(Implementation in progress)"), 
-                                     size = 6, hjust = 0.5) +
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                    ggtheme
-            
+            plot <- ggplot2::ggplot() +
+                ggplot2::geom_text(
+                    ggplot2::aes(
+                        x = 0.5, y = 0.5,
+                        label = "Shewhart Control Chart\n(Implementation in progress)"
+                    ),
+                    size = 6, hjust = 0.5
+                ) +
+                ggplot2::xlim(0, 1) +
+                ggplot2::ylim(0, 1) +
+                ggtheme
+
             print(plot)
             TRUE
         },
-        
         .plotCUSUM = function(image, ggtheme, theme, ...) {
             if (!self$options$control_plots || self$options$chart_type %in% c("shewhart", "ewma")) {
                 return()
             }
-            
-            plot <- ggplot2::ggplot() + 
-                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, 
-                                                   label = "CUSUM Control Chart\n(Implementation in progress)"), 
-                                     size = 6, hjust = 0.5) +
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                    ggtheme
-            
+
+            plot <- ggplot2::ggplot() +
+                ggplot2::geom_text(
+                    ggplot2::aes(
+                        x = 0.5, y = 0.5,
+                        label = "CUSUM Control Chart\n(Implementation in progress)"
+                    ),
+                    size = 6, hjust = 0.5
+                ) +
+                ggplot2::xlim(0, 1) +
+                ggplot2::ylim(0, 1) +
+                ggtheme
+
             print(plot)
             TRUE
         },
-        
         .plotEWMA = function(image, ggtheme, theme, ...) {
             if (!self$options$control_plots || self$options$chart_type %in% c("shewhart", "cusum")) {
                 return()
             }
-            
-            plot <- ggplot2::ggplot() + 
-                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, 
-                                                   label = "EWMA Control Chart\n(Implementation in progress)"), 
-                                     size = 6, hjust = 0.5) +
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                    ggtheme
-            
+
+            plot <- ggplot2::ggplot() +
+                ggplot2::geom_text(
+                    ggplot2::aes(
+                        x = 0.5, y = 0.5,
+                        label = "EWMA Control Chart\n(Implementation in progress)"
+                    ),
+                    size = 6, hjust = 0.5
+                ) +
+                ggplot2::xlim(0, 1) +
+                ggplot2::ylim(0, 1) +
+                ggtheme
+
             print(plot)
             TRUE
         },
-        
         .plotDistribution = function(image, ggtheme, theme, ...) {
             if (!self$options$histogram_plot || is.null(self$options$measurement)) {
                 return()
             }
-            
-            plot <- ggplot2::ggplot() + 
-                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, 
-                                                   label = "Distribution Histogram\n(Implementation in progress)"), 
-                                     size = 6, hjust = 0.5) +
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                    ggtheme
-            
+
+            plot <- ggplot2::ggplot() +
+                ggplot2::geom_text(
+                    ggplot2::aes(
+                        x = 0.5, y = 0.5,
+                        label = "Distribution Histogram\n(Implementation in progress)"
+                    ),
+                    size = 6, hjust = 0.5
+                ) +
+                ggplot2::xlim(0, 1) +
+                ggplot2::ylim(0, 1) +
+                ggtheme
+
             print(plot)
             TRUE
         },
-        
         .plotTrend = function(image, ggtheme, theme, ...) {
             if (!self$options$trend_plot || !self$options$trend_analysis || is.null(self$options$measurement)) {
                 return()
             }
-            
-            plot <- ggplot2::ggplot() + 
-                    ggplot2::geom_text(ggplot2::aes(x = 0.5, y = 0.5, 
-                                                   label = "Trend Analysis Plot\n(Implementation in progress)"), 
-                                     size = 6, hjust = 0.5) +
-                    ggplot2::xlim(0, 1) + ggplot2::ylim(0, 1) +
-                    ggtheme
-            
+
+            plot <- ggplot2::ggplot() +
+                ggplot2::geom_text(
+                    ggplot2::aes(
+                        x = 0.5, y = 0.5,
+                        label = "Trend Analysis Plot\n(Implementation in progress)"
+                    ),
+                    size = 6, hjust = 0.5
+                ) +
+                ggplot2::xlim(0, 1) +
+                ggplot2::ylim(0, 1) +
+                ggtheme
+
             print(plot)
             TRUE
         }

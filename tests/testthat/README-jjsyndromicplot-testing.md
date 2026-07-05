@@ -9,6 +9,7 @@ This document describes the comprehensive testing approach for `jjsyndromicplot`
 The `jjsyndromicplot` function's visualization approach is based on the **syndRomics package** developed by the Ferguson Lab at UCSF.
 
 **References:**
+
 - Ferguson AR, Irvine K-A, Gensel JC, et al. (2013). *Derivation of Multivariate Syndromic Outcome Metrics for Consistent Testing across Multiple Models of Cervical Spinal Cord Injury in Rats*. PLOS ONE, 8(3):e59712.
 - Torres-Espin A, Chou A, Huie JR, et al. (2021). *Reproducible analysis of disease space via principal components using the novel R package syndRomics*. eLife, 10:e61812.
 - GitHub: [ucsf-ferguson-lab/syndRomics](https://github.com/ucsf-ferguson-lab/syndRomics)
@@ -17,7 +18,7 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 
 **The reviewer was absolutely correct**: This function has complex, custom-built visualization code with **trigonometric calculations that must be validated**. Without automated tests, subtle bugs in the geometry formulas could lead researchers to misinterpret their PCA results.
 
-### What Could Go Wrong Without Tests:
+### What Could Go Wrong Without Tests
 
 1. **Arrow Direction Bugs**: An error in the angle calculation could cause positive loadings to appear as negative or vice versa
 2. **Arrow Positioning**: Incorrect cos/sin formulas could place arrows in wrong positions around the circle
@@ -30,16 +31,19 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 ## Test Files
 
 ### 1. `test-jjsyndromicplot.R` (NEW)
+
 **Purpose**: Comprehensive functional testing and PCA validation
 
 **Coverage**:
 
 #### Basic Functionality
+
 - ✅ Output structure validation
-- ✅ Minimum variable requirements (≥3 variables)
+- ✅ Minimum variable requirements (>=3 variables)
 - ✅ Plot and loadings table generation
 
 #### PCA Calculation Accuracy
+
 - ✅ PCA matches stats::prcomp results
 - ✅ Variance accounted for (VAF) calculation
 - ✅ Centered vs uncentered data
@@ -47,15 +51,18 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 - ✅ Loading calculations
 
 #### Component Selection
+
 - ✅ Different component numbers (PC1, PC2, PC3, etc.)
 - ✅ Component number exceeding dimensions (graceful handling)
 
 #### Cutoff Threshold
+
 - ✅ High cutoff (filters most variables)
 - ✅ Low cutoff (shows all variables)
 - ✅ Extreme cutoffs (0 and 1)
 
 #### Geometric Calculations (CRITICAL)
+
 - ✅ **Angle distribution**: Variables evenly spaced around circle
 - ✅ **Arrow positioning**: Start (radius 7) farther than end (radius 3.5)
 - ✅ **Text positioning**: Text (radius 9) outside arrows (radius 7)
@@ -63,6 +70,7 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 - ✅ **No NA/Inf values**: Trig calculations don't produce invalid values
 
 #### Customization Options
+
 - ✅ Arrow size multiplier (1-30)
 - ✅ Text size (4-20)
 - ✅ Label repel (TRUE/FALSE)
@@ -71,17 +79,20 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 - ✅ Plot size options
 
 #### Variable Ordering
+
 - ✅ Absolute value decreasing
 - ✅ Absolute value increasing
 - ✅ Value decreasing
 - ✅ Value increasing
 
 #### Clinical Presets
+
 - ✅ Biomarker discovery preset
 - ✅ Disease subtyping preset
 - ✅ Custom configuration
 
 #### Edge Cases
+
 - ✅ Missing data
 - ✅ High missingness (80%)
 - ✅ Constant variables
@@ -92,60 +103,73 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 - ✅ Variables with different scales
 
 #### Integration Tests
+
 - ✅ mtcars dataset
 - ✅ iris dataset
 
 **Test Count**: 50+ comprehensive tests
 
 ### 2. `test-jjsyndromicplot-visual.R` (NEW)
+
 **Purpose**: Visual regression testing with `vdiffr` to protect geometric accuracy
 
 **Coverage**:
 
 #### Basic Visualizations
+
 - ✅ PC1 visualization
 - ✅ PC2 visualization
 
 #### Cutoff Thresholds
+
 - ✅ Low cutoff (many variables)
 - ✅ High cutoff (few variables)
 
 #### Arrow Size
+
 - ✅ Small arrows (size 5)
 - ✅ Large arrows (size 20)
 
 #### Color Schemes
+
 - ✅ Blue-white-red gradient
 - ✅ Green-white-purple gradient
 
 #### Variable Ordering
+
 - ✅ Absolute value decreasing
 - ✅ Value decreasing
 - ✅ Value increasing
 
 #### Text Size
+
 - ✅ Small text (size 6)
 - ✅ Large text (size 14)
 
 #### Legend Options
+
 - ✅ With legend and cutoff indicator
 - ✅ Without legend
 - ✅ Cutoff indicator visual
 
 #### Label Repel
+
 - ✅ With ggrepel (avoids overlap)
 - ✅ Without repel (fixed positions)
 
 #### Clinical Presets
+
 - ✅ Biomarker discovery preset
 - ✅ Disease subtyping preset
 
 #### Geometric Edge Cases (CRITICAL)
+
 - ✅ 3 variables (triangle geometry)
 - ✅ 4 variables (square geometry)
 - ✅ 12 variables (crowded circle)
 
 #### Real-World Datasets
+
 - ✅ mtcars PC1
 - ✅ iris PC1
 
@@ -158,32 +182,39 @@ The `jjsyndromicplot` function's visualization approach is based on the **syndRo
 The syndromic plot uses these **critical trigonometric formulas**:
 
 ### 1. Angle Distribution
+
 ```R
 angle = (variable_index * 2 * pi / n_variables) + pi / 2
 ```
+
 - Distributes variables evenly around a circle
 - Starts at top (pi/2 = 90°)
 - Goes counterclockwise
 
 ### 2. Arrow Positioning
+
 ```R
 xend = 3.5 * cos(angle)  # Inner circle (arrow tip)
 yend = 3.5 * sin(angle)
 x = 7 * cos(angle)       # Outer circle (arrow base)
 y = 7 * sin(angle)
 ```
+
 - Arrow points FROM outer circle (radius 7) TO inner circle (radius 3.5)
 - Direction represents positive (outward from center conceptually) vs negative loading
 
 ### 3. Text Positioning
+
 ```R
 xtext = 9 * cos(angle)
 ytext = 9 * sin(angle)
 ```
+
 - Text labels positioned outside arrows (radius 9)
 - Prevents overlap with triangle and arrows
 
 ### 4. Triangle Polygon
+
 ```R
 angle1 = seq(0, 1.2, length.out = 50)
 angle2 = seq(1.95, 3.18, length.out = 50)
@@ -192,12 +223,14 @@ angle3 = seq(4.02, 5.4, length.out = 50)
 x = c(2.8 * cos(angle1) - 1, 2.8 * cos(angle2) + 1, 2.8 * cos(angle3))
 y = c(2.8 * sin(angle1) - 1, 2.8 * sin(angle2) - 1, 2.8 * sin(angle3) + 1)
 ```
+
 - Creates rounded triangle in center
 - Three arcs with adjustments for shape
 
 ### Why Visual Tests Are Essential
 
 These complex calculations can only be reliably verified with visual regression tests. A unit test can check that cos(pi/2) ≈ 0, but **only a visual test** can confirm that:
+
 - All 12 variables are evenly distributed around the circle
 - Arrows point in correct directions for positive/negative loadings
 - Labels don't overlap with triangle or each other
@@ -209,6 +242,7 @@ These complex calculations can only be reliably verified with visual regression 
 ## Running the Tests
 
 ### Run All Tests
+
 ```R
 # From package root directory
 devtools::test()
@@ -218,6 +252,7 @@ testthat::test_dir("tests/testthat")
 ```
 
 ### Run Specific Test File
+
 ```R
 # Run only functional tests
 testthat::test_file("tests/testthat/test-jjsyndromicplot.R")
@@ -227,6 +262,7 @@ testthat::test_file("tests/testthat/test-jjsyndromicplot-visual.R")
 ```
 
 ### Run Specific Test
+
 ```R
 # Run a single test by name
 testthat::test_file(
@@ -240,6 +276,7 @@ testthat::test_file(
 ## Visual Regression Testing with vdiffr
 
 ### First-Time Setup
+
 ```R
 # Install vdiffr
 install.packages("vdiffr")
@@ -254,12 +291,14 @@ devtools::test()
 ### Managing Visual Test Cases
 
 #### 1. Review New or Changed Plots
+
 ```R
 # Launch interactive Shiny app to review plots
 vdiffr::manage_cases()
 ```
 
 The Shiny app will show:
+
 - **New cases**: Plots that don't have baselines yet
 - **Failed cases**: Plots that differ from baselines (THIS IS CRITICAL)
 - **Orphaned cases**: Baseline files without corresponding tests
@@ -267,6 +306,7 @@ The Shiny app will show:
 #### 2. Review Geometric Accuracy
 
 When reviewing visual tests for jjsyndromicplot, **carefully verify**:
+
 - ✅ Variables are evenly spaced around the circle
 - ✅ Arrows point inward (from outer to inner circle)
 - ✅ Positive loadings and negative loadings have distinct colors
@@ -276,12 +316,15 @@ When reviewing visual tests for jjsyndromicplot, **carefully verify**:
 - ✅ Legend gradient is smooth
 
 #### 3. Accept or Reject Changes
+
 In the Shiny app:
+
 - Click "Toggle" to see before/after comparison
 - Click "Validate" to accept the new plot as baseline **only if geometrically correct**
 - Click "Delete" to reject and investigate the bug
 
 #### 4. Commit SVG Baselines
+
 ```bash
 git add tests/testthat/_snaps/
 git commit -m "Add visual regression baselines for jjsyndromicplot"
@@ -292,13 +335,16 @@ git commit -m "Add visual regression baselines for jjsyndromicplot"
 ## Test Data
 
 ### Reproducible Test Data
+
 All tests use fixed random seeds for reproducibility:
+
 ```R
 set.seed(42)         # Functional tests
 set.seed(12345)      # Visual tests
 ```
 
 ### Test Data Characteristics
+
 - **Sample size**: 80-100 observations
 - **Variables**: 3-12 continuous numeric variables
 - **Scenarios**: Correlated data, uncorrelated data, different scales, missing data
@@ -319,6 +365,7 @@ set.seed(12345)      # Visual tests
 ### What's Tested
 
 ✅ **PCA Statistical Core**:
+
 - stats::prcomp implementation
 - Centered vs uncentered
 - Scaled vs unscaled
@@ -326,6 +373,7 @@ set.seed(12345)      # Visual tests
 - VAF calculations
 
 ✅ **Geometric Accuracy** (CRITICAL):
+
 - Angle distribution (even spacing)
 - Arrow positioning (correct radii)
 - Text positioning (outside arrows)
@@ -334,6 +382,7 @@ set.seed(12345)      # Visual tests
 - No NA/Inf in calculations
 
 ✅ **Visual Consistency**:
+
 - Arrow directions
 - Arrow scaling
 - Color gradients
@@ -342,6 +391,7 @@ set.seed(12345)      # Visual tests
 - Cutoff threshold visualization
 
 ✅ **Edge Cases**:
+
 - Missing data
 - Small samples (n=10)
 - Many variables (>10)
@@ -350,6 +400,7 @@ set.seed(12345)      # Visual tests
 - Different variable scales
 
 ✅ **Customization**:
+
 - 2 clinical presets
 - 4 variable ordering methods
 - Arrow size (1-30)
@@ -362,6 +413,7 @@ set.seed(12345)      # Visual tests
 ## Critical Test Examples
 
 ### PCA Accuracy Test
+
 ```R
 test_that("jjsyndromicplot PCA matches stats::prcomp results", {
   set.seed(123)
@@ -392,6 +444,7 @@ test_that("jjsyndromicplot PCA matches stats::prcomp results", {
 ```
 
 ### Geometric Accuracy Test
+
 ```R
 test_that("jjsyndromicplot arrow positions are geometrically consistent", {
   # Verify that arrow start (outer) is farther from center than arrow end (inner)
@@ -413,6 +466,7 @@ test_that("jjsyndromicplot arrow positions are geometrically consistent", {
 ```
 
 ### Visual Regression Test
+
 ```R
 test_that("jjsyndromicplot with 3 variables (triangle)", {
   skip_if_not_installed_vdiffr()
@@ -446,12 +500,14 @@ test_that("jjsyndromicplot with 3 variables (triangle)", {
 ## Troubleshooting
 
 ### "vdiffr not installed" warnings
+
 ```R
 # Install vdiffr
 install.packages("vdiffr")
 ```
 
 ### Visual tests always failing
+
 ```R
 # Reset all visual baselines
 unlink("tests/testthat/_snaps", recursive = TRUE)
@@ -460,7 +516,9 @@ vdiffr::manage_cases()  # Accept all new baselines
 ```
 
 ### Geometric calculation errors
+
 If you see errors like "arrow positions incorrect":
+
 1. Check the trigonometric formulas in R/jjsyndromicplot.b.R
 2. Verify angle calculations (lines 432-442)
 3. Verify radius values (3.5, 7, 9)
@@ -471,12 +529,14 @@ If you see errors like "arrow positions incorrect":
 ## Best Practices
 
 ### 1. Always Verify Geometric Accuracy Visually
+
 ```R
 # After code changes, ALWAYS check visual baselines
 vdiffr::manage_cases()
 ```
 
 ### 2. Test Edge Cases for Geometry
+
 ```R
 # Test with 3, 4, 8, 12 variables to verify even spacing
 # Test all variable ordering methods
@@ -484,6 +544,7 @@ vdiffr::manage_cases()
 ```
 
 ### 3. Validate PCA Against Reference
+
 ```R
 # When in doubt, compare to stats::prcomp directly
 ref_pca <- prcomp(data, center = TRUE, scale. = TRUE)
@@ -491,7 +552,9 @@ ref_pca <- prcomp(data, center = TRUE, scale. = TRUE)
 ```
 
 ### 4. Document Any Formula Changes
+
 If you modify the trigonometric formulas:
+
 1. Update this documentation
 2. Regenerate all visual baselines
 3. Manually verify geometric accuracy
@@ -535,6 +598,7 @@ If you modify the trigonometric formulas:
 ## Contact
 
 For questions about testing:
+
 - Review this documentation
 - Check existing test files for examples
 - Consult jamovi module development guides in `vignettes/`
@@ -548,6 +612,7 @@ For questions about testing:
 **Status**: Production-ready ✅
 
 **Response to Reviewer Feedback**:
+
 - ✅ Implemented comprehensive test suite
 - ✅ PCA accuracy validated against stats::prcomp
 - ✅ Geometric calculations explicitly tested

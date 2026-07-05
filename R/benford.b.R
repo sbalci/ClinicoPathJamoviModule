@@ -378,7 +378,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data_range <- max(var_cleaned) / min(var_cleaned)
                 if (data_range < 10) {
                     # TODO (forward-looking): when /prepare-translation runs against this
-                    # function, consider migrating this sprintf to jmvcore::format("…
+                    # function, consider migrating this sprintf to jmvcore::format("...
                     # range ratio = {}", round(data_range, 2)) for consistency with the
                     # rest of the codebase. Not a drop-in: %.2f happens at format time
                     # whereas jmvcore::format takes the value as-is, so pre-rounding
@@ -402,7 +402,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Perform Benford analysis with error handling
             # TODO (forward-looking, perf): no `private$.checkpoint()` before
-            # the heaviest call below — `benford.analysis::benford()` iterates
+            # the heaviest call below `benford.analysis::benford()` iterates
             # the entire vector building the digit-distribution and
             # goodness-of-fit stats; on large clinical datasets (n > 100k)
             # this can run for several seconds and freeze the UI. Insert a

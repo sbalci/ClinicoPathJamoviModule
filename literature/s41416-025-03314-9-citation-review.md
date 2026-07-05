@@ -11,6 +11,7 @@
 **Title**: Integrating lymphovascular invasion and ypTNM staging system for esophageal squamous cell carcinoma undergoing neoadjuvant chemoradiotherapy and surgery: a multi-institutional analysis
 
 **Design & Cohort**:
+
 - **Study Type**: Retrospective multi-institutional cohort study
 - **Sample Size**: N=931 patients (Training: n=565; Validation: n=366)
 - **Institutions**: 5 high-volume academic centers in China (2006-2020)
@@ -19,6 +20,7 @@
 - **Follow-up**: Median 52.8 months (training), 38.6 months (validation)
 
 **Key Analyses**:
+
 - Prognostic value assessment of lymphovascular invasion (LVI) and perineural invasion (PNI)
 - Recursive partitioning analysis (RPA) for risk stratification
 - Development and validation of modified ypTNM staging system integrating LVI
@@ -58,7 +60,7 @@
 | Method / Model | Role | Variants & Options | Assumptions/Diagnostics | References |
 |---|---|---|---|---|
 | **Mann-Whitney U test** | Primary (univariate) | Two-sided test for continuous variables | Non-parametric; no normality assumption | Methods, p.609 |
-| **Chi-square test** | Primary (univariate) | Categorical variable comparison | Expected counts ≥5 (implied) | Methods, p.609 |
+| **Chi-square test** | Primary (univariate) | Categorical variable comparison | Expected counts >=5 (implied) | Methods, p.609 |
 | **Fisher's exact test** | Primary (univariate) | Alternative for categorical data | Used when chi-square inappropriate | Methods, p.609 |
 | **Kaplan-Meier survival estimation** | Primary | 95% CI calculation | Censoring at random | Methods, p.609; Fig 2-4 |
 | **Log-rank test** | Primary | Stratified by subgroups | Proportional hazards (assumed) | Methods, p.609; Results |
@@ -589,6 +591,7 @@ options:
 **Dependencies**: `rpart`, `rpart.plot`, `survival`, `survminer`
 
 **Validation**:
+
 1. Simulate ESCC-like data (n=500, 3 predictors: stage I-IV, LVI yes/no, age 40-80).
 2. Run `rpasurvival` and verify tree splits on log-rank statistic.
 3. Compare terminal node HRs to manual Cox models.
@@ -692,6 +695,7 @@ if (self$options$phtest && modelType == "cox") {
 **Dependencies**: `survival` (already included)
 
 **Validation**:
+
 1. Simulate data with PH violation (time-varying effect: LVI*log(time) interaction).
 2. Run extended `survival` with `phtest=TRUE` and verify p<0.05 for LVI.
 3. Compare to R's `cox.zph()` output directly.
@@ -820,6 +824,7 @@ if (self$options$bootstrap) {
 **Dependencies**: `survival`, `Hmisc` (optional for rms::validate equivalent)
 
 **Validation**:
+
 1. Simulate survival data (n=200, 3 predictors, 100 events).
 2. Run `survival` with `bootstrap=TRUE, nboot=1000`.
 3. Verify optimism > 0 (typical for small samples).
@@ -1019,6 +1024,7 @@ options:
 **Dependencies**: `survival`, `fmsb` (radar chart)
 
 **Validation**:
+
 1. Use study data: compare ypTNM (4 stages) vs. RPA (3 stages).
 2. Verify metrics match published values (Fig 4e).
 3. Test edge cases: 2-stage vs. 5-stage systems, unbalanced sample sizes.
@@ -1036,14 +1042,15 @@ options:
 | PH-001 | `survival` (phtest) | Simulated PH violation (LVI*log(time)) | Global p<0.05; LVI p<0.05 | Pending |
 | PH-002 | `survival` (phplot) | Cox model with 4 covariates | 4-panel Schoenfeld plot | Pending |
 | BOOT-001 | `survival` (bootstrap) | n=200, nboot=1000, seed=123 | Optimism>0; SE(C-index) reported | Pending |
-| BOOT-002 | `survival` (bootstrap) | nboot=100 (small B) | Warning: "Use nboot≥500 for stable estimates" | Pending |
+| BOOT-002 | `survival` (bootstrap) | nboot=100 (small B) | Warning: "Use nboot>=500 for stable estimates" | Pending |
 | GROOME-001 | `groomecompare` | ypTNM (4 stages) vs. RPA (3 stages) | Consistency, discrimination, balance, overall rank | Pending |
-| GROOME-002 | `groomecompare` | Single-stage system | Error: "Need ≥2 stages" | Pending |
+| GROOME-002 | `groomecompare` | Single-stage system | Error: "Need >=2 stages" | Pending |
 
 ### Assumption Checks
 
 All new survival functions should include:
-- **Input validation**: Check for missing time/event, factor levels ≥2
+
+- **Input validation**: Check for missing time/event, factor levels >=2
 - **Event rate check**: Warn if <10 events per predictor (Cox models)
 - **Convergence warnings**: Report non-convergence for Cox models
 - **Tied times handling**: Use Breslow method (default in survival package)
@@ -1115,18 +1122,22 @@ All new survival functions should include:
 ### Implementation Timeline (Suggested)
 
 **Phase 1 (Q1 2026)**: High-priority extensions to existing functions
+
 - PH testing → extend `survival` ✅
 - Bootstrap validation → extend `survival` ✅
 
 **Phase 2 (Q2 2026)**: New standalone functions
+
 - RPA for survival staging → new `rpasurvival` ✅
 - Groome comparison → new `groomecompare` ✅
 
 **Phase 3 (Q3 2026)**: Advanced validation tools
+
 - Calibration curves → extend `clinicalprediction` or `survival` ✅
 - Time-dependent ROC → new `timeroc` ✅
 
 **Phase 4 (Q4 2026)**: Enhancements
+
 - Restricted cubic splines → extend `survival` ✅
 - Competing risks validation → verify `competingsurvival` coverage ✅
 
@@ -1179,6 +1190,7 @@ All new survival functions should include:
 ### Recommended Actions for ClinicoPath Development
 
 **Immediate (High Priority)**:
+
 1. Extend `survival` to include PH testing (Schoenfeld residuals) → **Critical**
 2. Add C-index output to `survival` → **Essential for model evaluation**
 3. Implement `rpasurvival` function → **Enables staging system development**
@@ -1207,6 +1219,7 @@ All new survival functions should include:
 Liu S, Xu Y, Guo X, et al. Integrating lymphovascular invasion and ypTNM staging system for esophageal squamous cell carcinoma undergoing neoadjuvant chemoradiotherapy and surgery: a multi-institutional analysis. *Br J Cancer.* 2026;134:608-617. doi:10.1038/s41416-025-03314-9
 
 **Methodological References**:
+
 1. Groome PA, et al. A comparison of published head and neck stage groupings. *Head Neck.* 2001;23:613-24.
 2. Xie Y, et al. autoRPA: a web server for constructing cancer staging models. *Comput Struct Biotechnol J.* 2020;18:3361-7.
 3. Harrell FE. *Regression Modeling Strategies.* 2nd ed. Springer; 2015.

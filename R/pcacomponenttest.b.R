@@ -53,7 +53,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -135,7 +135,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint
             private$.checkpoint()
 
-            # Set Seed for Reproducibility — save and restore global RNG state so the
+            # Set Seed for Reproducibility - save and restore global RNG state so the
             # permutation test's seed doesn't propagate to subsequent random draws elsewhere
             # in the user's session. H4 hygiene fix mirrors optimalcutpoint.b.R:765-772.
             if (!is.null(self$options$seed)) {
@@ -181,7 +181,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             mydata <- self$data
             pca_data <- mydata[, vars, drop = FALSE]
 
-            # Remove missing values — jmvcore::naOmit preserves jamovi column attributes
+            # Remove missing values - jmvcore::naOmit preserves jamovi column attributes
             # (measureType / values / labels) that base na.omit drops.
             pca_data <- jmvcore::naOmit(pca_data)
 

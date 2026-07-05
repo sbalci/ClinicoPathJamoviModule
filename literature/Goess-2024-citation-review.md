@@ -7,6 +7,7 @@
 **Design & Cohort**: Retrospective cohort study, N=466 patients undergoing pancreatectomy for PDAC (309 pancreaticoduodenectomy, 84 distal pancreatectomy, 73 total pancreatectomy) at two European university hospitals (Munich, Lyon) between 2007-2018
 
 **Key Analyses**:
+
 - Multivariate Cox proportional hazards regression for overall survival
 - Kaplan-Meier survival curves with log-rank tests
 - Binomial probability law to calculate minimum examined lymph nodes (ELN) needed
@@ -45,10 +46,10 @@ None - all provided sources were successfully read (.txt file and 2 PNG images).
 |---|---|---|---|---|
 | **Kaplan-Meier survival curves** | Primary | Log-rank test, median survival with IQR, numbers at risk tables | Censoring assumption, non-informative censoring | Page 2 (lines 121-122), Figures 3a-c |
 | **Cox proportional hazards regression** | Primary | Multivariate adjusted model with HR and 95% CI, univariate and multivariate analyses | Proportional hazards assumption (not explicitly tested), linearity of continuous predictors | Page 2 (lines 122-125), Tables 4-5 |
-| **Log-rank test** | Primary | Two-sided, comparing survival curves between <21 ELN vs ≥21 ELN groups | Independent censoring, proportional hazards | Page 2 (line 121), Figures 3a-c (P=0.083, 0.084, 0.42) |
-| **Binomial probability law** | Secondary | Calculate minimum ELN to detect ≥1 LN metastasis with 95% probability: P = 1 - (1 - LNR)^ELN | Independence of LN examinations, constant detection probability | Page 2 (lines 126-130), Page 4 (lines 519-522) |
+| **Log-rank test** | Primary | Two-sided, comparing survival curves between <21 ELN vs >=21 ELN groups | Independent censoring, proportional hazards | Page 2 (line 121), Figures 3a-c (P=0.083, 0.084, 0.42) |
+| **Binomial probability law** | Secondary | Calculate minimum ELN to detect >=1 LN metastasis with 95% probability: P = 1 - (1 - LNR)^ELN | Independence of LN examinations, constant detection probability | Page 2 (lines 126-130), Page 4 (lines 519-522) |
 | **Spearman's correlation** | Secondary | Correlation between ELN and positive LN | Monotonic relationship, ordinal data | Page 2 (line 125), Figure 2e (P < 0.001) |
-| **Chi-square test** | Secondary | Comparison of categorical variables across groups | Expected frequencies ≥5, independence | Page 2 (line 133), Tables 1-3 |
+| **Chi-square test** | Secondary | Comparison of categorical variables across groups | Expected frequencies >=5, independence | Page 2 (line 133), Tables 1-3 |
 | **Fisher's exact test** | Secondary | For categorical comparisons when chi-square inappropriate | Exact distribution, small samples | Page 2 (line 133) |
 | **Descriptive statistics** | Primary | Median with min-max or IQR, frequencies and percentages | Not applicable | Throughout (Tables 1-3) |
 | **Stratified analysis** | Secondary | Separate analyses by resection type (PD, DP, TP) and N status (N0, N1, N2) | Subgroup homogeneity | Figures 2b-d, 3a-c, Table S1 |
@@ -163,6 +164,7 @@ None - all provided sources were successfully read (.txt file and 2 PNG images).
 **Closest existing function**: `pheval`, `coxdiagnostics`
 
 **Exact missing options**:
+
 - ✅ **Already implemented in ClinicoPath**:
   - Global Schoenfeld test (χ² statistic, df, p-value)
   - Individual covariate PH tests
@@ -181,6 +183,7 @@ None - all provided sources were successfully read (.txt file and 2 PNG images).
 **Closest existing function**: `survival`, `comparingsurvival`
 
 **Exact missing options**:
+
 - 🟡 **Partially covered**:
   - `comparingsurvival` performs multiple pairwise comparisons but **no explicit FWER/FDR correction** for survival curves
 - **Gap**: No Bonferroni, Holm, or Benjamini-Hochberg adjustment for log-rank p-values
@@ -194,11 +197,12 @@ None - all provided sources were successfully read (.txt file and 2 PNG images).
 
 **Method**: Flexible modeling of ELN effect using restricted cubic splines or fractional polynomials
 
-**Impact**: Study dichotomizes ELN (<21 vs ≥21), losing information and power. Splines reveal non-linear dose-response.
+**Impact**: Study dichotomizes ELN (<21 vs >=21), losing information and power. Splines reveal non-linear dose-response.
 
 **Closest existing function**: `survival` (Cox regression)
 
 **Exact missing options**:
+
 - ❌ **Not covered**: No spline/non-linear transformation options in `survival` module
 - **Gap**: Cannot model non-linear ELN effect (e.g., plateau after 25-30 LN)
 - **R packages available**: `rms::rcs()`, `splines::ns()`
@@ -216,6 +220,7 @@ None - all provided sources were successfully read (.txt file and 2 PNG images).
 **Closest existing function**: `survival` (manual iteration)
 
 **Exact missing options**:
+
 - 🟡 **Partially covered**: Can run multiple Cox models manually, but no automated sensitivity analysis
 - **Gap**: No "cutpoint optimization" feature with cross-validation or bootstrap
 - **R packages**: `OptimalCutpoints`, `maxstat` (log-rank based), `rpart` (survival trees)
@@ -233,9 +238,10 @@ None - all provided sources were successfully read (.txt file and 2 PNG images).
 **Closest existing function**: `competingsurvival`, `flexcomprisk`
 
 **Exact missing options**:
+
 - ✅ **Already implemented**: `competingsurvival` module supports Fine-Gray model
 
-**No gap for this article** - authors excluded complication-related deaths (≤30 days) to avoid bias.
+**No gap for this article** - authors excluded complication-related deaths (<=30 days) to avoid bias.
 
 ---
 
@@ -361,7 +367,7 @@ sections:
 - Without correction: expect ~40% false positives (1 - (1-0.05)^10 ≈ 0.40)
 - With Bonferroni: expect ~5% false positives (α/k = 0.05/10 = 0.005 per test)
 - With Holm: verify monotonic rejection sequence
-- With BH: verify FDR ≤ 0.05
+- With BH: verify FDR <= 0.05
 
 ---
 
@@ -770,7 +776,7 @@ sections:
 
 #### Validation
 
-- Simulate Cox data with known cutpoint at x = 50: HR = 1.0 (x<50), HR = 2.5 (x≥50)
+- Simulate Cox data with known cutpoint at x = 50: HR = 1.0 (x<50), HR = 2.5 (x>=50)
 - Run maxstat method: expect cutpoint ≈ 50 with P < 0.001
 - Bootstrap validation: 95% CI should include 50
 - Sensitivity analysis: vary true cutpoint (40, 45, 50, 55, 60) and verify detection
@@ -785,8 +791,8 @@ sections:
 1. **P-value adjustment**:
    - Simulate 10 independent log-rank tests with true null (no survival differences)
    - Verify that Bonferroni correction reduces false positive rate from ~40% to ~5%
-   - Verify Holm procedure maintains FWER ≤ 0.05
-   - Verify BH procedure maintains FDR ≤ 0.05
+   - Verify Holm procedure maintains FWER <= 0.05
+   - Verify BH procedure maintains FDR <= 0.05
 
 2. **Spline transformations**:
    - Simulate Cox data with quadratic covariate effect: HR(x) = exp(β₁x + β₂x²)
@@ -815,7 +821,7 @@ sections:
 
 1. **Small sample survival**:
    - Test with N = 20, 10 events: Cox model should converge, but cutpoint analysis may fail (insufficient power)
-   - Expect warning: "Cutpoint analysis requires ≥100 observations for reliable results"
+   - Expect warning: "Cutpoint analysis requires >=100 observations for reliable results"
 
 2. **Sparse ELN distribution**:
    - Test with 90% of patients having 10-20 ELN, 10% having >30 ELN
@@ -953,15 +959,18 @@ graph LR
 ## FINAL DELIVERABLES SUMMARY
 
 ### Article Analysis
-Goess et al. (2024) retrospective cohort study of 466 PDAC patients examining lymph node adequacy for staging. Key finding: **≥21 examined lymph nodes (ELN) required** to prevent N-stage misclassification. Study uses appropriate survival methods (Cox regression, Kaplan-Meier, binomial probability law) but has methodological gaps in assumption testing and multiple comparisons.
+
+Goess et al. (2024) retrospective cohort study of 466 PDAC patients examining lymph node adequacy for staging. Key finding: **>=21 examined lymph nodes (ELN) required** to prevent N-stage misclassification. Study uses appropriate survival methods (Cox regression, Kaplan-Meier, binomial probability law) but has methodological gaps in assumption testing and multiple comparisons.
 
 ### Coverage Assessment
+
 - **✅ COVERED: 9/12 methods** (75%)
 - **🟡 PARTIAL: 1/12 methods** (8% - multiple testing correction)
 - **❌ MISSING: 2/12 methods** (17% - spline analysis, cutpoint optimization)
 - **Overall coverage: EXCELLENT** - Core survival analysis fully supported
 
 ### Critical Evaluation
+
 - **Overall rating: 🟡 MODERATE (11/18 points)**
 - **Major concerns (2)**:
   1. Proportional hazards assumption not tested (use `pheval`)
@@ -973,20 +982,22 @@ Goess et al. (2024) retrospective cohort study of 466 PDAC patients examining ly
 - **Strengths**: Large sample, appropriate methods, transparent reporting
 
 ### Implementation Priority
+
 1. **Multiple testing correction** (2-3 hours, high impact) ⭐⭐⭐
 2. **Documentation of PH testing** (already implemented)
 3. **Spline transformations** (8-10 hours, medium impact) ⭐⭐
 4. **Cutpoint optimization** (15-20 hours, medium impact) ⭐
 
 ### Clinical Relevance
+
 Methods directly applicable to pathology staging studies, surgical adequacy research, and oncology outcomes analysis. The `pathsampling` module provides **binomial probability calculator** matching the authors' formula (P = 1 - (1-LNR)^ELN), enabling institutional validation of the 21 ELN threshold with local data.
 
 ---
 
 **Document Information:**
+
 - **Generated by:** ClinicoPath Article Review System
 - **Module Version:** pathsampling v1.0.0, survival v1.0.0
 - **Last Updated:** 2025-10-11
 - **Total Functions Scanned:** 100+
 - **Coverage Assessment:** ✅ 9/12 methods covered (75%)
-

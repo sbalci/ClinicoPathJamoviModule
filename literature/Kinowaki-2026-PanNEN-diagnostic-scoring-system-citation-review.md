@@ -154,21 +154,25 @@
 ## 🔎 GAP ANALYSIS (WHAT'S MISSING)
 
 ### ~~Gap 1: LASSO Logistic Regression for Binary Outcomes~~ — NOW IMPLEMENTED
+
 - **Function**: `lassologistic` — NEW function with LASSO, Ridge, and Elastic Net penalties for binary classification
 - **Features**: Cross-validated lambda selection, suitability assessment (EPV check), stratified CV folds, variable importance, model comparison
 - **Status**: COMPLETE
 
 ### ~~Gap 2: Scoring System Point Calculator~~ — NOW IMPLEMENTED
+
 - **Function**: `lassologistic` with `scoringSystem=true` option
 - **Features**: Coefficient-to-point conversion (configurable max points), optimal cutoff determination, scoring system AUC/accuracy/sensitivity/specificity, class-specific mean scores
 - **Status**: COMPLETE — integrated into lassologistic as a toggle option
 
 ### ~~Gap 2b: Bootstrap Optimism-Corrected Validation~~ — NOW IMPLEMENTED
+
 - **Function**: `lassologistic` with `bootstrapValidation=true` option
 - **Features**: Harrell's bootstrap method with full pipeline repeated in each iteration, optimism-corrected AUC and Brier score, automatic overfitting warning
 - **Status**: COMPLETE
 
 ### ~~Gap 3: Leave-One-Center-Out Cross-Validation~~ — NOW IMPLEMENTED
+
 - **Function**: `leaveonecenterout` — NEW function for internal-external validation
 - **Features**: Trains on all-but-one center, evaluates on held-out center; supports logistic/Cox/linear; optional LASSO within each fold; per-center AUC with CIs; forest plot; pooled performance with weighted mean; heterogeneity assessment; Debray et al. (2015) methodology
 - **Status**: COMPLETE
@@ -180,6 +184,7 @@
 ### Target 1: Add LASSO Logistic Regression for Binary Outcomes
 
 **.a.yaml** (new function `lassologistic`):
+
 ```yaml
 name: lassologistic
 title: "LASSO Logistic Regression"
@@ -248,6 +253,7 @@ options:
 ```
 
 **.b.R** (sketch):
+
 ```r
 if (suitabilityCheck) {
   n <- nrow(data)
@@ -283,6 +289,7 @@ if (bootstrapValidation) {
 ```
 
 **.r.yaml**:
+
 ```yaml
 items:
     - name: suitabilityTable
@@ -365,7 +372,7 @@ flowchart TD
     style K fill:#ffffcc
 
     H -.->|"🔴 Circular:<br>optimized on derivation data"| H
-    I -.->|"🔴 EPV = 2.6<br>need ≥10"| I
+    I -.->|"🔴 EPV = 2.6<br>need >=10"| I
     K -.->|"🔴 No optimism correction<br>🔴 No calibration"| K
 ```
 
@@ -400,7 +407,7 @@ This pipeline would address the key weaknesses: proper validation (optimism-corr
 | QUADAS-2 bias risk | HIGH in 3/4 domains | Incorporation bias; no inter-observer agreement; no consecutive sampling described |
 | GRADE | VERY LOW | Retrospective, severe overfitting risk, no external validation |
 
-**Conclusion**: The scoring system is hypothesis-generating. Clinical adoption requires: (a) simplification to 3-4 predictors (EPV ≥ 7), (b) optimism-corrected AUC + calibration, (c) inter-observer agreement study, (d) external validation with ≥100 cases.
+**Conclusion**: The scoring system is hypothesis-generating. Clinical adoption requires: (a) simplification to 3-4 predictors (EPV >= 7), (b) optimism-corrected AUC + calibration, (c) inter-observer agreement study, (d) external validation with >=100 cases.
 
 ---
 

@@ -187,7 +187,7 @@ accompanied by ﬁbrosis. The criteria scores of the two necropsy
 samples were averaged and served as the standard to which the
 other samples were compared.
 Based on the histologic criteria scores, a morphological diagnosis was assigned to each of the 4 specimens (three test methods
-and necropsy sample) based on the WSAVA Liver Standardization Group guidelines.15 Only histologic criteria scores ≥2 were
+and necropsy sample) based on the WSAVA Liver Standardization Group guidelines.15 Only histologic criteria scores >=2 were
 considered as part of the ﬁnal morphologic diagnosis. The morphologic diagnosis assigned to the necropsy samples was considered the deﬁnitive diagnosis. If the morphologic diagnoses from
 the two necropsy samples from the same liver did not agree, all
 specimens from that dog were censored from further analysis.
@@ -371,7 +371,7 @@ Cirrhosis
 0.97 (0.93–1.0)
 1 (1.0–1.0)
 
-Only morphologic diagnoses with ≥5 cases are shown.
+Only morphologic diagnoses with >=5 cases are shown.
 
 19391676, 2015, 1, Downloaded from https://onlinelibrary.wiley.com/doi/10.1111/jvim.12508 by Turkey National Provision, Wiley Online Library on [14/10/2025]. See the Terms and Conditions (https://onlinelibrary.wiley.com/terms-and-conditions) on Wiley Online Library for rules of use; OA articles are governed by the applicable Creative Commons License
 

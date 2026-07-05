@@ -1031,7 +1031,7 @@ adaptivelassoClass <- R6::R6Class(
                 self$results$predictions$deleteRows()
             }
 
-            # Plots -- set state data for all enabled plots
+            # Plots - set state data for all enabled plots
             if (self$options$plot_selection_path) {
                 private$.plotSelectionPath(adaptive_results)
             }

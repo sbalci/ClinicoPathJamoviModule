@@ -89,7 +89,7 @@ options:
       options:
         - title: Overall Frequency
           name: frequency
-        - title: High Grade Frequency (≥3)
+        - title: High Grade Frequency (>=3)
           name: high_grade
         - title: Alphabetical
           name: alphabetical
@@ -101,7 +101,7 @@ options:
             Method for ordering adverse events in the plot.
 
     - name: showHighGradeOnly
-      title: Show High Grade Only (≥3)
+      title: Show High Grade Only (>=3)
       type: Bool
       default: false
       description:

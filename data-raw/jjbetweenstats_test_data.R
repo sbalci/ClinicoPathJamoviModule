@@ -71,7 +71,7 @@ for (i in 1:n) {
     jjbetweenstats_test$tumor_reduction[i] <- rnorm(1, mean = 10, sd = 8)
   } else if (trt == "Low Dose") {
     jjbetweenstats_test$tumor_reduction[i] <- rnorm(1, mean = 25, sd = 10)
-  } else {  # High Dose
+  } else { # High Dose
     jjbetweenstats_test$tumor_reduction[i] <- rnorm(1, mean = 40, sd = 12)
   }
 
@@ -113,11 +113,11 @@ for (i in 1:n) {
 
   # LDH level (exponential, lower is better)
   if (trt == "Placebo") {
-    jjbetweenstats_test$ldh_level[i] <- rexp(1, rate = 1/300) + 200
+    jjbetweenstats_test$ldh_level[i] <- rexp(1, rate = 1 / 300) + 200
   } else if (trt == "Low Dose") {
-    jjbetweenstats_test$ldh_level[i] <- rexp(1, rate = 1/250) + 180
+    jjbetweenstats_test$ldh_level[i] <- rexp(1, rate = 1 / 250) + 180
   } else {
-    jjbetweenstats_test$ldh_level[i] <- rexp(1, rate = 1/200) + 160
+    jjbetweenstats_test$ldh_level[i] <- rexp(1, rate = 1 / 200) + 160
   }
 }
 
@@ -207,7 +207,6 @@ n_skewed <- 200
 
 jjbetweenstats_skewed <- tibble(
   patient_id = 1:n_skewed,
-
   treatment = sample(
     c("Placebo", "Low Dose", "High Dose"),
     n_skewed,
@@ -227,13 +226,13 @@ for (i in 1:n_skewed) {
 
   if (trt == "Placebo") {
     jjbetweenstats_skewed$tumor_marker[i] <- rlnorm(1, meanlog = 4, sdlog = 1)
-    jjbetweenstats_skewed$time_to_response[i] <- rexp(1, rate = 1/30)
+    jjbetweenstats_skewed$time_to_response[i] <- rexp(1, rate = 1 / 30)
   } else if (trt == "Low Dose") {
     jjbetweenstats_skewed$tumor_marker[i] <- rlnorm(1, meanlog = 3.5, sdlog = 0.9)
-    jjbetweenstats_skewed$time_to_response[i] <- rexp(1, rate = 1/20)
+    jjbetweenstats_skewed$time_to_response[i] <- rexp(1, rate = 1 / 20)
   } else {
     jjbetweenstats_skewed$tumor_marker[i] <- rlnorm(1, meanlog = 3, sdlog = 0.8)
-    jjbetweenstats_skewed$time_to_response[i] <- rexp(1, rate = 1/15)
+    jjbetweenstats_skewed$time_to_response[i] <- rexp(1, rate = 1 / 15)
   }
 }
 
@@ -276,7 +275,7 @@ for (i in 1:n_four) {
     jjbetweenstats_fourgroup$efficacy_score[i] <- rnorm(1, mean = 55, sd = 13)
   } else if (trt == "Drug B") {
     jjbetweenstats_fourgroup$efficacy_score[i] <- rnorm(1, mean = 60, sd = 14)
-  } else {  # Combination
+  } else { # Combination
     jjbetweenstats_fourgroup$efficacy_score[i] <- rnorm(1, mean = 75, sd = 12)
   }
 }
@@ -359,12 +358,12 @@ VARIABLE DESCRIPTIONS
 ---------------------
 
 Continuous Outcomes (for dep parameter):
-  • tumor_reduction [numeric, ≥0]: Tumor size reduction in mm
+  • tumor_reduction [numeric, >=0]: Tumor size reduction in mm
   • pain_score [numeric, 0-100]: Visual analog pain scale (lower is better)
   • qol_score [numeric, 0-100]: Quality of life score (higher is better)
   • biomarker_level [numeric]: Biomarker concentration
-  • crp_level [numeric, ≥0]: C-reactive protein (log-normal, lower is better)
-  • ldh_level [numeric, ≥0]: Lactate dehydrogenase (exponential distribution)
+  • crp_level [numeric, >=0]: C-reactive protein (log-normal, lower is better)
+  • ldh_level [numeric, >=0]: Lactate dehydrogenase (exponential distribution)
   • age [integer]: Patient age in years
   • bmi [numeric]: Body mass index
 

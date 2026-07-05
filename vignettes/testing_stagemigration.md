@@ -365,291 +365,291 @@
 Below is every option defined in `stagemigration.a.yaml` with its test coverage status. Mark each option as Covered (C) or Not Covered (N) after running tests.
 
 ### Core Variables
-- [ ] `oldStage` -- Test 1.1
-- [ ] `newStage` -- Test 1.1
-- [ ] `survivalTime` -- Test 1.1
-- [ ] `event` -- Test 1.1
-- [ ] `eventLevel` -- Test 1.1
+- [ ] `oldStage` - Test 1.1
+- [ ] `newStage` - Test 1.1
+- [ ] `survivalTime` - Test 1.1
+- [ ] `event` - Test 1.1
+- [ ] `eventLevel` - Test 1.1
 
 ### Clinical Presets & Configuration
-- [ ] `clinicalPreset` -- Tests 11.1, 11.2, 11.3
-- [ ] `enableGuidedMode` -- Manual test needed
-- [ ] `generateCopyReadyReport` -- Test 13.3
-- [ ] `enableAccessibilityFeatures` -- Manual test needed (TODO: Wire to .b.R)
-- [ ] `preferredLanguage` -- Test 13.3
-- [ ] `enableProgressIndicators` -- Manual test needed
-- [ ] `optimizeForLargeDatasets` -- Test 12.5
-- [ ] `complexityMode` -- Manual test needed (TODO: Wire to .b.R)
-- [ ] `analysisType` -- Tests 2.1, 2.2, 2.3
-- [ ] `confidenceLevel` -- Manual test: change to 0.90 and verify CI widths
+- [ ] `clinicalPreset` - Tests 11.1, 11.2, 11.3
+- [ ] `enableGuidedMode` - Manual test needed
+- [ ] `generateCopyReadyReport` - Test 13.3
+- [ ] `enableAccessibilityFeatures` - Manual test needed (TODO: Wire to .b.R)
+- [ ] `preferredLanguage` - Test 13.3
+- [ ] `enableProgressIndicators` - Manual test needed
+- [ ] `optimizeForLargeDatasets` - Test 12.5
+- [ ] `complexityMode` - Manual test needed (TODO: Wire to .b.R)
+- [ ] `analysisType` - Tests 2.1, 2.2, 2.3
+- [ ] `confidenceLevel` - Manual test: change to 0.90 and verify CI widths
 
 ### Advanced Statistical Methods
-- [ ] `calculateNRI` -- Tests 3.1, 3.2, 3.3
-- [ ] `nriTimePoints` -- Tests 3.1, 3.3
-- [ ] `calculateIDI` -- Test 3.4
-- [ ] `performROCAnalysis` -- Manual test: enable and verify `rocAnalysis` table
-- [ ] `rocTimePoints` -- Manual test: change time points
-- [ ] `performDCA` -- Test 6.1
-- [ ] `performCalibration` -- Tests 7.1, 7.2
+- [ ] `calculateNRI` - Tests 3.1, 3.2, 3.3
+- [ ] `nriTimePoints` - Tests 3.1, 3.3
+- [ ] `calculateIDI` - Test 3.4
+- [ ] `performROCAnalysis` - Manual test: enable and verify `rocAnalysis` table
+- [ ] `rocTimePoints` - Manual test: change time points
+- [ ] `performDCA` - Test 6.1
+- [ ] `performCalibration` - Tests 7.1, 7.2
 
 ### Validation & Bootstrap
-- [ ] `performBootstrap` -- Tests 4.1, 4.2
-- [ ] `bootstrapReps` -- Tests 4.1, 4.2
-- [ ] `performCrossValidation` -- Tests 4.3, 4.4
-- [ ] `cvFolds` -- Test 4.3
-- [ ] `institutionVariable` -- Test 4.4
+- [ ] `performBootstrap` - Tests 4.1, 4.2
+- [ ] `bootstrapReps` - Tests 4.1, 4.2
+- [ ] `performCrossValidation` - Tests 4.3, 4.4
+- [ ] `cvFolds` - Test 4.3
+- [ ] `institutionVariable` - Test 4.4
 
 ### Clinical Significance
-- [ ] `clinicalSignificanceThreshold` -- Manual test: change to 0.05 and verify interpretation
-- [ ] `nriClinicalThreshold` -- Test 3.2
+- [ ] `clinicalSignificanceThreshold` - Manual test: change to 0.05 and verify interpretation
+- [ ] `nriClinicalThreshold` - Test 3.2
 
 ### Homogeneity & Trend
-- [ ] `performHomogeneityTests` -- Manual test: enable and verify `homogeneityTests` table
-- [ ] `performTrendTests` -- Manual test: enable and verify `trendTests` table
+- [ ] `performHomogeneityTests` - Manual test: enable and verify `homogeneityTests` table
+- [ ] `performTrendTests` - Manual test: enable and verify `trendTests` table
 
 ### Model Comparison
-- [ ] `performLikelihoodTests` -- Manual test: enable and verify `likelihoodTests` and `linearTrendTest`
-- [ ] `calculatePseudoR2` -- Test 3.5
+- [ ] `performLikelihoodTests` - Manual test: enable and verify `likelihoodTests` and `linearTrendTest`
+- [ ] `calculatePseudoR2` - Test 3.5
 
 ### Table Display
-- [ ] `showMigrationOverview` -- Test 1.2
-- [ ] `showMigrationSummary` -- Manual test: enable and verify `migrationSummary`
-- [ ] `showStageDistribution` -- Test 1.4
-- [ ] `showMigrationMatrix` -- Test 1.3
-- [ ] `showStatisticalComparison` -- Manual test: verify `statisticalComparison` and `enhancedLRComparison`
-- [ ] `showConcordanceComparison` -- Manual test: verify `concordanceComparison`
+- [ ] `showMigrationOverview` - Test 1.2
+- [ ] `showMigrationSummary` - Manual test: enable and verify `migrationSummary`
+- [ ] `showStageDistribution` - Test 1.4
+- [ ] `showMigrationMatrix` - Test 1.3
+- [ ] `showStatisticalComparison` - Manual test: verify `statisticalComparison` and `enhancedLRComparison`
+- [ ] `showConcordanceComparison` - Manual test: verify `concordanceComparison`
 
 ### Visualizations
-- [ ] `showMigrationHeatmap` -- Test 10.3
-- [ ] `showSankeyDiagram` -- Test 10.4
-- [ ] `showROCComparison` -- Manual test: enable and verify ROC plot
-- [ ] `showCalibrationPlots` -- Test 7.2
-- [ ] `showDecisionCurves` -- Test 6.1
-- [ ] `showForestPlot` -- Manual test: enable and verify HR forest plot
-- [ ] `showWillRogersAnalysis` -- Test 5.1
-- [ ] `showWillRogersVisualization` -- Test 5.3
-- [ ] `showMigrationSurvivalComparison` -- Test 5.3
+- [ ] `showMigrationHeatmap` - Test 10.3
+- [ ] `showSankeyDiagram` - Test 10.4
+- [ ] `showROCComparison` - Manual test: enable and verify ROC plot
+- [ ] `showCalibrationPlots` - Test 7.2
+- [ ] `showDecisionCurves` - Test 6.1
+- [ ] `showForestPlot` - Manual test: enable and verify HR forest plot
+- [ ] `showWillRogersAnalysis` - Test 5.1
+- [ ] `showWillRogersVisualization` - Test 5.3
+- [ ] `showMigrationSurvivalComparison` - Test 5.3
 
 ### Survival Curves
-- [ ] `showSurvivalCurves` -- Tests 10.1, 10.2
-- [ ] `survivalPlotType` -- Tests 10.1, 10.2
-- [ ] `showConfidenceIntervals` -- Test 10.2
-- [ ] `showRiskTables` -- Test 10.2
-- [ ] `plotTimeRange` -- Manual test: set to "60" and verify X-axis limit
+- [ ] `showSurvivalCurves` - Tests 10.1, 10.2
+- [ ] `survivalPlotType` - Tests 10.1, 10.2
+- [ ] `showConfidenceIntervals` - Test 10.2
+- [ ] `showRiskTables` - Test 10.2
+- [ ] `plotTimeRange` - Manual test: set to "60" and verify X-axis limit
 
 ### Reporting & Interpretation
-- [ ] `showClinicalInterpretation` -- Test 6.3
-- [ ] `showStatisticalSummary` -- Manual test: enable and verify `statisticalSummary`
-- [ ] `showMethodologyNotes` -- Manual test: enable and verify `methodologyNotes`
-- [ ] `includeEffectSizes` -- Manual test: enable and verify `effectSizes`
-- [ ] `advancedMigrationAnalysis` -- Test 5.2
-- [ ] `generateExecutiveSummary` -- Manual test: enable and verify `executiveSummary`
-- [ ] `cancerType` -- Tests 5.2, 6.3
-- [ ] `useOptimismCorrection` -- Test 7.4
-- [ ] `showExplanations` -- Test 13.1
-- [ ] `showAbbreviationGlossary` -- Test 13.2
+- [ ] `showClinicalInterpretation` - Test 6.3
+- [ ] `showStatisticalSummary` - Manual test: enable and verify `statisticalSummary`
+- [ ] `showMethodologyNotes` - Manual test: enable and verify `methodologyNotes`
+- [ ] `includeEffectSizes` - Manual test: enable and verify `effectSizes`
+- [ ] `advancedMigrationAnalysis` - Test 5.2
+- [ ] `generateExecutiveSummary` - Manual test: enable and verify `executiveSummary`
+- [ ] `cancerType` - Tests 5.2, 6.3
+- [ ] `useOptimismCorrection` - Test 7.4
+- [ ] `showExplanations` - Test 13.1
+- [ ] `showAbbreviationGlossary` - Test 13.2
 
 ### Stage Migration Effect & RMST
-- [ ] `calculateSME` -- Manual test: enable and verify `stageMigrationEffect` and `stageMigrationEffectAssessment`
-- [ ] `calculateRMST` -- Manual test: enable and verify `rmstByStage` and `rmstComparison`
+- [ ] `calculateSME` - Manual test: enable and verify `stageMigrationEffect` and `stageMigrationEffectAssessment`
+- [ ] `calculateRMST` - Manual test: enable and verify `rmstByStage` and `rmstComparison`
 
 ### Multifactorial Analysis
-- [ ] `enableMultifactorialAnalysis` -- Manual test: enable with covariates
-- [ ] `continuousCovariates` -- Manual test: assign age as continuous covariate
-- [ ] `categoricalCovariates` -- Manual test: assign sex as categorical covariate
-- [ ] `multifactorialComparisonType` -- Manual test: try each option
-- [ ] `baselineModel` -- Manual test: try each option
-- [ ] `performInteractionTests` -- Manual test: enable and verify `interactionTests`
-- [ ] `stratifiedAnalysis` -- Manual test: enable and verify `stratifiedAnalysisTable`
-- [ ] `showMultifactorialTables` -- Manual test: enable and verify `multifactorialResults`
-- [ ] `showAdjustedCIndexComparison` -- Manual test: enable and verify `adjustedCIndexComparison`
-- [ ] `showNestedModelTests` -- Manual test: enable and verify `nestedModelTests`
-- [ ] `showStepwiseResults` -- Manual test: enable and verify `stepwiseResults`
+- [ ] `enableMultifactorialAnalysis` - Manual test: enable with covariates
+- [ ] `continuousCovariates` - Manual test: assign age as continuous covariate
+- [ ] `categoricalCovariates` - Manual test: assign sex as categorical covariate
+- [ ] `multifactorialComparisonType` - Manual test: try each option
+- [ ] `baselineModel` - Manual test: try each option
+- [ ] `performInteractionTests` - Manual test: enable and verify `interactionTests`
+- [ ] `stratifiedAnalysis` - Manual test: enable and verify `stratifiedAnalysisTable`
+- [ ] `showMultifactorialTables` - Manual test: enable and verify `multifactorialResults`
+- [ ] `showAdjustedCIndexComparison` - Manual test: enable and verify `adjustedCIndexComparison`
+- [ ] `showNestedModelTests` - Manual test: enable and verify `nestedModelTests`
+- [ ] `showStepwiseResults` - Manual test: enable and verify `stepwiseResults`
 
 ### Competing Risks
-- [ ] `performCompetingRisks` -- Test 8.1
-- [ ] `competingEventVar` -- Test 8.1
-- [ ] `performCompetingRisksAdvanced` -- Test 8.2
-- [ ] `competingRisksMethod` -- Test 8.2
-- [ ] `cifTimePoints` -- Manual test: change time points
-- [ ] `competingEventLevels` -- Manual test: specify event categories
-- [ ] `primaryEventLevel` -- Manual test: specify primary event
-- [ ] `generateCIFPlots` -- Manual test (TODO: Wire to .b.R)
-- [ ] `performGrayTest` -- Manual test: enable and verify Gray test p-value in `cifSummary`
-- [ ] `cifConfidenceLevel` -- Manual test (TODO: Wire to .b.R)
-- [ ] `competingRisksCovariates` -- Manual test: add covariates
-- [ ] `stratifyByStaging` -- Manual test: enable
-- [ ] `calculateCRCIndex` -- Test 8.3
-- [ ] `generateCRSummary` -- Manual test: enable and verify `competingRisksSummary`
+- [ ] `performCompetingRisks` - Test 8.1
+- [ ] `competingEventVar` - Test 8.1
+- [ ] `performCompetingRisksAdvanced` - Test 8.2
+- [ ] `competingRisksMethod` - Test 8.2
+- [ ] `cifTimePoints` - Manual test: change time points
+- [ ] `competingEventLevels` - Manual test: specify event categories
+- [ ] `primaryEventLevel` - Manual test: specify primary event
+- [ ] `generateCIFPlots` - Manual test (TODO: Wire to .b.R)
+- [ ] `performGrayTest` - Manual test: enable and verify Gray test p-value in `cifSummary`
+- [ ] `cifConfidenceLevel` - Manual test (TODO: Wire to .b.R)
+- [ ] `competingRisksCovariates` - Manual test: add covariates
+- [ ] `stratifyByStaging` - Manual test: enable
+- [ ] `calculateCRCIndex` - Test 8.3
+- [ ] `generateCRSummary` - Manual test: enable and verify `competingRisksSummary`
 
 ### Optimal Cut-point
-- [ ] `performOptimalCutpoint` -- Manual test: assign continuous variable
-- [ ] `continuousStageVariable` -- Manual test: assign age or tumor size
-- [ ] `cutpointMethod` -- Manual test: try each method
-- [ ] `cutpointRange` -- Manual test: change range
-- [ ] `multipleTestingCorrection` -- Manual test: try each correction
-- [ ] `validateCutpoint` -- Manual test: enable and verify `cutpointValidation`
-- [ ] `cutpointBootstrap` -- Manual test: enable
-- [ ] `cutpointBootstrapReps` -- Manual test: set to 200
-- [ ] `generateStagingSystem` -- Manual test: enable and verify `generatedStagingSystem`
-- [ ] `stagingSystemLevels` -- Manual test: set to 4
+- [ ] `performOptimalCutpoint` - Manual test: assign continuous variable
+- [ ] `continuousStageVariable` - Manual test: assign age or tumor size
+- [ ] `cutpointMethod` - Manual test: try each method
+- [ ] `cutpointRange` - Manual test: change range
+- [ ] `multipleTestingCorrection` - Manual test: try each correction
+- [ ] `validateCutpoint` - Manual test: enable and verify `cutpointValidation`
+- [ ] `cutpointBootstrap` - Manual test: enable
+- [ ] `cutpointBootstrapReps` - Manual test: set to 200
+- [ ] `generateStagingSystem` - Manual test: enable and verify `generatedStagingSystem`
+- [ ] `stagingSystemLevels` - Manual test: set to 4
 
 ### SHAP Interpretability
-- [ ] `performSHAPAnalysis` -- Manual test: enable
-- [ ] `shapAnalysisType` -- Manual test: try each option
-- [ ] `shapCovariates` -- Manual test: assign variables
-- [ ] `shapSampleSize` -- Manual test: set to 50
-- [ ] `shapBackgroundSamples` -- Manual test: set to 25
-- [ ] `shapExplanationType` -- Manual test: try each option
-- [ ] `generateSHAPPlots` -- Manual test (TODO: Wire to .b.R)
-- [ ] `shapPatientProfiles` -- Manual test: try each option
-- [ ] `shapInteractionAnalysis` -- Manual test: enable and verify `shapInteractions`
-- [ ] `shapClinicalThresholds` -- Manual test: change thresholds
+- [ ] `performSHAPAnalysis` - Manual test: enable
+- [ ] `shapAnalysisType` - Manual test: try each option
+- [ ] `shapCovariates` - Manual test: assign variables
+- [ ] `shapSampleSize` - Manual test: set to 50
+- [ ] `shapBackgroundSamples` - Manual test: set to 25
+- [ ] `shapExplanationType` - Manual test: try each option
+- [ ] `generateSHAPPlots` - Manual test (TODO: Wire to .b.R)
+- [ ] `shapPatientProfiles` - Manual test: try each option
+- [ ] `shapInteractionAnalysis` - Manual test: enable and verify `shapInteractions`
+- [ ] `shapClinicalThresholds` - Manual test: change thresholds
 
 ### Random Survival Forests
-- [ ] `performRandomForestAnalysis` -- Test 9.1
-- [ ] `forestModelType` -- Manual test: try each option
-- [ ] `forestNTrees` -- Tests 9.1, 9.2
-- [ ] `forestMTry` -- Manual test: set to specific number
-- [ ] `forestMinNodeSize` -- Manual test: set to 10
-- [ ] `forestCovariates` -- Manual test: assign covariates
-- [ ] `calculateVariableImportance` -- Test 9.2
-- [ ] `forestImportanceType` -- Manual test (TODO: Wire to .b.R)
-- [ ] `performForestValidation` -- Manual test: enable
-- [ ] `forestPredictionTimePoints` -- Manual test: change time points
-- [ ] `generateSurvivalPredictions` -- Manual test: enable and verify `forestSurvivalPredictions`
-- [ ] `forestDiscriminationMetrics` -- Test 9.3
-- [ ] `forestStagingComparison` -- Manual test (TODO: Wire to .b.R)
-- [ ] `forestBootstrap` -- Manual test (TODO: Wire to .b.R)
-- [ ] `forestBootstrapSamples` -- Manual test (TODO: Wire to .b.R)
-- [ ] `generateForestSummary` -- Manual test (TODO: Wire to .b.R)
-- [ ] `rfAnalyzeOldStage` -- Manual test: disable and verify exclusion
-- [ ] `rfAnalyzeNewStage` -- Manual test: disable and verify exclusion
-- [ ] `rfMtryAuto` -- Manual test: disable and verify manual mtry
-- [ ] `rfBootstrapType` -- Manual test: switch to by.node
-- [ ] `rfSamplingType` -- Manual test: switch to swor
-- [ ] `rfMinimalDepth` -- Manual test: enable
+- [ ] `performRandomForestAnalysis` - Test 9.1
+- [ ] `forestModelType` - Manual test: try each option
+- [ ] `forestNTrees` - Tests 9.1, 9.2
+- [ ] `forestMTry` - Manual test: set to specific number
+- [ ] `forestMinNodeSize` - Manual test: set to 10
+- [ ] `forestCovariates` - Manual test: assign covariates
+- [ ] `calculateVariableImportance` - Test 9.2
+- [ ] `forestImportanceType` - Manual test (TODO: Wire to .b.R)
+- [ ] `performForestValidation` - Manual test: enable
+- [ ] `forestPredictionTimePoints` - Manual test: change time points
+- [ ] `generateSurvivalPredictions` - Manual test: enable and verify `forestSurvivalPredictions`
+- [ ] `forestDiscriminationMetrics` - Test 9.3
+- [ ] `forestStagingComparison` - Manual test (TODO: Wire to .b.R)
+- [ ] `forestBootstrap` - Manual test (TODO: Wire to .b.R)
+- [ ] `forestBootstrapSamples` - Manual test (TODO: Wire to .b.R)
+- [ ] `generateForestSummary` - Manual test (TODO: Wire to .b.R)
+- [ ] `rfAnalyzeOldStage` - Manual test: disable and verify exclusion
+- [ ] `rfAnalyzeNewStage` - Manual test: disable and verify exclusion
+- [ ] `rfMtryAuto` - Manual test: disable and verify manual mtry
+- [ ] `rfBootstrapType` - Manual test: switch to by.node
+- [ ] `rfSamplingType` - Manual test: switch to swor
+- [ ] `rfMinimalDepth` - Manual test: enable
 
 ### Cure Models
-- [ ] `performCureModelAnalysis` -- Manual test: enable
-- [ ] `cureModelType` -- Manual test: try each option
-- [ ] `cureDistribution` -- Manual test: try each distribution
-- [ ] `cureAnalyzeOldStage` -- Manual test: enable
-- [ ] `cureAnalyzeNewStage` -- Manual test: enable
-- [ ] `cureFractionEstimation` -- Manual test (TODO: Wire to .b.R)
-- [ ] `cureConfidenceLevel` -- Manual test (TODO: Wire to .b.R)
-- [ ] `cureBootstrapCI` -- Manual test: enable and verify `cureModelBootstrap`
-- [ ] `cureBootstrapReps` -- Manual test: set to 200
-- [ ] `cureTimeHorizon` -- Manual test: set to 60
-- [ ] `curePlateauThreshold` -- Manual test: change threshold
-- [ ] `cureCovariates` -- Manual test: assign variables
-- [ ] `cureModelComparison` -- Manual test (TODO: Wire to .b.R)
-- [ ] `cureStageSpecificAnalysis` -- Manual test: enable and verify `stageSpecificCureAnalysis`
-- [ ] `cureGoodnessOfFit` -- Manual test (TODO: Wire to .b.R)
-- [ ] `generateCureSummary` -- Manual test (TODO: Wire to .b.R)
+- [ ] `performCureModelAnalysis` - Manual test: enable
+- [ ] `cureModelType` - Manual test: try each option
+- [ ] `cureDistribution` - Manual test: try each distribution
+- [ ] `cureAnalyzeOldStage` - Manual test: enable
+- [ ] `cureAnalyzeNewStage` - Manual test: enable
+- [ ] `cureFractionEstimation` - Manual test (TODO: Wire to .b.R)
+- [ ] `cureConfidenceLevel` - Manual test (TODO: Wire to .b.R)
+- [ ] `cureBootstrapCI` - Manual test: enable and verify `cureModelBootstrap`
+- [ ] `cureBootstrapReps` - Manual test: set to 200
+- [ ] `cureTimeHorizon` - Manual test: set to 60
+- [ ] `curePlateauThreshold` - Manual test: change threshold
+- [ ] `cureCovariates` - Manual test: assign variables
+- [ ] `cureModelComparison` - Manual test (TODO: Wire to .b.R)
+- [ ] `cureStageSpecificAnalysis` - Manual test: enable and verify `stageSpecificCureAnalysis`
+- [ ] `cureGoodnessOfFit` - Manual test (TODO: Wire to .b.R)
+- [ ] `generateCureSummary` - Manual test (TODO: Wire to .b.R)
 
 ### Multi-State Models
-- [ ] `performMultiStateAnalysis` -- Manual test: enable with state variable
-- [ ] `multiStateModel` -- Manual test (TODO: Wire to .b.R)
-- [ ] `stateVariable` -- Manual test: assign variable
-- [ ] `transitionTimeVariable` -- Manual test: assign variable
-- [ ] `multiStateStates` -- Manual test: define states
-- [ ] `absorptionStates` -- Manual test: define absorption states
-- [ ] `multiStateCovariates` -- Manual test: assign covariates
-- [ ] `calculateTransitionProbabilities` -- Manual test: enable and verify `transitionProbabilities`
-- [ ] `multiStateTimePoints` -- Manual test: change time points
-- [ ] `generateTransitionMatrix` -- Manual test: enable and verify `transitionIntensities`
-- [ ] `multiStateGraphics` -- Manual test (TODO: Wire to .b.R)
-- [ ] `msStratifyByStaging` -- Manual test (TODO: Wire to .b.R)
-- [ ] `multiStateValidation` -- Manual test (TODO: Wire to .b.R)
-- [ ] `generateMSMSummary` -- Manual test: enable and verify `multiStateSummary`
+- [ ] `performMultiStateAnalysis` - Manual test: enable with state variable
+- [ ] `multiStateModel` - Manual test (TODO: Wire to .b.R)
+- [ ] `stateVariable` - Manual test: assign variable
+- [ ] `transitionTimeVariable` - Manual test: assign variable
+- [ ] `multiStateStates` - Manual test: define states
+- [ ] `absorptionStates` - Manual test: define absorption states
+- [ ] `multiStateCovariates` - Manual test: assign covariates
+- [ ] `calculateTransitionProbabilities` - Manual test: enable and verify `transitionProbabilities`
+- [ ] `multiStateTimePoints` - Manual test: change time points
+- [ ] `generateTransitionMatrix` - Manual test: enable and verify `transitionIntensities`
+- [ ] `multiStateGraphics` - Manual test (TODO: Wire to .b.R)
+- [ ] `msStratifyByStaging` - Manual test (TODO: Wire to .b.R)
+- [ ] `multiStateValidation` - Manual test (TODO: Wire to .b.R)
+- [ ] `generateMSMSummary` - Manual test: enable and verify `multiStateSummary`
 
 ### Frailty Models
-- [ ] `performFrailtyModelsAnalysis` -- Manual test: enable with cluster variable
-- [ ] `frailtyClusterVariable` -- Manual test: assign institution/center variable
-- [ ] `frailtyDistribution` -- Manual test (TODO: Wire to .b.R)
-- [ ] `frailtyBootstrap` -- Manual test: enable
-- [ ] `frailtyBootstrapSamples` -- Manual test: set to 200
-- [ ] `frailtyVarianceComponents` -- Manual test (TODO: Wire to .b.R)
-- [ ] `frailtyHeterogeneityTest` -- Manual test (TODO: Wire to .b.R)
-- [ ] `frailtyClusterComparison` -- Manual test: enable
-- [ ] `frailtyModelSelection` -- Manual test (TODO: Wire to .b.R)
-- [ ] `frailtyPredictiveAccuracy` -- Manual test (TODO: Wire to .b.R)
-- [ ] `frailtyDiagnostics` -- Manual test: enable
-- [ ] `frailtyAdvancedInference` -- Manual test (TODO: Wire to .b.R)
+- [ ] `performFrailtyModelsAnalysis` - Manual test: enable with cluster variable
+- [ ] `frailtyClusterVariable` - Manual test: assign institution/center variable
+- [ ] `frailtyDistribution` - Manual test (TODO: Wire to .b.R)
+- [ ] `frailtyBootstrap` - Manual test: enable
+- [ ] `frailtyBootstrapSamples` - Manual test: set to 200
+- [ ] `frailtyVarianceComponents` - Manual test (TODO: Wire to .b.R)
+- [ ] `frailtyHeterogeneityTest` - Manual test (TODO: Wire to .b.R)
+- [ ] `frailtyClusterComparison` - Manual test: enable
+- [ ] `frailtyModelSelection` - Manual test (TODO: Wire to .b.R)
+- [ ] `frailtyPredictiveAccuracy` - Manual test (TODO: Wire to .b.R)
+- [ ] `frailtyDiagnostics` - Manual test: enable
+- [ ] `frailtyAdvancedInference` - Manual test (TODO: Wire to .b.R)
 
 ### Win Ratio
-- [ ] `performWinRatioAnalysis` -- Manual test: enable
-- [ ] `winRatioEndpoints` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioDeathVariable` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioSecondaryEndpoint` -- Manual test: assign variable
-- [ ] `wrSecondaryDirection` -- Manual test: try each option
-- [ ] `winRatioTertiaryEndpoint` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioTimeVariables` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioMatchingStrategy` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioConfidenceMethod` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioBootstrapSamples` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioConfidenceLevel` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioHandleTies` -- Manual test (TODO: Wire to .b.R)
-- [ ] `winRatioSensitivityAnalysis` -- Manual test: enable
-- [ ] `winRatioGeneralizedPairwise` -- Manual test (TODO: Wire to .b.R)
+- [ ] `performWinRatioAnalysis` - Manual test: enable
+- [ ] `winRatioEndpoints` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioDeathVariable` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioSecondaryEndpoint` - Manual test: assign variable
+- [ ] `wrSecondaryDirection` - Manual test: try each option
+- [ ] `winRatioTertiaryEndpoint` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioTimeVariables` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioMatchingStrategy` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioConfidenceMethod` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioBootstrapSamples` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioConfidenceLevel` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioHandleTies` - Manual test (TODO: Wire to .b.R)
+- [ ] `winRatioSensitivityAnalysis` - Manual test: enable
+- [ ] `winRatioGeneralizedPairwise` - Manual test (TODO: Wire to .b.R)
 
 ### Interval Censoring
-- [ ] `performIntervalCensoringAnalysis` -- Manual test: enable with left/right time variables
-- [ ] `intervalCensoringLeftTime` -- Manual test: assign variable
-- [ ] `intervalCensoringRightTime` -- Manual test: assign variable
-- [ ] `intervalCensoringDistribution` -- Manual test: try each distribution
-- [ ] `intervalCensoringModel` -- Manual test: try each model type
-- [ ] `intervalCensoringBootstrap` -- Manual test: enable
-- [ ] `intervalCensoringBootstrapSamples` -- Manual test: set to 200
-- [ ] `intervalCensoringCompareStages` -- Manual test: enable and verify comparison table
-- [ ] `intervalCensoringPlots` -- Manual test (TODO: Wire to .b.R)
-- [ ] `intervalCensoringDiagnostics` -- Manual test: enable
-- [ ] `intervalCensoringPredictionTime` -- Manual test: change time points
-- [ ] `intervalCensoringConfidenceLevel` -- Manual test: change to 0.90
-- [ ] `intervalCensoringAdjustVariables` -- Manual test: assign covariates
+- [ ] `performIntervalCensoringAnalysis` - Manual test: enable with left/right time variables
+- [ ] `intervalCensoringLeftTime` - Manual test: assign variable
+- [ ] `intervalCensoringRightTime` - Manual test: assign variable
+- [ ] `intervalCensoringDistribution` - Manual test: try each distribution
+- [ ] `intervalCensoringModel` - Manual test: try each model type
+- [ ] `intervalCensoringBootstrap` - Manual test: enable
+- [ ] `intervalCensoringBootstrapSamples` - Manual test: set to 200
+- [ ] `intervalCensoringCompareStages` - Manual test: enable and verify comparison table
+- [ ] `intervalCensoringPlots` - Manual test (TODO: Wire to .b.R)
+- [ ] `intervalCensoringDiagnostics` - Manual test: enable
+- [ ] `intervalCensoringPredictionTime` - Manual test: change time points
+- [ ] `intervalCensoringConfidenceLevel` - Manual test: change to 0.90
+- [ ] `intervalCensoringAdjustVariables` - Manual test: assign covariates
 
 ### Informative Censoring
-- [ ] `performInformativeCensoringAnalysis` -- Manual test: enable
-- [ ] `informativeCensoringTestMethod` -- Manual test: try each method
-- [ ] `informativeCensoringCovariates` -- Manual test (TODO: Wire to .b.R)
-- [ ] `informativeCensoringLandmarkTimes` -- Manual test: change times
-- [ ] `informativeCensoringAdjustmentMethod` -- Manual test: try each method
-- [ ] `informativeCensoringIPWVariables` -- Manual test (TODO: Wire to .b.R)
-- [ ] `informativeCensoringSensitivityRange` -- Manual test: change range
-- [ ] `informativeCensoringBootstrap` -- Manual test: enable
-- [ ] `informativeCensoringBootstrapSamples` -- Manual test: set to 200
-- [ ] `informativeCensoringAlpha` -- Manual test: change to 0.10
-- [ ] `informativeCensoringPlots` -- Manual test (TODO: Wire to .b.R)
-- [ ] `informativeCensoringCompareStages` -- Manual test: enable
+- [ ] `performInformativeCensoringAnalysis` - Manual test: enable
+- [ ] `informativeCensoringTestMethod` - Manual test: try each method
+- [ ] `informativeCensoringCovariates` - Manual test (TODO: Wire to .b.R)
+- [ ] `informativeCensoringLandmarkTimes` - Manual test: change times
+- [ ] `informativeCensoringAdjustmentMethod` - Manual test: try each method
+- [ ] `informativeCensoringIPWVariables` - Manual test (TODO: Wire to .b.R)
+- [ ] `informativeCensoringSensitivityRange` - Manual test: change range
+- [ ] `informativeCensoringBootstrap` - Manual test: enable
+- [ ] `informativeCensoringBootstrapSamples` - Manual test: set to 200
+- [ ] `informativeCensoringAlpha` - Manual test: change to 0.10
+- [ ] `informativeCensoringPlots` - Manual test (TODO: Wire to .b.R)
+- [ ] `informativeCensoringCompareStages` - Manual test: enable
 
 ### Concordance Probability
-- [ ] `performConcordanceProbabilityAnalysis` -- Manual test: enable
-- [ ] `concordanceProbabilityMethods` -- Manual test: try each method
-- [ ] `concordanceProbabilityTimePoints` -- Manual test: change time points
-- [ ] `concordanceProbabilityWeighting` -- Manual test: try each weighting
-- [ ] `concordanceProbabilityBootstrap` -- Manual test: enable
-- [ ] `concordanceProbabilityBootstrapSamples` -- Manual test (TODO: Wire to .b.R)
-- [ ] `concordanceProbabilityConfidenceLevel` -- Manual test: change level
-- [ ] `concordanceProbabilityCompareStages` -- Manual test: enable and verify comparison
-- [ ] `concordanceProbabilityAdjustVariables` -- Manual test (TODO: Wire to .b.R)
-- [ ] `concordanceProbabilityRobustnessAnalysis` -- Manual test: enable
-- [ ] `concordanceProbabilityAlpha` -- Manual test: change alpha
-- [ ] `concordanceProbabilityDiagnostics` -- Manual test: enable
+- [ ] `performConcordanceProbabilityAnalysis` - Manual test: enable
+- [ ] `concordanceProbabilityMethods` - Manual test: try each method
+- [ ] `concordanceProbabilityTimePoints` - Manual test: change time points
+- [ ] `concordanceProbabilityWeighting` - Manual test: try each weighting
+- [ ] `concordanceProbabilityBootstrap` - Manual test: enable
+- [ ] `concordanceProbabilityBootstrapSamples` - Manual test (TODO: Wire to .b.R)
+- [ ] `concordanceProbabilityConfidenceLevel` - Manual test: change level
+- [ ] `concordanceProbabilityCompareStages` - Manual test: enable and verify comparison
+- [ ] `concordanceProbabilityAdjustVariables` - Manual test (TODO: Wire to .b.R)
+- [ ] `concordanceProbabilityRobustnessAnalysis` - Manual test: enable
+- [ ] `concordanceProbabilityAlpha` - Manual test: change alpha
+- [ ] `concordanceProbabilityDiagnostics` - Manual test: enable
 
 ### Clinical Utility Index
-- [ ] `performClinicalUtilityAnalysis` -- Manual test: enable
-- [ ] `clinicalUtilityPrevalence` -- Manual test: change prevalence
-- [ ] `clinicalUtilityTimePoint` -- Manual test: change to 36
-- [ ] `clinicalUtilityThresholds` -- Manual test: try each range
-- [ ] `clinicalUtilityNNT` -- Manual test: enable
-- [ ] `clinicalUtilityTreatmentEffect` -- Manual test: change HR
-- [ ] `clinicalUtilityComparison` -- Manual test (TODO: Wire to .b.R)
-- [ ] `clinicalUtilityCostEffectiveness` -- Manual test (TODO: Wire to .b.R)
-- [ ] `clinicalUtilityCostPerIntervention` -- Manual test: change cost
-- [ ] `clinicalUtilityBootstrap` -- Manual test: enable
-- [ ] `clinicalUtilityBootstrapSamples` -- Manual test: set to 200
-- [ ] `clinicalUtilityTimeVarying` -- Manual test: enable
+- [ ] `performClinicalUtilityAnalysis` - Manual test: enable
+- [ ] `clinicalUtilityPrevalence` - Manual test: change prevalence
+- [ ] `clinicalUtilityTimePoint` - Manual test: change to 36
+- [ ] `clinicalUtilityThresholds` - Manual test: try each range
+- [ ] `clinicalUtilityNNT` - Manual test: enable
+- [ ] `clinicalUtilityTreatmentEffect` - Manual test: change HR
+- [ ] `clinicalUtilityComparison` - Manual test (TODO: Wire to .b.R)
+- [ ] `clinicalUtilityCostEffectiveness` - Manual test (TODO: Wire to .b.R)
+- [ ] `clinicalUtilityCostPerIntervention` - Manual test: change cost
+- [ ] `clinicalUtilityBootstrap` - Manual test: enable
+- [ ] `clinicalUtilityBootstrapSamples` - Manual test: set to 200
+- [ ] `clinicalUtilityTimeVarying` - Manual test: enable
 
 ---
 

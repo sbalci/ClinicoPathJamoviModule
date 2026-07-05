@@ -11,6 +11,7 @@
 Successfully migrated the `patientsimilarity` module from legacy HTML warnings pattern to modern jamovi Notices API. This was identified as the CRITICAL BLOCKER preventing clinical release in the comprehensive code review.
 
 **Implemented:**
+
 - ✅ **13 distinct Notices** (5 ERROR, 1 STRONG_WARNING, 5 WARNING, 2 INFO)
 - ✅ **Removed legacy infrastructure** (.messages, .accumulateMessage, .resetMessages)
 - ✅ **Replaced jmvcore::reject() calls** with graceful ERROR Notices
@@ -18,6 +19,7 @@ Successfully migrated the `patientsimilarity` module from legacy HTML warnings p
 - ✅ **Compilation verified** (`jmvtools::prepare()` PASSED with no errors)
 
 **Impact:**
+
 - Error handling score: **0/10 → 10/10** 📈
 - Overall quality score: **8.3/10 → 9.5/10** 📈
 - **Clinical readiness: UNBLOCKED** - Ready for next phase (clinician-friendly outputs)
@@ -52,7 +54,7 @@ Successfully migrated the `patientsimilarity` module from legacy HTML warnings p
 
 | # | Name | Trigger Condition | File Location | Message |
 |---|------|-------------------|---------------|---------|
-| 1 | `verySmallSample` | 5 ≤ n < 10 | R/patientsimilarity.b.R:161-167 | "Sample size is very small (n={n}). Results may be unreliable. Consider collecting more data for robust analysis." |
+| 1 | `verySmallSample` | 5 <= n < 10 | R/patientsimilarity.b.R:161-167 | "Sample size is very small (n={n}). Results may be unreliable. Consider collecting more data for robust analysis." |
 
 **User Experience:** Orange notice with strong visual emphasis. Analysis continues but user warned of reliability issues.
 
@@ -64,7 +66,7 @@ Successfully migrated the `patientsimilarity` module from legacy HTML warnings p
 
 | # | Name | Trigger Condition | File Location | Message |
 |---|------|-------------------|---------------|---------|
-| 1 | `smallSample` | 10 ≤ n < 30 | R/patientsimilarity.b.R:169-175 | "Sample size is small (n={n}). Results should be interpreted with caution." |
+| 1 | `smallSample` | 10 <= n < 30 | R/patientsimilarity.b.R:169-175 | "Sample size is small (n={n}). Results should be interpreted with caution." |
 | 2 | `perplexityAdjusted` | n < 3 × perplexity | R/patientsimilarity.b.R:310-317 | "t-SNE Perplexity ({original}) is too high for sample size (n={n}). Automatically adjusted to {adjusted}. For optimal results, use perplexity < n/3." |
 | 3 | `missingDbscan` | dbscan package missing | R/patientsimilarity.b.R:420-426 | 'Package "dbscan" not available. Using k-means clustering instead. Install dbscan with: install.packages("dbscan")' |
 | 4 | `dbscanFewClusters` | DBSCAN found < 2 clusters | R/patientsimilarity.b.R:433-439 | "DBSCAN found only {n} cluster(s). Try adjusting epsilon (eps) or minimum points (minPts) parameters to identify more clusters." |
@@ -94,6 +96,7 @@ Successfully migrated the `patientsimilarity` module from legacy HTML warnings p
 **File:** `R/patientsimilarity.b.R`
 
 **Deleted:**
+
 ```r
 # Lines 53, 62-67 - REMOVED
 .messages = list(),
@@ -108,12 +111,14 @@ Successfully migrated the `patientsimilarity` module from legacy HTML warnings p
 ```
 
 **Deleted:**
+
 ```r
 # Lines 95 - REMOVED
 private$.resetMessages()
 ```
 
 **Deleted:**
+
 ```r
 # Lines 140-150 - REMOVED
 if (length(private$.messages) > 0) {
@@ -134,6 +139,7 @@ if (length(private$.messages) > 0) {
 #### 2. Replaced Missing Variables Check
 
 **Before:**
+
 ```r
 if (is.null(self$options$vars) || length(self$options$vars) == 0) {
     return()  # SILENT RETURN
@@ -141,6 +147,7 @@ if (is.null(self$options$vars) || length(self$options$vars) == 0) {
 ```
 
 **After:**
+
 ```r
 if (is.null(self$options$vars) || length(self$options$vars) == 0) {
     notice <- jmvcore::Notice$new(
@@ -159,6 +166,7 @@ if (is.null(self$options$vars) || length(self$options$vars) == 0) {
 #### 3. Enhanced Sample Size Validation
 
 **Before:**
+
 ```r
 if (nrow(data) < 10) {
     private$.accumulateMessage("Sample size is very small (< 10). Results may be unreliable.")
@@ -166,6 +174,7 @@ if (nrow(data) < 10) {
 ```
 
 **After:**
+
 ```r
 # Check sample size
 if (nrow(data) < 5) {
@@ -203,6 +212,7 @@ if (nrow(data) < 5) {
 **Example 1: Data Preparation Error**
 
 **Before:**
+
 ```r
 }, error = function(e) {
     jmvcore::reject(paste("Error preparing data:", e$message), code='')
@@ -211,6 +221,7 @@ if (nrow(data) < 5) {
 ```
 
 **After:**
+
 ```r
 }, error = function(e) {
     notice <- jmvcore::Notice$new(
@@ -227,6 +238,7 @@ if (nrow(data) < 5) {
 **Example 2: Missing Rtsne Package**
 
 **Before:**
+
 ```r
 if (!requireNamespace("Rtsne", quietly = TRUE)) {
     jmvcore::reject("Package 'Rtsne' required for t-SNE. Please install it.", code='')
@@ -235,6 +247,7 @@ if (!requireNamespace("Rtsne", quietly = TRUE)) {
 ```
 
 **After:**
+
 ```r
 if (!requireNamespace("Rtsne", quietly = TRUE)) {
     notice <- jmvcore::Notice$new(
@@ -253,6 +266,7 @@ if (!requireNamespace("Rtsne", quietly = TRUE)) {
 #### 5. Enhanced Perplexity Validation
 
 **Before:**
+
 ```r
 if (nrow(data) < 3 * self$options$perplexity) {
     new_perp <- floor((nrow(data) - 1) / 3)
@@ -266,6 +280,7 @@ if (nrow(data) < 3 * self$options$perplexity) {
 ```
 
 **After:**
+
 ```r
 if (nrow(data) < 3 * self$options$perplexity) {
     new_perp <- floor((nrow(data) - 1) / 3)
@@ -291,6 +306,7 @@ if (nrow(data) < 3 * self$options$perplexity) {
 #### 6. Enhanced DBSCAN Handling
 
 **Before:**
+
 ```r
 if (!requireNamespace("dbscan", quietly = TRUE)) {
     private$.accumulateMessage("Package 'dbscan' not available, using k-means instead for clustering.")
@@ -305,6 +321,7 @@ if (!requireNamespace("dbscan", quietly = TRUE)) {
 ```
 
 **After:**
+
 ```r
 if (!requireNamespace("dbscan", quietly = TRUE)) {
     notice <- jmvcore::Notice$new(
@@ -335,6 +352,7 @@ if (!requireNamespace("dbscan", quietly = TRUE)) {
 #### 7. Enhanced Survival Analysis Validation
 
 **Before:**
+
 ```r
 if (is.null(self$options$survivalTime) || is.null(self$options$survivalEvent)) {
      private$.accumulateMessage("Survival analysis skipped: Missing time or event variable.")
@@ -348,6 +366,7 @@ if (any(is.na(survtime)) || any(is.na(event))) {
 ```
 
 **After:**
+
 ```r
 if (is.null(self$options$survivalTime) || is.null(self$options$survivalEvent)) {
     notice <- jmvcore::Notice$new(
@@ -378,6 +397,7 @@ if (any(is.na(survtime)) || any(is.na(event))) {
 #### 8. Enhanced Coordinates Export
 
 **Before:**
+
 ```r
 if (n_dims > 1) {
     private$.accumulateMessage(paste0("Note: Only Dimension 1 exported. For all ", n_dims, " dimensions, use external tools or modify output structure."))
@@ -385,6 +405,7 @@ if (n_dims > 1) {
 ```
 
 **After:**
+
 ```r
 if (n_dims > 1) {
     notice <- jmvcore::Notice$new(
@@ -404,6 +425,7 @@ if (n_dims > 1) {
 **File:** `jamovi/patientsimilarity.r.yaml`
 
 **Deleted:**
+
 ```yaml
 # Lines 19-22 - REMOVED
 - name: warnings
@@ -519,12 +541,14 @@ INFO (blue, position 999)
 ### 1. User Experience
 
 **Before:**
+
 - Silent failures (missing vars, packages)
 - All warnings same severity (HTML blob)
 - Crashes on package errors (`jmvcore::reject()`)
 - No distinction between critical vs informational
 
 **After:**
+
 - ✅ Clear error messages for failures (ERROR Notices)
 - ✅ Severity-coded warnings (STRONG_WARNING vs WARNING vs INFO)
 - ✅ Graceful package error handling with install instructions
@@ -533,11 +557,13 @@ INFO (blue, position 999)
 ### 2. Clinical Safety
 
 **Before:**
+
 - No warning for n<5 (analysis on tiny samples)
 - Package errors crash jamovi
 - Silent missing survival variables
 
 **After:**
+
 - ✅ ERROR Notice blocks analysis when n<5
 - ✅ Graceful ERROR Notices with recovery instructions
 - ✅ Clear ERROR Notice for missing survival vars
@@ -545,11 +571,13 @@ INFO (blue, position 999)
 ### 3. Code Quality
 
 **Before:**
+
 - Legacy infrastructure (.messages accumulation)
 - HTML rendering mixed with logic
 - Inconsistent error handling
 
 **After:**
+
 - ✅ Clean architecture (no legacy code)
 - ✅ Separation of concerns (Notices API handles all messaging)
 - ✅ Consistent error handling pattern
@@ -557,10 +585,12 @@ INFO (blue, position 999)
 ### 4. Jamovi Compliance
 
 **Before:**
+
 - 0/10 on Notices API compliance
 - Used deprecated HTML warnings pattern
 
 **After:**
+
 - ✅ 10/10 on Notices API compliance
 - ✅ Follows jamovi best practices
 - ✅ Modern notice system
@@ -603,7 +633,7 @@ INFO (blue, position 999)
 
 6. **Perplexity Adjustment (WARNING)**
    - [ ] Use dataset with n=50
-   - [ ] Set perplexity=30 (requires n≥90)
+   - [ ] Set perplexity=30 (requires n>=90)
    - [ ] Verify yellow WARNING Notice explains auto-adjustment
    - [ ] Verify analysis continues with adjusted perplexity
 
@@ -675,6 +705,7 @@ INFO (blue, position 999)
    - Test all 11 critical test cases above
 
 2. **Commit changes**
+
    ```bash
    git add R/patientsimilarity.b.R jamovi/patientsimilarity.r.yaml
    git commit -m "feat: migrate patientsimilarity to Notices API (CRITICAL)
@@ -699,13 +730,13 @@ INFO (blue, position 999)
 
 ### High Priority (Next Implementation)
 
-3. **Add Clinician-Friendly Outputs** (from code review recommendations)
+1. **Add Clinician-Friendly Outputs** (from code review recommendations)
    - Implement `.generatePlainLanguageSummary()` method
    - Implement `.generateEducationalExplanations()` method
    - Add `show_summary` and `show_explanations` toggles
    - Reference: `PATHOLOGYAGREEMENT_FIXES_COMPLETE.md` lines 87-187
 
-4. **Clinical Validation Testing**
+2. **Clinical Validation Testing**
    - Create realistic test dataset (`data/patientsimilarity_validation.csv`)
    - Test all 4 methods × 3 clustering methods = 12 combinations
    - Document validation results

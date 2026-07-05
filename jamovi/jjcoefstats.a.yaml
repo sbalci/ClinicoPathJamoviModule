@@ -11,25 +11,26 @@ description:
       Create publication-ready forest plots for regression coefficients and meta-analysis results.
       Supports both pre-computed coefficients and automatic model fitting from raw data.
       Uses ggstatsplot's ggcoefstats() for professional visualization.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage:
-            # For pre-computed coefficients:
-            # ClinicoPath::jjcoefstats(
-            #   data = model_results,
-            #   term = "term",
-            #   estimate = "estimate",
-            #   std_error = "std_error"
-            # )
-            #
-            # For automatic fitting:
-            # ClinicoPath::jjcoefstats(
-            #   data = mydata,
-            #   outcome = "weight",
-            #   predictors = vars(height, age, sex),
-            #   modelType = "lm"
-            # )
+      
+#     R:
+#         dontrun: true
+#         usage: |
+#             # Example usage:
+#             # For pre-computed coefficients:
+#             # ClinicoPath::jjcoefstats(
+#             #   data = model_results,
+#             #   term = "term",
+#             #   estimate = "estimate",
+#             #   std_error = "std_error"
+#             # )
+#             #
+#             # For automatic fitting:
+#             # ClinicoPath::jjcoefstats(
+#             #   data = mydata,
+#             #   outcome = "weight",
+#             #   predictors = vars(height, age, sex),
+#             #   modelType = "lm"
+#             # )
 
 completeWhenFilled: false
 

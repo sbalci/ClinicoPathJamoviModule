@@ -3521,7 +3521,7 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="loaOutput",
                 title="Add Case Agreement Categorization to Data",
                 varTitle="`{loaVariableName}`",
-                varDescription="Case agreement categorization. Simple mode: All Agreed (100%), Majority Agreed (\u2265threshold%), No Agreement. Detailed mode: Absolute (100%), High, Moderate, Low, Poor based on agreement thresholds.",
+                varDescription="Case agreement categorization. Simple mode: All Agreed (100%), Majority Agreed (>=threshold%), No Agreement. Detailed mode: Absolute (100%), High, Moderate, Low, Poor based on agreement thresholds.",
                 measureType="nominal",
                 clearWith=list(
                     "vars",
@@ -4265,7 +4265,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   ratings. Will be added to the dataset and available for downstream
 #'   analyses.
 #' @param consensusRule Rule for defining consensus. Simple majority = modal
-#'   category with >50 percent of votes. Supermajority requires ≥75 percent
+#'   category with >50 percent of votes. Supermajority requires >=75 percent
 #'   agreement. Unanimous requires 100 percent agreement. Cases not meeting
 #'   threshold are set to NA in consensus variable.
 #' @param tieBreaker How to handle ties when no single category meets the
@@ -4277,7 +4277,7 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   categories) classification. Useful for identifying difficult cases and
 #'   quality control.
 #' @param detailLevel Simple mode: All Agreed (100 percent), Majority Agreed
-#'   (≥threshold percent), No Agreement (<threshold percent). Detailed mode:
+#'   (>=threshold percent), No Agreement (<threshold percent). Detailed mode:
 #'   Absolute (100 percent), High, Moderate, Low, Poor (based on
 #'   custom/data-driven thresholds). Simple mode replicates the former
 #'   "Agreement Status" feature.
@@ -4288,10 +4288,10 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   categories. Custom = user-defined cutpoints. Quartiles/Tertiles =
 #'   data-driven splits.
 #' @param loaHighThreshold For Detailed mode with Custom thresholds only:
-#'   Minimum  percent for "High" classification (e.g., 75 percent = ≥12/16
-#'   raters). Cases ≥ this threshold are "High Agreement".
+#'   Minimum  percent for "High" classification (e.g., 75 percent = >=12/16
+#'   raters). Cases >= this threshold are "High Agreement".
 #' @param loaLowThreshold For Detailed mode with Custom thresholds only:
-#'   Minimum  percent for "Low" classification (e.g., 56 percent = ≥9/16
+#'   Minimum  percent for "Low" classification (e.g., 56 percent = >=9/16
 #'   raters). Below = "Poor", between Low and High = "Moderate".
 #' @param loaVariableName Name for the computed Level of Agreement variable
 #'   added to the dataset. Default: 'agreement_level'. Will contain categories

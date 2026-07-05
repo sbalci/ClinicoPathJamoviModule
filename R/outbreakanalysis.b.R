@@ -699,7 +699,7 @@ outbreakanalysisClass <- R6::R6Class(
         .populateTables = function() {
             # TODO (stub): two Html outputs declared in jamovi/outbreakanalysis.r.yaml at L409
             # (comprehensive_report) and L418 (public_health_summary) are never populated
-            # in this .b.R — when users toggle the corresponding .a.yaml options, jamovi
+            # in this .b.R - when users toggle the corresponding .a.yaml options, jamovi
             # shows empty Html panels with no error. Either populate them here via
             # `self$results$comprehensive_report$setContent(html)` (using the .descriptive_results,
             # .risk_factor_results, .epidemic_curve_data cached on `private`) or remove the

@@ -8,7 +8,7 @@
 # PACKAGE DEPENDENCIES AND OPERATORS
 # ============================================================================
 
-#' @importFrom stats binomial qbeta
+#' @importFrom stats binomial qbeta glm predict quantile
 #' @importFrom utils sessionInfo tail
 NULL
 
@@ -35,11 +35,12 @@ utils::globalVariables(c(
 #' Wraps `jmvcore::asFormula` with the function allow-list extended to cover
 #' common survival modelling helpers (`Surv`, `strata`, `cluster`, `frailty`,
 #' `tt`, `pspline`, `ns`, `bs`, `I`, `const`, `finegray`). Use this instead of
-#' base `as.formula()` in survival / Cox / Fine-Gray paths so the formula
+#' base `stats::as.formula()` in survival / Cox / Fine-Gray paths so the formula
 #' goes through jmvcore's allow-listed parser.
 #'
 #' @param x A character formula string (e.g. `"survival::Surv(t, d) ~ x"`).
 #' @return A parsed formula object.
+#' @keywords internal
 .asSurvivalFormula <- function(x) {
     jmvcore::asFormula(
         x,
@@ -58,6 +59,7 @@ utils::globalVariables(c(
 #'
 #' @param var_names Character vector of variable names.
 #' @return Character vector with non-syntactic names backtick-quoted.
+#' @keywords internal
 .escapeVariableNames <- function(var_names) {
     need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
     var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
@@ -86,6 +88,7 @@ utils::globalVariables(c(
 #'   interaction terms (e.g. `` "`Arm`:`Bio`" ``) appended to the right-hand
 #'   side after main effects and before strata.
 #' @return A parsed formula object (see `.asSurvivalFormula()`).
+#' @keywords internal
 .buildSurvivalFormula <- function(time_var, outcome_var, predictors, survival_type = "standard", start_var = NULL, stop_var = NULL, strata_vars = NULL, interaction_terms = NULL) {
   # Escape all variable names for safe formula construction
   escaped_time <- .escapeVariableNames(time_var)
@@ -139,7 +142,7 @@ utils::globalVariables(c(
 #'
 #' Thin wrapper around `requireNamespace()` that returns a boolean. Packages a
 #' jamovi module needs must be listed in `DESCRIPTION` `Imports:` so they are
-#' installed at install time — this helper does NOT install anything (auto-
+#' installed at install time - this helper does NOT install anything (auto-
 #' installing dependencies at runtime is a CRAN policy violation and a security
 #' hazard).
 #'
@@ -343,19 +346,19 @@ raw_to_prob <- function(values, actual, direction = ">=") {
     predictor <- if (direction == "<=") -values_clean else values_clean
 
     glm_result <- tryCatch({
-        model <- glm(actual_clean ~ predictor, family = binomial(link = "logit"))
+        model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
         # Get fitted probabilities for the complete cases
         fitted_probs <- model$fitted.values
         # Predict for ALL original values (including those with NA in actual)
         new_predictor <- if (direction == "<=") -values else values
-        predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
+        stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
     }, warning = function(w) {
         # glm may warn about convergence or fitted probabilities near 0/1
         # Suppress and continue
         suppressWarnings({
-            model <- glm(actual_clean ~ predictor, family = binomial(link = "logit"))
+            model <- stats::glm(actual_clean ~ predictor, family = binomial(link = "logit"))
             new_predictor <- if (direction == "<=") -values else values
-            predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
+            stats::predict(model, newdata = data.frame(predictor = new_predictor), type = "response")
         })
     }, error = function(e) {
         # Fallback: use empirical CDF-based rank probabilities

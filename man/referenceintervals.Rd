@@ -54,7 +54,7 @@ population}
 interval}
 
 \item{minimum_sample_size}{Minimum required sample size (CLSI recommends
-≥120)}
+>=120)}
 
 \item{outlier_detection}{Method for identifying and handling outliers}
 

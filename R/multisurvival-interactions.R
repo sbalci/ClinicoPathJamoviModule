@@ -5,6 +5,8 @@
 #' class so they can be unit-tested directly (see
 #' tests/testthat/test-multisurvival-interactions.R). All depend only on
 #' `survival`, `stats`, and `.escapeVariableNames()` (R/utils.R).
+#'
+#' @noRd
 
 # Map interaction terms from jamovi display labels to real column names.
 # `interactions`: list of character vectors (self$options$interactions).
@@ -69,7 +71,7 @@
 
 # Within-subgroup HRs for a 2-way interaction with a CATEGORICAL moderator.
 # Relevels `moderator` to each level, refits the SAME full model, and reads the
-# focal main-effect coefficient(s) — i.e. the fully-adjusted focal effect within
+# focal main-effect coefficient(s) - i.e. the fully-adjusted focal effect within
 # that subgroup. Focal may be categorical (one row per non-reference level) or
 # continuous (single "per unit" row). Returns NULL if moderator is not a usable
 # factor. Reference focal level yields no row (no contrast).

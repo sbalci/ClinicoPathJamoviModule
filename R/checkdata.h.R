@@ -208,12 +208,12 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="noOutliers",
-                title="Outlier Detection (Consensus: \u22652 methods)",
+                title="Outlier Detection (Consensus: >=2 methods)",
                 visible="(showOutliers)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outliers",
-                title="Outlier Detection (Consensus: \u22652 methods)",
+                title="Outlier Detection (Consensus: >=2 methods)",
                 visible="(showOutliers)",
                 rows=0,
                 columns=list(

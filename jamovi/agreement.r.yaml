@@ -1818,7 +1818,7 @@ items:
       title: Add Case Agreement Categorization to Data
       type: Output
       varTitle: '`{loaVariableName}`'
-      varDescription: 'Case agreement categorization. Simple mode: All Agreed (100%), Majority Agreed (≥threshold%), No Agreement. Detailed mode: Absolute (100%), High, Moderate, Low, Poor based on agreement thresholds.'
+      varDescription: 'Case agreement categorization. Simple mode: All Agreed (100%), Majority Agreed (>=threshold%), No Agreement. Detailed mode: Absolute (100%), High, Moderate, Low, Poor based on agreement thresholds.'
       measureType: nominal
       clearWith:
           - vars

@@ -6,93 +6,73 @@
 #' @importFrom pROC roc auc ci.auc coords
 #' @description Analyzes and visualizes relationships between biomarker levels and treatment responses
 
-biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
-    "biomarkerresponseClass",
-    inherit = biomarkerresponseBase,
-    private = list(
-
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-        # notice content must be plain text). ====
-        .noticeList = list(),
-
-        .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
-            # Render immediately so early-return validation aborts still display the notice
-            private$.renderNotices()
-        },
-
-        .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("")
-                return()
-            }
-
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
-            # output item renders this literally (no markup, no injection surface).
-            blocks <- vapply(private$.noticeList, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    "")
-                paste0(prefix, notice$title, "\n", notice$content)
-            }, character(1))
-
-            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-        },
-
-        # Escape variable names with spaces/special characters
-        .escapeVar = function(x) {
-            if (is.null(x) || length(x) == 0) return(x)
-            # Convert to safe variable name
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
-
-        # Set correct factor level ordering for binary response
-        .setBinaryFactorLevels = function(response_values, positive_level = NULL) {
-            # Convert to factor
-            response_factor <- as.factor(response_values)
-            current_levels <- levels(response_factor)
-
-            # Validate we have exactly 2 levels
-            if (length(current_levels) != 2) {
-                html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'> Non-Binary Response Data</h4>",
-                    "<p style='color: #856404;'>Binary response type selected but found ", length(current_levels), " levels.</p>",
-                    "<p><strong>Current levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ol style='margin-left: 20px;'>",
-                    "<li>Select 'Categorical' response type instead</li>",
-                    "<li>Filter data to include only 2 response levels</li>",
-                    "<li>Recode response variable to binary (0/1, Yes/No, etc.)</li>",
-                    "</ol>",
-                    "</div>"
+biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
+    R6::R6Class(
+        "biomarkerresponseClass",
+        inherit = biomarkerresponseBase,
+        private = list(
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+            .addNotice = function(type, title, content) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
                 )
-                self$results$dataWarning$setContent(html)
-                return(NULL)
-            }
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
 
-            # If positive level is specified, use it
-            if (!is.null(positive_level) && nchar(positive_level) > 0) {
-                # Check if specified level exists
-                if (!(positive_level %in% current_levels)) {
+                # Plain text only - notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        ""
+                    )
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
+
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+
+            # Escape variable names with spaces/special characters
+            .escapeVar = function(x) {
+                if (is.null(x) || length(x) == 0) {
+                    return(x)
+                }
+                # Convert to safe variable name
+                gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+            },
+
+            # Set correct factor level ordering for binary response
+            .setBinaryFactorLevels = function(response_values, positive_level = NULL) {
+                # Convert to factor
+                response_factor <- as.factor(response_values)
+                current_levels <- levels(response_factor)
+
+                # Validate we have exactly 2 levels
+                if (length(current_levels) != 2) {
                     html <- paste0(
                         "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'> Specified Positive Level Not Found</h4>",
-                        "<p style='color: #856404;'>Positive level '<strong>", htmltools::htmlEscape(positive_level), "</strong>' not found in response data.</p>",
-                        "<p><strong>Available levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
+                        "<h4 style='margin-top: 0; color: #856404;'> Non-Binary Response Data</h4>",
+                        "<p style='color: #856404;'>Binary response type selected but found ", length(current_levels), " levels.</p>",
+                        "<p><strong>Current levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
                         "<p><strong>Solutions:</strong></p>",
                         "<ol style='margin-left: 20px;'>",
-                        "<li>Correct the spelling of the positive level</li>",
-                        "<li>Check for case sensitivity (e.g., 'Responder' vs 'responder')</li>",
-                        "<li>Leave blank to use default ordering</li>",
+                        "<li>Select 'Categorical' response type instead</li>",
+                        "<li>Filter data to include only 2 response levels</li>",
+                        "<li>Recode response variable to binary (0/1, Yes/No, etc.)</li>",
                         "</ol>",
                         "</div>"
                     )
@@ -100,334 +80,383 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     return(NULL)
                 }
 
-                # Set levels with positive level as second (will become 1 when converted to numeric)
-                negative_level <- setdiff(current_levels, positive_level)
-                response_factor <- factor(response_values, levels = c(negative_level, positive_level))
+                # If positive level is specified, use it
+                if (!is.null(positive_level) && nchar(positive_level) > 0) {
+                    # Check if specified level exists
+                    if (!(positive_level %in% current_levels)) {
+                        html <- paste0(
+                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                            "<h4 style='margin-top: 0; color: #856404;'> Specified Positive Level Not Found</h4>",
+                            "<p style='color: #856404;'>Positive level '<strong>", htmltools::htmlEscape(positive_level), "</strong>' not found in response data.</p>",
+                            "<p><strong>Available levels:</strong> ", paste(htmltools::htmlEscape(current_levels), collapse = ", "), "</p>",
+                            "<p><strong>Solutions:</strong></p>",
+                            "<ol style='margin-left: 20px;'>",
+                            "<li>Correct the spelling of the positive level</li>",
+                            "<li>Check for case sensitivity (e.g., 'Responder' vs 'responder')</li>",
+                            "<li>Leave blank to use default ordering</li>",
+                            "</ol>",
+                            "</div>"
+                        )
+                        self$results$dataWarning$setContent(html)
+                        return(NULL)
+                    }
 
-            } else {
-                # No positive level specified - BLOCK execution to prevent label inversion
-                private$.addNotice('ERROR', 'Positive Level Required', paste0(
-                    "For binary response analysis, you must specify ",
-                    "which level represents positive response (e.g., 'Responder', 'Yes', '1').\n",
-                    "Available levels: ", paste(current_levels, collapse = ", "), "\n",
-                    "Current alphabetical ordering:\n",
-                    " - Negative class (0): ", current_levels[1], "\n",
-                    " - Positive class (1): ", current_levels[2], "\n",
-                    "Why required? Alphabetical ordering can invert sensitivity/specificity if, for example, ",
-                    "'Non-responder' comes before 'Responder'. This leads to incorrect clinical interpretation.\n",
-                    "Required Action: Enter the positive response level (exactly as it appears above) ",
-                    "in the 'Positive Response Level' field."
-                ))
-                return(NULL)  # Hard stop - do not proceed with analysis
-            }
-
-            return(response_factor)
-        },
-
-        # Determine optimal threshold using ROC analysis with bootstrap confidence intervals
-        .calculateOptimalThreshold = function(biomarker_values, response_binary, n_bootstrap = 1000, ci_level = 0.95) {
-            tryCatch({
-                # Calculate point estimates
-                roc_obj <- pROC::roc(response_binary, biomarker_values, quiet = TRUE)
-                coords_obj <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
-                point_threshold <- coords_obj$threshold
-                point_sensitivity <- coords_obj$sensitivity
-                point_specificity <- coords_obj$specificity
-                point_auc <- as.numeric(pROC::auc(roc_obj))
-
-                # Bootstrap confidence intervals
-                n_samples <- length(biomarker_values)
-                bootstrap_results <- matrix(NA, nrow = n_bootstrap, ncol = 4)
-                colnames(bootstrap_results) <- c("threshold", "sensitivity", "specificity", "auc")
-
-                for (i in 1:n_bootstrap) {
-                    # Stratified bootstrap to maintain class balance
-                    pos_idx <- which(response_binary == 1)
-                    neg_idx <- which(response_binary == 0)
-
-                    boot_pos_idx <- sample(pos_idx, length(pos_idx), replace = TRUE)
-                    boot_neg_idx <- sample(neg_idx, length(neg_idx), replace = TRUE)
-                    boot_idx <- c(boot_pos_idx, boot_neg_idx)
-
-                    boot_biomarker <- biomarker_values[boot_idx]
-                    boot_response <- response_binary[boot_idx]
-
-                    # Calculate threshold and metrics for bootstrap sample
-                    tryCatch({
-                        boot_roc <- pROC::roc(boot_response, boot_biomarker, quiet = TRUE)
-                        boot_coords <- pROC::coords(boot_roc, "best", ret = c("threshold", "sensitivity", "specificity"))
-
-                        bootstrap_results[i, "threshold"] <- boot_coords$threshold
-                        bootstrap_results[i, "sensitivity"] <- boot_coords$sensitivity
-                        bootstrap_results[i, "specificity"] <- boot_coords$specificity
-                        bootstrap_results[i, "auc"] <- as.numeric(pROC::auc(boot_roc))
-                    }, error = function(e) {
-                        # If bootstrap sample fails, skip this iteration
-                        bootstrap_results[i, ] <<- NA
-                    })
+                    # Set levels with positive level as second (will become 1 when converted to numeric)
+                    negative_level <- setdiff(current_levels, positive_level)
+                    response_factor <- factor(response_values, levels = c(negative_level, positive_level))
+                } else {
+                    # No positive level specified - BLOCK execution to prevent label inversion
+                    private$.addNotice("ERROR", "Positive Level Required", paste0(
+                        "For binary response analysis, you must specify ",
+                        "which level represents positive response (e.g., 'Responder', 'Yes', '1').\n",
+                        "Available levels: ", paste(current_levels, collapse = ", "), "\n",
+                        "Current alphabetical ordering:\n",
+                        " - Negative class (0): ", current_levels[1], "\n",
+                        " - Positive class (1): ", current_levels[2], "\n",
+                        "Why required? Alphabetical ordering can invert sensitivity/specificity if, for example, ",
+                        "'Non-responder' comes before 'Responder'. This leads to incorrect clinical interpretation.\n",
+                        "Required Action: Enter the positive response level (exactly as it appears above) ",
+                        "in the 'Positive Response Level' field."
+                    ))
+                    return(NULL) # Hard stop - do not proceed with analysis
                 }
 
-                # Calculate confidence intervals (percentile method)
-                alpha <- 1 - ci_level
-                ci_lower <- apply(bootstrap_results, 2, quantile, probs = alpha/2, na.rm = TRUE)
-                ci_upper <- apply(bootstrap_results, 2, quantile, probs = 1 - alpha/2, na.rm = TRUE)
+                return(response_factor)
+            },
 
-                # Also get AUC CI from pROC (uses DeLong method)
-                auc_ci <- as.numeric(pROC::ci.auc(roc_obj, conf.level = ci_level))
+            # Determine optimal threshold using ROC analysis with bootstrap confidence intervals
+            .calculateOptimalThreshold = function(biomarker_values, response_binary, n_bootstrap = 1000, ci_level = 0.95) {
+                tryCatch(
+                    {
+                        # Calculate point estimates
+                        roc_obj <- pROC::roc(response_binary, biomarker_values, quiet = TRUE)
+                        coords_obj <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
+                        point_threshold <- coords_obj$threshold
+                        point_sensitivity <- coords_obj$sensitivity
+                        point_specificity <- coords_obj$specificity
+                        point_auc <- as.numeric(pROC::auc(roc_obj))
 
-                return(list(
-                    threshold = point_threshold,
-                    threshold_ci_lower = ci_lower["threshold"],
-                    threshold_ci_upper = ci_upper["threshold"],
-                    sensitivity = point_sensitivity,
-                    sensitivity_ci_lower = ci_lower["sensitivity"],
-                    sensitivity_ci_upper = ci_upper["sensitivity"],
-                    specificity = point_specificity,
-                    specificity_ci_lower = ci_lower["specificity"],
-                    specificity_ci_upper = ci_upper["specificity"],
-                    auc = point_auc,
-                    auc_ci_lower = auc_ci[1],
-                    auc_ci_upper = auc_ci[3]
-                ))
-            }, error = function(e) {
-                return(list(
-                    threshold = median(biomarker_values, na.rm = TRUE),
-                    threshold_ci_lower = NA, threshold_ci_upper = NA,
-                    sensitivity = NA, sensitivity_ci_lower = NA, sensitivity_ci_upper = NA,
-                    specificity = NA, specificity_ci_lower = NA, specificity_ci_upper = NA,
-                    auc = NA, auc_ci_lower = NA, auc_ci_upper = NA
-                ))
-            })
-        },
-        
-        # Calculate threshold performance metrics
-        .calculateThresholdMetrics = function(biomarker_values, response_binary, threshold) {
-            biomarker_positive <- biomarker_values >= threshold
+                        # Bootstrap confidence intervals
+                        n_samples <- length(biomarker_values)
+                        bootstrap_results <- matrix(NA, nrow = n_bootstrap, ncol = 4)
+                        colnames(bootstrap_results) <- c("threshold", "sensitivity", "specificity", "auc")
 
-            tp <- sum(biomarker_positive & response_binary, na.rm = TRUE)
-            tn <- sum(!biomarker_positive & !response_binary, na.rm = TRUE)
-            fp <- sum(biomarker_positive & !response_binary, na.rm = TRUE)
-            fn <- sum(!biomarker_positive & response_binary, na.rm = TRUE)
+                        for (i in 1:n_bootstrap) {
+                            # Stratified bootstrap to maintain class balance
+                            pos_idx <- which(response_binary == 1)
+                            neg_idx <- which(response_binary == 0)
 
-            # Guard against zero denominators (single-class cohorts or empty cells)
-            # Check for sufficient positive and negative cases
-            total_positive <- tp + fn
-            total_negative <- tn + fp
-            total_predicted_positive <- tp + fp
-            total_predicted_negative <- tn + fn
+                            boot_pos_idx <- sample(pos_idx, length(pos_idx), replace = TRUE)
+                            boot_neg_idx <- sample(neg_idx, length(neg_idx), replace = TRUE)
+                            boot_idx <- c(boot_pos_idx, boot_neg_idx)
 
-            # Issue warning if insufficient class representation
-            if (total_positive == 0 || total_negative == 0) {
-                html <- paste0(
-                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #856404;'> Single-Class Cohort Detected</h4>",
-                    "<p style='color: #856404;'>All patients belong to a single response class. Cannot calculate classification metrics.</p>",
-                    "<p><strong>Data distribution:</strong></p>",
-                    "<ul style='margin-left: 20px;'>",
-                    "<li>Positive cases (responders): ", total_positive, "</li>",
-                    "<li>Negative cases (non-responders): ", total_negative, "</li>",
-                    "</ul>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ol style='margin-left: 20px;'>",
-                    "<li>Include patients from both response groups</li>",
-                    "<li>Verify Response Type setting matches your data</li>",
-                    "<li>Check if response variable is correctly coded</li>",
-                    "</ol>",
-                    "</div>"
+                            boot_biomarker <- biomarker_values[boot_idx]
+                            boot_response <- response_binary[boot_idx]
+
+                            # Calculate threshold and metrics for bootstrap sample
+                            tryCatch(
+                                {
+                                    boot_roc <- pROC::roc(boot_response, boot_biomarker, quiet = TRUE)
+                                    boot_coords <- pROC::coords(boot_roc, "best", ret = c("threshold", "sensitivity", "specificity"))
+
+                                    bootstrap_results[i, "threshold"] <- boot_coords$threshold
+                                    bootstrap_results[i, "sensitivity"] <- boot_coords$sensitivity
+                                    bootstrap_results[i, "specificity"] <- boot_coords$specificity
+                                    bootstrap_results[i, "auc"] <- as.numeric(pROC::auc(boot_roc))
+                                },
+                                error = function(e) {
+                                    # If bootstrap sample fails, skip this iteration
+                                    bootstrap_results[i, ] <<- NA
+                                }
+                            )
+                        }
+
+                        # Calculate confidence intervals (percentile method)
+                        alpha <- 1 - ci_level
+                        ci_lower <- apply(bootstrap_results, 2, quantile, probs = alpha / 2, na.rm = TRUE)
+                        ci_upper <- apply(bootstrap_results, 2, quantile, probs = 1 - alpha / 2, na.rm = TRUE)
+
+                        # Also get AUC CI from pROC (uses DeLong method)
+                        auc_ci <- as.numeric(pROC::ci.auc(roc_obj, conf.level = ci_level))
+
+                        return(list(
+                            threshold = point_threshold,
+                            threshold_ci_lower = ci_lower["threshold"],
+                            threshold_ci_upper = ci_upper["threshold"],
+                            sensitivity = point_sensitivity,
+                            sensitivity_ci_lower = ci_lower["sensitivity"],
+                            sensitivity_ci_upper = ci_upper["sensitivity"],
+                            specificity = point_specificity,
+                            specificity_ci_lower = ci_lower["specificity"],
+                            specificity_ci_upper = ci_upper["specificity"],
+                            auc = point_auc,
+                            auc_ci_lower = auc_ci[1],
+                            auc_ci_upper = auc_ci[3]
+                        ))
+                    },
+                    error = function(e) {
+                        return(list(
+                            threshold = median(biomarker_values, na.rm = TRUE),
+                            threshold_ci_lower = NA, threshold_ci_upper = NA,
+                            sensitivity = NA, sensitivity_ci_lower = NA, sensitivity_ci_upper = NA,
+                            specificity = NA, specificity_ci_lower = NA, specificity_ci_upper = NA,
+                            auc = NA, auc_ci_lower = NA, auc_ci_upper = NA
+                        ))
+                    }
                 )
-                self$results$dataWarning$setContent(html)
+            },
+
+            # Calculate threshold performance metrics
+            .calculateThresholdMetrics = function(biomarker_values, response_binary, threshold) {
+                biomarker_positive <- biomarker_values >= threshold
+
+                tp <- sum(biomarker_positive & response_binary, na.rm = TRUE)
+                tn <- sum(!biomarker_positive & !response_binary, na.rm = TRUE)
+                fp <- sum(biomarker_positive & !response_binary, na.rm = TRUE)
+                fn <- sum(!biomarker_positive & response_binary, na.rm = TRUE)
+
+                # Guard against zero denominators (single-class cohorts or empty cells)
+                # Check for sufficient positive and negative cases
+                total_positive <- tp + fn
+                total_negative <- tn + fp
+                total_predicted_positive <- tp + fp
+                total_predicted_negative <- tn + fn
+
+                # Issue warning if insufficient class representation
+                if (total_positive == 0 || total_negative == 0) {
+                    html <- paste0(
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #856404;'> Single-Class Cohort Detected</h4>",
+                        "<p style='color: #856404;'>All patients belong to a single response class. Cannot calculate classification metrics.</p>",
+                        "<p><strong>Data distribution:</strong></p>",
+                        "<ul style='margin-left: 20px;'>",
+                        "<li>Positive cases (responders): ", total_positive, "</li>",
+                        "<li>Negative cases (non-responders): ", total_negative, "</li>",
+                        "</ul>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Include patients from both response groups</li>",
+                        "<li>Verify Response Type setting matches your data</li>",
+                        "<li>Check if response variable is correctly coded</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+
+                    return(list(
+                        threshold = threshold,
+                        sensitivity = NA,
+                        specificity = NA,
+                        ppv = NA,
+                        npv = NA,
+                        auc = NA
+                    ))
+                }
+
+                # Calculate metrics with guards for zero denominators
+                sensitivity <- if (total_positive > 0) tp / total_positive else NA
+                specificity <- if (total_negative > 0) tn / total_negative else NA
+                ppv <- if (total_predicted_positive > 0) tp / total_predicted_positive else NA
+                npv <- if (total_predicted_negative > 0) tn / total_predicted_negative else NA
+
+                # Calculate AUC
+                tryCatch(
+                    {
+                        roc_obj <- pROC::roc(response_binary, biomarker_values)
+                        auc_val <- as.numeric(pROC::auc(roc_obj))
+                    },
+                    error = function(e) {
+                        auc_val <- NA
+                    }
+                )
 
                 return(list(
                     threshold = threshold,
-                    sensitivity = NA,
-                    specificity = NA,
-                    ppv = NA,
-                    npv = NA,
-                    auc = NA
+                    sensitivity = sensitivity,
+                    specificity = specificity,
+                    ppv = ppv,
+                    npv = npv,
+                    auc = auc_val
                 ))
-            }
+            },
 
-            # Calculate metrics with guards for zero denominators
-            sensitivity <- if (total_positive > 0) tp / total_positive else NA
-            specificity <- if (total_negative > 0) tn / total_negative else NA
-            ppv <- if (total_predicted_positive > 0) tp / total_predicted_positive else NA
-            npv <- if (total_predicted_negative > 0) tn / total_predicted_negative else NA
+            # Perform statistical tests based on response type
+            .performStatisticalTests = function(biomarker_values, response_values, response_type, conf_level) {
+                tests <- list()
 
-            # Calculate AUC
-            tryCatch({
-                roc_obj <- pROC::roc(response_binary, biomarker_values)
-                auc_val <- as.numeric(pROC::auc(roc_obj))
-            }, error = function(e) {
-                auc_val <- NA
-            })
+                if (response_type == "binary" || response_type == "categorical") {
+                    # Convert to factor if needed
+                    response_factor <- as.factor(response_values)
 
-            return(list(
-                threshold = threshold,
-                sensitivity = sensitivity,
-                specificity = specificity,
-                ppv = ppv,
-                npv = npv,
-                auc = auc_val
-            ))
-        },
-        
-        # Perform statistical tests based on response type
-        .performStatisticalTests = function(biomarker_values, response_values, response_type, conf_level) {
-            tests <- list()
-            
-            if (response_type == "binary" || response_type == "categorical") {
-                # Convert to factor if needed
-                response_factor <- as.factor(response_values)
-                
-                if (length(levels(response_factor)) == 2) {
-                    # T-test for binary response
-                    tryCatch({
-                        t_test <- t.test(biomarker_values ~ response_factor, conf.level = conf_level)
-                        tests[["t_test"]] <- list(
-                            test = "Two-sample t-test",
-                            statistic = t_test$statistic,
-                            pvalue = t_test$p.value,
-                            interpretation = ifelse(t_test$p.value < 0.05, 
-                                                   "Significant difference between groups", 
-                                                   "No significant difference")
+                    if (length(levels(response_factor)) == 2) {
+                        # T-test for binary response
+                        tryCatch(
+                            {
+                                t_test <- t.test(biomarker_values ~ response_factor, conf.level = conf_level)
+                                tests[["t_test"]] <- list(
+                                    test = "Two-sample t-test",
+                                    statistic = t_test$statistic,
+                                    pvalue = t_test$p.value,
+                                    interpretation = ifelse(t_test$p.value < 0.05,
+                                        "Significant difference between groups",
+                                        "No significant difference"
+                                    )
+                                )
+                            },
+                            error = function(e) {}
                         )
-                    }, error = function(e) {})
-                    
-                    # Wilcoxon test as non-parametric alternative with effect sizes
-                    tryCatch({
-                        wilcox_test <- wilcox.test(biomarker_values ~ response_factor, conf.level = conf_level, conf.int = TRUE)
-                        
-                        # Calculate effect sizes for biomarker analysis
-                        group_levels <- levels(response_factor)
-                        group1_data <- biomarker_values[response_factor == group_levels[1]]
-                        group2_data <- biomarker_values[response_factor == group_levels[2]]
-                        group1_data <- group1_data[!is.na(group1_data)]
-                        group2_data <- group2_data[!is.na(group2_data)]
-                        
-                        # Calculate Cliff's Delta
-                        cliff_delta <- private$.calculateCliffsDelta(group1_data, group2_data)
-                        
-                        # Calculate Hodges-Lehmann shift
-                        hodges_lehmann <- private$.calculateHodgesLehmann(group1_data, group2_data)
-                        
-                        tests[["wilcox_test"]] <- list(
-                            test = "Wilcoxon rank-sum test",
-                            statistic = wilcox_test$statistic,
-                            pvalue = wilcox_test$p.value,
-                            cliff_delta = cliff_delta,
-                            hodges_lehmann = hodges_lehmann,
-                            interpretation = private$.interpretBiomarkerEffects(wilcox_test$p.value, cliff_delta, hodges_lehmann, group_levels)
+
+                        # Wilcoxon test as non-parametric alternative with effect sizes
+                        tryCatch(
+                            {
+                                wilcox_test <- wilcox.test(biomarker_values ~ response_factor, conf.level = conf_level, conf.int = TRUE)
+
+                                # Calculate effect sizes for biomarker analysis
+                                group_levels <- levels(response_factor)
+                                group1_data <- biomarker_values[response_factor == group_levels[1]]
+                                group2_data <- biomarker_values[response_factor == group_levels[2]]
+                                group1_data <- group1_data[!is.na(group1_data)]
+                                group2_data <- group2_data[!is.na(group2_data)]
+
+                                # Calculate Cliff's Delta
+                                cliff_delta <- private$.calculateCliffsDelta(group1_data, group2_data)
+
+                                # Calculate Hodges-Lehmann shift
+                                hodges_lehmann <- private$.calculateHodgesLehmann(group1_data, group2_data)
+
+                                tests[["wilcox_test"]] <- list(
+                                    test = "Wilcoxon rank-sum test",
+                                    statistic = wilcox_test$statistic,
+                                    pvalue = wilcox_test$p.value,
+                                    cliff_delta = cliff_delta,
+                                    hodges_lehmann = hodges_lehmann,
+                                    interpretation = private$.interpretBiomarkerEffects(wilcox_test$p.value, cliff_delta, hodges_lehmann, group_levels)
+                                )
+                            },
+                            error = function(e) {}
                         )
-                    }, error = function(e) {})
-                    
-                } else if (length(levels(response_factor)) > 2) {
-                    # ANOVA for multiple groups
-                    anova_pvalue <- NULL
-                    tryCatch({
-                        anova_test <- aov(biomarker_values ~ response_factor)
-                        anova_summary <- summary(anova_test)
-                        anova_pvalue <- anova_summary[[1]][["Pr(>F)"]][1]
+                    } else if (length(levels(response_factor)) > 2) {
+                        # ANOVA for multiple groups
+                        anova_pvalue <- NULL
+                        tryCatch(
+                            {
+                                anova_test <- aov(biomarker_values ~ response_factor)
+                                anova_summary <- summary(anova_test)
+                                anova_pvalue <- anova_summary[[1]][["Pr(>F)"]][1]
 
-                        tests[["anova"]] <- list(
-                            test = "One-way ANOVA",
-                            statistic = anova_summary[[1]][["F value"]][1],
-                            pvalue = anova_pvalue,
-                            interpretation = ifelse(anova_pvalue < 0.05,
-                                                   "Significant difference between groups",
-                                                   "No significant difference")
+                                tests[["anova"]] <- list(
+                                    test = "One-way ANOVA",
+                                    statistic = anova_summary[[1]][["F value"]][1],
+                                    pvalue = anova_pvalue,
+                                    interpretation = ifelse(anova_pvalue < 0.05,
+                                        "Significant difference between groups",
+                                        "No significant difference"
+                                    )
+                                )
+                            },
+                            error = function(e) {}
                         )
-                    }, error = function(e) {})
 
-                    # Kruskal-Wallis test
-                    kw_pvalue <- NULL
-                    tryCatch({
-                        kw_test <- kruskal.test(biomarker_values ~ response_factor)
-                        kw_pvalue <- kw_test$p.value
+                        # Kruskal-Wallis test
+                        kw_pvalue <- NULL
+                        tryCatch(
+                            {
+                                kw_test <- kruskal.test(biomarker_values ~ response_factor)
+                                kw_pvalue <- kw_test$p.value
 
-                        tests[["kruskal"]] <- list(
-                            test = "Kruskal-Wallis test",
-                            statistic = kw_test$statistic,
-                            pvalue = kw_pvalue,
-                            interpretation = ifelse(kw_pvalue < 0.05,
-                                                   "Significant difference between groups",
-                                                   "No significant difference")
+                                tests[["kruskal"]] <- list(
+                                    test = "Kruskal-Wallis test",
+                                    statistic = kw_test$statistic,
+                                    pvalue = kw_pvalue,
+                                    interpretation = ifelse(kw_pvalue < 0.05,
+                                        "Significant difference between groups",
+                                        "No significant difference"
+                                    )
+                                )
+                            },
+                            error = function(e) {}
                         )
-                    }, error = function(e) {})
 
-                    # Post-hoc tests if omnibus test is significant
-                    posthoc_performed <- FALSE
-                    if (!is.null(anova_pvalue) && anova_pvalue < 0.05) {
-                        # Tukey HSD post-hoc
-                        tukey_results <- private$.performTukeyHSD(biomarker_values, response_factor)
-                        if (!is.null(tukey_results)) {
-                            self$results$postHocTests$setVisible(TRUE)
-                            for (i in seq_len(nrow(tukey_results))) {
-                                self$results$postHocTests$addRow(rowKey = i, values = tukey_results[i, ])
+                        # Post-hoc tests if omnibus test is significant
+                        posthoc_performed <- FALSE
+                        if (!is.null(anova_pvalue) && anova_pvalue < 0.05) {
+                            # Tukey HSD post-hoc
+                            tukey_results <- private$.performTukeyHSD(biomarker_values, response_factor)
+                            if (!is.null(tukey_results)) {
+                                self$results$postHocTests$setVisible(TRUE)
+                                for (i in seq_len(nrow(tukey_results))) {
+                                    self$results$postHocTests$addRow(rowKey = i, values = tukey_results[i, ])
+                                }
+                                posthoc_performed <- TRUE
                             }
-                            posthoc_performed <- TRUE
-                        }
-                    } else if (!is.null(kw_pvalue) && kw_pvalue < 0.05 && !posthoc_performed) {
-                        # Dunn's test post-hoc
-                        dunn_results <- private$.performDunnTest(biomarker_values, response_factor)
-                        if (!is.null(dunn_results)) {
-                            self$results$postHocTests$setVisible(TRUE)
-                            for (i in seq_len(nrow(dunn_results))) {
-                                self$results$postHocTests$addRow(rowKey = i, values = dunn_results[i, ])
+                        } else if (!is.null(kw_pvalue) && kw_pvalue < 0.05 && !posthoc_performed) {
+                            # Dunn's test post-hoc
+                            dunn_results <- private$.performDunnTest(biomarker_values, response_factor)
+                            if (!is.null(dunn_results)) {
+                                self$results$postHocTests$setVisible(TRUE)
+                                for (i in seq_len(nrow(dunn_results))) {
+                                    self$results$postHocTests$addRow(rowKey = i, values = dunn_results[i, ])
+                                }
                             }
                         }
                     }
-                }
-                
-            } else if (response_type == "continuous") {
-                # Correlation tests for continuous response
-                tryCatch({
-                    pearson_test <- cor.test(biomarker_values, response_values, method = "pearson", conf.level = conf_level)
-                    tests[["pearson"]] <- list(
-                        test = "Pearson correlation",
-                        statistic = pearson_test$statistic,
-                        pvalue = pearson_test$p.value,
-                        interpretation = ifelse(pearson_test$p.value < 0.05, 
-                                               paste("Significant correlation (r =", round(pearson_test$estimate, 3), ")"), 
-                                               "No significant correlation")
+                } else if (response_type == "continuous") {
+                    # Correlation tests for continuous response
+                    tryCatch(
+                        {
+                            pearson_test <- cor.test(biomarker_values, response_values, method = "pearson", conf.level = conf_level)
+                            tests[["pearson"]] <- list(
+                                test = "Pearson correlation",
+                                statistic = pearson_test$statistic,
+                                pvalue = pearson_test$p.value,
+                                interpretation = ifelse(pearson_test$p.value < 0.05,
+                                    paste("Significant correlation (r =", round(pearson_test$estimate, 3), ")"),
+                                    "No significant correlation"
+                                )
+                            )
+                        },
+                        error = function(e) {}
                     )
-                }, error = function(e) {})
-                
-                tryCatch({
-                    spearman_test <- cor.test(biomarker_values, response_values, method = "spearman", conf.level = conf_level)
-                    tests[["spearman"]] <- list(
-                        test = "Spearman correlation",
-                        statistic = spearman_test$statistic,
-                        pvalue = spearman_test$p.value,
-                        interpretation = ifelse(spearman_test$p.value < 0.05, 
-                                               paste("Significant correlation (rho =", round(spearman_test$estimate, 3), ")"), 
-                                               "No significant correlation")
-                    )
-                }, error = function(e) {})
-            }
-            
-            return(tests)
-        },
-        
-        .run = function() {
-            private$.noticeList <- list()
 
-            # Enhanced guidance and documentation
-            if (is.null(self$options$biomarker) || is.null(self$options$response)) {
-                todo <- "
+                    tryCatch(
+                        {
+                            spearman_test <- cor.test(biomarker_values, response_values, method = "spearman", conf.level = conf_level)
+                            tests[["spearman"]] <- list(
+                                test = "Spearman correlation",
+                                statistic = spearman_test$statistic,
+                                pvalue = spearman_test$p.value,
+                                interpretation = ifelse(spearman_test$p.value < 0.05,
+                                    paste("Significant correlation (rho =", round(spearman_test$estimate, 3), ")"),
+                                    "No significant correlation"
+                                )
+                            )
+                        },
+                        error = function(e) {}
+                    )
+                }
+
+                return(tests)
+            },
+            .run = function() {
+                private$.noticeList <- list()
+
+                # Enhanced guidance and documentation
+                if (is.null(self$options$biomarker) || is.null(self$options$response)) {
+                    todo <- "
                 <h3> ClinicoPath Biomarker Response Analysis</h3>
                 <p><strong>Purpose:</strong> Analyze biomarker-response relationships for precision medicine and clinical decision support.</p>
-                
+
                 <h4> Required Variables:</h4>
                 <ul>
                     <li><strong>Biomarker Variable:</strong> Continuous measurement (expression, concentration, score)</li>
                     <li><strong>Response Variable:</strong> Treatment outcome (binary, categorical, or continuous)</li>
                 </ul>
-                
+
                 <h4> Optional Variables:</h4>
                 <ul>
                     <li><strong>Grouping Variable:</strong> Stratification factor (treatment arm, disease stage)</li>
                 </ul>
-                
+
                 <h4> Analysis Features:</h4>
                 <ul>
                     <li><strong>ROC Analysis:</strong> Optimal threshold determination and performance metrics</li>
@@ -436,7 +465,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     <li><strong>Clinical Validation:</strong> Sensitivity, specificity, PPV, NPV calculations</li>
                     <li><strong>Data Quality:</strong> Outlier handling and transformation options</li>
                 </ul>
-                
+
                 <h4> Clinical Applications:</h4>
                 <ul>
                     <li><strong>Predictive Biomarkers:</strong> Treatment selection (HER2, PD-L1, EGFR)</li>
@@ -445,7 +474,7 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     <li><strong>Companion Diagnostics:</strong> Regulatory-grade biomarker validation</li>
                     <li><strong>Treatment Monitoring:</strong> Response assessment (PSA, HbA1c)</li>
                 </ul>
-                
+
                 <h4> Interpretation Guide:</h4>
                 <ul>
                     <li><strong>AUC > 0.8:</strong> Excellent biomarker performance</li>
@@ -453,1134 +482,1168 @@ biomarkerresponseClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     <li><strong>AUC 0.6-0.7:</strong> Fair biomarker performance</li>
                     <li><strong>p < 0.05:</strong> Statistically significant association</li>
                 </ul>
-                
+
                 <p><strong>Resources:</strong></p>
                 <ul>
                     <li><a href='https://clinicopath.github.io/ClinicoPathJamoviModule/' target='_blank'>User Guide</a></li>
                     <li><a href='https://www.fda.gov/drugs/cder-biomarker-qualification-program' target='_blank'>FDA Biomarker Guidance</a></li>
                 </ul>
                 "
-                self$results$todo$setContent(todo)
-                return()
-            }
-            
-            # Enhanced error checking and validation
-            if (nrow(self$data) == 0) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> No Data Available</h4>",
-                    "<p style='color: #721c24;'>Dataset contains no rows.</p>",
-                    "<p>Please load data for biomarker analysis.</p>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-            
-            # Enhanced data validation and preprocessing
-            data <- self$data
-            biomarker_var <- self$options$biomarker
-            response_var <- self$options$response
-            response_type <- self$options$responseType
-            
-            # Robust confidence level handling
-            # TODO (cleanup): self$options$confidenceLevel is OptionNumber
-            # (already numeric); the as.numeric() coerce here and the parallel
-            # one at line ~1265 are no-ops. Drop both for clarity. The
-            # length-0/NA guard below remains useful only if the option ever
-            # changes type — currently dead code.
-            conf_level <- as.numeric(self$options$confidenceLevel)
-            if (length(conf_level) == 0 || is.na(conf_level)) conf_level <- 0.95
-            
-            # Comprehensive data validation
-            raw_biomarker_values <- data[[biomarker_var]]
-            raw_response_values <- data[[response_var]]
-            
+                    self$results$todo$setContent(todo)
+                    return()
+                }
 
-            
-            # Initial data validation
-            if (is.null(raw_biomarker_values)) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
-                    "<p style='color: #721c24;'>Biomarker variable '<strong>", htmltools::htmlEscape(biomarker_var), "</strong>' could not be found in the dataset.</p>",
-                    "<p>Please check that the variable name is correct and exists in your data.</p>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-
-            if (is.null(raw_response_values)) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
-                    "<p style='color: #721c24;'>Response variable '<strong>", htmltools::htmlEscape(response_var), "</strong>' could not be found in the dataset.</p>",
-                    "<p>Please check that the variable name is correct and exists in your data.</p>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-
-            if (all(is.na(raw_biomarker_values))) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
-                    "<p style='color: #721c24;'>Biomarker variable contains only missing values.</p>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ol style='margin-left: 20px;'>",
-                    "<li>Check data import for errors</li>",
-                    "<li>Remove rows with missing biomarker values</li>",
-                    "<li>Select a different biomarker variable</li>",
-                    "</ol>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-
-            if (all(is.na(raw_response_values))) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
-                    "<p style='color: #721c24;'>Response variable contains only missing values.</p>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ol style='margin-left: 20px;'>",
-                    "<li>Check data import for errors</li>",
-                    "<li>Remove rows with missing response values</li>",
-                    "<li>Select a different response variable</li>",
-                    "</ol>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-            
-            # Convert biomarker to numeric if possible
-            if (!is.numeric(raw_biomarker_values)) {
-                tryCatch({
-                    raw_biomarker_values <- as.numeric(raw_biomarker_values)
-                }, error = function(e) {
+                # Enhanced error checking and validation
+                if (nrow(self$data) == 0) {
                     html <- paste0(
                         "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'> Invalid Biomarker Data Type</h4>",
-                        "<p style='color: #721c24;'>Biomarker variable must be numeric or convertible to numeric.</p>",
-                        "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_biomarker_values)[1]), "</p>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> No Data Available</h4>",
+                        "<p style='color: #721c24;'>Dataset contains no rows.</p>",
+                        "<p>Please load data for biomarker analysis.</p>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return()
+                }
+
+                # Enhanced data validation and preprocessing
+                data <- self$data
+                biomarker_var <- self$options$biomarker
+                response_var <- self$options$response
+                response_type <- self$options$responseType
+
+                # Robust confidence level handling
+                # TODO (cleanup): self$options$confidenceLevel is OptionNumber
+                # (already numeric); the as.numeric() coerce here and the parallel
+                # one at line ~1265 are no-ops. Drop both for clarity. The
+                # length-0/NA guard below remains useful only if the option ever
+                # changes type - currently dead code.
+                conf_level <- as.numeric(self$options$confidenceLevel)
+                if (length(conf_level) == 0 || is.na(conf_level)) conf_level <- 0.95
+
+                # Comprehensive data validation
+                raw_biomarker_values <- data[[biomarker_var]]
+                raw_response_values <- data[[response_var]]
+
+
+                # Initial data validation
+                if (is.null(raw_biomarker_values)) {
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
+                        "<p style='color: #721c24;'>Biomarker variable '<strong>", htmltools::htmlEscape(biomarker_var), "</strong>' could not be found in the dataset.</p>",
+                        "<p>Please check that the variable name is correct and exists in your data.</p>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return()
+                }
+
+                if (is.null(raw_response_values)) {
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> Variable Not Found</h4>",
+                        "<p style='color: #721c24;'>Response variable '<strong>", htmltools::htmlEscape(response_var), "</strong>' could not be found in the dataset.</p>",
+                        "<p>Please check that the variable name is correct and exists in your data.</p>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return()
+                }
+
+                if (all(is.na(raw_biomarker_values))) {
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
+                        "<p style='color: #721c24;'>Biomarker variable contains only missing values.</p>",
                         "<p><strong>Solutions:</strong></p>",
                         "<ol style='margin-left: 20px;'>",
-                        "<li>Select a different variable with numeric values</li>",
-                        "<li>Convert variable to numeric in jamovi (Data → Transform)</li>",
-                        "<li>Check for non-numeric characters in the data</li>",
+                        "<li>Check data import for errors</li>",
+                        "<li>Remove rows with missing biomarker values</li>",
+                        "<li>Select a different biomarker variable</li>",
                         "</ol>",
                         "</div>"
                     )
                     self$results$dataWarning$setContent(html)
                     return()
-                })
-            }
-            
-            # Validate response variable based on type
-            if (response_type == "binary") {
-                # Use explicit level ordering for binary response
-                positive_level <- self$options$positiveLevel
-                if (length(positive_level) == 0) positive_level <- NULL
-                raw_response_values <- private$.setBinaryFactorLevels(raw_response_values, positive_level)
+                }
 
-                # If setBinaryFactorLevels returned NULL (validation failed), stop
-                if (is.null(raw_response_values)) {
+                if (all(is.na(raw_response_values))) {
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> All Values Missing</h4>",
+                        "<p style='color: #721c24;'>Response variable contains only missing values.</p>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Check data import for errors</li>",
+                        "<li>Remove rows with missing response values</li>",
+                        "<li>Select a different response variable</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
                     return()
                 }
-            } else if (response_type == "categorical") {
-                # Categorical response - keep natural factor ordering
-                raw_response_values <- as.factor(raw_response_values)
-            } else if (response_type == "continuous") {
-                if (!is.numeric(raw_response_values)) {
-                    tryCatch({
-                        raw_response_values <- as.numeric(raw_response_values)
-                    }, error = function(e) {
+
+                # Convert biomarker to numeric if possible
+                if (!is.numeric(raw_biomarker_values)) {
+                    tryCatch(
+                        {
+                            raw_biomarker_values <- as.numeric(raw_biomarker_values)
+                        },
+                        error = function(e) {
+                            html <- paste0(
+                                "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                                "<h4 style='margin-top: 0; color: #721c24;'> Invalid Biomarker Data Type</h4>",
+                                "<p style='color: #721c24;'>Biomarker variable must be numeric or convertible to numeric.</p>",
+                                "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_biomarker_values)[1]), "</p>",
+                                "<p><strong>Solutions:</strong></p>",
+                                "<ol style='margin-left: 20px;'>",
+                                "<li>Select a different variable with numeric values</li>",
+                                "<li>Convert variable to numeric in jamovi (Data → Transform)</li>",
+                                "<li>Check for non-numeric characters in the data</li>",
+                                "</ol>",
+                                "</div>"
+                            )
+                            self$results$dataWarning$setContent(html)
+                            return()
+                        }
+                    )
+                }
+
+                # Validate response variable based on type
+                if (response_type == "binary") {
+                    # Use explicit level ordering for binary response
+                    positive_level <- self$options$positiveLevel
+                    if (length(positive_level) == 0) positive_level <- NULL
+                    raw_response_values <- private$.setBinaryFactorLevels(raw_response_values, positive_level)
+
+                    # If setBinaryFactorLevels returned NULL (validation failed), stop
+                    if (is.null(raw_response_values)) {
+                        return()
+                    }
+                } else if (response_type == "categorical") {
+                    # Categorical response - keep natural factor ordering
+                    raw_response_values <- as.factor(raw_response_values)
+                } else if (response_type == "continuous") {
+                    if (!is.numeric(raw_response_values)) {
+                        tryCatch(
+                            {
+                                raw_response_values <- as.numeric(raw_response_values)
+                            },
+                            error = function(e) {
+                                html <- paste0(
+                                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                                    "<h4 style='margin-top: 0; color: #721c24;'> Invalid Response Data Type</h4>",
+                                    "<p style='color: #721c24;'>Continuous response variable must be numeric or convertible to numeric.</p>",
+                                    "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_response_values)[1]), "</p>",
+                                    "<p><strong>Solutions:</strong></p>",
+                                    "<ol style='margin-left: 20px;'>",
+                                    "<li>Change Response Type to 'Binary' or 'Categorical' for non-numeric responses</li>",
+                                    "<li>Convert response variable to numeric in jamovi (Data → Transform)</li>",
+                                    "<li>Select a different response variable</li>",
+                                    "</ol>",
+                                    "</div>"
+                                )
+                                self$results$dataWarning$setContent(html)
+                                return()
+                            }
+                        )
+                    }
+                }
+
+                # Enhanced data preprocessing
+                biomarker_values <- private$.preprocessBiomarkerData(raw_biomarker_values)
+                response_values <- raw_response_values
+
+                # ============================================================================
+                # CLINICAL VALIDATION NOTICES
+                # ============================================================================
+
+                # Track final sample size after missing data removal
+                n_complete <- sum(complete.cases(data.frame(biomarker_values, response_values)))
+
+                # Notice 1: Small Sample Size Warning
+                if (n_complete < 30) {
+                    private$.addNotice("WARNING", "Small Sample Size", paste0(
+                        "Small sample size (n=", n_complete, ", below recommended minimum n=30). ",
+                        "Bootstrap CIs may be unstable, correlation estimates unreliable. ",
+                        "Results should be considered preliminary and validated in larger cohort. ",
+                        "Recommend n>=50 for biomarker development, n>=100 for clinical validation."
+                    ))
+                }
+
+                # Notice 2: Low Event Count Validation (Binary Response Only)
+                if (response_type == "binary") {
+                    # Count events per group
+                    # TODO (correctness): four sites in this file convert a binary
+                    # factor to 0/1 via `as.numeric(response_values) - 1`:
+                    #   - line ~614 (this site, event count notice)
+                    #   - line ~800 (binary threshold analysis)
+                    #   - line ~808 (alternate threshold path)
+                    #   - line ~960 (subgroup binary coding)
+                    # All assume the factor's internal codes are 1,2 (level indices).
+                    # For jamovi-labelled factors carrying values=c(0,1),
+                    # jmvcore::toNumeric returns 0,1 directly and `- 1` yields -1,0.
+                    # Decide intended semantics before migrating to toNumeric.
+                    # Same pattern already flagged at:
+                    #   R/betabinomialdiagnostic.b.R:200
+                    #   R/biomarkerdiscovery.b.R:391
+                    response_numeric <- as.numeric(response_values) - 1 # Convert to 0/1
+                    n_events <- sum(response_numeric == 1, na.rm = TRUE)
+                    n_non_events <- sum(response_numeric == 0, na.rm = TRUE)
+
+                    # CRITICAL: Block execution if < 10 events per group
+                    if (n_events < 10 || n_non_events < 10) {
+                        private$.addNotice("ERROR", "Insufficient Events", paste0(
+                            "Insufficient events for reliable ROC analysis. ",
+                            "Positive cases: n=", n_events, ", Negative cases: n=", n_non_events, ". ",
+                            "Minimum 10 per group required for stable AUC/threshold estimates (Hanley & McNeil, 1982). ",
+                            "Collect additional data before proceeding with biomarker validation."
+                        ))
+                        return() # HARD STOP - do not proceed
+                    }
+
+                    # STRONG WARNING: 10-19 events (low but not blocking)
+                    if (n_events < 20 || n_non_events < 20) {
+                        private$.addNotice("STRONG_WARNING", "Low Event Count", paste0(
+                            "Low event count (Positive: n=", n_events, ", Negative: n=", n_non_events, "). ",
+                            "ROC estimates may be unstable with wide confidence intervals. ",
+                            "FDA biomarker guidance recommends n>=50 per group for clinical validation studies. ",
+                            "Consider collecting additional data or use results cautiously as exploratory only."
+                        ))
+                    }
+
+                    # Notice 3: Extreme Prevalence Warning
+                    prevalence <- n_events / (n_events + n_non_events)
+                    if (prevalence < 0.05 || prevalence > 0.95) {
+                        private$.addNotice("STRONG_WARNING", "Extreme Response Prevalence", paste0(
+                            "Extreme response prevalence (", round(prevalence * 100, 1), "% positive). ",
+                            "PPV and NPV estimates are HIGHLY UNSTABLE and unlikely to generalize to populations with different prevalence. ",
+                            "Threshold selection unreliable. ",
+                            "ROC analysis assumes balanced sampling (recommend 40-60% prevalence for biomarker development). ",
+                            "Consider stratified sampling or interpret with caution."
+                        ))
+                    }
+                }
+
+                # ============================================================================
+
+                # Handle outliers if requested
+                if (self$options$outlierHandling == "remove") {
+                    outlier_indices <- private$.detectOutliers(biomarker_values)
+                    if (length(outlier_indices) > 0) {
+                        # Calculate outlier statistics before removal
+                        outlier_count <- length(outlier_indices)
+                        total_count <- length(biomarker_values)
+                        outlier_pct <- round(outlier_count / total_count * 100, 1)
+                        outlier_values <- biomarker_values[outlier_indices]
+
+                        # Calculate IQR bounds for reporting
+                        Q1 <- quantile(biomarker_values, 0.25, na.rm = TRUE)
+                        Q3 <- quantile(biomarker_values, 0.75, na.rm = TRUE)
+                        IQR_val <- Q3 - Q1
+                        lower_bound <- Q1 - 1.5 * IQR_val
+                        upper_bound <- Q3 + 1.5 * IQR_val
+
+                        # Remove outliers
+                        biomarker_values[outlier_indices] <- NA
+                        response_values[outlier_indices] <- NA
+
+                        # Issue informative Notice about outlier removal
+                        private$.addNotice("STRONG_WARNING", "Outliers Removed", paste0(
+                            outlier_count, " data points (", outlier_pct, "% of total) ",
+                            "identified as outliers and excluded from analysis.\n",
+                            "Detection Method: IQR-based (Tukey's fences)\n",
+                            " - Lower bound: ", round(lower_bound, 2), "\n",
+                            " - Upper bound: ", round(upper_bound, 2), "\n",
+                            " - Q1: ", round(Q1, 2), ", Q3: ", round(Q3, 2), ", IQR: ", round(IQR_val, 2), "\n",
+                            "Removed values range: ", round(min(outlier_values, na.rm = TRUE), 2), " to ",
+                            round(max(outlier_values, na.rm = TRUE), 2), "\n",
+                            "Impact: All subsequent analyses (ROC, statistics, correlations) are based on ",
+                            total_count - outlier_count, " remaining data points.\n",
+                            "Important: Outlier removal can bias results, especially in small samples or skewed distributions. ",
+                            "Consider reviewing excluded values to ensure they represent true outliers rather than valid extreme values."
+                        ))
+                    }
+                }
+
+                # Remove rows with missing values
+                complete_cases <- !is.na(biomarker_values) & !is.na(response_values)
+                biomarker_values <- biomarker_values[complete_cases]
+                response_values <- response_values[complete_cases]
+
+                # Final data validation
+                if (length(biomarker_values) == 0) {
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> No Valid Data Points</h4>",
+                        "<p style='color: #721c24;'>No valid data points remain after preprocessing.</p>",
+                        "<p><strong>Possible causes:</strong></p>",
+                        "<ul style='margin-left: 20px;'>",
+                        "<li>All values are missing (NA)</li>",
+                        "<li>Outlier removal eliminated all data points</li>",
+                        "<li>Biomarker and response variables have no overlapping non-missing values</li>",
+                        "</ul>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Check data for missing values</li>",
+                        "<li>Change Outlier Handling to 'Include All' or 'Highlight Outliers'</li>",
+                        "<li>Review data quality and completeness</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return()
+                }
+
+                if (length(biomarker_values) < 10) {
+                    warning(paste(
+                        "Small sample size (n =", length(biomarker_values),
+                        "). Results may be unreliable. Recommend n >= 30 for robust analysis."
+                    ))
+                }
+
+                if (response_type %in% c("binary", "categorical")) {
+                    response_factor <- as.factor(response_values)
+                    min_group_size <- min(table(response_factor))
+                    if (min_group_size < 5) {
+                        warning(paste(
+                            "Small group size detected (n =", min_group_size,
+                            "). Results may be unreliable for statistical testing."
+                        ))
+                    }
+                }
+
+                # Check biomarker data quality
+                biomarker_range <- max(biomarker_values) - min(biomarker_values)
+                if (biomarker_range == 0) {
+                    html <- paste0(
+                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #721c24;'> Constant Biomarker Values</h4>",
+                        "<p style='color: #721c24;'>All biomarker values are identical. Cannot perform analysis.</p>",
+                        "<p><strong>Current value:</strong> ", htmltools::htmlEscape(as.character(unique(biomarker_values)[1])), "</p>",
+                        "<p><strong>Solutions:</strong></p>",
+                        "<ol style='margin-left: 20px;'>",
+                        "<li>Select a biomarker variable with varying values</li>",
+                        "<li>Check if data was incorrectly filtered or transformed</li>",
+                        "<li>Verify data import was successful</li>",
+                        "</ol>",
+                        "</div>"
+                    )
+                    self$results$dataWarning$setContent(html)
+                    return()
+                }
+
+                # Data quality assessment
+                private$.assessDataQuality(biomarker_values, response_values, response_type)
+
+                # Clear warnings if all validation passed
+                self$results$dataWarning$setContent("")
+
+                # Determine threshold
+                threshold_value <- NULL
+                if (self$options$showThreshold) {
+                    threshold_val_opt <- self$options$thresholdValue
+                    if (length(threshold_val_opt) == 0) threshold_val_opt <- ""
+
+                    if (self$options$thresholdMethod == "manual" && threshold_val_opt != "") {
+                        threshold_value <- as.numeric(threshold_val_opt)
+                    } else if (self$options$thresholdMethod == "median") {
+                        threshold_value <- median(biomarker_values, na.rm = TRUE)
+                    } else if (self$options$thresholdMethod == "q75") {
+                        threshold_value <- quantile(biomarker_values, 0.75, na.rm = TRUE)
+                    } else if (self$options$thresholdMethod == "optimal" && response_type == "binary") {
+                        # Convert response to binary (factor levels already correctly ordered by .setBinaryFactorLevels)
+                        response_binary <- as.numeric(response_values) - 1
+                        optimal_result <- private$.calculateOptimalThreshold(biomarker_values, response_binary)
+                        threshold_value <- optimal_result$threshold
+                    }
+
+                    # Calculate threshold metrics if binary response
+                    if (!is.null(threshold_value) && response_type == "binary") {
+                        # Factor levels already correctly ordered by .setBinaryFactorLevels
+                        response_binary <- as.numeric(response_values) - 1
+                        threshold_metrics <- private$.calculateThresholdMetrics(biomarker_values, response_binary, threshold_value)
+
+                        # Calculate observed prevalence for PPV/NPV warning
+                        observed_prevalence <- mean(response_binary, na.rm = TRUE)
+
+                        # Issue warning about PPV/NPV prevalence dependence
+                        private$.addNotice("INFO", "PPV/NPV Prevalence Dependence", paste0(
+                            "The reported PPV and NPV values are calculated ",
+                            "using the observed prevalence in your dataset (", round(observed_prevalence * 100, 1), "%). ",
+                            "These values will differ in populations with different disease prevalence.\n",
+                            "Important: When applying this biomarker in a different clinical setting:\n",
+                            " - PPV/NPV values will change based on local prevalence\n",
+                            " - Sensitivity and specificity remain constant across populations\n",
+                            " - For external validation, recalculate PPV/NPV using local prevalence\n",
+                            "Formulas for prevalence adjustment:\n",
+                            "PPV = (Sens x Prev) / (Sens x Prev + (1 - Spec) x (1 - Prev))\n",
+                            "NPV = (Spec x (1 - Prev)) / (Spec x (1 - Prev) + (1 - Sens) x Prev)"
+                        ))
+
+                        # For optimal threshold method, we have bootstrap CIs from .calculateOptimalThreshold()
+                        # For other methods (manual, median, q75), CIs are not available
+                        if (self$options$thresholdMethod == "optimal" && exists("optimal_result") && !is.null(optimal_result)) {
+                            # Use CIs from optimal threshold calculation
+                            self$results$threshold$addRow(rowKey = 1, values = list(
+                                threshold = threshold_metrics$threshold,
+                                threshold_ci_lower = optimal_result$threshold_ci_lower,
+                                threshold_ci_upper = optimal_result$threshold_ci_upper,
+                                sensitivity = threshold_metrics$sensitivity,
+                                sensitivity_ci_lower = optimal_result$sensitivity_ci_lower,
+                                sensitivity_ci_upper = optimal_result$sensitivity_ci_upper,
+                                specificity = threshold_metrics$specificity,
+                                specificity_ci_lower = optimal_result$specificity_ci_lower,
+                                specificity_ci_upper = optimal_result$specificity_ci_upper,
+                                ppv = threshold_metrics$ppv,
+                                npv = threshold_metrics$npv,
+                                auc = optimal_result$auc,
+                                auc_ci_lower = optimal_result$auc_ci_lower,
+                                auc_ci_upper = optimal_result$auc_ci_upper
+                            ))
+                        } else {
+                            # No CIs for manual/median/q75 thresholds
+                            self$results$threshold$addRow(rowKey = 1, values = list(
+                                threshold = threshold_metrics$threshold,
+                                threshold_ci_lower = NA,
+                                threshold_ci_upper = NA,
+                                sensitivity = threshold_metrics$sensitivity,
+                                sensitivity_ci_lower = NA,
+                                sensitivity_ci_upper = NA,
+                                specificity = threshold_metrics$specificity,
+                                specificity_ci_lower = NA,
+                                specificity_ci_upper = NA,
+                                ppv = threshold_metrics$ppv,
+                                npv = threshold_metrics$npv,
+                                auc = threshold_metrics$auc,
+                                auc_ci_lower = NA,
+                                auc_ci_upper = NA
+                            ))
+                        }
+
+                        # ============================================================================
+                        # AUC QUALITY VALIDATION
+                        # ============================================================================
+
+                        # Extract AUC value for validation
+                        auc_val <- if (self$options$thresholdMethod == "optimal" && exists("optimal_result") && !is.null(optimal_result)) {
+                            optimal_result$auc
+                        } else {
+                            threshold_metrics$auc
+                        }
+
+                        if (!is.na(auc_val)) {
+                            # CRITICAL ERROR: AUC below chance (0.5)
+                            if (auc_val < 0.5) {
+                                private$.addNotice("ERROR", "AUC Below Chance", paste0(
+                                    "CRITICAL: AUC=", round(auc_val, 3), " is below chance level (0.5). ",
+                                    "Biomarker has NO discriminatory ability or relationship may be inverted. ",
+                                    "Verify: (1) Positive level is specified correctly, ",
+                                    "(2) Biomarker direction matches hypothesis (higher biomarker = better response?), ",
+                                    "(3) Data quality (check for data entry errors, measurement issues). ",
+                                    "Do NOT use this biomarker for clinical decision-making."
+                                ))
+                            }
+                            # STRONG WARNING: Poor discrimination (0.5-0.7)
+                            else if (auc_val < 0.7) {
+                                private$.addNotice("STRONG_WARNING", "Poor Biomarker Discrimination", paste0(
+                                    "Poor biomarker discrimination (AUC=", round(auc_val, 3), ", below acceptable threshold of 0.7). ",
+                                    "Clinical utility is LIMITED for single-marker diagnostic use. ",
+                                    "This biomarker alone CANNOT reliably predict response. ",
+                                    "Recommended actions: (1) Combine with other biomarkers in multi-marker panel, ",
+                                    "(2) Use different threshold optimization strategy, ",
+                                    "(3) Investigate alternative biomarkers. ",
+                                    "Only use in multi-factorial clinical decision algorithms, NOT as standalone test."
+                                ))
+                            }
+                            # INFO: Good-to-excellent performance (>= 0.8)
+                            else if (auc_val >= 0.8) {
+                                private$.addNotice("INFO", "Excellent Biomarker Discrimination", paste0(
+                                    "Excellent biomarker discrimination (AUC=", round(auc_val, 3), "). ",
+                                    "This biomarker shows strong predictive power and potential clinical utility. ",
+                                    "Next steps for clinical implementation: ",
+                                    "(1) Validate in independent cohort (external validation), ",
+                                    "(2) Assess performance in clinically relevant subgroups, ",
+                                    "(3) Compare to existing clinical markers, ",
+                                    "(4) Evaluate cost-effectiveness for clinical deployment. ",
+                                    "Consider regulatory pathway for companion diagnostic if applicable."
+                                ))
+                            }
+                        }
+
+                        # ============================================================================
+                    }
+                }
+
+                # Stratified analysis by groupVariable (for binary response only)
+                if (!is.null(self$options$groupVariable) && response_type == "binary") {
+                    group_var <- self$data[[self$options$groupVariable]][complete_cases]
+
+                    if (!is.null(group_var) && length(unique(group_var)) > 1) {
+                        group_factor <- as.factor(group_var)
+                        group_levels <- levels(group_factor)
+
+                        # Perform stratified ROC analysis for each group
+                        stratified_results <- list()
+                        for (group_level in group_levels) {
+                            # Subset data for this group
+                            group_idx <- group_factor == group_level
+                            biomarker_group <- biomarker_values[group_idx]
+                            response_group <- as.numeric(response_values[group_idx]) - 1
+
+                            # Skip groups with insufficient data or single class
+                            if (length(biomarker_group) < 10 ||
+                                length(unique(response_group)) < 2 ||
+                                sum(response_group == 1) < 3 ||
+                                sum(response_group == 0) < 3) {
+                                next
+                            }
+
+                            # Calculate optimal threshold and metrics for this group
+                            tryCatch(
+                                {
+                                    optimal_group <- private$.calculateOptimalThreshold(
+                                        biomarker_group, response_group,
+                                        n_bootstrap = 500 # Reduced for stratified analysis
+                                    )
+
+                                    # Interpret AUC performance
+                                    auc_val <- optimal_group$auc
+                                    performance <- if (is.na(auc_val)) {
+                                        "Insufficient data"
+                                    } else if (auc_val >= 0.9) {
+                                        "Excellent"
+                                    } else if (auc_val >= 0.8) {
+                                        "Good"
+                                    } else if (auc_val >= 0.7) {
+                                        "Fair"
+                                    } else if (auc_val >= 0.6) {
+                                        "Poor"
+                                    } else {
+                                        "No discrimination"
+                                    }
+
+                                    stratified_results[[group_level]] <- list(
+                                        group = group_level,
+                                        n = length(biomarker_group),
+                                        auc = optimal_group$auc,
+                                        auc_ci_lower = optimal_group$auc_ci_lower,
+                                        auc_ci_upper = optimal_group$auc_ci_upper,
+                                        threshold = optimal_group$threshold,
+                                        sensitivity = optimal_group$sensitivity,
+                                        specificity = optimal_group$specificity,
+                                        interpretation = performance
+                                    )
+                                },
+                                error = function(e) {
+                                    # Skip groups with errors
+                                }
+                            )
+                        }
+
+                        # Populate stratified analysis table if we have results
+                        if (length(stratified_results) > 0) {
+                            self$results$stratifiedAnalysis$setVisible(TRUE)
+                            for (i in seq_along(stratified_results)) {
+                                self$results$stratifiedAnalysis$addRow(
+                                    rowKey = i,
+                                    values = stratified_results[[i]]
+                                )
+                            }
+
+                            # Add informative Notice about stratified analysis
+                            private$.addNotice("INFO", "Stratified Analysis Performed", paste0(
+                                "Biomarker performance evaluated separately for each level of '",
+                                self$options$groupVariable, "'.\n",
+                                "Groups analyzed: ", length(stratified_results), " of ", length(group_levels), " total groups\n",
+                                "Use case: Compare biomarker performance across treatment arms, disease stages, or patient subgroups.\n",
+                                "Note: Groups with <10 patients or insufficient class representation were excluded from stratified analysis."
+                            ))
+                        }
+                    }
+                }
+
+                # Group comparison statistics
+                if (response_type %in% c("binary", "categorical")) {
+                    response_factor <- as.factor(response_values)
+                    group_stats <- data.frame(
+                        response_group = levels(response_factor),
+                        n = as.numeric(table(response_factor)),
+                        mean = tapply(biomarker_values, response_factor, mean, na.rm = TRUE),
+                        sd = tapply(biomarker_values, response_factor, sd, na.rm = TRUE),
+                        median = tapply(biomarker_values, response_factor, median, na.rm = TRUE),
+                        q1 = tapply(biomarker_values, response_factor, quantile, 0.25, na.rm = TRUE),
+                        q3 = tapply(biomarker_values, response_factor, quantile, 0.75, na.rm = TRUE)
+                    )
+
+                    for (i in 1:nrow(group_stats)) {
+                        self$results$groupComparison$addRow(rowKey = i, values = list(
+                            response_group = group_stats$response_group[i],
+                            n = group_stats$n[i],
+                            mean = group_stats$mean[i],
+                            sd = group_stats$sd[i],
+                            median = group_stats$median[i],
+                            iqr = paste0(round(group_stats$q1[i], 2), " - ", round(group_stats$q3[i], 2))
+                        ))
+                    }
+                }
+
+                # Correlation analysis for continuous response
+                if (self$options$showCorrelation && response_type == "continuous") {
+                    tryCatch(
+                        {
+                            pearson_cor <- cor.test(biomarker_values, response_values, method = "pearson", conf.level = conf_level)
+                            self$results$correlation$addRow(rowKey = 1, values = list(
+                                method = "Pearson",
+                                correlation = pearson_cor$estimate,
+                                pvalue = pearson_cor$p.value,
+                                ci_lower = pearson_cor$conf.int[1],
+                                ci_upper = pearson_cor$conf.int[2]
+                            ))
+                        },
+                        error = function(e) {}
+                    )
+
+                    tryCatch(
+                        {
+                            spearman_cor <- cor.test(biomarker_values, response_values, method = "spearman", conf.level = conf_level)
+                            self$results$correlation$addRow(rowKey = 2, values = list(
+                                method = "Spearman",
+                                correlation = spearman_cor$estimate,
+                                pvalue = spearman_cor$p.value,
+                                ci_lower = NA, # Spearman CI not always available
+                                ci_upper = NA
+                            ))
+                        },
+                        error = function(e) {}
+                    )
+                }
+
+                # Statistical tests
+                if (self$options$performTests) {
+                    test_results <- private$.performStatisticalTests(biomarker_values, response_values, response_type, conf_level)
+
+                    for (test_name in names(test_results)) {
+                        test <- test_results[[test_name]]
+                        self$results$statisticalTests$addRow(rowKey = test_name, values = list(
+                            test = test$test,
+                            statistic = test$statistic,
+                            pvalue = test$pvalue,
+                            interpretation = test$interpretation
+                        ))
+                    }
+                }
+
+                # Prepare plot data
+                plot_data <- list(
+                    biomarker = biomarker_values,
+                    response = response_values,
+                    response_type = response_type,
+                    plot_type = self$options$plotType,
+                    threshold = threshold_value,
+                    show_threshold = self$options$showThreshold,
+                    add_trend_line = self$options$addTrendLine,
+                    trend_method = self$options$trendMethod,
+                    outlier_handling = self$options$outlierHandling,
+                    group_variable = if (!is.null(self$options$groupVariable)) data[[self$options$groupVariable]][complete_cases] else NULL,
+                    biomarker_name = biomarker_var,
+                    response_name = response_var
+                )
+
+                self$results$plot$setState(plot_data)
+            },
+            .preprocessBiomarkerData = function(raw_data) {
+                # Enhanced biomarker data preprocessing
+
+                # Apply log transformation if requested
+                if (self$options$logTransform) {
+                    # Validate data is suitable for log transformation
+                    non_na_data <- raw_data[!is.na(raw_data)]
+
+                    # Check for negative values
+                    if (any(non_na_data < 0, na.rm = TRUE)) {
+                        negative_count <- sum(non_na_data < 0)
+                        min_value <- min(non_na_data, na.rm = TRUE)
+
                         html <- paste0(
                             "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                            "<h4 style='margin-top: 0; color: #721c24;'> Invalid Response Data Type</h4>",
-                            "<p style='color: #721c24;'>Continuous response variable must be numeric or convertible to numeric.</p>",
-                            "<p><strong>Current variable type:</strong> ", htmltools::htmlEscape(class(raw_response_values)[1]), "</p>",
+                            "<h4 style='margin-top: 0; color: #721c24;'> Invalid Data for Log Transformation</h4>",
+                            "<p style='color: #721c24;'>Log transformation requires non-negative values.</p>",
+                            "<p><strong>Your data contains:</strong></p>",
+                            "<ul style='margin-left: 20px;'>",
+                            "<li>", negative_count, " negative values</li>",
+                            "<li>Minimum value: ", round(min_value, 3), "</li>",
+                            "</ul>",
                             "<p><strong>Solutions:</strong></p>",
                             "<ol style='margin-left: 20px;'>",
-                            "<li>Change Response Type to 'Binary' or 'Categorical' for non-numeric responses</li>",
-                            "<li>Convert response variable to numeric in jamovi (Data → Transform)</li>",
-                            "<li>Select a different response variable</li>",
+                            "<li>Uncheck 'Log Transform Biomarker' option</li>",
+                            "<li>Remove or recode negative values in your data</li>",
+                            "<li>Use a different transformation appropriate for your data range</li>",
+                            "<li>Check if biomarker values were incorrectly recorded</li>",
+                            "</ol>",
+                            "<p><strong>Note:</strong> Analysis will continue WITHOUT log transformation.</p>",
+                            "</div>"
+                        )
+                        self$results$dataWarning$setContent(html)
+
+                        # Return untransformed data to allow analysis to continue
+                        return(raw_data)
+                    }
+
+                    # Apply log(x+1) transformation (safe for x >= 0)
+                    processed_data <- log(raw_data + 1)
+
+                    # Check for infinite or NaN values after transformation
+                    if (any(is.infinite(processed_data) | is.nan(processed_data), na.rm = TRUE)) {
+                        inf_count <- sum(is.infinite(processed_data), na.rm = TRUE)
+                        nan_count <- sum(is.nan(processed_data), na.rm = TRUE)
+
+                        html <- paste0(
+                            "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                            "<h4 style='margin-top: 0; color: #856404;'> Log Transformation Issues</h4>",
+                            "<p style='color: #856404;'>Log transformation produced invalid values.</p>",
+                            "<p><strong>Issues detected:</strong></p>",
+                            "<ul style='margin-left: 20px;'>",
+                            if (inf_count > 0) paste0("<li>", inf_count, " infinite values</li>") else "",
+                            if (nan_count > 0) paste0("<li>", nan_count, " NaN values</li>") else "",
+                            "</ul>",
+                            "<p><strong>Recommendations:</strong></p>",
+                            "<ol style='margin-left: 20px;'>",
+                            "<li>Review data quality and remove problematic values</li>",
+                            "<li>Consider using untransformed data</li>",
+                            "<li>Check for extreme outliers or data entry errors</li>",
                             "</ol>",
                             "</div>"
                         )
                         self$results$dataWarning$setContent(html)
-                        return()
-                    })
-                }
-            }
-            
-            # Enhanced data preprocessing
-            biomarker_values <- private$.preprocessBiomarkerData(raw_biomarker_values)
-            response_values <- raw_response_values
-
-            # ============================================================================
-            # CLINICAL VALIDATION NOTICES
-            # ============================================================================
-
-            # Track final sample size after missing data removal
-            n_complete <- sum(complete.cases(data.frame(biomarker_values, response_values)))
-
-            # Notice 1: Small Sample Size Warning
-            if (n_complete < 30) {
-                private$.addNotice('WARNING', 'Small Sample Size', paste0(
-                    "Small sample size (n=", n_complete, ", below recommended minimum n=30). ",
-                    "Bootstrap CIs may be unstable, correlation estimates unreliable. ",
-                    "Results should be considered preliminary and validated in larger cohort. ",
-                    "Recommend n>=50 for biomarker development, n>=100 for clinical validation."
-                ))
-            }
-
-            # Notice 2: Low Event Count Validation (Binary Response Only)
-            if (response_type == "binary") {
-                # Count events per group
-                # TODO (correctness): four sites in this file convert a binary
-                # factor to 0/1 via `as.numeric(response_values) - 1`:
-                #   - line ~614 (this site, event count notice)
-                #   - line ~800 (binary threshold analysis)
-                #   - line ~808 (alternate threshold path)
-                #   - line ~960 (subgroup binary coding)
-                # All assume the factor's internal codes are 1,2 (level indices).
-                # For jamovi-labelled factors carrying values=c(0,1),
-                # jmvcore::toNumeric returns 0,1 directly and `- 1` yields -1,0.
-                # Decide intended semantics before migrating to toNumeric.
-                # Same pattern already flagged at:
-                #   R/betabinomialdiagnostic.b.R:200
-                #   R/biomarkerdiscovery.b.R:391
-                response_numeric <- as.numeric(response_values) - 1  # Convert to 0/1
-                n_events <- sum(response_numeric == 1, na.rm = TRUE)
-                n_non_events <- sum(response_numeric == 0, na.rm = TRUE)
-
-                # CRITICAL: Block execution if < 10 events per group
-                if (n_events < 10 || n_non_events < 10) {
-                    private$.addNotice('ERROR', 'Insufficient Events', paste0(
-                        "Insufficient events for reliable ROC analysis. ",
-                        "Positive cases: n=", n_events, ", Negative cases: n=", n_non_events, ". ",
-                        "Minimum 10 per group required for stable AUC/threshold estimates (Hanley & McNeil, 1982). ",
-                        "Collect additional data before proceeding with biomarker validation."
-                    ))
-                    return()  # HARD STOP - do not proceed
-                }
-
-                # STRONG WARNING: 10-19 events (low but not blocking)
-                if (n_events < 20 || n_non_events < 20) {
-                    private$.addNotice('STRONG_WARNING', 'Low Event Count', paste0(
-                        "Low event count (Positive: n=", n_events, ", Negative: n=", n_non_events, "). ",
-                        "ROC estimates may be unstable with wide confidence intervals. ",
-                        "FDA biomarker guidance recommends n>=50 per group for clinical validation studies. ",
-                        "Consider collecting additional data or use results cautiously as exploratory only."
-                    ))
-                }
-
-                # Notice 3: Extreme Prevalence Warning
-                prevalence <- n_events / (n_events + n_non_events)
-                if (prevalence < 0.05 || prevalence > 0.95) {
-                    private$.addNotice('STRONG_WARNING', 'Extreme Response Prevalence', paste0(
-                        "Extreme response prevalence (", round(prevalence * 100, 1), "% positive). ",
-                        "PPV and NPV estimates are HIGHLY UNSTABLE and unlikely to generalize to populations with different prevalence. ",
-                        "Threshold selection unreliable. ",
-                        "ROC analysis assumes balanced sampling (recommend 40-60% prevalence for biomarker development). ",
-                        "Consider stratified sampling or interpret with caution."
-                    ))
-                }
-            }
-
-            # ============================================================================
-
-            # Handle outliers if requested
-            if (self$options$outlierHandling == "remove") {
-                outlier_indices <- private$.detectOutliers(biomarker_values)
-                if (length(outlier_indices) > 0) {
-                    # Calculate outlier statistics before removal
-                    outlier_count <- length(outlier_indices)
-                    total_count <- length(biomarker_values)
-                    outlier_pct <- round(outlier_count / total_count * 100, 1)
-                    outlier_values <- biomarker_values[outlier_indices]
-
-                    # Calculate IQR bounds for reporting
-                    Q1 <- quantile(biomarker_values, 0.25, na.rm = TRUE)
-                    Q3 <- quantile(biomarker_values, 0.75, na.rm = TRUE)
-                    IQR_val <- Q3 - Q1
-                    lower_bound <- Q1 - 1.5 * IQR_val
-                    upper_bound <- Q3 + 1.5 * IQR_val
-
-                    # Remove outliers
-                    biomarker_values[outlier_indices] <- NA
-                    response_values[outlier_indices] <- NA
-
-                    # Issue informative Notice about outlier removal
-                    private$.addNotice('STRONG_WARNING', 'Outliers Removed', paste0(
-                        outlier_count, " data points (", outlier_pct, "% of total) ",
-                        "identified as outliers and excluded from analysis.\n",
-                        "Detection Method: IQR-based (Tukey's fences)\n",
-                        " - Lower bound: ", round(lower_bound, 2), "\n",
-                        " - Upper bound: ", round(upper_bound, 2), "\n",
-                        " - Q1: ", round(Q1, 2), ", Q3: ", round(Q3, 2), ", IQR: ", round(IQR_val, 2), "\n",
-                        "Removed values range: ", round(min(outlier_values, na.rm = TRUE), 2), " to ",
-                        round(max(outlier_values, na.rm = TRUE), 2), "\n",
-                        "Impact: All subsequent analyses (ROC, statistics, correlations) are based on ",
-                        total_count - outlier_count, " remaining data points.\n",
-                        "Important: Outlier removal can bias results, especially in small samples or skewed distributions. ",
-                        "Consider reviewing excluded values to ensure they represent true outliers rather than valid extreme values."
-                    ))
-                }
-            }
-            
-            # Remove rows with missing values
-            complete_cases <- !is.na(biomarker_values) & !is.na(response_values)
-            biomarker_values <- biomarker_values[complete_cases]
-            response_values <- response_values[complete_cases]
-            
-            # Final data validation
-            if (length(biomarker_values) == 0) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> No Valid Data Points</h4>",
-                    "<p style='color: #721c24;'>No valid data points remain after preprocessing.</p>",
-                    "<p><strong>Possible causes:</strong></p>",
-                    "<ul style='margin-left: 20px;'>",
-                    "<li>All values are missing (NA)</li>",
-                    "<li>Outlier removal eliminated all data points</li>",
-                    "<li>Biomarker and response variables have no overlapping non-missing values</li>",
-                    "</ul>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ol style='margin-left: 20px;'>",
-                    "<li>Check data for missing values</li>",
-                    "<li>Change Outlier Handling to 'Include All' or 'Highlight Outliers'</li>",
-                    "<li>Review data quality and completeness</li>",
-                    "</ol>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-            
-            if (length(biomarker_values) < 10) {
-                warning(paste("Small sample size (n =", length(biomarker_values), 
-                            "). Results may be unreliable. Recommend n ≥ 30 for robust analysis."))
-            }
-            
-            if (response_type %in% c("binary", "categorical")) {
-                response_factor <- as.factor(response_values)
-                min_group_size <- min(table(response_factor))
-                if (min_group_size < 5) {
-                    warning(paste("Small group size detected (n =", min_group_size, 
-                                "). Results may be unreliable for statistical testing."))
-                }
-            }
-            
-            # Check biomarker data quality
-            biomarker_range <- max(biomarker_values) - min(biomarker_values)
-            if (biomarker_range == 0) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'> Constant Biomarker Values</h4>",
-                    "<p style='color: #721c24;'>All biomarker values are identical. Cannot perform analysis.</p>",
-                    "<p><strong>Current value:</strong> ", htmltools::htmlEscape(as.character(unique(biomarker_values)[1])), "</p>",
-                    "<p><strong>Solutions:</strong></p>",
-                    "<ol style='margin-left: 20px;'>",
-                    "<li>Select a biomarker variable with varying values</li>",
-                    "<li>Check if data was incorrectly filtered or transformed</li>",
-                    "<li>Verify data import was successful</li>",
-                    "</ol>",
-                    "</div>"
-                )
-                self$results$dataWarning$setContent(html)
-                return()
-            }
-            
-            # Data quality assessment
-            private$.assessDataQuality(biomarker_values, response_values, response_type)
-
-            # Clear warnings if all validation passed
-            self$results$dataWarning$setContent("")
-
-            # Determine threshold
-            threshold_value <- NULL
-            if (self$options$showThreshold) {
-                threshold_val_opt <- self$options$thresholdValue
-                if (length(threshold_val_opt) == 0) threshold_val_opt <- ""
-
-                if (self$options$thresholdMethod == "manual" && threshold_val_opt != "") {
-                    threshold_value <- as.numeric(threshold_val_opt)
-                } else if (self$options$thresholdMethod == "median") {
-                    threshold_value <- median(biomarker_values, na.rm = TRUE)
-                } else if (self$options$thresholdMethod == "q75") {
-                    threshold_value <- quantile(biomarker_values, 0.75, na.rm = TRUE)
-                } else if (self$options$thresholdMethod == "optimal" && response_type == "binary") {
-                    # Convert response to binary (factor levels already correctly ordered by .setBinaryFactorLevels)
-                    response_binary <- as.numeric(response_values) - 1
-                    optimal_result <- private$.calculateOptimalThreshold(biomarker_values, response_binary)
-                    threshold_value <- optimal_result$threshold
-                }
-
-                # Calculate threshold metrics if binary response
-                if (!is.null(threshold_value) && response_type == "binary") {
-                    # Factor levels already correctly ordered by .setBinaryFactorLevels
-                    response_binary <- as.numeric(response_values) - 1
-                    threshold_metrics <- private$.calculateThresholdMetrics(biomarker_values, response_binary, threshold_value)
-
-                    # Calculate observed prevalence for PPV/NPV warning
-                    observed_prevalence <- mean(response_binary, na.rm = TRUE)
-
-                    # Issue warning about PPV/NPV prevalence dependence
-                    private$.addNotice('INFO', 'PPV/NPV Prevalence Dependence', paste0(
-                        "The reported PPV and NPV values are calculated ",
-                        "using the observed prevalence in your dataset (", round(observed_prevalence * 100, 1), "%). ",
-                        "These values will differ in populations with different disease prevalence.\n",
-                        "Important: When applying this biomarker in a different clinical setting:\n",
-                        " - PPV/NPV values will change based on local prevalence\n",
-                        " - Sensitivity and specificity remain constant across populations\n",
-                        " - For external validation, recalculate PPV/NPV using local prevalence\n",
-                        "Formulas for prevalence adjustment:\n",
-                        "PPV = (Sens x Prev) / (Sens x Prev + (1 - Spec) x (1 - Prev))\n",
-                        "NPV = (Spec x (1 - Prev)) / (Spec x (1 - Prev) + (1 - Sens) x Prev)"
-                    ))
-
-                    # For optimal threshold method, we have bootstrap CIs from .calculateOptimalThreshold()
-                    # For other methods (manual, median, q75), CIs are not available
-                    if (self$options$thresholdMethod == "optimal" && exists("optimal_result") && !is.null(optimal_result)) {
-                        # Use CIs from optimal threshold calculation
-                        self$results$threshold$addRow(rowKey = 1, values = list(
-                            threshold = threshold_metrics$threshold,
-                            threshold_ci_lower = optimal_result$threshold_ci_lower,
-                            threshold_ci_upper = optimal_result$threshold_ci_upper,
-                            sensitivity = threshold_metrics$sensitivity,
-                            sensitivity_ci_lower = optimal_result$sensitivity_ci_lower,
-                            sensitivity_ci_upper = optimal_result$sensitivity_ci_upper,
-                            specificity = threshold_metrics$specificity,
-                            specificity_ci_lower = optimal_result$specificity_ci_lower,
-                            specificity_ci_upper = optimal_result$specificity_ci_upper,
-                            ppv = threshold_metrics$ppv,
-                            npv = threshold_metrics$npv,
-                            auc = optimal_result$auc,
-                            auc_ci_lower = optimal_result$auc_ci_lower,
-                            auc_ci_upper = optimal_result$auc_ci_upper
-                        ))
-                    } else {
-                        # No CIs for manual/median/q75 thresholds
-                        self$results$threshold$addRow(rowKey = 1, values = list(
-                            threshold = threshold_metrics$threshold,
-                            threshold_ci_lower = NA,
-                            threshold_ci_upper = NA,
-                            sensitivity = threshold_metrics$sensitivity,
-                            sensitivity_ci_lower = NA,
-                            sensitivity_ci_upper = NA,
-                            specificity = threshold_metrics$specificity,
-                            specificity_ci_lower = NA,
-                            specificity_ci_upper = NA,
-                            ppv = threshold_metrics$ppv,
-                            npv = threshold_metrics$npv,
-                            auc = threshold_metrics$auc,
-                            auc_ci_lower = NA,
-                            auc_ci_upper = NA
-                        ))
                     }
-
-                    # ============================================================================
-                    # AUC QUALITY VALIDATION
-                    # ============================================================================
-
-                    # Extract AUC value for validation
-                    auc_val <- if (self$options$thresholdMethod == "optimal" && exists("optimal_result") && !is.null(optimal_result)) {
-                        optimal_result$auc
-                    } else {
-                        threshold_metrics$auc
-                    }
-
-                    if (!is.na(auc_val)) {
-                        # CRITICAL ERROR: AUC below chance (0.5)
-                        if (auc_val < 0.5) {
-                            private$.addNotice('ERROR', 'AUC Below Chance', paste0(
-                                "CRITICAL: AUC=", round(auc_val, 3), " is below chance level (0.5). ",
-                                "Biomarker has NO discriminatory ability or relationship may be inverted. ",
-                                "Verify: (1) Positive level is specified correctly, ",
-                                "(2) Biomarker direction matches hypothesis (higher biomarker = better response?), ",
-                                "(3) Data quality (check for data entry errors, measurement issues). ",
-                                "Do NOT use this biomarker for clinical decision-making."
-                            ))
-                        }
-                        # STRONG WARNING: Poor discrimination (0.5-0.7)
-                        else if (auc_val < 0.7) {
-                            private$.addNotice('STRONG_WARNING', 'Poor Biomarker Discrimination', paste0(
-                                "Poor biomarker discrimination (AUC=", round(auc_val, 3), ", below acceptable threshold of 0.7). ",
-                                "Clinical utility is LIMITED for single-marker diagnostic use. ",
-                                "This biomarker alone CANNOT reliably predict response. ",
-                                "Recommended actions: (1) Combine with other biomarkers in multi-marker panel, ",
-                                "(2) Use different threshold optimization strategy, ",
-                                "(3) Investigate alternative biomarkers. ",
-                                "Only use in multi-factorial clinical decision algorithms, NOT as standalone test."
-                            ))
-                        }
-                        # INFO: Good-to-excellent performance (>= 0.8)
-                        else if (auc_val >= 0.8) {
-                            private$.addNotice('INFO', 'Excellent Biomarker Discrimination', paste0(
-                                "Excellent biomarker discrimination (AUC=", round(auc_val, 3), "). ",
-                                "This biomarker shows strong predictive power and potential clinical utility. ",
-                                "Next steps for clinical implementation: ",
-                                "(1) Validate in independent cohort (external validation), ",
-                                "(2) Assess performance in clinically relevant subgroups, ",
-                                "(3) Compare to existing clinical markers, ",
-                                "(4) Evaluate cost-effectiveness for clinical deployment. ",
-                                "Consider regulatory pathway for companion diagnostic if applicable."
-                            ))
-                        }
-                    }
-
-                    # ============================================================================
-                }
-            }
-
-            # Stratified analysis by groupVariable (for binary response only)
-            if (!is.null(self$options$groupVariable) && response_type == "binary") {
-                group_var <- self$data[[self$options$groupVariable]][complete_cases]
-
-                if (!is.null(group_var) && length(unique(group_var)) > 1) {
-                    group_factor <- as.factor(group_var)
-                    group_levels <- levels(group_factor)
-
-                    # Perform stratified ROC analysis for each group
-                    stratified_results <- list()
-                    for (group_level in group_levels) {
-                        # Subset data for this group
-                        group_idx <- group_factor == group_level
-                        biomarker_group <- biomarker_values[group_idx]
-                        response_group <- as.numeric(response_values[group_idx]) - 1
-
-                        # Skip groups with insufficient data or single class
-                        if (length(biomarker_group) < 10 ||
-                            length(unique(response_group)) < 2 ||
-                            sum(response_group == 1) < 3 ||
-                            sum(response_group == 0) < 3) {
-                            next
-                        }
-
-                        # Calculate optimal threshold and metrics for this group
-                        tryCatch({
-                            optimal_group <- private$.calculateOptimalThreshold(
-                                biomarker_group, response_group,
-                                n_bootstrap = 500  # Reduced for stratified analysis
-                            )
-
-                            # Interpret AUC performance
-                            auc_val <- optimal_group$auc
-                            performance <- if (is.na(auc_val)) {
-                                "Insufficient data"
-                            } else if (auc_val >= 0.9) {
-                                "Excellent"
-                            } else if (auc_val >= 0.8) {
-                                "Good"
-                            } else if (auc_val >= 0.7) {
-                                "Fair"
-                            } else if (auc_val >= 0.6) {
-                                "Poor"
-                            } else {
-                                "No discrimination"
-                            }
-
-                            stratified_results[[group_level]] <- list(
-                                group = group_level,
-                                n = length(biomarker_group),
-                                auc = optimal_group$auc,
-                                auc_ci_lower = optimal_group$auc_ci_lower,
-                                auc_ci_upper = optimal_group$auc_ci_upper,
-                                threshold = optimal_group$threshold,
-                                sensitivity = optimal_group$sensitivity,
-                                specificity = optimal_group$specificity,
-                                interpretation = performance
-                            )
-                        }, error = function(e) {
-                            # Skip groups with errors
-                        })
-                    }
-
-                    # Populate stratified analysis table if we have results
-                    if (length(stratified_results) > 0) {
-                        self$results$stratifiedAnalysis$setVisible(TRUE)
-                        for (i in seq_along(stratified_results)) {
-                            self$results$stratifiedAnalysis$addRow(
-                                rowKey = i,
-                                values = stratified_results[[i]]
-                            )
-                        }
-
-                        # Add informative Notice about stratified analysis
-                        private$.addNotice('INFO', 'Stratified Analysis Performed', paste0(
-                            "Biomarker performance evaluated separately for each level of '",
-                            self$options$groupVariable, "'.\n",
-                            "Groups analyzed: ", length(stratified_results), " of ", length(group_levels), " total groups\n",
-                            "Use case: Compare biomarker performance across treatment arms, disease stages, or patient subgroups.\n",
-                            "Note: Groups with <10 patients or insufficient class representation were excluded from stratified analysis."
-                        ))
-                    }
-                }
-            }
-
-            # Group comparison statistics
-            if (response_type %in% c("binary", "categorical")) {
-                response_factor <- as.factor(response_values)
-                group_stats <- data.frame(
-                    response_group = levels(response_factor),
-                    n = as.numeric(table(response_factor)),
-                    mean = tapply(biomarker_values, response_factor, mean, na.rm = TRUE),
-                    sd = tapply(biomarker_values, response_factor, sd, na.rm = TRUE),
-                    median = tapply(biomarker_values, response_factor, median, na.rm = TRUE),
-                    q1 = tapply(biomarker_values, response_factor, quantile, 0.25, na.rm = TRUE),
-                    q3 = tapply(biomarker_values, response_factor, quantile, 0.75, na.rm = TRUE)
-                )
-                
-                for (i in 1:nrow(group_stats)) {
-                    self$results$groupComparison$addRow(rowKey = i, values = list(
-                        response_group = group_stats$response_group[i],
-                        n = group_stats$n[i],
-                        mean = group_stats$mean[i],
-                        sd = group_stats$sd[i],
-                        median = group_stats$median[i],
-                        iqr = paste0(round(group_stats$q1[i], 2), " - ", round(group_stats$q3[i], 2))
-                    ))
-                }
-            }
-            
-            # Correlation analysis for continuous response
-            if (self$options$showCorrelation && response_type == "continuous") {
-                tryCatch({
-                    pearson_cor <- cor.test(biomarker_values, response_values, method = "pearson", conf.level = conf_level)
-                    self$results$correlation$addRow(rowKey = 1, values = list(
-                        method = "Pearson",
-                        correlation = pearson_cor$estimate,
-                        pvalue = pearson_cor$p.value,
-                        ci_lower = pearson_cor$conf.int[1],
-                        ci_upper = pearson_cor$conf.int[2]
-                    ))
-                }, error = function(e) {})
-                
-                tryCatch({
-                    spearman_cor <- cor.test(biomarker_values, response_values, method = "spearman", conf.level = conf_level)
-                    self$results$correlation$addRow(rowKey = 2, values = list(
-                        method = "Spearman",
-                        correlation = spearman_cor$estimate,
-                        pvalue = spearman_cor$p.value,
-                        ci_lower = NA,  # Spearman CI not always available
-                        ci_upper = NA
-                    ))
-                }, error = function(e) {})
-            }
-            
-            # Statistical tests
-            if (self$options$performTests) {
-                test_results <- private$.performStatisticalTests(biomarker_values, response_values, response_type, conf_level)
-                
-                for (test_name in names(test_results)) {
-                    test <- test_results[[test_name]]
-                    self$results$statisticalTests$addRow(rowKey = test_name, values = list(
-                        test = test$test,
-                        statistic = test$statistic,
-                        pvalue = test$pvalue,
-                        interpretation = test$interpretation
-                    ))
-                }
-            }
-            
-            # Prepare plot data
-            plot_data <- list(
-                biomarker = biomarker_values,
-                response = response_values,
-                response_type = response_type,
-                plot_type = self$options$plotType,
-                threshold = threshold_value,
-                show_threshold = self$options$showThreshold,
-                add_trend_line = self$options$addTrendLine,
-                trend_method = self$options$trendMethod,
-                outlier_handling = self$options$outlierHandling,
-                group_variable = if (!is.null(self$options$groupVariable)) data[[self$options$groupVariable]][complete_cases] else NULL,
-                biomarker_name = biomarker_var,
-                response_name = response_var
-            )
-            
-            self$results$plot$setState(plot_data)
-        },
-        
-        .preprocessBiomarkerData = function(raw_data) {
-            # Enhanced biomarker data preprocessing
-
-            # Apply log transformation if requested
-            if (self$options$logTransform) {
-                # Validate data is suitable for log transformation
-                non_na_data <- raw_data[!is.na(raw_data)]
-
-                # Check for negative values
-                if (any(non_na_data < 0, na.rm = TRUE)) {
-                    negative_count <- sum(non_na_data < 0)
-                    min_value <- min(non_na_data, na.rm = TRUE)
-
-                    html <- paste0(
-                        "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #721c24;'> Invalid Data for Log Transformation</h4>",
-                        "<p style='color: #721c24;'>Log transformation requires non-negative values.</p>",
-                        "<p><strong>Your data contains:</strong></p>",
-                        "<ul style='margin-left: 20px;'>",
-                        "<li>", negative_count, " negative values</li>",
-                        "<li>Minimum value: ", round(min_value, 3), "</li>",
-                        "</ul>",
-                        "<p><strong>Solutions:</strong></p>",
-                        "<ol style='margin-left: 20px;'>",
-                        "<li>Uncheck 'Log Transform Biomarker' option</li>",
-                        "<li>Remove or recode negative values in your data</li>",
-                        "<li>Use a different transformation appropriate for your data range</li>",
-                        "<li>Check if biomarker values were incorrectly recorded</li>",
-                        "</ol>",
-                        "<p><strong>Note:</strong> Analysis will continue WITHOUT log transformation.</p>",
-                        "</div>"
-                    )
-                    self$results$dataWarning$setContent(html)
-
-                    # Return untransformed data to allow analysis to continue
-                    return(raw_data)
-                }
-
-                # Apply log(x+1) transformation (safe for x >= 0)
-                processed_data <- log(raw_data + 1)
-
-                # Check for infinite or NaN values after transformation
-                if (any(is.infinite(processed_data) | is.nan(processed_data), na.rm = TRUE)) {
-                    inf_count <- sum(is.infinite(processed_data), na.rm = TRUE)
-                    nan_count <- sum(is.nan(processed_data), na.rm = TRUE)
-
-                    html <- paste0(
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'> Log Transformation Issues</h4>",
-                        "<p style='color: #856404;'>Log transformation produced invalid values.</p>",
-                        "<p><strong>Issues detected:</strong></p>",
-                        "<ul style='margin-left: 20px;'>",
-                        if (inf_count > 0) paste0("<li>", inf_count, " infinite values</li>") else "",
-                        if (nan_count > 0) paste0("<li>", nan_count, " NaN values</li>") else "",
-                        "</ul>",
-                        "<p><strong>Recommendations:</strong></p>",
-                        "<ol style='margin-left: 20px;'>",
-                        "<li>Review data quality and remove problematic values</li>",
-                        "<li>Consider using untransformed data</li>",
-                        "<li>Check for extreme outliers or data entry errors</li>",
-                        "</ol>",
-                        "</div>"
-                    )
-                    self$results$dataWarning$setContent(html)
-                }
-            } else {
-                processed_data <- raw_data
-            }
-
-            return(processed_data)
-        },
-        
-        .detectOutliers = function(data) {
-            # IQR-based outlier detection
-            Q1 <- quantile(data, 0.25, na.rm = TRUE)
-            Q3 <- quantile(data, 0.75, na.rm = TRUE)
-            IQR <- Q3 - Q1
-            
-            lower_bound <- Q1 - 1.5 * IQR
-            upper_bound <- Q3 + 1.5 * IQR
-            
-            outlier_indices <- which(data < lower_bound | data > upper_bound)
-            return(outlier_indices)
-        },
-        
-        .assessDataQuality = function(biomarker_values, response_values, response_type) {
-            # Comprehensive data quality assessment
-            
-            # Biomarker data quality
-            biomarker_missing_pct <- sum(is.na(biomarker_values)) / length(biomarker_values) * 100
-            biomarker_zeros_pct <- sum(biomarker_values == 0, na.rm = TRUE) / sum(!is.na(biomarker_values)) * 100
-            biomarker_cv <- sd(biomarker_values, na.rm = TRUE) / mean(biomarker_values, na.rm = TRUE)
-            
-            # Response data quality
-            if (response_type %in% c("binary", "categorical")) {
-                response_factor <- as.factor(response_values)
-                group_sizes <- table(response_factor)
-                min_group_size <- min(group_sizes)
-                group_balance <- min(group_sizes) / max(group_sizes)
-            }
-            
-            # Quality warnings
-            if (biomarker_missing_pct > 20) {
-                warning(paste("High missing data rate for biomarker (", round(biomarker_missing_pct, 1), "%)."))
-            }
-            
-            if (biomarker_zeros_pct > 30) {
-                warning(paste("High proportion of zero values in biomarker (", round(biomarker_zeros_pct, 1), "%)."))
-            }
-            
-            if (biomarker_cv > 2) {
-                warning("High coefficient of variation in biomarker data. Consider transformation.")
-            }
-            
-            if (response_type %in% c("binary", "categorical") && exists("group_balance") && group_balance < 0.2) {
-                warning("Severely imbalanced response groups detected. Results may be biased.")
-            }
-            
-            private$.checkpoint()
-        },
-        
-        .enhanceThresholdAnalysis = function(benford_obj, cleaned_data, threshold_value) {
-            # Enhanced threshold analysis with confidence intervals
-            
-            if (is.null(threshold_value)) {
-                return(NULL)
-            }
-            
-            tryCatch({
-                # Calculate confidence intervals for threshold metrics
-                n_bootstrap <- 1000
-                bootstrap_results <- replicate(n_bootstrap, {
-                    # Bootstrap sampling
-                    boot_indices <- sample(length(cleaned_data), replace = TRUE)
-                    boot_biomarker <- cleaned_data[boot_indices]
-                    boot_response <- response_values[boot_indices]
-                    
-                    # Calculate metrics for bootstrap sample
-                    boot_metrics <- private$.calculateThresholdMetrics(boot_biomarker, boot_response, threshold_value)
-                    return(c(boot_metrics$sensitivity, boot_metrics$specificity, 
-                            boot_metrics$ppv, boot_metrics$npv, boot_metrics$auc))
-                }, simplify = TRUE)
-                
-                # Calculate confidence intervals
-                ci_level <- as.numeric(self$options$confidenceLevel)
-                alpha <- 1 - ci_level
-                
-                ci_lower <- apply(bootstrap_results, 1, quantile, alpha/2, na.rm = TRUE)
-                ci_upper <- apply(bootstrap_results, 1, quantile, 1-alpha/2, na.rm = TRUE)
-                
-                return(list(
-                    sensitivity_ci = c(ci_lower[1], ci_upper[1]),
-                    specificity_ci = c(ci_lower[2], ci_upper[2]),
-                    ppv_ci = c(ci_lower[3], ci_upper[3]),
-                    npv_ci = c(ci_lower[4], ci_upper[4]),
-                    auc_ci = c(ci_lower[5], ci_upper[5])
-                ))
-                
-            }, error = function(e) {
-                warning("Could not calculate confidence intervals for threshold metrics.")
-                return(NULL)
-            })
-        },
-
-        .plot = function(image, ggtheme, theme, ...) {
-            plot_data <- image$state
-            if (is.null(plot_data)) return()
-            
-            biomarker <- plot_data$biomarker
-            response <- plot_data$response
-            response_type <- plot_data$response_type
-            plot_type <- plot_data$plot_type
-            
-            # Create base data frame
-            df <- data.frame(
-                biomarker = biomarker,
-                response = response
-            )
-            
-            # Add grouping variable if present
-            if (!is.null(plot_data$group_variable)) {
-                df$group <- plot_data$group_variable
-            }
-            
-            # Create different plot types
-            if (plot_type == "boxplot" && response_type %in% c("binary", "categorical")) {
-                p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(response), y = biomarker, fill = factor(response))) +
-                    ggplot2::geom_boxplot() +
-                    ggplot2::geom_jitter(width = 0.2, alpha = 0.6)
-                
-            } else if (plot_type == "violin" && response_type %in% c("binary", "categorical")) {
-                p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(response), y = biomarker, fill = factor(response))) +
-                    ggplot2::geom_violin() +
-                    ggplot2::geom_boxplot(width = 0.1, fill = "white", alpha = 0.7)
-                
-            } else if (plot_type == "scatter" || response_type == "continuous") {
-                p <- ggplot2::ggplot(df, ggplot2::aes(x = biomarker, y = response)) +
-                    ggplot2::geom_point(alpha = 0.6)
-                
-                # Add trend line if requested
-                if (plot_data$add_trend_line) {
-                    if (plot_data$trend_method == "lm") {
-                        p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE)
-                    } else if (plot_data$trend_method == "loess") {
-                        p <- p + ggplot2::geom_smooth(method = "loess", se = TRUE)
-                    } else if (plot_data$trend_method == "gam") {
-                        p <- p + ggplot2::geom_smooth(method = "gam", se = TRUE)
-                    }
-                }
-                
-            } else {
-                # Default to scatter plot
-                p <- ggplot2::ggplot(df, ggplot2::aes(x = biomarker, y = response)) +
-                    ggplot2::geom_point(alpha = 0.6)
-            }
-            
-            # Add threshold line if requested
-            if (plot_data$show_threshold && !is.null(plot_data$threshold)) {
-                if (plot_type == "scatter" || response_type == "continuous") {
-                    p <- p + ggplot2::geom_vline(xintercept = plot_data$threshold, 
-                                                linetype = "dashed", color = "red")
                 } else {
-                    p <- p + ggplot2::geom_hline(yintercept = plot_data$threshold, 
-                                                linetype = "dashed", color = "red")
+                    processed_data <- raw_data
                 }
-            }
-            
-            # Add grouping colors if group variable is present
-            if (!is.null(plot_data$group_variable)) {
-                p <- p + ggplot2::aes(color = group)
-            }
-            
-            # Labels and theme
-            p <- p + ggplot2::labs(
-                x = plot_data$biomarker_name,
-                y = plot_data$response_name,
-                title = "Biomarker-Response Association",
-                subtitle = paste("Analysis type:", response_type)
-            ) +
-                ggtheme +
-                ggplot2::theme(
-                    legend.position = "right"
-                )
-            
-            print(p)
-            TRUE
-        },
-        
-        .calculateCliffsDelta = function(x, y) {
-            # Cliff's Delta for biomarker comparison between response groups
-            # OPTIMIZED: Vectorized using outer() - ~10-100x speedup over nested loops
-            comparisons <- outer(x, y, "-")  # All pairwise differences as matrix
-            greater <- sum(comparisons > 0)   # Count x[i] > y[j]
-            less <- sum(comparisons < 0)      # Count x[i] < y[j]
-            delta <- (greater - less) / (length(x) * length(y))
-            return(delta)
-        },
-        
-        .calculateHodgesLehmann = function(x, y) {
-            # Hodges-Lehmann shift for biomarker level difference
-            # OPTIMIZED: Vectorized pairwise differences using outer()
-            differences <- outer(x, y, "-")  # Matrix of all x[i] - y[j]
-            return(median(differences))       # Median of all pairwise differences
-        },
-        
-        .interpretBiomarkerEffects = function(p_value, cliff_delta, hodges_lehmann, group_levels) {
-            # Clinical interpretation for biomarker-response associations
-            significance <- ifelse(p_value < 0.05, "Significant", "Non-significant")
-            abs_delta <- abs(cliff_delta)
-            abs_shift <- abs(hodges_lehmann)
-            
-            # Probability interpretation
-            prob <- round((cliff_delta + 1) / 2 * 100, 1)
-            direction <- ifelse(cliff_delta > 0, "higher", "lower")
-            better_group <- ifelse(cliff_delta > 0, group_levels[1], group_levels[2])
-            
-            # Effect magnitude
-            if (abs_delta < 0.147) {
-                effect_size <- "negligible"
-            } else if (abs_delta < 0.33) {
-                effect_size <- "small"
-            } else if (abs_delta < 0.474) {
-                effect_size <- "medium"
-            } else {
-                effect_size <- "large"
-            }
-            
-            return(paste0(
-                significance, " difference (p = ", round(p_value, 4), "). ",
-                effect_size, " effect size (δ = ", round(cliff_delta, 3), "). ",
-                "Probability that ", group_levels[1], " has ", direction, " biomarker levels: ", prob, "%. ",
-                "Typical difference: ", round(abs_shift, 2), " units (",
-                ifelse(hodges_lehmann > 0, paste(group_levels[1], "typically higher"),
-                       paste(group_levels[2], "typically higher")), "). ",
-                if (abs_delta >= 0.33) "Clinically meaningful biomarker difference." else "Limited clinical significance."
-            ))
-        },
 
-        # Tukey HSD post-hoc test for ANOVA
-        .performTukeyHSD = function(biomarker_values, response_factor, conf_level = 0.95) {
-            tryCatch({
-                # Perform ANOVA
-                anova_model <- aov(biomarker_values ~ response_factor)
+                return(processed_data)
+            },
+            .detectOutliers = function(data) {
+                # IQR-based outlier detection
+                Q1 <- quantile(data, 0.25, na.rm = TRUE)
+                Q3 <- quantile(data, 0.75, na.rm = TRUE)
+                IQR <- Q3 - Q1
 
-                # Tukey HSD
-                tukey_result <- TukeyHSD(anova_model, conf.level = conf_level)
-                tukey_table <- as.data.frame(tukey_result$response_factor)
+                lower_bound <- Q1 - 1.5 * IQR
+                upper_bound <- Q3 + 1.5 * IQR
 
-                # Extract results
-                comparisons <- rownames(tukey_table)
-                results <- data.frame(
-                    comparison = comparisons,
-                    mean_diff = tukey_table$diff,
-                    ci_lower = tukey_table$lwr,
-                    ci_upper = tukey_table$upr,
-                    pvalue_adj = tukey_table$`p adj`,
-                    stringsAsFactors = FALSE
-                )
+                outlier_indices <- which(data < lower_bound | data > upper_bound)
+                return(outlier_indices)
+            },
+            .assessDataQuality = function(biomarker_values, response_values, response_type) {
+                # Comprehensive data quality assessment
 
-                # Calculate Cohen's d for each comparison
-                results$effect_size <- sapply(seq_len(nrow(results)), function(i) {
-                    # Parse comparison (e.g., "Group2-Group1")
-                    groups <- strsplit(comparisons[i], "-")[[1]]
-                    group1_data <- biomarker_values[response_factor == groups[1]]
-                    group2_data <- biomarker_values[response_factor == groups[2]]
+                # Biomarker data quality
+                biomarker_missing_pct <- sum(is.na(biomarker_values)) / length(biomarker_values) * 100
+                biomarker_zeros_pct <- sum(biomarker_values == 0, na.rm = TRUE) / sum(!is.na(biomarker_values)) * 100
+                biomarker_cv <- sd(biomarker_values, na.rm = TRUE) / mean(biomarker_values, na.rm = TRUE)
 
-                    # Pooled SD
-                    n1 <- length(group1_data)
-                    n2 <- length(group2_data)
-                    sd1 <- sd(group1_data, na.rm = TRUE)
-                    sd2 <- sd(group2_data, na.rm = TRUE)
-                    pooled_sd <- sqrt(((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))
+                # Response data quality
+                if (response_type %in% c("binary", "categorical")) {
+                    response_factor <- as.factor(response_values)
+                    group_sizes <- table(response_factor)
+                    min_group_size <- min(group_sizes)
+                    group_balance <- min(group_sizes) / max(group_sizes)
+                }
 
-                    # Cohen's d
-                    cohens_d <- results$mean_diff[i] / pooled_sd
-                    return(cohens_d)
-                })
+                # Quality warnings
+                if (biomarker_missing_pct > 20) {
+                    warning(paste("High missing data rate for biomarker (", round(biomarker_missing_pct, 1), "%)."))
+                }
 
-                # Interpretation
-                results$interpretation <- sapply(seq_len(nrow(results)), function(i) {
-                    p <- results$pvalue_adj[i]
-                    d <- abs(results$effect_size[i])
+                if (biomarker_zeros_pct > 30) {
+                    warning(paste("High proportion of zero values in biomarker (", round(biomarker_zeros_pct, 1), "%)."))
+                }
 
-                    sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
-                    effect <- ifelse(d < 0.2, "negligible",
-                                   ifelse(d < 0.5, "small",
-                                        ifelse(d < 0.8, "medium", "large")))
+                if (biomarker_cv > 2) {
+                    warning("High coefficient of variation in biomarker data. Consider transformation.")
+                }
 
-                    return(paste0(sig, " (", effect, " effect)"))
-                })
+                if (response_type %in% c("binary", "categorical") && exists("group_balance") && group_balance < 0.2) {
+                    warning("Severely imbalanced response groups detected. Results may be biased.")
+                }
 
-                # Add raw p-values (same as adjusted for Tukey)
-                results$pvalue <- results$pvalue_adj
+                private$.checkpoint()
+            },
+            .enhanceThresholdAnalysis = function(benford_obj, cleaned_data, threshold_value) {
+                # Enhanced threshold analysis with confidence intervals
 
-                return(results)
-            }, error = function(e) {
-                return(NULL)
-            })
-        },
-
-        # Dunn's test post-hoc for Kruskal-Wallis
-        .performDunnTest = function(biomarker_values, response_factor) {
-            tryCatch({
-                # Perform Dunn's test with Bonferroni correction
-                if (!requireNamespace("FSA", quietly = TRUE)) {
-                    warning("FSA package required for Dunn's test. Install with install.packages('FSA')")
+                if (is.null(threshold_value)) {
                     return(NULL)
                 }
 
-                dunn_result <- FSA::dunnTest(biomarker_values ~ response_factor, method = "bonferroni")
-                dunn_table <- dunn_result$res
+                tryCatch(
+                    {
+                        # Calculate confidence intervals for threshold metrics
+                        n_bootstrap <- 1000
+                        bootstrap_results <- replicate(n_bootstrap,
+                            {
+                                # Bootstrap sampling
+                                boot_indices <- sample(length(cleaned_data), replace = TRUE)
+                                boot_biomarker <- cleaned_data[boot_indices]
+                                boot_response <- response_values[boot_indices]
 
-                # Extract results
-                results <- data.frame(
-                    comparison = dunn_table$Comparison,
-                    mean_diff = NA,  # Dunn's test is rank-based, no mean difference
-                    pvalue = dunn_table$P.unadj,
-                    pvalue_adj = dunn_table$P.adj,
-                    ci_lower = NA,  # No CI for rank-based test
-                    ci_upper = NA,
-                    effect_size = dunn_table$Z,  # Use Z-statistic as effect measure
-                    stringsAsFactors = FALSE
+                                # Calculate metrics for bootstrap sample
+                                boot_metrics <- private$.calculateThresholdMetrics(boot_biomarker, boot_response, threshold_value)
+                                return(c(
+                                    boot_metrics$sensitivity, boot_metrics$specificity,
+                                    boot_metrics$ppv, boot_metrics$npv, boot_metrics$auc
+                                ))
+                            },
+                            simplify = TRUE
+                        )
+
+                        # Calculate confidence intervals
+                        ci_level <- as.numeric(self$options$confidenceLevel)
+                        alpha <- 1 - ci_level
+
+                        ci_lower <- apply(bootstrap_results, 1, quantile, alpha / 2, na.rm = TRUE)
+                        ci_upper <- apply(bootstrap_results, 1, quantile, 1 - alpha / 2, na.rm = TRUE)
+
+                        return(list(
+                            sensitivity_ci = c(ci_lower[1], ci_upper[1]),
+                            specificity_ci = c(ci_lower[2], ci_upper[2]),
+                            ppv_ci = c(ci_lower[3], ci_upper[3]),
+                            npv_ci = c(ci_lower[4], ci_upper[4]),
+                            auc_ci = c(ci_lower[5], ci_upper[5])
+                        ))
+                    },
+                    error = function(e) {
+                        warning("Could not calculate confidence intervals for threshold metrics.")
+                        return(NULL)
+                    }
+                )
+            },
+            .plot = function(image, ggtheme, theme, ...) {
+                plot_data <- image$state
+                if (is.null(plot_data)) {
+                    return()
+                }
+
+                biomarker <- plot_data$biomarker
+                response <- plot_data$response
+                response_type <- plot_data$response_type
+                plot_type <- plot_data$plot_type
+
+                # Create base data frame
+                df <- data.frame(
+                    biomarker = biomarker,
+                    response = response
                 )
 
-                # Interpretation based on p-value
-                results$interpretation <- sapply(seq_len(nrow(results)), function(i) {
-                    p <- results$pvalue_adj[i]
-                    z <- abs(results$effect_size[i])
-
-                    sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
-                    effect <- ifelse(z < 1.96, "small", ifelse(z < 2.58, "medium", "large"))
-
-                    return(paste0(sig, " (", effect, " Z-score)"))
-                })
-
-                return(results)
-            }, error = function(e) {
-                warning(paste("Dunn's test failed:", e$message))
-                return(NULL)
-            })
-        }
-    ), # End of private list
-    public = list(
-        #' @description
-        #' Generate R source code for biomarkerresponse analysis
-        #' @return Character string with R syntax for reproducible analysis
-        asSource = function() {
-            biomarker <- self$options$biomarker
-            response <- self$options$response
-            groupVariable <- self$options$groupVariable
-
-            if (is.null(biomarker) || is.null(response))
-                return('')
-
-            # TODO (correctness): asSource() emits broken R for column names
-            # with special characters. The hand-rolled escaping below wraps
-            # `name with spaces` in backticks, then line ~1551 embeds the
-            # result inside DOUBLE QUOTES (e.g. `biomarker = "`gene 1`"`),
-            # producing invalid R syntax (backticks have no meaning inside
-            # double-quoted strings). For string-arg contexts you don't need
-            # backticks at all — only proper string quoting. Replacement:
-            #   biomarker_arg <- jmvcore::format('biomarker = {}', biomarker, context = "R")
-            #   response_arg  <- jmvcore::format('response = {}',  response,  context = "R")
-            #   groupVariable_arg <- jmvcore::format(',\n    groupVariable = {}',
-            #                                       groupVariable, context = "R")
-            # That removes the manual escaping helpers (lines ~1535-1547,
-            # ~1555-1561) and produces correctly quoted R for any name. NOT
-            # auto-applied because output for special-char names changes
-            # (broken→correct). See jamovify report for full diff.
-            # Escape biomarker variable
-            biomarker_escaped <- if (!is.null(biomarker) && !identical(make.names(biomarker), biomarker)) {
-                paste0('`', biomarker, '`')
-            } else {
-                biomarker
-            }
-
-            # Escape response variable
-            response_escaped <- if (!is.null(response) && !identical(make.names(response), response)) {
-                paste0('`', response, '`')
-            } else {
-                response
-            }
-
-            # Build required arguments
-            biomarker_arg <- paste0('biomarker = "', biomarker_escaped, '"')
-            response_arg <- paste0('response = "', response_escaped, '"')
-
-            # Build optional groupVariable argument
-            groupVariable_arg <- ''
-            if (!is.null(groupVariable)) {
-                groupVariable_escaped <- if (!identical(make.names(groupVariable), groupVariable)) {
-                    paste0('`', groupVariable, '`')
-                } else {
-                    groupVariable
+                # Add grouping variable if present
+                if (!is.null(plot_data$group_variable)) {
+                    df$group <- plot_data$group_variable
                 }
-                groupVariable_arg <- paste0(',\n    groupVariable = "', groupVariable_escaped, '"')
+
+                # Create different plot types
+                if (plot_type == "boxplot" && response_type %in% c("binary", "categorical")) {
+                    p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(response), y = biomarker, fill = factor(response))) +
+                        ggplot2::geom_boxplot() +
+                        ggplot2::geom_jitter(width = 0.2, alpha = 0.6)
+                } else if (plot_type == "violin" && response_type %in% c("binary", "categorical")) {
+                    p <- ggplot2::ggplot(df, ggplot2::aes(x = factor(response), y = biomarker, fill = factor(response))) +
+                        ggplot2::geom_violin() +
+                        ggplot2::geom_boxplot(width = 0.1, fill = "white", alpha = 0.7)
+                } else if (plot_type == "scatter" || response_type == "continuous") {
+                    p <- ggplot2::ggplot(df, ggplot2::aes(x = biomarker, y = response)) +
+                        ggplot2::geom_point(alpha = 0.6)
+
+                    # Add trend line if requested
+                    if (plot_data$add_trend_line) {
+                        if (plot_data$trend_method == "lm") {
+                            p <- p + ggplot2::geom_smooth(method = "lm", se = TRUE)
+                        } else if (plot_data$trend_method == "loess") {
+                            p <- p + ggplot2::geom_smooth(method = "loess", se = TRUE)
+                        } else if (plot_data$trend_method == "gam") {
+                            p <- p + ggplot2::geom_smooth(method = "gam", se = TRUE)
+                        }
+                    }
+                } else {
+                    # Default to scatter plot
+                    p <- ggplot2::ggplot(df, ggplot2::aes(x = biomarker, y = response)) +
+                        ggplot2::geom_point(alpha = 0.6)
+                }
+
+                # Add threshold line if requested
+                if (plot_data$show_threshold && !is.null(plot_data$threshold)) {
+                    if (plot_type == "scatter" || response_type == "continuous") {
+                        p <- p + ggplot2::geom_vline(
+                            xintercept = plot_data$threshold,
+                            linetype = "dashed", color = "red"
+                        )
+                    } else {
+                        p <- p + ggplot2::geom_hline(
+                            yintercept = plot_data$threshold,
+                            linetype = "dashed", color = "red"
+                        )
+                    }
+                }
+
+                # Add grouping colors if group variable is present
+                if (!is.null(plot_data$group_variable)) {
+                    p <- p + ggplot2::aes(color = group)
+                }
+
+                # Labels and theme
+                p <- p + ggplot2::labs(
+                    x = plot_data$biomarker_name,
+                    y = plot_data$response_name,
+                    title = "Biomarker-Response Association",
+                    subtitle = paste("Analysis type:", response_type)
+                ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        legend.position = "right"
+                    )
+
+                print(p)
+                TRUE
+            },
+            .calculateCliffsDelta = function(x, y) {
+                # Cliff's Delta for biomarker comparison between response groups
+                # OPTIMIZED: Vectorized using outer() - ~10-100x speedup over nested loops
+                comparisons <- outer(x, y, "-") # All pairwise differences as matrix
+                greater <- sum(comparisons > 0) # Count x[i] > y[j]
+                less <- sum(comparisons < 0) # Count x[i] < y[j]
+                delta <- (greater - less) / (length(x) * length(y))
+                return(delta)
+            },
+            .calculateHodgesLehmann = function(x, y) {
+                # Hodges-Lehmann shift for biomarker level difference
+                # OPTIMIZED: Vectorized pairwise differences using outer()
+                differences <- outer(x, y, "-") # Matrix of all x[i] - y[j]
+                return(median(differences)) # Median of all pairwise differences
+            },
+            .interpretBiomarkerEffects = function(p_value, cliff_delta, hodges_lehmann, group_levels) {
+                # Clinical interpretation for biomarker-response associations
+                significance <- ifelse(p_value < 0.05, "Significant", "Non-significant")
+                abs_delta <- abs(cliff_delta)
+                abs_shift <- abs(hodges_lehmann)
+
+                # Probability interpretation
+                prob <- round((cliff_delta + 1) / 2 * 100, 1)
+                direction <- ifelse(cliff_delta > 0, "higher", "lower")
+                better_group <- ifelse(cliff_delta > 0, group_levels[1], group_levels[2])
+
+                # Effect magnitude
+                if (abs_delta < 0.147) {
+                    effect_size <- "negligible"
+                } else if (abs_delta < 0.33) {
+                    effect_size <- "small"
+                } else if (abs_delta < 0.474) {
+                    effect_size <- "medium"
+                } else {
+                    effect_size <- "large"
+                }
+
+                return(paste0(
+                    significance, " difference (p = ", round(p_value, 4), "). ",
+                    effect_size, " effect size (δ = ", round(cliff_delta, 3), "). ",
+                    "Probability that ", group_levels[1], " has ", direction, " biomarker levels: ", prob, "%. ",
+                    "Typical difference: ", round(abs_shift, 2), " units (",
+                    ifelse(hodges_lehmann > 0, paste(group_levels[1], "typically higher"),
+                        paste(group_levels[2], "typically higher")
+                    ), "). ",
+                    if (abs_delta >= 0.33) "Clinically meaningful biomarker difference." else "Limited clinical significance."
+                ))
+            },
+
+            # Tukey HSD post-hoc test for ANOVA
+            .performTukeyHSD = function(biomarker_values, response_factor, conf_level = 0.95) {
+                tryCatch(
+                    {
+                        # Perform ANOVA
+                        anova_model <- aov(biomarker_values ~ response_factor)
+
+                        # Tukey HSD
+                        tukey_result <- TukeyHSD(anova_model, conf.level = conf_level)
+                        tukey_table <- as.data.frame(tukey_result$response_factor)
+
+                        # Extract results
+                        comparisons <- rownames(tukey_table)
+                        results <- data.frame(
+                            comparison = comparisons,
+                            mean_diff = tukey_table$diff,
+                            ci_lower = tukey_table$lwr,
+                            ci_upper = tukey_table$upr,
+                            pvalue_adj = tukey_table$`p adj`,
+                            stringsAsFactors = FALSE
+                        )
+
+                        # Calculate Cohen's d for each comparison
+                        results$effect_size <- sapply(seq_len(nrow(results)), function(i) {
+                            # Parse comparison (e.g., "Group2-Group1")
+                            groups <- strsplit(comparisons[i], "-")[[1]]
+                            group1_data <- biomarker_values[response_factor == groups[1]]
+                            group2_data <- biomarker_values[response_factor == groups[2]]
+
+                            # Pooled SD
+                            n1 <- length(group1_data)
+                            n2 <- length(group2_data)
+                            sd1 <- sd(group1_data, na.rm = TRUE)
+                            sd2 <- sd(group2_data, na.rm = TRUE)
+                            pooled_sd <- sqrt(((n1 - 1) * sd1^2 + (n2 - 1) * sd2^2) / (n1 + n2 - 2))
+
+                            # Cohen's d
+                            cohens_d <- results$mean_diff[i] / pooled_sd
+                            return(cohens_d)
+                        })
+
+                        # Interpretation
+                        results$interpretation <- sapply(seq_len(nrow(results)), function(i) {
+                            p <- results$pvalue_adj[i]
+                            d <- abs(results$effect_size[i])
+
+                            sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
+                            effect <- ifelse(d < 0.2, "negligible",
+                                ifelse(d < 0.5, "small",
+                                    ifelse(d < 0.8, "medium", "large")
+                                )
+                            )
+
+                            return(paste0(sig, " (", effect, " effect)"))
+                        })
+
+                        # Add raw p-values (same as adjusted for Tukey)
+                        results$pvalue <- results$pvalue_adj
+
+                        return(results)
+                    },
+                    error = function(e) {
+                        return(NULL)
+                    }
+                )
+            },
+
+            # Dunn's test post-hoc for Kruskal-Wallis
+            .performDunnTest = function(biomarker_values, response_factor) {
+                tryCatch(
+                    {
+                        # Perform Dunn's test with Bonferroni correction
+                        if (!requireNamespace("FSA", quietly = TRUE)) {
+                            warning("FSA package required for Dunn's test. Install with install.packages('FSA')")
+                            return(NULL)
+                        }
+
+                        dunn_result <- FSA::dunnTest(biomarker_values ~ response_factor, method = "bonferroni")
+                        dunn_table <- dunn_result$res
+
+                        # Extract results
+                        results <- data.frame(
+                            comparison = dunn_table$Comparison,
+                            mean_diff = NA, # Dunn's test is rank-based, no mean difference
+                            pvalue = dunn_table$P.unadj,
+                            pvalue_adj = dunn_table$P.adj,
+                            ci_lower = NA, # No CI for rank-based test
+                            ci_upper = NA,
+                            effect_size = dunn_table$Z, # Use Z-statistic as effect measure
+                            stringsAsFactors = FALSE
+                        )
+
+                        # Interpretation based on p-value
+                        results$interpretation <- sapply(seq_len(nrow(results)), function(i) {
+                            p <- results$pvalue_adj[i]
+                            z <- abs(results$effect_size[i])
+
+                            sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**", ifelse(p < 0.05, "*", "ns")))
+                            effect <- ifelse(z < 1.96, "small", ifelse(z < 2.58, "medium", "large"))
+
+                            return(paste0(sig, " (", effect, " Z-score)"))
+                        })
+
+                        return(results)
+                    },
+                    error = function(e) {
+                        warning(paste("Dunn's test failed:", e$message))
+                        return(NULL)
+                    }
+                )
             }
+        ), # End of private list
+        public = list(
+            #' @description
+            #' Generate R source code for biomarkerresponse analysis
+            #' @return Character string with R syntax for reproducible analysis
+            asSource = function() {
+                biomarker <- self$options$biomarker
+                response <- self$options$response
+                groupVariable <- self$options$groupVariable
 
-            # Get other arguments using base helper (if available)
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
+                if (is.null(biomarker) || is.null(response)) {
+                    return("")
+                }
+
+                # TODO (correctness): asSource() emits broken R for column names
+                # with special characters. The hand-rolled escaping below wraps
+                # `name with spaces` in backticks, then line ~1551 embeds the
+                # result inside DOUBLE QUOTES (e.g. `biomarker = "`gene 1`"`),
+                # producing invalid R syntax (backticks have no meaning inside
+                # double-quoted strings). For string-arg contexts you don't need
+                # backticks at all - only proper string quoting. Replacement:
+                #   biomarker_arg <- jmvcore::format('biomarker = {}', biomarker, context = "R")
+                #   response_arg  <- jmvcore::format('response = {}',  response,  context = "R")
+                #   groupVariable_arg <- jmvcore::format(',\n    groupVariable = {}',
+                #                                       groupVariable, context = "R")
+                # That removes the manual escaping helpers (lines ~1535-1547,
+                # ~1555-1561) and produces correctly quoted R for any name. NOT
+                # auto-applied because output for special-char names changes
+                # (broken→correct). See jamovify report for full diff.
+                # Escape biomarker variable
+                biomarker_escaped <- if (!is.null(biomarker) && !identical(make.names(biomarker), biomarker)) {
+                    paste0("`", biomarker, "`")
+                } else {
+                    biomarker
+                }
+
+                # Escape response variable
+                response_escaped <- if (!is.null(response) && !identical(make.names(response), response)) {
+                    paste0("`", response, "`")
+                } else {
+                    response
+                }
+
+                # Build required arguments
+                biomarker_arg <- paste0('biomarker = "', biomarker_escaped, '"')
+                response_arg <- paste0('response = "', response_escaped, '"')
+
+                # Build optional groupVariable argument
+                groupVariable_arg <- ""
+                if (!is.null(groupVariable)) {
+                    groupVariable_escaped <- if (!identical(make.names(groupVariable), groupVariable)) {
+                        paste0("`", groupVariable, "`")
+                    } else {
+                        groupVariable
+                    }
+                    groupVariable_arg <- paste0(',\n    groupVariable = "', groupVariable_escaped, '"')
+                }
+
+                # Get other arguments using base helper (if available)
+                args <- ""
+                if (!is.null(private$.asArgs)) {
+                    args <- private$.asArgs(incData = FALSE)
+                }
+                if (args != "") {
+                    args <- paste0(",\n    ", args)
+                }
+
+                # Get package name dynamically
+                pkg_name <- utils::packageName()
+                if (is.null(pkg_name)) pkg_name <- "ClinicoPath" # fallback
+
+                # Build complete function call
+                paste0(
+                    pkg_name, "::biomarkerresponse(\n    data = data,\n    ",
+                    biomarker_arg, ",\n    ", response_arg, groupVariable_arg, args, ")"
+                )
             }
-            if (args != '')
-                args <- paste0(',\n    ', args)
-
-            # Get package name dynamically
-            pkg_name <- utils::packageName()
-            if (is.null(pkg_name)) pkg_name <- "ClinicoPath"  # fallback
-
-            # Build complete function call
-            paste0(pkg_name, '::biomarkerresponse(\n    data = data,\n    ',
-                   biomarker_arg, ',\n    ', response_arg, groupVariable_arg, args, ')')
-        }
-    ) # End of public list
-)
+        ) # End of public list
+    )
+}

@@ -6,16 +6,16 @@ How do you compare Ki-67 expression across tumor grades? Or hemoglobin levels be
 
  • Flexible Statistical Framework: Choose from parametric (t-test/ANOVA), non-parametric (Mann-Whitney/Kruskal-Wallis), robust (trimmed means), or Bayesian approaches based on your data distribution
  • Automatic Pairwise Comparisons: Get post-hoc comparisons with built-in multiple testing corrections (Bonferroni, Holm, Hochberg, BH, FDR)
- • Effect Sizes with CIs: Not just p-values—calculate eta-squared, omega-squared, or Cohen's d with confidence intervals for meaningful interpretation
+ • Effect Sizes with CIs: Not just p-values - calculate eta-squared, omega-squared, or Cohen's d with confidence intervals for meaningful interpretation
  • Publication-Ready Output: Generate plots with journal-specific color palettes (Journal of Clinical Oncology, Nature, AAAS, Lancet, JAMA, NEJM) and colorblind-safe options
- • Stratified Analysis: Split comparisons by additional variables—compare treatment responses across different tumor stages simultaneously
+ • Stratified Analysis: Split comparisons by additional variables - compare treatment responses across different tumor stages simultaneously
 
  • Biomarker Validation: Compare IHC expression scores (Ki-67, ER, PR, HER2) across tumor grades or molecular subtypes
  • Treatment Response: Evaluate changes in tumor markers (CEA, CA19-9, PSA) between treatment groups with statistical rigor
  • Diagnostic Categories: Visualize differences in continuous pathology metrics across benign, borderline, and malignant cases
  • Lab Value Analysis: Compare hemoglobin, albumin, or inflammatory markers between patient cohorts for Table 1 presentations
 
-This function combines the power of hashtag#ggstatsplot with jamovi's point-and-click interface, giving you publication-quality plots in seconds. Whether you're comparing tumor proliferation indices across grades, validating new biomarkers, or preparing manuscript figures—jjbetweenstats handles the statistics and aesthetics automatically.
+This function combines the power of hashtag#ggstatsplot with jamovi's point-and-click interface, giving you publication-quality plots in seconds. Whether you're comparing tumor proliferation indices across grades, validating new biomarkers, or preparing manuscript figures - jjbetweenstats handles the statistics and aesthetics automatically.
 
 hashtag#Pathology hashtag#DigitalPathology hashtag#ClinicalResearch hashtag#Biostatistics hashtag#Oncology hashtag#Jamovi hashtag#OpenScience hashtag#BiomarkerResearch hashtag#IHC
 
@@ -32,7 +32,7 @@ This is the joke we use when evaluating new antibodies. We see promising antibod
 
 I recall a study (should be last year ESP) using text mining to extract positive/negative case counts from PubMed abstracts and summarising the results. There are also commercial websites listing positive and negative numbers to guide pathologists. 
 
-Here we should be aware of simple pooling. We cannot simply sum positive and negative cases across studies to calculate sensitivity and specificity—even if we ignore lab conditions and antibody clones.
+Here we should be aware of simple pooling. We cannot simply sum positive and negative cases across studies to calculate sensitivity and specificity - even if we ignore lab conditions and antibody clones.
 
 Why Simple Pooling Fails: 
 - Sensitivity and specificity are negatively correlated across studies (threshold effect). Studies reporting higher sensitivity often show lower specificity due to different cut-points. Simple pooling ignores this correlation and produces biased estimates.

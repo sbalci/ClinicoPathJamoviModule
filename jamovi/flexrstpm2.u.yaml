@@ -76,7 +76,7 @@ children:
               - type: TextBox
                 name: df
                 format: number
-                label: "Degrees of Freedom (3-4 typical, 5-6 for complex patterns, need ≥30 events)"
+                label: "Degrees of Freedom (3-4 typical, 5-6 for complex patterns, need >=30 events)"
               - type: ComboBox
                 name: link_function
                 label: "Link Function (log=standard, identity/sqrt=special cases)"

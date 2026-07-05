@@ -61,10 +61,12 @@ P(detect metastasis in first 5 LNs) = 1 - (1-p)^5  [binomial/geometric]
 p <- 0.15
 n_ln <- 12
 
-# Probability of finding ≥1 positive LN in 12 examined:
+# Probability of finding >=1 positive LN in 12 examined:
 prob_detect <- 1 - (1 - p)^n_ln
-cat(sprintf("Probability of detecting metastasis in %d LNs: %.1f%%\n",
-            n_ln, prob_detect * 100))
+cat(sprintf(
+  "Probability of detecting metastasis in %d LNs: %.1f%%\n",
+  n_ln, prob_detect * 100
+))
 
 # This is VALID because LNs are independent
 ```
@@ -142,16 +144,22 @@ n_blocks <- 6
 
 # Predict sensitivity at 6 blocks using binomial model:
 predicted_sens <- 1 - (1 - p_wrong)^n_blocks
-cat(sprintf("Binomial prediction at %d blocks: %.1f%%\n",
-            n_blocks, predicted_sens * 100))
+cat(sprintf(
+  "Binomial prediction at %d blocks: %.1f%%\n",
+  n_blocks, predicted_sens * 100
+))
 
 # But Duan 2023 observed: 95% sensitivity at 6 blocks!
 observed_sens <- 0.95
-cat(sprintf("Observed sensitivity at %d blocks: %.1f%%\n",
-            n_blocks, observed_sens * 100))
+cat(sprintf(
+  "Observed sensitivity at %d blocks: %.1f%%\n",
+  n_blocks, observed_sens * 100
+))
 
-cat(sprintf("\nUnderestimation: %.1f percentage points\n",
-            (observed_sens - predicted_sens) * 100))
+cat(sprintf(
+  "\nUnderestimation: %.1f percentage points\n",
+  (observed_sens - predicted_sens) * 100
+))
 ```
 
 **Why?** Because blocks are NOT independent. The binomial model underestimates cumulative sensitivity for clustered outcomes.
@@ -220,19 +228,24 @@ observed_sensitivity <- n_detected / n_cases
 
 # Binomial 95% CI (WRONG for dependent samples)
 binom_ci <- binom::binom.confint(n_detected, n_cases,
-                                  conf.level = 0.95,
-                                  methods = "wilson")
+  conf.level = 0.95,
+  methods = "wilson"
+)
 cat("Binomial Wilson 95% CI:\n")
-cat(sprintf("  [%.1f%%, %.1f%%]  ← TOO NARROW (assumes independence)\n",
-            binom_ci$lower * 100, binom_ci$upper * 100))
+cat(sprintf(
+  "  [%.1f%%, %.1f%%]  ← TOO NARROW (assumes independence)\n",
+  binom_ci$lower * 100, binom_ci$upper * 100
+))
 
 # Bootstrap 95% CI (CORRECT for dependent samples)
 # Simulated bootstrap result (would use actual case-level resampling)
 bootstrap_lower <- 0.872
 bootstrap_upper <- 0.995
 cat("\nBootstrap 95% CI:\n")
-cat(sprintf("  [%.1f%%, %.1f%%]  ← WIDER (accounts for case-level variation)\n",
-            bootstrap_lower * 100, bootstrap_upper * 100))
+cat(sprintf(
+  "  [%.1f%%, %.1f%%]  ← WIDER (accounts for case-level variation)\n",
+  bootstrap_lower * 100, bootstrap_upper * 100
+))
 
 cat("\nWhy wider?\n")
 cat("Some cases have VI in blocks 1-3 (early detection, clustered anteriorly)\n")
@@ -268,15 +281,18 @@ p_est <- 0.35
 binomial_pred <- 1 - (1 - p_est)^blocks
 
 # Plot
-plot(blocks, observed_sens, type = "b", pch = 19, col = "blue",
-     ylim = c(0, 1), xlab = "Number of Blocks",
-     ylab = "Cumulative Sensitivity",
-     main = "Observed vs Binomial Prediction: Plateau Effect")
+plot(blocks, observed_sens,
+  type = "b", pch = 19, col = "blue",
+  ylim = c(0, 1), xlab = "Number of Blocks",
+  ylab = "Cumulative Sensitivity",
+  main = "Observed vs Binomial Prediction: Plateau Effect"
+)
 lines(blocks, binomial_pred, type = "l", lty = 2, col = "red", lwd = 2)
 abline(h = 1.0, lty = 3, col = "gray")
 legend("bottomright",
-       c("Observed (Duan 2023)", "Binomial Model", "100% Sensitivity"),
-       col = c("blue", "red", "gray"), lty = c(1, 2, 3), pch = c(19, NA, NA))
+  c("Observed (Duan 2023)", "Binomial Model", "100% Sensitivity"),
+  col = c("blue", "red", "gray"), lty = c(1, 2, 3), pch = c(19, NA, NA)
+)
 text(9, 0.986, "Plateau at 7 blocks", pos = 3, cex = 0.8)
 text(9, 0.95, "Binomial overestimates\nbeyond observed range", pos = 1, cex = 0.8, col = "red")
 ```
@@ -301,16 +317,18 @@ p_metastasis <- 0.15
 
 n_required <- ceiling(log(1 - target_conf) / log(1 - p_metastasis))
 cat(sprintf("Required LNs: %d\n", n_required))
-cat(sprintf("Validation: 1 - (1-%.2f)^%d = %.1f%%\n",
-            p_metastasis, n_required,
-            (1 - (1-p_metastasis)^n_required) * 100))
+cat(sprintf(
+  "Validation: 1 - (1-%.2f)^%d = %.1f%%\n",
+  p_metastasis, n_required,
+  (1 - (1 - p_metastasis)^n_required) * 100
+))
 ```
 
 ### Dependent (Tumor Blocks)
 
 - **Must use empirical data** from similar cases
 - No closed-form solution
-- Recommendation: "Examine ≥6 blocks to achieve 95% sensitivity **based on observed data from 217 cases**" (Duan 2023)
+- Recommendation: "Examine >=6 blocks to achieve 95% sensitivity **based on observed data from 217 cases**" (Duan 2023)
 - Caveat: Assumes your sectioning protocol matches Duan 2023 (perpendicular, 5mm intervals, elastin stain)
 
 ---
@@ -324,7 +342,7 @@ The `pathsampling` module offers **three methods** with different suitability fo
 ### When to Use
 
 - ✅ **Lymph node dissection** (independent samples)
-- ✅ **Omentum sections** IF sampled from distant regions (≥5cm apart)
+- ✅ **Omentum sections** IF sampled from distant regions (>=5cm apart)
 - ❌ **Tumor blocks** (dependent samples) - **will underestimate sensitivity**
 
 ### Warning Now Added
@@ -422,13 +440,13 @@ not uncertainty about whether block 3 is independent of block 2.
 ```{r bootstrap_algorithm, eval=FALSE}
 # Pseudo-code for bootstrap CI calculation (from pathsampling.b.R)
 for (b in 1:nBoot) {
-    boot_idx <- sample(n_cases, replace = TRUE)  # Resample CASES
-    boot_first <- positive_first[boot_idx]
+  boot_idx <- sample(n_cases, replace = TRUE) # Resample CASES
+  boot_first <- positive_first[boot_idx]
 
-    for (n in 1:maxN) {
-        detected <- sum(boot_first <= n, na.rm = TRUE)
-        detection_matrix[b, n] <- detected / n_cases
-    }
+  for (n in 1:maxN) {
+    detected <- sum(boot_first <= n, na.rm = TRUE)
+    detection_matrix[b, n] <- detected / n_cases
+  }
 }
 
 ci_lower <- apply(detection_matrix, 2, quantile, probs = 0.025)
@@ -460,7 +478,7 @@ ci_upper <- apply(detection_matrix, 2, quantile, probs = 0.975)
 # Estimate p from first detection distribution
 # (Simplified - actual data would use all 119 VI+ cases)
 observed_sensitivity_1_block <- 0.296
-p_hat <- observed_sensitivity_1_block  # Crude estimate
+p_hat <- observed_sensitivity_1_block # Crude estimate
 
 # Predict sensitivity at different block counts using binomial
 blocks_tested <- c(1, 2, 3, 4, 5, 6, 7, 8)
@@ -479,11 +497,15 @@ comparison_df <- data.frame(
 print(comparison_df)
 
 cat("\nConclusion using WRONG model:\n")
-cat(sprintf("Binomial predicts %.1f%% at 6 blocks (UNDERESTIMATE)\n",
-            binomial_predictions[6] * 100))
+cat(sprintf(
+  "Binomial predicts %.1f%% at 6 blocks (UNDERESTIMATE)\n",
+  binomial_predictions[6] * 100
+))
 cat(sprintf("Observed: %.1f%% at 6 blocks\n", observed_values[6] * 100))
-cat(sprintf("Error: %.1f percentage points\n",
-            (observed_values[6] - binomial_predictions[6]) * 100))
+cat(sprintf(
+  "Error: %.1f percentage points\n",
+  (observed_values[6] - binomial_predictions[6]) * 100
+))
 ```
 
 ## Analysis Using Correct Method (Empirical)
@@ -496,7 +518,7 @@ cases_vi_positive <- 119
 
 detected_by_block <- data.frame(
   Blocks = 1:8,
-  Detected = c(34, 72, 87, 101, 107, 113, 115, 115),  # From Duan Fig 4A
+  Detected = c(34, 72, 87, 101, 107, 113, 115, 115), # From Duan Fig 4A
   Total = cases_vi_positive
 )
 
@@ -508,8 +530,10 @@ print(detected_by_block[, c("Blocks", "Detected", "Total", "Sensitivity_Pct")])
 cat("\nConclusion using CORRECT method:\n")
 cat("No modeling assumptions - just observed data\n")
 cat("Automatically accounts for clustering, heterogeneity, spatial patterns\n")
-cat(sprintf("\nRecommendation: Examine ≥6 blocks to achieve %.1f%% sensitivity\n",
-            detected_by_block$Sensitivity[6] * 100))
+cat(sprintf(
+  "\nRecommendation: Examine >=6 blocks to achieve %.1f%% sensitivity\n",
+  detected_by_block$Sensitivity[6] * 100
+))
 ```
 
 ---
@@ -603,7 +627,7 @@ data(duan2023_vi_blocks)
 # 3. Expected output:
 #    - Empirical sensitivity table with 95% bootstrap CIs
 #    - Warning about non-independence of tumor blocks
-#    - Recommendation: "Examine ≥6 blocks for 95% sensitivity"
+#    - Recommendation: "Examine >=6 blocks for 95% sensitivity"
 #    - Sensitivity curve plot with target threshold line
 ```
 

@@ -589,9 +589,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;", 
                     htmltools::div(
                         style = "font-weight: bold; color: #495057;",
-                        if (!is.null(col_var_name)) paste0(col_var_name, " →") else "",
+                        if (!is.null(col_var_name)) paste0(col_var_name, " \u{2192}") else "",
                         htmltools::br(),
-                        if (!is.null(row_var_name)) paste0(row_var_name, " ↓") else ""
+                        if (!is.null(row_var_name)) paste0(row_var_name, " \u{2193}") else ""
                     )
                 )
             )
@@ -688,9 +688,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!is.null(col_var_name) || !is.null(row_var_name)) {
                         htmltools::div(
                             style = "font-weight: bold; color: #495057; font-size: 11px;",
-                            if (!is.null(col_var_name)) paste0(col_var_name, " →") else "",
+                            if (!is.null(col_var_name)) paste0(col_var_name, " \u{2192}") else "",
                             htmltools::br(),
-                            if (!is.null(row_var_name)) paste0(row_var_name, " ↓") else ""
+                            if (!is.null(row_var_name)) paste0(row_var_name, " \u{2193}") else ""
                         )
                     } else {
                         ""
@@ -897,7 +897,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Generate clinical summary
         .generateClinicalSummary = function(chiSqTest, contTable, pairwise_results = NULL, rows = NULL, cols = NULL) {
-            # Calculate effect size (Cramér's V)
+            # Calculate effect size (Cramer's V)
             n <- sum(contTable)
             k <- min(nrow(contTable), ncol(contTable))
             cramers_v <- sqrt(chiSqTest$statistic / (n * (k - 1)))
@@ -947,7 +947,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             summary_text <- sprintf(
-                .("The association between %s was %s (χ²(%d) = %.2f, p %s, n = %d). The effect size was %s (Cramér's V = %.3f)."),
+                .("The association between %s was %s (\u{3C7}\u{B2}(%d) = %.2f, p %s, n = %d). The effect size was %s (Cram\u{E9}r's V = %.3f)."),
                 var_names,
                 significance_text,
                 chiSqTest$parameter,
@@ -1001,12 +1001,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Statistical conclusion
             sentences$conclusion <- if (chiSqTest$p.value < 0.05) {
                 sprintf(
-                    .("The null hypothesis of independence was rejected at the α = %.2f significance level."),
+                    .("The null hypothesis of independence was rejected at the \u{3B1} = %.2f significance level."),
                     self$options$sig
                 )
             } else {
                 sprintf(
-                    .("The null hypothesis of independence could not be rejected at the α = %.2f significance level."),
+                    .("The null hypothesis of independence could not be rejected at the \u{3B1} = %.2f significance level."),
                     self$options$sig
                 )
             }
@@ -1021,20 +1021,20 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 htmltools::h4(.("Statistical Terms Glossary"), style = "color: #495057; margin-top: 0;"),
 
                 htmltools::tags$dl(
-                    htmltools::tags$dt(htmltools::strong(.("Chi-square test (χ²)"))),
+                    htmltools::tags$dt(htmltools::strong(.("Chi-square test (\u{3C7}\u{B2})"))),
                     htmltools::tags$dd(.("Tests whether two categorical variables are independent. Used when you want to know if categories of one variable are associated with categories of another.")),
 
                     htmltools::tags$dt(htmltools::strong(.("p-value"))),
                     htmltools::tags$dd(.("The probability of observing results at least as extreme as what was found, assuming no real association exists. p < 0.05 typically indicates statistical significance.")),
 
-                    htmltools::tags$dt(htmltools::strong(.("Cramér's V"))),
+                    htmltools::tags$dt(htmltools::strong(.("Cram\u{E9}r's V"))),
                     htmltools::tags$dd(.("Effect size measure for chi-square tests. Ranges from 0 (no association) to 1 (perfect association). Values: 0.1=small, 0.3=medium, 0.5=large effect.")),
 
                     htmltools::tags$dt(htmltools::strong(.("Standardized Residuals"))),
                     htmltools::tags$dd(.("Show which specific cell combinations contribute to significance. Values > 2 or < -2 indicate cells that differ significantly from expected.")),
 
                     htmltools::tags$dt(htmltools::strong(.("Expected Counts"))),
-                    htmltools::tags$dd(.("The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts ≥ 5.")),
+                    htmltools::tags$dd(.("The number of observations expected in each cell if the variables were independent. Chi-square test requires most cells to have expected counts \u{2265} 5.")),
 
                     htmltools::tags$dt(htmltools::strong(.("Fisher's Exact Test"))),
                     htmltools::tags$dd(.("Alternative to chi-square when expected counts are low. Provides exact p-values rather than approximations.")),
@@ -1069,14 +1069,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     style = "padding: 15px; background-color: #e8f5e8; border-left: 4px solid #4caf50; margin: 10px 0;",
                     htmltools::h4(.("Standardized Residuals Interpretation"), style = "color: #2e7d32; margin-top: 0;"),
                     htmltools::p(htmltools::strong(.("What are standardized residuals?"))),
-                    htmltools::p(.("Standardized residuals measure how much each cell deviates from what we'd expect if there was no association. They're calculated as (Observed - Expected) / √Expected, then adjusted for multiple comparisons.")),
+                    htmltools::p(.("Standardized residuals measure how much each cell deviates from what we'd expect if there was no association. They're calculated as (Observed - Expected) / \u{221A}Expected, then adjusted for multiple comparisons.")),
                     htmltools::div(
                         style = "background-color: #f1f8e9; padding: 10px; border-radius: 3px;",
                         htmltools::strong(.("Interpretation Guidelines:")), htmltools::br(),
-                        .("• |Residual| > 2.0: Suggests meaningful deviation"), htmltools::br(),
-                        .("• |Residual| > 3.0: Strong evidence of deviation"), htmltools::br(),
-                        .("• Positive values: Over-represented (more than expected)"), htmltools::br(),
-                        .("• Negative values: Under-represented (fewer than expected)")
+                        .("\u{2022} |Residual| > 2.0: Suggests meaningful deviation"), htmltools::br(),
+                        .("\u{2022} |Residual| > 3.0: Strong evidence of deviation"), htmltools::br(),
+                        .("\u{2022} Positive values: Over-represented (more than expected)"), htmltools::br(),
+                        .("\u{2022} Negative values: Under-represented (fewer than expected)")
                     )
                 ))
             } else if (type == "multiple_testing" && !is.null(num_comparisons)) {
@@ -1089,9 +1089,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     htmltools::div(
                         style = "background-color: #fce4ec; padding: 10px; border-radius: 3px;",
                         htmltools::strong(.("Correction Applied:")), htmltools::br(),
-                        .("• Number of comparisons:"), " ", num_comparisons, htmltools::br(),
-                        .("• Adjusted significance level:"), " α = ", round(adjusted_alpha, 4), htmltools::br(),
-                        .("• Use adjusted p-values for significance decisions")
+                        .("\u{2022} Number of comparisons:"), " ", num_comparisons, htmltools::br(),
+                        .("\u{2022} Adjusted significance level:"), " \u{3B1} = ", round(adjusted_alpha, 4), htmltools::br(),
+                        .("\u{2022} Use adjusted p-values for significance decisions")
                     )
                 ))
             }
@@ -1121,14 +1121,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         ),
                         htmltools::tags$li(
                             htmltools::strong(.("Significance:")), " ",
-                            sprintf(.("Values exceeding ±%.2f are considered statistically significant."), cutoff)
+                            sprintf(.("Values exceeding \u{B1}%.2f are considered statistically significant."), cutoff)
                         )
                     )
                 ),
                 htmltools::div(
                     style = "font-style: italic; background-color: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px dashed #dee2e6;",
                     htmltools::strong(.("Example Interpretation:")), htmltools::br(),
-                    sprintf(.("If the cell 'Grade 3 × Positive' has a residual of +3.2 (with cutoff ±%.2f):"), cutoff), htmltools::br(),
+                    sprintf(.("If the cell 'Grade 3 \u{D7} Positive' has a residual of +3.2 (with cutoff \u{B1}%.2f):"), cutoff), htmltools::br(),
                     .("It indicates that Grade 3 cases are significantly over-represented among the Positive group compared to what would be expected by chance.")
                 )
             )
@@ -1191,8 +1191,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ", .("This tool performs a Chi-Square test followed by pairwise post-hoc tests for all combinations of category levels when the overall Chi-Square test is significant."), "
                 <br><br>
                 <strong>", .("Data Input Options:"), "</strong>
-                <br>• <strong>", .("Individual observations:"), "</strong> ", .("Select row and column variables from raw data"), "
-                <br>• <strong>", .("Frequency counts:"), "</strong> ", .("Select row and column variables plus a counts variable for aggregated data"), "
+                <br>\u{2022} <strong>", .("Individual observations:"), "</strong> ", .("Select row and column variables from raw data"), "
+                <br>\u{2022} <strong>", .("Frequency counts:"), "</strong> ", .("Select row and column variables plus a counts variable for aggregated data"), "
                 <br><br>
                 ", .("The post-hoc tests help identify which specific group combinations contribute to the significant overall effect."), "
                 <hr><br>
@@ -1312,8 +1312,27 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to perform chi-square test and populate results
         .performChiSquareTest = function(contTable, rows = NULL, cols = NULL) {
-            # Perform Chi-Square Test ----
-            chiSqTest <- stats::chisq.test(contTable, correct = FALSE)
+            # Guard against degenerate tables that make the chi-square test undefined.
+            # .buildContingencyTable already rejects tables with < 2 rows/columns, but a table
+            # can still have a zero row/column margin (a category with no observations) or be
+            # entirely empty - both give zero expected counts and NaN statistics, and some
+            # inputs make chisq.test error outright. Reject with an actionable message instead
+            # of emitting NaN results or a cryptic error.
+            if (sum(contTable) == 0)
+                jmvcore::reject("The contingency table is empty (no observations remain after handling missing values). Check the selected variables and the 'Exclude Missing (NA)' option.")
+            empty_rows <- rownames(contTable)[rowSums(contTable) == 0]
+            empty_cols <- colnames(contTable)[colSums(contTable) == 0]
+            if (length(empty_rows) > 0 || length(empty_cols) > 0) {
+                parts <- c(
+                    if (length(empty_rows) > 0) paste0("row category/categories with no observations: ", paste(empty_rows, collapse = ", ")),
+                    if (length(empty_cols) > 0) paste0("column category/categories with no observations: ", paste(empty_cols, collapse = ", ")))
+                jmvcore::reject(paste0("The chi-square test is undefined because of ", paste(parts, collapse = "; "), ". Drop or merge empty categories and re-run."))
+            }
+
+            # Perform Chi-Square Test (wrapped: pathological but non-empty tables can still error) ----
+            chiSqTest <- tryCatch(
+                stats::chisq.test(contTable, correct = FALSE),
+                error = function(e) jmvcore::reject(paste0("The chi-square test could not be computed: ", conditionMessage(e), ". Check that both variables are categorical with valid, nonnegative counts.")))
 
             # Add chi-square results to the table ----
             self$results$chisqTable$setRow(
@@ -1359,7 +1378,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     style = "margin-top: 10px;",
                     htmltools::tags$small(
                         htmltools::strong("Critical value for significance: "),
-                        "±", round(residuals_analysis$critical_value, 3)
+                        "\u{B1}", round(residuals_analysis$critical_value, 3)
                     )
                 )
             )
@@ -1379,9 +1398,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #f8f9fa;", 
                     htmltools::div(
                         style = "font-weight: bold; color: #495057;",
-                        if (!is.null(col_var_name)) paste0(col_var_name, " →") else "",
+                        if (!is.null(col_var_name)) paste0(col_var_name, " \u{2192}") else "",
                         htmltools::br(),
-                        if (!is.null(row_var_name)) paste0(row_var_name, " ↓") else ""
+                        if (!is.null(row_var_name)) paste0(row_var_name, " \u{2193}") else ""
                     )
                 )
             )
@@ -1471,7 +1490,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (length(pairwise_results) > 0) {
                     detailed_content <- htmltools::div(
                         style = "margin: 15px 0;",
-                        htmltools::h4(.("Detailed 2×2 Comparison Tables"), style = "color: #1976d2; margin-bottom: 15px;")
+                        htmltools::h4(.("Detailed 2\u{D7}2 Comparison Tables"), style = "color: #1976d2; margin-bottom: 15px;")
                     )
                     
                     tables_html <- lapply(pairwise_results, function(result) {
@@ -1550,7 +1569,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 message_text <- paste0(
                     "Overall chi-square test is not significant (p = ",
                     format.pval(chiSqTest$p.value, digits = 3),
-                    " ≥ ", self$options$sig, "). ",
+                    " \u{2265} ", self$options$sig, "). ",
                     "Post-hoc pairwise comparisons are only valid when the overall test is significant. ",
                     "Running pairwise tests after a non-significant omnibus test increases Type I error (false positives) ",
                     "and constitutes data dredging."
@@ -1681,7 +1700,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (j in seq_along(col_names)) {
                     export_data[[row_index]] <- list(
                         category = "Contingency Table",
-                        measure = paste(row_names[i], "×", col_names[j]),
+                        measure = paste(row_names[i], "\u{D7}", col_names[j]),
                         value = contTable[i, j],
                         interpretation = paste("Observed count:", contTable[i, j])
                     )
@@ -1698,7 +1717,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     category = "Residuals Analysis",
                     measure = "Critical Value",
                     value = round(residuals_analysis$critical_value, 3),
-                    interpretation = paste("±", round(residuals_analysis$critical_value, 3), "for significance")
+                    interpretation = paste("\u{B1}", round(residuals_analysis$critical_value, 3), "for significance")
                 )
                 row_index <- row_index + 1
                 
@@ -1715,7 +1734,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     for (j in seq_along(col_names)) {
                         export_data[[row_index]] <- list(
                             category = "Cell Residuals",
-                            measure = paste(row_names[i], "×", col_names[j], "Residual"),
+                            measure = paste(row_names[i], "\u{D7}", col_names[j], "Residual"),
                             value = round(residuals_analysis$adjusted_residuals[i, j], 3),
                             interpretation = residuals_analysis$interpretation[i, j]
                         )
@@ -1922,7 +1941,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 htmltools::div(
                     style = "margin-top: 10px; font-size: 12px; color: #666;",
                     htmltools::strong(.("Effect Size Interpretation: ")),
-                    sprintf(.("The effect size is %s (Cramér's V = %.3f)"), 
+                    sprintf(.("The effect size is %s (Cram\u{E9}r's V = %.3f)"), 
                            clinical_summary$effect_interpretation, clinical_summary$effect_size)
                 )
             )
@@ -2043,7 +2062,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (inherits(contTable, "try-error") || any(dim(contTable) < 2))
                 return(FALSE)
 
-            # Chi-square → residuals
+            # Chi-square -> residuals
             chiSqTest <- try(stats::chisq.test(contTable, correct = FALSE), silent = TRUE)
             if (inherits(chiSqTest, "try-error"))
                 return(FALSE)
@@ -2114,12 +2133,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # embeds the result inside DOUBLE QUOTES (e.g. `rows = "`name`"`),
             # producing invalid R syntax (backticks have no meaning inside
             # double-quoted strings). For string-arg contexts you don't need
-            # backticks at all — only proper string quoting. Replacement:
+            # backticks at all - only proper string quoting. Replacement:
             #   rows_arg <- jmvcore::format('rows = {}', rows, context = "R")
             #   cols_arg <- jmvcore::format('cols = {}', cols, context = "R")
             # That removes the manual escaping helpers and produces correctly
             # quoted R for any name. NOT auto-applied because output for
-            # special-char names changes (broken→correct). Same pattern flagged
+            # special-char names changes (broken->correct). Same pattern flagged
             # at R/biomarkerresponse.b.R:1535.
             # Escape rows variable
             rows_escaped <- if (!is.null(rows) && !identical(make.names(rows), rows)) {

@@ -519,8 +519,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<thead><tr style='background-color: #6c757d; color: white;'>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>Group</th>",
                 "<th style='padding: 12px; border: 1px solid #dee2e6;'>N</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(x_var), " Mean ± SD</th>",
-                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(y_var), " Mean ± SD</th>",
+                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(x_var), " Mean \u00b1 SD</th>",
+                "<th style='padding: 12px; border: 1px solid #dee2e6;'>", htmltools::htmlEscape(y_var), " Mean \u00b1 SD</th>",
                 "</tr></thead><tbody>"
             )
             
@@ -530,8 +530,8 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "<tr style='background-color: ", row_bg, ";'>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6;'><strong>", htmltools::htmlEscape(group_stats[[group_var]][i]), "</strong></td>",
                     "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$n[i], "</td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$x_mean[i], " ± ", group_stats$x_sd[i], "</td>",
-                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$y_mean[i], " ± ", group_stats$y_sd[i], "</td>",
+                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$x_mean[i], " \u00b1 ", group_stats$x_sd[i], "</td>",
+                    "<td style='padding: 10px; border: 1px solid #dee2e6; text-align: center;'>", group_stats$y_mean[i], " \u00b1 ", group_stats$y_sd[i], "</td>",
                     "</tr>"
                 )
             }
@@ -589,7 +589,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</ul>",
                 "<p><strong>Total outliers across all groups:</strong> ", total_outliers, "</p>",
                 "<p style='font-size: 12px; color: #856404; margin-top: 15px;'>",
-                "<em>Outliers defined as points beyond 1.5 × IQR from Q1/Q3. Consider investigating these points for data quality or interesting patterns.</em>",
+                "<em>Outliers defined as points beyond 1.5 \u00d7 IQR from Q1/Q3. Consider investigating these points for data quality or interesting patterns.</em>",
                 "</p></div>"
             )
             
@@ -608,7 +608,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     "<h4 style='color: #856404; margin-top: 0;'> Data Quality Warnings</h4>"
                 )
                 for (warning in validation_warnings) {
-                    warnings_html <- paste0(warnings_html, "<p style='color: #856404; margin: 5px 0;'>• ", htmltools::htmlEscape(warning), "</p>")
+                    warnings_html <- paste0(warnings_html, "<p style='color: #856404; margin: 5px 0;'>\u2022 ", htmltools::htmlEscape(warning), "</p>")
                 }
                 warnings_html <- paste0(warnings_html, "</div>")
             }
@@ -811,13 +811,13 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "<h4 style='color: #bf360c; margin-top: 0;'> Critical Reminder: Exploratory vs. Inferential Analysis</h4>",
                 "<p style='color: #bf360c; margin: 5px 0;'><strong>Hull plots are DESCRIPTIVE VISUALIZATIONS, not statistical tests.</strong></p>",
                 "<ul style='color: #bf360c; margin: 10px 0;'>",
-                "<li><strong>Visual separation ≠ statistical significance:</strong> Groups may appear separated in a hull plot but not differ significantly when tested formally</li>",
+                "<li><strong>Visual separation \u2260 statistical significance:</strong> Groups may appear separated in a hull plot but not differ significantly when tested formally</li>",
                 "<li><strong>Descriptive indices (e.g., 'well-separated') are heuristics:</strong> These use arbitrary thresholds, not validated statistical cutoffs</li>",
                 "<li><strong>Required for inference:</strong> Complement hull plots with appropriate statistical tests:",
                 "<ul>",
                 "<li>MANOVA for multivariate group differences</li>",
                 "<li>Discriminant analysis for classification</li>",
-                "<li>Hotelling's T² for two-group comparisons</li>",
+                "<li>Hotelling's T\u00b2 for two-group comparisons</li>",
                 "<li>Permutation tests for complex designs</li>",
                 "</ul></li>",
                 "<li><strong>Best use case:</strong> Exploratory analysis, hypothesis generation, presentation of patterns</li>",

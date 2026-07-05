@@ -34,7 +34,7 @@ were retrospectively reviewed. Multivariate Cox regression model and survival an
 Results: Overall 341 (73 per cent) patients showed lymph node metastasis (N1/N2), whereas 125 (27 per cent) patients had no lymph
 node involvement (N0). With increasing number of ELN, the proportion of positive lymph nodes increased. The minimum number
 of ELN needed to detect lymph node involvement was 21. In multivariate analysis, examination of <21 lymph nodes was a
-significant negative predictor for survival. Examination of ≥21 ELN reversed this effect and ruled out possible misclassification.
+significant negative predictor for survival. Examination of >=21 ELN reversed this effect and ruled out possible misclassification.
 Conclusion: The number of ELN affects survival in PDAC. Possible misclassification was identified when <21 lymph nodes were
 examined. Therefore, at least 21 lymph nodes must be examined to avoid false lymph node classification in all types of resection.
 
@@ -231,7 +231,7 @@ N2
 
 0.07
 
-Values are n (%) unless otherwise stated. N1, 1–3 positive lymph nodes; N2, ≥4 positive lymph nodes; lymph node ratio = positive lymph nodes/examined lymph
+Values are n (%) unless otherwise stated. N1, 1–3 positive lymph nodes; N2, >=4 positive lymph nodes; lymph node ratio = positive lymph nodes/examined lymph
 nodes.
 
 Downloaded from https://academic.oup.com/bjsopen/article/8/1/zrad125/7589247 by guest on 28 September 2025
@@ -248,9 +248,9 @@ pancreaticoduodenectomy (PD), distal pancreatectomy (DP), or
 total pancreatectomy (TP) with standard lymphadenectomy.
 Patients with organ metastasis diagnosed during resection (M1),
 macroscopically incomplete resection (R2 status), neoadjuvant
-treatment and complication-related postoperative death (≤30
+treatment and complication-related postoperative death (<=30
 days) were excluded from the study for avoiding bias in the
-survival analyses (Fig. 1). R0 status was defined as ≥1 mm
+survival analyses (Fig. 1). R0 status was defined as >=1 mm
 tumour-free resection margin.
 Overall survival was defined as the time from resection of the
 tumour to death. Lymph node ratio is calculated with the
@@ -410,7 +410,7 @@ P
 
 < 0.001
 
-Values are n (%) unless otherwise stated. T1, size ≤ 2 cm; T2, size ≤4 cm; T3, size >4 cm; T4, infiltration of coeliac trunk, A. hepatica or A. mesenterica sup. R1, distance
+Values are n (%) unless otherwise stated. T1, size <= 2 cm; T2, size <=4 cm; T3, size >4 cm; T4, infiltration of coeliac trunk, A. hepatica or A. mesenterica sup. R1, distance
 of the tumour < 1 mm to the resection margin.
 
 Table 3 Centre-specific characteristics of the study cohort
@@ -495,7 +495,7 @@ Influence of the number of examined lymph
 nodes on nodal staging
 The study cohort was classified into four different groups according
 to the amount of ELN (group I: < 10 ELN; group II: 10–19 ELN; group
-III: 20–29 ELN; group IV: ≥ 30 ELN). Concerning all patients, the
+III: 20–29 ELN; group IV: >= 30 ELN). Concerning all patients, the
 proportion of lymph node positive status (N1 and N2) increased
 
 cent (n = 104) (34 per cent (n = 45) N1 and 45 per cent (n = 59) N2)
@@ -755,7 +755,7 @@ P < 0.001
 
 Examined lymph nodes
 Fig. 2 Distribution of the number of examined lymph nodes (ELN) on nodal status
-Patients were categorized into four groups according to the number of ELN (I: <10 ELN; II: 10-19 ELN; III: 20-29 ELN; IV: ≥30 ELN) and analysed for each type of
+Patients were categorized into four groups according to the number of ELN (I: <10 ELN; II: 10-19 ELN; III: 20-29 ELN; IV: >=30 ELN) and analysed for each type of
 resection (a–d). Correlation analysis of examined lymph nodes and positive lymph nodes with Spearman’s correlation (e).
 
 in patients after pancreaticoduodenectomy, 0.06 after distal
@@ -770,7 +770,7 @@ To find a cut-off value that prevents misclassification, the calculated
 minimum number of ELN needed to detect one positive LN was
 analysed for its impact on survival. In all patients, the median
 overall survival did not show significant differences when <21 LN
-were examined compared to ELN of ≥21 (Fig. 3a–c) (P = 0.10).
+were examined compared to ELN of >=21 (Fig. 3a–c) (P = 0.10).
 
 Downloaded from https://academic.oup.com/bjsopen/article/8/1/zrad125/7589247 by guest on 28 September 2025
 
@@ -1297,7 +1297,7 @@ N2
 <0.001
 0.061
 
-*Defined as R0 ≥ 1 mm tumour-free resection margin. Adjusted Cox proportional hazard model, HR with 95 per cent c.i., examined lymph nodes (ELN).
+*Defined as R0 >= 1 mm tumour-free resection margin. Adjusted Cox proportional hazard model, HR with 95 per cent c.i., examined lymph nodes (ELN).
 
 Downloaded from https://academic.oup.com/bjsopen/article/8/1/zrad125/7589247 by guest on 28 September 2025
 
@@ -1444,7 +1444,7 @@ LN for distal pancreatectomy. Taking into account that previous
 studies have a lower median ELN, the present paper will serve as a
 reference for the minimum needed number of 21 LN for adequate
 staging. The European Society for Medical Oncology (ESMO)
-suggests the examination of ≥15 LN in pancreaticoduodenectomy
+suggests the examination of >=15 LN in pancreaticoduodenectomy
 as recommended by the International Study Group on Pancreatic
 Surgery (ISGPS)25. In the recently updated German S3-Guideline on
 the treatment of pancreatic cancer (AWMF), the minimum

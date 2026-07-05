@@ -69,7 +69,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Convert to aes() call with safe symbol construction.
-                # IMPORTANT: never use aes_string() — it runs parse(text=...) on
+                # IMPORTANT: never use aes_string() - it runs parse(text=...) on
                 # each argument, which would execute attacker-controlled column
                 # names like `system('whoami')` when ggplot evaluates the
                 # aesthetic in the data context. as.name() creates a symbol
@@ -260,7 +260,7 @@ esquisseautoClass <- if (requireNamespace('jmvcore'))
 
                 # Store generated code if requested.
                 # esquisse::ggcall is only used here to format R code for the
-                # syntax-display pane — the resulting expression is deparsed
+                # syntax-display pane - the resulting expression is deparsed
                 # to text and never executed.
                 if (isTRUE(self$options$showCode)) {
                     code_text <- tryCatch({

@@ -2,7 +2,7 @@
 # jamovi's translation helper `.()` (jmvcore) resolves `self` from the CALLING
 # frame, so it only works inside R6 analysis methods. The top-level helper
 # functions in this file run without `self` in scope, so they MUST use plain
-# string literals -- calling `.()` there throws "object 'self' not found"
+# string literals - calling `.()` there throws "object 'self' not found"
 # (GitHub issue #122). Do not reintroduce `.()` into file-level helpers.
 # (The previous `if (!exists(".")) . <- function(x) x` guard was dead code:
 # jmvcore::`.` is imported into the namespace, so `exists(".")` is always TRUE.)
@@ -242,7 +242,7 @@
     } else {
       summary_parts$findings <- paste0(
         "No statistically significant associations were identified among the", " ",
-        n_vars, " ", "factors examined", " (", "all p-values ≥ 0.05", ")."
+        n_vars, " ", "factors examined", " (", "all p-values \u2265 0.05", ")."
       )
     }
 
@@ -1023,7 +1023,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 <dt><b>C-index (Concordance Index)</b></dt>
                 <dd style='margin-bottom: 10px;'>Measures the model's ability to discriminate between patients who experience the event and those who don't. C-index &gt; 0.7 indicates good discrimination; 0.6-0.7 is acceptable; &lt; 0.6 suggests limited predictive ability. Similar to AUC in logistic regression.</dd>
                 <dt><b>EPV (Events Per Variable)</b></dt>
-                <dd style='margin-bottom: 10px;'>Number of events divided by number of predictors in the model. EPV ≥ 10 is recommended to avoid overfitting and optimism in model performance estimates. Low EPV increases risk of unstable coefficient estimates.</dd>
+                <dd style='margin-bottom: 10px;'>Number of events divided by number of predictors in the model. EPV \u2265 10 is recommended to avoid overfitting and optimism in model performance estimates. Low EPV increases risk of unstable coefficient estimates.</dd>
                 <dt><b>Proportional Hazards (PH) Assumption</b></dt>
                 <dd style='margin-bottom: 10px;'>Core assumption of Cox regression that the hazard ratio stays constant over time. Tested using cox.zph test; p &gt; 0.05 suggests assumption is met. If violated, consider time-varying effects or stratification.</dd>
                 <dt><b>Fine-Gray Model (Competing Risks)</b></dt>
@@ -1047,7 +1047,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 <li><b>Proportional Hazards:</b> Hazard ratios remain constant over time. Check using PH diagnostic test (cox.zph). If p &lt; 0.05 for any variable, consider time-varying effects or stratification.</li>
                 <li><b>Independent Censoring:</b> Censoring is unrelated to the event risk. Verify through study design (e.g., administrative censoring is typically safe; loss to follow-up may be informative).</li>
                 <li><b>Linear Relationships:</b> Continuous predictors have linear effects on log-hazard. Check using martingale residuals or categorize continuous variables.</li>
-                <li><b>Adequate Sample Size:</b> Minimum 10 events per predictor variable (EPV ≥ 10). Lower EPV increases risk of overfitting, unstable estimates, and optimistic performance.</li>
+                <li><b>Adequate Sample Size:</b> Minimum 10 events per predictor variable (EPV \u2265 10). Lower EPV increases risk of overfitting, unstable estimates, and optimistic performance.</li>
                 <li><b>No Influential Outliers:</b> Extreme observations can distort estimates. Check deviance residuals and dfbeta plots.</li>
                 <li><b>Correct Time Origin:</b> All subjects enter at time zero (or use left truncation for delayed entry).</li>
               </ul>
@@ -1136,7 +1136,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                   <p style='line-height: 1.6;'><b>Key Concepts:</b></p>
                   <ul style='line-height: 1.6;'>
                     <li><b>Person-time units:</b> Sum of follow-up time for all individuals (e.g., person-years)</li>
-                    <li><b>Incidence rate:</b> Number of events ÷ person-time (e.g., events per 1000 person-years)</li>
+                    <li><b>Incidence rate:</b> Number of events \u00f7 person-time (e.g., events per 1000 person-years)</li>
                     <li><b>Why it matters:</b> Properly accounts for varying observation periods and censoring</li>
                   </ul>
                   <p style='line-height: 1.6;'><i>Example:</i> If 10 people are followed for 5 years each (50 person-years) and 2 events occur, the incidence rate is 2/50 = 0.04 events per person-year or 40 per 1000 person-years.</p>
@@ -1229,10 +1229,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           jmvcore::reject(paste0(
             .("Data must have column names."), "\n\n",
             .("Possible solutions:"), "\n",
-            "• ", .("Ensure your dataset has proper column headers"), "\n",
-            "• ", .("Check that the data was imported correctly"), "\n",
-            "• ", .("Verify the data is not empty"), "\n",
-            "• ", .("Column names should describe your variables (e.g., 'Age', 'Survival_Time', 'Event_Status')")
+            "\u2022 ", .("Ensure your dataset has proper column headers"), "\n",
+            "\u2022 ", .("Check that the data was imported correctly"), "\n",
+            "\u2022 ", .("Verify the data is not empty"), "\n",
+            "\u2022 ", .("Column names should describe your variables (e.g., 'Age', 'Survival_Time', 'Event_Status')")
           ))
         }
 
@@ -1251,10 +1251,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           jmvcore::reject(paste0(
             .("Error cleaning variable names."), "\n\n",
             .("Possible solutions:"), "\n",
-            "• ", .("Check for special characters or spaces in column names"), "\n",
-            "• ", .("Ensure column names don't start with numbers"), "\n",
-            "• ", .("Remove any duplicate column names"), "\n",
-            "• ", .("Avoid reserved R keywords as column names (e.g., 'if', 'else', 'for')")
+            "\u2022 ", .("Check for special characters or spaces in column names"), "\n",
+            "\u2022 ", .("Ensure column names don't start with numbers"), "\n",
+            "\u2022 ", .("Remove any duplicate column names"), "\n",
+            "\u2022 ", .("Avoid reserved R keywords as column names (e.g., 'if', 'else', 'for')")
           ))
         }
 
@@ -1277,10 +1277,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           jmvcore::reject(paste0(
             .("Error setting variable labels."), "\n\n",
             .("Possible solutions:"), "\n",
-            "• ", .("Check that all variables have valid names after cleaning"), "\n",
-            "• ", .("Ensure no variables have completely missing data"), "\n",
-            "• ", .("Verify the dataset is not corrupted"), "\n",
-            "• ", .("Try reloading your data file")
+            "\u2022 ", .("Check that all variables have valid names after cleaning"), "\n",
+            "\u2022 ", .("Ensure no variables have completely missing data"), "\n",
+            "\u2022 ", .("Verify the dataset is not corrupted"), "\n",
+            "\u2022 ", .("Try reloading your data file")
           ))
         }
 
@@ -1366,20 +1366,20 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           jmvcore::reject(paste0(
             .("Could not find the elapsed time variable."), "\n\n",
             .("Possible solutions:"), "\n",
-            "• ", .("Check that the variable name is correct in your dataset"), "\n",
-            "• ", .("Ensure the variable contains numeric time values (days, months, years)"), "\n",
-            "• ", .("Verify there are no special characters in the variable name"), "\n",
-            "• ", .("The time variable should represent time from study entry to event or last follow-up")
+            "\u2022 ", .("Check that the variable name is correct in your dataset"), "\n",
+            "\u2022 ", .("Ensure the variable contains numeric time values (days, months, years)"), "\n",
+            "\u2022 ", .("Verify there are no special characters in the variable name"), "\n",
+            "\u2022 ", .("The time variable should represent time from study entry to event or last follow-up")
           ))
         }
         if (length(myoutcome) == 0 && !is.null(self$options$outcome)) {
           jmvcore::reject(paste0(
             .("Could not find the outcome variable."), "\n\n",
             .("Possible solutions:"), "\n",
-            "• ", .("Check that the variable name is correct in your dataset"), "\n",
-            "• ", .("Ensure the variable is coded as 0/1 or FALSE/TRUE (0=censored, 1=event)"), "\n",
-            "• ", .("Verify there are no missing values in the outcome variable"), "\n",
-            "• ", .("The outcome should indicate whether the event of interest occurred")
+            "\u2022 ", .("Check that the variable name is correct in your dataset"), "\n",
+            "\u2022 ", .("Ensure the variable is coded as 0/1 or FALSE/TRUE (0=censored, 1=event)"), "\n",
+            "\u2022 ", .("Verify there are no missing values in the outcome variable"), "\n",
+            "\u2022 ", .("The outcome should indicate whether the event of interest occurred")
           ))
         }
 
@@ -1607,7 +1607,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           # notice <- jmvcore::Notice$new(...)
           
           error_msg <- sprintf(
-              "Negative Survival Times Detected: %d observation(s) have negative time values. This typically indicates:\n• Follow-up date occurs before diagnosis date\n• Incorrect date variable selection (dates reversed)\n• Data entry errors in date fields\n\nTo Fix:\n1. Verify 'Diagnosis Date' and 'Follow-up Date' are correctly assigned\n2. Check that diagnosis always precedes follow-up\n3. Review date formats and ensure consistency\n4. Examine observations with negative times for data errors",
+              "Negative Survival Times Detected: %d observation(s) have negative time values. This typically indicates:\n\u2022 Follow-up date occurs before diagnosis date\n\u2022 Incorrect date variable selection (dates reversed)\n\u2022 Data entry errors in date fields\n\nTo Fix:\n1. Verify 'Diagnosis Date' and 'Follow-up Date' are correctly assigned\n2. Check that diagnosis always precedes follow-up\n3. Review date formats and ensure consistency\n4. Examine observations with negative times for data errors",
               n_negative
           )
           
@@ -2036,7 +2036,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           
           self$results$todo$setContent(paste0(
             "<b>Survival Analysis Error:</b> ", htmltools::htmlEscape(conditionMessage(e)), "<br><br>",
-            "Recommendations: (1) Check data for missing/invalid values in time and outcome variables, (2) Ensure time variable contains positive numeric values, (3) Verify outcome is binary (0/1 or FALSE/TRUE), (4) Check sufficient events (≥10), (5) Ensure explanatory variables have appropriate types, (6) Try fewer variables, or (7) Check for outliers."
+            "Recommendations: (1) Check data for missing/invalid values in time and outcome variables, (2) Ensure time variable contains positive numeric values, (3) Verify outcome is binary (0/1 or FALSE/TRUE), (4) Check sufficient events (\u226510), (5) Ensure explanatory variables have appropriate types, (6) Try fewer variables, or (7) Check for outliers."
           ))
           self$results$todo$setVisible(TRUE)
           return(NULL)
@@ -2303,13 +2303,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }
 
         # WARNING: EPV < 10 - Overfitting risk
-        # Note: Only warn if we have enough events (≥50) but too many variables
+        # Note: Only warn if we have enough events (>=50) but too many variables
         if (epv < 10 && n_events >= 50 && n_vars > 0) {
           private$.addHtmlMessage(
             "warning",
             "Low events-per-variable ratio",
             sprintf(
-              "Low events-per-variable ratio (EPV = %.1f with %d predictors, %d events). Recommended EPV ≥ 10 to minimize overfitting. Recommendations: (1) reduce number of predictors, (2) use variable selection (backward/forward/stepwise), (3) apply penalized regression (LASSO/Ridge), or (4) use clinical knowledge to prioritize key variables.",
+              "Low events-per-variable ratio (EPV = %.1f with %d predictors, %d events). Recommended EPV \u2265 10 to minimize overfitting. Recommendations: (1) reduce number of predictors, (2) use variable selection (backward/forward/stepwise), (3) apply penalized regression (LASSO/Ridge), or (4) use clinical knowledge to prioritize key variables.",
               epv, n_vars, n_events
             )
           )
@@ -2992,7 +2992,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         # Add HR equivalent if requested
         if (self$options$aft_show_hr_equivalent && distribution == "weibull") {
           info_html <- paste0(info_html, "
-<p style='margin-top:10px;'><i>For Weibull AFT models, Hazard Ratio ≈ 1/Time Ratio. This is only an approximation.</i></p>
+<p style='margin-top:10px;'><i>For Weibull AFT models, Hazard Ratio \u2248 1/Time Ratio. This is only an approximation.</i></p>
 ")
         }
 
@@ -4830,7 +4830,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         if (length(levels) < 2) {
           private$.addHtmlMessage(
             "warning",
-            "Adjustment variable needs ≥2 levels",
+            "Adjustment variable needs \u22652 levels",
             "Adjustment variable must have at least two levels to compute adjusted survival curves."
           )
           return(NULL)
@@ -6536,7 +6536,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         } else {
           summary_parts$findings <- paste0(
             "<br><br><b>Key Finding:</b> No statistically significant associations were identified among the ",
-            n_vars, " factors examined (all p-values ≥ 0.05)."
+            n_vars, " factors examined (all p-values \u2265 0.05)."
           )
         }
 
@@ -7319,9 +7319,9 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 <div style="background-color: #fef5e7; padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <strong> Clinical Example - Cancer Study:</strong>
                     <table style="width: 100%; margin: 5px 0;">
-                        <tr><td><strong>Age (per year):</strong></td><td>HR = 1.02 [0.99-1.05] → Minimal age effect</td></tr>
-                        <tr><td><strong>Stage III vs I:</strong></td><td>HR = 3.2 [2.1-4.8] → Strong predictor of poor survival</td></tr>
-                        <tr><td><strong>Treatment B vs A:</strong></td><td>HR = 0.6 [0.4-0.9] → Protective treatment effect</td></tr>
+                        <tr><td><strong>Age (per year):</strong></td><td>HR = 1.02 [0.99-1.05] \u2192 Minimal age effect</td></tr>
+                        <tr><td><strong>Stage III vs I:</strong></td><td>HR = 3.2 [2.1-4.8] \u2192 Strong predictor of poor survival</td></tr>
+                        <tr><td><strong>Treatment B vs A:</strong></td><td>HR = 0.6 [0.4-0.9] \u2192 Protective treatment effect</td></tr>
                     </table>
                 </div>
             </div>
@@ -7358,7 +7358,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 <ul style="margin: 5px 0; padding-left: 20px;">
                     <li><strong>Always report confidence intervals:</strong> Shows precision of estimates</li>
                     <li><strong>Check proportional hazards:</strong> Ensure model assumptions are met</li>
-                    <li><strong>Consider clinical significance:</strong> Statistical significance ≠ clinical importance</li>
+                    <li><strong>Consider clinical significance:</strong> Statistical significance \u2260 clinical importance</li>
                     <li><strong>Validate findings:</strong> Test models in independent populations when possible</li>
                 </ul>
             </div>
@@ -7823,7 +7823,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           cv_html <- glue::glue("
             <h4>Cross-Validation Results</h4>
             <p><strong>Method:</strong> {n_folds}-fold cross-validation</p>
-            <p><strong>Mean CV Score:</strong> {round(mean_cv_score, 4)} ± {round(sd_cv_score, 4)}</p>
+            <p><strong>Mean CV Score:</strong> {round(mean_cv_score, 4)} \u00b1 {round(sd_cv_score, 4)}</p>
             <p><strong>Individual Fold Scores:</strong> {paste(round(cv_results, 3), collapse = ', ')}</p>
           ")
 
@@ -8006,7 +8006,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
                 } else if (sig_data$total_predictors > 0) {
                     summary_html <- paste0(summary_html,
                         '<p style="margin: 10px 0;"><strong>', .("Key Findings:"), '</strong> ', .("None of the"), ' ', sig_data$total_predictors,
-                        ' ', .("predictor(s) showed statistically significant associations with the outcome (all p ≥ 0.05)."), '</p>'
+                        ' ', .("predictor(s) showed statistically significant associations with the outcome (all p \u2265 0.05)."), '</p>'
                     )
                 } else {
                     summary_html <- paste0(summary_html,

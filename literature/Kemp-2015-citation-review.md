@@ -5,6 +5,7 @@
 **Title**: A Comparison of Liver Sampling Techniques in Dogs
 
 **Design & Cohort**:
+
 - **Study Type**: Prospective diagnostic accuracy study
 - **Sample Size**: 70 dogs, 71 total sample sites (one dog had a focal lesion)
 - **Groups**: Three test sampling methods (14 gauge needle, 5 mm cup, 8 mm punch) compared to gold standard (large wedge necropsy samples)
@@ -13,6 +14,7 @@
   - Secondary: Number of portal triads, sensitivity, specificity, histologic feature scoring
 
 **Key Analyses**:
+
 - Cohen's kappa coefficients for diagnostic agreement
 - Sensitivity and specificity of each sampling method
 - Mantel-Haenszel Chi-square test for comparing proportions
@@ -136,20 +138,24 @@
 ### Gap 1: Generalized Estimating Equations (GEE)
 
 **Impact**:
+
 - Central to this study's analysis (logistic GEE for concordance, linear GEE for histologic scores)
 - Essential for pathology studies with clustered/correlated data (multiple samples per patient, repeated measures, multi-site studies)
 - Common in veterinary medicine, ophthalmology (bilateral eyes), dermatology (multiple lesions)
 
 **Clinical Relevance**:
+
 - High - GEE is gold standard for marginal models with correlated outcomes
 - Used in >30% of pathology diagnostic studies with repeated measures
 - Jamovi currently lacks any method to properly handle within-subject correlation for non-normal outcomes
 
 **Closest existing function**:
+
 - None directly; `jjbetweenstats` and ANOVA modules assume independence
 - Mixed effects models also not implemented
 
 **Exact missing options**:
+
 1. **Logistic GEE** (binary/categorical outcomes)
 2. **Linear GEE** (continuous outcomes)
 3. **Poisson GEE** (count outcomes)
@@ -165,18 +171,22 @@
 ### Gap 2: Mantel-Haenszel Chi-Square Test (Stratified Analysis)
 
 **Impact**:
+
 - Used in this study to compare sensitivity/specificity across 3 methods while controlling for diagnosis (stratification factor)
 - Common in case-control studies, matched designs, meta-analysis of diagnostic studies
 
 **Clinical Relevance**:
+
 - Medium - useful but alternatives exist (logistic regression with interaction terms)
 - Specific use: comparing proportions across groups adjusted for confounding/stratification
 
 **Closest existing function**:
+
 - `crosstable` - performs chi-square but not stratified Mantel-Haenszel variant
 - Could approximate with logistic regression + interaction
 
 **Exact missing options**:
+
 1. Mantel-Haenszel chi-square for stratified 2×K tables (comparing K groups across strata)
 2. Common odds ratio estimate with confidence interval
 3. Test of homogeneity of odds ratios across strata (Breslow-Day test)
@@ -187,18 +197,22 @@
 ### Gap 3: Mixed Model ANOVA (Repeated Measures / Random Effects)
 
 **Impact**:
+
 - Used in this study for comparing portal triad counts between 4 sample types (repeated measures per dog)
 - Fundamental for within-subject designs, longitudinal studies, hierarchical data
 
 **Clinical Relevance**:
+
 - High - extremely common in clinical research
 - Required when same subjects measured multiple times or data nested (patients within hospitals)
 
 **Closest existing function**:
+
 - `jjbetweenstats` - between-groups ANOVA only
 - `jjwithinstats` - within-groups but may not handle complex random effects
 
 **Exact missing options**:
+
 1. **Linear Mixed Model (LMM)** with:
    - Fixed effects (treatment, time, covariates)
    - Random intercepts (subject-level variation)
@@ -216,18 +230,22 @@
 ### Gap 4: Observer Agreement Extensions
 
 **Impact**:
+
 - Study mentions single pathologist (line 779-782) to ensure consistency
 - Multi-rater kappa, Fleiss' kappa, and ICC for continuous measures needed for inter-observer studies
 
 **Clinical Relevance**:
+
 - Medium-High - pathology heavily relies on observer agreement studies
 
 **Closest existing function**:
+
 - `cohenskappa` - excellent for two-rater agreement
 - `icccoeff` - ICC for continuous measures
 
 **Exact missing options**:
-1. **Fleiss' Kappa** for ≥3 raters (categorical outcomes)
+
+1. **Fleiss' Kappa** for >=3 raters (categorical outcomes)
 2. **Light's Kappa** (average of pairwise kappas)
 3. **Krippendorff's Alpha** (handles missing data, multiple data types)
 4. **Gwet's AC** (less affected by prevalence than kappa)
@@ -240,17 +258,21 @@
 ### Gap 5: Diagnostic Test Accuracy Framework
 
 **Impact**:
+
 - Study calculates sensitivity/specificity manually
 - Comprehensive diagnostic test evaluation framework missing
 
 **Clinical Relevance**:
+
 - High - core of pathology validation studies
 
 **Closest existing function**:
+
 - `pathsampling` - calculates sensitivity for sampling adequacy
 - Various diagnostic functions scattered across module
 
 **Exact missing options**:
+
 1. **Complete 2×2 table analysis**:
    - Sensitivity, specificity, PPV, NPV with CIs (Wilson, Clopper-Pearson, exact)
    - Likelihood ratios (LR+, LR-) with CIs
@@ -266,17 +288,21 @@
 ### Gap 6: Multiple Testing Corrections Suite
 
 **Impact**:
+
 - Study tests 16 histologic features without adjustment
 - Need comprehensive FDR and FWER control
 
 **Clinical Relevance**:
+
 - High - essential for genomic, proteomic, multi-marker studies
 
 **Closest existing function**:
+
 - Some functions offer Bonferroni, Holm, BH
 - Not centralized or comprehensive
 
 **Exact missing options**:
+
 1. **Familywise Error Rate (FWER)**:
    - Bonferroni (available in some functions)
    - Holm (sequential Bonferroni)
@@ -754,12 +780,14 @@ children:
 #### Validation Plan
 
 **Unit Tests**:
+
 1. Simulate data with known correlation structures (exchangeable ρ=0.5, AR(1) ρ=0.7)
 2. Compare to published results from geepack vignettes
 3. Verify robust SE matches sandwich package
 4. Test edge cases: single cluster, unbalanced clusters, missing data
 
 **Reproducibility**:
+
 1. Reproduce Kemp et al. (2015) GEE results if data available
 2. Compare to SAS PROC GENMOD GEE output
 3. Create tutorial vignette with liver biopsy example
@@ -775,6 +803,7 @@ children:
 *(Similar detailed structure as GEE above - abbreviated here for space)*
 
 **Key Requirements**:
+
 - Random intercepts and slopes
 - REML estimation
 - Kenward-Roger/Satterthwaite DF
@@ -819,6 +848,7 @@ if (self$options$mantel_haenszel && !is.null(strata_var)) {
 ```
 
 **Add to `.a.yaml`**:
+
 ```yaml
     - name: mantel_haenszel
       title: Mantel-Haenszel Test
@@ -841,6 +871,7 @@ if (self$options$mantel_haenszel && !is.null(strata_var)) {
 **Target**: New comprehensive function `diagnostic_accuracy`
 
 **Features**:
+
 1. **Single test evaluation**: Se, Sp, PPV, NPV, LR+, LR-, DOR, Youden
 2. **ROC analysis**: AUC with DeLong CI, optimal threshold selection
 3. **Multiple test comparison**: Compare 2+ tests on same subjects
@@ -848,6 +879,7 @@ if (self$options$mantel_haenszel && !is.null(strata_var)) {
 5. **Visualization**: ROC curves, likelihood ratio nomograms, pre/post-test probability
 
 **UI Mockup**:
+
 ```yaml
 - Data Input:
   - Test Result (binary or continuous)
@@ -876,6 +908,7 @@ if (self$options$mantel_haenszel && !is.null(strata_var)) {
 **Target**: Centralized function `multiple_testing_adjustment` or integrate into existing functions
 
 **Features**:
+
 1. **Input**: Vector of p-values
 2. **Methods**: Bonferroni, Holm, Hochberg, Hommel, Sidak, BH, BY, q-value, local FDR
 3. **Outputs**:
@@ -886,6 +919,7 @@ if (self$options$mantel_haenszel && !is.null(strata_var)) {
    - Q-Q plot
 
 **Quick Implementation**:
+
 ```r
 # Wrapper around p.adjust()
 adj_p <- p.adjust(raw_p_values, method = self$options$correction_method)
@@ -980,16 +1014,16 @@ discoveries_5pct <- sum(qvals < 0.05)
 
 | Package | Purpose | Version | Installation |
 |---------|---------|---------|--------------|
-| `geepack` | GEE estimation | ≥1.3.0 | CRAN |
-| `lme4` | Linear mixed models | ≥1.1.0 | CRAN |
-| `lmerTest` | Mixed model significance tests | ≥3.1.0 | CRAN |
-| `emmeans` | Estimated marginal means, post-hoc | ≥1.7.0 | CRAN |
-| `MuMIn` | QIC calculation for GEE | ≥1.46.0 | CRAN |
-| `pROC` | ROC analysis | ≥1.18.0 | CRAN |
-| `epiR` | Epidemiologic statistics | ≥2.0.0 | CRAN |
-| `cutpointr` | Optimal cutpoint selection | ≥1.1.0 | CRAN |
-| `qvalue` | FDR q-values | ≥2.26.0 | Bioconductor |
-| `performance` | Model diagnostics | ≥0.10.0 | CRAN |
+| `geepack` | GEE estimation | >=1.3.0 | CRAN |
+| `lme4` | Linear mixed models | >=1.1.0 | CRAN |
+| `lmerTest` | Mixed model significance tests | >=3.1.0 | CRAN |
+| `emmeans` | Estimated marginal means, post-hoc | >=1.7.0 | CRAN |
+| `MuMIn` | QIC calculation for GEE | >=1.46.0 | CRAN |
+| `pROC` | ROC analysis | >=1.18.0 | CRAN |
+| `epiR` | Epidemiologic statistics | >=2.0.0 | CRAN |
+| `cutpointr` | Optimal cutpoint selection | >=1.1.0 | CRAN |
+| `qvalue` | FDR q-values | >=2.26.0 | Bioconductor |
+| `performance` | Model diagnostics | >=0.10.0 | CRAN |
 
 ### Installation Script
 
@@ -1024,18 +1058,22 @@ BiocManager::install("qvalue")
 ### Implementation Timeline (Estimated)
 
 **Phase 1 (Months 1-3)**:
+
 - GEE module (logistic, linear, Poisson)
 - Basic Mantel-Haenszel in crosstable
 
 **Phase 2 (Months 4-6)**:
+
 - Mixed Model ANOVA
 - Diagnostic Accuracy module (basic)
 
 **Phase 3 (Months 7-9)**:
+
 - GEE post-hoc comparisons
 - Multiple testing corrections centralized
 
 **Phase 4 (Months 10-12)**:
+
 - Observer agreement extensions
 - Diagnostic accuracy advanced features (ROC comparison, sample size)
 
@@ -1114,34 +1152,40 @@ classDiagram
 
 This study by Kemp et al. (2015) represents a **well-designed diagnostic accuracy study** using appropriate advanced methods (GEE, mixed models) to handle correlated data from multiple samples per dog. However, several gaps emerged:
 
-### ✅ **Strengths**:
+### ✅ **Strengths**
+
 1. Proper use of GEE and mixed models for clustered data
 2. Kappa, sensitivity, specificity with CIs
 3. Blinded pathologist review (gold standard)
 4. Effect sizes prioritized over p-values
 
-### 🟡 **Moderate Issues**:
+### 🟡 **Moderate Issues**
+
 1. **Missing assumption checks**: No normality tests, variance homogeneity, GEE correlation structure not reported
 2. **Transparency gaps**: Software noted but no code/parameters shared; GEE link functions not specified
 3. **Multiple testing not adjusted**: 16 histologic features tested without FDR/FWER control
 
-### 🔴 **Critical Gaps**:
+### 🔴 **Critical Gaps**
+
 1. **No sample size justification**: Some diagnoses have only n=5-6 cases (underpowered subgroup analyses)
 2. **Multiplicity control absent**: Family of 16 feature tests, pairwise comparisons without adjustment → inflated Type I error
 3. **Small sample analyses**: Fibrosis and hepatitis subgroups likely underpowered
 
-### 📊 **Jamovi Coverage**:
+### 📊 **Jamovi Coverage**
+
 - ✅ **Covered**: Cohen's kappa (excellent), bootstrap CIs, basic sensitivity/specificity
 - 🟡 **Partial**: Diagnostic test evaluation (scattered functions), post-hoc comparisons
 - ❌ **Critical Missing**: GEE (logistic, linear), mixed model ANOVA, Mantel-Haenszel test
 
-### 🚀 **Roadmap Priority**:
+### 🚀 **Roadmap Priority**
+
 1. **GEE module** (highest impact, addresses fundamental gap)
 2. **Mixed model ANOVA** (high demand, repeated measures essential)
 3. **Diagnostic accuracy module** (centralized framework for pathology validation)
 4. **Mantel-Haenszel test** (easy win, moderate utility)
 
-### 🎯 **Recommendation for Jamovi Development**:
+### 🎯 **Recommendation for Jamovi Development**
+
 Implement GEE and mixed models as **top priorities** to enable proper analysis of correlated/clustered data - a common scenario in pathology (multiple samples/patient, bilateral organs, nested designs). These methods are used in >30% of pathology diagnostic studies and currently have **no jamovi alternative**.
 
 ---

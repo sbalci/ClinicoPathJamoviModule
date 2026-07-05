@@ -113,10 +113,10 @@ Net Benefit
 
 | Threshold | Meaning | Action |
 |-----------|---------|--------|
-| pt = 5% | Treat if risk ≥ 5% | Very aggressive (screening context) |
-| pt = 10% | Treat if risk ≥ 10% | Standard for many cancers |
-| pt = 20% | Treat if risk ≥ 20% | Moderate threshold |
-| pt = 30% | Treat if risk ≥ 30% | Conservative (toxic treatments) |
+| pt = 5% | Treat if risk >= 5% | Very aggressive (screening context) |
+| pt = 10% | Treat if risk >= 10% | Standard for many cancers |
+| pt = 20% | Treat if risk >= 20% | Moderate threshold |
+| pt = 30% | Treat if risk >= 30% | Conservative (toxic treatments) |
 
 **How to Choose pt:**
 
@@ -126,7 +126,7 @@ pt = Harm / (Harm + Benefit)
 Example: Chemotherapy for breast cancer
 - Benefit: Prevent 1 death
 - Harm: Severe toxicity in 4 patients (death equivalent)
-- pt = 4 / (4 + 1) = 0.80 (treat if risk ≥80%)
+- pt = 4 / (4 + 1) = 0.80 (treat if risk >=80%)
 ```
 
 ---

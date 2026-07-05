@@ -69,7 +69,7 @@ variables (e.g., "Dead", "Deceased"). If numeric, use level "1" for death.}
 
 \item{time_pfs}{Time to disease progression, relapse, or death (whichever
 comes first). Must be in the same units as overall survival time. PFS time
-should be ≤ OS time for each patient.}
+should be <= OS time for each patient.}
 
 \item{event_pfs}{Event indicator for progression-free survival. 1 =
 progression or death, 0 = censored (or specify factor level).}
@@ -127,7 +127,7 @@ toxicity ≈ 0.5, severe toxicity ≈ 0.3.}
 
 \item{utility_twist}{Quality-of-life utility weight for time without
 symptoms or toxicity. Typically set to 1.0 (perfect health) as the
-reference state. Should generally be ≥ utility_tox and ≥ utility_rel.}
+reference state. Should generally be >= utility_tox and >= utility_rel.}
 
 \item{utility_rel}{Quality-of-life utility weight for time after disease
 relapse/progression. Accounts for symptomatic disease burden. Typical

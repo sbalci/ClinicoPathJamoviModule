@@ -42,7 +42,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     return()
                 }
 
-                # Plain text only — notices avoid HTML by project convention; the Preformatted
+                # Plain text only - notices avoid HTML by project convention; the Preformatted
                 # output item renders this literally (no markup, no injection surface).
                 blocks <- vapply(private$.noticeList, function(notice) {
                     prefix <- switch(notice$type,
@@ -103,9 +103,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
                             "<strong>Design-Data Mismatch Warning</strong><br/>",
                             "You selected <strong>Repeated Measures</strong> design, but the data structure may not match:<br/>",
-                            "• Total observations: {n_obs}<br/>",
-                            "• Groups in '{group_var_safe}': {n_levels} ({group_levels_safe})<br/>",
-                            "• Expected for balanced repeated measures: {n_obs} should be divisible by {n_levels}<br/><br/>",
+                            "\u2022 Total observations: {n_obs}<br/>",
+                            "\u2022 Groups in '{group_var_safe}': {n_levels} ({group_levels_safe})<br/>",
+                            "\u2022 Expected for balanced repeated measures: {n_obs} should be divisible by {n_levels}<br/><br/>",
                             "<strong>Possible issues:</strong><br/>",
                             "1. This might be <em>independent groups</em> data, not repeated measures<br/>",
                             "2. Missing observations for some subjects<br/>",
@@ -125,9 +125,9 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             "<div style='background: #e3f2fd; border-left: 4px solid #2196f3; padding: 12px; margin: 10px 0;'>",
                             "<strong>Design Check</strong><br/>",
                             "Perfectly balanced groups detected ({obs_per_group} observations per group).<br/>",
-                            "• This pattern is common in <strong>independent groups</strong> designs<br/>",
-                            "• For repeated measures, each <em>subject</em> should appear in multiple groups<br/>",
-                            "• Verify: Does each row represent a different subject, or the same subject at different times?",
+                            "\u2022 This pattern is common in <strong>independent groups</strong> designs<br/>",
+                            "\u2022 For repeated measures, each <em>subject</em> should appear in multiple groups<br/>",
+                            "\u2022 Verify: Does each row represent a different subject, or the same subject at different times?",
                             "</div>"
                         )
                         warnings_html <- c(warnings_html, warning_msg)
@@ -232,7 +232,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     # Handle character variables (common in clinical data)
                     if (is.character(v)) {
                         unique_vals <- length(unique(v[!is.na(v)]))
-                        # Character columns with ≤20 unique values treated as categorical
+                        # Character columns with \u226420 unique values treated as categorical
                         if (unique_vals > 0 && unique_vals <= 20) return("factor")
                         return("unknown")
                     }
@@ -421,7 +421,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "<ul style='margin: 10px 0; padding-left: 20px;'>",
                         "<li><strong>Trend line:</strong> Shows the association direction and strength</li>",
                         "<li><strong>Confidence bands:</strong> Gray area indicates uncertainty in the trend</li>",
-                        "<li><strong>Positive slope:</strong> Higher {group_var_safe} values → higher {dep_var_safe} values</li>",
+                        "<li><strong>Positive slope:</strong> Higher {group_var_safe} values \u2192 higher {dep_var_safe} values</li>",
                         "<li><strong>Correlation:</strong> Tighter scatter around line indicates stronger association</li>",
                         "</ul>"
                     ),
@@ -481,7 +481,7 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                             "<p style='margin: 5px 0;'><strong>Parametric:</strong> Assumes normally distributed data. ",
                             "Best for continuous variables with bell-shaped distributions.</p>",
                             "<p style='font-size: 0.85em; color: #757575;'>",
-                            "<strong>When to use:</strong> Data appears symmetric, no extreme outliers, n≥30 per group</p>"
+                            "<strong>When to use:</strong> Data appears symmetric, no extreme outliers, n\u226530 per group</p>"
                         )
                     } else if (analysis_info$distribution == "np") {
                         assumption_html <- paste0(assumption_html,
@@ -687,29 +687,29 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         "<strong>CRITICAL: Very Small Sample (n={n_complete})</strong><br/>",
                         "Your analysis has only <strong>{n_complete} complete observations</strong>.<br/><br/>",
                         "<strong>Statistical concerns:</strong><br/>",
-                        "• Results are <em>highly unreliable</em> with n&lt;10<br/>",
-                        "• Statistical tests may fail or produce meaningless p-values<br/>",
-                        "• Effect sizes and confidence intervals will be very imprecise<br/>",
-                        "• Normality assumptions cannot be verified<br/><br/>",
+                        "\u2022 Results are <em>highly unreliable</em> with n&lt;10<br/>",
+                        "\u2022 Statistical tests may fail or produce meaningless p-values<br/>",
+                        "\u2022 Effect sizes and confidence intervals will be very imprecise<br/>",
+                        "\u2022 Normality assumptions cannot be verified<br/><br/>",
                         "<strong>Clinical recommendations:</strong><br/>",
                         "1. <strong>Collect more data</strong> before drawing conclusions<br/>",
                         "2. Use descriptive statistics only (no hypothesis testing)<br/>",
-                        "3. Consider exact tests if n≥5 (Fisher's exact test)<br/>",
+                        "3. Consider exact tests if n\u22655 (Fisher's exact test)<br/>",
                         "4. Clearly report sample size limitations in any publication",
                         "</div>"
                     ))
                 } else if (n_complete < 30) {
-                    # Warning: 10 ≤ n < 30
+                    # Warning: 10 \u2264 n < 30
                     validation_warnings <- paste0(validation_warnings, glue::glue(
                         "<div style='background: #fff3e0; border-left: 4px solid #f57c00; padding: 12px; margin: 10px 0;'>",
                         "<strong>Small Sample Warning (n={n_complete})</strong><br/>",
-                        "You have <strong>{n_complete} complete observations</strong> (below the conventional n≥30 guideline).<br/><br/>",
+                        "You have <strong>{n_complete} complete observations</strong> (below the conventional n\u226530 guideline).<br/><br/>",
                         "<strong>Recommendations:</strong><br/>",
-                        "• Consider <strong>nonparametric</strong> statistical approach (less sensitive to small samples)<br/>",
-                        "• Avoid parametric tests unless normality is well-established<br/>",
-                        "• Use <strong>robust methods</strong> to reduce outlier influence<br/>",
-                        "• Report confidence intervals (more informative than p-values alone)<br/>",
-                        "• Consider exact tests when applicable<br/><br/>",
+                        "\u2022 Consider <strong>nonparametric</strong> statistical approach (less sensitive to small samples)<br/>",
+                        "\u2022 Avoid parametric tests unless normality is well-established<br/>",
+                        "\u2022 Use <strong>robust methods</strong> to reduce outlier influence<br/>",
+                        "\u2022 Report confidence intervals (more informative than p-values alone)<br/>",
+                        "\u2022 Consider exact tests when applicable<br/><br/>",
                         "<strong>Clinical note:</strong> Statistical power is limited. Negative findings may reflect insufficient sample size rather than true absence of effect.",
                         "</div>"
                     ))

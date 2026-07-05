@@ -1,4 +1,4 @@
-# Group LASSO for Survival Analysis — Developer Documentation
+# Group LASSO for Survival Analysis - Developer Documentation
 
 ## 1. Overview
 
@@ -6,10 +6,10 @@
 - **Menu**: SurvivalT > Penalized Cox Regression > Group LASSO Cox
 - **Version**: 0.0.37
 - **Files**:
-  - `jamovi/grouplasso.u.yaml` — UI
-  - `jamovi/grouplasso.a.yaml` — Options
-  - `R/grouplasso.b.R` — Backend
-  - `jamovi/grouplasso.r.yaml` — Results
+  - `jamovi/grouplasso.u.yaml` - UI
+  - `jamovi/grouplasso.a.yaml` - Options
+  - `R/grouplasso.b.R` - Backend
+  - `jamovi/grouplasso.r.yaml` - Results
 
 **Summary**: Group LASSO fits penalized Cox proportional hazards models that select or remove pre-defined variable groups simultaneously using the `grpreg` package. Unlike standard LASSO (individual variable selection), Group LASSO uses an L1/L2 mixed norm penalty at the group level, making it ideal for categorical variables with multiple dummy codes, grouped biomarkers, or gene pathways. Supports four penalty types (grLasso, grMCP, grSCAD, Adaptive), stability selection, nested CV, and permutation testing.
 
@@ -21,11 +21,11 @@
 
 | UI Control | Type | Label | Binds to Option | Default | Constraints | Visibility/Enable |
 |------------|------|-------|-----------------|---------|-------------|-------------------|
-| `time` | VariablesListBox | Time Variable | `time` | — | maxItemCount: 1, numeric | Always |
-| `event` | VariablesListBox | Event Indicator | `event` | — | maxItemCount: 1, factor/numeric | Always |
-| `outcomeLevel` | LevelSelector | Event Level | `outcomeLevel` | — | Levels of `event` | `enable: (event)` |
-| `censorLevel` | LevelSelector | Censored Level | `censorLevel` | — | Levels of `event` | `enable: (event)` |
-| `predictors` | VariablesListBox | Predictor Variables | `predictors` | — | numeric/factor | Always |
+| `time` | VariablesListBox | Time Variable | `time` | - | maxItemCount: 1, numeric | Always |
+| `event` | VariablesListBox | Event Indicator | `event` | - | maxItemCount: 1, factor/numeric | Always |
+| `outcomeLevel` | LevelSelector | Event Level | `outcomeLevel` | - | Levels of `event` | `enable: (event)` |
+| `censorLevel` | LevelSelector | Censored Level | `censorLevel` | - | Levels of `event` | `enable: (event)` |
+| `predictors` | VariablesListBox | Predictor Variables | `predictors` | - | numeric/factor | Always |
 
 ### Data Suitability (CollapseBox, collapsed: false)
 
@@ -104,12 +104,12 @@
 
 | Option | Type | Default | Description | Downstream Effects |
 |--------|------|---------|-------------|-------------------|
-| `data` | Data | — | Input data frame | Used throughout `.prepareData()` |
-| `time` | Variable | — | Time to event (numeric) | `.prepareData()` → `survival::Surv()` |
-| `event` | Variable | — | Event indicator (factor/numeric) | `.prepareData()` → event encoding |
-| `outcomeLevel` | Level | — | Level of event = 1 | `.prepareData()` two-level encoding |
-| `censorLevel` | Level | — | Level of censoring = 0 | `.prepareData()` two-level encoding |
-| `predictors` | Variables | — | Predictor variables | `.prepareData()` → design matrix → model fitting |
+| `data` | Data | - | Input data frame | Used throughout `.prepareData()` |
+| `time` | Variable | - | Time to event (numeric) | `.prepareData()` → `survival::Surv()` |
+| `event` | Variable | - | Event indicator (factor/numeric) | `.prepareData()` → event encoding |
+| `outcomeLevel` | Level | - | Level of event = 1 | `.prepareData()` two-level encoding |
+| `censorLevel` | Level | - | Level of censoring = 0 | `.prepareData()` two-level encoding |
+| `predictors` | Variables | - | Predictor variables | `.prepareData()` → design matrix → model fitting |
 
 ### Group Definition
 
@@ -132,15 +132,15 @@
 
 | Option | Type | Default | Description | Downstream Effects |
 |--------|------|---------|-------------|-------------------|
-| `cv_folds` | Integer | `10` | CV folds (3–20) | `grpreg::cv.grpsurv(nfolds=)` |
-| `n_lambda` | Integer | `100` | Lambda grid size (10–500) | `grpreg::cv.grpsurv(nlambda=)` |
+| `cv_folds` | Integer | `10` | CV folds (3-20) | `grpreg::cv.grpsurv(nfolds=)` |
+| `n_lambda` | Integer | `100` | Lambda grid size (10-500) | `grpreg::cv.grpsurv(nlambda=)` |
 | `lambda_min_ratio` | Number | `0.001` | Min/max lambda ratio | `grpreg::cv.grpsurv(lambda.min=)` |
 
 ### Algorithm Settings
 
 | Option | Type | Default | Description | Downstream Effects |
 |--------|------|---------|-------------|-------------------|
-| `max_iterations` | Integer | `10000` | Max iterations (100–100000) | `grpreg::cv.grpsurv(max.iter=)` |
+| `max_iterations` | Integer | `10000` | Max iterations (100-100000) | `grpreg::cv.grpsurv(max.iter=)` |
 | `tolerance` | Number | `0.001` | Convergence tolerance | `grpreg::cv.grpsurv(eps=)` |
 | `selection_threshold` | Number | `1e-8` | Group selection cutoff | All result population methods |
 | `standardize` | Bool | `true` | Pre-standardize variables | `.createDesignMatrix()` column scaling |
@@ -151,12 +151,12 @@
 | Option | Type | Default | Description | Downstream Effects |
 |--------|------|---------|-------------|-------------------|
 | `stability_selection` | Bool | `false` | Run stability selection | `.stabilitySelection()` in `.fitGroupLasso()` |
-| `bootstrap_samples` | Integer | `100` | Subsample count (50–1000) | `.stabilitySelection()` loop count |
-| `stability_threshold` | Number | `0.6` | Stable selection cutoff (0.5–0.95) | `.populateStabilityResults()` |
+| `bootstrap_samples` | Integer | `100` | Subsample count (50-1000) | `.stabilitySelection()` loop count |
+| `stability_threshold` | Number | `0.6` | Stable selection cutoff (0.5-0.95) | `.populateStabilityResults()` |
 | `nested_cv` | Bool | `false` | Run nested CV | `.nestedCrossValidation()` |
-| `inner_cv_folds` | Integer | `5` | Inner CV folds (3–10) | `.nestedCrossValidation()` |
+| `inner_cv_folds` | Integer | `5` | Inner CV folds (3-10) | `.nestedCrossValidation()` |
 | `permutation_test` | Bool | `false` | Run permutation test | `.runPermutationTest()` in `.populateResults()` |
-| `n_permutations` | Integer | `100` | Permutation count (50–1000) | `.runPermutationTest()` loop |
+| `n_permutations` | Integer | `100` | Permutation count (50-1000) | `.runPermutationTest()` loop |
 
 ### Display Options
 
@@ -188,14 +188,14 @@
 | `.createDesignMatrix()` | Factor→dummy expansion, standardization, group assignment | `standardize`, `group_definition`, `factor_grouping` |
 | `.defineGroups()` | Dispatch to grouping method | `group_definition` |
 | `.automaticGrouping()` | Groups by original variable (optionally merging factor dummies) | `factor_grouping` |
-| `.factorBasedGrouping()` | Always merges factor dummies | — |
+| `.factorBasedGrouping()` | Always merges factor dummies | - |
 | `.customGrouping()` | Parses `"var:group"` string | `group_structure` |
 | `.buildGroupMultiplier()` | Computes per-group penalty weights | `group_weights`, `custom_weights` |
 | `.fitGroupLasso()` | Orchestrates model fit + optional stability/nested CV | `penalty_type`, `stability_selection`, `nested_cv` |
 | `.fitGrpregCox()` | Core `grpreg::cv.grpsurv()` call | `cv_folds`, `n_lambda`, `lambda_min_ratio`, `tolerance`, `max_iterations`, `random_seed` |
 | `.fitAdaptiveGroupLasso()` | Two-step: initial estimates → weighted grLasso | `adaptive_weights_method` |
 | `.getInitialEstimates()` | Ridge (via `glmnet`) or univariate Cox | `adaptive_weights_method` |
-| `.computeLambda1se()` | Manual 1-SE rule for grpreg (not natively provided) | — |
+| `.computeLambda1se()` | Manual 1-SE rule for grpreg (not natively provided) | - |
 | `.stabilitySelection()` | Subsample loop with CV on each | `bootstrap_samples`, `stability_threshold`, `random_seed` |
 | `.nestedCrossValidation()` | Outer/inner CV loop for unbiased performance | `cv_folds`, `inner_cv_folds`, `random_seed` |
 | `.runPermutationTest()` | Permuted response testing | `n_permutations`, `random_seed` |
@@ -204,35 +204,35 @@
 
 ### Key Logic Branches
 
-**Penalty type dispatch** (`.fitGroupLasso()` line 561–574):
+**Penalty type dispatch** (`.fitGroupLasso()` line 561 - 574):
 - `group_lasso` → `grpreg::cv.grpsurv(penalty="grLasso")`
 - `group_mcp` → `grpreg::cv.grpsurv(penalty="grMCP")`
 - `group_scad` → `grpreg::cv.grpsurv(penalty="grSCAD")`
 - `adaptive_group` → `.fitAdaptiveGroupLasso()` (two-step: initial estimates + weighted grLasso)
 
-**Adaptive weights** (`.getInitialEstimates()` line 669–727):
+**Adaptive weights** (`.getInitialEstimates()` line 669 - 727):
 - `ridge` → `glmnet::glmnet(alpha=0, family="cox")` for initial coefficients
 - `univariate` → `survival::coxph()` per group
 - Fallback → least-penalized `grpreg::grpsurv()` path
 
-**Group definition** (`.defineGroups()` line 369–384):
+**Group definition** (`.defineGroups()` line 369 - 384):
 - `automatic` → uses `model.matrix()` assign attribute + optional factor grouping
 - `factor_based` → always groups factor dummies together
 - `custom` → parses `"var1:1, var2:1, var3:2"` string
 
 ### Notice System
 
-Uses `.insertNotice()` (line 170–191) with fallback to `todo` HTML:
-- `missingGrpreg` / `missingSurvival` — missing package errors
-- `insufficientData` / `insufficientDataAfterEncoding` — too few observations
-- `excludedRows` — outcome encoding exclusions
-- `invalidTime` / `noEvents` — data validation
-- `veryLowEvents` / `lowEvents` — clinical warnings
-- `noSelection` — all coefficients zero
-- `poorDiscrimination` — C-index < 0.5
-- `weightMismatch` — custom weights length mismatch
-- `analysisComplete` — summary notice
-- `analysisError` — fitting error
+Uses `.insertNotice()` (line 170-191) with fallback to `todo` HTML:
+- `missingGrpreg` / `missingSurvival` - missing package errors
+- `insufficientData` / `insufficientDataAfterEncoding` - too few observations
+- `excludedRows` - outcome encoding exclusions
+- `invalidTime` / `noEvents` - data validation
+- `veryLowEvents` / `lowEvents` - clinical warnings
+- `noSelection` - all coefficients zero
+- `poorDiscrimination` - C-index < 0.5
+- `weightMismatch` - custom weights length mismatch
+- `analysisComplete` - summary notice
+- `analysisError` - fitting error
 
 ---
 
@@ -264,102 +264,102 @@ Uses `.insertNotice()` (line 170–191) with fallback to `todo` HTML:
 
 ### Table Column Schemas
 
-#### `groupSummary` — Group Structure Summary
+#### `groupSummary` - Group Structure Summary
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `group_id` | Group ID | integer | — |
-| `group_name` | Group Name | text | — |
-| `variables` | Variables | text | — |
-| `group_size` | Size | integer | — |
+| `group_id` | Group ID | integer | - |
+| `group_name` | Group Name | text | - |
+| `variables` | Variables | text | - |
+| `group_size` | Size | integer | - |
 | `group_weight` | Weight | number | zto |
-| `selected` | Selected | text | — |
-| `selection_order` | Entry Order | integer | — |
+| `selected` | Selected | text | - |
+| `selection_order` | Entry Order | integer | - |
 
 clearWith: `predictors`, `group_definition`, `group_structure`, `factor_grouping`
 
-#### `coefficients` — Group LASSO Coefficients
+#### `coefficients` - Group LASSO Coefficients
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `group_id` | Group | integer | — |
-| `variable` | Variable | text | — |
+| `group_id` | Group | integer | - |
+| `variable` | Variable | text | - |
 | `coefficient` | Coefficient | number | zto |
 | `exp_coefficient` | Hazard Ratio | number | zto |
 | `group_norm` | Group Norm | number | zto |
 | `relative_importance` | Relative Importance | number | zto |
-| `selected` | Selected | text | — |
+| `selected` | Selected | text | - |
 
 clearWith: `time`, `event`, `outcomeLevel`, `censorLevel`, `predictors`, `penalty_type`, `cv_folds`
 
-#### `pathSummary` — Regularization Path Summary
+#### `pathSummary` - Regularization Path Summary
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `step` | Step | integer | — |
+| `step` | Step | integer | - |
 | `lambda` | Lambda | number | zto |
-| `n_groups_selected` | Groups Selected | integer | — |
-| `n_variables_selected` | Variables Selected | integer | — |
+| `n_groups_selected` | Groups Selected | integer | - |
+| `n_variables_selected` | Variables Selected | integer | - |
 | `deviance` | Deviance | number | zto |
 | `df` | Degrees of Freedom | number | zto |
 
 clearWith: `n_lambda`, `penalty_type`
 
-#### `cvResults` — Cross-Validation Results
+#### `cvResults` - Cross-Validation Results
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `criterion` | Criterion | text | — |
+| `criterion` | Criterion | text | - |
 | `lambda_min` | Lambda Min | number | zto |
 | `lambda_1se` | Lambda 1SE | number | zto |
 | `cv_error_min` | Min CV Error | number | zto |
 | `cv_error_1se` | 1SE CV Error | number | zto |
-| `groups_min` | Groups (Min) | integer | — |
-| `groups_1se` | Groups (1SE) | integer | — |
+| `groups_min` | Groups (Min) | integer | - |
+| `groups_1se` | Groups (1SE) | integer | - |
 
 clearWith: `cv_folds`, `n_lambda`
 
-#### `stabilityResults` — Stability Selection Results
+#### `stabilityResults` - Stability Selection Results
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `group_id` | Group ID | integer | — |
-| `group_name` | Group Name | text | — |
+| `group_id` | Group ID | integer | - |
+| `group_name` | Group Name | text | - |
 | `selection_frequency` | Selection Frequency | number | pc (percentage) |
 | `stability_score` | Stability Score | number | zto |
-| `stable_selection` | Stable Selection | text | — |
+| `stable_selection` | Stable Selection | text | - |
 | `first_selected` | First Selected (Lambda) | number | zto |
 
 clearWith: `stability_threshold`, `bootstrap_samples`
 
-#### `modelPerformance` — Model Performance
+#### `modelPerformance` - Model Performance
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `metric` | Metric | text | — |
+| `metric` | Metric | text | - |
 | `value` | Value | number | zto |
-| `confidence_interval` | 95% CI | text | — |
-| `description` | Description | text | — |
+| `confidence_interval` | 95% CI | text | - |
+| `description` | Description | text | - |
 
 clearWith: `time`, `event`, `outcomeLevel`, `censorLevel`, `predictors`, `penalty_type`
 
-#### `nestedCVResults` — Nested Cross-Validation
+#### `nestedCVResults` - Nested Cross-Validation
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `outer_fold` | Outer Fold | integer | — |
+| `outer_fold` | Outer Fold | integer | - |
 | `optimal_lambda` | Optimal Lambda | number | zto |
-| `n_groups_selected` | Groups Selected | integer | — |
+| `n_groups_selected` | Groups Selected | integer | - |
 | `performance` | Performance | number | zto |
 | `training_error` | Training Error | number | zto |
 
 clearWith: `cv_folds`, `inner_cv_folds`, `nested_cv`
 
-#### `permutationResults` — Permutation Test Results
+#### `permutationResults` - Permutation Test Results
 
 | Column | Title | Type | Format |
 |--------|-------|------|--------|
-| `test_statistic` | Test Statistic | text | — |
+| `test_statistic` | Test Statistic | text | - |
 | `observed_value` | Observed Value | number | zto |
 | `permutation_mean` | Permutation Mean | number | zto |
 | `permutation_sd` | Permutation SD | number | zto |
@@ -512,7 +512,7 @@ flowchart TD
 | `permutation_test` | Adds permutation loop | Very heavy | 100 permutations × CV = 100+ model fits |
 | `selection_threshold` | Only result interpretation | Negligible | Too high → nothing selected; too low → noise selected |
 | `standardize` | Design matrix + fit | Negligible | Recommended TRUE for mixed-scale predictors |
-| Display toggles | Only UI visibility | Negligible | — |
+| Display toggles | Only UI visibility | Negligible | - |
 
 ---
 
@@ -571,7 +571,7 @@ plot_group_importance: true
 
 ### Key Code Patterns
 
-**grpreg Cox call** (line 599–611):
+**grpreg Cox call** (line 599 - 611):
 ```r
 cv_result <- grpreg::cv.grpsurv(
     X = group_data$x,
@@ -588,7 +588,7 @@ cv_result <- grpreg::cv.grpsurv(
 )
 ```
 
-**Lambda 1-SE computation** (line 729–746):
+**Lambda 1-SE computation** (line 729 - 746):
 ```r
 idx_min <- which.min(cve)
 threshold <- cve[idx_min] + cvse[idx_min]

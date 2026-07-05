@@ -139,7 +139,7 @@ HER2: Independent marker
 Molecular Subtype Prediction:
 ┌─────────────────────────────────────────┐
 │ Luminal A:   ER+/PR+, HER2-, Ki67 <20%  │  ← ER-PR-Ki67 cluster
-│ Luminal B:   ER+/PR+, HER2-, Ki67 ≥20%  │  ← ER-PR-Ki67 cluster
+│ Luminal B:   ER+/PR+, HER2-, Ki67 >=20%  │  ← ER-PR-Ki67 cluster
 │ HER2-enriched: HER2+ (regardless of ER) │  ← HER2 independent
 │ Triple-negative: ER-/PR-/HER2-          │  ← All separate
 └─────────────────────────────────────────┘
@@ -989,10 +989,10 @@ For 2x2 Tables (binary markers):
 
 Cramér's V     Interpretation            Clinical Meaning
 ─────────────────────────────────────────────────────────
-0.00 - 0.10    Negligible association   Markers are independent
-0.10 - 0.30    Weak association         Slight relationship
-0.30 - 0.50    Moderate association     Notable relationship
-0.50 - 1.00    Strong association       Markers often co-express
+0.00-0.10    Negligible association   Markers are independent
+0.10-0.30    Weak association         Slight relationship
+0.30-0.50    Moderate association     Notable relationship
+0.50-1.00    Strong association       Markers often co-express
 1.00           Perfect association      Always co-express
 
 Example:
@@ -1015,7 +1015,7 @@ p < 0.01    Strong evidence            Likely association
 p < 0.05    Moderate evidence          Consider association
             (95% confident)            Requires clinical context
 
-p ≥ 0.05    Insufficient evidence      Assume independent
+p >= 0.05    Insufficient evidence      Assume independent
             Consider markers           Don't eliminate based
             independent                on clustering alone
 ```
@@ -1385,7 +1385,7 @@ Cost Savings:
 
 4. **Always validate optimized panels**
    - Pilot with new cases before full adoption
-   - Accept ≥95% concordance with original panel
+   - Accept >=95% concordance with original panel
 
 5. **Cost savings = clinical utility**
    - Eliminating 2-3 antibodies per case adds up

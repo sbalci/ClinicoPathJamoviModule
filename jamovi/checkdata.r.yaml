@@ -39,12 +39,12 @@ items:
           type: text
 
     - name: noOutliers
-      title: "Outlier Detection (Consensus: ≥2 methods)"
+      title: "Outlier Detection (Consensus: >=2 methods)"
       type: Html
       visible: (showOutliers)
 
     - name: outliers
-      title: "Outlier Detection (Consensus: ≥2 methods)"
+      title: "Outlier Detection (Consensus: >=2 methods)"
       type: Table
       description: "Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown."
       visible: (showOutliers)

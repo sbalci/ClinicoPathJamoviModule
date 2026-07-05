@@ -7,7 +7,7 @@ Test datasets:
 
 ---
 
-## 1. LOGISTIC MODE -- Standard Data
+## 1. LOGISTIC MODE - Standard Data
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
@@ -24,7 +24,7 @@ Test datasets:
 
 ---
 
-## 2. COX MODE -- Survival Data
+## 2. COX MODE - Survival Data
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
@@ -76,8 +76,8 @@ Test datasets:
 
 | # | File | Variables | Options to Test | Expected Behavior |
 |---|------|-----------|-----------------|-------------------|
-| 23 | -- | No data | -- | Welcome HTML |
-| 24 | `firth_standard` | outcome only, no predictors | -- | Welcome HTML |
+| 23 | - | No data | - | Welcome HTML |
+| 24 | `firth_standard` | outcome only, no predictors | - | Welcome HTML |
 | 25 | `firth_standard` | Single predictor: `age` | Default | Should work |
 | 26 | `firth_standard` | Missing data (~15% in marker) | Default | Listwise deletion |
 | 27 | `firth_standard` | Cox without time variable | `analysisType=cox`, no time | Error notice |
@@ -100,20 +100,20 @@ Test datasets:
 
 ## COMPLETE OPTION COVERAGE CHECKLIST
 
-- [x] `analysisType` (logistic) -- test #1
-- [x] `analysisType` (cox) -- test #9
-- [x] `time` -- tests #9-11, #15
-- [x] `outcome` -- tests #1-27
-- [x] `outcomeLevel` -- tests #1-27
-- [x] `predictors` -- tests #1-27
-- [x] `suitabilityCheck` -- tests #16, #17
-- [x] `ciLevel` -- test #2
-- [x] `ciMethod` (profile) -- test #1
-- [x] `ciMethod` (wald) -- tests #3, #11
-- [x] `separationCheck` -- tests #6, #12, #14
-- [x] `compareStandard` -- tests #4, #5
-- [x] `showModelFit` -- tests #7, #8
-- [x] `forestPlot` -- test #18
-- [x] `separationPlot` -- test #19
-- [x] `showSummary` -- test #20
-- [x] `showExplanations` -- test #21
+- [x] `analysisType` (logistic) - test #1
+- [x] `analysisType` (cox) - test #9
+- [x] `time` - tests #9-11, #15
+- [x] `outcome` - tests #1-27
+- [x] `outcomeLevel` - tests #1-27
+- [x] `predictors` - tests #1-27
+- [x] `suitabilityCheck` - tests #16, #17
+- [x] `ciLevel` - test #2
+- [x] `ciMethod` (profile) - test #1
+- [x] `ciMethod` (wald) - tests #3, #11
+- [x] `separationCheck` - tests #6, #12, #14
+- [x] `compareStandard` - tests #4, #5
+- [x] `showModelFit` - tests #7, #8
+- [x] `forestPlot` - test #18
+- [x] `separationPlot` - test #19
+- [x] `showSummary` - test #20
+- [x] `showExplanations` - test #21

@@ -31,7 +31,7 @@
 | Publisher | BioMed Central / Springer Nature |
 | ISSN | 1746-1596 |
 | First Author | Lina Li |
-| Corresponding Author | Yueping Liu (annama@163.com) |
+| Corresponding Author | Yueping Liu (<annama@163.com>) |
 | Received / Accepted | April 15, 2021 / January 18, 2022 |
 | License | CC BY 4.0 |
 
@@ -49,7 +49,7 @@
 |---|---|---|---|---|
 | Kolmogorov-Smirnov test | Preliminary -- normality assessment | Applied to Ki-67LI in each group (VA, MC, SRC, AI); all groups non-normal (p < 0.05) | Justifies use of nonparametric methods and median reporting | Statistical Analysis (p5) |
 | Median and quartile spacing (M ± Q) | Descriptive -- central tendency and dispersion | Used instead of mean ± SD due to non-normal distributions | Appropriate for skewed data | Statistical Analysis (p5) |
-| Intraclass Correlation Coefficient (ICC) | Primary -- inter-rater and inter-method consistency | Single ICC values with 95% CIs; interpreted using Fleiss reference: <0.4 poor, 0.4-0.69 normal, 0.7-0.79 better, ≥0.8 very good | Not specified if ICC(1,1), ICC(2,1), or ICC(3,1); likely ICC(2,1) for consistency | Statistical Analysis (p5), Tables 2-4 |
+| Intraclass Correlation Coefficient (ICC) | Primary -- inter-rater and inter-method consistency | Single ICC values with 95% CIs; interpreted using Fleiss reference: <0.4 poor, 0.4-0.69 normal, 0.7-0.79 better, >=0.8 very good | Not specified if ICC(1,1), ICC(2,1), or ICC(3,1); likely ICC(2,1) for consistency | Statistical Analysis (p5), Tables 2-4 |
 | Bland-Altman scatterplot | Secondary -- consistency visualization | Used to check agreement between methods; not quantitatively analyzed (no LoA reported) | Paired measurements; visual assessment only | Statistical Analysis (p5) |
 | Heat map | Secondary -- visualization | 9 pathologists × 150 cases × 4 methods + gold standard; qualitative comparison of interpretation patterns | Visual tool; no formal statistical test applied to heat maps | Results (p7), Fig 6 |
 | Stratified analysis by heterogeneity | Secondary -- subgroup analysis | Homogeneous (121 cases, 40.33%) vs heterogeneous (179 cases, 59.67%) tumors; ICCs reported separately for each group | Stratification based on visual assessment of tumor Ki-67 distribution | Results (p5-6, p9), Table 4 |
@@ -92,6 +92,7 @@
 | Bias assessment | 1/1 | Region selection bias acknowledged in Discussion; gold standard combines AI + human to reduce bias |
 
 ### Strengths
+
 1. **Large multi-rater design**: 9 pathologists × 150 cases with 4 methods each -- comprehensive assessment
 2. **Experience stratification**: Junior, intermediate, and senior pathologists tested separately -- reveals experience-dependent effects
 3. **Heterogeneity stratification**: Separate analysis for homogeneous vs heterogeneous tumors -- clinically meaningful subgroups
@@ -100,6 +101,7 @@
 6. **Two-week washout**: Pathologists re-scored after 2 weeks, reducing memory bias for within-rater consistency
 
 ### Weaknesses
+
 1. **ICC model not specified**: Critical omission -- ICC(1,1), ICC(2,1), and ICC(3,1) have different interpretations; readers cannot judge which model was used
 2. **No Bland-Altman quantification**: Scatterplots shown but no limits of agreement, mean difference, or regression line reported
 3. **Kappa interpretation thresholds applied to ICC**: The cutoffs cited (Ref 14, Fleiss 1973) are for weighted kappa, not ICC; this is a common but incorrect practice
@@ -120,6 +122,7 @@
 **Current ClinicoPath coverage**: `agreement` and `icccoeff` report ICC values with 95% CIs. Users can visually compare overlapping CIs, but no formal test for ICC difference is provided.
 
 **Gap**: A formal test for comparing two ICCs, analogous to testing whether two correlation coefficients differ. This could use:
+
 - Fisher's z-transformation approach for comparing correlated ICCs
 - Bootstrap test for ICC difference
 - Zou's (2007) confidence interval for ICC difference

@@ -61,12 +61,12 @@ children:
                 name: directionGE
                 optionName: directionIndicator
                 optionPart: ">="
-                label: "≥ (higher values indicate positive class)"
+                label: ">= (higher values indicate positive class)"
               - type: RadioButton
                 name: directionLE
                 optionName: directionIndicator
                 optionPart: "<="
-                label: "≤ (lower values indicate positive class)"
+                label: "<= (lower values indicate positive class)"
           - type: CheckBox
             name: bayesianAnalysis
             label: Bayesian Analysis

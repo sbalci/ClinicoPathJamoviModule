@@ -14,10 +14,9 @@ survivalPowerClass <- R6::R6Class(
     "survivalPowerClass",
     inherit = survivalPowerBase,
     private = list(
-
         # --- Constants ----
-        AVERAGE_FOLLOWUP_FACTOR = 0.67,  # Schoenfeld (1981) for uniform accrual avg. follow-up
-        DEFAULT_CENSORING_RATE = 0.3,    # Default censoring proportion (30%) if not otherwise estimable
+        AVERAGE_FOLLOWUP_FACTOR = 0.67, # Schoenfeld (1981) for uniform accrual avg. follow-up
+        DEFAULT_CENSORING_RATE = 0.3, # Default censoring proportion (30%) if not otherwise estimable
         STRATIFICATION_EFFICIENCY = 0.95, # Efficiency gain per stratification factor
         effect_hr_info = NULL,
         calculated_sample_size = NULL,
@@ -25,14 +24,12 @@ survivalPowerClass <- R6::R6Class(
         # Notice collection (single Preformatted plain-text output item; avoids the
         # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
         .noticeList = list(),
-
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type, title = title, content = content
             )
             private$.renderNotices()
         },
-
         .renderNotices = function() {
             if (length(private$.noticeList) == 0) {
                 self$results$notices$setContent("")
@@ -40,13 +37,15 @@ survivalPowerClass <- R6::R6Class(
             }
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
-                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
-                    WARNING = "WARNING: ", "")
+                    ERROR = "ERROR: ",
+                    STRONG_WARNING = "WARNING: ",
+                    WARNING = "WARNING: ",
+                    ""
+                )
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
-
         .init = function() {
             # Initialize the analysis with comprehensive checks
 
@@ -61,7 +60,6 @@ survivalPowerClass <- R6::R6Class(
             # Update instructions based on current settings
             private$.update_instructions()
         },
-        
         .run = function() {
             private$.noticeList <- list()
 
@@ -87,7 +85,7 @@ survivalPowerClass <- R6::R6Class(
             # Perform analysis
             private$.populate_power_summary()
             private$.perform_power_analysis()
-            private$.populate_simulation_comparison()  # New: simulation validation
+            private$.populate_simulation_comparison() # New: simulation validation
             private$.populate_assumptions()
             private$.populate_regulatory_considerations()
             private$.create_visualizations()
@@ -95,8 +93,8 @@ survivalPowerClass <- R6::R6Class(
             private$.generate_clinical_friendly_outputs()
 
             # Add completion notice at bottom
-            private$.addNotice('INFO', 'Analysis Complete', sprintf(
-                'Power analysis completed: %s with %s endpoint • Assumes exponential survival and uniform accrual',
+            private$.addNotice("INFO", "Analysis Complete", sprintf(
+                "Power analysis completed: %s with %s endpoint • Assumes exponential survival and uniform accrual",
                 private$.format_test_type(self$options$test_type),
                 tolower(private$.format_primary_endpoint(self$options$primary_endpoint))
             ))
@@ -104,12 +102,10 @@ survivalPowerClass <- R6::R6Class(
             # Refresh instructions
             private$.update_instructions()
         },
-        
         .sort_notices = function(notices) {
             priority_map <- c(ERROR = 1, STRONG_WARNING = 2, WARNING = 3, INFO = 4)
             notices[order(sapply(notices, function(n) priority_map[n$type]))]
         },
-
         .validate_inputs = function() {
             # Comprehensive input validation - returns list(valid)
             # Notices are emitted via private$.addNotice (plain-text Preformatted output)
@@ -119,19 +115,20 @@ survivalPowerClass <- R6::R6Class(
             hr <- private$.get_effect_hr()
             if (!is.null(hr)) {
                 if (!is.finite(hr)) {
-                    private$.addNotice('ERROR', 'Invalid Effect Size',
-                        'Unable to derive a valid hazard ratio from the selected effect size inputs • Check effect size type and related parameters'
+                    private$.addNotice(
+                        "ERROR", "Invalid Effect Size",
+                        "Unable to derive a valid hazard ratio from the selected effect size inputs • Check effect size type and related parameters"
                     )
                     valid <- FALSE
                 } else if (hr <= 0 || hr > 5) {
-                    private$.addNotice('ERROR', 'Invalid Hazard Ratio', sprintf(
-                        'Hazard ratio must be between 0 and 5 (current: %.2f) • Common values: 0.5-0.8 (treatment benefit), 1.2-2.0 (increased risk)',
+                    private$.addNotice("ERROR", "Invalid Hazard Ratio", sprintf(
+                        "Hazard ratio must be between 0 and 5 (current: %.2f) • Common values: 0.5-0.8 (treatment benefit), 1.2-2.0 (increased risk)",
                         hr
                     ))
                     valid <- FALSE
                 } else if (hr < 0.3 || hr > 3) {
-                    private$.addNotice('STRONG_WARNING', 'Extreme Hazard Ratio', sprintf(
-                        'Extreme hazard ratio detected (%.2f) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible',
+                    private$.addNotice("STRONG_WARNING", "Extreme Hazard Ratio", sprintf(
+                        "Extreme hazard ratio detected (%.2f) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible",
                         hr
                     ))
                 }
@@ -141,14 +138,14 @@ survivalPowerClass <- R6::R6Class(
             power <- self$options$power_level
             if (!is.null(power)) {
                 if (power <= 0 || power >= 1) {
-                    private$.addNotice('ERROR', 'Invalid Power', sprintf(
-                        'Power must be between 0 and 1 (current: %.2f) • Standard values: 0.80 (80%%) or 0.90 (90%%)',
+                    private$.addNotice("ERROR", "Invalid Power", sprintf(
+                        "Power must be between 0 and 1 (current: %.2f) • Standard values: 0.80 (80%%) or 0.90 (90%%)",
                         power
                     ))
                     valid <- FALSE
                 } else if (power < 0.7) {
-                    private$.addNotice('WARNING', 'Low Power', sprintf(
-                        'Power below 70%% (current: %.0f%%) may result in underpowered study • Consider increasing to 80%% or 90%%',
+                    private$.addNotice("WARNING", "Low Power", sprintf(
+                        "Power below 70%% (current: %.0f%%) may result in underpowered study • Consider increasing to 80%% or 90%%",
                         power * 100
                     ))
                 }
@@ -158,14 +155,14 @@ survivalPowerClass <- R6::R6Class(
             alpha <- self$options$alpha_level
             if (!is.null(alpha)) {
                 if (alpha <= 0 || alpha >= 1) {
-                    private$.addNotice('ERROR', 'Invalid Alpha', sprintf(
-                        'Alpha level must be between 0 and 1 (current: %.3f) • Standard value: 0.05 (5%%)',
+                    private$.addNotice("ERROR", "Invalid Alpha", sprintf(
+                        "Alpha level must be between 0 and 1 (current: %.3f) • Standard value: 0.05 (5%%)",
                         alpha
                     ))
                     valid <- FALSE
                 } else if (alpha > 0.1) {
-                    private$.addNotice('WARNING', 'High Alpha', sprintf(
-                        'Alpha level above 0.10 (current: %.3f) is unusual for confirmatory trials',
+                    private$.addNotice("WARNING", "High Alpha", sprintf(
+                        "Alpha level above 0.10 (current: %.3f) is unusual for confirmatory trials",
                         alpha
                     ))
                 }
@@ -175,11 +172,11 @@ survivalPowerClass <- R6::R6Class(
             median_survival <- self$options$control_median_survival
             if (!is.null(median_survival)) {
                 if (median_survival <= 0) {
-                    private$.addNotice('ERROR', 'Invalid Median Survival', 'Median survival must be positive (in months)')
+                    private$.addNotice("ERROR", "Invalid Median Survival", "Median survival must be positive (in months)")
                     valid <- FALSE
                 } else if (median_survival > 240) {
-                    private$.addNotice('INFO', 'Long Median Survival', sprintf(
-                        'Median survival > 20 years (current: %.0f months = %.1f years) may require very long follow-up',
+                    private$.addNotice("INFO", "Long Median Survival", sprintf(
+                        "Median survival > 20 years (current: %.0f months = %.1f years) may require very long follow-up",
                         median_survival, median_survival / 12
                     ))
                 }
@@ -188,7 +185,8 @@ survivalPowerClass <- R6::R6Class(
             # Validate survival distribution
             distribution <- self$options$survival_distribution
             if (!is.null(distribution) && distribution != "exponential") {
-                private$.addNotice('ERROR', 'Distribution Not Supported',
+                private$.addNotice(
+                    "ERROR", "Distribution Not Supported",
                     'Only exponential survival distribution is validated in this release • Select "Exponential" to proceed'
                 )
                 valid <- FALSE
@@ -198,8 +196,8 @@ survivalPowerClass <- R6::R6Class(
             ratio <- self$options$allocation_ratio
             if (!is.null(ratio)) {
                 if (ratio <= 0 || ratio > 10) {
-                    private$.addNotice('ERROR', 'Invalid Allocation Ratio', sprintf(
-                        'Allocation ratio must be positive and typically between 0.5 and 3 (current: %.2f)',
+                    private$.addNotice("ERROR", "Invalid Allocation Ratio", sprintf(
+                        "Allocation ratio must be positive and typically between 0.5 and 3 (current: %.2f)",
                         ratio
                     ))
                     valid <- FALSE
@@ -210,11 +208,11 @@ survivalPowerClass <- R6::R6Class(
             dropout <- self$options$dropout_rate
             if (!is.null(dropout)) {
                 if (dropout < 0 || dropout > 1) {
-                    private$.addNotice('ERROR', 'Invalid Dropout Rate', sprintf('Dropout rate must be between 0 and 1 (current: %.2f)', dropout))
+                    private$.addNotice("ERROR", "Invalid Dropout Rate", sprintf("Dropout rate must be between 0 and 1 (current: %.2f)", dropout))
                     valid <- FALSE
                 } else if (dropout > 0.3) {
-                    private$.addNotice('STRONG_WARNING', 'High Dropout Rate', sprintf(
-                        'Dropout rate > 30%% (current: %.0f%%) may significantly impact study power • Review retention strategies',
+                    private$.addNotice("STRONG_WARNING", "High Dropout Rate", sprintf(
+                        "Dropout rate > 30%% (current: %.0f%%) may significantly impact study power • Review retention strategies",
                         dropout * 100
                     ))
                 }
@@ -225,7 +223,7 @@ survivalPowerClass <- R6::R6Class(
 
             # Multiplicity handling
             if (!isTRUE(self$options$multiple_comparisons %in% c("none", "bonferroni", "holm", "dunnett"))) {
-                private$.addNotice('ERROR', 'Unsupported Multiplicity Adjustment', sprintf(
+                private$.addNotice("ERROR", "Unsupported Multiplicity Adjustment", sprintf(
                     'Multiplicity adjustment "%s" not yet supported • Please select "none", "bonferroni", "holm", or "dunnett"',
                     self$options$multiple_comparisons
                 ))
@@ -234,15 +232,16 @@ survivalPowerClass <- R6::R6Class(
 
             if (isTRUE(self$options$study_design == "multi_arm") &&
                 isTRUE(self$options$multiple_comparisons %in% c("holm", "dunnett"))) {
-                private$.addNotice('WARNING', 'Multiplicity Approximation',
-                    'Holm/Dunnett adjustments are approximated conservatively using Bonferroni in current calculations'
+                private$.addNotice(
+                    "WARNING", "Multiplicity Approximation",
+                    "Holm/Dunnett adjustments are approximated conservatively using Bonferroni in current calculations"
                 )
             }
 
             # Stratification info
             if (!is.null(self$options$stratification_factors) && self$options$stratification_factors > 0) {
-                private$.addNotice('INFO', 'Stratification Not Used', sprintf(
-                    'Stratification factors (%d) not currently used to adjust variance • Plan stratified analyses separately',
+                private$.addNotice("INFO", "Stratification Not Used", sprintf(
+                    "Stratification factors (%d) not currently used to adjust variance • Plan stratified analyses separately",
                     self$options$stratification_factors
                 ))
             }
@@ -250,8 +249,9 @@ survivalPowerClass <- R6::R6Class(
             # Non-inferiority margin type validation
             if (isTRUE(self$options$test_type == "non_inferiority") &&
                 !isTRUE(self$options$ni_type %in% c("relative_margin"))) {
-                private$.addNotice('ERROR', 'Non-inferiority Margin Type Not Supported',
-                    'Non-inferiority calculations currently support only relative hazard-ratio margins'
+                private$.addNotice(
+                    "ERROR", "Non-inferiority Margin Type Not Supported",
+                    "Non-inferiority calculations currently support only relative hazard-ratio margins"
                 )
                 valid <- FALSE
             }
@@ -259,7 +259,7 @@ survivalPowerClass <- R6::R6Class(
             # Unsupported tests
             unsupported_tests <- c("competing_risks", "rmst_test", "snp_survival", "weighted_log_rank")
             if (isTRUE(self$options$test_type %in% unsupported_tests)) {
-                private$.addNotice('ERROR', 'Unsupported Test Type', sprintf(
+                private$.addNotice("ERROR", "Unsupported Test Type", sprintf(
                     'Test "%s" temporarily unavailable pending validation • Choose log-rank, Cox regression, or non-inferiority',
                     self$options$test_type
                 ))
@@ -268,7 +268,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(list(valid = valid))
         },
-
         .validate_parameter_combinations = function() {
             # Check for unrealistic parameter combinations - emits notices via .addNotice
             hr <- private$.get_effect_hr()
@@ -288,8 +287,8 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(median_survival) && !is.null(accrual) && !is.null(followup)) {
                 total_duration <- accrual + followup
                 if (total_duration < median_survival * 1.5) {
-                    private$.addNotice('WARNING', 'Short Study Duration', sprintf(
-                        'Study duration (%.1f mo) may be too short for median survival %.1f mo • Consider extending follow-up to at least %.1f mo',
+                    private$.addNotice("WARNING", "Short Study Duration", sprintf(
+                        "Study duration (%.1f mo) may be too short for median survival %.1f mo • Consider extending follow-up to at least %.1f mo",
                         total_duration, median_survival, median_survival * 1.5
                     ))
                 }
@@ -298,8 +297,8 @@ survivalPowerClass <- R6::R6Class(
             # Check for underpowered studies with small effect sizes
             if (!is.null(hr) && !is.null(power)) {
                 if ((hr > 0.9 && hr < 1.1) && power > 0.8) {
-                    private$.addNotice('WARNING', 'Small Effect Size', sprintf(
-                        'Detecting very small effect (HR=%.2f near 1.0) with %.0f%% power requires very large sample • Consider clinical meaningfulness',
+                    private$.addNotice("WARNING", "Small Effect Size", sprintf(
+                        "Detecting very small effect (HR=%.2f near 1.0) with %.0f%% power requires very large sample • Consider clinical meaningfulness",
                         hr, power * 100
                     ))
                 }
@@ -308,8 +307,8 @@ survivalPowerClass <- R6::R6Class(
             # Check for overly optimistic combinations
             if (!is.null(hr) && !is.null(power) && !is.null(alpha)) {
                 if (hr < 0.6 && power > 0.9 && alpha < 0.05) {
-                    private$.addNotice('STRONG_WARNING', 'Optimistic Assumptions', sprintf(
-                        'Assumes large effect (HR=%.2f) with high power (%.0f%%) • Ensure assumptions justified by prior data',
+                    private$.addNotice("STRONG_WARNING", "Optimistic Assumptions", sprintf(
+                        "Assumes large effect (HR=%.2f) with high power (%.0f%%) • Ensure assumptions justified by prior data",
                         hr, power * 100
                     ))
                 }
@@ -320,8 +319,8 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(ratio)) {
                 if (ratio < 0.5 || ratio > 2) {
                     efficiency_loss <- (1 + ratio)^2 / (4 * ratio)
-                    private$.addNotice('WARNING', 'Allocation Ratio Inefficiency', sprintf(
-                        'Allocation ratio %.2f:1 reduces efficiency by %.1f%% vs 1:1 randomization • Consider balancing if feasible',
+                    private$.addNotice("WARNING", "Allocation Ratio Inefficiency", sprintf(
+                        "Allocation ratio %.2f:1 reduces efficiency by %.1f%% vs 1:1 randomization • Consider balancing if feasible",
                         ratio, (efficiency_loss - 1) * 100
                     ))
                 }
@@ -329,7 +328,6 @@ survivalPowerClass <- R6::R6Class(
 
             invisible(NULL)
         },
-
         .check_required_packages = function() {
             # Check for required packages and insert Notice if missing
             required_packages <- list(
@@ -344,7 +342,7 @@ survivalPowerClass <- R6::R6Class(
             }
 
             if (length(missing_packages) > 0) {
-                private$.addNotice('ERROR', 'Missing Packages', sprintf(
+                private$.addNotice("ERROR", "Missing Packages", sprintf(
                     'Missing required R package: %s • Install with: install.packages("%s")',
                     paste(missing_packages, collapse = ", "),
                     paste(missing_packages, collapse = '", "')
@@ -354,14 +352,11 @@ survivalPowerClass <- R6::R6Class(
 
             return(TRUE)
         },
-
-
         .update_instructions = function() {
             # Update instructions based on analysis type
             html_content <- private$.generate_instructions_html()
             self$results$instructions$setContent(html_content)
         },
-        
         .generate_instructions_html = function() {
             analysis_type <- self$options$analysis_type
             test_type <- self$options$test_type
@@ -412,7 +407,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(instructions)
         },
-        
         .format_analysis_type = function(type) {
             switch(type,
                 "sample_size" = "Calculate Sample Size",
@@ -422,7 +416,6 @@ survivalPowerClass <- R6::R6Class(
                 type
             )
         },
-        
         .format_test_type = function(type) {
             switch(type,
                 "log_rank" = "Log-rank Test",
@@ -435,7 +428,6 @@ survivalPowerClass <- R6::R6Class(
                 type
             )
         },
-        
         .populate_power_summary = function() {
             summary_table <- self$results$power_summary
 
@@ -461,7 +453,6 @@ survivalPowerClass <- R6::R6Class(
 
             # Note: Assumption notes now handled by validation Notices
         },
-        
         .format_study_design = function(design) {
             switch(design,
                 "two_arm_parallel" = "Two-arm Parallel",
@@ -472,7 +463,6 @@ survivalPowerClass <- R6::R6Class(
                 design
             )
         },
-        
         .format_primary_endpoint = function(endpoint) {
             switch(endpoint,
                 "overall_survival" = "Overall Survival",
@@ -483,7 +473,6 @@ survivalPowerClass <- R6::R6Class(
                 endpoint
             )
         },
-        
         .format_effect_size_type = function(type) {
             switch(type,
                 "hazard_ratio" = "Hazard Ratio",
@@ -493,34 +482,35 @@ survivalPowerClass <- R6::R6Class(
                 type
             )
         },
-        
         .calculate_primary_result = function() {
             analysis_type <- self$options$analysis_type
             test_type <- self$options$test_type
-            
-            tryCatch({
-                if (test_type == "log_rank") {
-                    result <- private$.calculate_log_rank()
-                } else if (test_type == "cox_regression") {
-                    result <- private$.calculate_cox_regression()
-                } else if (test_type == "competing_risks") {
-                    result <- private$.calculate_competing_risks()
-                } else if (test_type == "rmst_test") {
-                    result <- private$.calculate_rmst()
-                } else if (test_type == "non_inferiority") {
-                    result <- private$.calculate_non_inferiority()
-                } else if (test_type == "snp_survival") {
-                    result <- private$.calculate_snp_survival()
-                } else {
-                    result <- "Calculation method not implemented"
+
+            tryCatch(
+                {
+                    if (test_type == "log_rank") {
+                        result <- private$.calculate_log_rank()
+                    } else if (test_type == "cox_regression") {
+                        result <- private$.calculate_cox_regression()
+                    } else if (test_type == "competing_risks") {
+                        result <- private$.calculate_competing_risks()
+                    } else if (test_type == "rmst_test") {
+                        result <- private$.calculate_rmst()
+                    } else if (test_type == "non_inferiority") {
+                        result <- private$.calculate_non_inferiority()
+                    } else if (test_type == "snp_survival") {
+                        result <- private$.calculate_snp_survival()
+                    } else {
+                        result <- "Calculation method not implemented"
+                    }
+
+                    return(result)
+                },
+                error = function(e) {
+                    return(paste("Error in calculation:", e$message))
                 }
-                
-                return(result)
-            }, error = function(e) {
-                return(paste("Error in calculation:", e$message))
-            })
+            )
         },
-        
         .calculate_log_rank = function() {
             # Log-rank test power calculation
 
@@ -544,7 +534,6 @@ survivalPowerClass <- R6::R6Class(
 
             return("Calculation completed")
         },
-
         .extract_log_rank_parameters = function() {
             # Extract all parameters needed for log-rank calculations
             params <- list(
@@ -566,7 +555,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(params)
         },
-
         .calculate_log_rank_sample_size = function(params) {
             events_needed <- private$.events_needed_log_rank(
                 hr = params$hr,
@@ -591,31 +579,34 @@ survivalPowerClass <- R6::R6Class(
             adjustments <- private$.build_adjustment_string(params)
             return(paste("Total Sample Size:", n_final, "subjects", adjustments))
         },
-
         .apply_sample_size_adjustments = function(n_base, params) {
             n_adjusted <- ceiling(n_base * params$sample_adj$design_effect * params$sample_adj$stratification_efficiency)
             n_final <- ceiling(private$.adjust_sample_for_accrual(n_adjusted))
             return(n_final)
         },
-
         .build_adjustment_string = function(params) {
             # Build string describing adjustments applied
             adjustments <- ""
             if (params$sample_adj$design_effect > 1) {
-                adjustments <- paste0(adjustments, ", cluster design effect: ",
-                                    round(params$sample_adj$design_effect, 2))
+                adjustments <- paste0(
+                    adjustments, ", cluster design effect: ",
+                    round(params$sample_adj$design_effect, 2)
+                )
             }
             if (params$sample_adj$stratification_efficiency < 1) {
-                adjustments <- paste0(adjustments, ", stratification efficiency: ",
-                                    round(params$sample_adj$stratification_efficiency, 2))
+                adjustments <- paste0(
+                    adjustments, ", stratification efficiency: ",
+                    round(params$sample_adj$stratification_efficiency, 2)
+                )
             }
             if (params$alpha_adjusted != params$alpha) {
-                adjustments <- paste0(adjustments, ", alpha adjusted for multiplicity: ",
-                                    round(params$alpha_adjusted, 4))
+                adjustments <- paste0(
+                    adjustments, ", alpha adjusted for multiplicity: ",
+                    round(params$alpha_adjusted, 4)
+                )
             }
             return(adjustments)
         },
-
         .calculate_log_rank_power = function(params) {
             n_total <- params$sample_size_input
 
@@ -636,10 +627,11 @@ survivalPowerClass <- R6::R6Class(
                 allocation_ratio = params$allocation_ratio
             )
 
-            return(paste("Statistical Power:", round(power_value * 100, 1), "% (",
-                         round(expected_events$total), "expected events)"))
+            return(paste(
+                "Statistical Power:", round(power_value * 100, 1), "% (",
+                round(expected_events$total), "expected events)"
+            ))
         },
-
         .calculate_log_rank_effect_size = function(params) {
             n_total <- params$sample_size_input
 
@@ -651,36 +643,39 @@ survivalPowerClass <- R6::R6Class(
             }
             interval <- if (direction_hr < 1) c(0.1, 0.99) else c(1.01, 5.0)
 
-            hr_solution <- tryCatch({
-                objective <- function(hr_candidate) {
-                    expected_events <- private$.expected_events_from_sample(
-                        n_total = n_total,
-                        lambda_control = params$lambda_control,
-                        hr = hr_candidate,
-                        allocation_ratio = params$allocation_ratio,
-                        accrual_period = params$accrual_period,
-                        follow_up_period = params$follow_up,
-                        dropout_rate = self$options$dropout_rate
-                    )$total
+            hr_solution <- tryCatch(
+                {
+                    objective <- function(hr_candidate) {
+                        expected_events <- private$.expected_events_from_sample(
+                            n_total = n_total,
+                            lambda_control = params$lambda_control,
+                            hr = hr_candidate,
+                            allocation_ratio = params$allocation_ratio,
+                            accrual_period = params$accrual_period,
+                            follow_up_period = params$follow_up,
+                            dropout_rate = self$options$dropout_rate
+                        )$total
 
-                    power_candidate <- private$.power_from_events(
-                        events = expected_events,
-                        hr = hr_candidate,
-                        alpha = alpha,
-                        allocation_ratio = params$allocation_ratio
-                    ) - target_power
-                    power_candidate
-                }
+                        power_candidate <- private$.power_from_events(
+                            events = expected_events,
+                            hr = hr_candidate,
+                            alpha = alpha,
+                            allocation_ratio = params$allocation_ratio
+                        ) - target_power
+                        power_candidate
+                    }
 
-                f_lower <- objective(interval[1])
-                f_upper <- objective(interval[2])
-                if (!is.finite(f_lower) || !is.finite(f_upper) || (f_lower * f_upper > 0)) {
-                    return(NA_real_)
+                    f_lower <- objective(interval[1])
+                    f_upper <- objective(interval[2])
+                    if (!is.finite(f_lower) || !is.finite(f_upper) || (f_lower * f_upper > 0)) {
+                        return(NA_real_)
+                    }
+                    uniroot(objective, interval = interval)$root
+                },
+                error = function(e) {
+                    NA_real_
                 }
-                uniroot(objective, interval = interval)$root
-            }, error = function(e) {
-                NA_real_
-            })
+            )
 
             if (is.na(hr_solution)) {
                 return("Unable to determine detectable hazard ratio with current settings")
@@ -688,7 +683,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(paste("Minimum Detectable HR:", round(hr_solution, 3)))
         },
-
         .calculate_power_for_hr = function(events_needed, hr, alpha) {
             private$.power_from_events(
                 events = events_needed,
@@ -697,7 +691,6 @@ survivalPowerClass <- R6::R6Class(
                 allocation_ratio = self$options$allocation_ratio
             )
         },
-
         .calculate_log_rank_duration = function(params) {
             n_total <- params$sample_size_input
             required_events <- private$.events_needed_log_rank(
@@ -734,18 +727,21 @@ survivalPowerClass <- R6::R6Class(
             }
 
             upper_bound <- max(3, params$follow_up * 2, (1 / lambda_control) * 10)
-            duration_follow_up <- tryCatch({
-                diff_upper <- event_target(upper_bound)
-                iter <- 0
-                while (diff_upper < 0 && iter < 10) {
-                    upper_bound <- upper_bound * 2
+            duration_follow_up <- tryCatch(
+                {
                     diff_upper <- event_target(upper_bound)
-                    iter <- iter + 1
+                    iter <- 0
+                    while (diff_upper < 0 && iter < 10) {
+                        upper_bound <- upper_bound * 2
+                        diff_upper <- event_target(upper_bound)
+                        iter <- iter + 1
+                    }
+                    uniroot(event_target, lower = lower_bound, upper = upper_bound)$root
+                },
+                error = function(e) {
+                    NA_real_
                 }
-                uniroot(event_target, lower = lower_bound, upper = upper_bound)$root
-            }, error = function(e) {
-                NA_real_
-            })
+            )
 
             if (is.na(duration_follow_up)) {
                 return("Unable to determine study duration with current settings")
@@ -754,8 +750,6 @@ survivalPowerClass <- R6::R6Class(
             total_duration <- accrual + duration_follow_up
             return(paste("Required Study Duration:", round(total_duration, 1), "months"))
         },
-        
-
         .events_needed_log_rank = function(hr, alpha, power, ratio) {
             if (is.null(hr) || hr <= 0 || hr == 1) {
                 stop("Hazard ratio must be positive and different from 1 for log-rank calculations.")
@@ -767,13 +761,12 @@ survivalPowerClass <- R6::R6Class(
             props <- private$.allocation_props(ratio)
             information_fraction <- props$control * props$treatment
 
-            z_alpha <- qnorm(1 - alpha/2)
+            z_alpha <- qnorm(1 - alpha / 2)
             z_beta <- qnorm(power)
 
             events <- ((z_alpha + z_beta)^2) / ((log(hr))^2 * information_fraction)
             ceiling(events)
         },
-        
         .calculate_cox_regression = function() {
             # Cox regression power calculation using gsDesign
             analysis_type <- self$options$analysis_type
@@ -788,234 +781,242 @@ survivalPowerClass <- R6::R6Class(
             # Convert median to rate parameter for exponential distribution
             lambda_control <- log(2) / median_control
 
-            tryCatch({
-                if (analysis_type == "sample_size") {
-                    # Calculate required sample size using gsDesign if available
-                    if (requireNamespace("gsDesign", quietly = TRUE)) {
-                        tryCatch({
-                            # Map parameters to nSurv
-                            # alpha: one-sided alpha if not specified, but nSurv takes sidedness
-                            # beta: 1 - power
-                            # lambdaC: hazard rate for control
-                            # hr: hazard ratio
-                            # ratio: allocation ratio
-                            # R: accrual period
-                            # T: total study duration (accrual + follow-up)
-                            # minfup: follow-up period
-                            
-                            k <- self$options$interim_analyses + 1
-                            timing <- if (k > 1) seq(1, k) / k else 1
-                            sfu <- if (self$options$alpha_spending == "obrien_fleming") gsDesign::sfLDOF else gsDesign::sfLDPocock
-                            
-                            design <- gsDesign::nSurv(
-                                alpha = alpha,
-                                beta = 1 - power,
-                                lambdaC = lambda_control,
-                                hr = hr,
-                                ratio = allocation_ratio,
-                                R = accrual_period,
-                                T = accrual_period + follow_up,
-                                minfup = follow_up,
-                                sided = 2,
-                                k = k,
-                                timing = timing,
-                                sfu = sfu
+            tryCatch(
+                {
+                    if (analysis_type == "sample_size") {
+                        # Calculate required sample size using gsDesign if available
+                        if (requireNamespace("gsDesign", quietly = TRUE)) {
+                            tryCatch(
+                                {
+                                    # Map parameters to nSurv
+                                    # alpha: one-sided alpha if not specified, but nSurv takes sidedness
+                                    # beta: 1 - power
+                                    # lambdaC: hazard rate for control
+                                    # hr: hazard ratio
+                                    # ratio: allocation ratio
+                                    # R: accrual period
+                                    # T: total study duration (accrual + follow-up)
+                                    # minfup: follow-up period
+
+                                    k <- self$options$interim_analyses + 1
+                                    timing <- if (k > 1) seq(1, k) / k else 1
+                                    sfu <- if (self$options$alpha_spending == "obrien_fleming") gsDesign::sfLDOF else gsDesign::sfLDPocock
+
+                                    design <- gsDesign::nSurv(
+                                        alpha = alpha,
+                                        beta = 1 - power,
+                                        lambdaC = lambda_control,
+                                        hr = hr,
+                                        ratio = allocation_ratio,
+                                        R = accrual_period,
+                                        T = accrual_period + follow_up,
+                                        minfup = follow_up,
+                                        sided = 2,
+                                        k = k,
+                                        timing = timing,
+                                        sfu = sfu
+                                    )
+
+                                    n_total <- ceiling(design$n)
+                                    events_needed <- ceiling(design$d)
+
+                                    return(paste("Total Sample Size:", n_total, "subjects (", events_needed, "events needed) [Calculated via gsDesign]"))
+                                },
+                                error = function(e) {
+                                    # Fallback if gsDesign fails
+                                    warning(paste("gsDesign calculation failed:", e$message, "- using standard log-rank formula"))
+                                }
                             )
-                            
-                            n_total <- ceiling(design$n)
-                            events_needed <- ceiling(design$d)
-                            
-                            return(paste("Total Sample Size:", n_total, "subjects (", events_needed, "events needed) [Calculated via gsDesign]"))
-                        }, error = function(e) {
-                            # Fallback if gsDesign fails
-                            warning(paste("gsDesign calculation failed:", e$message, "- using standard log-rank formula"))
-                        })
-                    }
-
-                    # Fallback / Standard calculation
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
-
-                    event_probs <- private$.overall_event_probability(
-                        lambda_control = lambda_control,
-                        hr = hr,
-                        allocation_ratio = allocation_ratio,
-                        accrual_period = accrual_period,
-                        follow_up_period = follow_up,
-                        dropout_rate = self$options$dropout_rate
-                    )
-
-                    n_total <- ceiling(events_needed / event_probs$overall)
-
-                    return(paste("Total Sample Size:", n_total, "subjects (", events_needed, "events needed)"))
-
-                } else if (analysis_type == "power") {
-                    # Calculate power for Cox regression
-                    n_total <- self$options$sample_size_input
-
-                    # Calculate power using gsDesign if available
-                    if (requireNamespace("gsDesign", quietly = TRUE)) {
-                        tryCatch({
-                            k <- self$options$interim_analyses + 1
-                            timing <- if (k > 1) seq(1, k) / k else 1
-                            sfu <- if (self$options$alpha_spending == "obrien_fleming") gsDesign::sfLDOF else gsDesign::sfLDPocock
-                            
-                            design <- gsDesign::nSurv(
-                                alpha = alpha,
-                                beta = NULL, # Calculate power
-                                lambdaC = lambda_control,
-                                hr = hr,
-                                ratio = allocation_ratio,
-                                R = accrual_period,
-                                T = accrual_period + follow_up,
-                                minfup = follow_up,
-                                sided = 2,
-                                k = k,
-                                timing = timing,
-                                sfu = sfu,
-                                n = n_total
-                            )
-                            
-                            power_calc <- design$power
-                            expected_events <- design$d
-                            
-                            return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", ceiling(expected_events), "events expected) [Calculated via gsDesign]"))
-                        }, error = function(e) {
-                            warning(paste("gsDesign power calculation failed:", e$message, "- using standard log-rank formula"))
-                        })
-                    }
-
-                    # Fallback / Standard calculation
-
-                    expected_events <- private$.expected_events_from_sample(
-                        n_total = n_total,
-                        lambda_control = lambda_control,
-                        hr = hr,
-                        allocation_ratio = allocation_ratio,
-                        accrual_period = accrual_period,
-                        follow_up_period = follow_up,
-                        dropout_rate = self$options$dropout_rate
-                    )$total
-
-                    power_calc <- private$.power_from_events(
-                        events = expected_events,
-                        hr = hr,
-                        alpha = alpha,
-                        allocation_ratio = allocation_ratio
-                    )
-
-                    return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", round(expected_events), "events expected)"))
-
-                } else if (analysis_type == "effect_size") {
-                    # Calculate minimum detectable HR for Cox regression
-                    n_total <- self$options$sample_size_input
-
-                    target_power <- power
-
-                    hr_solution <- tryCatch({
-                        objective <- function(hr_candidate) {
-                            events_candidate <- private$.expected_events_from_sample(
-                                n_total = n_total,
-                                lambda_control = lambda_control,
-                                hr = hr_candidate,
-                                allocation_ratio = allocation_ratio,
-                                accrual_period = accrual_period,
-                                follow_up_period = follow_up,
-                                dropout_rate = self$options$dropout_rate
-                            )$total
-
-                            private$.power_from_events(
-                                events = events_candidate,
-                                hr = hr_candidate,
-                                alpha = alpha,
-                                allocation_ratio = allocation_ratio
-                            ) - target_power
                         }
 
-                        uniroot(objective, interval = c(0.1, 1.5))$root
-                    }, error = function(e) {
-                        NA_real_
-                    })
+                        # Fallback / Standard calculation
+                        events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
 
-                    if (is.na(hr_solution)) {
-                        return("Unable to determine detectable hazard ratio with current settings")
+                        event_probs <- private$.overall_event_probability(
+                            lambda_control = lambda_control,
+                            hr = hr,
+                            allocation_ratio = allocation_ratio,
+                            accrual_period = accrual_period,
+                            follow_up_period = follow_up,
+                            dropout_rate = self$options$dropout_rate
+                        )
+
+                        n_total <- ceiling(events_needed / event_probs$overall)
+
+                        return(paste("Total Sample Size:", n_total, "subjects (", events_needed, "events needed)"))
+                    } else if (analysis_type == "power") {
+                        # Calculate power for Cox regression
+                        n_total <- self$options$sample_size_input
+
+                        # Calculate power using gsDesign if available
+                        if (requireNamespace("gsDesign", quietly = TRUE)) {
+                            tryCatch(
+                                {
+                                    k <- self$options$interim_analyses + 1
+                                    timing <- if (k > 1) seq(1, k) / k else 1
+                                    sfu <- if (self$options$alpha_spending == "obrien_fleming") gsDesign::sfLDOF else gsDesign::sfLDPocock
+
+                                    design <- gsDesign::nSurv(
+                                        alpha = alpha,
+                                        beta = NULL, # Calculate power
+                                        lambdaC = lambda_control,
+                                        hr = hr,
+                                        ratio = allocation_ratio,
+                                        R = accrual_period,
+                                        T = accrual_period + follow_up,
+                                        minfup = follow_up,
+                                        sided = 2,
+                                        k = k,
+                                        timing = timing,
+                                        sfu = sfu,
+                                        n = n_total
+                                    )
+
+                                    power_calc <- design$power
+                                    expected_events <- design$d
+
+                                    return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", ceiling(expected_events), "events expected) [Calculated via gsDesign]"))
+                                },
+                                error = function(e) {
+                                    warning(paste("gsDesign power calculation failed:", e$message, "- using standard log-rank formula"))
+                                }
+                            )
+                        }
+
+                        # Fallback / Standard calculation
+
+                        expected_events <- private$.expected_events_from_sample(
+                            n_total = n_total,
+                            lambda_control = lambda_control,
+                            hr = hr,
+                            allocation_ratio = allocation_ratio,
+                            accrual_period = accrual_period,
+                            follow_up_period = follow_up,
+                            dropout_rate = self$options$dropout_rate
+                        )$total
+
+                        power_calc <- private$.power_from_events(
+                            events = expected_events,
+                            hr = hr,
+                            alpha = alpha,
+                            allocation_ratio = allocation_ratio
+                        )
+
+                        return(paste("Statistical Power:", round(power_calc * 100, 1), "% (", round(expected_events), "events expected)"))
+                    } else if (analysis_type == "effect_size") {
+                        # Calculate minimum detectable HR for Cox regression
+                        n_total <- self$options$sample_size_input
+
+                        target_power <- power
+
+                        hr_solution <- tryCatch(
+                            {
+                                objective <- function(hr_candidate) {
+                                    events_candidate <- private$.expected_events_from_sample(
+                                        n_total = n_total,
+                                        lambda_control = lambda_control,
+                                        hr = hr_candidate,
+                                        allocation_ratio = allocation_ratio,
+                                        accrual_period = accrual_period,
+                                        follow_up_period = follow_up,
+                                        dropout_rate = self$options$dropout_rate
+                                    )$total
+
+                                    private$.power_from_events(
+                                        events = events_candidate,
+                                        hr = hr_candidate,
+                                        alpha = alpha,
+                                        allocation_ratio = allocation_ratio
+                                    ) - target_power
+                                }
+
+                                uniroot(objective, interval = c(0.1, 1.5))$root
+                            },
+                            error = function(e) {
+                                NA_real_
+                            }
+                        )
+
+                        if (is.na(hr_solution)) {
+                            return("Unable to determine detectable hazard ratio with current settings")
+                        }
+
+                        expected_events <- private$.expected_events_from_sample(
+                            n_total = n_total,
+                            lambda_control = lambda_control,
+                            hr = hr_solution,
+                            allocation_ratio = allocation_ratio,
+                            accrual_period = accrual_period,
+                            follow_up_period = follow_up,
+                            dropout_rate = self$options$dropout_rate
+                        )$total
+
+                        return(paste("Minimum Detectable HR:", round(hr_solution, 3), "(", round(expected_events), "events)"))
+                    } else if (analysis_type == "duration") {
+                        # Calculate required study duration for Cox regression
+                        n_total <- self$options$sample_size_input
+
+                        # Required events for target power
+                        events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
+
+                        # Event rate per month per subject
+                        event_rate_monthly <- lambda_control * (1 - self$options$dropout_rate / 12)
+
+                        # Approximate duration needed (simplified model)
+                        # Assumes uniform accrual over accrual period
+                        avg_follow_up_needed <- events_needed / (n_total * event_rate_monthly)
+                        total_duration <- accrual_period + avg_follow_up_needed
+
+                        # Warn user about approximation method
+                        private$.addNotice("INFO", "Duration Approximation", sprintf(
+                            "Duration calculation uses simplified event rate model (%.3f events/month/subject) • For precise estimates, consider simulation-based methods",
+                            event_rate_monthly
+                        ))
+
+                        return(paste("Required Study Duration:", round(total_duration, 1), "months"))
                     }
-
-                    expected_events <- private$.expected_events_from_sample(
-                        n_total = n_total,
-                        lambda_control = lambda_control,
-                        hr = hr_solution,
-                        allocation_ratio = allocation_ratio,
-                        accrual_period = accrual_period,
-                        follow_up_period = follow_up,
-                        dropout_rate = self$options$dropout_rate
-                    )$total
-
-                    return(paste("Minimum Detectable HR:", round(hr_solution, 3), "(", round(expected_events), "events)"))
-
-                } else if (analysis_type == "duration") {
-                    # Calculate required study duration for Cox regression
-                    n_total <- self$options$sample_size_input
-
-                    # Required events for target power
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
-
-                    # Event rate per month per subject
-                    event_rate_monthly <- lambda_control * (1 - self$options$dropout_rate / 12)
-
-                    # Approximate duration needed (simplified model)
-                    # Assumes uniform accrual over accrual period
-                    avg_follow_up_needed <- events_needed / (n_total * event_rate_monthly)
-                    total_duration <- accrual_period + avg_follow_up_needed
-
-                    # Warn user about approximation method
-                    private$.addNotice('INFO', 'Duration Approximation', sprintf(
-                        'Duration calculation uses simplified event rate model (%.3f events/month/subject) • For precise estimates, consider simulation-based methods',
-                        event_rate_monthly
-                    ))
-
-                    return(paste("Required Study Duration:", round(total_duration, 1), "months"))
+                },
+                error = function(e) {
+                    return(paste("Cox regression calculation error:", e$message))
                 }
-
-            }, error = function(e) {
-                return(paste("Cox regression calculation error:", e$message))
-            })
+            )
 
             return("Cox regression calculation completed")
         },
-        
         .calculate_competing_risks = function() {
             # Return summary string for main table
             # Detailed results are populated in specialized table
-            
+
             hr <- private$.get_effect_hr()
             rate <- self$options$competing_risk_rate
-            
-            return(paste("Calculating power with Competing Risk Rate =", rate, 
-                         "(See 'Competing Risks Analysis' table for details)"))
+
+            return(paste(
+                "Calculating power with Competing Risk Rate =", rate,
+                "(See 'Competing Risks Analysis' table for details)"
+            ))
         },
-        
         .calculate_rmst = function() {
             # Return summary string for main table
             # Detailed results are populated in specialized table
-            
-            tau <- self$options$rmst_tau
-            return(paste("RMST Analysis at tau =", tau, 
-                         "(See 'RMST Analysis' table for details)"))
-        },
 
+            tau <- self$options$rmst_tau
+            return(paste(
+                "RMST Analysis at tau =", tau,
+                "(See 'RMST Analysis' table for details)"
+            ))
+        },
         .calculate_rmst_variance = function(lambda, tau) {
             # Calculate asymptotic variance for RMST under exponential distribution
             # Based on theoretical formula for RMST variance
-            if (lambda <= 0) lambda <- 0.001  # Avoid division by zero
+            if (lambda <= 0) lambda <- 0.001 # Avoid division by zero
 
             # Theoretical variance for exponential RMST
             var_rmst <- (1 - exp(-lambda * tau)) / lambda^2 -
-                       (tau^2 * exp(-lambda * tau)) +
-                       (2 * tau * (1 - exp(-lambda * tau))) / lambda
+                (tau^2 * exp(-lambda * tau)) +
+                (2 * tau * (1 - exp(-lambda * tau))) / lambda
 
-            return(max(var_rmst, 0.01))  # Ensure positive variance
+            return(max(var_rmst, 0.01)) # Ensure positive variance
         },
-        
         .calculate_non_inferiority = function() {
             analysis_type <- self$options$analysis_type
             alpha <- self$options$alpha_level
@@ -1051,7 +1052,7 @@ survivalPowerClass <- R6::R6Class(
                 return("Allocation ratio must produce positive information fraction")
             }
 
-            z_alpha <- qnorm(1 - alpha)  # one-sided
+            z_alpha <- qnorm(1 - alpha) # one-sided
             z_beta <- qnorm(power)
             log_effect <- log(hr_true) - log(hr_margin)
 
@@ -1080,7 +1081,6 @@ survivalPowerClass <- R6::R6Class(
                     "Total Sample Size:", n_total,
                     "subjects (", events_needed, "events needed; NI margin HR =", hr_margin, ")"
                 ))
-
             } else if (analysis_type == "power") {
                 n_total <- self$options$sample_size_input
 
@@ -1102,7 +1102,6 @@ survivalPowerClass <- R6::R6Class(
                     "Non-inferiority Power:", round(power_calc * 100, 1),
                     "% (HR =", round(hr_true, 3), "vs margin =", hr_margin, ")"
                 ))
-
             } else if (analysis_type == "effect_size") {
                 n_total <- self$options$sample_size_input
 
@@ -1136,11 +1135,14 @@ survivalPowerClass <- R6::R6Class(
                     lower_bound <- max(1e-3, upper_bound * 0.2)
                 }
 
-                detectable_hr <- tryCatch({
-                    uniroot(objective, interval = c(lower_bound, upper_bound))$root
-                }, error = function(e) {
-                    NA_real_
-                })
+                detectable_hr <- tryCatch(
+                    {
+                        uniroot(objective, interval = c(lower_bound, upper_bound))$root
+                    },
+                    error = function(e) {
+                        NA_real_
+                    }
+                )
 
                 if (is.na(detectable_hr)) {
                     return("Unable to determine maximum HR satisfying non-inferiority criteria with current settings")
@@ -1150,7 +1152,6 @@ survivalPowerClass <- R6::R6Class(
                     "Maximum HR for Non-inferiority:", round(detectable_hr, 3),
                     "(margin =", hr_margin, ")"
                 ))
-
             } else if (analysis_type == "duration") {
                 n_total <- self$options$sample_size_input
                 duration <- private$.solve_follow_up_duration(
@@ -1173,14 +1174,12 @@ survivalPowerClass <- R6::R6Class(
 
             return("Non-inferiority calculation completed")
         },
-        
         .calculate_snp_survival = function() {
             return("SNP-based survival power calculations are temporarily unavailable pending validated genetic-model implementation")
         },
-        
         .perform_power_analysis = function() {
             analysis_type <- self$options$analysis_type
-            
+
             if (analysis_type == "sample_size") {
                 private$.populate_sample_size_results()
             } else if (analysis_type == "power") {
@@ -1190,29 +1189,28 @@ survivalPowerClass <- R6::R6Class(
             } else if (analysis_type == "duration") {
                 private$.populate_duration_results()
             }
-            
+
             # Populate specialized tables based on test type
             private$.populate_specialized_tables()
-            
+
             # Simulation validation is handled in .populate_simulation_comparison()
         },
-        
         .performSimulationValidation = function() {
             # Only run if requested
             if (!self$options$run_simulation_validation) {
                 return()
             }
-            
+
             # Only validate for sample size and power calculations
             if (!(self$options$analysis_type %in% c("sample_size", "power"))) {
                 return()
             }
-            
+
             # Only for log-rank test (others not yet supported)
             if (self$options$test_type != "log_rank") {
                 return()
             }
-            
+
             # Get current calculation results
             analytical_power <- if (self$options$analysis_type == "sample_size") {
                 self$options$power_level
@@ -1223,7 +1221,7 @@ survivalPowerClass <- R6::R6Class(
                 alpha <- self$options$alpha_level
                 control_median <- self$options$control_median_survival
                 lambda_control <- log(2) / control_median
-                
+
                 expected_events <- private$.expected_events_from_sample(
                     n_total = n_total,
                     lambda_control = lambda_control,
@@ -1233,7 +1231,7 @@ survivalPowerClass <- R6::R6Class(
                     follow_up_period = self$options$follow_up_period,
                     dropout_rate = self$options$dropout_rate
                 )$total
-                
+
                 private$.power_from_events(
                     events = expected_events,
                     hr = hr,
@@ -1241,7 +1239,7 @@ survivalPowerClass <- R6::R6Class(
                     allocation_ratio = self$options$allocation_ratio
                 )
             }
-            
+
             analytical_sample_size <- if (self$options$analysis_type == "sample_size") {
                 # Use stored numeric result if available
                 if (!is.null(private$calculated_sample_size)) {
@@ -1249,7 +1247,7 @@ survivalPowerClass <- R6::R6Class(
                 } else {
                     # Fallback to extracting from table
                     summary_table <- self$results$power_summary
-                    if (summary_table$rowCount > 0 && summary_table$isFilled(rowNo=1)) {
+                    if (summary_table$rowCount > 0 && summary_table$isFilled(rowNo = 1)) {
                         calc_value <- summary_table$asDF[1, "calculated_value"]
                         as.numeric(gsub("[^0-9]", "", calc_value))
                     } else {
@@ -1259,17 +1257,17 @@ survivalPowerClass <- R6::R6Class(
             } else {
                 self$options$sample_size_input
             }
-            
+
             if (is.null(analytical_sample_size)) {
                 return()
             }
-            
+
             # Prepare parameters for simulation
             dist_params <- private$.get_distribution_parameters(
                 median_control = self$options$control_median_survival,
                 hr = private$.get_effect_hr()
             )
-            
+
             sim_params <- list(
                 sample_size = analytical_sample_size,
                 distribution = self$options$survival_distribution,
@@ -1281,25 +1279,33 @@ survivalPowerClass <- R6::R6Class(
                 dropout_rate = self$options$dropout_rate,
                 alpha = self$options$alpha_level
             )
-            
+
             # Run simulation
-            sim_results <- tryCatch({
-                .validate_power_by_simulation(
-                    params = sim_params,
-                    n_sims = self$options$simulation_runs
-                )
-            }, error = function(e) {
-                return(NULL)
-            })
-            
+            sim_results <- tryCatch(
+                {
+                    .validate_power_by_simulation(
+                        params = sim_params,
+                        n_sims = self$options$simulation_runs
+                    )
+                },
+                error = function(e) {
+                    return(NULL)
+                }
+            )
+
             if (is.null(sim_results)) {
                 return()
             }
-            
+
             # Populate results table
             table <- self$results$simulation_validation_table
-            try({ table$deleteRows() }, silent = TRUE)
-            
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
+
             # Power comparison
             table$addRow(rowKey = "power", values = list(
                 metric = "Statistical Power",
@@ -1308,13 +1314,13 @@ survivalPowerClass <- R6::R6Class(
                 ci_lower = sim_results$ci_lower,
                 ci_upper = sim_results$ci_upper,
                 agreement = private$.assess_agreement(
-                    analytical_power, 
+                    analytical_power,
                     sim_results$simulated_power,
                     sim_results$ci_lower,
                     sim_results$ci_upper
                 )
             ))
-            
+
             # Add interpretation note if needed
             diff_pct <- abs(analytical_power - sim_results$simulated_power) / analytical_power * 100
             if (diff_pct > 5) {
@@ -1330,7 +1336,6 @@ survivalPowerClass <- R6::R6Class(
                 ))
             }
         },
-        
         .assess_agreement = function(analytical, simulated, ci_lower, ci_upper) {
             # Check if analytical value falls within simulation CI
             if (analytical >= ci_lower && analytical <= ci_upper) {
@@ -1346,20 +1351,19 @@ survivalPowerClass <- R6::R6Class(
                 return(" Outside CI - Review assumptions")
             }
         },
-        
         .populate_simulation_comparison = function() {
             # Populate simulation validation comparison table
             if (!self$options$run_simulation_validation) {
                 return()
             }
-            
+
             # Run simulation analysis
             sim_results <- private$.run_simulation_analysis()
-            
+
             if (is.null(sim_results)) {
                 return()
             }
-            
+
             # Get analytical power for comparison
             analytical_power <- if (self$options$analysis_type == "sample_size") {
                 self$options$power_level
@@ -1370,7 +1374,7 @@ survivalPowerClass <- R6::R6Class(
                 alpha <- self$options$alpha_level
                 control_median <- self$options$control_median_survival
                 lambda_control <- log(2) / control_median
-                
+
                 expected_events <- private$.expected_events_from_sample(
                     n_total = n_total,
                     lambda_control = lambda_control,
@@ -1380,7 +1384,7 @@ survivalPowerClass <- R6::R6Class(
                     follow_up_period = self$options$follow_up_period,
                     dropout_rate = self$options$dropout_rate
                 )$total
-                
+
                 private$.power_from_events(
                     events = expected_events,
                     hr = hr,
@@ -1388,19 +1392,22 @@ survivalPowerClass <- R6::R6Class(
                     allocation_ratio = self$options$allocation_ratio
                 )
             } else {
-                return()  # Only support sample_size and power analysis types
+                return() # Only support sample_size and power analysis types
             }
-            
+
             # Populate comparison table
             table <- self$results$simulation_validation_table
-            
+
             # Clear existing rows
-            tryCatch({
-                table$deleteRows()
-            }, error = function(e) {
-                # Table might be empty
-            })
-            
+            tryCatch(
+                {
+                    table$deleteRows()
+                },
+                error = function(e) {
+                    # Table might be empty
+                }
+            )
+
             # Calculate agreement status
             diff <- abs(analytical_power - sim_results$empirical_power)
             agreement <- if (diff < 0.02) {
@@ -1410,9 +1417,9 @@ survivalPowerClass <- R6::R6Class(
             } else if (diff < 0.10) {
                 "Fair (< 10%)"
             } else {
-                "Poor (≥ 10%)"
+                "Poor (>= 10%)"
             }
-            
+
             # Add power comparison row
             table$addRow(rowKey = "power", values = list(
                 metric = "Statistical Power",
@@ -1422,17 +1429,17 @@ survivalPowerClass <- R6::R6Class(
                 ci_upper = sim_results$ci_upper,
                 agreement = agreement
             ))
-            
+
             # Add expected events comparison
             # Calculate analytical expected events
             n_total <- if (self$options$analysis_type == "sample_size") {
                 # Use stored result if available
                 if (!is.null(private$calculated_sample_size)) {
-                     private$calculated_sample_size
+                    private$calculated_sample_size
                 } else {
                     # Extract from power summary
                     summary_table <- self$results$power_summary
-                    if (summary_table$rowCount > 0 && summary_table$isFilled(rowNo=1)) {
+                    if (summary_table$rowCount > 0 && summary_table$isFilled(rowNo = 1)) {
                         calc_value <- summary_table$asDF[1, "calculated_value"]
                         as.numeric(gsub("[^0-9]", "", calc_value))
                     } else {
@@ -1442,12 +1449,12 @@ survivalPowerClass <- R6::R6Class(
             } else {
                 self$options$sample_size_input
             }
-            
+
             if (!is.null(n_total)) {
                 hr <- private$.get_effect_hr()
                 control_median <- self$options$control_median_survival
                 lambda_control <- log(2) / control_median
-                
+
                 analytical_events <- private$.expected_events_from_sample(
                     n_total = n_total,
                     lambda_control = lambda_control,
@@ -1457,11 +1464,11 @@ survivalPowerClass <- R6::R6Class(
                     follow_up_period = self$options$follow_up_period,
                     dropout_rate = self$options$dropout_rate
                 )$total
-                
+
                 # Calculate agreement for events
                 events_diff <- abs(analytical_events - sim_results$avg_events)
                 events_pct_diff <- events_diff / analytical_events
-                
+
                 events_agreement <- if (events_pct_diff < 0.05) {
                     "Excellent (< 5%)"
                 } else if (events_pct_diff < 0.10) {
@@ -1469,9 +1476,9 @@ survivalPowerClass <- R6::R6Class(
                 } else if (events_pct_diff < 0.15) {
                     "Fair (< 15%)"
                 } else {
-                    "Poor (≥ 15%)"
+                    "Poor (>= 15%)"
                 }
-                
+
                 table$addRow(rowKey = "events", values = list(
                     metric = "Expected Events",
                     analytical = analytical_events,
@@ -1481,7 +1488,7 @@ survivalPowerClass <- R6::R6Class(
                     agreement = events_agreement
                 ))
             }
-            
+
             # Add table notes with convergence diagnostics
             convergence_note <- sprintf(
                 "Simulation Diagnostics:\n• Monte Carlo SE: %.4f (target: %.4f)\n• %d simulations completed\n• %s\n• Recommendation: %s",
@@ -1491,18 +1498,17 @@ survivalPowerClass <- R6::R6Class(
                 sim_results$convergence$message,
                 sim_results$convergence$recommendation
             )
-            
+
             table$setNote("convergence", convergence_note)
-            
+
             # Add distribution note
             dist_note <- sprintf(
                 "Distribution: %s | Validation Method: Monte Carlo simulation with log-rank test",
                 private$.format_distribution(self$options$survival_distribution)
             )
-            
+
             table$setNote("distribution", dist_note)
         },
-        
         .format_distribution = function(dist) {
             switch(dist,
                 "exponential" = "Exponential",
@@ -1512,36 +1518,56 @@ survivalPowerClass <- R6::R6Class(
                 dist
             )
         },
-
         .populate_sample_size_results = function() {
             table <- self$results$sample_size_results
             # Clear existing rows to avoid accumulation on updates
-            try({ table$deleteRows() }, silent = TRUE)
-            
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
+
             # Add key parameters for sample size calculation
             parameters <- list(
-                list(parameter = "Effect Size (HR)", value = round(private$.get_effect_hr(), 3), 
-                     description = "Hazard ratio used in calculations (derived if needed)"),
-                list(parameter = "Power", value = paste0(self$options$power_level * 100, "%"), 
-                     description = "Desired statistical power to detect the specified effect"),
-                list(parameter = "Alpha Level", value = self$options$alpha_level, 
-                     description = "Type I error rate (two-sided significance level)"),
-                list(parameter = "Allocation Ratio", value = self$options$allocation_ratio, 
-                     description = "Ratio of control to experimental group sizes"),
-                list(parameter = "Accrual Period", value = paste(self$options$accrual_period, "months"), 
-                     description = "Duration of patient recruitment period"),
-                list(parameter = "Follow-up Period", value = paste(self$options$follow_up_period, "months"), 
-                     description = "Additional follow-up after recruitment ends")
+                list(
+                    parameter = "Effect Size (HR)", value = round(private$.get_effect_hr(), 3),
+                    description = "Hazard ratio used in calculations (derived if needed)"
+                ),
+                list(
+                    parameter = "Power", value = paste0(self$options$power_level * 100, "%"),
+                    description = "Desired statistical power to detect the specified effect"
+                ),
+                list(
+                    parameter = "Alpha Level", value = self$options$alpha_level,
+                    description = "Type I error rate (two-sided significance level)"
+                ),
+                list(
+                    parameter = "Allocation Ratio", value = self$options$allocation_ratio,
+                    description = "Ratio of control to experimental group sizes"
+                ),
+                list(
+                    parameter = "Accrual Period", value = paste(self$options$accrual_period, "months"),
+                    description = "Duration of patient recruitment period"
+                ),
+                list(
+                    parameter = "Follow-up Period", value = paste(self$options$follow_up_period, "months"),
+                    description = "Additional follow-up after recruitment ends"
+                )
             )
-            
+
             for (i in seq_along(parameters)) {
                 table$addRow(rowKey = i, values = parameters[[i]])
             }
         },
-        
         .populate_power_results = function() {
             table <- self$results$power_results
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Calculate real power results based on current options
             n_total <- self$options$sample_size_input
@@ -1570,26 +1596,40 @@ survivalPowerClass <- R6::R6Class(
             )
 
             parameters <- list(
-                list(parameter = "Sample Size", value = paste(n_total, "subjects"),
-                     description = "Total number of subjects in the study"),
-                list(parameter = "Calculated Power", value = paste0(round(power_calc * 100, 1), "%"),
-                     description = "Statistical power for the given sample size"),
-                list(parameter = "Expected Events", value = paste(round(expected_events), "events"),
-                     description = "Number of events expected during study period"),
-                list(parameter = "Effect Size", value = paste("HR =", hr),
-                     description = "Hazard ratio representing treatment effect"),
-                list(parameter = "Significance Level", value = paste0(alpha * 100, "%"),
-                     description = "Type I error rate (alpha level)")
+                list(
+                    parameter = "Sample Size", value = paste(n_total, "subjects"),
+                    description = "Total number of subjects in the study"
+                ),
+                list(
+                    parameter = "Calculated Power", value = paste0(round(power_calc * 100, 1), "%"),
+                    description = "Statistical power for the given sample size"
+                ),
+                list(
+                    parameter = "Expected Events", value = paste(round(expected_events), "events"),
+                    description = "Number of events expected during study period"
+                ),
+                list(
+                    parameter = "Effect Size", value = paste("HR =", hr),
+                    description = "Hazard ratio representing treatment effect"
+                ),
+                list(
+                    parameter = "Significance Level", value = paste0(alpha * 100, "%"),
+                    description = "Type I error rate (alpha level)"
+                )
             )
 
             for (i in seq_along(parameters)) {
                 table$addRow(rowKey = i, values = parameters[[i]])
             }
         },
-        
         .populate_effect_size_results = function() {
             table <- self$results$effect_size_results
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Calculate real detectable effect size based on current options
             n_total <- self$options$sample_size_input
@@ -1613,21 +1653,24 @@ survivalPowerClass <- R6::R6Class(
                 )$total
             }
 
-            min_detectable_hr <- tryCatch({
-                objective <- function(hr_candidate) {
-                    events_candidate <- expected_events_fun(hr_candidate)
-                    private$.power_from_events(
-                        events = events_candidate,
-                        hr = hr_candidate,
-                        alpha = alpha,
-                        allocation_ratio = self$options$allocation_ratio
-                    ) - power
-                }
+            min_detectable_hr <- tryCatch(
+                {
+                    objective <- function(hr_candidate) {
+                        events_candidate <- expected_events_fun(hr_candidate)
+                        private$.power_from_events(
+                            events = events_candidate,
+                            hr = hr_candidate,
+                            alpha = alpha,
+                            allocation_ratio = self$options$allocation_ratio
+                        ) - power
+                    }
 
-                uniroot(objective, interval = c(0.1, 1.5))$root
-            }, error = function(e) {
-                NA_real_
-            })
+                    uniroot(objective, interval = c(0.1, 1.5))$root
+                },
+                error = function(e) {
+                    NA_real_
+                }
+            )
 
             if (is.na(min_detectable_hr)) {
                 min_detectable_hr <- NA
@@ -1639,26 +1682,40 @@ survivalPowerClass <- R6::R6Class(
             percent_reduction <- if (!is.na(min_detectable_hr)) round((1 - min_detectable_hr) * 100, 1) else NA
 
             parameters <- list(
-                list(parameter = "Minimum Detectable HR", value = if (!is.na(min_detectable_hr)) round(min_detectable_hr, 3) else "Not determined",
-                     description = "Smallest hazard ratio detectable with specified power"),
-                list(parameter = "Sample Size", value = paste(n_total, "subjects"),
-                     description = "Total number of subjects in the study"),
-                list(parameter = "Power", value = paste0(round(power * 100, 1), "%"),
-                     description = "Statistical power for detecting minimum effect"),
-                list(parameter = "Risk Reduction", value = if (!is.na(percent_reduction)) paste0(percent_reduction, "%") else "Not determined",
-                     description = "Minimum risk reduction detectable"),
-                list(parameter = "Expected Events", value = paste(round(expected_events), "events"),
-                     description = "Number of events expected during study period")
+                list(
+                    parameter = "Minimum Detectable HR", value = if (!is.na(min_detectable_hr)) round(min_detectable_hr, 3) else "Not determined",
+                    description = "Smallest hazard ratio detectable with specified power"
+                ),
+                list(
+                    parameter = "Sample Size", value = paste(n_total, "subjects"),
+                    description = "Total number of subjects in the study"
+                ),
+                list(
+                    parameter = "Power", value = paste0(round(power * 100, 1), "%"),
+                    description = "Statistical power for detecting minimum effect"
+                ),
+                list(
+                    parameter = "Risk Reduction", value = if (!is.na(percent_reduction)) paste0(percent_reduction, "%") else "Not determined",
+                    description = "Minimum risk reduction detectable"
+                ),
+                list(
+                    parameter = "Expected Events", value = paste(round(expected_events), "events"),
+                    description = "Number of events expected during study period"
+                )
             )
 
             for (i in seq_along(parameters)) {
                 table$addRow(rowKey = i, values = parameters[[i]])
             }
         },
-        
         .populate_duration_results = function() {
             table <- self$results$study_duration_results
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Calculate real duration requirements based on current options
             n_total <- self$options$sample_size_input
@@ -1668,11 +1725,14 @@ survivalPowerClass <- R6::R6Class(
             control_median <- self$options$control_median_survival
             accrual_period <- self$options$accrual_period
 
-            events_needed <- tryCatch({
-                private$.events_needed_log_rank(hr, alpha, power, self$options$allocation_ratio)
-            }, error = function(e) {
-                NA_real_
-            })
+            events_needed <- tryCatch(
+                {
+                    private$.events_needed_log_rank(hr, alpha, power, self$options$allocation_ratio)
+                },
+                error = function(e) {
+                    NA_real_
+                }
+            )
 
             lambda_control <- log(2) / control_median
 
@@ -1720,26 +1780,35 @@ survivalPowerClass <- R6::R6Class(
             value_half <- if (is.character(display_half)) display_half else paste(display_half, "months")
 
             parameters <- list(
-                list(parameter = "Required Duration", value = value_total,
-                     description = "Total study duration needed to achieve target power"),
-                list(parameter = "Accrual Period", value = paste(round(accrual_period, 1), "months"),
-                     description = "Patient recruitment period"),
-                list(parameter = "Minimum Follow-up", value = value_follow_up,
-                     description = "Additional follow-up needed after recruitment"),
-                list(parameter = "Required Events", value = value_events,
-                     description = "Number of events needed for target power"),
-                list(parameter = "50% Events Time", value = value_half,
-                     description = "Time when half of expected events occur")
+                list(
+                    parameter = "Required Duration", value = value_total,
+                    description = "Total study duration needed to achieve target power"
+                ),
+                list(
+                    parameter = "Accrual Period", value = paste(round(accrual_period, 1), "months"),
+                    description = "Patient recruitment period"
+                ),
+                list(
+                    parameter = "Minimum Follow-up", value = value_follow_up,
+                    description = "Additional follow-up needed after recruitment"
+                ),
+                list(
+                    parameter = "Required Events", value = value_events,
+                    description = "Number of events needed for target power"
+                ),
+                list(
+                    parameter = "50% Events Time", value = value_half,
+                    description = "Time when half of expected events occur"
+                )
             )
 
             for (i in seq_along(parameters)) {
                 table$addRow(rowKey = i, values = parameters[[i]])
             }
         },
-        
         .populate_specialized_tables = function() {
             test_type <- self$options$test_type
-            
+
             if (test_type == "non_inferiority") {
                 private$.populate_non_inferiority_table()
             } else if (test_type == "competing_risks") {
@@ -1753,20 +1822,24 @@ survivalPowerClass <- R6::R6Class(
             if (self$options$study_design == "multi_arm") {
                 private$.populate_multi_arm_table()
             }
-            
+
             if (self$options$interim_analyses > 0) {
                 private$.populate_interim_analysis_table()
             }
-            
+
             if (self$options$sensitivity_analysis) {
                 private$.populate_sensitivity_analysis_table()
             }
         },
-        
         .populate_competing_risks_table = function() {
             # Real competing risks analysis calculations
             table <- self$results$competing_risks_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Get parameters
             hr <- private$.get_effect_hr()
@@ -1785,18 +1858,18 @@ survivalPowerClass <- R6::R6Class(
 
             # Primary event cumulative incidence
             primary_cif_control <- (lambda_primary / (lambda_primary + lambda_competing)) *
-                                   (1 - exp(-(lambda_primary + lambda_competing) * follow_up_time))
+                (1 - exp(-(lambda_primary + lambda_competing) * follow_up_time))
 
             # Treatment effect on primary event
             lambda_primary_treatment <- lambda_primary * hr
             lambda_competing_treatment <- lambda_competing * competing_risk_hr
 
             primary_cif_treatment <- (lambda_primary_treatment / (lambda_primary_treatment + lambda_competing_treatment)) *
-                                     (1 - exp(-(lambda_primary_treatment + lambda_competing_treatment) * follow_up_time))
+                (1 - exp(-(lambda_primary_treatment + lambda_competing_treatment) * follow_up_time))
 
             # Competing risk cumulative incidence
             competing_cif_control <- (lambda_competing / (lambda_primary + lambda_competing)) *
-                                     (1 - exp(-(lambda_primary + lambda_competing) * follow_up_time))
+                (1 - exp(-(lambda_primary + lambda_competing) * follow_up_time))
 
             # Calculate variance inflation factor for competing risks
             vif <- 1 / (1 - competing_cif_control)
@@ -1814,28 +1887,36 @@ survivalPowerClass <- R6::R6Class(
             sample_size_inflation <- round((vif - 1) * 100, 1)
 
             risks <- list(
-                list(risk_type = "Primary Event",
-                     event_rate = round(primary_event_rate, 3),
-                     hazard_ratio = hr,
-                     cumulative_incidence = round(primary_cif_control * 100, 1),
-                     required_events = adjusted_events_primary,
-                     sample_size_impact = "Base calculation"),
-                list(risk_type = "Competing Risk",
-                     event_rate = round(competing_risk_rate, 3),
-                     hazard_ratio = competing_risk_hr,
-                     cumulative_incidence = round(competing_cif_control * 100, 1),
-                     required_events = adjusted_events_competing,
-                     sample_size_impact = paste0(sample_size_inflation, "% increase needed"))
+                list(
+                    risk_type = "Primary Event",
+                    event_rate = round(primary_event_rate, 3),
+                    hazard_ratio = hr,
+                    cumulative_incidence = round(primary_cif_control * 100, 1),
+                    required_events = adjusted_events_primary,
+                    sample_size_impact = "Base calculation"
+                ),
+                list(
+                    risk_type = "Competing Risk",
+                    event_rate = round(competing_risk_rate, 3),
+                    hazard_ratio = competing_risk_hr,
+                    cumulative_incidence = round(competing_cif_control * 100, 1),
+                    required_events = adjusted_events_competing,
+                    sample_size_impact = paste0(sample_size_inflation, "% increase needed")
+                )
             )
 
             for (i in seq_along(risks)) {
                 table$addRow(rowKey = i, values = risks[[i]])
             }
         },
-        
         .populate_non_inferiority_table = function() {
             table <- self$results$non_inferiority_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Calculate actual non-inferiority parameters
             ni_margin <- self$options$ni_margin
@@ -1869,42 +1950,53 @@ survivalPowerClass <- R6::R6Class(
             }
 
             ni_params <- list(
-                list(parameter = "Non-inferiority Margin",
-                     value = sprintf("%.3f", ni_margin),
-                     margin_type = private$.format_ni_type(ni_type),
-                     clinical_interpretation = paste("Maximum acceptable difference -", margin_interpretation)),
-                list(parameter = "Sample Size Requirement",
-                     value = sample_size_text,
-                     margin_type = "Total enrollment",
-                     clinical_interpretation = "Typically 20-50% larger than superiority trial"),
-                list(parameter = "One-sided Alpha",
-                     value = sprintf("%.4f", alpha),
-                     margin_type = "Statistical threshold",
-                     clinical_interpretation = "For non-inferiority conclusion"),
-                list(parameter = "True Hazard Ratio",
-                     value = sprintf("%.3f", hr),
-                     margin_type = "Expected effect",
-                     clinical_interpretation = if (hr < ni_margin) "Should demonstrate non-inferiority" else "May not achieve non-inferiority")
+                list(
+                    parameter = "Non-inferiority Margin",
+                    value = sprintf("%.3f", ni_margin),
+                    margin_type = private$.format_ni_type(ni_type),
+                    clinical_interpretation = paste("Maximum acceptable difference -", margin_interpretation)
+                ),
+                list(
+                    parameter = "Sample Size Requirement",
+                    value = sample_size_text,
+                    margin_type = "Total enrollment",
+                    clinical_interpretation = "Typically 20-50% larger than superiority trial"
+                ),
+                list(
+                    parameter = "One-sided Alpha",
+                    value = sprintf("%.4f", alpha),
+                    margin_type = "Statistical threshold",
+                    clinical_interpretation = "For non-inferiority conclusion"
+                ),
+                list(
+                    parameter = "True Hazard Ratio",
+                    value = sprintf("%.3f", hr),
+                    margin_type = "Expected effect",
+                    clinical_interpretation = if (hr < ni_margin) "Should demonstrate non-inferiority" else "May not achieve non-inferiority"
+                )
             )
 
             for (i in seq_along(ni_params)) {
                 table$addRow(rowKey = i, values = ni_params[[i]])
             }
         },
-        
         .format_ni_type = function(type) {
             switch(type,
                 "absolute_margin" = "Absolute Margin",
-                "relative_margin" = "Relative Margin", 
+                "relative_margin" = "Relative Margin",
                 "retention_fraction" = "Retention of Effect Fraction",
                 type
             )
         },
-        
         .populate_rmst_analysis_table = function() {
             # Real RMST analysis calculations
             table <- self$results$rmst_analysis_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Get parameters
             tau <- self$options$rmst_tau
@@ -1929,7 +2021,7 @@ survivalPowerClass <- R6::R6Class(
             var_treatment <- tau^2 * exp(-lambda_treatment * tau) / lambda_treatment^2
 
             # Sample size calculation for RMST difference
-            z_alpha <- qnorm(1 - alpha/2)
+            z_alpha <- qnorm(1 - alpha / 2)
             z_beta <- qnorm(power)
 
             # Approximate sample size per group for RMST test
@@ -1943,31 +2035,41 @@ survivalPowerClass <- R6::R6Class(
             ci_text <- sprintf("(%.2f, %.2f)", ci_lower, ci_upper)
 
             rmst_params <- list(
-                list(parameter = sprintf("RMST at %.0f months", tau),
-                     control_group = round(rmst_control, 2),
-                     treatment_group = round(rmst_treatment, 2),
-                     difference = round(calculated_diff, 2),
-                     confidence_interval = ci_text),
-                list(parameter = "Sample Size Required",
-                     control_group = n_per_group,
-                     treatment_group = n_per_group,
-                     difference = total_n,
-                     confidence_interval = "Total enrollment"),
-                list(parameter = "Power Achievement",
-                     control_group = round(power * 100, 1),
-                     treatment_group = round(power * 100, 1),
-                     difference = round(power * 100, 1),
-                     confidence_interval = sprintf("%.1f%% power", power * 100))
+                list(
+                    parameter = sprintf("RMST at %.0f months", tau),
+                    control_group = round(rmst_control, 2),
+                    treatment_group = round(rmst_treatment, 2),
+                    difference = round(calculated_diff, 2),
+                    confidence_interval = ci_text
+                ),
+                list(
+                    parameter = "Sample Size Required",
+                    control_group = n_per_group,
+                    treatment_group = n_per_group,
+                    difference = total_n,
+                    confidence_interval = "Total enrollment"
+                ),
+                list(
+                    parameter = "Power Achievement",
+                    control_group = round(power * 100, 1),
+                    treatment_group = round(power * 100, 1),
+                    difference = round(power * 100, 1),
+                    confidence_interval = sprintf("%.1f%% power", power * 100)
+                )
             )
 
             for (i in seq_along(rmst_params)) {
                 table$addRow(rowKey = i, values = rmst_params[[i]])
             }
         },
-        
         .populate_snp_analysis_table = function() {
             table <- self$results$snp_analysis_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Calculate actual SNP analysis parameters
             maf <- self$options$snp_maf
@@ -2006,7 +2108,7 @@ survivalPowerClass <- R6::R6Class(
                     power_carriers <- round(private$.basic_power_calc(calculated_n * (freq_Aa + freq_aa), hr, self$options$alpha_level) * 100, 1)
                     power_non_carriers <- round(private$.basic_power_calc(calculated_n * freq_AA, 1.0, self$options$alpha_level) * 100, 1)
                     paste0("AA: ", power_non_carriers, "%, Carriers (Aa+aa): ", power_carriers, "%")
-                } else {  # recessive
+                } else { # recessive
                     # Recessive model: aa vs AA+Aa
                     power_homozygous <- round(private$.basic_power_calc(calculated_n * freq_aa, hr, self$options$alpha_level) * 100, 1)
                     power_others <- round(private$.basic_power_calc(calculated_n * (freq_AA + freq_Aa), 1.0, self$options$alpha_level) * 100, 1)
@@ -2017,20 +2119,23 @@ survivalPowerClass <- R6::R6Class(
             }
 
             snp_data <- list(
-                list(genetic_model = private$.format_genetic_model(genetic_model),
-                     maf = round(maf, 4),
-                     genotype_frequencies = paste0("AA: ", round(freq_AA, 3),
-                                                  ", Aa: ", round(freq_Aa, 3),
-                                                  ", aa: ", round(freq_aa, 3)),
-                     required_sample_size = if (!is.na(calculated_n)) as.integer(calculated_n) else NA,
-                     power_by_genotype = power_by_genotype)
+                list(
+                    genetic_model = private$.format_genetic_model(genetic_model),
+                    maf = round(maf, 4),
+                    genotype_frequencies = paste0(
+                        "AA: ", round(freq_AA, 3),
+                        ", Aa: ", round(freq_Aa, 3),
+                        ", aa: ", round(freq_aa, 3)
+                    ),
+                    required_sample_size = if (!is.na(calculated_n)) as.integer(calculated_n) else NA,
+                    power_by_genotype = power_by_genotype
+                )
             )
 
             for (i in seq_along(snp_data)) {
                 table$addRow(rowKey = i, values = snp_data[[i]])
             }
         },
-        
         .format_genetic_model = function(model) {
             switch(model,
                 "additive" = "Additive Model",
@@ -2039,10 +2144,14 @@ survivalPowerClass <- R6::R6Class(
                 model
             )
         },
-        
         .populate_multi_arm_table = function() {
             table <- self$results$multi_arm_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
             num_arms <- self$options$number_of_arms
             multiple_comparisons <- self$options$multiple_comparisons
             alpha <- self$options$alpha_level
@@ -2095,27 +2204,27 @@ survivalPowerClass <- R6::R6Class(
 
                 round(power_calc * 100, 1)
             } else {
-                round(power * 100, 1)  # Target power
+                round(power * 100, 1) # Target power
             }
 
             # Calculate overall study power (probability of at least one significant result)
             if (multiple_comparisons == "none") {
                 # Without adjustment, family-wise error rate increases
-                overall_power <- round((1 - (1 - individual_power/100)^(num_arms-1)) * 100, 1)
+                overall_power <- round((1 - (1 - individual_power / 100)^(num_arms - 1)) * 100, 1)
             } else {
                 # With adjustment, power is reduced by the adjustment factor
                 adjustment_factor <- switch(multiple_comparisons,
                     "bonferroni" = 1 / (num_arms - 1),
                     "holm" = 1 / sqrt(num_arms - 1),
-                    "dunnett" = 0.9,  # Dunnett is more efficient than Bonferroni
-                    0.85  # fallback
+                    "dunnett" = 0.9, # Dunnett is more efficient than Bonferroni
+                    0.85 # fallback
                 )
                 overall_power <- round(individual_power * adjustment_factor, 1)
             }
 
             # Generate comparisons for each treatment arm vs control
             comparisons <- list()
-            for (i in 1:(num_arms-1)) {
+            for (i in 1:(num_arms - 1)) {
                 comparisons[[i]] <- list(
                     comparison = paste("Control vs Treatment", i),
                     sample_size_per_arm = if (!is.na(sample_size_per_arm)) as.integer(sample_size_per_arm) else NA,
@@ -2129,10 +2238,14 @@ survivalPowerClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = comparisons[[i]])
             }
         },
-        
         .populate_interim_analysis_table = function() {
             table <- self$results$interim_analysis_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
             num_interim <- self$options$interim_analyses
             alpha_spending <- self$options$alpha_spending
             alpha <- self$options$alpha_level
@@ -2145,7 +2258,7 @@ survivalPowerClass <- R6::R6Class(
                 # Calculate alpha spent based on spending function
                 alpha_spent <- if (alpha_spending == "obrien_fleming") {
                     # O'Brien-Fleming: conservative early, liberal late
-                    alpha * (2 * (1 - pnorm(qnorm(1 - alpha/2) / sqrt(timing/100))))
+                    alpha * (2 * (1 - pnorm(qnorm(1 - alpha / 2) / sqrt(timing / 100))))
                 } else if (alpha_spending == "pocock") {
                     # Pocock: equal alpha spending
                     alpha * i / (num_interim + 1)
@@ -2156,11 +2269,11 @@ survivalPowerClass <- R6::R6Class(
 
                 # Calculate boundary value (Z-score)
                 boundary_value <- if (alpha_spending == "obrien_fleming") {
-                    qnorm(1 - alpha_spent/2) / sqrt(timing/100)
+                    qnorm(1 - alpha_spent / 2) / sqrt(timing / 100)
                 } else if (alpha_spending == "pocock") {
-                    qnorm(1 - alpha_spent/2)
+                    qnorm(1 - alpha_spent / 2)
                 } else {
-                    qnorm(1 - alpha_spent/2)
+                    qnorm(1 - alpha_spent / 2)
                 }
 
                 # Calculate conditional power (simplified approximation)
@@ -2173,7 +2286,7 @@ survivalPowerClass <- R6::R6Class(
                     round(self$options$power_level * 100 * 0.9, 1)
                 } else {
                     # Middle analyses
-                    75.0 + (10 * (i-1) / (num_interim-1))
+                    75.0 + (10 * (i - 1) / (num_interim - 1))
                 }
 
                 table$addRow(rowKey = i, values = list(
@@ -2185,253 +2298,280 @@ survivalPowerClass <- R6::R6Class(
                 ))
             }
         },
-        
         .populate_sensitivity_analysis_table = function() {
             # Add error handling for sensitivity analysis
-            tryCatch({
-                table <- self$results$sensitivity_analysis_table
+            tryCatch(
+                {
+                    table <- self$results$sensitivity_analysis_table
 
-                # Force table to be visible for debugging
-                if (self$options$sensitivity_analysis) {
-                    table$setVisible(TRUE)
-                }
-
-                # Debug: Check if sensitivity analysis is enabled
-                if (!self$options$sensitivity_analysis) {
-                    return()
-                }
-
-                # Validate that we have the required parameters
-                if (is.null(self$options$effect_size) || is.null(self$options$alpha_level)) {
-                    warning("Sensitivity analysis: Missing required parameters (effect_size or alpha_level)")
-                    return()
-                }
-
-                # Clear existing rows first
-                table$deleteRows()
-
-                # Get base case values from current options
-                base_hr <- self$options$effect_size
-                base_power <- self$options$power_level
-                base_alpha <- self$options$alpha_level
-                base_median <- self$options$control_median_survival
-                base_accrual <- self$options$accrual_period
-                base_follow_up <- self$options$follow_up_period
-
-                # Calculate base case result
-                base_result <- private$.calculate_primary_result()
-
-                # Debug: Check base result
-                if (is.null(base_result) || is.na(base_result)) {
-                    warning("Sensitivity analysis: Base result calculation failed")
-                    return()
-                }
-
-            # Define sensitivity scenarios: vary key parameters by ±20%
-            scenarios <- list(
-                list(
-                    parameter = "Hazard Ratio",
-                    base_case = sprintf("%.2f", base_hr),
-                    scenario_1 = sprintf("%.2f", base_hr * 0.8),
-                    scenario_2 = sprintf("%.2f", base_hr * 1.2),
-                    impact_1 = private$.calculate_sensitivity_impact("effect_size", base_hr * 0.8),
-                    impact_2 = private$.calculate_sensitivity_impact("effect_size", base_hr * 1.2)
-                ),
-                list(
-                    parameter = "Control Median Survival",
-                    base_case = sprintf("%.1f months", base_median),
-                    scenario_1 = sprintf("%.1f months", base_median * 1.2),
-                    scenario_2 = sprintf("%.1f months", base_median * 0.8),
-                    impact_1 = private$.calculate_sensitivity_impact("control_median_survival", base_median * 1.2),
-                    impact_2 = private$.calculate_sensitivity_impact("control_median_survival", base_median * 0.8)
-                ),
-                list(
-                    parameter = "Significance Level",
-                    base_case = sprintf("%.3f", base_alpha),
-                    scenario_1 = sprintf("%.3f", pmax(0.01, base_alpha * 0.5)),
-                    scenario_2 = sprintf("%.3f", pmin(0.10, base_alpha * 2)),
-                    impact_1 = private$.calculate_sensitivity_impact("alpha_level", pmax(0.01, base_alpha * 0.5)),
-                    impact_2 = private$.calculate_sensitivity_impact("alpha_level", pmin(0.10, base_alpha * 2))
-                ),
-                list(
-                    parameter = "Accrual Period",
-                    base_case = sprintf("%.1f months", base_accrual),
-                    scenario_1 = sprintf("%.1f months", base_accrual * 0.8),
-                    scenario_2 = sprintf("%.1f months", base_accrual * 1.2),
-                    impact_1 = private$.calculate_sensitivity_impact("accrual_period", base_accrual * 0.8),
-                    impact_2 = private$.calculate_sensitivity_impact("accrual_period", base_accrual * 1.2)
-                )
-            )
-
-            for (i in seq_along(scenarios)) {
-                scenario <- scenarios[[i]]
-
-                # Calculate impact assessment with error handling
-                impact_assessment <- tryCatch({
-                    impact_result <- private$.format_sensitivity_impact(scenario$impact_1, scenario$impact_2)
-                    if (is.null(impact_result) || is.na(impact_result)) {
-                        "Impact calculation failed"
-                    } else {
-                        impact_result
+                    # Force table to be visible for debugging
+                    if (self$options$sensitivity_analysis) {
+                        table$setVisible(TRUE)
                     }
-                }, error = function(e) {
-                    warning(paste("Sensitivity impact calculation error:", e$message))
-                    paste("Error:", e$message)
-                })
 
-                # Add row with validation
-                tryCatch({
-                    table$addRow(rowKey = i, values = list(
-                        parameter = scenario$parameter,
-                        base_case = scenario$base_case,
-                        scenario_1 = scenario$scenario_1,
-                        scenario_2 = scenario$scenario_2,
-                        impact_assessment = impact_assessment
-                    ))
-                }, error = function(e) {
-                    warning(paste("Failed to add row", i, "to sensitivity analysis table:", e$message))
-                })
-            }
-            }, error = function(e) {
-                # If sensitivity analysis fails, continue without it
-                warning(paste("Sensitivity analysis failed:", e$message))
-            })
+                    # Debug: Check if sensitivity analysis is enabled
+                    if (!self$options$sensitivity_analysis) {
+                        return()
+                    }
+
+                    # Validate that we have the required parameters
+                    if (is.null(self$options$effect_size) || is.null(self$options$alpha_level)) {
+                        warning("Sensitivity analysis: Missing required parameters (effect_size or alpha_level)")
+                        return()
+                    }
+
+                    # Clear existing rows first
+                    table$deleteRows()
+
+                    # Get base case values from current options
+                    base_hr <- self$options$effect_size
+                    base_power <- self$options$power_level
+                    base_alpha <- self$options$alpha_level
+                    base_median <- self$options$control_median_survival
+                    base_accrual <- self$options$accrual_period
+                    base_follow_up <- self$options$follow_up_period
+
+                    # Calculate base case result
+                    base_result <- private$.calculate_primary_result()
+
+                    # Debug: Check base result
+                    if (is.null(base_result) || is.na(base_result)) {
+                        warning("Sensitivity analysis: Base result calculation failed")
+                        return()
+                    }
+
+                    # Define sensitivity scenarios: vary key parameters by ±20%
+                    scenarios <- list(
+                        list(
+                            parameter = "Hazard Ratio",
+                            base_case = sprintf("%.2f", base_hr),
+                            scenario_1 = sprintf("%.2f", base_hr * 0.8),
+                            scenario_2 = sprintf("%.2f", base_hr * 1.2),
+                            impact_1 = private$.calculate_sensitivity_impact("effect_size", base_hr * 0.8),
+                            impact_2 = private$.calculate_sensitivity_impact("effect_size", base_hr * 1.2)
+                        ),
+                        list(
+                            parameter = "Control Median Survival",
+                            base_case = sprintf("%.1f months", base_median),
+                            scenario_1 = sprintf("%.1f months", base_median * 1.2),
+                            scenario_2 = sprintf("%.1f months", base_median * 0.8),
+                            impact_1 = private$.calculate_sensitivity_impact("control_median_survival", base_median * 1.2),
+                            impact_2 = private$.calculate_sensitivity_impact("control_median_survival", base_median * 0.8)
+                        ),
+                        list(
+                            parameter = "Significance Level",
+                            base_case = sprintf("%.3f", base_alpha),
+                            scenario_1 = sprintf("%.3f", pmax(0.01, base_alpha * 0.5)),
+                            scenario_2 = sprintf("%.3f", pmin(0.10, base_alpha * 2)),
+                            impact_1 = private$.calculate_sensitivity_impact("alpha_level", pmax(0.01, base_alpha * 0.5)),
+                            impact_2 = private$.calculate_sensitivity_impact("alpha_level", pmin(0.10, base_alpha * 2))
+                        ),
+                        list(
+                            parameter = "Accrual Period",
+                            base_case = sprintf("%.1f months", base_accrual),
+                            scenario_1 = sprintf("%.1f months", base_accrual * 0.8),
+                            scenario_2 = sprintf("%.1f months", base_accrual * 1.2),
+                            impact_1 = private$.calculate_sensitivity_impact("accrual_period", base_accrual * 0.8),
+                            impact_2 = private$.calculate_sensitivity_impact("accrual_period", base_accrual * 1.2)
+                        )
+                    )
+
+                    for (i in seq_along(scenarios)) {
+                        scenario <- scenarios[[i]]
+
+                        # Calculate impact assessment with error handling
+                        impact_assessment <- tryCatch(
+                            {
+                                impact_result <- private$.format_sensitivity_impact(scenario$impact_1, scenario$impact_2)
+                                if (is.null(impact_result) || is.na(impact_result)) {
+                                    "Impact calculation failed"
+                                } else {
+                                    impact_result
+                                }
+                            },
+                            error = function(e) {
+                                warning(paste("Sensitivity impact calculation error:", e$message))
+                                paste("Error:", e$message)
+                            }
+                        )
+
+                        # Add row with validation
+                        tryCatch(
+                            {
+                                table$addRow(rowKey = i, values = list(
+                                    parameter = scenario$parameter,
+                                    base_case = scenario$base_case,
+                                    scenario_1 = scenario$scenario_1,
+                                    scenario_2 = scenario$scenario_2,
+                                    impact_assessment = impact_assessment
+                                ))
+                            },
+                            error = function(e) {
+                                warning(paste("Failed to add row", i, "to sensitivity analysis table:", e$message))
+                            }
+                        )
+                    }
+                },
+                error = function(e) {
+                    # If sensitivity analysis fails, continue without it
+                    warning(paste("Sensitivity analysis failed:", e$message))
+                }
+            )
         },
-
         .calculate_sensitivity_impact = function(param_name, new_value) {
             # Calculate sensitivity impact without modifying self$options
             # Use direct parameter passing to calculation methods
 
-            tryCatch({
-                # Get current parameter values
-                analysis_type <- self$options$analysis_type
-                test_type <- self$options$test_type
-                alpha <- if (param_name == "alpha_level") new_value else self$options$alpha_level
-                power <- self$options$power_level
-                hr <- if (param_name == "effect_size") new_value else self$options$effect_size
-                allocation_ratio <- self$options$allocation_ratio
-                accrual_period <- if (param_name == "accrual_period") new_value else self$options$accrual_period
-                follow_up <- self$options$follow_up_period
-                median_control <- if (param_name == "control_median_survival") new_value else self$options$control_median_survival
+            tryCatch(
+                {
+                    # Get current parameter values
+                    analysis_type <- self$options$analysis_type
+                    test_type <- self$options$test_type
+                    alpha <- if (param_name == "alpha_level") new_value else self$options$alpha_level
+                    power <- self$options$power_level
+                    hr <- if (param_name == "effect_size") new_value else self$options$effect_size
+                    allocation_ratio <- self$options$allocation_ratio
+                    accrual_period <- if (param_name == "accrual_period") new_value else self$options$accrual_period
+                    follow_up <- self$options$follow_up_period
+                    median_control <- if (param_name == "control_median_survival") new_value else self$options$control_median_survival
 
-                # Calculate with modified parameters directly
-                if (test_type == "log_rank") {
-                    result <- private$.calculate_log_rank_with_params(
-                        analysis_type, alpha, power, hr, allocation_ratio,
-                        accrual_period, follow_up, median_control
-                    )
-                } else {
-                    # For other test types, use approximation based on log-rank
-                    # Calculate events needed using modified parameters
-                    lambda_control <- log(2) / median_control
-                    total_time <- accrual_period + follow_up
-                    prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
-
-                    if (analysis_type == "sample_size") {
-                        events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
-                        n_total <- ceiling(events_needed / prob_event_control)
-                        result <- paste("Total Sample Size:", n_total, "subjects")
-                    } else if (analysis_type == "power") {
-                        n_total <- self$options$sample_size_input
-                        expected_events <- n_total * prob_event_control
-                        power_calc <- private$.basic_power_calc(expected_events, hr, alpha)
-                        result <- paste("Statistical Power:", round(power_calc * 100, 1), "%")
+                    # Calculate with modified parameters directly
+                    if (test_type == "log_rank") {
+                        result <- private$.calculate_log_rank_with_params(
+                            analysis_type, alpha, power, hr, allocation_ratio,
+                            accrual_period, follow_up, median_control
+                        )
                     } else {
-                        result <- "Sensitivity not available for this analysis type"
-                    }
-                }
+                        # For other test types, use approximation based on log-rank
+                        # Calculate events needed using modified parameters
+                        lambda_control <- log(2) / median_control
+                        total_time <- accrual_period + follow_up
+                        prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
 
-                return(result)
-            }, error = function(e) {
-                return("Calculation error")
-            })
-        },
-
-        .format_sensitivity_impact = function(impact_1, impact_2) {
-            # Simplified sensitivity impact assessment
-            tryCatch({
-                base_result <- private$.calculate_primary_result()
-
-                # Extract numeric values from result strings
-                extract_numeric <- function(result_text) {
-                    if (is.null(result_text) || is.na(result_text)) {
-                        return(NA)
-                    }
-
-                    result_char <- as.character(result_text)
-
-                    # Try to extract numbers from strings like "Total Sample Size: 181 subjects" or "Statistical Power: 85.2%"
-                    if (grepl("\\d+", result_char)) {
-                        num_match <- regmatches(result_char, regexpr("\\d+\\.?\\d*", result_char))
-                        if (length(num_match) > 0) {
-                            return(as.numeric(num_match[1]))
+                        if (analysis_type == "sample_size") {
+                            events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
+                            n_total <- ceiling(events_needed / prob_event_control)
+                            result <- paste("Total Sample Size:", n_total, "subjects")
+                        } else if (analysis_type == "power") {
+                            n_total <- self$options$sample_size_input
+                            expected_events <- n_total * prob_event_control
+                            power_calc <- private$.basic_power_calc(expected_events, hr, alpha)
+                            result <- paste("Statistical Power:", round(power_calc * 100, 1), "%")
+                        } else {
+                            result <- "Sensitivity not available for this analysis type"
                         }
                     }
 
-                    # Try direct conversion
-                    tryCatch({
-                        return(as.numeric(result_char))
-                    }, error = function(e) {
-                        return(NA)
-                    })
+                    return(result)
+                },
+                error = function(e) {
+                    return("Calculation error")
                 }
-
-                # Extract numeric values
-                base_numeric <- extract_numeric(base_result)
-                impact_1_numeric <- extract_numeric(impact_1)
-                impact_2_numeric <- extract_numeric(impact_2)
-
-                # Validate extracted values
-                if (is.na(base_numeric) || is.na(impact_1_numeric) || is.na(impact_2_numeric)) {
-                    # If we can't extract numbers, provide qualitative assessment
-                    return("Parameter change affects results")
-                }
-
-                # Handle numeric results
-                if (base_numeric > 0) {
-                    change_1 <- ((impact_1_numeric - base_numeric) / base_numeric) * 100
-                    change_2 <- ((impact_2_numeric - base_numeric) / base_numeric) * 100
-
-                    max_change <- max(abs(change_1), abs(change_2))
-
-                    if (max_change < 1) {
-                        return("Minimal impact (<1% change)")
-                    } else if (max_change < 5) {
-                        return(sprintf("Low impact (%.1f%% change)", max_change))
-                    } else if (max_change < 15) {
-                        return(sprintf("Moderate impact (%.1f%% change)", max_change))
-                    } else {
-                        return(sprintf("High impact (%.1f%% change)", max_change))
-                    }
-                } else {
-                    return("Parameter change affects results")
-                }
-            }, error = function(e) {
-                return("Impact calculation error")
-            })
+            )
         },
-        
+        .format_sensitivity_impact = function(impact_1, impact_2) {
+            # Simplified sensitivity impact assessment
+            tryCatch(
+                {
+                    base_result <- private$.calculate_primary_result()
+
+                    # Extract numeric values from result strings
+                    extract_numeric <- function(result_text) {
+                        if (is.null(result_text) || is.na(result_text)) {
+                            return(NA)
+                        }
+
+                        result_char <- as.character(result_text)
+
+                        # Try to extract numbers from strings like "Total Sample Size: 181 subjects" or "Statistical Power: 85.2%"
+                        if (grepl("\\d+", result_char)) {
+                            num_match <- regmatches(result_char, regexpr("\\d+\\.?\\d*", result_char))
+                            if (length(num_match) > 0) {
+                                return(as.numeric(num_match[1]))
+                            }
+                        }
+
+                        # Try direct conversion
+                        tryCatch(
+                            {
+                                return(as.numeric(result_char))
+                            },
+                            error = function(e) {
+                                return(NA)
+                            }
+                        )
+                    }
+
+                    # Extract numeric values
+                    base_numeric <- extract_numeric(base_result)
+                    impact_1_numeric <- extract_numeric(impact_1)
+                    impact_2_numeric <- extract_numeric(impact_2)
+
+                    # Validate extracted values
+                    if (is.na(base_numeric) || is.na(impact_1_numeric) || is.na(impact_2_numeric)) {
+                        # If we can't extract numbers, provide qualitative assessment
+                        return("Parameter change affects results")
+                    }
+
+                    # Handle numeric results
+                    if (base_numeric > 0) {
+                        change_1 <- ((impact_1_numeric - base_numeric) / base_numeric) * 100
+                        change_2 <- ((impact_2_numeric - base_numeric) / base_numeric) * 100
+
+                        max_change <- max(abs(change_1), abs(change_2))
+
+                        if (max_change < 1) {
+                            return("Minimal impact (<1% change)")
+                        } else if (max_change < 5) {
+                            return(sprintf("Low impact (%.1f%% change)", max_change))
+                        } else if (max_change < 15) {
+                            return(sprintf("Moderate impact (%.1f%% change)", max_change))
+                        } else {
+                            return(sprintf("High impact (%.1f%% change)", max_change))
+                        }
+                    } else {
+                        return("Parameter change affects results")
+                    }
+                },
+                error = function(e) {
+                    return("Impact calculation error")
+                }
+            )
+        },
         .populate_assumptions = function() {
             table <- self$results$assumptions_table
-            try({ table$deleteRows() }, silent = TRUE)
-            
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
+
             assumptions <- list(
-                list(assumption = "Survival Distribution", 
-                     specification = paste("Exponential with median", self$options$control_median_survival, "months"),
-                     impact = "Affects event rate calculations and timeline estimates",
-                     recommendation = "Validate with pilot data or literature review"),
-                list(assumption = "Proportional Hazards",
-                     specification = "Hazard ratio constant over time",
-                     impact = "Critical for log-rank test validity and sample size accuracy",
-                     recommendation = "Plan interim monitoring for proportional hazards assumption"),
-                list(assumption = "Dropout Rate",
-                     specification = paste0(self$options$dropout_rate * 100, "% annual loss to follow-up"),
-                     impact = "Reduces effective sample size and statistical power",
-                     recommendation = "Implement retention strategies and monitor dropout patterns"),
-                list(assumption = "Accrual Pattern",
-                     specification = private$.format_accrual_pattern(self$options$accrual_pattern),
-                     impact = "Affects study timeline and event occurrence timing",
-                     recommendation = "Monitor actual accrual against assumptions")
+                list(
+                    assumption = "Survival Distribution",
+                    specification = paste("Exponential with median", self$options$control_median_survival, "months"),
+                    impact = "Affects event rate calculations and timeline estimates",
+                    recommendation = "Validate with pilot data or literature review"
+                ),
+                list(
+                    assumption = "Proportional Hazards",
+                    specification = "Hazard ratio constant over time",
+                    impact = "Critical for log-rank test validity and sample size accuracy",
+                    recommendation = "Plan interim monitoring for proportional hazards assumption"
+                ),
+                list(
+                    assumption = "Dropout Rate",
+                    specification = paste0(self$options$dropout_rate * 100, "% annual loss to follow-up"),
+                    impact = "Reduces effective sample size and statistical power",
+                    recommendation = "Implement retention strategies and monitor dropout patterns"
+                ),
+                list(
+                    assumption = "Accrual Pattern",
+                    specification = private$.format_accrual_pattern(self$options$accrual_pattern),
+                    impact = "Affects study timeline and event occurrence timing",
+                    recommendation = "Monitor actual accrual against assumptions"
+                )
             )
 
             # Add simulation-based validation if sensitivity analysis is enabled
@@ -2451,7 +2591,6 @@ survivalPowerClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = assumptions[[i]])
             }
         },
-        
         .format_accrual_pattern = function(pattern) {
             switch(pattern,
                 "uniform" = "Uniform patient enrollment over accrual period",
@@ -2461,7 +2600,6 @@ survivalPowerClass <- R6::R6Class(
                 pattern
             )
         },
-        
         .generate_interpretation = function() {
             # Generate clinical interpretation - main coordinator function
             study_summary <- private$.generate_study_summary()
@@ -2480,7 +2618,6 @@ survivalPowerClass <- R6::R6Class(
                 self$results$clinical_interpretation$setVisible(TRUE)
             }
         },
-
         .generate_study_summary = function() {
             # Generate study design and parameter summary
             analysis_type <- self$options$analysis_type
@@ -2504,7 +2641,6 @@ survivalPowerClass <- R6::R6Class(
                 "• Statistical Test: ", private$.format_test_type(test_type), "<br>",
                 "• Design: ", private$.format_study_design(self$options$study_design), "<br>",
                 "• Primary Endpoint: ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
-
                 "<p><strong>Statistical Parameters:</strong><br>",
                 "• Hazard Ratio: ", round(hr, 3), "<br>",
                 "• Significance Level (alpha): ", round(alpha, 3), " (", round(alpha * 100, 1), "%)<br>",
@@ -2512,7 +2648,6 @@ survivalPowerClass <- R6::R6Class(
                 "• Allocation Ratio: ", self$options$allocation_ratio, ":1<br>",
                 if (analysis_type != "sample_size") paste0("• Sample Size: ", self$options$sample_size_input, " subjects<br>") else "",
                 "</p>",
-
                 "<p><strong>Population Characteristics:</strong><br>",
                 "• Control Median Survival: ", median_survival, " months<br>",
                 "• Expected Treatment Median: ",
@@ -2521,7 +2656,6 @@ survivalPowerClass <- R6::R6Class(
                 "• Accrual Period: ", accrual, " months<br>",
                 "• Follow-up Period: ", follow_up, " months<br>",
                 "• Annual Dropout Rate: ", round(dropout * 100, 1), "%</p>",
-
                 "<p><strong>Objective:</strong><br>",
                 private$.generate_objective_text(),
                 "</p>"
@@ -2529,7 +2663,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(explanation)
         },
-
         .generate_objective_text = function() {
             # Generate objective text based on analysis type
             analysis_type <- self$options$analysis_type
@@ -2541,20 +2674,27 @@ survivalPowerClass <- R6::R6Class(
             power <- self$options$power_level
 
             if (analysis_type == "sample_size") {
-                paste0("Determine the required sample size to detect a hazard ratio of ", round(hr, 3),
-                      " with ", round(power * 100), "% power at a ", round(alpha * 100), "% significance level.")
+                paste0(
+                    "Determine the required sample size to detect a hazard ratio of ", round(hr, 3),
+                    " with ", round(power * 100), "% power at a ", round(alpha * 100), "% significance level."
+                )
             } else if (analysis_type == "power") {
-                paste0("Calculate the statistical power to detect a hazard ratio of ", round(hr, 3),
-                      " with ", self$options$sample_size_input, " subjects at a ", round(alpha * 100), "% significance level.")
+                paste0(
+                    "Calculate the statistical power to detect a hazard ratio of ", round(hr, 3),
+                    " with ", self$options$sample_size_input, " subjects at a ", round(alpha * 100), "% significance level."
+                )
             } else if (analysis_type == "effect_size") {
-                paste0("Determine the minimum detectable hazard ratio with ", self$options$sample_size_input,
-                      " subjects, ", round(power * 100), "% power, and ", round(alpha * 100), "% significance level.")
+                paste0(
+                    "Determine the minimum detectable hazard ratio with ", self$options$sample_size_input,
+                    " subjects, ", round(power * 100), "% power, and ", round(alpha * 100), "% significance level."
+                )
             } else {
-                paste0("Calculate the required study duration to achieve ", round(power * 100),
-                      "% power with ", self$options$sample_size_input, " subjects.")
+                paste0(
+                    "Calculate the required study duration to achieve ", round(power * 100),
+                    "% power with ", self$options$sample_size_input, " subjects."
+                )
             }
         },
-
         .generate_clinical_interpretation = function() {
             # Generate clinical interpretation section
             analysis_type <- self$options$analysis_type
@@ -2575,7 +2715,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(interpretation)
         },
-
         .generate_sample_size_interpretation = function(result_text) {
             # Generate sample size specific interpretation
             hr <- private$.get_effect_hr()
@@ -2592,43 +2731,52 @@ survivalPowerClass <- R6::R6Class(
             if (length(n_match) > 0) {
                 n <- as.numeric(n_match[1])
 
-                interpretation <- paste0(interpretation,
+                interpretation <- paste0(
+                    interpretation,
                     "<p><strong>Sample Size Interpretation:</strong><br>",
                     "To detect a hazard ratio of ", round(hr, 2),
                     " with ", round(power * 100), "% power and ",
                     round(alpha * 100), "% significance level, you need approximately ",
-                    n, " total subjects.</p>")
+                    n, " total subjects.</p>"
+                )
 
                 # Add clinical context
                 if (hr < 1) {
                     risk_reduction <- round((1 - hr) * 100)
-                    interpretation <- paste0(interpretation,
+                    interpretation <- paste0(
+                        interpretation,
                         "<p>A hazard ratio of ", round(hr, 2),
                         " represents a ", risk_reduction,
-                        "% reduction in the risk of the event in the treatment group compared to control.</p>")
+                        "% reduction in the risk of the event in the treatment group compared to control.</p>"
+                    )
                 } else if (hr > 1) {
                     risk_increase <- round((hr - 1) * 100)
-                    interpretation <- paste0(interpretation,
+                    interpretation <- paste0(
+                        interpretation,
                         "<p>A hazard ratio of ", round(hr, 2),
                         " represents a ", risk_increase,
-                        "% increase in the risk of the event in the treatment group compared to control.</p>")
+                        "% increase in the risk of the event in the treatment group compared to control.</p>"
+                    )
                 }
 
                 # Add feasibility assessment
                 if (n > 1000) {
-                    interpretation <- paste0(interpretation,
+                    interpretation <- paste0(
+                        interpretation,
                         "<p><strong>Feasibility Note:</strong> This large sample size may require ",
-                        "multi-center collaboration or extended recruitment periods.</p>")
+                        "multi-center collaboration or extended recruitment periods.</p>"
+                    )
                 } else if (n < 100) {
-                    interpretation <- paste0(interpretation,
+                    interpretation <- paste0(
+                        interpretation,
                         "<p><strong>Note:</strong> This relatively small sample size is feasible ",
-                        "for single-center studies, but ensure the effect size is realistic.</p>")
+                        "for single-center studies, but ensure the effect size is realistic.</p>"
+                    )
                 }
             }
 
             return(interpretation)
         },
-
         .generate_power_interpretation = function(result_text) {
             # Generate power specific interpretation
             hr <- self$options$effect_size
@@ -2640,27 +2788,32 @@ survivalPowerClass <- R6::R6Class(
             if (length(power_match) > 0) {
                 calculated_power <- as.numeric(gsub("%", "", power_match[1])) / 100
 
-                interpretation <- paste0(interpretation,
+                interpretation <- paste0(
+                    interpretation,
                     "<p><strong>Power Interpretation:</strong><br>",
                     "With ", self$options$sample_size_input, " subjects, ",
                     "you have ", round(calculated_power * 100, 1),
                     "% probability of detecting a hazard ratio of ", round(hr, 2),
-                    " if it truly exists.</p>")
+                    " if it truly exists.</p>"
+                )
 
                 # Add adequacy assessment
                 if (calculated_power < 0.7) {
-                    interpretation <- paste0(interpretation,
+                    interpretation <- paste0(
+                        interpretation,
                         "<p><strong>Warning:</strong> Power below 70% indicates the study is underpowered. ",
-                        "Consider increasing sample size or reconsidering the effect size.</p>")
+                        "Consider increasing sample size or reconsidering the effect size.</p>"
+                    )
                 } else if (calculated_power >= 0.8) {
-                    interpretation <- paste0(interpretation,
-                        "<p>This power level meets standard requirements for clinical trials.</p>")
+                    interpretation <- paste0(
+                        interpretation,
+                        "<p>This power level meets standard requirements for clinical trials.</p>"
+                    )
                 }
             }
 
             return(interpretation)
         },
-
         .generate_effect_size_interpretation = function(result_text) {
             # Generate effect size specific interpretation
             interpretation <- paste0(
@@ -2671,7 +2824,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(interpretation)
         },
-
         .generate_duration_interpretation = function(result_text) {
             # Generate duration specific interpretation
             interpretation <- paste0(
@@ -2682,7 +2834,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(interpretation)
         },
-
         .generate_report_sentence = function() {
             # Generate a copy-ready report sentence
             analysis_type <- self$options$analysis_type
@@ -2762,10 +2913,14 @@ survivalPowerClass <- R6::R6Class(
 
             return(sentence)
         },
-
         .populate_regulatory_considerations = function() {
             table <- self$results$regulatory_table
-            try({ table$deleteRows() }, silent = TRUE)
+            try(
+                {
+                    table$deleteRows()
+                },
+                silent = TRUE
+            )
 
             # Get study parameters
             analysis_type <- self$options$analysis_type
@@ -2804,7 +2959,7 @@ survivalPowerClass <- R6::R6Class(
                 regulatory_aspect = "Statistical Power",
                 requirement = "Minimum 80% power for primary endpoint",
                 compliance_status = power_compliance,
-                recommendation = if (power < 0.80) "Increase power to ≥80% for regulatory acceptance" else "Meets regulatory standards"
+                recommendation = if (power < 0.80) "Increase power to >=80% for regulatory acceptance" else "Meets regulatory standards"
             )))
 
             # Effect size considerations
@@ -2841,7 +2996,6 @@ survivalPowerClass <- R6::R6Class(
                 table$addRow(rowKey = i, values = regulatory_items[[i]])
             }
         },
-        
         .create_visualizations = function() {
             # Only create plots if we have valid options
             if (is.null(self$options$alpha_level) || is.null(self$options$power_level)) {
@@ -2849,264 +3003,288 @@ survivalPowerClass <- R6::R6Class(
             }
 
             # Create plot state for power curve - always generate data when available
-            tryCatch({
-                power_data <- private$.generate_power_curve_data()
+            tryCatch(
+                {
+                    power_data <- private$.generate_power_curve_data()
 
-                if (!is.null(power_data) && nrow(power_data) > 0) {
-                    plotState <- list(
-                        data = power_data,
-                        config = list(
-                            title = "Power Curve",
-                            xlab = "Effect Size (Hazard Ratio)",
-                            ylab = "Statistical Power",
-                            type = "power_curve"
-                        ),
-                        options = list(
-                            alpha = self$options$alpha_level,
-                            sample_size = if (!is.null(self$options$sample_size_input)) self$options$sample_size_input else 200
+                    if (!is.null(power_data) && nrow(power_data) > 0) {
+                        plotState <- list(
+                            data = power_data,
+                            config = list(
+                                title = "Power Curve",
+                                xlab = "Effect Size (Hazard Ratio)",
+                                ylab = "Statistical Power",
+                                type = "power_curve"
+                            ),
+                            options = list(
+                                alpha = self$options$alpha_level,
+                                sample_size = if (!is.null(self$options$sample_size_input)) self$options$sample_size_input else 200
+                            )
                         )
-                    )
-                    self$results$power_curve_plot$setState(plotState)
+                        self$results$power_curve_plot$setState(plotState)
+                    }
+                },
+                error = function(e) {
+                    warning(paste("Power curve data generation failed:", e$message))
                 }
-            }, error = function(e) {
-                warning(paste("Power curve data generation failed:", e$message))
-            })
+            )
 
             # Create plot state for sample size curve - always generate when relevant
-            tryCatch({
-                sample_size_data <- private$.generate_sample_size_curve_data()
+            tryCatch(
+                {
+                    sample_size_data <- private$.generate_sample_size_curve_data()
 
-                if (!is.null(sample_size_data) && nrow(sample_size_data) > 0) {
-                    plotState <- list(
-                        data = sample_size_data,
-                        config = list(
-                            title = "Sample Size Requirements",
-                            xlab = "Effect Size (Hazard Ratio)",
-                            ylab = "Required Sample Size",
-                            type = "sample_size_curve"
-                        ),
-                        options = list(
-                            power = self$options$power_level,
-                            alpha = self$options$alpha_level
-                        )
-                    )
-                    self$results$sample_size_plot$setState(plotState)
-                }
-            }, error = function(e) {
-                warning(paste("Sample size curve data generation failed:", e$message))
-            })
-
-            # Create expected survival curves plot
-            tryCatch({
-                survival_data <- private$.generate_survival_curve_data()
-
-                if (!is.null(survival_data) && nrow(survival_data) > 0) {
-                    plotState <- list(
-                        data = survival_data,
-                        config = list(
-                            title = "Expected Survival Curves",
-                            xlab = "Time (months)",
-                            ylab = "Survival Probability",
-                            type = "survival_curves"
-                        ),
-                        options = list(
-                            hr = self$options$effect_size,
-                            median_survival = self$options$control_median_survival
-                        )
-                    )
-                    self$results$survival_curves_plot$setState(plotState)
-                }
-            }, error = function(e) {
-                warning(paste("Survival curve data generation failed:", e$message))
-            })
-
-            # Create study timeline plot
-            tryCatch({
-                timeline_data <- private$.generate_timeline_data()
-
-                if (!is.null(timeline_data) && nrow(timeline_data) > 0) {
-                    plotState <- list(
-                        data = timeline_data,
-                        config = list(
-                            title = "Study Timeline",
-                            xlab = "Time (months)",
-                            ylab = "Study Phase",
-                            type = "timeline"
-                        ),
-                        options = list(
-                            accrual_period = self$options$accrual_period,
-                            follow_up = self$options$follow_up_period
-                        )
-                    )
-                    self$results$accrual_timeline_plot$setState(plotState)
-                }
-            }, error = function(e) {
-                warning(paste("Timeline data generation failed:", e$message))
-            })
-
-            # Create sensitivity analysis plot if enabled
-            if (self$options$sensitivity_analysis) {
-                tryCatch({
-                    sensitivity_data <- private$.generate_sensitivity_plot_data()
-
-                    if (!is.null(sensitivity_data) && nrow(sensitivity_data) > 0) {
+                    if (!is.null(sample_size_data) && nrow(sample_size_data) > 0) {
                         plotState <- list(
-                            data = sensitivity_data,
+                            data = sample_size_data,
                             config = list(
-                                title = "Sensitivity Analysis",
-                                xlab = "Hazard Ratio",
+                                title = "Sample Size Requirements",
+                                xlab = "Effect Size (Hazard Ratio)",
                                 ylab = "Required Sample Size",
-                                type = "sensitivity"
+                                type = "sample_size_curve"
                             ),
                             options = list(
                                 power = self$options$power_level,
                                 alpha = self$options$alpha_level
                             )
                         )
-                        self$results$sensitivity_plot$setState(plotState)
+                        self$results$sample_size_plot$setState(plotState)
                     }
-                }, error = function(e) {
-                    warning(paste("Sensitivity plot data generation failed:", e$message))
-                })
+                },
+                error = function(e) {
+                    warning(paste("Sample size curve data generation failed:", e$message))
+                }
+            )
+
+            # Create expected survival curves plot
+            tryCatch(
+                {
+                    survival_data <- private$.generate_survival_curve_data()
+
+                    if (!is.null(survival_data) && nrow(survival_data) > 0) {
+                        plotState <- list(
+                            data = survival_data,
+                            config = list(
+                                title = "Expected Survival Curves",
+                                xlab = "Time (months)",
+                                ylab = "Survival Probability",
+                                type = "survival_curves"
+                            ),
+                            options = list(
+                                hr = self$options$effect_size,
+                                median_survival = self$options$control_median_survival
+                            )
+                        )
+                        self$results$survival_curves_plot$setState(plotState)
+                    }
+                },
+                error = function(e) {
+                    warning(paste("Survival curve data generation failed:", e$message))
+                }
+            )
+
+            # Create study timeline plot
+            tryCatch(
+                {
+                    timeline_data <- private$.generate_timeline_data()
+
+                    if (!is.null(timeline_data) && nrow(timeline_data) > 0) {
+                        plotState <- list(
+                            data = timeline_data,
+                            config = list(
+                                title = "Study Timeline",
+                                xlab = "Time (months)",
+                                ylab = "Study Phase",
+                                type = "timeline"
+                            ),
+                            options = list(
+                                accrual_period = self$options$accrual_period,
+                                follow_up = self$options$follow_up_period
+                            )
+                        )
+                        self$results$accrual_timeline_plot$setState(plotState)
+                    }
+                },
+                error = function(e) {
+                    warning(paste("Timeline data generation failed:", e$message))
+                }
+            )
+
+            # Create sensitivity analysis plot if enabled
+            if (self$options$sensitivity_analysis) {
+                tryCatch(
+                    {
+                        sensitivity_data <- private$.generate_sensitivity_plot_data()
+
+                        if (!is.null(sensitivity_data) && nrow(sensitivity_data) > 0) {
+                            plotState <- list(
+                                data = sensitivity_data,
+                                config = list(
+                                    title = "Sensitivity Analysis",
+                                    xlab = "Hazard Ratio",
+                                    ylab = "Required Sample Size",
+                                    type = "sensitivity"
+                                ),
+                                options = list(
+                                    power = self$options$power_level,
+                                    alpha = self$options$alpha_level
+                                )
+                            )
+                            self$results$sensitivity_plot$setState(plotState)
+                        }
+                    },
+                    error = function(e) {
+                        warning(paste("Sensitivity plot data generation failed:", e$message))
+                    }
+                )
             }
         },
-
         .generate_power_curve_data = function() {
             # Generate data for power curve plot
-            tryCatch({
-                base_hr <- private$.get_effect_hr()
-                if (!is.finite(base_hr)) {
-                    base_hr <- 0.75
-                }
-                hr_values <- if (base_hr >= 1) {
-                    seq(1.05, min(3, base_hr + 0.5), by = 0.05)
-                } else {
-                    seq(0.5, 0.95, by = 0.05)
-                }
-                n_total <- if (isTRUE(self$options$analysis_type == "sample_size") &&
-                    !is.null(private$calculated_sample_size)) {
-                    private$calculated_sample_size
-                } else {
-                    self$options$sample_size_input
-                }
-                if (is.null(n_total) || !is.finite(n_total) || n_total <= 0) {
-                    n_total <- 200
-                }
-                power_values <- sapply(hr_values, function(hr) {
-                    private$.basic_power_calc(n_total, hr, self$options$alpha_level)
-                })
+            tryCatch(
+                {
+                    base_hr <- private$.get_effect_hr()
+                    if (!is.finite(base_hr)) {
+                        base_hr <- 0.75
+                    }
+                    hr_values <- if (base_hr >= 1) {
+                        seq(1.05, min(3, base_hr + 0.5), by = 0.05)
+                    } else {
+                        seq(0.5, 0.95, by = 0.05)
+                    }
+                    n_total <- if (isTRUE(self$options$analysis_type == "sample_size") &&
+                        !is.null(private$calculated_sample_size)) {
+                        private$calculated_sample_size
+                    } else {
+                        self$options$sample_size_input
+                    }
+                    if (is.null(n_total) || !is.finite(n_total) || n_total <= 0) {
+                        n_total <- 200
+                    }
+                    power_values <- sapply(hr_values, function(hr) {
+                        private$.basic_power_calc(n_total, hr, self$options$alpha_level)
+                    })
 
-                return(data.frame(
-                    hazard_ratio = hr_values,
-                    power = power_values
-                ))
-            }, error = function(e) {
-                warning(paste("Power curve data generation error:", e$message))
-                return(NULL)
-            })
+                    return(data.frame(
+                        hazard_ratio = hr_values,
+                        power = power_values
+                    ))
+                },
+                error = function(e) {
+                    warning(paste("Power curve data generation error:", e$message))
+                    return(NULL)
+                }
+            )
         },
-
         .generate_sample_size_curve_data = function() {
             # Generate data for sample size curve plot
-            tryCatch({
-                base_hr <- private$.get_effect_hr()
-                if (!is.finite(base_hr)) {
-                    base_hr <- 0.75
-                }
-                hr_values <- if (base_hr >= 1) {
-                    seq(1.05, min(3, base_hr + 0.5), by = 0.05)
-                } else {
-                    seq(0.5, 0.95, by = 0.05)
-                }
-                sample_sizes <- sapply(hr_values, function(hr) {
-                    private$.basic_sample_size_calc(self$options$power_level, hr, self$options$alpha_level)
-                })
+            tryCatch(
+                {
+                    base_hr <- private$.get_effect_hr()
+                    if (!is.finite(base_hr)) {
+                        base_hr <- 0.75
+                    }
+                    hr_values <- if (base_hr >= 1) {
+                        seq(1.05, min(3, base_hr + 0.5), by = 0.05)
+                    } else {
+                        seq(0.5, 0.95, by = 0.05)
+                    }
+                    sample_sizes <- sapply(hr_values, function(hr) {
+                        private$.basic_sample_size_calc(self$options$power_level, hr, self$options$alpha_level)
+                    })
 
-                return(data.frame(
-                    hazard_ratio = hr_values,
-                    sample_size = sample_sizes
-                ))
-            }, error = function(e) {
-                warning(paste("Sample size curve data generation error:", e$message))
-                return(NULL)
-            })
+                    return(data.frame(
+                        hazard_ratio = hr_values,
+                        sample_size = sample_sizes
+                    ))
+                },
+                error = function(e) {
+                    warning(paste("Sample size curve data generation error:", e$message))
+                    return(NULL)
+                }
+            )
         },
-
         .generate_survival_curve_data = function() {
             # Generate expected survival curves for control and treatment groups
-            tryCatch({
-                time <- seq(0, 60, by = 1)
-                hr <- private$.get_effect_hr()
-                median_control <- self$options$control_median_survival
+            tryCatch(
+                {
+                    time <- seq(0, 60, by = 1)
+                    hr <- private$.get_effect_hr()
+                    median_control <- self$options$control_median_survival
 
-                # Convert median to rate parameter
-                lambda_control <- log(2) / median_control
-                lambda_treatment <- lambda_control * hr
+                    # Convert median to rate parameter
+                    lambda_control <- log(2) / median_control
+                    lambda_treatment <- lambda_control * hr
 
-                surv_control <- exp(-lambda_control * time)
-                surv_treatment <- exp(-lambda_treatment * time)
+                    surv_control <- exp(-lambda_control * time)
+                    surv_treatment <- exp(-lambda_treatment * time)
 
-                data <- data.frame(
-                    time = rep(time, 2),
-                    survival = c(surv_control, surv_treatment),
-                    group = rep(c("Control", "Treatment"), each = length(time))
-                )
+                    data <- data.frame(
+                        time = rep(time, 2),
+                        survival = c(surv_control, surv_treatment),
+                        group = rep(c("Control", "Treatment"), each = length(time))
+                    )
 
-                return(data)
-            }, error = function(e) {
-                warning(paste("Survival curve data generation error:", e$message))
-                return(NULL)
-            })
+                    return(data)
+                },
+                error = function(e) {
+                    warning(paste("Survival curve data generation error:", e$message))
+                    return(NULL)
+                }
+            )
         },
-
         .generate_timeline_data = function() {
             # Generate study timeline data
-            tryCatch({
-                accrual_period <- self$options$accrual_period
-                follow_up <- self$options$follow_up_period
+            tryCatch(
+                {
+                    accrual_period <- self$options$accrual_period
+                    follow_up <- self$options$follow_up_period
 
-                timeline_data <- data.frame(
-                    phase = c("Accrual", "Follow-up", "Analysis"),
-                    start = c(0, accrual_period, accrual_period + follow_up),
-                    end = c(accrual_period, accrual_period + follow_up, accrual_period + follow_up + 3),
-                    y = c(1, 1, 1)
-                )
+                    timeline_data <- data.frame(
+                        phase = c("Accrual", "Follow-up", "Analysis"),
+                        start = c(0, accrual_period, accrual_period + follow_up),
+                        end = c(accrual_period, accrual_period + follow_up, accrual_period + follow_up + 3),
+                        y = c(1, 1, 1)
+                    )
 
-                return(timeline_data)
-            }, error = function(e) {
-                warning(paste("Timeline data generation error:", e$message))
-                return(NULL)
-            })
+                    return(timeline_data)
+                },
+                error = function(e) {
+                    warning(paste("Timeline data generation error:", e$message))
+                    return(NULL)
+                }
+            )
         },
-
         .generate_sensitivity_plot_data = function() {
             # Generate data for sensitivity analysis plot
-            tryCatch({
-                # Create a range of hazard ratios around the base value
-                base_hr <- private$.get_effect_hr()
-                hr_range <- seq(max(0.3, base_hr - 0.3), min(1.0, base_hr + 0.3), by = 0.05)
+            tryCatch(
+                {
+                    # Create a range of hazard ratios around the base value
+                    base_hr <- private$.get_effect_hr()
+                    hr_range <- seq(max(0.3, base_hr - 0.3), min(1.0, base_hr + 0.3), by = 0.05)
 
-                # Calculate required sample size for each HR
-                sample_sizes <- sapply(hr_range, function(hr) {
-                    private$.basic_sample_size_calc(
-                        self$options$power_level,
-                        hr,
-                        self$options$alpha_level
-                    )
-                })
+                    # Calculate required sample size for each HR
+                    sample_sizes <- sapply(hr_range, function(hr) {
+                        private$.basic_sample_size_calc(
+                            self$options$power_level,
+                            hr,
+                            self$options$alpha_level
+                        )
+                    })
 
-                # Create data frame for plotting
-                return(data.frame(
-                    hazard_ratio = hr_range,
-                    sample_size = sample_sizes,
-                    is_base_case = abs(hr_range - base_hr) < 0.01
-                ))
-            }, error = function(e) {
-                warning(paste("Sensitivity plot data generation error:", e$message))
-                return(NULL)
-            })
+                    # Create data frame for plotting
+                    return(data.frame(
+                        hazard_ratio = hr_range,
+                        sample_size = sample_sizes,
+                        is_base_case = abs(hr_range - base_hr) < 0.01
+                    ))
+                },
+                error = function(e) {
+                    warning(paste("Sensitivity plot data generation error:", e$message))
+                    return(NULL)
+                }
+            )
         },
-
         .basic_power_calc = function(n_total, hr, alpha) {
             lambda_control <- log(2) / self$options$control_median_survival
 
@@ -3128,7 +3306,6 @@ survivalPowerClass <- R6::R6Class(
             )
             max(0, min(1, power))
         },
-
         .basic_sample_size_calc = function(power, hr, alpha) {
             events_needed <- private$.events_needed_log_rank(
                 hr = hr,
@@ -3158,8 +3335,10 @@ survivalPowerClass <- R6::R6Class(
             es <- self$options$effect_size
             # Default/fallback
             if (is.null(type) || type == "hazard_ratio") {
-                private$effect_hr_info <- list(type = "hazard_ratio", hr = es,
-                    note = "Using hazard ratio directly as effect size.")
+                private$effect_hr_info <- list(
+                    type = "hazard_ratio", hr = es,
+                    note = "Using hazard ratio directly as effect size."
+                )
                 return(es)
             }
 
@@ -3175,10 +3354,14 @@ survivalPowerClass <- R6::R6Class(
                 }
                 # Under exponential assumption: median_t/median_c = 1/HR
                 hr <- 1 / es
-                private$effect_hr_info <- list(type = "median_ratio", hr = hr,
-                    note = paste0("Converted from median survival ratio (treatment/control) = ",
-                                  sprintf("%.3f", es),
-                                  "; assuming exponential survival, HR = 1 / ratio."))
+                private$effect_hr_info <- list(
+                    type = "median_ratio", hr = hr,
+                    note = paste0(
+                        "Converted from median survival ratio (treatment/control) = ",
+                        sprintf("%.3f", es),
+                        "; assuming exponential survival, HR = 1 / ratio."
+                    )
+                )
                 return(hr)
             }
 
@@ -3202,24 +3385,32 @@ survivalPowerClass <- R6::R6Class(
                     rmst_t <- (1 - exp(-lambda_t * tau)) / lambda_t
                     (rmst_t - rmst_c) - delta
                 }
-                a <- 0.2; b <- 3.0
-                fa <- rmst_diff_fn(a); fb <- rmst_diff_fn(b)
+                a <- 0.2
+                b <- 3.0
+                fa <- rmst_diff_fn(a)
+                fb <- rmst_diff_fn(b)
                 if (is.finite(fa) && is.finite(fb) && fa * fb <= 0) {
                     hr <- tryCatch(uniroot(rmst_diff_fn, c(a, b))$root, error = function(e) NA)
                     if (is.finite(hr)) {
-                        private$effect_hr_info <- list(type = "rmst_difference", hr = hr,
-                            note = paste0("Derived HR from RMST difference ", sprintf("%.3f", delta),
-                                          " at tau = ", sprintf("%.1f", tau),
-                                          " months under exponential assumption."))
+                        private$effect_hr_info <- list(
+                            type = "rmst_difference", hr = hr,
+                            note = paste0(
+                                "Derived HR from RMST difference ", sprintf("%.3f", delta),
+                                " at tau = ", sprintf("%.1f", tau),
+                                " months under exponential assumption."
+                            )
+                        )
                         return(hr)
                     }
                 }
                 private$effect_hr_info <- list(
                     type = "rmst_difference",
                     hr = NA_real_,
-                    note = paste0("Could not solve HR from RMST difference (inputs: Δ=",
-                                   sprintf("%.3f", delta), ", tau=", sprintf("%.1f", tau),
-                                   ", median_c=", sprintf("%.1f", mc), ").")
+                    note = paste0(
+                        "Could not solve HR from RMST difference (inputs: Δ=",
+                        sprintf("%.3f", delta), ", tau=", sprintf("%.1f", tau),
+                        ", median_c=", sprintf("%.1f", mc), ")."
+                    )
                 )
                 return(NA_real_)
             }
@@ -3243,234 +3434,253 @@ survivalPowerClass <- R6::R6Class(
                     s_t <- exp(-(lambda_c * hr) * T)
                     (s_t - s_c(T)) - delta
                 }
-                a <- 0.2; b <- 3.0
-                fa <- target_fn(a); fb <- target_fn(b)
+                a <- 0.2
+                b <- 3.0
+                fa <- target_fn(a)
+                fb <- target_fn(b)
                 if (is.finite(fa) && is.finite(fb) && fa * fb <= 0) {
                     hr <- tryCatch(uniroot(target_fn, c(a, b))$root, error = function(e) NA)
                     if (is.finite(hr)) {
-                        private$effect_hr_info <- list(type = "survival_difference", hr = hr,
-                            note = paste0("Derived HR from survival difference ", sprintf("%.3f", delta),
-                                          " at follow-up = ", sprintf("%.1f", T),
-                                          " months under exponential assumption."))
+                        private$effect_hr_info <- list(
+                            type = "survival_difference", hr = hr,
+                            note = paste0(
+                                "Derived HR from survival difference ", sprintf("%.3f", delta),
+                                " at follow-up = ", sprintf("%.1f", T),
+                                " months under exponential assumption."
+                            )
+                        )
                         return(hr)
                     }
                 }
                 private$effect_hr_info <- list(
                     type = "survival_difference",
                     hr = NA_real_,
-                    note = paste0("Could not solve HR from survival difference (inputs: Δ=",
-                                   sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", T),
-                                   ", median_c=", sprintf("%.1f", mc), ").")
+                    note = paste0(
+                        "Could not solve HR from survival difference (inputs: Δ=",
+                        sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", T),
+                        ", median_c=", sprintf("%.1f", mc), ")."
+                    )
                 )
                 return(NA_real_)
             }
 
-            # Unknown type — return provided value
-            private$effect_hr_info <- list(type = type, hr = es,
-                note = "Using provided effect size without conversion.")
+            # Unknown type - return provided value
+            private$effect_hr_info <- list(
+                type = type, hr = es,
+                note = "Using provided effect size without conversion."
+            )
             return(es)
         },
 
         # Plot functions
         .plot_power_curves = function(image, ggtheme, theme, ...) {
-            tryCatch({
-                plotData <- image$state
+            tryCatch(
+                {
+                    plotData <- image$state
 
-                if (is.null(plotData)) {
-                    return(FALSE)
-                }
-
-                if (is.null(plotData$data) || nrow(plotData$data) == 0) {
-                    return(FALSE)
-                }
-
-                # Create power curve plot
-                plot <- ggplot2::ggplot(plotData$data, ggplot2::aes(x = hazard_ratio, y = power)) +
-                    ggplot2::geom_line(size = 1.2, color = "blue") +
-                    ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.6) +
-                    ggplot2::labs(
-                        title = plotData$config$title,
-                        x = plotData$config$xlab,
-                        y = plotData$config$ylab
-                    ) +
-                    ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent_format()) +
-                    ggtheme
-
-                print(plot)
-                return(TRUE)
-
-            }, error = function(e) {
-                warning(paste("Power curve plot error:", e$message))
-                return(FALSE)
-            })
-        },
-
-        .plot_sample_size_curves = function(image, ggtheme, theme, ...) {
-            tryCatch({
-                plotData <- image$state
-
-                if (is.null(plotData)) {
-                    return(FALSE)
-                }
-
-                if (is.null(plotData$data) || nrow(plotData$data) == 0) {
-                    return(FALSE)
-                }
-
-                # Create sample size curve plot
-                plot <- ggplot2::ggplot(plotData$data, ggplot2::aes(x = hazard_ratio, y = sample_size)) +
-                    ggplot2::geom_line(size = 1.2, color = "red") +
-                    ggplot2::labs(
-                        title = plotData$config$title,
-                        x = plotData$config$xlab,
-                        y = plotData$config$ylab
-                    ) +
-                    ggtheme
-
-                print(plot)
-                return(TRUE)
-
-            }, error = function(e) {
-                warning(paste("Sample size plot error:", e$message))
-                return(FALSE)
-            })
-        },
-
-        .plot_expected_survival = function(image, ggtheme, theme, ...) {
-            tryCatch({
-                plotData <- image$state
-
-                if (is.null(plotData)) {
-                    return(FALSE)
-                }
-
-                if (is.null(plotData$data) || nrow(plotData$data) == 0) {
-                    return(FALSE)
-                }
-
-                # Create survival curve plot
-                plot <- ggplot2::ggplot(plotData$data, ggplot2::aes(x = time, y = survival, color = group)) +
-                    ggplot2::geom_line(size = 1.2) +
-                    ggplot2::labs(
-                        title = plotData$config$title,
-                        x = plotData$config$xlab,
-                        y = plotData$config$ylab,
-                        color = "Group"
-                    ) +
-                    ggplot2::scale_y_continuous(limits = c(0, 1)) +
-                    ggplot2::scale_color_manual(values = c("Control" = "red", "Treatment" = "blue")) +
-                    ggtheme
-
-                print(plot)
-                return(TRUE)
-
-            }, error = function(e) {
-                warning(paste("Survival curve plot error:", e$message))
-                return(FALSE)
-            })
-        },
-
-        .plot_study_timeline = function(image, ggtheme, theme, ...) {
-            tryCatch({
-                plotData <- image$state
-
-                if (is.null(plotData)) {
-                    return(FALSE)
-                }
-
-                if (is.null(plotData$data) || nrow(plotData$data) == 0) {
-                    return(FALSE)
-                }
-
-                # Create timeline plot
-                plot <- ggplot2::ggplot(plotData$data,
-                                      ggplot2::aes(xmin = start, xmax = end,
-                                                  ymin = y - 0.2, ymax = y + 0.2,
-                                                  fill = phase)) +
-                    ggplot2::geom_rect() +
-                    ggplot2::labs(
-                        title = plotData$config$title,
-                        x = plotData$config$xlab,
-                        fill = "Study Phase"
-                    ) +
-                    ggplot2::theme(
-                        axis.text.y = ggplot2::element_blank(),
-                        axis.ticks.y = ggplot2::element_blank(),
-                        axis.title.y = ggplot2::element_blank()
-                    ) +
-                    ggplot2::scale_fill_manual(values = c(
-                        "Accrual" = "#3498db",
-                        "Follow-up" = "#2ecc71",
-                        "Analysis" = "#e74c3c"
-                    )) +
-                    ggtheme
-
-                print(plot)
-                return(TRUE)
-
-            }, error = function(e) {
-                warning(paste("Timeline plot error:", e$message))
-                return(FALSE)
-            })
-        },
-
-        .plot_sensitivity_analysis = function(image, ggtheme, theme, ...) {
-            tryCatch({
-                plotData <- image$state
-
-                if (is.null(plotData)) {
-                    return(FALSE)
-                }
-
-                # Use provided data or return FALSE if no data
-                if (is.null(plotData$data) || nrow(plotData$data) == 0) {
-                    return(FALSE)
-                }
-
-                data <- plotData$data
-
-                # Create sensitivity analysis plot
-                plot <- ggplot2::ggplot(data, ggplot2::aes(x = hazard_ratio, y = sample_size)) +
-                    ggplot2::geom_line(color = "steelblue", size = 1) +
-                    ggplot2::geom_point(size = 3, color = "steelblue") +
-
-                # Highlight base case if present
-                if ("is_base_case" %in% names(data)) {
-                    base_data <- data[data$is_base_case, ]
-                    if (nrow(base_data) > 0) {
-                        plot <- plot + ggplot2::geom_point(
-                            data = base_data,
-                            color = "red", size = 5, shape = 21, fill = "red", alpha = 0.7
-                        )
+                    if (is.null(plotData)) {
+                        return(FALSE)
                     }
+
+                    if (is.null(plotData$data) || nrow(plotData$data) == 0) {
+                        return(FALSE)
+                    }
+
+                    # Create power curve plot
+                    plot <- ggplot2::ggplot(plotData$data, ggplot2::aes(x = hazard_ratio, y = power)) +
+                        ggplot2::geom_line(size = 1.2, color = "blue") +
+                        ggplot2::geom_hline(yintercept = 0.8, linetype = "dashed", alpha = 0.6) +
+                        ggplot2::labs(
+                            title = plotData$config$title,
+                            x = plotData$config$xlab,
+                            y = plotData$config$ylab
+                        ) +
+                        ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent_format()) +
+                        ggtheme
+
+                    print(plot)
+                    return(TRUE)
+                },
+                error = function(e) {
+                    warning(paste("Power curve plot error:", e$message))
+                    return(FALSE)
                 }
-
-                plot <- plot +
-                    ggplot2::labs(
-                        title = "Sensitivity Analysis",
-                        x = "Hazard Ratio",
-                        y = "Required Sample Size"
-                    ) +
-                    ggtheme
-
-                print(plot)
-                return(TRUE)
-
-            }, error = function(e) {
-                warning(paste("Sensitivity analysis plot error:", e$message))
-                return(FALSE)
-            })
+            )
         },
+        .plot_sample_size_curves = function(image, ggtheme, theme, ...) {
+            tryCatch(
+                {
+                    plotData <- image$state
 
+                    if (is.null(plotData)) {
+                        return(FALSE)
+                    }
+
+                    if (is.null(plotData$data) || nrow(plotData$data) == 0) {
+                        return(FALSE)
+                    }
+
+                    # Create sample size curve plot
+                    plot <- ggplot2::ggplot(plotData$data, ggplot2::aes(x = hazard_ratio, y = sample_size)) +
+                        ggplot2::geom_line(size = 1.2, color = "red") +
+                        ggplot2::labs(
+                            title = plotData$config$title,
+                            x = plotData$config$xlab,
+                            y = plotData$config$ylab
+                        ) +
+                        ggtheme
+
+                    print(plot)
+                    return(TRUE)
+                },
+                error = function(e) {
+                    warning(paste("Sample size plot error:", e$message))
+                    return(FALSE)
+                }
+            )
+        },
+        .plot_expected_survival = function(image, ggtheme, theme, ...) {
+            tryCatch(
+                {
+                    plotData <- image$state
+
+                    if (is.null(plotData)) {
+                        return(FALSE)
+                    }
+
+                    if (is.null(plotData$data) || nrow(plotData$data) == 0) {
+                        return(FALSE)
+                    }
+
+                    # Create survival curve plot
+                    plot <- ggplot2::ggplot(plotData$data, ggplot2::aes(x = time, y = survival, color = group)) +
+                        ggplot2::geom_line(size = 1.2) +
+                        ggplot2::labs(
+                            title = plotData$config$title,
+                            x = plotData$config$xlab,
+                            y = plotData$config$ylab,
+                            color = "Group"
+                        ) +
+                        ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                        ggplot2::scale_color_manual(values = c("Control" = "red", "Treatment" = "blue")) +
+                        ggtheme
+
+                    print(plot)
+                    return(TRUE)
+                },
+                error = function(e) {
+                    warning(paste("Survival curve plot error:", e$message))
+                    return(FALSE)
+                }
+            )
+        },
+        .plot_study_timeline = function(image, ggtheme, theme, ...) {
+            tryCatch(
+                {
+                    plotData <- image$state
+
+                    if (is.null(plotData)) {
+                        return(FALSE)
+                    }
+
+                    if (is.null(plotData$data) || nrow(plotData$data) == 0) {
+                        return(FALSE)
+                    }
+
+                    # Create timeline plot
+                    plot <- ggplot2::ggplot(
+                        plotData$data,
+                        ggplot2::aes(
+                            xmin = start, xmax = end,
+                            ymin = y - 0.2, ymax = y + 0.2,
+                            fill = phase
+                        )
+                    ) +
+                        ggplot2::geom_rect() +
+                        ggplot2::labs(
+                            title = plotData$config$title,
+                            x = plotData$config$xlab,
+                            fill = "Study Phase"
+                        ) +
+                        ggplot2::theme(
+                            axis.text.y = ggplot2::element_blank(),
+                            axis.ticks.y = ggplot2::element_blank(),
+                            axis.title.y = ggplot2::element_blank()
+                        ) +
+                        ggplot2::scale_fill_manual(values = c(
+                            "Accrual" = "#3498db",
+                            "Follow-up" = "#2ecc71",
+                            "Analysis" = "#e74c3c"
+                        )) +
+                        ggtheme
+
+                    print(plot)
+                    return(TRUE)
+                },
+                error = function(e) {
+                    warning(paste("Timeline plot error:", e$message))
+                    return(FALSE)
+                }
+            )
+        },
+        .plot_sensitivity_analysis = function(image, ggtheme, theme, ...) {
+            tryCatch(
+                {
+                    plotData <- image$state
+
+                    if (is.null(plotData)) {
+                        return(FALSE)
+                    }
+
+                    # Use provided data or return FALSE if no data
+                    if (is.null(plotData$data) || nrow(plotData$data) == 0) {
+                        return(FALSE)
+                    }
+
+                    data <- plotData$data
+
+                    # Create sensitivity analysis plot
+                    plot <- ggplot2::ggplot(data, ggplot2::aes(x = hazard_ratio, y = sample_size)) +
+                        ggplot2::geom_line(color = "steelblue", size = 1) +
+                        ggplot2::geom_point(size = 3, color = "steelblue") +
+
+                        # Highlight base case if present
+                        if ("is_base_case" %in% names(data)) {
+                            base_data <- data[data$is_base_case, ]
+                            if (nrow(base_data) > 0) {
+                                plot <- plot + ggplot2::geom_point(
+                                    data = base_data,
+                                    color = "red", size = 5, shape = 21, fill = "red", alpha = 0.7
+                                )
+                            }
+                        }
+
+                    plot <- plot +
+                        ggplot2::labs(
+                            title = "Sensitivity Analysis",
+                            x = "Hazard Ratio",
+                            y = "Required Sample Size"
+                        ) +
+                        ggtheme
+
+                    print(plot)
+                    return(TRUE)
+                },
+                error = function(e) {
+                    warning(paste("Sensitivity analysis plot error:", e$message))
+                    return(FALSE)
+                }
+            )
+        },
         .get_distribution_parameters = function(median_control, hr) {
             distribution <- self$options$survival_distribution
             weibull_shape <- self$options$weibull_shape
-            
+
             if (distribution == "exponential") {
                 # Exponential distribution (original implementation)
                 lambda_control <- log(2) / median_control
                 lambda_treatment <- lambda_control * hr
-                
+
                 return(list(
                     distribution = "exponential",
                     lambda_control = lambda_control,
@@ -3478,26 +3688,25 @@ survivalPowerClass <- R6::R6Class(
                     median_control = median_control,
                     median_treatment = median_control / hr
                 ))
-                
             } else if (distribution == "weibull") {
                 # Weibull distribution support
                 # S(t) = exp(-(lambda*t)^shape)
                 # Median: m = (log(2)/lambda)^(1/shape)
                 # Under PH: lambda_treatment = lambda_control * hr^(1/shape)
-                
+
                 if (is.null(weibull_shape) || weibull_shape <= 0) {
                     stop("Weibull shape parameter must be positive (default: 1.0 for exponential)")
                 }
-                
+
                 # Calculate scale parameter from median
                 lambda_control <- (log(2) / median_control)^(1 / weibull_shape)
-                
+
                 # Treatment group scale under proportional hazards
                 lambda_treatment <- lambda_control * hr^(1 / weibull_shape)
-                
+
                 # Calculate treatment median
                 median_treatment <- (log(2) / lambda_treatment)^(1 / weibull_shape)
-                
+
                 return(list(
                     distribution = "weibull",
                     lambda_control = lambda_control,
@@ -3506,20 +3715,19 @@ survivalPowerClass <- R6::R6Class(
                     median_control = median_control,
                     median_treatment = median_treatment
                 ))
-                
             } else if (distribution == "log_normal") {
                 # Log-normal distribution support
                 # log(T) ~ N(mu, sigma^2)
                 # Median: m = exp(mu)
                 # Approximate HR effect: mu_treatment = mu_control - log(hr)
-                
+
                 # Use weibull_shape parameter as sigma for log-normal
                 sigma <- if (!is.null(weibull_shape) && weibull_shape > 0) weibull_shape else 1.0
-                
+
                 mu_control <- log(median_control)
                 mu_treatment <- mu_control - log(hr)
                 median_treatment <- exp(mu_treatment)
-                
+
                 return(list(
                     distribution = "lognormal",
                     mu_control = mu_control,
@@ -3528,7 +3736,6 @@ survivalPowerClass <- R6::R6Class(
                     median_control = median_control,
                     median_treatment = median_treatment
                 ))
-                
             } else if (distribution == "piecewise_exponential") {
                 # Piecewise exponential - requires custom specification
                 # For now, return error with guidance
@@ -3537,7 +3744,6 @@ survivalPowerClass <- R6::R6Class(
                     "Please use exponential or Weibull distribution, or contact package maintainer",
                     "for guidance on implementing piecewise exponential models."
                 ))
-                
             } else {
                 stop(paste(
                     "Unsupported distribution:", distribution,
@@ -3546,7 +3752,6 @@ survivalPowerClass <- R6::R6Class(
                 ))
             }
         },
-
         .adjust_alpha_for_multiplicity = function(alpha) {
             study_design <- self$options$study_design
             multiple_comparisons <- self$options$multiple_comparisons
@@ -3572,7 +3777,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(alpha_adjusted)
         },
-
         .adjust_sample_for_design = function() {
             study_design <- self$options$study_design
             cluster_size <- self$options$cluster_size
@@ -3591,7 +3795,6 @@ survivalPowerClass <- R6::R6Class(
                 stratification_efficiency = 1
             ))
         },
-
         .adjust_sample_for_accrual = function(base_sample_size) {
             accrual_pattern <- self$options$accrual_pattern
 
@@ -3601,7 +3804,6 @@ survivalPowerClass <- R6::R6Class(
 
             return(base_sample_size)
         },
-
         .allocation_props = function(allocation_ratio) {
             ratio <- ifelse(is.null(allocation_ratio) || allocation_ratio <= 0, 1, allocation_ratio)
             list(
@@ -3609,7 +3811,6 @@ survivalPowerClass <- R6::R6Class(
                 treatment = 1 / (1 + ratio)
             )
         },
-
         .dropout_hazard = function(dropout_rate) {
             if (is.null(dropout_rate) || dropout_rate <= 0) {
                 return(0)
@@ -3617,7 +3818,6 @@ survivalPowerClass <- R6::R6Class(
             rate <- min(dropout_rate, 0.99)
             -log(1 - rate) / 12
         },
-
         .event_probability = function(lambda, accrual_period, follow_up_period, dropout_rate) {
             accrual <- max(0, accrual_period)
             follow_up <- max(0, follow_up_period)
@@ -3639,7 +3839,6 @@ survivalPowerClass <- R6::R6Class(
             prob <- (lambda / H) * (integral / accrual)
             pmin(pmax(prob, 0), 1)
         },
-
         .overall_event_probability = function(lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate) {
             props <- private$.allocation_props(allocation_ratio)
             lambda_treatment <- lambda_control * hr
@@ -3654,7 +3853,6 @@ survivalPowerClass <- R6::R6Class(
                 props = props
             )
         },
-
         .expected_events_from_sample = function(n_total, lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate) {
             probs <- private$.overall_event_probability(lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate)
             list(
@@ -3664,12 +3862,10 @@ survivalPowerClass <- R6::R6Class(
                 probs = probs
             )
         },
-
         .information_from_events = function(events, allocation_ratio) {
             props <- private$.allocation_props(allocation_ratio)
             events * props$control * props$treatment
         },
-
         .power_from_events = function(events, hr, alpha, allocation_ratio) {
             if (is.null(events) || events <= 0 || is.null(hr) || hr <= 0 || hr == 1) {
                 return(0)
@@ -3680,11 +3876,10 @@ survivalPowerClass <- R6::R6Class(
                 return(0)
             }
 
-            z_alpha <- qnorm(1 - alpha/2)
+            z_alpha <- qnorm(1 - alpha / 2)
             z <- sqrt(info) * abs(log(hr))
             pnorm(z - z_alpha)
         },
-
         .sample_size_from_events = function(events_needed, lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate) {
             probs <- private$.overall_event_probability(lambda_control, hr, allocation_ratio, accrual_period, follow_up_period, dropout_rate)
 
@@ -3694,7 +3889,6 @@ survivalPowerClass <- R6::R6Class(
 
             ceiling(events_needed / probs$overall)
         },
-
         .solve_follow_up_duration = function(n_total, target_events, lambda_control, hr, allocation_ratio, accrual_period, dropout_rate, initial_follow_up) {
             if (is.null(target_events) || target_events <= 0 || is.null(n_total) || n_total <= 0) {
                 return(NA_real_)
@@ -3743,23 +3937,26 @@ survivalPowerClass <- R6::R6Class(
                 iter <- iter + 1
             }
 
-            follow_up_solution <- tryCatch({
-                uniroot(
-                    function(fu) {
-                        private$.expected_events_from_sample(
-                            n_total = n_total,
-                            lambda_control = lambda_control,
-                            hr = hr,
-                            allocation_ratio = allocation_ratio,
-                            accrual_period = accrual_period,
-                            follow_up_period = fu,
-                            dropout_rate = dropout_rate
-                        )$total - target_events
-                    },
-                    lower = lower,
-                    upper = upper
-                )$root
-            }, error = function(e) NA_real_)
+            follow_up_solution <- tryCatch(
+                {
+                    uniroot(
+                        function(fu) {
+                            private$.expected_events_from_sample(
+                                n_total = n_total,
+                                lambda_control = lambda_control,
+                                hr = hr,
+                                allocation_ratio = allocation_ratio,
+                                accrual_period = accrual_period,
+                                follow_up_period = fu,
+                                dropout_rate = dropout_rate
+                            )$total - target_events
+                        },
+                        lower = lower,
+                        upper = upper
+                    )$root
+                },
+                error = function(e) NA_real_
+            )
 
             if (is.na(follow_up_solution)) {
                 return(NA_real_)
@@ -3767,215 +3964,225 @@ survivalPowerClass <- R6::R6Class(
 
             accrual_period + follow_up_solution
         },
-
         .calculate_log_rank_with_params = function(analysis_type, alpha, power, hr, allocation_ratio, accrual_period, follow_up, median_control) {
             # Calculate log-rank results with specific parameters (used for sensitivity analysis)
             # Convert median to rate parameter
             lambda_control <- log(2) / median_control
 
             if (analysis_type == "sample_size") {
-                tryCatch({
-                    # Basic sample size calculation
-                    events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
+                tryCatch(
+                    {
+                        # Basic sample size calculation
+                        events_needed <- private$.events_needed_log_rank(hr, alpha, power, allocation_ratio)
 
-                    # Adjust for study timeline
-                    total_time <- accrual_period + follow_up
-                    prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
+                        # Adjust for study timeline
+                        total_time <- accrual_period + follow_up
+                        prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
 
-                    n_total <- ceiling(events_needed / prob_event_control)
-                    return(paste("Total Sample Size:", n_total, "subjects"))
-                }, error = function(e) {
-                    return("Calculation error")
-                })
+                        n_total <- ceiling(events_needed / prob_event_control)
+                        return(paste("Total Sample Size:", n_total, "subjects"))
+                    },
+                    error = function(e) {
+                        return("Calculation error")
+                    }
+                )
             } else if (analysis_type == "power") {
-                tryCatch({
-                    n_total <- self$options$sample_size_input
-                    total_time <- accrual_period + follow_up
-                    prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
-                    expected_events <- n_total * prob_event_control
+                tryCatch(
+                    {
+                        n_total <- self$options$sample_size_input
+                        total_time <- accrual_period + follow_up
+                        prob_event_control <- 1 - exp(-lambda_control * (total_time * private$AVERAGE_FOLLOWUP_FACTOR))
+                        expected_events <- n_total * prob_event_control
 
-                    power_calc <- private$.power_from_events(
-                        events = expected_events,
-                        hr = hr,
-                        alpha = alpha,
-                        allocation_ratio = self$options$allocation_ratio
-                    )
-                    return(paste("Statistical Power:", round(power_calc * 100, 1), "%"))
-                }, error = function(e) {
-                    return("Calculation error")
-                })
+                        power_calc <- private$.power_from_events(
+                            events = expected_events,
+                            hr = hr,
+                            alpha = alpha,
+                            allocation_ratio = self$options$allocation_ratio
+                        )
+                        return(paste("Statistical Power:", round(power_calc * 100, 1), "%"))
+                    },
+                    error = function(e) {
+                        return("Calculation error")
+                    }
+                )
             } else {
                 return("Analysis type not supported for sensitivity")
             }
         },
-
         .run_simulation_analysis = function() {
             # Enhanced simulation-based power analysis with convergence diagnostics
-            if (!self$options$run_simulation_validation) return(NULL)
+            if (!self$options$run_simulation_validation) {
+                return(NULL)
+            }
 
             n_sims <- self$options$simulation_runs
-            if (is.null(n_sims) || n_sims < 100) n_sims <- 1000  # Increased default
-            if (n_sims > 100000) n_sims <- 100000  # Allow more simulations
+            if (is.null(n_sims) || n_sims < 100) n_sims <- 1000 # Increased default
+            if (n_sims > 100000) n_sims <- 100000 # Allow more simulations
 
-            tryCatch({
-                # Get base parameters
-                hr_true <- private$.get_effect_hr()
-                alpha <- self$options$alpha_level
-                
-                # Determine sample size
-                # Determine sample size
-                n_total <- if (self$options$analysis_type == "sample_size") {
-                    # Use stored numeric result if available
-                    if (!is.null(private$calculated_sample_size)) {
-                        private$calculated_sample_size
-                    } else {
-                        # Try to recalculate/extract
-                        result <- private$.calculate_primary_result()
+            tryCatch(
+                {
+                    # Get base parameters
+                    hr_true <- private$.get_effect_hr()
+                    alpha <- self$options$alpha_level
+
+                    # Determine sample size
+                    # Determine sample size
+                    n_total <- if (self$options$analysis_type == "sample_size") {
+                        # Use stored numeric result if available
                         if (!is.null(private$calculated_sample_size)) {
                             private$calculated_sample_size
-                        } else if (grepl("([0-9,]+)", result)) {
-                            as.numeric(gsub("[^0-9]", "", regmatches(result, regexpr("[0-9,]+", result))))
                         } else {
-                            200  # fallback
+                            # Try to recalculate/extract
+                            result <- private$.calculate_primary_result()
+                            if (!is.null(private$calculated_sample_size)) {
+                                private$calculated_sample_size
+                            } else if (grepl("([0-9,]+)", result)) {
+                                as.numeric(gsub("[^0-9]", "", regmatches(result, regexpr("[0-9,]+", result))))
+                            } else {
+                                200 # fallback
+                            }
                         }
+                    } else {
+                        self$options$sample_size_input
                     }
-                } else {
-                    self$options$sample_size_input
-                }
-                
-                if (is.na(n_total) || n_total < 10) n_total <- 200
 
-                # Get distribution parameters
-                dist_params <- private$.get_distribution_parameters(
-                    median_control = self$options$control_median_survival,
-                    hr = hr_true
-                )
-                
-                accrual <- self$options$accrual_period
-                follow_up <- self$options$follow_up_period
-                dropout_rate <- self$options$dropout_rate
-                allocation_ratio <- self$options$allocation_ratio
-                
-                # Allocation
-                props <- private$.allocation_props(allocation_ratio)
-                n_control <- round(n_total * props$control)
-                n_treatment <- n_total - n_control
+                    if (is.na(n_total) || n_total < 10) n_total <- 200
 
-                p_values <- numeric(n_sims)
-                event_counts <- numeric(n_sims)
-
-                # Monte Carlo Simulation
-                for (i in 1:n_sims) {
-                    # Simulate trial data using distribution-specific function
-                    sim_data <- private$.simulate_trial_data(
-                        n_control = n_control,
-                        n_treatment = n_treatment,
-                        dist_params = dist_params,
-                        accrual_period = accrual,
-                        follow_up_period = follow_up,
-                        dropout_rate = dropout_rate
+                    # Get distribution parameters
+                    dist_params <- private$.get_distribution_parameters(
+                        median_control = self$options$control_median_survival,
+                        hr = hr_true
                     )
-                    
-                    # Perform Log-rank test
-                    tryCatch({
-                        sdf <- survival::survdiff(
-                            survival::Surv(sim_data$time, sim_data$event) ~ sim_data$group
+
+                    accrual <- self$options$accrual_period
+                    follow_up <- self$options$follow_up_period
+                    dropout_rate <- self$options$dropout_rate
+                    allocation_ratio <- self$options$allocation_ratio
+
+                    # Allocation
+                    props <- private$.allocation_props(allocation_ratio)
+                    n_control <- round(n_total * props$control)
+                    n_treatment <- n_total - n_control
+
+                    p_values <- numeric(n_sims)
+                    event_counts <- numeric(n_sims)
+
+                    # Monte Carlo Simulation
+                    for (i in 1:n_sims) {
+                        # Simulate trial data using distribution-specific function
+                        sim_data <- private$.simulate_trial_data(
+                            n_control = n_control,
+                            n_treatment = n_treatment,
+                            dist_params = dist_params,
+                            accrual_period = accrual,
+                            follow_up_period = follow_up,
+                            dropout_rate = dropout_rate
                         )
-                        p_values[i] <- 1 - pchisq(sdf$chisq, df = 1)
-                        event_counts[i] <- sum(sim_data$event)
-                    }, error = function(e) {
-                        p_values[i] <- 1.0  # Non-significant if test fails
-                        event_counts[i] <- 0
-                    })
+
+                        # Perform Log-rank test
+                        tryCatch(
+                            {
+                                sdf <- survival::survdiff(
+                                    survival::Surv(sim_data$time, sim_data$event) ~ sim_data$group
+                                )
+                                p_values[i] <- 1 - pchisq(sdf$chisq, df = 1)
+                                event_counts[i] <- sum(sim_data$event)
+                            },
+                            error = function(e) {
+                                p_values[i] <- 1.0 # Non-significant if test fails
+                                event_counts[i] <- 0
+                            }
+                        )
+                    }
+
+                    # Calculate empirical power
+                    empirical_power <- mean(p_values < alpha, na.rm = TRUE)
+
+                    # Calculate Monte Carlo standard error
+                    mc_se <- sqrt(empirical_power * (1 - empirical_power) / n_sims)
+
+                    # 95% Confidence interval for simulated power
+                    ci_lower <- max(0, empirical_power - 1.96 * mc_se)
+                    ci_upper <- min(1, empirical_power + 1.96 * mc_se)
+
+                    # Calculate average number of events
+                    avg_events <- mean(event_counts, na.rm = TRUE)
+
+                    # Convergence diagnostics
+                    convergence <- private$.assess_simulation_convergence(
+                        power_estimate = empirical_power,
+                        n_sims = n_sims,
+                        mc_se = mc_se
+                    )
+
+                    return(list(
+                        empirical_power = empirical_power,
+                        mc_se = mc_se,
+                        ci_lower = ci_lower,
+                        ci_upper = ci_upper,
+                        n_sims = n_sims,
+                        avg_events = avg_events,
+                        convergence = convergence,
+                        p_values = p_values,
+                        event_counts = event_counts
+                    ))
+                },
+                error = function(e) {
+                    warning(paste("Simulation analysis failed:", e$message))
+                    return(NULL)
                 }
-
-                # Calculate empirical power
-                empirical_power <- mean(p_values < alpha, na.rm = TRUE)
-                
-                # Calculate Monte Carlo standard error
-                mc_se <- sqrt(empirical_power * (1 - empirical_power) / n_sims)
-                
-                # 95% Confidence interval for simulated power
-                ci_lower <- max(0, empirical_power - 1.96 * mc_se)
-                ci_upper <- min(1, empirical_power + 1.96 * mc_se)
-                
-                # Calculate average number of events
-                avg_events <- mean(event_counts, na.rm = TRUE)
-                
-                # Convergence diagnostics
-                convergence <- private$.assess_simulation_convergence(
-                    power_estimate = empirical_power,
-                    n_sims = n_sims,
-                    mc_se = mc_se
-                )
-
-                return(list(
-                    empirical_power = empirical_power,
-                    mc_se = mc_se,
-                    ci_lower = ci_lower,
-                    ci_upper = ci_upper,
-                    n_sims = n_sims,
-                    avg_events = avg_events,
-                    convergence = convergence,
-                    p_values = p_values,
-                    event_counts = event_counts
-                ))
-
-            }, error = function(e) {
-                warning(paste("Simulation analysis failed:", e$message))
-                return(NULL)
-            })
+            )
         },
-        
-        .simulate_trial_data = function(n_control, n_treatment, dist_params, 
-                                       accrual_period, follow_up_period, dropout_rate) {
+        .simulate_trial_data = function(n_control, n_treatment, dist_params,
+                                        accrual_period, follow_up_period, dropout_rate) {
             # Simulate a single trial dataset based on distribution
-            
+
             total_study_time <- accrual_period + follow_up_period
             n_total <- n_control + n_treatment
-            
+
             # Generate accrual times (uniform)
             accrual_time <- runif(n_total, 0, accrual_period)
-            
+
             # Generate event times based on distribution
             if (dist_params$distribution == "exponential") {
                 event_time_control <- rexp(n_control, rate = dist_params$lambda_control)
                 event_time_treatment <- rexp(n_treatment, rate = dist_params$lambda_treatment)
-                
             } else if (dist_params$distribution == "weibull") {
                 # Weibull random generation
                 lambda_c <- dist_params$lambda_control
                 lambda_t <- dist_params$lambda_treatment
                 shape <- dist_params$shape
-                
+
                 event_time_control <- (-log(runif(n_control)) / lambda_c)^(1 / shape)
                 event_time_treatment <- (-log(runif(n_treatment)) / lambda_t)^(1 / shape)
-                
             } else if (dist_params$distribution == "lognormal") {
                 # Log-normal random generation
-                event_time_control <- rlnorm(n_control, 
-                                            meanlog = dist_params$mu_control, 
-                                            sdlog = dist_params$sigma)
-                event_time_treatment <- rlnorm(n_treatment, 
-                                              meanlog = dist_params$mu_treatment, 
-                                              sdlog = dist_params$sigma)
+                event_time_control <- rlnorm(n_control,
+                    meanlog = dist_params$mu_control,
+                    sdlog = dist_params$sigma
+                )
+                event_time_treatment <- rlnorm(n_treatment,
+                    meanlog = dist_params$mu_treatment,
+                    sdlog = dist_params$sigma
+                )
             } else {
                 stop("Unsupported distribution for simulation")
             }
-            
+
             event_time <- c(event_time_control, event_time_treatment)
-            
+
             # Generate dropout times (exponential)
-            dropout_hazard <- -log(1 - dropout_rate) / 12  # Annual to monthly
+            dropout_hazard <- -log(1 - dropout_rate) / 12 # Annual to monthly
             dropout_time <- rexp(n_total, rate = dropout_hazard)
-            
+
             # Administrative censoring time
             admin_censor_time <- total_study_time - accrual_time
-            
+
             # Observed time = minimum of event, dropout, admin censoring
             observed_time <- pmin(event_time, dropout_time, admin_censor_time)
             event <- (event_time <= dropout_time) & (event_time <= admin_censor_time)
-            
+
             # Create dataset
             data.frame(
                 group = c(rep(0, n_control), rep(1, n_treatment)),
@@ -3984,13 +4191,12 @@ survivalPowerClass <- R6::R6Class(
                 accrual_time = accrual_time
             )
         },
-        
         .assess_simulation_convergence = function(power_estimate, n_sims, mc_se) {
             # Assess whether simulation has converged
-            
+
             # Target MC SE: aim for < 0.01 (1 percentage point)
             target_mc_se <- 0.01
-            
+
             # Calculate recommended number of simulations for target precision
             if (power_estimate > 0 && power_estimate < 1) {
                 recommended_n_sims <- ceiling(
@@ -3999,10 +4205,10 @@ survivalPowerClass <- R6::R6Class(
             } else {
                 recommended_n_sims <- n_sims
             }
-            
+
             # Determine convergence status
             converged <- mc_se <= target_mc_se
-            
+
             # Generate convergence message
             if (converged) {
                 message <- sprintf(
@@ -4020,7 +4226,7 @@ survivalPowerClass <- R6::R6Class(
                     recommended_n_sims
                 )
             }
-            
+
             list(
                 converged = converged,
                 mc_se = mc_se,
@@ -4030,7 +4236,6 @@ survivalPowerClass <- R6::R6Class(
                 recommendation = recommendation
             )
         },
-
         .apply_clinical_preset = function() {
             # Apply clinical preset configurations
             preset <- self$options$clinical_preset
@@ -4053,13 +4258,14 @@ survivalPowerClass <- R6::R6Class(
             # For backend validation, we could check if preset values are consistent
             # with the clinical preset selection, but JavaScript handles the actual setting
         },
-
         .generate_clinical_friendly_outputs = function() {
             # Generate clinical-friendly outputs based on user preferences
 
             # Early return if no clinical features enabled - performance optimization
             if (!any(self$options$show_summary, self$options$show_explanations,
-                     self$options$show_glossary, self$options$guided_mode, na.rm = TRUE)) {
+                self$options$show_glossary, self$options$guided_mode,
+                na.rm = TRUE
+            )) {
                 return()
             }
 
@@ -4083,7 +4289,6 @@ survivalPowerClass <- R6::R6Class(
                 private$.generate_guided_workflow()
             }
         },
-
         .generate_natural_language_summary = function() {
             # Generate plain-language summary of results
             analysis_type <- self$options$analysis_type
@@ -4098,37 +4303,48 @@ survivalPowerClass <- R6::R6Class(
                 "<h3> Plain Language Summary</h3>",
                 "<p><strong>Study Design:</strong> ", private$.format_test_type(test_type),
                 " for ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
-
                 if (analysis_type == "sample_size") {
-                    paste0("<p><strong>Sample Size Calculation:</strong> To detect a hazard ratio of ",
-                           hr, " (", ifelse(hr < 1, paste0(round((1-hr)*100), "% risk reduction"),
-                                           paste0(round((hr-1)*100), "% risk increase")),
-                           ") with ", round(power*100), "% power at ", round(alpha*100), "% significance level.</p>")
+                    paste0(
+                        "<p><strong>Sample Size Calculation:</strong> To detect a hazard ratio of ",
+                        hr, " (", ifelse(hr < 1, paste0(round((1 - hr) * 100), "% risk reduction"),
+                            paste0(round((hr - 1) * 100), "% risk increase")
+                        ),
+                        ") with ", round(power * 100), "% power at ", round(alpha * 100), "% significance level.</p>"
+                    )
                 } else if (analysis_type == "power") {
-                    paste0("<p><strong>Power Calculation:</strong> With ", self$options$sample_size_input,
-                           " subjects, the study has power to detect a hazard ratio of ", hr, ".</p>")
+                    paste0(
+                        "<p><strong>Power Calculation:</strong> With ", self$options$sample_size_input,
+                        " subjects, the study has power to detect a hazard ratio of ", hr, ".</p>"
+                    )
                 } else if (analysis_type == "effect_size") {
-                    paste0("<p><strong>Effect Size:</strong> The minimum detectable effect with ",
-                           self$options$sample_size_input, " subjects and ", round(power*100), "% power.</p>")
+                    paste0(
+                        "<p><strong>Effect Size:</strong> The minimum detectable effect with ",
+                        self$options$sample_size_input, " subjects and ", round(power * 100), "% power.</p>"
+                    )
                 } else {
                     "<p><strong>Duration Analysis:</strong> Study timeline requirements for adequate power.</p>"
                 },
-
                 "<p><strong>Clinical Impact:</strong> ",
-                if (hr < 0.67) "Large clinical benefit expected"
-                else if (hr < 0.80) "Moderate clinical benefit expected"
-                else if (hr < 1.0) "Small clinical benefit expected"
-                else if (hr == 1.0) "No treatment difference expected"
-                else if (hr < 1.25) "Small increase in risk expected"
-                else if (hr < 1.5) "Moderate increase in risk expected"
-                else "Large increase in risk expected",
+                if (hr < 0.67) {
+                    "Large clinical benefit expected"
+                } else if (hr < 0.80) {
+                    "Moderate clinical benefit expected"
+                } else if (hr < 1.0) {
+                    "Small clinical benefit expected"
+                } else if (hr == 1.0) {
+                    "No treatment difference expected"
+                } else if (hr < 1.25) {
+                    "Small increase in risk expected"
+                } else if (hr < 1.5) {
+                    "Moderate increase in risk expected"
+                } else {
+                    "Large increase in risk expected"
+                },
                 ".</p>",
-
                 "<p><strong>Study Timeline:</strong> ", self$options$accrual_period,
                 " months recruitment + ", self$options$follow_up_period,
                 " months follow-up = ", self$options$accrual_period + self$options$follow_up_period,
                 " months total.</p>",
-
                 "<div class='references' style='margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.9em;'>",
                 "<p><strong>Methods:</strong> Sample size calculations based on ",
                 if (test_type == "log_rank") {
@@ -4147,7 +4363,6 @@ survivalPowerClass <- R6::R6Class(
 
             self$results$natural_language_summary$setContent(summary_text)
         },
-
         .generate_educational_explanations = function() {
             # Generate educational explanations based on test type
             test_type <- self$options$test_type
@@ -4187,7 +4402,7 @@ survivalPowerClass <- R6::R6Class(
 
             current_explanation <- explanations[[test_type]]
             if (is.null(current_explanation)) {
-                current_explanation <- explanations[["log_rank"]]  # Default fallback
+                current_explanation <- explanations[["log_rank"]] # Default fallback
             }
 
             explanation_html <- paste0(
@@ -4214,54 +4429,44 @@ survivalPowerClass <- R6::R6Class(
 
             self$results$educational_explanations$setContent(explanation_html)
         },
-
         .generate_statistical_glossary = function() {
             # Generate glossary of statistical terms
             glossary_html <- paste0(
                 "<div class='jmv-glossary'>",
                 "<h3> Statistical Terms Glossary</h3>",
-
                 "<div class='glossary-term'>",
                 "<h4>Hazard Ratio (HR)</h4>",
                 "<p>The risk of an event in one group compared to another. HR = 0.75 means 25% lower risk, HR = 1.5 means 50% higher risk.</p>",
                 "</div>",
-
                 "<div class='glossary-term'>",
                 "<h4>Statistical Power</h4>",
                 "<p>The probability of detecting a true effect. 80% power means 8 out of 10 studies would detect the effect if it exists.</p>",
                 "</div>",
-
                 "<div class='glossary-term'>",
                 "<h4>Alpha Level (Type I Error)</h4>",
                 "<p>The probability of finding a significant result when no true effect exists. Alpha = 0.05 means 5% chance of false positive.</p>",
                 "</div>",
-
                 "<div class='glossary-term'>",
                 "<h4>Confidence Interval (CI)</h4>",
                 "<p>Range of plausible values for the true effect. 95% CI means we're 95% confident the true value lies within this range.</p>",
                 "</div>",
-
                 "<div class='glossary-term'>",
                 "<h4>Sample Size</h4>",
                 "<p>Number of participants needed to detect the expected effect with desired power and significance level.</p>",
                 "</div>",
-
                 "<div class='glossary-term'>",
                 "<h4>Effect Size</h4>",
                 "<p>The magnitude of the difference between groups. Larger effect sizes require smaller sample sizes to detect.</p>",
                 "</div>",
-
                 "<div class='glossary-term'>",
                 "<h4>Allocation Ratio</h4>",
                 "<p>The ratio of participants in control vs treatment groups. 1:1 means equal groups, 2:1 means twice as many in treatment group.</p>",
                 "</div>",
-
                 "</div>"
             )
 
             self$results$statistical_glossary$setContent(glossary_html)
         },
-
         .generate_guided_workflow = function() {
             # Generate step-by-step guided workflow
             current_step <- private$.determine_current_step()
@@ -4289,7 +4494,7 @@ survivalPowerClass <- R6::R6Class(
                 "<div class='workflow-step ", if (current_step >= 3) "completed" else if (current_step == 2) "current" else "pending", "'>",
                 "<h4>Step 3: Set Study Parameters</h4>",
                 "<p>Configure effect size, power, and alpha levels</p>",
-                "<p><em>Effect Size: ", self$options$effect_size, ", Power: ", round(self$options$power_level*100), "%, Alpha: ", self$options$alpha_level, "</em></p>",
+                "<p><em>Effect Size: ", self$options$effect_size, ", Power: ", round(self$options$power_level * 100), "%, Alpha: ", self$options$alpha_level, "</em></p>",
                 "</div>",
 
                 # Step 4: Review Assumptions
@@ -4303,7 +4508,6 @@ survivalPowerClass <- R6::R6Class(
                 "<h4>Step 5: Interpret Results</h4>",
                 "<p>Review the calculated results and clinical interpretation</p>",
                 "</div>",
-
                 "</div>",
 
                 # Next Steps Recommendation
@@ -4317,13 +4521,11 @@ survivalPowerClass <- R6::R6Class(
                     "<p>Your analysis is complete! Consider running sensitivity analysis to test robustness.</p>"
                 },
                 "</div>",
-
                 "</div>"
             )
 
             self$results$guided_workflow$setContent(workflow_html)
         },
-
         .determine_current_step = function() {
             # Determine which step of the guided workflow the user is on
             step <- 1
@@ -4348,8 +4550,8 @@ survivalPowerClass <- R6::R6Class(
             # Step 4: Assumptions reviewed (if parameters are non-default)
             if (step >= 4 &&
                 (self$options$effect_size != 0.75 ||
-                 self$options$power_level != 0.80 ||
-                 self$options$alpha_level != 0.05)) {
+                    self$options$power_level != 0.80 ||
+                    self$options$alpha_level != 0.05)) {
                 step <- 5
             }
 

@@ -1,10 +1,10 @@
-# Group LASSO Cox Regression — Feature Mapping
+# Group LASSO Cox Regression - Feature Mapping
 
 This document provides a comprehensive overview of the Group LASSO for Survival Analysis module, detailing its features, user interface elements, and the underlying R functions.
 
 ## Feature Summary
 
-The Group LASSO Cox module (`grouplasso`) performs penalized Cox proportional hazards regression with group-level variable selection via the `grpreg` package. It is designed for clinicopathological research where predictors have natural groupings — categorical variables with multiple dummy codes, biomarker panels, gene pathways, or clinical domains.
+The Group LASSO Cox module (`grouplasso`) performs penalized Cox proportional hazards regression with group-level variable selection via the `grpreg` package. It is designed for clinicopathological research where predictors have natural groupings - categorical variables with multiple dummy codes, biomarker panels, gene pathways, or clinical domains.
 
 The module supports four penalty types (Group LASSO, Group MCP, Group SCAD, Adaptive Group LASSO), three grouping strategies (automatic, factor-based, custom), and comprehensive validation tools including stability selection, nested cross-validation, and permutation testing. A traffic-light suitability assessment helps users evaluate whether their data is appropriate for this analysis.
 
@@ -17,18 +17,18 @@ The following table provides a detailed mapping of the module's features, from t
 | Feature | YAML Argument (`.a.yaml`) | UI Label | Results Section (`.r.yaml`) | R Function (`.b.R`) |
 |---------|---------------------------|----------|----------------------------|---------------------|
 | **Input Variables** | | | | |
-| Time to event | `time` | Time Variable | — | `.prepareData()` |
-| Event indicator | `event` | Event Indicator | — | `.prepareData()` |
-| Event level | `outcomeLevel` | Event Level | — | `.prepareData()` |
-| Censored level | `censorLevel` | Censored Level | — | `.prepareData()` |
-| Predictors | `predictors` | Predictor Variables | — | `.prepareData()` → `.createDesignMatrix()` |
+| Time to event | `time` | Time Variable | - | `.prepareData()` |
+| Event indicator | `event` | Event Indicator | - | `.prepareData()` |
+| Event level | `outcomeLevel` | Event Level | - | `.prepareData()` |
+| Censored level | `censorLevel` | Censored Level | - | `.prepareData()` |
+| Predictors | `predictors` | Predictor Variables | - | `.prepareData()` → `.createDesignMatrix()` |
 | **Data Suitability** | | | | |
 | Suitability assessment | `suitabilityCheck` | Data Suitability Assessment | `suitabilityReport` | `.assessSuitability()` |
-| EPV check | — | — | `suitabilityReport` | `.assessSuitability()` (check 1) |
-| Reduction need check | — | — | `suitabilityReport` | `.assessSuitability()` (check 2) |
-| Sample size check | — | — | `suitabilityReport` | `.assessSuitability()` (check 3) |
-| Multicollinearity check | — | — | `suitabilityReport` | `.assessSuitability()` (check 4) |
-| Data quality check | — | — | `suitabilityReport` | `.assessSuitability()` (check 5) |
+| EPV check | - | - | `suitabilityReport` | `.assessSuitability()` (check 1) |
+| Reduction need check | - | - | `suitabilityReport` | `.assessSuitability()` (check 2) |
+| Sample size check | - | - | `suitabilityReport` | `.assessSuitability()` (check 3) |
+| Multicollinearity check | - | - | `suitabilityReport` | `.assessSuitability()` (check 4) |
+| Data quality check | - | - | `suitabilityReport` | `.assessSuitability()` (check 5) |
 | **Group Definition** | | | | |
 | Grouping method | `group_definition` | Group Definition Method | `groupSummary` | `.defineGroups()` |
 | Custom group assignments | `group_structure` | Group Structure | `groupSummary` | `.customGrouping()` |
@@ -37,17 +37,17 @@ The following table provides a detailed mapping of the module's features, from t
 | Penalty type selection | `penalty_type` | Penalty Type | `coefficients`, `pathSummary` | `.fitGroupLasso()` |
 | Group weight method | `group_weights` | Group Weight Method | `groupSummary` | `.buildGroupMultiplier()` |
 | Custom weights | `custom_weights` | Custom Group Weights | `groupSummary` | `.buildGroupMultiplier()` |
-| Adaptive weights method | `adaptive_weights_method` | Adaptive Weights Method | — | `.fitAdaptiveGroupLasso()` → `.getInitialEstimates()` |
+| Adaptive weights method | `adaptive_weights_method` | Adaptive Weights Method | - | `.fitAdaptiveGroupLasso()` → `.getInitialEstimates()` |
 | **Cross-Validation** | | | | |
 | Number of CV folds | `cv_folds` | Cross-Validation Folds | `cvResults` | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
 | Lambda grid size | `n_lambda` | Number of Lambda Values | `pathSummary` | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
-| Lambda min ratio | `lambda_min_ratio` | Lambda Min Ratio | — | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
+| Lambda min ratio | `lambda_min_ratio` | Lambda Min Ratio | - | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
 | **Algorithm Settings** | | | | |
-| Max iterations | `max_iterations` | Maximum Iterations | — | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
-| Convergence tolerance | `tolerance` | Convergence Tolerance | — | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
+| Max iterations | `max_iterations` | Maximum Iterations | - | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
+| Convergence tolerance | `tolerance` | Convergence Tolerance | - | `.fitGrpregCox()` → `grpreg::cv.grpsurv()` |
 | Selection threshold | `selection_threshold` | Group Selection Threshold | All tables & summary | `.populateGroupSummary()`, `.populateCoefficients()`, `.populatePerformance()` |
-| Standardize variables | `standardize` | Standardize Variables | — | `.createDesignMatrix()` |
-| Random seed | `random_seed` | Random Seed | — | `.fitGrpregCox()`, `.stabilitySelection()`, `.nestedCrossValidation()` |
+| Standardize variables | `standardize` | Standardize Variables | - | `.createDesignMatrix()` |
+| Random seed | `random_seed` | Random Seed | - | `.fitGrpregCox()`, `.stabilitySelection()`, `.nestedCrossValidation()` |
 | **Advanced Validation** | | | | |
 | Stability selection | `stability_selection` | Stability Selection | `stabilityResults` | `.stabilitySelection()` |
 | Bootstrap samples | `bootstrap_samples` | Bootstrap Samples | `stabilityResults` | `.stabilitySelection()` |
@@ -61,8 +61,8 @@ The following table provides a detailed mapping of the module's features, from t
 | Coefficient table | `show_coefficients` | Show Coefficients | `coefficients` | `.populateCoefficients()` |
 | Regularization path table | `show_path_summary` | Show Regularization Path | `pathSummary` | `.populatePathSummary()` |
 | CV results table | `show_cv_results` | Show CV Results | `cvResults` | `.populateCVResults()` |
-| Model performance | — | — | `modelPerformance` | `.populatePerformance()` |
-| Performance note | — | — | `modelPerformanceNote` | `.populatePerformance()` |
+| Model performance | - | - | `modelPerformance` | `.populatePerformance()` |
+| Performance note | - | - | `modelPerformanceNote` | `.populatePerformance()` |
 | **Plots** | | | | |
 | Regularization path plot | `plot_regularization_path` | Group Regularization Path | `pathPlot` | `.setPathPlotState()` → `.renderPathPlot()` |
 | CV curve plot | `plot_cv_curve` | Cross-Validation Curve | `cvPlot` | `.setCVPlotState()` → `.renderCVPlot()` |
@@ -72,5 +72,5 @@ The following table provides a detailed mapping of the module's features, from t
 | **Clinical Output** | | | | |
 | Results summary | `showSummary` | Show Summary | `summary` | `.populateSummary()` |
 | Explanations panel | `showExplanations` | Show Explanations | `explanations` | `.populateExplanations()` |
-| Instructions | — | — | `instructions` | `.init()` |
-| Notices (fallback) | — | — | `todo` | `.insertNotice()` fallback |
+| Instructions | - | - | `instructions` | `.init()` |
+| Notices (fallback) | - | - | `todo` | `.insertNotice()` fallback |

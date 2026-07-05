@@ -13,7 +13,7 @@
 #' - Statistical power (1 - beta)
 #' - Proportion of p-hacked or biased studies
 #' 
-#' PPV = (Power × R + u × β × R) / (R + α - β × R + u - u × α + u × β × R)
+#' PPV = (Power x R + u x beta x R) / (R + alpha - beta x R + u - u x alpha + u x beta x R)
 #' where R is the pre-study odds of true relationships (percTrue/(100-percTrue))
 #' and u is the bias factor (percHack/100)
 #' 
@@ -68,7 +68,7 @@ ppvClass <- R6::R6Class(
                 warning("High p-hacking rate (>50%) detected. This represents a severely compromised research environment.")
             }
 
-            # Save & restore RNG state — the cell-distribution sample() call
+            # Save & restore RNG state - the cell-distribution sample() call
             # inside suppressWarnings() below consumes RNG to allocate fractional
             # leftover counts across the 4 confusion-matrix cells. Without this
             # wrapper, the user's `.Random.seed` would shift on every ppv

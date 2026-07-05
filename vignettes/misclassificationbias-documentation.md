@@ -1,4 +1,4 @@
-# Misclassification Bias Sensitivity Analysis (`misclassificationbias`) -- Developer Documentation
+# Misclassification Bias Sensitivity Analysis (`misclassificationbias`) - Developer Documentation
 
 > **Module:** meddecide (menuGroup: `meddecideT`)
 > **Submenu:** Decision Support
@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-`misclassificationbias` quantifies how classification errors in an exposure or diagnostic test distort observed effect estimates (OR, RR, RD). It applies matrix inversion correction to recover the "true" 2x2 table from observed counts, then uses Monte Carlo multinomial resampling to construct confidence intervals for the bias-adjusted estimate. This is essential for any study relying on subjective classification methods -- Ki-67 visual estimation, morphologic grading, IHC scoring -- where inter-observer variability is a known source of systematic error.
+`misclassificationbias` quantifies how classification errors in an exposure or diagnostic test distort observed effect estimates (OR, RR, RD). It applies matrix inversion correction to recover the "true" 2x2 table from observed counts, then uses Monte Carlo multinomial resampling to construct confidence intervals for the bias-adjusted estimate. This is essential for any study relying on subjective classification methods - Ki-67 visual estimation, morphologic grading, IHC scoring - where inter-observer variability is a known source of systematic error.
 
 **Capabilities:**
 
@@ -80,11 +80,11 @@ The UI (`.u.yaml`) is organized into 4 collapsible panels plus top-level variabl
 
 | # | Name | Type | Default | Constraints | Description |
 |---|---|---|---|---|---|
-| 1 | `data` | Data | -- | -- | Input data frame |
-| 2 | `outcome` | Variable | -- | suggested: nominal/ordinal; permitted: factor | Binary outcome (e.g., recurrence, death) |
-| 3 | `outcomeLevel` | Level | -- | variable: (outcome) | Level considered the event |
-| 4 | `exposure` | Variable | -- | suggested: nominal/ordinal; permitted: factor | Binary classifier subject to misclassification |
-| 5 | `exposureLevel` | Level | -- | variable: (exposure) | Level considered positive/exposed |
+| 1 | `data` | Data | - | - | Input data frame |
+| 2 | `outcome` | Variable | - | suggested: nominal/ordinal; permitted: factor | Binary outcome (e.g., recurrence, death) |
+| 3 | `outcomeLevel` | Level | - | variable: (outcome) | Level considered the event |
+| 4 | `exposure` | Variable | - | suggested: nominal/ordinal; permitted: factor | Binary classifier subject to misclassification |
+| 5 | `exposureLevel` | Level | - | variable: (exposure) | Level considered positive/exposed |
 | 6 | `misclassType` | List | `nondifferential` | nondifferential, differential | Whether error rates differ by outcome group |
 | 7 | `senExposure` | Number | 0.85 | [0.01, 1.0] | Classifier sensitivity (non-differential mode) |
 | 8 | `specExposure` | Number | 0.90 | [0.01, 1.0] | Classifier specificity (non-differential mode) |
@@ -93,7 +93,7 @@ The UI (`.u.yaml`) is organized into 4 collapsible panels plus top-level variabl
 | 11 | `senExposureControl` | Number | 0.85 | [0.01, 1.0] | Sensitivity among controls (differential mode) |
 | 12 | `specExposureControl` | Number | 0.90 | [0.01, 1.0] | Specificity among controls (differential mode) |
 | 13 | `effectMeasure` | List | `or` | or, rr, rd | Effect measure to compute and bias-adjust |
-| 14 | `rangeAnalysis` | Bool | true | -- | Sweep across sen/spec grid with heatmap |
+| 14 | `rangeAnalysis` | Bool | true | - | Sweep across sen/spec grid with heatmap |
 | 15 | `senRange` | String | `"0.70,0.75,0.80,0.85,0.90,0.95"` | Comma-separated | Sensitivity grid values |
 | 16 | `specRange` | String | `"0.70,0.75,0.80,0.85,0.90,0.95"` | Comma-separated | Specificity grid values |
 | 17 | `nSimulations` | Integer | 10000 | [1000, 100000] | Monte Carlo iterations for CIs |
@@ -124,23 +124,23 @@ The UI (`.u.yaml`) is organized into 4 collapsible panels plus top-level variabl
 
 | Option | Backend usage |
 |---|---|
-| `outcome` | `.buildTable()` -- extracts column from `self$data`, converts `haven_labelled` |
-| `outcomeLevel` | `.buildTable()` -- defines the event row; defaults to 2nd sorted level |
-| `exposure` | `.buildTable()` -- extracts classifier column |
-| `exposureLevel` | `.buildTable()` -- defines "exposed" column; defaults to 2nd sorted level |
-| `misclassType` | `.correctMisclassification()` + `.simulateCIs()` -- switches between shared vs separate error rates |
-| `senExposure` | `.correctMisclassification()`, `.simulateCIs()` -- non-differential sensitivity |
-| `specExposure` | `.correctMisclassification()`, `.simulateCIs()` -- non-differential specificity |
-| `senExposureCase` | `.correctMisclassification()`, `.simulateCIs()` -- differential sensitivity in cases |
-| `specExposureCase` | `.correctMisclassification()`, `.simulateCIs()` -- differential specificity in cases |
-| `senExposureControl` | `.correctMisclassification()`, `.simulateCIs()` -- differential sensitivity in controls |
-| `specExposureControl` | `.correctMisclassification()`, `.simulateCIs()` -- differential specificity in controls |
-| `effectMeasure` | `.populateBiasAnalysis()`, `.populateRangeAnalysis()`, `.rangePlot()` -- selects OR/RR/RD |
-| `rangeAnalysis` | `.run()` gate -- conditionally calls `.populateRangeAnalysis()` |
-| `senRange` | `.populateRangeAnalysis()`, `.rangePlot()` -- parsed via `strsplit(",")` |
-| `specRange` | `.populateRangeAnalysis()`, `.rangePlot()` -- parsed via `strsplit(",")` |
-| `nSimulations` | `.simulateCIs()` -- loop iteration count |
-| `random_seed` | `.run()` -- `set.seed()` at top of pipeline |
+| `outcome` | `.buildTable()` - extracts column from `self$data`, converts `haven_labelled` |
+| `outcomeLevel` | `.buildTable()` - defines the event row; defaults to 2nd sorted level |
+| `exposure` | `.buildTable()` - extracts classifier column |
+| `exposureLevel` | `.buildTable()` - defines "exposed" column; defaults to 2nd sorted level |
+| `misclassType` | `.correctMisclassification()` + `.simulateCIs()` - switches between shared vs separate error rates |
+| `senExposure` | `.correctMisclassification()`, `.simulateCIs()` - non-differential sensitivity |
+| `specExposure` | `.correctMisclassification()`, `.simulateCIs()` - non-differential specificity |
+| `senExposureCase` | `.correctMisclassification()`, `.simulateCIs()` - differential sensitivity in cases |
+| `specExposureCase` | `.correctMisclassification()`, `.simulateCIs()` - differential specificity in cases |
+| `senExposureControl` | `.correctMisclassification()`, `.simulateCIs()` - differential sensitivity in controls |
+| `specExposureControl` | `.correctMisclassification()`, `.simulateCIs()` - differential specificity in controls |
+| `effectMeasure` | `.populateBiasAnalysis()`, `.populateRangeAnalysis()`, `.rangePlot()` - selects OR/RR/RD |
+| `rangeAnalysis` | `.run()` gate - conditionally calls `.populateRangeAnalysis()` |
+| `senRange` | `.populateRangeAnalysis()`, `.rangePlot()` - parsed via `strsplit(",")` |
+| `specRange` | `.populateRangeAnalysis()`, `.rangePlot()` - parsed via `strsplit(",")` |
+| `nSimulations` | `.simulateCIs()` - loop iteration count |
+| `random_seed` | `.run()` - `set.seed()` at top of pipeline |
 
 ### 4.3 Matrix Inversion Correction
 
@@ -226,9 +226,9 @@ graph TD
 
     C --> H[.populateBiasAnalysis]
     F --> H
-    H --> H1[.computeEffects -- observed]
-    H --> H2[.computeEffects -- adjusted]
-    H --> H3[.simulateCIs -- Monte Carlo]
+    H --> H1[.computeEffects - observed]
+    H --> H2[.computeEffects - adjusted]
+    H --> H3[.simulateCIs - Monte Carlo]
     H --> H4[bias % + direction footnote]
 
     C --> I{rangeAnalysis?}
@@ -251,15 +251,15 @@ graph TD
 
 ```
 list(
-  a              = integer  -- cases & exposed
-  b              = integer  -- cases & unexposed
-  c              = integer  -- controls & exposed
-  d              = integer  -- controls & unexposed
-  n              = integer  -- total (a + b + c + d)
-  outcome_event  = character -- event level label
-  outcome_ref    = character -- reference level label
-  exposure_pos   = character -- positive/exposed level label
-  exposure_neg   = character -- negative/unexposed level label
+  a              = integer  - cases & exposed
+  b              = integer  - cases & unexposed
+  c              = integer  - controls & exposed
+  d              = integer  - controls & unexposed
+  n              = integer  - total (a + b + c + d)
+  outcome_event  = character - event level label
+  outcome_ref    = character - reference level label
+  exposure_pos   = character - positive/exposed level label
+  exposure_neg   = character - negative/unexposed level label
 )
 ```
 
@@ -267,10 +267,10 @@ list(
 
 ```
 list(
-  a = numeric  -- corrected cases & exposed (may be non-integer)
-  b = numeric  -- corrected cases & unexposed
-  c = numeric  -- corrected controls & exposed
-  d = numeric  -- corrected controls & unexposed
+  a = numeric  - corrected cases & exposed (may be non-integer)
+  b = numeric  - corrected cases & unexposed
+  c = numeric  - corrected controls & exposed
+  d = numeric  - corrected controls & unexposed
 )
 ```
 
@@ -380,7 +380,7 @@ d_adj = n_controls - c_adj
 
 ### 9.2 Differential Misclassification
 
-Error rates differ between cases and controls (e.g., pathologists may be more vigilant when examining known cancer specimens). This can bias the estimate in **either direction** -- toward or away from the null.
+Error rates differ between cases and controls (e.g., pathologists may be more vigilant when examining known cancer specimens). This can bias the estimate in **either direction** - toward or away from the null.
 
 Uses `senExposureCase`/`specExposureCase` for the case row and `senExposureControl`/`specExposureControl` for the control row.
 
@@ -420,7 +420,7 @@ The heatmap uses a diverging blue-white-red color scale centered at the null val
 | Add new effect measure | `.a.yaml` (effectMeasure options), `.b.R` (`.computeEffects()`, all populate methods) | Yes | Update switch statements in 4+ locations |
 | Change correction formula | `.b.R` only (`.correctMisclassification()` + `.simulateCIs()`) | No | Must update both methods consistently |
 | Add outcome misclassification | `.a.yaml` (new options), `.u.yaml`, `.b.R` (new correction branch) | Yes | Currently only corrects exposure misclassification |
-| Add probabilistic bias analysis | `.b.R` (`.simulateCIs()` -- add prior distributions on sen/spec) | No | Currently uses fixed sen/spec per simulation |
+| Add probabilistic bias analysis | `.b.R` (`.simulateCIs()` - add prior distributions on sen/spec) | No | Currently uses fixed sen/spec per simulation |
 | Convert Notices to HTML | `.r.yaml` (add Html item), `.b.R` (replace `insert()`) | Yes | Follow `waterfall.b.R` pattern; see CLAUDE.md |
 | Add new plot type (e.g., forest plot) | `.r.yaml` (Image item), `.b.R` (render function) | Yes | |
 | Change heatmap color scale | `.b.R` only (`.rangePlot()`) | No | |

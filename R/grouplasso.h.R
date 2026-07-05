@@ -869,19 +869,6 @@ grouplassoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' group-wise feature selection with preserved biological or clinical 
 #' structure.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- grouplasso(
-#'     data = mydata,
-#'     time = "time_to_event",
-#'     event = "event_indicator",
-#'     predictors = c("age", "stage", "biomarker1", "biomarker2"),
-#'     group_structure = "age:1, stage:2, biomarker1:3, biomarker2:3",
-#'     penalty_type = "group_lasso",
-#'     cv_folds = 10
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param suitabilityCheck Run a comprehensive data suitability assessment
 #'   before analysis. Checks sample size, events-per-variable ratio,

@@ -510,26 +510,6 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' etc.). Features automatic format detection, quality assessment, and preview 
 #' of converted data. Perfect for preparing datetime data for analysis and 
 #' creating time-based variables.
-#'
-#' @examples
-#' \donttest{
-#' # Basic datetime conversion: '0.0.47'
-#' datetimeconverter(
-#'   data = study_data,
-#'   datetime_var = "event_date",
-#'   datetime_format = "auto"
-#' )
-#'
-#' # Extract components:
-#' datetimeconverter(
-#'   data = study_data,
-#'   datetime_var = "timestamp",
-#'   datetime_format = "ymd_hms",
-#'   extract_year = TRUE,
-#'   extract_month = TRUE,
-#'   extract_dayname = TRUE
-#' )
-#'}
 #' @param data The data as a data frame containing datetime variable to
 #'   convert.
 #' @param datetime_var Variable containing datetime information in various

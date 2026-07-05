@@ -411,7 +411,7 @@ recurrentsurvivalClass <- R6::R6Class(
         },
 
         # TODO (stub): these model branches are placeholders that only render a "simplified
-        # implementation" note and never fit a model — .performPWPAnalysis (here),
+        # implementation" note and never fit a model - .performPWPAnalysis (here),
         # .performFrailtyAnalysis, .performMultiStateAnalysis, .performCountingProcessAnalysis.
         # Several declared options are also not yet consumed (e.g. prediction_times,
         # frailty_distribution, stratification_vars, cluster_variable, the *_plots toggles).
@@ -733,7 +733,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 private$.formatReRegResults(rereg_fit, reReg_model)
 
                 # TODO (cleanup): ..rereg_model / ..rereg_data are stored here but never read back
-                # as fields — .generateReRegPlots uses the rereg_fit/reData passed as arguments, not
+                # as fields - .generateReRegPlots uses the rereg_fit/reData passed as arguments, not
                 # these private$ fields. Either wire the plot renderers to read the fields or drop
                 # these dead stores (they are now reset at the top of .run() to avoid stale state).
                 private$..rereg_model <- rereg_fit

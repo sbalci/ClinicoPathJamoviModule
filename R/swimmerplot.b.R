@@ -48,7 +48,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 return()
             }
 
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
+            # Plain text only - notices avoid HTML by project convention; the Preformatted
             # output item renders this literally (no markup, no injection surface).
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
@@ -2716,7 +2716,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         glyphs[i] <- clinical_mapping[[first_match]]
                     } else {
                         # Fallback to default symbols
-                        default_symbols <- c("⬤", "■", "", "", "", "", "⬟", "", "", "")
+                        default_symbols <- c("\u{2b24}", "\u{25a0}", "", "", "", "", "\u{2b1f}", "", "", "")
                         glyphs[i] <- default_symbols[((i - 1) %% length(default_symbols)) + 1]
                     }
                 }
@@ -2735,9 +2735,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "<h4 style='color: #0056b3; margin: 10px 0 5px 0;'>Response Categories</h4>",
                 "<ul style='margin: 5px 0; padding-left: 20px;'>",
                 "<li><strong>CR (Complete Response):</strong> Complete disappearance of all target lesions</li>",
-                "<li><strong>PR (Partial Response):</strong> ≥30% decrease in sum of target lesion diameters</li>",
+                "<li><strong>PR (Partial Response):</strong> \u{2265}30% decrease in sum of target lesion diameters</li>",
                 "<li><strong>SD (Stable Disease):</strong> Neither sufficient shrinkage for PR nor sufficient increase for PD</li>",
-                "<li><strong>PD (Progressive Disease):</strong> ≥20% increase in sum of target lesion diameters</li>",
+                "<li><strong>PD (Progressive Disease):</strong> \u{2265}20% increase in sum of target lesion diameters</li>",
                 "</ul>",
                 "</div>",
 

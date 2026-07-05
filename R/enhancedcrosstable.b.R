@@ -191,7 +191,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                             prop_table <- prop.table(ct) * 100
                         }
                         
-                        # Format table — htmlEscape user column names and
+                        # Format table - htmlEscape user column names and
                         # factor labels before HTML interpolation.
                         html_content <- paste0(html_content, "<h5>", htmltools::htmlEscape(var_original), "</h5>")
                         html_content <- paste0(html_content, "<table class='table table-striped' style='margin: 10px 0; max-width: 800px;'>")
@@ -372,7 +372,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                         or_upper <- exp(log(or_val) + 1.96 * se_log_or)
                         effect_html <- paste0(effect_html,
                             "<tr><td style='padding: 4px 8px;'>Odds Ratio</td><td style='padding: 4px 8px;'>",
-                            sprintf("%.3f (95%% CI: %.3f\u2013%.3f)", or_val, or_lower, or_upper),
+                            sprintf("%.3f (95%% CI: %.3f - %.3f)", or_val, or_lower, or_upper),
                             "</td></tr>")
                     }
 
@@ -407,7 +407,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             var_count <- length(self$options$vars)
             by_var_name <- self$options$by_var
             # by_var_name holds a column name selected from the user's
-            # dataset — the name itself can contain HTML. Escape before
+            # dataset - the name itself can contain HTML. Escape before
             # interpolating into the rendered HTML.
             safe_by_var <- htmltools::htmlEscape(by_var_name)
             interp_html <- paste0(interp_html, "<p><strong>Current Analysis:</strong> Examining associations between ", var_count, " variable(s) and '", safe_by_var, "'.</p>")

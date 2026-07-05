@@ -5,6 +5,7 @@
 When using Jaccard distance for IHC clustering, all data must be converted to binary (0/1) format. The ClinicoPath module performs this conversion automatically and displays a comprehensive notice showing exactly how your data was converted.
 
 **This guide explains:**
+
 1. How automatic binary conversion works
 2. How to structure your data correctly
 3. Common pitfalls and warnings
@@ -19,6 +20,7 @@ When you select **Jaccard distance**, a prominent notice appears at the top of y
 ### 1. Categorical Marker Conversion Table
 
 Shows for each categorical IHC marker:
+
 - **Marker name**
 - **Original levels** in your data
 - **Number of Positive (1)** cases
@@ -38,6 +40,7 @@ Shows for each categorical IHC marker:
 ### 2. Continuous Marker Conversion Table
 
 Shows for each continuous marker:
+
 - **Marker name**
 - **Range** of values
 - **Median** split point
@@ -61,12 +64,14 @@ Shows for each continuous marker:
 The conversion recognizes these as **POSITIVE (coded as 1):**
 
 ✅ **Acceptable positive values:**
+
 - `"Positive"`
 - `"pos"`
 - `"+"`
 - `"1"`
 
 All other values are treated as **NEGATIVE (coded as 0):**
+
 - `"Negative"`
 - `"neg"`
 - `"-"`
@@ -81,12 +86,14 @@ All other values are treated as **NEGATIVE (coded as 0):**
 #### Mistake 1: Non-Standard Positive Coding
 
 **Problem:**
+
 ```
 Marker: CD99
 Levels: "Strong", "Weak", "Negative"
 ```
 
 **What happens:**
+
 - `"Strong"` → Treated as **NEGATIVE** (0)
 - `"Weak"` → Treated as **NEGATIVE** (0)
 - `"Negative"` → Treated as **NEGATIVE** (0)
@@ -94,6 +101,7 @@ Levels: "Strong", "Weak", "Negative"
 
 **Solution:**
 Recode your data before analysis:
+
 ```r
 data$CD99 <- factor(ifelse(data$CD99 %in% c("Strong", "Weak"), "Positive", "Negative"))
 ```
@@ -101,12 +109,14 @@ data$CD99 <- factor(ifelse(data$CD99 %in% c("Strong", "Weak"), "Positive", "Nega
 #### Mistake 2: Ordinal Intensity Scales
 
 **Problem:**
+
 ```
 Marker: HER2
 Levels: "0", "1+", "2+", "3+"
 ```
 
 **What happens:**
+
 - `"0"` → Treated as **NEGATIVE** (0)
 - `"1+"` → Treated as **NEGATIVE** (0) ❌ Lost information!
 - `"2+"` → Treated as **NEGATIVE** (0) ❌ Lost information!
@@ -116,6 +126,7 @@ Levels: "0", "1+", "2+", "3+"
 **DO NOT use Jaccard distance with ordinal scales.** Use **Gower distance** instead, which preserves ordinal information.
 
 Or, if you must use Jaccard, recode:
+
 ```r
 data$HER2 <- factor(ifelse(data$HER2 %in% c("2+", "3+"), "Positive", "Negative"))
 ```
@@ -123,6 +134,7 @@ data$HER2 <- factor(ifelse(data$HER2 %in% c("2+", "3+"), "Positive", "Negative")
 #### Mistake 3: Language-Specific Coding
 
 **Problem:**
+
 ```
 Marker: ER
 Levels: "Positivo", "Negativo" (Spanish)
@@ -130,11 +142,13 @@ Levels: "Pozitif", "Negatif" (Turkish)
 ```
 
 **What happens:**
+
 - Non-English text is treated as **NEGATIVE** (0)
 - All cases may appear negative
 
 **Solution:**
 Recode to English standard:
+
 ```r
 data$ER <- factor(ifelse(data$ER == "Positivo", "Positive", "Negative"))
 ```
@@ -149,22 +163,25 @@ For continuous markers (H-scores, percentages, counts):
 
 1. **Calculate median** of all values
 2. **Values > median** → coded as 1 (High)
-3. **Values ≤ median** → coded as 0 (Low)
+3. **Values <= median** → coded as 0 (Low)
 
 ### ⚠️ Information Loss Warning
 
 **Original data:**
+
 ```
 Ki67: 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%
 Median = 22.5%
 ```
 
 **After binary conversion:**
+
 ```
 Ki67: 0, 0, 0, 0, 1, 1, 1, 1
 ```
 
 **What's lost:**
+
 - The difference between 5% and 20% (both → 0)
 - The difference between 25% and 40% (both → 1)
 - All nuanced variation within high/low groups
@@ -172,6 +189,7 @@ Ki67: 0, 0, 0, 0, 1, 1, 1, 1
 ### When Median Split is Problematic
 
 1. **Bimodal distributions:**
+
 ```
 Ki67 values: 5, 5, 5, 50, 55, 60, 60, 60
 Median = 52.5
@@ -179,14 +197,16 @@ Low group: 5, 5, 5, 50  ← 50% is "low"? Questionable.
 High group: 55, 60, 60, 60
 ```
 
-2. **Narrow ranges:**
+1. **Narrow ranges:**
+
 ```
 H-Score: 145, 148, 150, 152, 155
 Median = 150
 Result: Almost arbitrary split of similar values
 ```
 
-3. **Clinical cutoffs ignored:**
+1. **Clinical cutoffs ignored:**
+
 ```
 Ki67: 2%, 8%, 15%, 20%, 30%, 45%
 Clinical cutoff: 14% (standard for breast cancer)
@@ -194,6 +214,7 @@ Median split: 17.5% (not clinically meaningful)
 ```
 
 **Solution:** For continuous markers with clinical meaning, use **Gower distance** or pre-categorize using established cutoffs:
+
 ```r
 data$Ki67_Category <- factor(ifelse(data$Ki67_Percent > 14, "High", "Low"))
 ```
@@ -207,6 +228,7 @@ data$Ki67_Category <- factor(ifelse(data$Ki67_Percent > 14, "High", "Low"))
 **What it means:** All cases have the same binary value (all 0 or all 1).
 
 **Example:**
+
 ```
 p63: All cases coded as "Negative"
 → After conversion: All 0
@@ -214,6 +236,7 @@ p63: All cases coded as "Negative"
 ```
 
 **Action required:**
+
 1. Check if this is biologically expected
 2. If not expected, verify data entry
 3. Consider removing this marker from analysis
@@ -224,11 +247,13 @@ p63: All cases coded as "Negative"
 **What it means:** Marker uses values that don't match expected Positive/Negative format.
 
 **Example:**
+
 ```
 CD99 levels: "Strong", "Moderate", "Weak", "Negative"
 ```
 
 **Action required:**
+
 1. Verify how the marker was coded in your data
 2. Recode to standard Positive/Negative format
 3. Or remove marker if recoding is complex
@@ -240,6 +265,7 @@ CD99 levels: "Strong", "Moderate", "Weak", "Negative"
 Before interpreting results from Jaccard distance clustering, verify:
 
 ### ☑ Categorical Markers
+
 - [ ] All markers use standard positive/negative coding
 - [ ] No markers show "All same" warning
 - [ ] Non-standard coding warnings investigated and resolved
@@ -247,6 +273,7 @@ Before interpreting results from Jaccard distance clustering, verify:
 - [ ] No ordinal scales (0/1+/2+/3+) included
 
 ### ☑ Continuous Markers
+
 - [ ] Understand that median split was applied
 - [ ] Accept information loss from dichotomization
 - [ ] Median split point is reasonable for your data
@@ -254,6 +281,7 @@ Before interpreting results from Jaccard distance clustering, verify:
 - [ ] Clinical cutoffs (if any) are not violated
 
 ### ☑ Overall Data Quality
+
 - [ ] Binary conversion table shows expected patterns
 - [ ] No markers provide zero information (all 0 or all 1)
 - [ ] Sample size adequate for number of markers
@@ -263,7 +291,7 @@ Before interpreting results from Jaccard distance clustering, verify:
 
 ## When Jaccard is Appropriate vs. Gower
 
-### ✅ Use Jaccard Distance When:
+### ✅ Use Jaccard Distance When
 
 1. **Tissue microarray (TMA) scoring:**
    - Binary present/absent assessment
@@ -285,7 +313,7 @@ Before interpreting results from Jaccard distance clustering, verify:
    - Established clinical cutoffs applied
    - No ordinal or continuous information available
 
-### ✅ Use Gower Distance (Default) When:
+### ✅ Use Gower Distance (Default) When
 
 1. **Mixed data types:**
    - Categorical AND continuous markers
@@ -383,11 +411,13 @@ data_wrong <- data.frame(
 **Likely cause:** Data uses non-standard coding throughout.
 
 **Diagnostic steps:**
+
 1. Check original data: `table(data$MarkerName)`
 2. Verify factor levels: `levels(data$MarkerName)`
 3. Look for language-specific text, abbreviations, or intensity scales
 
 **Solution:**
+
 ```r
 # Batch recode all markers
 standard_markers <- c("CK7", "TTF1", "p63", "CK5_6")
@@ -407,11 +437,13 @@ for (marker in standard_markers) {
 **Likely cause:** Continuous markers have non-normal distributions.
 
 **Diagnostic steps:**
+
 1. Plot histogram: `hist(data$Ki67_Percent)`
 2. Check for bimodality, skewness, outliers
 3. Verify if clinical cutoffs exist
 
 **Solution:**
+
 ```r
 # Option 1: Use clinical cutoff instead
 data$Ki67_Binary <- factor(
@@ -435,11 +467,13 @@ results <- ihccluster(
 **Likely cause:** Different binary conversion approach.
 
 **Check:**
+
 1. Published study's exact coding definitions
 2. Whether they used different cutoffs
 3. Pre-processing steps (log transform, standardization)
 
 **Solution:**
+
 - Match exact methodology from paper
 - Contact authors for data coding details
 - Document any differences in your methods section
@@ -473,6 +507,7 @@ Do you have continuous markers?
 ## Additional Resources
 
 **Related Documentation:**
+
 - `STERLACCI_2019_FEATURE_ANALYSIS.md` - Technical implementation details
 - `STERLACCI_2019_USER_GUIDE.md` - Complete user guide for Phase 1 features
 - `IHC_PREDICTION_PATHOLOGIST_GUIDE.md` - IHC prediction workflow
@@ -481,8 +516,9 @@ Do you have continuous markers?
 Sterlacci W, et al. (2019). Tissue microarray based analysis of immunohistochemical expression patterns of molecular targets in NSCLC. *Histol Histopathol*.
 
 **Support:**
-- GitHub Issues: https://github.com/sbalci/ClinicoPathJamoviModule/issues
-- jamovi Forum: https://forum.jamovi.org
+
+- GitHub Issues: <https://github.com/sbalci/ClinicoPathJamoviModule/issues>
+- jamovi Forum: <https://forum.jamovi.org>
 
 ---
 

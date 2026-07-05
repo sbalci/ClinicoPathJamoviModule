@@ -30,9 +30,13 @@ cases <- data.frame(
   age = round(rnorm(n_cases, mean = 65, sd = 12)),
   sex = sample(c("Male", "Female"), n_cases, replace = TRUE, prob = c(0.53, 0.47)),
   site = sample(c("Right colon", "Left colon", "Rectum"),
-                n_cases, replace = TRUE, prob = c(0.22, 0.39, 0.39)),
+    n_cases,
+    replace = TRUE, prob = c(0.22, 0.39, 0.39)
+  ),
   stage = sample(c("I", "II", "III", "IV"),
-                 n_cases, replace = TRUE, prob = c(0.15, 0.39, 0.40, 0.07)),
+    n_cases,
+    replace = TRUE, prob = c(0.15, 0.39, 0.40, 0.07)
+  ),
   tumor_size_cm = round(rgamma(n_cases, shape = 3, scale = 1.5), 1),
   neoadjuvant = sample(c(0, 1), n_cases, replace = TRUE, prob = c(0.79, 0.21)),
   blocks_examined = sample(2:8, n_cases, replace = TRUE, prob = c(0.02, 0.05, 0.10, 0.15, 0.25, 0.28, 0.15))
@@ -114,7 +118,7 @@ ls_negative <- cases$linear_spiculation == 0 & non_neoadj
 for (i in which(ls_positive)) {
   if (cases$emvi_positive[i] == 0 && runif(1) < 0.60) {
     cases$emvi_positive[i] <- 1
-    cases$vi_positive[i] <- 1  # EMVI implies VI
+    cases$vi_positive[i] <- 1 # EMVI implies VI
     # Assign first detection block
     max_blocks <- cases$blocks_examined[i]
     cum_probs <- emvi_sensitivity_curve[1:min(max_blocks, length(emvi_sensitivity_curve))]
@@ -123,13 +127,15 @@ for (i in which(ls_positive)) {
       marginal_probs[length(marginal_probs)] <- marginal_probs[length(marginal_probs)] + (1 - sum(marginal_probs))
     }
     cases$first_emvi_block[i] <- sample(1:length(marginal_probs), 1, prob = marginal_probs)
-    cases$first_vi_block[i] <- min(cases$first_emvi_block[i],
-                                     sample(1:cases$blocks_examined[i], 1))
+    cases$first_vi_block[i] <- min(
+      cases$first_emvi_block[i],
+      sample(1:cases$blocks_examined[i], 1)
+    )
   }
 }
 
 # Add tumor size category
-cases$tumor_size_cat <- ifelse(cases$tumor_size_cm >= 5, "≥5 cm", "<5 cm")
+cases$tumor_size_cat <- ifelse(cases$tumor_size_cm >= 5, ">=5 cm", "<5 cm")
 
 # Add outcome labels
 cases$vi_status <- factor(cases$vi_positive, levels = 0:1, labels = c("VI-", "VI+"))
@@ -137,11 +143,13 @@ cases$emvi_status <- factor(cases$emvi_positive, levels = 0:1, labels = c("EMVI-
 cases$ls_status <- factor(cases$linear_spiculation, levels = 0:1, labels = c("LS-", "LS+"))
 
 # Reorder columns
-duan2023_vi_blocks <- cases[, c("case_id", "age", "sex", "site", "stage",
-                                 "tumor_size_cm", "tumor_size_cat", "neoadjuvant",
-                                 "blocks_examined", "linear_spiculation", "ls_status",
-                                 "vi_positive", "vi_status", "first_vi_block",
-                                 "emvi_positive", "emvi_status", "first_emvi_block")]
+duan2023_vi_blocks <- cases[, c(
+  "case_id", "age", "sex", "site", "stage",
+  "tumor_size_cm", "tumor_size_cat", "neoadjuvant",
+  "blocks_examined", "linear_spiculation", "ls_status",
+  "vi_positive", "vi_status", "first_vi_block",
+  "emvi_positive", "emvi_status", "first_emvi_block"
+)]
 
 # Verify sensitivity matches expected values
 cat("\nVerification of Simulated Data:\n")
@@ -149,12 +157,18 @@ cat("================================\n\n")
 
 cat("Overall Statistics:\n")
 cat(sprintf("Total cases: %d\n", nrow(duan2023_vi_blocks)))
-cat(sprintf("VI+ cases: %d (%.1f%%)\n", sum(duan2023_vi_blocks$vi_positive),
-            100 * mean(duan2023_vi_blocks$vi_positive)))
-cat(sprintf("EMVI+ cases: %d (%.1f%%)\n", sum(duan2023_vi_blocks$emvi_positive),
-            100 * mean(duan2023_vi_blocks$emvi_positive)))
-cat(sprintf("Linear spiculation: %d (%.1f%%)\n\n", sum(duan2023_vi_blocks$linear_spiculation),
-            100 * mean(duan2023_vi_blocks$linear_spiculation)))
+cat(sprintf(
+  "VI+ cases: %d (%.1f%%)\n", sum(duan2023_vi_blocks$vi_positive),
+  100 * mean(duan2023_vi_blocks$vi_positive)
+))
+cat(sprintf(
+  "EMVI+ cases: %d (%.1f%%)\n", sum(duan2023_vi_blocks$emvi_positive),
+  100 * mean(duan2023_vi_blocks$emvi_positive)
+))
+cat(sprintf(
+  "Linear spiculation: %d (%.1f%%)\n\n", sum(duan2023_vi_blocks$linear_spiculation),
+  100 * mean(duan2023_vi_blocks$linear_spiculation)
+))
 
 cat("VI Detection Sensitivity by Number of Blocks:\n")
 vi_pos <- duan2023_vi_blocks$vi_positive == 1
@@ -162,8 +176,10 @@ for (n in 1:8) {
   detected <- sum(vi_pos & duan2023_vi_blocks$first_vi_block <= n, na.rm = TRUE)
   total_vi <- sum(vi_pos)
   sensitivity <- detected / total_vi
-  cat(sprintf("  %d block%s: %.1f%% (%d/%d)\n", n, ifelse(n==1, "", "s"),
-              100 * sensitivity, detected, total_vi))
+  cat(sprintf(
+    "  %d block%s: %.1f%% (%d/%d)\n", n, ifelse(n == 1, "", "s"),
+    100 * sensitivity, detected, total_vi
+  ))
 }
 
 cat("\nEMVI Detection Sensitivity by Number of Blocks:\n")
@@ -172,8 +188,10 @@ for (n in 1:8) {
   detected <- sum(emvi_pos & duan2023_vi_blocks$first_emvi_block <= n, na.rm = TRUE)
   total_emvi <- sum(emvi_pos)
   sensitivity <- detected / total_emvi
-  cat(sprintf("  %d block%s: %.1f%% (%d/%d)\n", n, ifelse(n==1, "", "s"),
-              100 * sensitivity, detected, total_emvi))
+  cat(sprintf(
+    "  %d block%s: %.1f%% (%d/%d)\n", n, ifelse(n == 1, "", "s"),
+    100 * sensitivity, detected, total_emvi
+  ))
 }
 
 cat("\nLinear Spiculation vs EMVI (non-neoadjuvant cases only):\n")
@@ -182,18 +200,24 @@ ls_pos <- non_neoadj_cases$linear_spiculation == 1
 ls_neg <- non_neoadj_cases$linear_spiculation == 0
 emvi_rate_ls_pos <- mean(non_neoadj_cases$emvi_positive[ls_pos])
 emvi_rate_ls_neg <- mean(non_neoadj_cases$emvi_positive[ls_neg])
-cat(sprintf("  LS+: %.1f%% EMVI+ (%d/%d)\n", 100 * emvi_rate_ls_pos,
-            sum(non_neoadj_cases$emvi_positive[ls_pos]), sum(ls_pos)))
-cat(sprintf("  LS-: %.1f%% EMVI+ (%d/%d)\n", 100 * emvi_rate_ls_neg,
-            sum(non_neoadj_cases$emvi_positive[ls_neg]), sum(ls_neg)))
+cat(sprintf(
+  "  LS+: %.1f%% EMVI+ (%d/%d)\n", 100 * emvi_rate_ls_pos,
+  sum(non_neoadj_cases$emvi_positive[ls_pos]), sum(ls_pos)
+))
+cat(sprintf(
+  "  LS-: %.1f%% EMVI+ (%d/%d)\n", 100 * emvi_rate_ls_neg,
+  sum(non_neoadj_cases$emvi_positive[ls_neg]), sum(ls_neg)
+))
 
 # Save datasets
 write.csv(duan2023_vi_blocks,
-          file = "data/duan2023_vi_blocks.csv",
-          row.names = FALSE)
+  file = "data/duan2023_vi_blocks.csv",
+  row.names = FALSE
+)
 
 saveRDS(duan2023_vi_blocks,
-        file = "data/duan2023_vi_blocks.rds")
+  file = "data/duan2023_vi_blocks.rds"
+)
 
 cat("\n✓ Dataset saved to data/duan2023_vi_blocks.csv and .rds\n")
 cat("✓ Ready for use in pathsampling module\n\n")
@@ -210,7 +234,7 @@ cat("   - Maximum Samples: 8\n")
 cat("   - Enable: Show Empirical Cumulative Detection\n")
 cat("   - Enable: Show Bootstrap Analysis\n")
 cat("3. Optional stratification:\n")
-cat("   - Group By: tumor_size_cat (compare <5cm vs ≥5cm)\n")
+cat("   - Group By: tumor_size_cat (compare <5cm vs >=5cm)\n")
 cat("   - Sample Type: stage (compare by AJCC stage)\n\n")
 
 # Return dataset invisibly

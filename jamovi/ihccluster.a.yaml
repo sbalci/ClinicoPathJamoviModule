@@ -439,13 +439,13 @@ options:
       title: 'Low Cutoff'
       type: Number
       default: 1.0
-      description: 'Values ≤ this are classified as Low'
+      description: 'Values <= this are classified as Low'
 
     - name: ratioHighCutoff
       title: 'High Cutoff'
       type: Number
       default: 2.0
-      description: 'Values ≥ this are classified as High'
+      description: 'Values >= this are classified as High'
 
     - name: exportClusters
       title: 'Export Cluster Assignments'

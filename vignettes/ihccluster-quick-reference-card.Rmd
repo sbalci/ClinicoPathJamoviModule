@@ -53,11 +53,11 @@ vignette: >
 ```
 Distance    Meaning                 Action
 ────────────────────────────────────────────────
-0.0 - 0.2   Nearly identical       ⚠️ One marker likely redundant
-0.2 - 0.4   Very similar           Consider clinical context
-0.4 - 0.6   Moderately different   Probably keep both
-0.6 - 0.8   Different              Definitely keep both
-0.8 - 1.0   Completely distinct    Independent information
+0.0-0.2   Nearly identical       ⚠️ One marker likely redundant
+0.2-0.4   Very similar           Consider clinical context
+0.4-0.6   Moderately different   Probably keep both
+0.6-0.8   Different              Definitely keep both
+0.8-1.0   Completely distinct    Independent information
 ```
 
 ---
@@ -163,7 +163,7 @@ P-value     Confidence    Interpretation
 < 0.001     99.9%         Very strong association
 < 0.01      99%           Strong association
 < 0.05      95%           Moderate association
-≥ 0.05      < 95%         No significant association
+>= 0.05      < 95%         No significant association
 ```
 
 ### Cramér's V Effect Size
@@ -172,11 +172,11 @@ For 2×2 Tables (Binary Markers):
 
 V           Interpretation     Clinical Meaning
 ────────────────────────────────────────────────────
-0.0 - 0.1   Negligible        Independent markers
-0.1 - 0.3   Weak              Slight relationship
-0.3 - 0.5   Moderate          Notable co-expression
-0.5 - 0.7   Strong            Often co-express
-0.7 - 1.0   Very strong       Nearly always together
+0.0-0.1   Negligible        Independent markers
+0.1-0.3   Weak              Slight relationship
+0.3-0.5   Moderate          Notable co-expression
+0.5-0.7   Strong            Often co-express
+0.7-1.0   Very strong       Nearly always together
 1.0         Perfect           Always co-express
 ```
 
@@ -185,8 +185,8 @@ V           Interpretation     Clinical Meaning
 Jaccard     Interpretation     Action
 ────────────────────────────────────────────
 > 0.8       Very high overlap  Consider dropping one
-0.6 - 0.8   High overlap       Evaluate clinical need
-0.4 - 0.6   Moderate overlap   Keep both
+0.6-0.8   High overlap       Evaluate clinical need
+0.4-0.6   Moderate overlap   Keep both
 < 0.4       Low overlap        Independent markers
 ```
 
@@ -231,7 +231,7 @@ Annual savings = $60 × 2 × 500 = $60,000
 
 BUT check:
 ✓ Does diagnosis change in any cases?
-✓ Is validation data convincing (≥95% concordance)?
+✓ Is validation data convincing (>=95% concordance)?
 ✓ Do guidelines allow this modification?
 ```
 
@@ -250,7 +250,7 @@ BUT check:
 ## Workflow Checklist
 
 ```
-□ 1. Collect ≥50-100 cases with complete IHC data
+□ 1. Collect >=50-100 cases with complete IHC data
 □ 2. Choose distance metric (Chi-squared/Euclidean/Mixed)
 □ 3. Run clustering analysis in jamovi
 □ 4. Review dendrogram for marker groups
@@ -259,7 +259,7 @@ BUT check:
 □ 7. Review clinical literature for validation
 □ 8. Calculate cost savings
 □ 9. Pilot optimized panel on 20-30 new cases
-□ 10. Require ≥95% concordance before adoption
+□ 10. Require >=95% concordance before adoption
 □ 11. Document protocol and share with colleagues
 □ 12. Monitor performance and adjust annually
 ```

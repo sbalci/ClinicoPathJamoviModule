@@ -308,17 +308,6 @@ precisionrecallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Informative than the ROC Plot When Evaluating Binary Classifiers on
 #' Imbalanced Datasets." PLoS ONE 10(3): e0118432.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic PRC curve
-#' precisionrecall(data = mydata, outcome = 'disease', score = 'biomarker')
-#'
-#' # Compare multiple classifiers
-#' precisionrecall(data = mydata, outcome = 'disease',
-#'                scores = c('model1', 'model2', 'model3'),
-#'                comparison = TRUE)
-#'}
 #' @param data the data as a data frame
 #' @param outcome Binary outcome variable (0/1, TRUE/FALSE, or factor with 2
 #'   levels)

@@ -68,7 +68,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # TODO (correctness): file-wide `jmvcore::format(template, list(name=value))`
-            # pattern silently fails to interpolate — emits "…" placeholders instead of
+            # pattern silently fails to interpolate - emits "…" placeholders instead of
             # actual values. Empirical confirmation:
             #   > jmvcore::format("Found {n}", list(n = 3))   → "Found …"
             #   > jmvcore::format("Found {n}", n = 3)         → "Found 3"
@@ -86,7 +86,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #     awk '/jmvcore::format/,/\\)/'  # then keep lines that also contain "list("
             # (or use the paren-balanced awk script in the audit chat for an exact count).
             #
-            # Fix shape per site — drop the format() wrapper, pass placeholders as
+            # Fix shape per site - drop the format() wrapper, pass placeholders as
             # named `...` args directly (jmvcore::reject forwards them to format()):
             #   # broken (current)
             #   jmvcore::reject(jmvcore::format(.('Found {n}'), list(n = v)))
@@ -97,7 +97,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #
             # Behavior change: users currently see "…" in error/info messages; after
             # the fix they'll see the actual values. Defer to a dedicated correctness
-            # pass — not appropriate for a drop-in jamovify migration.
+            # pass - not appropriate for a drop-in jamovify migration.
             if (length(missing_packages) > 0) {
                 pkg_list <- paste(missing_packages, collapse = ", ")
                 install_cmd <- paste0("install.packages(c(", paste0("'", missing_packages, "'", collapse = ", "), "))")
@@ -301,7 +301,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_chr <- as.character(outcome_raw)
                 observed_levels <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
                 if (length(observed_levels) < 2) {
-                    # See file-wide TODO (correctness) near line 73 — broken format-list pattern.
+                    # See file-wide TODO (correctness) near line 73 - broken format-list pattern.
                     jmvcore::reject(jmvcore::format(.('Outcome variable must have at least 2 observed values. Found {n} level(s): {levels}'),
                         list(n = length(observed_levels), levels = paste(observed_levels, collapse = ", "))))
                 }
@@ -1688,7 +1688,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             p <- ncol(data$X)
             event_rate <- n_events / n
 
-            # -- Check 1: Events-Per-Variable (EPV) --
+            # - Check 1: Events-Per-Variable (EPV) --
             epv <- n_events / p
             if (epv >= 20) {
                 checks$epv <- list(
@@ -1710,7 +1710,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
-            # -- Check 2: Regularization Need --
+            # - Check 2: Regularization Need --
             if (p >= n / 3) {
                 checks$regularization <- list(
                     color = "green", label = .("Regularization Need"),
@@ -1737,7 +1737,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
-            # -- Check 3: Sample Size --
+            # - Check 3: Sample Size --
             if (n >= 100) {
                 checks$sample_size <- list(
                     color = "green", label = .("Sample Size"),
@@ -1758,7 +1758,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
-            # -- Check 4: Event Rate --
+            # - Check 4: Event Rate --
             if (event_rate >= 0.20 && event_rate <= 0.80) {
                 checks$event_rate <- list(
                     color = "green", label = .("Event Rate"),
@@ -1780,7 +1780,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
-            # -- Check 5: Multicollinearity --
+            # - Check 5: Multicollinearity --
             tryCatch({
                 # Identify which design-matrix columns came from the same original variable.
                 # Sort by decreasing name length so that longer variable names (e.g. "age_group")
@@ -1866,7 +1866,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             })
 
-            # -- Check 6: Data Quality --
+            # - Check 6: Data Quality --
             original_data <- self$data
             n_total <- nrow(original_data)
             n_missing <- n_total - n
@@ -1900,7 +1900,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             }
 
-            # -- Check 7: Proportional Hazards Assumption (advisory) --
+            # - Check 7: Proportional Hazards Assumption (advisory) --
             tryCatch({
                 # Fit a simple Cox model with top predictors to check PH
                 # Use at most 5 columns to keep computation fast
@@ -1949,7 +1949,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             })
 
-            # -- Overall Verdict --
+            # - Overall Verdict --
             colors <- sapply(checks, function(x) x$color)
             if (any(colors == "red")) {
                 overall <- "red"

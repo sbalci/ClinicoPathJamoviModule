@@ -240,5 +240,5 @@ New guides should follow this structure:
 **Last Updated:** 2026-06-22
 
 **Recent additions:**
-- 2026-06-22: Documented jmvtools DESCRIPTION `Imports`/`Remotes` behavior — a package may now appear in both fields; jmvtools suppresses the CRAN-mirror download of an import when it also appears in `Remotes` (see `jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies")
+- 2026-06-22: Documented jmvtools DESCRIPTION `Imports`/`Remotes` behavior - a package may now appear in both fields; jmvtools suppresses the CRAN-mirror download of an import when it also appears in `Remotes` (see `jamovi_module_patterns_guide.md` → "DESCRIPTION: Dependencies")
 - 2026-01-31: Added `jamovi_i18n_guide.md` - Comprehensive internationalization guide

@@ -590,7 +590,7 @@ cohenskappaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param rater3 Third rater for multi-rater agreement (Fleiss kappa)
 #' @param rater4 Fourth rater for multi-rater agreement
 #' @param rater5 Fifth rater for multi-rater agreement
-#' @param multi_rater_method Method for calculating multi-rater agreement (≥3
+#' @param multi_rater_method Method for calculating multi-rater agreement (>=3
 #'   raters)
 #' @param show_pairwise_kappa Show all pairwise kappa values between raters
 #'   (multi-rater only)

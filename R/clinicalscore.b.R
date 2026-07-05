@@ -233,14 +233,14 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             y_ordered <- NULL  # for ordinal models
 
             if (model_type == "linear") {
-                # Continuous outcome — no binary conversion
+                # Continuous outcome - no binary conversion
                 y <- jmvcore::toNumeric(outcome_raw)
                 if (all(is.na(y))) stop(.("Outcome variable must be numeric for linear regression."))
                 event_level <- "continuous"
                 ref_level <- "continuous"
 
             } else if (model_type == "ordinal") {
-                # Ordinal outcome — ensure ordered factor
+                # Ordinal outcome - ensure ordered factor
                 if (is.factor(outcome_raw)) {
                     if (!is.ordered(outcome_raw)) {
                         y_ordered <- factor(outcome_raw, levels = levels(outcome_raw), ordered = TRUE)
@@ -255,7 +255,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 # TODO (correctness): `as.numeric(factor) - 1` maps factor LEVEL
                 # INDICES {1..K} to {0..K-1}. Fragile if jmvcore hands in a factor
                 # with a `values` attribute (e.g., c(0,1) for binary or arbitrary
-                # ordinal codings) — `as.numeric` would then return those values
+                # ordinal codings) - `as.numeric` would then return those values
                 # and subtraction breaks the 0-based encoding. Use:
                 #   y <- match(as.character(y_ordered), levels(y_ordered)) - 1L
                 # which always returns {0..K-1} based on level position, regardless
@@ -265,7 +265,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 ref_level <- levels(y_ordered)[1]
 
             } else {
-                # Logistic or Cox — convert to 0/1 binary
+                # Logistic or Cox - convert to 0/1 binary
                 if (is.factor(outcome_raw) || is.character(outcome_raw)) {
                     outcome_chr <- as.character(outcome_raw)
                     levels_obs <- sort(unique(outcome_chr[!is.na(outcome_chr)]))
@@ -1069,7 +1069,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             pred <- model$predicted
             obs <- prepared$y
 
-            # Create calibration groups -- reduce groups if quantile breaks collapse
+            # Create calibration groups - reduce groups if quantile breaks collapse
             n_unique <- length(unique(pred))
             eff_groups <- min(n_groups, n_unique)
             if (eff_groups < 2) return(FALSE)

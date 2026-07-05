@@ -36,7 +36,7 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cvVar <- self$options$cv
             teaVar <- self$options$tea
             analyteVar <- self$options$analyte
-            # TODO (stub): ~16 declared options are never read by this backend — laboratory, method,
+            # TODO (stub): ~16 declared options are never read by this backend - laboratory, method,
             #   sigma_calculation, quality_goals, custom_tea, confidence_level, benchmark_comparison,
             #   process_capability, method_validation, improvement_recommendations, regulatory_compliance,
             #   cost_of_quality, control_planning, sigma_plots, normalized_plots, quality_scorecard.
@@ -106,7 +106,7 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # QGI = Bias / (1.5 * CV)
             # QGI < 0.8: Imprecision is the main problem
             # QGI > 1.2: Inaccuracy (Bias) is the main problem
-            # 0.8 - 1.2: Both imprecision and inaccuracy
+            # 0.8-1.2: Both imprecision and inaccuracy
             if (self$options$quality_goal_index) {
                 tableQGI <- self$results$qualityGoalIndex
                 tableQGI$deleteRows()
@@ -141,7 +141,7 @@ sigmametricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         current_rate_ppm = mydata$defect_rate[i],
                         target_rate_ppm = 3.4, # 6 sigma goal
                         # TODO (correctness): monthly_volume is hardcoded 1000 (placeholder), so annual_errors
-                        #   below is fabricated — not tied to any real test-volume input. Add a volume option
+                        #   below is fabricated - not tied to any real test-volume input. Add a volume option
                         #   or drop the monthly_volume/annual_errors columns until a real input exists.
                         monthly_volume = 1000, # Placeholder volume
                         annual_errors = as.integer(mydata$defect_rate[i] * 12 * 1000 / 1e6),

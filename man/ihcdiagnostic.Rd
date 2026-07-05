@@ -57,7 +57,7 @@ performance estimates. Recommended for clinical validation but takes longer
 to compute.}
 
 \item{minimumGroupSize}{Minimum number of cases required per diagnostic
-group. Groups with fewer cases will trigger a warning (recommend ≥10).}
+group. Groups with fewer cases will trigger a warning (recommend >=10).}
 }
 \value{
 A results object containing:

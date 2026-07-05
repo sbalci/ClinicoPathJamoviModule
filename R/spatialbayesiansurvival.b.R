@@ -45,17 +45,17 @@ spatialbayesiansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             tableSummary <- self$results$modelSummary
             tableSummary$addRow(rowKey=1, values=list(parameter="Observations", value=as.character(nrow(mydata)), interpretation="Total sample size"))
             # TODO (correctness): as.numeric(mydata[[statusVar]]) == 1 counts the FIRST factor level
-            #   (level index 1), not necessarily the event — and a naive jmvcore::toNumeric() swap is
+            #   (level index 1), not necessarily the event - and a naive jmvcore::toNumeric() swap is
             #   unsafe (honors the factor's values/labels → 0/1 or NA for char-level factors). Derive
             #   the event count from an explicit event level (require an eventLevel option, or compare
             #   mydata[[statusVar]] == <event_level>) instead of positional level indices.
             tableSummary$addRow(rowKey=2, values=list(parameter="Events", value=as.character(sum(as.numeric(mydata[[statusVar]]) == 1)), interpretation="Number of events"))
             tableSummary$addRow(rowKey=3, values=list(parameter="Spatial Model", value=self$options$spatial_model, interpretation="Selected spatial structure"))
 
-            # TODO (stub): RELEASE BLOCKER — this is a placeholder, NOT a real spatial Bayesian model.
+            # TODO (stub): RELEASE BLOCKER - this is a placeholder, NOT a real spatial Bayesian model.
             #   It fits a standard survreg as a "surrogate for Bayesian mean" (below) and the Spatial
             #   Effects table (~L96) hardcodes spatial_effect=0 / relative_risk=1.0 for every region.
-            #   The displayed Bayesian/spatial results are not real — wire up spBayesSurv (or similar)
+            #   The displayed Bayesian/spatial results are not real - wire up spBayesSurv (or similar)
             #   before exposing this analysis for clinical use.
             # 4. Perform Analysis (Placeholder for spBayesSurv)
             # In a full implementation, we would use spBayesSurv::spatial_survival(...)

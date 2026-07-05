@@ -213,7 +213,7 @@ raftgeeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tolerance <- self$options$convergence_tolerance
             robustVar <- self$options$robust_variance
             
-            # Build formula — Defense 1: composeTerms backtick-escapes user
+            # Build formula - Defense 1: composeTerms backtick-escapes user
             # column names safely. Defense 2: .asSurvivalFormula (project
             # wrapper around jmvcore::asFormula with survival helpers pre-
             # allow-listed) validates against jamovi 2.7.27+'s hardened
@@ -268,7 +268,7 @@ raftgeeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(list(model = aftModel, cox_model = coxModel, error = NULL))
                 
             }, error = function(e) {
-                # Escape e$message — it can echo user column names from
+                # Escape e$message - it can echo user column names from
                 # underlying aftgee/coxph error messages. Defense-in-depth
                 # since setNote renderer HTML behavior is jamovi-version-dep.
                 error_msg <- paste("AFT-GEE model fitting failed:",

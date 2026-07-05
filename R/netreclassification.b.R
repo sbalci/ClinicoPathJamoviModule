@@ -138,10 +138,10 @@ netreclassificationClass <- R6::R6Class(
                 analysis_data <- jmvcore::naOmit(analysis_data)
             }
             
-            # TODO (UX): file-wide pattern — validation errors use
+            # TODO (UX): file-wide pattern - validation errors use
             # `self$results$instructions$setContent("<html>...") + return(NULL)` instead of
             # `jmvcore::reject()`. Sites here, L151 (invalid outcome), L164 (invalid risk
-            # predictions). Same pattern as missingdata/mlpathology/modelval audits —
+            # predictions). Same pattern as missingdata/mlpathology/modelval audits - 
             # migrating to reject() would surface structured UI errors but is a behavior
             # change (inline HTML guidance → error dialog). Defer to dedicated UX/error-
             # flow pass.
@@ -156,7 +156,7 @@ netreclassificationClass <- R6::R6Class(
             # Validate outcome variable
             # TODO (correctness): `outcome` is declared `permitted: [factor, numeric]` in
             # .a.yaml (L46-47), but `as.numeric(factor)` returns level indices (1/2)
-            # which then fails the `%in% c(0,1)` check below — making jamovi-coded binary
+            # which then fails the `%in% c(0,1)` check below - making jamovi-coded binary
             # factor outcomes silently rejected as invalid. Fix: replace with
             # `jmvcore::toNumeric(...)` to honor the `values` attribute on jamovi factors,
             # OR add explicit binary-factor handling (e.g., `as.numeric(factor) - 1` after
@@ -499,11 +499,11 @@ netreclassificationClass <- R6::R6Class(
         .populateReclassification = function(nri_results) {
             # TODO (stub): 2 OptionString HIGH-source options declared in .a.yaml /
             # .h.R but never read in this .b.R:
-            #   - `category_labels` (.h.R L109) — likely intended to label the rows/
+            #   - `category_labels` (.h.R L109) - likely intended to label the rows/
             #     columns of this reclassification cross-tab; when wired, any HTML-
             #     bound flow must wrap with `htmltools::htmlEscape(...)` (HIGH
             #     free-text user input).
-            #   - `utility_weights` (.h.R L265) — likely numeric-parsed for cost-
+            #   - `utility_weights` (.h.R L265) - likely numeric-parsed for cost-
             #     effectiveness analysis (mirror `risk_thresholds` strsplit+as.numeric
             #     pattern at L188); validate strictly when parsed.
             # Either wire them up or remove from .a.yaml to avoid misleading users.
@@ -606,7 +606,7 @@ netreclassificationClass <- R6::R6Class(
                 subgroup = "Overall",
                 n_subjects = nri_data$n_obs,
                 nri_estimate = 0.1,  # Placeholder
-                nri_ci = "0.05 - 0.15",
+                nri_ci = "0.05-0.15",
                 p_value = 0.001
             )
 

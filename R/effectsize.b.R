@@ -400,7 +400,7 @@ effectsizeClass <- R6::R6Class(
         },
         
         .createForestPlot = function(plot_data) {
-            # Create forest plot — ggplot2 is in DESCRIPTION's Imports.
+            # Create forest plot - ggplot2 is in DESCRIPTION's Imports.
 
             p <- ggplot2::ggplot(plot_data, ggplot2::aes(y = measure, x = estimate)) +
                 ggplot2::geom_point(size = 3, color = "blue") +

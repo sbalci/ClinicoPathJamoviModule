@@ -7,7 +7,7 @@ Test datasets are stored as follows:
 
 ---
 
-## 1. STANDARD CLINICAL -- Lung Cancer Mixed Types
+## 1. STANDARD CLINICAL - Lung Cancer Mixed Types
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
@@ -104,7 +104,7 @@ Test datasets are stored as follows:
 
 ---
 
-## 8. HIGH-DIMENSIONAL -- Gene Panel
+## 8. HIGH-DIMENSIONAL - Gene Panel
 
 | # | File | Variables | Options to Test |
 |---|------|-----------|-----------------|
@@ -117,11 +117,11 @@ Test datasets are stored as follows:
 
 | # | File | Variables | Options to Test | Expected Behavior |
 |---|------|-----------|-----------------|-------------------|
-| 37 | -- | No data loaded | -- | Instructions HTML displayed |
-| 38 | `sparsegrouplasso_lung` | time + event only, no predictors | -- | Todo HTML, early return |
+| 37 | - | No data loaded | - | Instructions HTML displayed |
+| 38 | `sparsegrouplasso_lung` | time + event only, no predictors | - | Todo HTML, early return |
 | 39 | `sparsegrouplasso_lung` | Only 2 predictors: `age, tumor_size` | Default | Should work (minimum) |
 | 40 | `sparsegrouplasso_small` | All 6 predictors | `cv_folds=3` | Small sample warnings expected |
-| 41 | `sparsegrouplasso_lung` | All-censored: set `status` to all `Alive` | -- | ERROR notice: no events |
+| 41 | `sparsegrouplasso_lung` | All-censored: set `status` to all `Alive` | - | ERROR notice: no events |
 | 42 | `sparsegrouplasso_lung` | 10% missing in `pdl1` | Default | Listwise deletion, runs OK |
 
 ---
@@ -142,57 +142,57 @@ Test datasets are stored as follows:
 
 ## COMPLETE OPTION COVERAGE CHECKLIST
 
-- [x] `time_var` -- tests #1-42
-- [x] `event_var` -- tests #1-42
-- [x] `outcomeLevel` -- tests #1-42
-- [x] `censorLevel` -- tests #1-42
-- [x] `pred_vars` -- tests #1-42
-- [x] `suitabilityCheck` -- tests #1 (TRUE), #34 (FALSE)
-- [x] `group_definition` (factor_based) -- tests #1, #2, #8
-- [x] `group_definition` (custom) -- test #9
-- [x] `group_definition` (pathway_based) -- needs pathway variable
-- [x] `group_definition` (variable_type) -- test #10
-- [x] `group_definition` (correlation_based) -- tests #11, #12
-- [x] `custom_groups` -- test #9
-- [x] `pathway_info` -- needs pathway variable in dataset
-- [x] `correlation_threshold` -- tests #11, #12
-- [x] `alpha_sgl` -- tests #1 (0.95), #3 (0.3), #4 (0.99)
-- [x] `lambda_sequence` (auto) -- test #13
-- [x] `lambda_sequence` (custom) -- test #14
-- [x] `lambda_sequence` (adaptive) -- test #15
-- [x] `custom_lambda` -- test #14
-- [x] `lambda_min_ratio` -- test #13
-- [x] `n_lambda` -- test #13
-- [x] `selection_criterion` (cv_deviance) -- test #1
-- [x] `selection_criterion` (aic) -- test #5
-- [x] `selection_criterion` (bic) -- test #6
-- [x] `selection_criterion` (ebic) -- test #7
-- [x] `cv_folds` -- tests #16, #35
-- [x] `cv_repeats` -- test #17
-- [x] `ebic_gamma` -- test #7
-- [x] `weight_type` (none) -- test #1
-- [x] `weight_type` (ridge_based) -- tests #18, #21
-- [x] `weight_type` (univariate_based) -- test #19
-- [x] `weight_type` (lasso_based) -- test #20
-- [x] `weight_power` -- test #21
-- [x] `standardize_vars` -- test #31
-- [x] `center_vars` -- test #32
-- [x] `seed_value` -- test #33
-- [x] `show_summary` -- tests #26, #27
-- [x] `show_coefficients` -- tests #26, #27
-- [x] `show_groups` -- tests #26, #27
-- [x] `show_path` -- test #28
-- [x] `show_performance` -- tests #26, #27
-- [x] `show_validation` -- tests #26, #27
-- [x] `plot_cv_error` -- tests #29, #30
-- [x] `plot_coefficients` -- tests #29, #30
-- [x] `plot_groups` -- tests #29, #30
-- [x] `plot_sparsity` -- tests #29, #30
-- [x] `plot_stability` -- tests #29, #30
-- [x] `alpha_level` -- tests #22, #23
-- [x] `confidence_intervals` -- tests #22, #23
-- [x] `bootstrap_samples` -- tests #22, #24
-- [x] `stability_selection` -- tests #24, #25
-- [x] `stability_threshold` -- tests #24, #25
-- [x] `stability_subsample` -- test #24
-- [x] `showExplanations` -- tests #26, #27
+- [x] `time_var` - tests #1-42
+- [x] `event_var` - tests #1-42
+- [x] `outcomeLevel` - tests #1-42
+- [x] `censorLevel` - tests #1-42
+- [x] `pred_vars` - tests #1-42
+- [x] `suitabilityCheck` - tests #1 (TRUE), #34 (FALSE)
+- [x] `group_definition` (factor_based) - tests #1, #2, #8
+- [x] `group_definition` (custom) - test #9
+- [x] `group_definition` (pathway_based) - needs pathway variable
+- [x] `group_definition` (variable_type) - test #10
+- [x] `group_definition` (correlation_based) - tests #11, #12
+- [x] `custom_groups` - test #9
+- [x] `pathway_info` - needs pathway variable in dataset
+- [x] `correlation_threshold` - tests #11, #12
+- [x] `alpha_sgl` - tests #1 (0.95), #3 (0.3), #4 (0.99)
+- [x] `lambda_sequence` (auto) - test #13
+- [x] `lambda_sequence` (custom) - test #14
+- [x] `lambda_sequence` (adaptive) - test #15
+- [x] `custom_lambda` - test #14
+- [x] `lambda_min_ratio` - test #13
+- [x] `n_lambda` - test #13
+- [x] `selection_criterion` (cv_deviance) - test #1
+- [x] `selection_criterion` (aic) - test #5
+- [x] `selection_criterion` (bic) - test #6
+- [x] `selection_criterion` (ebic) - test #7
+- [x] `cv_folds` - tests #16, #35
+- [x] `cv_repeats` - test #17
+- [x] `ebic_gamma` - test #7
+- [x] `weight_type` (none) - test #1
+- [x] `weight_type` (ridge_based) - tests #18, #21
+- [x] `weight_type` (univariate_based) - test #19
+- [x] `weight_type` (lasso_based) - test #20
+- [x] `weight_power` - test #21
+- [x] `standardize_vars` - test #31
+- [x] `center_vars` - test #32
+- [x] `seed_value` - test #33
+- [x] `show_summary` - tests #26, #27
+- [x] `show_coefficients` - tests #26, #27
+- [x] `show_groups` - tests #26, #27
+- [x] `show_path` - test #28
+- [x] `show_performance` - tests #26, #27
+- [x] `show_validation` - tests #26, #27
+- [x] `plot_cv_error` - tests #29, #30
+- [x] `plot_coefficients` - tests #29, #30
+- [x] `plot_groups` - tests #29, #30
+- [x] `plot_sparsity` - tests #29, #30
+- [x] `plot_stability` - tests #29, #30
+- [x] `alpha_level` - tests #22, #23
+- [x] `confidence_intervals` - tests #22, #23
+- [x] `bootstrap_samples` - tests #22, #24
+- [x] `stability_selection` - tests #24, #25
+- [x] `stability_threshold` - tests #24, #25
+- [x] `stability_subsample` - test #24
+- [x] `showExplanations` - tests #26, #27

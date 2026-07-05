@@ -428,20 +428,6 @@ conditionalinferenceBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' predictors. The method is particularly suitable for exploratory survival 
 #' analysis and biomarker discovery in clinical research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- conditionalinference(
-#'     data = mydata,
-#'     time = "time_to_event",
-#'     event = "event_indicator",
-#'     predictors = c("age", "stage", "biomarker"),
-#'     mincriterion = 0.95,
-#'     minsplit = 20,
-#'     minbucket = 7,
-#'     maxdepth = 5
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time to event variable (numeric). For right-censored data, this
 #'   is the  time from study entry to event or censoring.

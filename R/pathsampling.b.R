@@ -1,112 +1,110 @@
-
 # This file is a generated template, your changes will not be overwritten
 
-pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
-    "pathsamplingClass",
-    inherit = pathsamplingBase,
-    private = list(
-        # HTML Styling Constants (decisionpanel style)
-        .styleConstants = list(
-            font = "font-family: Arial, sans-serif;",
-            lineHeight = "line-height: 1.4;",
-            colorPrimary = "color: #333;",
-            colorSecondary = "color: #666;",
-            bgLight = "background: #f5f5f5;",
-            bgLighter = "background: #f9f9f9;",
-            bgWhite = "background: white;",
-            borderPrimary = "border: 2px solid #333;",
-            borderSecondary = "border: 1px solid #ccc;",
-            borderLeft = "border-left: 4px solid #333;",
-            borderWarning = "border-left: 4px solid #ffc107;",
-            fontSize13 = "font-size: 13px;",
-            fontSize14 = "font-size: 14px;",
-            fontSize15 = "font-size: 15px;",
-            fontSize16 = "font-size: 16px;",
-            fontSize18 = "font-size: 18px;",
-            fontWeight700 = "font-weight: 700;",
-            padding10 = "padding: 10px;",
-            padding15 = "padding: 15px;",
-            padding20 = "padding: 20px;",
-            margin10 = "margin: 10px 0;",
-            margin15 = "margin: 15px 0;",
-            margin20 = "margin: 20px 0;",
-            colorSuccess = "color: #155724;",
-            colorInfo = "color: #0c5460;"
-        ),
-        
-        .empiricalHeterogeneity = NULL,
-        .totalSamplesData = NULL,
-        .firstDetectionData = NULL,
-        .pEstimate = NULL,
-        .maxSamp = NULL,
-        .bootstrapResults = NULL,
-        .positiveCassettesData = NULL,
-        .maxPositiveSingleData = NULL,
+pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
+    R6::R6Class(
+        "pathsamplingClass",
+        inherit = pathsamplingBase,
+        private = list(
+            # HTML Styling Constants (decisionpanel style)
+            .styleConstants = list(
+                font = "font-family: Arial, sans-serif;",
+                lineHeight = "line-height: 1.4;",
+                colorPrimary = "color: #333;",
+                colorSecondary = "color: #666;",
+                bgLight = "background: #f5f5f5;",
+                bgLighter = "background: #f9f9f9;",
+                bgWhite = "background: white;",
+                borderPrimary = "border: 2px solid #333;",
+                borderSecondary = "border: 1px solid #ccc;",
+                borderLeft = "border-left: 4px solid #333;",
+                borderWarning = "border-left: 4px solid #ffc107;",
+                fontSize13 = "font-size: 13px;",
+                fontSize14 = "font-size: 14px;",
+                fontSize15 = "font-size: 15px;",
+                fontSize16 = "font-size: 16px;",
+                fontSize18 = "font-size: 18px;",
+                fontWeight700 = "font-weight: 700;",
+                padding10 = "padding: 10px;",
+                padding15 = "padding: 15px;",
+                padding20 = "padding: 20px;",
+                margin10 = "margin: 10px 0;",
+                margin15 = "margin: 15px 0;",
+                margin20 = "margin: 20px 0;",
+                colorSuccess = "color: #155724;",
+                colorInfo = "color: #0c5460;"
+            ),
+            .empiricalHeterogeneity = NULL,
+            .totalSamplesData = NULL,
+            .firstDetectionData = NULL,
+            .pEstimate = NULL,
+            .maxSamp = NULL,
+            .bootstrapResults = NULL,
+            .positiveCassettesData = NULL,
+            .maxPositiveSingleData = NULL,
 
-        # Helper to build combined styles
-        .buildStyle = function(...) {
-            paste(..., collapse = " ")
-        },
+            # Helper to build combined styles
+            .buildStyle = function(...) {
+                paste(..., collapse = " ")
+            },
 
-        # TODO (correctness): `.escapeVar` corrupts column references for unusual column names.
-        # `gsub("[^A-Za-z0-9_]+", "_", make.names(x))` produces an identifier that does NOT
-        # match the original column. For a column named "weight (g)", .escapeVar returns
-        # "weight__g__" → `data[["weight__g__"]]` looks up a column that doesn't exist →
-        # NULL → downstream analysis silently fails or errors with a confusing message.
-        # The fix is to use `jmvcore::composeTerm(x)` for formula contexts (which produces
-        # `\`weight (g)\`` — valid R syntax) and `data[[self$options$X]]` directly for indexing.
-        # Substantial refactor across all .escapeVar call sites (L445/L446/L459/L464/L2792/L2793/L3018/L3019/etc.).
-        # Accidentally provides defense-in-depth against D-category XSS (broken lookups never
-        # reach setContent), but breaks the analysis for legitimate non-identifier column names.
-        # Utility function to escape variable names with special characters
-        .escapeVar = function(x) {
-            if (is.null(x) || length(x) == 0) return(NULL)
-            # Convert to valid R names, replacing special chars with underscores
-            escaped <- gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-            return(escaped)
-        },
+            # TODO (correctness): `.escapeVar` corrupts column references for unusual column names.
+            # `gsub("[^A-Za-z0-9_]+", "_", make.names(x))` produces an identifier that does NOT
+            # match the original column. For a column named "weight (g)", .escapeVar returns
+            # "weight__g__" → `data[["weight__g__"]]` looks up a column that doesn't exist →
+            # NULL → downstream analysis silently fails or errors with a confusing message.
+            # The fix is to use `jmvcore::composeTerm(x)` for formula contexts (which produces
+            # `\`weight (g)\`` - valid R syntax) and `data[[self$options$X]]` directly for indexing.
+            # Substantial refactor across all .escapeVar call sites (L445/L446/L459/L464/L2792/L2793/L3018/L3019/etc.).
+            # Accidentally provides defense-in-depth against D-category XSS (broken lookups never
+            # reach setContent), but breaks the analysis for legitimate non-identifier column names.
+            # Utility function to escape variable names with special characters
+            .escapeVar = function(x) {
+                if (is.null(x) || length(x) == 0) {
+                    return(NULL)
+                }
+                # Convert to valid R names, replacing special chars with underscores
+                escaped <- gsub("[^A-Za-z0-9_]+", "_", make.names(x))
+                return(escaped)
+            },
 
-        # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
-        # notice content must be plain text). ====
-        .noticeList = list(),
+            # Notice collection helpers. A single Preformatted (plain-text) output item:
+            # avoids BOTH the jmvcore::Notice serialization error from
+            # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+            # notice content must be plain text). ====
+            .noticeList = list(),
+            .addNotice = function(type, title, content) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+                # Render immediately so early-return validation aborts still display the notice
+                private$.renderNotices()
+            },
+            .renderNotices = function() {
+                if (length(private$.noticeList) == 0) {
+                    self$results$notices$setContent("")
+                    return()
+                }
 
-        .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
-            # Render immediately so early-return validation aborts still display the notice
-            private$.renderNotices()
-        },
+                # Plain text only - notices avoid HTML by project convention; the Preformatted
+                # output item renders this literally (no markup, no injection surface).
+                blocks <- vapply(private$.noticeList, function(notice) {
+                    prefix <- switch(notice$type,
+                        ERROR          = "ERROR: ",
+                        STRONG_WARNING = "WARNING: ",
+                        WARNING        = "WARNING: ",
+                        ""
+                    )
+                    paste0(prefix, notice$title, "\n", notice$content)
+                }, character(1))
 
-        .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("")
-                return()
-            }
-
-            # Plain text only — notices avoid HTML by project convention; the Preformatted
-            # output item renders this literally (no markup, no injection surface).
-            blocks <- vapply(private$.noticeList, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
-                    WARNING        = "WARNING: ",
-                    "")
-                paste0(prefix, notice$title, "\n", notice$content)
-            }, character(1))
-
-            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-        },
-
-        .init = function() {
-
-            # Welcome message when no variables selected
-            welcome <- self$results$welcome
-            welcomeHtml <- "
+                self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
+            },
+            .init = function() {
+                # Welcome message when no variables selected
+                welcome <- self$results$welcome
+                welcomeHtml <- "
             <div style='font-family: Arial, sans-serif; max-width: 800px; line-height: 1.4;'>
                 <div style='background: #f5f5f5; border: 2px solid #333; padding: 20px; margin-bottom: 20px;'>
                     <h2 style='margin: 0 0 10px 0; font-size: 18px; color: #333;'>Pathology Sampling Adequacy Analysis</h2>
@@ -158,13 +156,14 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </p>
                 </div>
             </div>"
-            welcome$setContent(welcomeHtml)
+                welcome$setContent(welcomeHtml)
 
-            # === Guided Instructions (Detailed Checklist) ===
-            if (self$options$showGuidedInstructions) {
-                guidedInstructions <- self$results$guidedInstructions
+                # === Guided Instructions (Detailed Checklist) ===
+                if (self$options$showGuidedInstructions) {
+                    guidedInstructions <- self$results$guidedInstructions
 
-                guidedHtml <- sprintf("<div style='%s'>
+                    guidedHtml <- sprintf(
+                        "<div style='%s'>
                     <div style='%s'>
                         <h3 style='%s'>Quick Start Checklist</h3>
                         <ol style='%s'>
@@ -212,74 +211,76 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         </ul>
                     </div>
                 </div>",
-                private$.styleConstants$font,
-                private$.buildStyle(
-                    private$.styleConstants$bgLight,
-                    private$.styleConstants$borderLeft,
-                    private$.styleConstants$padding15,
-                    private$.styleConstants$margin10
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize16,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.buildStyle(
-                    "margin: 0;",
-                    "padding-left: 20px;",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary
-                ),
-                private$.buildStyle(
-                    "margin: 5px 0;",
-                    "padding-left: 20px;",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorSecondary
-                ),
-                private$.buildStyle(
-                    "margin: 5px 0;",
-                    "padding-left: 20px;",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorSecondary
-                ),
-                private$.buildStyle(
-                    "margin: 5px 0;",
-                    "padding-left: 20px;",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorSecondary
-                ),
-                private$.buildStyle(
-                    "margin: 5px 0;",
-                    "padding-left: 20px;",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorSecondary
-                ),
-                private$.buildStyle(
-                    "background: #fff3cd;",
-                    private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding10,
-                    private$.styleConstants$margin10
-                ),
-                private$.buildStyle(
-                    "color: #856404;",
-                    private$.styleConstants$fontSize15,
-                    "margin: 0 0 8px 0;"
-                ),
-                private$.buildStyle(
-                    "margin: 0;",
-                    "padding-left: 20px;",
-                    "color: #856404;",
-                    private$.styleConstants$fontSize14
-                ))
+                        private$.styleConstants$font,
+                        private$.buildStyle(
+                            private$.styleConstants$bgLight,
+                            private$.styleConstants$borderLeft,
+                            private$.styleConstants$padding15,
+                            private$.styleConstants$margin10
+                        ),
+                        private$.buildStyle(
+                            private$.styleConstants$colorPrimary,
+                            private$.styleConstants$fontSize16,
+                            "margin: 0 0 10px 0;"
+                        ),
+                        private$.buildStyle(
+                            "margin: 0;",
+                            "padding-left: 20px;",
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary
+                        ),
+                        private$.buildStyle(
+                            "margin: 5px 0;",
+                            "padding-left: 20px;",
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorSecondary
+                        ),
+                        private$.buildStyle(
+                            "margin: 5px 0;",
+                            "padding-left: 20px;",
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorSecondary
+                        ),
+                        private$.buildStyle(
+                            "margin: 5px 0;",
+                            "padding-left: 20px;",
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorSecondary
+                        ),
+                        private$.buildStyle(
+                            "margin: 5px 0;",
+                            "padding-left: 20px;",
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorSecondary
+                        ),
+                        private$.buildStyle(
+                            "background: #fff3cd;",
+                            private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding10,
+                            private$.styleConstants$margin10
+                        ),
+                        private$.buildStyle(
+                            "color: #856404;",
+                            private$.styleConstants$fontSize15,
+                            "margin: 0 0 8px 0;"
+                        ),
+                        private$.buildStyle(
+                            "margin: 0;",
+                            "padding-left: 20px;",
+                            "color: #856404;",
+                            private$.styleConstants$fontSize14
+                        )
+                    )
 
-                guidedInstructions$setContent(guidedHtml)
-            }
+                    guidedInstructions$setContent(guidedHtml)
+                }
 
-            # === Concise Instructions (Brief Overview) ===
-            if (self$options$showConciseInstructions) {
-                conciseInstructions <- self$results$conciseInstructions
+                # === Concise Instructions (Brief Overview) ===
+                if (self$options$showConciseInstructions) {
+                    conciseInstructions <- self$results$conciseInstructions
 
-                conciseHtml <- sprintf("<div style='%s'>
+                    conciseHtml <- sprintf(
+                        "<div style='%s'>
                     <h3 style='%s %s'>Pathology Sampling Adequacy Analysis</h3>
                     <p style='%s %s'>This analysis determines the minimum number of tissue samples
                     (blocks, cassettes, sections, or lymph nodes) required to detect lesions with a
@@ -294,282 +295,295 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <p style='%s %s'><b>Statistical Methods:</b> Binomial probability models,
                     Bootstrap resampling, Hypergeometric and Beta-Binomial models for finite populations</p>
                 </div>",
-                private$.styleConstants$font,
-                private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary)
-
-                conciseInstructions$setContent(conciseHtml)
-            }
-
-            if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) {
-                welcome$setVisible(TRUE)
-                # No variables selected - show welcome message only
-                return()
-            } else {
-                welcome$setVisible(FALSE)
-            }
-
-
-        },
-
-        .run = function() {
-
-            private$.noticeList <- list()
-
-            if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) return()
-
-
-            # Get required variables
-            totalSamples <- self$options$totalSamples
-            firstDetection <- self$options$firstDetection
-
-            # Get optional enhanced variables
-            positiveCount <- self$options$positiveCount
-            positiveSamplesList <- self$options$positiveSamplesList
-            sampleType <- self$options$sampleType
-
-            # Validate required variables
-            if (is.null(totalSamples) || is.null(firstDetection)) {
-                # Variables not selected - show instructions only
-                return()
-            }
-
-            # Get options and validate
-            targetConf <- self$options$targetConfidence
-            maxSamp <- self$options$maxSamples
-            nBoot <- self$options$bootstrapIterations
-            analysisContext <- if (is.null(self$options$analysisContext)) "general" else self$options$analysisContext
-            
-            # Flag to skip Binomial model if assumptions violated
-            skipBinomial <- FALSE
-
-            # Prepare recommendation collector to summarize minimum samples for target confidence
-            recommendations <- list()
-            addRecommendation <- function(method, probVec, priority, description, detail = NULL, ci = NULL) {
-                # Extend recommendation list with standardized fields and target-driven summary
-                if (length(probVec) == 0 || all(is.na(probVec))) {
-                    status <- "No valid probabilities available"
-                    rec <- list(
-                        method = method,
-                        description = description,
-                        minSamples = NA_integer_,
-                        achievedProb = NA_real_,
-                        bestProb = NA_real_,
-                        bestN = NA_integer_,
-                        status = status,
-                        detail = ifelse(is.null(detail) || detail == "", "", detail),
-                        priority = priority,
-                        ciLower = ifelse(is.null(ci), NA_real_, ci[1]),
-                        ciUpper = ifelse(is.null(ci), NA_real_, ci[2])
+                        private$.styleConstants$font,
+                        private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary
                     )
-                    recommendations <<- c(recommendations, list(rec))
-                    return(invisible())
+
+                    conciseInstructions$setContent(conciseHtml)
                 }
 
-                validIdx <- which(!is.na(probVec))
-                if (length(validIdx) == 0) {
-                    status <- "No valid probabilities available"
-                    rec <- list(
-                        method = method,
-                        description = description,
-                        minSamples = NA_integer_,
-                        achievedProb = NA_real_,
-                        bestProb = NA_real_,
-                        bestN = NA_integer_,
-                        status = status,
-                        detail = ifelse(is.null(detail) || detail == "", "", detail),
-                        priority = priority,
-                        ciLower = ifelse(is.null(ci), NA_real_, ci[1]),
-                        ciUpper = ifelse(is.null(ci), NA_real_, ci[2])
-                    )
-                    recommendations <<- c(recommendations, list(rec))
-                    return(invisible())
-                }
-
-                targetCandidates <- validIdx[probVec[validIdx] >= targetConf]
-                targetIdx <- if (length(targetCandidates) > 0) targetCandidates[1] else NA_integer_
-
-                bestInValid <- which.max(probVec[validIdx])
-                bestIdx <- validIdx[bestInValid]
-                bestProb <- probVec[bestIdx]
-
-                if (!is.na(targetIdx)) {
-                    minSamples <- targetIdx
-                    achievedProb <- probVec[targetIdx]
-                    status <- sprintf("Meets target at %d samples (%.1f%%)",
-                        minSamples, achievedProb * 100)
+                if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) {
+                    welcome$setVisible(TRUE)
+                    # No variables selected - show welcome message only
+                    return()
                 } else {
-                    minSamples <- NA_integer_
-                    achievedProb <- bestProb
-                    status <- ifelse(length(validIdx) > 0,
-                        sprintf("Target not reached; best %.1f%% at %d samples",
-                            bestProb * 100, bestIdx),
-                        "Target not reached")
+                    welcome$setVisible(FALSE)
+                }
+            },
+            .run = function() {
+                private$.noticeList <- list()
+
+                if (is.null(self$options$totalSamples) && is.null(self$options$firstDetection)) {
+                    return()
                 }
 
-                detailParts <- character()
-                if (!is.null(detail) && nzchar(detail)) {
-                    detailParts <- c(detailParts, detail)
+
+                # Get required variables
+                totalSamples <- self$options$totalSamples
+                firstDetection <- self$options$firstDetection
+
+                # Get optional enhanced variables
+                positiveCount <- self$options$positiveCount
+                positiveSamplesList <- self$options$positiveSamplesList
+                sampleType <- self$options$sampleType
+
+                # Validate required variables
+                if (is.null(totalSamples) || is.null(firstDetection)) {
+                    # Variables not selected - show instructions only
+                    return()
                 }
-                if (!is.null(ci) && length(ci) == 2 && all(is.finite(ci))) {
-                    detailParts <- c(detailParts,
-                        sprintf("95%% CI %.1f%%-%.1f%%", ci[1] * 100, ci[2] * 100))
+
+                # Get options and validate
+                targetConf <- self$options$targetConfidence
+                maxSamp <- self$options$maxSamples
+                nBoot <- self$options$bootstrapIterations
+                analysisContext <- if (is.null(self$options$analysisContext)) "general" else self$options$analysisContext
+
+                # Flag to skip Binomial model if assumptions violated
+                skipBinomial <- FALSE
+
+                # Prepare recommendation collector to summarize minimum samples for target confidence
+                recommendations <- list()
+                addRecommendation <- function(method, probVec, priority, description, detail = NULL, ci = NULL) {
+                    # Extend recommendation list with standardized fields and target-driven summary
+                    if (length(probVec) == 0 || all(is.na(probVec))) {
+                        status <- "No valid probabilities available"
+                        rec <- list(
+                            method = method,
+                            description = description,
+                            minSamples = NA_integer_,
+                            achievedProb = NA_real_,
+                            bestProb = NA_real_,
+                            bestN = NA_integer_,
+                            status = status,
+                            detail = ifelse(is.null(detail) || detail == "", "", detail),
+                            priority = priority,
+                            ciLower = ifelse(is.null(ci), NA_real_, ci[1]),
+                            ciUpper = ifelse(is.null(ci), NA_real_, ci[2])
+                        )
+                        recommendations <<- c(recommendations, list(rec))
+                        return(invisible())
+                    }
+
+                    validIdx <- which(!is.na(probVec))
+                    if (length(validIdx) == 0) {
+                        status <- "No valid probabilities available"
+                        rec <- list(
+                            method = method,
+                            description = description,
+                            minSamples = NA_integer_,
+                            achievedProb = NA_real_,
+                            bestProb = NA_real_,
+                            bestN = NA_integer_,
+                            status = status,
+                            detail = ifelse(is.null(detail) || detail == "", "", detail),
+                            priority = priority,
+                            ciLower = ifelse(is.null(ci), NA_real_, ci[1]),
+                            ciUpper = ifelse(is.null(ci), NA_real_, ci[2])
+                        )
+                        recommendations <<- c(recommendations, list(rec))
+                        return(invisible())
+                    }
+
+                    targetCandidates <- validIdx[probVec[validIdx] >= targetConf]
+                    targetIdx <- if (length(targetCandidates) > 0) targetCandidates[1] else NA_integer_
+
+                    bestInValid <- which.max(probVec[validIdx])
+                    bestIdx <- validIdx[bestInValid]
+                    bestProb <- probVec[bestIdx]
+
+                    if (!is.na(targetIdx)) {
+                        minSamples <- targetIdx
+                        achievedProb <- probVec[targetIdx]
+                        status <- sprintf(
+                            "Meets target at %d samples (%.1f%%)",
+                            minSamples, achievedProb * 100
+                        )
+                    } else {
+                        minSamples <- NA_integer_
+                        achievedProb <- bestProb
+                        status <- ifelse(length(validIdx) > 0,
+                            sprintf(
+                                "Target not reached; best %.1f%% at %d samples",
+                                bestProb * 100, bestIdx
+                            ),
+                            "Target not reached"
+                        )
+                    }
+
+                    detailParts <- character()
+                    if (!is.null(detail) && nzchar(detail)) {
+                        detailParts <- c(detailParts, detail)
+                    }
+                    if (!is.null(ci) && length(ci) == 2 && all(is.finite(ci))) {
+                        detailParts <- c(
+                            detailParts,
+                            sprintf("95%% CI %.1f%%-%.1f%%", ci[1] * 100, ci[2] * 100)
+                        )
+                    }
+                    detailText <- paste(detailParts, collapse = "; ")
+
+                    rec <- list(
+                        method = method,
+                        description = description,
+                        minSamples = minSamples,
+                        achievedProb = achievedProb,
+                        bestProb = bestProb,
+                        bestN = bestIdx,
+                        status = status,
+                        detail = detailText,
+                        priority = priority,
+                        ciLower = ifelse(is.null(ci), NA_real_, ci[1]),
+                        ciUpper = ifelse(is.null(ci), NA_real_, ci[2])
+                    )
+
+                    recommendations <<- c(recommendations, list(rec))
                 }
-                detailText <- paste(detailParts, collapse = "; ")
 
-                rec <- list(
-                    method = method,
-                    description = description,
-                    minSamples = minSamples,
-                    achievedProb = achievedProb,
-                    bestProb = bestProb,
-                    bestN = bestIdx,
-                    status = status,
-                    detail = detailText,
-                    priority = priority,
-                    ciLower = ifelse(is.null(ci), NA_real_, ci[1]),
-                    ciUpper = ifelse(is.null(ci), NA_real_, ci[2])
-                )
+                # Storage for bootstrap-derived summary (used later for clinical summary narrative)
+                bootstrapTargetIdx <- NA_integer_
+                bootstrapMeansVec <- NULL
+                bootstrapCILowerVec <- NULL
+                bootstrapCIUpperVec <- NULL
 
-                recommendations <<- c(recommendations, list(rec))
-            }
+                # Validate target confidence range
+                if (targetConf <= 0 || targetConf >= 1) {
+                    dataInfo <- self$results$dataInfo
+                    dataInfo$addRow(rowKey = "error_conf", values = list(
+                        measure = "ERROR",
+                        value = "Target confidence must be between 0 and 1"
+                    ))
+                    return()
+                }
 
-            # Storage for bootstrap-derived summary (used later for clinical summary narrative)
-            bootstrapTargetIdx <- NA_integer_
-            bootstrapMeansVec <- NULL
-            bootstrapCILowerVec <- NULL
-            bootstrapCIUpperVec <- NULL
-
-            # Validate target confidence range
-            if (targetConf <= 0 || targetConf >= 1) {
-                dataInfo <- self$results$dataInfo
-                dataInfo$addRow(rowKey="error_conf", values=list(
-                    measure = "ERROR",
-                    value = "Target confidence must be between 0 and 1"
-                ))
-                return()
-            }
-
-            # Warning for extreme confidence levels
-            if (targetConf > 0.99) {
-                interpretText <- self$results$interpretText
-                warningHtml <- sprintf("<div style='%s %s %s %s'>
+                # Warning for extreme confidence levels
+                if (targetConf > 0.99) {
+                    interpretText <- self$results$interpretText
+                    warningHtml <- sprintf(
+                        "<div style='%s %s %s %s'>
                     <p style='margin: 0; %s'><strong>WARNING: Extreme Confidence Level</strong></p>
                     <p style='margin: 5px 0 0 0; %s'>
                         Target confidence of %.1f%% is extremely high and may require impractical sample sizes.
                         Standard diagnostic test sensitivity uses 95%%. Consider using 0.90-0.95 for clinical applicability.
                     </p>
                 </div>",
-                private$.styleConstants$font, private$.styleConstants$bgLight,
-                private$.styleConstants$borderLeft, private$.styleConstants$padding10,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary,
-                targetConf * 100)
-                interpretText$setContent(warningHtml)
-            }
+                        private$.styleConstants$font, private$.styleConstants$bgLight,
+                        private$.styleConstants$borderLeft, private$.styleConstants$padding10,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary,
+                        targetConf * 100
+                    )
+                    interpretText$setContent(warningHtml)
+                }
 
-            # Warning for insufficient bootstrap iterations
-            if (self$options$showBootstrap && nBoot < 1000) {
-                interpretText <- self$results$interpretText
-                warningHtml <- sprintf("<div style='%s %s %s %s'>
+                # Warning for insufficient bootstrap iterations
+                if (self$options$showBootstrap && nBoot < 1000) {
+                    interpretText <- self$results$interpretText
+                    warningHtml <- sprintf(
+                        "<div style='%s %s %s %s'>
                     <p style='margin: 0; %s %s'><strong>WARNING: Low Bootstrap Iterations</strong></p>
                     <p style='margin: 5px 0 0 0; %s %s'>
                         Only %d bootstrap iterations specified. Confidence intervals may be unstable.
-                        Recommended: ≥1,000 iterations for preliminary analysis, ≥10,000 for publication.
+                        Recommended: >=1,000 iterations for preliminary analysis, >=10,000 for publication.
                     </p>
                 </div>",
-                private$.styleConstants$font, private$.styleConstants$bgLight,
-                private$.styleConstants$borderLeft, private$.styleConstants$padding10,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary,
-                nBoot)
-                interpretText$setContent(warningHtml)
-            }
+                        private$.styleConstants$font, private$.styleConstants$bgLight,
+                        private$.styleConstants$borderLeft, private$.styleConstants$padding10,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary,
+                        nBoot
+                    )
+                    interpretText$setContent(warningHtml)
+                }
 
-            # Escape variable names for safe lookup
-            totalSamplesEsc <- private$.escapeVar(totalSamples)
-            firstDetectionEsc <- private$.escapeVar(firstDetection)
+                # Escape variable names for safe lookup
+                totalSamplesEsc <- private$.escapeVar(totalSamples)
+                firstDetectionEsc <- private$.escapeVar(firstDetection)
 
-            # Get data with escaped names
-            data <- self$data
-            totalSamplesData <- jmvcore::toNumeric(data[[totalSamplesEsc]])
-            firstDetectionData <- jmvcore::toNumeric(data[[firstDetectionEsc]])
+                # Get data with escaped names
+                data <- self$data
+                totalSamplesData <- jmvcore::toNumeric(data[[totalSamplesEsc]])
+                firstDetectionData <- jmvcore::toNumeric(data[[firstDetectionEsc]])
 
-            # Get optional enhanced data
-            positiveCountData <- NULL
-            positiveSamplesListData <- NULL
-            sampleTypeData <- NULL
+                # Get optional enhanced data
+                positiveCountData <- NULL
+                positiveSamplesListData <- NULL
+                sampleTypeData <- NULL
 
-            if (!is.null(positiveCount)) {
-                positiveCountEsc <- private$.escapeVar(positiveCount)
-                positiveCountData <- jmvcore::toNumeric(data[[positiveCountEsc]])
-            }
+                if (!is.null(positiveCount)) {
+                    positiveCountEsc <- private$.escapeVar(positiveCount)
+                    positiveCountData <- jmvcore::toNumeric(data[[positiveCountEsc]])
+                }
 
-            if (!is.null(positiveSamplesList)) {
-                positiveSamplesListEsc <- private$.escapeVar(positiveSamplesList)
-                positiveSamplesListData <- data[[positiveSamplesListEsc]]
-            }
+                if (!is.null(positiveSamplesList)) {
+                    positiveSamplesListEsc <- private$.escapeVar(positiveSamplesList)
+                    positiveSamplesListData <- data[[positiveSamplesListEsc]]
+                }
 
-            if (!is.null(sampleType)) {
-                sampleTypeEsc <- private$.escapeVar(sampleType)
-                sampleTypeData <- data[[sampleTypeEsc]]
-            }
+                if (!is.null(sampleType)) {
+                    sampleTypeEsc <- private$.escapeVar(sampleType)
+                    sampleTypeData <- data[[sampleTypeEsc]]
+                }
 
-            # Preserve raw inputs for reporting before exclusions
-            rawTotalSamplesData <- totalSamplesData
-            rawFirstDetectionData <- firstDetectionData
-            totalCasesInput <- length(rawTotalSamplesData)
+                # Preserve raw inputs for reporting before exclusions
+                rawTotalSamplesData <- totalSamplesData
+                rawFirstDetectionData <- firstDetectionData
+                totalCasesInput <- length(rawTotalSamplesData)
 
-            # Handle labelled data (convert factors to numeric)
-            if (is.factor(totalSamplesData) || !is.null(attr(totalSamplesData, 'labels'))) {
-                totalSamplesData <- as.numeric(as.character(totalSamplesData))
-            }
-            if (is.factor(firstDetectionData) || !is.null(attr(firstDetectionData, 'labels'))) {
-                firstDetectionData <- as.numeric(as.character(firstDetectionData))
-            }
+                # Handle labelled data (convert factors to numeric)
+                if (is.factor(totalSamplesData) || !is.null(attr(totalSamplesData, "labels"))) {
+                    totalSamplesData <- as.numeric(as.character(totalSamplesData))
+                }
+                if (is.factor(firstDetectionData) || !is.null(attr(firstDetectionData, "labels"))) {
+                    firstDetectionData <- as.numeric(as.character(firstDetectionData))
+                }
 
-            # Identify valid cases (allow missing first detection for non-detected lesions)
-            validCases <- !is.na(totalSamplesData)
+                # Identify valid cases (allow missing first detection for non-detected lesions)
+                validCases <- !is.na(totalSamplesData)
 
-            # Track data quality notes before filtering
-            dataWarnings <- character()
-            nExcludedMissingTotal <- 0
-            if (any(!validCases)) {
-                nExcludedMissingTotal <- sum(!validCases)
-                dataWarnings <- c(dataWarnings,
-                    sprintf("%d cases removed due to missing total samples", nExcludedMissingTotal))
-            }
+                # Track data quality notes before filtering
+                dataWarnings <- character()
+                nExcludedMissingTotal <- 0
+                if (any(!validCases)) {
+                    nExcludedMissingTotal <- sum(!validCases)
+                    dataWarnings <- c(
+                        dataWarnings,
+                        sprintf("%d cases removed due to missing total samples", nExcludedMissingTotal)
+                    )
+                }
 
-            # Filter to valid cases
-            totalSamplesData <- totalSamplesData[validCases]
-            firstDetectionData <- firstDetectionData[validCases]
+                # Filter to valid cases
+                totalSamplesData <- totalSamplesData[validCases]
+                firstDetectionData <- firstDetectionData[validCases]
 
-            # Filter optional data
-            if (!is.null(positiveCountData)) {
-                positiveCountData <- positiveCountData[validCases]
-            }
-            if (!is.null(positiveSamplesListData)) {
-                positiveSamplesListData <- positiveSamplesListData[validCases]
-            }
-            if (!is.null(sampleTypeData)) {
-                sampleTypeData <- sampleTypeData[validCases]
-            }
+                # Filter optional data
+                if (!is.null(positiveCountData)) {
+                    positiveCountData <- positiveCountData[validCases]
+                }
+                if (!is.null(positiveSamplesListData)) {
+                    positiveSamplesListData <- positiveSamplesListData[validCases]
+                }
+                if (!is.null(sampleTypeData)) {
+                    sampleTypeData <- sampleTypeData[validCases]
+                }
 
-            # ===== Edge Case Validation =====
+                # ===== Edge Case Validation =====
 
-            # Error 1: No valid cases after removing missing total samples
-            if (length(totalSamplesData) == 0) {
-                dataInfo <- self$results$dataInfo
-                dataInfo$addRow(rowKey="error_no_cases", values=list(
-                    measure = "ERROR",
-                    value = "No valid cases found. All cases have missing total samples."
-                ))
+                # Error 1: No valid cases after removing missing total samples
+                if (length(totalSamplesData) == 0) {
+                    dataInfo <- self$results$dataInfo
+                    dataInfo$addRow(rowKey = "error_no_cases", values = list(
+                        measure = "ERROR",
+                        value = "No valid cases found. All cases have missing total samples."
+                    ))
 
-                interpretText <- self$results$interpretText
-                errorHtml <- sprintf("<div style='%s %s %s %s'>
+                    interpretText <- self$results$interpretText
+                    errorHtml <- sprintf(
+                        "<div style='%s %s %s %s'>
                     <p style='margin: 0; %s'><strong> ERROR: No Valid Data</strong></p>
                     <p style='margin: 10px 0 0 0; %s'>
                         All %d cases in the dataset have missing values for total samples.
@@ -581,45 +595,47 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <li>Ensure at least some cases have non-missing values</li>
                     </ul>
                 </div>",
-                private$.styleConstants$font, private$.styleConstants$bgLight,
-                private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                private$.styleConstants$fontSize15,
-                private$.styleConstants$fontSize14, totalCasesInput,
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontSize14)
-                interpretText$setContent(errorHtml)
-                return()
-            }
-
-            # Check for invalid data: first detection > total samples
-            invalidCases <- !is.na(firstDetectionData) & (firstDetectionData > totalSamplesData)
-            nExcludedInvalidDetection <- 0
-            if (any(invalidCases)) {
-                nExcludedInvalidDetection <- sum(invalidCases)
-                totalSamplesData <- totalSamplesData[!invalidCases]
-                firstDetectionData <- firstDetectionData[!invalidCases]
-
-                # Filter optional data for invalid cases too
-                if (!is.null(positiveCountData)) {
-                    positiveCountData <- positiveCountData[!invalidCases]
-                }
-                if (!is.null(positiveSamplesListData)) {
-                    positiveSamplesListData <- positiveSamplesListData[!invalidCases]
-                }
-                if (!is.null(sampleTypeData)) {
-                    sampleTypeData <- sampleTypeData[!invalidCases]
+                        private$.styleConstants$font, private$.styleConstants$bgLight,
+                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                        private$.styleConstants$fontSize15,
+                        private$.styleConstants$fontSize14, totalCasesInput,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14
+                    )
+                    interpretText$setContent(errorHtml)
+                    return()
                 }
 
-                # Error 2: All remaining cases invalid after filtering
-                if (length(firstDetectionData) == 0) {
-                    dataInfo <- self$results$dataInfo
-                    dataInfo$addRow(rowKey="error_invalid_all", values=list(
-                        measure = "ERROR",
-                        value = "No valid cases remaining after removing data errors"
-                    ))
+                # Check for invalid data: first detection > total samples
+                invalidCases <- !is.na(firstDetectionData) & (firstDetectionData > totalSamplesData)
+                nExcludedInvalidDetection <- 0
+                if (any(invalidCases)) {
+                    nExcludedInvalidDetection <- sum(invalidCases)
+                    totalSamplesData <- totalSamplesData[!invalidCases]
+                    firstDetectionData <- firstDetectionData[!invalidCases]
 
-                    interpretText <- self$results$interpretText
-                    errorHtml <- sprintf("<div style='%s %s %s %s'>
+                    # Filter optional data for invalid cases too
+                    if (!is.null(positiveCountData)) {
+                        positiveCountData <- positiveCountData[!invalidCases]
+                    }
+                    if (!is.null(positiveSamplesListData)) {
+                        positiveSamplesListData <- positiveSamplesListData[!invalidCases]
+                    }
+                    if (!is.null(sampleTypeData)) {
+                        sampleTypeData <- sampleTypeData[!invalidCases]
+                    }
+
+                    # Error 2: All remaining cases invalid after filtering
+                    if (length(firstDetectionData) == 0) {
+                        dataInfo <- self$results$dataInfo
+                        dataInfo$addRow(rowKey = "error_invalid_all", values = list(
+                            measure = "ERROR",
+                            value = "No valid cases remaining after removing data errors"
+                        ))
+
+                        interpretText <- self$results$interpretText
+                        errorHtml <- sprintf(
+                            "<div style='%s %s %s %s'>
                         <p style='margin: 0; %s'><strong> ERROR: Data Quality Issues</strong></p>
                         <p style='margin: 10px 0 0 0; %s'>
                             All %d remaining cases have invalid data (first detection > total samples).
@@ -632,86 +648,96 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         </ul>
                         <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Review source data for consistency.</p>
                     </div>",
-                    private$.styleConstants$font, private$.styleConstants$bgLight,
-                    private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$fontSize14, nExcludedInvalidDetection,
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$fontSize14)
-                    interpretText$setContent(errorHtml)
-                    return()
+                            private$.styleConstants$font, private$.styleConstants$bgLight,
+                            private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                            private$.styleConstants$fontSize15,
+                            private$.styleConstants$fontSize14, nExcludedInvalidDetection,
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$fontSize14
+                        )
+                        interpretText$setContent(errorHtml)
+                        return()
+                    }
+
+                    dataWarnings <- c(
+                        dataWarnings,
+                        sprintf("%d cases removed due to first detection exceeding total samples", nExcludedInvalidDetection)
+                    )
                 }
 
-                dataWarnings <- c(dataWarnings,
-                    sprintf("%d cases removed due to first detection exceeding total samples", nExcludedInvalidDetection))
-            }
+                # Treat non-positive detection indices as censored (no lesion detected)
+                invalidNonPositive <- !is.na(firstDetectionData) & firstDetectionData < 1
+                if (any(invalidNonPositive)) {
+                    dataWarnings <- c(
+                        dataWarnings,
+                        sprintf("%d cases recorded first detection < 1; treated as no lesion detected", sum(invalidNonPositive))
+                    )
+                    firstDetectionData[invalidNonPositive] <- NA
+                }
 
-            # Treat non-positive detection indices as censored (no lesion detected)
-            invalidNonPositive <- !is.na(firstDetectionData) & firstDetectionData < 1
-            if (any(invalidNonPositive)) {
-                dataWarnings <- c(dataWarnings,
-                    sprintf("%d cases recorded first detection < 1; treated as no lesion detected", sum(invalidNonPositive)))
-                firstDetectionData[invalidNonPositive] <- NA
-            }
+                # Check for negative total samples
+                negativeTotal <- totalSamplesData < 0
+                if (any(negativeTotal, na.rm = TRUE)) {
+                    nNegativeTotal <- sum(negativeTotal, na.rm = TRUE)
+                    dataWarnings <- c(
+                        dataWarnings,
+                        sprintf("%d cases with negative total samples removed", nNegativeTotal)
+                    )
+                    totalSamplesData <- totalSamplesData[!negativeTotal]
+                    firstDetectionData <- firstDetectionData[!negativeTotal]
+                    if (!is.null(positiveCountData)) {
+                        positiveCountData <- positiveCountData[!negativeTotal]
+                    }
+                    if (!is.null(positiveSamplesListData)) {
+                        positiveSamplesListData <- positiveSamplesListData[!negativeTotal]
+                    }
+                    if (!is.null(sampleTypeData)) {
+                        sampleTypeData <- sampleTypeData[!negativeTotal]
+                    }
+                }
 
-            # Check for negative total samples
-            negativeTotal <- totalSamplesData < 0
-            if (any(negativeTotal, na.rm = TRUE)) {
-                nNegativeTotal <- sum(negativeTotal, na.rm = TRUE)
-                dataWarnings <- c(dataWarnings,
-                    sprintf("%d cases with negative total samples removed", nNegativeTotal))
-                totalSamplesData <- totalSamplesData[!negativeTotal]
-                firstDetectionData <- firstDetectionData[!negativeTotal]
+                # Check for invalid positive counts (negative or exceeds total)
                 if (!is.null(positiveCountData)) {
-                    positiveCountData <- positiveCountData[!negativeTotal]
+                    invalidPositiveCount <- positiveCountData < 0 | positiveCountData > totalSamplesData
+                    if (any(invalidPositiveCount, na.rm = TRUE)) {
+                        nInvalidPosCount <- sum(invalidPositiveCount, na.rm = TRUE)
+                        dataWarnings <- c(
+                            dataWarnings,
+                            sprintf("%d cases with invalid positive count (negative or > total samples) excluded from empirical estimation", nInvalidPosCount)
+                        )
+                        # Set to NA rather than removing cases, to preserve other analyses
+                        positiveCountData[invalidPositiveCount] <- NA
+                    }
                 }
-                if (!is.null(positiveSamplesListData)) {
-                    positiveSamplesListData <- positiveSamplesListData[!negativeTotal]
-                }
-                if (!is.null(sampleTypeData)) {
-                    sampleTypeData <- sampleTypeData[!negativeTotal]
-                }
-            }
 
-            # Check for invalid positive counts (negative or exceeds total)
-            if (!is.null(positiveCountData)) {
-                invalidPositiveCount <- positiveCountData < 0 | positiveCountData > totalSamplesData
-                if (any(invalidPositiveCount, na.rm = TRUE)) {
-                    nInvalidPosCount <- sum(invalidPositiveCount, na.rm = TRUE)
-                    dataWarnings <- c(dataWarnings,
-                        sprintf("%d cases with invalid positive count (negative or > total samples) excluded from empirical estimation", nInvalidPosCount))
-                    # Set to NA rather than removing cases, to preserve other analyses
-                    positiveCountData[invalidPositiveCount] <- NA
-                }
-            }
+                # Recalculate detected cases after cleaning
+                detectedCases <- !is.na(firstDetectionData)
+                nDetected <- sum(detectedCases)
 
-            # Recalculate detected cases after cleaning
-            detectedCases <- !is.na(firstDetectionData)
-            nDetected <- sum(detectedCases)
+                # Error 3: Zero positive cases - cannot perform analysis
+                if (nDetected == 0) {
+                    dataInfo <- self$results$dataInfo
+                    nCases <- length(totalSamplesData)
 
-            # Error 3: Zero positive cases - cannot perform analysis
-            if (nDetected == 0) {
-                dataInfo <- self$results$dataInfo
-                nCases <- length(totalSamplesData)
+                    dataInfo$addRow(rowKey = "total_cases", values = list(
+                        measure = "Total cases analyzed",
+                        value = as.character(nCases)
+                    ))
 
-                dataInfo$addRow(rowKey="total_cases", values=list(
-                    measure = "Total cases analyzed",
-                    value = as.character(nCases)
-                ))
+                    dataInfo$addRow(rowKey = "positive_cases", values = list(
+                        measure = "Cases with lesion detected",
+                        value = "0"
+                    ))
 
-                dataInfo$addRow(rowKey="positive_cases", values=list(
-                    measure = "Cases with lesion detected",
-                    value = "0"
-                ))
+                    dataInfo$addRow(rowKey = "error_no_positive", values = list(
+                        measure = "ERROR",
+                        value = "Cannot estimate detection probability without positive cases"
+                    ))
 
-                dataInfo$addRow(rowKey="error_no_positive", values=list(
-                    measure = "ERROR",
-                    value = "Cannot estimate detection probability without positive cases"
-                ))
-
-                interpretText <- self$results$interpretText
-                errorHtml <- sprintf("<div style='%s %s %s %s'>
+                    interpretText <- self$results$interpretText
+                    errorHtml <- sprintf(
+                        "<div style='%s %s %s %s'>
                     <p style='margin: 0; %s'><strong> ERROR: No Positive Cases</strong></p>
                     <p style='margin: 10px 0 0 0; %s'>
                         Analysis requires at least one case with detected lesions.
@@ -727,182 +753,189 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <p style='margin: 10px 0 0 0; %s'><strong>Note:</strong> This module estimates sampling adequacy from observed detection patterns.
                     If no lesions are detected, estimation is not possible.</p>
                 </div>",
-                private$.styleConstants$font, private$.styleConstants$bgLight,
-                private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                private$.styleConstants$fontSize15,
-                private$.styleConstants$fontSize14, nCases,
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontSize14)
-                interpretText$setContent(errorHtml)
-                return()
-            }
+                        private$.styleConstants$font, private$.styleConstants$bgLight,
+                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                        private$.styleConstants$fontSize15,
+                        private$.styleConstants$fontSize14, nCases,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14
+                    )
+                    interpretText$setContent(errorHtml)
+                    return()
+                }
 
-            # Warning 1: Small sample size (detected cases only)
-            if (nDetected < 10) {
-                interpretText <- self$results$interpretText
-                warningHtml <- sprintf("<div style='%s %s %s %s'>
+                # Warning 1: Small sample size (detected cases only)
+                if (nDetected < 10) {
+                    interpretText <- self$results$interpretText
+                    warningHtml <- sprintf(
+                        "<div style='%s %s %s %s'>
                     <p style='margin: 0; %s'><strong> WARNING: Small Sample Size</strong></p>
                     <p style='margin: 10px 0 0 0; %s'>
                         Only %d cases with detected lesions. Results may be unreliable.
                     </p>
                     <p style='margin: 10px 0 0 0; %s'><strong>Recommendations:</strong></p>
                     <ul style='margin: 5px 0 0 0; padding-left: 20px; %s'>
-                        <li>Collect more cases for robust estimates (recommended: n ≥ 30 for bootstrap analysis)</li>
+                        <li>Collect more cases for robust estimates (recommended: n >= 30 for bootstrap analysis)</li>
                         <li>Interpret confidence intervals with caution</li>
                         <li>Consider using 'Auto' estimation method which adapts to sample size</li>
                     </ul>
                 </div>",
-                private$.styleConstants$font, private$.styleConstants$bgLight,
-                private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontSize14, nDetected,
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontSize14)
-                interpretText$setContent(warningHtml)
-            }
+                        private$.styleConstants$font, private$.styleConstants$bgLight,
+                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14, nDetected,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontSize14
+                    )
+                    interpretText$setContent(warningHtml)
+                }
 
-            # Set seed if requested — save and restore global RNG state so subsequent
-            # random draws elsewhere in the user's session are not affected by our seed.
-            if (self$options$setSeed) {
-                old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
-                                get(".Random.seed", envir = .GlobalEnv)
-                            else NULL
-                on.exit({
-                    if (!is.null(old_seed))
-                        assign(".Random.seed", old_seed, envir = .GlobalEnv)
-                }, add = TRUE)
-                set.seed(self$options$seedValue)
-            }
+                # Set seed if requested - save and restore global RNG state so subsequent
+                # random draws elsewhere in the user's session are not affected by our seed.
+                if (self$options$setSeed) {
+                    old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) {
+                        get(".Random.seed", envir = .GlobalEnv)
+                    } else {
+                        NULL
+                    }
+                    on.exit(
+                        {
+                            if (!is.null(old_seed)) {
+                                assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                            }
+                        },
+                        add = TRUE
+                    )
+                    set.seed(self$options$seedValue)
+                }
 
-            # === Key Results Summary ===
-            keyResults <- self$results$keyResults
-            keyResultsHtml <- "<div style='padding: 15px; background: #e9f5ff; border: 2px solid #b3d7ff; margin-bottom: 20px;'>
+                # === Key Results Summary ===
+                keyResults <- self$results$keyResults
+                keyResultsHtml <- "<div style='padding: 15px; background: #e9f5ff; border: 2px solid #b3d7ff; margin-bottom: 20px;'>
                                 <h3 style='margin: 0 0 10px 0; font-size: 16px; color: #0056b3;'>Key Results</h3>
                                 <p style='margin: 0; font-size: 14px; color: #0056b3;'>This section will be populated with the key findings from the analysis.</p>
                              </div>"
-            if (self$options$showKeyResults) {
-                keyResults$setContent(keyResultsHtml)
-            }
+                if (self$options$showKeyResults) {
+                    keyResults$setContent(keyResultsHtml)
+                }
 
-            # === Data Summary ===
-            dataInfo <- self$results$dataInfo
+                # === Data Summary ===
+                dataInfo <- self$results$dataInfo
 
-            nCases <- length(totalSamplesData)
-            nNoDetection <- nCases - nDetected
+                nCases <- length(totalSamplesData)
+                nNoDetection <- nCases - nDetected
 
-            totalSubmitted <- sum(totalSamplesData, na.rm = TRUE)  # Total samples submitted (includes unexamined)
-            examinedDetected <- sum(firstDetectionData[detectedCases], na.rm = TRUE)
-            examinedNondetected <- sum(totalSamplesData[!detectedCases], na.rm = TRUE)
-            totalExamined <- examinedDetected + examinedNondetected  # Samples actually examined across all cases
-            meanSamplesPerCase <- mean(totalSamplesData, na.rm = TRUE)
-            medianFirst <- if (nDetected > 0) median(firstDetectionData[detectedCases], na.rm = TRUE) else NA
+                totalSubmitted <- sum(totalSamplesData, na.rm = TRUE) # Total samples submitted (includes unexamined)
+                examinedDetected <- sum(firstDetectionData[detectedCases], na.rm = TRUE)
+                examinedNondetected <- sum(totalSamplesData[!detectedCases], na.rm = TRUE)
+                totalExamined <- examinedDetected + examinedNondetected # Samples actually examined across all cases
+                meanSamplesPerCase <- mean(totalSamplesData, na.rm = TRUE)
+                medianFirst <- if (nDetected > 0) median(firstDetectionData[detectedCases], na.rm = TRUE) else NA
 
-            dataInfo <- self$results$dataInfo
+                dataInfo <- self$results$dataInfo
 
-            totalSubmittedRaw <- sum(rawTotalSamplesData, na.rm = TRUE)
+                totalSubmittedRaw <- sum(rawTotalSamplesData, na.rm = TRUE)
 
-            dataInfo$addRow(rowKey="total_cases", values=list(
-                measure = "Total cases supplied",
-                value = as.character(totalCasesInput)
-            ))
-
-            dataInfo$addRow(rowKey="cases_analyzed", values=list(
-                measure = "Cases analyzed",
-                value = as.character(nCases)
-            ))
-
-            if (nExcludedMissingTotal > 0) {
-                dataInfo$addRow(rowKey="excluded_missing", values=list(
-                    measure = "Excluded: missing total samples",
-                    value = as.character(nExcludedMissingTotal)
+                dataInfo$addRow(rowKey = "total_cases", values = list(
+                    measure = "Total cases supplied",
+                    value = as.character(totalCasesInput)
                 ))
-            }
 
-            if (nExcludedInvalidDetection > 0) {
-                dataInfo$addRow(rowKey="excluded_invalid", values=list(
-                    measure = "Excluded: first detection > total",
-                    value = as.character(nExcludedInvalidDetection)
+                dataInfo$addRow(rowKey = "cases_analyzed", values = list(
+                    measure = "Cases analyzed",
+                    value = as.character(nCases)
                 ))
-            }
 
-            dataInfo$addRow(rowKey="total_input", values=list(
-                measure = "Total samples (input)",
-                value = sprintf("%d (recorded)", totalSubmittedRaw)
-            ))
+                if (nExcludedMissingTotal > 0) {
+                    dataInfo$addRow(rowKey = "excluded_missing", values = list(
+                        measure = "Excluded: missing total samples",
+                        value = as.character(nExcludedMissingTotal)
+                    ))
+                }
 
-            dataInfo$addRow(rowKey="total_analyzed", values=list(
-                measure = "Total samples analyzed",
-                value = sprintf("%d (up to first detection)", totalExamined)
-            ))
+                if (nExcludedInvalidDetection > 0) {
+                    dataInfo$addRow(rowKey = "excluded_invalid", values = list(
+                        measure = "Excluded: first detection > total",
+                        value = as.character(nExcludedInvalidDetection)
+                    ))
+                }
 
-            dataInfo$addRow(rowKey="mean_samples", values=list(
-                measure = "Mean samples per analyzed case",
-                value = sprintf("%.2f", meanSamplesPerCase)
-            ))
-
-            dataInfo$addRow(rowKey="median_first", values=list(
-                measure = "Median first detection",
-                value = if (!is.na(medianFirst)) sprintf("%.0f", medianFirst) else "No lesions detected"
-            ))
-
-            dataInfo$addRow(rowKey="no_detection", values=list(
-                measure = "Cases without detected lesion",
-                value = sprintf("%d", nNoDetection)
-            ))
-
-            if (length(dataWarnings) > 0) {
-                dataInfo$addRow(rowKey="data_notes", values=list(
-                    measure = "Data notes",
-                    value = paste(dataWarnings, collapse = "; ")
+                dataInfo$addRow(rowKey = "total_input", values = list(
+                    measure = "Total samples (input)",
+                    value = sprintf("%d (recorded)", totalSubmittedRaw)
                 ))
-            }
 
-            # === Binomial Model ===
-            pEstimate <- NA_real_
-            estimationMethod <- "Not calculated"
+                dataInfo$addRow(rowKey = "total_analyzed", values = list(
+                    measure = "Total samples analyzed",
+                    value = sprintf("%d (up to first detection)", totalExamined)
+                ))
 
-            if (self$options$showBinomialModel) {
+                dataInfo$addRow(rowKey = "mean_samples", values = list(
+                    measure = "Mean samples per analyzed case",
+                    value = sprintf("%.2f", meanSamplesPerCase)
+                ))
 
-                # Determine which estimation method to use
-                methodChoice <- self$options$estimationMethod
-                contextSupportsEmpirical <- analysisContext %in% c("general", "lymphnode", "omentum")
-                empiricalEligible <- !is.null(positiveCountData) && nDetected > 0 && contextSupportsEmpirical
-                autoEmpirical <- (methodChoice == "auto") && empiricalEligible
-                forceGeometricNote <- FALSE
+                dataInfo$addRow(rowKey = "median_first", values = list(
+                    measure = "Median first detection",
+                    value = if (!is.na(medianFirst)) sprintf("%.0f", medianFirst) else "No lesions detected"
+                ))
 
-                # Method 1: Empirical Proportion (preferred if positiveCount available)
-                if ((methodChoice == "empirical" && !is.null(positiveCountData) && nDetected > 0) || autoEmpirical) {
+                dataInfo$addRow(rowKey = "no_detection", values = list(
+                    measure = "Cases without detected lesion",
+                    value = sprintf("%d", nNoDetection)
+                ))
 
-                    # Use empirical proportion: sum of positive samples / sum of total samples (positive cases only)
-                    positive_idx <- !is.na(firstDetectionData)
-                    total_samples_positive <- sum(totalSamplesData[positive_idx], na.rm = TRUE)
-                    total_positive_samples <- sum(positiveCountData[positive_idx], na.rm = TRUE)
+                if (length(dataWarnings) > 0) {
+                    dataInfo$addRow(rowKey = "data_notes", values = list(
+                        measure = "Data notes",
+                        value = paste(dataWarnings, collapse = "; ")
+                    ))
+                }
 
-                    if (total_samples_positive > 0) {
-                        pEstimate <- total_positive_samples / total_samples_positive
-                        estimationMethod <- "Empirical Proportion (uses all positive samples)"
+                # === Binomial Model ===
+                pEstimate <- NA_real_
+                estimationMethod <- "Not calculated"
 
-                        # Store heterogeneity info for later warning (after dataQualityWarnings is initialized)
-                        private$.empiricalHeterogeneity <- NULL
-                        case_proportions <- positiveCountData[positive_idx] / totalSamplesData[positive_idx]
-                        case_proportions <- case_proportions[is.finite(case_proportions)]
+                if (self$options$showBinomialModel) {
+                    # Determine which estimation method to use
+                    methodChoice <- self$options$estimationMethod
+                    contextSupportsEmpirical <- analysisContext %in% c("general", "lymphnode", "omentum")
+                    empiricalEligible <- !is.null(positiveCountData) && nDetected > 0 && contextSupportsEmpirical
+                    autoEmpirical <- (methodChoice == "auto") && empiricalEligible
+                    forceGeometricNote <- FALSE
 
-                        if (length(case_proportions) >= 3) {
-                            cv <- sd(case_proportions, na.rm = TRUE) / mean(case_proportions, na.rm = TRUE)
+                    # Method 1: Empirical Proportion (preferred if positiveCount available)
+                    if ((methodChoice == "empirical" && !is.null(positiveCountData) && nDetected > 0) || autoEmpirical) {
+                        # Use empirical proportion: sum of positive samples / sum of total samples (positive cases only)
+                        positive_idx <- !is.na(firstDetectionData)
+                        total_samples_positive <- sum(totalSamplesData[positive_idx], na.rm = TRUE)
+                        total_positive_samples <- sum(positiveCountData[positive_idx], na.rm = TRUE)
 
-                            if (!is.na(cv) && is.finite(cv)) {
-                                if (cv > 0.5) {
-                                    # High heterogeneity - DISABLE BINOMIAL MODEL
-                                    private$.empiricalHeterogeneity <- sprintf(" HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
+                        if (total_samples_positive > 0) {
+                            pEstimate <- total_positive_samples / total_samples_positive
+                            estimationMethod <- "Empirical Proportion (uses all positive samples)"
 
-                                    # CRITICAL FIX: Disable binomial model when independence violated
-                                    binomialText <- self$results$binomialText
-                                    binomialTable <- self$results$binomialTable
-                                    binomialRecommendTable <- self$results$binomialRecommendTable
+                            # Store heterogeneity info for later warning (after dataQualityWarnings is initialized)
+                            private$.empiricalHeterogeneity <- NULL
+                            case_proportions <- positiveCountData[positive_idx] / totalSamplesData[positive_idx]
+                            case_proportions <- case_proportions[is.finite(case_proportions)]
 
-                                    fmt <- "<div style='%s %s %s %s'>
+                            if (length(case_proportions) >= 3) {
+                                cv <- sd(case_proportions, na.rm = TRUE) / mean(case_proportions, na.rm = TRUE)
+
+                                if (!is.na(cv) && is.finite(cv)) {
+                                    if (cv > 0.5) {
+                                        # High heterogeneity - DISABLE BINOMIAL MODEL
+                                        private$.empiricalHeterogeneity <- sprintf(" HIGH HETEROGENEITY: Detection probability varies substantially across cases (CV=%.2f). Pooled estimate may not represent any individual case well. Consider stratified analysis or reporting case-specific estimates.", cv)
+
+                                        # CRITICAL FIX: Disable binomial model when independence violated
+                                        binomialText <- self$results$binomialText
+                                        binomialTable <- self$results$binomialTable
+                                        binomialRecommendTable <- self$results$binomialRecommendTable
+
+                                        fmt <- "<div style='%s %s %s %s'>
                                         <p style='margin: 0; %s'><strong> Binomial Model Not Applicable</strong></p>
                                         <p style='margin: 10px 0 0 0; %s'>
                                             <b>High heterogeneity detected (CV=%.2f > 0.5)</b> indicates substantial variation in detection
@@ -922,110 +955,124 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                             <li><b>Stratified Analysis:</b> Analyze subgroups separately</li>
                                         </ul>
                                     </div>"
-                                    
-                                    errorHtml <- sprintf(fmt,
-                                    private$.styleConstants$font, private$.styleConstants$bgLight,
-                                    private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                                    private$.styleConstants$fontSize15,
-                                    private$.styleConstants$fontSize14, cv,
-                                    private$.styleConstants$fontSize14,
-                                    private$.styleConstants$fontSize14, cv * 100, cv,
-                                    private$.styleConstants$fontSize14,
-                                    private$.styleConstants$fontSize14)
-                                    
-                                    if (self$options$showBinomialModel) {
-                                        binomialText$setContent(errorHtml)
-                                    }
 
-                                    # Skip binomial model entirely, but continue to other analyses
-                                    skipBinomial <- TRUE
-                                } else if (cv > 0.3) {
-                                    # Moderate heterogeneity - warn but allow
-                                    private$.empiricalHeterogeneity <- sprintf(" MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
+                                        errorHtml <- sprintf(
+                                            fmt,
+                                            private$.styleConstants$font, private$.styleConstants$bgLight,
+                                            private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                                            private$.styleConstants$fontSize15,
+                                            private$.styleConstants$fontSize14, cv,
+                                            private$.styleConstants$fontSize14,
+                                            private$.styleConstants$fontSize14, cv * 100, cv,
+                                            private$.styleConstants$fontSize14,
+                                            private$.styleConstants$fontSize14
+                                        )
+
+                                        if (self$options$showBinomialModel) {
+                                            binomialText$setContent(errorHtml)
+                                        }
+
+                                        # Skip binomial model entirely, but continue to other analyses
+                                        skipBinomial <- TRUE
+                                    } else if (cv > 0.3) {
+                                        # Moderate heterogeneity - warn but allow
+                                        private$.empiricalHeterogeneity <- sprintf(" MODERATE HETEROGENEITY: Detection probability shows moderate variation across cases (CV=%.2f). Interpret pooled estimate with caution.", cv)
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                # Method 2: Geometric MLE (fallback or explicit choice)
-                # Method 2: Geometric MLE (fallback or explicit choice)
-                if (!skipBinomial && ((is.na(pEstimate) || methodChoice == "geometric" || (!contextSupportsEmpirical && methodChoice == "auto" && !is.null(positiveCountData))) && nDetected > 0)) {
+                    # Method 2: Geometric MLE (fallback or explicit choice)
+                    # Method 2: Geometric MLE (fallback or explicit choice)
+                    if (!skipBinomial && ((is.na(pEstimate) || methodChoice == "geometric" || (!contextSupportsEmpirical && methodChoice == "auto" && !is.null(positiveCountData))) && nDetected > 0)) {
+                        # Use geometric MLE: q = 1 / mean(first detection position)
+                        positive_first <- firstDetectionData[!is.na(firstDetectionData)]
 
-                    # Use geometric MLE: q = 1 / mean(first detection position)
-                    positive_first <- firstDetectionData[!is.na(firstDetectionData)]
-
-                    if (length(positive_first) > 0) {
-                        mean_first_detection <- mean(positive_first, na.rm = TRUE)
-                        if (mean_first_detection > 0) {
-                            pEstimate <- 1 / mean_first_detection
-                            if (methodChoice == "auto" && !contextSupportsEmpirical && !is.null(positiveCountData)) {
-                                forceGeometricNote <- TRUE
-                                estimationMethod <- "Geometric MLE (auto: empirical disabled for dependent sampling)"
-                            } else {
-                                estimationMethod <- "Geometric MLE (first detection only)"
+                        if (length(positive_first) > 0) {
+                            mean_first_detection <- mean(positive_first, na.rm = TRUE)
+                            if (mean_first_detection > 0) {
+                                pEstimate <- 1 / mean_first_detection
+                                if (methodChoice == "auto" && !contextSupportsEmpirical && !is.null(positiveCountData)) {
+                                    forceGeometricNote <- TRUE
+                                    estimationMethod <- "Geometric MLE (auto: empirical disabled for dependent sampling)"
+                                } else {
+                                    estimationMethod <- "Geometric MLE (first detection only)"
+                                }
                             }
                         }
                     }
-                }
 
-                # Validate probability estimate and warn on data quality issues
-                # Validate probability estimate and warn on data quality issues
-                dataQualityWarnings <- character(0)
-                
-                if (!skipBinomial) {
-                    pForCalc <- pEstimate
-    
-                    # Add heterogeneity warning if detected during empirical estimation
-                    if (!is.null(private$.empiricalHeterogeneity)) {
-                        dataQualityWarnings <- c(dataQualityWarnings, private$.empiricalHeterogeneity)
-                    }
-    
-                    if (is.na(pForCalc)) {
+                    # Validate probability estimate and warn on data quality issues
+                    # Validate probability estimate and warn on data quality issues
+                    dataQualityWarnings <- character(0)
+
+                    if (!skipBinomial) {
+                        pForCalc <- pEstimate
+
+                        # Add heterogeneity warning if detected during empirical estimation
+                        if (!is.null(private$.empiricalHeterogeneity)) {
+                            dataQualityWarnings <- c(dataQualityWarnings, private$.empiricalHeterogeneity)
+                        }
+
+                        if (is.na(pForCalc)) {
+                            pForCalc <- NA_real_
+                            dataQualityWarnings <- c(
+                                dataQualityWarnings,
+                                " Could not estimate detection probability from data"
+                            )
+                        } else if (pForCalc <= 0) {
+                            dataQualityWarnings <- c(
+                                dataQualityWarnings,
+                                " DATA QUALITY ISSUE: Estimated probability <= 0. Check for data entry errors or insufficient positive cases."
+                            )
+                            # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
+                            pForCalc <- NA_real_
+                        } else if (pForCalc >= 1) {
+                            dataQualityWarnings <- c(
+                                dataQualityWarnings,
+                                " DATA QUALITY ISSUE: Estimated probability >= 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity."
+                            )
+                            # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
+                            # This represents practical certainty while maintaining numeric stability
+                            pForCalc <- 0.9999
+                        } else if (pForCalc < 0.0001) {
+                            # Warn about very low probabilities that may cause numeric issues
+                            dataQualityWarnings <- c(
+                                dataQualityWarnings,
+                                sprintf(" CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc)
+                            )
+                        } else if (pForCalc > 0.99) {
+                            # Warn about very high probabilities
+                            dataQualityWarnings <- c(
+                                dataQualityWarnings,
+                                sprintf(" CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc)
+                            )
+                        }
+                    } else {
                         pForCalc <- NA_real_
-                        dataQualityWarnings <- c(dataQualityWarnings,
-                            " Could not estimate detection probability from data")
-                    } else if (pForCalc <= 0) {
-                        dataQualityWarnings <- c(dataQualityWarnings,
-                            " DATA QUALITY ISSUE: Estimated probability ≤ 0. Check for data entry errors or insufficient positive cases.")
-                        # Set to NA instead of 0 to avoid log(0) errors in downstream calculations
-                        pForCalc <- NA_real_
-                    } else if (pForCalc >= 1) {
-                        dataQualityWarnings <- c(dataQualityWarnings,
-                            " DATA QUALITY ISSUE: Estimated probability ≥ 1 (impossible). Possible causes: first detection always at position 1, or positive count exceeds total samples. Please verify data integrity.")
-                        # Cap at 0.9999 instead of 1 - 1e-12 to avoid extreme log calculations
-                        # This represents practical certainty while maintaining numeric stability
-                        pForCalc <- 0.9999
-                    } else if (pForCalc < 0.0001) {
-                        # Warn about very low probabilities that may cause numeric issues
-                        dataQualityWarnings <- c(dataQualityWarnings,
-                            sprintf(" CAUTION: Very low detection probability (%.6f). Predictions for high confidence levels may require impractical sample sizes.", pForCalc))
-                    } else if (pForCalc > 0.99) {
-                        # Warn about very high probabilities
-                        dataQualityWarnings <- c(dataQualityWarnings,
-                            sprintf(" CAUTION: Very high detection probability (%.4f). This suggests near-certain detection in first sample, which may indicate data quality issues.", pForCalc))
                     }
-                } else {
-                    pForCalc <- NA_real_
-                }
 
-                # Check for impossible positive counts
-                if (!is.null(positiveCountData) && !is.null(totalSamplesData)) {
-                    invalid_counts <- positiveCountData > totalSamplesData
-                    if (any(invalid_counts, na.rm = TRUE)) {
-                        n_invalid <- sum(invalid_counts, na.rm = TRUE)
-                        dataQualityWarnings <- c(dataQualityWarnings,
-                            sprintf(" DATA ERROR: %d cases have positive count > total samples. These have been excluded from analysis.", n_invalid))
+                    # Check for impossible positive counts
+                    if (!is.null(positiveCountData) && !is.null(totalSamplesData)) {
+                        invalid_counts <- positiveCountData > totalSamplesData
+                        if (any(invalid_counts, na.rm = TRUE)) {
+                            n_invalid <- sum(invalid_counts, na.rm = TRUE)
+                            dataQualityWarnings <- c(
+                                dataQualityWarnings,
+                                sprintf(" DATA ERROR: %d cases have positive count > total samples. These have been excluded from analysis.", n_invalid)
+                            )
+                        }
                     }
-                }
 
-                binomialText <- self$results$binomialText
+                    binomialText <- self$results$binomialText
 
-                # Context-specific warning for inappropriate use of binomial model
-                binomialWarning <- ""
+                    # Context-specific warning for inappropriate use of binomial model
+                    binomialWarning <- ""
 
-                if (analysisContext == "tumor") {
-                    binomialWarning <- sprintf("<div style='background: #ffebee; border: 1px solid #ef5350; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                    if (analysisContext == "tumor") {
+                        binomialWarning <- sprintf(
+                            "<div style='background: #ffebee; border: 1px solid #ef5350; padding: 12px; margin: 10px 0; border-radius: 4px;'>
                         <p style='%s margin: 0;'><b> WARNING: Binomial Model May Underestimate Sensitivity for Tumor Sampling</b></p>
                         <p style='%s margin: 8px 0 0 0;'>
                             Sequential tumor samples (blocks) are <b>not independent</b> - they are serial sections through the same lesion
@@ -1040,51 +1087,61 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             <em>Reference: See vignette 'Independent vs Dependent Sampling' for detailed explanation</em>
                         </p>
                     </div>",
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
-                } else if (analysisContext == "margin") {
-                    binomialWarning <- sprintf("<div style='background: #fff3e0; border: 1px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary)
+                        )
+                    } else if (analysisContext == "margin") {
+                        binomialWarning <- sprintf(
+                            "<div style='background: #fff3e0; border: 1px solid #ff9800; padding: 12px; margin: 10px 0; border-radius: 4px;'>
                         <p style='%s margin: 0;'><b> Caution: Margin samples may show spatial clustering</b></p>
                         <p style='%s margin: 8px 0 0 0;'>
                             Consider using empirical methods if margin positivity is geographically clustered.
                         </p>
                     </div>",
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
-                }
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary)
+                        )
+                    }
 
-                # Add data quality warnings
-                dataQualityWarningHTML <- ""
-                if (length(dataQualityWarnings) > 0) {
-                    warningList <- paste(sprintf("<li>%s</li>", dataQualityWarnings), collapse = "\n")
-                    dataQualityWarningHTML <- sprintf("<div style='background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px;'>
+                    # Add data quality warnings
+                    dataQualityWarningHTML <- ""
+                    if (length(dataQualityWarnings) > 0) {
+                        warningList <- paste(sprintf("<li>%s</li>", dataQualityWarnings), collapse = "\n")
+                        dataQualityWarningHTML <- sprintf(
+                            "<div style='background: #ffebee; border: 2px solid #d32f2f; padding: 15px; margin: 10px 0; border-radius: 4px;'>
                         <p style='%s margin: 0 0 10px 0;'><b> DATA QUALITY WARNINGS</b></p>
                         <ul style='%s margin: 0;'>
                             %s
                         </ul>
                     </div>",
-                    private$.buildStyle(private$.styleConstants$fontSize14, "color: #d32f2f; font-weight: bold;"),
-                    private$.buildStyle(private$.styleConstants$fontSize13, "color: #d32f2f;"),
-                    warningList)
-                }
+                            private$.buildStyle(private$.styleConstants$fontSize14, "color: #d32f2f; font-weight: bold;"),
+                            private$.buildStyle(private$.styleConstants$fontSize13, "color: #d32f2f;"),
+                            warningList
+                        )
+                    }
 
-                # Calculate description based on data available
-                if (!is.null(positiveCountData) && estimationMethod == "Empirical Proportion (uses all positive samples)") {
-                    positive_idx <- !is.na(firstDetectionData)
-                    total_samples_positive <- sum(totalSamplesData[positive_idx], na.rm = TRUE)
-                    total_positive_samples <- sum(positiveCountData[positive_idx], na.rm = TRUE)
-                    data_desc <- sprintf("Based on %d positive cases with %d positive samples out of %d total samples examined.",
-                                        nDetected, total_positive_samples, total_samples_positive)
-                } else {
-                    positive_first <- firstDetectionData[!is.na(firstDetectionData)]
-                    mean_first <- if (length(positive_first) > 0) mean(positive_first, na.rm = TRUE) else NA
-                    data_desc <- sprintf("Based on %d positive cases with mean first detection at sample %.2f.",
-                                        nDetected, ifelse(is.na(mean_first), 0, mean_first))
-                }
+                    # Calculate description based on data available
+                    if (!is.null(positiveCountData) && estimationMethod == "Empirical Proportion (uses all positive samples)") {
+                        positive_idx <- !is.na(firstDetectionData)
+                        total_samples_positive <- sum(totalSamplesData[positive_idx], na.rm = TRUE)
+                        total_positive_samples <- sum(positiveCountData[positive_idx], na.rm = TRUE)
+                        data_desc <- sprintf(
+                            "Based on %d positive cases with %d positive samples out of %d total samples examined.",
+                            nDetected, total_positive_samples, total_samples_positive
+                        )
+                    } else {
+                        positive_first <- firstDetectionData[!is.na(firstDetectionData)]
+                        mean_first <- if (length(positive_first) > 0) mean(positive_first, na.rm = TRUE) else NA
+                        data_desc <- sprintf(
+                            "Based on %d positive cases with mean first detection at sample %.2f.",
+                            nDetected, ifelse(is.na(mean_first), 0, mean_first)
+                        )
+                    }
 
-                html <- sprintf("<div style='%s'>
+                    html <- sprintf(
+                        "<div style='%s'>
                     %s
                     %s
                     <div style='%s'>
@@ -1099,484 +1156,493 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             %s
                         </p>
                         <p style='%s'>
-                            <b>Formula:</b> P(detect ≥ 1 in n samples | lesion present) = 1 - (1-q)<sup>n</sup>
+                            <b>Formula:</b> P(detect >= 1 in n samples | lesion present) = 1 - (1-q)<sup>n</sup>
                         </p>
                         <p style='%s'>
                             <em>Note: This estimates sensitivity (detection given lesion is present), not population-level detection rate.</em>
                         </p>
                     </div>
                 </div>",
-                private$.styleConstants$font,
-                dataQualityWarningHTML,  # Insert data quality warnings FIRST
-                binomialWarning,  # Insert context-specific warning
-                private$.buildStyle(
-                    private$.styleConstants$bgLight,
-                    private$.styleConstants$borderLeft,
-                    private$.styleConstants$padding15,
-                    private$.styleConstants$margin10
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize15,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.styleConstants$colorPrimary,
-                if (!is.na(pEstimate)) sprintf("%.4f", pEstimate) else "NA",
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                ),
-                estimationMethod,
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorSecondary,
-                    "margin: 0 0 10px 0;"
-                ),
-                data_desc,
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$fontSize13,
-                    private$.styleConstants$colorSecondary,
-                    "margin: 0;"
-                ))
-                if (self$options$showBinomialModel) {
-                    binomialText$setContent(html)
-                }
-
-                # Surface estimator choice in the data summary so downstream tests/users can verify the assumption used
-                dataInfo <- self$results$dataInfo
-                dataInfo$addRow(rowKey="binomial_method", values=list(
-                    measure = "Binomial estimator",
-                    value = estimationMethod
-                ))
-                if (forceGeometricNote) {
-                    dataInfo$addRow(rowKey="binomial_method_note", values=list(
-                        measure = "Binomial note",
-                        value = "Empirical estimator disabled for dependent sampling contexts"
-                    ))
-                }
-
-                # Calculate detection probabilities for different sample sizes
-                binomialTable <- self$results$binomialTable
-
-                binomProbVec <- rep(NA_real_, maxSamp)
-                prevProb <- 0
-                for (i in 1:maxSamp) {
-                    if (is.na(pForCalc)) {
-                        cumProb <- NA
-                        marginal <- NA
-                    } else {
-                        cumProb <- 1 - (1 - pForCalc)^i
-                        marginal <- cumProb - prevProb
+                        private$.styleConstants$font,
+                        dataQualityWarningHTML, # Insert data quality warnings FIRST
+                        binomialWarning, # Insert context-specific warning
+                        private$.buildStyle(
+                            private$.styleConstants$bgLight,
+                            private$.styleConstants$borderLeft,
+                            private$.styleConstants$padding15,
+                            private$.styleConstants$margin10
+                        ),
+                        private$.buildStyle(
+                            private$.styleConstants$colorPrimary,
+                            private$.styleConstants$fontSize15,
+                            "margin: 0 0 10px 0;"
+                        ),
+                        private$.buildStyle(
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0 0 10px 0;"
+                        ),
+                        private$.styleConstants$colorPrimary,
+                        if (!is.na(pEstimate)) sprintf("%.4f", pEstimate) else "NA",
+                        private$.buildStyle(
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0 0 10px 0;"
+                        ),
+                        estimationMethod,
+                        private$.buildStyle(
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorSecondary,
+                            "margin: 0 0 10px 0;"
+                        ),
+                        data_desc,
+                        private$.buildStyle(
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0 0 10px 0;"
+                        ),
+                        private$.buildStyle(
+                            private$.styleConstants$fontSize13,
+                            private$.styleConstants$colorSecondary,
+                            "margin: 0;"
+                        )
+                    )
+                    if (self$options$showBinomialModel) {
+                        binomialText$setContent(html)
                     }
 
-                    binomialTable$addRow(rowKey=paste0("n_", i), values=list(
-                        nSamples = i,
-                        cumProb = cumProb,
-                        marginalGain = marginal
+                    # Surface estimator choice in the data summary so downstream tests/users can verify the assumption used
+                    dataInfo <- self$results$dataInfo
+                    dataInfo$addRow(rowKey = "binomial_method", values = list(
+                        measure = "Binomial estimator",
+                        value = estimationMethod
                     ))
-                    if (!is.na(cumProb)) {
-                        prevProb <- cumProb
-                        binomProbVec[i] <- cumProb
+                    if (forceGeometricNote) {
+                        dataInfo$addRow(rowKey = "binomial_method_note", values = list(
+                            measure = "Binomial note",
+                            value = "Empirical estimator disabled for dependent sampling contexts"
+                        ))
                     }
-                }
 
-                # Minimum samples for different confidence levels
-                recommendTable <- self$results$recommendTable
+                    # Calculate detection probabilities for different sample sizes
+                    binomialTable <- self$results$binomialTable
 
-                confLevels <- c(0.80, 0.90, 0.95, 0.99)
-                for (i in seq_along(confLevels)) {
-                    conf <- confLevels[i]
-                    if (is.na(pForCalc) || pForCalc <= 0) {
-                        nMin <- NA
-                    } else if (pForCalc >= 0.9999) {
-                        # For very high probabilities, minimum samples is effectively 1
-                        nMin <- 1
-                    } else {
-                        # Use log1p for better numerical stability
-                        # Formula: n = log(1-conf) / log(1-p) = log1p(-conf) / log1p(-p)
-                        nMin <- ceiling(log1p(-conf) / log1p(-pForCalc))
+                    binomProbVec <- rep(NA_real_, maxSamp)
+                    prevProb <- 0
+                    for (i in 1:maxSamp) {
+                        if (is.na(pForCalc)) {
+                            cumProb <- NA
+                            marginal <- NA
+                        } else {
+                            cumProb <- 1 - (1 - pForCalc)^i
+                            marginal <- cumProb - prevProb
+                        }
 
-                        # Sanity check: if result is negative or extremely large, set to NA
-                        if (!is.finite(nMin) || nMin < 1 || nMin > 10000) {
-                            nMin <- NA
+                        binomialTable$addRow(rowKey = paste0("n_", i), values = list(
+                            nSamples = i,
+                            cumProb = cumProb,
+                            marginalGain = marginal
+                        ))
+                        if (!is.na(cumProb)) {
+                            prevProb <- cumProb
+                            binomProbVec[i] <- cumProb
                         }
                     }
 
-                    recommendTable$addRow(rowKey=paste0("conf_", conf), values=list(
-                        confidence = conf,
-                        minSamples = nMin
-                    ))
+                    # Minimum samples for different confidence levels
+                    recommendTable <- self$results$recommendTable
+
+                    confLevels <- c(0.80, 0.90, 0.95, 0.99)
+                    for (i in seq_along(confLevels)) {
+                        conf <- confLevels[i]
+                        if (is.na(pForCalc) || pForCalc <= 0) {
+                            nMin <- NA
+                        } else if (pForCalc >= 0.9999) {
+                            # For very high probabilities, minimum samples is effectively 1
+                            nMin <- 1
+                        } else {
+                            # Use log1p for better numerical stability
+                            # Formula: n = log(1-conf) / log(1-p) = log1p(-conf) / log1p(-p)
+                            nMin <- ceiling(log1p(-conf) / log1p(-pForCalc))
+
+                            # Sanity check: if result is negative or extremely large, set to NA
+                            if (!is.finite(nMin) || nMin < 1 || nMin > 10000) {
+                                nMin <- NA
+                            }
+                        }
+
+                        recommendTable$addRow(rowKey = paste0("conf_", conf), values = list(
+                            confidence = conf,
+                            minSamples = nMin
+                        ))
+                    }
+
+                    addRecommendation(
+                        method = "Binomial",
+                        probVec = binomProbVec,
+                        priority = 4,
+                        description = "Independent detection probability model",
+                        detail = if (!is.na(pEstimate)) sprintf("p = %.4f", pEstimate) else "Per-sample probability unavailable"
+                    )
                 }
 
-                addRecommendation(
-                    method = "Binomial",
-                    probVec = binomProbVec,
-                    priority = 4,
-                    description = "Independent detection probability model",
-                    detail = if (!is.na(pEstimate)) sprintf("p = %.4f", pEstimate) else "Per-sample probability unavailable"
-                )
-            }
+                # === Heterogeneity Test ===
+                if (self$options$showHeterogeneityTest) {
+                    heterogeneityText <- self$results$heterogeneityText
+                    heterogeneityTable <- self$results$heterogeneityTest
 
-            # === Heterogeneity Test ===
-            if (self$options$showHeterogeneityTest) {
-                heterogeneityText <- self$results$heterogeneityText
-                heterogeneityTable <- self$results$heterogeneityTest
-                
-                if (is.null(sampleTypeData)) {
-                    heterogeneityText$setContent("To test for heterogeneity, please specify a 'Sample Type' variable.")
-                } else {
-                    het_results <- private$.testHeterogeneity(firstDetectionData, sampleTypeData)
-                    
-                    if (!is.na(het_results$statistic)) {
-                        heterogeneityTable$addRow(rowKey="het_test", values=list(
-                            test = "Likelihood Ratio Test",
-                            statistic = het_results$statistic,
-                            df = het_results$df,
-                            pValue = het_results$pValue,
-                            interpretation = het_results$interpretation
-                        ))
-                        
-                        # Add explanatory text
-                        html <- sprintf("<div style='%s'>
+                    if (is.null(sampleTypeData)) {
+                        heterogeneityText$setContent("To test for heterogeneity, please specify a 'Sample Type' variable.")
+                    } else {
+                        het_results <- private$.testHeterogeneity(firstDetectionData, sampleTypeData)
+
+                        if (!is.na(het_results$statistic)) {
+                            heterogeneityTable$addRow(rowKey = "het_test", values = list(
+                                test = "Likelihood Ratio Test",
+                                statistic = het_results$statistic,
+                                df = het_results$df,
+                                pValue = het_results$pValue,
+                                interpretation = het_results$interpretation
+                            ))
+
+                            # Add explanatory text
+                            html <- sprintf(
+                                "<div style='%s'>
                             <p><strong>Interpretation:</strong> %s</p>
                             <p>This test compares a single pooled detection probability (q) against group-specific probabilities.
                             Significant heterogeneity suggests that different sample types have different detection rates and should be analyzed separately.</p>
-                        </div>", 
-                        private$.styleConstants$font, het_results$interpretation)
-                        heterogeneityText$setContent(html)
-                    } else {
-                        heterogeneityText$setContent("Insufficient data for heterogeneity testing (requires n ≥ 10).")
+                        </div>",
+                                private$.styleConstants$font, het_results$interpretation
+                            )
+                            heterogeneityText$setContent(html)
+                        } else {
+                            heterogeneityText$setContent("Insufficient data for heterogeneity testing (requires n >= 10).")
+                        }
                     }
                 }
-            }
 
-            # === Model Fit Assessment ===
-            if (self$options$showModelFit) {
-                modelFitText <- self$results$modelFitText
-                modelFitTable <- self$results$modelFitTable
-                
-                if (is.na(pEstimate)) {
-                    modelFitText$setContent("Cannot assess model fit: detection probability (q) could not be estimated.")
-                } else {
-                    fit_results <- private$.testModelFit(firstDetectionData, pEstimate)
-                    
-                    if (!is.na(fit_results$chiSquare)) {
-                        modelFitTable$addRow(rowKey="fit_test", values=list(
-                            test = "Chi-Square Goodness of Fit",
-                            chiSquare = fit_results$chiSquare,
-                            df = fit_results$df,
-                            pValue = fit_results$pValue,
-                            fitQuality = fit_results$fitQuality
-                        ))
-                        
-                        # Add explanatory text
-                        html <- sprintf("<div style='%s'>
+                # === Model Fit Assessment ===
+                if (self$options$showModelFit) {
+                    modelFitText <- self$results$modelFitText
+                    modelFitTable <- self$results$modelFitTable
+
+                    if (is.na(pEstimate)) {
+                        modelFitText$setContent("Cannot assess model fit: detection probability (q) could not be estimated.")
+                    } else {
+                        fit_results <- private$.testModelFit(firstDetectionData, pEstimate)
+
+                        if (!is.na(fit_results$chiSquare)) {
+                            modelFitTable$addRow(rowKey = "fit_test", values = list(
+                                test = "Chi-Square Goodness of Fit",
+                                chiSquare = fit_results$chiSquare,
+                                df = fit_results$df,
+                                pValue = fit_results$pValue,
+                                fitQuality = fit_results$fitQuality
+                            ))
+
+                            # Add explanatory text
+                            html <- sprintf(
+                                "<div style='%s'>
                             <p><strong>Fit Quality:</strong> %s</p>
                             <p>This test compares the observed distribution of first detection positions with the expected geometric distribution.
                             A significant p-value (< 0.05) indicates poor fit, suggesting the geometric/binomial model assumptions may be violated (e.g., due to spatial clustering).</p>
-                        </div>", 
-                        private$.styleConstants$font, fit_results$fitQuality)
-                        modelFitText$setContent(html)
-                    } else {
-                        modelFitText$setContent("Insufficient data for model fit testing (requires n ≥ 10).")
-                    }
-                }
-            }
-
-            # === Observed vs Predicted Table ===
-            if (self$options$showObsPred) {
-                obsPredText <- self$results$obsPredText
-                obsPredTable <- self$results$obsPredTable
-                
-                if (is.na(pEstimate)) {
-                    obsPredText$setContent("Cannot compare observed vs predicted: detection probability (q) could not be estimated.")
-                } else {
-                    op_results <- private$.calculateObsPred(firstDetectionData, pEstimate, maxSamp)
-                    
-                    if (nrow(op_results) > 0) {
-                        for (i in 1:nrow(op_results)) {
-                            obsPredTable$addRow(rowKey=paste0("op_", i), values=list(
-                                nSamples = op_results$nSamples[i],
-                                observed = op_results$observed[i],
-                                predicted = op_results$predicted[i],
-                                difference = op_results$difference[i],
-                                assessment = op_results$assessment[i]
-                            ))
+                        </div>",
+                                private$.styleConstants$font, fit_results$fitQuality
+                            )
+                            modelFitText$setContent(html)
+                        } else {
+                            modelFitText$setContent("Insufficient data for model fit testing (requires n >= 10).")
                         }
-                        
-                        obsPredText$setContent("<p>Comparison of observed cumulative detection rates vs. model predictions. Large differences indicate model misfit.</p>")
-                    } else {
-                        obsPredText$setContent("No positive cases available for comparison.")
                     }
                 }
-            }
 
-            # === Power Analysis ===
-            if (self$options$showPowerAnalysis) {
-                powerText <- self$results$powerAnalysisText
-                powerTable <- self$results$powerTable
-                
-                targetPower <- self$options$targetPower
-                targetQ <- self$options$targetDetectionProb
-                
-                # Scenario 1: User specified target q
-                n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
-                achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
-                
-                powerTable$addRow(rowKey="user_spec", values=list(
-                    scenario = "User Specified Target",
-                    targetPower = targetPower,
-                    probDetect = targetQ,
-                    nSamples = n_req_1,
-                    achievedPower = achieved_power_1
-                ))
-                
-                # Scenario 2: Observed q (if available)
-                if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
-                    n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
-                    achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
-                    
-                    powerTable$addRow(rowKey="observed", values=list(
-                        scenario = "Observed Data Estimate",
-                        targetPower = targetPower,
-                        probDetect = pEstimate,
-                        nSamples = n_req_2,
-                        achievedPower = achieved_power_2
-                    ))
+                # === Observed vs Predicted Table ===
+                if (self$options$showObsPred) {
+                    obsPredText <- self$results$obsPredText
+                    obsPredTable <- self$results$obsPredTable
+
+                    if (is.na(pEstimate)) {
+                        obsPredText$setContent("Cannot compare observed vs predicted: detection probability (q) could not be estimated.")
+                    } else {
+                        op_results <- private$.calculateObsPred(firstDetectionData, pEstimate, maxSamp)
+
+                        if (nrow(op_results) > 0) {
+                            for (i in 1:nrow(op_results)) {
+                                obsPredTable$addRow(rowKey = paste0("op_", i), values = list(
+                                    nSamples = op_results$nSamples[i],
+                                    observed = op_results$observed[i],
+                                    predicted = op_results$predicted[i],
+                                    difference = op_results$difference[i],
+                                    assessment = op_results$assessment[i]
+                                ))
+                            }
+
+                            obsPredText$setContent("<p>Comparison of observed cumulative detection rates vs. model predictions. Large differences indicate model misfit.</p>")
+                        } else {
+                            obsPredText$setContent("No positive cases available for comparison.")
+                        }
+                    }
                 }
-                
-                html <- sprintf("<div style='%s'>
+
+                # === Power Analysis ===
+                if (self$options$showPowerAnalysis) {
+                    powerText <- self$results$powerAnalysisText
+                    powerTable <- self$results$powerTable
+
+                    targetPower <- self$options$targetPower
+                    targetQ <- self$options$targetDetectionProb
+
+                    # Scenario 1: User specified target q
+                    n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
+                    achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
+
+                    powerTable$addRow(rowKey = "user_spec", values = list(
+                        scenario = "User Specified Target",
+                        targetPower = targetPower,
+                        probDetect = targetQ,
+                        nSamples = n_req_1,
+                        achievedPower = achieved_power_1
+                    ))
+
+                    # Scenario 2: Observed q (if available)
+                    if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
+                        n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
+                        achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
+
+                        powerTable$addRow(rowKey = "observed", values = list(
+                            scenario = "Observed Data Estimate",
+                            targetPower = targetPower,
+                            probDetect = pEstimate,
+                            nSamples = n_req_2,
+                            achievedPower = achieved_power_2
+                        ))
+                    }
+
+                    html <- sprintf("<div style='%s'>
                     <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
                     <p>Formula: n = log(1 - Power) / log(1 - q)</p>
                 </div>", private$.styleConstants$font)
-                powerText$setContent(html)
-            }
-
-            # === Multi-Focal Analysis ===
-            if (self$options$showMultifocalAnalysis) {
-                multifocalText <- self$results$multifocalAnalysisText
-                multifocalTable <- self$results$multifocalProbTable
-                
-                q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
-                
-                for (i in 1:maxSamp) {
-                    # P(X >= k) = 1 - pbinom(k-1, n, p)
-                    p_ge_1 <- 1 - pbinom(0, i, q_val)
-                    p_ge_2 <- 1 - pbinom(1, i, q_val)
-                    p_ge_3 <- 1 - pbinom(2, i, q_val)
-                    
-                    multifocalTable$addRow(rowKey=i, values=list(
-                        nSamples = i,
-                        detectOne = p_ge_1,
-                        detectTwo = p_ge_2,
-                        detectThree = p_ge_3
-                    ))
+                    powerText$setContent(html)
                 }
-                
-                html <- sprintf("<div style='%s'>
+
+                # === Multi-Focal Analysis ===
+                if (self$options$showMultifocalAnalysis) {
+                    multifocalText <- self$results$multifocalAnalysisText
+                    multifocalTable <- self$results$multifocalProbTable
+
+                    q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
+
+                    for (i in 1:maxSamp) {
+                        # P(X >= k) = 1 - pbinom(k-1, n, p)
+                        p_ge_1 <- 1 - pbinom(0, i, q_val)
+                        p_ge_2 <- 1 - pbinom(1, i, q_val)
+                        p_ge_3 <- 1 - pbinom(2, i, q_val)
+
+                        multifocalTable$addRow(rowKey = i, values = list(
+                            nSamples = i,
+                            detectOne = p_ge_1,
+                            detectTwo = p_ge_2,
+                            detectThree = p_ge_3
+                        ))
+                    }
+
+                    html <- sprintf("<div style='%s'>
                     <p><strong>Multifocal Detection:</strong> Probability of detecting multiple lesions in 'n' samples, assuming per-sample detection probability q = %.3f.</p>
                     <p>Useful for planning sampling when the goal is to find multiple foci (e.g., multifocal tumor).</p>
                 </div>", private$.styleConstants$font, q_val)
-                multifocalText$setContent(html)
-            }
+                    multifocalText$setContent(html)
+                }
 
-            # === Automated Model Selection ===
-            if (self$options$autoSelectModel) {
-                selectionText <- self$results$modelSelectionText
-                comparisonTable <- self$results$modelComparisonTable
-                
-                # Use private helper to compare models
-                if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
-                    model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
-                    
-                    for (res in model_results) {
-                        comparisonTable$addRow(rowKey=res$model, values=res)
-                    }
-                    
-                    best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
-                    
-                    html <- sprintf("<div style='%s'>
+                # === Automated Model Selection ===
+                if (self$options$autoSelectModel) {
+                    selectionText <- self$results$modelSelectionText
+                    comparisonTable <- self$results$modelComparisonTable
+
+                    # Use private helper to compare models
+                    if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
+                        model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
+
+                        for (res in model_results) {
+                            comparisonTable$addRow(rowKey = res$model, values = res)
+                        }
+
+                        best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
+
+                        html <- sprintf("<div style='%s'>
                         <p><strong>Best Fitting Model:</strong> %s (based on AIC)</p>
                         <p>Lower AIC/BIC indicates better fit. Non-significant Chi-square p-value (>0.05) indicates adequate fit.</p>
                     </div>", private$.styleConstants$font, best_model)
-                    selectionText$setContent(html)
-                } else {
-                    selectionText$setContent("Insufficient data for model selection.")
+                        selectionText$setContent(html)
+                    } else {
+                        selectionText$setContent("Insufficient data for model selection.")
+                    }
                 }
-            }
 
-            # === Power Analysis ===
-            if (self$options$showPowerAnalysis) {
-                powerText <- self$results$powerAnalysisText
-                powerTable <- self$results$powerTable
-                
-                targetPower <- self$options$targetPower
-                targetQ <- self$options$targetDetectionProb
-                
-                # Scenario 1: User specified target q
-                n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
-                achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
-                
-                powerTable$addRow(rowKey="user_spec", values=list(
-                    scenario = "User Specified Target",
-                    targetPower = targetPower,
-                    probDetect = targetQ,
-                    nSamples = n_req_1,
-                    achievedPower = achieved_power_1
-                ))
-                
-                # Scenario 2: Observed q (if available)
-                if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
-                    n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
-                    achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
-                    
-                    powerTable$addRow(rowKey="observed", values=list(
-                        scenario = "Observed Data Estimate",
+                # === Power Analysis ===
+                if (self$options$showPowerAnalysis) {
+                    powerText <- self$results$powerAnalysisText
+                    powerTable <- self$results$powerTable
+
+                    targetPower <- self$options$targetPower
+                    targetQ <- self$options$targetDetectionProb
+
+                    # Scenario 1: User specified target q
+                    n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
+                    achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
+
+                    powerTable$addRow(rowKey = "user_spec", values = list(
+                        scenario = "User Specified Target",
                         targetPower = targetPower,
-                        probDetect = pEstimate,
-                        nSamples = n_req_2,
-                        achievedPower = achieved_power_2
+                        probDetect = targetQ,
+                        nSamples = n_req_1,
+                        achievedPower = achieved_power_1
                     ))
-                }
-                
-                html <- sprintf("<div style='%s'>
+
+                    # Scenario 2: Observed q (if available)
+                    if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
+                        n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
+                        achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
+
+                        powerTable$addRow(rowKey = "observed", values = list(
+                            scenario = "Observed Data Estimate",
+                            targetPower = targetPower,
+                            probDetect = pEstimate,
+                            nSamples = n_req_2,
+                            achievedPower = achieved_power_2
+                        ))
+                    }
+
+                    html <- sprintf("<div style='%s'>
                     <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
                     <p>Formula: n = log(1 - Power) / log(1 - q)</p>
                 </div>", private$.styleConstants$font, targetPower * 100)
-                powerText$setContent(html)
-            }
-
-            # === Multi-Focal Analysis ===
-            if (self$options$showMultifocalAnalysis) {
-                multifocalText <- self$results$multifocalAnalysisText
-                multifocalTable <- self$results$multifocalProbTable
-                
-                q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
-                
-                for (i in 1:maxSamp) {
-                    # P(X >= k) = 1 - pbinom(k-1, n, p)
-                    p_ge_1 <- 1 - pbinom(0, i, q_val)
-                    p_ge_2 <- 1 - pbinom(1, i, q_val)
-                    p_ge_3 <- 1 - pbinom(2, i, q_val)
-                    
-                    multifocalTable$addRow(rowKey=i, values=list(
-                        nSamples = i,
-                        detectOne = p_ge_1,
-                        detectTwo = p_ge_2,
-                        detectThree = p_ge_3
-                    ))
+                    powerText$setContent(html)
                 }
-                
-                html <- sprintf("<div style='%s'>
+
+                # === Multi-Focal Analysis ===
+                if (self$options$showMultifocalAnalysis) {
+                    multifocalText <- self$results$multifocalAnalysisText
+                    multifocalTable <- self$results$multifocalProbTable
+
+                    q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
+
+                    for (i in 1:maxSamp) {
+                        # P(X >= k) = 1 - pbinom(k-1, n, p)
+                        p_ge_1 <- 1 - pbinom(0, i, q_val)
+                        p_ge_2 <- 1 - pbinom(1, i, q_val)
+                        p_ge_3 <- 1 - pbinom(2, i, q_val)
+
+                        multifocalTable$addRow(rowKey = i, values = list(
+                            nSamples = i,
+                            detectOne = p_ge_1,
+                            detectTwo = p_ge_2,
+                            detectThree = p_ge_3
+                        ))
+                    }
+
+                    html <- sprintf("<div style='%s'>
                     <p><strong>Multifocal Detection:</strong> Probability of detecting multiple lesions in 'n' samples, assuming per-sample detection probability q = %.3f.</p>
                     <p>Useful for planning sampling when the goal is to find multiple foci (e.g., multifocal tumor).</p>
                 </div>", private$.styleConstants$font, q_val)
-                multifocalText$setContent(html)
-            }
+                    multifocalText$setContent(html)
+                }
 
-            # === Automated Model Selection ===
-            if (self$options$autoSelectModel) {
-                selectionText <- self$results$modelSelectionText
-                comparisonTable <- self$results$modelComparisonTable
-                
-                # Use private helper to compare models
-                if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
-                    model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
-                    
-                    for (res in model_results) {
-                        comparisonTable$addRow(rowKey=res$model, values=res)
-                    }
-                    
-                    best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
-                    
-                    html <- sprintf("<div style='%s'>
+                # === Automated Model Selection ===
+                if (self$options$autoSelectModel) {
+                    selectionText <- self$results$modelSelectionText
+                    comparisonTable <- self$results$modelComparisonTable
+
+                    # Use private helper to compare models
+                    if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
+                        model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
+
+                        for (res in model_results) {
+                            comparisonTable$addRow(rowKey = res$model, values = res)
+                        }
+
+                        best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
+
+                        html <- sprintf("<div style='%s'>
                         <p><strong>Best Fitting Model:</strong> %s (based on AIC)</p>
                         <p>Lower AIC/BIC indicates better fit. Non-significant Chi-square p-value (>0.05) indicates adequate fit.</p>
                     </div>", private$.styleConstants$font, best_model)
-                    selectionText$setContent(html)
-                } else {
-                    selectionText$setContent("Insufficient data for model selection.")
-                }
-            }
-
-            # === Auto-Detect Heterogeneity (Warning Only) ===
-            if (self$options$autoDetectHeterogeneity && !is.null(sampleTypeData)) {
-                auto_het <- private$.autoDetectHeterogeneity(firstDetectionData, sampleTypeData)
-                
-                if (auto_het$warning) {
-                    # Add to interpretText if not already there
-                    interpretText <- self$results$interpretText
-                    currentContent <- interpretText$content
-                    if (is.null(currentContent)) currentContent <- ""
-                    
-                    warningHtml <- sprintf("<div style='%s %s %s %s'>
-                        <p style='margin: 0; %s'><strong>%s</strong></p>
-                    </div>",
-                    private$.styleConstants$font, private$.styleConstants$bgLight,
-                    private$.styleConstants$borderWarning, private$.styleConstants$padding10,
-                    private$.styleConstants$fontSize14,
-                    auto_het$message)
-                    
-                    # Prepend to existing content
-                    interpretText$setContent(paste(warningHtml, currentContent, sep="<br>"))
-                }
-            }
-
-            # === Probability Explanation ===
-            probabilityExplanation <- self$results$probabilityExplanation
-
-            # Calculate prevalence and example probabilities
-            prevalence <- nDetected / nCases
-
-            # Use pEstimate if available, otherwise derive from observed first-detection data
-            qForExamples <- NA_real_
-            if (!is.na(pEstimate) && pEstimate > 0) {
-                qForExamples <- pEstimate
-            } else {
-                positive_first <- firstDetectionData[!is.na(firstDetectionData)]
-                if (length(positive_first) > 0) {
-                    mean_first_detection <- mean(positive_first, na.rm = TRUE)
-                    if (is.finite(mean_first_detection) && mean_first_detection > 0) {
-                        qForExamples <- 1 / mean_first_detection
+                        selectionText$setContent(html)
+                    } else {
+                        selectionText$setContent("Insufficient data for model selection.")
                     }
                 }
-            }
 
-            if (is.na(qForExamples) || qForExamples <= 0) {
-                probabilityExplanation$setContent(
-                    sprintf("<div style='%s %s %s'>\n                        <p style='%s'><strong>Insufficient detection data</strong></p>\n                        <p style='%s'>No positive cases with valid first detection positions were available, so example probabilities could not be calculated. Provide first detection data or additional positive cases to enable this narrative.</p>\n                    </div>",
-                        private$.styleConstants$font,
-                        private$.styleConstants$bgLight,
-                        private$.styleConstants$padding15,
-                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
+                # === Auto-Detect Heterogeneity (Warning Only) ===
+                if (self$options$autoDetectHeterogeneity && !is.null(sampleTypeData)) {
+                    auto_het <- private$.autoDetectHeterogeneity(firstDetectionData, sampleTypeData)
+
+                    if (auto_het$warning) {
+                        # Add to interpretText if not already there
+                        interpretText <- self$results$interpretText
+                        currentContent <- interpretText$content
+                        if (is.null(currentContent)) currentContent <- ""
+
+                        warningHtml <- sprintf(
+                            "<div style='%s %s %s %s'>
+                        <p style='margin: 0; %s'><strong>%s</strong></p>
+                    </div>",
+                            private$.styleConstants$font, private$.styleConstants$bgLight,
+                            private$.styleConstants$borderWarning, private$.styleConstants$padding10,
+                            private$.styleConstants$fontSize14,
+                            auto_het$message
+                        )
+
+                        # Prepend to existing content
+                        interpretText$setContent(paste(warningHtml, currentContent, sep = "<br>"))
+                    }
+                }
+
+                # === Probability Explanation ===
+                probabilityExplanation <- self$results$probabilityExplanation
+
+                # Calculate prevalence and example probabilities
+                prevalence <- nDetected / nCases
+
+                # Use pEstimate if available, otherwise derive from observed first-detection data
+                qForExamples <- NA_real_
+                if (!is.na(pEstimate) && pEstimate > 0) {
+                    qForExamples <- pEstimate
+                } else {
+                    positive_first <- firstDetectionData[!is.na(firstDetectionData)]
+                    if (length(positive_first) > 0) {
+                        mean_first_detection <- mean(positive_first, na.rm = TRUE)
+                        if (is.finite(mean_first_detection) && mean_first_detection > 0) {
+                            qForExamples <- 1 / mean_first_detection
+                        }
+                    }
+                }
+
+                if (is.na(qForExamples) || qForExamples <= 0) {
+                    probabilityExplanation$setContent(
+                        sprintf(
+                            "<div style='%s %s %s'>\n                        <p style='%s'><strong>Insufficient detection data</strong></p>\n                        <p style='%s'>No positive cases with valid first detection positions were available, so example probabilities could not be calculated. Provide first detection data or additional positive cases to enable this narrative.</p>\n                    </div>",
+                            private$.styleConstants$font,
+                            private$.styleConstants$bgLight,
+                            private$.styleConstants$padding15,
+                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
+                        )
                     )
-                )
-                return()
-            }
+                    return()
+                }
 
-            # Calculate conditional probabilities (sensitivity)
-            conditional_3 <- 1 - (1 - qForExamples)^3
-            conditional_5 <- 1 - (1 - qForExamples)^5
-            conditional_10 <- 1 - (1 - qForExamples)^10
+                # Calculate conditional probabilities (sensitivity)
+                conditional_3 <- 1 - (1 - qForExamples)^3
+                conditional_5 <- 1 - (1 - qForExamples)^5
+                conditional_10 <- 1 - (1 - qForExamples)^10
 
-            # Calculate population-level probabilities
-            population_3 <- prevalence * conditional_3
-            population_5 <- prevalence * conditional_5
-            population_10 <- prevalence * conditional_10
+                # Calculate population-level probabilities
+                population_3 <- prevalence * conditional_3
+                population_5 <- prevalence * conditional_5
+                population_10 <- prevalence * conditional_10
 
-            html <- sprintf("<div style='%s'>
+                html <- sprintf(
+                    "<div style='%s'>
                 <h4 style='%s'> Two Ways to Measure Detection Performance</h4>
 
                 <p style='%s'>
@@ -1619,7 +1685,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <strong>Clinical question:</strong> Across all specimens submitted (positive + negative), how often do we detect tumour with n blocks?
                     </p>
                     <p style='%s'>
-                        <strong>Best used for:</strong> Monitoring service-level performance, comparing surgeons/protocols, or highlighting when low prevalence—not sampling—limits detection.
+                        <strong>Best used for:</strong> Monitoring service-level performance, comparing surgeons/protocols, or highlighting when low prevalence - not sampling - limits detection.
                     </p>
                     <p style='%s'>
                         <strong>Formula:</strong> P(detect overall) = Prevalence × Sensitivity = π × [1 - (1-q)<sup>n</sup>]
@@ -1656,144 +1722,145 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </p>
                 </div>
             </div>",
-            private$.styleConstants$font,
-            private$.buildStyle(
-                private$.styleConstants$bgLighter,
-                private$.styleConstants$borderSecondary,
-                private$.styleConstants$padding20
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorPrimary,
-                "margin: 0 0 15px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$bgWhite,
-                private$.styleConstants$borderLeft,
-                private$.styleConstants$padding15,
-                private$.styleConstants$margin15
-            ),
-            private$.buildStyle(
-                private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize15,
-                "margin: 0 0 10px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorPrimary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            nDetected, qForExamples,
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0; padding-left: 25px;"
-            ),
-            conditional_3 * 100, conditional_5 * 100, conditional_10 * 100,
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorPrimary,
-                "margin: 0;"
-            ),
-            private$.styleConstants$colorSuccess,
-            private$.buildStyle(
-                private$.styleConstants$bgWhite,
-                private$.styleConstants$borderLeft,
-                private$.styleConstants$padding15,
-                private$.styleConstants$margin15
-            ),
-            private$.buildStyle(
-                private$.styleConstants$colorPrimary,
-                private$.styleConstants$fontSize15,
-                "margin: 0 0 10px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorPrimary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            prevalence * 100, nDetected, nCases,
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0; padding-left: 25px;"
-            ),
-            population_3 * 100, population_5 * 100, population_10 * 100,
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorPrimary,
-                "margin: 0;"
-            ),
-            private$.styleConstants$colorInfo,
-            private$.buildStyle(
-                private$.styleConstants$bgLight,
-                private$.styleConstants$borderWarning,
-                private$.styleConstants$padding15,
-                private$.styleConstants$margin15
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$fontWeight700,
-                "margin: 0 0 10px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0 0 8px 0;"
-            ),
-            private$.buildStyle(
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorSecondary,
-                "margin: 0;"
-            ),
-            prevalence * 100)
+                    private$.styleConstants$font,
+                    private$.buildStyle(
+                        private$.styleConstants$bgLighter,
+                        private$.styleConstants$borderSecondary,
+                        private$.styleConstants$padding20
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        "margin: 0 0 15px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$bgWhite,
+                        private$.styleConstants$borderLeft,
+                        private$.styleConstants$padding15,
+                        private$.styleConstants$margin15
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize15,
+                        "margin: 0 0 10px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    nDetected, qForExamples,
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0; padding-left: 25px;"
+                    ),
+                    conditional_3 * 100, conditional_5 * 100, conditional_10 * 100,
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        "margin: 0;"
+                    ),
+                    private$.styleConstants$colorSuccess,
+                    private$.buildStyle(
+                        private$.styleConstants$bgWhite,
+                        private$.styleConstants$borderLeft,
+                        private$.styleConstants$padding15,
+                        private$.styleConstants$margin15
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize15,
+                        "margin: 0 0 10px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    prevalence * 100, nDetected, nCases,
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0; padding-left: 25px;"
+                    ),
+                    population_3 * 100, population_5 * 100, population_10 * 100,
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        "margin: 0;"
+                    ),
+                    private$.styleConstants$colorInfo,
+                    private$.buildStyle(
+                        private$.styleConstants$bgLight,
+                        private$.styleConstants$borderWarning,
+                        private$.styleConstants$padding15,
+                        private$.styleConstants$margin15
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$fontWeight700,
+                        "margin: 0 0 10px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0 0 8px 0;"
+                    ),
+                    private$.buildStyle(
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorSecondary,
+                        "margin: 0;"
+                    ),
+                    prevalence * 100
+                )
 
-            if (!skipBinomial && self$options$showProbabilityExplanation) {
-                probabilityExplanation$setContent(html)
-            }
+                if (!skipBinomial && self$options$showProbabilityExplanation) {
+                    probabilityExplanation$setContent(html)
+                }
 
-            # === Bootstrap Analysis ===
-            if (self$options$showBootstrap) {
-
-                # Validation: Check if we have enough positive cases for bootstrap
-                if (nDetected < 3) {
-                    bootstrapText <- self$results$bootstrapText
-                    errorHtml <- sprintf("<div style='%s %s %s %s'>
+                # === Bootstrap Analysis ===
+                if (self$options$showBootstrap) {
+                    # Validation: Check if we have enough positive cases for bootstrap
+                    if (nDetected < 3) {
+                        bootstrapText <- self$results$bootstrapText
+                        errorHtml <- sprintf(
+                            "<div style='%s %s %s %s'>
                         <p style='margin: 0; %s'><strong> ERROR: Insufficient Data for Bootstrap</strong></p>
                         <p style='margin: 10px 0 0 0; %s'>
                             Bootstrap analysis requires at least 3 positive cases.
@@ -1802,16 +1869,17 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong>
                             Disable bootstrap analysis or collect more positive cases.</p>
                     </div>",
-                    private$.styleConstants$font, private$.styleConstants$bgLight,
-                    private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$fontSize14, nDetected, if (nDetected == 1) "" else "s",
-                    private$.styleConstants$fontSize14)
-                    bootstrapText$setContent(errorHtml)
-                } else {
-
-                bootstrapText <- self$results$bootstrapText
-                html <- sprintf("<div style='%s'>
+                            private$.styleConstants$font, private$.styleConstants$bgLight,
+                            private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$fontSize14, nDetected, if (nDetected == 1) "" else "s",
+                            private$.styleConstants$fontSize14
+                        )
+                        bootstrapText$setContent(errorHtml)
+                    } else {
+                        bootstrapText <- self$results$bootstrapText
+                        html <- sprintf(
+                            "<div style='%s'>
                     <div style='%s'>
                         <h4 style='%s'>Bootstrap Resampling Analysis</h4>
                         <p style='%s'>
@@ -1826,206 +1894,214 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         </p>
                     </div>
                 </div>",
-                private$.styleConstants$font,
-                private$.buildStyle(
-                    private$.styleConstants$bgLight,
-                    private$.styleConstants$borderLeft,
-                    private$.styleConstants$padding15,
-                    private$.styleConstants$margin10
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize15,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.styleConstants$colorPrimary,
-                nBoot,
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                ),
-                private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0;"
-                ))
-                if (self$options$showBootstrap) {
-                    bootstrapText$setContent(html)
+                            private$.styleConstants$font,
+                            private$.buildStyle(
+                                private$.styleConstants$bgLight,
+                                private$.styleConstants$borderLeft,
+                                private$.styleConstants$padding15,
+                                private$.styleConstants$margin10
+                            ),
+                            private$.buildStyle(
+                                private$.styleConstants$colorPrimary,
+                                private$.styleConstants$fontSize15,
+                                "margin: 0 0 10px 0;"
+                            ),
+                            private$.buildStyle(
+                                private$.styleConstants$fontSize14,
+                                private$.styleConstants$colorPrimary,
+                                "margin: 0 0 10px 0;"
+                            ),
+                            private$.styleConstants$colorPrimary,
+                            nBoot,
+                            private$.buildStyle(
+                                private$.styleConstants$fontSize14,
+                                private$.styleConstants$colorPrimary,
+                                "margin: 0 0 10px 0;"
+                            ),
+                            private$.buildStyle(
+                                private$.styleConstants$fontSize14,
+                                private$.styleConstants$colorPrimary,
+                                "margin: 0;"
+                            )
+                        )
+                        if (self$options$showBootstrap) {
+                            bootstrapText$setContent(html)
+                        }
+
+                        # Perform bootstrap
+                        bootstrapResults <- matrix(0, nrow = nBoot, ncol = maxSamp)
+
+                        bootstrapMeans <- rep(NA_real_, maxSamp)
+                        bootstrapCILower <- rep(NA_real_, maxSamp)
+                        bootstrapCIUpper <- rep(NA_real_, maxSamp)
+
+                        # Add checkpoint calls for progress (only for large iterations)
+                        if (nBoot >= 5000) {
+                            checkpointInterval <- floor(nBoot / 10) # Update every 10%
+                        } else {
+                            checkpointInterval <- nBoot + 1 # Don't checkpoint for small iterations
+                        }
+
+                        # Get positive cases only for bootstrap (conditional probability)
+                        # IMPORTANT: This creates SELECTION BIAS - only detected cases are resampled
+                        # Sensitivity estimates will be OVEROPTIMISTIC if any true positives were missed
+                        positiveCases <- !is.na(firstDetectionData)
+                        positiveIndices <- which(positiveCases)
+                        nPositiveCases <- length(positiveIndices)
+
+                        # Add CRITICAL WARNING about selection bias
+                        private$.addNotice(
+                            "STRONG_WARNING", "Bootstrap Selection Bias",
+                            " SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively."
+                        )
+
+                        # Perform bootstrap resampling
+
+                        for (iter in 1:nBoot) {
+                            # Progress checkpoint every 10%
+                            if (iter %% checkpointInterval == 0) {
+                                private$.checkpoint()
+                            }
+
+                            # Resample from POSITIVE cases only with replacement
+                            sampledPositiveIndices <- sample(positiveIndices, nPositiveCases, replace = TRUE)
+                            sampledFirst <- firstDetectionData[sampledPositiveIndices]
+
+                            # Calculate detection rate for each sample count (conditional)
+                            for (j in 1:maxSamp) {
+                                detected <- sum(!is.na(sampledFirst) & sampledFirst <= j)
+                                bootstrapResults[iter, j] <- detected / nPositiveCases
+                            }
+                        }
+
+                        # Store for plotting
+                        private$.bootstrapResults <- bootstrapResults
+
+                        # Calculate summary statistics from bootstrap results
+                        for (j in 1:maxSamp) {
+                            bootstrapMeans[j] <- mean(bootstrapResults[, j], na.rm = TRUE)
+                            bootstrapCILower[j] <- quantile(bootstrapResults[, j], probs = 0.025, na.rm = TRUE)
+                            bootstrapCIUpper[j] <- quantile(bootstrapResults[, j], probs = 0.975, na.rm = TRUE)
+                        }
+
+                        # Populate bootstrap table
+                        bootstrapTable <- self$results$bootstrapTable
+
+                        # Clear existing rows (if any)
+                        # bootstrapTable$clearRows() # Not available in mock?
+
+                        for (i in 1:maxSamp) {
+                            meanVal <- bootstrapMeans[i]
+                            ciLower <- bootstrapCILower[i]
+                            ciUpper <- bootstrapCIUpper[i]
+
+                            # Add row to table
+                            bootstrapTable$addRow(rowKey = i, values = list(
+                                nSamples = i,
+                                meanSens = meanVal,
+                                ciLower = ciLower,
+                                ciUpper = ciUpper
+                            ))
+                        }
+
+                        bootstrapMeansVec <- bootstrapMeans
+                        bootstrapCILowerVec <- bootstrapCILower
+                        bootstrapCIUpperVec <- bootstrapCIUpper
+
+                        targetCandidates <- which(!is.na(bootstrapMeans) & bootstrapMeans >= targetConf)
+                        bootstrapTargetIdx <- if (length(targetCandidates) > 0) targetCandidates[1] else NA_integer_
+
+                        ciTarget <- c(
+                            quantile(bootstrapMeansVec, probs = (1 - targetConf) / 2, na.rm = TRUE),
+                            quantile(bootstrapMeansVec, probs = 1 - (1 - targetConf) / 2, na.rm = TRUE)
+                        )
+
+                        addRecommendation(
+                            method = "Bootstrap",
+                            probVec = bootstrapMeans,
+                            priority = 1,
+                            description = "Empirical resampling of cases",
+                            detail = sprintf("%d iterations", nBoot),
+                            ci = ciTarget
+                        )
+                    } # End else block for bootstrap validation
                 }
 
-                # Perform bootstrap
-                bootstrapResults <- matrix(0, nrow = nBoot, ncol = maxSamp)
+                # Store data for plotting
+                private$.totalSamplesData <- totalSamplesData
+                private$.firstDetectionData <- firstDetectionData
+                private$.pEstimate <- pEstimate
+                private$.maxSamp <- maxSamp
 
-                bootstrapMeans <- rep(NA_real_, maxSamp)
-                bootstrapCILower <- rep(NA_real_, maxSamp)
-                bootstrapCIUpper <- rep(NA_real_, maxSamp)
+                # Calculate observed conditional detection probability (sensitivity)
+                # Only among positive cases, not population-level
+                nPositiveCases <- sum(!is.na(firstDetectionData))
 
-                # Add checkpoint calls for progress (only for large iterations)
-                if (nBoot >= 5000) {
-                    checkpointInterval <- floor(nBoot / 10)  # Update every 10%
-                } else {
-                    checkpointInterval <- nBoot + 1  # Don't checkpoint for small iterations
-                }
-
-                # Get positive cases only for bootstrap (conditional probability)
-                # IMPORTANT: This creates SELECTION BIAS - only detected cases are resampled
-                # Sensitivity estimates will be OVEROPTIMISTIC if any true positives were missed
-                positiveCases <- !is.na(firstDetectionData)
-                positiveIndices <- which(positiveCases)
-                nPositiveCases <- length(positiveIndices)
-
-                # Add CRITICAL WARNING about selection bias
-                private$.addNotice('STRONG_WARNING', 'Bootstrap Selection Bias',
-                    ' SELECTION BIAS WARNING: Bootstrap resamples only DETECTED cases. Sensitivity estimates assume 100% of true positives were detected and will be OVEROPTIMISTIC if any cases were missed. These are CONDITIONAL estimates (probability of detection given lesion was eventually found). For unbiased population-level sensitivity, you must provide gold-standard total positive count or use external validation. Interpret sample size recommendations conservatively.'
-                )
-
-                # Perform bootstrap resampling
-                
-                for (iter in 1:nBoot) {
-                    # Progress checkpoint every 10%
-                    if (iter %% checkpointInterval == 0) {
-                        private$.checkpoint()
+                observedProbVec <- sapply(1:maxSamp, function(n) {
+                    if (nPositiveCases == 0) {
+                        return(0)
                     }
-
-                    # Resample from POSITIVE cases only with replacement
-                    sampledPositiveIndices <- sample(positiveIndices, nPositiveCases, replace = TRUE)
-                    sampledFirst <- firstDetectionData[sampledPositiveIndices]
-
-                    # Calculate detection rate for each sample count (conditional)
-                    for (j in 1:maxSamp) {
-                        detected <- sum(!is.na(sampledFirst) & sampledFirst <= j)
-                        bootstrapResults[iter, j] <- detected / nPositiveCases
-                    }
-                }
-
-                # Store for plotting
-                private$.bootstrapResults <- bootstrapResults
-
-                # Calculate summary statistics from bootstrap results
-                for (j in 1:maxSamp) {
-                    bootstrapMeans[j] <- mean(bootstrapResults[, j], na.rm = TRUE)
-                    bootstrapCILower[j] <- quantile(bootstrapResults[, j], probs = 0.025, na.rm = TRUE)
-                    bootstrapCIUpper[j] <- quantile(bootstrapResults[, j], probs = 0.975, na.rm = TRUE)
-                }
-
-                # Populate bootstrap table
-                bootstrapTable <- self$results$bootstrapTable
-                
-                # Clear existing rows (if any)
-                # bootstrapTable$clearRows() # Not available in mock?
-                
-                for (i in 1:maxSamp) {
-                    meanVal <- bootstrapMeans[i]
-                    ciLower <- bootstrapCILower[i]
-                    ciUpper <- bootstrapCIUpper[i]
-                    
-                    # Add row to table
-                    bootstrapTable$addRow(rowKey = i, values = list(
-                        nSamples = i,
-                        meanSens = meanVal,
-                        ciLower = ciLower,
-                        ciUpper = ciUpper
-                    ))
-                }
-
-                bootstrapMeansVec <- bootstrapMeans
-                bootstrapCILowerVec <- bootstrapCILower
-                bootstrapCIUpperVec <- bootstrapCIUpper
-
-                targetCandidates <- which(!is.na(bootstrapMeans) & bootstrapMeans >= targetConf)
-                bootstrapTargetIdx <- if (length(targetCandidates) > 0) targetCandidates[1] else NA_integer_
-
-                ciTarget <- c(
-                    quantile(bootstrapMeansVec, probs = (1 - targetConf) / 2, na.rm = TRUE),
-                    quantile(bootstrapMeansVec, probs = 1 - (1 - targetConf) / 2, na.rm = TRUE)
-                )
-                
+                    # Count positive cases detected by sample n / total positive cases
+                    sum(!is.na(firstDetectionData) & firstDetectionData <= n) / nPositiveCases
+                })
                 addRecommendation(
-                    method = "Bootstrap",
-                    probVec = bootstrapMeans,
-                    priority = 1,
-                    description = "Empirical resampling of cases",
-                    detail = sprintf("%d iterations", nBoot),
-                    ci = ciTarget
+                    method = "Empirical",
+                    probVec = observedProbVec,
+                    priority = 5,
+                    description = "Observed cumulative detection in dataset",
+                    detail = sprintf("Conditional probability among %d positive cases", nPositiveCases)
                 )
-                }  # End else block for bootstrap validation
-            }
 
-            # Store data for plotting
-            private$.totalSamplesData <- totalSamplesData
-            private$.firstDetectionData <- firstDetectionData
-            private$.pEstimate <- pEstimate
-            private$.maxSamp <- maxSamp
-
-            # Calculate observed conditional detection probability (sensitivity)
-            # Only among positive cases, not population-level
-            nPositiveCases <- sum(!is.na(firstDetectionData))
-
-            observedProbVec <- sapply(1:maxSamp, function(n) {
-                if (nPositiveCases == 0) return(0)
-                # Count positive cases detected by sample n / total positive cases
-                sum(!is.na(firstDetectionData) & firstDetectionData <= n) / nPositiveCases
-            })
-            addRecommendation(
-                method = "Empirical",
-                probVec = observedProbVec,
-                priority = 5,
-                description = "Observed cumulative detection in dataset",
-                detail = sprintf("Conditional probability among %d positive cases", nPositiveCases)
-            )
-
-            obsPercents <- observedProbVec * 100
-            obs1 <- if (length(obsPercents) >= 1) obsPercents[1] else NA_real_
-            obs2 <- if (length(obsPercents) >= 2) obsPercents[2] else NA_real_
-            obs3 <- if (length(obsPercents) >= 3) obsPercents[3] else NA_real_
-            obs4 <- if (length(obsPercents) >= 4) obsPercents[4] else NA_real_
-            obsIndices <- seq_len(min(4, length(obsPercents)))
-            obsListHtml <- ""
-            if (length(obsIndices) > 0) {
-                obsListHtml <- paste(
-                    sprintf("<li>%d sample%s: %.1f%%%%</li>",
-                        obsIndices,
-                        ifelse(obsIndices == 1, "", "s"),
-                        obsPercents[obsIndices]),
-                    collapse = "")
-            }
-
-            # ===== Tumor Burden Analysis =====
-            # Modern implementation: Analyzes extent of tumor involvement using
-            # sample positivity ratio (SPR) and distribution patterns
-
-            if (self$options$showTumorBurden && !is.null(self$options$positiveCassettes)) {
-                private$.checkpoint()
-
-                # Get positive samples count data
-                positiveCassettesVar <- self$options$positiveCassettes
-                positiveCassettesEsc <- private$.escapeVar(positiveCassettesVar)
-                positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
-
-                # Handle factor/labelled data
-                if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, 'labels'))) {
-                    positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
+                obsPercents <- observedProbVec * 100
+                obs1 <- if (length(obsPercents) >= 1) obsPercents[1] else NA_real_
+                obs2 <- if (length(obsPercents) >= 2) obsPercents[2] else NA_real_
+                obs3 <- if (length(obsPercents) >= 3) obsPercents[3] else NA_real_
+                obs4 <- if (length(obsPercents) >= 4) obsPercents[4] else NA_real_
+                obsIndices <- seq_len(min(4, length(obsPercents)))
+                obsListHtml <- ""
+                if (length(obsIndices) > 0) {
+                    obsListHtml <- paste(
+                        sprintf(
+                            "<li>%d sample%s: %.1f%%%%</li>",
+                            obsIndices,
+                            ifelse(obsIndices == 1, "", "s"),
+                            obsPercents[obsIndices]
+                        ),
+                        collapse = ""
+                    )
                 }
 
-                # Filter to valid analyzed cases
-                positiveCassettesData <- positiveCassettesData[validCases]
-                if (!is.null(invalidCases)) {
-                    positiveCassettesData <- positiveCassettesData[!invalidCases]
-                }
+                # ===== Tumor Burden Analysis =====
+                # Modern implementation: Analyzes extent of tumor involvement using
+                # sample positivity ratio (SPR) and distribution patterns
 
-                # Store for other analyses
-                private$.positiveCassettesData <- positiveCassettesData
+                if (self$options$showTumorBurden && !is.null(self$options$positiveCassettes)) {
+                    private$.checkpoint()
 
-                # === Explanatory Text ===
-                tumorBurdenText <- self$results$tumorBurdenText
+                    # Get positive samples count data
+                    positiveCassettesVar <- self$options$positiveCassettes
+                    positiveCassettesEsc <- private$.escapeVar(positiveCassettesVar)
+                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
 
-                html <- sprintf("<div style='%s'>
+                    # Handle factor/labelled data
+                    if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
+                        positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
+                    }
+
+                    # Filter to valid analyzed cases
+                    positiveCassettesData <- positiveCassettesData[validCases]
+                    if (!is.null(invalidCases)) {
+                        positiveCassettesData <- positiveCassettesData[!invalidCases]
+                    }
+
+                    # Store for other analyses
+                    private$.positiveCassettesData <- positiveCassettesData
+
+                    # === Explanatory Text ===
+                    tumorBurdenText <- self$results$tumorBurdenText
+
+                    html <- sprintf(
+                        "<div style='%s'>
                     <h4 style='%s'>Tumor Burden Analysis</h4>
                     <p style='%s'>
                         Analyzes the <strong>sample positivity ratio (SPR)</strong>: the proportion of samples
@@ -2044,159 +2120,167 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         Higher SPR may indicate more extensive disease or better sampling.
                     </p>
                 </div>",
-                private$.buildStyle(private$.styleConstants$font),
-                private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                        private$.buildStyle(private$.styleConstants$font),
+                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
+                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
+                    )
 
-                if (self$options$showTumorBurden) {
-                    tumorBurdenText$setContent(html)
-                }
+                    if (self$options$showTumorBurden) {
+                        tumorBurdenText$setContent(html)
+                    }
 
-                # === Calculate SPR Statistics ===
-                tumorBurdenInfo <- self$results$tumorBurdenInfo
+                    # === Calculate SPR Statistics ===
+                    tumorBurdenInfo <- self$results$tumorBurdenInfo
 
-                # Filter to positive cases only
-                positive_cases_idx <- !is.na(firstDetectionData)
-                spr_values <- positiveCassettesData[positive_cases_idx] / totalSamplesData[positive_cases_idx]
+                    # Filter to positive cases only
+                    positive_cases_idx <- !is.na(firstDetectionData)
+                    spr_values <- positiveCassettesData[positive_cases_idx] / totalSamplesData[positive_cases_idx]
 
-                # Summary statistics
-                n_positive_for_burden <- sum(positive_cases_idx)
-                mean_spr <- mean(spr_values, na.rm = TRUE)
-                median_spr <- median(spr_values, na.rm = TRUE)
-                sd_spr <- sd(spr_values, na.rm = TRUE)
-                min_spr <- min(spr_values, na.rm = TRUE)
-                max_spr <- max(spr_values, na.rm = TRUE)
+                    # Summary statistics
+                    n_positive_for_burden <- sum(positive_cases_idx)
+                    mean_spr <- mean(spr_values, na.rm = TRUE)
+                    median_spr <- median(spr_values, na.rm = TRUE)
+                    sd_spr <- sd(spr_values, na.rm = TRUE)
+                    min_spr <- min(spr_values, na.rm = TRUE)
+                    max_spr <- max(spr_values, na.rm = TRUE)
 
-                # Overall totals
-                total_positive_samples <- sum(positiveCassettesData[positive_cases_idx], na.rm = TRUE)
-                total_samples_positive_cases <- sum(totalSamplesData[positive_cases_idx], na.rm = TRUE)
-                overall_spr <- total_positive_samples / total_samples_positive_cases
+                    # Overall totals
+                    total_positive_samples <- sum(positiveCassettesData[positive_cases_idx], na.rm = TRUE)
+                    total_samples_positive_cases <- sum(totalSamplesData[positive_cases_idx], na.rm = TRUE)
+                    overall_spr <- total_positive_samples / total_samples_positive_cases
 
-                # Populate statistics table
-                tumorBurdenInfo$addRow(rowKey="n_cases", values=list(
-                    measure = "Cases analyzed (with tumor)",
-                    value = sprintf("%d", n_positive_for_burden)
-                ))
-
-                tumorBurdenInfo$addRow(rowKey="mean_spr", values=list(
-                    measure = "Mean SPR",
-                    value = sprintf("%.3f (SD: %.3f)", mean_spr, sd_spr)
-                ))
-
-                tumorBurdenInfo$addRow(rowKey="median_spr", values=list(
-                    measure = "Median SPR",
-                    value = sprintf("%.3f", median_spr)
-                ))
-
-                tumorBurdenInfo$addRow(rowKey="range_spr", values=list(
-                    measure = "SPR range",
-                    value = sprintf("%.3f - %.3f", min_spr, max_spr)
-                ))
-
-                tumorBurdenInfo$addRow(rowKey="overall_spr", values=list(
-                    measure = "Overall SPR (pooled)",
-                    value = sprintf("%.3f (%d / %d samples)", overall_spr, total_positive_samples, total_samples_positive_cases)
-                ))
-
-                # === Tumor Distribution Pattern Classification ===
-                cassetteDistribution <- self$results$cassetteDistribution
-
-                # Classify based on number of positive samples
-                # Focal: 1 positive, Limited: 2-3 positive, Moderate: 4-6 positive, Extensive: 7+ positive
-                n_focal <- sum(positiveCassettesData[positive_cases_idx] == 1, na.rm = TRUE)
-                n_limited <- sum(positiveCassettesData[positive_cases_idx] >= 2 &
-                                 positiveCassettesData[positive_cases_idx] <= 3, na.rm = TRUE)
-                n_moderate <- sum(positiveCassettesData[positive_cases_idx] >= 4 &
-                                  positiveCassettesData[positive_cases_idx] <= 6, na.rm = TRUE)
-                n_extensive <- sum(positiveCassettesData[positive_cases_idx] >= 7, na.rm = TRUE)
-
-                # Add to table
-                if (n_focal > 0) {
-                    cassetteDistribution$addRow(rowKey="focal", values=list(
-                        pattern = "Focal (1 positive sample)",
-                        count = n_focal,
-                        percent = n_focal / n_positive_for_burden
+                    # Populate statistics table
+                    tumorBurdenInfo$addRow(rowKey = "n_cases", values = list(
+                        measure = "Cases analyzed (with tumor)",
+                        value = sprintf("%d", n_positive_for_burden)
                     ))
-                }
 
-                if (n_limited > 0) {
-                    cassetteDistribution$addRow(rowKey="limited", values=list(
-                        pattern = "Limited (2-3 positive)",
-                        count = n_limited,
-                        percent = n_limited / n_positive_for_burden
+                    tumorBurdenInfo$addRow(rowKey = "mean_spr", values = list(
+                        measure = "Mean SPR",
+                        value = sprintf("%.3f (SD: %.3f)", mean_spr, sd_spr)
                     ))
-                }
 
-                if (n_moderate > 0) {
-                    cassetteDistribution$addRow(rowKey="moderate", values=list(
-                        pattern = "Moderate (4-6 positive)",
-                        count = n_moderate,
-                        percent = n_moderate / n_positive_for_burden
+                    tumorBurdenInfo$addRow(rowKey = "median_spr", values = list(
+                        measure = "Median SPR",
+                        value = sprintf("%.3f", median_spr)
                     ))
-                }
 
-                if (n_extensive > 0) {
-                    cassetteDistribution$addRow(rowKey="extensive", values=list(
-                        pattern = "Extensive (7+ positive)",
-                        count = n_extensive,
-                        percent = n_extensive / n_positive_for_burden
+                    tumorBurdenInfo$addRow(rowKey = "range_spr", values = list(
+                        measure = "SPR range",
+                        value = sprintf("%.3f - %.3f", min_spr, max_spr)
                     ))
-                }
 
-                # === Additional Insight ===
-                # Calculate correlation between total samples and positive samples
-                if (n_positive_for_burden >= 3) {
-                    cor_result <- tryCatch({
-                        cor.test(totalSamplesData[positive_cases_idx],
-                                positiveCassettesData[positive_cases_idx],
-                                method = "spearman")
-                    }, error = function(e) NULL)
+                    tumorBurdenInfo$addRow(rowKey = "overall_spr", values = list(
+                        measure = "Overall SPR (pooled)",
+                        value = sprintf("%.3f (%d / %d samples)", overall_spr, total_positive_samples, total_samples_positive_cases)
+                    ))
 
-                    if (!is.null(cor_result) && !is.na(cor_result$estimate)) {
-                        tumorBurdenInfo$addRow(rowKey="correlation", values=list(
-                            measure = "Correlation (samples examined vs positive)",
-                            value = sprintf("ρ = %.3f (p %s %.3f)",
-                                          cor_result$estimate,
-                                          if (cor_result$p.value < 0.001) "<" else "=",
-                                          if (cor_result$p.value < 0.001) 0.001 else cor_result$p.value)
+                    # === Tumor Distribution Pattern Classification ===
+                    cassetteDistribution <- self$results$cassetteDistribution
+
+                    # Classify based on number of positive samples
+                    # Focal: 1 positive, Limited: 2-3 positive, Moderate: 4-6 positive, Extensive: 7+ positive
+                    n_focal <- sum(positiveCassettesData[positive_cases_idx] == 1, na.rm = TRUE)
+                    n_limited <- sum(positiveCassettesData[positive_cases_idx] >= 2 &
+                        positiveCassettesData[positive_cases_idx] <= 3, na.rm = TRUE)
+                    n_moderate <- sum(positiveCassettesData[positive_cases_idx] >= 4 &
+                        positiveCassettesData[positive_cases_idx] <= 6, na.rm = TRUE)
+                    n_extensive <- sum(positiveCassettesData[positive_cases_idx] >= 7, na.rm = TRUE)
+
+                    # Add to table
+                    if (n_focal > 0) {
+                        cassetteDistribution$addRow(rowKey = "focal", values = list(
+                            pattern = "Focal (1 positive sample)",
+                            count = n_focal,
+                            percent = n_focal / n_positive_for_burden
                         ))
                     }
-                }
-            }
 
-            # ===== Stage Migration Analysis =====
-            # Analyzes whether examining fewer samples leads to understaging
-
-            if (self$options$showStageMigration && !is.null(self$options$positiveCassettes)) {
-                private$.checkpoint()
-
-                # Get positive samples data (reuse if already loaded from tumor burden)
-                if (exists("positiveCassettesData", inherits = FALSE)) {
-                    # Already loaded in tumor burden section
-                    positiveCassettesData <- private$.positiveCassettesData
-                } else {
-                    # Load it now
-                    positiveCassettesVar <- self$options$positiveCassettes
-                    positiveCassettesEsc <- private$.escapeVar(positiveCassettesVar)
-                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
-
-                    if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, 'labels'))) {
-                        positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
+                    if (n_limited > 0) {
+                        cassetteDistribution$addRow(rowKey = "limited", values = list(
+                            pattern = "Limited (2-3 positive)",
+                            count = n_limited,
+                            percent = n_limited / n_positive_for_burden
+                        ))
                     }
 
-                    positiveCassettesData <- positiveCassettesData[validCases]
-                    if (!is.null(invalidCases)) {
-                        positiveCassettesData <- positiveCassettesData[!invalidCases]
+                    if (n_moderate > 0) {
+                        cassetteDistribution$addRow(rowKey = "moderate", values = list(
+                            pattern = "Moderate (4-6 positive)",
+                            count = n_moderate,
+                            percent = n_moderate / n_positive_for_burden
+                        ))
+                    }
+
+                    if (n_extensive > 0) {
+                        cassetteDistribution$addRow(rowKey = "extensive", values = list(
+                            pattern = "Extensive (7+ positive)",
+                            count = n_extensive,
+                            percent = n_extensive / n_positive_for_burden
+                        ))
+                    }
+
+                    # === Additional Insight ===
+                    # Calculate correlation between total samples and positive samples
+                    if (n_positive_for_burden >= 3) {
+                        cor_result <- tryCatch(
+                            {
+                                cor.test(totalSamplesData[positive_cases_idx],
+                                    positiveCassettesData[positive_cases_idx],
+                                    method = "spearman"
+                                )
+                            },
+                            error = function(e) NULL
+                        )
+
+                        if (!is.null(cor_result) && !is.na(cor_result$estimate)) {
+                            tumorBurdenInfo$addRow(rowKey = "correlation", values = list(
+                                measure = "Correlation (samples examined vs positive)",
+                                value = sprintf(
+                                    "ρ = %.3f (p %s %.3f)",
+                                    cor_result$estimate,
+                                    if (cor_result$p.value < 0.001) "<" else "=",
+                                    if (cor_result$p.value < 0.001) 0.001 else cor_result$p.value
+                                )
+                            ))
+                        }
                     }
                 }
 
-                # === Explanatory Text ===
-                stageMigrationText <- self$results$stageMigrationText
+                # ===== Stage Migration Analysis =====
+                # Analyzes whether examining fewer samples leads to understaging
 
-                html <- sprintf("<div style='%s'>
+                if (self$options$showStageMigration && !is.null(self$options$positiveCassettes)) {
+                    private$.checkpoint()
+
+                    # Get positive samples data (reuse if already loaded from tumor burden)
+                    if (exists("positiveCassettesData", inherits = FALSE)) {
+                        # Already loaded in tumor burden section
+                        positiveCassettesData <- private$.positiveCassettesData
+                    } else {
+                        # Load it now
+                        positiveCassettesVar <- self$options$positiveCassettes
+                        positiveCassettesEsc <- private$.escapeVar(positiveCassettesVar)
+                        positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
+
+                        if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
+                            positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
+                        }
+
+                        positiveCassettesData <- positiveCassettesData[validCases]
+                        if (!is.null(invalidCases)) {
+                            positiveCassettesData <- positiveCassettesData[!invalidCases]
+                        }
+                    }
+
+                    # === Explanatory Text ===
+                    stageMigrationText <- self$results$stageMigrationText
+
+                    html <- sprintf(
+                        "<div style='%s'>
                     <h4 style='%s'>Stage Migration Analysis</h4>
                     <p style='%s'>
                         Examines whether examining fewer samples leads to <strong>understaging</strong>
@@ -2210,247 +2294,249 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <strong>Reference:</strong> Habib et al. (2024), Goess et al. (2024) - lymph node adequacy methods.
                     </p>
                 </div>",
-                private$.buildStyle(private$.styleConstants$font),
-                private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                        private$.buildStyle(private$.styleConstants$font),
+                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
+                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
+                    )
 
-                if (self$options$showStageMigration) {
-                    stageMigrationText$setContent(html)
+                    if (self$options$showStageMigration) {
+                        stageMigrationText$setContent(html)
+                    }
+
+                    # Analyze detection rates by cassette groups
+                    stageMigrationTable <- self$results$stageMigrationTable
+
+                    # Define groups based on data quartiles or standard thresholds
+                    # Using standard thresholds: <median, >=median
+                    medianCassettes <- median(totalSamplesData)
+
+                    # Group 1: Below median
+                    group1 <- totalSamplesData < medianCassettes
+                    nGroup1 <- sum(group1)
+                    nPosGroup1 <- sum(positiveCassettesData[group1] > 0)
+                    rateGroup1 <- if (nGroup1 > 0) nPosGroup1 / nGroup1 else 0
+
+                    # Group 2: At or above median
+                    group2 <- totalSamplesData >= medianCassettes
+                    nGroup2 <- sum(group2)
+                    nPosGroup2 <- sum(positiveCassettesData[group2] > 0)
+                    rateGroup2 <- if (nGroup2 > 0) nPosGroup2 / nGroup2 else 0
+
+                    stageMigrationTable$addRow(rowKey = "group_1", values = list(
+                        cassettes = sprintf("<%d", medianCassettes),
+                        nCases = nGroup1,
+                        nPositive = nPosGroup1,
+                        positivityRate = rateGroup1
+                    ))
+                    stageMigrationTable$addRow(rowKey = "group_2", values = list(
+                        cassettes = sprintf(">=%d", medianCassettes),
+                        nCases = nGroup2,
+                        nPositive = nPosGroup2,
+                        positivityRate = rateGroup2
+                    ))
+                    stageMigrationTable$addRow(rowKey = "group_3", values = list(
+                        cassettes = "Absolute difference",
+                        nCases = NA,
+                        nPositive = NA,
+                        positivityRate = abs(rateGroup2 - rateGroup1)
+                    ))
                 }
 
-                # Analyze detection rates by cassette groups
-                stageMigrationTable <- self$results$stageMigrationTable
+                # === Correlation Analysis ===
+                positiveCassettes <- self$options$positiveCassettes
+                if (self$options$showCorrelation && !is.null(positiveCassettes)) {
+                    positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
+                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
 
-                # Define groups based on data quartiles or standard thresholds
-                # Using standard thresholds: <median, >=median
-                medianCassettes <- median(totalSamplesData)
+                    if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
+                        positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
+                    }
 
-                # Group 1: Below median
-                group1 <- totalSamplesData < medianCassettes
-                nGroup1 <- sum(group1)
-                nPosGroup1 <- sum(positiveCassettesData[group1] > 0)
-                rateGroup1 <- if(nGroup1 > 0) nPosGroup1 / nGroup1 else 0
+                    positiveCassettesData <- positiveCassettesData[validCases]
+                    if (!is.null(invalidCases)) {
+                        positiveCassettesData <- positiveCassettesData[!invalidCases]
+                    }
 
-                # Group 2: At or above median
-                group2 <- totalSamplesData >= medianCassettes
-                nGroup2 <- sum(group2)
-                nPosGroup2 <- sum(positiveCassettesData[group2] > 0)
-                rateGroup2 <- if(nGroup2 > 0) nPosGroup2 / nGroup2 else 0
-
-                stageMigrationTable$addRow(rowKey="group_1", values=list(
-                    cassettes = sprintf("<%d", medianCassettes),
-                    nCases = nGroup1,
-                    nPositive = nPosGroup1,
-                    positivityRate = rateGroup1
-                ))
-                stageMigrationTable$addRow(rowKey="group_2", values=list(
-                    cassettes = sprintf("≥%d", medianCassettes),
-                    nCases = nGroup2,
-                    nPositive = nPosGroup2,
-                    positivityRate = rateGroup2
-                ))
-                stageMigrationTable$addRow(rowKey="group_3", values=list(
-                    cassettes = "Absolute difference",
-                    nCases = NA,
-                    nPositive = NA,
-                    positivityRate = abs(rateGroup2 - rateGroup1)
-                ))
-            }
-
-            # === Correlation Analysis ===
-            positiveCassettes <- self$options$positiveCassettes
-            if (self$options$showCorrelation && !is.null(positiveCassettes)) {
-
-                positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
-                positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
-
-                if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, 'labels'))) {
-                    positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
-                }
-
-                positiveCassettesData <- positiveCassettesData[validCases]
-                if (!is.null(invalidCases)) {
-                    positiveCassettesData <- positiveCassettesData[!invalidCases]
-                }
-
-                correlationText <- self$results$correlationText
-                html <- "<h4>Examined vs Positive Correlation</h4>
+                    correlationText <- self$results$correlationText
+                    html <- "<h4>Examined vs Positive Correlation</h4>
                 <p>Relationship between total cassettes examined and number of positive cassettes.</p>
                 <p>Positive correlation suggests more extensive sampling yields more detection.</p>"
-                if (self$options$showCorrelation) {
-                    correlationText$setContent(html)
+                    if (self$options$showCorrelation) {
+                        correlationText$setContent(html)
+                    }
+
+                    # Calculate correlation
+                    corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
+
+                    correlationStats <- self$results$correlationStats
+                    correlationStats$addRow(rowKey = "r_value", values = list(
+                        statistic = "Spearman's rho",
+                        value = sprintf("%.3f", corTest$estimate)
+                    ))
+                    correlationStats$addRow(rowKey = "p_value", values = list(
+                        statistic = "p-value",
+                        value = sprintf("%.4f", corTest$p.value)
+                    ))
+                    correlationStats$addRow(rowKey = "n_cases", values = list(
+                        statistic = "Interpretation",
+                        value = if (corTest$p.value < 0.05) {
+                            if (corTest$estimate > 0) "Significant positive correlation" else "Significant negative correlation"
+                        } else {
+                            "No significant correlation"
+                        }
+                    ))
                 }
 
-                # Calculate correlation
-                corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
+                # === Distribution Pattern Analysis (Single vs Summed) ===
+                positiveCassettes <- self$options$positiveCassettes
+                maxPositiveSingle <- self$options$maxPositiveSingle
 
-                correlationStats <- self$results$correlationStats
-                correlationStats$addRow(rowKey="r_value", values=list(
-                    statistic = "Spearman's rho",
-                    value = sprintf("%.3f", corTest$estimate)
-                ))
-                correlationStats$addRow(rowKey="p_value", values=list(
-                    statistic = "p-value",
-                    value = sprintf("%.4f", corTest$p.value)
-                ))
-                correlationStats$addRow(rowKey="n_cases", values=list(
-                    statistic = "Interpretation",
-                    value = if(corTest$p.value < 0.05) {
-                        if(corTest$estimate > 0) "Significant positive correlation" else "Significant negative correlation"
-                    } else "No significant correlation"
-                ))
-            }
+                if (self$options$showDistributionPattern && !is.null(positiveCassettes) && !is.null(maxPositiveSingle)) {
+                    # Get both variables
+                    positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
+                    maxPositiveSingleEsc <- private$.escapeVar(maxPositiveSingle)
 
-            # === Distribution Pattern Analysis (Single vs Summed) ===
-            positiveCassettes <- self$options$positiveCassettes
-            maxPositiveSingle <- self$options$maxPositiveSingle
+                    positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
+                    maxPositiveSingleData <- jmvcore::toNumeric(data[[maxPositiveSingleEsc]])
 
-            if (self$options$showDistributionPattern && !is.null(positiveCassettes) && !is.null(maxPositiveSingle)) {
+                    # Handle labelled data
+                    if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, "labels"))) {
+                        positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
+                    }
+                    if (is.factor(maxPositiveSingleData) || !is.null(attr(maxPositiveSingleData, "labels"))) {
+                        maxPositiveSingleData <- as.numeric(as.character(maxPositiveSingleData))
+                    }
 
-                # Get both variables
-                positiveCassettesEsc <- private$.escapeVar(positiveCassettes)
-                maxPositiveSingleEsc <- private$.escapeVar(maxPositiveSingle)
+                    # Filter to valid cases
+                    positiveCassettesData <- positiveCassettesData[validCases]
+                    maxPositiveSingleData <- maxPositiveSingleData[validCases]
+                    if (!is.null(invalidCases)) {
+                        positiveCassettesData <- positiveCassettesData[!invalidCases]
+                        maxPositiveSingleData <- maxPositiveSingleData[!invalidCases]
+                    }
 
-                positiveCassettesData <- jmvcore::toNumeric(data[[positiveCassettesEsc]])
-                maxPositiveSingleData <- jmvcore::toNumeric(data[[maxPositiveSingleEsc]])
+                    # Get threshold
+                    threshold <- self$options$distributionThreshold
 
-                # Handle labelled data
-                if (is.factor(positiveCassettesData) || !is.null(attr(positiveCassettesData, 'labels'))) {
-                    positiveCassettesData <- as.numeric(as.character(positiveCassettesData))
-                }
-                if (is.factor(maxPositiveSingleData) || !is.null(attr(maxPositiveSingleData, 'labels'))) {
-                    maxPositiveSingleData <- as.numeric(as.character(maxPositiveSingleData))
-                }
-
-                # Filter to valid cases
-                positiveCassettesData <- positiveCassettesData[validCases]
-                maxPositiveSingleData <- maxPositiveSingleData[validCases]
-                if (!is.null(invalidCases)) {
-                    positiveCassettesData <- positiveCassettesData[!invalidCases]
-                    maxPositiveSingleData <- maxPositiveSingleData[!invalidCases]
-                }
-
-                # Get threshold
-                threshold <- self$options$distributionThreshold
-
-                # Distribution Pattern Text
-                distributionPatternText <- self$results$distributionPatternText
-                html <- sprintf("<h4>Distribution Pattern Analysis (Single vs Summed)</h4>
-                <p>Based on Ates et al. (2025), cases reaching ≥%d foci on a <b>single cassette</b>
-                may have worse prognosis than those reaching ≥%d only when <b>summing across cassettes</b>.</p>
+                    # Distribution Pattern Text
+                    distributionPatternText <- self$results$distributionPatternText
+                    html <- sprintf("<h4>Distribution Pattern Analysis (Single vs Summed)</h4>
+                <p>Based on Ates et al. (2025), cases reaching >=%d foci on a <b>single cassette</b>
+                may have worse prognosis than those reaching >=%d only when <b>summing across cassettes</b>.</p>
                 <p>This analysis classifies cases by how they meet the threshold for substantial involvement.</p>
                 <p><b>Reference:</b> Ates D, et al. Lymphovascular Space Invasion in Endometrial Cancer.
                 <i>Mod Pathol.</i> 2025;38:100885.</p>", threshold, threshold)
-                if (self$options$showDistributionPattern) {
-                    distributionPatternText$setContent(html)
+                    if (self$options$showDistributionPattern) {
+                        distributionPatternText$setContent(html)
+                    }
+
+                    # Classify cases
+                    # Focal: total < threshold
+                    # Substantial-single: max on single cassette >= threshold
+                    # Substantial-summed: total >= threshold BUT max < threshold
+
+                    focal <- positiveCassettesData < threshold
+                    substantialSingle <- maxPositiveSingleData >= threshold
+                    substantialSummed <- (positiveCassettesData >= threshold) & (maxPositiveSingleData < threshold)
+
+                    nFocal <- sum(focal, na.rm = TRUE)
+                    nSubstantialSingle <- sum(substantialSingle, na.rm = TRUE)
+                    nSubstantialSummed <- sum(substantialSummed, na.rm = TRUE)
+
+                    # Distribution Pattern Table
+                    distributionPatternTable <- self$results$distributionPatternTable
+
+                    distributionPatternTable$addRow(rowKey = "predominant_single", values = list(
+                        pattern = sprintf("Focal (<%d total)", threshold),
+                        count = nFocal,
+                        percent = nFocal / nCases
+                    ))
+                    distributionPatternTable$addRow(rowKey = "summed_effect", values = list(
+                        pattern = sprintf("Substantial on single cassette (>=%d on >=1 cassette)", threshold),
+                        count = nSubstantialSingle,
+                        percent = nSubstantialSingle / nCases
+                    ))
+                    distributionPatternTable$addRow(rowKey = "diffuse", values = list(
+                        pattern = sprintf("Substantial only when summed (>=%d total, <%d max)", threshold, threshold),
+                        count = nSubstantialSummed,
+                        percent = nSubstantialSummed / nCases
+                    ))
+
+                    # Comparison statistics
+                    distributionComparisonTable <- self$results$distributionComparisonTable
+
+                    # Among substantial cases (total >= threshold)
+                    substantialCases <- positiveCassettesData >= threshold
+                    nSubstantial <- sum(substantialCases, na.rm = TRUE)
+
+                    if (nSubstantial > 0) {
+                        pctSingleAmongSubstantial <- sum(substantialSingle, na.rm = TRUE) / nSubstantial * 100
+                        pctSummedAmongSubstantial <- sum(substantialSummed, na.rm = TRUE) / nSubstantial * 100
+
+                        distributionComparisonTable$addRow(rowKey = "mean_single", values = list(
+                            measure = sprintf("Cases with >=%d foci (substantial)", threshold),
+                            value = sprintf("%d (%.1f%%)", nSubstantial, nSubstantial / nCases * 100)
+                        ))
+                        distributionComparisonTable$addRow(rowKey = "max_single", values = list(
+                            measure = sprintf("  - Met on single cassette"),
+                            value = sprintf("%d (%.1f%% of substantial)", nSubstantialSingle, pctSingleAmongSubstantial)
+                        ))
+                        distributionComparisonTable$addRow(rowKey = "mean_summed", values = list(
+                            measure = sprintf("  - Met only by summing"),
+                            value = sprintf("%d (%.1f%% of substantial)", nSubstantialSummed, pctSummedAmongSubstantial)
+                        ))
+
+                        # Calculate mean max on single cassette for each group
+                        meanMaxSingle <- mean(maxPositiveSingleData[substantialSingle], na.rm = TRUE)
+                        meanMaxSummed <- mean(maxPositiveSingleData[substantialSummed], na.rm = TRUE)
+
+                        distributionComparisonTable$addRow(rowKey = "predominance_ratio", values = list(
+                            measure = "Mean max foci per cassette (single group)",
+                            value = sprintf("%.1f", meanMaxSingle)
+                        ))
+                        distributionComparisonTable$addRow(rowKey = "detection_yield", values = list(
+                            measure = "Mean max foci per cassette (summed group)",
+                            value = sprintf("%.1f", meanMaxSummed)
+                        ))
+
+                        # Clinical interpretation
+                        distributionComparisonTable$addRow(rowKey = "clinical_relevance", values = list(
+                            measure = "Clinical significance",
+                            value = "Cases with >=5 on single cassette had worse survival (Ates 2025, p=.023)"
+                        ))
+                    } else {
+                        distributionComparisonTable$addRow(rowKey = "mean_single", values = list(
+                            measure = "No substantial cases",
+                            value = sprintf("No cases with >=%d foci", threshold)
+                        ))
+                    }
+
+                    # Store for potential future use
+                    private$.maxPositiveSingleData <- maxPositiveSingleData
                 }
 
-                # Classify cases
-                # Focal: total < threshold
-                # Substantial-single: max on single cassette >= threshold
-                # Substantial-summed: total >= threshold BUT max < threshold
+                # ===== PHASE 2: Empirical Cumulative Detection =====
+                if (self$options$showEmpiricalCumulative && nDetected > 0) {
+                    private$.checkpoint()
 
-                focal <- positiveCassettesData < threshold
-                substantialSingle <- maxPositiveSingleData >= threshold
-                substantialSummed <- (positiveCassettesData >= threshold) & (maxPositiveSingleData < threshold)
+                    empiricalCumulativeText <- self$results$empiricalCumulativeText
+                    empiricalCumulativeTable <- self$results$empiricalCumulativeTable
 
-                nFocal <- sum(focal, na.rm = TRUE)
-                nSubstantialSingle <- sum(substantialSingle, na.rm = TRUE)
-                nSubstantialSummed <- sum(substantialSummed, na.rm = TRUE)
+                    # Calculate empirical cumulative detection with bootstrap CIs
+                    boot_results <- private$.bootstrapEmpiricalCumulative(
+                        firstDetectionData, totalSamplesData, maxSamp, nBoot
+                    )
 
-                # Distribution Pattern Table
-                distributionPatternTable <- self$results$distributionPatternTable
+                    if (!is.null(boot_results)) {
+                        # Context-specific explanatory text
+                        analysisContext <- self$options$analysisContext
 
-                distributionPatternTable$addRow(rowKey="predominant_single", values=list(
-                    pattern = sprintf("Focal (<%d total)", threshold),
-                    count = nFocal,
-                    percent = nFocal / nCases
-                ))
-                distributionPatternTable$addRow(rowKey="summed_effect", values=list(
-                    pattern = sprintf("Substantial on single cassette (≥%d on ≥1 cassette)", threshold),
-                    count = nSubstantialSingle,
-                    percent = nSubstantialSingle / nCases
-                ))
-                distributionPatternTable$addRow(rowKey="diffuse", values=list(
-                    pattern = sprintf("Substantial only when summed (≥%d total, <%d max)", threshold, threshold),
-                    count = nSubstantialSummed,
-                    percent = nSubstantialSummed / nCases
-                ))
-
-                # Comparison statistics
-                distributionComparisonTable <- self$results$distributionComparisonTable
-
-                # Among substantial cases (total >= threshold)
-                substantialCases <- positiveCassettesData >= threshold
-                nSubstantial <- sum(substantialCases, na.rm = TRUE)
-
-                if (nSubstantial > 0) {
-                    pctSingleAmongSubstantial <- sum(substantialSingle, na.rm = TRUE) / nSubstantial * 100
-                    pctSummedAmongSubstantial <- sum(substantialSummed, na.rm = TRUE) / nSubstantial * 100
-
-                    distributionComparisonTable$addRow(rowKey="mean_single", values=list(
-                        measure = sprintf("Cases with ≥%d foci (substantial)", threshold),
-                        value = sprintf("%d (%.1f%%)", nSubstantial, nSubstantial/nCases*100)
-                    ))
-                    distributionComparisonTable$addRow(rowKey="max_single", values=list(
-                        measure = sprintf("  - Met on single cassette"),
-                        value = sprintf("%d (%.1f%% of substantial)", nSubstantialSingle, pctSingleAmongSubstantial)
-                    ))
-                    distributionComparisonTable$addRow(rowKey="mean_summed", values=list(
-                        measure = sprintf("  - Met only by summing"),
-                        value = sprintf("%d (%.1f%% of substantial)", nSubstantialSummed, pctSummedAmongSubstantial)
-                    ))
-
-                    # Calculate mean max on single cassette for each group
-                    meanMaxSingle <- mean(maxPositiveSingleData[substantialSingle], na.rm = TRUE)
-                    meanMaxSummed <- mean(maxPositiveSingleData[substantialSummed], na.rm = TRUE)
-
-                    distributionComparisonTable$addRow(rowKey="predominance_ratio", values=list(
-                        measure = "Mean max foci per cassette (single group)",
-                        value = sprintf("%.1f", meanMaxSingle)
-                    ))
-                    distributionComparisonTable$addRow(rowKey="detection_yield", values=list(
-                        measure = "Mean max foci per cassette (summed group)",
-                        value = sprintf("%.1f", meanMaxSummed)
-                    ))
-
-                    # Clinical interpretation
-                    distributionComparisonTable$addRow(rowKey="clinical_relevance", values=list(
-                        measure = "Clinical significance",
-                        value = "Cases with ≥5 on single cassette had worse survival (Ates 2025, p=.023)"
-                    ))
-                } else {
-                    distributionComparisonTable$addRow(rowKey="mean_single", values=list(
-                        measure = "No substantial cases",
-                        value = sprintf("No cases with ≥%d foci", threshold)
-                    ))
-                }
-
-                # Store for potential future use
-                private$.maxPositiveSingleData <- maxPositiveSingleData
-            }
-
-            # ===== PHASE 2: Empirical Cumulative Detection =====
-            if (self$options$showEmpiricalCumulative && nDetected > 0) {
-                private$.checkpoint()
-
-                empiricalCumulativeText <- self$results$empiricalCumulativeText
-                empiricalCumulativeTable <- self$results$empiricalCumulativeTable
-
-                # Calculate empirical cumulative detection with bootstrap CIs
-                boot_results <- private$.bootstrapEmpiricalCumulative(
-                    firstDetectionData, totalSamplesData, maxSamp, nBoot
-                )
-
-                if (!is.null(boot_results)) {
-                    # Context-specific explanatory text
-                    analysisContext <- self$options$analysisContext
-
-                    contextNote <- ""
-                    if (analysisContext == "tumor") {
-                        contextNote <- sprintf("<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                        contextNote <- ""
+                        if (analysisContext == "tumor") {
+                            contextNote <- sprintf(
+                                "<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 12px; margin: 10px 0; border-radius: 4px;'>
                             <p style='%s margin: 0;'><b> Note for Tumor Sampling:</b> Sequential tumor samples (blocks) are not independent -
                             they represent serial sections through the same lesion. Spatial clustering of features like venous invasion (VI) or
                             perineural invasion (PNI) is expected. The <b>empirical method is recommended</b> over parametric models (binomial/geometric)
@@ -2458,119 +2544,127 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             distributional assumptions.</p>
                             <p style='%s margin: 5px 0 0 0;'><em>Reference: Duan et al. 2023 - Histopathology (tissue sampling impact on VI detection)</em></p>
                         </div>",
-                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
-                        private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary))
-                    } else if (analysisContext == "margin") {
-                        contextNote <- sprintf("<div style='background: #d1ecf1; border: 1px solid #0c5460; padding: 12px; margin: 10px 0; border-radius: 4px;'>
+                                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary),
+                                private$.buildStyle(private$.styleConstants$fontSize12, private$.styleConstants$colorSecondary)
+                            )
+                        } else if (analysisContext == "margin") {
+                            contextNote <- sprintf(
+                                "<div style='background: #d1ecf1; border: 1px solid #0c5460; padding: 12px; margin: 10px 0; border-radius: 4px;'>
                             <p style='%s margin: 0;'><b> Note for Margin Sampling:</b> Margin samples may show spatial clustering -
                             positive margins are often geographically close. Empirical approach recommended for accurate sensitivity estimates.</p>
                         </div>",
-                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary))
-                    }
+                                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorPrimary)
+                            )
+                        }
 
-                    # Populate text
-                    html <- sprintf("<div style='%s'>
+                        # Populate text
+                        html <- sprintf(
+                            "<div style='%s'>
                         <h4 style='%s'>Empirical Cumulative Detection Analysis</h4>
                         <p style='%s'>Non-parametric estimation of detection probability based on actual observed data.
                         Does not assume geometric distribution - uses bootstrap resampling for confidence intervals.</p>
                         <p style='%s'><b>Based on:</b> %d positive cases with first detection positions ranging from %.0f to %.0f.</p>
                         %s
                     </div>",
-                    private$.buildStyle(private$.styleConstants$font),
-                    private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                    nDetected,
-                    min(firstDetectionData, na.rm=TRUE),
-                    max(firstDetectionData, na.rm=TRUE),
-                    contextNote)
+                            private$.buildStyle(private$.styleConstants$font),
+                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
+                            nDetected,
+                            min(firstDetectionData, na.rm = TRUE),
+                            max(firstDetectionData, na.rm = TRUE),
+                            contextNote
+                        )
 
-                    if (self$options$showEmpiricalCumulative) {
-                        empiricalCumulativeText$setContent(html)
+                        if (self$options$showEmpiricalCumulative) {
+                            empiricalCumulativeText$setContent(html)
+                        }
+
+                        # Populate table
+                        prev_cum <- 0
+                        for (n in 1:nrow(boot_results)) {
+                            incremental <- boot_results$mean[n] - prev_cum
+                            empiricalCumulativeTable$addRow(rowKey = paste0("n_", n), values = list(
+                                nSamples = n,
+                                cumDetection = boot_results$mean[n],
+                                ciLower = boot_results$lower[n],
+                                ciUpper = boot_results$upper[n],
+                                incrementalYield = incremental
+                            ))
+                            prev_cum <- boot_results$mean[n]
+                        }
                     }
+                }
 
-                    # Populate table
-                    prev_cum <- 0
-                    for (n in 1:nrow(boot_results)) {
-                        incremental <- boot_results$mean[n] - prev_cum
-                        empiricalCumulativeTable$addRow(rowKey=paste0("n_", n), values=list(
-                            nSamples = n,
-                            cumDetection = boot_results$mean[n],
-                            ciLower = boot_results$lower[n],
-                            ciUpper = boot_results$upper[n],
-                            incrementalYield = incremental
+                # ===== PHASE 2: Incremental Yield Analysis =====
+                if (self$options$showIncrementalYield && nDetected > 0) {
+                    private$.checkpoint()
+
+                    incrementalYieldText <- self$results$incrementalYieldText
+                    incrementalYieldTable <- self$results$incrementalYieldTable
+
+                    # Calculate incremental yield
+                    positive_idx <- !is.na(firstDetectionData)
+                    positive_first <- firstDetectionData[positive_idx]
+
+                    incremental_data <- data.frame()
+                    for (n in 1:(maxSamp - 1)) {
+                        from_n <- sum(positive_first <= n, na.rm = TRUE) / length(positive_first)
+                        to_n <- sum(positive_first <= (n + 1), na.rm = TRUE) / length(positive_first)
+                        incremental <- to_n - from_n
+                        cases_per_100 <- incremental * 100
+
+                        # Cost-benefit rating
+                        if (incremental >= 0.10) {
+                            rating <- "High value"
+                        } else if (incremental >= 0.05) {
+                            rating <- "Moderate value"
+                        } else if (incremental >= 0.02) {
+                            rating <- "Diminishing returns"
+                        } else {
+                            rating <- "Low yield"
+                        }
+
+                        incrementalYieldTable$addRow(rowKey = paste0("n_", n), values = list(
+                            fromSamples = n,
+                            toSamples = n + 1,
+                            incrementalDetection = incremental,
+                            casesDetected = cases_per_100,
+                            costBenefit = rating
                         ))
-                        prev_cum <- boot_results$mean[n]
-                    }
-                }
-            }
-
-            # ===== PHASE 2: Incremental Yield Analysis =====
-            if (self$options$showIncrementalYield && nDetected > 0) {
-                private$.checkpoint()
-
-                incrementalYieldText <- self$results$incrementalYieldText
-                incrementalYieldTable <- self$results$incrementalYieldTable
-
-                # Calculate incremental yield
-                positive_idx <- !is.na(firstDetectionData)
-                positive_first <- firstDetectionData[positive_idx]
-
-                incremental_data <- data.frame()
-                for (n in 1:(maxSamp-1)) {
-                    from_n <- sum(positive_first <= n, na.rm=TRUE) / length(positive_first)
-                    to_n <- sum(positive_first <= (n+1), na.rm=TRUE) / length(positive_first)
-                    incremental <- to_n - from_n
-                    cases_per_100 <- incremental * 100
-
-                    # Cost-benefit rating
-                    if (incremental >= 0.10) {
-                        rating <- "High value"
-                    } else if (incremental >= 0.05) {
-                        rating <- "Moderate value"
-                    } else if (incremental >= 0.02) {
-                        rating <- "Diminishing returns"
-                    } else {
-                        rating <- "Low yield"
                     }
 
-                    incrementalYieldTable$addRow(rowKey=paste0("n_", n), values=list(
-                        fromSamples = n,
-                        toSamples = n+1,
-                        incrementalDetection = incremental,
-                        casesDetected = cases_per_100,
-                        costBenefit = rating
-                    ))
-                }
-
-                html <- sprintf("<div style='%s'>
+                    html <- sprintf(
+                        "<div style='%s'>
                     <h4 style='%s'>Incremental Diagnostic Yield Analysis</h4>
                     <p style='%s'>Marginal benefit of examining each additional sample. Helps identify the optimal stopping point where yield diminishes.</p>
-                    <p style='%s'><b>Interpretation:</b> High value (≥10%%), Moderate (5-10%%), Diminishing (<5%%), Low (<2%%).</p>
+                    <p style='%s'><b>Interpretation:</b> High value (>=10%%), Moderate (5-10%%), Diminishing (<5%%), Low (<2%%).</p>
                 </div>",
-                private$.buildStyle(private$.styleConstants$font),
-                private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
+                        private$.buildStyle(private$.styleConstants$font),
+                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
+                    )
 
-                if (self$options$showIncrementalYield) {
-                    incrementalYieldText$setContent(html)
+                    if (self$options$showIncrementalYield) {
+                        incrementalYieldText$setContent(html)
+                    }
                 }
-            }
 
-            # ===== PHASE 3: Sample Type Stratification =====
-            if (self$options$showStratifiedAnalysis && !is.null(sampleTypeData) && nDetected > 0) {
-                private$.checkpoint()
+                # ===== PHASE 3: Sample Type Stratification =====
+                if (self$options$showStratifiedAnalysis && !is.null(sampleTypeData) && nDetected > 0) {
+                    private$.checkpoint()
 
-                stratifiedText <- self$results$stratifiedText
-                prevalenceTable <- self$results$prevalenceTable
-                stratifiedDetectionTable <- self$results$stratifiedDetectionTable
+                    stratifiedText <- self$results$stratifiedText
+                    prevalenceTable <- self$results$prevalenceTable
+                    stratifiedDetectionTable <- self$results$stratifiedDetectionTable
 
-                # Get unique sample types
-                unique_types <- unique(sampleTypeData[!is.na(sampleTypeData)])
+                    # Get unique sample types
+                    unique_types <- unique(sampleTypeData[!is.na(sampleTypeData)])
 
-                if (length(unique_types) > 0) {
-                    html <- sprintf("<div style='%s'>
+                    if (length(unique_types) > 0) {
+                        html <- sprintf(
+                            "<div style='%s'>
                         <h4 style='%s'>Stratified Analysis by Sample Type</h4>
                         <p style='%s'>Separate analysis for each sample type reveals differences in:</p>
                         <ul style='%s'>
@@ -2580,75 +2674,77 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             <li><b>Population detection:</b> P(detect overall) = prevalence × sensitivity</li>
                         </ul>
                     </div>",
-                    private$.buildStyle(private$.styleConstants$font),
-                    private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary))
+                            private$.buildStyle(private$.styleConstants$font),
+                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary)
+                        )
 
-                    if (self$options$showStratifiedAnalysis) {
-                        stratifiedText$setContent(html)
-                    }
+                        if (self$options$showStratifiedAnalysis) {
+                            stratifiedText$setContent(html)
+                        }
 
-                    # Calculate for each type
-                    type_row <- 1
-                    for (type in unique_types) {
-                        type_idx <- sampleTypeData == type & !is.na(sampleTypeData)
-                        type_positive_idx <- type_idx & !is.na(firstDetectionData)
+                        # Calculate for each type
+                        type_row <- 1
+                        for (type in unique_types) {
+                            type_idx <- sampleTypeData == type & !is.na(sampleTypeData)
+                            type_positive_idx <- type_idx & !is.na(firstDetectionData)
 
-                        n_type_total <- sum(type_idx, na.rm=TRUE)
-                        n_type_positive <- sum(type_positive_idx, na.rm=TRUE)
-                        prevalence_type <- n_type_positive / n_type_total
+                            n_type_total <- sum(type_idx, na.rm = TRUE)
+                            n_type_positive <- sum(type_positive_idx, na.rm = TRUE)
+                            prevalence_type <- n_type_positive / n_type_total
 
-                        if (n_type_positive > 0) {
-                            # Calculate q for this type
-                            if (!is.null(positiveCountData)) {
-                                q_type <- sum(positiveCountData[type_positive_idx], na.rm=TRUE) /
-                                         sum(totalSamplesData[type_positive_idx], na.rm=TRUE)
-                            } else {
-                                q_type <- 1 / mean(firstDetectionData[type_positive_idx], na.rm=TRUE)
-                            }
-
-                            # Prevalence table
-                            prevalenceTable$addRow(rowKey=paste0("type_", type_row), values=list(
-                                sampleType = as.character(type),
-                                totalCases = n_type_total,
-                                positiveCases = n_type_positive,
-                                prevalence = prevalence_type,
-                                qEstimate = q_type
-                            ))
-
-                            # Detection probability table (for key thresholds)
-                            for (n in c(3, 5, 7, 10)) {
-                                if (n <= maxSamp) {
-                                    conditional_det <- 1 - (1 - q_type)^n
-                                    population_det <- prevalence_type * conditional_det
-
-                                    stratifiedDetectionTable$addRow(rowKey=paste0(type, "_", n), values=list(
-                                        sampleType = as.character(type),
-                                        nSamples = n,
-                                        conditionalDetection = conditional_det,
-                                        populationDetection = population_det
-                                    ))
+                            if (n_type_positive > 0) {
+                                # Calculate q for this type
+                                if (!is.null(positiveCountData)) {
+                                    q_type <- sum(positiveCountData[type_positive_idx], na.rm = TRUE) /
+                                        sum(totalSamplesData[type_positive_idx], na.rm = TRUE)
+                                } else {
+                                    q_type <- 1 / mean(firstDetectionData[type_positive_idx], na.rm = TRUE)
                                 }
-                            }
 
-                            type_row <- type_row + 1
+                                # Prevalence table
+                                prevalenceTable$addRow(rowKey = paste0("type_", type_row), values = list(
+                                    sampleType = as.character(type),
+                                    totalCases = n_type_total,
+                                    positiveCases = n_type_positive,
+                                    prevalence = prevalence_type,
+                                    qEstimate = q_type
+                                ))
+
+                                # Detection probability table (for key thresholds)
+                                for (n in c(3, 5, 7, 10)) {
+                                    if (n <= maxSamp) {
+                                        conditional_det <- 1 - (1 - q_type)^n
+                                        population_det <- prevalence_type * conditional_det
+
+                                        stratifiedDetectionTable$addRow(rowKey = paste0(type, "_", n), values = list(
+                                            sampleType = as.character(type),
+                                            nSamples = n,
+                                            conditionalDetection = conditional_det,
+                                            populationDetection = population_det
+                                        ))
+                                    }
+                                }
+
+                                type_row <- type_row + 1
+                            }
                         }
                     }
                 }
-            }
 
-            # ===== PHASE 3: Population-Level Detection Rates =====
-            if (self$options$showPopulationDetection && nDetected > 0) {
-                private$.checkpoint()
+                # ===== PHASE 3: Population-Level Detection Rates =====
+                if (self$options$showPopulationDetection && nDetected > 0) {
+                    private$.checkpoint()
 
-                populationDetectionText <- self$results$populationDetectionText
-                populationDetectionTable <- self$results$populationDetectionTable
+                    populationDetectionText <- self$results$populationDetectionText
+                    populationDetectionTable <- self$results$populationDetectionTable
 
-                # Calculate overall prevalence
-                prevalence <- nDetected / length(firstDetectionData)
+                    # Calculate overall prevalence
+                    prevalence <- nDetected / length(firstDetectionData)
 
-                html <- sprintf("<div style='%s'>
+                    html <- sprintf(
+                        "<div style='%s'>
                     <h4 style='%s'>Population-Level vs Conditional Detection</h4>
                     <p style='%s'>Distinguishes between:</p>
                     <ul style='%s'>
@@ -2658,67 +2754,69 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <p style='%s'><b>Observed prevalence:</b> %.1f%% (%d/%d cases positive)</p>
                     <p style='%s'><em>Note:</em> Prevalence reflects this specific dataset and may not generalize.</p>
                 </div>",
-                private$.buildStyle(private$.styleConstants$font),
-                private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                100*prevalence, nDetected, length(firstDetectionData),
-                private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                        private$.buildStyle(private$.styleConstants$font),
+                        private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
+                        private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                        100 * prevalence, nDetected, length(firstDetectionData),
+                        private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
+                    )
 
-                if (self$options$showPopulationDetection) {
-                    populationDetectionText$setContent(html)
-                }
-
-                # Populate table
-                for (n in 1:maxSamp) {
-                    if (!is.na(pForCalc) && pForCalc > 0) {
-                        conditional <- 1 - (1 - pForCalc)^n
-                        population <- prevalence * conditional
-
-                        populationDetectionTable$addRow(rowKey=paste0("n_", n), values=list(
-                            nSamples = n,
-                            prevalence = prevalence,
-                            conditional = conditional,
-                            population = population
-                        ))
+                    if (self$options$showPopulationDetection) {
+                        populationDetectionText$setContent(html)
                     }
-                }
-            }
 
-            # ===== PHASE 4: Spatial Clustering Analysis =====
-            if (self$options$showSpatialClustering && !is.null(positiveSamplesListData) && nDetected > 0) {
-                private$.checkpoint()
+                    # Populate table
+                    for (n in 1:maxSamp) {
+                        if (!is.na(pForCalc) && pForCalc > 0) {
+                            conditional <- 1 - (1 - pForCalc)^n
+                            population <- prevalence * conditional
 
-                spatialClusteringText <- self$results$spatialClusteringText
-                clusteringTable <- self$results$clusteringTable
-
-                # Parse sample lists and calculate clustering
-                clustering_indices <- numeric(length(positiveSamplesListData))
-                clustering_indices[] <- NA
-
-                positive_idx <- !is.na(firstDetectionData)
-                for (i in which(positive_idx)) {
-                    samples <- private$.parseSampleList(positiveSamplesListData[i])
-                    if (length(samples) > 1) {
-                        clustering_indices[i] <- private$.calculateClusteringIndex(
-                            samples, totalSamplesData[i]
-                        )
+                            populationDetectionTable$addRow(rowKey = paste0("n_", n), values = list(
+                                nSamples = n,
+                                prevalence = prevalence,
+                                conditional = conditional,
+                                population = population
+                            ))
+                        }
                     }
                 }
 
-                # Categorize patterns
-                clustered_idx <- clustering_indices < 0.7 & !is.na(clustering_indices)
-                random_idx <- clustering_indices >= 0.7 & clustering_indices <= 1.3 & !is.na(clustering_indices)
-                dispersed_idx <- clustering_indices > 1.3 & !is.na(clustering_indices)
+                # ===== PHASE 4: Spatial Clustering Analysis =====
+                if (self$options$showSpatialClustering && !is.null(positiveSamplesListData) && nDetected > 0) {
+                    private$.checkpoint()
 
-                n_clustered <- sum(clustered_idx, na.rm=TRUE)
-                n_random <- sum(random_idx, na.rm=TRUE)
-                n_dispersed <- sum(dispersed_idx, na.rm=TRUE)
-                n_total <- sum(!is.na(clustering_indices))
+                    spatialClusteringText <- self$results$spatialClusteringText
+                    clusteringTable <- self$results$clusteringTable
 
-                if (n_total > 0) {
-                    html <- sprintf("<div style='%s'>
+                    # Parse sample lists and calculate clustering
+                    clustering_indices <- numeric(length(positiveSamplesListData))
+                    clustering_indices[] <- NA
+
+                    positive_idx <- !is.na(firstDetectionData)
+                    for (i in which(positive_idx)) {
+                        samples <- private$.parseSampleList(positiveSamplesListData[i])
+                        if (length(samples) > 1) {
+                            clustering_indices[i] <- private$.calculateClusteringIndex(
+                                samples, totalSamplesData[i]
+                            )
+                        }
+                    }
+
+                    # Categorize patterns
+                    clustered_idx <- clustering_indices < 0.7 & !is.na(clustering_indices)
+                    random_idx <- clustering_indices >= 0.7 & clustering_indices <= 1.3 & !is.na(clustering_indices)
+                    dispersed_idx <- clustering_indices > 1.3 & !is.na(clustering_indices)
+
+                    n_clustered <- sum(clustered_idx, na.rm = TRUE)
+                    n_random <- sum(random_idx, na.rm = TRUE)
+                    n_dispersed <- sum(dispersed_idx, na.rm = TRUE)
+                    n_total <- sum(!is.na(clustering_indices))
+
+                    if (n_total > 0) {
+                        html <- sprintf(
+                            "<div style='%s'>
                         <h4 style='%s'>Spatial Clustering Analysis</h4>
                         <p style='%s'>Analyzes how positive samples are distributed spatially:</p>
                         <ul style='%s'>
@@ -2729,495 +2827,514 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <p style='%s'><b>Clinical significance:</b> Clustered patterns may allow more targeted sampling;
                         dispersed patterns require broader sampling strategy.</p>
                     </div>",
-                    private$.buildStyle(private$.styleConstants$font),
-                    private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                            private$.buildStyle(private$.styleConstants$font),
+                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorSecondary),
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
+                        )
 
-                    if (self$options$showSpatialClustering) {
-                        spatialClusteringText$setContent(html)
-                    }
+                        if (self$options$showSpatialClustering) {
+                            spatialClusteringText$setContent(html)
+                        }
 
-                    # Populate table
-                    clusteringTable$addRow(rowKey="clustered", values=list(
-                        pattern = "Clustered (focal)",
-                        count = n_clustered,
-                        percent = n_clustered / n_total,
-                        meanClusterIndex = if (n_clustered > 0) mean(clustering_indices[clustered_idx], na.rm=TRUE) else NA
-                    ))
-                    clusteringTable$addRow(rowKey="random", values=list(
-                        pattern = "Random",
-                        count = n_random,
-                        percent = n_random / n_total,
-                        meanClusterIndex = if (n_random > 0) mean(clustering_indices[random_idx], na.rm=TRUE) else NA
-                    ))
-                    clusteringTable$addRow(rowKey="dispersed", values=list(
-                        pattern = "Dispersed (multifocal)",
-                        count = n_dispersed,
-                        percent = n_dispersed / n_total,
-                        meanClusterIndex = if (n_dispersed > 0) mean(clustering_indices[dispersed_idx], na.rm=TRUE) else NA
-                    ))
-                }
-            }
-
-            # ===== PHASE 4: Multifocal Detection Analysis =====
-            if (self$options$showMultifocalAnalysis && !is.null(positiveSamplesListData) && nDetected > 0) {
-                private$.checkpoint()
-
-                multifocalText <- self$results$multifocalText
-                multifocalTable <- self$results$multifocalTable
-
-                # Parse sample lists and estimate foci
-                foci_counts <- integer(length(positiveSamplesListData))
-                foci_counts[] <- NA
-
-                positive_idx <- !is.na(firstDetectionData)
-                for (i in which(positive_idx)) {
-                    samples <- private$.parseSampleList(positiveSamplesListData[i])
-                    if (length(samples) > 0) {
-                        foci_counts[i] <- private$.estimateFociCount(samples)
+                        # Populate table
+                        clusteringTable$addRow(rowKey = "clustered", values = list(
+                            pattern = "Clustered (focal)",
+                            count = n_clustered,
+                            percent = n_clustered / n_total,
+                            meanClusterIndex = if (n_clustered > 0) mean(clustering_indices[clustered_idx], na.rm = TRUE) else NA
+                        ))
+                        clusteringTable$addRow(rowKey = "random", values = list(
+                            pattern = "Random",
+                            count = n_random,
+                            percent = n_random / n_total,
+                            meanClusterIndex = if (n_random > 0) mean(clustering_indices[random_idx], na.rm = TRUE) else NA
+                        ))
+                        clusteringTable$addRow(rowKey = "dispersed", values = list(
+                            pattern = "Dispersed (multifocal)",
+                            count = n_dispersed,
+                            percent = n_dispersed / n_total,
+                            meanClusterIndex = if (n_dispersed > 0) mean(clustering_indices[dispersed_idx], na.rm = TRUE) else NA
+                        ))
                     }
                 }
 
-                # Categorize by foci count
-                unifocal_idx <- foci_counts == 1 & !is.na(foci_counts)
-                bifocal_idx <- foci_counts == 2 & !is.na(foci_counts)
-                multifocal_idx <- foci_counts >= 3 & !is.na(foci_counts)
+                # ===== PHASE 4: Multifocal Detection Analysis =====
+                if (self$options$showMultifocalAnalysis && !is.null(positiveSamplesListData) && nDetected > 0) {
+                    private$.checkpoint()
 
-                n_unifocal <- sum(unifocal_idx, na.rm=TRUE)
-                n_bifocal <- sum(bifocal_idx, na.rm=TRUE)
-                n_multifocal <- sum(multifocal_idx, na.rm=TRUE)
-                n_total <- sum(!is.na(foci_counts))
+                    multifocalText <- self$results$multifocalText
+                    multifocalTable <- self$results$multifocalTable
 
-                if (n_total > 0) {
-                    html <- sprintf("<div style='%s'>
+                    # Parse sample lists and estimate foci
+                    foci_counts <- integer(length(positiveSamplesListData))
+                    foci_counts[] <- NA
+
+                    positive_idx <- !is.na(firstDetectionData)
+                    for (i in which(positive_idx)) {
+                        samples <- private$.parseSampleList(positiveSamplesListData[i])
+                        if (length(samples) > 0) {
+                            foci_counts[i] <- private$.estimateFociCount(samples)
+                        }
+                    }
+
+                    # Categorize by foci count
+                    unifocal_idx <- foci_counts == 1 & !is.na(foci_counts)
+                    bifocal_idx <- foci_counts == 2 & !is.na(foci_counts)
+                    multifocal_idx <- foci_counts >= 3 & !is.na(foci_counts)
+
+                    n_unifocal <- sum(unifocal_idx, na.rm = TRUE)
+                    n_bifocal <- sum(bifocal_idx, na.rm = TRUE)
+                    n_multifocal <- sum(multifocal_idx, na.rm = TRUE)
+                    n_total <- sum(!is.na(foci_counts))
+
+                    if (n_total > 0) {
+                        html <- sprintf(
+                            "<div style='%s'>
                         <h4 style='%s'>Multifocal Detection Analysis</h4>
                         <p style='%s'>Estimates number of separate foci based on spatial distribution of positive samples.
                         Gaps > 2 samples suggest separate foci.</p>
                         <p style='%s'><b>Clinical note:</b> Multifocal involvement may indicate more advanced disease
                         and can affect staging/treatment decisions.</p>
                     </div>",
-                    private$.buildStyle(private$.styleConstants$font),
-                    private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
-                    private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary))
+                            private$.buildStyle(private$.styleConstants$font),
+                            private$.buildStyle(private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize14, private$.styleConstants$colorPrimary),
+                            private$.buildStyle(private$.styleConstants$fontSize13, private$.styleConstants$colorSecondary)
+                        )
 
-                    if (self$options$showMultifocalAnalysis) {
-                        multifocalText$setContent(html)
-                    }
-
-                    # Populate table
-                    if (n_unifocal > 0) {
-                        multifocalTable$addRow(rowKey="single", values=list(
-                            fociCount = "Unifocal (1 focus)",
-                            cases = n_unifocal,
-                            percent = n_unifocal / n_total,
-                            meanFirstDetection = mean(firstDetectionData[unifocal_idx], na.rm=TRUE)
-                        ))
-                    }
-                    if (n_bifocal > 0) {
-                        multifocalTable$addRow(rowKey="low_multi", values=list(
-                            fociCount = "Bifocal (2 foci)",
-                            cases = n_bifocal,
-                            percent = n_bifocal / n_total,
-                            meanFirstDetection = mean(firstDetectionData[bifocal_idx], na.rm=TRUE)
-                        ))
-                    }
-                    if (n_multifocal > 0) {
-                        multifocalTable$addRow(rowKey="high_multi", values=list(
-                            fociCount = "Multifocal (3+ foci)",
-                            cases = n_multifocal,
-                            percent = n_multifocal / n_total,
-                            meanFirstDetection = mean(firstDetectionData[multifocal_idx], na.rm=TRUE)
-                        ))
-                    }
-                }
-            }
-
-            # === Hypergeometric Model Analysis ===
-            if (self$options$showHypergeometric && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
-
-                # Get hypergeometric parameters
-                totalPopulationEsc <- private$.escapeVar(self$options$totalPopulation)
-                successStatesEsc <- private$.escapeVar(self$options$successStates)
-
-                totalPopulationData <- jmvcore::toNumeric(data[[totalPopulationEsc]])
-                successStatesData <- jmvcore::toNumeric(data[[successStatesEsc]])
-
-                # Handle labelled data
-                if (is.factor(totalPopulationData) || !is.null(attr(totalPopulationData, 'labels'))) {
-                    totalPopulationData <- as.numeric(as.character(totalPopulationData))
-                }
-                if (is.factor(successStatesData) || !is.null(attr(successStatesData, 'labels'))) {
-                    successStatesData <- as.numeric(as.character(successStatesData))
-                }
-
-                # Filter to valid cases
-                totalPopulationData <- totalPopulationData[validCases]
-                successStatesData <- successStatesData[validCases]
-                if (!is.null(invalidCases)) {
-                    totalPopulationData <- totalPopulationData[!invalidCases]
-                    successStatesData <- successStatesData[!invalidCases]
-                }
-
-                target <- self$options$targetDetections        # Minimum detections desired
-                if (is.null(target) || is.na(target) || target < 1) {
-                    target <- 1
-                }
-
-                # Identify cases with complete hypergeometric inputs
-                hyperValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
-                if (sum(hyperValid) == 0) {
-                    hypergeometricText <- self$results$hypergeometricText
-                    hypergeometricTable <- self$results$hypergeometricTable
-                    hyperRecommendTable <- self$results$hyperRecommendTable
-                    if (self$options$showHypergeometric) {
-                        hypergeometricText$setContent("<p>No valid cases with total population and success counts were found for the hypergeometric model.</p>")
-                    }
-                    hypergeometricTable$clearRows()
-                    hyperRecommendTable$clearRows()
-                    return()
-                }
-
-                N_values <- totalPopulationData[hyperValid]
-                K_values <- successStatesData[hyperValid]
-
-                hyperNotes <- character()
-
-                # Enforce integer counts (hypergeometric requires discrete totals)
-                if (any(abs(N_values - round(N_values)) > 1e-6, na.rm = TRUE)) {
-                    hyperNotes <- c(hyperNotes, "Total population counts rounded to nearest integer")
-                }
-                if (any(abs(K_values - round(K_values)) > 1e-6, na.rm = TRUE)) {
-                    hyperNotes <- c(hyperNotes, "Positive counts rounded to nearest integer")
-                }
-
-                N_int <- round(N_values)
-                K_int <- round(K_values)
-
-                # Remove impossible cases
-                invalidHyper <- (N_int <= 0) | (K_int < 0) | (K_int > N_int)
-                if (any(invalidHyper, na.rm = TRUE)) {
-                    removed <- sum(invalidHyper, na.rm = TRUE)
-                    hyperNotes <- c(hyperNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
-                    N_int <- N_int[!invalidHyper]
-                    K_int <- K_int[!invalidHyper]
-                }
-
-                if (length(N_int) == 0) {
-                    hypergeometricText <- self$results$hypergeometricText
-                    hypergeometricTable <- self$results$hypergeometricTable
-                    hyperRecommendTable <- self$results$hyperRecommendTable
-                    if (self$options$showHypergeometric) {
-                        hypergeometricText$setContent("<p>All cases were removed because population/success counts were invalid for the hypergeometric model.</p>")
-                    }
-                    hypergeometricTable$clearRows()
-                    hyperRecommendTable$clearRows()
-                    return()
-                }
-
-                positiveCaseIdx <- K_int >= target & K_int > 0
-                if (sum(positiveCaseIdx) == 0) {
-                    hypergeometricText <- self$results$hypergeometricText
-                    hypergeometricTable <- self$results$hypergeometricTable
-                    hyperRecommendTable <- self$results$hyperRecommendTable
-                    note <- sprintf("<p>No cases had at least %d positive observations, so the hypergeometric model could not be estimated.</p>", target)
-                    if (self$options$showHypergeometric) {
-                        hypergeometricText$setContent(note)
-                    }
-                    hypergeometricTable$clearRows()
-                    hyperRecommendTable$clearRows()
-                    return()
-                }
-                removedZeroPos <- sum(!positiveCaseIdx)
-                if (removedZeroPos > 0) {
-                    hyperNotes <- c(hyperNotes,
-                        sprintf("%d cases excluded (no positive observations for conditional model)", removedZeroPos))
-                }
-                N_int <- N_int[positiveCaseIdx]
-                K_int <- K_int[positiveCaseIdx]
-
-                nHyperCases <- length(N_int)
-                medianN <- stats::median(N_int)
-                medianK <- stats::median(K_int)
-
-                hypergeometricText <- self$results$hypergeometricText
-                notesHtml <- if (length(hyperNotes) > 0) {
-                    sprintf("<p><b>Data notes:</b> %s.</p>", paste(hyperNotes, collapse = "; "))
-                } else ""
-
-                html <- sprintf("<h4>Hypergeometric Probability Model</h4>
-                <p>Finite-population sampling without replacement (e.g., lymph node dissections) evaluated on %d positive cases.</p>
-                <p><b>Typical case:</b> median total nodes = %.0f, median positive nodes = %.0f.</p>
-                %s
-                <p><b>Model:</b> For each case i with population N<sub>i</sub> and positives K<sub>i</sub>, the probability of detecting ≥%d positives after n draws is averaged across cases:</p>
-                <p style='margin-left: 15px;'>P(detect ≥ %d) = mean<sub>i</sub>[1 - Σ<sub>x=0</sub><sup>%d-1</sup> dhyper(x, K<sub>i</sub>, N<sub>i</sub>-K<sub>i</sub>, min(n, N<sub>i</sub>))]</p>
-                <p><b>Reference:</b> Orange-peeling LN dissection study (2025) - Hypergeometric adequacy thresholds.</p>",
-                nHyperCases, medianN, medianK, notesHtml, target, target, max(target - 1, 0))
-                if (self$options$showHypergeometric) {
-                    hypergeometricText$setContent(html)
-                }
-
-                # Pre-compute cumulative probabilities across cases
-                hypergeometricTable <- self$results$hypergeometricTable
-                aggregatedProb <- rep(NA_real_, maxSamp)
-
-                prevProb <- NA_real_
-                for (n in 1:maxSamp) {
-                    draws <- pmin(n, N_int)
-
-                    caseProb <- vapply(seq_along(N_int), function(idx) {
-                        Ni <- N_int[idx]
-                        Ki <- K_int[idx]
-                        draw <- draws[idx]
-
-                        if (Ki <= 0 || target > draw) {
-                            return(0)
+                        if (self$options$showMultifocalAnalysis) {
+                            multifocalText$setContent(html)
                         }
 
-                        failures <- Ni - Ki
-                        if (target > 1) {
-                            probLess <- stats::phyper(target - 1, Ki, failures, draw)
-                        } else {
-                            probLess <- stats::dhyper(0, Ki, failures, draw)
+                        # Populate table
+                        if (n_unifocal > 0) {
+                            multifocalTable$addRow(rowKey = "single", values = list(
+                                fociCount = "Unifocal (1 focus)",
+                                cases = n_unifocal,
+                                percent = n_unifocal / n_total,
+                                meanFirstDetection = mean(firstDetectionData[unifocal_idx], na.rm = TRUE)
+                            ))
                         }
-
-                        1 - probLess
-                    }, numeric(1))
-
-                    if (all(is.na(caseProb))) {
-                        cumProb <- NA_real_
-                    } else {
-                        cumProb <- mean(caseProb, na.rm = TRUE)
-                    }
-
-                    aggregatedProb[n] <- cumProb
-
-                    marginal <- if (!is.na(cumProb) && !is.na(prevProb)) cumProb - prevProb else if (!is.na(cumProb) && is.na(prevProb)) cumProb else NA
-
-                    hypergeometricTable$addRow(rowKey=paste0("n_", n), values=list(
-                        nSamples = n,
-                        cumProb = cumProb,
-                        marginalGain = marginal
-                    ))
-
-                    if (!is.na(cumProb)) prevProb <- cumProb
-                }
-
-                hyperDetail <- if (length(hyperNotes) > 0) paste(hyperNotes, collapse = "; ") else ""
-
-                addRecommendation(
-                    method = "Hypergeometric",
-                    probVec = aggregatedProb,
-                    priority = 3,
-                    description = "Finite population model (sampling without replacement)",
-                    detail = hyperDetail
-                )
-
-                # Minimum samples for target confidence levels
-                hyperRecommendTable <- self$results$hyperRecommendTable
-
-                confLevels <- c(0.80, 0.90, 0.95, 0.99)
-                for (i in seq_along(confLevels)) {
-                    conf <- confLevels[i]
-
-                    minSamples <- NA
-                    expectedYield <- NA
-
-                    idx <- which(!is.na(aggregatedProb) & aggregatedProb >= conf)[1]
-                    if (!is.na(idx)) {
-                        minSamples <- idx
-
-                        # Expected detections based on case-level probabilities
-                        caseExpected <- vapply(seq_along(N_int), function(idxCase) {
-                            Ni <- N_int[idxCase]
-                            Ki <- K_int[idxCase]
-                            draw <- min(minSamples, Ni)
-
-                            if (Ki <= 0 || draw <= 0) {
-                                return(0)
-                            }
-
-                            # Expected detections under hypergeometric sampling with replacement adjustment
-                            expected <- draw * Ki / Ni
-
-                            # To respect user target, cap expected at target if target specified
-                            if (!is.null(target) && !is.na(target)) {
-                                expected <- min(expected, target)
-                            }
-
-                            expected
-                        }, numeric(1))
-
-                        expectedYield <- mean(caseExpected, na.rm = TRUE)
-                    }
-
-                    hyperRecommendTable$addRow(rowKey=paste0("conf_", i), values=list(
-                        confidence = conf,
-                        minSamples = minSamples,
-                        expectedYield = expectedYield
-                    ))
-                }
-            }
-
-            # === Beta-Binomial Model Analysis ===
-            if (self$options$showBetaBinomial && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
-
-                # Get data
-                totalPopulationEsc <- private$.escapeVar(self$options$totalPopulation)
-                successStatesEsc <- private$.escapeVar(self$options$successStates)
-
-                totalPopulationData <- jmvcore::toNumeric(data[[totalPopulationEsc]])
-                successStatesData <- jmvcore::toNumeric(data[[successStatesEsc]])
-
-                # Filter to valid cases
-                totalPopulationData <- totalPopulationData[validCases]
-                successStatesData <- successStatesData[validCases]
-                if (!is.null(invalidCases)) {
-                    totalPopulationData <- totalPopulationData[!invalidCases]
-                    successStatesData <- successStatesData[!invalidCases]
-                }
-
-                betaBinomNotes <- character()
-                betaProceed <- TRUE
-
-                betaValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
-                if (sum(betaValid) == 0) {
-                    betaBinomialText <- self$results$betaBinomialText
-                    betaBinomialTable <- self$results$betaBinomialTable
-                    betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-                    if (self$options$showBetaBinomial) {
-                        betaBinomialText$setContent("<p>No valid cases were available for the beta-binomial model (missing total population or success counts).</p>")
-                    }
-                    betaBinomialTable$clearRows()
-                    betaBinomialRecommendTable$clearRows()
-                    betaProceed <- FALSE
-                } else {
-                    totalPopulationData <- totalPopulationData[betaValid]
-                    successStatesData <- successStatesData[betaValid]
-
-                    invalidBeta <- (totalPopulationData <= 0) | (successStatesData < 0) | (successStatesData > totalPopulationData)
-                    if (any(invalidBeta, na.rm = TRUE)) {
-                        removed <- sum(invalidBeta, na.rm = TRUE)
-                        betaBinomNotes <- c(betaBinomNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
-                        totalPopulationData <- totalPopulationData[!invalidBeta]
-                        successStatesData <- successStatesData[!invalidBeta]
-                    }
-
-                    if (length(totalPopulationData) == 0) {
-                        betaBinomialText <- self$results$betaBinomialText
-                        betaBinomialTable <- self$results$betaBinomialTable
-                        betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-                        if (self$options$showBetaBinomial) {
-                            betaBinomialText$setContent("<p>All cases were removed after validating total population and success counts.</p>")
+                        if (n_bifocal > 0) {
+                            multifocalTable$addRow(rowKey = "low_multi", values = list(
+                                fociCount = "Bifocal (2 foci)",
+                                cases = n_bifocal,
+                                percent = n_bifocal / n_total,
+                                meanFirstDetection = mean(firstDetectionData[bifocal_idx], na.rm = TRUE)
+                            ))
                         }
-                        betaBinomialTable$clearRows()
-                        betaBinomialRecommendTable$clearRows()
-                        betaProceed <- FALSE
+                        if (n_multifocal > 0) {
+                            multifocalTable$addRow(rowKey = "high_multi", values = list(
+                                fociCount = "Multifocal (3+ foci)",
+                                cases = n_multifocal,
+                                percent = n_multifocal / n_total,
+                                meanFirstDetection = mean(firstDetectionData[multifocal_idx], na.rm = TRUE)
+                            ))
+                        }
                     }
                 }
 
-                if (betaProceed) {
+                # === Hypergeometric Model Analysis ===
+                if (self$options$showHypergeometric && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
+                    # Get hypergeometric parameters
+                    totalPopulationEsc <- private$.escapeVar(self$options$totalPopulation)
+                    successStatesEsc <- private$.escapeVar(self$options$successStates)
 
-                    target <- self$options$targetDetections
+                    totalPopulationData <- jmvcore::toNumeric(data[[totalPopulationEsc]])
+                    successStatesData <- jmvcore::toNumeric(data[[successStatesEsc]])
+
+                    # Handle labelled data
+                    if (is.factor(totalPopulationData) || !is.null(attr(totalPopulationData, "labels"))) {
+                        totalPopulationData <- as.numeric(as.character(totalPopulationData))
+                    }
+                    if (is.factor(successStatesData) || !is.null(attr(successStatesData, "labels"))) {
+                        successStatesData <- as.numeric(as.character(successStatesData))
+                    }
+
+                    # Filter to valid cases
+                    totalPopulationData <- totalPopulationData[validCases]
+                    successStatesData <- successStatesData[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalPopulationData <- totalPopulationData[!invalidCases]
+                        successStatesData <- successStatesData[!invalidCases]
+                    }
+
+                    target <- self$options$targetDetections # Minimum detections desired
                     if (is.null(target) || is.na(target) || target < 1) {
                         target <- 1
                     }
 
-                    # Estimate alpha and beta using VGAM for proper N-weighted estimation
-                    # Previous unweighted method biased estimates when sample sizes varied
-                    alpha <- NA_real_
-                    beta <- NA_real_
-                    modelRejected <- FALSE
-
-                    # Check minimum requirements
-                    if (length(totalPopulationData) < 2) {
-                        betaBinomNotes <- c(betaBinomNotes, " Insufficient cases for parameter estimation (need ≥2)")
-                        modelRejected <- TRUE
-                    } else if (!requireNamespace("VGAM", quietly = TRUE)) {
-                        betaBinomNotes <- c(betaBinomNotes, " VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')")
-                        modelRejected <- TRUE
-                    } else {
-                        # Use VGAM for proper maximum likelihood estimation with varying N
-                        betaData <- data.frame(
-                            success = successStatesData,
-                            fail = totalPopulationData - successStatesData,
-                            total = totalPopulationData
-                        )
-
-                        # Check for invalid data (negative failures)
-                        if (any(betaData$fail < 0, na.rm = TRUE)) {
-                            betaBinomNotes <- c(betaBinomNotes, " Invalid data: success counts exceed total population in some cases")
-                            modelRejected <- TRUE
-                        } else {
-                            tryCatch({
-                                # Fit beta-binomial using VGAM (proper N-weighted MLE)
-                                fit <- VGAM::vglm(
-                                    cbind(success, fail) ~ 1,
-                                    family = VGAM::betabinomial,
-                                    data = betaData,
-                                    trace = FALSE
-                                )
-
-                                # Extract shape parameters from VGAM fit
-                                # VGAM uses logit-link for rho and logit for mu
-                                coefs <- VGAM::Coef(fit)
-
-                                # Get mean and rho from fitted model
-                                mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
-                                rho_fit <- VGAM::logitlink(coefs[2], inverse = TRUE)
-
-                                # Convert to alpha/beta parameterization
-                                # rho = 1/(alpha + beta + 1), so alpha + beta = (1-rho)/rho
-                                # mu = alpha/(alpha + beta)
-                                if (rho_fit > 0 && rho_fit < 1) {
-                                    total_shape <- (1 - rho_fit) / rho_fit
-                                    alpha <- mu_fit * total_shape
-                                    beta <- (1 - mu_fit) * total_shape
-                                } else {
-                                    betaBinomNotes <- c(betaBinomNotes, " VGAM fit produced invalid rho (overdispersion parameter)")
-                                    modelRejected <- TRUE
-                                }
-
-                                # Validate estimated parameters
-                                if (!modelRejected && (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0)) {
-                                    betaBinomNotes <- c(betaBinomNotes,
-                                        " Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution.")
-                                    modelRejected <- TRUE
-                                } else if (!modelRejected) {
-                                    # Check for extremely skewed parameters
-                                    if (alpha < 0.01 || beta < 0.01) {
-                                        betaBinomNotes <- c(betaBinomNotes,
-                                            sprintf(" CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta))
-                                    }
-
-                                    # Check for zero variance (all identical)
-                                    if (rho_fit < 0.001) {
-                                        betaBinomNotes <- c(betaBinomNotes,
-                                            sprintf(" Very low overdispersion (ρ=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit))
-                                    }
-
-                                    # Add note about N-weighted estimation
-                                    betaBinomNotes <- c(betaBinomNotes,
-                                        sprintf(" Parameters estimated using N-weighted MLE via VGAM (μ=%.3f, ρ=%.3f, α=%.3f, β=%.3f)", mu_fit, rho_fit, alpha, beta))
-                                }
-
-                            }, error = function(e) {
-                                betaBinomNotes <- c(betaBinomNotes,
-                                    sprintf(" VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", htmltools::htmlEscape(conditionMessage(e))))
-                                modelRejected <- TRUE
-                            })
+                    # Identify cases with complete hypergeometric inputs
+                    hyperValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
+                    if (sum(hyperValid) == 0) {
+                        hypergeometricText <- self$results$hypergeometricText
+                        hypergeometricTable <- self$results$hypergeometricTable
+                        hyperRecommendTable <- self$results$hyperRecommendTable
+                        if (self$options$showHypergeometric) {
+                            hypergeometricText$setContent("<p>No valid cases with total population and success counts were found for the hypergeometric model.</p>")
                         }
+                        hypergeometricTable$clearRows()
+                        hyperRecommendTable$clearRows()
+                        return()
                     }
 
-                    # If model is rejected, skip beta-binomial analysis
-                    if (modelRejected) {
+                    N_values <- totalPopulationData[hyperValid]
+                    K_values <- successStatesData[hyperValid]
+
+                    hyperNotes <- character()
+
+                    # Enforce integer counts (hypergeometric requires discrete totals)
+                    if (any(abs(N_values - round(N_values)) > 1e-6, na.rm = TRUE)) {
+                        hyperNotes <- c(hyperNotes, "Total population counts rounded to nearest integer")
+                    }
+                    if (any(abs(K_values - round(K_values)) > 1e-6, na.rm = TRUE)) {
+                        hyperNotes <- c(hyperNotes, "Positive counts rounded to nearest integer")
+                    }
+
+                    N_int <- round(N_values)
+                    K_int <- round(K_values)
+
+                    # Remove impossible cases
+                    invalidHyper <- (N_int <= 0) | (K_int < 0) | (K_int > N_int)
+                    if (any(invalidHyper, na.rm = TRUE)) {
+                        removed <- sum(invalidHyper, na.rm = TRUE)
+                        hyperNotes <- c(hyperNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
+                        N_int <- N_int[!invalidHyper]
+                        K_int <- K_int[!invalidHyper]
+                    }
+
+                    if (length(N_int) == 0) {
+                        hypergeometricText <- self$results$hypergeometricText
+                        hypergeometricTable <- self$results$hypergeometricTable
+                        hyperRecommendTable <- self$results$hyperRecommendTable
+                        if (self$options$showHypergeometric) {
+                            hypergeometricText$setContent("<p>All cases were removed because population/success counts were invalid for the hypergeometric model.</p>")
+                        }
+                        hypergeometricTable$clearRows()
+                        hyperRecommendTable$clearRows()
+                        return()
+                    }
+
+                    positiveCaseIdx <- K_int >= target & K_int > 0
+                    if (sum(positiveCaseIdx) == 0) {
+                        hypergeometricText <- self$results$hypergeometricText
+                        hypergeometricTable <- self$results$hypergeometricTable
+                        hyperRecommendTable <- self$results$hyperRecommendTable
+                        note <- sprintf("<p>No cases had at least %d positive observations, so the hypergeometric model could not be estimated.</p>", target)
+                        if (self$options$showHypergeometric) {
+                            hypergeometricText$setContent(note)
+                        }
+                        hypergeometricTable$clearRows()
+                        hyperRecommendTable$clearRows()
+                        return()
+                    }
+                    removedZeroPos <- sum(!positiveCaseIdx)
+                    if (removedZeroPos > 0) {
+                        hyperNotes <- c(
+                            hyperNotes,
+                            sprintf("%d cases excluded (no positive observations for conditional model)", removedZeroPos)
+                        )
+                    }
+                    N_int <- N_int[positiveCaseIdx]
+                    K_int <- K_int[positiveCaseIdx]
+
+                    nHyperCases <- length(N_int)
+                    medianN <- stats::median(N_int)
+                    medianK <- stats::median(K_int)
+
+                    hypergeometricText <- self$results$hypergeometricText
+                    notesHtml <- if (length(hyperNotes) > 0) {
+                        sprintf("<p><b>Data notes:</b> %s.</p>", paste(hyperNotes, collapse = "; "))
+                    } else {
+                        ""
+                    }
+
+                    html <- sprintf(
+                        "<h4>Hypergeometric Probability Model</h4>
+                <p>Finite-population sampling without replacement (e.g., lymph node dissections) evaluated on %d positive cases.</p>
+                <p><b>Typical case:</b> median total nodes = %.0f, median positive nodes = %.0f.</p>
+                %s
+                <p><b>Model:</b> For each case i with population N<sub>i</sub> and positives K<sub>i</sub>, the probability of detecting >=%d positives after n draws is averaged across cases:</p>
+                <p style='margin-left: 15px;'>P(detect >= %d) = mean<sub>i</sub>[1 - Σ<sub>x=0</sub><sup>%d-1</sup> dhyper(x, K<sub>i</sub>, N<sub>i</sub>-K<sub>i</sub>, min(n, N<sub>i</sub>))]</p>
+                <p><b>Reference:</b> Orange-peeling LN dissection study (2025) - Hypergeometric adequacy thresholds.</p>",
+                        nHyperCases, medianN, medianK, notesHtml, target, target, max(target - 1, 0)
+                    )
+                    if (self$options$showHypergeometric) {
+                        hypergeometricText$setContent(html)
+                    }
+
+                    # Pre-compute cumulative probabilities across cases
+                    hypergeometricTable <- self$results$hypergeometricTable
+                    aggregatedProb <- rep(NA_real_, maxSamp)
+
+                    prevProb <- NA_real_
+                    for (n in 1:maxSamp) {
+                        draws <- pmin(n, N_int)
+
+                        caseProb <- vapply(seq_along(N_int), function(idx) {
+                            Ni <- N_int[idx]
+                            Ki <- K_int[idx]
+                            draw <- draws[idx]
+
+                            if (Ki <= 0 || target > draw) {
+                                return(0)
+                            }
+
+                            failures <- Ni - Ki
+                            if (target > 1) {
+                                probLess <- stats::phyper(target - 1, Ki, failures, draw)
+                            } else {
+                                probLess <- stats::dhyper(0, Ki, failures, draw)
+                            }
+
+                            1 - probLess
+                        }, numeric(1))
+
+                        if (all(is.na(caseProb))) {
+                            cumProb <- NA_real_
+                        } else {
+                            cumProb <- mean(caseProb, na.rm = TRUE)
+                        }
+
+                        aggregatedProb[n] <- cumProb
+
+                        marginal <- if (!is.na(cumProb) && !is.na(prevProb)) cumProb - prevProb else if (!is.na(cumProb) && is.na(prevProb)) cumProb else NA
+
+                        hypergeometricTable$addRow(rowKey = paste0("n_", n), values = list(
+                            nSamples = n,
+                            cumProb = cumProb,
+                            marginalGain = marginal
+                        ))
+
+                        if (!is.na(cumProb)) prevProb <- cumProb
+                    }
+
+                    hyperDetail <- if (length(hyperNotes) > 0) paste(hyperNotes, collapse = "; ") else ""
+
+                    addRecommendation(
+                        method = "Hypergeometric",
+                        probVec = aggregatedProb,
+                        priority = 3,
+                        description = "Finite population model (sampling without replacement)",
+                        detail = hyperDetail
+                    )
+
+                    # Minimum samples for target confidence levels
+                    hyperRecommendTable <- self$results$hyperRecommendTable
+
+                    confLevels <- c(0.80, 0.90, 0.95, 0.99)
+                    for (i in seq_along(confLevels)) {
+                        conf <- confLevels[i]
+
+                        minSamples <- NA
+                        expectedYield <- NA
+
+                        idx <- which(!is.na(aggregatedProb) & aggregatedProb >= conf)[1]
+                        if (!is.na(idx)) {
+                            minSamples <- idx
+
+                            # Expected detections based on case-level probabilities
+                            caseExpected <- vapply(seq_along(N_int), function(idxCase) {
+                                Ni <- N_int[idxCase]
+                                Ki <- K_int[idxCase]
+                                draw <- min(minSamples, Ni)
+
+                                if (Ki <= 0 || draw <= 0) {
+                                    return(0)
+                                }
+
+                                # Expected detections under hypergeometric sampling with replacement adjustment
+                                expected <- draw * Ki / Ni
+
+                                # To respect user target, cap expected at target if target specified
+                                if (!is.null(target) && !is.na(target)) {
+                                    expected <- min(expected, target)
+                                }
+
+                                expected
+                            }, numeric(1))
+
+                            expectedYield <- mean(caseExpected, na.rm = TRUE)
+                        }
+
+                        hyperRecommendTable$addRow(rowKey = paste0("conf_", i), values = list(
+                            confidence = conf,
+                            minSamples = minSamples,
+                            expectedYield = expectedYield
+                        ))
+                    }
+                }
+
+                # === Beta-Binomial Model Analysis ===
+                if (self$options$showBetaBinomial && !is.null(self$options$totalPopulation) && !is.null(self$options$successStates)) {
+                    # Get data
+                    totalPopulationEsc <- private$.escapeVar(self$options$totalPopulation)
+                    successStatesEsc <- private$.escapeVar(self$options$successStates)
+
+                    totalPopulationData <- jmvcore::toNumeric(data[[totalPopulationEsc]])
+                    successStatesData <- jmvcore::toNumeric(data[[successStatesEsc]])
+
+                    # Filter to valid cases
+                    totalPopulationData <- totalPopulationData[validCases]
+                    successStatesData <- successStatesData[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalPopulationData <- totalPopulationData[!invalidCases]
+                        successStatesData <- successStatesData[!invalidCases]
+                    }
+
+                    betaBinomNotes <- character()
+                    betaProceed <- TRUE
+
+                    betaValid <- !is.na(totalPopulationData) & !is.na(successStatesData)
+                    if (sum(betaValid) == 0) {
                         betaBinomialText <- self$results$betaBinomialText
                         betaBinomialTable <- self$results$betaBinomialTable
                         betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                        if (self$options$showBetaBinomial) {
+                            betaBinomialText$setContent("<p>No valid cases were available for the beta-binomial model (missing total population or success counts).</p>")
+                        }
+                        betaBinomialTable$clearRows()
+                        betaBinomialRecommendTable$clearRows()
+                        betaProceed <- FALSE
+                    } else {
+                        totalPopulationData <- totalPopulationData[betaValid]
+                        successStatesData <- successStatesData[betaValid]
 
-                        errorHtml <- sprintf("<div style='%s %s %s %s'>
+                        invalidBeta <- (totalPopulationData <= 0) | (successStatesData < 0) | (successStatesData > totalPopulationData)
+                        if (any(invalidBeta, na.rm = TRUE)) {
+                            removed <- sum(invalidBeta, na.rm = TRUE)
+                            betaBinomNotes <- c(betaBinomNotes, sprintf("%d cases removed (invalid population/success counts)", removed))
+                            totalPopulationData <- totalPopulationData[!invalidBeta]
+                            successStatesData <- successStatesData[!invalidBeta]
+                        }
+
+                        if (length(totalPopulationData) == 0) {
+                            betaBinomialText <- self$results$betaBinomialText
+                            betaBinomialTable <- self$results$betaBinomialTable
+                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+                            if (self$options$showBetaBinomial) {
+                                betaBinomialText$setContent("<p>All cases were removed after validating total population and success counts.</p>")
+                            }
+                            betaBinomialTable$clearRows()
+                            betaBinomialRecommendTable$clearRows()
+                            betaProceed <- FALSE
+                        }
+                    }
+
+                    if (betaProceed) {
+                        target <- self$options$targetDetections
+                        if (is.null(target) || is.na(target) || target < 1) {
+                            target <- 1
+                        }
+
+                        # Estimate alpha and beta using VGAM for proper N-weighted estimation
+                        # Previous unweighted method biased estimates when sample sizes varied
+                        alpha <- NA_real_
+                        beta <- NA_real_
+                        modelRejected <- FALSE
+
+                        # Check minimum requirements
+                        if (length(totalPopulationData) < 2) {
+                            betaBinomNotes <- c(betaBinomNotes, " Insufficient cases for parameter estimation (need >=2)")
+                            modelRejected <- TRUE
+                        } else if (!requireNamespace("VGAM", quietly = TRUE)) {
+                            betaBinomNotes <- c(betaBinomNotes, " VGAM package required for beta-binomial analysis. Please install: install.packages('VGAM')")
+                            modelRejected <- TRUE
+                        } else {
+                            # Use VGAM for proper maximum likelihood estimation with varying N
+                            betaData <- data.frame(
+                                success = successStatesData,
+                                fail = totalPopulationData - successStatesData,
+                                total = totalPopulationData
+                            )
+
+                            # Check for invalid data (negative failures)
+                            if (any(betaData$fail < 0, na.rm = TRUE)) {
+                                betaBinomNotes <- c(betaBinomNotes, " Invalid data: success counts exceed total population in some cases")
+                                modelRejected <- TRUE
+                            } else {
+                                tryCatch(
+                                    {
+                                        # Fit beta-binomial using VGAM (proper N-weighted MLE)
+                                        fit <- VGAM::vglm(
+                                            cbind(success, fail) ~ 1,
+                                            family = VGAM::betabinomial,
+                                            data = betaData,
+                                            trace = FALSE
+                                        )
+
+                                        # Extract shape parameters from VGAM fit
+                                        # VGAM uses logit-link for rho and logit for mu
+                                        coefs <- VGAM::Coef(fit)
+
+                                        # Get mean and rho from fitted model
+                                        mu_fit <- VGAM::logitlink(coefs[1], inverse = TRUE)
+                                        rho_fit <- VGAM::logitlink(coefs[2], inverse = TRUE)
+
+                                        # Convert to alpha/beta parameterization
+                                        # rho = 1/(alpha + beta + 1), so alpha + beta = (1-rho)/rho
+                                        # mu = alpha/(alpha + beta)
+                                        if (rho_fit > 0 && rho_fit < 1) {
+                                            total_shape <- (1 - rho_fit) / rho_fit
+                                            alpha <- mu_fit * total_shape
+                                            beta <- (1 - mu_fit) * total_shape
+                                        } else {
+                                            betaBinomNotes <- c(betaBinomNotes, " VGAM fit produced invalid rho (overdispersion parameter)")
+                                            modelRejected <- TRUE
+                                        }
+
+                                        # Validate estimated parameters
+                                        if (!modelRejected && (!is.finite(alpha) || !is.finite(beta) || alpha <= 0 || beta <= 0)) {
+                                            betaBinomNotes <- c(
+                                                betaBinomNotes,
+                                                " Parameter estimation failed (non-finite or negative values). Data may not fit beta-binomial distribution."
+                                            )
+                                            modelRejected <- TRUE
+                                        } else if (!modelRejected) {
+                                            # Check for extremely skewed parameters
+                                            if (alpha < 0.01 || beta < 0.01) {
+                                                betaBinomNotes <- c(
+                                                    betaBinomNotes,
+                                                    sprintf(" CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta)
+                                                )
+                                            }
+
+                                            # Check for zero variance (all identical)
+                                            if (rho_fit < 0.001) {
+                                                betaBinomNotes <- c(
+                                                    betaBinomNotes,
+                                                    sprintf(" Very low overdispersion (ρ=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit)
+                                                )
+                                            }
+
+                                            # Add note about N-weighted estimation
+                                            betaBinomNotes <- c(
+                                                betaBinomNotes,
+                                                sprintf(" Parameters estimated using N-weighted MLE via VGAM (μ=%.3f, ρ=%.3f, α=%.3f, β=%.3f)", mu_fit, rho_fit, alpha, beta)
+                                            )
+                                        }
+                                    },
+                                    error = function(e) {
+                                        betaBinomNotes <- c(
+                                            betaBinomNotes,
+                                            sprintf(" VGAM fitting failed: %s. Data may not fit beta-binomial distribution or may have convergence issues.", htmltools::htmlEscape(conditionMessage(e)))
+                                        )
+                                        modelRejected <- TRUE
+                                    }
+                                )
+                            }
+                        }
+
+                        # If model is rejected, skip beta-binomial analysis
+                        if (modelRejected) {
+                            betaBinomialText <- self$results$betaBinomialText
+                            betaBinomialTable <- self$results$betaBinomialTable
+                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+
+                            errorHtml <- sprintf(
+                                "<div style='%s %s %s %s'>
                             <p style='margin: 0; %s'><strong> Beta-Binomial Model Not Applicable</strong></p>
                             <p style='margin: 10px 0 0 0; %s'>%s</p>
                             <p style='margin: 10px 0 0 0; %s'><strong>Recommendation:</strong> Use alternative approaches:</p>
@@ -3227,29 +3344,33 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                 <li>For heterogeneous populations: Consider bootstrap or empirical methods</li>
                             </ul>
                         </div>",
-                        private$.styleConstants$font, private$.styleConstants$bgLight,
-                        private$.styleConstants$borderWarning, private$.styleConstants$padding15,
-                        private$.styleConstants$fontSize15,
-                        private$.styleConstants$fontSize14, paste(betaBinomNotes, collapse = " "),
-                        private$.styleConstants$fontSize14,
-                        private$.styleConstants$fontSize14)
+                                private$.styleConstants$font, private$.styleConstants$bgLight,
+                                private$.styleConstants$borderWarning, private$.styleConstants$padding15,
+                                private$.styleConstants$fontSize15,
+                                private$.styleConstants$fontSize14, paste(betaBinomNotes, collapse = " "),
+                                private$.styleConstants$fontSize14,
+                                private$.styleConstants$fontSize14
+                            )
 
-                        if (self$options$showBetaBinomial) {
-                            betaBinomialText$setContent(errorHtml)
+                            if (self$options$showBetaBinomial) {
+                                betaBinomialText$setContent(errorHtml)
+                            }
+                            betaBinomialTable$clearRows()
+                            betaBinomialRecommendTable$clearRows()
+                            betaProceed <- FALSE
                         }
-                        betaBinomialTable$clearRows()
-                        betaBinomialRecommendTable$clearRows()
-                        betaProceed <- FALSE
-                    }
 
-                    # Beta-Binomial Text (only if model is valid)
-                    if (!modelRejected) {
-                        betaBinomialText <- self$results$betaBinomialText
-                        extraText <- if (length(betaBinomNotes) > 0) {
-                            sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
-                        } else ""
+                        # Beta-Binomial Text (only if model is valid)
+                        if (!modelRejected) {
+                            betaBinomialText <- self$results$betaBinomialText
+                            extraText <- if (length(betaBinomNotes) > 0) {
+                                sprintf("<p><b>Estimation notes:</b> %s.</p>", paste(betaBinomNotes, collapse = "; "))
+                            } else {
+                                ""
+                            }
 
-                        html <- sprintf("<h4>Beta-Binomial Probability Model</h4>
+                            html <- sprintf(
+                                "<h4>Beta-Binomial Probability Model</h4>
                     <p>For <b>finite population sampling with overdispersion</b> (e.g., lymph node dissection where positivity varies between cases).</p>
                     <p>This model is more robust than the hypergeometric model when there is case-by-case variability in the number of positive items.</p>
                     <p><b>Model parameters (estimated from data):</b></p>
@@ -3259,135 +3380,135 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     </ul>
                     %s
                     <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
-                    alpha, beta, extraText)
-                        if (self$options$showBetaBinomial) {
-                            betaBinomialText$setContent(html)
-                        }
-
-                    # Calculate beta-binomial probabilities
-                    betaBinomialTable <- self$results$betaBinomialTable
-
-                    betaCumProb <- rep(NA_real_, maxSamp)
-                    prevProb <- 0
-
-                    # Beta-binomial PMF function
-                    dbetabinom_pmf <- function(k, n, alpha, beta) {
-                        exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
-                    }
-
-                    for (n in 1:maxSamp) {
-                        # P(detect ≥ target) using beta-binomial distribution
-                        # Calculate P(X < target) = sum of P(X=k) for k=0 to target-1
-                        prob_less_than_target <- 0
-                        for (k in 0:(target - 1)) {
-                            if (k <= n) {  # Can't have more successes than samples
-                                prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
+                                alpha, beta, extraText
+                            )
+                            if (self$options$showBetaBinomial) {
+                                betaBinomialText$setContent(html)
                             }
-                        }
-                        # P(X ≥ target) = 1 - P(X < target)
-                        cumProb <- 1 - prob_less_than_target
 
-                        marginal <- cumProb - prevProb
+                            # Calculate beta-binomial probabilities
+                            betaBinomialTable <- self$results$betaBinomialTable
 
-                        betaBinomialTable$addRow(rowKey=paste0("n_", n), values=list(
-                            nSamples = n,
-                            cumProb = cumProb,
-                            marginalGain = marginal
-                        ))
+                            betaCumProb <- rep(NA_real_, maxSamp)
+                            prevProb <- 0
 
-                        prevProb <- cumProb
-                        betaCumProb[n] <- cumProb
-                    }
+                            # Beta-binomial PMF function
+                            dbetabinom_pmf <- function(k, n, alpha, beta) {
+                                exp(lchoose(n, k) + lbeta(k + alpha, n - k + beta) - lbeta(alpha, beta))
+                            }
 
-                    # Minimum samples for target confidence levels
-                    betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
-
-                    addRecommendation(
-                        method = "Beta-binomial",
-                        probVec = betaCumProb,
-                        priority = 2,
-                        description = "Overdispersed finite population model",
-                        detail = if (length(betaBinomNotes) > 0) paste(betaBinomNotes, collapse = "; ") else ""
-                    )
-
-                    maxFeasible <- floor(max(totalPopulationData, na.rm = TRUE))
-                    maxFeasible <- min(maxFeasible, maxSamp)
-
-                    confLevels <- c(0.80, 0.90, 0.95, 0.99)
-                    for (i in seq_along(confLevels)) {
-                        conf <- confLevels[i]
-
-                        minSamples <- NA
-                        expectedYield <- NA
-
-                        if (maxFeasible > 0) {
-                            for (n in 1:maxFeasible) {
-                                # Calculate P(X ≥ target) correctly
+                            for (n in 1:maxSamp) {
+                                # P(detect >= target) using beta-binomial distribution
+                                # Calculate P(X < target) = sum of P(X=k) for k=0 to target-1
                                 prob_less_than_target <- 0
                                 for (k in 0:(target - 1)) {
-                                    if (k <= n) {
+                                    if (k <= n) { # Can't have more successes than samples
                                         prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
                                     }
                                 }
+                                # P(X >= target) = 1 - P(X < target)
                                 cumProb <- 1 - prob_less_than_target
 
-                                if (cumProb >= conf) {
-                                    minSamples <- n
-                                    expectedYield <- n * alpha / (alpha + beta)
-                                    if (!is.null(target) && !is.na(target)) {
-                                        expectedYield <- min(expectedYield, target)
-                                    }
-                                    break
-                                }
+                                marginal <- cumProb - prevProb
+
+                                betaBinomialTable$addRow(rowKey = paste0("n_", n), values = list(
+                                    nSamples = n,
+                                    cumProb = cumProb,
+                                    marginalGain = marginal
+                                ))
+
+                                prevProb <- cumProb
+                                betaCumProb[n] <- cumProb
                             }
-                        }
 
-                        betaBinomialRecommendTable$addRow(rowKey=paste0("conf_", i), values=list(
-                            confidence = conf,
-                            minSamples = minSamples,
-                            expectedYield = expectedYield
-                        ))
+                            # Minimum samples for target confidence levels
+                            betaBinomialRecommendTable <- self$results$betaBinomialRecommendTable
+
+                            addRecommendation(
+                                method = "Beta-binomial",
+                                probVec = betaCumProb,
+                                priority = 2,
+                                description = "Overdispersed finite population model",
+                                detail = if (length(betaBinomNotes) > 0) paste(betaBinomNotes, collapse = "; ") else ""
+                            )
+
+                            maxFeasible <- floor(max(totalPopulationData, na.rm = TRUE))
+                            maxFeasible <- min(maxFeasible, maxSamp)
+
+                            confLevels <- c(0.80, 0.90, 0.95, 0.99)
+                            for (i in seq_along(confLevels)) {
+                                conf <- confLevels[i]
+
+                                minSamples <- NA
+                                expectedYield <- NA
+
+                                if (maxFeasible > 0) {
+                                    for (n in 1:maxFeasible) {
+                                        # Calculate P(X >= target) correctly
+                                        prob_less_than_target <- 0
+                                        for (k in 0:(target - 1)) {
+                                            if (k <= n) {
+                                                prob_less_than_target <- prob_less_than_target + dbetabinom_pmf(k, n, alpha, beta)
+                                            }
+                                        }
+                                        cumProb <- 1 - prob_less_than_target
+
+                                        if (cumProb >= conf) {
+                                            minSamples <- n
+                                            expectedYield <- n * alpha / (alpha + beta)
+                                            if (!is.null(target) && !is.na(target)) {
+                                                expectedYield <- min(expectedYield, target)
+                                            }
+                                            break
+                                        }
+                                    }
+                                }
+
+                                betaBinomialRecommendTable$addRow(rowKey = paste0("conf_", i), values = list(
+                                    confidence = conf,
+                                    minSamples = minSamples,
+                                    expectedYield = expectedYield
+                                ))
+                            }
+                        } # End if (!modelRejected)
                     }
-                    }  # End if (!modelRejected)
-                }
-            }
-
-            # === Lymph Node Ratio and Staging Analysis ===
-            if (self$options$showLNAnalysis && !is.null(self$options$totalLymphNodes) && !is.null(self$options$positiveLymphNodes)) {
-
-                # Get LN variables
-                totalLymphNodesEsc <- private$.escapeVar(self$options$totalLymphNodes)
-                positiveLymphNodesEsc <- private$.escapeVar(self$options$positiveLymphNodes)
-
-                totalELN <- jmvcore::toNumeric(data[[totalLymphNodesEsc]])
-                positiveLN <- jmvcore::toNumeric(data[[positiveLymphNodesEsc]])
-
-                # Handle labelled data
-                if (is.factor(totalELN) || !is.null(attr(totalELN, 'labels'))) {
-                    totalELN <- as.numeric(as.character(totalELN))
-                }
-                if (is.factor(positiveLN) || !is.null(attr(positiveLN, 'labels'))) {
-                    positiveLN <- as.numeric(as.character(positiveLN))
                 }
 
-                # Filter to valid cases
-                totalELN <- totalELN[validCases]
-                positiveLN <- positiveLN[validCases]
-                if (!is.null(invalidCases)) {
-                    totalELN <- totalELN[!invalidCases]
-                    positiveLN <- positiveLN[!invalidCases]
-                }
+                # === Lymph Node Ratio and Staging Analysis ===
+                if (self$options$showLNAnalysis && !is.null(self$options$totalLymphNodes) && !is.null(self$options$positiveLymphNodes)) {
+                    # Get LN variables
+                    totalLymphNodesEsc <- private$.escapeVar(self$options$totalLymphNodes)
+                    positiveLymphNodesEsc <- private$.escapeVar(self$options$positiveLymphNodes)
 
-                # LN Analysis Text
-                lnAnalysisText <- self$results$lnAnalysisText
-                html <- "<h4>Lymph Node Ratio and Staging Analysis</h4>
+                    totalELN <- jmvcore::toNumeric(data[[totalLymphNodesEsc]])
+                    positiveLN <- jmvcore::toNumeric(data[[positiveLymphNodesEsc]])
+
+                    # Handle labelled data
+                    if (is.factor(totalELN) || !is.null(attr(totalELN, "labels"))) {
+                        totalELN <- as.numeric(as.character(totalELN))
+                    }
+                    if (is.factor(positiveLN) || !is.null(attr(positiveLN, "labels"))) {
+                        positiveLN <- as.numeric(as.character(positiveLN))
+                    }
+
+                    # Filter to valid cases
+                    totalELN <- totalELN[validCases]
+                    positiveLN <- positiveLN[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalELN <- totalELN[!invalidCases]
+                        positiveLN <- positiveLN[!invalidCases]
+                    }
+
+                    # LN Analysis Text
+                    lnAnalysisText <- self$results$lnAnalysisText
+                    html <- "<h4>Lymph Node Ratio and Staging Analysis</h4>
                 <p>Based on validated lymph node adequacy studies in pancreatic adenocarcinoma:</p>
                 <ul>
                     <li><b>Tomlinson et al. 2007 (UCLA/SEER, n=1,150 pN0):</b> minELN=15
                         <br>• 8-month survival advantage (27 vs 19 mo, P<0.001), HR=0.63
-                        <br>• 90% of pN1a disease detected with ≤15 nodes</li>
+                        <br>• 90% of pN1a disease detected with <=15 nodes</li>
                     <li><b>Pu et al. 2021 (Johns Hopkins, n=1,837):</b> minELN=12
-                        <br>• Binomial: P=1-(1-p)^n ≥0.95 → n=11.6 → 12
+                        <br>• Binomial: P=1-(1-p)^n >=0.95 → n=11.6 → 12
                         <br>• LNR classification (X-tile: 0.1, 0.3), LNR superior when ELN 12-28</li>
                     <li><b>Yoon et al. 2025 (Korean dual-cohort, n=1,252):</b> minELN=12-16
                         <br>• False N0 modeling: 16 LN → 18.9% false N0 (exploration)
@@ -3401,136 +3522,137 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <br>• Tomlinson JS, et al. <i>Arch Surg.</i> 2007;142(8):767-774.
                 <br>• Pu N, et al. <i>J Natl Compr Canc Netw.</i> 2021;19(9):1029-1036.
                 <br>• Yoon SJ, et al. <i>Ann Surg Oncol.</i> 2025. doi:10.1245/s10434-025-18029-7</p>"
-                if (self$options$showLNAnalysis) {
-                    lnAnalysisText$setContent(html)
+                    if (self$options$showLNAnalysis) {
+                        lnAnalysisText$setContent(html)
+                    }
+
+                    # Calculate LNR
+                    LNR <- positiveLN / totalELN
+
+                    # Get user-specified thresholds
+                    threshold1 <- self$options$lnrThreshold1
+                    threshold2 <- self$options$lnrThreshold2
+
+                    # LNR Classification (Pu2021 thresholds: 0.1 and 0.3)
+                    lnrStage <- character(length(LNR))
+                    lnrRange <- character(length(LNR))
+                    lnrStage[LNR == 0] <- "LNR0"
+                    lnrRange[LNR == 0] <- "0.000"
+                    lnrStage[LNR > 0 & LNR <= threshold1] <- "LNR1"
+                    lnrRange[LNR > 0 & LNR <= threshold1] <- sprintf("0.001-%.3f", threshold1)
+                    lnrStage[LNR > threshold1 & LNR <= threshold2] <- "LNR2"
+                    lnrRange[LNR > threshold1 & LNR <= threshold2] <- sprintf("%.3f-%.3f", threshold1, threshold2)
+                    lnrStage[LNR > threshold2] <- "LNR3"
+                    lnrRange[LNR > threshold2] <- sprintf("%.3f-1.000", threshold2)
+
+                    # Populate LNR Classification Table
+                    lnrClassification <- self$results$lnrClassification
+
+                    lnrGroups <- c("LNR0 (node-negative)", "LNR1 (low burden)", "LNR2 (moderate burden)", "LNR3 (high burden)")
+                    lnrRanges <- c(
+                        "0.000", sprintf("0.001-%.3f", threshold1),
+                        sprintf("%.3f-%.3f", threshold1, threshold2),
+                        sprintf("%.3f-1.000", threshold2)
+                    )
+
+                    for (i in 1:4) {
+                        cases_in_group <- sum(lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i], na.rm = TRUE)
+                        median_eln <- median(totalELN[lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i]], na.rm = TRUE)
+
+                        lnrClassification$addRow(rowKey = paste0("lnr_", i), values = list(
+                            lnrStage = lnrGroups[i],
+                            lnrRange = lnrRanges[i],
+                            cases = cases_in_group,
+                            percent = cases_in_group / nCases,
+                            medianELN = if (!is.na(median_eln)) median_eln else NA
+                        ))
+                    }
+
+                    # AJCC N Stage Classification
+                    nStage <- character(length(positiveLN))
+                    nStage[positiveLN == 0] <- "N0"
+                    nStage[positiveLN >= 1 & positiveLN <= 3] <- "N1"
+                    nStage[positiveLN >= 4] <- "N2"
+
+                    # Populate AJCC N Stage Table
+                    ajccNStage <- self$results$ajccNStage
+
+                    nStageGroups <- c("N0", "N1", "N2")
+                    nStageCriteria <- c("0 positive LN", "1-3 positive LN", ">=4 positive LN")
+
+                    for (i in 1:3) {
+                        cases_in_stage <- sum(nStage == nStageGroups[i], na.rm = TRUE)
+                        median_eln_stage <- median(totalELN[nStage == nStageGroups[i]], na.rm = TRUE)
+
+                        ajccNStage$addRow(rowKey = paste0("stage_", i), values = list(
+                            nStage = nStageGroups[i],
+                            criteria = nStageCriteria[i],
+                            cases = cases_in_stage,
+                            percent = cases_in_stage / nCases,
+                            medianELN = if (!is.na(median_eln_stage)) median_eln_stage else NA
+                        ))
+                    }
+
+                    # Adequacy Assessment by ELN Thresholds (Tomlinson2007 + Pu2021)
+                    adequacyByELN <- self$results$adequacyByELN
+
+                    # Define ELN groups (Tomlinson 2007, Pu 2021, Yoon 2025)
+                    eln_group <- character(length(totalELN))
+                    eln_group[totalELN < 9] <- "<9 ELN"
+                    eln_group[totalELN >= 9 & totalELN < 12] <- "9-11 ELN"
+                    eln_group[totalELN >= 12 & totalELN < 16] <- "12-15 ELN"
+                    eln_group[totalELN >= 16 & totalELN < 22] <- "16-21 ELN"
+                    eln_group[totalELN >= 22] <- ">=22 ELN"
+
+                    elnGroups <- c("<9 ELN", "9-11 ELN", "12-15 ELN", "16-21 ELN", ">=22 ELN")
+                    comments <- c(
+                        "Inadequate (false N0 >30%)",
+                        "Marginal (false N0 20-30%)",
+                        "Adequate - Minimum (Pu2021/Yoon2025: 12 LN, false N0 ~20%)",
+                        "Adequate - Quality (Tomlinson2007/Yoon2025: 16 LN, false N0 13-19%)",
+                        "Excellent (false N0 <13%, diminishing returns)"
+                    )
+
+                    for (i in 1:5) {
+                        cases_in_eln <- sum(eln_group == elnGroups[i], na.rm = TRUE)
+                        npositive_in_eln <- sum(positiveLN[eln_group == elnGroups[i]] > 0, na.rm = TRUE)
+
+                        adequacyByELN$addRow(rowKey = paste0("eln_", i), values = list(
+                            elnGroup = elnGroups[i],
+                            cases = cases_in_eln,
+                            percent = cases_in_eln / nCases,
+                            nPositive = npositive_in_eln,
+                            comment = comments[i]
+                        ))
+                    }
                 }
 
-                # Calculate LNR
-                LNR <- positiveLN / totalELN
+                # === Effect Size Measures ===
+                if (self$options$showEffectSizes && !is.null(self$options$totalLymphNodes)) {
+                    # Get total ELN data
+                    totalLymphNodesEsc <- private$.escapeVar(self$options$totalLymphNodes)
+                    totalELN <- jmvcore::toNumeric(data[[totalLymphNodesEsc]])
 
-                # Get user-specified thresholds
-                threshold1 <- self$options$lnrThreshold1
-                threshold2 <- self$options$lnrThreshold2
+                    # Handle labelled data
+                    if (is.factor(totalELN) || !is.null(attr(totalELN, "labels"))) {
+                        totalELN <- as.numeric(as.character(totalELN))
+                    }
 
-                # LNR Classification (Pu2021 thresholds: 0.1 and 0.3)
-                lnrStage <- character(length(LNR))
-                lnrRange <- character(length(LNR))
-                lnrStage[LNR == 0] <- "LNR0"
-                lnrRange[LNR == 0] <- "0.000"
-                lnrStage[LNR > 0 & LNR <= threshold1] <- "LNR1"
-                lnrRange[LNR > 0 & LNR <= threshold1] <- sprintf("0.001-%.3f", threshold1)
-                lnrStage[LNR > threshold1 & LNR <= threshold2] <- "LNR2"
-                lnrRange[LNR > threshold1 & LNR <= threshold2] <- sprintf("%.3f-%.3f", threshold1, threshold2)
-                lnrStage[LNR > threshold2] <- "LNR3"
-                lnrRange[LNR > threshold2] <- sprintf("%.3f-1.000", threshold2)
+                    # Filter to valid cases
+                    totalELN <- totalELN[validCases]
+                    if (!is.null(invalidCases)) {
+                        totalELN <- totalELN[!invalidCases]
+                    }
 
-                # Populate LNR Classification Table
-                lnrClassification <- self$results$lnrClassification
-
-                lnrGroups <- c("LNR0 (node-negative)", "LNR1 (low burden)", "LNR2 (moderate burden)", "LNR3 (high burden)")
-                lnrRanges <- c("0.000", sprintf("0.001-%.3f", threshold1),
-                              sprintf("%.3f-%.3f", threshold1, threshold2),
-                              sprintf("%.3f-1.000", threshold2))
-
-                for (i in 1:4) {
-                    cases_in_group <- sum(lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i], na.rm = TRUE)
-                    median_eln <- median(totalELN[lnrStage == c("LNR0", "LNR1", "LNR2", "LNR3")[i]], na.rm = TRUE)
-
-                    lnrClassification$addRow(rowKey=paste0("lnr_", i), values=list(
-                        lnrStage = lnrGroups[i],
-                        lnrRange = lnrRanges[i],
-                        cases = cases_in_group,
-                        percent = cases_in_group / nCases,
-                        medianELN = if (!is.na(median_eln)) median_eln else NA
-                    ))
-                }
-
-                # AJCC N Stage Classification
-                nStage <- character(length(positiveLN))
-                nStage[positiveLN == 0] <- "N0"
-                nStage[positiveLN >= 1 & positiveLN <= 3] <- "N1"
-                nStage[positiveLN >= 4] <- "N2"
-
-                # Populate AJCC N Stage Table
-                ajccNStage <- self$results$ajccNStage
-
-                nStageGroups <- c("N0", "N1", "N2")
-                nStageCriteria <- c("0 positive LN", "1-3 positive LN", "≥4 positive LN")
-
-                for (i in 1:3) {
-                    cases_in_stage <- sum(nStage == nStageGroups[i], na.rm = TRUE)
-                    median_eln_stage <- median(totalELN[nStage == nStageGroups[i]], na.rm = TRUE)
-
-                    ajccNStage$addRow(rowKey=paste0("stage_", i), values=list(
-                        nStage = nStageGroups[i],
-                        criteria = nStageCriteria[i],
-                        cases = cases_in_stage,
-                        percent = cases_in_stage / nCases,
-                        medianELN = if (!is.na(median_eln_stage)) median_eln_stage else NA
-                    ))
-                }
-
-                # Adequacy Assessment by ELN Thresholds (Tomlinson2007 + Pu2021)
-                adequacyByELN <- self$results$adequacyByELN
-
-                # Define ELN groups (Tomlinson 2007, Pu 2021, Yoon 2025)
-                eln_group <- character(length(totalELN))
-                eln_group[totalELN < 9] <- "<9 ELN"
-                eln_group[totalELN >= 9 & totalELN < 12] <- "9-11 ELN"
-                eln_group[totalELN >= 12 & totalELN < 16] <- "12-15 ELN"
-                eln_group[totalELN >= 16 & totalELN < 22] <- "16-21 ELN"
-                eln_group[totalELN >= 22] <- "≥22 ELN"
-
-                elnGroups <- c("<9 ELN", "9-11 ELN", "12-15 ELN", "16-21 ELN", "≥22 ELN")
-                comments <- c(
-                    "Inadequate (false N0 >30%)",
-                    "Marginal (false N0 20-30%)",
-                    "Adequate - Minimum (Pu2021/Yoon2025: 12 LN, false N0 ~20%)",
-                    "Adequate - Quality (Tomlinson2007/Yoon2025: 16 LN, false N0 13-19%)",
-                    "Excellent (false N0 <13%, diminishing returns)"
-                )
-
-                for (i in 1:5) {
-                    cases_in_eln <- sum(eln_group == elnGroups[i], na.rm = TRUE)
-                    npositive_in_eln <- sum(positiveLN[eln_group == elnGroups[i]] > 0, na.rm = TRUE)
-
-                    adequacyByELN$addRow(rowKey=paste0("eln_", i), values=list(
-                        elnGroup = elnGroups[i],
-                        cases = cases_in_eln,
-                        percent = cases_in_eln / nCases,
-                        nPositive = npositive_in_eln,
-                        comment = comments[i]
-                    ))
-                }
-            }
-
-            # === Effect Size Measures ===
-            if (self$options$showEffectSizes && !is.null(self$options$totalLymphNodes)) {
-
-                # Get total ELN data
-                totalLymphNodesEsc <- private$.escapeVar(self$options$totalLymphNodes)
-                totalELN <- jmvcore::toNumeric(data[[totalLymphNodesEsc]])
-
-                # Handle labelled data
-                if (is.factor(totalELN) || !is.null(attr(totalELN, 'labels'))) {
-                    totalELN <- as.numeric(as.character(totalELN))
-                }
-
-                # Filter to valid cases
-                totalELN <- totalELN[validCases]
-                if (!is.null(invalidCases)) {
-                    totalELN <- totalELN[!invalidCases]
-                }
-
-                # Effect Size Text
-                effectSizesText <- self$results$effectSizesText
-                html <- "<h4>Effect Size Measures</h4>
+                    # Effect Size Text
+                    effectSizesText <- self$results$effectSizesText
+                    html <- "<h4>Effect Size Measures</h4>
                 <p>Non-parametric effect size measures for adequacy comparisons.</p>
                 <p><b>Measures:</b></p>
                 <ul>
                     <li><b>Cliff's Delta:</b> Non-parametric effect size for ordinal data (range: -1 to +1)</li>
                     <li><b>Hodges-Lehmann Estimator:</b> Robust median difference between groups</li>
-                    <li><b>Odds Ratio (OR):</b> Odds of achieving adequacy (≥12 LN)</li>
+                    <li><b>Odds Ratio (OR):</b> Odds of achieving adequacy (>=12 LN)</li>
                     <li><b>Relative Risk (RR):</b> Relative probability of adequacy</li>
                     <li><b>Risk Difference (RD):</b> Absolute improvement in adequacy rate</li>
                 </ul>
@@ -3539,320 +3661,344 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <li>Cliff's Delta: |d| < 0.147 (negligible), 0.147-0.330 (small), 0.330-0.474 (medium), > 0.474 (large)</li>
                     <li>OR: 1.0 (no effect), 1.5-3.0 (small-moderate), 3.0-9.0 (moderate-large), > 9.0 (large)</li>
                 </ul>"
-                if (self$options$showEffectSizes) {
-                    effectSizesText$setContent(html)
-                }
-
-                # Define adequacy groups (e.g., <12 vs ≥12 LN)
-                adequate <- totalELN >= 12
-                inadequate <- totalELN < 12
-
-                # Cliff's Delta function
-                cliff_delta <- function(x, y) {
-                    concordant <- sum(outer(x, y, ">"))
-                    discordant <- sum(outer(x, y, "<"))
-                    delta <- (concordant - discordant) / (length(x) * length(y))
-                    return(delta)
-                }
-
-                # Hodges-Lehmann estimator function
-                hodges_lehmann <- function(x, y) {
-                    diffs <- outer(x, y, "-")
-                    median(diffs)
-                }
-
-                # Calculate effect sizes
-                effectSizesTable <- self$results$effectSizesTable
-
-                if (sum(adequate) > 0 && sum(inadequate) > 0) {
-                    # Cliff's Delta
-                    delta <- cliff_delta(totalELN[adequate], totalELN[inadequate])
-                    delta_interp <- if (abs(delta) < 0.147) "Negligible" else if (abs(delta) < 0.330) "Small" else if (abs(delta) < 0.474) "Medium" else "Large"
-
-                    effectSizesTable$addRow(rowKey="cliff_delta", values=list(
-                        measure = "Cliff's Delta",
-                        value = sprintf("%.3f", delta),
-                        interpretation = delta_interp
-                    ))
-
-                    # Hodges-Lehmann Estimator
-                    hl_est <- hodges_lehmann(totalELN[adequate], totalELN[inadequate])
-                    effectSizesTable$addRow(rowKey="hodges_lehmann", values=list(
-                        measure = "Hodges-Lehmann Estimator",
-                        value = sprintf("%.2f LN", hl_est),
-                        interpretation = "Median ELN difference"
-                    ))
-
-                    # Odds Ratio (OR) for achieving adequacy
-                    # Define outcome: achieved ≥12 LN
-                    # Could compare by different grouping variables if available
-                    # For now, calculate overall adequacy rate
-                    adequacy_rate <- sum(adequate) / nCases
-                    inadequacy_rate <- sum(inadequate) / nCases
-
-                    if (adequacy_rate > 0 && inadequacy_rate > 0) {
-                        odds_adequate <- adequacy_rate / (1 - adequacy_rate)
-                        odds_inadequate <- inadequacy_rate / (1 - inadequacy_rate)
-                        OR <- odds_adequate / odds_inadequate
-                        OR_interp <- if (OR < 1.5) "Negligible" else if (OR < 3.0) "Small-moderate" else if (OR < 9.0) "Moderate-large" else "Large"
-
-                        effectSizesTable$addRow(rowKey="odds_ratio", values=list(
-                            measure = "Odds Ratio (OR)",
-                            value = sprintf("%.2f", OR),
-                            interpretation = OR_interp
-                        ))
-
-                        # Relative Risk (RR)
-                        RR <- adequacy_rate / inadequacy_rate
-                        effectSizesTable$addRow(rowKey="relative_risk", values=list(
-                            measure = "Relative Risk (RR)",
-                            value = sprintf("%.2f", RR),
-                            interpretation = sprintf("%.0f%% relative improvement", (RR - 1) * 100)
-                        ))
-
-                        # Risk Difference (RD)
-                        RD <- adequacy_rate - inadequacy_rate
-                        effectSizesTable$addRow(rowKey="risk_diff", values=list(
-                            measure = "Risk Difference (RD)",
-                            value = sprintf("%.3f", RD),
-                            interpretation = sprintf("%.1f%% absolute improvement", RD * 100)
-                        ))
-                    } else {
-                        effectSizesTable$addRow(rowKey="or_rr_rd_na", values=list(
-                            measure = "OR/RR/RD",
-                            value = "N/A",
-                            interpretation = "Insufficient variability in adequacy"
-                        ))
+                    if (self$options$showEffectSizes) {
+                        effectSizesText$setContent(html)
                     }
 
-                    # Mean and median ELN comparison
-                    mean_adequate <- mean(totalELN[adequate], na.rm = TRUE)
-                    mean_inadequate <- mean(totalELN[inadequate], na.rm = TRUE)
-                    mean_diff <- mean_adequate - mean_inadequate
+                    # Define adequacy groups (e.g., <12 vs >=12 LN)
+                    adequate <- totalELN >= 12
+                    inadequate <- totalELN < 12
 
-                    effectSizesTable$addRow(rowKey="mean_eln", values=list(
-                        measure = "Mean ELN Difference",
-                        value = sprintf("%.2f - %.2f = %.2f", mean_adequate, mean_inadequate, mean_diff),
-                        interpretation = "Adequate vs Inadequate group"
-                    ))
+                    # Cliff's Delta function
+                    cliff_delta <- function(x, y) {
+                        concordant <- sum(outer(x, y, ">"))
+                        discordant <- sum(outer(x, y, "<"))
+                        delta <- (concordant - discordant) / (length(x) * length(y))
+                        return(delta)
+                    }
 
-                    median_adequate <- median(totalELN[adequate], na.rm = TRUE)
-                    median_inadequate <- median(totalELN[inadequate], na.rm = TRUE)
-                    median_diff <- median_adequate - median_inadequate
+                    # Hodges-Lehmann estimator function
+                    hodges_lehmann <- function(x, y) {
+                        diffs <- outer(x, y, "-")
+                        median(diffs)
+                    }
 
-                    effectSizesTable$addRow(rowKey="median_eln", values=list(
-                        measure = "Median ELN Difference",
-                        value = sprintf("%.1f - %.1f = %.1f", median_adequate, median_inadequate, median_diff),
-                        interpretation = "Adequate vs Inadequate group"
-                    ))
+                    # Calculate effect sizes
+                    effectSizesTable <- self$results$effectSizesTable
 
-                } else {
-                    effectSizesTable$addRow(rowKey="insufficient", values=list(
-                        measure = "Effect Size Calculation",
-                        value = "N/A",
-                        interpretation = "Insufficient cases in one or both adequacy groups"
-                    ))
+                    if (sum(adequate) > 0 && sum(inadequate) > 0) {
+                        # Cliff's Delta
+                        delta <- cliff_delta(totalELN[adequate], totalELN[inadequate])
+                        delta_interp <- if (abs(delta) < 0.147) "Negligible" else if (abs(delta) < 0.330) "Small" else if (abs(delta) < 0.474) "Medium" else "Large"
+
+                        effectSizesTable$addRow(rowKey = "cliff_delta", values = list(
+                            measure = "Cliff's Delta",
+                            value = sprintf("%.3f", delta),
+                            interpretation = delta_interp
+                        ))
+
+                        # Hodges-Lehmann Estimator
+                        hl_est <- hodges_lehmann(totalELN[adequate], totalELN[inadequate])
+                        effectSizesTable$addRow(rowKey = "hodges_lehmann", values = list(
+                            measure = "Hodges-Lehmann Estimator",
+                            value = sprintf("%.2f LN", hl_est),
+                            interpretation = "Median ELN difference"
+                        ))
+
+                        # Odds Ratio (OR) for achieving adequacy
+                        # Define outcome: achieved >=12 LN
+                        # Could compare by different grouping variables if available
+                        # For now, calculate overall adequacy rate
+                        adequacy_rate <- sum(adequate) / nCases
+                        inadequacy_rate <- sum(inadequate) / nCases
+
+                        if (adequacy_rate > 0 && inadequacy_rate > 0) {
+                            odds_adequate <- adequacy_rate / (1 - adequacy_rate)
+                            odds_inadequate <- inadequacy_rate / (1 - inadequacy_rate)
+                            OR <- odds_adequate / odds_inadequate
+                            OR_interp <- if (OR < 1.5) "Negligible" else if (OR < 3.0) "Small-moderate" else if (OR < 9.0) "Moderate-large" else "Large"
+
+                            effectSizesTable$addRow(rowKey = "odds_ratio", values = list(
+                                measure = "Odds Ratio (OR)",
+                                value = sprintf("%.2f", OR),
+                                interpretation = OR_interp
+                            ))
+
+                            # Relative Risk (RR)
+                            RR <- adequacy_rate / inadequacy_rate
+                            effectSizesTable$addRow(rowKey = "relative_risk", values = list(
+                                measure = "Relative Risk (RR)",
+                                value = sprintf("%.2f", RR),
+                                interpretation = sprintf("%.0f%% relative improvement", (RR - 1) * 100)
+                            ))
+
+                            # Risk Difference (RD)
+                            RD <- adequacy_rate - inadequacy_rate
+                            effectSizesTable$addRow(rowKey = "risk_diff", values = list(
+                                measure = "Risk Difference (RD)",
+                                value = sprintf("%.3f", RD),
+                                interpretation = sprintf("%.1f%% absolute improvement", RD * 100)
+                            ))
+                        } else {
+                            effectSizesTable$addRow(rowKey = "or_rr_rd_na", values = list(
+                                measure = "OR/RR/RD",
+                                value = "N/A",
+                                interpretation = "Insufficient variability in adequacy"
+                            ))
+                        }
+
+                        # Mean and median ELN comparison
+                        mean_adequate <- mean(totalELN[adequate], na.rm = TRUE)
+                        mean_inadequate <- mean(totalELN[inadequate], na.rm = TRUE)
+                        mean_diff <- mean_adequate - mean_inadequate
+
+                        effectSizesTable$addRow(rowKey = "mean_eln", values = list(
+                            measure = "Mean ELN Difference",
+                            value = sprintf("%.2f - %.2f = %.2f", mean_adequate, mean_inadequate, mean_diff),
+                            interpretation = "Adequate vs Inadequate group"
+                        ))
+
+                        median_adequate <- median(totalELN[adequate], na.rm = TRUE)
+                        median_inadequate <- median(totalELN[inadequate], na.rm = TRUE)
+                        median_diff <- median_adequate - median_inadequate
+
+                        effectSizesTable$addRow(rowKey = "median_eln", values = list(
+                            measure = "Median ELN Difference",
+                            value = sprintf("%.1f - %.1f = %.1f", median_adequate, median_inadequate, median_diff),
+                            interpretation = "Adequate vs Inadequate group"
+                        ))
+                    } else {
+                        effectSizesTable$addRow(rowKey = "insufficient", values = list(
+                            measure = "Effect Size Calculation",
+                            value = "N/A",
+                            interpretation = "Insufficient cases in one or both adequacy groups"
+                        ))
+                    }
                 }
-            }
 
-            # === Clinical Recommendations ===
-            recommendationTable <- NULL
-            primaryRecommendation <- NULL
-            fallbackRecommendation <- NULL
+                # === Clinical Recommendations ===
+                recommendationTable <- NULL
+                primaryRecommendation <- NULL
+                fallbackRecommendation <- NULL
 
-            if (length(recommendations) > 0) {
-                recommendationTable <- do.call(rbind, lapply(recommendations, function(rec) {
-                    data.frame(
-                        method = rec$method,
-                        description = rec$description,
-                        minSamples = ifelse(is.null(rec$minSamples), NA, rec$minSamples),
-                        achievedProb = rec$achievedProb,
-                        bestProb = rec$bestProb,
-                        bestN = rec$bestN,
-                        status = rec$status,
-                        detail = ifelse(is.null(rec$detail), "", rec$detail),
-                        priority = rec$priority,
-                        ciLower = rec$ciLower,
-                        ciUpper = rec$ciUpper,
-                        stringsAsFactors = FALSE
+                if (length(recommendations) > 0) {
+                    recommendationTable <- do.call(rbind, lapply(recommendations, function(rec) {
+                        data.frame(
+                            method = rec$method,
+                            description = rec$description,
+                            minSamples = ifelse(is.null(rec$minSamples), NA, rec$minSamples),
+                            achievedProb = rec$achievedProb,
+                            bestProb = rec$bestProb,
+                            bestN = rec$bestN,
+                            status = rec$status,
+                            detail = ifelse(is.null(rec$detail), "", rec$detail),
+                            priority = rec$priority,
+                            ciLower = rec$ciLower,
+                            ciUpper = rec$ciUpper,
+                            stringsAsFactors = FALSE
+                        )
+                    }))
+
+                    recommendationTable$priority <- as.numeric(recommendationTable$priority)
+                    recommendationTable$minSamples <- as.numeric(recommendationTable$minSamples)
+                    recommendationTable$achievedProb <- as.numeric(recommendationTable$achievedProb)
+                    recommendationTable$bestProb <- as.numeric(recommendationTable$bestProb)
+                    recommendationTable$bestN <- as.numeric(recommendationTable$bestN)
+                    recommendationTable$ciLower <- as.numeric(recommendationTable$ciLower)
+                    recommendationTable$ciUpper <- as.numeric(recommendationTable$ciUpper)
+
+                    recommendationTable <- recommendationTable[order(recommendationTable$priority, recommendationTable$method), , drop = FALSE]
+
+                    validPrimary <- recommendationTable[!is.na(recommendationTable$minSamples), , drop = FALSE]
+                    if (nrow(validPrimary) > 0) {
+                        ordPrimary <- order(validPrimary$priority, validPrimary$minSamples)
+                        primaryRecommendation <- validPrimary[ordPrimary[1], , drop = FALSE]
+                    }
+
+                    fallbackCandidates <- recommendationTable[!is.na(recommendationTable$bestProb), , drop = FALSE]
+                    if (nrow(fallbackCandidates) > 0) {
+                        ordFallback <- order(-fallbackCandidates$bestProb, fallbackCandidates$priority, fallbackCandidates$method)
+                        fallbackRecommendation <- fallbackCandidates[ordFallback[1], , drop = FALSE]
+                    }
+                }
+
+                recommendText <- self$results$recommendText
+
+                # Get analysis context for tailored recommendations
+                analysisContext <- self$options$analysisContext
+
+                if (!is.null(primaryRecommendation) && nrow(primaryRecommendation) == 1) {
+                    rec <- primaryRecommendation
+                    detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
+
+                    # Context-specific recommendation text
+                    contextHeader <- switch(analysisContext,
+                        "tumor" = "Tumor Sampling Recommendations",
+                        "lymphnode" = "Lymph Node Dissection Recommendations",
+                        "omentum" = "Omentum Sampling Recommendations",
+                        "margin" = "Margin Sampling Recommendations",
+                        "Clinical Recommendations" # default for general
                     )
-                }))
 
-                recommendationTable$priority <- as.numeric(recommendationTable$priority)
-                recommendationTable$minSamples <- as.numeric(recommendationTable$minSamples)
-                recommendationTable$achievedProb <- as.numeric(recommendationTable$achievedProb)
-                recommendationTable$bestProb <- as.numeric(recommendationTable$bestProb)
-                recommendationTable$bestN <- as.numeric(recommendationTable$bestN)
-                recommendationTable$ciLower <- as.numeric(recommendationTable$ciLower)
-                recommendationTable$ciUpper <- as.numeric(recommendationTable$ciUpper)
-
-                recommendationTable <- recommendationTable[order(recommendationTable$priority, recommendationTable$method), , drop = FALSE]
-
-                validPrimary <- recommendationTable[!is.na(recommendationTable$minSamples), , drop = FALSE]
-                if (nrow(validPrimary) > 0) {
-                    ordPrimary <- order(validPrimary$priority, validPrimary$minSamples)
-                    primaryRecommendation <- validPrimary[ordPrimary[1], , drop = FALSE]
-                }
-
-                fallbackCandidates <- recommendationTable[!is.na(recommendationTable$bestProb), , drop = FALSE]
-                if (nrow(fallbackCandidates) > 0) {
-                    ordFallback <- order(-fallbackCandidates$bestProb, fallbackCandidates$priority, fallbackCandidates$method)
-                    fallbackRecommendation <- fallbackCandidates[ordFallback[1], , drop = FALSE]
-                }
-            }
-
-            recommendText <- self$results$recommendText
-
-            # Get analysis context for tailored recommendations
-            analysisContext <- self$options$analysisContext
-
-            if (!is.null(primaryRecommendation) && nrow(primaryRecommendation) == 1) {
-                rec <- primaryRecommendation
-                detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-
-                # Context-specific recommendation text
-                contextHeader <- switch(analysisContext,
-                    "tumor" = "Tumor Sampling Recommendations",
-                    "lymphnode" = "Lymph Node Dissection Recommendations",
-                    "omentum" = "Omentum Sampling Recommendations",
-                    "margin" = "Margin Sampling Recommendations",
-                    "Clinical Recommendations"  # default for general
-                )
-
-                contextExample <- switch(analysisContext,
-                    "tumor" = sprintf("<p style='font-size: 13px; color: #666; font-style: italic; margin: 10px 0;'>
+                    contextExample <- switch(analysisContext,
+                        "tumor" = sprintf("<p style='font-size: 13px; color: #666; font-style: italic; margin: 10px 0;'>
                         Example: To achieve 95%% sensitivity for detecting venous invasion (VI), examine at least %d tumor samples.
                         This recommendation is based on empirical detection patterns from similar cases.</p>", rec$minSamples),
-                    "lymphnode" = sprintf("<p style='font-size: 13px; color: #666; font-style: italic; margin: 10px 0;'>
+                        "lymphnode" = sprintf("<p style='font-size: 13px; color: #666; font-style: italic; margin: 10px 0;'>
                         Example: For adequate lymph node dissection with 95%% confidence, examine at least %d lymph nodes.</p>", rec$minSamples),
-                    ""  # default: no example
-                )
+                        "" # default: no example
+                    )
 
-                html <- sprintf("<h4>%s</h4>
+                    html <- sprintf(
+                        "<h4>%s</h4>
                 <p><b>Recommended minimum samples for %.0f%% sensitivity:</b> %d (based on %s model)%s.</p>
                 <p>This plan achieves an estimated sensitivity of <b>%.1f%%</b> using the %s.</p>
                 %s",
-                    contextHeader,
-                    targetConf * 100,
-                    rec$minSamples,
-                    rec$method,
-                    detailSuffix,
-                    rec$achievedProb * 100,
-                    rec$description,
-                    contextExample)
-                if (nzchar(obsListHtml)) {
-                    html <- paste0(html,
-                        "<p><b>Observed cumulative detection:</b></p><ul>",
-                        obsListHtml,
-                        "</ul>")
-                }
-            } else if (!is.null(fallbackRecommendation) && nrow(fallbackRecommendation) == 1) {
-                rec <- fallbackRecommendation
-                detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                bestProb <- rec$bestProb * 100
-                bestSamples <- rec$bestN
-                html <- sprintf("<h4>Clinical Recommendations</h4>
+                        contextHeader,
+                        targetConf * 100,
+                        rec$minSamples,
+                        rec$method,
+                        detailSuffix,
+                        rec$achievedProb * 100,
+                        rec$description,
+                        contextExample
+                    )
+                    if (nzchar(obsListHtml)) {
+                        html <- paste0(
+                            html,
+                            "<p><b>Observed cumulative detection:</b></p><ul>",
+                            obsListHtml,
+                            "</ul>"
+                        )
+                    }
+                } else if (!is.null(fallbackRecommendation) && nrow(fallbackRecommendation) == 1) {
+                    rec <- fallbackRecommendation
+                    detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
+                    bestProb <- rec$bestProb * 100
+                    bestSamples <- rec$bestN
+                    html <- sprintf(
+                        "<h4>Clinical Recommendations</h4>
                 <p>Target sensitivity of %.0f%% could not be achieved within the evaluated range.</p>
                 <p><b>Best observed performance:</b> %s model%s reached %.1f%% at %d samples.</p>",
-                    targetConf * 100,
-                    rec$method,
-                    detailSuffix,
-                    bestProb,
-                    bestSamples)
-                if (nzchar(obsListHtml)) {
-                    html <- paste0(html,
-                        "<p><b>Observed cumulative detection:</b></p><ul>",
-                        obsListHtml,
-                        "</ul>")
-                }
-            } else {
-                html <- "<p>No sufficient information to produce clinical recommendations.</p>"
-            }
-
-            if (self$options$showRecommendText) {
-                recommendText$setContent(html)
-            }
-
-            keyResults <- self$results$keyResults
-
-            targetLine <- sprintf("<p style='%s %s'><b>Target confidence:</b> %.0f%%%%</p>",
-                private$.styleConstants$fontSize14,
-                private$.styleConstants$colorPrimary,
-                targetConf * 100)
-
-            if (!is.null(primaryRecommendation) && nrow(primaryRecommendation) == 1) {
-                rec <- primaryRecommendation
-                detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                primaryLine <- sprintf("<p style='%s %s'><b>Recommended minimum samples:</b> %d (%s) achieving %.1f%%%% sensitivity%s.</p>",
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$colorPrimary,
-                    rec$minSamples,
-                    rec$method,
-                    rec$achievedProb * 100,
-                    detailSuffix)
-            } else if (!is.null(fallbackRecommendation) && nrow(fallbackRecommendation) == 1) {
-                rec <- fallbackRecommendation
-                detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                primaryLine <- sprintf("<p style='%s %s'><b>Target not reached:</b> Best performance is %.1f%%%% at %d samples using %s%s.</p>",
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$colorPrimary,
-                    rec$bestProb * 100,
-                    rec$bestN,
-                    rec$method,
-                    detailSuffix)
-            } else {
-                primaryLine <- sprintf("<p style='%s %s'>No valid models were available to evaluate sampling adequacy.</p>",
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$colorPrimary)
-            }
-
-            methodListHtml <- ""
-            if (!is.null(recommendationTable) && nrow(recommendationTable) > 0) {
-                methodItems <- character(nrow(recommendationTable))
-                for (i in seq_len(nrow(recommendationTable))) {
-                    rec <- recommendationTable[i, ]
-                    detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
-                    methodItems[i] <- sprintf("<li><b>%s:</b> %s%s</li>",
+                        targetConf * 100,
                         rec$method,
-                        rec$status,
-                        detailSuffix)
+                        detailSuffix,
+                        bestProb,
+                        bestSamples
+                    )
+                    if (nzchar(obsListHtml)) {
+                        html <- paste0(
+                            html,
+                            "<p><b>Observed cumulative detection:</b></p><ul>",
+                            obsListHtml,
+                            "</ul>"
+                        )
+                    }
+                } else {
+                    html <- "<p>No sufficient information to produce clinical recommendations.</p>"
                 }
-                methodListHtml <- paste(methodItems, collapse = "")
-            }
 
-            comparisonSection <- if (nzchar(methodListHtml)) {
-                sprintf("<p style='%s %s'><b>Model comparison:</b></p><ul style='%s %s'>%s</ul>",
+                if (self$options$showRecommendText) {
+                    recommendText$setContent(html)
+                }
+
+                keyResults <- self$results$keyResults
+
+                targetLine <- sprintf(
+                    "<p style='%s %s'><b>Target confidence:</b> %.0f%%%%</p>",
                     private$.styleConstants$fontSize14,
                     private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    methodListHtml)
-            } else ""
+                    targetConf * 100
+                )
 
-            keyResultsHtml <- sprintf("<div style='%s %s %s %s %s'>%s%s%s</div>",
-                private$.styleConstants$font,
-                private$.styleConstants$bgLight,
-                private$.styleConstants$borderPrimary,
-                private$.styleConstants$padding15,
-                private$.styleConstants$margin10,
-                targetLine,
-                primaryLine,
-                comparisonSection)
+                if (!is.null(primaryRecommendation) && nrow(primaryRecommendation) == 1) {
+                    rec <- primaryRecommendation
+                    detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
+                    primaryLine <- sprintf(
+                        "<p style='%s %s'><b>Recommended minimum samples:</b> %d (%s) achieving %.1f%%%% sensitivity%s.</p>",
+                        private$.styleConstants$fontSize15,
+                        private$.styleConstants$colorPrimary,
+                        rec$minSamples,
+                        rec$method,
+                        rec$achievedProb * 100,
+                        detailSuffix
+                    )
+                } else if (!is.null(fallbackRecommendation) && nrow(fallbackRecommendation) == 1) {
+                    rec <- fallbackRecommendation
+                    detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
+                    primaryLine <- sprintf(
+                        "<p style='%s %s'><b>Target not reached:</b> Best performance is %.1f%%%% at %d samples using %s%s.</p>",
+                        private$.styleConstants$fontSize15,
+                        private$.styleConstants$colorPrimary,
+                        rec$bestProb * 100,
+                        rec$bestN,
+                        rec$method,
+                        detailSuffix
+                    )
+                } else {
+                    primaryLine <- sprintf(
+                        "<p style='%s %s'>No valid models were available to evaluate sampling adequacy.</p>",
+                        private$.styleConstants$fontSize15,
+                        private$.styleConstants$colorPrimary
+                    )
+                }
 
-            if (self$options$showKeyResults) {
-                keyResults$setContent(keyResultsHtml)
-            }
+                methodListHtml <- ""
+                if (!is.null(recommendationTable) && nrow(recommendationTable) > 0) {
+                    methodItems <- character(nrow(recommendationTable))
+                    for (i in seq_len(nrow(recommendationTable))) {
+                        rec <- recommendationTable[i, ]
+                        detailSuffix <- if (!is.na(rec$detail) && nzchar(rec$detail)) sprintf(" (%s)", rec$detail) else ""
+                        methodItems[i] <- sprintf(
+                            "<li><b>%s:</b> %s%s</li>",
+                            rec$method,
+                            rec$status,
+                            detailSuffix
+                        )
+                    }
+                    methodListHtml <- paste(methodItems, collapse = "")
+                }
 
-            # === Clinical Summary (Plain Language) ===
-            if (self$options$showClinicalSummary) {
-                clinicalSummary <- self$results$clinicalSummary
+                comparisonSection <- if (nzchar(methodListHtml)) {
+                    sprintf(
+                        "<p style='%s %s'><b>Model comparison:</b></p><ul style='%s %s'>%s</ul>",
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        private$.styleConstants$fontSize14,
+                        private$.styleConstants$colorPrimary,
+                        methodListHtml
+                    )
+                } else {
+                    ""
+                }
 
-                if (!self$options$showBootstrap || is.null(bootstrapMeansVec)) {
-                    # Provide basic summary without bootstrap
-                    perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
-                    medianDetectionText <- if (!is.na(medianFirst)) sprintf("%d", medianFirst) else "N/A"
+                keyResultsHtml <- sprintf(
+                    "<div style='%s %s %s %s %s'>%s%s%s</div>",
+                    private$.styleConstants$font,
+                    private$.styleConstants$bgLight,
+                    private$.styleConstants$borderPrimary,
+                    private$.styleConstants$padding15,
+                    private$.styleConstants$margin10,
+                    targetLine,
+                    primaryLine,
+                    comparisonSection
+                )
 
-                    html <- sprintf("<div style='%s %s %s %s'>
+                if (self$options$showKeyResults) {
+                    keyResults$setContent(keyResultsHtml)
+                }
+
+                # === Clinical Summary (Plain Language) ===
+                if (self$options$showClinicalSummary) {
+                    clinicalSummary <- self$results$clinicalSummary
+
+                    if (!self$options$showBootstrap || is.null(bootstrapMeansVec)) {
+                        # Provide basic summary without bootstrap
+                        perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
+                        medianDetectionText <- if (!is.na(medianFirst)) sprintf("%d", medianFirst) else "N/A"
+
+                        html <- sprintf(
+                            "<div style='%s %s %s %s'>
                         <h3 style='%s %s margin: 0 0 15px 0;'>Clinical Summary</h3>
                         <div style='%s %s %s %s'>
                             <h4 style='%s %s margin: 0 0 10px 0;'>Study Overview</h4>
@@ -3874,183 +4020,189 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             </p>
                         </div>
                     </div>",
-                    private$.styleConstants$font, private$.styleConstants$bgLighter,
-                    private$.styleConstants$borderPrimary, private$.styleConstants$padding20,
-                    private$.styleConstants$colorPrimary, private$.styleConstants$fontSize18,
-                    private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding15, private$.styleConstants$margin10,
-                    private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize14,
-                    nCases, totalExamined, meanSamplesPerCase,
-                    private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding15, private$.styleConstants$margin10,
-                    private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize14,
-                    nDetected, nCases, (nDetected / nCases) * 100,
-                    medianDetectionText, perSampleText,
-                    private$.styleConstants$bgLight, private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding10, private$.styleConstants$margin10,
-                    private$.styleConstants$fontSize13)
+                            private$.styleConstants$font, private$.styleConstants$bgLighter,
+                            private$.styleConstants$borderPrimary, private$.styleConstants$padding20,
+                            private$.styleConstants$colorPrimary, private$.styleConstants$fontSize18,
+                            private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding15, private$.styleConstants$margin10,
+                            private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
+                            private$.styleConstants$fontSize14,
+                            nCases, totalExamined, meanSamplesPerCase,
+                            private$.styleConstants$bgWhite, private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding15, private$.styleConstants$margin10,
+                            private$.styleConstants$fontSize15, private$.styleConstants$colorPrimary,
+                            private$.styleConstants$fontSize14,
+                            nDetected, nCases, (nDetected / nCases) * 100,
+                            medianDetectionText, perSampleText,
+                            private$.styleConstants$bgLight, private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding10, private$.styleConstants$margin10,
+                            private$.styleConstants$fontSize13
+                        )
 
-                    clinicalSummary$setContent(html)
-                } else if (is.na(bootstrapTargetIdx) || length(bootstrapTargetIdx) == 0) {
-                    html <- sprintf("<div style='%s %s %s %s'>
+                        clinicalSummary$setContent(html)
+                    } else if (is.na(bootstrapTargetIdx) || length(bootstrapTargetIdx) == 0) {
+                        html <- sprintf(
+                            "<div style='%s %s %s %s'>
                         <h3 style='%s %s margin: 0 0 15px 0;'>Clinical Summary</h3>
                         <p style='%s margin: 0;'>
                             Target confidence (%.0f%%) not achievable with evaluated sample sizes (maximum: %d).
                             Consider increasing 'Maximum samples to evaluate' parameter.
                         </p>
                     </div>",
-                    private$.styleConstants$font, private$.styleConstants$bgLight,
-                    private$.styleConstants$borderPrimary, private$.styleConstants$padding15,
-                    private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
-                    private$.styleConstants$fontSize14,
-                    targetConf * 100, maxSamp)
+                            private$.styleConstants$font, private$.styleConstants$bgLight,
+                            private$.styleConstants$borderPrimary, private$.styleConstants$padding15,
+                            private$.styleConstants$colorPrimary, private$.styleConstants$fontSize16,
+                            private$.styleConstants$fontSize14,
+                            targetConf * 100, maxSamp
+                        )
 
-                    clinicalSummary$setContent(html)
-                } else {
-                    # Get key metrics (safe now)
-                    ciLower <- bootstrapCILowerVec[bootstrapTargetIdx]
-                    ciUpper <- bootstrapCIUpperVec[bootstrapTargetIdx]
-                    meanAtTarget <- bootstrapMeansVec[bootstrapTargetIdx]
+                        clinicalSummary$setContent(html)
+                    } else {
+                        # Get key metrics (safe now)
+                        ciLower <- bootstrapCILowerVec[bootstrapTargetIdx]
+                        ciUpper <- bootstrapCIUpperVec[bootstrapTargetIdx]
+                        meanAtTarget <- bootstrapMeansVec[bootstrapTargetIdx]
 
-                    perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
-                    obs3Text <- if (!is.na(obs3)) sprintf("%.1f%%", obs3) else "Not available"
+                        perSampleText <- if (!is.na(pEstimate)) sprintf("%.1f%%", pEstimate * 100) else "Not estimated"
+                        obs3Text <- if (!is.na(obs3)) sprintf("%.1f%%", obs3) else "Not available"
 
-                outerStyle <- private$.buildStyle(
-                    private$.styleConstants$font,
-                    private$.styleConstants$bgLighter,
-                    private$.styleConstants$borderPrimary,
-                    private$.styleConstants$padding20,
-                    private$.styleConstants$margin20
-                )
-                headerStyle <- private$.buildStyle(
-                    private$.styleConstants$colorPrimary,
-                    private$.styleConstants$fontSize18,
-                    "margin: 0 0 15px 0;"
-                )
-                overviewDivStyle <- private$.buildStyle(
-                    private$.styleConstants$bgWhite,
-                    private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding15,
-                    private$.styleConstants$margin10
-                )
-                overviewHeadingStyle <- private$.buildStyle(
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                )
-                overviewBodyStyle <- private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 5px 0;"
-                )
-                overviewBodyText <- sprintf(
-                    "Pathology sampling adequacy analysis of <strong>%d cases</strong> to determine the minimum number of samples required to reliably detect lesions.",
-                    nCases)
+                        outerStyle <- private$.buildStyle(
+                            private$.styleConstants$font,
+                            private$.styleConstants$bgLighter,
+                            private$.styleConstants$borderPrimary,
+                            private$.styleConstants$padding20,
+                            private$.styleConstants$margin20
+                        )
+                        headerStyle <- private$.buildStyle(
+                            private$.styleConstants$colorPrimary,
+                            private$.styleConstants$fontSize18,
+                            "margin: 0 0 15px 0;"
+                        )
+                        overviewDivStyle <- private$.buildStyle(
+                            private$.styleConstants$bgWhite,
+                            private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding15,
+                            private$.styleConstants$margin10
+                        )
+                        overviewHeadingStyle <- private$.buildStyle(
+                            private$.styleConstants$fontSize15,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0 0 10px 0;"
+                        )
+                        overviewBodyStyle <- private$.buildStyle(
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0 0 5px 0;"
+                        )
+                        overviewBodyText <- sprintf(
+                            "Pathology sampling adequacy analysis of <strong>%d cases</strong> to determine the minimum number of samples required to reliably detect lesions.",
+                            nCases
+                        )
 
-                keyDivStyle <- private$.buildStyle(
-                    private$.styleConstants$bgWhite,
-                    private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding15,
-                    private$.styleConstants$margin10
-                )
-                keyHeadingStyle <- private$.buildStyle(
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0 0 10px 0;"
-                )
-                keyListStyle <- private$.buildStyle(
-                    "margin: 0;",
-                    "padding-left: 20px;",
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary
-                )
-                bootstrapIterationsText <- sprintf("%.0fk", nBoot / 1000)
-                bootstrapSensitivityText <- sprintf("%.1f%%", meanAtTarget * 100)
-                bootstrapCIText <- sprintf("%.1f%%-%.1f%%", ciLower * 100, ciUpper * 100)
-                keyFindingsItems <- paste0(
-                    sprintf("<li style='margin: 5px 0;'>Detection probability per sample: <strong>%s</strong></li>", perSampleText),
-                    sprintf("<li style='margin: 5px 0;'>Recommended samples for %.0f%%%% sensitivity: <strong>%d samples</strong></li>", targetConf * 100, bootstrapTargetIdx),
-                    sprintf("<li style='margin: 5px 0;'>Bootstrap validation (%s iterations): <strong>%s</strong> sensitivity (95%%%% CI: %s)</li>", bootstrapIterationsText, bootstrapSensitivityText, bootstrapCIText),
-                    sprintf("<li style='margin: 5px 0;'>First 3 samples detected: <strong>%s</strong> of all cases</li>", obs3Text)
-                )
+                        keyDivStyle <- private$.buildStyle(
+                            private$.styleConstants$bgWhite,
+                            private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding15,
+                            private$.styleConstants$margin10
+                        )
+                        keyHeadingStyle <- private$.buildStyle(
+                            private$.styleConstants$fontSize15,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0 0 10px 0;"
+                        )
+                        keyListStyle <- private$.buildStyle(
+                            "margin: 0;",
+                            "padding-left: 20px;",
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary
+                        )
+                        bootstrapIterationsText <- sprintf("%.0fk", nBoot / 1000)
+                        bootstrapSensitivityText <- sprintf("%.1f%%", meanAtTarget * 100)
+                        bootstrapCIText <- sprintf("%.1f%%-%.1f%%", ciLower * 100, ciUpper * 100)
+                        keyFindingsItems <- paste0(
+                            sprintf("<li style='margin: 5px 0;'>Detection probability per sample: <strong>%s</strong></li>", perSampleText),
+                            sprintf("<li style='margin: 5px 0;'>Recommended samples for %.0f%%%% sensitivity: <strong>%d samples</strong></li>", targetConf * 100, bootstrapTargetIdx),
+                            sprintf("<li style='margin: 5px 0;'>Bootstrap validation (%s iterations): <strong>%s</strong> sensitivity (95%%%% CI: %s)</li>", bootstrapIterationsText, bootstrapSensitivityText, bootstrapCIText),
+                            sprintf("<li style='margin: 5px 0;'>First 3 samples detected: <strong>%s</strong> of all cases</li>", obs3Text)
+                        )
 
-                reportDivStyle <- private$.buildStyle(
-                    private$.styleConstants$bgLight,
-                    private$.styleConstants$borderLeft,
-                    private$.styleConstants$padding10,
-                    private$.styleConstants$margin10
-                )
-                reportHeadingStyle <- private$.buildStyle(
-                    private$.styleConstants$fontSize13,
-                    private$.styleConstants$colorSecondary,
-                    "margin: 0 0 8px 0;"
-                )
-                reportInnerStyle <- private$.buildStyle(
-                    private$.styleConstants$bgWhite,
-                    private$.styleConstants$borderSecondary,
-                    private$.styleConstants$padding10,
-                    private$.styleConstants$margin10
-                )
-                reportParagraphStyle <- private$.buildStyle(
-                    private$.styleConstants$fontSize14,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0; font-style: italic;"
-                )
-                reportParagraph <- sprintf(
-                    "\"Sampling adequacy analysis of %d cases showed a per-sample detection probability of %s. To achieve %.0f%%%% sensitivity, a minimum of %d samples is recommended based on binomial probability modeling and bootstrap validation (%d iterations, 95%%%% CI: %.1f%%%%-%.1f%%%%). Observed data showed %s of lesions detected within first 3 samples.\"",
-                    nCases,
-                    perSampleText,
-                    targetConf * 100,
-                    bootstrapTargetIdx,
-                    nBoot,
-                    ciLower * 100,
-                    ciUpper * 100,
-                    obs3Text)
+                        reportDivStyle <- private$.buildStyle(
+                            private$.styleConstants$bgLight,
+                            private$.styleConstants$borderLeft,
+                            private$.styleConstants$padding10,
+                            private$.styleConstants$margin10
+                        )
+                        reportHeadingStyle <- private$.buildStyle(
+                            private$.styleConstants$fontSize13,
+                            private$.styleConstants$colorSecondary,
+                            "margin: 0 0 8px 0;"
+                        )
+                        reportInnerStyle <- private$.buildStyle(
+                            private$.styleConstants$bgWhite,
+                            private$.styleConstants$borderSecondary,
+                            private$.styleConstants$padding10,
+                            private$.styleConstants$margin10
+                        )
+                        reportParagraphStyle <- private$.buildStyle(
+                            private$.styleConstants$fontSize14,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0; font-style: italic;"
+                        )
+                        reportParagraph <- sprintf(
+                            "\"Sampling adequacy analysis of %d cases showed a per-sample detection probability of %s. To achieve %.0f%%%% sensitivity, a minimum of %d samples is recommended based on binomial probability modeling and bootstrap validation (%d iterations, 95%%%% CI: %.1f%%%%-%.1f%%%%). Observed data showed %s of lesions detected within first 3 samples.\"",
+                            nCases,
+                            perSampleText,
+                            targetConf * 100,
+                            bootstrapTargetIdx,
+                            nBoot,
+                            ciLower * 100,
+                            ciUpper * 100,
+                            obs3Text
+                        )
 
-                recommendDivStyle <- private$.buildStyle(
-                    private$.styleConstants$bgLight,
-                    private$.styleConstants$borderPrimary,
-                    private$.styleConstants$padding15
-                )
-                recommendParagraphStyle <- private$.buildStyle(
-                    private$.styleConstants$fontSize15,
-                    private$.styleConstants$colorPrimary,
-                    "margin: 0;"
-                )
+                        recommendDivStyle <- private$.buildStyle(
+                            private$.styleConstants$bgLight,
+                            private$.styleConstants$borderPrimary,
+                            private$.styleConstants$padding15
+                        )
+                        recommendParagraphStyle <- private$.buildStyle(
+                            private$.styleConstants$fontSize15,
+                            private$.styleConstants$colorPrimary,
+                            "margin: 0;"
+                        )
 
-                html <- paste0(
-                    "<div style='", outerStyle, "'>",
-                    "<h3 style='", headerStyle, "'>Clinical Summary</h3>",
-                    "<div style='", overviewDivStyle, "'>",
-                    "<p style='", overviewHeadingStyle, "'><strong>Analysis Overview:</strong></p>",
-                    "<p style='", overviewBodyStyle, "'>", overviewBodyText, "</p>",
-                    "</div>",
-                    "<div style='", keyDivStyle, "'>",
-                    "<p style='", keyHeadingStyle, "'><strong>Key Findings:</strong></p>",
-                    "<ul style='", keyListStyle, "'>", keyFindingsItems, "</ul>",
-                    "</div>",
-                    "<div style='", reportDivStyle, "'>",
-                    "<p style='", reportHeadingStyle, "'><em>Copy-ready text for reports:</em></p>",
-                    "<div style='", reportInnerStyle, "'>",
-                    "<p style='", reportParagraphStyle, "'>", reportParagraph, "</p>",
-                    "</div>",
-                    "</div>",
-                    "<div style='", recommendDivStyle, "'>",
-                    "<p style='", recommendParagraphStyle, "'><strong>Clinical Recommendation:</strong> Submit a minimum of <strong>",
-                    bootstrapTargetIdx, " samples</strong> to ensure adequate diagnostic sensitivity in routine practice.</p>",
-                    "</div>",
-                    "</div>")
+                        html <- paste0(
+                            "<div style='", outerStyle, "'>",
+                            "<h3 style='", headerStyle, "'>Clinical Summary</h3>",
+                            "<div style='", overviewDivStyle, "'>",
+                            "<p style='", overviewHeadingStyle, "'><strong>Analysis Overview:</strong></p>",
+                            "<p style='", overviewBodyStyle, "'>", overviewBodyText, "</p>",
+                            "</div>",
+                            "<div style='", keyDivStyle, "'>",
+                            "<p style='", keyHeadingStyle, "'><strong>Key Findings:</strong></p>",
+                            "<ul style='", keyListStyle, "'>", keyFindingsItems, "</ul>",
+                            "</div>",
+                            "<div style='", reportDivStyle, "'>",
+                            "<p style='", reportHeadingStyle, "'><em>Copy-ready text for reports:</em></p>",
+                            "<div style='", reportInnerStyle, "'>",
+                            "<p style='", reportParagraphStyle, "'>", reportParagraph, "</p>",
+                            "</div>",
+                            "</div>",
+                            "<div style='", recommendDivStyle, "'>",
+                            "<p style='", recommendParagraphStyle, "'><strong>Clinical Recommendation:</strong> Submit a minimum of <strong>",
+                            bootstrapTargetIdx, " samples</strong> to ensure adequate diagnostic sensitivity in routine practice.</p>",
+                            "</div>",
+                            "</div>"
+                        )
 
-                clinicalSummary$setContent(html)
+                        clinicalSummary$setContent(html)
+                    }
                 }
-            }
 
-            # === Statistical Interpretation ===
-            interpretText <- self$results$interpretText
+                # === Statistical Interpretation ===
+                interpretText <- self$results$interpretText
 
-            html <- "<h4>Statistical Interpretation</h4>
+                html <- "<h4>Statistical Interpretation</h4>
             <p>This analysis addresses the question: <i>How many tissue samples are necessary
             to reliably detect a lesion?</i></p>
 
@@ -4071,19 +4223,19 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><b>Bootstrap CIs:</b> Assume the analyzed sample is representative of the broader population of interest.</li>
             </ul>"
 
-            if (self$options$showInterpretText) {
-                interpretText$setContent(html)
-            }
+                if (self$options$showInterpretText) {
+                    interpretText$setContent(html)
+                }
 
-            # === Omentum-Specific Analysis ===
-            if (self$options$showOmentumAnalysis) {
-                private$.populateOmentumAnalysis()
-            }
+                # === Omentum-Specific Analysis ===
+                if (self$options$showOmentumAnalysis) {
+                    private$.populateOmentumAnalysis()
+                }
 
-            # === References ===
-            referencesText <- self$results$referencesText
+                # === References ===
+                referencesText <- self$results$referencesText
 
-            html <- "<h4>Statistical Methods & References</h4>
+                html <- "<h4>Statistical Methods & References</h4>
             <p><b>Methods:</b></p>
             <ul>
                 <li>Binomial probability distribution for detection modeling</li>
@@ -4131,234 +4283,256 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 </li>
             </ul>"
 
-            if (self$options$showReferencesText) {
-                referencesText$setContent(html)
-            }
+                if (self$options$showReferencesText) {
+                    referencesText$setContent(html)
+                }
+            },
+            .detectionCurve = function(image, ggtheme, theme, ...) {
+                if (is.null(private$.firstDetectionData)) {
+                    return()
+                }
 
-        },
+                firstDetectionData <- private$.firstDetectionData
+                pEstimate <- private$.pEstimate
+                maxSamp <- private$.maxSamp
+                nCases <- length(firstDetectionData)
+                nPositiveCases <- sum(!is.na(firstDetectionData))
 
-        .detectionCurve = function(image, ggtheme, theme, ...) {
+                # Calculate observed conditional probability (sensitivity)
+                # Only among positive cases, not population-level
+                nSamples <- 1:maxSamp
+                observedProb <- sapply(nSamples, function(n) {
+                    if (nPositiveCases == 0) {
+                        return(0)
+                    }
+                    sum(!is.na(firstDetectionData) & firstDetectionData <= n) / nPositiveCases
+                })
+                if (is.na(pEstimate)) {
+                    predictedProb <- rep(NA_real_, length(nSamples))
+                } else {
+                    predictedProb <- 1 - (1 - pEstimate)^nSamples
+                }
 
-            if (is.null(private$.firstDetectionData))
-                return()
-
-            firstDetectionData <- private$.firstDetectionData
-            pEstimate <- private$.pEstimate
-            maxSamp <- private$.maxSamp
-            nCases <- length(firstDetectionData)
-            nPositiveCases <- sum(!is.na(firstDetectionData))
-
-            # Calculate observed conditional probability (sensitivity)
-            # Only among positive cases, not population-level
-            nSamples <- 1:maxSamp
-            observedProb <- sapply(nSamples, function(n) {
-                if (nPositiveCases == 0) return(0)
-                sum(!is.na(firstDetectionData) & firstDetectionData <= n) / nPositiveCases
-            })
-            if (is.na(pEstimate)) {
-                predictedProb <- rep(NA_real_, length(nSamples))
-            } else {
-                predictedProb <- 1 - (1 - pEstimate)^nSamples
-            }
-
-            # Create data frame for plotting
-            plotData <- data.frame(
-                nSamples = rep(nSamples, 2),
-                Probability = c(observedProb, predictedProb),
-                Type = rep(c("Observed", "Binomial Model"), each = maxSamp)
-            )
-
-            # Create plot
-            p <- ggplot2::ggplot(plotData, ggplot2::aes(x = nSamples, y = Probability,
-                                                         color = Type, linetype = Type)) +
-                ggplot2::geom_line(size = 1.2) +
-                ggplot2::geom_point(size = 3) +
-                ggplot2::geom_hline(yintercept = self$options$targetConfidence,
-                                   linetype = "dashed", color = "red", alpha = 0.5) +
-                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                ggplot2::scale_x_continuous(breaks = nSamples) +
-                ggplot2::labs(
-                    title = "Diagnostic Yield Curve",
-                    subtitle = sprintf("Target sensitivity: %.0f%% (red line)",
-                                      self$options$targetConfidence * 100),
-                    x = "Number of Samples",
-                    y = "Cumulative Detection Probability",
-                    color = "Method",
-                    linetype = "Method"
-                ) +
-                ggtheme +
-                ggplot2::theme(
-                    legend.position = "bottom",
-                    plot.title = ggplot2::element_text(size = 14, face = "bold"),
-                    plot.subtitle = ggplot2::element_text(size = 11)
+                # Create data frame for plotting
+                plotData <- data.frame(
+                    nSamples = rep(nSamples, 2),
+                    Probability = c(observedProb, predictedProb),
+                    Type = rep(c("Observed", "Binomial Model"), each = maxSamp)
                 )
 
-            print(p)
-            TRUE
-        },
+                # Create plot
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(
+                    x = nSamples, y = Probability,
+                    color = Type, linetype = Type
+                )) +
+                    ggplot2::geom_line(size = 1.2) +
+                    ggplot2::geom_point(size = 3) +
+                    ggplot2::geom_hline(
+                        yintercept = self$options$targetConfidence,
+                        linetype = "dashed", color = "red", alpha = 0.5
+                    ) +
+                    ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                    ggplot2::scale_x_continuous(breaks = nSamples) +
+                    ggplot2::labs(
+                        title = "Diagnostic Yield Curve",
+                        subtitle = sprintf(
+                            "Target sensitivity: %.0f%% (red line)",
+                            self$options$targetConfidence * 100
+                        ),
+                        x = "Number of Samples",
+                        y = "Cumulative Detection Probability",
+                        color = "Method",
+                        linetype = "Method"
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        legend.position = "bottom",
+                        plot.title = ggplot2::element_text(size = 14, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(size = 11)
+                    )
 
-        .sensitivityPlot = function(image, ggtheme, theme, ...) {
+                print(p)
+                TRUE
+            },
+            .sensitivityPlot = function(image, ggtheme, theme, ...) {
+                if (is.null(private$.bootstrapResults)) {
+                    return()
+                }
 
-            if (is.null(private$.bootstrapResults))
-                return()
+                bootstrapResults <- private$.bootstrapResults
+                maxSamp <- private$.maxSamp
 
-            bootstrapResults <- private$.bootstrapResults
-            maxSamp <- private$.maxSamp
+                # Calculate statistics
+                nSamples <- 1:maxSamp
+                meanSens <- colMeans(bootstrapResults)
+                ciLower <- apply(bootstrapResults, 2, quantile, 0.025)
+                ciUpper <- apply(bootstrapResults, 2, quantile, 0.975)
 
-            # Calculate statistics
-            nSamples <- 1:maxSamp
-            meanSens <- colMeans(bootstrapResults)
-            ciLower <- apply(bootstrapResults, 2, quantile, 0.025)
-            ciUpper <- apply(bootstrapResults, 2, quantile, 0.975)
-
-            plotData <- data.frame(
-                nSamples = nSamples,
-                meanSens = meanSens,
-                ciLower = ciLower,
-                ciUpper = ciUpper
-            )
-
-            # Create plot
-            p <- ggplot2::ggplot(plotData, ggplot2::aes(x = nSamples, y = meanSens)) +
-                ggplot2::geom_ribbon(ggplot2::aes(ymin = ciLower, ymax = ciUpper),
-                                    alpha = 0.3, fill = "steelblue") +
-                ggplot2::geom_line(color = "steelblue", size = 1.2) +
-                ggplot2::geom_point(color = "steelblue", size = 3) +
-                ggplot2::geom_hline(yintercept = self$options$targetConfidence,
-                                   linetype = "dashed", color = "red", alpha = 0.5) +
-                ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
-                ggplot2::scale_x_continuous(breaks = nSamples) +
-                ggplot2::labs(
-                    title = "Bootstrap Sensitivity Estimates with 95% Confidence Intervals",
-                    subtitle = sprintf("Based on %d bootstrap iterations",
-                                      self$options$bootstrapIterations),
-                    x = "Number of Samples",
-                    y = "Sensitivity (Detection Probability)"
-                ) +
-                ggtheme +
-                ggplot2::theme(
-                    plot.title = ggplot2::element_text(size = 14, face = "bold"),
-                    plot.subtitle = ggplot2::element_text(size = 11)
+                plotData <- data.frame(
+                    nSamples = nSamples,
+                    meanSens = meanSens,
+                    ciLower = ciLower,
+                    ciUpper = ciUpper
                 )
 
-            print(p)
-            TRUE
-        },
+                # Create plot
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = nSamples, y = meanSens)) +
+                    ggplot2::geom_ribbon(ggplot2::aes(ymin = ciLower, ymax = ciUpper),
+                        alpha = 0.3, fill = "steelblue"
+                    ) +
+                    ggplot2::geom_line(color = "steelblue", size = 1.2) +
+                    ggplot2::geom_point(color = "steelblue", size = 3) +
+                    ggplot2::geom_hline(
+                        yintercept = self$options$targetConfidence,
+                        linetype = "dashed", color = "red", alpha = 0.5
+                    ) +
+                    ggplot2::scale_y_continuous(limits = c(0, 1), labels = scales::percent) +
+                    ggplot2::scale_x_continuous(breaks = nSamples) +
+                    ggplot2::labs(
+                        title = "Bootstrap Sensitivity Estimates with 95% Confidence Intervals",
+                        subtitle = sprintf(
+                            "Based on %d bootstrap iterations",
+                            self$options$bootstrapIterations
+                        ),
+                        x = "Number of Samples",
+                        y = "Sensitivity (Detection Probability)"
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(size = 14, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(size = 11)
+                    )
 
-        .empiricalCumulativePlot = function(image, ggtheme, theme, ...) {
+                print(p)
+                TRUE
+            },
+            .empiricalCumulativePlot = function(image, ggtheme, theme, ...) {
+                if (is.null(private$.firstDetectionData)) {
+                    return()
+                }
 
-            if (is.null(private$.firstDetectionData))
-                return()
+                firstDetectionData <- private$.firstDetectionData
+                pEstimate <- private$.pEstimate
+                maxSamp <- private$.maxSamp
+                nPositiveCases <- sum(!is.na(firstDetectionData))
 
-            firstDetectionData <- private$.firstDetectionData
-            pEstimate <- private$.pEstimate
-            maxSamp <- private$.maxSamp
-            nPositiveCases <- sum(!is.na(firstDetectionData))
+                if (nPositiveCases == 0) {
+                    return()
+                }
 
-            if (nPositiveCases == 0)
-                return()
+                # Calculate empirical cumulative detection (conditional - positive cases only)
+                nSamples <- 1:maxSamp
+                empirical_prob <- sapply(nSamples, function(n) {
+                    sum(!is.na(firstDetectionData) & firstDetectionData <= n) / nPositiveCases
+                })
 
-            # Calculate empirical cumulative detection (conditional - positive cases only)
-            nSamples <- 1:maxSamp
-            empirical_prob <- sapply(nSamples, function(n) {
-                sum(!is.na(firstDetectionData) & firstDetectionData <= n) / nPositiveCases
-            })
+                # Calculate binomial model for comparison
+                if (!is.na(pEstimate) && pEstimate > 0) {
+                    model_prob <- 1 - (1 - pEstimate)^nSamples
+                } else {
+                    model_prob <- rep(NA_real_, length(nSamples))
+                }
 
-            # Calculate binomial model for comparison
-            if (!is.na(pEstimate) && pEstimate > 0) {
-                model_prob <- 1 - (1 - pEstimate)^nSamples
-            } else {
-                model_prob <- rep(NA_real_, length(nSamples))
-            }
-
-            # Create data frame for plotting
-            plot_data <- data.frame(
-                samples = rep(nSamples, 2),
-                probability = c(empirical_prob, model_prob),
-                method = rep(c("Empirical (Observed)", "Binomial Model"), each = length(nSamples))
-            )
-
-            # Remove NAs for model if pEstimate not available
-            plot_data <- plot_data[!is.na(plot_data$probability), ]
-
-            # Create plot
-            p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = samples, y = probability,
-                                                          color = method, linetype = method)) +
-                ggplot2::geom_line(size = 1.2) +
-                ggplot2::geom_point(size = 3) +
-                ggplot2::geom_hline(yintercept = self$options$targetConfidence,
-                                   linetype = "dashed", color = "red", alpha = 0.5) +
-                ggplot2::scale_y_continuous(labels = scales::percent_format(),
-                                           limits = c(0, 1),
-                                           breaks = seq(0, 1, 0.2)) +
-                ggplot2::scale_x_continuous(breaks = nSamples) +
-                ggplot2::scale_color_manual(values = c("Empirical (Observed)" = "darkorange",
-                                                       "Binomial Model" = "steelblue")) +
-                ggplot2::scale_linetype_manual(values = c("Empirical (Observed)" = "solid",
-                                                          "Binomial Model" = "dashed")) +
-                ggplot2::labs(
-                    title = "Empirical Cumulative Detection vs Binomial Model",
-                    subtitle = sprintf("Conditional probability (sensitivity) | %d positive cases | q = %.3f",
-                                      nPositiveCases,
-                                      ifelse(is.na(pEstimate), 0, pEstimate)),
-                    x = "Number of Samples Examined",
-                    y = "Cumulative Detection Probability",
-                    color = "Method",
-                    linetype = "Method"
-                ) +
-                ggtheme +
-                ggplot2::theme(
-                    legend.position = "bottom",
-                    plot.title = ggplot2::element_text(face = "bold", size = 14),
-                    plot.subtitle = ggplot2::element_text(size = 11)
+                # Create data frame for plotting
+                plot_data <- data.frame(
+                    samples = rep(nSamples, 2),
+                    probability = c(empirical_prob, model_prob),
+                    method = rep(c("Empirical (Observed)", "Binomial Model"), each = length(nSamples))
                 )
 
-            print(p)
-            TRUE
-        },
+                # Remove NAs for model if pEstimate not available
+                plot_data <- plot_data[!is.na(plot_data$probability), ]
 
-        .correlationPlot = function(image, ggtheme, theme, ...) {
+                # Create plot
+                p <- ggplot2::ggplot(plot_data, ggplot2::aes(
+                    x = samples, y = probability,
+                    color = method, linetype = method
+                )) +
+                    ggplot2::geom_line(size = 1.2) +
+                    ggplot2::geom_point(size = 3) +
+                    ggplot2::geom_hline(
+                        yintercept = self$options$targetConfidence,
+                        linetype = "dashed", color = "red", alpha = 0.5
+                    ) +
+                    ggplot2::scale_y_continuous(
+                        labels = scales::percent_format(),
+                        limits = c(0, 1),
+                        breaks = seq(0, 1, 0.2)
+                    ) +
+                    ggplot2::scale_x_continuous(breaks = nSamples) +
+                    ggplot2::scale_color_manual(values = c(
+                        "Empirical (Observed)" = "darkorange",
+                        "Binomial Model" = "steelblue"
+                    )) +
+                    ggplot2::scale_linetype_manual(values = c(
+                        "Empirical (Observed)" = "solid",
+                        "Binomial Model" = "dashed"
+                    )) +
+                    ggplot2::labs(
+                        title = "Empirical Cumulative Detection vs Binomial Model",
+                        subtitle = sprintf(
+                            "Conditional probability (sensitivity) | %d positive cases | q = %.3f",
+                            nPositiveCases,
+                            ifelse(is.na(pEstimate), 0, pEstimate)
+                        ),
+                        x = "Number of Samples Examined",
+                        y = "Cumulative Detection Probability",
+                        color = "Method",
+                        linetype = "Method"
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        legend.position = "bottom",
+                        plot.title = ggplot2::element_text(face = "bold", size = 14),
+                        plot.subtitle = ggplot2::element_text(size = 11)
+                    )
 
-            if (is.null(private$.totalSamplesData) || is.null(private$.positiveCassettesData))
-                return()
+                print(p)
+                TRUE
+            },
+            .correlationPlot = function(image, ggtheme, theme, ...) {
+                if (is.null(private$.totalSamplesData) || is.null(private$.positiveCassettesData)) {
+                    return()
+                }
 
-            totalSamplesData <- private$.totalSamplesData
-            positiveCassettesData <- private$.positiveCassettesData
+                totalSamplesData <- private$.totalSamplesData
+                positiveCassettesData <- private$.positiveCassettesData
 
-            # Create data frame
-            plotData <- data.frame(
-                total = totalSamplesData,
-                positive = positiveCassettesData
-            )
-
-            # Calculate correlation
-            corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
-
-            # Create scatter plot with regression line
-            p <- ggplot2::ggplot(plotData, ggplot2::aes(x = total, y = positive)) +
-                ggplot2::geom_point(alpha = 0.6, size = 3, color = "steelblue") +
-                ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkred", fill = "pink", alpha = 0.2) +
-                ggplot2::labs(
-                    title = "Correlation: Total Cassettes Examined vs Positive Cassettes",
-                    subtitle = sprintf("Spearman's rho = %.3f, p = %.4f",
-                                      corTest$estimate, corTest$p.value),
-                    x = "Total Cassettes Examined",
-                    y = "Number of Positive Cassettes"
-                ) +
-                ggtheme +
-                ggplot2::theme(
-                    plot.title = ggplot2::element_text(size = 14, face = "bold"),
-                    plot.subtitle = ggplot2::element_text(size = 11)
+                # Create data frame
+                plotData <- data.frame(
+                    total = totalSamplesData,
+                    positive = positiveCassettesData
                 )
 
-            print(p)
-            TRUE
-        },
+                # Calculate correlation
+                corTest <- cor.test(totalSamplesData, positiveCassettesData, method = "spearman")
 
-        .populateOmentumAnalysis = function() {
-            omentumText <- self$results$omentumText
+                # Create scatter plot with regression line
+                p <- ggplot2::ggplot(plotData, ggplot2::aes(x = total, y = positive)) +
+                    ggplot2::geom_point(alpha = 0.6, size = 3, color = "steelblue") +
+                    ggplot2::geom_smooth(method = "lm", se = TRUE, color = "darkred", fill = "pink", alpha = 0.2) +
+                    ggplot2::labs(
+                        title = "Correlation: Total Cassettes Examined vs Positive Cassettes",
+                        subtitle = sprintf(
+                            "Spearman's rho = %.3f, p = %.4f",
+                            corTest$estimate, corTest$p.value
+                        ),
+                        x = "Total Cassettes Examined",
+                        y = "Number of Positive Cassettes"
+                    ) +
+                    ggtheme +
+                    ggplot2::theme(
+                        plot.title = ggplot2::element_text(size = 14, face = "bold"),
+                        plot.subtitle = ggplot2::element_text(size = 11)
+                    )
 
-            html <- "<h4>Omentum Sampling Adequacy - Literature Comparison</h4>
+                print(p)
+                TRUE
+            },
+            .populateOmentumAnalysis = function() {
+                omentumText <- self$results$omentumText
+
+                html <- "<h4>Omentum Sampling Adequacy - Literature Comparison</h4>
 
             <p><b>Recent Evidence:</b></p>
             <ul>
@@ -4366,7 +4540,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     <br>• Grossly normal: 8.0% MPR, 1-2 blocks showed similar MPR to 5-6 blocks (P>.50)
                     <br>• Post-neoadjuvant: 19.0% MPR (5× higher, P=.03)
                     <br>• <b>Critical limitation:</b> No gold standard comparison, false negative rate unknown</li>
-                <li><b>ISGyP Guidelines (2019):</b> ≥4 blocks for grossly normal omentum</li>
+                <li><b>ISGyP Guidelines (2019):</b> >=4 blocks for grossly normal omentum</li>
                 <li><b>Skala & Hagemann 2015 (n=44, simulation):</b>
                     <br>• 5 blocks → 82% sensitivity
                     <br>• 10 blocks → 95% sensitivity</li>
@@ -4382,12 +4556,12 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <tr>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Grossly normal, no NACT</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>8.0%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>≥4 (guideline)</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>>=4 (guideline)</td>
                 </tr>
                 <tr>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Grossly normal, post-NACT</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>19.0%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>≥6 (high risk)</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>>=6 (high risk)</td>
                 </tr>
                 <tr>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Multifocal/diffuse abnormal</td>
@@ -4397,7 +4571,7 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <tr>
                     <td style='border: 1px solid #ddd; padding: 8px;'>Focal abnormal</td>
                     <td style='border: 1px solid #ddd; padding: 8px;'>66.4%</td>
-                    <td style='border: 1px solid #ddd; padding: 8px;'>≥4 (heterogeneous)</td>
+                    <td style='border: 1px solid #ddd; padding: 8px;'>>=4 (heterogeneous)</td>
                 </tr>
             </table>
 
@@ -4412,484 +4586,495 @@ pathsamplingClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Skala SL, Hagemann IS. <i>Int J Gynecol Pathol.</i> 2015;34:281-287</li>
             </ul>"
 
-            if (self$options$showOmentumAnalysis) {
-                omentumText$setContent(html)
-            }
-
-            # === Append Calculated Variables ===
-            if (self$options$appendVariables && !is.na(pEstimate)) {
-                # Calculate recommended samples for target confidence
-                rec_samples <- NA
-                if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
-                     rec_samples <- ceiling(log1p(-targetConf) / log1p(-pEstimate))
+                if (self$options$showOmentumAnalysis) {
+                    omentumText$setContent(html)
                 }
-                
-                # We use the filtered data for calculation
-                # Note: In a full Jamovi implementation, this would need to be mapped back to original rows
-                # or output via a specific Output object. Here we execute the logic to ensure correctness.
-                
-                # TODO (stub + security future-proof): `enhanced_data` is computed here but
-                # never returned, stored on private fields, or written to any result output —
-                # dead/stub feature. `self$options$appendPrefix` is an OptionString (HIGH
-                # attacker-controlled free text) flowing into column-name construction via
-                # `paste0(prefix, "cumulative_prob_", i)` etc. inside .appendCalculatedVariables.
-                # If a future maintainer wires this up to a result pane, user-supplied
-                # `appendPrefix = "<script>alert(1)</script>"` would land in column-name strings
-                # that flow into HTML. Either remove this dead block or htmlEscape the prefix
-                # at the .appendCalculatedVariables boundary before column-name construction.
-                enhanced_data <- private$.appendCalculatedVariables(
-                    data = data.frame(row_id = 1:length(firstDetectionData)), # Dummy df for context
-                    q_estimate = pEstimate,
-                    recommended_samples = rec_samples,
-                    first_detection = firstDetectionData,
-                    prefix = self$options$appendPrefix
+
+                # === Append Calculated Variables ===
+                if (self$options$appendVariables && !is.na(pEstimate)) {
+                    # Calculate recommended samples for target confidence
+                    rec_samples <- NA
+                    if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
+                        rec_samples <- ceiling(log1p(-targetConf) / log1p(-pEstimate))
+                    }
+
+                    # We use the filtered data for calculation
+                    # Note: In a full Jamovi implementation, this would need to be mapped back to original rows
+                    # or output via a specific Output object. Here we execute the logic to ensure correctness.
+
+                    # TODO (stub + security future-proof): `enhanced_data` is computed here but
+                    # never returned, stored on private fields, or written to any result output - 
+                    # dead/stub feature. `self$options$appendPrefix` is an OptionString (HIGH
+                    # attacker-controlled free text) flowing into column-name construction via
+                    # `paste0(prefix, "cumulative_prob_", i)` etc. inside .appendCalculatedVariables.
+                    # If a future maintainer wires this up to a result pane, user-supplied
+                    # `appendPrefix = "<script>alert(1)</script>"` would land in column-name strings
+                    # that flow into HTML. Either remove this dead block or htmlEscape the prefix
+                    # at the .appendCalculatedVariables boundary before column-name construction.
+                    enhanced_data <- private$.appendCalculatedVariables(
+                        data = data.frame(row_id = 1:length(firstDetectionData)), # Dummy df for context
+                        q_estimate = pEstimate,
+                        recommended_samples = rec_samples,
+                        first_detection = firstDetectionData,
+                        prefix = self$options$appendPrefix
+                    )
+                }
+            },
+
+            # ===== Helper Functions for Enhanced Analyses =====
+
+            # Parse comma-separated sample list
+            .parseSampleList = function(sampleListString) {
+                if (is.na(sampleListString) || sampleListString == "" ||
+                    is.null(sampleListString) || length(sampleListString) == 0) {
+                    return(integer(0))
+                }
+
+                # Handle both string and numeric input
+                str_val <- as.character(sampleListString)
+                if (str_val == "") {
+                    return(integer(0))
+                }
+
+                # Split and convert to integer
+                samples <- tryCatch(
+                    {
+                        as.integer(strsplit(str_val, ",")[[1]])
+                    },
+                    error = function(e) {
+                        integer(0)
+                    }
                 )
-            }
-        },
 
-        # ===== Helper Functions for Enhanced Analyses =====
+                # Remove NAs and return
+                samples <- samples[!is.na(samples)]
+                return(samples)
+            },
 
-        # Parse comma-separated sample list
-        .parseSampleList = function(sampleListString) {
-            if (is.na(sampleListString) || sampleListString == "" ||
-                is.null(sampleListString) || length(sampleListString) == 0) {
-                return(integer(0))
-            }
-
-            # Handle both string and numeric input
-            str_val <- as.character(sampleListString)
-            if (str_val == "") return(integer(0))
-
-            # Split and convert to integer
-            samples <- tryCatch({
-                as.integer(strsplit(str_val, ",")[[1]])
-            }, error = function(e) {
-                integer(0)
-            })
-
-            # Remove NAs and return
-            samples <- samples[!is.na(samples)]
-            return(samples)
-        },
-
-        # Calculate clustering index for a list of positive samples
-        .calculateClusteringIndex = function(positiveSamples, totalSamples) {
-            if (length(positiveSamples) <= 1) return(NA_real_)
-
-            sorted_samples <- sort(positiveSamples)
-            distances <- diff(sorted_samples)
-            mean_distance <- mean(distances)
-
-            expected_distance <- totalSamples / length(positiveSamples)
-
-            if (expected_distance == 0) return(NA_real_)
-
-            clustering_index <- mean_distance / expected_distance
-            return(clustering_index)
-        },
-
-        # Estimate number of foci from sample positions
-        .estimateFociCount = function(positiveSamples) {
-            if (length(positiveSamples) <= 1) return(1)
-
-            sorted_samples <- sort(positiveSamples)
-            distances <- diff(sorted_samples)
-
-            # Count gaps > 2 as separate foci
-            gaps <- sum(distances > 2)
-            foci <- gaps + 1
-
-            return(foci)
-        },
-
-        # Bootstrap empirical cumulative detection
-        .bootstrapEmpiricalCumulative = function(firstDetectionData, totalSamplesData,
-                                                 maxN, nBoot = 10000) {
-
-            positive_idx <- !is.na(firstDetectionData)
-            positive_first <- firstDetectionData[positive_idx]
-            positive_total <- totalSamplesData[positive_idx]
-
-            if (length(positive_first) == 0) {
-                return(NULL)
-            }
-
-            n_cases <- length(positive_first)
-            detection_matrix <- matrix(NA_real_, nrow = nBoot, ncol = maxN)
-
-            for (b in 1:nBoot) {
-                boot_idx <- sample(n_cases, replace = TRUE)
-                boot_first <- positive_first[boot_idx]
-
-                for (n in 1:maxN) {
-                    detected <- sum(boot_first <= n, na.rm = TRUE)
-                    detection_matrix[b, n] <- detected / n_cases
+            # Calculate clustering index for a list of positive samples
+            .calculateClusteringIndex = function(positiveSamples, totalSamples) {
+                if (length(positiveSamples) <= 1) {
+                    return(NA_real_)
                 }
-            }
 
-            # Calculate percentiles
-            ci_lower <- apply(detection_matrix, 2, quantile, probs = 0.025, na.rm = TRUE)
-            ci_upper <- apply(detection_matrix, 2, quantile, probs = 0.975, na.rm = TRUE)
-            ci_mean <- apply(detection_matrix, 2, mean, na.rm = TRUE)
+                sorted_samples <- sort(positiveSamples)
+                distances <- diff(sorted_samples)
+                mean_distance <- mean(distances)
 
-            return(data.frame(
-                n = 1:maxN,
-                mean = ci_mean,
-                lower = ci_lower,
-                upper = ci_upper
-            ))
-        },
+                expected_distance <- totalSamples / length(positiveSamples)
 
-        # Private storage for plotting data
-        
-        # ==============================================================================
-        # 1. HETEROGENEITY TESTING
-        # ==============================================================================
-
-        .testHeterogeneity = function(first_detection, groups) {
-            # Remove NAs
-            valid_idx <- !is.na(first_detection) & !is.na(groups)
-            first_detection <- first_detection[valid_idx]
-            groups <- groups[valid_idx]
-
-            if (length(first_detection) < 10) {
-                return(list(
-                    statistic = NA,
-                    df = NA,
-                    pValue = NA,
-                    interpretation = "Insufficient data (n < 10)"
-                ))
-            }
-
-            # Calculate pooled q (H0: null model)
-            mean_first_pooled <- mean(first_detection, na.rm = TRUE)
-            q_pooled <- 1 / mean_first_pooled
-
-            # Log-likelihood for pooled model (geometric distribution)
-            ll_null <- sum(log(dgeom(first_detection - 1, q_pooled)), na.rm = TRUE)
-
-            # Calculate group-specific q (H1: alternative model)
-            ll_alt <- 0
-            unique_groups <- unique(groups)
-            n_groups <- length(unique_groups)
-
-            for (group in unique_groups) {
-                group_data <- first_detection[groups == group]
-                if (length(group_data) > 0) {
-                    mean_first_group <- mean(group_data, na.rm = TRUE)
-                    q_group <- 1 / mean_first_group
-                    ll_alt <- ll_alt + sum(log(dgeom(group_data - 1, q_group)), na.rm = TRUE)
+                if (expected_distance == 0) {
+                    return(NA_real_)
                 }
-            }
 
-            # Likelihood ratio statistic
-            lr_stat <- 2 * (ll_alt - ll_null)
-            df <- n_groups - 1
-            p_value <- pchisq(lr_stat, df, lower.tail = FALSE)
+                clustering_index <- mean_distance / expected_distance
+                return(clustering_index)
+            },
 
-            # Interpretation
-            if (p_value < 0.001) {
-                interp <- "Strong evidence of heterogeneity (p < 0.001)"
-            } else if (p_value < 0.01) {
-                interp <- "Significant heterogeneity detected (p < 0.01)"
-            } else if (p_value < 0.05) {
-                interp <- "Moderate heterogeneity detected (p < 0.05)"
-            } else {
-                interp <- "No significant heterogeneity (p ≥ 0.05)"
-            }
-
-            list(
-                statistic = lr_stat,
-                df = df,
-                pValue = p_value,
-                interpretation = interp
-            )
-        },
-
-        # ==============================================================================
-        # 2. GEOMETRIC CI CALCULATION
-        # ==============================================================================
-
-        .calculateGeometricCI = function(n_samples, q_mle, q_ci_lower, q_ci_upper) {
-            # Cumulative detection probability
-            prob_point <- 1 - (1 - q_mle)^n_samples
-            prob_lower <- 1 - (1 - q_ci_lower)^n_samples
-            prob_upper <- 1 - (1 - q_ci_upper)^n_samples
-
-            list(
-                point = prob_point,
-                lower = prob_lower,
-                upper = prob_upper,
-                method = "geometric"
-            )
-        },
-
-        # ==============================================================================
-        # 3. MODEL FIT ASSESSMENT
-        # ==============================================================================
-
-        .testModelFit = function(first_detection, q_estimate) {
-            # Remove NAs
-            first_detection <- first_detection[!is.na(first_detection)]
-
-            if (length(first_detection) < 10) {
-                return(list(
-                    chiSquare = NA,
-                    df = NA,
-                    pValue = NA,
-                    fitQuality = "Insufficient data"
-                ))
-            }
-
-            # Get unique values and frequencies
-            first_vals <- sort(unique(first_detection))
-            observed <- sapply(first_vals, function(x) sum(first_detection == x))
-
-            # Expected frequencies under geometric distribution
-            n_total <- length(first_detection)
-            expected <- sapply(first_vals, function(x) {
-                n_total * dgeom(x - 1, q_estimate)
-            })
-
-            # Combine small expected frequencies (< 5)
-            if (any(expected < 5)) {
-                # Simple approach: group all rare categories
-                keep_idx <- expected >= 5
-                if (sum(keep_idx) > 1) {
-                    observed <- c(observed[keep_idx], sum(observed[!keep_idx]))
-                    expected <- c(expected[keep_idx], sum(expected[!keep_idx]))
+            # Estimate number of foci from sample positions
+            .estimateFociCount = function(positiveSamples) {
+                if (length(positiveSamples) <= 1) {
+                    return(1)
                 }
-            }
 
-            # Chi-square goodness of fit
-            chi_sq <- sum((observed - expected)^2 / expected)
-            df <- length(observed) - 1 - 1  # -1 for total, -1 for estimated parameter
+                sorted_samples <- sort(positiveSamples)
+                distances <- diff(sorted_samples)
 
-            if (df < 1) df <- 1  # Minimum df = 1
+                # Count gaps > 2 as separate foci
+                gaps <- sum(distances > 2)
+                foci <- gaps + 1
 
-            p_value <- pchisq(chi_sq, df, lower.tail = FALSE)
+                return(foci)
+            },
 
-            # Fit quality assessment
-            if (p_value >= 0.10) {
-                fit_quality <- "Good fit (p ≥ 0.10)"
-            } else if (p_value >= 0.05) {
-                fit_quality <- "Acceptable fit (p ≥ 0.05)"
-            } else if (p_value >= 0.01) {
-                fit_quality <- "Marginal fit (p < 0.05)"
-            } else {
-                fit_quality <- "Poor fit (p < 0.01)"
-            }
+            # Bootstrap empirical cumulative detection
+            .bootstrapEmpiricalCumulative = function(firstDetectionData, totalSamplesData,
+                                                     maxN, nBoot = 10000) {
+                positive_idx <- !is.na(firstDetectionData)
+                positive_first <- firstDetectionData[positive_idx]
+                positive_total <- totalSamplesData[positive_idx]
 
-            list(
-                chiSquare = chi_sq,
-                df = df,
-                pValue = p_value,
-                fitQuality = fit_quality
-            )
-        },
+                if (length(positive_first) == 0) {
+                    return(NULL)
+                }
 
-        # ==============================================================================
-        # 4. OBSERVED VS PREDICTED COMPARISON
-        # ==============================================================================
+                n_cases <- length(positive_first)
+                detection_matrix <- matrix(NA_real_, nrow = nBoot, ncol = maxN)
 
-        .calculateObsPred = function(first_detection, q_estimate, max_samples) {
-            # Remove NAs
-            valid_data <- first_detection[!is.na(first_detection)]
-            n_positive <- length(valid_data)
+                for (b in 1:nBoot) {
+                    boot_idx <- sample(n_cases, replace = TRUE)
+                    boot_first <- positive_first[boot_idx]
 
-            if (n_positive == 0) {
+                    for (n in 1:maxN) {
+                        detected <- sum(boot_first <= n, na.rm = TRUE)
+                        detection_matrix[b, n] <- detected / n_cases
+                    }
+                }
+
+                # Calculate percentiles
+                ci_lower <- apply(detection_matrix, 2, quantile, probs = 0.025, na.rm = TRUE)
+                ci_upper <- apply(detection_matrix, 2, quantile, probs = 0.975, na.rm = TRUE)
+                ci_mean <- apply(detection_matrix, 2, mean, na.rm = TRUE)
+
                 return(data.frame(
-                    nSamples = integer(0),
-                    observed = numeric(0),
-                    predicted = numeric(0),
-                    difference = numeric(0),
-                    assessment = character(0)
+                    n = 1:maxN,
+                    mean = ci_mean,
+                    lower = ci_lower,
+                    upper = ci_upper
                 ))
-            }
+            },
 
-            results <- data.frame(
-                nSamples = 1:max_samples,
-                observed = NA_real_,
-                predicted = NA_real_,
-                difference = NA_real_,
-                assessment = NA_character_,
-                stringsAsFactors = FALSE
-            )
+            # Private storage for plotting data
 
-            for (i in 1:max_samples) {
-                # Observed cumulative detection
-                n_detected_by_i <- sum(valid_data <= i)
-                obs <- n_detected_by_i / n_positive
+            # ==============================================================================
+            # 1. HETEROGENEITY TESTING
+            # ==============================================================================
 
-                # Predicted (geometric model)
-                pred <- 1 - (1 - q_estimate)^i
+            .testHeterogeneity = function(first_detection, groups) {
+                # Remove NAs
+                valid_idx <- !is.na(first_detection) & !is.na(groups)
+                first_detection <- first_detection[valid_idx]
+                groups <- groups[valid_idx]
 
-                # Difference
-                diff <- obs - pred
-
-                # Assessment
-                abs_diff <- abs(diff)
-                if (abs_diff < 0.05) {
-                    assess <- " Excellent fit"
-                } else if (abs_diff < 0.10) {
-                    assess <- " Good fit"
-                } else if (abs_diff < 0.15) {
-                    assess <- " Fair fit"
-                } else {
-                    assess <- " Poor fit"
+                if (length(first_detection) < 10) {
+                    return(list(
+                        statistic = NA,
+                        df = NA,
+                        pValue = NA,
+                        interpretation = "Insufficient data (n < 10)"
+                    ))
                 }
 
-                results[i, ] <- list(i, obs, pred, diff, assess)
-            }
+                # Calculate pooled q (H0: null model)
+                mean_first_pooled <- mean(first_detection, na.rm = TRUE)
+                q_pooled <- 1 / mean_first_pooled
 
-            results
-        },
+                # Log-likelihood for pooled model (geometric distribution)
+                ll_null <- sum(log(dgeom(first_detection - 1, q_pooled)), na.rm = TRUE)
 
-        # ==============================================================================
-        # 5. APPEND CALCULATED VARIABLES
-        # ==============================================================================
+                # Calculate group-specific q (H1: alternative model)
+                ll_alt <- 0
+                unique_groups <- unique(groups)
+                n_groups <- length(unique_groups)
 
-        .appendCalculatedVariables = function(data, q_estimate, recommended_samples,
-                                               first_detection, prefix = "ps_") {
-            # Ensure data is a data frame
-            if (!is.data.frame(data)) {
-                warning("Data must be a data frame for appendVariables")
+                for (group in unique_groups) {
+                    group_data <- first_detection[groups == group]
+                    if (length(group_data) > 0) {
+                        mean_first_group <- mean(group_data, na.rm = TRUE)
+                        q_group <- 1 / mean_first_group
+                        ll_alt <- ll_alt + sum(log(dgeom(group_data - 1, q_group)), na.rm = TRUE)
+                    }
+                }
+
+                # Likelihood ratio statistic
+                lr_stat <- 2 * (ll_alt - ll_null)
+                df <- n_groups - 1
+                p_value <- pchisq(lr_stat, df, lower.tail = FALSE)
+
+                # Interpretation
+                if (p_value < 0.001) {
+                    interp <- "Strong evidence of heterogeneity (p < 0.001)"
+                } else if (p_value < 0.01) {
+                    interp <- "Significant heterogeneity detected (p < 0.01)"
+                } else if (p_value < 0.05) {
+                    interp <- "Moderate heterogeneity detected (p < 0.05)"
+                } else {
+                    interp <- "No significant heterogeneity (p >= 0.05)"
+                }
+
+                list(
+                    statistic = lr_stat,
+                    df = df,
+                    pValue = p_value,
+                    interpretation = interp
+                )
+            },
+
+            # ==============================================================================
+            # 2. GEOMETRIC CI CALCULATION
+            # ==============================================================================
+
+            .calculateGeometricCI = function(n_samples, q_mle, q_ci_lower, q_ci_upper) {
+                # Cumulative detection probability
+                prob_point <- 1 - (1 - q_mle)^n_samples
+                prob_lower <- 1 - (1 - q_ci_lower)^n_samples
+                prob_upper <- 1 - (1 - q_ci_upper)^n_samples
+
+                list(
+                    point = prob_point,
+                    lower = prob_lower,
+                    upper = prob_upper,
+                    method = "geometric"
+                )
+            },
+
+            # ==============================================================================
+            # 3. MODEL FIT ASSESSMENT
+            # ==============================================================================
+
+            .testModelFit = function(first_detection, q_estimate) {
+                # Remove NAs
+                first_detection <- first_detection[!is.na(first_detection)]
+
+                if (length(first_detection) < 10) {
+                    return(list(
+                        chiSquare = NA,
+                        df = NA,
+                        pValue = NA,
+                        fitQuality = "Insufficient data"
+                    ))
+                }
+
+                # Get unique values and frequencies
+                first_vals <- sort(unique(first_detection))
+                observed <- sapply(first_vals, function(x) sum(first_detection == x))
+
+                # Expected frequencies under geometric distribution
+                n_total <- length(first_detection)
+                expected <- sapply(first_vals, function(x) {
+                    n_total * dgeom(x - 1, q_estimate)
+                })
+
+                # Combine small expected frequencies (< 5)
+                if (any(expected < 5)) {
+                    # Simple approach: group all rare categories
+                    keep_idx <- expected >= 5
+                    if (sum(keep_idx) > 1) {
+                        observed <- c(observed[keep_idx], sum(observed[!keep_idx]))
+                        expected <- c(expected[keep_idx], sum(expected[!keep_idx]))
+                    }
+                }
+
+                # Chi-square goodness of fit
+                chi_sq <- sum((observed - expected)^2 / expected)
+                df <- length(observed) - 1 - 1 # -1 for total, -1 for estimated parameter
+
+                if (df < 1) df <- 1 # Minimum df = 1
+
+                p_value <- pchisq(chi_sq, df, lower.tail = FALSE)
+
+                # Fit quality assessment
+                if (p_value >= 0.10) {
+                    fit_quality <- "Good fit (p >= 0.10)"
+                } else if (p_value >= 0.05) {
+                    fit_quality <- "Acceptable fit (p >= 0.05)"
+                } else if (p_value >= 0.01) {
+                    fit_quality <- "Marginal fit (p < 0.05)"
+                } else {
+                    fit_quality <- "Poor fit (p < 0.01)"
+                }
+
+                list(
+                    chiSquare = chi_sq,
+                    df = df,
+                    pValue = p_value,
+                    fitQuality = fit_quality
+                )
+            },
+
+            # ==============================================================================
+            # 4. OBSERVED VS PREDICTED COMPARISON
+            # ==============================================================================
+
+            .calculateObsPred = function(first_detection, q_estimate, max_samples) {
+                # Remove NAs
+                valid_data <- first_detection[!is.na(first_detection)]
+                n_positive <- length(valid_data)
+
+                if (n_positive == 0) {
+                    return(data.frame(
+                        nSamples = integer(0),
+                        observed = numeric(0),
+                        predicted = numeric(0),
+                        difference = numeric(0),
+                        assessment = character(0)
+                    ))
+                }
+
+                results <- data.frame(
+                    nSamples = 1:max_samples,
+                    observed = NA_real_,
+                    predicted = NA_real_,
+                    difference = NA_real_,
+                    assessment = NA_character_,
+                    stringsAsFactors = FALSE
+                )
+
+                for (i in 1:max_samples) {
+                    # Observed cumulative detection
+                    n_detected_by_i <- sum(valid_data <= i)
+                    obs <- n_detected_by_i / n_positive
+
+                    # Predicted (geometric model)
+                    pred <- 1 - (1 - q_estimate)^i
+
+                    # Difference
+                    diff <- obs - pred
+
+                    # Assessment
+                    abs_diff <- abs(diff)
+                    if (abs_diff < 0.05) {
+                        assess <- " Excellent fit"
+                    } else if (abs_diff < 0.10) {
+                        assess <- " Good fit"
+                    } else if (abs_diff < 0.15) {
+                        assess <- " Fair fit"
+                    } else {
+                        assess <- " Poor fit"
+                    }
+
+                    results[i, ] <- list(i, obs, pred, diff, assess)
+                }
+
+                results
+            },
+
+            # ==============================================================================
+            # 5. APPEND CALCULATED VARIABLES
+            # ==============================================================================
+
+            .appendCalculatedVariables = function(data, q_estimate, recommended_samples,
+                                                  first_detection, prefix = "ps_") {
+                # Ensure data is a data frame
+                if (!is.data.frame(data)) {
+                    warning("Data must be a data frame for appendVariables")
+                    return(data)
+                }
+
+                n_rows <- nrow(data)
+
+                # 1. Add cumulative probabilities for common sample sizes
+                for (i in c(1, 2, 3, 4, 5, 7, 10)) {
+                    var_name <- paste0(prefix, "cumulative_prob_", i)
+                    prob <- 1 - (1 - q_estimate)^i
+                    data[[var_name]] <- rep(prob, n_rows)
+                }
+
+                # 2. Add detection category
+                detection_cat <- rep(NA_character_, n_rows)
+                for (idx in 1:n_rows) {
+                    fd <- first_detection[idx]
+                    if (is.na(fd)) {
+                        detection_cat[idx] <- "Negative"
+                    } else if (fd <= 2) {
+                        detection_cat[idx] <- "Early (1-2)"
+                    } else if (fd <= 5) {
+                        detection_cat[idx] <- "Standard (3-5)"
+                    } else {
+                        detection_cat[idx] <- "Late (>5)"
+                    }
+                }
+                data[[paste0(prefix, "detection_category")]] <- factor(
+                    detection_cat,
+                    levels = c("Early (1-2)", "Standard (3-5)", "Late (>5)", "Negative")
+                )
+
+                # 3. Add recommended samples (constant for all rows)
+                data[[paste0(prefix, "recommended_samples")]] <- rep(recommended_samples, n_rows)
+
+                # 4. Add "detected by N" flags
+                for (n in c(3, 5, 7, 10)) {
+                    var_name <- paste0(prefix, "detected_by_", n)
+                    detected <- !is.na(first_detection) & first_detection <= n
+                    data[[var_name]] <- detected
+                }
+
+                # 5. Add detection efficiency (how early detected relative to recommended)
+                efficiency <- rep(NA_real_, n_rows)
+                for (idx in 1:n_rows) {
+                    fd <- first_detection[idx]
+                    if (!is.na(fd) && !is.na(recommended_samples) && recommended_samples > 0) {
+                        efficiency[idx] <- fd / recommended_samples
+                    }
+                }
+                data[[paste0(prefix, "detection_efficiency")]] <- efficiency
+
                 return(data)
-            }
+            },
 
-            n_rows <- nrow(data)
+            # ==============================================================================
+            # 6. AUTO-DETECT HETEROGENEITY (COMPOSITION ANALYSIS)
+            # ==============================================================================
 
-            # 1. Add cumulative probabilities for common sample sizes
-            for (i in c(1, 2, 3, 4, 5, 7, 10)) {
-                var_name <- paste0(prefix, "cumulative_prob_", i)
-                prob <- 1 - (1 - q_estimate)^i
-                data[[var_name]] <- rep(prob, n_rows)
-            }
+            .autoDetectHeterogeneity = function(first_detection, groups) {
+                # Remove NAs
+                valid_idx <- !is.na(first_detection) & !is.na(groups)
+                first_detection <- first_detection[valid_idx]
+                groups <- groups[valid_idx]
 
-            # 2. Add detection category
-            detection_cat <- rep(NA_character_, n_rows)
-            for (idx in 1:n_rows) {
-                fd <- first_detection[idx]
-                if (is.na(fd)) {
-                    detection_cat[idx] <- "Negative"
-                } else if (fd <= 2) {
-                    detection_cat[idx] <- "Early (1-2)"
-                } else if (fd <= 5) {
-                    detection_cat[idx] <- "Standard (3-5)"
-                } else {
-                    detection_cat[idx] <- "Late (>5)"
+                if (length(first_detection) < 10) {
+                    return(list(
+                        warning = FALSE,
+                        message = "Insufficient data for heterogeneity assessment (n < 10)"
+                    ))
                 }
-            }
-            data[[paste0(prefix, "detection_category")]] <- factor(
-                detection_cat,
-                levels = c("Early (1-2)", "Standard (3-5)", "Late (>5)", "Negative")
-            )
 
-            # 3. Add recommended samples (constant for all rows)
-            data[[paste0(prefix, "recommended_samples")]] <- rep(recommended_samples, n_rows)
+                # Calculate q for each group
+                unique_groups <- unique(groups)
+                group_stats <- list()
+                q_values <- numeric(length(unique_groups))
 
-            # 4. Add "detected by N" flags
-            for (n in c(3, 5, 7, 10)) {
-                var_name <- paste0(prefix, "detected_by_", n)
-                detected <- !is.na(first_detection) & first_detection <= n
-                data[[var_name]] <- detected
-            }
+                for (i in seq_along(unique_groups)) {
+                    group <- unique_groups[i]
+                    group_data <- first_detection[groups == group]
+                    n_group <- length(group_data)
 
-            # 5. Add detection efficiency (how early detected relative to recommended)
-            efficiency <- rep(NA_real_, n_rows)
-            for (idx in 1:n_rows) {
-                fd <- first_detection[idx]
-                if (!is.na(fd) && !is.na(recommended_samples) && recommended_samples > 0) {
-                    efficiency[idx] <- fd / recommended_samples
+                    if (n_group >= 3) {
+                        mean_first <- mean(group_data)
+                        q_group <- 1 / mean_first
+                        q_values[i] <- q_group
+
+                        group_stats[[as.character(group)]] <- list(
+                            n = n_group,
+                            q = q_group,
+                            mean_first = mean_first
+                        )
+                    } else {
+                        q_values[i] <- NA
+                    }
                 }
-            }
-            data[[paste0(prefix, "detection_efficiency")]] <- efficiency
 
-            return(data)
-        },
+                # Remove NA q values
+                q_values <- q_values[!is.na(q_values)]
 
-        # ==============================================================================
-        # 6. AUTO-DETECT HETEROGENEITY (COMPOSITION ANALYSIS)
-        # ==============================================================================
+                if (length(q_values) < 2) {
+                    return(list(
+                        warning = FALSE,
+                        message = "Only one group has sufficient data for q estimation"
+                    ))
+                }
 
-        .autoDetectHeterogeneity = function(first_detection, groups) {
-            # Remove NAs
-            valid_idx <- !is.na(first_detection) & !is.na(groups)
-            first_detection <- first_detection[valid_idx]
-            groups <- groups[valid_idx]
+                # Calculate coefficient of variation
+                mean_q <- mean(q_values)
+                sd_q <- sd(q_values)
+                cv_q <- sd_q / mean_q
 
-            if (length(first_detection) < 10) {
-                return(list(
-                    warning = FALSE,
-                    message = "Insufficient data for heterogeneity assessment (n < 10)"
-                ))
-            }
+                # Warning threshold
+                warning_flag <- cv_q > 0.30
 
-            # Calculate q for each group
-            unique_groups <- unique(groups)
-            group_stats <- list()
-            q_values <- numeric(length(unique_groups))
-
-            for (i in seq_along(unique_groups)) {
-                group <- unique_groups[i]
-                group_data <- first_detection[groups == group]
-                n_group <- length(group_data)
-
-                if (n_group >= 3) {
-                    mean_first <- mean(group_data)
-                    q_group <- 1 / mean_first
-                    q_values[i] <- q_group
-
-                    group_stats[[as.character(group)]] <- list(
-                        n = n_group,
-                        q = q_group,
-                        mean_first = mean_first
+                # Create summary message
+                if (warning_flag) {
+                    severity <- if (cv_q > 0.50) "HIGH" else "MODERATE"
+                    message <- sprintf(
+                        " %s heterogeneity detected (CV = %.2f). Detection probability varies substantially across groups. Consider stratified analysis.",
+                        severity, cv_q
                     )
                 } else {
-                    q_values[i] <- NA
+                    message <- sprintf(
+                        " Low heterogeneity (CV = %.2f). Pooled analysis is appropriate.",
+                        cv_q
+                    )
                 }
-            }
 
-            # Remove NA q values
-            q_values <- q_values[!is.na(q_values)]
-
-            if (length(q_values) < 2) {
-                return(list(
-                    warning = FALSE,
-                    message = "Only one group has sufficient data for q estimation"
-                ))
-            }
-
-            # Calculate coefficient of variation
-            mean_q <- mean(q_values)
-            sd_q <- sd(q_values)
-            cv_q <- sd_q / mean_q
-
-            # Warning threshold
-            warning_flag <- cv_q > 0.30
-
-            # Create summary message
-            if (warning_flag) {
-                severity <- if (cv_q > 0.50) "HIGH" else "MODERATE"
-                message <- sprintf(
-                    " %s heterogeneity detected (CV = %.2f). Detection probability varies substantially across groups. Consider stratified analysis.",
-                    severity, cv_q
-                )
-            } else {
-                message <- sprintf(
-                    " Low heterogeneity (CV = %.2f). Pooled analysis is appropriate.",
-                    cv_q
+                list(
+                    warning = warning_flag,
+                    cv = cv_q,
+                    mean_q = mean_q,
+                    sd_q = sd_q,
+                    group_stats = group_stats,
+                    message = message
                 )
             }
-
-            list(
-                warning = warning_flag,
-                cv = cv_q,
-                mean_q = mean_q,
-                sd_q = sd_q,
-                group_stats = group_stats,
-                message = message
-            )
-        }
+        )
     )
-)
+}

@@ -17,18 +17,19 @@ description:
         penalized likelihood ratio tests, and separation diagnostics. Particularly
         valuable in clinical settings with low event counts, unbalanced predictors,
         or when standard maximum likelihood estimates become infinite due to separation.
-    R:
-        dontrun: true
-        usage: |
-            # Firth logistic regression
-            firthregression(data = mydata, analysisType = "logistic",
-                outcome = "mortality",
-                predictors = c("age", "stage", "biomarker"))
-
-            # Firth Cox regression
-            firthregression(data = mydata, analysisType = "cox",
-                time = "follow_up_time", outcome = "status",
-                predictors = c("age", "stage", "biomarker"))
+        
+#     R:
+#         dontrun: true
+#         usage: |
+#             # Firth logistic regression
+#             firthregression(data = mydata, analysisType = "logistic",
+#                 outcome = "mortality",
+#                 predictors = c("age", "stage", "biomarker"))
+# 
+#             # Firth Cox regression
+#             firthregression(data = mydata, analysisType = "cox",
+#                 time = "follow_up_time", outcome = "status",
+#                 predictors = c("age", "stage", "biomarker"))
 
 options:
     - name: data

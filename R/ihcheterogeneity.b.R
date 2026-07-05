@@ -19,7 +19,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
         .repro_stats = NULL,
 
         # TODO (correctness): .escapeVar mangles non-syntactic column names then
-        # uses the mangled name to look up data[[mangled_name]] — silently breaks
+        # uses the mangled name to look up data[[mangled_name]] - silently breaks
         # variable lookup for any column with spaces/dashes/special chars (callers
         # at L183, L232, L338 hit `data[[.escapeVar(name)]]` which returns NULL).
         # Same broken pattern as finegray's .escapeVar (project-wide cleanup needed).
@@ -1199,15 +1199,15 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<p><strong> INSUFFICIENT DATA:</strong> Unable to evaluate sampling quality because correlation or variability estimates could not be computed.</p>"
             } else if (metrics$overall_corr >= correlation_threshold && metrics$mean_cv <= cv_threshold) {
                 paste0("<p><strong> ADEQUATE SAMPLING:</strong> Regional measurements provide good representation of ",
-                       comparison_target, " (correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
+                       comparison_target, " (correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%). ",
                        "<span style='color: green;'>Current sampling approach is suitable for clinical use.</span></p>")
             } else if (metrics$overall_corr >= (correlation_threshold - 0.2) && metrics$mean_cv <= (cv_threshold * 1.5)) {
                 paste0("<p><strong> MODERATE SAMPLING:</strong> Regional measurements show moderate agreement with ",
-                       comparison_target, " (thresholds: correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
+                       comparison_target, " (thresholds: correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%). ",
                        "<span style='color: orange;'>Consider additional samples or sampling optimization.</span></p>")
             } else {
                 paste0("<p><strong> INADEQUATE SAMPLING:</strong> Sampling does not meet quality thresholds ",
-                       "(correlation ≥ ", correlation_threshold, ", CV ≤ ", cv_threshold, "%). ",
+                       "(correlation \u{2265} ", correlation_threshold, ", CV \u{2264} ", cv_threshold, "%). ",
                        "<span style='color: red;'>Review sampling strategy and consider increased sampling.</span></p>")
             }
 
@@ -1234,7 +1234,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<li><strong>Sample Size:</strong> ",
                 if (!is.na(metrics$mean_cv)) {
                     if (metrics$mean_cv <= cv_threshold/2) {
-                        paste0("Current sampling appears adequate (CV = ", round(metrics$mean_cv, 1), "% ≤ ", cv_threshold/2, "%)")
+                        paste0("Current sampling appears adequate (CV = ", round(metrics$mean_cv, 1), "% \u{2264} ", cv_threshold/2, "%)")
                     } else if (metrics$mean_cv <= cv_threshold) {
                         paste0("Consider 2-3 additional samples to reduce variability (current CV = ", round(metrics$mean_cv, 1), "%, threshold = ", cv_threshold, "%)")
                     } else {
@@ -1352,7 +1352,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 " simulated core biopsy measurements each, following the methodology of Zilenaite-Petrulaitiene et al. ",
                 "Reproducibility was assessed using Spearman correlation and intraclass correlation coefficient (ICC). ",
                 "Sampling variability was quantified using coefficient of variation (CV). ",
-                "Quality thresholds were set at correlation ≥", correlation_threshold, " and CV ≤", cv_threshold, "%.",
+                "Quality thresholds were set at correlation \u{2265}", correlation_threshold, " and CV \u{2264}", cv_threshold, "%.",
                 "</p>",
 
                 "<h4>Results Section:</h4>",
@@ -1469,7 +1469,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<h4> Clinical Application Guidelines</h4>",
                 "<div style='background-color: #f3e5f5; padding: 12px; border-radius: 5px;'>",
                 "<ul>",
-                "<li><strong>Quality Thresholds:</strong> Correlation ≥0.80 and CV ≤20% recommended for routine clinical use</li>",
+                "<li><strong>Quality Thresholds:</strong> Correlation \u{2265}0.80 and CV \u{2264}20% recommended for routine clinical use</li>",
                 "<li><strong>Biomarker-Specific Adjustment:</strong> Thresholds may require adjustment for specific biomarkers</li>",
                 "<li><strong>Protocol Validation:</strong> Results should inform but not replace empirical validation studies</li>",
                 "<li><strong>Continuous Monitoring:</strong> Regular quality assessment recommended for clinical implementation</li>",
@@ -1523,7 +1523,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<div style='margin: 15px 0; padding: 15px; background-color: #f0fff4; border-left: 4px solid #48bb78; border-radius: 4px;'>",
                 "<h4 style='color: #276749; margin-top: 0;'> Variability Measures</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
-                "<li><strong>CV (Coefficient of Variation):</strong> Standardized measure of variability = (SD/Mean) × 100%. ",
+                "<li><strong>CV (Coefficient of Variation):</strong> Standardized measure of variability = (SD/Mean) \u{00d7} 100%. ",
                 "CV < 10% = low variability (excellent), 10-20% = moderate, 20-30% = high, >30% = very high. ",
                 "Clinical meaning: How much measurements vary relative to their average.</li>",
                 "<li><strong>Standard Deviation (SD):</strong> Average distance of measurements from the mean.</li>",
@@ -1535,7 +1535,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "<h4 style='color: #553c9a; margin-top: 0;'> IHC-Specific Terms</h4>",
                 "<ul style='margin: 10px 0; padding-left: 20px;'>",
                 "<li><strong>Spatial Heterogeneity:</strong> Variation in biomarker expression across different tissue regions.</li>",
-                "<li><strong>H-score:</strong> Immunohistochemical scoring method: (1×%weak) + (2×%moderate) + (3×%strong). Range: 0-300.</li>",
+                "<li><strong>H-score:</strong> Immunohistochemical scoring method: (1\u{00d7}%weak) + (2\u{00d7}%moderate) + (3\u{00d7}%strong). Range: 0-300.</li>",
                 "<li><strong>Proliferation Index:</strong> Percentage of cells showing positive staining (e.g., Ki67). Range: 0-100%.</li>",
                 "<li><strong>Regional Sampling:</strong> Measuring biomarker expression from specific tissue areas.</li>",
                 "</ul>",
@@ -1872,7 +1872,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Check for values outside typical biomarker ranges
             max_value <- max(c(whole_section, as.matrix(biopsy_data)), na.rm = TRUE)
             if (!is.na(max_value) && max_value > 300) {
-                warnings <- c(warnings, paste0("Very high biomarker values detected (max: ", round(max_value, 1), "). Verify if these are appropriate for your biomarker scale (e.g., percentages should be ≤100%, H-scores ≤300)."))
+                warnings <- c(warnings, paste0("Very high biomarker values detected (max: ", round(max_value, 1), "). Verify if these are appropriate for your biomarker scale (e.g., percentages should be \u{2264}100%, H-scores \u{2264}300)."))
             }
 
             return(warnings)

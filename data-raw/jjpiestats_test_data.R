@@ -15,7 +15,7 @@ library(here)
 library(writexl)
 library(jmvReadWrite)
 
-set.seed(42)  # For reproducibility
+set.seed(42) # For reproducibility
 
 # ═══════════════════════════════════════════════════════════
 # Dataset 1: jjpiestats_test - Comprehensive clinical data
@@ -29,48 +29,55 @@ jjpiestats_test <- tibble(
   # Treatment response (main categorical variable)
   treatment_response = sample(
     c("Complete Response", "Partial Response", "Stable Disease", "Progressive Disease"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.25, 0.35, 0.25, 0.15)
   ),
 
   # Treatment arm
   treatment_arm = sample(
     c("Control", "Treatment A", "Treatment B"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.3, 0.35, 0.35)
   ),
 
   # Disease severity
   disease_severity = sample(
     c("Mild", "Moderate", "Severe"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.3, 0.5, 0.2)
   ),
 
   # Gender
   gender = sample(
     c("Male", "Female"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.55, 0.45)
   ),
 
   # Hospital site (for split/grouped analysis)
   hospital_site = sample(
     c("Site A", "Site B", "Site C"),
-    n, replace = TRUE
+    n,
+    replace = TRUE
   ),
 
   # Age group
   age_group = sample(
     c("18-40", "41-60", "61-80", "80+"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.15, 0.35, 0.40, 0.10)
   ),
 
   # Tumor stage
   tumor_stage = sample(
     c("Stage I", "Stage II", "Stage III", "Stage IV"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.20, 0.30, 0.30, 0.20)
   )
 )
@@ -108,7 +115,8 @@ jjpiestats_diagnostic <- tibble(
   # Gold standard diagnosis
   disease_status = sample(
     c("Disease Present", "Disease Absent"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.35, 0.65)
   ),
 
@@ -123,13 +131,15 @@ for (i in 1:n) {
     # True positives and false negatives
     jjpiestats_diagnostic$test_result[i] <- sample(
       c("Positive", "Negative"),
-      1, prob = c(0.85, 0.15)  # 85% sensitivity
+      1,
+      prob = c(0.85, 0.15) # 85% sensitivity
     )
   } else {
     # True negatives and false positives
     jjpiestats_diagnostic$test_result[i] <- sample(
       c("Positive", "Negative"),
-      1, prob = c(0.10, 0.90)  # 90% specificity
+      1,
+      prob = c(0.10, 0.90) # 90% specificity
     )
   }
 }
@@ -137,7 +147,7 @@ for (i in 1:n) {
 # Additional variables
 jjpiestats_diagnostic <- jjpiestats_diagnostic %>%
   mutate(
-    age_category = sample(c("< 50 years", "≥ 50 years"), n, replace = TRUE),
+    age_category = sample(c("< 50 years", ">= 50 years"), n, replace = TRUE),
     clinical_site = sample(c("Center 1", "Center 2", "Center 3"), n, replace = TRUE),
     gender = sample(c("Male", "Female"), n, replace = TRUE, prob = c(0.48, 0.52))
   ) %>%
@@ -161,7 +171,7 @@ jjpiestats_treatment <- tibble(
   # Treatment groups
   treatment = rep(
     c("Placebo", "Low Dose", "Medium Dose", "High Dose"),
-    each = n/4
+    each = n / 4
   ),
 
   # Response outcome
@@ -179,7 +189,8 @@ for (i in 1:n) {
 
   jjpiestats_treatment$outcome[i] <- sample(
     c("Excellent", "Good", "Fair", "Poor"),
-    1, prob = outcome_prob
+    1,
+    prob = outcome_prob
   )
 }
 
@@ -210,27 +221,31 @@ jjpiestats_biomarker <- tibble(
   # Biomarker expression level
   expression_level = sample(
     c("Negative", "Low", "Moderate", "High"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.25, 0.30, 0.25, 0.20)
   ),
 
   # Cancer type
   cancer_type = sample(
     c("Type A", "Type B", "Type C"),
-    n, replace = TRUE
+    n,
+    replace = TRUE
   ),
 
   # Receptor status
   receptor_status = sample(
     c("Positive", "Negative"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.60, 0.40)
   ),
 
   # Histological grade
   grade = sample(
     c("Grade 1", "Grade 2", "Grade 3"),
-    n, replace = TRUE,
+    n,
+    replace = TRUE,
     prob = c(0.30, 0.50, 0.20)
   ),
 

@@ -442,7 +442,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
           }
           
         }, error = function(e) {
-          # TODO (UX): file-wide pattern — these display/estimate helpers swallow
+          # TODO (UX): file-wide pattern - these display/estimate helpers swallow
           # errors into empty handlers with no user feedback (also .displayCoxResults
           # ~L464, .plotKM ~L480, .populationEstimates ~L514). A genuine failure makes
           # the result panel silently blank. Surface it via the todo/notice panel
@@ -488,7 +488,7 @@ surveysurvivalClass <- if (requireNamespace('jmvcore'))
       
       # Create KM plot object
       .createKMPlot = function(km_result) {
-        # TODO (stub): KM plotting is unimplemented — this returns NULL and the
+        # TODO (stub): KM plotting is unimplemented - this returns NULL and the
         # render fn .kmPlot (~L562) is also an empty NULL stub, so the km_plot
         # option (wired in .a.yaml/.u.yaml and gated at .weightedKaplanMeier ~L380)
         # produces no plot. Either implement weighted-survival-curve plotting here

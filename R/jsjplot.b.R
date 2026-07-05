@@ -159,7 +159,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         # TODO (correctness): R6 cache invalidation here relies on
         # `.calculateDataHash()`/`.calculateOptionsHash()` (called from
-        # `.canUseCache()` — see the cache check at L174-188 and L160). If
+        # `.canUseCache()` - see the cache check at L174-188 and L160). If
         # those hash helpers use fragile patterns like `paste(nrow, ncol,
         # var_names)` without mixing in actual data content, mutations within
         # the data won't invalidate the cache and stale `model_table`/`plot`/
@@ -649,7 +649,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 for (i in 1:nrow(coefs)) {
                     html_table <- paste0(html_table, "<tr>")
-                    # htmlEscape coefficient row names — derived from formula RHS (user column names)
+                    # htmlEscape coefficient row names - derived from formula RHS (user column names)
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(rownames(coefs)[i]), "</td>")
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", round(coefs[i, 1], 4), "</td>")
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", round(coefs[i, 2], 4), "</td>")
