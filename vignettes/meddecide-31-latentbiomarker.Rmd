@@ -5,7 +5,7 @@ author: "ClinicoPath"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Latent biomarker constructs}
+  %\VignetteIndexEntry{Latent biomarker constructs and survival}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -419,11 +419,10 @@ l2 <- c(0.78, 0.73, 0.70)   # invasion markers
 sd1 <- sqrt(1 - l1^2)
 sd2 <- sqrt(1 - l2^2)
 
-# Generate indicators
-proliferative <- sweep(outer(F1, l1), 2, sd1,
-                       FUN = function(a, b) a + rnorm(n6, 0, b))
-invasion      <- sweep(outer(F2, l2), 2, sd2,
-                       FUN = function(a, b) a + rnorm(n6, 0, b))
+# Generate indicators (independent per-column residual noise so the covariance
+# stays full-rank / positive-definite; matches the pattern used in scenario 4)
+proliferative <- outer(F1, l1) + sapply(sd1, function(s) rnorm(n6, 0, s))
+invasion      <- outer(F2, l2) + sapply(sd2, function(s) rnorm(n6, 0, s))
 
 colnames(proliferative) <- c("ki67_li", "pcna_expr", "cyclind1_expr")
 colnames(invasion)      <- c("mmp9_expr", "ecadherin_loss", "ni_extent")
