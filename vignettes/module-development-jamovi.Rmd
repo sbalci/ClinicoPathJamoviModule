@@ -63,6 +63,20 @@ install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-
 
 ### ClinicoPath Development Setup
 
+**Prerequisites (one-time setup):**
+
+- Use `R >= 4.5.0`
+- Install jamovi from https://www.jamovi.org/download.html
+- Install `jmvtools`. It is **not on CRAN** — it must be installed from the jamovi
+  repository, along with its `node` dependency:
+
+```r
+install.packages('node', repos = 'https://repo.jamovi.org')
+install.packages('jmvtools', repos = c('https://repo.jamovi.org', 'https://cran.r-project.org'))
+```
+
+**Build and install the module:**
+
 - Fork and clone this repository: https://github.com/sbalci/ClinicoPathJamoviModule
 - Navigate to the cloned directory in R
 - Run `jmvtools::install()` to build and install the module
@@ -1474,8 +1488,11 @@ https://www.jamovi.org/downloads/jamovi-unsigned.zip
 
 https://dev.jamovi.org/tuts0101-getting-started.html
 
+`jmvtools` is not on CRAN, so install it (and its `node` dependency) from the
+jamovi repository:
 
 ```r
+install.packages('node', repos='https://repo.jamovi.org')
 install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 ```
 

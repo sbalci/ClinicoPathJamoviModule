@@ -142,6 +142,24 @@ Official documentation is here: https://dev.jamovi.org/
 install.packages('node', repos='https://repo.jamovi.org')
 install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-project.org'))
 ```
+
+# Install jmvtools if needed
+if (!requireNamespace('jmvtools', quietly = TRUE)) install.packages('jmvtools', repos='https://repo.jamovi.org')
+
+---
+
+# Build and install development version
+# Run this from the module root directory
+# It will produce a .jmo file in the docs/ folder
+# And install the module into your jamovi user directory
+jmvtools::install()
+
+# For development mode (loads from source instead of installed package):
+# Rscript -e "jmvtools::prepare()"
+
+# To build the package (no installation):
+# Rscript -e "devtools::document()"
+```
 -->
 <div class="section level4">
 <h4 id="clinicopath-development-setup">ClinicoPath Development Setup<a class="anchor" aria-label="anchor" href="#clinicopath-development-setup"></a>
