@@ -2,11 +2,11 @@
 title: "Latent biomarker constructs and survival"
 subtitle: "When a single biomarker score isn't enough"
 author: "ClinicoPath"
-date: today
-format: html
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Latent biomarker constructs}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   echo = TRUE,
   warning = FALSE,
   message = FALSE,
-  eval = TRUE
+  eval = requireNamespace("lavaan", quietly = TRUE)
 )
 ```
 

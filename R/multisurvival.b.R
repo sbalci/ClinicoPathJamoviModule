@@ -8318,9 +8318,9 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     ) # End of private list
     
     # , public = list(
-        #' @description
-        #' Generate R source code for Multi-Variable Survival analysis
-        #' @return Character string with R syntax for reproducible analysis
+        # @description
+        # Generate R source code for Multi-Variable Survival analysis
+        # @return Character string with R syntax for reproducible analysis
         # NOTE (2026-07): Custom asSource() commented out. It emitted
         # `elapsedtime`/`outcome` MANUALLY and then private$.asArgs() emitted
         # them AGAIN, producing duplicated (non-runnable) arguments in the

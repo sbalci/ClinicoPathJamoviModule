@@ -2,11 +2,11 @@
 title: "Interobserver reliability beyond a single kappa"
 subtitle: "All-pairs Cohen's kappa and per-category bottlenecks (YSRB-style cytology)"
 author: "ClinicoPath"
-date: today
-format: html
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Interobserver reliability beyond a single kappa}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   echo = TRUE,
   warning = FALSE,
   message = FALSE,
-  eval = TRUE
+  eval = requireNamespace("ClinicoPath", quietly = TRUE)
 )
 ```
 
