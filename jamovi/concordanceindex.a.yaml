@@ -22,15 +22,15 @@ description:
         survival predictions, and prognostic scores. The C-index accounts for censoring
         through appropriate pair weighting and can be decomposed to identify which
         risk groups contribute most to discrimination.
-    R:
-        dontrun: true
-        usage: >
-            result <- concordanceindex(
-                data = validation_data,
-                time = "follow_up_months",
-                event = "death",
-                predictor = "risk_score"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: >
+    #         result <- concordanceindex(
+    #             data = validation_data,
+    #             time = "follow_up_months",
+    #             event = "death",
+    #             predictor = "risk_score"
+    #         )
 
 options:
     - name: data

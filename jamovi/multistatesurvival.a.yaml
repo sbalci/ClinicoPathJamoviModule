@@ -12,19 +12,19 @@ description:
         Multistate models for analyzing disease progression through multiple states.
         Implements transition probabilities, state occupation probabilities, and 
         competing transitions for complex disease pathways in clinical research.
-    R:
-        dontrun: true
-        usage: |
-            # Example: Cancer progression model
-            # States: Diagnosis -> Remission -> Relapse -> Death
-            #                   -> Death (direct)
-            multistatesurvival(
-                data = cancer_data,
-                id = patient_id,
-                time = follow_up_time,
-                state = disease_state,
-                covariates = c(age, stage, treatment)
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example: Cancer progression model
+    #         # States: Diagnosis -> Remission -> Relapse -> Death
+    #         #                   -> Death (direct)
+    #         multistatesurvival(
+    #             data = cancer_data,
+    #             id = patient_id,
+    #             time = follow_up_time,
+    #             state = disease_state,
+    #             covariates = c(age, stage, treatment)
+    #         )
 
 options:
     - name: data

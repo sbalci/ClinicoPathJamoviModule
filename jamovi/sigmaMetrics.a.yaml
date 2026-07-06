@@ -10,16 +10,16 @@ description:
         Calculates sigma metrics, process capability indices, and quality goal index (QGI)
         for analytical methods. Supports ISO 15189 compliance and quality improvement initiatives.
         Essential for laboratory method validation and performance monitoring.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            sigmametrics(
-                bias = "method_bias",
-                cv = "coefficient_variation",
-                tea = "total_allowable_error",
-                analyte = "test_name"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         sigmametrics(
+    #             bias = "method_bias",
+    #             cv = "coefficient_variation",
+    #             tea = "total_allowable_error",
+    #             analyte = "test_name"
+    #         )
 
 options:
     - name: data

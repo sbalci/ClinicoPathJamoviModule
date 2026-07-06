@@ -14,17 +14,17 @@ description:
         This method first screens features using univariate Cox regression, then applies PCA
         to selected features, and finally fits a Cox model using the principal components.
         Particularly effective for genomics data where many features are correlated.
-    R:
-        dontrun: true
-        usage: |
-            superpc(
-                data = data,
-                time = "time",
-                event = "event",
-                features = c("gene1", "gene2", "gene3"),
-                threshold = 0.1,
-                n_components = 5
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         superpc(
+    #             data = data,
+    #             time = "time",
+    #             event = "event",
+    #             features = c("gene1", "gene2", "gene3"),
+    #             threshold = 0.1,
+    #             n_components = 5
+    #         )
 
 completeWhenFilled: false
 

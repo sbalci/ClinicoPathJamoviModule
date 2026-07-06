@@ -13,18 +13,18 @@ description:
         using network geometry. Supports direct and indirect comparisons, network
         coherence assessment, and ranking of multiple interventions with uncertainty
         quantification for clinical decision making.
-    R:
-        dontrun: true
-        usage: |
-            # Bayesian network meta-analysis
-            bayesiannetworkma(
-                data = network_data,
-                study_id = "study",
-                treatment = "treatment",
-                outcome = "response",
-                sample_size = "n",
-                network_type = "mixed_evidence"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Bayesian network meta-analysis
+    #         bayesiannetworkma(
+    #             data = network_data,
+    #             study_id = "study",
+    #             treatment = "treatment",
+    #             outcome = "response",
+    #             sample_size = "n",
+    #             network_type = "mixed_evidence"
+    #         )
 
 options:
     - name: data

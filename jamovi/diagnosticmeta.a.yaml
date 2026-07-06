@@ -12,17 +12,17 @@ description:
         pathology research. Performs bivariate random-effects modeling, HSROC analysis, 
         meta-regression, and publication bias assessment for AI algorithm validation 
         and biomarker diagnostic accuracy synthesis.
-    R:
-        dontrun: true
-        usage: |
-            data('diagnostic_studies')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('diagnostic_studies')
             
-            diagnosticmeta(data = diagnostic_studies,
-                          study = study_name,
-                          true_positives = tp,
-                          false_positives = fp,
-                          false_negatives = fn,
-                          true_negatives = tn)
+    #         diagnosticmeta(data = diagnostic_studies,
+    #                       study = study_name,
+    #                       true_positives = tp,
+    #                       false_positives = fp,
+    #                       false_negatives = fn,
+    #                       true_negatives = tn)
 
 options:
     - name: data

@@ -13,10 +13,10 @@ description:
         These tests provide enhanced power for detecting differences at specific time points
         using various weighting schemes. Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto,
         and custom weight function approaches for comprehensive survival comparison.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
 

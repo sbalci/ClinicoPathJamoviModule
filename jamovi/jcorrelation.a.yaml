@@ -12,21 +12,21 @@ description:
         Comprehensive correlation analysis including Pearson, Spearman, and Kendall 
         correlations with significance tests, confidence intervals, and natural language 
         reporting. Suitable for exploring relationships between continuous variables.
-    R:
-        dontrun: true
-        usage: |
-            # Basic correlation analysis
-            jcorrelation(
-                data = histopathology,
-                vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Basic correlation analysis
+    #         jcorrelation(
+    #             data = histopathology,
+    #             vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
+    #         )
             
-            # With grouping variable
-            jcorrelation(
-                data = histopathology,
-                vars = c("Age", "OverallTime", "MeasurementA"),
-                group = "Sex"
-            )
+    #         # With grouping variable
+    #         jcorrelation(
+    #             data = histopathology,
+    #             vars = c("Age", "OverallTime", "MeasurementA"),
+    #             group = "Sex"
+    #         )
 
 completeWhenFilled: true
 

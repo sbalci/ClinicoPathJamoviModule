@@ -13,10 +13,10 @@ description:
         observed but are inferred from observed covariates or measurements. 
         Provides estimation of transition intensities, state prevalences, 
         and predictions with uncertainty quantification.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
     - name: data

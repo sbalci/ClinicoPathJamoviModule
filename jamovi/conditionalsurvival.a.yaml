@@ -15,10 +15,10 @@ description:
         estimates for patients who have already survived a certain period. Multiple 
         estimation methods are supported including Kaplan-Meier weights, landmark 
         approaches, and inverse probability weighting.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
 

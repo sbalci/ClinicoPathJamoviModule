@@ -9,16 +9,16 @@ jas: '1.2'
 
 description:
     main: Base R graphics visualization module providing fast, blazing fast, and extremely customizable data visualization solutions using pure base R graphics.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage:
-            # Scatter plot
-            plot(x, y, main="Scatter Plot", xlab="X Variable", ylab="Y Variable")
-            # Histogram
-            hist(data, main="Histogram", xlab="Values")
-            # Box plot
-            boxplot(data ~ group, main="Box Plot")
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage:
+    #         # Scatter plot
+    #         plot(x, y, main="Scatter Plot", xlab="X Variable", ylab="Y Variable")
+    #         # Histogram
+    #         hist(data, main="Histogram", xlab="Values")
+    #         # Box plot
+    #         boxplot(data ~ group, main="Box Plot")
 
 options:
     - name: data

@@ -11,18 +11,18 @@ description:
         correlated survival data. Uses the frailtySurv package for efficient estimation
         of parametric baseline distributions combined with frailty components to model
         unobserved heterogeneity between clusters or individuals.
-    R:
-        dontrun: true
-        usage: |
-            data('lung', package='survival')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('lung', package='survival')
             
-            parametricfrailty(data = lung, 
-                             elapsedtime = 'time',
-                             outcome = 'status', 
-                             covariates = c('age', 'sex'),
-                             frailty_variable = 'inst',
-                             baseline_distribution = 'weibull',
-                             frailty_distribution = 'gamma')
+    #         parametricfrailty(data = lung, 
+    #                          elapsedtime = 'time',
+    #                          outcome = 'status', 
+    #                          covariates = c('age', 'sex'),
+    #                          frailty_variable = 'inst',
+    #                          baseline_distribution = 'weibull',
+    #                          frailty_distribution = 'gamma')
 
 options:
     - name: data

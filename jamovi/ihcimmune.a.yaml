@@ -11,15 +11,15 @@ description:
     main: >
         Tumor-infiltrating lymphocyte (TIL) analysis and immune microenvironment characterization
         using IHC markers. Specialized for immuno-oncology applications.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            ihcimmune(
-                immune_markers = c("CD3", "CD4", "CD8", "CD20"),
-                tilAnalysis = TRUE,
-                immuneContexture = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         ihcimmune(
+    #             immune_markers = c("CD3", "CD4", "CD8", "CD20"),
+    #             tilAnalysis = TRUE,
+    #             immuneContexture = TRUE
+    #         )
 
 options:
     - name: data

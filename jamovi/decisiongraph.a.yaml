@@ -12,10 +12,10 @@ description:
         Creates decision tree graphs for cost-effectiveness analysis with typical
         decision nodes, chance nodes, and terminal nodes. Supports visualization
         of treatment pathways, probabilities, costs, and outcomes.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
     - name: data

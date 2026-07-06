@@ -9,15 +9,15 @@ jas: '1.2'
 
 description:
     main: Enhanced cross-tabulation analysis using the danchaltiel/crosstable package for advanced clinical research functionality.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage:
-            library(crosstable)
-            # Enhanced crosstable with tidyselect
-            crosstable(data, c(var1, var2), by = group_var)
-            # Formula interface
-            crosstable(data, c(age_group = age > 65), by = treatment)
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage:
+    #         library(crosstable)
+    #         # Enhanced crosstable with tidyselect
+    #         crosstable(data, c(var1, var2), by = group_var)
+    #         # Formula interface
+    #         crosstable(data, c(age_group = age > 65), by = treatment)
 
 options:
   - name: data

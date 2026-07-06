@@ -15,18 +15,18 @@ description:
         over time and influence prognosis. The analysis implements various dynamic prediction
         methods including landmark approaches, joint modeling, and dynamic Cox models, allowing
         for real-time risk assessment and personalized medicine applications.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            dynamicprediction(
-                elapsedtime = "time_to_event",
-                outcome = "event_status",
-                baseline = c("age", "stage"),
-                longitudinal = c("biomarker", "treatment_response"),
-                time_var = "measurement_time",
-                prediction_horizon = 24
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         dynamicprediction(
+    #             elapsedtime = "time_to_event",
+    #             outcome = "event_status",
+    #             baseline = c("age", "stage"),
+    #             longitudinal = c("biomarker", "treatment_response"),
+    #             time_var = "measurement_time",
+    #             prediction_horizon = 24
+    #         )
 
 options:
     - name: data

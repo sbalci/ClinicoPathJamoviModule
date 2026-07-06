@@ -10,16 +10,16 @@ description:
         and JCGM 100:2008 guidelines. Calculates Type A and Type B uncertainties, combined and expanded
         uncertainty, and uncertainty budgets for clinical laboratory measurements.
         Essential for laboratory accreditation and quality assurance.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            measurementuncertainty(
-                measurement = "glucose_result",
-                reference_value = "certified_value",
-                replicate_group = "measurement_run",
-                uncertainty_method = "gum_approach"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         measurementuncertainty(
+    #             measurement = "glucose_result",
+    #             reference_value = "certified_value",
+    #             replicate_group = "measurement_run",
+    #             uncertainty_method = "gum_approach"
+    #         )
 
 options:
     - name: data

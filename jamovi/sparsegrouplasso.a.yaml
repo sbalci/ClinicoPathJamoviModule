@@ -10,18 +10,18 @@ jas: '1.2'
 
 description:
     main: Sparse Group LASSO regularization for survival analysis
-    R:
-        dontrun: true
-        usage: |
-            data('histopathology', package='ClinicoPath')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('histopathology', package='ClinicoPath')
             
-            sparsegrouplasso(data = histopathology,
-                           time_var = 'OverallSurvival',
-                           event_var = 'Death',
-                           pred_vars = c('Age', 'Grade', 'LVI', 'PNI'),
-                           group_definition = 'factor_based',
-                           alpha_sgl = 0.95,
-                           lambda_sequence = 'auto')
+    #         sparsegrouplasso(data = histopathology,
+    #                        time_var = 'OverallSurvival',
+    #                        event_var = 'Death',
+    #                        pred_vars = c('Age', 'Grade', 'LVI', 'PNI'),
+    #                        group_definition = 'factor_based',
+    #                        alpha_sgl = 0.95,
+    #                        lambda_sequence = 'auto')
 
 options:
     - name: data

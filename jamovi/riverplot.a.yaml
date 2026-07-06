@@ -13,47 +13,47 @@ description:
         flows, transitions, and temporal changes in categorical data. Supports individual
         entity tracking, aggregate trends, and multi-stage pathways. Perfect for patient
         journeys, treatment progressions, categorical changes over time, and flow analysis.
-    R:
-        dontrun: true
-        usage: |
-            # Basic temporal flow - Track treatment response changes over time
-            riverplot(
-              data = patient_data,
-              time = "follow_up_month",
-              strata = "treatment_response",
-              plotType = "alluvial",
-              labelNodes = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Basic temporal flow - Track treatment response changes over time
+    #         riverplot(
+    #           data = patient_data,
+    #           time = "follow_up_month",
+    #           strata = "treatment_response",
+    #           plotType = "alluvial",
+    #           labelNodes = TRUE
+    #         )
             
-            # Individual patient tracking with ID
-            riverplot(
-              data = longitudinal_data,
-              id = "patient_id",
-              time = "visit_date",
-              strata = "disease_stage",
-              plotType = "flow",
-              fillType = "last",
-              showCounts = TRUE
-            )
+    #         # Individual patient tracking with ID
+    #         riverplot(
+    #           data = longitudinal_data,
+    #           id = "patient_id",
+    #           time = "visit_date",
+    #           strata = "disease_stage",
+    #           plotType = "flow",
+    #           fillType = "last",
+    #           showCounts = TRUE
+    #         )
             
-            # Multi-stage pathway (wide format data)
-            riverplot(
-              data = pathway_data,
-              strata = c("baseline_status", "month3_status", "month6_status"),
-              plotType = "sankey",
-              fillType = "frequency",
-              curveType = "cardinal"
-            )
+    #         # Multi-stage pathway (wide format data)
+    #         riverplot(
+    #           data = pathway_data,
+    #           strata = c("baseline_status", "month3_status", "month6_status"),
+    #           plotType = "sankey",
+    #           fillType = "frequency",
+    #           curveType = "cardinal"
+    #         )
             
-            # Weighted stream chart - Account for patient counts or values
-            riverplot(
-              data = aggregate_data,
-              time = "quarter",
-              strata = "outcome_category", 
-              weight = "patient_count",
-              plotType = "stream",
-              showLegend = TRUE
-            )
+    #         # Weighted stream chart - Account for patient counts or values
+    #         riverplot(
+    #           data = aggregate_data,
+    #           time = "quarter",
+    #           strata = "outcome_category", 
+    #           weight = "patient_count",
+    #           plotType = "stream",
+    #           showLegend = TRUE
+    #         )
 
 options:
     - name: data

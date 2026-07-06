@@ -12,26 +12,26 @@ description:
         Compare agreement between different diagnostic modalities (e.g., glass slides vs digital images)
         with specialized metrics for pathology applications including discordance pattern analysis
         and HER2 scoring validation.
-    R:
-        dontrun: true
-        usage: |
-            # Basic modality comparison
-            result1 <- modalitycomparison(
-              data = data,
-              modality1_var = "glass_slides",
-              modality2_var = "digital_images",
-              case_id = "case_number"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Basic modality comparison
+    #         result1 <- modalitycomparison(
+    #           data = data,
+    #           modality1_var = "glass_slides",
+    #           modality2_var = "digital_images",
+    #           case_id = "case_number"
+    #         )
             
-            # HER2 scoring comparison with 5-category analysis
-            result2 <- modalitycomparison(
-              data = her2_data,
-              modality1_var = "glass_score",
-              modality2_var = "digital_score", 
-              case_id = "case_id",
-              score_categories = "her2_5cat",
-              show_discordance_analysis = TRUE
-            )
+    #         # HER2 scoring comparison with 5-category analysis
+    #         result2 <- modalitycomparison(
+    #           data = her2_data,
+    #           modality1_var = "glass_score",
+    #           modality2_var = "digital_score", 
+    #           case_id = "case_id",
+    #           score_categories = "her2_5cat",
+    #           show_discordance_analysis = TRUE
+    #         )
 
 options:
     - name: data

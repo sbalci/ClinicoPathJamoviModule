@@ -14,10 +14,10 @@ description:
 
         This is the specialized function for competing risks power analysis. For unified analysis across all survival
         study types, also consider 'Comprehensive Survival Power Analysis'.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
     - name: data

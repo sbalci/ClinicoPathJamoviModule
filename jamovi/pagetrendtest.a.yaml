@@ -10,16 +10,16 @@ description:
         This test is used when there is a specific predicted ordering of the treatment 
         effects or time points, making it more powerful than the general Friedman test
         when the alternative hypothesis specifies a trend or ordered pattern.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            pagetrendtest(
-                dependent = "measurement_value",
-                subject = "patient_id", 
-                within = "time_point",
-                trend_direction = "increasing"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         pagetrendtest(
+    #             dependent = "measurement_value",
+    #             subject = "patient_id", 
+    #             within = "time_point",
+    #             trend_direction = "increasing"
+    #         )
 
 options:
     - name: data

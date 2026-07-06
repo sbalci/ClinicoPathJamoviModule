@@ -13,11 +13,11 @@ description:
         Performs LASSO-penalized logistic regression for variable selection in binary
         classification problems. Ideal for diagnostic pathology studies that build
         classifiers (e.g., tumor type A vs B) with automatic feature selection.
-    R:
-        dontrun: true
-        usage: |
-            lassologistic(data = data, outcome = "diagnosis",
-                outcomeLevel = "PanNEC", explanatory = vars(p53, Rb1, Ki67, SSTR2A))
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         lassologistic(data = data, outcome = "diagnosis",
+    #             outcomeLevel = "PanNEC", explanatory = vars(p53, Rb1, Ki67, SSTR2A))
 
 options:
     - name: data

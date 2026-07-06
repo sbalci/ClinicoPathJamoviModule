@@ -13,16 +13,16 @@ description:
         Calculates AUC, sensitivity, and specificity for predictor variables and
         performs statistical comparison using DeLong test.
 
-    R:
-        dontrun: true
-        usage: |
-            data('medical_ai_data', package='ClinicoPath')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('medical_ai_data', package='ClinicoPath')
 
-            aivalidation(data = medical_ai_data,
-                        predictorVars = c('AI_score', 'human_score', 'biomarker1'),
-                        outcomeVar = 'diagnosis',
-                        positiveLevel = 'positive',
-                        compareModels = TRUE)
+    #         aivalidation(data = medical_ai_data,
+    #                     predictorVars = c('AI_score', 'human_score', 'biomarker1'),
+    #                     outcomeVar = 'diagnosis',
+    #                     positiveLevel = 'positive',
+    #                     compareModels = TRUE)
 
 options:
     - name: data

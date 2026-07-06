@@ -11,15 +11,15 @@ description:
     main: >
         Diagnostic performance analysis and clinical classification using IHC markers.
         Designed for differential diagnosis and antibody panel optimization.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            ihcdiagnostic(
-                markers = c("ER", "PR", "HER2", "Ki67"),
-                diagnosis = "tumor_type",
-                differentialDiagnosis = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         ihcdiagnostic(
+    #             markers = c("ER", "PR", "HER2", "Ki67"),
+    #             diagnosis = "tumor_type",
+    #             differentialDiagnosis = TRUE
+    #         )
 
 options:
     - name: data

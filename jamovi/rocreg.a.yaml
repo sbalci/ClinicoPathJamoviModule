@@ -23,15 +23,15 @@ description:
         binormal, non-parametric, or Bayesian approaches to model covariate effects
         on ROC curves. Provides both population-averaged and covariate-specific
         diagnostic accuracy estimates.
-    R:
-        dontrun: true
-        usage: >
-            result <- rocreg(
-                data = multi_center_data,
-                predictor = "biomarker_level",
-                outcome = "disease_status",
-                covariates = c("age", "scanner_type", "center")
-            )
+    # R:
+    #     dontrun: true
+    #     usage: >
+    #         result <- rocreg(
+    #             data = multi_center_data,
+    #             predictor = "biomarker_level",
+    #             outcome = "disease_status",
+    #             covariates = c("age", "scanner_type", "center")
+    #         )
 
 options:
     - name: data

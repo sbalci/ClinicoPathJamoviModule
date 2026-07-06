@@ -13,19 +13,19 @@ description:
         bootstrap validation, cross-validation, model calibration assessment, 
         and clinical performance evaluation designed for medical research and 
         diagnostic test evaluation.
-    R:
-        dontrun: true
-        usage: |
-            # Clinical model validation with bootstrap
-            clinical_validation(
-                data = clinical_data,
-                outcome = "diagnosis",
-                predictors = c("biomarker1", "biomarker2", "age", "gender"),
-                model_type = "logistic",
-                validation_method = "bootstrap",
-                bootstrap_samples = 1000,
-                clinical_context = "diagnosis"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Clinical model validation with bootstrap
+    #         clinical_validation(
+    #             data = clinical_data,
+    #             outcome = "diagnosis",
+    #             predictors = c("biomarker1", "biomarker2", "age", "gender"),
+    #             model_type = "logistic",
+    #             validation_method = "bootstrap",
+    #             bootstrap_samples = 1000,
+    #             clinical_context = "diagnosis"
+    #         )
 
 options:
     - name: data

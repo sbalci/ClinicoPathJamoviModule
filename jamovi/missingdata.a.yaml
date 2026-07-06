@@ -15,15 +15,15 @@ description:
     comparison of observed vs imputed data, and quality evaluation. Perfect for clinical
     research data preprocessing where missing data is common and proper handling is critical
     for valid statistical inference.
-  R:
-    dontrun: true
-    usage: |
-      # Example:
-      # 1. Select variables for missing data analysis
-      # 2. Explore missing data patterns and correlations
-      # 3. Configure imputation methods and parameters
-      # 4. Run multiple imputation and evaluate convergence
-      # 5. Compare observed vs imputed data distributions
+  # R:
+  #   dontrun: true
+  #   usage: |
+  #     # Example:
+  #     # 1. Select variables for missing data analysis
+  #     # 2. Explore missing data patterns and correlations
+  #     # 3. Configure imputation methods and parameters
+  #     # 4. Run multiple imputation and evaluate convergence
+  #     # 5. Compare observed vs imputed data distributions
 
 options:
 

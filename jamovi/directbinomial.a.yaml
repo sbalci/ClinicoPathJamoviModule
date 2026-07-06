@@ -12,10 +12,10 @@ description:
         functions in competing risks analysis using the timereg package. This 
         method provides direct modeling of cumulative incidence without 
         proportional subdistribution hazards assumptions.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
     - name: data

@@ -15,19 +15,19 @@ description:
         ranking, pathway analysis, and clinical validation metrics. Designed for omics
         data analysis with regulatory compliance features for biomarker development
         and clinical translation.
-    R:
-        dontrun: true
-        usage: |
-            data('biomarker_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('biomarker_data')
             
-            biomarkerdiscovery(
-                data = biomarker_data,
-                outcome_var = "response",
-                biomarker_vars = c("gene1", "gene2", "protein1"),
-                discovery_method = "elastic_net",
-                validation_method = "bootstrap",
-                interpretability = TRUE
-            )
+    #         biomarkerdiscovery(
+    #             data = biomarker_data,
+    #             outcome_var = "response",
+    #             biomarker_vars = c("gene1", "gene2", "protein1"),
+    #             discovery_method = "elastic_net",
+    #             validation_method = "bootstrap",
+    #             interpretability = TRUE
+    #         )
 
 completeWhenFilled: false
 

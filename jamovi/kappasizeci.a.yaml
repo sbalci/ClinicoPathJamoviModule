@@ -11,10 +11,10 @@ jas: '1.2'
 description:
     main: >
         Power Analysis for Interobserver Agreement Analysis.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
     - name: outcome

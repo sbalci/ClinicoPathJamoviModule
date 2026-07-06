@@ -23,10 +23,10 @@ description:
         • Clinical interpretation of parameters
         • Comprehensive diagnostic plots
         • Copy-ready report templates
-    R:
-        dontrun: true
-        usage: |
-            # Example usage will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage will be added
 
 options:
     - name: data

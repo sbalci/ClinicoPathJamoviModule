@@ -12,17 +12,17 @@ description:
     main: |
         Principal Component Analysis for Cox regression with high-dimensional predictors.
         Reduces dimensionality while preserving survival-relevant information using supervised PCA.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage
-            pcacox(
-                data = highdim_data,
-                time = survival_time,
-                status = event_status,
-                predictors = high_dimensional_variables,
-                n_components = 5
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage
+    #         pcacox(
+    #             data = highdim_data,
+    #             time = survival_time,
+    #             status = event_status,
+    #             predictors = high_dimensional_variables,
+    #             n_components = 5
+    #         )
 
 options:
     - name: data

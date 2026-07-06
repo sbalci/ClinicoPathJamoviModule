@@ -16,19 +16,19 @@ description:
         
         Supports randomized controlled trials (RCTs), equivalence trials, non-inferiority
         trials, superiority trials, and observational studies with proper power calculations.
-    R:
-        dontrun: true
-        usage: |
-            data('your_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('your_data')
             
-            clinicaltrialdesign(
-                trial_type = "superiority",
-                outcome_type = "continuous", 
-                test_type = "two_sample_ttest",
-                effect_size = 0.5,
-                alpha = 0.05,
-                power = 0.80
-            )
+    #         clinicaltrialdesign(
+    #             trial_type = "superiority",
+    #             outcome_type = "continuous", 
+    #             test_type = "two_sample_ttest",
+    #             effect_size = 0.5,
+    #             alpha = 0.05,
+    #             power = 0.80
+    #         )
 
 completeWhenFilled: false
 

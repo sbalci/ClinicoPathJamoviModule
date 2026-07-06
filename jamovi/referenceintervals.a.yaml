@@ -10,16 +10,16 @@ description:
         Supports parametric and non-parametric approaches, robust methods for outlier handling,
         and partitioning analysis for demographic factors. Essential for laboratory standardization
         and clinical interpretation of test results.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            referenceintervals(
-                measurement = "laboratory_value",
-                age = "patient_age",
-                gender = "patient_gender",
-                method = "robust_nonparametric"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         referenceintervals(
+    #             measurement = "laboratory_value",
+    #             age = "patient_age",
+    #             gender = "patient_gender",
+    #             method = "robust_nonparametric"
+    #         )
 
 options:
     - name: data

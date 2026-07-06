@@ -10,16 +10,16 @@ description:
         Implements Moran's I, Geary's C, and local indicators of spatial association (LISA) for
         detecting spatial clustering and patterns in histopathological data. Essential for analyzing
         spatial dependencies in tissue architecture and cellular distributions.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            spatialautocorrelation(
-                measurement = "biomarker_intensity",
-                x_coordinate = "cell_x",
-                y_coordinate = "cell_y",
-                autocorr_method = "morans_i"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         spatialautocorrelation(
+    #             measurement = "biomarker_intensity",
+    #             x_coordinate = "cell_x",
+    #             y_coordinate = "cell_y",
+    #             autocorr_method = "morans_i"
+    #         )
 
 options:
     - name: data

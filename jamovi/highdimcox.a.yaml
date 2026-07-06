@@ -16,35 +16,35 @@ description:
         of variables is large relative to the number of observations, enabling variable
         selection and preventing overfitting in genomic, proteomic, or other high-dimensional
         clinical datasets.
-    R:
-        dontrun: true
-        usage: |
-            # Example 1: LASSO regularization for gene expression data
-            library(survival)
-            library(glmnet)
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example 1: LASSO regularization for gene expression data
+    #         library(survival)
+    #         library(glmnet)
             
-            highdimcox(
-                data = genomic_survival_data,
-                elapsedtime = "time",
-                outcome = "status", 
-                outcomeLevel = "1",
-                predictors = c("gene1", "gene2", "gene3", "...gene1000"),
-                regularization_method = "lasso",
-                cv_folds = 10
-            )
+    #         highdimcox(
+    #             data = genomic_survival_data,
+    #             elapsedtime = "time",
+    #             outcome = "status", 
+    #             outcomeLevel = "1",
+    #             predictors = c("gene1", "gene2", "gene3", "...gene1000"),
+    #             regularization_method = "lasso",
+    #             cv_folds = 10
+    #         )
             
-            # Example 2: Elastic Net with stability selection
-            highdimcox(
-                data = protein_data,
-                elapsedtime = "survival_time",
-                outcome = "event",
-                outcomeLevel = "1", 
-                predictors = c("protein1", "protein2", "...protein500"),
-                regularization_method = "elastic_net",
-                alpha_value = 0.5,
-                stability_selection = TRUE,
-                subsampling_iterations = 500
-            )
+    #         # Example 2: Elastic Net with stability selection
+    #         highdimcox(
+    #             data = protein_data,
+    #             elapsedtime = "survival_time",
+    #             outcome = "event",
+    #             outcomeLevel = "1", 
+    #             predictors = c("protein1", "protein2", "...protein500"),
+    #             regularization_method = "elastic_net",
+    #             alpha_value = 0.5,
+    #             stability_selection = TRUE,
+    #             subsampling_iterations = 500
+    #         )
 
 options:
   - name: data

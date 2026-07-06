@@ -14,10 +14,10 @@ description:
         Cox regression models. Supports multiple models comparison, custom coefficient
         selection, standardized coefficients, and various styling options. Essential 
         for presenting regression results in clinical research and epidemiological studies.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
 

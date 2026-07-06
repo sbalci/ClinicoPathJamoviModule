@@ -15,20 +15,20 @@ description:
         population attributable risk calculation. Includes adjustment for sampling schemes,
         competing mortality, and population stratification. Designed for epidemiological
         research including cancer registry studies, cohort studies, and population surveillance.
-    R:
-        dontrun: true
-        usage: |
-            data('population_cohort')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('population_cohort')
             
-            epidemiosurvival(
-                data = population_cohort,
-                time_var = "followup_time",
-                event_var = "death",
-                exposure_var = "smoking_status",
-                age_var = "age_at_entry",
-                calendar_time = "entry_year",
-                population_weights = "sampling_weight"
-            )
+    #         epidemiosurvival(
+    #             data = population_cohort,
+    #             time_var = "followup_time",
+    #             event_var = "death",
+    #             exposure_var = "smoking_status",
+    #             age_var = "age_at_entry",
+    #             calendar_time = "entry_year",
+    #             population_weights = "sampling_weight"
+    #         )
 
 completeWhenFilled: false
 

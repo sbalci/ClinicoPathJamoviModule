@@ -15,18 +15,18 @@ description:
         outcomes using standard statistical methods by transforming survival data into pseudo-observations
         that can be analyzed with conventional regression techniques. Supports various functionals
         including survival probabilities, cumulative incidence functions, and restricted mean survival times.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            generalpseudo(
-                elapsedtime = "time_to_event",
-                outcome = "event_status",
-                explanatory = c("age", "treatment", "stage"),
-                functional_type = "survival",
-                time_points = c(12, 24, 60),
-                cause_specific = 1
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         generalpseudo(
+    #             elapsedtime = "time_to_event",
+    #             outcome = "event_status",
+    #             explanatory = c("age", "treatment", "stage"),
+    #             functional_type = "survival",
+    #             time_points = c(12, 24, 60),
+    #             cause_specific = 1
+    #         )
 
 options:
     - name: data

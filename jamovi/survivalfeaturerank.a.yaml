@@ -13,47 +13,47 @@ description:
         This analysis runs a separate Cox proportional hazards model for each selected feature and ranks them
         by statistical significance, hazard ratio, or concordance index. Useful for biomarker screening,
         exploratory analysis, and feature selection before building multivariable models.
-    R:
-        dontrun: true
-        usage: |
-            # Example 1: Basic feature ranking
-            library(survival)
-            data(colon)
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example 1: Basic feature ranking
+    #         library(survival)
+    #         data(colon)
 
-            survivalfeaturerank(
-                data = colon,
-                survtime = "time",
-                event = "status",
-                eventLevel = "1",
-                features = c("sex", "obstruct", "perfor", "adhere", "nodes", "differ"),
-                rankBy = "pvalue"
-            )
+    #         survivalfeaturerank(
+    #             data = colon,
+    #             survtime = "time",
+    #             event = "status",
+    #             eventLevel = "1",
+    #             features = c("sex", "obstruct", "perfor", "adhere", "nodes", "differ"),
+    #             rankBy = "pvalue"
+    #         )
 
-            # Example 2: Rank by hazard ratio with plots
-            survivalfeaturerank(
-                data = colon,
-                survtime = "time",
-                event = "status",
-                eventLevel = "1",
-                features = c("sex", "obstruct", "perfor", "age", "nodes"),
-                rankBy = "hazard",
-                showForestPlot = TRUE,
-                showTopKM = TRUE,
-                topN = 3
-            )
+    #         # Example 2: Rank by hazard ratio with plots
+    #         survivalfeaturerank(
+    #             data = colon,
+    #             survtime = "time",
+    #             event = "status",
+    #             eventLevel = "1",
+    #             features = c("sex", "obstruct", "perfor", "age", "nodes"),
+    #             rankBy = "hazard",
+    #             showForestPlot = TRUE,
+    #             showTopKM = TRUE,
+    #             topN = 3
+    #         )
 
-            # Example 3: Rank by C-index for predictive power
-            survivalfeaturerank(
-                data = colon,
-                survtime = "time",
-                event = "status",
-                eventLevel = "1",
-                features = c("age", "nodes", "extent", "surg"),
-                rankBy = "cindex",
-                showCI = TRUE,
-                adjustPValues = TRUE,
-                adjustMethod = "fdr"
-            )
+    #         # Example 3: Rank by C-index for predictive power
+    #         survivalfeaturerank(
+    #             data = colon,
+    #             survtime = "time",
+    #             event = "status",
+    #             eventLevel = "1",
+    #             features = c("age", "nodes", "extent", "surg"),
+    #             rankBy = "cindex",
+    #             showCI = TRUE,
+    #             adjustPValues = TRUE,
+    #             adjustMethod = "fdr"
+    #         )
 
 options:
 

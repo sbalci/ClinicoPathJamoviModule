@@ -23,17 +23,17 @@ description:
         uncertain classifications. Particularly valuable for real-world implementation
         of diagnostic tests where "I don't know" is a valid and often safer response
         than forcing a potentially incorrect binary classification.
-    R:
-        dontrun: true
-        usage: >
-            result <- greyzoneroc(
-                data = ai_predictions,
-                predictor = "ai_probability",
-                outcome = "true_diagnosis",
-                positive_level = "disease",
-                grey_zone_width = 0.1,
-                confidence_threshold = 0.80
-            )
+    # R:
+    #     dontrun: true
+    #     usage: >
+    #         result <- greyzoneroc(
+    #             data = ai_predictions,
+    #             predictor = "ai_probability",
+    #             outcome = "true_diagnosis",
+    #             positive_level = "disease",
+    #             grey_zone_width = 0.1,
+    #             confidence_threshold = 0.80
+    #         )
 
 options:
     - name: data

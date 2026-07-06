@@ -24,18 +24,18 @@ description:
         - Meta-regression with study-level covariates
         - Publication bias assessment and adjustment
         
-    R:
-        dontrun: true
-        usage: |
-            # Bayesian meta-analysis of treatment effects
-            bayesianmetaanalysis(
-                data = data,
-                effectSize = "effect",
-                standardError = "se",
-                studyId = "study",
-                modelType = "random_effects",
-                outcomeType = "continuous"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Bayesian meta-analysis of treatment effects
+    #         bayesianmetaanalysis(
+    #             data = data,
+    #             effectSize = "effect",
+    #             standardError = "se",
+    #             studyId = "study",
+    #             modelType = "random_effects",
+    #             outcomeType = "continuous"
+    #         )
 
 options:
     - name: data

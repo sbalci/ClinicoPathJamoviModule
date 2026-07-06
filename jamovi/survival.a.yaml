@@ -14,10 +14,10 @@ description:
         survival estimates and incidence rates that account for varying follow-up durations 
         across groups. The Cox proportional hazards model incorporates person-time by modeling 
         the hazard function, which represents the instantaneous event rate per unit of person-time.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 
 options:

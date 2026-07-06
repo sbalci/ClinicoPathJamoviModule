@@ -14,18 +14,18 @@ description:
         SCAD provides automatic variable selection with oracle properties, avoiding over-penalization
         of large coefficients while maintaining sparsity for small coefficients. Particularly useful
         for genomics and high-dimensional clinical data where interpretable variable selection is crucial.
-    R:
-        dontrun: true
-        usage: |
-            ncvregcox(
-                data = data,
-                time = "time",
-                event = "event", 
-                covariates = c("x1", "x2", "x3"),
-                penalty = "SCAD",
-                cv_folds = 10,
-                lambda_type = "min"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         ncvregcox(
+    #             data = data,
+    #             time = "time",
+    #             event = "event", 
+    #             covariates = c("x1", "x2", "x3"),
+    #             penalty = "SCAD",
+    #             cv_folds = 10,
+    #             lambda_type = "min"
+    #         )
 
 completeWhenFilled: false
 

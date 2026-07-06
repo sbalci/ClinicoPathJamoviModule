@@ -11,19 +11,19 @@ description:
         for survival analysis. Provides efficient estimation of frailty distributions
         and variance components in complex survival data with unobserved heterogeneity.
         Supports multiple frailty distributions and convergence diagnostics.
-    R:
-        dontrun: true
-        usage: |
-            data('lung', package='survival')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('lung', package='survival')
             
-            emfrailty(data = lung, 
-                     elapsedtime = 'time',
-                     outcome = 'status', 
-                     covariates = c('age', 'sex'),
-                     frailty_variable = 'inst',
-                     frailty_distribution = 'gamma',
-                     estimation_method = 'em',
-                     max_iterations = 100)
+    #         emfrailty(data = lung, 
+    #                  elapsedtime = 'time',
+    #                  outcome = 'status', 
+    #                  covariates = c('age', 'sex'),
+    #                  frailty_variable = 'inst',
+    #                  frailty_distribution = 'gamma',
+    #                  estimation_method = 'em',
+    #                  max_iterations = 100)
 
 options:
     - name: data

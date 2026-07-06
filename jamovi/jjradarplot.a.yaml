@@ -10,10 +10,10 @@ description:
     main: |
         'Create radar plots (spider plots) for multivariate data visualization.
         This function allows comparison of multiple variables across different categories.'
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
 

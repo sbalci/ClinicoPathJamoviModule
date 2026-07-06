@@ -13,30 +13,30 @@ description:
         calculating treatment effects within patient subgroups and testing for interactions.
         Supports survival (time-to-event), binary, and continuous outcomes with
         comprehensive statistical validation and heterogeneity testing.
-    R:
-        dontrun: true
-        usage: |
-            # Survival outcome subgroup analysis
-            subgroupforest(
-                data = clinical_trial,
-                outcome = "time_to_event",
-                treatment = "treatment_arm", 
-                subgroups = c("age_group", "gender", "stage"),
-                time = "time_to_event",
-                event = "event_occurred",
-                outcomeType = "survival",
-                effectMeasure = "hr"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Survival outcome subgroup analysis
+    #         subgroupforest(
+    #             data = clinical_trial,
+    #             outcome = "time_to_event",
+    #             treatment = "treatment_arm", 
+    #             subgroups = c("age_group", "gender", "stage"),
+    #             time = "time_to_event",
+    #             event = "event_occurred",
+    #             outcomeType = "survival",
+    #             effectMeasure = "hr"
+    #         )
             
-            # Binary outcome analysis
-            subgroupforest(
-                data = study_data,
-                outcome = "response",
-                treatment = "intervention",
-                subgroups = c("age_category", "sex"),
-                outcomeType = "binary",
-                effectMeasure = "or"
-            )
+    #         # Binary outcome analysis
+    #         subgroupforest(
+    #             data = study_data,
+    #             outcome = "response",
+    #             treatment = "intervention",
+    #             subgroups = c("age_category", "sex"),
+    #             outcomeType = "binary",
+    #             effectMeasure = "or"
+    #         )
 
 options:
     - name: data

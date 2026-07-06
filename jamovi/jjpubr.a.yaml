@@ -27,37 +27,37 @@ description:
         - Publication-ready themes
         - Customizable color palettes
         - Grouping and faceting options
-    R:
-        dontrun: true
-        usage: |
-            # Box plot with statistical comparison
-            jjpubr(
-                data = mtcars,
-                plotType = "boxplot",
-                xvar = "cyl",
-                yvar = "mpg",
-                addStats = TRUE,
-                palette = "jco"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Box plot with statistical comparison
+    #         jjpubr(
+    #             data = mtcars,
+    #             plotType = "boxplot",
+    #             xvar = "cyl",
+    #             yvar = "mpg",
+    #             addStats = TRUE,
+    #             palette = "jco"
+    #         )
 
-            # Scatter plot with correlation
-            jjpubr(
-                data = mtcars,
-                plotType = "scatter",
-                xvar = "wt",
-                yvar = "mpg",
-                addCorr = TRUE,
-                addMarginal = TRUE
-            )
+    #         # Scatter plot with correlation
+    #         jjpubr(
+    #             data = mtcars,
+    #             plotType = "scatter",
+    #             xvar = "wt",
+    #             yvar = "mpg",
+    #             addCorr = TRUE,
+    #             addMarginal = TRUE
+    #         )
 
-            # Histogram with density overlay
-            jjpubr(
-                data = mtcars,
-                plotType = "histogram",
-                xvar = "mpg",
-                addDensity = TRUE,
-                fillColor = "#0073C2FF"
-            )
+    #         # Histogram with density overlay
+    #         jjpubr(
+    #             data = mtcars,
+    #             plotType = "histogram",
+    #             xvar = "mpg",
+    #             addDensity = TRUE,
+    #             fillColor = "#0073C2FF"
+    #         )
 
 options:
     - name: data

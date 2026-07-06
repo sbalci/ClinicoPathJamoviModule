@@ -13,14 +13,14 @@ description:
         Creates CONSORT 2010 compliant flow diagrams for clinical trials using the consort R package.
         Automatically calculates participant numbers from patient-level data with exclusion columns.
         Follows the approach described by Riinu Ots (https://www.riinu.me/2024/02/consort/).
-    R:
-        dontrun: true
-        usage: |
-            # Prepare data with exclusion columns
-            # Each row = one participant
-            # Non-NA values in exclusion columns indicate exclusion at that stage
-            # Example:
-            # data with columns: id, age_exclusion, consent_exclusion, randomization_arm
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Prepare data with exclusion columns
+    #         # Each row = one participant
+    #         # Non-NA values in exclusion columns indicate exclusion at that stage
+    #         # Example:
+    #         # data with columns: id, age_exclusion, consent_exclusion, randomization_arm
 
 options:
     - name: data

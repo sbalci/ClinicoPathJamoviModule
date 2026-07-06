@@ -13,10 +13,10 @@ description:
         Uses the clintools package to compute COest, CPPopt, CVRi, Dx, Mx, PI, PRx, PWA, RI, and Sx
         from continuous recordings of arterial blood pressure, intracranial pressure, 
         middle cerebral artery blood velocity, and heart rate.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
 

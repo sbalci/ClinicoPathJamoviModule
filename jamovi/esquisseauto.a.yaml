@@ -13,23 +13,23 @@ description:
         data types using the esquisse package. Supports 40+ plot type combinations including
         histograms, scatter plots, box plots, violin plots, bar charts, line plots, and more.
         Perfect for quick data visualization with intelligent defaults.
-    R:
-        dontrun: true
-        usage: |
-            # Auto-select plot type based on variables
-            esquisseauto(
-                data = mtcars,
-                xvar = "cyl",
-                yvar = "mpg"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Auto-select plot type based on variables
+    #         esquisseauto(
+    #             data = mtcars,
+    #             xvar = "cyl",
+    #             yvar = "mpg"
+    #         )
 
-            # With color grouping
-            esquisseauto(
-                data = iris,
-                xvar = "Species",
-                yvar = "Sepal.Length",
-                colorvar = "Species"
-            )
+    #         # With color grouping
+    #         esquisseauto(
+    #             data = iris,
+    #             xvar = "Species",
+    #             yvar = "Sepal.Length",
+    #             colorvar = "Species"
+    #         )
 
 options:
     - name: data

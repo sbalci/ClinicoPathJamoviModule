@@ -16,18 +16,18 @@ description:
         outcomes (hazard ratios). Includes fixed-effect, random-effects, and Bayesian
         meta-analysis approaches with comprehensive heterogeneity assessment and
         publication bias evaluation.
-    R:
-        dontrun: true
-        usage: |
-            data('meta_studies')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('meta_studies')
             
-            treatmentmeta(
-                data = meta_studies,
-                study_id = study,
-                effect_measure = "SMD",
-                outcome_type = "continuous",
-                model_type = "random"
-            )
+    #         treatmentmeta(
+    #             data = meta_studies,
+    #             study_id = study,
+    #             effect_measure = "SMD",
+    #             outcome_type = "continuous",
+    #             model_type = "random"
+    #         )
 
 completeWhenFilled: false
 

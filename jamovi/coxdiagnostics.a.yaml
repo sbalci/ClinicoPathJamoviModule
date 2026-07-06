@@ -9,17 +9,17 @@ jas: '1.2'
 
 description:
     main: Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from survminer package for comprehensive model validation.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage:
-            library(survival)
-            library(survminer)
-            # Fit Cox model
-            cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
-            # Generate diagnostic plots
-            ggcoxdiagnostics(cox_model, type = "martingale")
-            ggcoxdiagnostics(cox_model, type = "deviance")
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage:
+    #         library(survival)
+    #         library(survminer)
+    #         # Fit Cox model
+    #         cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
+    #         # Generate diagnostic plots
+    #         ggcoxdiagnostics(cox_model, type = "martingale")
+    #         ggcoxdiagnostics(cox_model, type = "deviance")
 
 options:
   - name: data

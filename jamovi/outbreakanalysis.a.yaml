@@ -15,18 +15,18 @@ description:
         epidemic curves, case-control associations, and spatial-temporal patterns. Essential for outbreak
         investigation, surveillance analysis, and epidemiological research with robust statistical methods
         for public health decision-making and intervention planning.
-    R:
-        dontrun: true
-        usage: |
-            data('outbreak_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('outbreak_data')
             
-            outbreakanalysis(
-                data = outbreak_data,
-                case_status = "case",
-                exposure_vars = c("food_a", "food_b", "water"),
-                date_onset = "onset_date",
-                location_var = "location"
-            )
+    #         outbreakanalysis(
+    #             data = outbreak_data,
+    #             case_status = "case",
+    #             exposure_vars = c("food_a", "food_b", "water"),
+    #             date_onset = "onset_date",
+    #             location_var = "location"
+    #         )
 
 completeWhenFilled: false
 

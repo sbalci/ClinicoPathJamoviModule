@@ -11,15 +11,15 @@ description:
     main: >
         Advanced clustering analysis with marker optimization and validation.
         Includes optimal K selection, PCA analysis, and iterative marker selection.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            ihcadvanced(
-                markers = c("ER", "PR", "HER2", "Ki67"),
-                optimalKMethod = "silhouette",
-                iterativeClustering = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         ihcadvanced(
+    #             markers = c("ER", "PR", "HER2", "Ki67"),
+    #             optimalKMethod = "silhouette",
+    #             iterativeClustering = TRUE
+    #         )
 
 options:
     - name: data

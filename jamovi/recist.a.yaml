@@ -12,25 +12,25 @@ description:
         Multi-lesion RECIST 1.1 aggregation for automated calculation of target
         lesion sums and best overall response. Processes individual lesion measurements
         and applies RECIST 1.1 criteria (Eisenhauer et al., 2009) for response classification.
-    R:
-        dontrun: true
-        usage: |
-            data <- data.frame(
-                patient = rep(c("P01", "P02"), each = 6),
-                time = rep(c(0, 8, 16), 4),
-                lesion = rep(c("L1", "L2"), each = 3, times = 2),
-                lesion_type = "target",
-                diameter = c(25, 15, 12, 20, 10, 8, 30, 35, 40, 22, 20, 18)
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data <- data.frame(
+    #             patient = rep(c("P01", "P02"), each = 6),
+    #             time = rep(c(0, 8, 16), 4),
+    #             lesion = rep(c("L1", "L2"), each = 3, times = 2),
+    #             lesion_type = "target",
+    #             diameter = c(25, 15, 12, 20, 10, 8, 30, 35, 40, 22, 20, 18)
+    #         )
 
-            recist(
-                data = data,
-                patientId = "patient",
-                assessmentTime = "time",
-                lesionId = "lesion",
-                lesionType = "lesion_type",
-                lesionDiameter = "diameter"
-            )
+    #         recist(
+    #             data = data,
+    #             patientId = "patient",
+    #             assessmentTime = "time",
+    #             lesionId = "lesion",
+    #             lesionType = "lesion_type",
+    #             lesionDiameter = "diameter"
+    #         )
 
 completeWhenFilled: false
 

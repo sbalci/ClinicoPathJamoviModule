@@ -15,19 +15,19 @@ description:
         and clinical interpretation. Supports standardized instruments (SF-36, EORTC QLQ-C30, 
         FACT-G, etc.) and custom questionnaires with missing data handling and longitudinal analysis.
         Essential for patient-centered outcomes research and clinical trials.
-    R:
-        dontrun: true
-        usage: |
-            data('pro_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('pro_data')
             
-            patientreported(
-                data = pro_data,
-                scale_items = c("item1", "item2", "item3"),
-                patient_id = "patient_id",
-                time_var = "visit_number",
-                reliability_analysis = TRUE,
-                validity_analysis = TRUE
-            )
+    #         patientreported(
+    #             data = pro_data,
+    #             scale_items = c("item1", "item2", "item3"),
+    #             patient_id = "patient_id",
+    #             time_var = "visit_number",
+    #             reliability_analysis = TRUE,
+    #             validity_analysis = TRUE
+    #         )
 
 completeWhenFilled: false
 

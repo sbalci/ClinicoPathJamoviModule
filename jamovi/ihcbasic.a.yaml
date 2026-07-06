@@ -11,16 +11,16 @@ description:
     main: >
         Essential IHC expression analysis with clustering and H-score calculation.
         Designed for routine clinical use with simplified options.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            ihcbasic(
-                markers = c("ER", "PR", "HER2", "Ki67"),
-                clusterMethod = "hierarchical",
-                nClusters = 3,
-                computeHScore = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         ihcbasic(
+    #             markers = c("ER", "PR", "HER2", "Ki67"),
+    #             clusterMethod = "hierarchical",
+    #             nClusters = 3,
+    #             computeHScore = TRUE
+    #         )
 
 options:
     - name: data

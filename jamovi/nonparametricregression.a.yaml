@@ -12,17 +12,17 @@ description:
         Comprehensive non-parametric regression methods including kernel regression,
         local polynomial smoothing (LOESS), spline regression, and robust regression
         techniques designed for clinical research where parametric assumptions are violated.
-    R:
-        dontrun: true
-        usage: |
-            # Kernel regression with automatic bandwidth selection
-            nonparametricregression(
-                data = clinical_data,
-                outcome = "biomarker_response",
-                predictors = c("age", "weight", "baseline_score"),
-                regression_type = "kernel",
-                bandwidth_method = "cross_validation"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Kernel regression with automatic bandwidth selection
+    #         nonparametricregression(
+    #             data = clinical_data,
+    #             outcome = "biomarker_response",
+    #             predictors = c("age", "weight", "baseline_score"),
+    #             regression_type = "kernel",
+    #             bandwidth_method = "cross_validation"
+    #         )
 
 options:
     - name: data

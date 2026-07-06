@@ -20,23 +20,23 @@ description:
         Applications: AI triage systems ("defer to pathologist" decisions), feature
         selection, test ordering optimization, multi-class uncertainty quantification.
 
-    R:
-        dontrun: true
-        usage: |
-            # Example with AI prediction probabilities
-            data <- data.frame(
-              true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),
-              prob_A = runif(100),
-              prob_B = runif(100),
-              prob_C = runif(100)
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example with AI prediction probabilities
+    #         data <- data.frame(
+    #           true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),
+    #           prob_A = runif(100),
+    #           prob_B = runif(100),
+    #           prob_C = runif(100)
+    #         )
 
-            entropyanalysis(
-              data = data,
-              outcome = 'true_class',
-              probability_vars = c('prob_A', 'prob_B', 'prob_C'),
-              uncertainty_threshold = 0.5
-            )
+    #         entropyanalysis(
+    #           data = data,
+    #           outcome = 'true_class',
+    #           probability_vars = c('prob_A', 'prob_B', 'prob_C'),
+    #           uncertainty_threshold = 0.5
+    #         )
 
 completeWhenFilled: true
 

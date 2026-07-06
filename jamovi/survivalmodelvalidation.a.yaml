@@ -11,17 +11,17 @@ description:
         Comprehensive validation toolkit for survival models including calibration assessment, 
         prediction performance metrics, bootstrap validation, and external validation frameworks.
         Essential for developing reliable prognostic models.
-    R:
-        dontrun: true
-        usage: |
-            # Example: Cox model validation
-            survivalmodelvalidation(
-                data = clinical_data,
-                time = followup_months,
-                status = death_event,
-                risk_score = predicted_risk,
-                validation_type = "internal_bootstrap"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example: Cox model validation
+    #         survivalmodelvalidation(
+    #             data = clinical_data,
+    #             time = followup_months,
+    #             status = death_event,
+    #             risk_score = predicted_risk,
+    #             validation_type = "internal_bootstrap"
+    #         )
 
 options:
     - name: data

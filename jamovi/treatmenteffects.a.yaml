@@ -16,19 +16,19 @@ description:
         sensitivity analysis, and causal effect estimation with confidence intervals. Essential for
         comparative effectiveness research, real-world evidence studies, and observational research
         where randomized controlled trials are not feasible.
-    R:
-        dontrun: true
-        usage: |
-            data('treatment_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('treatment_data')
             
-            treatmenteffects(
-                data = treatment_data,
-                treatment_var = "treatment",
-                outcome_var = "outcome",
-                covariates = c("age", "sex", "baseline_severity"),
-                causal_method = "propensity_score",
-                estimand = "ate"
-            )
+    #         treatmenteffects(
+    #             data = treatment_data,
+    #             treatment_var = "treatment",
+    #             outcome_var = "outcome",
+    #             covariates = c("age", "sex", "baseline_severity"),
+    #             causal_method = "propensity_score",
+    #             estimand = "ate"
+    #         )
 
 completeWhenFilled: false
 

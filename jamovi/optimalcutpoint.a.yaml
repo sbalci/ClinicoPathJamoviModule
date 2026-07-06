@@ -13,15 +13,15 @@ description:
         diagnostic or prognostic performance. Essential for converting 
         continuous measurements to clinically actionable thresholds and 
         preventing arbitrary cutpoint selection in pathology studies.
-    R:
-        dontrun: true
-        usage: |
-            data('histopathology')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('histopathology')
             
-            optimalcutpoint(data = histopathology, 
-                           biomarker = ki67_score, 
-                           outcome = tumor_grade,
-                           analysis_type = "binary")
+    #         optimalcutpoint(data = histopathology, 
+    #                        biomarker = ki67_score, 
+    #                        outcome = tumor_grade,
+    #                        analysis_type = "binary")
 
 completeWhenFilled: true
 

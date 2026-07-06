@@ -13,10 +13,10 @@ description:
         rely on asymptotic theory, making them particularly suitable for small samples or when
         distributional assumptions are violated. Includes various permutation strategies and
         multiple comparison corrections for robust survival analysis.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage will be added
 
 options:
     - name: data

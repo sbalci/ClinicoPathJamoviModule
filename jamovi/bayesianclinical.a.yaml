@@ -15,17 +15,17 @@ description:
         and decision analysis. Provides intuitive interpretation of evidence, uncertainty quantification,
         and clinical decision support. Essential for evidence-based medicine, clinical guidelines, and
         personalized treatment decisions with proper uncertainty communication.
-    R:
-        dontrun: true
-        usage: |
-            data('clinical_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('clinical_data')
             
-            bayesianclinical(
-                data = clinical_data,
-                outcome_var = "treatment_success",
-                treatment_var = "treatment_group",
-                covariates = c("age", "severity", "comorbidity")
-            )
+    #         bayesianclinical(
+    #             data = clinical_data,
+    #             outcome_var = "treatment_success",
+    #             treatment_var = "treatment_group",
+    #             covariates = c("age", "severity", "comorbidity")
+    #         )
 
 completeWhenFilled: false
 

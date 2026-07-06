@@ -19,15 +19,15 @@ description:
         and AI triage systems where abnormal cases are infrequent. This module provides comprehensive
         PR analysis with optimal threshold selection, comparison to baseline (random classifier),
         and F-score optimization for different precision-recall trade-offs.
-    R:
-        dontrun: true
-        usage: >
-            result <- prauc(
-                data = pathology_data,
-                outcome = "cancer",
-                predictor = "ai_score",
-                positive_level = "positive"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: >
+    #         result <- prauc(
+    #             data = pathology_data,
+    #             outcome = "cancer",
+    #             predictor = "ai_score",
+    #             positive_level = "positive"
+    #         )
 
 options:
     - name: data

@@ -11,17 +11,17 @@ description:
     main: |
         Flexible parametric multi-state survival models for complex disease progression.
         Models transition hazards using splines and handles competing risks and intermediate states.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage
-            flexmultistate(
-                data = disease_data,
-                time = transition_time,
-                status = state_variable,
-                states = c("Healthy", "Disease", "Death"),
-                transition_matrix = transition_def
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage
+    #         flexmultistate(
+    #             data = disease_data,
+    #             time = transition_time,
+    #             status = state_variable,
+    #             states = c("Healthy", "Disease", "Death"),
+    #             transition_matrix = transition_def
+    #         )
 
 options:
     - name: data

@@ -12,20 +12,20 @@ description:
         Simple decision tree analysis for medical research and clinical decision making.
         Uses enhanced CART algorithm optimized for healthcare applications with
         clinical validation, performance metrics, and medical interpretation guidelines.
-    R:
-        dontrun: true
-        usage: |
-            # Example for cancer diagnosis
-            data(cancer_data)
-            treemedical(
-                data = cancer_data,
-                vars = c("PSA", "age"),
-                facs = c("grade", "stage"),
-                target = "diagnosis",
-                targetLevel = "cancer",
-                validation = "cv",
-                show_tree_plot = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example for cancer diagnosis
+    #         data(cancer_data)
+    #         treemedical(
+    #             data = cancer_data,
+    #             vars = c("PSA", "age"),
+    #             facs = c("grade", "stage"),
+    #             target = "diagnosis",
+    #             targetLevel = "cancer",
+    #             validation = "cv",
+    #             show_tree_plot = TRUE
+    #         )
 
 options:
     - name: data

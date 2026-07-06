@@ -10,16 +10,16 @@ description:
         or ordinal outcomes. This is the non-parametric alternative to repeated measures 
         ANOVA when normality assumptions are violated. It tests whether the median values 
         differ significantly across multiple related measurements or time points.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            friedmantest(
-                dependent = "measurement_value",
-                subject = "patient_id", 
-                within = "time_point",
-                posthoc = TRUE
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         friedmantest(
+    #             dependent = "measurement_value",
+    #             subject = "patient_id", 
+    #             within = "time_point",
+    #             posthoc = TRUE
+    #         )
 
 options:
     - name: data

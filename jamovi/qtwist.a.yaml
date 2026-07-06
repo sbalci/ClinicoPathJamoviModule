@@ -33,45 +33,45 @@ description:
         - Shared decision-making (patient-relevant quality metrics)
         - Regulatory submissions (FDA/EMA recognized endpoint)
 
-    R:
-        dontrun: true
-        usage: |
-            # Load example data
-            data("qtwist_breast_cancer")
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Load example data
+    #         data("qtwist_breast_cancer")
 
-            # Example 1: Basic Q-TWiST Analysis
-            qtwist(
-                data = qtwist_breast_cancer,
-                time_os = "overall_survival_months",
-                event_os = "death_event",
-                event_os_level = 1,
-                time_pfs = "progression_free_months",
-                event_pfs = "progression_event",
-                event_pfs_level = 1,
-                treatment = "treatment",
-                toxicity_method = "fixed_window",
-                toxicity_window = 3,
-                tau = 24,
-                utility_tox = 0.5,
-                utility_twist = 1.0,
-                utility_rel = 0.5
-            )
+    #         # Example 1: Basic Q-TWiST Analysis
+    #         qtwist(
+    #             data = qtwist_breast_cancer,
+    #             time_os = "overall_survival_months",
+    #             event_os = "death_event",
+    #             event_os_level = 1,
+    #             time_pfs = "progression_free_months",
+    #             event_pfs = "progression_event",
+    #             event_pfs_level = 1,
+    #             treatment = "treatment",
+    #             toxicity_method = "fixed_window",
+    #             toxicity_window = 3,
+    #             tau = 24,
+    #             utility_tox = 0.5,
+    #             utility_twist = 1.0,
+    #             utility_rel = 0.5
+    #         )
 
-            # Example 2: With Individual Toxicity Durations
-            qtwist(
-                data = qtwist_breast_cancer,
-                time_os = "overall_survival_months",
-                event_os = "death_event",
-                time_pfs = "progression_free_months",
-                event_pfs = "progression_event",
-                treatment = "treatment",
-                toxicity_method = "individual_duration",
-                toxicity_duration_var = "toxicity_duration_months",
-                tau = 24,
-                sensitivity_analysis = TRUE,
-                plot_partitioned_survival = TRUE,
-                plot_sensitivity = TRUE
-            )
+    #         # Example 2: With Individual Toxicity Durations
+    #         qtwist(
+    #             data = qtwist_breast_cancer,
+    #             time_os = "overall_survival_months",
+    #             event_os = "death_event",
+    #             time_pfs = "progression_free_months",
+    #             event_pfs = "progression_event",
+    #             treatment = "treatment",
+    #             toxicity_method = "individual_duration",
+    #             toxicity_duration_var = "toxicity_duration_months",
+    #             tau = 24,
+    #             sensitivity_analysis = TRUE,
+    #             plot_partitioned_survival = TRUE,
+    #             plot_sensitivity = TRUE
+    #         )
 
 options:
     - name: data

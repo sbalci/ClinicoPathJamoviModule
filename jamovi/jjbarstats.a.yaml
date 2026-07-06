@@ -11,10 +11,10 @@ description:
     main: |
         'Wrapper Function for ggstatsplot::ggbarstats and
         ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
 

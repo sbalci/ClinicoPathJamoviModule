@@ -11,14 +11,14 @@ description:
     This module generates descriptive statistics for continuous variables.
     It provides both a textual summary and a visually appealing summary table.
     Optionally, you can enable distribution diagnostics to examine normality, skewness, and kurtosis.
-  R:
-    dontrun: true
-    usage: |
-      # Example:
-      # 1. Load your data frame.
-      # 2. Select one or more continuous variables.
-      # 3. (Optional) Enable Distribution Diagnostics to view additional tests.
-      # 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
+  # R:
+  #   dontrun: true
+  #   usage: |
+  #     # Example:
+  #     # 1. Load your data frame.
+  #     # 2. Select one or more continuous variables.
+  #     # 3. (Optional) Enable Distribution Diagnostics to view additional tests.
+  #     # 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
 
 
 options:

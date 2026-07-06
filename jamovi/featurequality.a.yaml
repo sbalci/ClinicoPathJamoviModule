@@ -15,17 +15,17 @@ description:
         analysis, correlation assessment, and variance evaluation. Implements multiple quality metrics
         with clinical interpretation and actionable recommendations. Critical for ensuring data integrity
         before statistical analysis and meeting regulatory standards for clinical research.
-    R:
-        dontrun: true
-        usage: |
-            data('clinical_data')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('clinical_data')
             
-            featurequality(
-                data = clinical_data,
-                features = c("biomarker1", "biomarker2", "age", "severity"),
-                outlier_detection = TRUE,
-                correlation_analysis = TRUE
-            )
+    #         featurequality(
+    #             data = clinical_data,
+    #             features = c("biomarker1", "biomarker2", "age", "severity"),
+    #             outlier_detection = TRUE,
+    #             correlation_analysis = TRUE
+    #         )
 
 completeWhenFilled: false
 

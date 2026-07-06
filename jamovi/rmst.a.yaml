@@ -13,10 +13,10 @@ description:
         measure of survival benefit by estimating the area under the survival curve 
         up to a specific time point (tau), representing the average survival time 
         within the restriction period.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage will be added
 
 options:
     - name: data

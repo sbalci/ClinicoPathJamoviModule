@@ -11,16 +11,16 @@ description:
         digital pathology applications. Provides classification metrics, ROC analysis, 
         segmentation quality assessment, and statistical model comparison for AI 
         validation and algorithm comparison studies.
-    R:
-        dontrun: true
-        usage: |
-            data('classification_results')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('classification_results')
             
-            mlpathology(data = classification_results,
-                       analysis_type = 'classification',
-                       actual_labels = actual,
-                       predicted_labels = predicted,
-                       predicted_probabilities = prob)
+    #         mlpathology(data = classification_results,
+    #                    analysis_type = 'classification',
+    #                    actual_labels = actual,
+    #                    predicted_labels = predicted,
+    #                    predicted_probabilities = prob)
 
 options:
     - name: data

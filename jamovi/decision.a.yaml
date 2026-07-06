@@ -11,10 +11,10 @@ description:
     main: >
         Function for Medical Decision Analysis. Sensitivity, Specificity, Positive Predictive Value,
         Negative Predictive Value.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 
 options:

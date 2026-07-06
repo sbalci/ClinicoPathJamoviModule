@@ -16,20 +16,20 @@ description:
         cutting-edge designs such as seamless Phase II/III, platform trials, and master
         protocol studies. Designed for clinical trialists requiring state-of-the-art
         methodology and regulatory compliance.
-    R:
-        dontrun: true
-        usage: |
-            data('clinical_trial')
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data('clinical_trial')
             
-            advancedtrials(
-                data = clinical_trial,
-                time_var = "survival_time",
-                event_var = "death",
-                treatment_var = "arm",
-                design_type = "group_sequential",
-                alpha_spending = "obrien_fleming",
-                number_of_looks = 3
-            )
+    #         advancedtrials(
+    #             data = clinical_trial,
+    #             time_var = "survival_time",
+    #             event_var = "death",
+    #             treatment_var = "arm",
+    #             design_type = "group_sequential",
+    #             alpha_spending = "obrien_fleming",
+    #             number_of_looks = 3
+    #         )
 
 completeWhenFilled: false
 

@@ -11,17 +11,17 @@ description:
     main: |
         Landmark analysis for survival data with time-varying predictors.
         Provides unbiased estimates by analyzing survival from fixed landmark times.
-    R:
-        dontrun: true
-        usage: |
-            # Example usage
-            landmarkanalysis(
-                data = survival_data,
-                time = followup_time,
-                status = event_status,
-                predictors = c(biomarker, treatment),
-                landmark_times = c(6, 12, 24)
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example usage
+    #         landmarkanalysis(
+    #             data = survival_data,
+    #             time = followup_time,
+    #             status = event_status,
+    #             predictors = c(biomarker, treatment),
+    #             landmark_times = c(6, 12, 24)
+    #         )
 
 options:
     - name: data

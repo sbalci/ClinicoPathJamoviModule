@@ -10,11 +10,11 @@ jas: '1.2'
 
 description:
     main: Performs Lasso-penalized Cox regression for variable selection in survival analysis.
-    R:
-        dontrun: true
-        usage: |
-            lassocox(data = data, elapsedtime = "Time", outcome = "Status",
-                outcomeLevel = "1", explanatory = vars(age, stage, grade))
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         lassocox(data = data, elapsedtime = "Time", outcome = "Status",
+    #             outcomeLevel = "1", explanatory = vars(age, stage, grade))
 
 options:
     - name: data

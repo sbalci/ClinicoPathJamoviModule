@@ -51,7 +51,7 @@
 #' **How Waffle Charts Work:**
 #' A waffle chart uses a grid of colored squares (typically 10x10 = 100 squares)
 #' where each square represents a fixed proportion of the total sample. This makes
-#' percentages immediately intuitive - each square \u2248 1% of the sample.
+#' percentages immediately intuitive - each square ~= 1% of the sample.
 #'
 #' **Clinical Applications:**
 #' - **Disease Classification:** Show distribution of tumor grades, cancer stages,
@@ -71,7 +71,7 @@
 #' - Faceting enables subgroup comparisons
 #'
 #' **Statistical Considerations:**
-#' - Most effective with n\u226530; smaller samples may show unstable proportions
+#' - Most effective with n>=30; smaller samples may show unstable proportions
 #' - Works best when no single category dominates (>80%)
 #' - Each square represents approximately 1% of the sample
 #' - Categories with <5 cases may be statistically unreliable

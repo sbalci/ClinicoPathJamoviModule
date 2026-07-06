@@ -15,17 +15,17 @@ description:
         offers clinically interpretable results and does not require proportional hazards assumptions.
         RMST represents the area under the survival curve up to time tau and can be compared between
         groups or modeled with covariates using regression techniques.
-    R:
-        dontrun: true
-        usage: |
-            data |>
-            rmstregression(
-                elapsedtime = "time_to_event",
-                outcome = "event_status",
-                explanatory = c("age", "treatment", "stage"),
-                tau = 60,
-                analysis_type = "comparison"
-            )
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         data |>
+    #         rmstregression(
+    #             elapsedtime = "time_to_event",
+    #             outcome = "event_status",
+    #             explanatory = c("age", "treatment", "stage"),
+    #             tau = 60,
+    #             analysis_type = "comparison"
+    #         )
 
 options:
     - name: data

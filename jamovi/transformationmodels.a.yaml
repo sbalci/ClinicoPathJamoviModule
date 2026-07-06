@@ -14,23 +14,23 @@ description:
         Includes linear transformation models, Box-Cox transformations, and
         non-parametric transformations, enabling flexible modeling of survival
         data with automatic transformation selection and validation.
-    R:
-        dontrun: true
-        usage: |
-            # Example: Transformation model with Box-Cox transformation
-            library(survival)
-            library(tram)
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # Example: Transformation model with Box-Cox transformation
+    #         library(survival)
+    #         library(tram)
             
-            transformationmodels(
-                data = survival_data,
-                elapsedtime = "time",
-                outcome = "status",
-                outcomeLevel = "1",
-                covariates = c("age", "treatment", "biomarker"),
-                transformation = "boxcox",
-                distribution = "normal",
-                method = "ml"
-            )
+    #         transformationmodels(
+    #             data = survival_data,
+    #             elapsedtime = "time",
+    #             outcome = "status",
+    #             outcomeLevel = "1",
+    #             covariates = c("age", "treatment", "biomarker"),
+    #             transformation = "boxcox",
+    #             distribution = "normal",
+    #             method = "ml"
+    #         )
 
 options:
     - name: data

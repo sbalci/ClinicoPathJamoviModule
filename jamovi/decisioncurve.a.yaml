@@ -12,10 +12,10 @@ description:
         Decision Curve Analysis for evaluating the clinical utility of prediction models
         and diagnostic tests. Calculates net benefit across threshold probabilities to
         determine if using a model provides more benefit than default strategies.
-    R:
-        dontrun: true
-        usage: |
-            # example will be added
+    # R:
+    #     dontrun: true
+    #     usage: |
+    #         # example will be added
 
 options:
     - name: data
