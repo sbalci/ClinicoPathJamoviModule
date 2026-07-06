@@ -205,7 +205,16 @@
       "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/dynamiccoeff.b.R\"\"\"\"\\)')",
       "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule add -A)",
       "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule commit -F /tmp/commit_main.txt -q)",
-      "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule rev-parse --short HEAD)"
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule rev-parse --short HEAD)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/OncoPath add -A)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/OncoPath commit -F /tmp/commit_submodule.txt -q)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/OncoPath rev-parse --short HEAD)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/jsurvival add -A)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/jsurvival commit -F /tmp/commit_submodule.txt -q)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/jsurvival rev-parse --short HEAD)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/meddecide add -A)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/meddecide commit -F /tmp/commit_submodule.txt -q)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/meddecide rev-parse --short HEAD)"
     ],
     "deny": [],
     "ask": [],
