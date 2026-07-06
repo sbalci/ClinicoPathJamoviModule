@@ -106,15 +106,3 @@ Implements PCA visualization, ComBat correction, feature quality
 assessment,
 and comprehensive quality control metrics for high-dimensional data.
 }
-\examples{
-\donttest{
-data('your_data')
-
-batcheffect(data = your_data,
-           features = feature_variables,
-           batch_var = batch_id,
-           biological_var = treatment_group,
-           perform_pca = TRUE,
-           perform_combat = TRUE)
-}
-}

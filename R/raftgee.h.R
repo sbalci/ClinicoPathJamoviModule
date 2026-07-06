@@ -504,23 +504,6 @@ raftgeeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' are violated, offering distribution-free methods for modeling survival 
 #' times with emphasis on median survival relationships and time acceleration 
 #' effects in clinical research applications.
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic rank-based AFT with GEE
-#' library(aftgee)
-#' library(survival)
-#'
-#' raftgee(
-#'     data = lung_data,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "2",
-#'     covariates = c("age", "sex", "ph.ecog"),
-#'     rank_method = "logrank",
-#'     correlation_structure = "independence"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

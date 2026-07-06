@@ -302,15 +302,6 @@ datevalidatorBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' For datetime conversion with component extraction (year, month, day, hour, 
 #' minute, second), see the DateTime Converter module.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Select variables containing date/datetime information that need validation.
-#' # 2. Choose validation method (automatic detection or specific format).
-#' # 3. Configure missing value imputation settings.
-#' # 4. Review validation results and quality assessment.
-#'}
 #' @param data The data as a data frame.
 #' @param date_vars Variables containing date or datetime information in
 #'   various formats that need validation and quality assessment. Can handle

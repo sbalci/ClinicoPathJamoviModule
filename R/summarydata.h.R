@@ -153,15 +153,6 @@ summarydataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Optionally, you can enable distribution diagnostics to examine normality, 
 #' skewness, and kurtosis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Load your data frame.
-#' # 2. Select one or more continuous variables.
-#' # 3. (Optional) Enable Distribution Diagnostics to view additional tests.
-#' # 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
-#'}
 #' @param data The data as a data frame.
 #' @param vars a string naming the variables from \code{data} that contains
 #'   the continuous values used for the report

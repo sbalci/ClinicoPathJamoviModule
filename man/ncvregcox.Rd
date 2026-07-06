@@ -104,16 +104,3 @@ Particularly useful
 for genomics and high-dimensional clinical data where interpretable
 variable selection is crucial.
 }
-\examples{
-\donttest{
-ncvregcox(
-    data = data,
-    time = "time",
-    event = "event",
-    covariates = c("x1", "x2", "x3"),
-    penalty = "SCAD",
-    cv_folds = 10,
-    lambda_type = "min"
-)
-}
-}

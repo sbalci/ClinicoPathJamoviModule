@@ -74,19 +74,3 @@ correlations with significance tests, confidence intervals, and natural
 language  reporting. Suitable for exploring relationships between
 continuous variables.
 }
-\examples{
-\donttest{
-# Basic correlation analysis
-jcorrelation(
-    data = histopathology,
-    vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
-)
-
-# With grouping variable
-jcorrelation(
-    data = histopathology,
-    vars = c("Age", "OverallTime", "MeasurementA"),
-    group = "Sex"
-)
-}
-}

@@ -94,27 +94,3 @@ Integrated Discrimination Improvement (IDI), and related metrics for both
 binary and survival outcomes. Essential for demonstrating incremental value
 of new biomarkers or predictors.
 }
-\examples{
-\donttest{
-# Example usage - Binary outcome:
-# ClinicoPath::reclassmetrics(
-#   data = data,
-#   outcome = "disease",
-#   oldModelProb = "old_risk",
-#   newModelProb = "new_risk",
-#   outcomeType = "binary",
-#   riskCategories = "0.0,0.1,0.2,1.0"
-# )
-#
-# Example usage - Survival outcome:
-# ClinicoPath::reclassmetrics(
-#   data = data,
-#   outcome = "death",
-#   survivalTime = "months",
-#   oldModelProb = "old_surv",
-#   newModelProb = "new_surv",
-#   outcomeType = "survival",
-#   timePoint = 60
-# )
-}
-}

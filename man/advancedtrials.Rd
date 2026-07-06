@@ -188,18 +188,3 @@ protocol studies. Designed for clinical trialists requiring
 state-of-the-art
 methodology and regulatory compliance.
 }
-\examples{
-\donttest{
-data('clinical_trial')
-
-advancedtrials(
-    data = clinical_trial,
-    time_var = "survival_time",
-    event_var = "death",
-    treatment_var = "arm",
-    design_type = "group_sequential",
-    alpha_spending = "obrien_fleming",
-    number_of_looks = 3
-)
-}
-}

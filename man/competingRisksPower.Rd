@@ -121,8 +121,3 @@ This is the specialized function for competing risks power analysis. For
 unified analysis across all survival
 study types, also consider 'Comprehensive Survival Power Analysis'.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

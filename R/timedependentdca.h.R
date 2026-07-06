@@ -472,22 +472,6 @@ timedependentdcaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' prediction,
 #' time-varying treatment decisions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with survival outcome
-#' library(survival)
-#' data <- lung
-#'
-#' timedependentdca(
-#'   data = data,
-#'   time = 'time',
-#'   event = 'status',
-#'   predictor = 'ph.ecog',
-#'   time_points = c(180, 365, 730),
-#'   reference_strategy = 'treat_all'
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param time a string naming the time-to-event variable
 #' @param event a string naming the event indicator (1=event, 0=censored)

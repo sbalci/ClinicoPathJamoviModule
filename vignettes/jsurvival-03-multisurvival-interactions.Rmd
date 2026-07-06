@@ -8,6 +8,7 @@ vignette: >
   %\VignetteIndexEntry{Interaction terms in Multivariable Survival Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteKeepMd{true}
 ---
 
 ```{r setup, include=FALSE}

@@ -178,17 +178,3 @@ and scientific publications. Features scatter plots with error bars,
 distribution plots,
 before-after comparisons, and factorial designs with professional styling.
 }
-\examples{
-\donttest{
-# Example: Scientific scatter plot with error bars
-data(clinical_data)
-grafify(
-    data = clinical_data,
-    vars = c("biomarker1", "biomarker2"),
-    groups = "treatment_group",
-    plot_type = "scatterbar",
-    error_type = "sd",
-    color_palette = "vibrant"
-)
-}
-}

@@ -576,38 +576,6 @@ jjpubrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' - Customizable color palettes
 #' - Grouping and faceting options
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Box plot with statistical comparison
-#' jjpubr(
-#'     data = mtcars,
-#'     plotType = "boxplot",
-#'     xvar = "cyl",
-#'     yvar = "mpg",
-#'     addStats = TRUE,
-#'     palette = "jco"
-#' )
-#'
-#' # Scatter plot with correlation
-#' jjpubr(
-#'     data = mtcars,
-#'     plotType = "scatter",
-#'     xvar = "wt",
-#'     yvar = "mpg",
-#'     addCorr = TRUE,
-#'     addMarginal = TRUE
-#' )
-#'
-#' # Histogram with density overlay
-#' jjpubr(
-#'     data = mtcars,
-#'     plotType = "histogram",
-#'     xvar = "mpg",
-#'     addDensity = TRUE,
-#'     fillColor = "#0073C2FF"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param plotType Type of plot: boxplot, violin, scatter, histogram, density,
 #'   barplot, dotplot, line, errorplot

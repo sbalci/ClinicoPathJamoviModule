@@ -136,8 +136,3 @@ Fits Semi-Markov models where transition intensities depend on time since
 last transition rather than absolute time. Suitable for processes where the
 'clock' resets at each transition using SemiMarkov package.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

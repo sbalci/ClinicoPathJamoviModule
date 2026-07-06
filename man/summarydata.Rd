@@ -50,12 +50,3 @@ It provides both a textual summary and a visually appealing summary table.
 Optionally, you can enable distribution diagnostics to examine normality,
 skewness, and kurtosis.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Load your data frame.
-# 2. Select one or more continuous variables.
-# 3. (Optional) Enable Distribution Diagnostics to view additional tests.
-# 4. Run the summarydata module to see descriptive statistics and distribution characteristics.
-}
-}

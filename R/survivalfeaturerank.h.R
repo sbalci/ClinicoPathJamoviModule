@@ -504,48 +504,6 @@ survivalfeaturerankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' statistical significance, hazard ratio, or concordance index. Useful for 
 #' biomarker screening, exploratory analysis, and feature selection before 
 #' building multivariable models.
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic feature ranking
-#' library(survival)
-#' data(colon)
-#'
-#' survivalfeaturerank(
-#'     data = colon,
-#'     survtime = "time",
-#'     event = "status",
-#'     eventLevel = "1",
-#'     features = c("sex", "obstruct", "perfor", "adhere", "nodes", "differ"),
-#'     rankBy = "pvalue"
-#' )
-#'
-#' # Example 2: Rank by hazard ratio with plots
-#' survivalfeaturerank(
-#'     data = colon,
-#'     survtime = "time",
-#'     event = "status",
-#'     eventLevel = "1",
-#'     features = c("sex", "obstruct", "perfor", "age", "nodes"),
-#'     rankBy = "hazard",
-#'     showForestPlot = TRUE,
-#'     showTopKM = TRUE,
-#'     topN = 3
-#' )
-#'
-#' # Example 3: Rank by C-index for predictive power
-#' survivalfeaturerank(
-#'     data = colon,
-#'     survtime = "time",
-#'     event = "status",
-#'     eventLevel = "1",
-#'     features = c("age", "nodes", "extent", "surg"),
-#'     rankBy = "cindex",
-#'     showCI = TRUE,
-#'     adjustPValues = TRUE,
-#'     adjustMethod = "fdr"
-#' )
-#'}
 #' @param data The dataset to be analyzed, provided as a data frame.
 #' @param survtime The numeric variable representing follow-up time until the
 #'   event or censoring.

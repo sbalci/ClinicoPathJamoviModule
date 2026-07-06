@@ -639,20 +639,6 @@ relativesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' registry 
 #' studies and population-based research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Cancer relative survival
-#' relativesurvival(
-#'     data = cancer_registry,
-#'     time = followup_years,
-#'     status = vital_status,
-#'     age = age_at_diagnosis,
-#'     sex = gender,
-#'     year = diagnosis_year,
-#'     ratetable = "us_population"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Follow-up time variable
 #' @param status Event status variable

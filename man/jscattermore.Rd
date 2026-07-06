@@ -94,13 +94,3 @@ A results object containing:
 High-performance scatter plots using the scattermore package for plotting
 millions of points efficiently with advanced customization options.
 }
-\examples{
-\donttest{
-# Example usage:
-library(scattermore)
-# Fast scatter plot
-scattermoreplot(x, y)
-# ggplot2 integration
-ggplot(data) + geom_scattermore(aes(x = x, y = y))
-}
-}

@@ -19,7 +19,7 @@ Logical indicating whether the package is available.
 \description{
 Thin wrapper around \code{requireNamespace()} that returns a boolean. Packages a
 jamovi module needs must be listed in \code{DESCRIPTION} \verb{Imports:} so they are
-installed at install time — this helper does NOT install anything (auto-
+installed at install time - this helper does NOT install anything (auto-
 installing dependencies at runtime is a CRAN policy violation and a security
 hazard).
 }

@@ -527,13 +527,6 @@ mageeequationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Provides all four published equations (Original + 3 new) with risk
 #' category classification and concordance analysis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' mageeequation(data = data, nuclearGrade = nucgrade,
-#'     mitosis = mitotic_score, erHscore = er_hscore,
-#'     prHscore = pr_hscore, her2Status = her2)
-#'}
 #' @param data .
 #' @param nuclearGrade .
 #' @param mitosis .

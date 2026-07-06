@@ -97,8 +97,3 @@ meaningful  measure of survival benefit by estimating the area under the
 survival curve  up to a specific time point (tau), representing the average
 survival time  within the restriction period.
 }
-\examples{
-\donttest{
-# Example usage will be added
-}
-}

@@ -76,7 +76,7 @@ realistic survival data with the following characteristics:
 \itemize{
 \item Survival times follow exponential distribution
 \item Event rates are clinically realistic (60-70\%)
-\item Prognostic correlations built in (Stage IV → shorter survival)
+\item Prognostic correlations built in (Stage IV -> shorter survival)
 \item Missing data pattern (~3\% in continuous biomarkers)
 \item Events-per-variable (EPV) ratio > 10 for all datasets
 }
@@ -159,7 +159,7 @@ All datasets have been validated for:
 \itemize{
 \item Non-negative survival times
 \item Appropriate event rates
-\item Stage-survival correlation (higher stage → worse prognosis)
+\item Stage-survival correlation (higher stage -> worse prognosis)
 \item Sufficient EPV (events per variable > 10)
 \item Realistic clinical distributions
 \item Proper factor level ordering

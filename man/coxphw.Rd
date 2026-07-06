@@ -118,20 +118,3 @@ weights to improve estimation accuracy when events are rare or covariates
 are imbalanced, providing more reliable hazard ratios and confidence
 intervals in challenging clinical research scenarios.
 }
-\examples{
-\donttest{
-# Example: Weighted Cox regression for rare events
-library(survival)
-library(coxphw)
-
-coxphw(
-    data = rare_event_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    covariates = c("age", "treatment", "biomarker"),
-    weight_method = "average",
-    alpha = 0.5
-)
-}
-}

@@ -582,42 +582,6 @@ patientsimilarityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' 3D space to reveal natural patient groupings and subpopulations. Inspired 
 #' by Orange Data Mining's interactive projection widgets, adapted for jamovi 
 #' with comprehensive cluster analysis and statistical validation.
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic t-SNE visualization
-#' library(Rtsne)
-#' data(iris)
-#'
-#' patientsimilarity(
-#'     data = iris,
-#'     vars = c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width"),
-#'     method = "tsne",
-#'     colorBy = "Species"
-#' )
-#'
-#' # Example 2: UMAP with cluster analysis
-#' patientsimilarity(
-#'     data = clinical_data,
-#'     vars = c("age", "tumor_size", "grade", "ki67"),
-#'     method = "umap",
-#'     colorBy = "survival_status",
-#'     performClustering = TRUE,
-#'     nClusters = 3,
-#'     showClusterStats = TRUE
-#' )
-#'
-#' # Example 3: PCA with survival comparison
-#' patientsimilarity(
-#'     data = pathology_data,
-#'     vars = c("age", "stage", "nodes", "size"),
-#'     method = "pca",
-#'     colorBy = "death",
-#'     dimensions = 3,
-#'     survivalTime = "months",
-#'     survivalEvent = "death"
-#' )
-#'}
 #' @param data The dataset to be analyzed, provided as a data frame.
 #' @param vars Continuous variables to use for calculating patient similarity.
 #'   These will be used to compute distances between patients. Categorical

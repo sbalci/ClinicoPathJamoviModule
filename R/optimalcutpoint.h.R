@@ -380,16 +380,6 @@ optimalcutpointBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' continuous measurements to clinically actionable thresholds and 
 #' preventing arbitrary cutpoint selection in pathology studies.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology')
-#'
-#' optimalcutpoint(data = histopathology,
-#'                biomarker = ki67_score,
-#'                outcome = tumor_grade,
-#'                analysis_type = "binary")
-#'}
 #' @param data the data as a data frame
 #' @param biomarker Continuous biomarker variable for cutpoint optimization
 #' @param analysis_type Type of analysis based on outcome variable

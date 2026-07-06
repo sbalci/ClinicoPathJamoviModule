@@ -103,14 +103,3 @@ the hazard ratios in a single forest plot. Perfect for showing treatment
 effects
 across patient variants, genetic subtypes, or clinical subgroups.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Load survival data with time, event, treatment, and subgroup variables.
-# 2. Select time variable (follow-up duration).
-# 3. Select event variable (outcome/death indicator).
-# 4. Select treatment variable (treatment vs control).
-# 5. Select grouping variable (variants/subgroups for comparison).
-# 6. Run grouped forest plot analysis to compare treatment effects across groups.
-}
-}

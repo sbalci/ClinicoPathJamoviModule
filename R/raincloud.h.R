@@ -412,56 +412,6 @@ raincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' multimodality
 #' and distribution shape. Based on the ggdist R-Bloggers tutorial.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load example dataset
-#' data(histopathology)
-#'
-#' # Basic raincloud plot
-#' raincloud(
-#'   data = histopathology,
-#'   dep_var = "Age",
-#'   group_var = "Group"
-#' )
-#'
-#' # Advanced raincloud plot with faceting and custom colors
-#' raincloud(
-#'   data = histopathology,
-#'   dep_var = "OverallTime",
-#'   group_var = "Group",
-#'   facet_var = "Sex",
-#'   color_var = "Race",
-#'   color_palette = "clinical",
-#'   plot_theme = "publication"
-#' )
-#'
-#' # Statistical analysis with outlier detection
-#' raincloud(
-#'   data = histopathology,
-#'   dep_var = "Age",
-#'   group_var = "Group",
-#'   show_statistics = TRUE,
-#'   show_outliers = TRUE,
-#'   outlier_method = "iqr",
-#'   normality_test = TRUE,
-#'   comparison_test = TRUE
-#' )
-#'
-#' # Customized visualization components
-#' raincloud(
-#'   data = histopathology,
-#'   dep_var = "Age",
-#'   group_var = "Group",
-#'   show_violin = TRUE,
-#'   show_boxplot = TRUE,
-#'   show_dots = TRUE,
-#'   dots_side = "left",
-#'   orientation = "horizontal",
-#'   violin_width = 0.8,
-#'   alpha_violin = 0.6
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep_var Continuous variable whose distribution will be visualized in
 #'   the raincloud plot.

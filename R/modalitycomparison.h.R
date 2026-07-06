@@ -426,27 +426,6 @@ modalitycomparisonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' pattern analysis
 #' and HER2 scoring validation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic modality comparison
-#' result1 <- modalitycomparison(
-#'   data = data,
-#'   modality1_var = "glass_slides",
-#'   modality2_var = "digital_images",
-#'   case_id = "case_number"
-#' )
-#'
-#' # HER2 scoring comparison with 5-category analysis
-#' result2 <- modalitycomparison(
-#'   data = her2_data,
-#'   modality1_var = "glass_score",
-#'   modality2_var = "digital_score",
-#'   case_id = "case_id",
-#'   score_categories = "her2_5cat",
-#'   show_discordance_analysis = TRUE
-#' )
-#'}
 #' @param data The data as a data frame with paired observations from two
 #'   modalities.
 #' @param modality1_var Variable containing scores/ratings from the first

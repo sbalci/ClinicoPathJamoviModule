@@ -10,7 +10,7 @@
 \title{Clinical Trial Test Datasets for Advanced Raincloud Plot}
 \format{
 \describe{
-\item{advancedraincloud_data}{Longitudinal dataset with 900 rows (300 patients × 3 visits) and 15 variables}
+\item{advancedraincloud_data}{Longitudinal dataset with 900 rows (300 patients x 3 visits) and 15 variables}
 \item{advancedraincloud_baseline}{Cross-sectional baseline data with 300 rows and 13 variables}
 \item{advancedraincloud_endpoint}{Cross-sectional endpoint data with 300 rows and 13 variables}
 \item{advancedraincloud_change}{Change score data with 130 complete cases and 6 variables}
@@ -235,7 +235,7 @@ These datasets were generated using realistic assumptions:
 \examples{
 # Load the datasets
 data("advancedraincloud_data")
-data("advancedraincloud_baseline") 
+data("advancedraincloud_baseline")
 data("advancedraincloud_endpoint")
 data("advancedraincloud_change")
 
@@ -244,16 +244,20 @@ str(advancedraincloud_data)
 summary(advancedraincloud_baseline)
 
 # Check missing data patterns
-table(is.na(advancedraincloud_data$tumor_size_change), 
-      advancedraincloud_data$time_point,
-      advancedraincloud_data$treatment_arm)
+table(
+    is.na(advancedraincloud_data$tumor_size_change),
+    advancedraincloud_data$time_point,
+    advancedraincloud_data$treatment_arm
+)
 
 # View response rates by treatment
-with(advancedraincloud_endpoint, 
-     table(tumor_responder, treatment_arm, useNA = "ifany"))
+with(
+    advancedraincloud_endpoint,
+    table(tumor_responder, treatment_arm, useNA = "ifany")
+)
 
 # Check change score completeness
-nrow(advancedraincloud_change)  # Complete cases for change analysis
+nrow(advancedraincloud_change) # Complete cases for change analysis
 }
 \seealso{
 \itemize{

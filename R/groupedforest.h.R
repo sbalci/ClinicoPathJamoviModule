@@ -295,17 +295,6 @@ groupedforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' effects
 #' across patient variants, genetic subtypes, or clinical subgroups.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Load survival data with time, event, treatment, and subgroup variables.
-#' # 2. Select time variable (follow-up duration).
-#' # 3. Select event variable (outcome/death indicator).
-#' # 4. Select treatment variable (treatment vs control).
-#' # 5. Select grouping variable (variants/subgroups for comparison).
-#' # 6. Run grouped forest plot analysis to compare treatment effects across groups.
-#'}
 #' @param data The data as a data frame containing survival variables.
 #' @param time_var Numeric variable representing follow-up time until the
 #'   event or last observation.

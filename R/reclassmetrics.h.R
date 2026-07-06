@@ -428,30 +428,6 @@ reclassmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' binary and survival outcomes. Essential for demonstrating incremental value 
 #' of new biomarkers or predictors.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage - Binary outcome:
-#' # ClinicoPath::reclassmetrics(
-#' #   data = data,
-#' #   outcome = "disease",
-#' #   oldModelProb = "old_risk",
-#' #   newModelProb = "new_risk",
-#' #   outcomeType = "binary",
-#' #   riskCategories = "0.0,0.1,0.2,1.0"
-#' # )
-#' #
-#' # Example usage - Survival outcome:
-#' # ClinicoPath::reclassmetrics(
-#' #   data = data,
-#' #   outcome = "death",
-#' #   survivalTime = "months",
-#' #   oldModelProb = "old_surv",
-#' #   newModelProb = "new_surv",
-#' #   outcomeType = "survival",
-#' #   timePoint = 60
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome (for binary analysis) or event indicator (for
 #'   survival).

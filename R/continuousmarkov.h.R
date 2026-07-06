@@ -627,18 +627,6 @@ continuousmarkovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' Handles irregularly observed data and estimates transition intensities 
 #' between states.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage
-#' continuousmarkov(
-#'     data = longitudinal_data,
-#'     time = observation_time,
-#'     state = state_variable,
-#'     subject = patient_id,
-#'     covariates = c(age, treatment)
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param subject Variable identifying individual subjects
 #' @param time Time variable for observations

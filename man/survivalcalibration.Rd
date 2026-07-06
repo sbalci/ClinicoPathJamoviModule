@@ -101,17 +101,3 @@ metrics. Assess calibration, discrimination, and predictive accuracy at
 specific time points using bootstrap validation and cross-validation.
 TRIPOD-compliant reporting.
 }
-\examples{
-\donttest{
-# Example usage:
-# data <- your_data
-# ClinicoPath::survivalcalibration(
-#   data = data,
-#   time = "survival_time",
-#   event = "status",
-#   predicted = "pred_5yr_surv",
-#   calibrationTime = 60,
-#   validationMethod = "bootstrap"
-# )
-}
-}

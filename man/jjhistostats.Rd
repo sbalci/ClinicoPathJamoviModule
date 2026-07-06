@@ -168,34 +168,3 @@ A results object containing:
 'Wrapper Function for ggstatsplot::gghistostats and
 ggstatsplot::grouped_gghistostats to generate Histogram.'
 }
-\examples{
-\donttest{
-# Load test data
-data(jjhistostats_test_data)
-
-# Basic histogram
-jjhistostats(
-  data = jjhistostats_test_data,
-  dep = "age_years",
-  typestatistics = "parametric"
-)
-
-# Multiple histograms
-jjhistostats(
-  data = jjhistostats_test_data,
-  dep = c("age_years", "tumor_size_mm", "bmi"),
-  centralityline = TRUE,
-  resultssubtitle = TRUE
-)
-
-# Grouped histogram by disease stage
-jjhistostats(
-  data = jjhistostats_test_data,
-  dep = "psa_level",
-  grvar = "disease_stage",
-  typestatistics = "nonparametric",
-  changebinwidth = TRUE,
-  binwidth = 2.0
-)
-}
-}

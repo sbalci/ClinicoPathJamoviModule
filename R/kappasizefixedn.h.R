@@ -137,11 +137,6 @@ kappaSizeFixedNBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'
 #' Lowest Expected Value for a fixed sample size.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param outcome Number of outcome level.
 #' @param kappa0 Expected value of kappa.
 #' @param props Proportions of outcome level.

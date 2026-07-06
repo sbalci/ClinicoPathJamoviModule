@@ -351,19 +351,6 @@ modelvalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' probabilities from existing models. Supports external validation, temporal 
 #' validation, and subgroup analysis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # data <- your_data
-#' # ClinicoPath::modelval(
-#' #   data = data,
-#' #   outcome = "disease",
-#' #   predicted = "risk_score",
-#' #   validationType = "external",
-#' #   subgroup = "hospital"
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (observed events: yes/no).
 #' @param outcomePositive The factor level of the outcome variable that

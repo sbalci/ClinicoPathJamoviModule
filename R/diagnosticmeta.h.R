@@ -656,18 +656,6 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' validation 
 #' and biomarker diagnostic accuracy synthesis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('diagnostic_studies')
-#'
-#' diagnosticmeta(data = diagnostic_studies,
-#'               study = study_name,
-#'               true_positives = tp,
-#'               false_positives = fp,
-#'               false_negatives = fn,
-#'               true_negatives = tn)
-#'}
 #' @param data the data as a data frame
 #' @param study Variable containing unique study identifiers
 #' @param true_positives Number of true positive results in each study

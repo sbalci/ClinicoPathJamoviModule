@@ -339,17 +339,6 @@ mlpathologyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' segmentation quality assessment, and statistical model comparison for AI 
 #' validation and algorithm comparison studies.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('classification_results')
-#'
-#' mlpathology(data = classification_results,
-#'            analysis_type = 'classification',
-#'            actual_labels = actual,
-#'            predicted_labels = predicted,
-#'            predicted_probabilities = prob)
-#'}
 #' @param data the data as a data frame
 #' @param analysis_type Type of performance analysis to conduct
 #' @param actual_labels True/actual classification labels

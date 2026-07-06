@@ -45,19 +45,3 @@ A results object containing:
 \description{
 Function for making Cross Tables.
 }
-\examples{
-\donttest{
-# Example usage:
-# dat <- as.data.frame(your_data)
-# ClinicoPath::crosstable(
-#   data = dat,
-#   vars = vars(YourRowVariable),
-#   group = "YourGroupingVariable",
-#   sty = "finalfit",
-#   excl = TRUE,
-#   cont = "mean",
-#   pcat = "chisq",
-#   exportCSV = TRUE
-# )
-}
-}

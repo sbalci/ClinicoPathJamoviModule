@@ -88,33 +88,33 @@ data(toxicityprofile_small_sample)
 
 # Minimal sample analysis
 result <- toxicityprofile(
-  data = toxicityprofile_small_sample,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  plotType = "stacked_bar"
+    data = toxicityprofile_small_sample,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    plotType = "stacked_bar"
 )
 
 # Edge case testing with group comparison
 result_comparison <- toxicityprofile(
-  data = toxicityprofile_small_sample,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  groupComparison = TRUE,
-  showConfidenceIntervals = TRUE
+    data = toxicityprofile_small_sample,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    groupComparison = TRUE,
+    showConfidenceIntervals = TRUE
 )
 
 # Minimal visualization testing
 result_minimal <- toxicityprofile(
-  data = toxicityprofile_small_sample,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  plotType = "dot_plot",
-  minIncidence = 1
+    data = toxicityprofile_small_sample,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    plotType = "dot_plot",
+    minIncidence = 1
 )
 }
 }

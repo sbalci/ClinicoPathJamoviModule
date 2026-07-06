@@ -82,13 +82,3 @@ missing value analysis, correlation matrices, PCA visualization, and
 automated reporting.
 Based on autoEDA research from R Journal 2019 (Staniak & Biecek).
 }
-\examples{
-\donttest{
-# Example:
-# 1. Load your data frame.
-# 2. Select variables for analysis.
-# 3. Choose analysis type (overview, missing, correlation, etc.)
-# 4. Configure output options.
-# 5. Run autoeda module for comprehensive automated analysis.
-}
-}

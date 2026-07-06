@@ -386,29 +386,6 @@ pcacomponenttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' Without centering/scaling, the test compares raw variance instead of 
 #' correlation structure.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with mtcars dataset
-#' data("mtcars")
-#'
-#' # Test significance of first 5 principal components
-#' pcacomponenttest(
-#'   data = mtcars,
-#'   vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
-#'   ncomp = 5,
-#'   nperm = 1000,
-#'   center = TRUE,
-#'   scale = TRUE,
-#'   conflevel = 0.95,
-#'   adjustmethod = "BH"
-#' )
-#'}
-#' @section References:
-#' Buja A, Eyuboglu N. (1992). Remarks on Parallel Analysis. Multivariate Behavioral Research, 27(4):509-540.
-#'
-#' Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812.
-#'
 #' @param data The data as a data frame.
 #' @param vars Continuous variables to include in Principal Component
 #'   Analysis. Select at least 3 numeric variables.

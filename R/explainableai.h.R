@@ -858,27 +858,6 @@ explainableaiBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' importance,
 #' SHAP values, and other interpretability methods.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # SHAP analysis for feature importance
-#' explainableai(
-#'     data = model_data,
-#'     model_predictions = "predictions_var",
-#'     features = c("feature1", "feature2", "feature3"),
-#'     method = "shap",
-#'     plot_type = "summary"
-#' )
-#'
-#' # Attention map analysis for image models
-#' explainableai(
-#'     data = image_data,
-#'     image_paths = "image_path_var",
-#'     attention_maps = "attention_var",
-#'     method = "attention_analysis",
-#'     overlay_original = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param analysis_type type of explainability analysis to perform
 #' @param features features/variables for importance analysis

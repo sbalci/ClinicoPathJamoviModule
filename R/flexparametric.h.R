@@ -490,11 +490,6 @@ flexparametricBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' function • Automatic model comparison and selection • Clinical 
 #' interpretation of parameters • Comprehensive diagnostic plots • Copy-ready 
 #' report templates
-#'
-#' @examples
-#' \donttest{
-#' # Example usage will be added
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis.
 #' @param outcome Event indicator variable.

@@ -930,20 +930,6 @@ progressionsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' specific
 #' to cancer clinical trials and observational studies.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('cancer_trial')
-#'
-#' progressionsurvival(
-#'     data = cancer_trial,
-#'     time_var = "pfs_time",
-#'     progression_var = "progression",
-#'     death_var = "death",
-#'     treatment_var = "treatment",
-#'     stratification_vars = c("stage", "histology")
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param time_var Time to progression or censoring (PFS time)
 #' @param progression_var Progression indicator (1=progression, 0=censored)

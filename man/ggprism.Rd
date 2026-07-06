@@ -144,13 +144,3 @@ types including violin plots, box plots, scatter plots, and dose-response
 curves
 with seamless ggplot2 integration and Prism-style aesthetics.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Load your data frame with continuous and categorical variables.
-# 2. Select variables for X and Y axes.
-# 3. Choose grouping variables for statistical comparisons.
-# 4. Customize with Prism-style themes and color palettes.
-# 5. Add statistical annotations and publication formatting.
-}
-}

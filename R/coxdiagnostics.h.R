@@ -410,18 +410,6 @@ coxdiagnosticsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'
 #' Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from 
 #' survminer package for comprehensive model validation.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' library(survival)
-#' library(survminer)
-#' # Fit Cox model
-#' cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
-#' # Generate diagnostic plots
-#' ggcoxdiagnostics(cox_model, type = "martingale")
-#' ggcoxdiagnostics(cox_model, type = "deviance")
-#'}
 #' @param data The data as a data frame.
 #' @param time The time-to-event variable for survival analysis.
 #' @param event The event indicator variable (1=event, 0=censored).

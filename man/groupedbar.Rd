@@ -166,14 +166,3 @@ groups,
 treatment responses across hospitals, survey responses across demographics,
 or any metric that varies by categorical groupings.
 }
-\examples{
-\donttest{
-# Example: Compare lab values across disease groups
-groupedbar(
-    data = clinicalData,
-    items = c("glucose", "cholesterol", "creatinine"),
-    groups = "disease_group",
-    values = "measurement"
-)
-}
-}

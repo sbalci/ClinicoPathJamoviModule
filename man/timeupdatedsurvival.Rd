@@ -84,8 +84,3 @@ relationships.  Multiple modeling approaches are supported including Aalen
 additive models,  Cox-Aalen hybrid models, and dynamic regression with
 time-updated coefficients.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

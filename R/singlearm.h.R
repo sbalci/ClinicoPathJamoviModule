@@ -1062,17 +1062,6 @@ singlearmBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' when you want to analyze overall survival  characteristics of your entire 
 #' study population - for example, to determine median  survival time or 
 #' 1/3/5-year survival rates for all patients collectively.
-#'
-#' @examples
-#' \donttest{
-#' # Example analyzing overall survival for a patient cohort:
-#' # singlearm(
-#' #   data = patient_data,
-#' #   elapsedtime = "months_survival",
-#' #   outcome = "death_status",
-#' #   outcomeLevel = "Dead"
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime The time-to-event or follow-up duration for each
 #'   patient. The sum of these values represents the total person-time follow-up

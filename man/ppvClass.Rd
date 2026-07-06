@@ -18,7 +18,7 @@ The calculation is based on Bayes' theorem and considers:
 \item Proportion of p-hacked or biased studies
 }
 
-PPV = (Power × R + u × β × R) / (R + α - β × R + u - u × α + u × β × R)
+PPV = (Power x R + u x beta x R) / (R + alpha - beta x R + u - u x alpha + u x beta x R)
 where R is the pre-study odds of true relationships (percTrue/(100-percTrue))
 and u is the bias factor (percHack/100)
 }

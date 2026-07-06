@@ -996,8 +996,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Function for Interrater Reliability.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

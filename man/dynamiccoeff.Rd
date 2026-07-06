@@ -124,21 +124,3 @@ effects using Bayesian frameworks and dynamic linear models, offering
 sophisticated alternatives to static coefficient approaches in survival
 analysis.
 }
-\examples{
-\donttest{
-# Example 1: Dynamic coefficient model with Bayesian updating
-library(survival)
-library(dlm)
-veteran <- survival::veteran
-
-dynamiccoeff(
-    data = veteran,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    covariates = c("age", "karno"),
-    dynamic_covariates = c("diagtime"),
-    updating_method = "kalman"
-)
-}
-}

@@ -125,15 +125,3 @@ Handles heterogeneity in sensitivity and specificity across studies or
 centers using beta-binomial distributions with flexible correlation
 structures.
 }
-\examples{
-\donttest{
-# Example: Beta-binomial diagnostic accuracy analysis
-betabinomialdiagnostic(
-    data = diagnostic_data,
-    test_result = test_outcome,
-    disease_status = true_disease,
-    study_id = study_center,
-    overdispersion_model = "beta_binomial"
-)
-}
-}

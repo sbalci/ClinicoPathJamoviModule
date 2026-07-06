@@ -76,7 +76,7 @@ data(medical_roc_data)
 result1 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = "biomarker1",
-  classVar = "disease_status", 
+  classVar = "disease_status",
   positiveClass = "Disease"
 )
 
@@ -95,7 +95,7 @@ result3 <- psychopdaROC(
   data = medical_roc_data,
   dependentVars = c("biomarker1", "biomarker2"),
   classVar = "disease_status",
-  positiveClass = "Disease", 
+  positiveClass = "Disease",
   calculateIDI = TRUE,
   calculateNRI = TRUE,
   refVar = "biomarker1",
@@ -109,7 +109,7 @@ result4 <- psychopdaROC(
   classVar = "disease_status",
   positiveClass = "Disease",
   method = "oc_cost_ratio",
-  costratioFP = 2.5  # False positives cost 2.5x false negatives
+  costratioFP = 2.5 # False positives cost 2.5x false negatives
 )
 
 # Subgroup analysis by hospital
@@ -148,9 +148,9 @@ financial_result <- psychopdaROC(
   dependentVars = c("credit_score", "income_debt_ratio", "employment_score"),
   classVar = "default_status",
   positiveClass = "Default",
-  direction = "<=",  # Lower credit scores indicate higher risk
+  direction = "<=", # Lower credit scores indicate higher risk
   method = "oc_cost_ratio",
-  costratioFP = 0.1,  # False positives (rejected good clients) cost less
+  costratioFP = 0.1, # False positives (rejected good clients) cost less
   delongTest = TRUE,
   subGroup = "client_type"
 )
@@ -174,11 +174,11 @@ education_result <- psychopdaROC(
 data(manufacturing_roc_data)
 
 quality_result <- psychopdaROC(
-  data = manufacturing_roc_data, 
+  data = manufacturing_roc_data,
   dependentVars = c("dimension_score", "surface_score", "strength_score"),
   classVar = "quality_status",
   positiveClass = "Defect",
-  method = "oc_equal_sens_spec",  # Balanced sensitivity/specificity
+  method = "oc_equal_sens_spec", # Balanced sensitivity/specificity
   plotROC = TRUE,
   showCriterionPlot = TRUE,
   showDotPlot = TRUE,
@@ -199,8 +199,8 @@ ROC curve to reclassification and beyond. Statistics in Medicine, 27(2), 157-172
 Youden, W. J. (1950). Index for rating diagnostic tests. Cancer, 3(1), 32-35.
 }
 \seealso{
-\code{\link{cutpointr}} for cutpoint optimization methods
-\code{\link{pROC}} for ROC curve analysis
+\code{\link[cutpointr]{cutpointr}} for cutpoint optimization methods
+\code{\link[pROC]{roc}} for ROC curve analysis
 }
 \keyword{AUC}
 \keyword{ROC}

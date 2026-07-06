@@ -90,16 +90,3 @@ calibration, discrimination, and clinical utility using predicted
 probabilities from existing models. Supports external validation, temporal
 validation, and subgroup analysis.
 }
-\examples{
-\donttest{
-# Example usage:
-# data <- your_data
-# ClinicoPath::modelval(
-#   data = data,
-#   outcome = "disease",
-#   predicted = "risk_score",
-#   validationType = "external",
-#   subgroup = "hospital"
-# )
-}
-}

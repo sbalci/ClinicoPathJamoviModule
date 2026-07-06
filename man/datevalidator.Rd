@@ -100,12 +100,3 @@ workflows.
 For datetime conversion with component extraction (year, month, day, hour,
 minute, second), see the DateTime Converter module.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select variables containing date/datetime information that need validation.
-# 2. Choose validation method (automatic detection or specific format).
-# 3. Configure missing value imputation settings.
-# 4. Review validation results and quality assessment.
-}
-}

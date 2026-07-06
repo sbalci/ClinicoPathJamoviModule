@@ -162,17 +162,3 @@ bootstrap validation, cross-validation, model calibration assessment,
 and clinical performance evaluation designed for medical research and
 diagnostic test evaluation.
 }
-\examples{
-\donttest{
-# Clinical model validation with bootstrap
-clinical_validation(
-    data = clinical_data,
-    outcome = "diagnosis",
-    predictors = c("biomarker1", "biomarker2", "age", "gender"),
-    model_type = "logistic",
-    validation_method = "bootstrap",
-    bootstrap_samples = 1000,
-    clinical_context = "diagnosis"
-)
-}
-}

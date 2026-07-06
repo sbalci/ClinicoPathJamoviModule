@@ -121,14 +121,3 @@ laboratory methods. Supports regulatory submissions and laboratory
 accreditation. Essential for establishing method performance
 characteristics.
 }
-\examples{
-\donttest{
-data |>
-methodvalidation(
-    measurement = "glucose_result",
-    reference_value = "reference_glucose",
-    replicate = "replicate_number",
-    concentration_level = "control_level"
-)
-}
-}

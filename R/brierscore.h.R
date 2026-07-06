@@ -678,17 +678,6 @@ brierscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' riskRegression::Score() or pec::pec(). This implementation has NOT been 
 #' validated against those standards.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- brierscore(
-#'     data = validation_data,
-#'     time = "follow_up_time",
-#'     event = "death",
-#'     predictions = "predicted_survival_prob",
-#'     prediction_time = 60
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time-to-event or censoring variable. For survival analysis,
 #'   this is the follow-up time in days, months, or years.

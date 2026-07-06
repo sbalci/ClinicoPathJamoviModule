@@ -82,36 +82,36 @@ data(toxicityprofile_oncology_trial)
 
 # Basic toxicity profile analysis
 result <- toxicityprofile(
-  data = toxicityprofile_oncology_trial,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  plotType = "stacked_bar",
-  showHighGradeOnly = FALSE
+    data = toxicityprofile_oncology_trial,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    plotType = "stacked_bar",
+    showHighGradeOnly = FALSE
 )
 
 # Treatment comparison analysis
 result_comparison <- toxicityprofile(
-  data = toxicityprofile_oncology_trial,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event", 
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  systemOrganClass = "system_organ_class",
-  groupComparison = TRUE,
-  showConfidenceIntervals = TRUE
+    data = toxicityprofile_oncology_trial,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    systemOrganClass = "system_organ_class",
+    groupComparison = TRUE,
+    showConfidenceIntervals = TRUE
 )
 
 # Time-to-event analysis
 result_time <- toxicityprofile(
-  data = toxicityprofile_oncology_trial,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade", 
-  timeToEvent = "time_to_event",
-  plotType = "time_to_event",
-  cumulativeIncidence = TRUE
+    data = toxicityprofile_oncology_trial,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    timeToEvent = "time_to_event",
+    plotType = "time_to_event",
+    cumulativeIncidence = TRUE
 )
 }
 }

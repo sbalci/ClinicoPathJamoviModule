@@ -129,9 +129,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Performs Lasso-penalized Cox regression for variable selection in survival
 analysis.
 }
-\examples{
-\donttest{
-lassocox(data = data, elapsedtime = "Time", outcome = "Status",
-    outcomeLevel = "1", explanatory = vars(age, stage, grade))
-}
-}

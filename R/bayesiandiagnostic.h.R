@@ -1246,18 +1246,6 @@ bayesiandiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' diagnostic odds ratios with full uncertainty quantification. Supports
 #' meta-analysis, hierarchical modeling, and comparative test evaluation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Bayesian diagnostic test evaluation
-#' bayesiandiagnostic(
-#'     data = diagnostic_data,
-#'     test_results = "test_outcome",
-#'     gold_standard = "true_diagnosis",
-#'     prior_sensitivity_mean = 0.8,
-#'     prior_specificity_mean = 0.9
-#' )
-#'}
 #' @param data The data as a data frame for Bayesian diagnostic test
 #'   evaluation.
 #' @param test_results .

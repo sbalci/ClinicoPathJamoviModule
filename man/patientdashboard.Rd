@@ -158,16 +158,3 @@ featuring vital signs monitoring, laboratory trend analysis, alert
 threshold management, and clinical decision support for comprehensive
 patient care coordination and clinical workflow optimization.
 }
-\examples{
-\donttest{
-data('patient_monitoring', package='ClinicoPath')
-
-# Basic patient monitoring dashboard
-patientdashboard(patient_monitoring,
-               patientID = 'PatientID',
-               vitals = c('HeartRate', 'BloodPressure', 'Temperature'),
-               labValues = c('Glucose', 'Creatinine', 'Hemoglobin'),
-               realtime_monitoring = TRUE,
-               alert_system = TRUE)
-}
-}

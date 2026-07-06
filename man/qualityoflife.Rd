@@ -235,18 +235,3 @@ and health economic outcomes. Essential for clinical trials,
 patient-centered care, and
 health technology assessment.
 }
-\examples{
-\donttest{
-data('qol_data')
-
-qualityoflife(
-    data = qol_data,
-    qol_domains = list(
-        physical = c("pf1", "pf2", "pf3"),
-        mental = c("mh1", "mh2", "mh3")
-    ),
-    patient_id = "patient_id",
-    instrument_type = "sf36"
-)
-}
-}

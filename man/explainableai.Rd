@@ -122,24 +122,3 @@ in medical and clinical applications. Provides attention maps, feature
 importance,
 SHAP values, and other interpretability methods.
 }
-\examples{
-\donttest{
-# SHAP analysis for feature importance
-explainableai(
-    data = model_data,
-    model_predictions = "predictions_var",
-    features = c("feature1", "feature2", "feature3"),
-    method = "shap",
-    plot_type = "summary"
-)
-
-# Attention map analysis for image models
-explainableai(
-    data = image_data,
-    image_paths = "image_path_var",
-    attention_maps = "attention_var",
-    method = "attention_analysis",
-    overlay_original = TRUE
-)
-}
-}

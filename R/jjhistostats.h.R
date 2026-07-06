@@ -506,37 +506,6 @@ jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 'Wrapper Function for ggstatsplot::gghistostats and
 #' ggstatsplot::grouped_gghistostats to generate Histogram.'
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load test data
-#' data(jjhistostats_test_data)
-#'
-#' # Basic histogram
-#' jjhistostats(
-#'   data = jjhistostats_test_data,
-#'   dep = "age_years",
-#'   typestatistics = "parametric"
-#' )
-#'
-#' # Multiple histograms
-#' jjhistostats(
-#'   data = jjhistostats_test_data,
-#'   dep = c("age_years", "tumor_size_mm", "bmi"),
-#'   centralityline = TRUE,
-#'   resultssubtitle = TRUE
-#' )
-#'
-#' # Grouped histogram by disease stage
-#' jjhistostats(
-#'   data = jjhistostats_test_data,
-#'   dep = "psa_level",
-#'   grvar = "disease_stage",
-#'   typestatistics = "nonparametric",
-#'   changebinwidth = TRUE,
-#'   binwidth = 2.0
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep One or more continuous numeric variables for which histograms
 #'   will be created. Multiple variables will be displayed in separate panels.

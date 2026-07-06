@@ -927,19 +927,6 @@ adaptivetrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' stopping rules, and group sequential designs. Designed for efficient
 #' clinical trial conduct with ethical early stopping capabilities.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Adaptive trial design with interim analysis
-#' adaptivetrialdesign(
-#'     data = trial_data,
-#'     outcome = "response",
-#'     treatment = "arm",
-#'     adaptation_type = "sample_size",
-#'     interim_analysis = TRUE,
-#'     futility_boundary = 0.1
-#' )
-#'}
 #' @param data The data as a data frame for adaptive trial design analysis.
 #' @param outcome .
 #' @param treatment .

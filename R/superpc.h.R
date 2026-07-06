@@ -462,18 +462,6 @@ superpcBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Particularly effective for genomics data where many features are 
 #' correlated.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' superpc(
-#'     data = data,
-#'     time = "time",
-#'     event = "event",
-#'     features = c("gene1", "gene2", "gene3"),
-#'     threshold = 0.1,
-#'     n_components = 5
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param time survival time variable
 #' @param event event indicator (1=event, 0=censored)

@@ -600,11 +600,6 @@ conditionalgeeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' consecutive event occurrences conditional  on previous event history, 
 #' accounting for within-subject correlation and providing  robust 
 #' population-average estimates of covariate effects on inter-event times.
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology', package='ClinicoPath')
-#'}
 #' @param data .
 #' @param subjectID .
 #' @param gap_time .

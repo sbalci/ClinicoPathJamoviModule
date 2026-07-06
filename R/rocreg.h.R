@@ -553,16 +553,6 @@ rocregBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' curves. Provides both population-averaged and covariate-specific diagnostic 
 #' accuracy estimates.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- rocreg(
-#'     data = multi_center_data,
-#'     predictor = "biomarker_level",
-#'     outcome = "disease_status",
-#'     covariates = c("age", "scanner_type", "center")
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param predictor Continuous diagnostic test variable (biomarker level,
 #'   imaging score, AI probability). The test whose accuracy varies by

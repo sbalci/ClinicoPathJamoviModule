@@ -202,8 +202,3 @@ models and diagnostic tests. Calculates net benefit across threshold
 probabilities to determine if using a model provides more benefit than
 default strategies.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

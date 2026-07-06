@@ -222,14 +222,3 @@ For rigorous clinical validation, use established packages:
 riskRegression::Score() or pec::pec(). This implementation has NOT been
 validated against those standards.
 }
-\examples{
-\donttest{
-result <- brierscore(
-    data = validation_data,
-    time = "follow_up_time",
-    event = "death",
-    predictions = "predicted_survival_prob",
-    prediction_time = 60
-)
-}
-}

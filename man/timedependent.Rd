@@ -148,19 +148,3 @@ prediction
 accuracy assessment through time-dependent AUC and optimal cutpoint
 selection.
 }
-\examples{
-\donttest{
-# Example: Time-varying biomarker effects
-timedependent(
-    data = biomarker_data,
-    id = patient_id,
-    start_time = tstart,
-    stop_time = tstop,
-    event = status,
-    time_dependent_vars = c("biomarker_level", "treatment_status"),
-    baseline_vars = c("age", "sex"),
-    landmark_times = c(6, 12, 24),
-    roc_times = c(1, 2, 3, 5)
-)
-}
-}

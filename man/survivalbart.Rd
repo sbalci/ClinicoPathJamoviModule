@@ -235,17 +235,3 @@ supports both accelerated failure time and proportional hazards
 formulations
 with comprehensive posterior inference and model diagnostics.
 }
-\examples{
-\donttest{
-result <- survivalbart(
-    data = mydata,
-    time = "time_to_event",
-    event = "event_indicator",
-    predictors = c("age", "stage", "biomarker1", "biomarker2"),
-    model_type = "aft",
-    n_trees = 200,
-    n_burn = 1000,
-    n_post = 2000
-)
-}
-}

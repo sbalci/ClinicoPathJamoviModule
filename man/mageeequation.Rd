@@ -91,10 +91,3 @@ estimating Oncotype DX Recurrence Score from standard pathology variables.
 Provides all four published equations (Original + 3 new) with risk
 category classification and concordance analysis.
 }
-\examples{
-\donttest{
-mageeequation(data = data, nuclearGrade = nucgrade,
-    mitosis = mitotic_score, erHscore = er_hscore,
-    prHscore = pr_hscore, her2Status = her2)
-}
-}

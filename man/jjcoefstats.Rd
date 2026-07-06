@@ -126,23 +126,3 @@ meta-analysis results. Supports both pre-computed coefficients and
 automatic model fitting from raw data. Uses ggstatsplot's ggcoefstats() for
 professional visualization.
 }
-\examples{
-\donttest{
-# Example usage:
-# For pre-computed coefficients:
-# ClinicoPath::jjcoefstats(
-#   data = model_results,
-#   term = "term",
-#   estimate = "estimate",
-#   std_error = "std_error"
-# )
-#
-# For automatic fitting:
-# ClinicoPath::jjcoefstats(
-#   data = mydata,
-#   outcome = "weight",
-#   predictors = vars(height, age, sex),
-#   modelType = "lm"
-# )
-}
-}

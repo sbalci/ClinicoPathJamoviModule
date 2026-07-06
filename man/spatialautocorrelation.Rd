@@ -124,14 +124,3 @@ indicators of spatial association (LISA) for detecting spatial clustering
 and patterns in histopathological data. Essential for analyzing spatial
 dependencies in tissue architecture and cellular distributions.
 }
-\examples{
-\donttest{
-data |>
-spatialautocorrelation(
-    measurement = "biomarker_intensity",
-    x_coordinate = "cell_x",
-    y_coordinate = "cell_y",
-    autocorr_method = "morans_i"
-)
-}
-}

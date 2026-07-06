@@ -209,13 +209,3 @@ survival predictions, and prognostic scores. The C-index accounts for
 censoring through appropriate pair weighting and can be decomposed to
 identify which risk groups contribute most to discrimination.
 }
-\examples{
-\donttest{
-result <- concordanceindex(
-    data = validation_data,
-    time = "follow_up_months",
-    event = "death",
-    predictor = "risk_score"
-)
-}
-}

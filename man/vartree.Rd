@@ -118,24 +118,3 @@ Supports current CRAN vtree package with advanced styling, statistical
 summaries, and interpretation features. Consolidates functionality from
 legacy versions with modern vtree capabilities.
 }
-\examples{
-\donttest{
-# Basic variable tree
-vartree(
-    data = mydata,
-    vars = c("var1", "var2", "var3"),
-    style = "default",
-    showInterpretation = TRUE
-)
-
-# Enhanced tree with statistical summaries
-vartree(
-    data = mydata,
-    vars = c("treatment", "response"),
-    summaryvar = "age",
-    summarylocation = "allnodes",
-    style = "clean",
-    showInterpretation = TRUE
-)
-}
-}

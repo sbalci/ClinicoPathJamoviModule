@@ -16,6 +16,7 @@ A parsed formula object.
 Wraps \code{jmvcore::asFormula} with the function allow-list extended to cover
 common survival modelling helpers (\code{Surv}, \code{strata}, \code{cluster}, \code{frailty},
 \code{tt}, \code{pspline}, \code{ns}, \code{bs}, \code{I}, \code{const}, \code{finegray}). Use this instead of
-base \code{as.formula()} in survival / Cox / Fine-Gray paths so the formula
+base \code{stats::as.formula()} in survival / Cox / Fine-Gray paths so the formula
 goes through jmvcore's allow-listed parser.
 }
+\keyword{internal}

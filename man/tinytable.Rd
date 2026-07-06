@@ -80,12 +80,3 @@ to complement existing ClinicoPath table modules with modern styling,
 flexible formatting, and clean aesthetics. Perfect for enhancing data
 presentation in clinical research publications and reports.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select variables for table display.
-# 2. Choose grouping variables for organized presentation.
-# 3. Customize styling, themes, and formatting options.
-# 4. Generate publication-ready tables in multiple formats.
-}
-}

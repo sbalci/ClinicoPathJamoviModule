@@ -130,57 +130,57 @@ Results include comprehensive guidance for staging system adoption:
 \dontrun{
 # Basic staging comparison
 stagemigration(
-  data = cancer_data,
-  oldStage = "old_stage",
-  newStage = "new_stage",
-  survivalTime = "survival_months",
-  event = "outcome",
-  eventLevel = "DEAD",
-  analysisType = "basic"
+    data = cancer_data,
+    oldStage = "old_stage",
+    newStage = "new_stage",
+    survivalTime = "survival_months",
+    event = "outcome",
+    eventLevel = "DEAD",
+    analysisType = "basic"
 )
 
 # Comprehensive analysis with all options
 stagemigration(
-  data = lung_cancer_cohort,
-  oldStage = "tnm7_stage",
-  newStage = "tnm8_stage",
-  survivalTime = "os_months",
-  event = "death",
-  eventLevel = "dead",
-  analysisType = "comprehensive",
-  calculateNRI = TRUE,
-  performBootstrap = TRUE,
-  bootstrapReps = 1000
+    data = lung_cancer_cohort,
+    oldStage = "tnm7_stage",
+    newStage = "tnm8_stage",
+    survivalTime = "os_months",
+    event = "death",
+    eventLevel = "dead",
+    analysisType = "comprehensive",
+    calculateNRI = TRUE,
+    performBootstrap = TRUE,
+    bootstrapReps = 1000
 )
 
 # PHASE 1 ENHANCED: Evidence-based Will Rogers assessment
 stagemigration(
-  data = pancreatic_cohort,
-  oldStage = "T_AJCC8",
-  newStage = "T_modified", 
-  survivalTime = "overall_survival_months",
-  event = "death_status",
-  eventLevel = "Dead",
-  analysisType = "publication",
-  advancedMigrationAnalysis = TRUE,
-  showMigrationHeatmap = TRUE,
-  cancerType = "other",
-  showExplanations = TRUE
+    data = pancreatic_cohort,
+    oldStage = "T_AJCC8",
+    newStage = "T_modified",
+    survivalTime = "overall_survival_months",
+    event = "death_status",
+    eventLevel = "Dead",
+    analysisType = "publication",
+    advancedMigrationAnalysis = TRUE,
+    showMigrationHeatmap = TRUE,
+    cancerType = "other",
+    showExplanations = TRUE
 )
 
 # Phase 1 Enhanced with landmark analysis for lung cancer
 stagemigration(
-  data = lung_staging_data,
-  oldStage = "stage_7th_edition",
-  newStage = "stage_8th_edition",
-  survivalTime = "survival_months",
-  event = "vital_status",
-  eventLevel = "deceased",
-  analysisType = "comprehensive", 
-  advancedMigrationAnalysis = TRUE,
-  cancerType = "lung",  # Uses lung-specific landmark times: 3,6,12,24 months
-  showWillRogersVisualization = TRUE,
-  showMigrationSurvivalComparison = TRUE
+    data = lung_staging_data,
+    oldStage = "stage_7th_edition",
+    newStage = "stage_8th_edition",
+    survivalTime = "survival_months",
+    event = "vital_status",
+    eventLevel = "deceased",
+    analysisType = "comprehensive",
+    advancedMigrationAnalysis = TRUE,
+    cancerType = "lung", # Uses lung-specific landmark times: 3,6,12,24 months
+    showWillRogersVisualization = TRUE,
+    showMigrationSurvivalComparison = TRUE
 )
 }
 

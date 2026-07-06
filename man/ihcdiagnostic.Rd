@@ -84,13 +84,3 @@ Diagnostic performance analysis and clinical classification using IHC
 markers. Designed for differential diagnosis and antibody panel
 optimization.
 }
-\examples{
-\donttest{
-data |>
-ihcdiagnostic(
-    markers = c("ER", "PR", "HER2", "Ki67"),
-    diagnosis = "tumor_type",
-    differentialDiagnosis = TRUE
-)
-}
-}

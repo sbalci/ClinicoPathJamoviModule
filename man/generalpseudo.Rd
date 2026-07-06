@@ -122,16 +122,3 @@ analyzed with conventional regression techniques. Supports various
 functionals including survival probabilities, cumulative incidence
 functions, and restricted mean survival times.
 }
-\examples{
-\donttest{
-data |>
-generalpseudo(
-    elapsedtime = "time_to_event",
-    outcome = "event_status",
-    explanatory = c("age", "treatment", "stage"),
-    functional_type = "survival",
-    time_points = c(12, 24, 60),
-    cause_specific = 1
-)
-}
-}

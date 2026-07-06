@@ -90,8 +90,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Overall, Cause Specific, and Competing Survival.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

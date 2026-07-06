@@ -832,20 +832,6 @@ mixedeffectscoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' measurements, and unobserved heterogeneity using the coxme framework for  
 #' multi-level survival analysis in clinical research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Mixed-effects Cox model with random intercept
-#' mixedeffectscox(
-#'     data = hierarchical_data,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     fixed_effects = c("age", "treatment"),
-#'     random_effects = c("hospital"),
-#'     random_structure = "random_intercept"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

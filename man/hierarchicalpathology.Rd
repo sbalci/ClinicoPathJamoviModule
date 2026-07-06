@@ -89,14 +89,3 @@ pathology data structures. Essential for WSI analysis with Patient >
 Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring
 clustering effects.
 }
-\examples{
-\donttest{
-data('histopathology')
-
-hierarchicalpathology(data = histopathology,
-                     dependent = measurement,
-                     level_3 = patient_id,
-                     level_2 = slide_id,
-                     level_1 = roi_id)
-}
-}

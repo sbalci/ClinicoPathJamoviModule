@@ -151,18 +151,3 @@ Note: This analysis can be computationally intensive. Expected runtime:
 2-10 minutes
 depending on data size and model complexity.
 }
-\examples{
-\donttest{
-# Example: PSA trajectory and prostate cancer survival
-jointmodeling(
-    data = psa_data,
-    id = patient_id,
-    time_longitudinal = visit_time,
-    biomarker = psa_level,
-    survival_time = followup_time,
-    survival_status = death_status,
-    covariates = c("age", "stage"),
-    functional_form = "linear"
-)
-}
-}

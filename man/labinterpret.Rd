@@ -152,15 +152,3 @@ adjustments, trend analysis, and critical value monitoring for
 evidence-based
 diagnostic decision-making and clinical assessment optimization.
 }
-\examples{
-\donttest{
-data('clinicaldata', package='ClinicoPath')
-
-# Basic laboratory interpretation
-labinterpret(clinicaldata,
-            labValues = c('Hemoglobin', 'Glucose', 'Creatinine'),
-            patientDemo = c('Age', 'Gender'),
-            reference_ranges = TRUE,
-            trend_analysis = TRUE)
-}
-}

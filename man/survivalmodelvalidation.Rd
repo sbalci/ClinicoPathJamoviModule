@@ -145,15 +145,3 @@ prediction performance metrics, bootstrap validation, and external
 validation frameworks.
 Essential for developing reliable prognostic models.
 }
-\examples{
-\donttest{
-# Example: Cox model validation
-survivalmodelvalidation(
-    data = clinical_data,
-    time = followup_months,
-    status = death_event,
-    risk_score = predicted_risk,
-    validation_type = "internal_bootstrap"
-)
-}
-}

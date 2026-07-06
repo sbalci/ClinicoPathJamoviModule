@@ -1478,21 +1478,3 @@ Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis,
 decision curve analysis, bootstrap validation,  and comprehensive clinical
 interpretation guidance.
 }
-\examples{
-\donttest{
-# Example analyzing TNM staging system migration:
-# stagemigration(
-#   data = cancer_cohort,
-#   oldStage = "tnm7_stage",
-#   newStage = "tnm8_stage",
-#   survivalTime = "os_months",
-#   event = "death_status",
-#   eventLevel = "Dead",
-#   analysisType = "comprehensive",
-#   calculateNRI = TRUE,
-#   calculateIDI = TRUE,
-#   performBootstrap = TRUE,
-#   bootstrapReps = 1000
-# )
-}
-}

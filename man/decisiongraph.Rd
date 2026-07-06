@@ -270,8 +270,3 @@ This module provides comprehensive decision tree visualization capabilities incl
 }
 }
 
-\examples{
-\donttest{
-# example will be added
-}
-}

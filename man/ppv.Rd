@@ -44,14 +44,3 @@ researchers understand the probability that their significant findings are
 actually true, considering factors like prior probability, statistical
 power, and research biases.
 }
-\examples{
-\donttest{
-# Calculate PPV for a typical medical research scenario
-ppv(
-    percTrue = 10,    # 10 percent of tested hypotheses are true
-    alpha = 0.05,     # 5 percent significance level
-    power = 0.80,     # 80 percent power
-    percHack = 30     # 30 percent of studies have some bias
-)
-}
-}

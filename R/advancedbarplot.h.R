@@ -574,16 +574,6 @@ advancedbarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' designs. Each approach optimized for different use cases in clinical 
 #' research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage - 5 different bar chart approaches:
-#' # 1. Basic ggplot2 approach
-#' # 2. Polished presentation style
-#' # 3. Statistical annotation style
-#' # 4. Interactive plotly style
-#' # 5. Publication-ready style
-#'}
 #' @param data The data as a data frame.
 #' @param x_var Categorical variable for x-axis categories.
 #' @param y_var Numeric variable for bar heights.

@@ -107,21 +107,3 @@ continuous modeling of how covariate effects change over time, offering an
 alternative to step-function approaches in standard time-varying Cox models
 and complementing Aalen's additive hazard methodology.
 }
-\examples{
-\donttest{
-# Example 1: Spline-based time-varying effects
-library(timereg)
-library(survival)
-veteran <- survival::veteran
-
-smoothtimevary(
-    data = veteran,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    covariates = c("age", "karno"),
-    time_varying_covariates = c("diagtime"),
-    smoothing_method = "spline"
-)
-}
-}

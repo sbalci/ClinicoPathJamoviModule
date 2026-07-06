@@ -176,41 +176,10 @@ extrapolate beyond observed data or estimate absolute risks.
 WHEN TO USE: • Cancer survival with complex hazard patterns • Health
 economic evaluations requiring extrapolation • Time-varying treatment
 effects • Relative survival analysis with population mortality
-REQUIREMENTS: • Minimum 30 events (preferably >=50) • Follow-up covering the
-period of interest • For df>4: need >=100 events to avoid overfitting
+REQUIREMENTS: • Minimum 30 events (preferably >=50) • Follow-up covering
+the period of interest • For df>4: need >=100 events to avoid overfitting
 KEY OUTPUTS: • Hazard ratios with clinical interpretation • Survival
 predictions at specific time points • Model fit statistics (AIC,
 concordance) • Time-varying effect plots • Copy-ready clinical report
 sentences
-}
-\examples{
-\donttest{
-# Example 1: Basic flexible parametric model
-library(rstpm2)
-library(survival)
-
-flexrstpm2(
-    data = breast_cancer_data,
-    elapsedtime = "rectime",
-    outcome = "censrec",
-    outcomeLevel = "1",
-    covariates = c("hormon", "age", "size"),
-    df = 4,
-    scale = "hazard"
-)
-
-# Example 2: Time-varying effects with spline interactions
-flexrstpm2(
-    data = colon_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    covariates = c("rx", "age", "nodes"),
-    time_varying_covariates = c("rx"),
-    df = 5,
-    tvc_df = 3,
-    scale = "odds",
-    show_time_varying_plots = TRUE
-)
-}
 }

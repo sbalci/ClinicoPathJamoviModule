@@ -439,18 +439,6 @@ intervalsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' is unknown but falls within an interval. Common in periodic follow-up 
 #' studies, screening programs, and clinical trials with scheduled visits.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Tumor progression between visits
-#' intervalsurvival(
-#'     data = oncology_data,
-#'     left_time = last_negative_visit,
-#'     right_time = first_positive_visit,
-#'     covariates = c("age", "stage", "treatment"),
-#'     model_type = "aft_weibull"
-#' )
-#'}
 #' @param left_time Left boundary of the censoring interval
 #' @param right_time Right boundary of the censoring interval
 #' @param status_var Censoring status indicator variable

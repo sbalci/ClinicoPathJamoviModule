@@ -482,11 +482,6 @@ chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' testing). No automated validation against established packages exists. Use 
 #' with caution for clinical decision-making.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param rows variable in the rows
 #' @param cols variable in the columns

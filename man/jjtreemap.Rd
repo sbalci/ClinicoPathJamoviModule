@@ -90,8 +90,3 @@ A results object containing:
 \description{
 'Creates treemap visualizations for categorical data'
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

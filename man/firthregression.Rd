@@ -109,16 +109,3 @@ diagnostics. Particularly valuable in clinical settings with low event
 counts, unbalanced predictors, or when standard maximum likelihood
 estimates become infinite due to separation.
 }
-\examples{
-\donttest{
-# Firth logistic regression
-firthregression(data = mydata, analysisType = "logistic",
-    outcome = "mortality",
-    predictors = c("age", "stage", "biomarker"))
-
-# Firth Cox regression
-firthregression(data = mydata, analysisType = "cox",
-    time = "follow_up_time", outcome = "status",
-    predictors = c("age", "stage", "biomarker"))
-}
-}

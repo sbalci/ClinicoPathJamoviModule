@@ -143,7 +143,7 @@ Royston, P., & Parmar, M. K. (2013). Restricted mean survival time: an alternati
 to the hazard ratio for the design and analysis of randomized trials with a
 time-to-event outcome. BMC Medical Research Methodology, 13(1), 152.
 
-Morris, T. P., et al. (2019). Proposals on Kaplan–Meier plots in medical research
+Morris, T. P., et al. (2019). Proposals on Kaplan-Meier plots in medical research
 and a survey of stakeholder views: KMunicate. BMJ Open, 9(9), e030874.
 }
 \section{Super classes}{

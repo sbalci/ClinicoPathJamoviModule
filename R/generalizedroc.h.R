@@ -518,23 +518,6 @@ generalizedrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' The generalized approach models the full distribution rather than imposing
 #' binary cutoffs, providing more flexible and robust performance assessment.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with continuous Ki67 percentage
-#' data <- data.frame(
-#'   outcome = factor(sample(c("Low", "High"), 100, replace=TRUE)),
-#'   ki67_percent = c(rnorm(50, 10, 5), rnorm(50, 40, 15))
-#' )
-#'
-#' generalizedroc(
-#'   data = data,
-#'   outcome = 'outcome',
-#'   predictor = 'ki67_percent',
-#'   assume_equal_variance = FALSE,
-#'   transformation = 'none'
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param outcome a string naming the outcome variable (binary or ordinal)
 #' @param predictor a string naming the continuous predictor variable

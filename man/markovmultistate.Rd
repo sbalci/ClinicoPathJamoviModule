@@ -128,8 +128,3 @@ Fits Markov multi-state models for analyzing transitions between different
 health states over time. Supports homogeneous and non-homogeneous models
 with covariate effects using mstate and msm packages.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

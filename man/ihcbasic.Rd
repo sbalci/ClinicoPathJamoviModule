@@ -102,14 +102,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Essential IHC expression analysis with clustering and H-score calculation.
 Designed for routine clinical use with simplified options.
 }
-\examples{
-\donttest{
-data |>
-ihcbasic(
-    markers = c("ER", "PR", "HER2", "Ki67"),
-    clusterMethod = "hierarchical",
-    nClusters = 3,
-    computeHScore = TRUE
-)
-}
-}

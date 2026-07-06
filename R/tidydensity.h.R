@@ -519,15 +519,6 @@ tidydensityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis,
 #' distribution comparison, and statistical education in clinical research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Select distribution type (Normal, Gamma, Beta, etc.)
-#' # 2. Configure distribution parameters (mean, sd, etc.)
-#' # 3. Set number of observations and simulations
-#' # 4. Choose visualization options and analysis type
-#'}
 #' @param data The data as a data frame.
 #' @param distribution_type Type of statistical distribution to generate. Each
 #'   distribution has specific parameters that can be configured.

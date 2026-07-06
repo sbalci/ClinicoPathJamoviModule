@@ -115,15 +115,3 @@ states.
 Handles irregularly observed data and estimates transition intensities
 between states.
 }
-\examples{
-\donttest{
-# Example usage
-continuousmarkov(
-    data = longitudinal_data,
-    time = observation_time,
-    state = state_variable,
-    subject = patient_id,
-    covariates = c(age, treatment)
-)
-}
-}

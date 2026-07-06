@@ -139,15 +139,3 @@ predictors.
 Reduces dimensionality while preserving survival-relevant information using
 supervised PCA.
 }
-\examples{
-\donttest{
-# Example usage
-pcacox(
-    data = highdim_data,
-    time = survival_time,
-    status = event_status,
-    predictors = high_dimensional_variables,
-    n_components = 5
-)
-}
-}

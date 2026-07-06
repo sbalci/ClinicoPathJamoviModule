@@ -112,21 +112,3 @@ combinations including histograms, scatter plots, box plots, violin plots,
 bar charts, line plots, and more. Perfect for quick data visualization with
 intelligent defaults.
 }
-\examples{
-\donttest{
-# Auto-select plot type based on variables
-esquisseauto(
-    data = mtcars,
-    xvar = "cyl",
-    yvar = "mpg"
-)
-
-# With color grouping
-esquisseauto(
-    data = iris,
-    xvar = "Species",
-    yvar = "Sepal.Length",
-    colorvar = "Species"
-)
-}
-}

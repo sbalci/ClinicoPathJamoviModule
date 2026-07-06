@@ -119,8 +119,3 @@ Fine-Gray subdistribution hazard regression for competing risks data.
 Models the cumulative incidence function (CIF) while accounting for
 competing events. Provides sub-hazard ratios (sHR) for covariate effects.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

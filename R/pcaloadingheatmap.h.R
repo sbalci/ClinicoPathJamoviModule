@@ -316,27 +316,6 @@ pcaloadingheatmapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' identify
 #' which variables contribute most strongly to each component.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with mtcars dataset
-#' data("mtcars")
-#'
-#' # Create loading heatmap and barmap
-#' pcaloadingheatmap(
-#'   data = mtcars,
-#'   vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
-#'   ncomp = 4,
-#'   cutoff = 0.5,
-#'   center = TRUE,
-#'   scale = TRUE,
-#'   textvalues = TRUE,
-#'   gradientcolor = TRUE
-#' )
-#'}
-#' @section References:
-#' Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812.
-#'
 #' @param data The data as a data frame.
 #' @param vars Continuous variables to include in Principal Component
 #'   Analysis. Select at least 3 numeric variables.

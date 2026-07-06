@@ -136,21 +136,3 @@ linear transformation models, Box-Cox transformations, and non-parametric
 transformations, enabling flexible modeling of survival data with automatic
 transformation selection and validation.
 }
-\examples{
-\donttest{
-# Example: Transformation model with Box-Cox transformation
-library(survival)
-library(tram)
-
-transformationmodels(
-    data = survival_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    covariates = c("age", "treatment", "biomarker"),
-    transformation = "boxcox",
-    distribution = "normal",
-    method = "ml"
-)
-}
-}

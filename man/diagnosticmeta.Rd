@@ -11,7 +11,7 @@ diagnosticmeta(
   false_positives,
   false_negatives,
   true_negatives,
-  covariate,
+  covariate = NULL,
   bivariate_analysis = TRUE,
   hsroc_analysis = FALSE,
   meta_regression = FALSE,
@@ -128,16 +128,4 @@ analysis,
 meta-regression, and publication bias assessment for AI algorithm
 validation
 and biomarker diagnostic accuracy synthesis.
-}
-\examples{
-\donttest{
-data('diagnostic_studies')
-
-diagnosticmeta(data = diagnostic_studies,
-              study = study_name,
-              true_positives = tp,
-              false_positives = fp,
-              false_negatives = fn,
-              true_negatives = tn)
-}
 }

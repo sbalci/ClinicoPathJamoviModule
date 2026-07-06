@@ -483,24 +483,6 @@ dynamiccoeffBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' effects using Bayesian frameworks and dynamic linear models, offering 
 #' sophisticated alternatives to static coefficient approaches in survival 
 #' analysis.
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Dynamic coefficient model with Bayesian updating
-#' library(survival)
-#' library(dlm)
-#' veteran <- survival::veteran
-#'
-#' dynamiccoeff(
-#'     data = veteran,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     covariates = c("age", "karno"),
-#'     dynamic_covariates = c("diagtime"),
-#'     updating_method = "kalman"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

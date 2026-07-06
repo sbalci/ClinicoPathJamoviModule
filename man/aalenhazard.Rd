@@ -98,34 +98,3 @@ violated, allowing for time-varying covariate effects and non-proportional
 hazards. The model estimates cumulative regression functions that can
 reveal how covariate effects change over time.
 }
-\examples{
-\donttest{
-# Example 1: Basic Aalen additive hazard model
-library(timereg)
-library(survival)
-veteran <- survival::veteran
-
-aalenhazard(
-    data = veteran,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    covariates = c("age", "karno", "diagtime"),
-    model_type = "additive",
-    constant_effects = c("age")
-)
-
-# Example 2: Semi-parametric Aalen model with constant effects
-lung <- survival::lung
-aalenhazard(
-    data = lung,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "2",
-    covariates = c("age", "sex", "ph.ecog"),
-    model_type = "semiparametric",
-    constant_effects = c("sex"),
-    show_cumulative_plots = TRUE
-)
-}
-}

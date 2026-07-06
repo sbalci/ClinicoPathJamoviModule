@@ -899,17 +899,6 @@ costeffectivenessBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' valuable for demonstrating value proposition of advanced diagnostics to 
 #' hospital administrators, payers, and policy makers.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- costeffectiveness(
-#'     data = diagnostic_study,
-#'     strategy = "test_strategy",
-#'     cost = "total_cost",
-#'     effectiveness = "correct_diagnoses",
-#'     comparator = "standard_care"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param strategy Variable indicating which diagnostic strategy was used for
 #'   each observation. Should have at least 2 levels (e.g., "New Test" vs.

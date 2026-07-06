@@ -541,47 +541,6 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' ggstatsplot::grouped_ggscatterstats to generate scatter plots
 #' with correlation analysis and optional marginal distributions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load test data
-#' data("mtcars")
-#'
-#' # Basic scatter plot with correlation
-#' jjscatterstats(
-#'   data = mtcars,
-#'   dep = "mpg",       # x-axis
-#'   group = "hp",      # y-axis
-#'   typestatistics = "parametric",
-#'   conflevel = 0.95,
-#'   k = 2
-#' )
-#'
-#' # Scatter plot with marginal histograms
-#' jjscatterstats(
-#'   data = mtcars,
-#'   dep = "mpg",
-#'   group = "hp",
-#'   marginal = TRUE,
-#'   xsidefill = "#009E73",
-#'   ysidefill = "#D55E00",
-#'   pointsize = 4,
-#'   pointalpha = 0.6,
-#'   smoothlinesize = 2,
-#'   smoothlinecolor = "red"
-#' )
-#'
-#' # Grouped scatter plot by number of cylinders
-#' jjscatterstats(
-#'   data = mtcars,
-#'   dep = "mpg",
-#'   group = "hp",
-#'   grvar = "cyl",
-#'   typestatistics = "nonparametric",
-#'   bfmessage = FALSE,
-#'   resultssubtitle = TRUE
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep First continuous variable for correlation analysis (e.g.,
 #'   biomarker levels, age, tumor size).  This will appear on the horizontal

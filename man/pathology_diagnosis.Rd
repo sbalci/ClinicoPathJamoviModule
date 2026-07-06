@@ -8,8 +8,8 @@
 A data frame with 300 cases and 12 variables:
 \describe{
 \item{case_id}{Character. Unique case identifier (PATH_0001 to PATH_0300)}
-\item{cell_size}{Numeric. Cell size measurement (μm)}
-\item{nuclear_area}{Numeric. Nuclear area measurement (μm²)}
+\item{cell_size}{Numeric. Cell size measurement (um)}
+\item{nuclear_area}{Numeric. Nuclear area measurement (um^2)}
 \item{mitotic_count}{Integer. Mitotic count per high-power field}
 \item{pleomorphism_score}{Integer. Nuclear pleomorphism score (1-3)}
 \item{ki67_percentage}{Numeric. Ki-67 proliferation index (\%)}

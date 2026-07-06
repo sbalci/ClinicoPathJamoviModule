@@ -623,13 +623,6 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' breakdowns within categories. Perfect for displaying composition data where 
 #' each bar represents 100 percent and segments show relative proportions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage for segmented total bar charts:
-#' # Shows proportional composition within categories
-#' # Each bar totals to 100 percent with segments showing relative proportions
-#'}
 #' @param data The data as a data frame.
 #' @param analysis_preset Predefined clinical analysis configurations.
 #' @param x_var Categorical variable for x-axis categories.

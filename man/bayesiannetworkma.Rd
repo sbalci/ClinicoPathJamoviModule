@@ -214,16 +214,3 @@ coherence assessment, and ranking of multiple interventions with
 uncertainty
 quantification for clinical decision making.
 }
-\examples{
-\donttest{
-# Bayesian network meta-analysis
-bayesiannetworkma(
-    data = network_data,
-    study_id = "study",
-    treatment = "treatment",
-    outcome = "response",
-    sample_size = "n",
-    network_type = "mixed_evidence"
-)
-}
-}

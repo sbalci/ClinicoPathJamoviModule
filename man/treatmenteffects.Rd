@@ -192,17 +192,3 @@ comparative effectiveness research, real-world evidence studies, and
 observational research
 where randomized controlled trials are not feasible.
 }
-\examples{
-\donttest{
-data('treatment_data')
-
-treatmenteffects(
-    data = treatment_data,
-    treatment_var = "treatment",
-    outcome_var = "outcome",
-    covariates = c("age", "sex", "baseline_severity"),
-    causal_method = "propensity_score",
-    estimand = "ate"
-)
-}
-}

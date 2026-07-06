@@ -113,14 +113,3 @@ Base R graphics visualization module providing fast, blazing fast, and
 extremely customizable data visualization solutions using pure base R
 graphics.
 }
-\examples{
-\donttest{
-# Example usage:
-# Scatter plot
-plot(x, y, main="Scatter Plot", xlab="X Variable", ylab="Y Variable")
-# Histogram
-hist(data, main="Histogram", xlab="Values")
-# Box plot
-boxplot(data ~ group, main="Box Plot")
-}
-}

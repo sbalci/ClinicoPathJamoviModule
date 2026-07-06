@@ -484,19 +484,6 @@ advancedimputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' regulatory-compliant clinical research where missing data handling must be
 #' thoroughly documented and validated.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('clinical_trial_data')
-#'
-#' advancedimputation(
-#'     data = clinical_trial_data,
-#'     imputation_vars = c("primary_endpoint", "biomarker", "age"),
-#'     auxiliary_vars = c("baseline_score", "treatment_group"),
-#'     sensitivity_analysis = TRUE,
-#'     mnar_methods = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param imputation_vars Variables with missing values to be imputed
 #' @param auxiliary_vars Complete or mostly complete variables to assist

@@ -129,7 +129,7 @@ the Cox model.}
 
 \item{interactions}{Interaction (crossed) terms added to the Cox model,
 built from variables already selected as explanatory or continuous
-explanatory variables. Each term tests effect modification — e.g. Treatment
+explanatory variables. Each term tests effect modification - e.g. Treatment
 x Biomarker for predictive-biomarker analysis. For a 2-way term the first
 variable is the focal effect and the second is the moderator.}
 
@@ -314,93 +314,4 @@ person-time by modeling the hazard function, which represents the
 instantaneous event rate per unit of person-time. When stratifying analyses
 or examining multiple predictors, the model accounts for how these factors
 influence event rates relative to the person-time at risk in each subgroup.
-}
-\examples{
-\donttest{
-# Example 1: Basic multivariable Cox regression
-library(survival)
-data(colon)
-
-multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    explanatory = c("sex", "obstruct", "perfor"),
-    contexpl = c("age", "nodes"),
-    timetypeoutput = "days",
-    hr = TRUE  # Show hazard ratio plot
-)
-
-# Example 2: Using dates to calculate survival time
-# Assuming you have diagnosis and follow-up dates
-multisurvival(
-    data = mydata,
-    tint = TRUE,
-    dxdate = "diagnosis_date",
-    fudate = "last_followup_date",
-    timetypedata = "ymd",
-    timetypeoutput = "months",
-    outcome = "vital_status",
-    outcomeLevel = "Dead",
-    explanatory = c("stage", "grade"),
-    contexpl = "age"
-)
-
-# Example 3: Risk stratification analysis
-multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    explanatory = c("sex", "obstruct"),
-    contexpl = c("age", "nodes"),
-    calculateRiskScore = TRUE,
-    numRiskGroups = "three",
-    plotRiskGroups = TRUE,
-    addRiskScore = TRUE,  # Add risk score to data
-    addRiskGroup = TRUE   # Add risk group to data
-)
-
-# Example 4: Model with stratification for non-proportional hazards
-multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    explanatory = c("obstruct", "perfor"),
-    contexpl = c("age", "nodes"),
-    use_stratify = TRUE,
-    stratvar = "sex",  # Stratify by sex if PH assumption violated
-    ph_cox = TRUE      # Test proportional hazards assumption
-)
-
-# Example 5: Stepwise model selection
-# multisurvival(
-#     data = colon,
-#     elapsedtime = "time",
-#     outcome = "status",
-#     outcomeLevel = "1",
-#     explanatory = c("sex", "obstruct", "perfor", "adhere"),
-#     contexpl = c("age", "nodes"),
-#     use_modelSelection = TRUE,
-#     modelSelection = "both",  # Stepwise selection
-#     selectionCriteria = "aic",
-#     pEntry = 0.05,
-#     pRemoval = 0.10
-# )
-
-# Example 6: Person-time analysis
-multisurvival(
-    data = colon,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    explanatory = "sex",
-    contexpl = "age",
-    person_time = TRUE,
-    time_intervals = "180, 365, 730",  # 6mo, 1yr, 2yr
-    rate_multiplier = 1000  # Rate per 1000 person-days
-)
-}
 }

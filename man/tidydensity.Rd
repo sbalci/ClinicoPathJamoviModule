@@ -149,12 +149,3 @@ probability plots, and Q-Q plots. Perfect for simulation studies, power
 analysis,
 distribution comparison, and statistical education in clinical research.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select distribution type (Normal, Gamma, Beta, etc.)
-# 2. Configure distribution parameters (mean, sd, etc.)
-# 3. Set number of observations and simulations
-# 4. Choose visualization options and analysis type
-}
-}

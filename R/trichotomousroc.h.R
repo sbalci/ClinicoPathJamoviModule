@@ -639,18 +639,6 @@ trichotomousrocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' molecular pathology where grey-zone results trigger reflex testing (e.g., 
 #' HER2 2+ requires FISH confirmation).
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- trichotomousroc(
-#'     data = her2_data,
-#'     predictor = "her2_score",
-#'     outcome = "gold_standard",
-#'     positive_level = "positive",
-#'     indeterminate_level = "indeterminate",
-#'     negative_level = "negative"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param predictor Continuous predictor variable (e.g., IHC H-score, gene
 #'   expression level, AI probability score) used to classify cases into three

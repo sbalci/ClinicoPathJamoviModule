@@ -69,18 +69,3 @@ Note: Advanced features (pairwise comparisons, effect sizes, residual
 analysis,
 correspondence analysis) are planned but not yet available.
 }
-\examples{
-\donttest{
-# Example usage:
-# dat <- as.data.frame(your_data)
-# ClinicoPathDescriptives::crosstable(
-#   data = dat,
-#   vars = vars(YourRowVariable),
-#   group = "YourGroupingVariable",
-#   sty = "finalfit",
-#   excl = TRUE,
-#   cont = "mean",
-#   pcat = "chisq"
-# )
-}
-}

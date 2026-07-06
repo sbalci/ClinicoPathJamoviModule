@@ -66,8 +66,3 @@ A results object containing:
 This function allows comparison of multiple variables across different
 categories.'
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

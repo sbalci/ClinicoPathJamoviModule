@@ -363,16 +363,6 @@ ihcdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' markers. Designed for differential diagnosis and antibody panel 
 #' optimization.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' ihcdiagnostic(
-#'     markers = c("ER", "PR", "HER2", "Ki67"),
-#'     diagnosis = "tumor_type",
-#'     differentialDiagnosis = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param markers Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
 #'   markers). These can be percentage scores, H-scores, or categorical results.

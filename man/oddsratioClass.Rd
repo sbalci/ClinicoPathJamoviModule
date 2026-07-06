@@ -67,7 +67,7 @@ Harrison, E., Drake, T., & Ots, R. (2019). finalfit: Quickly create elegant
 regression results tables and plots when modelling. R package version 0.9.7.
 }
 \seealso{
-\code{\link{finalfit}}, \code{\link{rms}}
+\code{\link[finalfit]{finalfit}}, \code{\link[rms]{rms}}
 }
 \author{
 ClinicoPath Development Team

@@ -80,15 +80,3 @@ Landmark analysis for survival data with time-varying predictors.
 Provides unbiased estimates by analyzing survival from fixed landmark
 times.
 }
-\examples{
-\donttest{
-# Example usage
-landmarkanalysis(
-    data = survival_data,
-    time = followup_time,
-    status = event_status,
-    predictors = c(biomarker, treatment),
-    landmark_times = c(6, 12, 24)
-)
-}
-}

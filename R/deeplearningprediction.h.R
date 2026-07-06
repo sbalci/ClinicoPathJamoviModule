@@ -719,30 +719,6 @@ deeplearningpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' for 
 #' biomarker prediction from H&E-stained tissue images.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic Vision Transformer prediction
-#' deeplearningprediction(
-#'     data = image_data,
-#'     image_path_var = "image_file_path",
-#'     target_var = "biomarker_status",
-#'     model_type = "vision_transformer",
-#'     attention_maps = TRUE,
-#'     validation_split = 0.2
-#' )
-#'
-#' # Cumulative logit with gray-zone
-#' deeplearningprediction(
-#'     data = ordinal_data,
-#'     image_path_var = "image_paths",
-#'     target_var = "ki67_score",
-#'     model_type = "vision_transformer",
-#'     prediction_type = "cumulative_logit",
-#'     gray_zone_width = 5.0,
-#'     thresholds = c(5, 10, 15, 20)
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param image_path_var variable containing file paths to histological images
 #' @param target_var dependent variable to predict (biomarker status,

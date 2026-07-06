@@ -184,15 +184,3 @@ boundary. Particularly valuable for establishing clinical cutoffs in
 molecular pathology where grey-zone results trigger reflex testing (e.g.,
 HER2 2+ requires FISH confirmation).
 }
-\examples{
-\donttest{
-result <- trichotomousroc(
-    data = her2_data,
-    predictor = "her2_score",
-    outcome = "gold_standard",
-    positive_level = "positive",
-    indeterminate_level = "indeterminate",
-    negative_level = "negative"
-)
-}
-}

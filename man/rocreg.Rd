@@ -170,13 +170,3 @@ non-parametric, or Bayesian approaches to model covariate effects on ROC
 curves. Provides both population-averaged and covariate-specific diagnostic
 accuracy estimates.
 }
-\examples{
-\donttest{
-result <- rocreg(
-    data = multi_center_data,
-    predictor = "biomarker_level",
-    outcome = "disease_status",
-    covariates = c("age", "scanner_type", "center")
-)
-}
-}

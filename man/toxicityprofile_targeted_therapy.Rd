@@ -82,35 +82,37 @@ data(toxicityprofile_targeted_therapy)
 
 # Targeted therapy toxicity profile
 result <- toxicityprofile(
-  data = toxicityprofile_targeted_therapy,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  plotType = "stacked_bar",
-  sortBy = "frequency"
+    data = toxicityprofile_targeted_therapy,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    plotType = "stacked_bar",
+    sortBy = "frequency"
 )
 
 # Dermatologic toxicity focus
-dermatologic_data <- subset(toxicityprofile_targeted_therapy, 
-                           system_organ_class == "Skin and subcutaneous tissue disorders")
+dermatologic_data <- subset(
+    toxicityprofile_targeted_therapy,
+    system_organ_class == "Skin and subcutaneous tissue disorders"
+)
 result_derm <- toxicityprofile(
-  data = dermatologic_data,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  plotType = "dot_plot",
-  showConfidenceIntervals = TRUE
+    data = dermatologic_data,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    plotType = "dot_plot",
+    showConfidenceIntervals = TRUE
 )
 
 # Early onset pattern analysis
 result_timing <- toxicityprofile(
-  data = toxicityprofile_targeted_therapy,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  timeToEvent = "time_to_event",
-  plotType = "time_to_event"
+    data = toxicityprofile_targeted_therapy,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    timeToEvent = "time_to_event",
+    plotType = "time_to_event"
 )
 }
 }

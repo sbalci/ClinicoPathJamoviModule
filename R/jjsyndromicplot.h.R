@@ -351,41 +351,6 @@ jjsyndromicplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' The triangle center displays the component label and variance accounted for 
 #' (VAF).
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with mtcars dataset
-#' data("mtcars")
-#'
-#' # Basic syndromic plot for first principal component
-#' jjsyndromicplot(
-#'   data = mtcars,
-#'   vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
-#'   component = 1,
-#'   cutoff = 0.5,
-#'   center = TRUE,
-#'   scale = TRUE
-#' )
-#'
-#' # Customize appearance
-#' jjsyndromicplot(
-#'   data = mtcars,
-#'   vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
-#'   component = 2,
-#'   cutoff = 0.4,
-#'   arrowsize = 15,
-#'   textsize = 8,
-#'   colorlow = "blue",
-#'   colormid = "white",
-#'   colorhigh = "red",
-#'   varorder = "abs decreasing"
-#' )
-#'}
-#' @section References:
-#' Ferguson AR, Irvine K-A, Gensel JC, et al. (2013). Derivation of Multivariate Syndromic Outcome Metrics for Consistent Testing across Multiple Models of Cervical Spinal Cord Injury in Rats. PLOS ONE, 8(3):e59712.
-#'
-#' Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812.
-#'
 #' @param data The data as a data frame.
 #' @param vars Continuous variables to include in Principal Component
 #'   Analysis. Select at least 3 numeric variables (e.g., biomarker levels,

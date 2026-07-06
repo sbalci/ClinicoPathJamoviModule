@@ -420,19 +420,6 @@ frailtysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' Includes gamma frailty, shared frailty, and correlated frailty models
 #' for multi-center studies, family studies, and recurrent events.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Multi-center survival with shared frailty
-#' frailtysurvival(
-#'     data = multicenter_data,
-#'     time_var = followup_time,
-#'     status_var = death_event,
-#'     cluster_var = center_id,
-#'     covariates = c("age", "stage", "treatment"),
-#'     frailty_type = "shared"
-#' )
-#'}
 #' @param time_var Survival time variable
 #' @param status_var Event status indicator variable
 #' @param cluster_var Variable defining clusters for frailty modeling

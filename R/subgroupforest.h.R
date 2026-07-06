@@ -339,31 +339,6 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' outcomes with comprehensive statistical validation and heterogeneity 
 #' testing.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Survival outcome subgroup analysis
-#' subgroupforest(
-#'     data = clinical_trial,
-#'     outcome = "time_to_event",
-#'     treatment = "treatment_arm",
-#'     subgroups = c("age_group", "gender", "stage"),
-#'     time = "time_to_event",
-#'     event = "event_occurred",
-#'     outcomeType = "survival",
-#'     effectMeasure = "hr"
-#' )
-#'
-#' # Binary outcome analysis
-#' subgroupforest(
-#'     data = study_data,
-#'     outcome = "response",
-#'     treatment = "intervention",
-#'     subgroups = c("age_category", "sex"),
-#'     outcomeType = "binary",
-#'     effectMeasure = "or"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Primary outcome variable. For survival analysis, this should
 #'   be the time variable. For binary outcomes, use 0/1 or factor with 2 levels.

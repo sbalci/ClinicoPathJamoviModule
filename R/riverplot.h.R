@@ -710,48 +710,6 @@ riverplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' journeys, treatment progressions, categorical changes over time, and flow 
 #' analysis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic temporal flow - Track treatment response changes over time
-#' riverplot(
-#'   data = patient_data,
-#'   time = "follow_up_month",
-#'   strata = "treatment_response",
-#'   plotType = "alluvial",
-#'   labelNodes = TRUE
-#' )
-#'
-#' # Individual patient tracking with ID
-#' riverplot(
-#'   data = longitudinal_data,
-#'   id = "patient_id",
-#'   time = "visit_date",
-#'   strata = "disease_stage",
-#'   plotType = "flow",
-#'   fillType = "last",
-#'   showCounts = TRUE
-#' )
-#'
-#' # Multi-stage pathway (wide format data)
-#' riverplot(
-#'   data = pathway_data,
-#'   strata = c("baseline_status", "month3_status", "month6_status"),
-#'   plotType = "sankey",
-#'   fillType = "frequency",
-#'   curveType = "cardinal"
-#' )
-#'
-#' # Weighted stream chart - Account for patient counts or values
-#' riverplot(
-#'   data = aggregate_data,
-#'   time = "quarter",
-#'   strata = "outcome_category",
-#'   weight = "patient_count",
-#'   plotType = "stream",
-#'   showLegend = TRUE
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param id Optional identifier for tracking individual entities (patients,
 #'   cases, customers) through transitions. Required for individual-level flow

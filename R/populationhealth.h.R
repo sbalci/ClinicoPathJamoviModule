@@ -953,20 +953,6 @@ populationhealthBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' healthcare 
 #' system optimization through evidence-based population health insights.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('population_health', package='ClinicoPath')
-#'
-#' # Basic population health analytics
-#' populationhealth(population_health,
-#'                patientID = 'PatientID',
-#'                healthOutcomes = c('BMI', 'BloodPressure', 'Cholesterol'),
-#'                demographics = c('Age', 'Gender', 'Ethnicity'),
-#'                geographic = 'ZipCode',
-#'                risk_stratification = TRUE,
-#'                predictive_modeling = TRUE)
-#'}
 #' @param data .
 #' @param patientID Unique patient identifier for population tracking and
 #'   analysis

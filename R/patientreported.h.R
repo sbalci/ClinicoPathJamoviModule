@@ -1267,20 +1267,6 @@ patientreportedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' longitudinal analysis.
 #' Essential for patient-centered outcomes research and clinical trials.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('pro_data')
-#'
-#' patientreported(
-#'     data = pro_data,
-#'     scale_items = c("item1", "item2", "item3"),
-#'     patient_id = "patient_id",
-#'     time_var = "visit_number",
-#'     reliability_analysis = TRUE,
-#'     validity_analysis = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param scale_items Items/questions that comprise the PRO scale or
 #'   questionnaire

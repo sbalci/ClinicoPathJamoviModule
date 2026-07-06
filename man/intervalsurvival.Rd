@@ -104,15 +104,3 @@ Interval-censored survival analysis for data where the exact event time
 is unknown but falls within an interval. Common in periodic follow-up
 studies, screening programs, and clinical trials with scheduled visits.
 }
-\examples{
-\donttest{
-# Example: Tumor progression between visits
-intervalsurvival(
-    data = oncology_data,
-    left_time = last_negative_visit,
-    right_time = first_positive_visit,
-    covariates = c("age", "stage", "treatment"),
-    model_type = "aft_weibull"
-)
-}
-}

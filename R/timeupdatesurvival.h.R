@@ -590,18 +590,6 @@ timeupdatesurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' and  dynamic hazard functions. Incorporates real-time patient information 
 #' updates  for precision medicine and personalized survival prediction.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' timeupdatesurvival(
-#'     time = "time_variable",
-#'     status = "status_variable",
-#'     covariates = c("age", "treatment"),
-#'     update_times = c(0.5, 1, 2),
-#'     method = "aalen_additive"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param time Time-to-event or follow-up time variable (numeric)
 #' @param status Event indicator variable (1/TRUE = event occurred, 0/FALSE =

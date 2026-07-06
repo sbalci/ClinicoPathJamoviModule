@@ -383,17 +383,6 @@ referenceintervalsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' for demographic factors. Essential for laboratory standardization and 
 #' clinical interpretation of test results.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' referenceintervals(
-#'     measurement = "laboratory_value",
-#'     age = "patient_age",
-#'     gender = "patient_gender",
-#'     method = "robust_nonparametric"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param measurement Laboratory test measurement values from reference
 #'   population

@@ -618,24 +618,6 @@ transformationmodelsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' linear transformation models, Box-Cox transformations, and non-parametric 
 #' transformations, enabling flexible modeling of survival data with automatic 
 #' transformation selection and validation.
-#'
-#' @examples
-#' \donttest{
-#' # Example: Transformation model with Box-Cox transformation
-#' library(survival)
-#' library(tram)
-#'
-#' transformationmodels(
-#'     data = survival_data,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     covariates = c("age", "treatment", "biomarker"),
-#'     transformation = "boxcox",
-#'     distribution = "normal",
-#'     method = "ml"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

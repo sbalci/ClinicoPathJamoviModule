@@ -129,8 +129,3 @@ inferred from observed covariates or measurements.  Provides estimation of
 transition intensities, state prevalences,  and predictions with
 uncertainty quantification.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

@@ -1416,7 +1416,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   the Cox model.
 #' @param interactions Interaction (crossed) terms added to the Cox model,
 #'   built from variables already selected as explanatory or continuous
-#'   explanatory variables. Each term tests effect modification — e.g. Treatment
+#'   explanatory variables. Each term tests effect modification - e.g. Treatment
 #'   x Biomarker for predictive-biomarker analysis. For a 2-way term the first
 #'   variable is the focal effect and the second is the moderator.
 #' @param multievent If true, multiple event levels will be considered for

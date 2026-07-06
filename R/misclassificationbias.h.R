@@ -438,14 +438,6 @@ misclassificationbiasBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' Essential for studies relying on subjective classification methods
 #' (e.g., Ki-67 visual estimation, morphologic grading, IHC scoring).
 #' 
-#'
-#' @examples
-#' \donttest{
-#' misclassificationbias(data = data, outcome = "survival_status",
-#'     exposure = "tumor_grade", outcomeLevel = "dead",
-#'     exposureLevel = "high_grade",
-#'     senExposure = 0.85, specExposure = 0.90)
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (e.g., recurrence, death, disease
 #'   status).

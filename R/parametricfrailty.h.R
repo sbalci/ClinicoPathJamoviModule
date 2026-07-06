@@ -542,19 +542,6 @@ parametricfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' components to model unobserved heterogeneity between clusters or 
 #' individuals.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('lung', package='survival')
-#'
-#' parametricfrailty(data = lung,
-#'                  elapsedtime = 'time',
-#'                  outcome = 'status',
-#'                  covariates = c('age', 'sex'),
-#'                  frailty_variable = 'inst',
-#'                  baseline_distribution = 'weibull',
-#'                  frailty_distribution = 'gamma')
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable. Should
 #'   contain positive  numeric values representing the time to event or

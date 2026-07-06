@@ -112,36 +112,3 @@ Includes Spearman, Kendall, Percentage Bend, Biweight Midcorrelation,
 Minimum Volume Ellipsoid (MVE), and Minimum Covariance Determinant (MCD)
 correlation methods.
 }
-\examples{
-\donttest{
-# Load test data
-data("mtcars")
-
-# Basic robust correlation analysis
-robustcorrelation(
-  data = mtcars,
-  dep = c("mpg", "hp", "wt", "qsec"),
-  method = "spearman"
-)
-
-# Advanced robust correlation with outlier detection
-robustcorrelation(
-  data = mtcars,
-  dep = c("mpg", "hp", "wt", "qsec", "disp"),
-  method = "percentage_bend",
-  outlier_detection = TRUE,
-  outlier_method = "mcd",
-  bootstrap_ci = TRUE,
-  n_bootstrap = 1000
-)
-
-# Multiple robust methods comparison
-robustcorrelation(
-  data = mtcars,
-  dep = c("mpg", "hp", "wt"),
-  method = "biweight",
-  show_heatmap = TRUE,
-  matrix_type = "lower"
-)
-}
-}

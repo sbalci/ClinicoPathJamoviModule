@@ -152,16 +152,3 @@ for
 regulatory-compliant clinical research where missing data handling must be
 thoroughly documented and validated.
 }
-\examples{
-\donttest{
-data('clinical_trial_data')
-
-advancedimputation(
-    data = clinical_trial_data,
-    imputation_vars = c("primary_endpoint", "biomarker", "age"),
-    auxiliary_vars = c("baseline_score", "treatment_group"),
-    sensitivity_analysis = TRUE,
-    mnar_methods = TRUE
-)
-}
-}

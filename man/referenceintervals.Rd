@@ -53,8 +53,7 @@ population}
 \item{reference_percentiles}{Lower and upper percentiles for reference
 interval}
 
-\item{minimum_sample_size}{Minimum required sample size (CLSI recommends
->=120)}
+\item{minimum_sample_size}{Minimum required sample size (CLSI recommends=120)}
 
 \item{outlier_detection}{Method for identifying and handling outliers}
 
@@ -112,15 +111,4 @@ following CLSI EP28-A3c guidelines. Supports parametric and non-parametric
 approaches, robust methods for outlier handling, and partitioning analysis
 for demographic factors. Essential for laboratory standardization and
 clinical interpretation of test results.
-}
-\examples{
-\donttest{
-data |>
-referenceintervals(
-    measurement = "laboratory_value",
-    age = "patient_age",
-    gender = "patient_gender",
-    method = "robust_nonparametric"
-)
-}
 }

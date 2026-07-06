@@ -533,18 +533,6 @@ differentialdiagnosisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' evidence-based 
 #' clinical decision support and diagnostic accuracy optimization.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology', package='ClinicoPath')
-#'
-#' # Basic differential diagnosis analysis
-#' differentialdiagnosis(histopathology,
-#'                     clinicalFindings = c('Symptom1', 'Symptom2'),
-#'                     confirmedDiagnosis = 'Diagnosis',
-#'                     diagnostic_probability = TRUE,
-#'                     likelihood_ratios = TRUE)
-#'}
 #' @param data .
 #' @param clinicalFindings Clinical findings, symptoms, signs, and test
 #'   results for diagnostic reasoning

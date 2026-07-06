@@ -623,17 +623,6 @@ groupedbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' treatment responses across hospitals, survey responses across demographics,
 #' or any metric that varies by categorical groupings.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Compare lab values across disease groups
-#' groupedbar(
-#'     data = clinicalData,
-#'     items = c("glucose", "cholesterol", "creatinine"),
-#'     groups = "disease_group",
-#'     values = "measurement"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param items The measurements, variables, or items to compare across
 #'   groups. Can be categorical (for frequencies) or continuous (for summary

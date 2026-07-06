@@ -268,16 +268,6 @@ autoedaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' automated reporting.
 #' Based on autoEDA research from R Journal 2019 (Staniak & Biecek).
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Load your data frame.
-#' # 2. Select variables for analysis.
-#' # 3. Choose analysis type (overview, missing, correlation, etc.)
-#' # 4. Configure output options.
-#' # 5. Run autoeda module for comprehensive automated analysis.
-#'}
 #' @param data The data as a data frame.
 #' @param vars Variables to include in the automated exploratory data
 #'   analysis. All variable types are supported.

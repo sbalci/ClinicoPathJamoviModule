@@ -552,41 +552,6 @@ waterfallrecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' response confirmation requirements. REGULATORY-READY: Suitable for clinical 
 #' trial endpoints and regulatory submissions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Lesion-level data for RECIST v1.1
-#' data_recist <- data.frame(
-#'     PatientID = rep(paste0("PT", 1:3), each = 6),
-#'     VisitTime = rep(c(0, 4, 8, 12, 16, 20), 3),
-#'     LesionID = paste0("L", rep(1:2, each = 3, times = 3)),
-#'     LesionType = rep(c("Target", "Target"), each = 3, times = 3),
-#'     Location = rep(c("Liver", "Lung"), each = 3, times = 3),
-#'     Diameter = c(
-#'         # Patient 1
-#'         35, 28, 20,  # Lesion 1
-#'         42, 38, 30,  # Lesion 2
-#'         # Patient 2
-#'         50, 45, 48,  # Lesion 1
-#'         30, 28, 32,  # Lesion 2
-#'         # Patient 3
-#'         45, 30, 25,  # Lesion 1
-#'         38, 25, 20   # Lesion 2
-#'     ),
-#'     IsNewLesion = rep(0, 18)
-#' )
-#'
-#' waterfallrecist(
-#'     data = data_recist,
-#'     patientID = "PatientID",
-#'     lesionID = "LesionID",
-#'     visitTime = "VisitTime",
-#'     lesionType = "LesionType",
-#'     location = "Location",
-#'     diameter = "Diameter",
-#'     isNewLesion = "IsNewLesion"
-#' )
-#'}
 #' @param data The data as a data frame with LESION-LEVEL observations (one
 #'   row per lesion per timepoint).
 #' @param patientID Variable containing patient identifiers. Each patient can

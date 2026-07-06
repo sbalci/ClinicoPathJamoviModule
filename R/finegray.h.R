@@ -578,11 +578,6 @@ finegrayBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Models the cumulative incidence function (CIF) while accounting for 
 #' competing events. Provides sub-hazard ratios (sHR) for covariate effects.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param survivalTime Time to event or censoring. Must be numeric and
 #'   positive.

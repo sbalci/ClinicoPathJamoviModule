@@ -200,17 +200,3 @@ in survival outcomes. Incorporates spatial correlation structures,
 disease mapping capabilities, and hierarchical Bayesian modeling for
 clinical research with geographic components.
 }
-\examples{
-\donttest{
-# Spatial Bayesian survival analysis
-spatialbayesiansurvival(
-    data = clinical_data,
-    time = "survival_months",
-    status = "death_indicator",
-    predictors = c("age", "stage", "treatment"),
-    spatial_coords = c("latitude", "longitude"),
-    spatial_model = "car",
-    mcmc_samples = 5000
-)
-}
-}

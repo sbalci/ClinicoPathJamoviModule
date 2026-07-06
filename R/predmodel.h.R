@@ -335,19 +335,6 @@ predmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' stepwise/LASSO selection, ROC analysis, calibration plots, and bootstrap 
 #' validation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # data <- your_data
-#' # ClinicoPath::predmodel(
-#' #   data = data,
-#' #   outcome = "disease",
-#' #   predictors = vars(age, biomarker, stage),
-#' #   validation = "bootstrap",
-#' #   calibration = TRUE
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (disease/event vs. no disease/no
 #'   event).

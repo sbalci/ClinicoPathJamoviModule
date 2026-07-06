@@ -14,7 +14,7 @@ A data frame with 400 patients and 13 variables:
 \item{hdl}{Numeric. HDL cholesterol level (mg/dL)}
 \item{ldl}{Numeric. LDL cholesterol level (mg/dL)}
 \item{triglycerides}{Numeric. Triglyceride level (mg/dL)}
-\item{bmi}{Numeric. Body mass index (kg/m²)}
+\item{bmi}{Numeric. Body mass index (kg/m^2)}
 \item{age}{Integer. Patient age (years)}
 \item{smoking}{Factor. Smoking status ("Never", "Former", "Current")}
 \item{diabetes}{Factor. Diabetes status ("No", "Yes")}

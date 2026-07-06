@@ -189,12 +189,3 @@ complex distribution visualization in clinical research. Uses the ggrain
 package
 for enhanced customization and connectivity features.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select continuous variable for distribution analysis.
-# 2. Choose grouping variable for comparisons.
-# 3. Optionally add longitudinal ID variable for connections.
-# 4. Configure advanced raincloud features and positioning.
-}
-}

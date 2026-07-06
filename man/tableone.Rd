@@ -57,15 +57,3 @@ This function generates a "Table One", a descriptive summary table
 frequently used in  clinicopathological research manuscripts. It supports
 multiple output styles for flexible formatting.
 }
-\examples{
-\donttest{
-# Example usage:
-# data('histopathology')
-# dat <- as.data.frame(histopathology)
-# ClinicoPathDescriptives::tableone(
-#   data = dat,
-#   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-#   sty = "t3",
-#   excl = TRUE)
-}
-}

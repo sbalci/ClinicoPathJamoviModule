@@ -460,18 +460,6 @@ jiwillsurviveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Intuitive survival analysis using the iwillsurvive package with 
 #' user-friendly interface, automatic data preparation, and comprehensive 
 #' visualization options.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' library(iwillsurvive)
-#' # Derive follow-up columns
-#' data <- derive_followup_days(data, start_date, end_date)
-#' # Fit survival model
-#' model <- iwillsurvive(time, event, data = data)
-#' # Plot results
-#' plot(model)
-#'}
 #' @param data The data as a data frame.
 #' @param analysis_type Type of survival analysis to perform.
 #' @param time_var Time-to-event or follow-up time variable.

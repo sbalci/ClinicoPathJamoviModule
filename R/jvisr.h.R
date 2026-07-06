@@ -300,16 +300,6 @@ jvisrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Clinical and medical research focused visualizations using the visR package 
 #' with sensible defaults based on graphical principles.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' library(visR)
-#' # Kaplan-Meier estimation
-#' survfit_object <- estimate_KM(data = data, strata = "treatment")
-#' # Clinical visualization
-#' visr(survfit_object)
-#'}
 #' @param data The data as a data frame.
 #' @param analysis_type Type of clinical visualization to generate.
 #' @param time_var Time-to-event variable for survival analysis.

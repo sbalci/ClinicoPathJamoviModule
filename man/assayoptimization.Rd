@@ -104,15 +104,3 @@ Includes power calculations, sample size determination, design
 optimization,
 and quality control for laboratory assays.
 }
-\examples{
-\donttest{
-# Example: Optimize PCR assay design
-assayoptimization(
-    data = pcr_data,
-    response_var = concentration,
-    factors = c("primer_conc", "temperature", "cycles"),
-    optimization_goal = "maximize_efficiency",
-    design_type = "factorial"
-)
-}
-}

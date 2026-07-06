@@ -100,36 +100,3 @@ This analysis is particularly useful for:
 • Evaluating cost-effectiveness of different testing strategies
 • Teaching sequential testing concepts and Bayesian probability
 }
-\examples{
-\donttest{
-# COVID-19 testing: Rapid antigen followed by RT-PCR confirmation
-# Shows how serial positive strategy improves specificity
-data(sequential_testing_examples)
-covid_example <- sequential_testing_examples[
-  sequential_testing_examples$scenario == "COVID-19 Testing" &
-  sequential_testing_examples$clinical_setting == "Community screening", ]
-
-# Cancer screening: Mammography followed by tissue biopsy
-# Demonstrates cost-effective screening with definitive diagnosis
-breast_cancer <- sequential_testing_examples[
-  sequential_testing_examples$scenario == "Breast Cancer Screening", ]
-
-# Emergency medicine: Parallel testing for rapid diagnosis
-# Shows how parallel strategy maximizes sensitivity
-emergency_example <- sequential_testing_examples[
-  sequential_testing_examples$scenario == "Myocardial Infarction Rule-out", ]
-
-# Strategy comparison across different prevalence settings
-data(strategy_comparison)
-
-# Cost-effectiveness analysis for resource planning
-data(cost_effectiveness_examples)
-
-# Load example datasets for realistic clinical scenarios
-data(sequential_testing_examples)  # 15+ clinical scenarios across specialties
-data(strategy_comparison)          # Strategy performance comparisons
-data(cost_effectiveness_examples)  # Economic analysis examples
-data(teaching_examples)            # Educational scenarios
-data(common_test_combinations)     # Reference test characteristics
-}
-}

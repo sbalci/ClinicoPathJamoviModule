@@ -71,13 +71,3 @@ include ER/PR combinations, dual IHC (e.g., p16/Ki67), imaging radiomics
 plus molecular markers, and any scenario with two continuous diagnostic
 measurements.
 }
-\examples{
-\donttest{
-result <- roc2d(
-    data = dual_marker_data,
-    marker1 = "biomarker_A",
-    marker2 = "biomarker_B",
-    outcome = "disease_status"
-)
-}
-}

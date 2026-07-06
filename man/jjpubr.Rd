@@ -150,35 +150,3 @@ Each plot type supports:
 \item Grouping and faceting options
 }
 }
-\examples{
-\donttest{
-# Box plot with statistical comparison
-jjpubr(
-    data = mtcars,
-    plotType = "boxplot",
-    xvar = "cyl",
-    yvar = "mpg",
-    addStats = TRUE,
-    palette = "jco"
-)
-
-# Scatter plot with correlation
-jjpubr(
-    data = mtcars,
-    plotType = "scatter",
-    xvar = "wt",
-    yvar = "mpg",
-    addCorr = TRUE,
-    addMarginal = TRUE
-)
-
-# Histogram with density overlay
-jjpubr(
-    data = mtcars,
-    plotType = "histogram",
-    xvar = "mpg",
-    addDensity = TRUE,
-    fillColor = "#0073C2FF"
-)
-}
-}

@@ -118,13 +118,3 @@ functionality including
 competing risks, RMST analysis, and additional methods, also consider
 'Comprehensive Survival Power Analysis'.
 }
-\examples{
-\donttest{
-# Example usage:
-library(gsDesign)
-# Sample size for survival study
-nSurvival(lambda1 = 0.2, lambda2 = 0.1, Ts = 24, Tr = 12)
-# Number of events required
-nEvents(hr = 0.6, alpha = 0.025, beta = 0.1)
-}
-}

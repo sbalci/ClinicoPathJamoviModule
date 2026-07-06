@@ -82,13 +82,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Advanced clustering analysis with marker optimization and validation.
 Includes optimal K selection, PCA analysis, and iterative marker selection.
 }
-\examples{
-\donttest{
-data |>
-ihcadvanced(
-    markers = c("ER", "PR", "HER2", "Ki67"),
-    optimalKMethod = "silhouette",
-    iterativeClustering = TRUE
-)
-}
-}

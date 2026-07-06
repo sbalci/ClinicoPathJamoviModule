@@ -864,33 +864,6 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Features enhanced data validation  and complete ggswim integration for 
 #' professional clinical visualization.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Clinical trial swimmer plot example
-#' data <- data.frame(
-#'     PatientID = paste0("PT", formatC(1:20, width = 3, flag = "0")),
-#'     StartTime = rep(0, 20),
-#'     EndTime = sample(6:24, 20, replace = TRUE),
-#'     Response = sample(c("CR", "PR", "SD", "PD"), 20, replace = TRUE),
-#'     Surgery = sample(c(1, 2, 3, NA), 20, replace = TRUE),
-#'     Progression = sample(c(8, 12, 16, NA), 20, replace = TRUE)
-#' )
-#'
-#' swimmerplot(
-#'     data = data,
-#'     patientID = "PatientID",
-#'     startTime = "StartTime",
-#'     endTime = "EndTime",
-#'     responseVar = "Response",
-#'     milestone1Name = "Surgery",
-#'     milestone1Date = "Surgery",
-#'     milestone2Name = "Progression",
-#'     milestone2Date = "Progression",
-#'     showEventMarkers = TRUE,
-#'     showInterpretation = TRUE
-#' )
-#'}
 #' @param data The data as a data frame containing patient timeline
 #'   information.
 #' @param patientID Variable containing unique patient identifiers.

@@ -11,9 +11,9 @@ Creates oncoplots (mutation landscapes) to visualize genomic alterations across 
 }
 \examples{
 data <- data.frame(
-  SampleID = paste0("S", 1:10),
-  TP53 = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1),
-  KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0)
+    SampleID = paste0("S", 1:10),
+    TP53 = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1),
+    KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0)
 )
 jjoncoplot(data, "SampleID", c("TP53", "KRAS"))
 }

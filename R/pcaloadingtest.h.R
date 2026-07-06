@@ -350,30 +350,6 @@ pcaloadingtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Procrustes rotation is applied to handle sign reflection and component
 #' indeterminacy issues.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with pcaloadingtest_data (simulated dataset with known structure)
-#' data("pcaloadingtest_data")
-#'
-#' # Test loading significance for first 3 components
-#' # Expected: var1-3 load on PC1, var4-5 on PC2, var6-7 on PC3
-#' pcaloadingtest(
-#'   data = pcaloadingtest_data,
-#'   vars = c("var1", "var2", "var3", "var4", "var5", "var6", "var7", "noise"),
-#'   ncomp = 3,
-#'   nperm = 1000,
-#'   center = TRUE,
-#'   scale = TRUE,
-#'   conflevel = 0.95,
-#'   adjustmethod = "BH"
-#' )
-#'}
-#' @section References:
-#' Linting M, van Os BJ, Meulman JJ. (2011). Statistical Significance of the Contribution of Variables to the PCA solution: An Alternative Permutation Strategy. Psychometrika, 76(3):440-460.
-#'
-#' Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812.
-#'
 #' @param data The data as a data frame.
 #' @param vars Continuous variables to include in Principal Component
 #'   Analysis. Select at least 3 numeric variables.

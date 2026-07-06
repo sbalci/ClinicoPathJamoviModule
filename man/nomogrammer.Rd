@@ -39,7 +39,7 @@ posterior probabilities) onto the plot.}
 through LR = 1 to illustrate an uninformative test.}
 
 \item{LabelSize}{Numeric. Controls the size of text labels on the plot.
-Default is 14/5 ≈ 2.8.}
+Default is 14/5 ~= 2.8.}
 
 \item{Verbose}{Logical. If TRUE, prints diagnostic metrics to the console.}
 }
@@ -62,7 +62,7 @@ input via sensitivity/specificity or directly via likelihood ratios.
 \details{
 The Fagan nomogram visually represents Bayes' theorem for diagnostic testing:
 
-\deqn{Post-test odds = Pre-test odds × Likelihood ratio}
+\deqn{Post-test odds = Pre-test odds x Likelihood ratio}
 
 The function accepts either:
 \itemize{
@@ -77,9 +77,9 @@ Mathematical relationships:
 \item PLR = Sensitivity / (1 - Specificity)
 \item NLR = (1 - Sensitivity) / Specificity
 \item When calculating from LRs: Specificity = (PLR - 1) / (PLR - NLR)
-\item When calculating from LRs: Sensitivity = PLR × (1 - Specificity)
-\item Post-test probability (+) = (Prevalence × PLR) / ((Prevalence × PLR) + (1 - Prevalence))
-\item Post-test probability (-) = (Prevalence × NLR) / ((Prevalence × NLR) + (1 - Prevalence))
+\item When calculating from LRs: Sensitivity = PLR x (1 - Specificity)
+\item Post-test probability (+) = (Prevalence x PLR) / ((Prevalence x PLR) + (1 - Prevalence))
+\item Post-test probability (-) = (Prevalence x NLR) / ((Prevalence x NLR) + (1 - Prevalence))
 }
 }
 \note{

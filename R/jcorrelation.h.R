@@ -265,22 +265,6 @@ jcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' language  reporting. Suitable for exploring relationships between 
 #' continuous variables.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic correlation analysis
-#' jcorrelation(
-#'     data = histopathology,
-#'     vars = c("Age", "OverallTime", "MeasurementA", "MeasurementB")
-#' )
-#'
-#' # With grouping variable
-#' jcorrelation(
-#'     data = histopathology,
-#'     vars = c("Age", "OverallTime", "MeasurementA"),
-#'     group = "Sex"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param vars A vector of strings naming the variables to correlate.
 #' @param group Variable to split the analysis by.

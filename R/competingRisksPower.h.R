@@ -542,11 +542,6 @@ competingRisksPowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' unified analysis across all survival
 #' study types, also consider 'Comprehensive Survival Power Analysis'.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame (optional for power calculations).
 #' @param analysisType Type of power analysis to perform
 #' @param alpha Type I error rate for statistical testing

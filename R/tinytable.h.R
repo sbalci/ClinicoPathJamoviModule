@@ -251,15 +251,6 @@ tinytableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' flexible formatting, and clean aesthetics. Perfect for enhancing data
 #' presentation in clinical research publications and reports.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Select variables for table display.
-#' # 2. Choose grouping variables for organized presentation.
-#' # 3. Customize styling, themes, and formatting options.
-#' # 4. Generate publication-ready tables in multiple formats.
-#'}
 #' @param data The data as a data frame.
 #' @param vars Variables to include in the table display.
 #' @param group_var Optional variable for grouping rows or creating summary

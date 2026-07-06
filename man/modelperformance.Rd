@@ -117,17 +117,3 @@ models. Provides unified comparison tables with AIC, BIC, R², C-index, and
 other metrics. Inspired by Orange Data Mining's Test & Score widget,
 adapted for clinical research with comprehensive model diagnostics.
 }
-\examples{
-\donttest{
-# Example: Compare Cox models
-modelperformance(
-    data = cancer_data,
-    modelType = "cox",
-    outcome = "death",
-    timeVar = "months",
-    model1vars = c("age", "stage"),
-    model2vars = c("age", "stage", "grade"),
-    model3vars = c("age", "stage", "grade", "ki67")
-)
-}
-}

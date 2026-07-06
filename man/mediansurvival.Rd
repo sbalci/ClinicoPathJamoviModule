@@ -80,8 +80,3 @@ Performs statistical comparisons of median survival times between groups.
 Provides confidence intervals, hypothesis tests, and robust estimators for
 median survival with handling of censored data and group comparisons.
 }
-\examples{
-\donttest{
-# Example usage will be added
-}
-}

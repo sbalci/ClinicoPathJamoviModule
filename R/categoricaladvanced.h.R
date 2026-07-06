@@ -350,15 +350,6 @@ categoricaladvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' effect sizes, and association measures. Addresses the critical issue where 
 #' 25 percent of pathology studies use categorical analysis incorrectly.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology')
-#'
-#' categoricaladvanced(data = histopathology,
-#'                    rows = tumor_type,
-#'                    cols = grade)
-#'}
 #' @param data the data as a data frame
 #' @param rows Row variable for the contingency table
 #' @param cols Column variable for the contingency table

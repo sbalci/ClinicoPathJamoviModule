@@ -150,9 +150,3 @@ binary
 classification problems. Ideal for diagnostic pathology studies that build
 classifiers (e.g., tumor type A vs B) with automatic feature selection.
 }
-\examples{
-\donttest{
-lassologistic(data = data, outcome = "diagnosis",
-    outcomeLevel = "PanNEC", explanatory = vars(p53, Rb1, Ki67, SSTR2A))
-}
-}

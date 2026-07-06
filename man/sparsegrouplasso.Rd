@@ -187,16 +187,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Sparse Group LASSO regularization for survival analysis
 }
-\examples{
-\donttest{
-data('histopathology', package='ClinicoPath')
-
-sparsegrouplasso(data = histopathology,
-               time_var = 'OverallSurvival',
-               event_var = 'Death',
-               pred_vars = c('Age', 'Grade', 'LVI', 'PNI'),
-               group_definition = 'factor_based',
-               alpha_sgl = 0.95,
-               lambda_sequence = 'auto')
-}
-}

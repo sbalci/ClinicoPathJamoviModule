@@ -439,24 +439,6 @@ entropyanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' selection, test ordering optimization, multi-class uncertainty 
 #' quantification.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example with AI prediction probabilities
-#' data <- data.frame(
-#'   true_class = factor(sample(c("A", "B", "C"), 100, replace=TRUE)),
-#'   prob_A = runif(100),
-#'   prob_B = runif(100),
-#'   prob_C = runif(100)
-#' )
-#'
-#' entropyanalysis(
-#'   data = data,
-#'   outcome = 'true_class',
-#'   probability_vars = c('prob_A', 'prob_B', 'prob_C'),
-#'   uncertainty_threshold = 0.5
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param outcome a string naming the true outcome/class variable
 #' @param probability_vars vector of predicted probability variables (one per

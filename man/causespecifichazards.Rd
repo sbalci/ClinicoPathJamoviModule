@@ -106,15 +106,3 @@ treating other causes as censoring events. Provides comprehensive analysis
 including hazard ratios, cumulative incidence functions, and model
 comparisons across different causes of failure.
 }
-\examples{
-\donttest{
-data('mgus2', package='survival')
-
-causespecifichazards(data = mgus2,
-                    elapsedtime = 'futime',
-                    outcome = 'death',
-                    covariates = c('age', 'sex'),
-                    cause_variable = 'death',
-                    reference_cause = '1')
-}
-}

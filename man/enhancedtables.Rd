@@ -114,12 +114,3 @@ Designed for high-quality table presentation in medical publications,
 reports, and presentations. Features include conditional formatting,
 custom themes, statistical summaries, and multi-level grouping.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select variables for analysis
-# 2. Choose grouping and summary options
-# 3. Apply clinical formatting themes
-# 4. Generate publication-ready tables
-}
-}

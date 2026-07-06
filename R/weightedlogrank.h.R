@@ -298,11 +298,6 @@ weightedlogrankBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' differences at specific time points using various weighting schemes. 
 #' Includes Gehan-Wilcoxon, Tarone-Ware, Peto-Peto, and custom weight function 
 #' approaches for comprehensive survival comparison.
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis
 #' @param outcome Event indicator variable

@@ -197,18 +197,6 @@ tableoneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' frequently used in  clinicopathological research manuscripts. It supports 
 #' multiple output styles for flexible formatting.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # data('histopathology')
-#' # dat <- as.data.frame(histopathology)
-#' # ClinicoPathDescriptives::tableone(
-#' #   data = dat,
-#' #   vars = vars(Sex, PreinvasiveComponent, LVI, PNI, Grade, Age),
-#' #   sty = "t3",
-#' #   excl = TRUE)
-#'}
 #' @param data The input data as a data frame.
 #' @param vars A set of variable names from \code{data} to include in the
 #'   Table One. Supports numeric, ordinal, and categorical variables.

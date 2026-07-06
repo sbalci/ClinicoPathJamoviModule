@@ -565,17 +565,6 @@ pagetrendtestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Friedman test when the alternative hypothesis specifies a trend or ordered 
 #' pattern.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' pagetrendtest(
-#'     dependent = "measurement_value",
-#'     subject = "patient_id",
-#'     within = "time_point",
-#'     trend_direction = "increasing"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param dependent Continuous or ordinal dependent variable measured
 #'   repeatedly

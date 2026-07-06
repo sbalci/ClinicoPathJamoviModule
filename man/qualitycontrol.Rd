@@ -78,7 +78,7 @@ limits method)}
 
 \item{cusum_h_value}{CUSUM decision interval h (typically 4-5 * sigma)}
 
-\item{ewma_lambda}{EWMA smoothing parameter lambda (0 < λ <= 1)}
+\item{ewma_lambda}{EWMA smoothing parameter lambda (0 < lambda <= 1)}
 
 \item{sigma_calculation}{Method for calculating laboratory sigma metrics}
 
@@ -160,14 +160,4 @@ Comprehensive laboratory quality control statistics including control
 charts (Shewhart, CUSUM, EWMA),  sigma metrics, method validation
 protocols, and reference interval establishment for clinical laboratory
 management.
-}
-\examples{
-\donttest{
-data |>
-qualitycontrol(
-    measurement_var = "measurement",
-    analysis_type = "control_charts",
-    control_chart_type = "all_charts"
-)
-}
 }

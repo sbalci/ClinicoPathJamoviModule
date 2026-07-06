@@ -496,21 +496,6 @@ phevalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' proportional hazards models through statistical tests, graphical 
 #' diagnostics, and time-dependent coefficient analysis for robust model 
 #' assessment and assumption verification.
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic proportional hazards testing
-#' library(survival)
-#'
-#' pheval(
-#'     data = lung_data,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "2",
-#'     covariates = c("age", "sex", "ph.ecog"),
-#'     test_methods = c("schoenfeld", "scaled_schoenfeld")
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

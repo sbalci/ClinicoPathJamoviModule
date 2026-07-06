@@ -140,17 +140,3 @@ non-inferiority
 trials, superiority trials, and observational studies with proper power
 calculations.
 }
-\examples{
-\donttest{
-data('your_data')
-
-clinicaltrialdesign(
-    trial_type = "superiority",
-    outcome_type = "continuous",
-    test_type = "two_sample_ttest",
-    effect_size = 0.5,
-    alpha = 0.05,
-    power = 0.80
-)
-}
-}

@@ -531,18 +531,6 @@ rmstregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' tau and can be compared between groups or modeled with covariates using 
 #' regression techniques.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' rmstregression(
-#'     elapsedtime = "time_to_event",
-#'     outcome = "event_status",
-#'     explanatory = c("age", "treatment", "stage"),
-#'     tau = 60,
-#'     analysis_type = "comparison"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (1 = event, 0 = censored)

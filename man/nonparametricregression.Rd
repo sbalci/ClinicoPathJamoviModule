@@ -190,15 +190,3 @@ regression
 techniques designed for clinical research where parametric assumptions are
 violated.
 }
-\examples{
-\donttest{
-# Kernel regression with automatic bandwidth selection
-nonparametricregression(
-    data = clinical_data,
-    outcome = "biomarker_response",
-    predictors = c("age", "weight", "baseline_score"),
-    regression_type = "kernel",
-    bandwidth_method = "cross_validation"
-)
-}
-}

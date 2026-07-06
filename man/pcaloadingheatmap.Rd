@@ -95,26 +95,3 @@ above a specified cutoff threshold. These publication-ready plots help
 identify
 which variables contribute most strongly to each component.
 }
-\section{References}{
-
-Torres-Espin A, Chou A, Huie JR, et al. (2021). Reproducible analysis of disease space via principal components using the novel R package syndRomics. eLife, 10:e61812.
-}
-
-\examples{
-\donttest{
-# Example with mtcars dataset
-data("mtcars")
-
-# Create loading heatmap and barmap
-pcaloadingheatmap(
-  data = mtcars,
-  vars = c("mpg", "disp", "hp", "drat", "wt", "qsec"),
-  ncomp = 4,
-  cutoff = 0.5,
-  center = TRUE,
-  scale = TRUE,
-  textvalues = TRUE,
-  gradientcolor = TRUE
-)
-}
-}

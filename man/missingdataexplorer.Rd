@@ -142,16 +142,3 @@ for understanding missingness before imputation and for regulatory
 documentation
 of missing data handling strategies.
 }
-\examples{
-\donttest{
-data('clinical_data')
-
-missingdataexplorer(
-    data = clinical_data,
-    analysis_vars = c("primary_endpoint", "biomarker", "demographics"),
-    group_var = "treatment_arm",
-    pattern_analysis = TRUE,
-    mechanism_testing = TRUE
-)
-}
-}

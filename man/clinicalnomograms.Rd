@@ -145,15 +145,3 @@ and decision support tools. Transforms statistical models into practical
 clinical
 instruments for personalized risk assessment and treatment planning.
 }
-\examples{
-\donttest{
-# Example: Cox model nomogram
-clinicalnomograms(
-    data = clinical_data,
-    time = survival_months,
-    status = death_event,
-    covariates = c("age", "stage", "grade"),
-    nomogram_type = "survival_nomogram"
-)
-}
-}

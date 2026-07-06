@@ -548,18 +548,6 @@ causespecifichazardsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' including hazard ratios, cumulative incidence functions, and model 
 #' comparisons across different causes of failure.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('mgus2', package='survival')
-#'
-#' causespecifichazards(data = mgus2,
-#'                     elapsedtime = 'futime',
-#'                     outcome = 'death',
-#'                     covariates = c('age', 'sex'),
-#'                     cause_variable = 'death',
-#'                     reference_cause = '1')
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable. Should
 #'   contain positive  numeric values representing the time to event or

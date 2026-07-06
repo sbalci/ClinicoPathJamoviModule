@@ -160,11 +160,6 @@ kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Power Analysis for Interobserver Agreement Analysis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param outcome Number of outcome level.
 #' @param citype Type of confidence interval: 'two_sided' or 'one_sided'.
 #' @param kappa0 The null hypothesis value of kappa.

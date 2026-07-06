@@ -272,27 +272,3 @@ assumption checking, and post hoc analysis - addressing critical gaps
 identified in 30 percent
 of pathology studies that use these methods.
 }
-\examples{
-\donttest{
-# Example 1: Enhanced Mann-Whitney U test for biomarker expression
-nonparametric(
-    data = clinical_data,
-    deps = c("biomarker_level", "cell_count"),
-    groups = "treatment_group",
-    test_type = "mann_whitney",
-    effect_size = TRUE,
-    post_hoc = TRUE
-)
-
-# Example 2: Kruskal-Wallis with robust estimation
-nonparametric(
-    data = clinical_data,
-    outcome = "expression_level",
-    groups = "tumor_grade",
-    test_type = "kruskal_wallis",
-    robust_method = "trimmed",
-    post_hoc_method = "dunn",
-    clinical_context = "pathological"
-)
-}
-}

@@ -194,16 +194,3 @@ Bayesian
 meta-analysis approaches with comprehensive heterogeneity assessment and
 publication bias evaluation.
 }
-\examples{
-\donttest{
-data('meta_studies')
-
-treatmentmeta(
-    data = meta_studies,
-    study_id = study,
-    effect_measure = "SMD",
-    outcome_type = "continuous",
-    model_type = "random"
-)
-}
-}

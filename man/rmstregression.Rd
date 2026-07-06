@@ -115,15 +115,3 @@ assumptions. RMST represents the area under the survival curve up to time
 tau and can be compared between groups or modeled with covariates using
 regression techniques.
 }
-\examples{
-\donttest{
-data |>
-rmstregression(
-    elapsedtime = "time_to_event",
-    outcome = "event_status",
-    explanatory = c("age", "treatment", "stage"),
-    tau = 60,
-    analysis_type = "comparison"
-)
-}
-}

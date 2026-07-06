@@ -150,13 +150,3 @@ Essential for validating biomarkers, imaging features, and AI models in
 multi-class clinicopathological applications where binary classification is
 insufficient.
 }
-\examples{
-\donttest{
-result <- vusanalysis(
-    data = tumor_data,
-    predictor = "biomarker_score",
-    multiclass_outcome = "tumor_grade",
-    outcome_order = c("Grade 1", "Grade 2", "Grade 3")
-)
-}
-}

@@ -323,16 +323,6 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' clusters.
 #' Based on the geom_mark_hull() function from ggforce package.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Load your data frame with continuous variables for x and y axes.
-#' # 2. Select x and y variables for the scatter plot.
-#' # 3. Choose a grouping variable to define hull boundaries.
-#' # 4. Customize hull appearance and plot aesthetics.
-#' # 5. Run the hull plot to visualize group clusters.
-#'}
 #' @param data The data as a data frame.
 #' @param x_var Continuous variable for the X-axis of the scatter plot.
 #' @param y_var Continuous variable for the Y-axis of the scatter plot.

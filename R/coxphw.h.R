@@ -539,23 +539,6 @@ coxphwBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' weights to improve estimation accuracy when events are rare or covariates 
 #' are imbalanced, providing more reliable hazard ratios and confidence 
 #' intervals in challenging clinical research scenarios.
-#'
-#' @examples
-#' \donttest{
-#' # Example: Weighted Cox regression for rare events
-#' library(survival)
-#' library(coxphw)
-#'
-#' coxphw(
-#'     data = rare_event_data,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     covariates = c("age", "treatment", "biomarker"),
-#'     weight_method = "average",
-#'     alpha = 0.5
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

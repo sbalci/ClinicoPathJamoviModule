@@ -89,16 +89,3 @@ and relate it to a right-censored survival outcome via Cox regression.
 Auto-selects MLR (continuous) or WLSMV (ordinal/binary) estimation. Refuses
 inappropriate inputs with explanatory messages.
 }
-\examples{
-\donttest{
-data('histopathology', package='ClinicoPath')
-ClinicoPath::latentbiomarker(
-    data = histopathology,
-    dep_time = "OverallTime",
-    dep_event = "Outcome",
-    event_level = "1",
-    indicators = c("MeasurementA", "MeasurementB", "Measurement1"),
-    reflective_confirmed = TRUE
-)
-}
-}

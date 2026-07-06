@@ -467,11 +467,6 @@ competingsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' Overall, Cause Specific, and Competing Survival
 #'
 #' Overall, Cause Specific, and Competing Survival.
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param explanatory .
 #' @param overalltime .

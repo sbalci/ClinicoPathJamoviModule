@@ -136,14 +136,3 @@ uncertainties, combined and expanded uncertainty, and uncertainty budgets
 for clinical laboratory measurements. Essential for laboratory
 accreditation and quality assurance.
 }
-\examples{
-\donttest{
-data |>
-measurementuncertainty(
-    measurement = "glucose_result",
-    reference_value = "certified_value",
-    replicate_group = "measurement_run",
-    uncertainty_method = "gum_approach"
-)
-}
-}

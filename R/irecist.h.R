@@ -742,24 +742,6 @@ irecistBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Seymour et al. (2017) guidelines including pseudoprogression detection and 
 #' confirmation requirements.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data <- data.frame(
-#'     patient = c("P01", "P01", "P01", "P02", "P02"),
-#'     time = c(0, 8, 16, 0, 8),
-#'     target_sum = c(45, 52, 48, 50, 35),
-#'     new_lesions = c(0, 0, 0, 0, 0)
-#' )
-#'
-#' irecist(
-#'     data = data,
-#'     patientId = "patient",
-#'     assessmentTime = "time",
-#'     targetLesionSum = "target_sum",
-#'     newLesions = "new_lesions"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param patientId Patient identifier variable
 #' @param assessmentTime Time from baseline (weeks or months)

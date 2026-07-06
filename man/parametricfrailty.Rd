@@ -108,16 +108,3 @@ estimation of parametric baseline distributions combined with frailty
 components to model unobserved heterogeneity between clusters or
 individuals.
 }
-\examples{
-\donttest{
-data('lung', package='survival')
-
-parametricfrailty(data = lung,
-                 elapsedtime = 'time',
-                 outcome = 'status',
-                 covariates = c('age', 'sex'),
-                 frailty_variable = 'inst',
-                 baseline_distribution = 'weibull',
-                 frailty_distribution = 'gamma')
-}
-}

@@ -197,15 +197,3 @@ and clinical decision support. Essential for evidence-based medicine,
 clinical guidelines, and
 personalized treatment decisions with proper uncertainty communication.
 }
-\examples{
-\donttest{
-data('clinical_data')
-
-bayesianclinical(
-    data = clinical_data,
-    outcome_var = "treatment_success",
-    treatment_var = "treatment_group",
-    covariates = c("age", "severity", "comorbidity")
-)
-}
-}

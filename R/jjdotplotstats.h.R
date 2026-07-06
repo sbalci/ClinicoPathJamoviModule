@@ -354,57 +354,6 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' comparisons of continuous variables between groups with
 #' statistical annotations and significance testing.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic dot plot with iris dataset
-#' jjdotplotstats(
-#'     data = iris,
-#'     dep = "Sepal.Length",
-#'     group = "Species",
-#'     typestatistics = "parametric"
-#' )
-#'
-#' # Advanced dot plot with custom settings
-#' jjdotplotstats(
-#'     data = iris,
-#'     dep = "Petal.Width",
-#'     group = "Species",
-#'     typestatistics = "nonparametric",
-#'     centralityplotting = TRUE,
-#'     centralitytype = "nonparametric",
-#'     testvalueline = TRUE,
-#'     testvalue = 1.0,
-#'     mytitle = "Petal Width by Species",
-#'     xtitle = "Petal Width (cm)",
-#'     ytitle = "Species"
-#' )
-#'
-#' # Grouped analysis with mtcars dataset
-#' jjdotplotstats(
-#'     data = mtcars,
-#'     dep = "mpg",
-#'     group = "cyl",
-#'     grvar = "am",
-#'     typestatistics = "robust",
-#'     centralityplotting = TRUE,
-#'     centralitytype = "robust",
-#'     effsizetype = "unbiased",
-#'     conflevel = 0.99,
-#'     k = 3
-#' )
-#'
-#' # Bayesian analysis with ToothGrowth dataset
-#' jjdotplotstats(
-#'     data = ToothGrowth,
-#'     dep = "len",
-#'     group = "supp",
-#'     typestatistics = "bayes",
-#'     bfmessage = TRUE,
-#'     centralityparameter = "mean",
-#'     mytitle = "Tooth Growth by Supplement Type"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep A continuous numeric variable for which the distribution will be
 #'   displayed across different groups using dot plots.

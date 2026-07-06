@@ -8,6 +8,7 @@ vignette: >
   %\VignetteIndexEntry{Interobserver reliability beyond a single kappa}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteKeepMd{true}
 ---
 
 ```{r setup, include=FALSE}

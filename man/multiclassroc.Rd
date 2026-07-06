@@ -103,23 +103,3 @@ Common applications include tumor subtype classification, disease staging
 with
 multiple levels, and AI model validation for multi-class predictions.
 }
-\examples{
-\donttest{
-# Example with tumor subtype classification
-data <- data.frame(
-  true_class = factor(sample(c("TypeA", "TypeB", "TypeC"), 100, replace=TRUE)),
-  score_A = rnorm(100),
-  score_B = rnorm(100),
-  score_C = rnorm(100)
-)
-
-multiclassroc(
-  data = data,
-  outcome = 'true_class',
-  predictors = c('score_A', 'score_B', 'score_C'),
-  method = 'ovr',
-  calculate_macro_auc = TRUE,
-  confidence_intervals = TRUE
-)
-}
-}

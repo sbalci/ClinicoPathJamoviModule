@@ -734,18 +734,6 @@ pcacoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Reduces dimensionality while preserving survival-relevant information using 
 #' supervised PCA.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage
-#' pcacox(
-#'     data = highdim_data,
-#'     time = survival_time,
-#'     status = event_status,
-#'     predictors = high_dimensional_variables,
-#'     n_components = 5
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Survival time variable
 #' @param status Event status variable

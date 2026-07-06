@@ -604,20 +604,6 @@ grafifyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' distribution plots,
 #' before-after comparisons, and factorial designs with professional styling.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Scientific scatter plot with error bars
-#' data(clinical_data)
-#' grafify(
-#'     data = clinical_data,
-#'     vars = c("biomarker1", "biomarker2"),
-#'     groups = "treatment_group",
-#'     plot_type = "scatterbar",
-#'     error_type = "sd",
-#'     color_palette = "vibrant"
-#' )
-#'}
 #' @param data The data as a data frame containing scientific or clinical
 #'   variables for professional visualization with grafify.
 #' @param vars Continuous variables for plotting. Can be used as X, Y

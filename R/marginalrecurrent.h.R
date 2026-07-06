@@ -572,11 +572,6 @@ marginalrecurrentBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' covariate effects on  recurrent event rates, with options for marginal rate 
 #' models, accelerated rate  models, and gamma frailty models to handle 
 #' within-subject correlation.
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology', package='ClinicoPath')
-#'}
 #' @param data .
 #' @param subjectID .
 #' @param time .

@@ -749,11 +749,6 @@ markovmultistateBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' health states over time. Supports homogeneous and non-homogeneous models 
 #' with covariate effects using mstate and msm packages.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param time Follow-up time variable
 #' @param event Event/state variable indicating transitions between states

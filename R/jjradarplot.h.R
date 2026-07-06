@@ -212,11 +212,6 @@ jjradarplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' This function allows comparison of multiple variables across different 
 #' categories.'
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param vars A list of numeric variables to be used as radar axes (minimum 3
 #'   required).

@@ -138,18 +138,3 @@ strategic use of
 gridlines, and standardized chart dimensions optimized for digital
 publication.
 }
-\examples{
-\donttest{
-# Basic BBC-style visualization
-library(bbplot)
-library(ggplot2)
-
-# Create plot with BBC styling
-plot <- ggplot(data, aes(x = category, y = value)) +
-  geom_col(fill = "#1380A1") +
-  bbc_style()
-
-# Finalize with BBC branding
-finalise_plot(plot, "Source: Data source", "output.png")
-}
-}

@@ -370,19 +370,6 @@ continuousrelationshipBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' using  evidence-based approaches from BMJ best practices. Avoids common 
 #' pitfalls like  arbitrary categorization and linear assumptions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Analyzing BMI vs mortality risk
-#' continuousrelationship(
-#'     data = clinical_data,
-#'     outcome = "mortality",
-#'     predictor = "bmi",
-#'     modelType = "spline",
-#'     nKnots = 4,
-#'     showGuidance = TRUE
-#' )
-#'}
 #' @param data The dataset containing clinical variables
 #' @param outcome The outcome/dependent variable (can be continuous or binary)
 #' @param predictor The continuous predictor variable to analyze

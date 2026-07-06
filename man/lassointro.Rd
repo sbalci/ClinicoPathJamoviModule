@@ -42,9 +42,3 @@ ClinicoPath. Helps clinicians, pathologists, radiologists, and oncologists
 choose the right analysis for their data and research question. No data or
 variables required.
 }
-\examples{
-\donttest{
-# Simply open the guide - no data needed
-lassointro()
-}
-}

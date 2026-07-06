@@ -3863,11 +3863,6 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Interrater Reliability
 #'
 #' Function for Interrater Reliability.
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame. The data should be in long format,
 #'   where each row is a unique observation.
 #' @param vars A string naming the variable from \code{data} that contains the

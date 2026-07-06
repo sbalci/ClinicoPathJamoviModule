@@ -123,16 +123,6 @@ reportcatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' textual and visual formats, making it easy to interpret the distribution of 
 #' your data.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # 1. Load your data into a data frame.
-#' # 2. Select the categorical variables to summarize.
-#' # 3. Run the reportcat module to view the summary.
-#' #
-#' # The module will produce a styled textual report along with a visual summary table.
-#'}
 #' @param data The data as a data frame.
 #' @param vars Select the variables from your data frame that you wish to
 #'   summarize. Only categorical variables (nominal, ordinal, or factors) are

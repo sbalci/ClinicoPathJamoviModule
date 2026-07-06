@@ -107,13 +107,3 @@ making it easy to identify customer segments, group membership, and data
 clusters.
 Based on the geom_mark_hull() function from ggforce package.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Load your data frame with continuous variables for x and y axes.
-# 2. Select x and y variables for the scatter plot.
-# 3. Choose a grouping variable to define hull boundaries.
-# 4. Customize hull appearance and plot aesthetics.
-# 5. Run the hull plot to visualize group clusters.
-}
-}

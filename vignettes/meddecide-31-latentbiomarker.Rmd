@@ -8,6 +8,7 @@ vignette: >
   %\VignetteIndexEntry{Latent biomarker constructs and survival}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteKeepMd{true}
 ---
 
 ```{r setup, include=FALSE}

@@ -41,14 +41,14 @@ in Bujang (2023).
 
 \strong{Validation Test Cases:}
 \enumerate{
-\item Prevalence 5\%, Sens/Spec 95\%, CI width 0.10 → N = 940
-\item Prevalence 5\%, Sens/Spec 70\%, CI width 0.10 → N = 3,410
-\item Prevalence 10\%, Sens/Spec 95\%, CI width 0.10 → N = 940
-\item Prevalence 10\%, Sens/Spec 90\%, CI width 0.20 → N = 440
-\item Prevalence 20\%, Sens/Spec 90\%, CI width 0.20 → N = 220
-\item Prevalence 50\%, Sens/Spec 90\%, CI width 0.20 → N = 88
-\item Prevalence 50\%, Sens/Spec 80\%, CI width 0.20 → N = 140
-\item Prevalence 90\%, Sens/Spec 95\%, CI width 0.20 → N = 941
+\item Prevalence 5\%, Sens/Spec 95\%, CI width 0.10 -> N = 940
+\item Prevalence 5\%, Sens/Spec 70\%, CI width 0.10 -> N = 3,410
+\item Prevalence 10\%, Sens/Spec 95\%, CI width 0.10 -> N = 940
+\item Prevalence 10\%, Sens/Spec 90\%, CI width 0.20 -> N = 440
+\item Prevalence 20\%, Sens/Spec 90\%, CI width 0.20 -> N = 220
+\item Prevalence 50\%, Sens/Spec 90\%, CI width 0.20 -> N = 88
+\item Prevalence 50\%, Sens/Spec 80\%, CI width 0.20 -> N = 140
+\item Prevalence 90\%, Sens/Spec 95\%, CI width 0.20 -> N = 941
 }
 }
 \section{Usage}{

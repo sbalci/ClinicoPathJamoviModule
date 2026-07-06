@@ -12,10 +12,10 @@ A data frame with 180 observations and 15 variables:
 \item{visit_date}{Date. Date of laboratory assessment}
 \item{lab_category}{Factor. Clinical interpretation ("Normal", "Borderline", "Abnormal")}
 \item{urgency}{Factor. Test urgency ("Routine", "STAT", "Priority")}
-\item{wbc}{Numeric. White blood cell count (2.0-15.0 × 10³/μL)}
-\item{rbc}{Numeric. Red blood cell count (3.5-6.0 × 10⁶/μL)}
+\item{wbc}{Numeric. White blood cell count (2.0-15.0 x 10^3/uL)}
+\item{rbc}{Numeric. Red blood cell count (3.5-6.0 x 10^6/uL)}
 \item{hematocrit}{Numeric. Hematocrit percentage (30-55\%)}
-\item{platelets}{Integer. Platelet count (100-500 × 10³/μL)}
+\item{platelets}{Integer. Platelet count (100-500 x 10^3/uL)}
 \item{sodium}{Integer. Serum sodium (130-150 mEq/L)}
 \item{potassium}{Numeric. Serum potassium (3.0-5.5 mEq/L)}
 \item{creatinine}{Numeric. Serum creatinine (0.5-3.0 mg/dL)}

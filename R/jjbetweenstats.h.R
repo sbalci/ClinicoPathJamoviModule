@@ -484,53 +484,6 @@ jjbetweenstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' for comparing continuous variables between groups with statistical
 #' annotations.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic comparison between groups
-#' jjbetweenstats(
-#'     data = iris,
-#'     dep = "Sepal.Length",
-#'     group = "Species",
-#'     typestatistics = "parametric",
-#'     pairwisecomparisons = TRUE
-#' )
-#'
-#' # Multiple variables comparison
-#' jjbetweenstats(
-#'     data = mtcars,
-#'     dep = c("mpg", "hp", "wt"),
-#'     group = "cyl",
-#'     typestatistics = "nonparametric",
-#'     pairwisecomparisons = TRUE,
-#'     pairwisedisplay = "significant",
-#'     padjustmethod = "bonferroni"
-#' )
-#'
-#' # Grouped analysis with split variable
-#' jjbetweenstats(
-#'     data = mtcars,
-#'     dep = "mpg",
-#'     group = "cyl",
-#'     grvar = "am",
-#'     typestatistics = "robust",
-#'     centralityplotting = TRUE,
-#'     centralitytype = "robust",
-#' )
-#'
-#' # Bayesian analysis with custom aesthetics
-#' jjbetweenstats(
-#'     data = ToothGrowth,
-#'     dep = "len",
-#'     group = "supp",
-#'     grvar = "dose",
-#'     typestatistics = "bayes",
-#'     bfmessage = TRUE,
-#'     mytitle = "Tooth Growth by Supplement Type",
-#'     xtitle = "Supplement",
-#'     ytitle = "Tooth Length"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param group .

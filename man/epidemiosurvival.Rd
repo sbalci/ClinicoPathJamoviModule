@@ -168,18 +168,3 @@ epidemiological
 research including cancer registry studies, cohort studies, and population
 surveillance.
 }
-\examples{
-\donttest{
-data('population_cohort')
-
-epidemiosurvival(
-    data = population_cohort,
-    time_var = "followup_time",
-    event_var = "death",
-    exposure_var = "smoking_status",
-    age_var = "age_at_entry",
-    calendar_time = "entry_year",
-    population_weights = "sampling_weight"
-)
-}
-}

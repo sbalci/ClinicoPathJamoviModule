@@ -601,15 +601,6 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' package
 #' for enhanced customization and connectivity features.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Select continuous variable for distribution analysis.
-#' # 2. Choose grouping variable for comparisons.
-#' # 3. Optionally add longitudinal ID variable for connections.
-#' # 4. Configure advanced raincloud features and positioning.
-#'}
 #' @param data The data as a data frame.
 #' @param y_var Continuous variable for distribution visualization on Y-axis.
 #' @param x_var Grouping variable for X-axis categories.

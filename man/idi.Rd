@@ -246,15 +246,3 @@ clinical utility of new predictors in medical research. Particularly
 valuable when numeric risk improvement is more relevant than categorical
 reclassification, such as in precision medicine applications.
 }
-\examples{
-\donttest{
-result <- idi(
-    data = mydata,
-    outcome = "event_indicator",
-    baseline_risk = "baseline_predictions",
-    new_risk = "new_model_predictions",
-    time_point = 5,
-    bootstrap_samples = 1000
-)
-}
-}

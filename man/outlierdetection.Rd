@@ -100,12 +100,3 @@ Complements existing data quality assessment modules with state-of-the-art
 outlier detection capabilities.
 Perfect for clinical research data quality control and preprocessing.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select variables for outlier detection analysis.
-# 2. Choose detection methods (univariate, multivariate, or composite).
-# 3. Configure thresholds and visualization options.
-# 4. Review outlier results and exclusion recommendations.
-}
-}

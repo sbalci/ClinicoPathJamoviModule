@@ -120,15 +120,3 @@ Intuitive survival analysis using the iwillsurvive package with
 user-friendly interface, automatic data preparation, and comprehensive
 visualization options.
 }
-\examples{
-\donttest{
-# Example usage:
-library(iwillsurvive)
-# Derive follow-up columns
-data <- derive_followup_days(data, start_date, end_date)
-# Fit survival model
-model <- iwillsurvive(time, event, data = data)
-# Plot results
-plot(model)
-}
-}

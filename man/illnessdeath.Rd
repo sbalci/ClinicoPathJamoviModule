@@ -233,16 +233,3 @@ recovery. The model provides state occupancy probabilities, mean sojourn
 times, and transition-specific hazard ratios with clinical interpretation
 frameworks for evidence-based medicine.
 }
-\examples{
-\donttest{
-result <- illnessdeath(
-    data = mydata,
-    time_entry = "entry_time",
-    time_exit = "exit_time",
-    state_from = "from_state",
-    state_to = "to_state",
-    covariates = c("age", "treatment", "stage"),
-    reversible_illness = FALSE
-)
-}
-}

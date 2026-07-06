@@ -160,16 +160,3 @@ clinical presentations, and pathological data for enhanced diagnostic
 accuracy and clinical decision support through evidence-based pattern
 recognition and cross-modality validation.
 }
-\examples{
-\donttest{
-data('clinicaldata', package='ClinicoPath')
-
-# Basic imaging correlation analysis
-imagingcorrelation(clinicaldata,
-                 imagingFindings = c('CT_Finding', 'MRI_Finding', 'PET_Finding'),
-                 labResults = c('Biomarker1', 'Biomarker2'),
-                 clinicalVars = c('Symptoms', 'Signs'),
-                 correlation_analysis = TRUE,
-                 concordance_assessment = TRUE)
-}
-}

@@ -134,8 +134,3 @@ custom coefficient selection, standardized coefficients, and various
 styling options. Essential  for presenting regression results in clinical
 research and epidemiological studies.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

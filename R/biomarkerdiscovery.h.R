@@ -1309,20 +1309,6 @@ biomarkerdiscoveryBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' data analysis with regulatory compliance features for biomarker development
 #' and clinical translation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('biomarker_data')
-#'
-#' biomarkerdiscovery(
-#'     data = biomarker_data,
-#'     outcome_var = "response",
-#'     biomarker_vars = c("gene1", "gene2", "protein1"),
-#'     discovery_method = "elastic_net",
-#'     validation_method = "bootstrap",
-#'     interpretability = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param outcome_var Primary outcome variable for biomarker discovery
 #' @param biomarker_vars Potential biomarker variables (genes, proteins,

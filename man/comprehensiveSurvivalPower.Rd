@@ -233,38 +233,3 @@ complex study designs with accrual periods, variable follow-up, and dropout
 considerations. Essential for study planning, grant applications, and
 regulatory submissions.
 }
-\examples{
-\donttest{
-# Standard log-rank test power calculation
-comprehensiveSurvivalPower(
-    method_category = "standard",
-    calculation_type = "sample_size",
-    statistical_method = "log_rank",
-    hazard_ratio = 0.75,
-    power = 0.80,
-    alpha = 0.05,
-    allocation_ratio = 1
-)
-
-# Competing risks power analysis
-comprehensiveSurvivalPower(
-    method_category = "competing_risks",
-    calculation_type = "power",
-    statistical_method = "grays_test",
-    sample_size = 300,
-    effect_size = 0.15,
-    alpha = 0.05
-)
-
-# Advanced RMST-based analysis
-comprehensiveSurvivalPower(
-    method_category = "advanced",
-    calculation_type = "effect_size",
-    statistical_method = "rmst",
-    sample_size = 400,
-    power = 0.90,
-    alpha = 0.05,
-    rmst_timepoint = 24
-)
-}
-}

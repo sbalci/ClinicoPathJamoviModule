@@ -106,13 +106,3 @@ research data preprocessing where missing data is common and proper
 handling is critical
 for valid statistical inference.
 }
-\examples{
-\donttest{
-# Example:
-# 1. Select variables for missing data analysis
-# 2. Explore missing data patterns and correlations
-# 3. Configure imputation methods and parameters
-# 4. Run multiple imputation and evaluate convergence
-# 5. Compare observed vs imputed data distributions
-}
-}

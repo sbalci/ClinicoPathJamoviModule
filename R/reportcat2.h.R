@@ -123,31 +123,6 @@ reportcat2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' enhanced data exploration. Automatically handles  edge cases like missing 
 #' values, single categories, and variable conversion.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic categorical summary
-#' data <- data.frame(
-#'   treatment = factor(c("A", "B", "A", "C", "B", "A")),
-#'   grade = factor(c("High", "Low", "Medium", "High", "Low", "Medium"))
-#' )
-#' result <- reportcat(data = data, vars = c("treatment", "grade"))
-#'
-#' # Example 2: Enhanced summary with cumulative percentages
-#' result_enhanced <- reportcat(
-#'   data = data,
-#'   vars = "treatment",
-#'   sumvar_style = TRUE,
-#'   show_proportions = TRUE
-#' )
-#'
-#' # Example 3: Sort categories by frequency
-#' result_sorted <- reportcat(
-#'   data = data,
-#'   vars = "grade",
-#'   sort_by_frequency = TRUE
-#' )
-#'}
 #' @param data The data as a data frame containing the categorical variables
 #'   to be analyzed.  The data frame should have at least one row and the
 #'   specified variables should  exist in the dataset.

@@ -203,19 +203,3 @@ validation methods, hyperparameter tuning, and detailed clinical
 performance
 assessment for medical research and clinical decision support.
 }
-\examples{
-\donttest{
-# Advanced analysis with hyperparameter tuning
-tree_advanced(
-    data = clinical_data,
-    vars = c("biomarker1", "biomarker2", "age"),
-    facs = c("grade", "stage"),
-    target = "outcome",
-    targetLevel = "positive",
-    validation = "repeated_cv",
-    hyperparameter_tuning = TRUE,
-    show_cp_analysis = TRUE,
-    cost_sensitive = TRUE
-)
-}
-}

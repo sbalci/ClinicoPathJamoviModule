@@ -83,13 +83,3 @@ effects. Appropriate for Likert-scale data, ordered categorical outcomes
 ordinal endpoints. Uses the ordinal package for fitting cumulative link
 mixed models with logit, probit, or complementary log-log links.
 }
-\examples{
-\donttest{
-data |>
-ordinalmixedmodel(
-    dep = "rating",
-    fixedFactors = "scanner",
-    randomTerms = "pathologist"
-)
-}
-}

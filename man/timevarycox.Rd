@@ -72,8 +72,3 @@ This analysis allows covariates to change values over time during
 follow-up,  which is essential for modeling dynamic clinical variables such
 as treatment  changes, biomarker levels, or disease progression markers.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

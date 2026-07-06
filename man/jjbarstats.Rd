@@ -132,8 +132,3 @@ A results object containing:
 'Wrapper Function for ggstatsplot::ggbarstats and
 ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

@@ -113,14 +113,3 @@ quality goal index (QGI) for analytical methods. Supports ISO 15189
 compliance and quality improvement initiatives. Essential for laboratory
 method validation and performance monitoring.
 }
-\examples{
-\donttest{
-data |>
-sigmametrics(
-    bias = "method_bias",
-    cv = "coefficient_variation",
-    tea = "total_allowable_error",
-    analyte = "test_name"
-)
-}
-}

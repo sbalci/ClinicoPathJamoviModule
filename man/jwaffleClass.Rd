@@ -25,7 +25,7 @@ in clinical and pathological data.
 \strong{How Waffle Charts Work:}
 A waffle chart uses a grid of colored squares (typically 10x10 = 100 squares)
 where each square represents a fixed proportion of the total sample. This makes
-percentages immediately intuitive - each square ≈ 1\% of the sample.
+percentages immediately intuitive - each square ~= 1\% of the sample.
 
 \strong{Clinical Applications:}
 \itemize{

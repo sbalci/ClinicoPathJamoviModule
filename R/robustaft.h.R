@@ -612,24 +612,6 @@ robustaftBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' parametric survival models when standard AFT models are sensitive to 
 #' extreme observations or model misspecification, ensuring reliable parameter 
 #' estimates in challenging clinical datasets.
-#'
-#' @examples
-#' \donttest{
-#' # Example: Robust AFT model with Weibull distribution
-#' library(survival)
-#' library(RobustAFT)
-#'
-#' robustaft(
-#'     data = clinical_data,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     covariates = c("age", "treatment", "biomarker"),
-#'     distribution = "weibull",
-#'     robust_method = "huber",
-#'     tuning_constant = 1.345
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Survival time or follow-up duration variable
 #' @param outcome Event indicator variable (0/1, FALSE/TRUE, or factor)

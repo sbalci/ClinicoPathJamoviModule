@@ -106,13 +106,3 @@ Tumor-infiltrating lymphocyte (TIL) analysis and immune microenvironment
 characterization using IHC markers. Specialized for immuno-oncology
 applications.
 }
-\examples{
-\donttest{
-data |>
-ihcimmune(
-    immune_markers = c("CD3", "CD4", "CD8", "CD20"),
-    tilAnalysis = TRUE,
-    immuneContexture = TRUE
-)
-}
-}

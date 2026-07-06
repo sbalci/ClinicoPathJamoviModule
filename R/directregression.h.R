@@ -413,18 +413,6 @@ directregressionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' to hazard-based models. Particularly useful when interest lies in survival 
 #' probabilities rather than hazard ratios.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' directregression(
-#'     elapsedtime = "time_to_event",
-#'     outcome = "event_status",
-#'     explanatory = c("age", "treatment", "stage"),
-#'     time_points = c(12, 24, 60),
-#'     regression_type = "linear"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (1 = event, 0 = censored)

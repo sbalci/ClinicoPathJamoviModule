@@ -88,15 +88,3 @@ components.
 Particularly effective for genomics data where many features are
 correlated.
 }
-\examples{
-\donttest{
-superpc(
-    data = data,
-    time = "time",
-    event = "event",
-    features = c("gene1", "gene2", "gene3"),
-    threshold = 0.1,
-    n_components = 5
-)
-}
-}

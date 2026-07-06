@@ -13,7 +13,7 @@ automated binning options suitable for clinical research workflows.
 
 Features:
 \itemize{
-\item Multiple binning methods (quantile, equal, manual, mean±SD, median split, Jenks)
+\item Multiple binning methods (quantile, equal, manual, mean+/-SD, median split, Jenks)
 \item Customizable labels and category names
 \item Distribution visualization with break points
 \item R code generation for reproducibility

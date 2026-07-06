@@ -179,16 +179,3 @@ investigation, surveillance analysis, and epidemiological research with
 robust statistical methods
 for public health decision-making and intervention planning.
 }
-\examples{
-\donttest{
-data('outbreak_data')
-
-outbreakanalysis(
-    data = outbreak_data,
-    case_status = "case",
-    exposure_vars = c("food_a", "food_b", "water"),
-    date_onset = "onset_date",
-    location_var = "location"
-)
-}
-}

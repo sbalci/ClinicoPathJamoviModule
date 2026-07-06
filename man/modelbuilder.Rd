@@ -208,8 +208,3 @@ Build and validate prediction models for medical decision making. Creates
 multiple logistic regression models with predicted probabilities that can
 be directly used in Decision Curve Analysis.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

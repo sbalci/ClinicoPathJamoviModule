@@ -2393,11 +2393,6 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' proportional hazards model incorporates person-time by modeling  the hazard 
 #' function, which represents the instantaneous event rate per unit of 
 #' person-time.
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime The time elapsed from the start of the study to the
 #'   event or censoring.

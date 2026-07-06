@@ -118,8 +118,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Function for Medical Decision Analysis. Sensitivity, Specificity, Positive
 Predictive Value, Negative Predictive Value.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

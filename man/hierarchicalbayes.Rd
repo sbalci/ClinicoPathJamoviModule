@@ -135,17 +135,3 @@ Hierarchical Bayesian models for multi-center diagnostic studies.
 Implements bivariate meta-analysis of diagnostic accuracy with
 between-study heterogeneity and correlation structures.
 }
-\examples{
-\donttest{
-# Example: Hierarchical Bayesian diagnostic meta-analysis
-hierarchicalbayes(
-    data = multicenter_data,
-    tp = true_positives,
-    fp = false_positives,
-    fn = false_negatives,
-    tn = true_negatives,
-    study_id = center,
-    model_type = "bivariate_normal"
-)
-}
-}

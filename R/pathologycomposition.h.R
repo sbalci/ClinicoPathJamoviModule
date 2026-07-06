@@ -280,17 +280,6 @@ pathologycompositionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' composition 
 #' pattern analysis, and optimal threshold identification.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('pathology_data')
-#'
-#' pathologycomposition(data = pathology_data,
-#'                     outcome_variable = lymph_node_metastasis,
-#'                     component1 = signet_ring_cells,
-#'                     component2 = poorly_differentiated,
-#'                     composition_analysis = TRUE)
-#'}
 #' @param data the data as a data frame
 #' @param outcome_variable Clinical outcome variable for composition analysis
 #' @param component1 First histologic component (proportion or category)

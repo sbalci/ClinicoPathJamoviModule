@@ -746,18 +746,6 @@ survivalmodelvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
 #' validation frameworks.
 #' Essential for developing reliable prognostic models.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Cox model validation
-#' survivalmodelvalidation(
-#'     data = clinical_data,
-#'     time = followup_months,
-#'     status = death_event,
-#'     risk_score = predicted_risk,
-#'     validation_type = "internal_bootstrap"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time_var Time to event or censoring
 #' @param status_var Event indicator variable

@@ -95,7 +95,7 @@ The outlier detection module supports four main categories of methods:
 \section{References}{
 
 \itemize{
-\item Lüdecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021).
+\item Ludecke, D., Ben-Shachar, M., Patil, I., Waggoner, P., & Makowski, D. (2021).
 performance: An R Package for Assessment, Comparison and Testing of Statistical Models.
 Journal of Open Source Software, 6(60), 3139. https://doi.org/10.21105/joss.03139
 \item Rousseeuw, P. J., & Hubert, M. (2018). Anomaly detection by robust statistics.

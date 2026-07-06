@@ -385,19 +385,6 @@ bayesianmetaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' - Meta-regression with study-level covariates
 #' - Publication bias assessment and adjustment
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Bayesian meta-analysis of treatment effects
-#' bayesianmetaanalysis(
-#'     data = data,
-#'     effectSize = "effect",
-#'     standardError = "se",
-#'     studyId = "study",
-#'     modelType = "random_effects",
-#'     outcomeType = "continuous"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param effectSize the effect size variable (e.g., mean difference, log odds
 #'   ratio)

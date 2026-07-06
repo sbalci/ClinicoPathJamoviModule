@@ -1182,20 +1182,6 @@ clinicalpredictionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' features
 #' for model validation and documentation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('clinical_data')
-#'
-#' clinicalprediction(
-#'     data = clinical_data,
-#'     outcome_var = "mortality",
-#'     predictor_vars = c("age", "biomarker", "stage"),
-#'     model_type = "random_forest",
-#'     interpretability = TRUE,
-#'     validation_method = "cv_10fold"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param outcome_var Target variable for prediction (binary, continuous, or
 #'   survival)

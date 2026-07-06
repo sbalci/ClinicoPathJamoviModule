@@ -818,53 +818,6 @@ surveysurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' standard errors and confidence intervals, enabling proper population-level
 #' survival estimates from survey data.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic survey-weighted Kaplan-Meier
-#' library(survival)
-#' library(survey)
-#'
-#' surveysurvival(
-#'     data = mysurveydata,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     weights = "survey_weight",
-#'     strata = "stratum",
-#'     cluster = "psu",
-#'     timetypeoutput = "months"
-#' )
-#'
-#' # Example 2: Weighted Cox regression with complex design
-#' surveysurvival(
-#'     data = mysurveydata,
-#'     elapsedtime = "time",
-#'     outcome = "status",
-#'     outcomeLevel = "1",
-#'     explanatory = c("age_group", "sex"),
-#'     contexpl = c("income"),
-#'     weights = "survey_weight",
-#'     strata = "stratum",
-#'     cluster = "psu",
-#'     fpc = "fpc_var",
-#'     design_type = "stratified_cluster"
-#' )
-#'
-#' # Example 3: Multi-stage survey design
-#' surveysurvival(
-#'     data = nhanes_data,
-#'     elapsedtime = "followup_years",
-#'     outcome = "death",
-#'     outcomeLevel = "Dead",
-#'     explanatory = c("education", "race"),
-#'     weights = "wtmec2yr",
-#'     strata = "sdmvstra",
-#'     cluster = "sdmvpsu",
-#'     design_type = "multistage",
-#'     nest_clusters = TRUE
-#' )
-#'}
 #' @param data The survey dataset to be analyzed, provided as a data frame.
 #'   Must contain survival variables, survey design variables (weights, strata,
 #'   clusters), and any explanatory variables for analysis.

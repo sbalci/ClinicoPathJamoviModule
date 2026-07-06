@@ -96,16 +96,3 @@ Frailty and random effects survival models for clustered data analysis.
 Includes gamma frailty, shared frailty, and correlated frailty models
 for multi-center studies, family studies, and recurrent events.
 }
-\examples{
-\donttest{
-# Example: Multi-center survival with shared frailty
-frailtysurvival(
-    data = multicenter_data,
-    time_var = followup_time,
-    status_var = death_event,
-    cluster_var = center_id,
-    covariates = c("age", "stage", "treatment"),
-    frailty_type = "shared"
-)
-}
-}

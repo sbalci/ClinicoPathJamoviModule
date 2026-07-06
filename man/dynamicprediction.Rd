@@ -128,16 +128,3 @@ analysis implements various dynamic prediction methods including landmark
 approaches, joint modeling, and dynamic Cox models, allowing for real-time
 risk assessment and personalized medicine applications.
 }
-\examples{
-\donttest{
-data |>
-dynamicprediction(
-    elapsedtime = "time_to_event",
-    outcome = "event_status",
-    baseline = c("age", "stage"),
-    longitudinal = c("biomarker", "treatment_response"),
-    time_var = "measurement_time",
-    prediction_horizon = 24
-)
-}
-}

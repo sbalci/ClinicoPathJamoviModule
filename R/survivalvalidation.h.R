@@ -688,19 +688,6 @@ survivalvalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' plots,
 #' and decision curve analysis for clinical decision making.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Validate Cox regression model
-#' survivalvalidation(
-#'     data = cancer_data,
-#'     time = followup_time,
-#'     status = death_status,
-#'     predicted_risk = risk_score,
-#'     validation_method = "cv",
-#'     time_points = c(1, 3, 5)
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time to event or censoring
 #' @param status Event indicator variable

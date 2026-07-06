@@ -134,12 +134,6 @@ lassointroBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' choose the right analysis for their data and research question. No data or 
 #' variables required.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Simply open the guide - no data needed
-#' lassointro()
-#'}
 #' @param showOverview Show overview of all penalized Cox regression methods
 #' @param showDecisionGuide Show decision flowchart for choosing the right
 #'   method

@@ -82,37 +82,41 @@ data(toxicityprofile_pediatric)
 
 # Pediatric safety profile
 result <- toxicityprofile(
-  data = toxicityprofile_pediatric,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  plotType = "dot_plot",
-  showConfidenceIntervals = TRUE
+    data = toxicityprofile_pediatric,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    plotType = "dot_plot",
+    showConfidenceIntervals = TRUE
 )
 
 # Behavioral toxicity focus
-behavioral_events <- c("Irritability", "Sleep disturbance", "Mood changes", 
-                      "Attention difficulties", "Hyperactivity")
-behavioral_data <- subset(toxicityprofile_pediatric, 
-                         adverse_event \%in\% behavioral_events)
+behavioral_events <- c(
+    "Irritability", "Sleep disturbance", "Mood changes",
+    "Attention difficulties", "Hyperactivity"
+)
+behavioral_data <- subset(
+    toxicityprofile_pediatric,
+    adverse_event \%in\% behavioral_events
+)
 result_behavioral <- toxicityprofile(
-  data = behavioral_data,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  groupComparison = TRUE
+    data = behavioral_data,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    groupComparison = TRUE
 )
 
 # Age-stratified analysis
 adolescent_data <- subset(toxicityprofile_pediatric, patient_age >= 13)
 result_adolescent <- toxicityprofile(
-  data = adolescent_data,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  plotType = "stacked_bar"
+    data = adolescent_data,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    plotType = "stacked_bar"
 )
 }
 }

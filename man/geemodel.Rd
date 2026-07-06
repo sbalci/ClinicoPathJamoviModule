@@ -110,17 +110,3 @@ patient).
 \item Clustered randomized trials
 }
 }
-\examples{
-\donttest{
-# Example: Multiple liver samples per dog
-geemodel(
-  data = liver_data,
-  outcome = 'diagnosis',
-  predictors = c('sample_method', 'fibrosis_score'),
-  cluster_id = 'dog_id',
-  family = 'binomial',
-  corstr = 'exchangeable',
-  robust_se = TRUE
-)
-}
-}

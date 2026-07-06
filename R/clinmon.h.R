@@ -285,11 +285,6 @@ clinmonBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' PWA, RI, and Sx from continuous recordings of arterial blood pressure, 
 #' intracranial pressure,  middle cerebral artery blood velocity, and heart 
 #' rate.
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame with continuous monitoring data.
 #'   First column must be time in seconds, followed by physiological variables.
 #' @param time_var Time variable in seconds. This should be the first column

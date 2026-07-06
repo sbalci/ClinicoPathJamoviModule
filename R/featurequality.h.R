@@ -727,18 +727,6 @@ featurequalityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' before statistical analysis and meeting regulatory standards for clinical 
 #' research.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('clinical_data')
-#'
-#' featurequality(
-#'     data = clinical_data,
-#'     features = c("biomarker1", "biomarker2", "age", "severity"),
-#'     outlier_detection = TRUE,
-#'     correlation_analysis = TRUE
-#' )
-#'}
 #' @param data .
 #' @param features .
 #' @param group_var .

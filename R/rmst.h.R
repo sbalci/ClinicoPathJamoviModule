@@ -358,11 +358,6 @@ rmstBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' survival curve  up to a specific time point (tau), representing the average 
 #' survival time  within the restriction period.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage will be added
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis
 #' @param outcome Event indicator variable

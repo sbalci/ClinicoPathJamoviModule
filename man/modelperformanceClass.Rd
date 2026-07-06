@@ -5,7 +5,7 @@
 \title{Multi-Model Performance Comparison}
 \description{
 Compare performance of multiple statistical models side-by-side. Supports Cox proportional hazards,
-logistic regression, and linear regression. Provides unified comparison with AIC, BIC, R², C-index.
+logistic regression, and linear regression. Provides unified comparison with AIC, BIC, R^2, C-index.
 Inspired by Orange Data Mining's Test & Score widget.
 }
 \author{

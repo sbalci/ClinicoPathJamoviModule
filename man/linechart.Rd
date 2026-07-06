@@ -87,23 +87,3 @@ Creates line charts for time series analysis and trend visualization, with
 support for multiple groups, confidence intervals, and statistical
 overlays.
 }
-\examples{
-\donttest{
-# Basic line chart
-linechart(
-    data = clinical_data,
-    xvar = "time_point",
-    yvar = "lab_value"
-)
-
-# Grouped line chart with confidence intervals
-linechart(
-    data = clinical_data,
-    xvar = "time_point",
-    yvar = "lab_value",
-    groupby = "treatment_group",
-    confidence = TRUE,
-    trendline = TRUE
-)
-}
-}

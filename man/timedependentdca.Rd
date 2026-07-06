@@ -102,19 +102,3 @@ Common applications: Serial biopsy surveillance, recurrence vs death
 prediction,
 time-varying treatment decisions.
 }
-\examples{
-\donttest{
-# Example with survival outcome
-library(survival)
-data <- lung
-
-timedependentdca(
-  data = data,
-  time = 'time',
-  event = 'status',
-  predictor = 'ph.ecog',
-  time_points = c(180, 365, 730),
-  reference_strategy = 'treat_all'
-)
-}
-}

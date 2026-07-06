@@ -1703,40 +1703,6 @@ pathagreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis. Provides agreement statistics, visualization, and clinical 
 #' interpretation for categorical rating data.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load example data
-#' data('pathology_ratings', package = 'ClinicoPath')
-#'
-#' # Basic agreement analysis with 2 raters
-#' pathagreement(pathology_ratings,
-#'           vars = c('rater1', 'rater2'))
-#'
-#' # Advanced analysis with 3+ raters including visualization
-#' pathagreement(pathology_ratings,
-#'           vars = c('rater1', 'rater2', 'rater3'),
-#'           multiraterMethod = 'fleiss',
-#'           fleissCI = TRUE,
-#'           heatmap = TRUE,
-#'           heatmapDetails = TRUE,
-#'           sft = TRUE)
-#'
-#' # Krippendorff's alpha for ordinal data
-#' agreement(pathology_ratings,
-#'           vars = c('rater1', 'rater2', 'rater3'),
-#'           multiraterMethod = 'krippendorff',
-#'           kripp = TRUE,
-#'           krippMethod = 'ordinal')
-#'
-#' # Consensus analysis
-#' agreement(pathology_ratings,
-#'           vars = c('rater1', 'rater2', 'rater3'),
-#'           consensus = TRUE,
-#'           consensus_method = 'majority',
-#'           tie_breaking = 'arbitration',
-#'           show_consensus_table = TRUE)
-#'}
 #' @param data The data as a data frame. Each row represents a case/subject,
 #'   and columns represent different raters/observers.
 #' @param vars Variables representing different raters/observers. Each

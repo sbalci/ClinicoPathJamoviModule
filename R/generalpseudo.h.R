@@ -597,19 +597,6 @@ generalpseudoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' functionals including survival probabilities, cumulative incidence 
 #' functions, and restricted mean survival times.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' generalpseudo(
-#'     elapsedtime = "time_to_event",
-#'     outcome = "event_status",
-#'     explanatory = c("age", "treatment", "stage"),
-#'     functional_type = "survival",
-#'     time_points = c(12, 24, 60),
-#'     cause_specific = 1
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param elapsedtime Time to event or censoring
 #' @param outcome Event indicator (for survival: 1 = event, 0 = censored; for

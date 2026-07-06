@@ -666,18 +666,6 @@ labinterpretBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' evidence-based 
 #' diagnostic decision-making and clinical assessment optimization.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('clinicaldata', package='ClinicoPath')
-#'
-#' # Basic laboratory interpretation
-#' labinterpret(clinicaldata,
-#'             labValues = c('Hemoglobin', 'Glucose', 'Creatinine'),
-#'             patientDemo = c('Age', 'Gender'),
-#'             reference_ranges = TRUE,
-#'             trend_analysis = TRUE)
-#'}
 #' @param data .
 #' @param labValues Laboratory test results and biomarker values for
 #'   interpretation

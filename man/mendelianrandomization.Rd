@@ -149,18 +149,3 @@ and provides multiple MR methods with comprehensive sensitivity analysis.
 Applications: Genetic epidemiology, drug target validation, causal
 inference in observational studies.
 }
-\examples{
-\donttest{
-# Example: Analyze effect of BMI on coronary disease
-mendelianrandomization(
-    exposure_data = bmi_gwas,
-    outcome_data = cad_gwas,
-    snp_column = 'rsID',
-    beta_exposure = 'beta_bmi',
-    se_exposure = 'se_bmi',
-    beta_outcome = 'beta_cad',
-    se_outcome = 'se_cad',
-    mr_methods = c('IVW', 'MR-Egger', 'Weighted Median')
-)
-}
-}

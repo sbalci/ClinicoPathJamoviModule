@@ -14,9 +14,9 @@ A data frame with 50 observations and 13 variables:
 \item{total_points}{Integer. Total number of grid points examined (100)}
 \item{boundary_intersections}{Integer. Grid line intersections with vessel boundaries}
 \item{object_count}{Integer. Number of discrete vessels counted}
-\item{reference_area}{Numeric. Total reference area examined (μm²)}
-\item{grid_spacing}{Numeric. Distance between grid lines (μm)}
-\item{section_thickness}{Numeric. Histological section thickness (μm)}
+\item{reference_area}{Numeric. Total reference area examined (um^2)}
+\item{grid_spacing}{Numeric. Distance between grid lines (um)}
+\item{section_thickness}{Numeric. Histological section thickness (um)}
 \item{Aa}{Numeric. Calculated area density (fraction)}
 \item{Vv}{Numeric. Calculated volume density (fraction)}
 }
@@ -38,10 +38,10 @@ demonstrates quantitative histopathology using systematic grid-based sampling.
 \strong{Study Design:}
 \itemize{
 \item 50 histological images from 3 diagnostic groups
-\item Systematic 10×10 grid overlay (100 points per image)
-\item Grid spacing: 10 μm
-\item Reference area: 1000×1000 μm (1 mm²)
-\item Section thickness: 5 μm (standard histology)
+\item Systematic 10x10 grid overlay (100 points per image)
+\item Grid spacing: 10 um
+\item Reference area: 1000x1000 um (1 mm^2)
+\item Section thickness: 5 um (standard histology)
 }
 
 \strong{Clinical Context:}
@@ -73,7 +73,7 @@ from 2D histological sections without requiring 3D reconstruction.
 }
 \item \strong{Boundary Density (Ba)}
 \itemize{
-\item Formula: Ba = (2 × boundary_intersections) / line_length
+\item Formula: Ba = (2 x boundary_intersections) / line_length
 \item Meaning: Vessel boundary length per unit area
 \item Use: Measure of vessel complexity
 }
@@ -85,7 +85,7 @@ from 2D histological sections without requiring 3D reconstruction.
 }
 \item \strong{Surface Density (Sv)}
 \itemize{
-\item Formula: Sv = 2 × Ba
+\item Formula: Sv = 2 x Ba
 \item Meaning: Vessel surface area per unit volume
 \item Use: Exchange surface quantification
 }
@@ -158,7 +158,7 @@ stereology(
 
 \strong{Quality Control:}
 \itemize{
-\item Grid spacing appropriate for vessel size (10 μm)
+\item Grid spacing appropriate for vessel size (10 um)
 \item Adequate number of points per image (100 points)
 \item Multiple images per diagnosis (16-17 per group)
 \item Systematic random sampling approach

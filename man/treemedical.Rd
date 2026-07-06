@@ -139,18 +139,3 @@ Uses enhanced CART algorithm optimized for healthcare applications with
 clinical validation, performance metrics, and medical interpretation
 guidelines.
 }
-\examples{
-\donttest{
-# Example for cancer diagnosis
-data(cancer_data)
-treemedical(
-    data = cancer_data,
-    vars = c("PSA", "age"),
-    facs = c("grade", "stage"),
-    target = "diagnosis",
-    targetLevel = "cancer",
-    validation = "cv",
-    show_tree_plot = TRUE
-)
-}
-}

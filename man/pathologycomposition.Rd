@@ -86,14 +86,3 @@ gastric cancer composition analysis. Performs component risk assessment,
 composition
 pattern analysis, and optimal threshold identification.
 }
-\examples{
-\donttest{
-data('pathology_data')
-
-pathologycomposition(data = pathology_data,
-                    outcome_variable = lymph_node_metastasis,
-                    component1 = signet_ring_cells,
-                    component2 = poorly_differentiated,
-                    composition_analysis = TRUE)
-}
-}

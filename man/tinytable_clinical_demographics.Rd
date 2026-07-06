@@ -12,7 +12,7 @@ A data frame with 250 observations and 14 variables:
 \item{sex}{Factor. Patient sex ("Male", "Female")}
 \item{treatment_group}{Factor. Treatment assignment ("Control", "Treatment A", "Treatment B")}
 \item{study_site}{Factor. Study enrollment site ("Site_A" to "Site_F")}
-\item{bmi}{Numeric. Body mass index (16-45 kg/m²) with ~3\% missing values}
+\item{bmi}{Numeric. Body mass index (16-45 kg/m^2) with ~3\% missing values}
 \item{systolic_bp}{Integer. Systolic blood pressure (90-200 mmHg)}
 \item{diastolic_bp}{Integer. Diastolic blood pressure (60-120 mmHg)}
 \item{diabetes}{Factor. Diabetes status ("No", "Type 1", "Type 2")}

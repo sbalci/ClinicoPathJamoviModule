@@ -107,8 +107,3 @@ Performs flexible competing risks analysis using advanced regression
 techniques including spline-based hazards, time-varying effects, and
 robust prediction models with comprehensive model validation.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

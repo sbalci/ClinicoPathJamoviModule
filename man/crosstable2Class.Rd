@@ -18,7 +18,7 @@ this function now optionally provides an exportable CSV version of the cross tab
 \details{
 The function cleans variable names and applies original labels. It then builds
 a formula based on the cleaned data and performs the appropriate statistical
-test (e.g. chi-square or Fisher’s exact test). Detailed user guidance is provided
+test (e.g. chi-square or Fisher's exact test). Detailed user guidance is provided
 via HTML to-do messages.
 }
 \section{Super classes}{

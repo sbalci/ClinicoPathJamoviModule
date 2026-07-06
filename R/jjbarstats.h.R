@@ -433,11 +433,6 @@ jjbarstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 'Wrapper Function for ggstatsplot::ggbarstats and
 #' ggstatsplot::grouped_ggbarstats to generate Bar Charts.'
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param dep .
 #' @param group .

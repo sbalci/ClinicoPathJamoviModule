@@ -986,11 +986,6 @@ modelbuilderBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' multiple logistic regression models with predicted probabilities that can 
 #' be directly used in Decision Curve Analysis.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param clinicalPreset Predefined clinical scenarios with optimized settings
 #'   and variable recommendations.

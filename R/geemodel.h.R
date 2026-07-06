@@ -394,20 +394,6 @@ geemodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' - Multi-site studies
 #' - Clustered randomized trials
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Multiple liver samples per dog
-#' geemodel(
-#'   data = liver_data,
-#'   outcome = 'diagnosis',
-#'   predictors = c('sample_method', 'fibrosis_score'),
-#'   cluster_id = 'dog_id',
-#'   family = 'binomial',
-#'   corstr = 'exchangeable',
-#'   robust_se = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param outcome outcome variable (dependent variable); can be continuous,
 #'   binary, or count

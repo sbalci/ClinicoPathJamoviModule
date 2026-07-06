@@ -715,13 +715,6 @@ clinicalscoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' variable categorization, calibration, discrimination, nomogram generation,
 #' and TRIPOD compliance.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' clinicalscore(data = data, outcome = "diagnosis",
-#'     outcomeLevel = "malignant", explanatory = vars(age, grade, ki67),
-#'     modelType = "logistic", scoringMethod = "compare")
-#'}
 #' @param data .
 #' @param modelType .
 #' @param outcome .

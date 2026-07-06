@@ -112,6 +112,7 @@ venn(data = clinical_data,
      colorPalette = "viridis")
 }
 }
+\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{vennBase} -> \code{vennClass}
 }

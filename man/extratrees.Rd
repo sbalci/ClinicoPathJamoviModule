@@ -173,17 +173,3 @@ measures, out-of-bag error estimation, support for competing risks, and
 excellent scalability. Ideal for exploratory analysis, baseline modeling,
 and ensemble methods in survival prediction tasks.
 }
-\examples{
-\donttest{
-result <- extratrees(
-    data = mydata,
-    time = "time_to_event",
-    event = "event_indicator",
-    predictors = c("age", "stage", "biomarker1", "biomarker2"),
-    num_trees = 500,
-    mtry = "sqrt",
-    min_node_size = 10,
-    splitrule = "extratrees"
-)
-}
-}

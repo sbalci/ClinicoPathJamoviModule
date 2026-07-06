@@ -919,11 +919,6 @@ decisioncurveBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' probabilities to determine if using a model provides more benefit than 
 #' default strategies.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable (0/1 or FALSE/TRUE). This represents
 #'   the condition or event you want to predict.

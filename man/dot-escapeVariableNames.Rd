@@ -17,3 +17,4 @@ Adds backticks around names that contain anything other than
 \verb{[A-Za-z0-9._]}. Centralises the helper that previously lived in
 multiple \code{.b.R} files so the implementation stays in one place.
 }
+\keyword{internal}

@@ -559,16 +559,6 @@ ggprismBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' curves
 #' with seamless ggplot2 integration and Prism-style aesthetics.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Load your data frame with continuous and categorical variables.
-#' # 2. Select variables for X and Y axes.
-#' # 3. Choose grouping variables for statistical comparisons.
-#' # 4. Customize with Prism-style themes and color palettes.
-#' # 5. Add statistical annotations and publication formatting.
-#'}
 #' @param data The data as a data frame.
 #' @param x_var Variable for the X-axis. Can be continuous or categorical.
 #' @param y_var Continuous variable for the Y-axis.

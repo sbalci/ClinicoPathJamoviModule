@@ -722,11 +722,6 @@ jointfrailtyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' event process  jointly, accounting for their association through shared 
 #' frailty terms and providing  comprehensive risk assessment for subjects 
 #' experiencing multiple types of events.
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology', package='ClinicoPath')
-#'}
 #' @param data .
 #' @param subjectID .
 #' @param time .

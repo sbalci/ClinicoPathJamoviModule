@@ -582,11 +582,6 @@ hiddenmarkovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' transition intensities, state prevalences,  and predictions with 
 #' uncertainty quantification.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param subject Subject identifier variable
 #' @param state Observed state variable (can be noisy observations of true

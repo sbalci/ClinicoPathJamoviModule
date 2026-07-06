@@ -510,17 +510,6 @@ hierarchicalpathologyBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
 #' Slide > ROI > Cell hierarchies, and prevents Type I errors from ignoring 
 #' clustering effects.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('histopathology')
-#'
-#' hierarchicalpathology(data = histopathology,
-#'                      dependent = measurement,
-#'                      level_3 = patient_id,
-#'                      level_2 = slide_id,
-#'                      level_1 = roi_id)
-#'}
 #' @param data the data as a data frame
 #' @param dependent The dependent variable from \code{data}, variable must be
 #'   numeric

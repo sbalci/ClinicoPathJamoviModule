@@ -183,16 +183,3 @@ For specialized needs,
 consider the other power analysis functions: Classical, Competing Risks,
 Advanced, or Comprehensive.
 }
-\examples{
-\donttest{
-survivalPower(
-    test_type = "log_rank",
-    effect_size = 0.75,
-    alpha_level = 0.05,
-    power_level = 0.80,
-    allocation_ratio = 1,
-    accrual_period = 24,
-    follow_up_period = 36
-)
-}
-}

@@ -631,11 +631,6 @@ decisionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Function for Medical Decision Analysis. Sensitivity, Specificity, Positive 
 #' Predictive Value, Negative Predictive Value.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame. The data frame should contain the
 #'   variables specified in the 'variables' option.
 #' @param gold The gold standard reference variable representing true disease

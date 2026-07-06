@@ -120,17 +120,3 @@ states.
 Implements transition probabilities, state occupation probabilities, and
 competing transitions for complex disease pathways in clinical research.
 }
-\examples{
-\donttest{
-# Example: Cancer progression model
-# States: Diagnosis -> Remission -> Relapse -> Death
-#                   -> Death (direct)
-multistatesurvival(
-    data = cancer_data,
-    id = patient_id,
-    time = follow_up_time,
-    state = disease_state,
-    covariates = c(age, stage, treatment)
-)
-}
-}

@@ -515,39 +515,6 @@ robustcorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' Minimum Volume Ellipsoid (MVE), and Minimum Covariance Determinant (MCD)
 #' correlation methods.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load test data
-#' data("mtcars")
-#'
-#' # Basic robust correlation analysis
-#' robustcorrelation(
-#'   data = mtcars,
-#'   dep = c("mpg", "hp", "wt", "qsec"),
-#'   method = "spearman"
-#' )
-#'
-#' # Advanced robust correlation with outlier detection
-#' robustcorrelation(
-#'   data = mtcars,
-#'   dep = c("mpg", "hp", "wt", "qsec", "disp"),
-#'   method = "percentage_bend",
-#'   outlier_detection = TRUE,
-#'   outlier_method = "mcd",
-#'   bootstrap_ci = TRUE,
-#'   n_bootstrap = 1000
-#' )
-#'
-#' # Multiple robust methods comparison
-#' robustcorrelation(
-#'   data = mtcars,
-#'   dep = c("mpg", "hp", "wt"),
-#'   method = "biweight",
-#'   show_heatmap = TRUE,
-#'   matrix_type = "lower"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep List of continuous variables for robust correlation analysis.
 #'   All variables must be numeric with sufficient variation.

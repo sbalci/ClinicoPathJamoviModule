@@ -723,18 +723,6 @@ greyzonerocBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' diagnostic tests where "I don't know" is a valid and often safer response 
 #' than forcing a potentially incorrect binary classification.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- greyzoneroc(
-#'     data = ai_predictions,
-#'     predictor = "ai_probability",
-#'     outcome = "true_diagnosis",
-#'     positive_level = "disease",
-#'     grey_zone_width = 0.1,
-#'     confidence_threshold = 0.80
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param predictor Continuous predictor variable or probability score from
 #'   diagnostic test. For AI models, this is typically the predicted

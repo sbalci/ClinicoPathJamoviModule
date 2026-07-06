@@ -822,11 +822,6 @@ semimarkovBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' last transition rather than absolute time. Suitable for processes where the  
 #' 'clock' resets at each transition using SemiMarkov package.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param time Follow-up time variable
 #' @param event Event/state variable indicating transitions between states

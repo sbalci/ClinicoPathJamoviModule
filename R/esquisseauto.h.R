@@ -322,24 +322,6 @@ esquisseautoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' combinations including histograms, scatter plots, box plots, violin plots, 
 #' bar charts, line plots, and more. Perfect for quick data visualization with 
 #' intelligent defaults.
-#'
-#' @examples
-#' \donttest{
-#' # Auto-select plot type based on variables
-#' esquisseauto(
-#'     data = mtcars,
-#'     xvar = "cyl",
-#'     yvar = "mpg"
-#' )
-#'
-#' # With color grouping
-#' esquisseauto(
-#'     data = iris,
-#'     xvar = "Species",
-#'     yvar = "Sepal.Length",
-#'     colorvar = "Species"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param xvar Variable for x-axis. Can be continuous, discrete, or
 #'   time-based.

@@ -574,21 +574,6 @@ jointmodelingBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' 2-10 minutes
 #' depending on data size and model complexity.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: PSA trajectory and prostate cancer survival
-#' jointmodeling(
-#'     data = psa_data,
-#'     id = patient_id,
-#'     time_longitudinal = visit_time,
-#'     biomarker = psa_level,
-#'     survival_time = followup_time,
-#'     survival_status = death_status,
-#'     covariates = c("age", "stage"),
-#'     functional_form = "linear"
-#' )
-#'}
 #' @param data The data as a data frame in long format (multiple rows per
 #'   patient).
 #' @param id Patient ID for linking longitudinal measurements

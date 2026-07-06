@@ -98,16 +98,3 @@ and restricted mean survival time (RMST). Enables regression analysis of
 survival probability at specific time points and RMST with standard
 statistical methods.
 }
-\examples{
-\donttest{
-# Example: RMST regression with covariates
-pseudosurvival(
-    data = cancer_data,
-    time_var = survival_time,
-    status_var = death_status,
-    covariates = c("age", "stage", "treatment"),
-    analysis_type = "rmst_regression",
-    tau_rmst = 60
-)
-}
-}

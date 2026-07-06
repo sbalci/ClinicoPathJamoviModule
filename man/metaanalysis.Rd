@@ -159,14 +159,3 @@ Comprehensive meta-analysis and evidence synthesis including forest plots,
 heterogeneity testing, publication bias assessment, diagnostic test
 accuracy meta-analysis, and network meta-analysis.
 }
-\examples{
-\donttest{
-data |>
-metaanalysis(
-    effect_size = "effect",
-    variance = "variance",
-    analysis_type = "generic",
-    model_type = "random_effects"
-)
-}
-}

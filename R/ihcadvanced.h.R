@@ -420,16 +420,6 @@ ihcadvancedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Advanced clustering analysis with marker optimization and validation. 
 #' Includes optimal K selection, PCA analysis, and iterative marker selection.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' ihcadvanced(
-#'     markers = c("ER", "PR", "HER2", "Ki67"),
-#'     optimalKMethod = "silhouette",
-#'     iterativeClustering = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param markers Select IHC marker variables (e.g., ER, PR, HER2, Ki67, CD
 #'   markers). Can be categorical scores (0/1+/2+/3+) or continuous values

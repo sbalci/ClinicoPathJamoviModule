@@ -90,34 +90,34 @@ data(toxicityprofile_dose_escalation)
 
 # Dose-response analysis
 result <- toxicityprofile(
-  data = toxicityprofile_dose_escalation,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  plotType = "stacked_bar",
-  sortBy = "high_grade"
+    data = toxicityprofile_dose_escalation,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    plotType = "stacked_bar",
+    sortBy = "high_grade"
 )
 
 # High-grade toxicity by dose level
 result_dlts <- toxicityprofile(
-  data = toxicityprofile_dose_escalation,
-  patientID = "patient_id", 
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  showHighGradeOnly = TRUE,
-  groupComparison = FALSE
+    data = toxicityprofile_dose_escalation,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    showHighGradeOnly = TRUE,
+    groupComparison = FALSE
 )
 
 # Dose level comparison
 result_comparison <- toxicityprofile(
-  data = toxicityprofile_dose_escalation,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event", 
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  plotType = "heatmap"
+    data = toxicityprofile_dose_escalation,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    plotType = "heatmap"
 )
 }
 }

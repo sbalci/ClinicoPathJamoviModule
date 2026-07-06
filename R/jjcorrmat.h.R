@@ -377,43 +377,6 @@ jjcorrmatBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' ggstatsplot::grouped_ggcorrmat to generate correlation matrix
 #' visualizations with significance testing.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load test data
-#' data("mtcars")
-#'
-#' # Basic correlation matrix with defaults
-#' jjcorrmat(
-#'   data = mtcars,
-#'   dep = c("mpg", "hp", "wt", "qsec"),
-#'   typestatistics = "parametric"
-#' )
-#'
-#' # Customized correlation matrix
-#' jjcorrmat(
-#'   data = mtcars,
-#'   dep = c("mpg", "hp", "wt", "qsec", "disp"),
-#'   typestatistics = "nonparametric",
-#'   matrixtype = "lower",
-#'   matrixmethod = "circle",
-#'   padjustmethod = "bonferroni",
-#'   k = 3,
-#'   lowcolor = "blue",
-#'   midcolor = "white",
-#'   highcolor = "red",
-#'   title = "Motor Trend Car Correlations"
-#' )
-#'
-#' # Grouped correlation matrix by number of cylinders
-#' jjcorrmat(
-#'   data = mtcars,
-#'   dep = c("mpg", "hp", "wt", "qsec"),
-#'   grvar = "cyl",
-#'   typestatistics = "robust",
-#'   siglevel = 0.01
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep List of continuous variables for which the correlation matrix
 #'   will be computed and visualized. All variables must be numeric.

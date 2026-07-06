@@ -209,33 +209,3 @@ events per patient) using mixed-effects modeling. The random effects
 capture cluster-specific variation while estimating population-level  fixed
 effects.
 }
-\examples{
-\donttest{
-# Example 1: Patients clustered within hospitals
-library(survival)
-library(coxme)
-
-mixedcox(
-    data = hospital_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    fixed_effects = c("age", "sex", "treatment"),
-    cluster_var = "hospital_id",
-    random_effects = "intercept"
-)
-
-# Example 2: Multiple tumors per patient
-mixedcox(
-    data = tumor_data,
-    elapsedtime = "survival_time",
-    outcome = "recurrence",
-    outcomeLevel = "Yes",
-    fixed_effects = c("tumor_size", "grade", "stage"),
-    continuous_effects = c("age", "biomarker_level"),
-    cluster_var = "patient_id",
-    random_effects = "slope",
-    random_slope_var = "treatment"
-)
-}
-}

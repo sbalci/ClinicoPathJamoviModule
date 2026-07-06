@@ -128,29 +128,6 @@ retractedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' can optionally retrieve PubMed IDs. Includes DOI format validation, rate 
 #' limiting, and  robust error handling for reliable results.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example 1: Basic retraction check
-#' data <- data.frame(
-#'   doi = c("10.1126/science.aac4716", "10.1038/nature12373", "10.1016/j.cell.2014.09.045")
-#' )
-#' result <- retracted(data = data, doi = "doi")
-#'
-#' # Example 2: Include PubMed IDs
-#' result_with_pmid <- retracted(
-#'   data = data,
-#'   doi = "doi",
-#'   pmid = TRUE
-#' )
-#'
-#' # Example 3: Using different database
-#' result_rw <- retracted(
-#'   data = data,
-#'   doi = "doi",
-#'   database = "rw"
-#' )
-#'}
 #' @param data The data as a data frame containing the DOI variable to check.
 #'   Must have at least one column with DOI strings.
 #' @param doi Column containing DOI strings to check for retractions. Supports

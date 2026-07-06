@@ -273,21 +273,6 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' analysis,
 #' correspondence analysis) are planned but not yet available.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # dat <- as.data.frame(your_data)
-#' # ClinicoPathDescriptives::crosstable(
-#' #   data = dat,
-#' #   vars = vars(YourRowVariable),
-#' #   group = "YourGroupingVariable",
-#' #   sty = "finalfit",
-#' #   excl = TRUE,
-#' #   cont = "mean",
-#' #   pcat = "chisq"
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param vars The variable(s) that will appear as rows in the cross table.
 #' @param group The variable that will appear as columns (groups) in the

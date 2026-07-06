@@ -97,15 +97,3 @@ A results object containing:
 Cox proportional hazards model diagnostic plots using ggcoxdiagnostics from
 survminer package for comprehensive model validation.
 }
-\examples{
-\donttest{
-# Example usage:
-library(survival)
-library(survminer)
-# Fit Cox model
-cox_model <- coxph(Surv(time, status) ~ age + sex, data = data)
-# Generate diagnostic plots
-ggcoxdiagnostics(cox_model, type = "martingale")
-ggcoxdiagnostics(cox_model, type = "deviance")
-}
-}

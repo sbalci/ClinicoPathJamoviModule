@@ -569,11 +569,6 @@ flexcompriskBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' techniques including spline-based hazards, time-varying effects, and  
 #' robust prediction models with comprehensive model validation.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param time Follow-up time variable
 #' @param event Event type variable (0=censored, 1=event of interest,

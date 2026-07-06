@@ -428,11 +428,6 @@ directbinomialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' method provides direct modeling of cumulative incidence without  
 #' proportional subdistribution hazards assumptions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param time Follow-up time variable
 #' @param event Event type variable (0=censored, 1=event of interest,

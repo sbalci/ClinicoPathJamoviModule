@@ -96,8 +96,3 @@ PWA, RI, and Sx from continuous recordings of arterial blood pressure,
 intracranial pressure,  middle cerebral artery blood velocity, and heart
 rate.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

@@ -923,18 +923,6 @@ spikeslabpriorsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' survival analysis with automatic variable selection, model averaging, and
 #' uncertainty quantification for clinical biomarker discovery.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Spike-and-slab variable selection
-#' spikeslabpriors(
-#'     data = biomarker_data,
-#'     outcome = "clinical_response",
-#'     predictors = c("gene1", "gene2", "gene3", ..., "gene1000"),
-#'     model_type = "regression",
-#'     prior_inclusion_prob = 0.1
-#' )
-#'}
 #' @param data The data as a data frame for spike-and-slab variable selection.
 #' @param outcome .
 #' @param predictors .

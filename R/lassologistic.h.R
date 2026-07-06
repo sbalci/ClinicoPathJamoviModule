@@ -837,12 +837,6 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' classification problems. Ideal for diagnostic pathology studies that build
 #' classifiers (e.g., tumor type A vs B) with automatic feature selection.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' lassologistic(data = data, outcome = "diagnosis",
-#'     outcomeLevel = "PanNEC", explanatory = vars(p53, Rb1, Ki67, SSTR2A))
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Binary outcome variable to classify. Can be factor or
 #'   numeric with exactly two observed values.

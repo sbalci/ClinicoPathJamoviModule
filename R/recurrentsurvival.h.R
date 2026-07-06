@@ -593,20 +593,6 @@ recurrentsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' and chronic disease episodes. Handles gap time, calendar time, and counting 
 #' process formulations.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Cancer recurrence analysis
-#' recurrentsurvival(
-#'     data = cancer_data,
-#'     subject_id = patient_id,
-#'     event_time = recurrence_time,
-#'     event_type = recurrence_type,
-#'     terminal_event = death,
-#'     covariates = c("age", "stage", "treatment"),
-#'     model_type = "ag_model"
-#' )
-#'}
 #' @param subject_id Variable identifying unique subjects who can have
 #'   multiple events
 #' @param event_time Time variable for recurrent event occurrence

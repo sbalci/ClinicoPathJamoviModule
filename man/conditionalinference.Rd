@@ -134,17 +134,3 @@ values without surrogate splits, and robust performance with correlated
 predictors. The method is particularly suitable for exploratory survival
 analysis and biomarker discovery in clinical research.
 }
-\examples{
-\donttest{
-result <- conditionalinference(
-    data = mydata,
-    time = "time_to_event",
-    event = "event_indicator",
-    predictors = c("age", "stage", "biomarker"),
-    mincriterion = 0.95,
-    minsplit = 20,
-    minbucket = 7,
-    maxdepth = 5
-)
-}
-}

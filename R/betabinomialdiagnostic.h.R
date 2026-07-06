@@ -840,18 +840,6 @@ betabinomialdiagnosticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' centers using beta-binomial distributions with flexible correlation 
 #' structures.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Beta-binomial diagnostic accuracy analysis
-#' betabinomialdiagnostic(
-#'     data = diagnostic_data,
-#'     test_result = test_outcome,
-#'     disease_status = true_disease,
-#'     study_id = study_center,
-#'     overdispersion_model = "beta_binomial"
-#' )
-#'}
 #' @param test_result Test result variable
 #' @param disease_status Gold standard disease status
 #' @param study_id Clustering variable for multi-center studies

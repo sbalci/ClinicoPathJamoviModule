@@ -317,16 +317,6 @@ jscattermoreBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' High-performance scatter plots using the scattermore package for plotting 
 #' millions of points efficiently with advanced customization options.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' library(scattermore)
-#' # Fast scatter plot
-#' scattermoreplot(x, y)
-#' # ggplot2 integration
-#' ggplot(data) + geom_scattermore(aes(x = x, y = y))
-#'}
 #' @param data The data as a data frame.
 #' @param x_var Variable for the X-axis.
 #' @param y_var Variable for the Y-axis.

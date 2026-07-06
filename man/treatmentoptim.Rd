@@ -137,16 +137,3 @@ characteristics, medical history, and evidence-based clinical guidelines
 for
 optimal therapeutic decision-making.
 }
-\examples{
-\donttest{
-data('histopathology', package='ClinicoPath')
-
-# Basic treatment optimization analysis
-treatmentoptim(histopathology,
-             patientVars = c('Age', 'Gender'),
-             treatmentOptions = 'Treatment',
-             responseVar = 'Response',
-             treatment_selection = TRUE,
-             dose_optimization = TRUE)
-}
-}

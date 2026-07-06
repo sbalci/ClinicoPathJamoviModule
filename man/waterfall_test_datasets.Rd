@@ -28,7 +28,7 @@ Main test dataset with pre-calculated percentage changes (30 patients):
 
 \subsection{\code{waterfall_spider_test}}{
 
-Longitudinal data for spider plot testing (120 observations: 20 patients × 6 timepoints):
+Longitudinal data for spider plot testing (120 observations: 20 patients x 6 timepoints):
 \describe{
 \item{patientID}{Character. Patient identifier (PT001-PT020)}
 \item{treatment}{Character. Treatment group (Experimental, Standard)}
@@ -40,7 +40,7 @@ Longitudinal data for spider plot testing (120 observations: 20 patients × 6 ti
 
 \subsection{\code{waterfall_raw_test}}{
 
-Raw tumor measurements for percentage calculation (125 observations: 25 patients × 5 timepoints):
+Raw tumor measurements for percentage calculation (125 observations: 25 patients x 5 timepoints):
 \describe{
 \item{patientID}{Character. Patient identifier (PT001-PT025)}
 \item{time}{Numeric. Months from baseline (0, 1, 2, 4, 6)}
@@ -204,10 +204,10 @@ head(waterfall_test)
 # Basic waterfall plot
 \dontrun{
 waterfall(
-  data = waterfall_test,
-  patientID = "patientID",
-  responseVar = "best_response",
-  inputType = "percentage"
+    data = waterfall_test,
+    patientID = "patientID",
+    responseVar = "best_response",
+    inputType = "percentage"
 )
 }
 
@@ -215,12 +215,12 @@ waterfall(
 \dontrun{
 data(waterfall_spider_test)
 waterfall(
-  data = waterfall_spider_test,
-  patientID = "patientID",
-  responseVar = "pct_change",
-  timeVar = "time",
-  showSpiderPlot = TRUE,
-  timeUnitLabel = "months"
+    data = waterfall_spider_test,
+    patientID = "patientID",
+    responseVar = "pct_change",
+    timeVar = "time",
+    showSpiderPlot = TRUE,
+    timeUnitLabel = "months"
 )
 }
 
@@ -228,12 +228,12 @@ waterfall(
 \dontrun{
 data(waterfall_raw_test)
 waterfall(
-  data = waterfall_raw_test,
-  patientID = "patientID",
-  responseVar = "tumor_size",
-  timeVar = "time",
-  inputType = "raw",
-  groupVar = "treatment"
+    data = waterfall_raw_test,
+    patientID = "patientID",
+    responseVar = "tumor_size",
+    timeVar = "time",
+    inputType = "raw",
+    groupVar = "treatment"
 )
 }
 
@@ -241,12 +241,12 @@ waterfall(
 \dontrun{
 data(waterfall_phase2)
 waterfall(
-  data = waterfall_phase2,
-  patientID = "patientID",
-  responseVar = "best_response",
-  groupVar = "cohort",
-  generateCopyReadyReport = TRUE,
-  showConfidenceIntervals = TRUE
+    data = waterfall_phase2,
+    patientID = "patientID",
+    responseVar = "best_response",
+    groupVar = "cohort",
+    generateCopyReadyReport = TRUE,
+    showConfidenceIntervals = TRUE
 )
 }
 

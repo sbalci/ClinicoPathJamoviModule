@@ -597,12 +597,6 @@ lassocoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Performs Lasso-penalized Cox regression for variable selection in survival 
 #' analysis.
-#'
-#' @examples
-#' \donttest{
-#' lassocox(data = data, elapsedtime = "Time", outcome = "Status",
-#'     outcomeLevel = "1", explanatory = vars(age, stage, grade))
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime The numeric variable representing follow-up time until
 #'   the event or last observation.

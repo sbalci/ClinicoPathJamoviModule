@@ -355,16 +355,6 @@ missingdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' handling is critical
 #' for valid statistical inference.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Select variables for missing data analysis
-#' # 2. Explore missing data patterns and correlations
-#' # 3. Configure imputation methods and parameters
-#' # 4. Run multiple imputation and evaluate convergence
-#' # 5. Compare observed vs imputed data distributions
-#'}
 #' @param data The data as a data frame.
 #' @param analysis_vars Variables to include in the missing data analysis and
 #'   imputation. Can include numeric, factor, and ID variables.

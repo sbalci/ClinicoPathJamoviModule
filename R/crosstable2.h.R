@@ -198,22 +198,6 @@ crosstable2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Cross Tables
 #'
 #' Function for making Cross Tables.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # dat <- as.data.frame(your_data)
-#' # ClinicoPath::crosstable(
-#' #   data = dat,
-#' #   vars = vars(YourRowVariable),
-#' #   group = "YourGroupingVariable",
-#' #   sty = "finalfit",
-#' #   excl = TRUE,
-#' #   cont = "mean",
-#' #   pcat = "chisq",
-#' #   exportCSV = TRUE
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param vars The variable(s) that will appear as rows in the cross table.
 #' @param group The variable that will appear as columns (groups) in the

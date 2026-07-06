@@ -408,56 +408,6 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' reference standards for estimating test performance when no perfect 
 #' reference test exists.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Basic example with simulated diagnostic test data
-#' set.seed(123)
-#' n <- 200
-#'
-#' # Simulate disease status (latent, unknown)
-#' disease <- rbinom(n, 1, 0.3)  # 30 percent prevalence
-#'
-#' # Simulate test results with known sensitivity/specificity
-#' test1_result <- ifelse(disease == 1,
-#'                        rbinom(sum(disease), 1, 0.85),     # sensitivity 0.85
-#'                        rbinom(sum(1-disease), 1, 0.15))   # 1-specificity 0.15
-#' test1_result <- factor(test1_result, levels=c(0,1), labels=c("Negative", "Positive"))
-#'
-#' test2_result <- ifelse(disease == 1,
-#'                        rbinom(sum(disease), 1, 0.80),     # sensitivity 0.80
-#'                        rbinom(sum(1-disease), 1, 0.10))   # 1-specificity 0.10
-#' test2_result <- factor(test2_result, levels=c(0,1), labels=c("Negative", "Positive"))
-#'
-#' # Create data frame
-#' test_data <- data.frame(
-#'     Test1 = test1_result,
-#'     Test2 = test2_result
-#' )
-#'
-#' # Latent Class Analysis (recommended method)
-#' nogoldstandard(
-#'     data = test_data,
-#'     test1 = "Test1",
-#'     test1Positive = "Positive",
-#'     test2 = "Test2",
-#'     test2Positive = "Positive",
-#'     method = "latent_class"
-#' )
-#'
-#' # With bootstrap confidence intervals
-#' nogoldstandard(
-#'     data = test_data,
-#'     test1 = "Test1",
-#'     test1Positive = "Positive",
-#'     test2 = "Test2",
-#'     test2Positive = "Positive",
-#'     method = "latent_class",
-#'     bootstrap = TRUE,
-#'     nboot = 500,
-#'     verbose = TRUE
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param clinicalPreset Predefined clinical scenarios with optimized settings
 #'   and method recommendations.

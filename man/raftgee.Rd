@@ -117,20 +117,3 @@ are violated, offering distribution-free methods for modeling survival
 times with emphasis on median survival relationships and time acceleration
 effects in clinical research applications.
 }
-\examples{
-\donttest{
-# Example 1: Basic rank-based AFT with GEE
-library(aftgee)
-library(survival)
-
-raftgee(
-    data = lung_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "2",
-    covariates = c("age", "sex", "ph.ecog"),
-    rank_method = "logrank",
-    correlation_structure = "independence"
-)
-}
-}

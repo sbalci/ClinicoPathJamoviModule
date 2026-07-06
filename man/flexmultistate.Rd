@@ -106,15 +106,3 @@ progression.
 Models transition hazards using splines and handles competing risks and
 intermediate states.
 }
-\examples{
-\donttest{
-# Example usage
-flexmultistate(
-    data = disease_data,
-    time = transition_time,
-    status = state_variable,
-    states = c("Healthy", "Disease", "Death"),
-    transition_matrix = transition_def
-)
-}
-}

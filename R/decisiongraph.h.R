@@ -962,11 +962,6 @@ decisiongraphBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' decision nodes, chance nodes, and terminal nodes. Supports visualization of 
 #' treatment pathways, probabilities, costs, and outcomes.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame containing decision tree parameters.
 #' @param treeType Type of decision tree to create.
 #' @param clinicalPreset Pre-configured analysis templates for common clinical

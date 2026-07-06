@@ -1466,21 +1466,6 @@ qualityoflifeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' patient-centered care, and
 #' health technology assessment.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('qol_data')
-#'
-#' qualityoflife(
-#'     data = qol_data,
-#'     qol_domains = list(
-#'         physical = c("pf1", "pf2", "pf3"),
-#'         mental = c("mh1", "mh2", "mh3")
-#'     ),
-#'     patient_id = "patient_id",
-#'     instrument_type = "sf36"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param physical_function_items Items measuring physical functioning domain
 #' @param role_physical_items Items measuring role limitations due to physical

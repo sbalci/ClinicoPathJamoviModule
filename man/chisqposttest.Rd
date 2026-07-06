@@ -123,8 +123,3 @@ is not available (by design, as it would encourage inappropriate multiple
 testing). No automated validation against established packages exists. Use
 with caution for clinical decision-making.
 }
-\examples{
-\donttest{
-# example will be added
-}
-}

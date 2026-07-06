@@ -536,27 +536,6 @@ survivalendpointsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' variables for use in survival analysis. Designed for seamless integration 
 #' with swimmer/waterfall plot data.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data <- data.frame(
-#'     patient = c("P01", "P02", "P03"),
-#'     start_date = as.Date(c("2023-01-01", "2023-02-01", "2023-03-01")),
-#'     end_date = as.Date(c("2023-06-15", "2023-08-20", "2023-09-10")),
-#'     last_followup = as.Date(c("2024-01-01", "2023-12-01", "2024-02-01")),
-#'     death = c(0, 1, 0),
-#'     progression = c(1, 1, 0)
-#' )
-#'
-#' survivalendpoints(
-#'     data = data,
-#'     patientId = "patient",
-#'     startDate = "start_date",
-#'     lastFollowup = "last_followup",
-#'     deathEvent = "death",
-#'     progressionEvent = "progression"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param patientId Patient identifier variable
 #' @param startDate Treatment start date or baseline time (Date or numeric)

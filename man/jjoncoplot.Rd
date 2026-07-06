@@ -115,18 +115,3 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 Creates oncoplots (mutation landscapes) to visualize genomic alterations
 across genes and samples with optional clinical annotations.
 }
-\examples{
-\donttest{
-data <- data.frame(
-    SampleID = paste0("S", 1:10),
-    TP53 = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1),
-    KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0),
-    PIK3CA = c(1, 1, 0, 0, 1, 0, 1, 1, 0, 0)
-)
-result <- jjoncoplot(
-    data = data,
-    sampleVar = "SampleID",
-    geneVars = c("TP53", "KRAS", "PIK3CA")
-)
-}
-}

@@ -183,17 +183,3 @@ and variance components in complex survival data with unobserved
 heterogeneity. Supports multiple frailty distributions and convergence
 diagnostics.
 }
-\examples{
-\donttest{
-data('lung', package='survival')
-
-emfrailty(data = lung,
-         elapsedtime = 'time',
-         outcome = 'status',
-         covariates = c('age', 'sex'),
-         frailty_variable = 'inst',
-         frailty_distribution = 'gamma',
-         estimation_method = 'em',
-         max_iterations = 100)
-}
-}

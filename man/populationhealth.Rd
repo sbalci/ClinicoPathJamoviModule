@@ -173,17 +173,3 @@ modeling for public health surveillance, population management, and
 healthcare
 system optimization through evidence-based population health insights.
 }
-\examples{
-\donttest{
-data('population_health', package='ClinicoPath')
-
-# Basic population health analytics
-populationhealth(population_health,
-               patientID = 'PatientID',
-               healthOutcomes = c('BMI', 'BloodPressure', 'Cholesterol'),
-               demographics = c('Age', 'Gender', 'Ethnicity'),
-               geographic = 'ZipCode',
-               risk_stratification = TRUE,
-               predictive_modeling = TRUE)
-}
-}

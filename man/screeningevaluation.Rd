@@ -225,16 +225,3 @@ assessment, quality improvement, and evidence-based screening policy
 development using
 standardized epidemiological methods and performance indicators.
 }
-\examples{
-\donttest{
-data('screening_data')
-
-screeningevaluation(
-    data = screening_data,
-    screening_result = "screen_positive",
-    disease_status = "true_disease",
-    age_var = "age",
-    screening_round = "round_number"
-)
-}
-}

@@ -120,18 +120,3 @@ proportional hazards models through statistical tests, graphical
 diagnostics, and time-dependent coefficient analysis for robust model
 assessment and assumption verification.
 }
-\examples{
-\donttest{
-# Example 1: Basic proportional hazards testing
-library(survival)
-
-pheval(
-    data = lung_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "2",
-    covariates = c("age", "sex", "ph.ecog"),
-    test_methods = c("schoenfeld", "scaled_schoenfeld")
-)
-}
-}

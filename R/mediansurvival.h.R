@@ -290,11 +290,6 @@ mediansurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Performs statistical comparisons of median survival times between groups. 
 #' Provides confidence intervals, hypothesis tests, and robust estimators for  
 #' median survival with handling of censored data and group comparisons.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage will be added
-#'}
 #' @param data The data as a data frame.
 #' @param elapsedtime Time variable for survival analysis.
 #' @param outcome Event indicator variable.

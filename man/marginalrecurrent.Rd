@@ -108,8 +108,3 @@ covariate effects on  recurrent event rates, with options for marginal rate
 models, accelerated rate  models, and gamma frailty models to handle
 within-subject correlation.
 }
-\examples{
-\donttest{
-data('histopathology', package='ClinicoPath')
-}
-}

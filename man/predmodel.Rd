@@ -74,16 +74,3 @@ and discrimination metrics. Supports logistic regression with
 stepwise/LASSO selection, ROC analysis, calibration plots, and bootstrap
 validation.
 }
-\examples{
-\donttest{
-# Example usage:
-# data <- your_data
-# ClinicoPath::predmodel(
-#   data = data,
-#   outcome = "disease",
-#   predictors = vars(age, biomarker, stage),
-#   validation = "bootstrap",
-#   calibration = TRUE
-# )
-}
-}

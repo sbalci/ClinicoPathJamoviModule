@@ -91,14 +91,3 @@ repeated measures  ANOVA when normality assumptions are violated. It tests
 whether the median values  differ significantly across multiple related
 measurements or time points.
 }
-\examples{
-\donttest{
-data |>
-friedmantest(
-    dependent = "measurement_value",
-    subject = "patient_id",
-    within = "time_point",
-    posthoc = TRUE
-)
-}
-}

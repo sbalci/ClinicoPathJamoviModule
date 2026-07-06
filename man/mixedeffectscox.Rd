@@ -139,17 +139,3 @@ survival data with random effects. Accounts for clustering, repeated
 measurements, and unobserved heterogeneity using the coxme framework for
 multi-level survival analysis in clinical research.
 }
-\examples{
-\donttest{
-# Mixed-effects Cox model with random intercept
-mixedeffectscox(
-    data = hierarchical_data,
-    elapsedtime = "time",
-    outcome = "status",
-    outcomeLevel = "1",
-    fixed_effects = c("age", "treatment"),
-    random_effects = c("hospital"),
-    random_structure = "random_intercept"
-)
-}
-}

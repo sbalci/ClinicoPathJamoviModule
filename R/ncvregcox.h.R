@@ -552,19 +552,6 @@ ncvregcoxBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' for genomics and high-dimensional clinical data where interpretable 
 #' variable selection is crucial.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' ncvregcox(
-#'     data = data,
-#'     time = "time",
-#'     event = "event",
-#'     covariates = c("x1", "x2", "x3"),
-#'     penalty = "SCAD",
-#'     cv_folds = 10,
-#'     lambda_type = "min"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param time survival time variable
 #' @param event event indicator (1=event, 0=censored)

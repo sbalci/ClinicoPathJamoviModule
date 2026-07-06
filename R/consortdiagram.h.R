@@ -458,15 +458,6 @@ consortdiagramBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Follows the approach described by Riinu Ots 
 #' (https://www.riinu.me/2024/02/consort/).
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Prepare data with exclusion columns
-#' # Each row = one participant
-#' # Non-NA values in exclusion columns indicate exclusion at that stage
-#' # Example:
-#' # data with columns: id, age_exclusion, consent_exclusion, randomization_arm
-#'}
 #' @param data Patient-level data frame where each row represents one
 #'   participant. Exclusion columns should have non-NA values for excluded
 #'   participants.

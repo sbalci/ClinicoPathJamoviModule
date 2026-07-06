@@ -93,16 +93,3 @@ Key features:
 \item Publication bias assessment and adjustment
 }
 }
-\examples{
-\donttest{
-# Bayesian meta-analysis of treatment effects
-bayesianmetaanalysis(
-    data = data,
-    effectSize = "effect",
-    standardError = "se",
-    studyId = "study",
-    modelType = "random_effects",
-    outcomeType = "continuous"
-)
-}
-}

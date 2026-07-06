@@ -603,20 +603,6 @@ clinicaltrialdesignBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' trials, superiority trials, and observational studies with proper power 
 #' calculations.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('your_data')
-#'
-#' clinicaltrialdesign(
-#'     trial_type = "superiority",
-#'     outcome_type = "continuous",
-#'     test_type = "two_sample_ttest",
-#'     effect_size = 0.5,
-#'     alpha = 0.05,
-#'     power = 0.80
-#' )
-#'}
 #' @param data the data as a data frame (optional for power calculations)
 #' @param trial_type Type of clinical trial design for appropriate power
 #'   calculations

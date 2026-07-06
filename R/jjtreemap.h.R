@@ -309,11 +309,6 @@ jjtreemapBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' 'Creates treemap visualizations for categorical data'
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # example will be added
-#'}
 #' @param data The data as a data frame.
 #' @param group .
 #' @param size .

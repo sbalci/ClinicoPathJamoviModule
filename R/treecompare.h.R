@@ -630,20 +630,6 @@ treecompareBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Compares CART, Random Forest, and Gradient Boosting with cross-validation,
 #' statistical testing, and clinical performance assessment.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Compare multiple tree algorithms
-#' treecomparison(
-#'     data = clinical_data,
-#'     vars = c("biomarker1", "biomarker2", "age"),
-#'     facs = c("grade", "stage"),
-#'     target = "outcome",
-#'     targetLevel = "positive",
-#'     algorithms = c("cart", "rf", "gbm"),
-#'     validation = "repeated_cv"
-#' )
-#'}
 #' @param data The data as a data frame for algorithm comparison.
 #' @param vars .
 #' @param facs .

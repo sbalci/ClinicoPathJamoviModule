@@ -73,12 +73,3 @@ This module provides data quality assessment including duplicate detection,
 missing value analysis, and data completeness summary (similar to sumvar's
 dup() function).
 }
-\examples{
-\donttest{
-# Example:
-# 1. Load your data frame.
-# 2. Select variables to check for data quality issues.
-# 3. Choose analysis type (duplicates, missing values, or both).
-# 4. Run the dataquality module to see comprehensive data quality report.
-}
-}

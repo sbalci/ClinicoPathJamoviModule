@@ -550,21 +550,6 @@ jjoncoplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Creates oncoplots (mutation landscapes) to visualize genomic alterations 
 #' across genes and samples with optional clinical annotations.
-#'
-#' @examples
-#' \donttest{
-#' data <- data.frame(
-#'     SampleID = paste0("S", 1:10),
-#'     TP53 = c(1, 0, 1, 0, 1, 0, 0, 1, 0, 1),
-#'     KRAS = c(0, 1, 0, 1, 0, 1, 1, 0, 1, 0),
-#'     PIK3CA = c(1, 1, 0, 0, 1, 0, 1, 1, 0, 0)
-#' )
-#' result <- jjoncoplot(
-#'     data = data,
-#'     sampleVar = "SampleID",
-#'     geneVars = c("TP53", "KRAS", "PIK3CA")
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param sampleVar Variable containing sample identifiers.
 #' @param geneVars Variables representing genes or mutations (0/1 or

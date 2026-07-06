@@ -952,21 +952,6 @@ advancedtrialsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' state-of-the-art
 #' methodology and regulatory compliance.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('clinical_trial')
-#'
-#' advancedtrials(
-#'     data = clinical_trial,
-#'     time_var = "survival_time",
-#'     event_var = "death",
-#'     treatment_var = "arm",
-#'     design_type = "group_sequential",
-#'     alpha_spending = "obrien_fleming",
-#'     number_of_looks = 3
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param time_var Time to primary endpoint (survival, progression, response)
 #' @param event_var Event indicator (1=event, 0=censored)

@@ -136,8 +136,3 @@ function • Automatic model comparison and selection • Clinical
 interpretation of parameters • Comprehensive diagnostic plots • Copy-ready
 report templates
 }
-\examples{
-\donttest{
-# Example usage will be added
-}
-}

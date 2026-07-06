@@ -138,13 +138,3 @@ infrequent. This module provides comprehensive PR analysis with optimal
 threshold selection, comparison to baseline (random classifier), and
 F-score optimization for different precision-recall trade-offs.
 }
-\examples{
-\donttest{
-result <- prauc(
-    data = pathology_data,
-    outcome = "cancer",
-    predictor = "ai_score",
-    positive_level = "positive"
-)
-}
-}

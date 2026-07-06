@@ -431,16 +431,6 @@ ordinalmixedmodelBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' ordinal endpoints. Uses the ordinal package for fitting cumulative link 
 #' mixed models with logit, probit, or complementary log-log links.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' ordinalmixedmodel(
-#'     dep = "rating",
-#'     fixedFactors = "scanner",
-#'     randomTerms = "pathologist"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param dep Ordinal dependent variable (e.g., Likert scale, tumor grade,
 #'   severity level)

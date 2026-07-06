@@ -351,17 +351,6 @@ aivalidationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Calculates AUC, sensitivity, and specificity for predictor variables and 
 #' performs statistical comparison using DeLong test.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('medical_ai_data', package='ClinicoPath')
-#'
-#' aivalidation(data = medical_ai_data,
-#'             predictorVars = c('AI_score', 'human_score', 'biomarker1'),
-#'             outcomeVar = 'diagnosis',
-#'             positiveLevel = 'positive',
-#'             compareModels = TRUE)
-#'}
 #' @param data the data as a data frame
 #' @param predictorVars a vector of strings naming the predictor variables (AI
 #'   scores, human scores, biomarkers, etc.) from \code{data}. Limited to first

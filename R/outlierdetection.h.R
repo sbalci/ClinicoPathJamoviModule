@@ -295,15 +295,6 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' outlier detection capabilities.
 #' Perfect for clinical research data quality control and preprocessing.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example:
-#' # 1. Select variables for outlier detection analysis.
-#' # 2. Choose detection methods (univariate, multivariate, or composite).
-#' # 3. Configure thresholds and visualization options.
-#' # 4. Review outlier results and exclusion recommendations.
-#'}
 #' @param data The data as a data frame.
 #' @param vars Continuous variables to analyze for outliers. The module will
 #'   detect outliers based on the selected variables using the chosen detection

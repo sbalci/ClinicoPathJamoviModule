@@ -884,17 +884,6 @@ segmentationmetricsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' workflows, comparing segmentation methods, and establishing performance 
 #' benchmarks for digital pathology systems.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' result <- segmentationmetrics(
-#'     data = segmentation_results,
-#'     prediction_mask = "ai_segmentation",
-#'     ground_truth_mask = "expert_annotation",
-#'     image_id = "slide_id",
-#'     metric_type = "all"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param prediction_mask AI-predicted segmentation mask. For binary
 #'   segmentation, this is a binary variable (0/1 or background/foreground). For

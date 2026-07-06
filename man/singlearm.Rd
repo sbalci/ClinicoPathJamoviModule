@@ -274,14 +274,3 @@ when you want to analyze overall survival  characteristics of your entire
 study population - for example, to determine median  survival time or
 1/3/5-year survival rates for all patients collectively.
 }
-\examples{
-\donttest{
-# Example analyzing overall survival for a patient cohort:
-# singlearm(
-#   data = patient_data,
-#   elapsedtime = "months_survival",
-#   outcome = "death_status",
-#   outcomeLevel = "Dead"
-# )
-}
-}

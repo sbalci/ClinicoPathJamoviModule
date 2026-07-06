@@ -386,36 +386,6 @@ jjpiestatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' ggstatsplot::grouped_ggpiestats to generate Pie Charts with
 #' statistical analysis.'
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Load test data
-#' data(jjpiestats_test_data)
-#'
-#' # Basic pie chart
-#' jjpiestats(
-#'   data = jjpiestats_test_data,
-#'   dep = "treatment_response",
-#'   typestatistics = "parametric"
-#' )
-#'
-#' # Pie chart with grouping
-#' jjpiestats(
-#'   data = jjpiestats_test_data,
-#'   dep = "treatment_response",
-#'   group = "treatment_arm",
-#'   resultssubtitle = TRUE
-#' )
-#'
-#' # Grouped pie charts by split variable
-#' jjpiestats(
-#'   data = jjpiestats_test_data,
-#'   dep = "disease_severity",
-#'   group = "gender",
-#'   grvar = "hospital_site",
-#'   typestatistics = "nonparametric"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param dep The categorical variable to display in the pie chart. This
 #'   variable will be used to create pie slices representing the proportion of

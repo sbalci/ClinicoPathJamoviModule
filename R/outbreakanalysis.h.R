@@ -950,19 +950,6 @@ outbreakanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #' robust statistical methods
 #' for public health decision-making and intervention planning.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data('outbreak_data')
-#'
-#' outbreakanalysis(
-#'     data = outbreak_data,
-#'     case_status = "case",
-#'     exposure_vars = c("food_a", "food_b", "water"),
-#'     date_onset = "onset_date",
-#'     location_var = "location"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param case_status Binary variable indicating case (1) vs control (0) or
 #'   case vs non-case

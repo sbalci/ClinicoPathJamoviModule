@@ -395,13 +395,6 @@ leaveonecenteroutBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' held-out center, repeating for each center. Provides internal-external
 #' validation recommended by TRIPOD and Debray et al. (2015).
 #' 
-#'
-#' @examples
-#' \donttest{
-#' leaveonecenterout(data = data, outcome = "diagnosis",
-#'     outcomeLevel = "PanNEC", predictors = vars(p53, Rb1, SSTR2A),
-#'     centerVariable = "institution", modelType = "logistic")
-#'}
 #' @param data The data as a data frame.
 #' @param outcome Outcome variable to predict. Binary for logistic, continuous
 #'   for linear.

@@ -718,18 +718,6 @@ clinicalvalidationinteractiveBase <- if (requireNamespace("jmvcore", quietly=TRU
 #' parameter correction, clinical scenario presets, and dynamic threshold 
 #' optimization for medical research and diagnostic applications.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Interactive clinical validation with presets
-#' clinical_validation_interactive(
-#'     data = clinical_data,
-#'     outcome = "diagnosis",
-#'     predictors = c("biomarker1", "biomarker2", "age"),
-#'     clinical_preset = "diagnostic_biomarker",
-#'     auto_optimize = TRUE
-#' )
-#'}
 #' @param data The data as a data frame for clinical model validation.
 #' @param outcome .
 #' @param outcomeLevel .

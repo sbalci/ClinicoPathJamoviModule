@@ -519,17 +519,6 @@ ihcsurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' Survival analysis and prognostic clustering using IHC markers. Designed for 
 #' prognostic biomarker discovery and risk stratification.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' ihcsurvival(
-#'     markers = c("ER", "PR", "HER2", "Ki67"),
-#'     survivalTime = "os_months",
-#'     survivalEvent = "death",
-#'     prognosticClustering = TRUE
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param markers IHC marker variables for prognostic analysis
 #' @param survivalTime Time to event variable (months, years, days)

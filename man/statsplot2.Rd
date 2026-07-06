@@ -60,30 +60,3 @@ comprehensive fallback options. Supports both independent and repeated
 measures designs with various plot types including violin plots, scatter
 plots, bar charts, and alluvial diagrams.
 }
-\examples{
-\donttest{
-# Automatic plot selection for factor vs continuous variables
-statsplot2(
-    data = mtcars,
-    dep = "mpg",
-    group = "cyl",
-    direction = "independent",
-    distribution = "p"
-)
-
-# Repeated measures with alluvial diagram
-statsplot2(
-    data = survey_data,
-    dep = "condition_baseline",
-    group = "condition_followup",
-    direction = "repeated",
-    alluvsty = "t1"
-)
-
-# Enhanced error messages provide contextual guidance:
-# - Variable names and types in error messages
-# - Specific data requirement feedback
-# - Package installation instructions when needed
-# - Actionable suggestions for unsupported combinations
-}
-}

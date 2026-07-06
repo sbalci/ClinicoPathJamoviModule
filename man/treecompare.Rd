@@ -174,17 +174,3 @@ Comprehensive comparison of decision tree algorithms for clinical research.
 Compares CART, Random Forest, and Gradient Boosting with cross-validation,
 statistical testing, and clinical performance assessment.
 }
-\examples{
-\donttest{
-# Compare multiple tree algorithms
-treecomparison(
-    data = clinical_data,
-    vars = c("biomarker1", "biomarker2", "age"),
-    facs = c("grade", "stage"),
-    target = "outcome",
-    targetLevel = "positive",
-    algorithms = c("cart", "rf", "gbm"),
-    validation = "repeated_cv"
-)
-}
-}

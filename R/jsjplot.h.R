@@ -369,18 +369,6 @@ jsjplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'
 #' Social science statistical visualization using the sjPlot package for 
 #' regression tables, model plots, and interaction visualizations.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' library(sjPlot)
-#' # Regression table
-#' tab_model(lm_model)
-#' # Coefficient plot
-#' plot_model(lm_model)
-#' # Interaction plot
-#' plot_model(lm_model, type = "int")
-#'}
 #' @param data The data as a data frame.
 #' @param analysis_type Type of statistical visualization to generate.
 #' @param dependent_var Dependent/outcome variable for analysis.

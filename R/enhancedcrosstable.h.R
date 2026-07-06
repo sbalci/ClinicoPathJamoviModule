@@ -322,16 +322,6 @@ enhancedcrosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #'
 #' Enhanced cross-tabulation analysis using the danchaltiel/crosstable package 
 #' for advanced clinical research functionality.
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' library(crosstable)
-#' # Enhanced crosstable with tidyselect
-#' crosstable(data, c(var1, var2), by = group_var)
-#' # Formula interface
-#' crosstable(data, c(age_group = age > 65), by = treatment)
-#'}
 #' @param data The data as a data frame.
 #' @param vars Variables to include in the cross-tabulation (table rows).
 #' @param by_var The grouping variable for cross-tabulation (table columns).

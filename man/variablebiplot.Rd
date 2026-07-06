@@ -117,16 +117,3 @@ with vector length indicating contribution strength. Inspired by Orange
 Data Mining's contribution analysis, adapted for clinical research with
 comprehensive variable importance metrics.
 }
-\examples{
-\donttest{
-# Example: PCA biplot for tumor staging
-variablebiplot(
-    data = clinical_data,
-    groupVar = "stage",
-    features = c("age", "ki67", "grade", "size"),
-    method = "pca",
-    showLoadings = TRUE,
-    topContributors = 10
-)
-}
-}

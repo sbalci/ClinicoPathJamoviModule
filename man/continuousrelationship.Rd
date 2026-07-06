@@ -91,16 +91,3 @@ Analyzes relationships between continuous variables in clinical research
 using  evidence-based approaches from BMJ best practices. Avoids common
 pitfalls like  arbitrary categorization and linear assumptions.
 }
-\examples{
-\donttest{
-# Example: Analyzing BMI vs mortality risk
-continuousrelationship(
-    data = clinical_data,
-    outcome = "mortality",
-    predictor = "bmi",
-    modelType = "spline",
-    nKnots = 4,
-    showGuidance = TRUE
-)
-}
-}

@@ -7,7 +7,7 @@
 A formatted table according to the chosen style.
 }
 \description{
-This function creates a “Table One” – a descriptive summary table commonly used in clinicopathological research.
+This function creates a "Table One" - a descriptive summary table commonly used in clinicopathological research.
 It offers several output styles using different packages (tableone, gtsummary, arsenal, and janitor).
 }
 \section{Super classes}{

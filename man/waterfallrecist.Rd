@@ -48,8 +48,8 @@ lesions are assessed qualitatively (present/absent/progressed).}
 Used to enforce RECIST rule: max 2 target lesions per organ.}
 
 \item{diameter}{Longest diameter of target lesions in millimeters (>=10mm
-for non-lymph nodes, >=15mm for lymph nodes). For non-target lesions, can be
-NA (qualitative assessment only).}
+for non-lymph nodes, >=15mm for lymph nodes). For non-target lesions, can
+be NA (qualitative assessment only).}
 
 \item{isNewLesion}{Binary indicator (0 = baseline/existing, 1 = new lesion
 appearing after baseline). ANY new lesion automatically triggers
@@ -115,39 +115,4 @@ analysis. Implements full RECIST v1.1 protocol including target lesion
 summation, new lesion detection, non-target progression assessment, and
 response confirmation requirements. REGULATORY-READY: Suitable for clinical
 trial endpoints and regulatory submissions.
-}
-\examples{
-\donttest{
-# Example: Lesion-level data for RECIST v1.1
-data_recist <- data.frame(
-    PatientID = rep(paste0("PT", 1:3), each = 6),
-    VisitTime = rep(c(0, 4, 8, 12, 16, 20), 3),
-    LesionID = paste0("L", rep(1:2, each = 3, times = 3)),
-    LesionType = rep(c("Target", "Target"), each = 3, times = 3),
-    Location = rep(c("Liver", "Lung"), each = 3, times = 3),
-    Diameter = c(
-        # Patient 1
-        35, 28, 20,  # Lesion 1
-        42, 38, 30,  # Lesion 2
-        # Patient 2
-        50, 45, 48,  # Lesion 1
-        30, 28, 32,  # Lesion 2
-        # Patient 3
-        45, 30, 25,  # Lesion 1
-        38, 25, 20   # Lesion 2
-    ),
-    IsNewLesion = rep(0, 18)
-)
-
-waterfallrecist(
-    data = data_recist,
-    patientID = "PatientID",
-    lesionID = "LesionID",
-    visitTime = "VisitTime",
-    lesionType = "LesionType",
-    location = "Location",
-    diameter = "Diameter",
-    isNewLesion = "IsNewLesion"
-)
-}
 }

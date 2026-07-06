@@ -101,15 +101,3 @@ survivors.
 Implements mixture cure models and non-mixture cure models for oncology
 research.
 }
-\examples{
-\donttest{
-# Example usage
-curemodels(
-    data = cancer_data,
-    time = followup_time,
-    status = death_status,
-    predictors = c(age, stage, treatment),
-    model_type = "mixture"
-)
-}
-}

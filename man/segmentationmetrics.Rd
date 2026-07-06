@@ -264,14 +264,3 @@ Critical for validating AI algorithms before deployment in diagnostic
 workflows, comparing segmentation methods, and establishing performance
 benchmarks for digital pathology systems.
 }
-\examples{
-\donttest{
-result <- segmentationmetrics(
-    data = segmentation_results,
-    prediction_mask = "ai_segmentation",
-    ground_truth_mask = "expert_annotation",
-    image_id = "slide_id",
-    metric_type = "all"
-)
-}
-}

@@ -847,18 +847,6 @@ clinicalnomogramsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' clinical 
 #' instruments for personalized risk assessment and treatment planning.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example: Cox model nomogram
-#' clinicalnomograms(
-#'     data = clinical_data,
-#'     time = survival_months,
-#'     status = death_event,
-#'     covariates = c("age", "stage", "grade"),
-#'     nomogram_type = "survival_nomogram"
-#' )
-#'}
 #' @param data The data as a data frame.
 #' @param time_var Time to event or censoring
 #' @param status_var Event indicator variable

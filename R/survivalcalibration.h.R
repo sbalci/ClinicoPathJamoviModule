@@ -409,20 +409,6 @@ survivalcalibrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #' specific time points using bootstrap validation and cross-validation. 
 #' TRIPOD-compliant reporting.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' # Example usage:
-#' # data <- your_data
-#' # ClinicoPath::survivalcalibration(
-#' #   data = data,
-#' #   time = "survival_time",
-#' #   event = "status",
-#' #   predicted = "pred_5yr_surv",
-#' #   calibrationTime = 60,
-#' #   validationMethod = "bootstrap"
-#' # )
-#'}
 #' @param data The data as a data frame.
 #' @param time Time to event or censoring (in months).
 #' @param event Event indicator (0 = censored, 1 = event).

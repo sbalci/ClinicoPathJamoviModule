@@ -198,16 +198,3 @@ Bayesian interim analysis, adaptive sample size re-estimation, futility
 stopping rules, and group sequential designs. Designed for efficient
 clinical trial conduct with ethical early stopping capabilities.
 }
-\examples{
-\donttest{
-# Adaptive trial design with interim analysis
-adaptivetrialdesign(
-    data = trial_data,
-    outcome = "response",
-    treatment = "arm",
-    adaptation_type = "sample_size",
-    interim_analysis = TRUE,
-    futility_boundary = 0.1
-)
-}
-}

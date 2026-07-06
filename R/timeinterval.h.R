@@ -306,8 +306,8 @@ timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   event frequency.
 #' @param time_basis Controls how months/years are computed. Standardized uses
 #'   fixed lengths (30.44 days per month, 365.25 days per year) suited for
-#'   person-time denominators. Calendar-aware respects actual month lengths
-#'   (28–31 days) when converting intervals to months/years.
+#'   person-time denominators. Calendar-aware respects actual month lengths (28
+#'   - 31 days) when converting intervals to months/years.
 #' @param use_landmark Enables conditional analysis from a specific time
 #'   point. Useful for  studying outcomes after a landmark time (e.g., 6-month
 #'   survivors only).

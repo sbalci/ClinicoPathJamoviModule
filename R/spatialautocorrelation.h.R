@@ -692,17 +692,6 @@ spatialautocorrelationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
 #' and patterns in histopathological data. Essential for analyzing spatial 
 #' dependencies in tissue architecture and cellular distributions.
 #' 
-#'
-#' @examples
-#' \donttest{
-#' data |>
-#' spatialautocorrelation(
-#'     measurement = "biomarker_intensity",
-#'     x_coordinate = "cell_x",
-#'     y_coordinate = "cell_y",
-#'     autocorr_method = "morans_i"
-#' )
-#'}
 #' @param data the data as a data frame
 #' @param measurement Continuous measurement for spatial autocorrelation
 #'   analysis

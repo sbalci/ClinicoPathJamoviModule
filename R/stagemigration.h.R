@@ -8049,24 +8049,6 @@ stagemigrationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Integrated Discrimination  Improvement (IDI), time-dependent ROC analysis, 
 #' decision curve analysis, bootstrap validation,  and comprehensive clinical 
 #' interpretation guidance.
-#'
-#' @examples
-#' \donttest{
-#' # Example analyzing TNM staging system migration:
-#' # stagemigration(
-#' #   data = cancer_cohort,
-#' #   oldStage = "tnm7_stage",
-#' #   newStage = "tnm8_stage",
-#' #   survivalTime = "os_months",
-#' #   event = "death_status",
-#' #   eventLevel = "Dead",
-#' #   analysisType = "comprehensive",
-#' #   calculateNRI = TRUE,
-#' #   calculateIDI = TRUE,
-#' #   performBootstrap = TRUE,
-#' #   bootstrapReps = 1000
-#' # )
-#'}
 #' @param data The dataset containing staging and survival information for TNM
 #'   validation analysis.
 #' @param oldStage CLINICAL EXAMPLE: Select your current staging variable such

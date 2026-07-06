@@ -138,16 +138,3 @@ characteristics with The Economist's distinctive visual style. Perfect for
 comparing distributions across categories, showing price variations, or
 visualizing any statistical distribution data in clinical research.
 }
-\examples{
-\donttest{
-# Example usage:
-# 1. Select continuous variable for distribution analysis
-# 2. Choose grouping variable for comparison
-# 3. Customize Economist-style visual elements
-# 4. Add statistical annotations and interpretations
-library(ggeconodist)
-ggplot(data, aes(x = group, y = value)) +
-  geom_econodist() +
-  theme_econodist()
-}
-}

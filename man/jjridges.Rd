@@ -215,23 +215,3 @@ and
 complex ridge plots with inside plots, double ridgelines, and color
 gradients.'
 }
-\examples{
-\donttest{
-# Basic ridgeline plot
-jjridges(
-  data = iris,
-  x_var = "Sepal.Length",
-  y_var = "Species"
-)
-
-# Advanced with statistics
-jjridges(
-  data = mtcars,
-  x_var = "mpg",
-  y_var = "cyl",
-  plot_type = "density_ridges_gradient",
-  show_stats = TRUE,
-  add_boxplot = TRUE
-)
-}
-}

@@ -84,33 +84,33 @@ data(toxicityprofile_immunotherapy)
 
 # Immune-related AE analysis
 result <- toxicityprofile(
-  data = toxicityprofile_immunotherapy,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  treatment = "treatment_group",
-  systemOrganClass = "system_organ_class",
-  plotType = "heatmap"
+    data = toxicityprofile_immunotherapy,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    treatment = "treatment_group",
+    systemOrganClass = "system_organ_class",
+    plotType = "heatmap"
 )
 
 # High-grade irAE analysis
 result_serious <- toxicityprofile(
-  data = toxicityprofile_immunotherapy,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  showHighGradeOnly = TRUE,
-  minIncidence = 1
+    data = toxicityprofile_immunotherapy,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    showHighGradeOnly = TRUE,
+    minIncidence = 1
 )
 
 # Time-to-onset analysis
 result_timing <- toxicityprofile(
-  data = toxicityprofile_immunotherapy,
-  patientID = "patient_id",
-  adverseEvent = "adverse_event",
-  grade = "toxicity_grade",
-  timeToEvent = "time_to_event",
-  plotType = "time_to_event"
+    data = toxicityprofile_immunotherapy,
+    patientID = "patient_id",
+    adverseEvent = "adverse_event",
+    grade = "toxicity_grade",
+    timeToEvent = "time_to_event",
+    plotType = "time_to_event"
 )
 }
 }

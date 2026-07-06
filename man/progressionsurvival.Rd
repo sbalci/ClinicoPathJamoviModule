@@ -172,17 +172,3 @@ of progression patterns, censoring mechanisms, and clinical interpretation
 specific
 to cancer clinical trials and observational studies.
 }
-\examples{
-\donttest{
-data('cancer_trial')
-
-progressionsurvival(
-    data = cancer_trial,
-    time_var = "pfs_time",
-    progression_var = "progression",
-    death_var = "death",
-    treatment_var = "treatment",
-    stratification_vars = c("stage", "histology")
-)
-}
-}
