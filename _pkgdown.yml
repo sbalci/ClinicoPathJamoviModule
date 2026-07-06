@@ -80,11 +80,14 @@ articles:
   - jsurvival-sparsegrouplasso-comprehensive
   - jsurvival-survival-comprehensive
   - jsurvival-timeroc-comprehensive
+  - jsurvival-03-multisurvival-interactions
 
 - title: "meddecide Module"
   desc: "Guides for medical decision analysis"
   contents:
   - meddecide-leaveonecenterout-comprehensive
+  - meddecide-31-latentbiomarker
+  - meddecide-32-ysrb-interobserver
 
 - title: "OncoPath Module"
   desc: "Guides for IHC clustering and oncology analysis"

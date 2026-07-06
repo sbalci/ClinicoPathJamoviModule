@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>SCAD/MCP Cox Regression for Variable Selection in Survival Analysis • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="SCAD/MCP Cox Regression for Variable Selection in Survival Analysis">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,8 +82,8 @@ below show the R syntax for reference. To run interactively, use
 </h3>
 <p>The <strong>SCAD/MCP Cox Regression</strong> module
 (<code>ncvregcox</code>) performs variable selection using non-convex
-penalties – <strong>SCAD</strong> (Smoothly Clipped Absolute Deviation)
-and <strong>MCP</strong> (Minimax Concave Penalty) – for Cox
+penalties - <strong>SCAD</strong> (Smoothly Clipped Absolute Deviation)
+and <strong>MCP</strong> (Minimax Concave Penalty) - for Cox
 proportional hazards models. These penalties solve a fundamental problem
 with LASSO: <strong>over-penalization of large
 coefficients</strong>.</p>
@@ -114,7 +114,7 @@ rule)</li>
 which means:</p>
 <ul>
 <li>Small (noise) coefficients: shrunk to zero (good)</li>
-<li>Large (true) coefficients: also over-shrunk (bad – introduces
+<li>Large (true) coefficients: also over-shrunk (bad - introduces
 bias)</li>
 </ul>
 <p><strong>SCAD</strong> and <strong>MCP</strong> use penalties that
@@ -185,13 +185,13 @@ offer oracle properties LASSO cannot provide.</p>
 <h4 id="mathematical-formulation">Mathematical Formulation<a class="anchor" aria-label="anchor" href="#mathematical-formulation"></a>
 </h4>
 <p><strong>SCAD penalty</strong> (Fan &amp; Li, 2001):
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mi>λ</mi><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo><=</mo><mi>λ</mi></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mi>−</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>β</mi><mn>2</mn></msup><mo>−</mo><mn>2</mn><mi>γ</mi><mi>λ</mi><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mi>+</mi><msup><mi>λ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mn>2</mn><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mi>λ</mi><mo>&lt;</mo><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo><=</mo><mi>γ</mi><mi>λ</mi></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msup><mi>λ</mi><mn>2</mn></msup></mrow><mn>2</mn></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mi>γ</mi><mi>λ</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">P(\beta) = \begin{cases}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mi>λ</mi><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>≤</mo><mi>λ</mi></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mi>−</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>β</mi><mn>2</mn></msup><mo>−</mo><mn>2</mn><mi>γ</mi><mi>λ</mi><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mi>+</mi><msup><mi>λ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mn>2</mn><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mi>λ</mi><mo>&lt;</mo><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>≤</mo><mi>γ</mi><mi>λ</mi></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msup><mi>λ</mi><mn>2</mn></msup></mrow><mn>2</mn></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mi>γ</mi><mi>λ</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">P(\beta) = \begin{cases}
 \lambda |\beta| &amp; \text{if } |\beta| \leq \lambda \\
 \frac{-(\beta^2 - 2\gamma\lambda|\beta| + \lambda^2)}{2(\gamma-1)} &amp; \text{if } \lambda &lt; |\beta| \leq \gamma\lambda \\
 \frac{(\gamma+1)\lambda^2}{2} &amp; \text{if } |\beta| &gt; \gamma\lambda
 \end{cases}</annotation></semantics></math></p>
 <p><strong>MCP</strong> (Zhang, 2010):
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mi>λ</mi><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mi>−</mi><mfrac><msup><mi>β</mi><mn>2</mn></msup><mrow><mn>2</mn><mi>γ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo><=</mo><mi>γ</mi><mi>λ</mi></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mi>γ</mi><msup><mi>λ</mi><mn>2</mn></msup></mrow><mn>2</mn></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mi>γ</mi><mi>λ</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">P(\beta) = \begin{cases}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mi>λ</mi><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mi>−</mi><mfrac><msup><mi>β</mi><mn>2</mn></msup><mrow><mn>2</mn><mi>γ</mi></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>≤</mo><mi>γ</mi><mi>λ</mi></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mi>γ</mi><msup><mi>λ</mi><mn>2</mn></msup></mrow><mn>2</mn></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mo stretchy="false" form="prefix">|</mo><mi>β</mi><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mi>γ</mi><mi>λ</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">P(\beta) = \begin{cases}
 \lambda |\beta| - \frac{\beta^2}{2\gamma} &amp; \text{if } |\beta| \leq \gamma\lambda \\
 \frac{\gamma\lambda^2}{2} &amp; \text{if } |\beta| &gt; \gamma\lambda
 \end{cases}</annotation></semantics></math></p>
@@ -244,7 +244,7 @@ in advance.</p>
 </tr>
 <tr class="odd">
 <td>Very high dimensional (p &gt;&gt; n)</td>
-<td>Consider <code>lassocox</code> – LASSO may be more stable</td>
+<td>Consider <code>lassocox</code> - LASSO may be more stable</td>
 </tr>
 <tr class="even">
 <td>Need guaranteed convexity for optimization</td>
@@ -353,22 +353,22 @@ comprehensive suitability check with a traffic-light system
 (green/yellow/red) across 6 dimensions:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Events-Per-Variable (EPV)</strong> – are there enough events
+<strong>Events-Per-Variable (EPV)</strong> - are there enough events
 relative to predictors?</li>
 <li>
-<strong>Regularization Need</strong> – is the dimensionality high
+<strong>Regularization Need</strong> - is the dimensionality high
 enough to warrant penalization?</li>
 <li>
-<strong>Sample Size</strong> – is n adequate for stable
+<strong>Sample Size</strong> - is n adequate for stable
 cross-validation?</li>
 <li>
-<strong>Event Rate</strong> – is the event/censoring balance
+<strong>Event Rate</strong> - is the event/censoring balance
 reasonable?</li>
 <li>
-<strong>Multicollinearity</strong> – are predictors highly
+<strong>Multicollinearity</strong> - are predictors highly
 correlated?</li>
 <li>
-<strong>Data Quality</strong> – how much missing data exists?</li>
+<strong>Data Quality</strong> - how much missing data exists?</li>
 </ol>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run with suitability check enabled (default)</span></span>
@@ -392,9 +392,8 @@ correlated?</li>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -516,7 +515,7 @@ covariates), you should see mostly green indicators.</p>
 <div class="section level3">
 <h3 id="scad-penalty-default">3. SCAD Penalty (Default)<a class="anchor" aria-label="anchor" href="#scad-penalty-default"></a>
 </h3>
-<p>SCAD is the recommended starting point – it provides nearly unbiased
+<p>SCAD is the recommended starting point - it provides nearly unbiased
 estimates for truly important variables while setting noise variables to
 zero.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -543,9 +542,8 @@ zero.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -676,7 +674,7 @@ eliminated with nearly unbiased coefficient estimates.</p>
 <div class="section level3">
 <h3 id="mcp-penalty">4. MCP Penalty<a class="anchor" aria-label="anchor" href="#mcp-penalty"></a>
 </h3>
-<p>MCP is more aggressive than SCAD – it transitions to zero penalty
+<p>MCP is more aggressive than SCAD - it transitions to zero penalty
 more quickly, leading to sparser models.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/ncvregcox.html">ncvregcox</a></span><span class="op">(</span></span>
@@ -702,9 +700,8 @@ more quickly, leading to sparser models.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -839,7 +836,7 @@ Li recommendation)</li>
 = more aggressive selection</li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># SCAD with lower gamma (more aggressive -- penalty flattens sooner)</span></span>
+<code class="sourceCode R"><span><span class="co"># SCAD with lower gamma (more aggressive - penalty flattens sooner)</span></span>
 <span><span class="fu"><a href="../reference/ncvregcox.html">ncvregcox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">ncvregcox_clinical</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -858,9 +855,8 @@ Li recommendation)</li>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -944,7 +940,7 @@ Li recommendation)</li>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># SCAD with higher gamma (less aggressive -- closer to LASSO-like behavior)</span></span>
+<code class="sourceCode R"><span><span class="co"># SCAD with higher gamma (less aggressive - closer to LASSO-like behavior)</span></span>
 <span><span class="fu"><a href="../reference/ncvregcox.html">ncvregcox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">ncvregcox_clinical</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -963,9 +959,8 @@ Li recommendation)</li>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1063,14 +1058,14 @@ coefficients. The default 3.7 is a well-studied compromise.</p>
 strength (lambda). Two strategies are available:</p>
 <ul>
 <li>
-<strong>min</strong>: Lambda that minimizes CV error – selects more
+<strong>min</strong>: Lambda that minimizes CV error - selects more
 variables</li>
 <li>
-<strong>1se</strong>: Lambda within 1 SE of minimum – more
+<strong>1se</strong>: Lambda within 1 SE of minimum - more
 parsimonious (Breiman’s rule)</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Minimum CV error -- selects more variables</span></span>
+<code class="sourceCode R"><span><span class="co"># Minimum CV error - selects more variables</span></span>
 <span><span class="fu"><a href="../reference/ncvregcox.html">ncvregcox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">ncvregcox_clinical</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -1088,9 +1083,8 @@ parsimonious (Breiman’s rule)</li>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1177,7 +1171,7 @@ parsimonious (Breiman’s rule)</li>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># One SE rule -- more parsimonious</span></span>
+<code class="sourceCode R"><span><span class="co"># One SE rule - more parsimonious</span></span>
 <span><span class="fu"><a href="../reference/ncvregcox.html">ncvregcox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">ncvregcox_clinical</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -1195,9 +1189,8 @@ parsimonious (Breiman’s rule)</li>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1295,7 +1288,7 @@ better.</p>
 <h3 id="sparse-scenario-many-noise-variables">7. Sparse Scenario (Many Noise Variables)<a class="anchor" aria-label="anchor" href="#sparse-scenario-many-noise-variables"></a>
 </h3>
 <p>The <code>ncvregcox_sparse</code> dataset has 30 covariates but only
-4 true signals. This is where non-convex penalties shine – SCAD/MCP
+4 true signals. This is where non-convex penalties shine - SCAD/MCP
 should recover the true model more accurately than LASSO would.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ncvregcox_sparse</span>, package <span class="op">=</span> <span class="st">"ClinicoPath"</span><span class="op">)</span></span>
@@ -1320,9 +1313,8 @@ should recover the true model more accurately than LASSO would.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1446,7 +1438,7 @@ should recover the true model more accurately than LASSO would.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># MCP comparison -- often sparser than SCAD</span></span>
+<code class="sourceCode R"><span><span class="co"># MCP comparison - often sparser than SCAD</span></span>
 <span><span class="fu"><a href="../reference/ncvregcox.html">ncvregcox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">ncvregcox_sparse</span>,</span>
 <span>  time <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -1466,9 +1458,8 @@ should recover the true model more accurately than LASSO would.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1582,9 +1573,8 @@ is possible.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1698,9 +1688,8 @@ all variables.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1827,9 +1816,8 @@ about sample size and EPV.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -1952,7 +1940,7 @@ about sample size and EPV.</p>
 <strong>EPV</strong>: Likely yellow (few events relative to 5
 covariates)</li>
 <li>
-<strong>Regularization Need</strong>: Yellow (low dimensionality –
+<strong>Regularization Need</strong>: Yellow (low dimensionality -
 standard Cox may suffice)</li>
 </ul>
 <p>With only 25 observations, cross-validation folds should be reduced
@@ -1998,9 +1986,8 @@ challenge for penalized methods.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -2141,9 +2128,8 @@ challenge for penalized methods.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -2283,9 +2269,8 @@ challenge for penalized methods.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  SCAD COX REGRESSION RESULTS</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  missing value where TRUE/FALSE needed</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ERROR: Analysis Error</span></span>
+<span><span class="co">#&gt; missing value where TRUE/FALSE needed</span></span>
 <span><span class="co">#&gt;  SCAD/MCP Cox Regression Analysis</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Non-convex penalized Cox regression for high-dimensional survival data</span></span>
@@ -2445,7 +2430,7 @@ biased.</p>
 <tbody>
 <tr class="odd">
 <td>Green</td>
-<td>No concerns – proceed with confidence</td>
+<td>No concerns - proceed with confidence</td>
 </tr>
 <tr class="even">
 <td>Yellow</td>
@@ -2453,7 +2438,7 @@ biased.</p>
 </tr>
 <tr class="odd">
 <td>Red</td>
-<td>Potential issue – results may be unreliable</td>
+<td>Potential issue - results may be unreliable</td>
 </tr>
 </tbody>
 </table>
@@ -2518,7 +2503,7 @@ a specific reason to change it.</p></li>
 <li><p><strong>Comparing SCAD/MCP coefficients directly to
 LASSO</strong>: SCAD/MCP coefficients are less biased. A SCAD
 coefficient of 0.8 is not “bigger” than a LASSO coefficient of 0.5 for
-the same variable – the LASSO version is just more shrunk.</p></li>
+the same variable - the LASSO version is just more shrunk.</p></li>
 <li><p><strong>Not reporting the penalty type</strong>: Always specify
 whether you used SCAD or MCP, along with the gamma value and lambda
 selection method.</p></li>
@@ -2615,7 +2600,7 @@ with application to the lasso. <em>Ann Stat</em>.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

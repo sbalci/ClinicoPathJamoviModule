@@ -1,0 +1,349 @@
+# PCA Cox Regression - Comprehensive Guide
+
+> **Note:** The
+> [`pcacox()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/pcacox.md)
+> function is designed for use within **jamovi’s GUI**. The code
+> examples below show the R syntax for reference.
+
+## PCA Cox Regression
+
+### Overview
+
+PCA Cox regression addresses the challenge of high-dimensional survival
+data where the number of predictors approaches or exceeds the sample
+size. By reducing the predictor space to a smaller set of orthogonal
+principal components, it enables Cox proportional hazards modeling even
+when standard regression would fail due to multicollinearity or
+overfitting.
+
+The module supports four PCA methods: supervised PCA (using survival
+information to guide component extraction via the superpc package),
+standard PCA (unsupervised via prcomp), sparse PCA (with interpretable
+sparse loadings via sparsepca), and kernel PCA (for nonlinear
+relationships via kernlab). Each method falls back gracefully to
+standard PCA if the required package is unavailable.
+
+This analysis is particularly valuable for genomic survival studies
+(gene expression signatures), proteomics/metabolomics panels, imaging
+feature sets, and any clinical scenario with many correlated predictors.
+
+------------------------------------------------------------------------
+
+### Datasets Used in This Guide
+
+| Dataset | N | Predictors | Events | Primary Use |
+|----|----|----|----|----|
+| `pcacox_clinical` | 60 | 10 (mixed clinical) | 30 | Standard clinical scenarios |
+| `pcacox_genomic` | 150 | 30 (6 correlated gene blocks) | 72 | High-dimensional genomics |
+
+------------------------------------------------------------------------
+
+### 1. Standard PCA with Clinical Data
+
+#### Basic analysis
+
+``` r
+
+clinical <- read.csv(paste0(data_path, "pcacox_clinical.csv"))
+#> Error in `file()`:
+#> ! cannot open the connection
+str(clinical[, 1:6])
+#> Error:
+#> ! object 'clinical' not found
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  pca_method = "standard",
+  n_components = 3,
+  component_selection = "fixed",
+  suitabilityCheck = TRUE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+Look for: PCA summary (eigenvalues, variance explained, selection
+status), Cox model table (coefficients, HRs, p-values), model
+performance (C-index, R-squared, AIC).
+
+------------------------------------------------------------------------
+
+### 2. PCA Methods
+
+#### Supervised PCA (survival-weighted)
+
+Supervised PCA uses survival information to select features before
+extracting components, focusing on survival-relevant variation.
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  pca_method = "supervised",
+  survival_weighting = TRUE,
+  n_components = 3,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+#### Sparse PCA
+
+Sparse PCA produces components with few non-zero loadings, making
+interpretation easier.
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  pca_method = "sparse",
+  sparse_parameter = 0.1,
+  n_components = 3,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+------------------------------------------------------------------------
+
+### 3. Component Selection
+
+#### Cross-validation
+
+CV-based selection evaluates 1-K components and picks the number
+maximizing out-of-fold C-index.
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  component_selection = "cv",
+  cv_folds = 5,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+#### Variance threshold
+
+Select the minimum number of components explaining at least the
+specified proportion of variance.
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  component_selection = "variance",
+  variance_threshold = 0.8,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+------------------------------------------------------------------------
+
+### 4. Validation
+
+#### Bootstrap optimism correction
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh"),
+  clinical_vars = NULL,
+  n_components = 2,
+  bootstrap_validation = TRUE,
+  n_bootstrap = 50,
+  permutation_test = TRUE,
+  n_permutations = 50,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+Look for: optimism-corrected C-index (should be lower than apparent),
+calibration slope, per-component permutation p-values.
+
+------------------------------------------------------------------------
+
+### 5. Additional Analyses
+
+#### Model comparison + feature clusters
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  n_components = 3,
+  show_model_comparison = TRUE,
+  pathway_analysis = TRUE,
+  risk_score = TRUE,
+  feature_importance = TRUE,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+Look for: sequential model comparison (1-5 PCs with AIC/BIC/C-index),
+feature cluster analysis by dominant component, risk group KM curves.
+
+------------------------------------------------------------------------
+
+### 6. High-Dimensional Genomic Data
+
+``` r
+
+genomic <- read.csv(paste0(data_path, "pcacox_genomic.csv"))
+#> Error in `file()`:
+#> ! cannot open the connection
+gene_vars <- names(genomic)[!names(genomic) %in% c("time", "status")]
+#> Error:
+#> ! object 'genomic' not found
+
+pcacox(
+  data = genomic,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = gene_vars,
+  clinical_vars = NULL,
+  pca_method = "standard",
+  n_components = 5,
+  component_selection = "variance",
+  variance_threshold = 0.8,
+  feature_importance = TRUE,
+  pathway_analysis = TRUE,
+  suitabilityCheck = TRUE
+)
+#> Error:
+#> ! object 'genomic' not found
+```
+
+With 30 predictors and 150 observations, PCA dimensionality reduction is
+essential. The feature cluster analysis groups genes by their dominant
+component.
+
+------------------------------------------------------------------------
+
+### 7. All Plots
+
+``` r
+
+pcacox(
+  data = clinical,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi", "albumin", "crp", "ldh",
+                 "hemoglobin", "wbc", "platelets", "tumor_size", "ki67"),
+  clinical_vars = NULL,
+  n_components = 3,
+  plot_scree = TRUE,
+  plot_loadings = TRUE,
+  plot_biplot = TRUE,
+  plot_survival = TRUE,
+  risk_score = TRUE,
+  suitabilityCheck = FALSE
+)
+#> Error:
+#> ! object 'clinical' not found
+```
+
+------------------------------------------------------------------------
+
+### 8. Edge Case: Small Sample
+
+``` r
+
+small <- clinical[1:25, ]
+#> Error:
+#> ! object 'clinical' not found
+
+pcacox(
+  data = small,
+  time = "time",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "albumin", "crp", "ldh"),
+  clinical_vars = NULL,
+  n_components = 2,
+  suitabilityCheck = TRUE,
+  plot_scree = FALSE,
+  plot_loadings = FALSE,
+  plot_biplot = FALSE,
+  plot_survival = FALSE,
+  bootstrap_validation = FALSE,
+  permutation_test = FALSE
+)
+#> Error:
+#> ! object 'small' not found
+```
+
+------------------------------------------------------------------------
+
+### References
+
+- Bair E, Tibshirani R (2004). “Semi-supervised methods to predict
+  patient survival from gene expression data.” *PLoS Biology*, 2(4),
+  e108.
+- Therneau TM (2026). *survival: Survival Analysis*. R package version
+  3.8-6.
+- Erichson NB, Zheng P, Manohar K, Brunton S, Kutz JN, Aravkin AY
+  (2020). “Sparse Principal Component Analysis via Variable Projection.”
+  *SIAM Journal on Applied Mathematics*.

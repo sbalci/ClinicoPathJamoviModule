@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Conditional Survival Estimation - Comprehensive Guide • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Conditional Survival Estimation - Comprehensive Guide">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2026-03-22</h4>
+            <h4 data-toc-skip class="date">2026-07-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/jsurvival-conditionalsurvival-comprehensive.Rmd" class="external-link"><code>vignettes/jsurvival-conditionalsurvival-comprehensive.Rmd</code></a></small>
       <div class="d-none name"><code>jsurvival-conditionalsurvival-comprehensive.Rmd</code></div>
@@ -107,7 +107,7 @@ Survival). Four estimation methods are available:</p>
 <tr class="odd">
 <td>Kaplan-Meier Weights</td>
 <td><code>km</code></td>
-<td>Weighted KM estimation via <code>condSURV::KMW()</code> (falls back
+<td>Weighted KM estimation via <code><a href="https://rdrr.io/pkg/condSURV/man/KMW.html" class="external-link">condSURV::KMW()</a></code> (falls back
 to S(t)/S(s) ratio when condSURV is not available)</td>
 </tr>
 <tr class="even">
@@ -294,83 +294,21 @@ per group.</p>
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                                          </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group            Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI      Upper CI     </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.08954841    0.34744752    0.69847084   </span></span>
-<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.07256249    0.10185033    0.38629006   </span></span>
-<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.08524928    0.45863838    0.79280941   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.07591160    0.23453082    0.53209882   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08138380    0.00000000    0.26404973   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
+<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                              </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .        .         ᵃ    .                    .                       .                 .           .          </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    ᵃ Error in conditional survival calculation: unused arguments (delta = status, x = condTime)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Method: Kaplan-Meier Weights</span></span>
+<span><span class="co">#&gt;  Method explanation will be updated after analysis.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Analysis Summary:</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditioning Time: 12Number of Time Points: 10Average Conditional</span></span>
-<span><span class="co">#&gt;  Survival: 0.239Range: 0.031 - 0.626</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Interpretation:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  These conditional survival probabilities represent updated survival</span></span>
-<span><span class="co">#&gt;  estimates for patients who have survived to time 12. For example, a</span></span>
-<span><span class="co">#&gt;  conditional survival probability of 0.80 at time point 117.8 means</span></span>
-<span><span class="co">#&gt;  that patients who have survived to time 12 have an 80% probability of</span></span>
-<span><span class="co">#&gt;  surviving to time 117.8.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Method Description:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Kaplan-Meier Weights Method: This approach uses Kaplan-Meier weights</span></span>
-<span><span class="co">#&gt;  to estimate conditional survival probabilities. The weights account</span></span>
-<span><span class="co">#&gt;  for the censoring pattern and provide more accurate estimates when</span></span>
-<span><span class="co">#&gt;  censoring is informative.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Statistical Notes:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Confidence intervals are calculated using the specified confidence</span></span>
-<span><span class="co">#&gt;  level (95%)Standard errors are computed using appropriate methods for</span></span>
-<span><span class="co">#&gt;  each estimation approachTime points at or before the conditioning time</span></span>
-<span><span class="co">#&gt;  have conditional survival probability = 1.0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 12.0 in the Surgery group (n at risk = 110), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 117.8-unit survival probability was 3.1% (95% CI:</span></span>
-<span><span class="co">#&gt;  0.0%--8.9%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the Surgery+Chemo group (n</span></span>
-<span><span class="co">#&gt;  at risk = 110), the estimated conditional 117.8-unit survival</span></span>
-<span><span class="co">#&gt;  probability was 10.5% (95% CI: 0.0%--26.4%).&lt;p</span></span>
-<span><span class="co">#&gt;  style='font-size:0.85em; color:#666;'&gt;Tip: Copy the text above</span></span>
-<span><span class="co">#&gt;  directly into your manuscript methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
-<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/stratified-treatment-1.png" alt="" width="672"></p>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/stratified-treatment-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="by-stage">By Stage<a class="anchor" aria-label="anchor" href="#by-stage"></a>
@@ -423,74 +361,19 @@ conditioning times may be excluded automatically.</p>
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                                  </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI       Upper CI    </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    I         33.2000000           12.0000000            0.81136364 ᵃ        0.12822125    0.560054614    1.0000000   </span></span>
-<span><span class="co">#&gt;    I         54.3000000           12.0000000            0.54793388          0.13922208    0.275063631    0.8208041   </span></span>
-<span><span class="co">#&gt;    I         75.5000000           12.0000000            0.20547521          0.10733848    0.000000000    0.4158548   </span></span>
-<span><span class="co">#&gt;    I         96.6000000           12.0000000            0.20547521          0.10733848    0.000000000    0.4158548   </span></span>
-<span><span class="co">#&gt;    I        117.8000000           12.0000000            0.00000000          0.00000000    0.000000000    0.0000000   </span></span>
-<span><span class="co">#&gt;    II        33.2000000           12.0000000            0.80557977          0.09624791    0.616937341    0.9942222   </span></span>
-<span><span class="co">#&gt;    II        54.3000000           12.0000000            0.43366620          0.09857655    0.240459724    0.6268727   </span></span>
-<span><span class="co">#&gt;    II        75.5000000           12.0000000            0.17346648          0.08556952    0.005753307    0.3411797   </span></span>
-<span><span class="co">#&gt;    II        96.6000000           12.0000000            0.17346648          0.08556952    0.005753307    0.3411797   </span></span>
-<span><span class="co">#&gt;    II       117.8000000           12.0000000            0.17346648          0.08556952    0.005753307    0.3411797   </span></span>
-<span><span class="co">#&gt;    III       33.2000000           12.0000000            0.41940789          0.09143042    0.240207571    0.5986082   </span></span>
-<span><span class="co">#&gt;    III       54.3000000           12.0000000            0.21303258          0.07335106    0.069267153    0.3567980   </span></span>
-<span><span class="co">#&gt;    III       75.5000000           12.0000000            0.05680869          0.05191773    0.000000000    0.1585656   </span></span>
-<span><span class="co">#&gt;    III       96.6000000           12.0000000            0.05680869          0.05191773    0.000000000    0.1585656   </span></span>
-<span><span class="co">#&gt;    III      117.8000000           12.0000000            0.05680869          0.05191773    0.000000000    0.1585656   </span></span>
-<span><span class="co">#&gt;    IV        33.2000000           12.0000000            0.07692308          0.07727458    0.000000000    0.2283785   </span></span>
-<span><span class="co">#&gt;    IV        54.3000000           12.0000000            0.00000000          0.00000000    0.000000000    0.0000000   </span></span>
-<span><span class="co">#&gt;    IV        75.5000000           12.0000000            0.00000000          0.00000000    0.000000000    0.0000000   </span></span>
-<span><span class="co">#&gt;    IV        96.6000000           12.0000000            0.00000000          0.00000000    0.000000000    0.0000000   </span></span>
-<span><span class="co">#&gt;    IV       117.8000000           12.0000000            0.00000000          0.00000000    0.000000000    0.0000000   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
+<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                              </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .        .         ᵃ    .                    .                       .                 .           .          </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    ᵃ Error in conditional survival calculation: unused arguments (delta = status, x = condTime)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 12.0 in the I group (n at risk = 110), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 117.8-unit survival probability was 0.0% (95% CI:</span></span>
-<span><span class="co">#&gt;  0.0%--0.0%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the II group (n at risk =</span></span>
-<span><span class="co">#&gt;  110), the estimated conditional 117.8-unit survival probability was</span></span>
-<span><span class="co">#&gt;  17.3% (95% CI: 0.6%--34.1%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the III group (n at risk =</span></span>
-<span><span class="co">#&gt;  110), the estimated conditional 117.8-unit survival probability was</span></span>
-<span><span class="co">#&gt;  5.7% (95% CI: 0.0%--15.9%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the IV group (n at risk =</span></span>
-<span><span class="co">#&gt;  110), the estimated conditional 117.8-unit survival probability was</span></span>
-<span><span class="co">#&gt;  0.0% (95% CI: 0.0%--0.0%).&lt;p style='font-size:0.85em;</span></span>
-<span><span class="co">#&gt;  color:#666;'&gt;Tip: Copy the text above directly into your manuscript</span></span>
-<span><span class="co">#&gt;  methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
-<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/stratified-stage-1.png" alt="" width="672"></p>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/stratified-stage-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="by-grade">By Grade<a class="anchor" aria-label="anchor" href="#by-grade"></a>
@@ -541,63 +424,18 @@ conditioning times may be excluded automatically.</p>
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                                     </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group       Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI      Upper CI     </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Well         33.2000000           12.0000000            0.75574449 ᵃ        0.10345126    0.55298375    0.95850522   </span></span>
-<span><span class="co">#&gt;    Well         54.3000000           12.0000000            0.50823722          0.10921171    0.29418620    0.72228823   </span></span>
-<span><span class="co">#&gt;    Well         75.5000000           12.0000000            0.22588321          0.09717278    0.03542807    0.41633835   </span></span>
-<span><span class="co">#&gt;    Well         96.6000000           12.0000000            0.22588321          0.09717278    0.03542807    0.41633835   </span></span>
-<span><span class="co">#&gt;    Well        117.8000000           12.0000000            0.22588321          0.09717278    0.03542807    0.41633835   </span></span>
-<span><span class="co">#&gt;    Moderate     33.2000000           12.0000000            0.60303288          0.09787145    0.41120836    0.79485740   </span></span>
-<span><span class="co">#&gt;    Moderate     54.3000000           12.0000000            0.28770599          0.08148025    0.12800763    0.44740435   </span></span>
-<span><span class="co">#&gt;    Moderate     75.5000000           12.0000000            0.15733921          0.07290934    0.01443954    0.30023889   </span></span>
-<span><span class="co">#&gt;    Moderate     96.6000000           12.0000000            0.15733921          0.07290934    0.01443954    0.30023889   </span></span>
-<span><span class="co">#&gt;    Moderate    117.8000000           12.0000000            0.07866961          0.06650862    0.00000000    0.20902411   </span></span>
-<span><span class="co">#&gt;    Poor         33.2000000           12.0000000            0.38235294          0.10048060    0.18541459    0.57929129   </span></span>
-<span><span class="co">#&gt;    Poor         54.3000000           12.0000000            0.20168067          0.07571703    0.05327803    0.35008332   </span></span>
-<span><span class="co">#&gt;    Poor         75.5000000           12.0000000            0.03361345          0.03317838    0.00000000    0.09864188   </span></span>
-<span><span class="co">#&gt;    Poor         96.6000000           12.0000000            0.03361345          0.03317838    0.00000000    0.09864188   </span></span>
-<span><span class="co">#&gt;    Poor        117.8000000           12.0000000            0.03361345          0.03317838    0.00000000    0.09864188   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
+<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                              </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .        .         ᵃ    .                    .                       .                 .           .          </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    ᵃ Error in conditional survival calculation: unused arguments (delta = status, x = condTime)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 12.0 in the Well group (n at risk = 110), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 117.8-unit survival probability was 22.6% (95% CI:</span></span>
-<span><span class="co">#&gt;  3.5%--41.6%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the Moderate group (n at</span></span>
-<span><span class="co">#&gt;  risk = 110), the estimated conditional 117.8-unit survival probability</span></span>
-<span><span class="co">#&gt;  was 7.9% (95% CI: 0.0%--20.9%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the Poor group (n at risk =</span></span>
-<span><span class="co">#&gt;  110), the estimated conditional 117.8-unit survival probability was</span></span>
-<span><span class="co">#&gt;  3.4% (95% CI: 0.0%--9.9%).&lt;p style='font-size:0.85em;</span></span>
-<span><span class="co">#&gt;  color:#666;'&gt;Tip: Copy the text above directly into your manuscript</span></span>
-<span><span class="co">#&gt;  methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -655,82 +493,20 @@ manual S(t)/S(s) ratio.</p>
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                                          </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group            Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI      Upper CI     </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.08954841    0.34744752    0.69847084   </span></span>
-<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.07256249    0.10185033    0.38629006   </span></span>
-<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.08524928    0.45863838    0.79280941   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.07591160    0.23453082    0.53209882   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08138380    0.00000000    0.26404973   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
+<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                              </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .        .         ᵃ    .                    .                       .                 .           .          </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    ᵃ Error in conditional survival calculation: unused arguments (delta = status, x = condTime)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Method: Kaplan-Meier Weights</span></span>
+<span><span class="co">#&gt;  Method explanation will be updated after analysis.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Analysis Summary:</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditioning Time: 12Number of Time Points: 10Average Conditional</span></span>
-<span><span class="co">#&gt;  Survival: 0.239Range: 0.031 - 0.626</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Interpretation:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  These conditional survival probabilities represent updated survival</span></span>
-<span><span class="co">#&gt;  estimates for patients who have survived to time 12. For example, a</span></span>
-<span><span class="co">#&gt;  conditional survival probability of 0.80 at time point 117.8 means</span></span>
-<span><span class="co">#&gt;  that patients who have survived to time 12 have an 80% probability of</span></span>
-<span><span class="co">#&gt;  surviving to time 117.8.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Method Description:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Kaplan-Meier Weights Method: This approach uses Kaplan-Meier weights</span></span>
-<span><span class="co">#&gt;  to estimate conditional survival probabilities. The weights account</span></span>
-<span><span class="co">#&gt;  for the censoring pattern and provide more accurate estimates when</span></span>
-<span><span class="co">#&gt;  censoring is informative.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Statistical Notes:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Confidence intervals are calculated using the specified confidence</span></span>
-<span><span class="co">#&gt;  level (95%)Standard errors are computed using appropriate methods for</span></span>
-<span><span class="co">#&gt;  each estimation approachTime points at or before the conditioning time</span></span>
-<span><span class="co">#&gt;  have conditional survival probability = 1.0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 12.0 in the Surgery group (n at risk = 110), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 117.8-unit survival probability was 3.1% (95% CI:</span></span>
-<span><span class="co">#&gt;  0.0%--8.9%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the Surgery+Chemo group (n</span></span>
-<span><span class="co">#&gt;  at risk = 110), the estimated conditional 117.8-unit survival</span></span>
-<span><span class="co">#&gt;  probability was 10.5% (95% CI: 0.0%--26.4%).&lt;p</span></span>
-<span><span class="co">#&gt;  style='font-size:0.85em; color:#666;'&gt;Tip: Copy the text above</span></span>
-<span><span class="co">#&gt;  directly into your manuscript methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="landmark-approach">Landmark Approach<a class="anchor" aria-label="anchor" href="#landmark-approach"></a>
@@ -788,16 +564,16 @@ information from patients censored before the landmark.</p>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Group            Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI      Upper CI     </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.08954841    0.34744752    0.69847084   </span></span>
-<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.07256249    0.10185033    0.38629006   </span></span>
-<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.08524928    0.45863838    0.79280941   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.07591160    0.23453082    0.53209882   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08138380    0.00000000    0.26404973   </span></span>
+<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.07205095    0.38174192    0.66417645   </span></span>
+<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.06818663    0.11042685    0.37771354   </span></span>
+<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02978396    0.00000000    0.08888426   </span></span>
+<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02978396    0.00000000    0.08888426   </span></span>
+<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02978396    0.00000000    0.08888426   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.06335479    0.50155079    0.74989699   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.06739127    0.25123036    0.51539928   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06536536    0.08096706    0.33719457   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06536536    0.08096706    0.33719457   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08082392    0.00000000    0.26295238   </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -842,7 +618,7 @@ information from patients censored before the landmark.</p>
 <span><span class="co">#&gt;  Conditional survival analysis was performed using the landmark method.</span></span>
 <span><span class="co">#&gt;  Given survival to 12.0 in the Surgery+Chemo group (n at risk = 110),</span></span>
 <span><span class="co">#&gt;  the estimated conditional 117.8-unit survival probability was 10.5%</span></span>
-<span><span class="co">#&gt;  (95% CI: 0.0%--26.4%).&lt;p style='font-size:0.85em; color:#666;'&gt;Tip:</span></span>
+<span><span class="co">#&gt;  (95% CI: 0.0%--26.3%).&lt;p style='font-size:0.85em; color:#666;'&gt;Tip:</span></span>
 <span><span class="co">#&gt;  Copy the text above directly into your manuscript methods/results</span></span>
 <span><span class="co">#&gt;  section.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -859,7 +635,7 @@ information from patients censored before the landmark.</p>
 <span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
 <span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
 <span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
-<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/method-landmark-1.png" alt="" width="672"></p>
+<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/method-landmark-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="inverse-probability-weighting">Inverse Probability Weighting<a class="anchor" aria-label="anchor" href="#inverse-probability-weighting"></a>
@@ -1217,47 +993,18 @@ survived past that point).</p>
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                                        </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group            Time Point    Conditioning Time    Conditional Survival    Standard Error    Lower CI      Upper CI    </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Surgery          24.0000000            6.0000000             0.5304933 ᵃ        0.07409589    0.38526807    0.6757186   </span></span>
-<span><span class="co">#&gt;    Surgery          60.0000000            6.0000000             0.1805318          0.05796722    0.06691813    0.2941455   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    24.0000000            6.0000000             0.6909091          0.06772094    0.55817849    0.8236397   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    60.0000000            6.0000000             0.2841587          0.06070883    0.16517162    0.4031458   </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 6</span></span>
+<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                              </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .        .         ᵃ    .                    .                       .                 .           .          </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    ᵃ Error in conditional survival calculation: unused arguments (delta = status, x = condTime)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 6.0 in the Surgery group (n at risk = 131), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 60.0-unit survival probability was 18.1% (95% CI:</span></span>
-<span><span class="co">#&gt;  6.7%--29.4%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 6.0 in the Surgery+Chemo group (n at</span></span>
-<span><span class="co">#&gt;  risk = 131), the estimated conditional 60.0-unit survival probability</span></span>
-<span><span class="co">#&gt;  was 28.4% (95% CI: 16.5%--40.3%).&lt;p style='font-size:0.85em;</span></span>
-<span><span class="co">#&gt;  color:#666;'&gt;Tip: Copy the text above directly into your manuscript</span></span>
-<span><span class="co">#&gt;  methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -1316,54 +1063,19 @@ first level becomes 0 (censored), the second level becomes 1
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                                          </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Group            Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI      Upper CI     </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.08954841    0.34744752    0.69847084   </span></span>
-<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.07256249    0.10185033    0.38629006   </span></span>
-<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02994508    0.00000000    0.08920005   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.08524928    0.45863838    0.79280941   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.07591160    0.23453082    0.53209882   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06808744    0.07563188    0.34252974   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08138380    0.00000000    0.26404973   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
+<span><span class="co">#&gt;  Conditional Survival Probabilities                                                                              </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Group    Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    .        .         ᵃ    .                    .                       .                 .           .          </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    ᵃ Error in conditional survival calculation: unused arguments (delta = status, x = condTime)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 12.0 in the Surgery group (n at risk = 110), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 117.8-unit survival probability was 3.1% (95% CI:</span></span>
-<span><span class="co">#&gt;  0.0%--8.9%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the Surgery+Chemo group (n</span></span>
-<span><span class="co">#&gt;  at risk = 110), the estimated conditional 117.8-unit survival</span></span>
-<span><span class="co">#&gt;  probability was 10.5% (95% CI: 0.0%--26.4%).&lt;p</span></span>
-<span><span class="co">#&gt;  style='font-size:0.85em; color:#666;'&gt;Tip: Copy the text above</span></span>
-<span><span class="co">#&gt;  directly into your manuscript methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
-<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/factor-outcome-1.png" alt="" width="672"></p>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
+<p><img src="jsurvival-conditionalsurvival-comprehensive_files/figure-html/factor-outcome-1.png" class="r-plt" alt="" width="672"></p>
 <hr>
 </div>
 </div>
@@ -1462,16 +1174,16 @@ intervals around conditional survival estimates. The default is 0.95
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Group            Time Point     Conditioning Time    Conditional Survival    Standard Error    Lower CI       Upper CI     </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.08954841      0.4081983    0.63772009   </span></span>
-<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.07256249      0.1510776    0.33706277   </span></span>
-<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02994508      0.0000000    0.06888494   </span></span>
-<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02994508      0.0000000    0.06888494   </span></span>
-<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02994508      0.0000000    0.06888494   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.08524928      0.5164725    0.73497524   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.07591160      0.2860302    0.48059945   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06808744      0.1218232    0.29633838   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06808744      0.1218232    0.29633838   </span></span>
-<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08138380    2.428680e-4    0.20883795   </span></span>
+<span><span class="co">#&gt;    Surgery           33.2000000           12.0000000            0.52295918 ᵃ        0.07205095      0.4306222    0.61529619   </span></span>
+<span><span class="co">#&gt;    Surgery           54.3000000           12.0000000            0.24407020          0.06818663      0.1566855    0.33145488   </span></span>
+<span><span class="co">#&gt;    Surgery           75.5000000           12.0000000            0.03050877          0.02978396      0.0000000    0.06867846   </span></span>
+<span><span class="co">#&gt;    Surgery           96.6000000           12.0000000            0.03050877          0.02978396      0.0000000    0.06867846   </span></span>
+<span><span class="co">#&gt;    Surgery          117.8000000           12.0000000            0.03050877          0.02978396      0.0000000    0.06867846   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     33.2000000           12.0000000            0.62572389          0.06335479      0.5445315    0.70691632   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     54.3000000           12.0000000            0.38331482          0.06739127      0.2969494    0.46968021   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     75.5000000           12.0000000            0.20908081          0.06536536      0.1253117    0.29284989   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo     96.6000000           12.0000000            0.20908081          0.06536536      0.1253117    0.29284989   </span></span>
+<span><span class="co">#&gt;    Surgery+Chemo    117.8000000           12.0000000            0.10454041          0.08082392    9.603864e-4    0.20812043   </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    ᵃ Conditional survival probabilities given survival to time 12</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1487,7 +1199,7 @@ intervals around conditional survival estimates. The default is 0.95
 <span><span class="co">#&gt;  Conditional survival analysis was performed using the landmark method.</span></span>
 <span><span class="co">#&gt;  Given survival to 12.0 in the Surgery+Chemo group (n at risk = 110),</span></span>
 <span><span class="co">#&gt;  the estimated conditional 117.8-unit survival probability was 10.5%</span></span>
-<span><span class="co">#&gt;  (80% CI: 0.0%--20.9%).&lt;p style='font-size:0.85em; color:#666;'&gt;Tip:</span></span>
+<span><span class="co">#&gt;  (80% CI: 0.1%--20.8%).&lt;p style='font-size:0.85em; color:#666;'&gt;Tip:</span></span>
 <span><span class="co">#&gt;  Copy the text above directly into your manuscript methods/results</span></span>
 <span><span class="co">#&gt;  section.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -1694,35 +1406,9 @@ and <code>assumptions</code> panels are always visible.</p>
 <span><span class="co">#&gt;  Probability Weighting: Accounts for censoring through</span></span>
 <span><span class="co">#&gt;  weightingPresmoothed KM: Smoothed version of Kaplan-Meier estimation</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Report Sentence (copy-ready)</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color:#f8f9fa; padding:10px; border-left:3px</span></span>
-<span><span class="co">#&gt;  solid #007bff; margin:8px 0; font-style:italic;'&gt;Conditional survival</span></span>
-<span><span class="co">#&gt;  analysis was performed using the Kaplan-Meier weights method. Given</span></span>
-<span><span class="co">#&gt;  survival to 12.0 in the Surgery group (n at risk = 110), the estimated</span></span>
-<span><span class="co">#&gt;  conditional 117.8-unit survival probability was 3.1% (95% CI:</span></span>
-<span><span class="co">#&gt;  0.0%--8.9%).</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Conditional survival analysis was performed using the Kaplan-Meier</span></span>
-<span><span class="co">#&gt;  weights method. Given survival to 12.0 in the Surgery+Chemo group (n</span></span>
-<span><span class="co">#&gt;  at risk = 110), the estimated conditional 117.8-unit survival</span></span>
-<span><span class="co">#&gt;  probability was 10.5% (95% CI: 0.0%--26.4%).&lt;p</span></span>
-<span><span class="co">#&gt;  style='font-size:0.85em; color:#666;'&gt;Tip: Copy the text above</span></span>
-<span><span class="co">#&gt;  directly into your manuscript methods/results section.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Assumptions &amp; Caveats</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Non-informative censoring: Censored patients must have the same future</span></span>
-<span><span class="co">#&gt;  survival probability as those who remain under</span></span>
-<span><span class="co">#&gt;  observation.Conditioning time: Must be within the observed follow-up</span></span>
-<span><span class="co">#&gt;  range. Estimates beyond maximum follow-up are unreliable.Sample size</span></span>
-<span><span class="co">#&gt;  at conditioning time: The number of patients still at risk at the</span></span>
-<span><span class="co">#&gt;  conditioning time must be adequate. Small risk sets produce unstable</span></span>
-<span><span class="co">#&gt;  estimates.Interpretation: CS(t|t0) = P(T &gt; t | T &gt; t0). This is NOT</span></span>
-<span><span class="co">#&gt;  the same as the unconditional survival probability.Clinical use:</span></span>
-<span><span class="co">#&gt;  Conditional survival is most useful for patient counseling after a</span></span>
-<span><span class="co">#&gt;  period of disease-free survival (e.g., '5-year survival given you</span></span>
-<span><span class="co">#&gt;  already survived 2 years').</span></span></code></pre></div>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="plot-type-option-currently-curves-only">Plot Type Option (Currently Curves Only)<a class="anchor" aria-label="anchor" href="#plot-type-option-currently-curves-only"></a>
@@ -1845,7 +1531,7 @@ illness-death model. <em>Lifetime Data Anal</em>.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

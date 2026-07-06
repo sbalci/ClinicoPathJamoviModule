@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Adaptive LASSO Cox Regression for Variable Selection in Survival Analysis • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Adaptive LASSO Cox Regression for Variable Selection in Survival Analysis">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,7 @@ below show the R syntax for reference. To run interactively, use
 Cox proportional hazards models using data-driven adaptive weights.
 Unlike standard LASSO, the adaptive LASSO assigns differential penalties
 to each coefficient based on an initial estimate of their importance.
-This achieves the <strong>oracle property</strong> – meaning that
+This achieves the <strong>oracle property</strong> - meaning that
 asymptotically, it selects the true model as if the true sparse
 structure were known in advance.</p>
 <p>This matters in practice because standard LASSO can over-shrink large
@@ -296,7 +296,7 @@ analysis:</p>
 <td>61</td>
 <td>76%</td>
 <td>17 (9 numeric + 8 factor)</td>
-<td>–</td>
+<td>-</td>
 <td>High-dimensional with genomic features</td>
 </tr>
 </tbody>
@@ -499,7 +499,7 @@ rough screen in very high-dimensional settings.</p>
 <div class="section level4">
 <h4 id="equal-weights-standard-lasso">2.5 Equal Weights (Standard LASSO)<a class="anchor" aria-label="anchor" href="#equal-weights-standard-lasso"></a>
 </h4>
-<p>Setting weights to equal recovers the standard LASSO – no adaptation.
+<p>Setting weights to equal recovers the standard LASSO - no adaptation.
 This is useful as a baseline comparison to see how much the adaptive
 weighting changes the variable selection.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -525,7 +525,7 @@ weighting changes the variable selection.</p>
 Weight” column in the coefficients table shows how aggressively each
 variable is penalized. Variables with small weights are protected from
 shrinkage; variables with large weights are strongly penalized.
-Different weight methods may select different variables – this is
+Different weight methods may select different variables - this is
 expected and informative about which predictors are robust across
 estimation strategies.</p>
 <hr>
@@ -584,7 +584,7 @@ together.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `adaptivelasso()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "censor_level" is missing, with no default</span></span></code></pre></div>
-<p><strong>Alpha = 0.0 (Pure Ridge):</strong> No variable selection –
+<p><strong>Alpha = 0.0 (Pure Ridge):</strong> No variable selection -
 all coefficients are shrunk but none set exactly to zero. This is not
 typically the goal of adaptive LASSO, but it is useful as a
 comparison.</p>
@@ -716,7 +716,7 @@ efficient.</p>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `adaptivelasso()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "censor_level" is missing, with no default</span></span></code></pre></div>
 <p><strong>C-index (Harrell’s concordance):</strong> Optimizes
-discrimination ability – the probability that for a random pair of
+discrimination ability - the probability that for a random pair of
 patients, the one with the higher risk score has the earlier event. This
 focuses on ranking rather than calibration.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
@@ -910,7 +910,7 @@ of false selections (Meinshausen and Buhlmann, 2010).</li>
 <div class="section level4">
 <h4 id="varying-threshold">5.2 Varying Threshold<a class="anchor" aria-label="anchor" href="#varying-threshold"></a>
 </h4>
-<p>A higher threshold is more conservative – fewer variables are
+<p>A higher threshold is more conservative - fewer variables are
 declared “stably selected” but you have more confidence in those that
 are. A lower threshold is more liberal.</p>
 <p><strong>Conservative threshold (0.9):</strong></p>
@@ -1521,7 +1521,7 @@ statistical power.</p>
 <p>Expected suitability flags:</p>
 <ul>
 <li>
-<strong>EPV</strong>: 11 events / 6 predictors = 1.8 (likely red –
+<strong>EPV</strong>: 11 events / 6 predictors = 1.8 (likely red -
 very low)</li>
 <li>
 <strong>Sample size</strong>: n=40 (likely yellow or red)</li>
@@ -1597,7 +1597,7 @@ suitability check with many predictors.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `adaptivelasso()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "censor_level" is missing, with no default</span></span></code></pre></div>
-<p>The suitability assessment never blocks the analysis – it is
+<p>The suitability assessment never blocks the analysis - it is
 advisory. Even with red flags, the model will still run, but results
 should be interpreted accordingly.</p>
 </div>
@@ -1653,7 +1653,7 @@ protective)</td>
 </tr>
 <tr class="odd">
 <td>Hazard Ratio</td>
-<td>exp(coefficient) – multiplicative effect on hazard per unit
+<td>exp(coefficient) - multiplicative effect on hazard per unit
 change</td>
 </tr>
 <tr class="even">
@@ -1799,7 +1799,7 @@ still needed for unbiased assessment.</p></li>
 </h4>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Use ridge weights as the default</strong> – they are stable
+<strong>Use ridge weights as the default</strong> - they are stable
 across data dimensions.</li>
 <li>
 <strong>Always run suitability check</strong> before interpreting
@@ -1808,7 +1808,7 @@ results.</li>
 <strong>Use stability selection</strong> for confirmatory analysis
 to strengthen variable selection evidence.</li>
 <li>
-<strong>Compare weight methods</strong> – if the same variables are
+<strong>Compare weight methods</strong> - if the same variables are
 selected across methods, you have stronger evidence.</li>
 <li>
 <strong>Report the full specification:</strong> weight method,
@@ -1820,7 +1820,7 @@ performance is optimistic.</li>
 <strong>Follow TRIPOD guidelines</strong> for transparent reporting
 of prediction models.</li>
 <li>
-<strong>Combine with clinical knowledge</strong> – adaptive LASSO
+<strong>Combine with clinical knowledge</strong> - adaptive LASSO
 selects statistically important variables, but clinical relevance
 requires domain expertise.</li>
 </ol>
@@ -1974,7 +1974,7 @@ prediction model for individual prognosis or diagnosis (TRIPOD).
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

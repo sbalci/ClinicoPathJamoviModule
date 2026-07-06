@@ -1,5 +1,5 @@
 pandoc: 3.8.2.1
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   clinicopath-descriptives-checkdata-guide: clinicopath-descriptives-checkdata-guide.html
@@ -8,6 +8,7 @@ articles:
   general-independent-vs-dependent-sampling-explained: general-independent-vs-dependent-sampling-explained.html
   ihccluster-marker-distance-pathologist-guide: ihccluster-marker-distance-pathologist-guide.html
   ihccluster-quick-reference-card: ihccluster-quick-reference-card.html
+  jsurvival-03-multisurvival-interactions: jsurvival-03-multisurvival-interactions.html
   jsurvival-adaptivelasso-comprehensive: jsurvival-adaptivelasso-comprehensive.html
   jsurvival-competingsurvival-comprehensive: jsurvival-competingsurvival-comprehensive.html
   jsurvival-conditionalsurvival-comprehensive: jsurvival-conditionalsurvival-comprehensive.html
@@ -22,6 +23,8 @@ articles:
   jsurvival-sparsegrouplasso-comprehensive: jsurvival-sparsegrouplasso-comprehensive.html
   jsurvival-survival-comprehensive: jsurvival-survival-comprehensive.html
   jsurvival-timeroc-comprehensive: jsurvival-timeroc-comprehensive.html
+  meddecide-31-latentbiomarker: meddecide-31-latentbiomarker.html
+  meddecide-32-ysrb-interobserver: meddecide-32-ysrb-interobserver.html
   meddecide-leaveonecenterout-comprehensive: meddecide-leaveonecenterout-comprehensive.html
   module-development-jamovi: module-development-jamovi.html
   oncopath-curemodels-comprehensive: oncopath-curemodels-comprehensive.html
@@ -30,7 +33,7 @@ articles:
   test-data-catalog: test-data-catalog.html
   test-data-complete-catalog: test-data-complete-catalog.html
   users-of-ClinicoPath: users-of-ClinicoPath.html
-last_built: 2026-03-22T06:02Z
+last_built: 2026-07-06T17:08Z
 urls:
   reference: https://www.serdarbalci.com/ClinicoPathJamoviModule/reference
   article: https://www.serdarbalci.com/ClinicoPathJamoviModule/articles

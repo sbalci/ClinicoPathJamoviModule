@@ -1,0 +1,1283 @@
+# Interrater Reliability
+
+Function for Interrater Reliability.
+
+## Usage
+
+``` r
+agreement(
+  data,
+  vars,
+  baConfidenceLevel = 0.95,
+  confLevel = 0.95,
+  proportionalBias = FALSE,
+  showBlandAltmanGuide = FALSE,
+  blandAltmanPlot = FALSE,
+  agreementHeatmap = FALSE,
+  heatmapColorScheme = "bluered",
+  heatmapShowPercentages = TRUE,
+  heatmapShowCounts = TRUE,
+  heatmapAnnotationSize = 3.5,
+  showAgreementHeatmapGuide = FALSE,
+  sft = FALSE,
+  wght = "unweighted",
+  exct = FALSE,
+  showLevelInfo = FALSE,
+  kripp = FALSE,
+  krippMethod = "nominal",
+  bootstrap = FALSE,
+  showKrippGuide = FALSE,
+  gwet = FALSE,
+  gwetWeights = "unweighted",
+  showGwetGuide = FALSE,
+  pabak = FALSE,
+  showPABAKGuide = FALSE,
+  icc = FALSE,
+  showICCGuide = FALSE,
+  iccType = "icc21",
+  meanPearson = FALSE,
+  showMeanPearsonGuide = FALSE,
+  linCCC = FALSE,
+  showLinCCCGuide = FALSE,
+  tdi = FALSE,
+  tdiCoverage = 90,
+  tdiLimit = 10,
+  showTDIGuide = FALSE,
+  iota = FALSE,
+  iotaStandardize = TRUE,
+  showIotaGuide = FALSE,
+  finn = FALSE,
+  finnLevels = 3,
+  finnModel = "oneway",
+  showFinnGuide = FALSE,
+  lightKappa = FALSE,
+  showLightKappaGuide = FALSE,
+  kendallW = FALSE,
+  showKendallWGuide = FALSE,
+  robinsonA = FALSE,
+  showRobinsonAGuide = FALSE,
+  meanSpearman = FALSE,
+  showMeanSpearmanGuide = FALSE,
+  raterBias = FALSE,
+  showRaterBiasGuide = FALSE,
+  bhapkar = FALSE,
+  showBhapkarGuide = FALSE,
+  stuartMaxwell = FALSE,
+  showStuartMaxwellGuide = FALSE,
+  maxwellRE = FALSE,
+  showMaxwellREGuide = FALSE,
+  interIntraRater = FALSE,
+  interIntraSeparator = "_",
+  showInterIntraRaterGuide = FALSE,
+  pairwiseKappa = FALSE,
+  referenceRater = NULL,
+  rankRaters = FALSE,
+  showPairwiseKappaGuide = FALSE,
+  allPairsKappa = FALSE,
+  allPairsCI = TRUE,
+  showAllPairsKappaGuide = FALSE,
+  itemModalCategoryAgreement = FALSE,
+  showItemModalGuide = FALSE,
+  hierarchicalKappa = FALSE,
+  clusterVariable = NULL,
+  iccHierarchical = FALSE,
+  clusterSpecificKappa = TRUE,
+  varianceDecomposition = TRUE,
+  shrinkageEstimates = FALSE,
+  testClusterHomogeneity = TRUE,
+  clusterRankings = FALSE,
+  showHierarchicalGuide = FALSE,
+  conditionVariable = NULL,
+  mixedEffectsComparison = FALSE,
+  multipleTestCorrection = "none",
+  showMixedEffectsGuide = FALSE,
+  confusionMatrix = FALSE,
+  confusionNormalize = "none",
+  showConfusionMatrixGuide = FALSE,
+  bootstrapCI = FALSE,
+  nBoot = 1000,
+  showBootstrapCIGuide = FALSE,
+  multiAnnotatorConcordance = FALSE,
+  predictionColumn = 1,
+  showConcordanceF1Guide = FALSE,
+  specificAgreement = FALSE,
+  specificPositiveCategory = "",
+  specificAllCategories = TRUE,
+  specificConfidenceIntervals = TRUE,
+  showSpecificAgreementGuide = FALSE,
+  showSummary = FALSE,
+  showAbout = FALSE,
+  consensusName = "consensus_rating",
+  consensusRule = "majority",
+  tieBreaker = "exclude",
+  loaVariable = FALSE,
+  detailLevel = "detailed",
+  simpleThreshold = 50,
+  loaThresholds = "custom",
+  loaHighThreshold = 75,
+  loaLowThreshold = 56,
+  loaVariableName = "agreement_level",
+  showLoaTable = TRUE,
+  raterProfiles = FALSE,
+  raterProfileType = "boxplot",
+  raterProfileShowPoints = FALSE,
+  showRaterProfileGuide = FALSE,
+  agreementBySubgroup = FALSE,
+  subgroupVariable = NULL,
+  subgroupForestPlot = TRUE,
+  subgroupMinCases = 10,
+  showSubgroupGuide = FALSE,
+  raterClustering = FALSE,
+  clusterMethod = "hierarchical",
+  clusterDistance = "correlation",
+  clusterLinkage = "average",
+  nClusters = 3,
+  showDendrogram = TRUE,
+  showClusterHeatmap = TRUE,
+  showRaterClusterGuide = FALSE,
+  caseClustering = FALSE,
+  caseClusterMethod = "hierarchical",
+  caseClusterDistance = "correlation",
+  caseClusterLinkage = "average",
+  nCaseClusters = 3,
+  showCaseDendrogram = TRUE,
+  showCaseClusterHeatmap = TRUE,
+  showCaseClusterGuide = FALSE,
+  pairedAgreementTest = FALSE,
+  conditionBVars = NULL,
+  pairedBootN = 2000,
+  showPairedAgreementGuide = FALSE,
+  agreementSampleSize = FALSE,
+  ssMetric = "kappa",
+  ssKappaNull = 0.4,
+  ssKappaAlt = 0.7,
+  ssNRaters = 2,
+  ssNCategories = 4,
+  ssAlpha = 0.05,
+  ssPower = 0.8,
+  showSampleSizeGuide = FALSE
+)
+```
+
+## Arguments
+
+- data:
+
+  The data as a data frame. The data should be in long format, where
+  each row is a unique observation.
+
+- vars:
+
+  A string naming the variable from `data` that contains the diagnosis
+  given by the observer.
+
+- baConfidenceLevel:
+
+  Confidence level for Bland-Altman limits of agreement (LoA). Typically
+  0.95 for 95 percent confidence intervals.
+
+- confLevel:
+
+  Confidence level for confidence intervals in ICC, CCC, bootstrap CIs,
+  and other agreement statistics. Default is 0.95 (95 percent CI).
+
+- proportionalBias:
+
+  Test whether the difference between raters changes systematically with
+  the magnitude of measurement (proportional bias). Uses linear
+  regression of difference vs. mean.
+
+- showBlandAltmanGuide:
+
+  Show educational guide explaining Bland-Altman limits of agreement for
+  method comparison studies.
+
+- blandAltmanPlot:
+
+  Generate Bland-Altman plot for continuous agreement analysis. Displays
+  mean difference and limits of agreement between the first two raters.
+  Only applicable when raters provide continuous measurements (e.g.,
+  tumor size in mm).
+
+- agreementHeatmap:
+
+  Generate heatmap visualization of agreement patterns for categorical
+  data. Creates confusion matrices showing how each rater pair's
+  classifications correspond. Color-coded cells reveal agreement
+  (diagonal) and specific disagreement patterns (off-diagonal).
+  Essential for identifying systematic biases, problematic categories,
+  and training needs. Shows where raters agree strongly, where they
+  consistently disagree, and which category confusions are most common.
+  Particularly valuable for multi-category classifications with complex
+  disagreement patterns.
+
+- heatmapColorScheme:
+
+  Color palette for heatmap visualization. Blue-Red highlights diagonal
+  agreement with strong contrast. Traffic light uses intuitive color
+  coding. Viridis is perceptually uniform and colorblind-safe. Grayscale
+  for black-and-white printing.
+
+- heatmapShowPercentages:
+
+  Display percentage values within heatmap cells (percentage of total
+  cases). Helps interpret relative frequency of each rater combination.
+  Essential when comparing heatmaps with different sample sizes.
+
+- heatmapShowCounts:
+
+  Display absolute counts within heatmap cells (number of cases). Shows
+  actual sample sizes for each cell. Useful for identifying cells with
+  insufficient data and assessing statistical reliability.
+
+- heatmapAnnotationSize:
+
+  Text size for cell annotations (counts and percentages). Adjust for
+  readability with different numbers of categories. Larger for few
+  categories, smaller for many categories.
+
+- showAgreementHeatmapGuide:
+
+  Show educational guide and clinical use cases for Agreement Heatmap
+  before running analysis.
+
+- sft:
+
+  Display frequency tables showing the distribution of ratings for each
+  rater. Useful for understanding rating patterns and identifying
+  potential biases.
+
+- wght:
+
+  For ordinal variables (e.g., tumor grade G1/G2/G3), weighted kappa
+  accounts for degree of disagreement. Linear weights: Adjacent
+  disagreements (G1 vs G2) receive partial credit. Squared weights:
+  Larger disagreements (G1 vs G3) are penalized more heavily. Use
+  'Unweighted' for nominal categories with no inherent order.
+
+- exct:
+
+  Use exact p-value calculation instead of normal approximation.
+  Recommended for small sample sizes (\< 30 cases) with 3 or more
+  raters. Note: Not applicable for 2-rater analysis (use Cohen's kappa).
+
+- showLevelInfo:
+
+  Display information about how categorical levels are currently ordered
+  in your variables. Essential for weighted kappa analysis to ensure
+  ordinal levels are properly ordered (e.g., G1 → G2 → G3 for tumor
+  grades).
+
+- kripp:
+
+  Alternative reliability measure that handles missing data and supports
+  various data types. Useful when raters didn't rate all cases or when
+  comparing different measurement levels.
+
+- krippMethod:
+
+  Specifies the measurement level for Krippendorff's alpha calculation.
+
+- bootstrap:
+
+  Calculate bootstrap confidence intervals for Krippendorff's alpha.
+
+- showKrippGuide:
+
+  Show educational guide explaining when to use Krippendorff's Alpha
+  including handling missing data and data type selection.
+
+- gwet:
+
+  Alternative agreement coefficient that is more stable than Cohen's
+  kappa when dealing with high agreement rates or unbalanced marginal
+  distributions (e.g., rare tumor subtypes). Gwet's AC corrects for the
+  paradoxical behavior of kappa in extreme cases.
+
+- gwetWeights:
+
+  Unweighted (AC1) for nominal categories. Linear or Quadratic weights
+  (AC2) for ordinal data.
+
+- showGwetGuide:
+
+  Show educational guide explaining when Gwet's AC is preferred over
+  Cohen's kappa, especially for high agreement rates.
+
+- pabak:
+
+  Prevalence-Adjusted Bias-Adjusted Kappa (PABAK) corrects Cohen's kappa
+  for the effects of prevalence and bias. Also reports the prevalence
+  index (PI) and bias index (BI). Useful when kappa is paradoxically low
+  despite high agreement (Byrt et al. 1993). Requires exactly 2 raters
+  with categorical data.
+
+- showPABAKGuide:
+
+  Show educational guide explaining PABAK, the kappa paradox, and when
+  prevalence/bias adjustment is needed.
+
+- icc:
+
+  Intraclass Correlation Coefficient for continuous measurements (e.g.,
+  tumor size in mm, biomarker concentrations). Standard measure for
+  assessing agreement with numeric data. Complements Bland-Altman
+  analysis.
+
+- showICCGuide:
+
+  Show educational guide explaining when and how to use the Intraclass
+  Correlation Coefficient, including ICC model selection, interpretation
+  thresholds, and clinical examples.
+
+- iccType:
+
+  ICC model selection. One-way: each subject rated by different raters.
+  Two-way: all subjects rated by same raters. Random: raters are random
+  sample. Mixed: raters are fixed. Single: reliability of individual
+  rater. Average (k): reliability of mean rating.
+
+- meanPearson:
+
+  Mean Pearson Correlation calculates the average linear correlation
+  coefficient across all rater pairs for continuous measurements.
+  Pearson's r measures linear association between variables, ranging
+  from -1 (perfect negative) to +1 (perfect positive correlation). For
+  interrater agreement, high positive correlations indicate raters'
+  measurements vary together linearly. Particularly useful for
+  continuous scales (tumor size, biomarker levels, quantitative scores),
+  assumes linear relationship and normality. Complements ICC by focusing
+  on correlation rather than absolute agreement. Simple, interpretable
+  measure for assessing whether raters rank and scale measurements
+  similarly.
+
+- showMeanPearsonGuide:
+
+  Show educational guide and clinical use cases for Mean Pearson
+  Correlation before running analysis.
+
+- linCCC:
+
+  Lin's Concordance Correlation Coefficient (CCC) measures both
+  precision and accuracy for continuous data, making it superior to
+  Pearson's r for method comparison and agreement studies. CCC ranges
+  from -1 to +1 (perfect concordance) and equals the product of
+  Pearson's r (precision) and a bias correction factor (accuracy).
+  Unlike Pearson's r which only measures linear association, CCC
+  penalizes systematic bias. Essential for method comparison (manual vs.
+  automated), instrument validation, and assessing measurement
+  agreement. Requires 2 raters/methods for pairwise comparison;
+  calculates all pairwise CCCs for 3+ raters.
+
+- showLinCCCGuide:
+
+  Show educational guide and clinical use cases for Lin's Concordance
+  Correlation Coefficient before running analysis.
+
+- tdi:
+
+  Total Deviation Index (TDI) quantifies the limits within which a
+  specified proportion of differences between two measurement methods
+  will fall. Unlike Bland-Altman which assumes constant variability, TDI
+  accounts for heteroscedastic errors (variance increasing with
+  magnitude). Provides a single index for acceptable agreement based on
+  predefined clinically acceptable limits. Essential for medical device
+  validation, laboratory method comparison, and biomarker assay
+  validation where regulatory agencies require demonstration that a
+  specified percentage of measurements fall within acceptable limits.
+  Requires 2 raters/methods. Particularly useful when establishing
+  equivalence between manual and automated measurements or between
+  different measurement platforms.
+
+- tdiCoverage:
+
+  The proportion of differences that should fall within TDI limits
+  (default: 90 percent). Common values: 90 percent for general
+  agreement, 95 percent for stringent requirements. This defines what
+  percentage of future measurements must fall within acceptable limits.
+
+- tdiLimit:
+
+  Maximum acceptable difference between methods in original units.
+  Example: For tumor size, 5mm might be clinically acceptable. TDI
+  should be smaller than this limit for methods to be considered
+  equivalent.
+
+- showTDIGuide:
+
+  Show educational guide and clinical use cases for Total Deviation
+  Index before running analysis.
+
+- iota:
+
+  Iota coefficient for multivariate interrater agreement. Measures
+  agreement when raters assess multiple variables simultaneously (e.g.,
+  tumor size + grade + mitotic count). Unlike ICC which analyzes one
+  variable at a time, Iota provides a single chance-corrected agreement
+  index across all variables. Supports both quantitative (continuous)
+  and nominal (categorical) data. Reduces to Fleiss' kappa for single
+  categorical variable.
+
+- iotaStandardize:
+
+  Z-standardize quantitative variables before computing Iota.
+  Recommended when variables are on different scales (e.g., tumor size
+  in mm vs. Ki-67 percentage). Ensures each variable contributes equally
+  to the overall agreement measure.
+
+- showIotaGuide:
+
+  Show educational guide explaining the Iota coefficient for
+  multivariate agreement assessment.
+
+- finn:
+
+  Finn coefficient for interrater reliability of categorical data.
+  Variance-based agreement measure especially useful when variance
+  between raters is low (i.e., agreement is high). Alternative to
+  traditional kappa-based measures. Works with ordered categorical
+  ratings.
+
+- finnLevels:
+
+  The number of different rating categories for Finn coefficient
+  calculation (e.g., 3 for low/medium/high, 5 for 5-point Likert scale).
+  Must specify the total number of distinct categories in your rating
+  scale.
+
+- finnModel:
+
+  Model specification for Finn coefficient. One-way: only subjects are
+  random effects (each subject may be rated by different raters).
+  Two-way: both subjects and raters are random (subjects and raters
+  randomly chosen from larger populations).
+
+- showFinnGuide:
+
+  Show educational guide explaining the Finn coefficient and
+  variance-based agreement measurement.
+
+- lightKappa:
+
+  Alternative agreement measure for 3 or more raters. Calculates the
+  average of all pairwise kappas between raters. More robust than
+  Fleiss' kappa when raters have different marginal distributions or
+  when assumptions of Fleiss' kappa are questionable.
+
+- showLightKappaGuide:
+
+  Show educational guide explaining when Light's Kappa is preferred for
+  3+ rater studies.
+
+- kendallW:
+
+  Kendall's coefficient of concordance (W) measures agreement among
+  raters when rating or ranking ordinal data. W ranges from 0 (no
+  agreement) to 1 (perfect agreement). Particularly useful for ranked
+  data, severity scores, and ordinal grading systems where you want to
+  know if raters rank cases in similar order.
+
+- showKendallWGuide:
+
+  Show educational guide explaining Kendall's W for ordinal concordance
+  and ranking agreement.
+
+- robinsonA:
+
+  Robinson's A is an agreement coefficient for ordinal data based on the
+  proportion of concordant pairs. It ranges from -1 (complete
+  disagreement) to 1 (perfect agreement), with 0 indicating agreement no
+  better than chance. Alternative to weighted kappa that directly
+  measures the degree of ordinal association between raters.
+  Particularly useful when ordinal categories have meaningful rank order
+  (e.g., disease severity stages, tumor grades). Less affected by
+  marginal distribution imbalances than kappa-based measures.
+
+- showRobinsonAGuide:
+
+  Show educational guide and clinical use cases for Robinson's A before
+  running analysis.
+
+- meanSpearman:
+
+  Mean Spearman Rho calculates the average rank correlation across all
+  rater pairs. Spearman's rho is a nonparametric measure of monotonic
+  association for ordinal data. It ranges from -1 (perfect negative
+  association) to +1 (perfect positive association), with 0 indicating
+  no association. When used for interrater agreement, high positive
+  values indicate raters rank cases similarly. Particularly useful for
+  ordinal scales, rankings, and severity ratings. Robust to outliers and
+  does not assume linear relationship. Complements other ordinal
+  measures (Robinson's A, Kendall's W) by focusing on rank-order
+  correlation rather than exact concordance.
+
+- showMeanSpearmanGuide:
+
+  Show educational guide and clinical use cases for Mean Spearman Rho
+  before running analysis.
+
+- raterBias:
+
+  Tests whether raters have systematically different rating patterns
+  (e.g., one rater is more lenient/strict than others). Uses chi-square
+  test to detect if marginal frequencies differ significantly across
+  raters. Essential quality control tool to identify raters who
+  consistently over-diagnose or under-diagnose compared to their peers.
+
+- showRaterBiasGuide:
+
+  Show educational guide for detecting systematic rater bias in quality
+  control.
+
+- bhapkar:
+
+  Bhapkar test for marginal homogeneity between two raters with multiple
+  categories. More powerful alternative to Stuart-Maxwell test. Like
+  McNemar's test but for \>2 categories. Tests if two raters use rating
+  categories with equal frequency. Essential for paired comparisons
+  (e.g., pre-post training, novice vs. expert, pathologist vs. AI
+  algorithm) to detect systematic differences in category usage.
+
+- showBhapkarGuide:
+
+  Show educational guide for the Bhapkar test of marginal homogeneity.
+
+- stuartMaxwell:
+
+  Stuart-Maxwell test for marginal homogeneity between two raters with
+  multiple categories. Classic test for matched data analysis. Like
+  McNemar's test but for \>2 categories. Tests if two raters use rating
+  categories with equal frequency. Note: Bhapkar test is more powerful
+  for large samples, but Stuart-Maxwell is the traditional choice. Use
+  for paired/matched comparisons to detect systematic category usage
+  differences.
+
+- showStuartMaxwellGuide:
+
+  Show educational guide for the Stuart-Maxwell test of marginal
+  homogeneity.
+
+- maxwellRE:
+
+  Maxwell's Random Error (RE) index decomposes total measurement
+  variance into systematic and random error components. RE represents
+  the proportion of total disagreement attributable to random
+  measurement error rather than systematic differences between raters or
+  methods. Values range from 0 (all error is systematic) to 1 (all error
+  is random). Essential for understanding error sources in method
+  comparison studies, diagnostic test validation, and measurement
+  reliability assessment. Typically used with continuous or ordinal data
+  requiring 2+ raters/methods.
+
+- showMaxwellREGuide:
+
+  Show educational guide and clinical use cases for Maxwell's RE before
+  running analysis.
+
+- interIntraRater:
+
+  Simultaneous assessment of inter-rater and intra-rater reliability for
+  test-retest studies. Calculates intra-rater reliability (same rater
+  consistency across time) and inter-rater reliability (agreement
+  between different raters). Requires paired columns representing the
+  same rater at different time points (e.g., Rater1_Time1,
+  Rater1_Time2). Essential for training evaluation, fatigue studies, and
+  long-term reliability assessment. Reports both within-rater
+  consistency and between-rater agreement.
+
+- interIntraSeparator:
+
+  Character separating rater ID from time point in column names
+  (default: underscore). Example: With separator "*", columns named
+  "Rater1_T1" and "Rater1_T2" are recognized as the same rater at two
+  time points. Common patterns: underscore (*), dot (.), dash (-).
+
+- showInterIntraRaterGuide:
+
+  Show educational guide and clinical use cases for Inter/Intra-Rater
+  Reliability before running analysis.
+
+- pairwiseKappa:
+
+  Compare each rater individually against a reference rater (e.g., gold
+  standard, consensus score, senior pathologist). Produces individual
+  kappa values for each rater-vs-reference comparison. Essential for
+  training assessment, rater certification, and performance monitoring.
+
+- referenceRater:
+
+  Select the reference rater variable (e.g., consensus score, gold
+  standard diagnosis, senior pathologist ratings). Each rater in the
+  main variable list will be compared pairwise with this reference using
+  Cohen's kappa.
+
+- rankRaters:
+
+  Rank raters from highest to lowest kappa (relative to reference).
+  Shows best and worst performing raters for quality control and
+  training needs. Useful for identifying raters who need additional
+  training or those ready for certification.
+
+- showPairwiseKappaGuide:
+
+  Show educational guide for pairwise kappa analysis against a reference
+  rater.
+
+- allPairsKappa:
+
+  For studies with 3+ raters, compute Cohen's kappa, observed agreement,
+  standard error, 95 percent CI, z, and p-value for every rater pair
+  (C(k,2) rows). Reproduces the conventional pairwise agreement table
+  reported in interobserver reliability studies. Honors the 'wght'
+  (weights) and 'multipleTestCorrection' options.
+
+- allPairsCI:
+
+  Compute Fisher-z 95 percent CI for each pairwise kappa using the
+  analytical standard error returned by irr::kappa2.
+
+- showAllPairsKappaGuide:
+
+  Show educational guide for all-pairs kappa: when to report the full
+  pairwise table versus average (Light's) or overall (Fleiss') kappa.
+
+- itemModalCategoryAgreement:
+
+  For each rating category, compute the mean within-case agreement rate
+  across raters on cases whose modal rating equals that category.
+  Identifies which categories drive disagreement (e.g., YSRB Category IV
+  "suspicious" is a known agreement bottleneck in breast cytology).
+  Cases with no unique mode (ties) are excluded.
+
+- showItemModalGuide:
+
+  Show educational guide for per-category item-modal agreement.
+
+- hierarchicalKappa:
+
+  Enable hierarchical (multilevel) kappa analysis for nested data
+  structures (e.g., pathologists nested within institutions, readers
+  nested within centers). Accounts for clustering effects and provides
+  institution/cluster-specific agreement estimates. Essential for
+  multi-center reliability studies.
+
+- clusterVariable:
+
+  Variable defining clusters/institutions/centers. For example, hospital
+  ID, institution name, or scanner ID. Raters are nested within these
+  clusters.
+
+- iccHierarchical:
+
+  Calculate intraclass correlation coefficients for hierarchical data.
+  ICC(1): between-cluster agreement, ICC(2): reliability of cluster
+  means, ICC(3): within-cluster agreement. Decomposes variance into
+  cluster-level and rater-level components.
+
+- clusterSpecificKappa:
+
+  Calculate kappa separately for each cluster/institution to identify
+  sites with poor agreement. Useful for quality control in multi-center
+  studies.
+
+- varianceDecomposition:
+
+  Decompose total variance into between-cluster and within-cluster
+  components. Large between-cluster variance indicates institutional
+  heterogeneity. Comparison informs whether issues are local or
+  systematic.
+
+- shrinkageEstimates:
+
+  Calculate shrinkage estimates for cluster-specific kappas. Shrinks
+  extreme estimates toward overall mean, providing more stable estimates
+  for small clusters. Recommended when cluster sizes vary substantially.
+
+- testClusterHomogeneity:
+
+  Test whether agreement is homogeneous across clusters (null
+  hypothesis: all clusters have equal kappa). Significant result
+  indicates heterogeneity requiring investigation.
+
+- clusterRankings:
+
+  Rank clusters/institutions by agreement performance with confidence
+  intervals. Identifies best and worst performing sites. Use cautiously
+  to avoid unfair comparisons when cluster sizes differ substantially.
+
+- showHierarchicalGuide:
+
+  Show educational guide for hierarchical/multilevel kappa in
+  multi-center studies.
+
+- conditionVariable:
+
+  Variable distinguishing measurement conditions (e.g., AI-assisted vs.
+  conventional, pre-training vs. post-training). Enables mixed-effects
+  comparison that accounts for rater and case random effects. Each
+  case-rater pair should have one observation per condition level.
+
+- mixedEffectsComparison:
+
+  Fit a linear mixed model to compare measurement conditions while
+  accounting for rater and case random effects. Model: score ~
+  condition + (1\|rater) + (1\|case). Provides condition effect estimate
+  with CI, variance components, and ICC. More powerful than paired
+  t-tests or Wilcoxon tests when data has a crossed rater x case x
+  condition design (e.g., Dy et al. 2024 Ki-67 AI study).
+
+- multipleTestCorrection:
+
+  Correction method for multiple comparisons when testing agreement
+  across multiple strata or clusters. Applied to cluster-specific
+  p-values in the hierarchical analysis and to per-condition comparisons
+  when multiple conditions are present.
+
+- showMixedEffectsGuide:
+
+  Show educational guide for mixed-effects condition comparison in AI
+  validation studies.
+
+- confusionMatrix:
+
+  Display a formal N×N confusion matrix comparing first two raters (or
+  reference vs predicted). Includes row/column normalization options and
+  per-class precision, recall, and F1 scores. Essential for
+  multi-category classification studies (e.g., HER2 0/1+/2+/3+ scoring).
+
+- confusionNormalize:
+
+  How to normalize the confusion matrix. None shows raw counts.
+  Row-normalized shows proportions within each reference category
+  (equivalent to recall/sensitivity per class). Column-normalized shows
+  proportions within each predicted category (equivalent to
+  precision/PPV per class).
+
+- showConfusionMatrixGuide:
+
+  Show educational guide for multi-class confusion matrix interpretation
+  and per-class metrics.
+
+- bootstrapCI:
+
+  Calculate bootstrap confidence intervals for agreement metrics (kappa,
+  Fleiss kappa, Krippendorff alpha, ICC, percent agreement). Uses case
+  resampling with BCa (bias-corrected and accelerated) method.
+  Recommended when analytical CIs are unavailable or when distributions
+  may be non-normal (e.g., skewed kappa distributions with few
+  categories).
+
+- nBoot:
+
+  Number of bootstrap resamples for confidence interval estimation. 1000
+  is adequate for 95 percent CIs. Use 5000-10000 for publication-quality
+  99 percent CIs or when metrics are near boundary values (0 or 1).
+
+- showBootstrapCIGuide:
+
+  Show educational guide for bootstrap confidence intervals and when
+  they are preferred over analytical CIs.
+
+- multiAnnotatorConcordance:
+
+  Compute concordance metrics where a prediction is considered correct
+  if it matches ANY of the reference annotators. Useful for AI
+  validation studies where multiple pathologists annotate the same cases
+  and no single ground truth exists (e.g., Ottl et al. 2025 HER2
+  scoring). Reports concordance accuracy, per-class concordance F1, and
+  comparison to strict consensus-based evaluation.
+
+- predictionColumn:
+
+  Which rater column contains the predictions to evaluate. Default is
+  column 1 (first rater). Remaining columns are treated as reference
+  annotators. For AI validation, set this to the column containing AI
+  predictions.
+
+- showConcordanceF1Guide:
+
+  Show educational guide for concordance metrics in AI validation with
+  multiple reference annotators.
+
+- specificAgreement:
+
+  Calculate category-specific agreement indices for binary or
+  multi-category data. For binary data: Positive Specific Agreement
+  (PSA) and Negative Specific Agreement (NSA). For multi-category data:
+  Agreement indices for each category separately. Essential when some
+  categories are more clinically important than others (e.g., cancer
+  diagnosis, adverse events, critical findings). Unlike overall kappa
+  which treats all disagreements equally, specific agreement focuses on
+  agreement within each category, revealing which categories have
+  reliable agreement and which need attention.
+
+- specificPositiveCategory:
+
+  For binary specific agreement: Specify which category should be
+  treated as "positive" (e.g., "Cancer", "Malignant", "Present", "Yes",
+  "1"). Leave blank to calculate specific agreement for all categories.
+  Required for PSA/NSA interpretation. Example: If categories are
+  "Benign" and "Malignant", enter "Malignant".
+
+- specificAllCategories:
+
+  Calculate specific agreement for each category separately
+  (recommended). When enabled, provides agreement indices for every
+  category in your data, identifying which specific
+  diagnoses/classifications have strong agreement and which may need
+  improved training or criteria clarification.
+
+- specificConfidenceIntervals:
+
+  Calculate 95 percent confidence intervals for specific agreement
+  indices using Wilson score method. Recommended for publication and
+  when sample sizes vary across categories. Helps distinguish true
+  differences in category-specific agreement from random variation.
+
+- showSpecificAgreementGuide:
+
+  Show educational guide and clinical use cases for Specific Agreement
+  Indices before running analysis.
+
+- showSummary:
+
+  Display a natural-language interpretation of results with color-coded
+  agreement levels and clinical guidance. Recommended for reports and
+  presentations.
+
+- showAbout:
+
+  Display an explanatory panel describing what this analysis does, when
+  to use it, and how to interpret results.
+
+- consensusName:
+
+  Name of the new computed variable containing consensus ratings. Will
+  be added to the dataset and available for downstream analyses.
+
+- consensusRule:
+
+  Rule for defining consensus. Simple majority = modal category with
+  \>50 percent of votes. Supermajority requires \>=75 percent agreement.
+  Unanimous requires 100 percent agreement. Cases not meeting threshold
+  are set to NA in consensus variable.
+
+- tieBreaker:
+
+  How to handle ties when no single category meets the consensus
+  threshold (e.g., 2-2 split with 4 raters). Exclude = set consensus to
+  NA for tied cases. First = use first category that appears.
+  Lowest/Highest = use min/max of tied categories.
+
+- loaVariable:
+
+  Calculate agreement level for each case and add as new computed
+  column. Choose between Simple (3 categories) or Detailed (5
+  categories) classification. Useful for identifying difficult cases and
+  quality control.
+
+- detailLevel:
+
+  Simple mode: All Agreed (100 percent), Majority Agreed (\>=threshold
+  percent), No Agreement (\<threshold percent). Detailed mode: Absolute
+  (100 percent), High, Moderate, Low, Poor (based on custom/data-driven
+  thresholds). Simple mode replicates the former "Agreement Status"
+  feature.
+
+- simpleThreshold:
+
+  For Simple mode only: Minimum percent for "Majority Agreed" status. 50
+  percent = simple majority, 75 percent = supermajority, 100 percent =
+  unanimous.
+
+- loaThresholds:
+
+  For Detailed mode only: How to define 5 LoA categories. Custom =
+  user-defined cutpoints. Quartiles/Tertiles = data-driven splits.
+
+- loaHighThreshold:
+
+  For Detailed mode with Custom thresholds only: Minimum percent for
+  "High" classification (e.g., 75 percent = \>=12/16 raters). Cases \>=
+  this threshold are "High Agreement".
+
+- loaLowThreshold:
+
+  For Detailed mode with Custom thresholds only: Minimum percent for
+  "Low" classification (e.g., 56 percent = \>=9/16 raters). Below =
+  "Poor", between Low and High = "Moderate".
+
+- loaVariableName:
+
+  Name for the computed Level of Agreement variable added to the
+  dataset. Default: 'agreement_level'. Will contain categories like
+  'Absolute', 'High', 'Moderate', 'Low', 'Poor'.
+
+- showLoaTable:
+
+  Display summary table showing distribution of cases across LoA
+  categories with counts and percentages. Useful for quality control
+  reporting.
+
+- raterProfiles:
+
+  Generate box plots or violin plots showing the distribution of ratings
+  for each rater. For categorical data: bar plots showing category
+  distribution per rater. For continuous data: box plots/violin plots
+  showing rating distribution per rater. Essential for identifying
+  raters with systematically different rating patterns (e.g.,
+  consistently higher/lower scores, restricted range use, bimodal
+  distributions). Reveals rating style differences, scale use patterns,
+  and potential training needs. Particularly valuable when agreement is
+  low - helps determine if disagreement stems from systematic
+  differences in rating distributions or random variation.
+
+- raterProfileType:
+
+  For continuous data: Choose between box plots (shows median,
+  quartiles, outliers) or violin plots (shows full distribution shape
+  including multimodality). For categorical data: Automatically uses bar
+  plots showing category frequencies.
+
+- raterProfileShowPoints:
+
+  Overlay individual rating observations on box/violin plots. Useful for
+  smaller datasets (N \< 100) to show actual data distribution. Not
+  recommended for large datasets due to overplotting.
+
+- showRaterProfileGuide:
+
+  .
+
+- agreementBySubgroup:
+
+  Calculate agreement statistics separately for each level of a subgroup
+  variable (e.g., tumor type, disease stage, specimen type, difficulty
+  level). Generates forest plot showing kappa/ICC values with confidence
+  intervals across subgroups. Essential for determining whether
+  agreement is consistent across different contexts or varies by case
+  characteristics. Common use cases: comparing agreement for benign vs.
+  malignant cases, early vs. advanced stage, different anatomical sites,
+  or easy vs. difficult cases. Reveals whether rater training is
+  adequate for all case types or whether specific subgroups need
+  targeted attention.
+
+- subgroupVariable:
+
+  Categorical variable defining subgroups for stratified analysis.
+  Examples: tumor_type, disease_stage, specimen_site, difficulty_level.
+  Agreement will be calculated separately for each level of this
+  variable.
+
+- subgroupForestPlot:
+
+  Create forest plot showing agreement estimates (kappa/ICC) with
+  confidence intervals for each subgroup. Facilitates visual comparison
+  of agreement across subgroups.
+
+- subgroupMinCases:
+
+  Minimum number of cases required in a subgroup to calculate agreement
+  statistics. Subgroups with fewer cases will be excluded with a warning
+  message. Default: 10 cases (reasonable for kappa estimation).
+
+- showSubgroupGuide:
+
+  .
+
+- raterClustering:
+
+  Cluster raters based on their rating patterns to identify groups of
+  raters with similar rating behavior. For continuous data: clustering
+  based on correlation or Euclidean distance of ratings. For categorical
+  data: clustering based on agreement patterns or confusion matrices.
+  Essential for identifying subgroups of raters who rate similarly,
+  detecting outlier raters, understanding rater training backgrounds,
+  and optimizing panel composition. Reveals whether raters form natural
+  groups (e.g., experienced vs. novice, different training backgrounds)
+  or rate independently. Useful for targeted training interventions and
+  understanding sources of disagreement.
+
+- clusterMethod:
+
+  Hierarchical clustering: Creates dendrogram showing nested rater
+  groupings at all similarity levels. Best for exploring natural
+  groupings without pre-specifying number of clusters. K-means:
+  Partitions raters into K distinct clusters. Requires specifying number
+  of clusters. Best when number of groups is known a priori (e.g., 2
+  training cohorts, 3 experience levels).
+
+- clusterDistance:
+
+  For continuous data: - Correlation: Groups raters with similar
+  relative rating patterns (recommended for most cases) - Euclidean:
+  Groups raters with similar absolute rating values - Manhattan: Like
+  Euclidean but less sensitive to outliers For categorical data: -
+  Agreement-based: Distance = 1 - pairwise agreement proportion
+  Correlation is recommended for most applications as it captures rating
+  pattern similarity regardless of systematic shifts (one rater
+  consistently 10 percent higher).
+
+- clusterLinkage:
+
+  How to measure distance between clusters: - Average: Distance between
+  cluster means (balanced, recommended for most cases) - Complete:
+  Maximum distance between any two points (compact clusters) - Single:
+  Minimum distance between any two points (can create chain-like
+  clusters) - Ward: Minimizes within-cluster variance (tends to create
+  equal-sized clusters)
+
+- nClusters:
+
+  Number of clusters to create for k-means clustering. Consider: number
+  of training cohorts, experience levels, or institutions. For
+  hierarchical clustering, this is ignored but dendrogram can be cut at
+  any height.
+
+- showDendrogram:
+
+  Display hierarchical clustering dendrogram showing rater groupings at
+  all similarity levels. Height of joins indicates dissimilarity. Raters
+  joined at lower heights are more similar. Useful for identifying
+  natural number of clusters and understanding rater relationships.
+
+- showClusterHeatmap:
+
+  Display heatmap of pairwise rater similarities with cluster
+  memberships annotated. Helps visualize which raters are most similar
+  and validates cluster assignments. For continuous data: correlation
+  matrix. For categorical data: agreement matrix.
+
+- showRaterClusterGuide:
+
+  .
+
+- caseClustering:
+
+  Perform clustering of cases based on rating patterns across raters.
+  Identifies groups of cases that received similar ratings.
+
+- caseClusterMethod:
+
+  Hierarchical: Creates a dendrogram showing nested groupings at all
+  similarity levels. K-means: Partitions cases into K distinct clusters
+  (continuous data only).
+
+- caseClusterDistance:
+
+  Correlation (1 - r): Based on correlation between rating vectors
+  (continuous). Euclidean: Straight-line distance in rating space.
+  Manhattan: City-block distance (sum of absolute differences).
+  Agreement-Based: Proportion of disagreeing raters (categorical).
+
+- caseClusterLinkage:
+
+  Average: Uses average distance between all pairs. Complete: Uses
+  maximum distance between pairs. Single: Uses minimum distance between
+  pairs. Ward: Minimizes within-cluster variance.
+
+- nCaseClusters:
+
+  Number of clusters to create for k-means clustering.
+
+- showCaseDendrogram:
+
+  Display hierarchical clustering dendrogram for cases.
+
+- showCaseClusterHeatmap:
+
+  Display similarity matrix heatmap with cluster boundaries.
+
+- showCaseClusterGuide:
+
+  Show educational guide about case clustering analysis.
+
+- pairedAgreementTest:
+
+  Perform a bootstrap test comparing interobserver agreement (kappa and
+  percent agreement) between two conditions (e.g., manual vs AI-assisted
+  scoring of the same cases).
+
+- conditionBVars:
+
+  Rater columns for the second condition (e.g., AI-assisted). The main
+  rater variables serve as Condition A.
+
+- pairedBootN:
+
+  Number of bootstrap replications for paired comparison test.
+
+- showPairedAgreementGuide:
+
+  Show educational guide for comparing agreement between two conditions.
+
+- agreementSampleSize:
+
+  Compute the required sample size (number of subjects) for a
+  prospective agreement study based on kappa or ICC.
+
+- ssMetric:
+
+  The agreement metric to power the study for.
+
+- ssKappaNull:
+
+  The kappa (or ICC) value under the null hypothesis. Common choices -
+  0.4 (moderate), 0.6 (substantial).
+
+- ssKappaAlt:
+
+  The kappa (or ICC) value under the alternative hypothesis. This is the
+  minimum clinically meaningful agreement.
+
+- ssNRaters:
+
+  Planned number of raters in the study.
+
+- ssNCategories:
+
+  Number of rating categories (e.g., 4 for HER2 0/1+/2+/3+).
+
+- ssAlpha:
+
+  Type I error rate (two-sided).
+
+- ssPower:
+
+  Target power (1 - Type II error rate).
+
+- showSampleSizeGuide:
+
+  Show educational guide for planning agreement study sample size.
+
+## Value
+
+A results object containing:
+
+|                                          |     |     |     |     |                |
+|------------------------------------------|-----|-----|-----|-----|----------------|
+| `results$welcome`                        |     |     |     |     | a html         |
+| `results$irrtableHeading`                |     |     |     |     | a preformatted |
+| `results$irrtable`                       |     |     |     |     | a table        |
+| `results$contingencyTableHeading`        |     |     |     |     | a preformatted |
+| `results$contingencyTable`               |     |     |     |     | a table        |
+| `results$ratingCombinationsTable`        |     |     |     |     | a table        |
+| `results$contingencyTableExplanation`    |     |     |     |     | a html         |
+| `results$blandAltmanHeading`             |     |     |     |     | a preformatted |
+| `results$blandAltman`                    |     |     |     |     | an image       |
+| `results$agreementHeatmapPlot`           |     |     |     |     | an image       |
+| `results$agreementHeatmapExplanation`    |     |     |     |     | a html         |
+| `results$blandAltmanExplanation`         |     |     |     |     | a html         |
+| `results$blandAltmanStats`               |     |     |     |     | a table        |
+| `results$krippTableHeading`              |     |     |     |     | a preformatted |
+| `results$krippTable`                     |     |     |     |     | a table        |
+| `results$krippExplanation`               |     |     |     |     | a html         |
+| `results$lightKappaTableHeading`         |     |     |     |     | a preformatted |
+| `results$lightKappaTable`                |     |     |     |     | a table        |
+| `results$lightKappaExplanation`          |     |     |     |     | a html         |
+| `results$finnTable`                      |     |     |     |     | a table        |
+| `results$finnExplanation`                |     |     |     |     | a html         |
+| `results$kendallWTable`                  |     |     |     |     | a table        |
+| `results$kendallWExplanation`            |     |     |     |     | a html         |
+| `results$robinsonATable`                 |     |     |     |     | a table        |
+| `results$robinsonAExplanation`           |     |     |     |     | a html         |
+| `results$meanSpearmanTable`              |     |     |     |     | a table        |
+| `results$meanSpearmanExplanation`        |     |     |     |     | a html         |
+| `results$raterBiasHeading`               |     |     |     |     | a preformatted |
+| `results$raterBiasTable`                 |     |     |     |     | a table        |
+| `results$raterBiasExplanation`           |     |     |     |     | a html         |
+| `results$bhapkarTable`                   |     |     |     |     | a table        |
+| `results$bhapkarExplanation`             |     |     |     |     | a html         |
+| `results$stuartMaxwellTable`             |     |     |     |     | a table        |
+| `results$stuartMaxwellExplanation`       |     |     |     |     | a html         |
+| `results$pairwiseKappaTable`             |     |     |     |     | a table        |
+| `results$pairwiseKappaExplanation`       |     |     |     |     | a html         |
+| `results$allPairsKappaHeading`           |     |     |     |     | a preformatted |
+| `results$allPairsKappaTable`             |     |     |     |     | a table        |
+| `results$allPairsKappaExplanation`       |     |     |     |     | a html         |
+| `results$itemModalAgreementHeading`      |     |     |     |     | a preformatted |
+| `results$itemModalAgreementTable`        |     |     |     |     | a table        |
+| `results$itemModalAgreementExplanation`  |     |     |     |     | a html         |
+| `results$hierarchicalHeading`            |     |     |     |     | a preformatted |
+| `results$hierarchicalOverallTable`       |     |     |     |     | a table        |
+| `results$clusterSpecificTable`           |     |     |     |     | a table        |
+| `results$varianceDecompositionTable`     |     |     |     |     | a table        |
+| `results$hierarchicalICCTable`           |     |     |     |     | a table        |
+| `results$homogeneityTestTable`           |     |     |     |     | a table        |
+| `results$hierarchicalExplanation`        |     |     |     |     | a html         |
+| `results$advancedHeading`                |     |     |     |     | a preformatted |
+| `results$mixedEffectsTable`              |     |     |     |     | a table        |
+| `results$mixedEffectsVarianceTable`      |     |     |     |     | a table        |
+| `results$mixedEffectsExplanation`        |     |     |     |     | a html         |
+| `results$confusionMatrixTable`           |     |     |     |     | a table        |
+| `results$perClassMetricsTable`           |     |     |     |     | a table        |
+| `results$confusionMatrixExplanation`     |     |     |     |     | a html         |
+| `results$bootstrapCITable`               |     |     |     |     | a table        |
+| `results$bootstrapCIExplanation`         |     |     |     |     | a html         |
+| `results$concordanceF1Table`             |     |     |     |     | a table        |
+| `results$concordanceF1PerClassTable`     |     |     |     |     | a table        |
+| `results$concordanceF1Explanation`       |     |     |     |     | a html         |
+| `results$gwetHeading`                    |     |     |     |     | a preformatted |
+| `results$gwetTable`                      |     |     |     |     | a table        |
+| `results$gwetExplanation`                |     |     |     |     | a html         |
+| `results$pabakTable`                     |     |     |     |     | a table        |
+| `results$pabakExplanation`               |     |     |     |     | a html         |
+| `results$iccHeading`                     |     |     |     |     | a preformatted |
+| `results$iccTable`                       |     |     |     |     | a table        |
+| `results$iccExplanation`                 |     |     |     |     | a html         |
+| `results$meanPearsonTable`               |     |     |     |     | a table        |
+| `results$meanPearsonExplanation`         |     |     |     |     | a html         |
+| `results$linCCCTable`                    |     |     |     |     | a table        |
+| `results$linCCCExplanation`              |     |     |     |     | a html         |
+| `results$tdiTable`                       |     |     |     |     | a table        |
+| `results$tdiExplanation`                 |     |     |     |     | a html         |
+| `results$maxwellREHeading`               |     |     |     |     | a preformatted |
+| `results$maxwellRETable`                 |     |     |     |     | a table        |
+| `results$maxwellREExplanation`           |     |     |     |     | a html         |
+| `results$interIntraRaterIntraTable`      |     |     |     |     | a table        |
+| `results$interIntraRaterInterTable`      |     |     |     |     | a table        |
+| `results$interIntraRaterExplanation`     |     |     |     |     | a html         |
+| `results$iotaTable`                      |     |     |     |     | a table        |
+| `results$iotaExplanation`                |     |     |     |     | a html         |
+| `results$weightedKappaGuide`             |     |     |     |     | a html         |
+| `results$specificAgreementHeading`       |     |     |     |     | a preformatted |
+| `results$specificAgreementTable`         |     |     |     |     | a table        |
+| `results$specificAgreementExplanation`   |     |     |     |     | a html         |
+| `results$levelInfoTable`                 |     |     |     |     | a table        |
+| `results$summary`                        |     |     |     |     | a html         |
+| `results$about`                          |     |     |     |     | a html         |
+| `results$clinicalUseCases`               |     |     |     |     | a html         |
+| `results$computedVariablesHeading`       |     |     |     |     | a preformatted |
+| `results$consensusTable`                 |     |     |     |     | a table        |
+| `results$loaTable`                       |     |     |     |     | a table        |
+| `results$loaDetailTable`                 |     |     |     |     | a table        |
+| `results$computedVariablesInfo`          |     |     |     |     | a html         |
+| `results$consensusVar`                   |     |     |     |     | an output      |
+| `results$loaOutput`                      |     |     |     |     | an output      |
+| `results$raterProfilePlot`               |     |     |     |     | an image       |
+| `results$raterProfileExplanation`        |     |     |     |     | a html         |
+| `results$subgroupAgreementTable`         |     |     |     |     | a table        |
+| `results$subgroupForestPlotImage`        |     |     |     |     | an image       |
+| `results$subgroupExplanation`            |     |     |     |     | a html         |
+| `results$raterClusterHeading`            |     |     |     |     | a preformatted |
+| `results$raterClusterTable`              |     |     |     |     | a table        |
+| `results$raterDendrogram`                |     |     |     |     | an image       |
+| `results$raterClusterHeatmap`            |     |     |     |     | an image       |
+| `results$raterClusterExplanation`        |     |     |     |     | a html         |
+| `results$caseClusterTable`               |     |     |     |     | a table        |
+| `results$caseDendrogram`                 |     |     |     |     | an image       |
+| `results$caseClusterHeatmap`             |     |     |     |     | an image       |
+| `results$caseClusterExplanation`         |     |     |     |     | a html         |
+| `results$pairedAgreementHeading`         |     |     |     |     | a preformatted |
+| `results$pairedAgreementTable`           |     |     |     |     | a table        |
+| `results$pairedAgreementExplanation`     |     |     |     |     | a html         |
+| `results$agreementSampleSizeTable`       |     |     |     |     | a table        |
+| `results$agreementSampleSizeExplanation` |     |     |     |     | a html         |
+
+Tables can be converted to data frames with `asDF` or
+[`as.data.frame`](https://rdrr.io/r/base/as.data.frame.html). For
+example:
+
+`results$irrtable$asDF`
+
+`as.data.frame(results$irrtable)`

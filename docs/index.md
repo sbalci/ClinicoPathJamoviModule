@@ -1,0 +1,892 @@
+------------------------------------------------------------------------
+
+## Abstract
+
+### **The ClinicoPathJamoviModule: A Comprehensive Open-Source Toolkit for Streamlining Clinicopathological Research**
+
+**Background:** Clinicopathological research is fundamental to advancing
+evidence-based medicine, but it requires the application of complex and
+specialized statistical methods. The technical barrier of
+programming-based statistical software can limit the ability of
+clinicians and researchers to perform these analyses efficiently and
+reproducibly. To address this gap, we have developed the
+ClinicoPathJamoviModule, an open-source extension for the user-friendly
+jamovi statistical platform.
+
+**Methods:** The ClinicoPathJamoviModule integrates a robust and
+comprehensive suite of analytical tools designed to address the typical
+workflow of clinicopathological data analysis. The module is built upon
+the R statistical language and provides a graphical user interface
+within jamovi for a wide range of functions. Key features include:
+
+- **Descriptive Statistics:** Generation of publication-ready summary
+  tables (`Table 1`), advanced stratified analysis (Mantel-Haenszel),
+  and mixed model ANOVA for repeated measures and nested designs.
+- **Survival Analysis:** A comprehensive framework including:
+  - **Core Methods:** Kaplan-Meier, Nelson-Aalen, and Turnbull NPMLE for
+    interval-censored data.
+  - **Advanced Modeling:** Cox PH, time-varying effects, AFT models, and
+    frailty models.
+  - **Specialized Applications:** Competing risks, multi-state models,
+    recurrent event analysis, and cure models.
+  - **Machine Learning Integration:** Survival trees, random forests,
+    gradient boosting, and regularized regression (LASSO, Ridge).
+  - **Oncological Analysis:** Specialized methods for Progression-Free
+    Survival (PFS), treatment switching (IPCW), and tumor growth
+    kinetics.
+  - **Validation & Reliability:** Simulation-based validation for power
+    analysis to verify analytical results against Monte Carlo
+    simulations.
+- **Clinical Trial Design & Evaluation:**
+  - **Modern Designs:** Group sequential, adaptive, platform, and master
+    (umbrella, basket) protocols.
+  - **Epidemiological Tools:** Population-based survival analysis,
+    case-cohort designs, and attributable risk calculation.
+- **Diagnostic & Prognostic Accuracy:**
+  - **Test Evaluation:** ROC analysis, decision curve analysis (DCA),
+    and screening test calculators.
+  - **Model Validation:** Time-dependent ROC, prediction error curves,
+    C-statistics, and calibration plots.
+  - **Sample Size Planning:** Precision-based diagnostic test sample
+    size calculation with Clopper-Pearson exact CI, automated
+    justification statements, and multi-method CI comparison (Wilson,
+    Agresti-Coull, Wald).
+- **Agreement and Reliability:**
+  - **Inter-rater Statistics:** Cohen’s Kappa, Fleiss’ Kappa,
+    Krippendorff’s Alpha, and ICC
+  - **Consensus Scoring:** Automated consensus determination with
+    majority rule, super-majority, and unanimous methods
+  - **Digital Pathology Validation:** Modality comparison for glass
+    slides vs digital images with HER2-specific analysis
+  - **Method Comparison:** Bland-Altman plots and Deming Regression
+- **Evidence-Based Decision Support:** A suite of tools for:
+  - **Clinical Monitoring:** Alert systems and patient monitoring
+    dashboards.
+  - **Treatment Planning:** Optimization frameworks and differential
+    diagnosis assistance.
+  - **Results Interpretation:** Laboratory and imaging findings
+    correlation.
+- **Laboratory Quality Control:** Statistical process control, including
+  Shewhart/CUSUM charts, Six Sigma metrics, and measurement uncertainty.
+- **Spatial Statistics & Digital Pathology:**
+  - **Spatial Analysis:** Spatial point pattern analysis (Ripley’s
+    K-function), spatial autocorrelation (Moran’s I)
+  - **Texture Analysis:** Haralick texture features for quantitative
+    pathology
+  - **Validation Studies:** Glass slide vs digital image comparison with
+    discordance pattern analysis
+  - **HER2 Scoring:** Specialized tools for HER2-low/null distinction
+    and ADC therapy eligibility
+- **Data Visualization:** Advanced plotting tools such as waterfall
+  plots, swimmer plots, and raincloud plots.
+- **Data Preprocessing:** Utilities for data quality checking, missing
+  data management, and date corrections.
+
+**Conclusion:** The ClinicoPathJamoviModule provides a powerful,
+accessible, and free-to-use toolkit that empowers medical researchers to
+conduct sophisticated statistical analyses without requiring extensive
+programming knowledge. By integrating these essential functions into the
+intuitive jamovi framework, the module aims to lower the barrier to
+high-quality data analysis, enhance research reproducibility, and
+accelerate the translation of clinical data into meaningful insights.
+
+------------------------------------------------------------------------
+
+## Documentation
+
+For a comprehensive guide to all the documentation available for this
+package, please see the [Documentation
+Hub](https://www.serdarbalci.com/ClinicoPathJamoviModule/vignettes/documentation_hub.md).
+
+------------------------------------------------------------------------
+
+## 📊 Test Data & Examples
+
+**NEW!** Comprehensive test data catalog with downloadable .omv files
+for learning and testing:
+
+- **[Test Data
+  Catalog](https://www.serdarbalci.com/ClinicoPathJamoviModule/vignettes/test-data-catalog.Rmd)** -
+  Curated overview with key functions and download links
+  - Quick start guide for downloading and using test data
+  - Featured: NEW kappa sample size functions (kappasizeci,
+    kappasizefixedn, kappasizepower) ✨
+  - Direct download links for example .omv files
+  - Access in R:
+    [`vignette("test-data-catalog", package = "ClinicoPath")`](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/test-data-catalog.md)
+- **[Complete Test Data
+  Catalog](https://www.serdarbalci.com/ClinicoPathJamoviModule/vignettes/test-data-complete-catalog.Rmd)** -
+  All 945 test files
+  - Complete alphabetical listing of ALL .omv files
+  - Direct download links for every file
+  - Browse online: [GitHub Data
+    Directory](https://github.com/sbalci/ClinicoPathJamoviModule/tree/master/data)
+  - Access in R:
+    [`vignette("test-data-complete-catalog", package = "ClinicoPath")`](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/test-data-complete-catalog.md)
+- **[Function Reference
+  Guide](https://www.serdarbalci.com/ClinicoPathJamoviModule/vignettes/function-reference.Rmd)** -
+  420+ analysis functions
+  - Functions organized by menu group (ClinicoPathDescriptives,
+    JJStatsPlot, OncoPath, jsurvival, meddecide)
+  - Purpose and “when to use” guidance for each function
+  - Test data availability for each function
+  - Access in R:
+    [`vignette("function-reference", package = "ClinicoPath")`](https://www.serdarbalci.com/ClinicoPathJamoviModule/articles/function-reference.md)
+
+**Quick Download Example:**
+
+``` r
+
+# Download a specific test file
+download.file(
+  "https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/kappasizeci_scenarios_comprehensive.omv",
+  destfile = "kappasizeci_test.omv"
+)
+```
+
+**Total Test Data:** 945 .omv files \| **Functions Covered:** 60+ \|
+**Menu Groups:** 5
+
+------------------------------------------------------------------------
+
+## 🎓 Tutorials
+
+**NEW!** Comprehensive tutorial series for ClinicoPath users:
+
+- **[Tutorial Series
+  Home](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/README.md)** -
+  Complete learning paths for clinical trials, diagnostic pathology, and
+  advanced analyses
+- **Quick Start:** [Getting Started with
+  ClinicoPath](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/01-getting-started.qmd)
+  (30 min)
+- **Clinical Trials:** [Table One for Baseline
+  Characteristics](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/02-table-one-clinical-trial.qmd)
+  (45 min)
+- **Survival Analysis:** [Kaplan-Meier & Cox
+  Regression](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/03-survival-analysis-cancer.qmd)
+  (45 min)
+- **Diagnostic Testing:** [ROC Analysis & Optimal
+  Cutpoints](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/04-roc-diagnostic-test.qmd)
+  (45 min)
+- **Advanced Modeling:** [Decision Curve
+  Analysis](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/05-decision-curve-analysis.qmd)
+  (50 min)
+- **Reproducibility:** [Automated Reports & Version
+  Control](https://www.serdarbalci.com/ClinicoPathJamoviModule/tutorials/06-reproducible-reports.qmd)
+  (40 min)
+
+**Total Learning Time:** 4.5 hours \| **No Programming Required**
+
+The tutorial series includes 60+ working code examples, 25+ visual
+diagrams, and 18 hands-on practice exercises. Perfect for clinicians,
+pathologists, and researchers new to ClinicoPath.
+
+------------------------------------------------------------------------
+
+## ClinicoPath [jamovi](https://www.jamovi.org) Module 🔬
+
+A [jamovi](https://www.jamovi.org) Module that contains main analysis
+used in **ClinicoPathological** research. ClinicoPath help researchers
+to generate natural language summaries of their dataset, generate cross
+tables with statistical tests, and survival analysis with survival
+tables, survival curves, and natural language summaries.
+
+🔬👀📑🗃📊🏨🗄📇📖⚗📝🎶📈📉📃🖍 🔬🔬🏋🚴🚙👨💻 📸📺🎛🔭🔬💊🔐🍫🌸
+
+------------------------------------------------------------------------
+
+[![Download
+ClinicoPathJamoviModule](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
+[](https://www.buymeacoffee.com/bS0teIs)
+
+<https://zenodo.org/account/settings/github/repository/sbalci/ClinicoPathJamoviModule>
+
+DOI 10.17605/OSF.IO/9SZUD
+
+<https://osf.io/9szud/>
+
+------------------------------------------------------------------------
+
+## Installation in [jamovi](https://www.jamovi.org)
+
+You can install this module after installing jamovi version \>= 2.7.2
+from here: <https://www.jamovi.org/download.html>
+
+Then you can install the submodules directly inside the jamovi, using
+library.
+
+Submodules are:
+
+- ClinicoPathDescriptives
+- jsurvival
+- meddecide
+- jjstatsplot
+- OncoPath
+
+![](reference/figures/jamovi-library.png)
+
+![](reference/figures/jamovi-ClinicoPath-0.0.2-released.gif)
+
+## Installation via sideload [jamovi](https://www.jamovi.org)
+
+### Step 1:
+
+**Download and install [jamovi](https://www.jamovi.org).**
+
+### Step 2:
+
+**Download the relevant `jmo` file for your operating system from**
+
+#### a: For development version
+
+- [releases](https://github.com/sbalci/ClinicoPathJamoviModule/releases/)
+
+#### b: For modules
+
+##### ClinicoPathDescriptives
+
+ClinicoPathDescriptives functions are separately added to jamovi library
+under Exploration menu
+
+ClinicoPathDescriptives module can be downloaded inside jamovi (click
+Modules and jamovi library)
+
+<https://github.com/sbalci/ClinicoPathDescriptives/>
+
+<https://github.com/sbalci/ClinicoPathDescriptives/releases/>
+
+``` r
+
+remotes::install_github("sbalci/ClinicoPathDescriptives")
+```
+
+##### JJStatsPlot
+
+GGStatsPlot functions are separately added to jamovi library under
+jjstatsplot menu
+
+JJStastPlot module can be downloaded inside jamovi (click Modules and
+jamovi library)
+
+<https://github.com/sbalci/jjstatsplot>
+
+<https://github.com/sbalci/jjstatsplot/releases/>
+
+``` r
+
+remotes::install_github("sbalci/jjstatsplot")
+```
+
+##### jsurvival
+
+<https://github.com/sbalci/jsurvival>
+
+<https://github.com/sbalci/jsurvival/releases/>
+
+``` r
+
+remotes::install_github("sbalci/jsurvival")
+```
+
+##### meddecide
+
+<https://github.com/sbalci/meddecide/>
+
+<https://github.com/sbalci/meddecide/releases/>
+
+``` r
+
+remotes::install_github("sbalci/meddecide")
+```
+
+##### OncoPath
+
+OncoPath functions are specialized for oncological and pathological
+research under OncoPath menu
+
+OncoPath module can be downloaded inside jamovi (click Modules and
+jamovi library)
+
+<https://github.com/sbalci/OncoPath>
+
+<https://github.com/sbalci/OncoPath/releases/>
+
+``` r
+
+remotes::install_github("sbalci/OncoPath")
+```
+
+**Step 3: And install using side-load as shown below:**
+
+![](reference/figures/jamovi-sideload.gif)
+
+------------------------------------------------------------------------
+
+## Screenshots of Module
+
+------------------------------------------------------------------------
+
+### Example Datasets
+
+**Using Example Datasets**
+
+![](reference/figures/jamovi-ClinicoPath-example-datasets.gif)
+
+------------------------------------------------------------------------
+
+<https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.csv>
+
+------------------------------------------------------------------------
+
+<https://cloud.jamovi.org/?open=https://raw.githubusercontent.com/sbalci/ClinicoPathJamoviModule/master/data/histopathology.omv>
+
+<https://cloud.jamovi.org/?open=https://docs.google.com/spreadsheets/d/e/2PACX-1vST3kwze9bNUSEr0eijs_81F6hXBrDZ-2Zt97ez-fbpXMELKGFHJNuQHSP2Oxars2C6F3n50KzT1-zD/pub?output=csv>
+
+### Exploration
+
+#### ClinicoPath Descriptives
+
+##### [Age Pyramid](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/agepyramid_documentation.html)
+
+![](reference/figures/jamovi-ClinicoPath-age-pyramid.png)
+
+##### [Age Pyramid 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/agepyramid2_documentation.html)
+
+(Similar to Age Pyramid with more styling options)
+
+##### [Alluvial Diagrams](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/alluvial_documentation.html)
+
+![](reference/figures/jamovi-ClinicoPath-easyalluvial.gif)
+
+##### [Alluvial Diagrams 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/alluvial2_documentation.html)
+
+(Similar to Alluvial Diagrams with more styling options)
+
+##### [Missing Data Analysis and Imputation](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/missingdata_documentation.html)
+
+(Comprehensive missing data analysis and multiple imputation)
+
+##### [Outlier Detection](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/outlierdetection_documentation.html)
+
+(Advanced outlier detection with multiple statistical methods)
+
+##### [Summary of Categorical Variables](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/reportcat_documentation.html)
+
+![](reference/figures/jamovi-and-R-report.gif)
+
+##### [Summary of Categorical Variables 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/reportcat2_documentation.html)
+
+(Enhanced categorical summary)
+
+##### [Raincloud Plot](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/raincloud_documentation.html)
+
+(Comprehensive distribution analysis)
+
+##### [Summary of Continuous Variables](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata_documentation.html)
+
+![](reference/figures/jamovi-write-summary-continuous-variables.gif)
+
+##### [Summary of Continuous Variables 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/summarydata2_documentation.html)
+
+(Enhanced summary statistics for continuous and date variables)
+
+##### [Table One](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone_documentation.html)
+
+![](reference/figures/jamovi-and-R-tableone.gif)![](reference/figures/jamovi-ClinicoPath-tableone.gif)
+
+##### [Table One 2](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tableone2_documentation.html)
+
+(Enhanced Table One with pivottabler)
+
+##### [Tidy Density](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/tidydensity_documentation.html)
+
+(Statistical distribution generator and analyzer)
+
+##### [Tools Summary](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/toolssummary_documentation.html)
+
+(Tools for data summary with summarytools integration)
+
+##### [Toxicity Profile](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/toxicityprofile_documentation.html)
+
+(Treatment toxicity profile analysis)
+
+##### [Venn Diagram](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/venn_documentation.html)
+
+(Venn and Upset diagrams)
+
+##### [Variable Tree](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/vartree_documentation.html)
+
+![](reference/figures/jamovi-ClinicoPath-VariableTree.gif)![](reference/figures/jamovi-ClinicoPath-VariableTree2.gif)
+
+------------------------------------------------------------------------
+
+#### ClinicoPath Comparisons
+
+##### Cross Tables
+
+![](reference/figures/jamovi-and-R-tangram.png)
+
+![](reference/figures/jamovi-and-tangram-crosstable.gif)
+
+![](reference/figures/jamovi-and-CrossTable-FinalFit.png)
+
+##### Pairwise Chi-Square Tests
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+### JJStatsPlot
+
+#### Graphs and Plots
+
+##### [Advanced Barplot](https://www.serdarbalci.com/jjstatsplot/articles/advancedbarplot_documentation.html)
+
+(Advanced bar charts - 5 ways)
+
+##### [Advanced Raincloud Plot](https://www.serdarbalci.com/jjstatsplot/articles/advancedraincloud_documentation.html)
+
+(Advanced raincloud plot with longitudinal support)
+
+##### [Predictive Power Score Analysis](https://www.serdarbalci.com/jjstatsplot/articles/jpps_documentation.html)
+
+(Predictive Power Score Analysis)
+
+##### [High-Performance Scatter Plots](https://www.serdarbalci.com/jjstatsplot/articles/jscattermore_documentation.html)
+
+(Fast scatter plots for large datasets)
+
+##### [Social Science Statistical Visualization](https://www.serdarbalci.com/jjstatsplot/articles/jsjplot_documentation.html)
+
+(sjPlot Integration for Social Science Research)
+
+##### [Professional Violin Plot](https://www.serdarbalci.com/jjstatsplot/articles/jviolin_documentation.html)
+
+(Advanced Violin Plots for Data Distribution)
+
+##### [Waffle Charts](https://www.serdarbalci.com/jjstatsplot/articles/jwaffle_documentation.html)
+
+(Create Waffle Charts to visualize distributions)
+
+##### [Line Chart](https://www.serdarbalci.com/jjstatsplot/articles/linechart_documentation.html)
+
+(Line Chart for Time Series and Trend Analysis)
+
+##### [Lasso-Cox Regression](https://www.serdarbalci.com/jjstatsplot/articles/lassocox_documentation.html)
+
+(Lasso-Cox Regression for Variable Selection in Survival Analysis)
+
+##### [Parallel Coordinates Plot](https://www.serdarbalci.com/jjstatsplot/articles/parallelplot_documentation.html)
+
+(Multivariate Exploration)
+
+##### [Automatic Plot Selection](https://www.serdarbalci.com/jjstatsplot/articles/statsplot2_documentation.html)
+
+(Automatic Plot Selection Based on Variable Types)
+
+##### [Statistical Distribution Generator](https://www.serdarbalci.com/jjstatsplot/articles/tidydensity_documentation.html)
+
+(TidyDensity - Distribution Analysis & Simulation)
+
+##### [Within-Group Comparison](https://www.serdarbalci.com/jjstatsplot/articles/jjwithinstats_documentation.html)
+
+(Violin Plots to Compare Within Groups)
+
+##### [Treemap](https://www.serdarbalci.com/jjstatsplot/articles/jjtreemap_documentation.html)
+
+(Creates treemap visualizations for categorical data)
+
+##### [StreamGraphs](https://www.serdarbalci.com/jjstatsplot/articles/jjstreamgraph_documentation.html)
+
+(Create interactive StreamGraphs using R streamgraph package.)
+
+##### [Scatter Plot](https://www.serdarbalci.com/jjstatsplot/articles/jjscatterstats_documentation.html)
+
+(Scatter Plot for Continuous Variables)
+
+![](reference/figures/jamovi-ClinicoPath-ggstatsplot-alluvial-plots.gif)
+
+![](reference/figures/jamovi-and-R-ggstatsplot.png)
+
+![](reference/figures/jamovi-and-ggstatsplot.gif)
+
+------------------------------------------------------------------------
+
+### OncoPath
+
+#### Patient Follow-Up Plots
+
+##### [Swimmer Plot](https://www.serdarbalci.com/OncoPath/articles/swimmerplot_documentation.html)
+
+![](reference/figures/jamovi-OncoPath-swimmerplot.gif) (Comprehensive
+swimmer plots for visualizing patient timelines, clinical events, and
+treatment responses)
+
+##### [Waterfall Plot](https://www.serdarbalci.com/OncoPath/articles/waterfall_documentation.html)
+
+![](reference/figures/jamovi-OncoPath-waterfall.gif) (Treatment response
+analysis with RECIST criteria, waterfall plots, and spider plots)
+
+------------------------------------------------------------------------
+
+### Survival
+
+#### jsurvival
+
+##### [Alluvial Survival Plot](https://www.serdarbalci.com/jsurvival/articles/alluvialsurvival_documentation.html)
+
+(Treatment Pathway Alluvial Plot)
+
+##### [Multivariable Survival Analysis](https://www.serdarbalci.com/jsurvival/articles/multisurvival_documentation.html)
+
+![](reference/figures/jamovi-and-survival-analysis-multivariate-finalfit.png)![](reference/figures/jamovi-and-multivariate-survival.gif)![](reference/figures/jamovi-clinicopath-multivariate-survival.gif)
+
+##### [Odds Ratio Table and Plot](https://www.serdarbalci.com/jsurvival/articles/oddsratio_documentation.html)
+
+![](reference/figures/jamovi-ClinicoPath-oddsratio.gif)
+
+##### [Kaplan-Meier Survival Analysis for Single Group](https://www.serdarbalci.com/jsurvival/articles/onesurvival_documentation.html)
+
+(Kaplan-Meier Survival Analysis for Single Group)
+
+##### [Single Arm Survival](https://www.serdarbalci.com/jsurvival/articles/singlearm_documentation.html)
+
+(Survival for whole group, no explanatory factor)
+
+##### [Comprehensive Survival Analysis](https://www.serdarbalci.com/jsurvival/articles/survival_documentation.html)
+
+![](reference/figures/jamovi-and-survival-analysis-finalfit.png)![](reference/figures/jamovi-and-survival-analysis-finalfit-2.png)![](reference/figures/jamovi-and-survival-analysis-finalfit-3.png)![](reference/figures/jamovi-KMunicate-survival.png)
+
+##### [Survival Analysis for Continuous Explanatory Variable](https://www.serdarbalci.com/jsurvival/articles/survivalcont_documentation.html)
+
+(Cut-off & Univariate Survival Analysis)
+
+##### [Comprehensive Survival Power Analysis](https://www.serdarbalci.com/jsurvival/articles/jsurvival-02-comprehensive-survival-power-analysis.html)
+
+**Enhanced Unified Power Analysis Platform** - **Seven Method
+Categories:** Standard methods, competing risks, advanced methods,
+genetic analysis, cure models, sequential analysis, and epidemiological
+studies - **Advanced Statistical Methods:** NPHMC mixture cure models,
+powerSurvEpi epidemiological methods, survSNP genetic associations,
+survivalpwr Cox regression, and rpact sequential designs -
+**Comprehensive Calculations:** Sample size, power, and effect size
+calculations across all methodologies - **Modern Interface:** Organized
+CollapseBox layout with conditional parameter visibility for streamlined
+analysis workflow
+
+##### [Time-Dependent ROC Analysis](https://www.serdarbalci.com/jsurvival/articles/timeroc_documentation.html)
+
+(Predictive Performance Over Time)
+
+##### [Comprehensive Time Interval Calculator](https://www.serdarbalci.com/jsurvival/articles/timeinterval_documentation.html)
+
+(Advanced time interval analysis with quality assessment)
+
+##### [Jvisr](https://www.serdarbalci.com/jsurvival/articles/jvisr_documentation.html)
+
+(Fit-for-Purpose Clinical Visualizations)
+
+##### [Competing Survival](https://www.serdarbalci.com/jsurvival/articles/15-competing-survival.html)
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+### meddecide
+
+#### Agreement
+
+##### Interrater Reliability
+
+![](reference/figures/jamovi-clinicopath-kappa-irr.png)
+
+##### ICC coefficients
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+#### Decision
+
+##### Medical Decision
+
+![](reference/figures/jamovi-and-R-caret-from-data.png)
+
+##### [Decision Calculator](https://www.serdarbalci.com/meddecide/articles/35-screening-calculator-comprehensive.html)
+
+![](reference/figures/jamovi-and-R-caret-user-input.png)
+
+![](reference/figures/jamovi-ClinicoPath-FaganNomogram.gif)
+
+##### [Decision Tree](https://www.serdarbalci.com/meddecide/articles/05-decision-tree-analysis.html)
+
+##### [Decision Tree explore](https://www.serdarbalci.com/meddecide/articles/05-decision-tree-analysis.html)
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+![](reference/figures/jamovi-clinicopath-explore-decision-tree.png)
+
+###### FFTrees
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+![](reference/figures/jamovi-clinicopath-FFTrees-decision-tree.png)
+
+###### rpart
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+![](reference/figures/jamovi-clinicopath-rpart-decision-tree.png)
+
+##### [ROC Analysis](https://www.serdarbalci.com/meddecide/articles/03-roc-analysis.html)
+
+🔬🔬🔬🔬 UNDER CONSTRUCTION 🛠⛔️⚠️🔩
+
+------------------------------------------------------------------------
+
+### Correlation
+
+#### [Correlation](https://www.serdarbalci.com/ClinicoPathDescriptives/articles/01-correlation-analysis.html)
+
+------------------------------------------------------------------------
+
+## Installation in R
+
+You can install the development version from
+[GitHub](https://github.com/) with:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("sbalci/ClinicoPathJamoviModule")
+```
+
+## Current Package Versions:
+
+**R:** 4.0.5
+
+**MRAN:** <https://cran.microsoft.com/snapshot/2020-08-24>
+
+## Acknowledgement
+
+Made possible via the codes, help, and guidence of
+
+- [jamovi](https://www.jamovi.org/) developer [Jonathon
+  Love](https://github.com/jonathon-love),
+- [finalfit](https://finalfit.org/) developer [Ewen
+  Harrison](https://github.com/ewenharrison),
+- [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/) developer
+  [Indrajeet Patil](https://github.com/IndrajeetPatil),
+- [tangram](https://github.com/spgarbet/tangram) developer [Shawn
+  Garbett](https://github.com/spgarbet),
+- [easystats](https://easystats.github.io/blog/) developers ,
+- [report](https://easystats.github.io/report/) ,
+- [tableone](https://github.com/kaz-yos/tableone),
+- [survival](https://github.com/therneau/survival),
+- [survminer](https://github.com/kassambara/survminer),
+- [vtree](https://github.com/nbarrowman/vtree) developer [Nick
+  Barrowman](https://github.com/nbarrowman),
+- [easyalluvial](https://github.com/erblast/easyalluvial), developer
+  [Björn Oettinghaus](https://github.com/erblast), and
+- [rstats community](https://twitter.com/search?q=%23rstats&src=savs).
+
+See <https://github.com/ClinicoPath> for forked packages.
+
+------------------------------------------------------------------------
+
+[Follow @serdarbalci](https://twitter.com/serdarbalci)
+
+[![Buy me a
+coffee](https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg)Buy me
+a coffee](https://www.buymeacoffee.com/bS0teIs)
+
+<https://paypal.me/serdarbalci>
+
+------------------------------------------------------------------------
+
+![Buy Me A
+Coffee](https://cdn.buymeacoffee.com/buttons/arial-orange.png)  
+![Twitter
+Follow](https://img.shields.io/twitter/follow/serdarbalci?style=social)![GitHub
+followers](https://img.shields.io/github/followers/sbalci?style=social)[![Say
+Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/sbalci)
+
+## Development Status
+
+**Code**  
+[![Launch Rstudio
+Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
+[![Gitpod
+Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sbalci/ClinicoPathJamoviModule)
+[![Download
+ClinicoPathJamoviModule](https://img.shields.io/sourceforge/dt/clinicopathjamovimodule.svg)](https://sourceforge.net/projects/clinicopathjamovimodule/files/latest/download)
+
+**Status**  
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)  
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/)
+[![stability-unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/joethorley/stability-badges#unstable)
+[![GitHub
+issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/issues)
+![GitHub
+issues](https://img.shields.io/github/issues/sbalci/clinicopathjamovimodule)
+
+**Check, CI**  
+![R-CMD-check](https://github.com/sbalci/ClinicoPathJamoviModule/workflows/R-CMD-check/badge.svg)
+
+[![Codacy
+Badge](https://app.codacy.com/project/badge/Grade/cdf2bede535c439d826b6dffdff40764)](https://www.codacy.com/manual/drserdarbalci/ClinicoPathJamoviModule?utm_source=github.com&utm_medium=referral&utm_content=sbalci/ClinicoPathJamoviModule&utm_campaign=Badge_Grade)
+[![CodeFactor](https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule/badge)](https://www.codefactor.io/repository/github/sbalci/clinicopathjamovimodule)
+[![Coverage
+Status](https://coveralls.io/repos/github/sbalci/ClinicoPathJamoviModule/badge.svg?branch=master)](https://coveralls.io/github/sbalci/ClinicoPathJamoviModule?branch=master)
+[![Build
+Status](https://travis-ci.com/sbalci/ClinicoPathJamoviModule.svg?branch=master)](https://travis-ci.com/sbalci/ClinicoPathJamoviModule)
+[![Build
+status](https://ci.appveyor.com/api/projects/status/ftdd497g9qamm4ov?svg=true)](https://ci.appveyor.com/project/sbalci/clinicopathjamovimodule)
+[![codecov](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/branch/master/graph/badge.svg)](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule)
+[![CircleCI](https://circleci.com/gh/sbalci/ClinicoPathJamoviModule.svg?style=svg)](https://circleci.com/gh/sbalci/ClinicoPathJamoviModule)
+[![GuardRails
+badge](https://badges.guardrails.io/sbalci/ClinicoPathJamoviModule.svg?token=9402aef8ace3415bad8f423a384b631c7319e5faffc96e2e299b603ace62d68e&provider=github)](https://dashboard.guardrails.io/gh/sbalci/33943)
+[![Maintainability](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/maintainability)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/maintainability)
+[![Test
+Coverage](https://api.codeclimate.com/v1/badges/692e4af79330f43dac48/test_coverage)](https://codeclimate.com/github/sbalci/ClinicoPathJamoviModule/test_coverage)
+
+**Recency, Updates**  
+![GitHub](https://img.shields.io/github/license/sbalci/clinicopathjamovimodule.svg)[![GitHub
+last
+commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2026--01--07-yellowgreen.svg)](https://github.com/sbalci/clinicopathjamovimodule/commits/master)
+![GitHub Release
+Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)![GitHub
+commit
+activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
+
+**Webpage, Links, Size, Download**  
+[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
+[![GitHub code size in
+bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
+
+**Dependencies**  
+[![minimal R
+version](https://img.shields.io/badge/R%3E%3D-3.6.3-6666ff.svg)](https://cran.r-project.org/)
+[![Libraries.io dependency status for GitHub
+repo](https://img.shields.io/librariesio/github/sbalci/clinicopathjamovimodule.svg)](https://libraries.io/github/sbalci/clinicopathjamovimodule)
+[![Requirements
+Status](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements.svg?branch=gh-pages)](https://requires.io/github/sbalci/ClinicoPathJamoviModule/requirements/?branch=gh-pages)
+
+**Interaction, Shares**  
+[![GitHub
+forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/network)
+![GitHub
+forks](https://img.shields.io/github/forks/sbalci/clinicopathjamovimodule?style=social)[![GitHub
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/clinicopathjamovimodule/stargazers)
+[![Github
+Stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg?style=social&label=Github)](https://github.com/sbalci/clinicopathjamovimodule)
+![GitHub
+stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20%F0%9F%93%A6.%20@serdarbalci&url=https%3A%2F%2Fsbalci.github.io%2ClinicoPathJamoviModule%2)
+[![contributions
+welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
+![GitHub
+watchers](https://img.shields.io/github/watchers/sbalci/clinicopathjamovimodule?style=social)
+
+## Videos
+
+# Bir hata oluştu.
+
+JavaScript çalıştırılamıyor.
+
+## Accessing Raw and External Data Files
+
+Beyond the datasets readily available with `data(dataset_name)`, this
+package also includes various raw and external data files in other
+formats like CSV (Comma Separated Values), XLSX (Excel), and OMV (Jamovi
+files). These can be useful for users who want to access the original
+data, use it with other software, or understand how the R data objects
+(`.rda` files) were generated.
+
+These files are typically located in the `inst/extdata` directory of the
+package. You can get the full path to a file in `inst/extdata` using the
+[`system.file()`](https://rdrr.io/r/base/system.file.html) function. For
+example:
+
+``` r
+
+# Get the path to 'BreastCancer.csv' in inst/extdata
+# (Assuming BreastCancer.csv will be moved to inst/extdata in a later step)
+csv_path <- system.file("extdata", "BreastCancer.csv", package = "ClinicoPath")
+
+if (nzchar(csv_path)) {
+  # Read the CSV file
+  breast_cancer_df <- read.csv(csv_path)
+  head(breast_cancer_df)
+} else {
+  message("BreastCancer.csv not found in inst/extdata. This example assumes it's present there.")
+}
+```
+
+### Common File Types
+
+#### CSV Files
+
+Many datasets are available in CSV format. These can be easily read into
+R using [`read.csv()`](https://rdrr.io/r/utils/read.table.html) or other
+functions from packages like `readr` or `data.table`.
+
+- **Example:** The `BreastCancer` dataset, also available via
+  `data(BreastCancer)`, has its source data potentially available as
+  `BreastCancer.csv`.
+- Other CSV files like `oncology_response_data.csv` (related to the
+  `treatmentResponse` dataset) and `colon.csv` are also available.
+
+#### XLSX Files (Excel)
+
+Some datasets might be provided in Excel format. You can read these
+using packages like `readxl`.
+
+- **Example:** `heartdisease.xlsx`
+
+  ``` r
+
+  # Ensure readxl is installed: install.packages("readxl")
+  # xlsx_path <- system.file("extdata", "heartdisease.xlsx", package = "ClinicoPath")
+  # if (nzchar(xlsx_path)) {
+  #   heartdisease_df <- readxl::read_excel(xlsx_path)
+  #   head(heartdisease_df)
+  # }
+  ```
+
+  *(Note: The availability and specific location of `heartdisease.xlsx`
+  in `inst/extdata` will be finalized in a later step).*
+
+#### OMV Files (Jamovi)
+
+Files with the `.omv` extension are project files for Jamovi, a free and
+open statistical spreadsheet. These files often contain datasets and
+analyses demonstrating the use of this R package’s functionalities
+within the Jamovi environment. They are not typically read directly into
+R but opened with Jamovi.
+
+- **Examples:** `BreastCancer.omv`, `colon.omv`, `histopathology.omv`,
+  and many others found in `data/` or `inst/extdata/`.
+
+#### JASP Files
+
+Files with the `.jasp` extension are for JASP software, another
+alternative to SPSS. Similar to Jamovi files, these demonstrate analyses
+and data.
+
+- **Example:** `histopathology_jasp.jasp`
+
+### Relationship to `.rda` Data Files
+
+Many of the `.rda` files (loaded using `data(dataset_name)`) provided by
+this package are derived from these raw data files (like CSVs). The
+`.rda` files are offered for convenience, as they load directly into
+your R session with proper data types already set. Accessing the raw
+files can be useful for reproducibility, using the data in other tools,
+or for specific data manipulation needs not covered by the pre-processed
+`.rda` versions.
+
+Please explore the `inst/extdata` directory (once files are organized in
+Step 5 of the data documentation improvement plan) to see the full list
+of available raw and external files.

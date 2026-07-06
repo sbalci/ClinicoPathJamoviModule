@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>LASSO Cox Regression for Variable Selection in Survival Analysis • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="LASSO Cox Regression for Variable Selection in Survival Analysis">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,7 +84,7 @@ below show the R syntax for reference. To run interactively, use
 (<code>lassocox</code>) performs automatic variable selection in
 survival analysis using L1-penalized Cox proportional hazards
 regression. It identifies the most important predictors while preventing
-overfitting — ideal for clinicopathological research with many candidate
+overfitting - ideal for clinicopathological research with many candidate
 variables.</p>
 <p>Key features:</p>
 <ul>
@@ -146,7 +146,7 @@ the model.</p>
 <td>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>∑</mo><msubsup><mi>β</mi><mi>j</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\lambda \sum \beta_j^2</annotation></semantics></math>
 (L2)</td>
-<td>No — shrinks but keeps all</td>
+<td>No - shrinks but keeps all</td>
 <td>Correlated predictors, all must stay</td>
 </tr>
 <tr class="even">
@@ -154,13 +154,13 @@ the model.</p>
 <td>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>λ</mi><mo>∑</mo><mo stretchy="false" form="prefix">|</mo><msub><mi>β</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">\lambda \sum |\beta_j|</annotation></semantics></math>
 (L1)</td>
-<td>Yes — sets some to zero</td>
+<td>Yes - sets some to zero</td>
 <td>Sparse models, feature selection</td>
 </tr>
 <tr class="odd">
 <td><strong>Elastic Net</strong></td>
 <td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mi>λ</mi><mo>∑</mo><mo stretchy="false" form="prefix">|</mo><msub><mi>β</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo><mi>+</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false" form="postfix">)</mo><mi>λ</mi><mo>∑</mo><msubsup><mi>β</mi><mi>j</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\alpha \lambda \sum |\beta_j| + (1-\alpha) \lambda \sum \beta_j^2</annotation></semantics></math></td>
-<td>Yes — grouped selection</td>
+<td>Yes - grouped selection</td>
 <td>Correlated groups should stay/go together</td>
 </tr>
 </tbody>
@@ -269,21 +269,21 @@ module.</p>
 <tr class="even">
 <td><code>lassocox_genomic</code></td>
 <td>80</td>
-<td>–</td>
+<td>-</td>
 <td>50 gene features</td>
 <td>High-dimensional genomic scenario</td>
 </tr>
 <tr class="odd">
 <td><code>lassocox_multicollinear</code></td>
 <td>180</td>
-<td>–</td>
+<td>-</td>
 <td>12 correlated</td>
 <td>Multicollinearity stress test</td>
 </tr>
 <tr class="even">
 <td><code>lassocox_breast_cancer</code></td>
 <td>250</td>
-<td>–</td>
+<td>-</td>
 <td>20 clinical</td>
 <td>Breast cancer clinicopathological</td>
 </tr>
@@ -372,12 +372,12 @@ potential issues.</p>
 <p>Expected suitability flags:</p>
 <ul>
 <li>
-<strong>EPV</strong>: 25/5 = 5.0 (yellow — adequate for LASSO but
+<strong>EPV</strong>: 25/5 = 5.0 (yellow - adequate for LASSO but
 interpret with caution)</li>
 <li>
-<strong>Sample size</strong>: n=60 (yellow — small sample)</li>
+<strong>Sample size</strong>: n=60 (yellow - small sample)</li>
 <li>
-<strong>Regularization</strong>: yellow — standard Cox may be an
+<strong>Regularization</strong>: yellow - standard Cox may be an
 alternative</li>
 </ul>
 <hr>
@@ -469,7 +469,7 @@ check correctly excludes within-factor dummy correlations.</p>
 <p>The choice of lambda controls the trade-off between model complexity
 and parsimony.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># lambda.min: minimum CV error — more variables, better in-sample fit</span></span>
+<code class="sourceCode R"><span><span class="co"># lambda.min: minimum CV error - more variables, better in-sample fit</span></span>
 <span><span class="fu"><a href="../reference/lassocox.html">lassocox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data_green</span>,</span>
 <span>  elapsedtime <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -487,7 +487,7 @@ and parsimony.</p>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `lassocox()`:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> argument "censorLevel" is missing, with no default</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># lambda.1se: most regularized within 1 SE — fewer variables, better generalization</span></span>
+<code class="sourceCode R"><span><span class="co"># lambda.1se: most regularized within 1 SE - fewer variables, better generalization</span></span>
 <span><span class="fu"><a href="../reference/lassocox.html">lassocox</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">data_green</span>,</span>
 <span>  elapsedtime <span class="op">=</span> <span class="st">"time"</span>,</span>
@@ -518,7 +518,7 @@ Recommended for clinical models that need to generalize.</li>
 <div class="section level3">
 <h3 id="suitability-check-toggle">6. Suitability Check Toggle<a class="anchor" aria-label="anchor" href="#suitability-check-toggle"></a>
 </h3>
-<p>The suitability assessment is advisory — it never blocks the
+<p>The suitability assessment is advisory - it never blocks the
 analysis.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Disable suitability assessment</span></span>
@@ -690,7 +690,7 @@ dataset.</p>
 </tr>
 <tr class="odd">
 <td>Hazard Ratio</td>
-<td>exp(coefficient) — multiplicative effect on hazard</td>
+<td>exp(coefficient) - multiplicative effect on hazard</td>
 </tr>
 <tr class="even">
 <td>95% CI (Lower/Upper)</td>
@@ -742,22 +742,22 @@ dataset.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>0.50–0.60</td>
+<td>0.50-0.60</td>
 <td>Poor</td>
 <td>Limited</td>
 </tr>
 <tr class="even">
-<td>0.60–0.70</td>
+<td>0.60-0.70</td>
 <td>Fair</td>
 <td>May inform decisions</td>
 </tr>
 <tr class="odd">
-<td>0.70–0.80</td>
+<td>0.70-0.80</td>
 <td>Good</td>
 <td>Useful for stratification</td>
 </tr>
 <tr class="even">
-<td>0.80–0.90</td>
+<td>0.80-0.90</td>
 <td>Excellent</td>
 <td>Strong utility</td>
 </tr>
@@ -780,11 +780,11 @@ dataset.</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Using LASSO with too few events</strong>: EPV &lt; 2
 produces unreliable results. Even with regularization, LASSO needs
-sufficient events — a common problem in small radiomics cohorts (e.g.,
+sufficient events - a common problem in small radiomics cohorts (e.g.,
 80 patients with 300 features).</p></li>
 <li><p><strong>Not standardizing variables</strong>: LASSO is sensitive
-to scale. A variable measured in 0–20,000 (e.g., tumor area) will
-dominate one measured in 0–100 (e.g., age) unless standardized. Use
+to scale. A variable measured in 0 - 20,000 (e.g., tumor area) will
+dominate one measured in 0 - 100 (e.g., age) unless standardized. Use
 <code>standardize = TRUE</code> (the default).</p></li>
 <li><p><strong>Interpreting coefficients as p-values</strong>: LASSO
 performs <em>selection</em>, not <em>testing</em>. Incorrect: “LASSO
@@ -809,8 +809,8 @@ hierarchy:</p>
 <li><p><strong>Ignoring feature stability</strong>: Radiomic or WSI
 features may change with scanner, staining protocol, segmentation
 method, or resolution. Before LASSO, features should be tested for
-robustness using intraclass correlation coefficient (ICC) or test–retest
-analysis.</p></li>
+robustness using intraclass correlation coefficient (ICC) or test -
+retest analysis.</p></li>
 <li><p><strong>Reporting only selected variables</strong>: Good
 reporting requires: selected features, lambda value used,
 cross-validation method, coefficient values, and performance metrics.
@@ -820,12 +820,12 @@ papers include only image features. Combined models (clinical +
 pathological + radiomic + molecular) usually perform better.</p></li>
 <li><p><strong>Not assessing model performance properly</strong>:
 Survival models should report C-index <em>and</em> calibration curves.
-High discrimination (C-index) alone is insufficient — the model must
+High discrimination (C-index) alone is insufficient - the model must
 also be well-calibrated. Consider decision curve analysis for clinical
 utility.</p></li>
 <li><p><strong>No calibration analysis</strong>: A model with high
 AUC/C-index but poor calibration makes systematically wrong predictions.
-Always check calibration plots and consider the Hosmer–Lemeshow test or
+Always check calibration plots and consider the Hosmer-Lemeshow test or
 calibration slope.</p></li>
 </ol>
 </div>
@@ -871,7 +871,7 @@ steps:</p>
        ↓
 Feature Extraction (e.g., texture, morphology, deep features)
        ↓
-Feature Stability Testing (ICC, test–retest)
+Feature Stability Testing (ICC, test - retest)
        ↓
 Feature Reduction (remove unstable/redundant features)
        ↓
@@ -1063,7 +1063,7 @@ prediction model for individual prognosis or diagnosis (TRIPOD).
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

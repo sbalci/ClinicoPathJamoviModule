@@ -202,7 +202,10 @@
       "Bash(Rscript -e 'roxygen2::roxygenise\\(\\)')",
       "Bash(do echo:*)",
       "Bash(Rscript -e \"tryCatch\\(parse\\(''''$f''''\\), error = function\\(e\\) cat\\(''''PARSE ERROR:'''', e$message, ''''\\\\n''''\\)\\); cat\\(''''OK\\\\n''''\\)\")",
-      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/dynamiccoeff.b.R\"\"\"\"\\)')"
+      "Bash(Rscript -e 'parse\\(file=\"\"\"\"R/dynamiccoeff.b.R\"\"\"\"\\)')",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule add -A)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule commit -F /tmp/commit_main.txt -q)",
+      "Bash(git -C /Users/serdarbalci/Documents/GitHub/ClinicoPathJamoviModule rev-parse --short HEAD)"
     ],
     "deny": [],
     "ask": [],

@@ -1,0 +1,1105 @@
+# PLS Cox Regression for High-Dimensional Survival Analysis
+
+> **Note:** The
+> [`plscox()`](https://www.serdarbalci.com/ClinicoPathJamoviModule/reference/plscox.md)
+> function is designed for use within **jamovi’s GUI**. The code
+> examples below show the R syntax for reference. To run interactively,
+> use
+> [`devtools::load_all()`](https://devtools.r-lib.org/reference/load_all.html)
+> and call the R6 class directly:
+> `plscoxClass$new(options = plscoxOptions$new(...), data = mydata)`.
+
+## PLS Cox Regression
+
+### Overview
+
+The **PLS Cox Regression** module (`plscox`) combines Partial Least
+Squares (PLS) dimensionality reduction with Cox proportional hazards
+modeling for high-dimensional survival data. Instead of selecting
+individual variables like LASSO, PLS creates **latent components** -
+weighted combinations of all predictors that maximally explain
+covariance with the survival outcome.
+
+Key features:
+
+- **Component selection** via cross-validation (log-likelihood,
+  C-index), information criteria (BIC, AIC), or manual
+- **Multiple scaling methods** (standardization, unit variance, min-max,
+  none)
+- **Advanced PLS settings** (sparse PLS, Q-squared stopping, p-value
+  variable selection)
+- **Bootstrap validation** (Harrell optimism-corrected C-index)
+- **Permutation testing** for overall model significance
+- **Risk group stratification** with Kaplan-Meier survival curves
+- **Variable importance** (Cox-weighted PLS loadings)
+- **Data suitability assessment** (traffic-light system with 6 checks)
+
+------------------------------------------------------------------------
+
+### PLS vs LASSO: Different Philosophies
+
+| Approach | How It Works | Output |
+|----|----|----|
+| **LASSO** | Selects individual variables, drops others | Sparse coefficient vector |
+| **PLS** | Creates weighted combinations of ALL variables | Component scores + loadings |
+
+**Use PLS when:** - Variables are highly correlated (metabolomics, gene
+expression) - You want to retain information from all variables - The
+underlying signal comes from latent biological processes - p \>\> n and
+LASSO produces unstable selections
+
+**Use LASSO when:** - You want to identify individual important
+predictors - A sparse, interpretable model is needed - Variables are
+relatively independent
+
+------------------------------------------------------------------------
+
+### How PLS Cox Works
+
+1.  **Extract PLS components**: Find linear combinations of X that
+    maximize covariance with the survival response
+2.  **Select components**: Choose the optimal number via CV or
+    information criteria
+3.  **Fit Cox model**: Use selected components as predictors in Cox
+    regression
+4.  **Interpret**: Back-project component loadings to understand
+    original variable contributions
+
+------------------------------------------------------------------------
+
+### Datasets Used in This Guide
+
+| Dataset | N | Events | Predictors | Time Var | Status Var | Description |
+|----|----|----|----|----|----|----|
+| `plscox_metabolomics` | 120 | ~50% | 80 metabolites + 3 clinical | `survival_months` | `death` | Metabolomic survival study with 3 latent pathways |
+| `plscox_small` | 50 | ~60% | 25 biomarkers | `time_months` | `status` | Small sample edge case |
+| `plscox_genomic` | 60 | ~55% | 200 genes | `os_time` | `os_event` (numeric 0/1) | True p\>\>n with missing data |
+
+``` r
+
+data_path2 <- "data/"
+
+# Load metabolomics dataset (n=120, p=80)
+load(paste0(data_path2, "plscox_metabolomics.rda"))
+#> Error in `readChar()`:
+#> ! cannot open the connection
+cat("Metabolomics: N =", nrow(plscox_metabolomics),
+    "| Events =", sum(plscox_metabolomics$death == "Dead"),
+    "| Predictors =", sum(grepl("^METAB_", names(plscox_metabolomics))), "+ 3 clinical\n")
+#> Metabolomics: N = 120 | Events = 69 | Predictors = 80 + 3 clinical
+
+# Load small dataset (n=50, p=25)
+load(paste0(data_path2, "plscox_small.rda"))
+#> Error in `readChar()`:
+#> ! cannot open the connection
+cat("Small: N =", nrow(plscox_small),
+    "| Events =", sum(plscox_small$status == "Dead"),
+    "| Predictors =", sum(grepl("^MARKER_", names(plscox_small))), "\n")
+#> Small: N = 50 | Events = 29 | Predictors = 25
+
+# Load genomic dataset (n=60, p=200)
+load(paste0(data_path2, "plscox_genomic.rda"))
+#> Error in `readChar()`:
+#> ! cannot open the connection
+cat("Genomic: N =", nrow(plscox_genomic),
+    "| Events =", sum(plscox_genomic$os_event == 1),
+    "| Predictors =", sum(grepl("^GENE_", names(plscox_genomic))),
+    "| Missing values =", sum(is.na(plscox_genomic)), "\n")
+#> Genomic: N = 60 | Events = 39 | Predictors = 200 | Missing values = 358
+```
+
+------------------------------------------------------------------------
+
+### 1. Basic PLS Cox Analysis (Default Settings)
+
+This demonstrates all default settings: 5 components, 10-fold CV, CV
+log-likelihood selection, standardization scaling, and all outputs/plots
+enabled.
+
+``` r
+
+metab_predictors <- c("age", "gender", "bmi",
+                       paste0("METAB_", sprintf("%03d", 1:80)))
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  cross_validation = "k10",
+  component_selection = "cv_loglik",
+  scaling_method = "standardize",
+  suitabilityCheck = TRUE,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_scores = TRUE,
+  plot_validation = TRUE,
+  plot_survival = TRUE,
+  risk_groups = 3,
+  confidence_intervals = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+Expected: PLS should identify 2-3 important components reflecting the
+underlying pathway structure. Metabolites in blocks 1-15, 25-40, and
+55-70 should have high loadings on the first few components.
+
+------------------------------------------------------------------------
+
+### 2. Component Selection Methods
+
+#### Cross-Validated Log-Likelihood (default)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  plot_validation = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Cross-Validated C-Index
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  component_selection = "cv_cindex",
+  cross_validation = "k10",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### BIC (no cross-validation needed)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  component_selection = "bic",
+  cross_validation = "none",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### AIC
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  component_selection = "aic",
+  cross_validation = "none",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Manual (fixed number of components)
+
+``` r
+
+# Use exactly 3 components (based on domain knowledge)
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  cross_validation = "none",
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  feature_importance = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 3. Cross-Validation Methods
+
+#### 10-Fold CV (default)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  cross_validation = "k10",
+  component_selection = "cv_loglik",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### 5-Fold CV (faster, slightly more bias)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  cross_validation = "k5",
+  component_selection = "cv_loglik",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Leave-One-Out CV (small samples only)
+
+``` r
+
+small_predictors <- paste0("MARKER_", sprintf("%02d", 1:25))
+
+plscox(
+  data = plscox_small,
+  time = "time_months",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = small_predictors,
+  pls_components = 5,
+  cross_validation = "loo",
+  component_selection = "cv_loglik",
+  plot_validation = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'small_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 4. Scaling Methods
+
+Variable scaling is critical for PLS since it operates on covariances.
+
+#### Standardization (Z-scores, default)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  scaling_method = "standardize",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Unit Variance Scaling (no centering)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  scaling_method = "unit_variance",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Min-Max Scaling (range \[0,1\])
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  scaling_method = "minmax",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### No Scaling
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  scaling_method = "none",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 5. Advanced PLS Settings
+
+#### Sparse PLS (automatic variable selection within components)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  sparse_pls = TRUE,
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Convergence Tolerance
+
+``` r
+
+# Strict tolerance for higher precision
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  tolerance = 1e-10,
+  component_selection = "manual",
+  feature_importance = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Q-Squared Limit (PLS stopping criterion)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  limQ2set = 0.5,
+  component_selection = "manual",
+  feature_importance = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### P-Value Based Variable Selection
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  pvals_expli = TRUE,
+  alpha_pvals_expli = 0.05,
+  component_selection = "manual",
+  feature_importance = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Tie Handling Method
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  tie_method = "breslow",
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 6. Bootstrap Validation
+
+Bootstrap validation assesses model overfitting using Harrell’s
+optimism-corrected C-index. Each bootstrap iteration: (1) fit model on
+bootstrap sample, (2) assess on bootstrap and original data, (3) compute
+optimism.
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  bootstrap_validation = TRUE,
+  n_bootstrap = 100,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 7. Permutation Testing
+
+Test whether the PLS components capture real survival signal or random
+patterns. The p-value is the proportion of permuted C-indices that
+exceed the original.
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  permutation_test = TRUE,
+  n_permutations = 50,  # Use 100+ for publication
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 8. Risk Stratification
+
+Patients are stratified into risk groups based on quantiles of the
+PLS-derived linear predictor from the Cox model.
+
+#### Binary Risk Groups
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  risk_groups = 2,
+  plot_survival = TRUE,
+  confidence_intervals = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Quartile Risk Groups
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  risk_groups = 4,
+  plot_survival = TRUE,
+  confidence_intervals = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 9. Data Suitability Assessment
+
+The traffic-light assessment checks 6 criteria: events-per-variable,
+reduction need, sample size, event rate, multicollinearity, and data
+quality.
+
+``` r
+
+# Metabolomics data: expected mostly green
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  suitabilityCheck = TRUE,
+  plot_components = FALSE,
+  plot_loadings = FALSE,
+  plot_scores = FALSE,
+  plot_validation = FALSE,
+  plot_survival = FALSE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+``` r
+
+# Genomic p>>n data: expected yellow/red for EPV and data quality
+gene_predictors <- paste0("GENE_", sprintf("%03d", 1:200))
+
+plscox(
+  data = plscox_genomic,
+  time = "os_time",
+  status = "os_event",
+  outcomeLevel = "1",
+  censorLevel = "0",
+  predictors = gene_predictors,
+  pls_components = 5,
+  component_selection = "manual",
+  suitabilityCheck = TRUE,
+  plot_components = FALSE,
+  plot_loadings = FALSE,
+  plot_scores = FALSE,
+  plot_validation = FALSE,
+  plot_survival = FALSE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'gene_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 10. Small Sample Analysis
+
+``` r
+
+plscox(
+  data = plscox_small,
+  time = "time_months",
+  status = "status",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = paste0("MARKER_", sprintf("%02d", 1:25)),
+  pls_components = 3,
+  cross_validation = "k5",
+  component_selection = "cv_loglik",
+  scaling_method = "standardize",
+  risk_groups = 2,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_survival = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
+)
+#> 
+#>  PARTIAL LEAST SQUARES COX MODELS
+#> 
+#> character(0)
+#> 
+#>  Error: Package Not Found
+#> 
+#>  The plsRcox package is required but not installed. Please install it
+#>  using:
+#>  install.packages('plsRcox')
+#> 
+#>  Component Selection Results                             
+#>  ─────────────────────────────────────────────────────── 
+#>    Components    CV Score    SE    C-Index    Selected   
+#>  ─────────────────────────────────────────────────────── 
+#>  ─────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  PLS Cox Model Coefficients                                                                                               
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    PLS Component    Coefficient    Hazard Ratio    HR Lower CI    HR Upper CI    Standard Error    Z-value    p-value     
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Variable Loadings on PLS Components                                                  
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>    Variable    Component 1    Component 2    Component 3    Cox-Weighted Importance   
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Model Performance Metrics                                     
+#>  ───────────────────────────────────────────────────────────── 
+#>    Metric    Value    Standard Error    Lower CI    Upper CI   
+#>  ───────────────────────────────────────────────────────────── 
+#>  ───────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Risk Group Stratification                                                                        
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Risk Group    N Subjects    N Events    Median Survival    SE    HR vs Low Risk    p-value     
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#> character(0)
+#> 
+#> character(0)
+```
+
+------------------------------------------------------------------------
+
+### 11. High-Dimensional Genomic Analysis (p \>\> n)
+
+This is the core PLS use case: more genes than patients.
+
+``` r
+
+plscox(
+  data = plscox_genomic,
+  time = "os_time",
+  status = "os_event",
+  outcomeLevel = "1",
+  censorLevel = "0",
+  predictors = gene_predictors,
+  pls_components = 5,
+  component_selection = "bic",
+  cross_validation = "none",
+  scaling_method = "standardize",
+  risk_groups = 3,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_scores = TRUE,
+  plot_survival = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'gene_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 12. All Plots Demonstration
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 5,
+  component_selection = "cv_loglik",
+  cross_validation = "k10",
+  risk_groups = 3,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_scores = TRUE,
+  plot_validation = TRUE,
+  plot_survival = TRUE,
+  feature_importance = TRUE,
+  confidence_intervals = TRUE,
+  prediction_accuracy = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 13. Full Validation Pipeline
+
+Combine bootstrap validation and permutation testing for
+publication-quality results.
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 10,
+  component_selection = "cv_cindex",
+  cross_validation = "k5",
+  scaling_method = "standardize",
+  bootstrap_validation = TRUE,
+  n_bootstrap = 100,
+  permutation_test = TRUE,
+  n_permutations = 50,
+  risk_groups = 4,
+  plot_components = TRUE,
+  plot_loadings = TRUE,
+  plot_scores = TRUE,
+  plot_validation = TRUE,
+  plot_survival = TRUE,
+  confidence_intervals = TRUE,
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE,
+  suitabilityCheck = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### 14. Edge Cases
+
+#### Single Component Model
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 1,
+  component_selection = "manual",
+  plot_loadings = TRUE,
+  feature_importance = TRUE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+#### Few Predictors
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = c("age", "bmi"),
+  pls_components = 1,
+  component_selection = "manual",
+  feature_importance = TRUE,
+  prediction_accuracy = TRUE
+)
+#> 
+#>  PARTIAL LEAST SQUARES COX MODELS
+#> 
+#> character(0)
+#> 
+#>  Error: Package Not Found
+#> 
+#>  The plsRcox package is required but not installed. Please install it
+#>  using:
+#>  install.packages('plsRcox')
+#> 
+#>  Component Selection Results                             
+#>  ─────────────────────────────────────────────────────── 
+#>    Components    CV Score    SE    C-Index    Selected   
+#>  ─────────────────────────────────────────────────────── 
+#>  ─────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  PLS Cox Model Coefficients                                                                                               
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    PLS Component    Coefficient    Hazard Ratio    HR Lower CI    HR Upper CI    Standard Error    Z-value    p-value     
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Variable Loadings on PLS Components                                                  
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>    Variable    Component 1    Component 2    Component 3    Cox-Weighted Importance   
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#>  ──────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Model Performance Metrics                                     
+#>  ───────────────────────────────────────────────────────────── 
+#>    Metric    Value    Standard Error    Lower CI    Upper CI   
+#>  ───────────────────────────────────────────────────────────── 
+#>  ───────────────────────────────────────────────────────────── 
+#> 
+#> 
+#>  Risk Group Stratification                                                                        
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────── 
+#>    Risk Group    N Subjects    N Events    Median Survival    SE    HR vs Low Risk    p-value     
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────── 
+#>  ──────────────────────────────────────────────────────────────────────────────────────────────── 
+#> 
+#> 
+#> character(0)
+#> 
+#> character(0)
+```
+
+#### Minimal Output (no plots, no optional tables)
+
+``` r
+
+plscox(
+  data = plscox_metabolomics,
+  time = "survival_months",
+  status = "death",
+  outcomeLevel = "Dead",
+  censorLevel = "Alive",
+  predictors = metab_predictors,
+  pls_components = 3,
+  component_selection = "manual",
+  suitabilityCheck = FALSE,
+  plot_components = FALSE,
+  plot_loadings = FALSE,
+  plot_scores = FALSE,
+  plot_validation = FALSE,
+  plot_survival = FALSE,
+  confidence_intervals = FALSE,
+  feature_importance = FALSE,
+  prediction_accuracy = FALSE,
+  bootstrap_validation = FALSE,
+  permutation_test = FALSE
+)
+#> Error:
+#> ! Argument 'predictors' contains 'metab_predictors' which is not present in the dataset
+```
+
+------------------------------------------------------------------------
+
+### Interpreting Results
+
+#### Model Summary
+
+The Model Summary HTML shows: sample size, events, predictors, number of
+PLS components used, selection method, scaling, CV method, tie handling,
+tolerance, and training C-index with likelihood ratio and Wald tests.
+
+#### Component Selection Table
+
+| Column     | Meaning                                                        |
+|------------|----------------------------------------------------------------|
+| Components | Number of PLS components considered                            |
+| CV Score   | Cross-validation score (log-likelihood, C-index, AIC, or BIC)  |
+| SE         | Standard error of CV score (when available)                    |
+| C-Index    | Concordance index for that number of components (AIC/BIC only) |
+| Selected   | “Yes” marks the optimal number of components                   |
+
+#### Model Coefficients Table
+
+| Column                    | Meaning                                |
+|---------------------------|----------------------------------------|
+| PLS Component             | Component identifier (PLS_1, PLS_2, …) |
+| Coefficient               | Cox regression coefficient             |
+| Hazard Ratio              | exp(coefficient)                       |
+| HR Lower CI / HR Upper CI | 95% confidence interval for HR         |
+| Standard Error            | SE of the coefficient                  |
+| Z-value                   | Wald test statistic                    |
+| p-value                   | Significance of component in Cox model |
+
+#### Variable Loadings Table
+
+Variables are sorted by Cox-weighted importance:
+`|loadings| * |cox_coefficients|`. This accounts for both how much a
+variable contributes to each component AND how much each component
+matters for survival.
+
+#### Risk Stratification Table
+
+Patients are divided into quantile-based risk groups. Risk Group 1 is
+always the reference (HR = 1.0). Higher-numbered groups should have
+progressively higher HRs.
+
+------------------------------------------------------------------------
+
+### PLS vs PCA for Survival Analysis
+
+| Method  | Supervision  | Components Maximize                   |
+|---------|--------------|---------------------------------------|
+| **PCA** | Unsupervised | Variance in X only                    |
+| **PLS** | Supervised   | Covariance between X and Y (survival) |
+
+PLS components are specifically constructed to predict survival, while
+PCA components may capture variance unrelated to the outcome.
+
+------------------------------------------------------------------------
+
+### Common Pitfalls
+
+1.  **Too many components**: More components can mean overfitting.
+    Always use cross-validation to select the optimal number.
+
+2.  **Ignoring variable scaling**: Metabolites on different scales
+    dominate PLS if not standardized. Always use
+    `scaling_method = "standardize"` (the default).
+
+3.  **Not validating**: Use bootstrap validation and/or permutation
+    testing to assess reliability. The training C-index overestimates
+    true performance.
+
+4.  **Interpreting loadings as independent effects**: A high loading
+    means the variable contributes to a component, not that it has an
+    independent causal effect. Groups of correlated variables share
+    loading magnitude.
+
+5.  **Using LOO CV for large datasets**: Leave-one-out is
+    computationally expensive and can be unstable. Use 5- or 10-fold CV
+    for n \> 50.
+
+6.  **Sparse PLS with too few components**: Sparse PLS may return NULL
+    component scores for some configurations. If this happens, try
+    increasing components or disabling sparse mode.
+
+------------------------------------------------------------------------
+
+### Related ClinicoPath Functions
+
+| Function | Use When |
+|----|----|
+| **LASSO Cox** (`lassocox`) | Want sparse individual variable selection |
+| **Adaptive LASSO** (`adaptivelasso`) | Oracle property variable selection |
+| **NCV Reg Cox** (`ncvregcox`) | SCAD/MCP non-convex penalties |
+| **High-Dimensional Cox** (`highdimcox`) | Multiple regularization methods |
+| **PCA Cox** (`pcacox`) | Unsupervised dimensionality reduction |
+| **Multivariable Survival** | Standard Cox with few predictors |
+
+------------------------------------------------------------------------
+
+### References
+
+- Bastien P, Esposito Vinzi V, Tenenhaus M. PLS generalised linear
+  regression. *Comput Stat Data Anal*. 2005;48(1):17-46.
+- Boulesteix AL, Strimmer K. Partial least squares: a versatile tool for
+  the analysis of high-dimensional genomic data. *Brief Bioinform*.
+  2007;8(1):32-44.
+- Li H, Gui J. Partial Cox regression analysis for high-dimensional
+  microarray gene expression data. *Bioinformatics*. 2004;20(Suppl
+  1):i208-i215.
+- Mevik BH, Wehrens R. The pls package: principal component and partial
+  least squares regression in R. *J Stat Softw*. 2007;18(2):1-23.

@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Overall, Cause Specific, and Competing Survival - Comprehensive Guide • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Overall, Cause Specific, and Competing Survival - Comprehensive Guide">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@
                         <h4 data-toc-skip class="author">ClinicoPath
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2026-03-22</h4>
+            <h4 data-toc-skip class="date">2026-07-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/sbalci/ClinicoPathJamoviModule/blob/HEAD/vignettes/jsurvival-competingsurvival-comprehensive.Rmd" class="external-link"><code>vignettes/jsurvival-competingsurvival-comprehensive.Rmd</code></a></small>
       <div class="d-none name"><code>jsurvival-competingsurvival-comprehensive.Rmd</code></div>
@@ -251,9 +251,7 @@ death.</p>
 <span>  dooc <span class="op">=</span> <span class="st">"Dead_of_Other"</span>,</span>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The <code>cuminc</code> table shows the cumulative incidence of
 disease death and competing death at the default timepoints (12, 24, 36,
 60 months). The <code>comprisksPlot</code> displays the CIF curves.</p>
@@ -274,9 +272,7 @@ various label formats.</p>
 <span>  dooc <span class="op">=</span> <span class="st">"Dead of Other"</span>,</span>
 <span>  awd <span class="op">=</span> <span class="st">"Alive w Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive w/o Disease"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -298,9 +294,7 @@ the CIF) rather than the cause-specific hazard.</p>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  graystest <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The summary output includes the Gray’s test chi-squared statistic,
 degrees of freedom, and p-value for each event type.</p>
 <div class="section level4">
@@ -320,9 +314,7 @@ stages:</p>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  graystest <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -344,9 +336,7 @@ time.</p>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  subdistribution <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The <code>fineGrayTable</code> shows the coefficient, hazard ratio,
 confidence interval, standard error, z-statistic, and p-value. The
 <code>survivalTable</code> also gains a row for “Subdistribution HR
@@ -366,9 +356,7 @@ confidence interval, standard error, z-statistic, and p-value. The
 <span>  awd <span class="op">=</span> <span class="st">"Alive w Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive w/o Disease"</span>,</span>
 <span>  subdistribution <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -391,9 +379,7 @@ to 100%.</p>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  showStackedPlot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  cifColors <span class="op">=</span> <span class="st">"colorblind"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>At time 0, survival is 100% and both CIFs are 0%. As time progresses,
 survival decreases while the cumulative incidence of disease death and
 competing death increase, always summing to 100%.</p>
@@ -417,9 +403,7 @@ compared to the proper CIF.</p>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  showKMvsCIF <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The dashed line (1-KM) always lies above the solid line (CIF). The
 gap between them represents the bias introduced by ignoring competing
 events. This difference is clinically meaningful in older populations or
@@ -446,9 +430,7 @@ string.</p>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  timepoints <span class="op">=</span> <span class="st">"6,12,18,24,30,36,48,60"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="adjusting-confidence-level">Adjusting Confidence Level<a class="anchor" aria-label="anchor" href="#adjusting-confidence-level"></a>
@@ -468,9 +450,7 @@ for example, 0.90 for narrower intervals.</p>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span>,</span>
 <span>  subdistribution <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  confidencelevel <span class="op">=</span> <span class="fl">0.90</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>The Fine-Gray table and timepoint confidence intervals will reflect
 the 90% confidence level.</p>
 </div>
@@ -581,8 +561,8 @@ estimates.</p>
 <span>  awd <span class="op">=</span> <span class="st">"Alive_w_Disease"</span>,</span>
 <span>  awod <span class="op">=</span> <span class="st">"Alive_wo_Disease"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `private$.competingRisksSurvival()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Too few competing events (0). Competing risks analysis requires at least 5 events of each type.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;">:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Too few competing events ({}). Competing risks analysis requires at least 5 events of each type.</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="competing-risks-requires-both-death-types">Competing Risks Requires Both Death Types<a class="anchor" aria-label="anchor" href="#competing-risks-requires-both-death-types"></a>
@@ -651,9 +631,7 @@ competing risks analysis will produce an informative error.</p>
 <span>  showKMvsCIF <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  timepoints <span class="op">=</span> <span class="st">"12,24,36,60"</span>,</span>
 <span>  confidencelevel <span class="op">=</span> <span class="fl">0.95</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `value[[3L]]()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Competing risks analysis failed:</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Comparing the hazard ratios across these three analyses reveals how
 competing risks affect the estimated treatment effect. The
 cause-specific HR captures the direct treatment effect on disease death
@@ -894,7 +872,7 @@ Research</em>, 18(8):2301-2308.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

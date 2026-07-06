@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>PLS Cox Regression for High-Dimensional Survival Analysis • ClinicoPath</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="PLS Cox Regression for High-Dimensional Survival Analysis">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ClinicoPath</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.37.09</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,7 +84,7 @@ show the R syntax for reference. To run interactively, use
 combines Partial Least Squares (PLS) dimensionality reduction with Cox
 proportional hazards modeling for high-dimensional survival data.
 Instead of selecting individual variables like LASSO, PLS creates
-<strong>latent components</strong> – weighted combinations of all
+<strong>latent components</strong> - weighted combinations of all
 predictors that maximally explain covariance with the survival
 outcome.</p>
 <p>Key features:</p>
@@ -838,259 +838,52 @@ quality.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  PARTIAL LEAST SQUARES COX MODELS</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color: #fff3cd; color: #856404; border: 1px</span></span>
-<span><span class="co">#&gt;  solid #ffeeba; padding: 12px; border-radius: 6px; margin-bottom:</span></span>
-<span><span class="co">#&gt;  12px;'&gt;Overall: Data is usable but review the flagged items.&lt;table</span></span>
-<span><span class="co">#&gt;  style='width: 100%; border-collapse: collapse; font-size: 13px;'&gt;&lt;tr</span></span>
-<span><span class="co">#&gt;  style='border-bottom: 2px solid #dee2e6;'&gt;&lt;th style='padding: 6px;</span></span>
-<span><span class="co">#&gt;  text-align: left;'&gt;Status&lt;th style='padding: 6px; text-align:</span></span>
-<span><span class="co">#&gt;  left;'&gt;Check&lt;th style='padding: 6px; text-align: left;'&gt;Value&lt;th</span></span>
-<span><span class="co">#&gt;  style='padding: 6px; text-align: left;'&gt;Detail&lt;tr</span></span>
-<span><span class="co">#&gt;  style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;&lt;span style='color: #ffc107; font-size: 18px;'&gt;&amp;#9679;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;Events-Per-Variable (Overall)&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;1.2 (n_events=29, p=25)&lt;td style='padding: 6px;'&gt;Low EPV for</span></span>
-<span><span class="co">#&gt;  standard modeling, but PLS handles this well through dimensionality</span></span>
-<span><span class="co">#&gt;  reduction.&lt;tr style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;&lt;span style='color: #28a745; font-size:</span></span>
-<span><span class="co">#&gt;  18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Reduction Need&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;p=25, n=50 (ratio=0.50)&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;High-dimensional setting. Dimensionality reduction via PLS is</span></span>
-<span><span class="co">#&gt;  strongly indicated.&lt;tr style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;&lt;span style='color: #ffc107; font-size:</span></span>
-<span><span class="co">#&gt;  18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Sample Size&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;n=50&lt;td style='padding: 6px;'&gt;Small sample. Consider LOO</span></span>
-<span><span class="co">#&gt;  (Leave-One-Out) cross-validation instead of k-fold.&lt;tr</span></span>
-<span><span class="co">#&gt;  style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;&lt;span style='color: #28a745; font-size: 18px;'&gt;&amp;#9679;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;Event Rate&lt;td style='padding: 6px;'&gt;58.0%</span></span>
-<span><span class="co">#&gt;  (29/50)&lt;td style='padding: 6px;'&gt;Balanced event rate. Good for model</span></span>
-<span><span class="co">#&gt;  estimation.&lt;tr style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;&lt;span style='color: #28a745; font-size:</span></span>
-<span><span class="co">#&gt;  18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Multicollinearity&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;Max |r| = 0.71&lt;td style='padding: 6px;'&gt;Moderate</span></span>
-<span><span class="co">#&gt;  collinearity. PLS effectively orthogonalizes these correlated</span></span>
-<span><span class="co">#&gt;  predictors.&lt;tr style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;&lt;span style='color: #28a745; font-size:</span></span>
-<span><span class="co">#&gt;  18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Data Quality&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;No missing data&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;Complete dataset.</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Cox Model Results</span></span>
+<span><span class="co">#&gt;  Error: Package Not Found</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Analysis Summary:</span></span>
+<span><span class="co">#&gt;  The plsRcox package is required but not installed. Please install it</span></span>
+<span><span class="co">#&gt;  using:</span></span>
+<span><span class="co">#&gt;  install.packages('plsRcox')</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Sample size: 50 subjects</span></span>
-<span><span class="co">#&gt;  Number of events: 29</span></span>
-<span><span class="co">#&gt;  Number of predictors: 25</span></span>
-<span><span class="co">#&gt;  PLS components used: 3</span></span>
-<span><span class="co">#&gt;  PLS algorithm: NIPALS (plsRcox default)</span></span>
-<span><span class="co">#&gt;  Component selection: Cross-Validated Log-Likelihood</span></span>
-<span><span class="co">#&gt;  Scaling method: standardize</span></span>
-<span><span class="co">#&gt;  Cross-validation: k5 (5 folds)</span></span>
-<span><span class="co">#&gt;  Tie handling: efron</span></span>
-<span><span class="co">#&gt;  Convergence tolerance: 1e-06</span></span>
-<span><span class="co">#&gt;  Q-squared limit: 0.0975</span></span>
+<span><span class="co">#&gt;  Component Selection Results                             </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Components    CV Score    SE    C-Index    Selected   </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Performance:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Training Concordance Index: 0.783 (SE: 0.042)</span></span>
-<span><span class="co">#&gt;  Likelihood ratio test: 30.83 (p = 9.252e-07)</span></span>
-<span><span class="co">#&gt;  Wald test: 23.26 (p = 3.559e-05)</span></span>
+<span><span class="co">#&gt;  PLS Cox Model Coefficients                                                                                               </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    PLS Component    Coefficient    Hazard Ratio    HR Lower CI    HR Upper CI    Standard Error    Z-value    p-value     </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Note: The Training Concordance Index overestimates true out-of-sample</span></span>
-<span><span class="co">#&gt;  performance, especially for high-dimensional data. Use Bootstrap or</span></span>
-<span><span class="co">#&gt;  Permutation tests for rigorous validation.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Component Selection Results                                        </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Components    CV Score     SE              C-Index    Selected   </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;             1    0.5000000    1.570092e-17               No         </span></span>
-<span><span class="co">#&gt;             2    0.7423016      0.01114436               No         </span></span>
-<span><span class="co">#&gt;             3    0.7764710      0.01251187               Yes        </span></span>
-<span><span class="co">#&gt;             4    0.7994186      0.01239049               No         </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  Variable Loadings on PLS Components                                                  </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Variable    Component 1    Component 2    Component 3    Cox-Weighted Importance   </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Cox Model Coefficients                                                                                                  </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    PLS Component      Coefficient    Hazard Ratio    HR Lower CI    HR Upper CI    Standard Error    Z-value     p-value     </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    PLS Component 1      1.1897420        3.286233      2.0157554       5.357460         0.2493658    4.771071    0.0000018   </span></span>
-<span><span class="co">#&gt;    PLS Component 2      0.4950034        1.640504      1.1480875       2.344118         0.1820982    2.718332    0.0065612   </span></span>
-<span><span class="co">#&gt;    PLS Component 3      0.2705114        1.310635      0.9670626       1.776269         0.1551067    1.744035    0.0811530   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  Model Performance Metrics                                     </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Metric    Value    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Variable Loadings on PLS Components                                                     </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Variable     Component 1     Component 2    Component 3     Cox-Weighted Importance   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    MARKER_23     0.449576752    -0.09121106    -0.365550228                  0.6789156   </span></span>
-<span><span class="co">#&gt;    MARKER_11    -0.390481147    -0.33365274     0.084881497                  0.6526925   </span></span>
-<span><span class="co">#&gt;    MARKER_12    -0.396282580    -0.23338378    -0.189486585                  0.6382581   </span></span>
-<span><span class="co">#&gt;    MARKER_19     0.336257540     0.06808261     0.162194848                  0.4776364   </span></span>
-<span><span class="co">#&gt;    MARKER_25     0.016111147     0.49379534     0.568336928                  0.4173401   </span></span>
-<span><span class="co">#&gt;    MARKER_07     0.209590451    -0.26665806    -0.115383327                  0.4125677   </span></span>
-<span><span class="co">#&gt;    MARKER_22     0.198997934     0.24505796    -0.165699557                  0.4028843   </span></span>
-<span><span class="co">#&gt;    MARKER_04    -0.214505528    -0.19456538    -0.078487980                  0.3727487   </span></span>
-<span><span class="co">#&gt;    MARKER_17     0.196649676     0.26954662     0.001737450                  0.3678589   </span></span>
-<span><span class="co">#&gt;    MARKER_14     0.096454668     0.30688689     0.343713734                  0.3596447   </span></span>
-<span><span class="co">#&gt;    MARKER_13    -0.030224409     0.38049243     0.430188221                  0.3406751   </span></span>
-<span><span class="co">#&gt;    MARKER_03     0.204375503     0.01555463     0.240185475                  0.3158266   </span></span>
-<span><span class="co">#&gt;    MARKER_15    -0.192965850    -0.14193953    -0.019314614                  0.3050649   </span></span>
-<span><span class="co">#&gt;    MARKER_18    -0.202310655    -0.11354504     0.005294904                  0.2983350   </span></span>
-<span><span class="co">#&gt;    MARKER_05     0.121415349    -0.17075152     0.239214527                  0.2936858   </span></span>
-<span><span class="co">#&gt;    MARKER_20    -0.097537150    -0.09504999    -0.413333938                  0.2749056   </span></span>
-<span><span class="co">#&gt;    MARKER_16    -0.115681010    -0.12567312    -0.277435819                  0.2748887   </span></span>
-<span><span class="co">#&gt;    MARKER_06     0.103966624    -0.05080671     0.186811961                  0.1993777   </span></span>
-<span><span class="co">#&gt;    MARKER_08     0.075949296     0.03812589     0.312833805                  0.1938576   </span></span>
-<span><span class="co">#&gt;    MARKER_10    -0.099993927     0.02758448     0.197968634                  0.1861742   </span></span>
-<span><span class="co">#&gt;    MARKER_21    -0.004697051     0.30841166     0.067719883                  0.1765721   </span></span>
-<span><span class="co">#&gt;    MARKER_02    -0.064839172    -0.11967818     0.082363952                  0.1586634   </span></span>
-<span><span class="co">#&gt;    MARKER_24     0.070225439     0.09135463     0.028021233                  0.1363511   </span></span>
-<span><span class="co">#&gt;    MARKER_09    -0.027147818     0.14660176     0.068839979                  0.1234893   </span></span>
-<span><span class="co">#&gt;    MARKER_01    -0.050641691    -0.07973672     0.017243703                  0.1043851   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  Risk Group Stratification                                                                        </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Risk Group    N Subjects    N Events    Median Survival    SE    HR vs Low Risk    p-value     </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Performance Metrics                                                                 </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Metric                        Value          Standard Error    Lower CI     Upper CI    </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Training Concordance Index      0.7828283        0.04202365    0.7004619    0.8651946   </span></span>
-<span><span class="co">#&gt;    R-squared (Nagelkerke)          0.4601716                                               </span></span>
-<span><span class="co">#&gt;    AIC                           179.0487826                                               </span></span>
-<span><span class="co">#&gt;    BIC                           184.7848516                                               </span></span>
-<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Risk Group Stratification                                                                                </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Risk Group      N Subjects    N Events    Median Survival    SE          HR vs Low Risk    p-value     </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Risk Group 1            25           9                                         1.000000                </span></span>
-<span><span class="co">#&gt;    Risk Group 2            25          20           6.800000    2.372449          3.860085    0.0009021   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Interpretation Guide</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Components</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS components represent linear combinations of your original</span></span>
-<span><span class="co">#&gt;  predictors that are optimally related to survival outcomes. Each</span></span>
-<span><span class="co">#&gt;  component captures a different aspect of the biological variation in</span></span>
-<span><span class="co">#&gt;  your data.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Variable Loadings</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Loadings indicate how much each original variable contributes to each</span></span>
-<span><span class="co">#&gt;  PLS component. Variables with higher absolute loadings have stronger</span></span>
-<span><span class="co">#&gt;  influence on that component.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Hazard Ratios</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Note: The Hazard Ratios and p-values correspond to the abstract PLS</span></span>
-<span><span class="co">#&gt;  components, not your original variables. Each PLS component's hazard</span></span>
-<span><span class="co">#&gt;  ratio indicates the relative risk associated with a one-unit increase</span></span>
-<span><span class="co">#&gt;  in that component score. HR &gt; 1 indicates increased risk, HR &lt; 1</span></span>
-<span><span class="co">#&gt;  indicates decreased risk.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Risk Stratification</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Patients are grouped based on their overall PLS risk score. Higher</span></span>
-<span><span class="co">#&gt;  risk groups should show shorter survival times and more events.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Validation</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Cross-validation helps select the optimal number of components.</span></span>
-<span><span class="co">#&gt;  Bootstrap validation can assess model stability and provide confidence</span></span>
-<span><span class="co">#&gt;  intervals for performance metrics.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Application</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  This model can be used for:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Risk stratification of patients</span></span>
-<span><span class="co">#&gt;  Identification of prognostic biomarker signatures</span></span>
-<span><span class="co">#&gt;  Treatment decision support</span></span>
-<span><span class="co">#&gt;  Clinical trial stratification</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Technical Notes and Assumptions</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Cox Methodology</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  This analysis combines Partial Least Squares (PLS) dimensionality</span></span>
-<span><span class="co">#&gt;  reduction with Cox proportional hazards regression. PLS finds</span></span>
-<span><span class="co">#&gt;  components that maximize covariance between predictors and the</span></span>
-<span><span class="co">#&gt;  survival outcome.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Assumptions</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Proportional Hazards: The hazard ratio for each component is constant</span></span>
-<span><span class="co">#&gt;  over time</span></span>
-<span><span class="co">#&gt;  Linear Relationships: Log-hazard is linear in the PLS components</span></span>
-<span><span class="co">#&gt;  Independence: Observations are independent</span></span>
-<span><span class="co">#&gt;  Non-informative Censoring: Censoring is independent of the event</span></span>
-<span><span class="co">#&gt;  process</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Component Selection</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Cross-validation is used to select the optimal number of PLS</span></span>
-<span><span class="co">#&gt;  components to avoid overfitting while maintaining predictive</span></span>
-<span><span class="co">#&gt;  performance.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Variable Scaling</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Predictor variables should be scaled when they have different units or</span></span>
-<span><span class="co">#&gt;  vastly different ranges to ensure fair contribution to PLS components.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Sample Size Considerations</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  For reliable results, aim for at least 10-15 events per PLS component</span></span>
-<span><span class="co">#&gt;  included in the model. With high-dimensional data, cross-validation</span></span>
-<span><span class="co">#&gt;  becomes crucial.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Interpretation Cautions</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS components are linear combinations - biological interpretation may</span></span>
-<span><span class="co">#&gt;  be complex</span></span>
-<span><span class="co">#&gt;  Variable importance should be interpreted in context of component</span></span>
-<span><span class="co">#&gt;  loadings</span></span>
-<span><span class="co">#&gt;  External validation is recommended before clinical application</span></span></code></pre></div>
-<p><img src="jsurvival-plscox-comprehensive_files/figure-html/small-sample-analysis-1.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/small-sample-analysis-2.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/small-sample-analysis-3.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/small-sample-analysis-4.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/small-sample-analysis-5.png" alt="" width="672"></p>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
@@ -1227,230 +1020,52 @@ publication-quality results.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  PARTIAL LEAST SQUARES COX MODELS</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  &lt;div style='background-color: #fff3cd; color: #856404; border: 1px</span></span>
-<span><span class="co">#&gt;  solid #ffeeba; padding: 12px; border-radius: 6px; margin-bottom:</span></span>
-<span><span class="co">#&gt;  12px;'&gt;Overall: Data is usable but review the flagged items.&lt;table</span></span>
-<span><span class="co">#&gt;  style='width: 100%; border-collapse: collapse; font-size: 13px;'&gt;&lt;tr</span></span>
-<span><span class="co">#&gt;  style='border-bottom: 2px solid #dee2e6;'&gt;&lt;th style='padding: 6px;</span></span>
-<span><span class="co">#&gt;  text-align: left;'&gt;Status&lt;th style='padding: 6px; text-align:</span></span>
-<span><span class="co">#&gt;  left;'&gt;Check&lt;th style='padding: 6px; text-align: left;'&gt;Value&lt;th</span></span>
-<span><span class="co">#&gt;  style='padding: 6px; text-align: left;'&gt;Detail&lt;tr</span></span>
-<span><span class="co">#&gt;  style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;&lt;span style='color: #28a745; font-size: 18px;'&gt;&amp;#9679;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;Events-Per-Variable (Overall)&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;34.5 (n_events=69, p=2)&lt;td style='padding: 6px;'&gt;High EPV. Model</span></span>
-<span><span class="co">#&gt;  estimation will be robust.&lt;tr style='border-bottom: 1px solid</span></span>
-<span><span class="co">#&gt;  #dee2e6;'&gt;&lt;td style='padding: 6px;'&gt;&lt;span style='color: #ffc107;</span></span>
-<span><span class="co">#&gt;  font-size: 18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Reduction Need&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;p=2, EPV=34&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;Moderate/low dimensionality. Standard Cox might suffice, but PLS</span></span>
-<span><span class="co">#&gt;  is still valid.&lt;tr style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;&lt;span style='color: #28a745; font-size:</span></span>
-<span><span class="co">#&gt;  18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Sample Size&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;n=120&lt;td style='padding: 6px;'&gt;Adequate sample size for PLS</span></span>
-<span><span class="co">#&gt;  regression cross-validation.&lt;tr style='border-bottom: 1px solid</span></span>
-<span><span class="co">#&gt;  #dee2e6;'&gt;&lt;td style='padding: 6px;'&gt;&lt;span style='color: #28a745;</span></span>
-<span><span class="co">#&gt;  font-size: 18px;'&gt;&amp;#9679;&lt;td style='padding: 6px;'&gt;Event Rate&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;57.5% (69/120)&lt;td style='padding: 6px;'&gt;Balanced</span></span>
-<span><span class="co">#&gt;  event rate. Good for model estimation.&lt;tr style='border-bottom: 1px</span></span>
-<span><span class="co">#&gt;  solid #dee2e6;'&gt;&lt;td style='padding: 6px;'&gt;&lt;span style='color: #28a745;</span></span>
-<span><span class="co">#&gt;  font-size: 18px;'&gt;&amp;#9679;&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;Multicollinearity&lt;td style='padding: 6px;'&gt;Max |r| = 0.04&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;No concerning collinearity detected.&lt;tr</span></span>
-<span><span class="co">#&gt;  style='border-bottom: 1px solid #dee2e6;'&gt;&lt;td style='padding:</span></span>
-<span><span class="co">#&gt;  6px;'&gt;&lt;span style='color: #28a745; font-size: 18px;'&gt;&amp;#9679;&lt;td</span></span>
-<span><span class="co">#&gt;  style='padding: 6px;'&gt;Data Quality&lt;td style='padding: 6px;'&gt;No missing</span></span>
-<span><span class="co">#&gt;  data&lt;td style='padding: 6px;'&gt;Complete dataset.</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Cox Model Results</span></span>
+<span><span class="co">#&gt;  Error: Package Not Found</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Analysis Summary:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Sample size: 120 subjects</span></span>
-<span><span class="co">#&gt;  Number of events: 69</span></span>
-<span><span class="co">#&gt;  Number of predictors: 2</span></span>
-<span><span class="co">#&gt;  PLS components used: 1</span></span>
-<span><span class="co">#&gt;  PLS algorithm: NIPALS (plsRcox default)</span></span>
-<span><span class="co">#&gt;  Component selection: Manual</span></span>
-<span><span class="co">#&gt;  Scaling method: standardize</span></span>
-<span><span class="co">#&gt;  Cross-validation: k10 (10 folds)</span></span>
-<span><span class="co">#&gt;  Tie handling: efron</span></span>
-<span><span class="co">#&gt;  Convergence tolerance: 1e-06</span></span>
-<span><span class="co">#&gt;  Q-squared limit: 0.0975</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Performance:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Training Concordance Index: 0.539 (SE: 0.04)</span></span>
-<span><span class="co">#&gt;  Likelihood ratio test: 1.34 (p = 0.2477)</span></span>
-<span><span class="co">#&gt;  Wald test: 1.33 (p = 0.2491)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Note: The Training Concordance Index overestimates true out-of-sample</span></span>
-<span><span class="co">#&gt;  performance, especially for high-dimensional data. Use Bootstrap or</span></span>
-<span><span class="co">#&gt;  Permutation tests for rigorous validation.</span></span>
+<span><span class="co">#&gt;  The plsRcox package is required but not installed. Please install it</span></span>
+<span><span class="co">#&gt;  using:</span></span>
+<span><span class="co">#&gt;  install.packages('plsRcox')</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Component Selection Results                             </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Components    CV Score    SE    C-Index    Selected   </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;  ─────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Note. Component selection: Manual. Using 1</span></span>
-<span><span class="co">#&gt;    component(s).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Cox Model Coefficients                                                                                                  </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    PLS Component      Coefficient    Hazard Ratio    HR Lower CI    HR Upper CI    Standard Error    Z-value     p-value     </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    PLS Component 1      0.1417969        1.152343      0.9054498       1.466557         0.1230228    1.152606    0.2490721   </span></span>
-<span><span class="co">#&gt;  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  PLS Cox Model Coefficients                                                                                               </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    PLS Component    Coefficient    Hazard Ratio    HR Lower CI    HR Upper CI    Standard Error    Z-value    p-value     </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Variable Loadings on PLS Components                                                  </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt;    Variable    Component 1    Component 2    Component 3    Cox-Weighted Importance   </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    bmi          -0.7742216                                               0.10978220   </span></span>
-<span><span class="co">#&gt;    age           0.6329146                                               0.08974532   </span></span>
 <span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Performance Metrics                                                                  </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Metric                        Value           Standard Error    Lower CI     Upper CI    </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Training Concordance Index      0.53922040        0.04034305    0.4601480    0.6182928   </span></span>
-<span><span class="co">#&gt;    R-squared (Nagelkerke)          0.01107350                                               </span></span>
-<span><span class="co">#&gt;    AIC                           542.39315135                                               </span></span>
-<span><span class="co">#&gt;    BIC                           545.18064309                                               </span></span>
-<span><span class="co">#&gt;  ────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  Model Performance Metrics                                     </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Metric    Value    Standard Error    Lower CI    Upper CI   </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ───────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Risk Group Stratification                                                                                </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Risk Group      N Subjects    N Events    Median Survival    SE          HR vs Low Risk    p-value     </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
-<span><span class="co">#&gt;    Risk Group 1            40          19           16.90000                      1.000000                </span></span>
-<span><span class="co">#&gt;    Risk Group 2            40          26           16.00000    3.265306          1.445136    0.2281569   </span></span>
-<span><span class="co">#&gt;    Risk Group 3            40          24           19.10000    4.540816          1.350071    0.3299992   </span></span>
-<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  Risk Group Stratification                                                                        </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;    Risk Group    N Subjects    N Events    Median Survival    SE    HR vs Low Risk    p-value     </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
+<span><span class="co">#&gt;  ──────────────────────────────────────────────────────────────────────────────────────────────── </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Interpretation Guide</span></span>
+<span><span class="co">#&gt; character(0)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Components</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS components represent linear combinations of your original</span></span>
-<span><span class="co">#&gt;  predictors that are optimally related to survival outcomes. Each</span></span>
-<span><span class="co">#&gt;  component captures a different aspect of the biological variation in</span></span>
-<span><span class="co">#&gt;  your data.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Variable Loadings</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Loadings indicate how much each original variable contributes to each</span></span>
-<span><span class="co">#&gt;  PLS component. Variables with higher absolute loadings have stronger</span></span>
-<span><span class="co">#&gt;  influence on that component.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Hazard Ratios</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Note: The Hazard Ratios and p-values correspond to the abstract PLS</span></span>
-<span><span class="co">#&gt;  components, not your original variables. Each PLS component's hazard</span></span>
-<span><span class="co">#&gt;  ratio indicates the relative risk associated with a one-unit increase</span></span>
-<span><span class="co">#&gt;  in that component score. HR &gt; 1 indicates increased risk, HR &lt; 1</span></span>
-<span><span class="co">#&gt;  indicates decreased risk.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Risk Stratification</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Patients are grouped based on their overall PLS risk score. Higher</span></span>
-<span><span class="co">#&gt;  risk groups should show shorter survival times and more events.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Validation</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Cross-validation helps select the optimal number of components.</span></span>
-<span><span class="co">#&gt;  Bootstrap validation can assess model stability and provide confidence</span></span>
-<span><span class="co">#&gt;  intervals for performance metrics.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Clinical Application</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  This model can be used for:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Risk stratification of patients</span></span>
-<span><span class="co">#&gt;  Identification of prognostic biomarker signatures</span></span>
-<span><span class="co">#&gt;  Treatment decision support</span></span>
-<span><span class="co">#&gt;  Clinical trial stratification</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Technical Notes and Assumptions</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS Cox Methodology</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  This analysis combines Partial Least Squares (PLS) dimensionality</span></span>
-<span><span class="co">#&gt;  reduction with Cox proportional hazards regression. PLS finds</span></span>
-<span><span class="co">#&gt;  components that maximize covariance between predictors and the</span></span>
-<span><span class="co">#&gt;  survival outcome.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Model Assumptions</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Proportional Hazards: The hazard ratio for each component is constant</span></span>
-<span><span class="co">#&gt;  over time</span></span>
-<span><span class="co">#&gt;  Linear Relationships: Log-hazard is linear in the PLS components</span></span>
-<span><span class="co">#&gt;  Independence: Observations are independent</span></span>
-<span><span class="co">#&gt;  Non-informative Censoring: Censoring is independent of the event</span></span>
-<span><span class="co">#&gt;  process</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Component Selection</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Cross-validation is used to select the optimal number of PLS</span></span>
-<span><span class="co">#&gt;  components to avoid overfitting while maintaining predictive</span></span>
-<span><span class="co">#&gt;  performance.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Variable Scaling</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Predictor variables should be scaled when they have different units or</span></span>
-<span><span class="co">#&gt;  vastly different ranges to ensure fair contribution to PLS components.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Sample Size Considerations</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  For reliable results, aim for at least 10-15 events per PLS component</span></span>
-<span><span class="co">#&gt;  included in the model. With high-dimensional data, cross-validation</span></span>
-<span><span class="co">#&gt;  becomes crucial.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  Interpretation Cautions</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;  PLS components are linear combinations - biological interpretation may</span></span>
-<span><span class="co">#&gt;  be complex</span></span>
-<span><span class="co">#&gt;  Variable importance should be interpreted in context of component</span></span>
-<span><span class="co">#&gt;  loadings</span></span>
-<span><span class="co">#&gt;  External validation is recommended before clinical application</span></span></code></pre></div>
-<p><img src="jsurvival-plscox-comprehensive_files/figure-html/edge-few-predictors-1.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/edge-few-predictors-2.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/edge-few-predictors-3.png" alt="" width="672"><img src="jsurvival-plscox-comprehensive_files/figure-html/edge-few-predictors-4.png" alt="" width="672"></p>
+<span><span class="co">#&gt; character(0)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="minimal-output-no-plots-no-optional-tables">Minimal Output (no plots, no optional tables)<a class="anchor" aria-label="anchor" href="#minimal-output-no-plots-no-optional-tables"></a>
@@ -1713,7 +1328,7 @@ partial least squares regression in R. <em>J Stat Softw</em>.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

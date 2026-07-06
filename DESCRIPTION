@@ -289,10 +289,7 @@ Imports:
     torch,
     torchvision,
     logistf
-VignetteBuilder: 
-    knitr, 
-    tiff, 
-    quarto
+VignetteBuilder: knitr
 Remotes:
     jthomasmock/gtExtras,
     grantmcdermott/parttree,

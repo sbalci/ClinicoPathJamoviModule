@@ -1,0 +1,227 @@
+# Arc Diagram
+
+'Creates arc diagrams for network visualization using the arcdiagram
+package.'
+
+## Usage
+
+``` r
+jjarcdiagram(
+  data,
+  source,
+  target,
+  weight = NULL,
+  group = NULL,
+  analysisPreset = "custom",
+  showNodes = FALSE,
+  nodeSize = "fixed",
+  nodeSizeValue = 2,
+  sortNodes = "none",
+  sortDecreasing = FALSE,
+  horizontal = FALSE,
+  arcWidth = "fixed",
+  arcWidthValue = 1,
+  arcTransparency = 0.5,
+  directed = FALSE,
+  aggregateEdges = TRUE,
+  weightMode = "strength",
+  arcColorMode = "source",
+  colorByGroup = FALSE,
+  showStats = FALSE,
+  showLegend = FALSE,
+  labelSize = 0.8,
+  plotTitle = "",
+  showSummary = TRUE,
+  showAssumptions = TRUE,
+  showGlossary = FALSE
+)
+```
+
+## Arguments
+
+- data:
+
+  The data as a data frame.
+
+- source:
+
+  Starting entity in each relationship. Select the variable containing
+  the "from" nodes. Clinical Examples: • Gene regulatory networks:
+  Regulator gene (e.g., TP53, BRCA1) • Patient networks: First patient
+  in similarity pair (Patient_ID) • Disease co-occurrence: Primary
+  diagnosis (ICD10 code) • Protein interactions: Upstream protein •
+  Treatment pathways: Initial intervention
+
+- target:
+
+  Ending entity in each relationship. Select the variable containing the
+  "to" nodes. Clinical Examples: • Gene regulatory networks: Target gene
+  being regulated (e.g., CDK4, MYC) • Patient networks: Second patient
+  in similarity pair • Disease co-occurrence: Secondary diagnosis or
+  comorbidity • Protein interactions: Downstream protein • Treatment
+  pathways: Next intervention in sequence
+
+- weight:
+
+  Optional numeric measure of connection strength or importance.
+  Clinical Examples: • Gene networks: Correlation coefficient (0-1),
+  fold-change, or interaction score • Patient networks: Similarity score
+  (e.g., Jaccard index, cosine similarity) • Disease co-occurrence:
+  Number of co-occurrences or relative risk • Protein interactions:
+  Binding affinity (Kd) or confidence score • Treatment pathways:
+  Transition probability (0-1) Leave empty for unweighted networks (all
+  edges treated equally).
+
+- group:
+
+  Optional grouping variable for color-coding entities. Examples: Gene
+  families, patient subtypes, disease categories, or functional
+  classifications.
+
+- analysisPreset:
+
+  Choose a preset configuration optimized for specific clinical or
+  research scenarios. Gene networks focus on regulatory relationships,
+  patient networks on similarity patterns, pathway networks on
+  biological processes, and comorbidity networks on disease
+  associations.
+
+- showNodes:
+
+  Whether to display node points along the arc baseline. When enabled,
+  nodes are shown as circles at their sorted positions.
+
+- nodeSize:
+
+  Method for determining node sizes. 'Fixed' uses constant size, 'By
+  Degree' scales nodes proportionally to their connectivity (number of
+  connections).
+
+- nodeSizeValue:
+
+  Size of nodes when using fixed sizing, or base size multiplier when
+  using degree-based sizing. Range: 0.1 to 10.
+
+- sortNodes:
+
+  Order in which nodes are arranged along the baseline. 'None' preserves
+  original order, 'By Name' sorts alphabetically, 'By Group' clusters by
+  categories, 'By Degree' orders by connectivity.
+
+- sortDecreasing:
+
+  When sorting nodes, whether to use descending order. Only applies when
+  Sort Nodes is not 'None'.
+
+- horizontal:
+
+  Layout orientation of the arc diagram. When TRUE, nodes are arranged
+  horizontally with arcs above. When FALSE, nodes are arranged
+  vertically with arcs to the side.
+
+- arcWidth:
+
+  Method for determining arc line widths. 'Fixed' uses constant width,
+  'By Weight' scales arc thickness proportionally to edge weights.
+
+- arcWidthValue:
+
+  Width of arcs when using fixed sizing, or base width when using
+  weight-based sizing. Range: 0.1 to 5.
+
+- arcTransparency:
+
+  Transparency level of arc lines. 0 = fully transparent (invisible), 1
+  = fully opaque. Lower values reduce visual clutter in dense networks.
+
+- directed:
+
+  Whether to treat the network as directed (edges have direction from
+  source to target) or undirected (edges represent bidirectional
+  relationships).
+
+- aggregateEdges:
+
+  "RECOMMENDED: Combine multiple edges between the same nodes by summing
+  weights. Why it matters: Ensures network density \<= 1.0 (without
+  aggregation, density can exceed 1.0) Prevents inflated centrality
+  measures Provides accurate statistical summaries Example: If Gene
+  A→Gene B appears 3 times with weights (2, 3, 5), aggregation creates a
+  single edge with weight 10. When to disable: Only if you specifically
+  need to preserve parallel edges for specialized analyses."
+
+- weightMode:
+
+  "How edge weights should be interpreted for centrality calculations.
+  STRENGTH mode (default): Higher values = stronger connections Use for:
+  Correlations, interaction scores, similarity indices Examples: r=0.8
+  (strong), binding affinity score=90 DISTANCE mode: Higher values =
+  longer paths/weaker connections Use for: Costs, physical distances,
+  dissimilarity measures Examples: Euclidean distance, cost metrics Most
+  clinical/biological networks use STRENGTH mode."
+
+- arcColorMode:
+
+  How to color arcs when nodes are grouped. 'Source' colors arcs by
+  source node's group, 'Target' by target node's group, 'Gradient'
+  creates a gradient from source to target colors. Only applies when
+  Color Nodes by Group is enabled.
+
+- colorByGroup:
+
+  When a grouping variable is specified, whether to color-code nodes by
+  their group membership. Requires a group variable.
+
+- showStats:
+
+  Whether to display network statistics including number of nodes,
+  edges, density, and centrality measures.
+
+- showLegend:
+
+  Whether to display a color legend when nodes are colored by groups.
+  Only appears when grouping variable is specified and color by group is
+  enabled.
+
+- labelSize:
+
+  Size of node labels (text). 0.8 is standard size, values above 1.0
+  increase label size, below 1.0 decrease it. Range: 0.1 to 2.0.
+
+- plotTitle:
+
+  Optional title to display above the arc diagram. Leave empty for no
+  title.
+
+- showSummary:
+
+  Whether to display a natural-language summary paragraph suitable for
+  copying into reports or publications. Includes network overview, key
+  findings, and grouping information.
+
+- showAssumptions:
+
+  Whether to display detailed assumptions, interpretation guidelines,
+  and common pitfalls panel. Includes network requirements, centrality
+  measure explanations, and important notes for proper interpretation.
+
+- showGlossary:
+
+  Whether to display a glossary panel with definitions of key network
+  analysis terms (nodes, edges, centrality measures, density). Useful
+  for users new to network analysis.
+
+## Value
+
+A results object containing:
+
+|                          |     |     |     |     |                |
+|--------------------------|-----|-----|-----|-----|----------------|
+| `results$notices`        |     |     |     |     | a preformatted |
+| `results$instructions`   |     |     |     |     | a html         |
+| `results$todo`           |     |     |     |     | a html         |
+| `results$plot`           |     |     |     |     | an image       |
+| `results$networkStats`   |     |     |     |     | a html         |
+| `results$assumptions`    |     |     |     |     | a html         |
+| `results$reportSentence` |     |     |     |     | a html         |
+| `results$glossary`       |     |     |     |     | a html         |

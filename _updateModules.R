@@ -2041,7 +2041,21 @@ if (extended) {
       }
       if (webpage) {
         cat("  🌐 Building website...\n")
-        pkgdown::build_site()
+        # Build pkgdown with dev/agent root .md hidden, then restore. pkgdown
+        # renders every root .md, has no exclude option, ignores .Rbuildignore,
+        # and hard-fails on ones with pandoc-invalid YAML (e.g. TODO.md).
+        (function() {
+          .dev <- c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md")
+          .have <- .dev[file.exists(.dev)]
+          .stash <- tempfile("pkgdown-dev-"); dir.create(.stash)
+          for (.f in .have) file.rename(.f, file.path(.stash, .f))
+          on.exit({
+            for (.f in .have) if (file.exists(file.path(.stash, .f)))
+              file.rename(file.path(.stash, .f), .f)
+            unlink(.stash, recursive = TRUE)
+          }, add = TRUE)
+          pkgdown::build_site()
+        })()
       }
       cat("  ✅ jjstatsplot processing completed\n")
     }, error = function(e) {
@@ -2081,7 +2095,21 @@ if (extended) {
       }
       if (webpage) {
         cat("  🌐 Building website...\n")
-        pkgdown::build_site()
+        # Build pkgdown with dev/agent root .md hidden, then restore. pkgdown
+        # renders every root .md, has no exclude option, ignores .Rbuildignore,
+        # and hard-fails on ones with pandoc-invalid YAML (e.g. TODO.md).
+        (function() {
+          .dev <- c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md")
+          .have <- .dev[file.exists(.dev)]
+          .stash <- tempfile("pkgdown-dev-"); dir.create(.stash)
+          for (.f in .have) file.rename(.f, file.path(.stash, .f))
+          on.exit({
+            for (.f in .have) if (file.exists(file.path(.stash, .f)))
+              file.rename(file.path(.stash, .f), .f)
+            unlink(.stash, recursive = TRUE)
+          }, add = TRUE)
+          pkgdown::build_site()
+        })()
       }
       cat("  ✅ meddecide processing completed\n")
     }, error = function(e) {
@@ -2121,7 +2149,21 @@ if (extended) {
       }
       if (webpage) {
         cat("  🌐 Building website...\n")
-        pkgdown::build_site()
+        # Build pkgdown with dev/agent root .md hidden, then restore. pkgdown
+        # renders every root .md, has no exclude option, ignores .Rbuildignore,
+        # and hard-fails on ones with pandoc-invalid YAML (e.g. TODO.md).
+        (function() {
+          .dev <- c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md")
+          .have <- .dev[file.exists(.dev)]
+          .stash <- tempfile("pkgdown-dev-"); dir.create(.stash)
+          for (.f in .have) file.rename(.f, file.path(.stash, .f))
+          on.exit({
+            for (.f in .have) if (file.exists(file.path(.stash, .f)))
+              file.rename(file.path(.stash, .f), .f)
+            unlink(.stash, recursive = TRUE)
+          }, add = TRUE)
+          pkgdown::build_site()
+        })()
       }
       cat("  ✅ jsurvival processing completed\n")
     }, error = function(e) {
@@ -2161,7 +2203,21 @@ if (extended) {
       }
       if (webpage) {
         cat("  🌐 Building website...\n")
-        pkgdown::build_site()
+        # Build pkgdown with dev/agent root .md hidden, then restore. pkgdown
+        # renders every root .md, has no exclude option, ignores .Rbuildignore,
+        # and hard-fails on ones with pandoc-invalid YAML (e.g. TODO.md).
+        (function() {
+          .dev <- c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md")
+          .have <- .dev[file.exists(.dev)]
+          .stash <- tempfile("pkgdown-dev-"); dir.create(.stash)
+          for (.f in .have) file.rename(.f, file.path(.stash, .f))
+          on.exit({
+            for (.f in .have) if (file.exists(file.path(.stash, .f)))
+              file.rename(file.path(.stash, .f), .f)
+            unlink(.stash, recursive = TRUE)
+          }, add = TRUE)
+          pkgdown::build_site()
+        })()
       }
       cat("  ✅ ClinicoPathDescriptives processing completed\n")
     }, error = function(e) {
@@ -2200,7 +2256,21 @@ if (extended) {
       }
       if (webpage) {
         cat("  🌐 Building website...\n")
-        pkgdown::build_site()
+        # Build pkgdown with dev/agent root .md hidden, then restore. pkgdown
+        # renders every root .md, has no exclude option, ignores .Rbuildignore,
+        # and hard-fails on ones with pandoc-invalid YAML (e.g. TODO.md).
+        (function() {
+          .dev <- c("AGENTS.md", "CLAUDE.md", "GEMINI.md", "TODO.md")
+          .have <- .dev[file.exists(.dev)]
+          .stash <- tempfile("pkgdown-dev-"); dir.create(.stash)
+          for (.f in .have) file.rename(.f, file.path(.stash, .f))
+          on.exit({
+            for (.f in .have) if (file.exists(file.path(.stash, .f)))
+              file.rename(file.path(.stash, .f), .f)
+            unlink(.stash, recursive = TRUE)
+          }, add = TRUE)
+          pkgdown::build_site()
+        })()
       }
       cat("  ✅ OncoPath processing completed\n")
     }, error = function(e) {
