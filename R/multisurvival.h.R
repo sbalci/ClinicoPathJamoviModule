@@ -705,7 +705,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 options=options,
                 name="interactionExplanation",
                 title="Interaction Terms \u2014 how to read this",
-                visible="(interactions && showExplanations)",
+                visible="(length(interactions) > 0 && showExplanations)",
                 clearWith=list(
                     "interactions",
                     "explanatory",

@@ -105,7 +105,7 @@ items:
     - name: interactionExplanation
       title: 'Interaction Terms — how to read this'
       type: Html
-      visible: (interactions && showExplanations)
+      visible: (length(interactions) > 0 && showExplanations)
       clearWith:
         - interactions
         - explanatory
