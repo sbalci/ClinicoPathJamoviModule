@@ -1,0 +1,151 @@
+---
+name:  winratio
+title: Win Ratio for Hierarchical Composite Endpoints
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - group
+          - refLevel
+          - time1
+          - status1
+
+    - name: mainTable
+      title: Win Ratio Analysis
+      type: Table
+      visible: true
+      clearWith:
+          - group
+          - refLevel
+          - time1
+          - status1
+          - eventLevel1
+          - time2
+          - status2
+          - eventLevel2
+          - contEndpoint
+          - contDirection
+          - contTol
+          - conf_level
+          - ciMethod
+          - bootstrap_n
+      columns:
+          - name: statistic
+            title: ''
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+
+    - name: countsTable
+      title: Pairwise Comparison Counts
+      type: Table
+      visible: true
+      clearWith:
+          - group
+          - refLevel
+          - time1
+          - status1
+          - eventLevel1
+          - time2
+          - status2
+          - eventLevel2
+          - contEndpoint
+          - contDirection
+          - contTol
+      columns:
+          - name: label
+            title: ''
+            type: text
+          - name: count
+            title: Pairs
+            type: integer
+          - name: pct
+            title: '%'
+            type: number
+            format: pc
+
+    - name: componentsTable
+      title: Contribution by Endpoint
+      type: Table
+      visible: (showComponents)
+      clearWith:
+          - group
+          - refLevel
+          - time1
+          - status1
+          - time2
+          - status2
+          - contEndpoint
+          - contDirection
+          - contTol
+      columns:
+          - name: endpoint
+            title: Endpoint (priority order)
+            type: text
+          - name: wins
+            title: Wins
+            type: integer
+          - name: losses
+            title: Losses
+            type: integer
+          - name: decided
+            title: Pairs Decided
+            type: integer
+          - name: decided_pct
+            title: '% of Decided'
+            type: number
+            format: pc
+
+    - name: plot
+      title: Win / Loss / Tie Composition
+      type: Image
+      width: 500
+      height: 300
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - group
+          - refLevel
+          - time1
+          - status1
+          - time2
+          - status2
+          - contEndpoint
+          - contDirection
+          - contTol
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - pocock2012winratio
+    - dong2016winratio
+    - ClinicoPathJamoviModule
+    - glue
+    - ggplot2
+    - scales
+...

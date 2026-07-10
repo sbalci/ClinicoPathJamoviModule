@@ -633,7 +633,7 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             super$initialize(
                 package = "ClinicoPath",
                 name = "diagnosticmeta",
-                version = c(0,0,47),
+                version = c(0,0,5),
                 options = options,
                 results = diagnosticmetaResults$new(options=options),
                 data = data,

@@ -119,11 +119,20 @@ test_that(".interactionModeratorInfo identifies focal, moderator, categorical", 
   expect_true(info$twoway)
   expect_true(info$categorical_moderator)
 
-  info2 <- .interactionModeratorInfo(c("arm", "age"), d)   # continuous moderator
-  expect_false(info2$categorical_moderator)
+  info2 <- .interactionModeratorInfo(c("arm","age"), d)   # continuous 2nd -> swap to arm moderator
+  expect_true(info2$categorical_moderator)
+  expect_true(info2$swapped)
+  expect_equal(info2$moderator, "arm")
+  expect_equal(info2$focal, "age")
 
   info3 <- .interactionModeratorInfo(c("arm", "bio", "age"), d)  # 3-way
   expect_false(info3$twoway)
+})
+
+test_that(".interactionModeratorInfo: both-continuous term has no categorical moderator", {
+  d <- data.frame(x = rnorm(20), y = rnorm(20))
+  info <- .interactionModeratorInfo(c("x","y"), d)
+  expect_false(info$categorical_moderator)
 })
 
 test_that(".interactionTestTable extracts interaction-coefficient HRs matching coxph", {

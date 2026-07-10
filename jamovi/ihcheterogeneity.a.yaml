@@ -3,7 +3,7 @@ name: ihcheterogeneity
 title: IHC Heterogeneity Analysis
 menuGroup: OncoPath
 menuSubgroup: IHC Analysis
-version: '0.0.47'
+version: '0.0.5'
 jas: '1.2'
 
 options:

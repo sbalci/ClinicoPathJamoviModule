@@ -4,7 +4,7 @@ title: Clinical ROC Analysis
 menuGroup: meddecide
 menuSubgroup: ROC
 menuSubtitle: "Clinical ROC analysis with diagnostic metrics and optimal cutoffs"
-version: '0.0.47'
+version: '0.0.5'
 jas: '1.2'
 
 description:

@@ -368,6 +368,17 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
       .noticeList = list(),
 
+      # Per-run compute caches. .cleandata() is invoked ~25x and .cox_model()
+      # ~15x within a single .run(); each .cox_model() call re-fits Cox (and,
+      # for competing risks, re-expands the dataset via survival::finegray).
+      # These caches ensure each heavy computation runs at most once per run.
+      # They are reset at the top of .run() via .resetComputeCaches() so a
+      # re-run with changed options recomputes rather than serving stale results.
+      .dataCache = NULL,
+      .dataComputed = FALSE,
+      .coxCache = NULL,
+      .coxComputed = FALSE,
+
       .addNotice = function(type, title, content) {
           private$.noticeList[[length(private$.noticeList) + 1]] <- list(
               type = type, title = title, content = content
@@ -434,6 +445,26 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results[[output_name]]$setVisible(TRUE)
       },
 
+      # Reset the per-run compute caches so a re-run recomputes cleaned data and
+      # the Cox model with the current options. Called at the top of .run().
+      .resetComputeCaches = function() {
+          private$.dataCache <- NULL
+          private$.dataComputed <- FALSE
+          private$.coxCache <- NULL
+          private$.coxComputed <- FALSE
+      },
+
+      # Clear the four HTML notice outputs at the start of each run. .addHtmlMessage
+      # appends to existing content, and these items have no clearWith in .r.yaml,
+      # so without this reset a notice that no longer applies (e.g. a low-event
+      # warning after the user adds data) would persist stale across re-runs.
+      .initializeMessageOutputs = function() {
+          for (nm in c("errors", "strongWarnings", "warnings", "infoMessages")) {
+              self$results[[nm]]$setContent("")
+              self$results[[nm]]$setVisible(FALSE)
+          }
+      },
+
       # Populate the interaction (effect-modification) test table and the
       # within-subgroup hazard-ratio table from a fitted Cox model. Called from
       # .run() only when interaction terms are requested. Pure numeric helpers
@@ -441,6 +472,67 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .populateInteractionTables = function(cox_model, cox_formula, data,
                                             real_interactions, conf_level,
                                             is_finegray) {
+        # --- In-app explanatory panel (rendered once per run) ---
+        # Base explanation (always shown). The continuous-variable caveat is
+        # appended AFTER the subgroup loop, and only when the within-subgroup
+        # table actually comes out empty (see below), so it does not clutter the
+        # panel when subgroup HRs are present.
+        interaction_expl_base <- paste0(
+          "<div style='font-size:13px;line-height:1.55;'>",
+          "<p><b>Interaction (Effect-Modification) Test.</b> One row per crossed term. ",
+          "The HR is the ratio of one variable's hazard ratio between the levels of the other; ",
+          "a small p indicates the effect of one variable <b>depends on</b> the other ",
+          "(effect modification &mdash; the signature of a predictive biomarker). HR = 1 means no modification.</p>",
+          "<p><b>Within-Subgroup Hazard Ratios.</b> The focal variable's HR <i>within each level of the categorical moderator</i>. ",
+          "For a term A&times;B the subgroups are formed by whichever variable is categorical (the moderator), and the HR shown is ",
+          "the other variable's effect within each subgroup. These are read from the single interaction model by relevel-and-refit &mdash; ",
+          "the model's implied conditional effects. They pool information across subgroups, so the confidence intervals are typically ",
+          "narrower (and p-values smaller) than fitting a separate Cox model within each subgroup; the point estimates are nearly identical.</p>",
+          "<p><b>Are the subgroup HRs from the interaction model, or from separate per-subgroup fits?</b> ",
+          "Directly from the single interaction model &mdash; not separate subgroup Cox fits. For each moderator level the module ",
+          "relevels the moderator so that level is the reference and refits the <i>same</i> full model ",
+          "(Surv ~ focal &times; moderator, plus any other covariates you included). Releveling changes only the parameterization, ",
+          "not the fit &mdash; so the focal main-effect coefficient in the releveled model is the focal effect <i>within</i> that ",
+          "moderator level: HR = exp(coef), with CI and p taken from that model's variance&ndash;covariance matrix. This is equivalent ",
+          "to reading &beta;(focal) and &beta;(focal) + &beta;(focal:moderator) off the one interaction model &mdash; releveling is ",
+          "simply how each conditional effect is read, with the correct standard error, directly.</p>",
+          "<p><b>Why do the subgroup HRs nearly match but the CIs and p-values differ from separate within-subgroup Cox models?</b> ",
+          "This is the expected, core statistical distinction between one interaction model and per-subgroup fits:</p>",
+          "<table style='border-collapse:collapse;font-size:12px;margin:6px 0;'>",
+          "<tr style='background:#f0f0f0;'>",
+          "<th style='border:1px solid #ccc;padding:3px 8px;text-align:left;'></th>",
+          "<th style='border:1px solid #ccc;padding:3px 8px;text-align:left;'>Interaction model (this module)</th>",
+          "<th style='border:1px solid #ccc;padding:3px 8px;text-align:left;'>Separate Cox per subgroup</th></tr>",
+          "<tr><td style='border:1px solid #ccc;padding:3px 8px;'><b>Baseline hazard</b></td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>common across moderator levels</td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>each subgroup has its own</td></tr>",
+          "<tr><td style='border:1px solid #ccc;padding:3px 8px;'><b>Other covariates' effects</b></td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>assumed common (pooled)</td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>re-estimated per subgroup</td></tr>",
+          "<tr><td style='border:1px solid #ccc;padding:3px 8px;'><b>Standard errors</b></td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>pool information across subgroups</td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>subgroup data only</td></tr>",
+          "<tr><td style='border:1px solid #ccc;padding:3px 8px;'><b>Efficiency</b></td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>higher (narrower CI, more power)</td>",
+          "<td style='border:1px solid #ccc;padding:3px 8px;'>lower (wider CI)</td></tr>",
+          "</table>",
+          "<p><b>HRs nearly identical:</b> with only focal &times; moderator in the model, they differ only because the interaction ",
+          "model uses a common baseline hazard across moderator levels while a subgroup-only fit uses a moderator-specific baseline ",
+          "(Cox's risk sets differ). With other covariates included, the small gap also reflects the interaction model's assumption of ",
+          "common covariate effects. Hence &quot;very close but not exactly equal.&quot;</p>",
+          "<p><b>CIs and p-values differ:</b> the interaction model borrows strength across both subgroups for the variance, giving ",
+          "tighter intervals and smaller p; a separate fit sees only that subgroup's data, giving wider intervals. Both are valid but ",
+          "answer subtly different questions &mdash; the interaction-model (conditional) subgroup effect is the more efficient estimand ",
+          "preferred for predictive-biomarker subgroup analysis, and is what this table reports (an implied conditional effect of the ",
+          "single interaction model, not an independent subgroup fit).</p>",
+          "<p><b>A note on sample size when comparing to a manual per-subgroup fit:</b> this analysis uses complete cases across ",
+          "<i>all</i> selected variables, whereas fitting one marker at a time (e.g. per-marker <code>na.omit()</code>) uses that ",
+          "marker's own complete-case set. To compare a single subgroup head-to-head, match the row set &mdash; analyse that one ",
+          "marker with the moderator &mdash; otherwise the N and event count (and therefore the CI and p) can differ for that reason ",
+          "alone.</p>",
+          "</div>")
+        self$results$interactionExplanation$setContent(interaction_expl_base)
+
         # --- Interaction (effect-modification) test table ---
         itab <- tryCatch(
           .interactionTestTable(cox_model, conf_level = conf_level),
@@ -472,11 +564,13 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         rowKey <- 0
         skipped_continuous <- FALSE
         skipped_highorder <- FALSE
+        any_swapped <- FALSE
         nonconverged <- character(0)
         for (term in real_interactions) {
           info <- .interactionModeratorInfo(term, data)
           if (!isTRUE(info$twoway)) { skipped_highorder <- TRUE; next }
           if (!isTRUE(info$categorical_moderator)) { skipped_continuous <- TRUE; next }
+          if (isTRUE(info$swapped)) any_swapped <- TRUE
           sub <- tryCatch(
             .computeSubgroupHRs(cox_formula, data,
                                 focal = info$focal, moderator = info$moderator,
@@ -500,14 +594,39 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
               nonconverged <- c(nonconverged, paste0(sub$interaction[i], " [", sub$moderator_level[i], "]"))
           }
         }
+        # Explain WHY the within-subgroup table is empty, in the explanation
+        # panel, ONLY when it actually came out empty (rowKey == 0) for a known
+        # structural reason (continuous moderator or higher-order term). When
+        # subgroup HRs ARE shown this would be misleading, so it is suppressed.
+        if (rowKey == 0 && (isTRUE(skipped_continuous) || isTRUE(skipped_highorder))) {
+          self$results$interactionExplanation$setContent(paste0(
+            interaction_expl_base,
+            "<div style='font-size:13px;line-height:1.55;'>",
+            "<p style='color:#8a5a00;'><b>Why is this table empty?</b> ",
+            "The interaction is read as <i>focal : moderator</i> &mdash; the first ",
+            "variable is the focal effect and the second is the moderator that ",
+            "defines the subgroups (if only the first variable is categorical, the ",
+            "two are swapped so the categorical variable becomes the moderator). ",
+            "Subgroup HRs are computed only when the term is <b>2-way</b> and the ",
+            "moderator is <b>categorical</b>. Here both variables are continuous, or ",
+            "the term is higher-order, so no discrete subgroups can be formed &mdash; ",
+            "only the interaction coefficient in the table above is reported. Include ",
+            "a categorical variable in a 2-way interaction to see subgroup HRs.</p></div>"))
+        }
+
         notes <- character(0)
         if (length(nonconverged) > 0)
           notes <- c(notes, paste0("* Model did not converge for: ",
                                    paste(unique(nonconverged), collapse = "; "),
                                    " (likely small-sample separation); interpret these HRs with extreme caution."))
-        if (skipped_continuous)
-          notes <- c(notes, "Interactions with a continuous moderator are shown as a coefficient in the table above; per-subgroup HRs require a categorical moderator.")
-        if (skipped_highorder)
+        # Non-empty table but a continuous-moderator term was skipped: note it as
+        # a footnote. The fully-empty case is covered by the panel caveat above,
+        # so we do not repeat it here.
+        if (isTRUE(skipped_continuous) && rowKey > 0)
+          notes <- c(notes, "Interactions with a continuous moderator are shown as a coefficient in the table above; per-subgroup HRs require a categorical moderator. If both variables in a term are continuous, no subgroups can be formed.")
+        if (any_swapped)
+          notes <- c(notes, "Subgroups were defined by the categorical variable in each term.")
+        if (isTRUE(skipped_highorder) && rowKey > 0)
           notes <- c(notes, "Within-subgroup HRs are computed for 2-way interactions only.")
         if (length(notes) > 0)
           sg$setNote("sgnote", paste(notes, collapse = " "))
@@ -1767,6 +1886,16 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # Clean Data ----
       ,
       .cleandata = function() {
+        # Cached wrapper: compute the cleaned/labelled data once per run.
+        # All ~25 call sites hit this; the heavy work lives in .cleandata_impl().
+        if (!private$.dataComputed) {
+          private$.dataCache <- private$.cleandata_impl()
+          private$.dataComputed <- TRUE
+        }
+        private$.dataCache
+      }
+      ,
+      .cleandata_impl = function() {
         ## Common Definitions ----
 
         contin <- c("integer", "numeric", "double")
@@ -2017,6 +2146,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             ml_time <- 0
           # }
 
+          # Optimism-corrected discrimination (bootstrap C-index), if requested
+          private$.calculateOptimismCIndex()
+
           # Generate clinical interpretation summary
           private$.generateAndDisplayClinicalSummary(cleaneddata)
 
@@ -2179,6 +2311,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
       .run = function() {
         private$.noticeList <- list()
+        private$.resetComputeCaches()
+        private$.initializeMessageOutputs()
         # Modular execution using helper functions
         if (!private$.validateAndPrepare()) {
           return()
@@ -2204,9 +2338,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
           private$.addHtmlMessage(
             "info",
-            "Analysis complete",
+            .("Analysis complete"),
             sprintf(
-              "Analysis completed successfully using %d observations with %d events (%.1f%% event rate) over %.1f %s median follow-up.",
+              .("Analysis completed successfully using %d observations with %d events (%.1f%% event rate) over %.1f %s median follow-up."),
               n_obs, n_events, event_rate, median_followup, time_unit
             )
           )
@@ -2224,6 +2358,19 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # cox model  ----
       ,
       .cox_model = function() {
+        # Cached wrapper: fit the Cox model once per run. Side effects (clinical
+        # notices, interaction-table population) therefore emit exactly once.
+        # The heavy fit (incl. Fine-Gray dataset expansion) lives in
+        # .cox_model_impl(). NULL (validation failure) is also cached so the
+        # failure path and its notices are not re-emitted within a run.
+        if (!private$.coxComputed) {
+          private$.coxCache <- private$.cox_model_impl()
+          private$.coxComputed <- TRUE
+        }
+        private$.coxCache
+      }
+      ,
+      .cox_model_impl = function() {
         cleaneddata <- private$.cleandata()
 
         name1time <- cleaneddata$name1time
@@ -2238,8 +2385,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           dropped <- sum(!complete.cases(mydata[, c("mytime", "myoutcome")]))
           private$.addHtmlMessage(
             "warning",
-            "Missing time/outcome values",
-            sprintf("Missing time/outcome values detected; %d row(s) may be excluded from the Cox model.", dropped)
+            .("Missing time/outcome values"),
+            sprintf(.("Missing time/outcome values detected; %d row(s) may be excluded from the Cox model."), dropped)
           )
         }
         # Safety check: Negative times should already be caught in .definemytime()
@@ -2248,9 +2395,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           n_negative <- sum(mydata$mytime < 0, na.rm = TRUE)
           private$.addHtmlMessage(
             "error",
-            "Negative survival times detected",
+            .("Negative survival times detected"),
             sprintf(
-              "%d observation(s) have negative time values. To fix: (1) if using 'Elapsed Time' directly, verify all values are positive; (2) if calculating from dates, check diagnosis date precedes follow-up date; (3) review data for entry errors; (4) consider excluding problematic observations.",
+              .("%d observation(s) have negative time values. To fix: (1) if using 'Elapsed Time' directly, verify all values are positive; (2) if calculating from dates, check diagnosis date precedes follow-up date; (3) review data for entry errors; (4) consider excluding problematic observations."),
               n_negative
             )
           )
@@ -2269,9 +2416,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (n_events < 10) {
           private$.addHtmlMessage(
             "error",
-            "Critically low event count",
+            .("Critically low event count"),
             sprintf(
-              "Only %d events detected. Cox regression requires at least 10 events for reliable estimation. Recommendations: (1) collect more data, (2) extend follow-up period, (3) use descriptive methods (Kaplan-Meier) instead of regression, or (4) pool event types if clinically appropriate.",
+              .("Only %d events detected. Cox regression requires at least 10 events for reliable estimation. Recommendations: (1) collect more data, (2) extend follow-up period, (3) use descriptive methods (Kaplan-Meier) instead of regression, or (4) pool event types if clinically appropriate."),
               n_events
             )
           )
@@ -2282,9 +2429,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (n_events >= 10 && n_events < 20) {
           private$.addHtmlMessage(
             "strongWarning",
-            "Low event count",
+            .("Low event count"),
             sprintf(
-              "Low event count (%d events). Results may be unstable; confidence intervals may be unreliable; small-sample bias likely. Recommendations: (1) interpret results cautiously and report exact p-values, (2) consider Firth's penalized likelihood (coxphf package) for bias reduction, (3) validate findings externally, or (4) collect additional data if feasible.",
+              .("Low event count (%d events). Results may be unstable; confidence intervals may be unreliable; small-sample bias likely. Recommendations: (1) interpret results cautiously and report exact p-values, (2) consider Firth's penalized likelihood (coxphf package) for bias reduction, (3) validate findings externally, or (4) collect additional data if feasible."),
               n_events
             )
           )
@@ -2294,9 +2441,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (n_events >= 20 && n_events < 50) {
           private$.addHtmlMessage(
             "warning",
-            "Moderate event count",
+            .("Moderate event count"),
             sprintf(
-              "Moderate event count (%d events). Statistical power may be limited for detecting small effects. Current EPV (events per variable) ratio: %.1f. Consider limiting model complexity or using variable selection methods.",
+              .("Moderate event count (%d events). Statistical power may be limited for detecting small effects. Current EPV (events per variable) ratio: %.1f. Consider limiting model complexity or using variable selection methods."),
               n_events, epv
             )
           )
@@ -2307,9 +2454,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (epv < 10 && n_events >= 50 && n_vars > 0) {
           private$.addHtmlMessage(
             "warning",
-            "Low events-per-variable ratio",
+            .("Low events-per-variable ratio"),
             sprintf(
-              "Low events-per-variable ratio (EPV = %.1f with %d predictors, %d events). Recommended EPV \u2265 10 to minimize overfitting. Recommendations: (1) reduce number of predictors, (2) use variable selection (backward/forward/stepwise), (3) apply penalized regression (LASSO/Ridge), or (4) use clinical knowledge to prioritize key variables.",
+              .("Low events-per-variable ratio (EPV = %.1f with %d predictors, %d events). Recommended EPV \u2265 10 to minimize overfitting. Recommendations: (1) reduce number of predictors, (2) use variable selection (backward/forward/stepwise), (3) apply penalized regression (LASSO/Ridge), or (4) use clinical knowledge to prioritize key variables."),
               epv, n_vars, n_events
             )
           )
@@ -2481,8 +2628,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
             if (is.factor(mydata$myoutcome) && !"Event" %in% levels(mydata$myoutcome)) {
               private$.addHtmlMessage(
                 "error",
-                "Invalid competing-risk coding",
-                "Competing risk mode requires an event level named 'Event' in the outcome variable. Adjust coding before running Fine-Gray."
+                .("Invalid competing-risk coding"),
+                .("Competing risk mode requires an event level named 'Event' in the outcome variable. Adjust coding before running Fine-Gray.")
               )
               return(NULL)
             }
@@ -2536,8 +2683,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$multievent && self$options$analysistype == 'compete') {
           private$.addHtmlMessage(
             "info",
-            "Competing-risk model",
-            "Competing-risk mode fits a Fine-Gray subdistribution model; HRs reflect subdistribution hazards and are not directly comparable to cause-specific Cox HRs."
+            .("Competing-risk model"),
+            .("Competing-risk mode fits a Fine-Gray subdistribution model; HRs reflect subdistribution hazards and are not directly comparable to cause-specific Cox HRs.")
           )
         }
 
@@ -2557,9 +2704,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (!is.na(epv_info$epv) && epv_info$epv < 10 && epv_info$coefficients > 0) {
           private$.addHtmlMessage(
             "warning",
-            "Low events-per-variable (post-fit)",
+            .("Low events-per-variable (post-fit)"),
             sprintf(
-              "Low events-per-variable: this Cox model fits %d coefficient(s) on %d event(s) (EPV = %.1f, below the conventional minimum of 10). Hazard-ratio estimates and CIs may be unstable. Consider: (i) reducing covariates; (ii) penalised Cox (lassocox / adaptivelasso); (iii) bootstrap-optimism correction (survivalvalidation).",
+              .("Low events-per-variable: this Cox model fits %d coefficient(s) on %d event(s) (EPV = %.1f, below the conventional minimum of 10). Hazard-ratio estimates and CIs may be unstable. Consider: (i) reducing covariates; (ii) penalised Cox (lassocox / adaptivelasso); (iii) bootstrap-optimism correction (survivalvalidation)."),
               epv_info$coefficients, epv_info$events, epv_info$epv
             )
           )
@@ -2572,8 +2719,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           if (any(ph_p[!is.na(ph_p)] < 0.05)) {
             private$.addHtmlMessage(
               "warning",
-              "Proportional hazards violation",
-              "Proportional hazards test (cox.zph) indicates potential violations (p < 0.05) for one or more terms. Interpret HRs with caution or consider time-varying effects/stratification."
+              .("Proportional hazards violation"),
+              .("Proportional hazards test (cox.zph) indicates potential violations (p < 0.05) for one or more terms. Interpret HRs with caution or consider time-varying effects/stratification.")
             )
           }
         }
@@ -2612,8 +2759,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (is.factor(mydata[["myoutcome"]]) && "Competing" %in% levels(mydata[["myoutcome"]])) {
           private$.addHtmlMessage(
             "info",
-            "Person-time counting strategy",
-            "Person-time rates count only the event-of-interest level ('Event'); competing events are treated as censored for rate calculations."
+            .("Person-time counting strategy"),
+            .("Person-time rates count only the event-of-interest level ('Event'); competing events are treated as censored for rate calculations.")
           )
         }
 
@@ -2831,8 +2978,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (self$options$multievent && self$options$analysistype == "compete") {
           private$.addHtmlMessage(
             "info",
-            "AFT not run under competing risks",
-            "AFT models are not calculated when competing-risk (Fine-Gray) analysis is selected."
+            .("AFT not run under competing risks"),
+            .("AFT models are not calculated when competing-risk (Fine-Gray) analysis is selected.")
           )
           return()
         }
@@ -2854,8 +3001,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
             private$.addHtmlMessage(
               "error",
-              "AFT outcome error",
-              "Outcome with more than two levels is not supported for AFT models. Please select a binary outcome variable or disable competing risk analysis for AFT."
+              .("AFT outcome error"),
+              .("Outcome with more than two levels is not supported for AFT models. Please select a binary outcome variable or disable competing risk analysis for AFT.")
             )
             return()
           }
@@ -2889,8 +3036,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         }, error = function(e) {
           private$.addHtmlMessage(
             "error",
-            "AFT model fitting error",
-            paste0(e$message, ". Check data quality, ensure adequate events, and verify distribution choice is appropriate for your data.")
+            .("AFT model fitting error"),
+            paste0(e$message, .(". Check data quality, ensure adequate events, and verify distribution choice is appropriate for your data."))
           )
           return(NULL)
         })
@@ -3711,6 +3858,62 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         return(html_content)
       }
 
+      # Bootstrap optimism-corrected Harrell's C-index (discrimination). Delegates
+      # the numeric work to the pure .multisurvivalOptimismCIndex() helper in
+      # R/multisurvival-metrics.R. Skipped for competing-risks (Fine-Gray)
+      # models, where a naive bootstrap of the weighted expanded data is not a
+      # standard optimism correction.
+      ,
+      .calculateOptimismCIndex = function() {
+        if (!isTRUE(self$options$ci_optimism)) return()
+
+        tbl <- self$results$cindexValidation
+
+        is_cr <- isTRUE(self$options$multievent) &&
+                 identical(self$options$analysistype, 'compete')
+        if (is_cr) {
+          tbl$setNote("cr", .("Optimism-corrected C-index is not computed for competing-risks (Fine-Gray) models."))
+          return()
+        }
+
+        cox_model <- private$.cox_model()
+        if (is.null(cox_model)) return()
+
+        res <- tryCatch({
+          cleaneddata <- private$.cleandata()
+          mydata <- cleaneddata$cleanData
+          status <- .eventIndicator(mydata$myoutcome)
+          B <- self$options$ci_optimism_boot
+          if (is.null(B) || is.na(B)) B <- 150L
+          .multisurvivalOptimismCIndex(cox_model, mydata, status, B = B)
+        }, error = function(e) NULL)
+
+        if (is.null(res)) {
+          tbl$setNote("na", .("Optimism-corrected C-index could not be computed (too few events or unstable bootstrap fits)."))
+          return()
+        }
+
+        tbl$addRow(rowKey = "apparent", values = list(
+          metric = .("Apparent C-index"),
+          value = res$apparent,
+          detail = .("In-sample (optimistic)")
+        ))
+        tbl$addRow(rowKey = "optimism", values = list(
+          metric = .("Optimism (bootstrap)"),
+          value = res$optimism,
+          detail = jmvcore::format(.("Mean over {b} resamples"), b = res$n_boot)
+        ))
+        tbl$addRow(rowKey = "corrected", values = list(
+          metric = .("Optimism-corrected C-index"),
+          value = res$corrected,
+          detail = .("Bias-corrected estimate")
+        ))
+        tbl$setNote(
+          "method",
+          .("Harrell's bootstrap optimism correction; corrected C = apparent C minus mean bootstrap optimism.")
+        )
+      }
+
 
       # coxph Proportional Hazards Assumption  ----
       ,
@@ -4419,9 +4622,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         if (is.na(risk_variance) || risk_variance < 1e-10) {
           private$.addHtmlMessage(
             "warning",
-            "Insufficient risk score variation",
+            .("Insufficient risk score variation"),
             sprintf(
-              "All patients have nearly identical risk scores (variance = %.2e). This occurs when covariate patterns are very similar across patients, model coefficients are very small, or predictors carry limited prognostic information. Recommendations: review predictor selection for discriminative variables, consider simpler risk stratification approaches, or interpret C-index instead of risk groups.",
+              .("All patients have nearly identical risk scores (variance = %.2e). This occurs when covariate patterns are very similar across patients, model coefficients are very small, or predictors carry limited prognostic information. Recommendations: review predictor selection for discriminative variables, consider simpler risk stratification approaches, or interpret C-index instead of risk groups."),
               risk_variance
             )
           )
@@ -4802,8 +5005,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         if (is.null(adj_var) || length(adj_var) == 0 || !(adj_var %in% names(data))) {
           private$.addHtmlMessage(
             "warning",
-            "Adjustment variable required",
-            "Adjusted survival curves require selecting an adjustment variable; no curves were produced."
+            .("Adjustment variable required"),
+            .("Adjusted survival curves require selecting an adjustment variable; no curves were produced.")
           )
           return(NULL)
         }
@@ -4820,8 +5023,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         if (self$options$multievent && self$options$analysistype == "compete") {
           private$.addHtmlMessage(
             "info",
-            "Adjusted curves use Fine-Gray",
-            "Adjusted survival curves are based on the Fine-Gray subdistribution model; curves reflect subdistribution survival, not cause-specific survival."
+            .("Adjusted curves use Fine-Gray"),
+            .("Adjusted survival curves are based on the Fine-Gray subdistribution model; curves reflect subdistribution survival, not cause-specific survival.")
           )
         }
 
@@ -4830,8 +5033,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         if (length(levels) < 2) {
           private$.addHtmlMessage(
             "warning",
-            "Adjustment variable needs \u22652 levels",
-            "Adjustment variable must have at least two levels to compute adjusted survival curves."
+            .("Adjustment variable needs \u22652 levels"),
+            .("Adjustment variable must have at least two levels to compute adjusted survival curves.")
           )
           return(NULL)
         }
@@ -6356,8 +6559,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     } else {
       private$.addHtmlMessage(
         "warning",
-        "Model selection requires binary outcome",
-        "Model selection requires a binary outcome; no selection performed. Consider using cause-specific coding for competing risks."
+        .("Model selection requires binary outcome"),
+        .("Model selection requires a binary outcome; no selection performed. Consider using cause-specific coding for competing risks.")
       )
       return(NULL)
     }
@@ -6811,8 +7014,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         }, error = function(e) {
           private$.addHtmlMessage(
             "error",
-            "Survival decision tree error",
-            paste0(e$message, ". Recommendations: (1) check sufficient data for tree building, (2) try reducing minimum node size, or (3) ensure variables contain valid data.")
+            .("Survival decision tree error"),
+            paste0(e$message, .(". Recommendations: (1) check sufficient data for tree building, (2) try reducing minimum node size, or (3) ensure variables contain valid data."))
           )
           return(NULL)
         })

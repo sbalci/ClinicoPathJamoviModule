@@ -418,7 +418,7 @@ misclassificationbiasBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             super$initialize(
                 package = "ClinicoPath",
                 name = "misclassificationbias",
-                version = c(0,0,46),
+                version = c(0,0,5),
                 options = options,
                 results = misclassificationbiasResults$new(options=options),
                 data = data,

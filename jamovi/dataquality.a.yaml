@@ -3,7 +3,7 @@ name: dataquality
 title: Multi-Variable Visual Quality
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Data Quality
-version: '0.0.47'
+version: '0.0.5'
 jas: '1.2'
 
 description:

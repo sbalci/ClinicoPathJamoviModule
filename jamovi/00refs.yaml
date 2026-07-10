@@ -1,5 +1,29 @@
 ---
 refs:
+    pocock2012winratio:
+        type: 'article'
+        author: Pocock, S. J., Ariti, C. A., Collier, T. J., & Wang, D.
+        year: 2012
+        title: "The win ratio: a new approach to the analysis of composite endpoints in clinical trials based on clinical priorities"
+        publisher: 'European Heart Journal'
+        volume: 33
+        issue: 2
+        pages: 176-182
+        doi: 10.1093/eurheartj/ehr352
+        url: https://pubmed.ncbi.nlm.nih.gov/21900289/
+
+    dong2016winratio:
+        type: 'article'
+        author: Dong, G., Li, D., Ballerstedt, S., & Vandemeulebroecke, M.
+        year: 2016
+        title: "A generalized analytic solution to the win ratio to analyze a composite endpoint considering the clinical importance order among components"
+        publisher: 'Pharmaceutical Statistics'
+        volume: 15
+        issue: 5
+        pages: 430-437
+        doi: 10.1002/pst.1763
+        url: https://pubmed.ncbi.nlm.nih.gov/27435905/
+
     willrogers1985:
         type: 'article'
         author: Feinstein, A. R., Sosin, D. M., & Wells, C. K.

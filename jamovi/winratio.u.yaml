@@ -1,0 +1,105 @@
+title: Win Ratio for Hierarchical Composite Endpoints
+name: winratio
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Group / Treatment Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: 'Primary Endpoint: Time'
+        children:
+          - type: VariablesListBox
+            name: time1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: 'Primary Endpoint: Event'
+        children:
+          - type: VariablesListBox
+            name: status1
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: 'Secondary Endpoint: Time (optional)'
+        children:
+          - type: VariablesListBox
+            name: time2
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: 'Secondary Endpoint: Event (optional)'
+        children:
+          - type: VariablesListBox
+            name: status2
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: 'Continuous Endpoint (optional tiebreaker)'
+        children:
+          - type: VariablesListBox
+            name: contEndpoint
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: refLevel
+        label: Reference (Control) Level
+      - type: LevelSelector
+        name: eventLevel1
+        label: Primary Event Level
+      - type: LevelSelector
+        name: eventLevel2
+        label: Secondary Event Level
+  - type: CollapseBox
+    label: Continuous Endpoint Options
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: ComboBox
+        name: contDirection
+      - type: TextBox
+        name: contTol
+        format: number
+  - type: CollapseBox
+    label: Inference Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: TextBox
+        name: conf_level
+        format: number
+      - type: ComboBox
+        name: ciMethod
+      - type: TextBox
+        name: bootstrap_n
+        format: number
+        enable: (ciMethod:bootstrap)
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showWinOdds
+      - type: CheckBox
+        name: showNetBenefit
+      - type: CheckBox
+        name: showComponents
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

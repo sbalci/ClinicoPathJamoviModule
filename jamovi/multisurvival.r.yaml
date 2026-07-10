@@ -102,6 +102,16 @@ items:
           - multievent
           # - use_modelSelection
 
+    - name: interactionExplanation
+      title: 'Interaction Terms — how to read this'
+      type: Html
+      visible: (interactions && showExplanations)
+      clearWith:
+        - interactions
+        - explanatory
+        - contexpl
+        - showExplanations
+
     - name: interactionTest
       title: 'Interaction (Effect-Modification) Test'
       type: Table
@@ -766,6 +776,41 @@ items:
           - contexpl
           - numRiskGroups
           # - use_modelSelection
+
+    - name: cindexValidation
+      title: Optimism-Corrected Discrimination (Harrell's C-index)
+      type: Table
+      visible: (ci_optimism)
+      rows: 0
+      columns:
+        - name: metric
+          title: Metric
+          type: text
+        - name: value
+          title: C-index
+          type: number
+          format: zto,dp:3
+        - name: detail
+          title: ''
+          type: text
+      clearWith:
+          - ci_optimism
+          - ci_optimism_boot
+          - outcome
+          - outcomeLevel
+          - elapsedtime
+          - explanatory
+          - contexpl
+          - multievent
+          - analysistype
+          - tint
+          - dxdate
+          - fudate
+          - uselandmark
+          - landmark
+          - use_stratify
+          - stratvar
+          - interactions
 
 
 # Startification

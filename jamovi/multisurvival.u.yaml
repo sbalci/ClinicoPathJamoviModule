@@ -272,6 +272,18 @@ children:
                       - type: Output
                         name: addRiskGroup
                         enable: (calculateRiskScore)
+              - type: Label
+                label: Model Discrimination
+                children:
+                  - type: LayoutBox
+                    margin: large
+                    children:
+                      - type: CheckBox
+                        name: ci_optimism
+                      - type: TextBox
+                        name: ci_optimism_boot
+                        format: number
+                        enable: (ci_optimism)
   - type: CollapseBox
     label: Adjusted Survival Analysis
     collapsed: true

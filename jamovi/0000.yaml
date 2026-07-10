@@ -1,17 +1,20 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 0.0.47
+version: 0.0.5
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-07-05'
+date: '2026-07-10'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
   dataset, generate cross tables with statistical tests, and survival analysis
-  with survival tables, survival plots, and natural language summaries.
+  with survival tables, survival plots, and natural language summaries. For
+  comments, suggestions, feature requests or reporting bugs, please open an
+  issue <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/"
+  target="_blank">here</a>. 
 analyses:
   - title: Table One
     name: tableone
@@ -5814,7 +5817,7 @@ analyses:
     name: lassologistic
     ns: ClinicoPath
     category: analyses
-    menuGroup: meddecideT
+    menuGroup: meddecide
     menuSubgroup: Prediction Models
     menuTitle: LASSO Logistic
     menuSubtitle: Penalized feature selection for binary classification
@@ -5891,6 +5894,26 @@ analyses:
       Auto-selects MLR (continuous) or WLSMV (ordinal/binary) estimation.
       Refuses inappropriate inputs with explanatory messages.
     category: analyses
+  - title: Win Ratio for Hierarchical Composite Endpoints
+    name: winratio
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: SurvivalD
+    menuSubgroup: Specialized Survival Methods
+    menuTitle: Win Ratio for Hierarchical Composite Endpoints
+    menuSubtitle: Win Ratio, Win Odds & Net Benefit
+    description: >
+      Analyzes prioritized (hierarchically ordered) composite endpoints using
+      the win ratio, win odds, and net benefit. Every subject in the index group
+      is compared with every subject in the reference group. Each pair is
+      classified as a win, loss, or tie by examining endpoints in order of
+      clinical priority (e.g. death, then hospitalization, then a continuous
+      biomarker): the first endpoint that can distinguish the pair decides it.
+      The win ratio is the number of wins divided by the number of losses.
+      Confidence intervals use the Dong et al. (2016) analytic variance of the
+      log win ratio; a subject-level bootstrap option is also provided. This
+      complements hazard-ratio and RMST analyses when outcomes of differing
+      severity must be combined and ranked.
 usesNative: true
 minApp: 2.7.27
 

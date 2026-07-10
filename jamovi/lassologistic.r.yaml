@@ -76,16 +76,6 @@ items:
           title: "Odds Ratio"
           type: number
           format: zto
-        - name: ci_lower
-          title: "Lower"
-          type: number
-          format: zto
-          superTitle: "95% CI"
-        - name: ci_upper
-          title: "Upper"
-          type: number
-          format: zto
-          superTitle: "95% CI"
         - name: importance
           title: "Importance"
           type: number
@@ -444,7 +434,7 @@ items:
           - random_seed
 
     - name: modelComparison
-      title: LASSO vs Standard Logistic
+      title: LASSO vs Unpenalized Logistic
       type: Table
       visible: (showModelComparison)
       rows: 0

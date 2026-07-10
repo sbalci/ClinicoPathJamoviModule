@@ -89,8 +89,10 @@ Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
 Sullivan: reference-variable scaling (Sullivan et al. 2004, Framingham
 method). Compare: generate all three and show performance comparison.}
 
-\item{scoringMaxPoints}{Maximum points assigned to the strongest predictor
-(Beta10 method).}
+\item{scoringMaxPoints}{Points assigned to the strongest predictor in the
+reference-scaled Sullivan method. The Beta10 method uses a fixed x10
+coefficient scaling and ignores this value; the Schneeweiss method scales
+by the smallest coefficient and also ignores it.}
 
 \item{scoreLookupTable}{Generate a lookup table mapping each possible total
 score to predicted probability of the positive class.}

@@ -40,6 +40,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             calculateRiskScore = FALSE,
             numRiskGroups = "four",
             plotRiskGroups = FALSE,
+            ci_optimism = FALSE,
+            ci_optimism_boot = 150,
             ac = FALSE,
             adjexplanatory = NULL,
             ac_method = "average",
@@ -269,6 +271,16 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "plotRiskGroups",
                 plotRiskGroups,
                 default=FALSE)
+            private$..ci_optimism <- jmvcore::OptionBool$new(
+                "ci_optimism",
+                ci_optimism,
+                default=FALSE)
+            private$..ci_optimism_boot <- jmvcore::OptionInteger$new(
+                "ci_optimism_boot",
+                ci_optimism_boot,
+                default=150,
+                min=20,
+                max=2000)
             private$..addRiskScore <- jmvcore::OptionOutput$new(
                 "addRiskScore")
             private$..addRiskGroup <- jmvcore::OptionOutput$new(
@@ -395,6 +407,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..calculateRiskScore)
             self$.addOption(private$..numRiskGroups)
             self$.addOption(private$..plotRiskGroups)
+            self$.addOption(private$..ci_optimism)
+            self$.addOption(private$..ci_optimism_boot)
             self$.addOption(private$..addRiskScore)
             self$.addOption(private$..addRiskGroup)
             self$.addOption(private$..ac)
@@ -451,6 +465,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         calculateRiskScore = function() private$..calculateRiskScore$value,
         numRiskGroups = function() private$..numRiskGroups$value,
         plotRiskGroups = function() private$..plotRiskGroups$value,
+        ci_optimism = function() private$..ci_optimism$value,
+        ci_optimism_boot = function() private$..ci_optimism_boot$value,
         addRiskScore = function() private$..addRiskScore$value,
         addRiskGroup = function() private$..addRiskGroup$value,
         ac = function() private$..ac$value,
@@ -506,6 +522,8 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..calculateRiskScore = NA,
         ..numRiskGroups = NA,
         ..plotRiskGroups = NA,
+        ..ci_optimism = NA,
+        ..ci_optimism_boot = NA,
         ..addRiskScore = NA,
         ..addRiskGroup = NA,
         ..ac = NA,
@@ -539,6 +557,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         multivariableCoxHeading = function() private$.items[["multivariableCoxHeading"]],
         text = function() private$.items[["text"]],
         text2 = function() private$.items[["text2"]],
+        interactionExplanation = function() private$.items[["interactionExplanation"]],
         interactionTest = function() private$.items[["interactionTest"]],
         subgroupHR = function() private$.items[["subgroupHR"]],
         multivariableCoxSummaryHeading = function() private$.items[["multivariableCoxSummaryHeading"]],
@@ -563,6 +582,7 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         riskScoreSummary = function() private$.items[["riskScoreSummary"]],
         riskScoreMetrics = function() private$.items[["riskScoreMetrics"]],
         riskGroupPlot = function() private$.items[["riskGroupPlot"]],
+        cindexValidation = function() private$.items[["cindexValidation"]],
         stratificationExplanation = function() private$.items[["stratificationExplanation"]],
         calculatedtime = function() private$.items[["calculatedtime"]],
         outcomeredefined = function() private$.items[["outcomeredefined"]],
@@ -681,6 +701,16 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "dxdate",
                     "tint",
                     "multievent")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="interactionExplanation",
+                title="Interaction Terms \u2014 how to read this",
+                visible="(interactions && showExplanations)",
+                clearWith=list(
+                    "interactions",
+                    "explanatory",
+                    "contexpl",
+                    "showExplanations")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="interactionTest",
@@ -1095,6 +1125,44 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "explanatory",
                     "contexpl",
                     "numRiskGroups")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="cindexValidation",
+                title="Optimism-Corrected Discrimination (Harrell's C-index)",
+                visible="(ci_optimism)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="C-index", 
+                        `type`="number", 
+                        `format`="zto,dp:3"),
+                    list(
+                        `name`="detail", 
+                        `title`="", 
+                        `type`="text")),
+                clearWith=list(
+                    "ci_optimism",
+                    "ci_optimism_boot",
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "multievent",
+                    "analysistype",
+                    "tint",
+                    "dxdate",
+                    "fudate",
+                    "uselandmark",
+                    "landmark",
+                    "use_stratify",
+                    "stratvar",
+                    "interactions")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="stratificationExplanation",
@@ -1341,7 +1409,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(0,0,47),
+                version = c(0,0,5),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -1454,6 +1522,13 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   selection.
 #' @param plotRiskGroups If true, stratifies individuals into risk groups
 #'   based on their calculated risk scores and plots their survival curves.
+#' @param ci_optimism If true, computes a bootstrap optimism-corrected
+#'   Harrell's C-index (apparent, optimism, and corrected) to quantify
+#'   overfitting of the Cox model's discrimination. Not available for
+#'   competing-risks (Fine-Gray) models.
+#' @param ci_optimism_boot Number of bootstrap resamples used for optimism
+#'   correction of the C-index. Larger values give more stable estimates but
+#'   take longer to compute.
 #' @param ac .
 #' @param adjexplanatory .
 #' @param ac_method Method for computing adjusted survival curves
@@ -1503,6 +1578,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$interactionExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$interactionTest} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$subgroupHR} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1527,6 +1603,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$riskScoreSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$cindexValidation} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$stratificationExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr
@@ -1595,6 +1672,8 @@ multisurvival <- function(
     calculateRiskScore = FALSE,
     numRiskGroups = "four",
     plotRiskGroups = FALSE,
+    ci_optimism = FALSE,
+    ci_optimism_boot = 150,
     ac = FALSE,
     adjexplanatory = NULL,
     ac_method = "average",
@@ -1675,6 +1754,8 @@ multisurvival <- function(
         calculateRiskScore = calculateRiskScore,
         numRiskGroups = numRiskGroups,
         plotRiskGroups = plotRiskGroups,
+        ci_optimism = ci_optimism,
+        ci_optimism_boot = ci_optimism_boot,
         ac = ac,
         adjexplanatory = adjexplanatory,
         ac_method = ac_method,

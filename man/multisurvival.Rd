@@ -40,6 +40,8 @@ multisurvival(
   calculateRiskScore = FALSE,
   numRiskGroups = "four",
   plotRiskGroups = FALSE,
+  ci_optimism = FALSE,
+  ci_optimism_boot = 150,
   ac = FALSE,
   adjexplanatory = NULL,
   ac_method = "average",
@@ -184,6 +186,15 @@ selection.}
 \item{plotRiskGroups}{If true, stratifies individuals into risk groups
 based on their calculated risk scores and plots their survival curves.}
 
+\item{ci_optimism}{If true, computes a bootstrap optimism-corrected
+Harrell's C-index (apparent, optimism, and corrected) to quantify
+overfitting of the Cox model's discrimination. Not available for
+competing-risks (Fine-Gray) models.}
+
+\item{ci_optimism_boot}{Number of bootstrap resamples used for optimism
+correction of the C-index. Larger values give more stable estimates but
+take longer to compute.}
+
 \item{ac}{.}
 
 \item{adjexplanatory}{.}
@@ -250,6 +261,7 @@ A results object containing:
 \code{results$multivariableCoxHeading} \tab \tab \tab \tab \tab a preformatted \cr
 \code{results$text} \tab \tab \tab \tab \tab a html \cr
 \code{results$text2} \tab \tab \tab \tab \tab a html \cr
+\code{results$interactionExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$interactionTest} \tab \tab \tab \tab \tab a table \cr
 \code{results$subgroupHR} \tab \tab \tab \tab \tab a table \cr
 \code{results$multivariableCoxSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -274,6 +286,7 @@ A results object containing:
 \code{results$riskScoreSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskScoreMetrics} \tab \tab \tab \tab \tab a html \cr
 \code{results$riskGroupPlot} \tab \tab \tab \tab \tab an image \cr
+\code{results$cindexValidation} \tab \tab \tab \tab \tab a table \cr
 \code{results$stratificationExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$calculatedtime} \tab \tab \tab \tab \tab an output \cr
 \code{results$outcomeredefined} \tab \tab \tab \tab \tab an output \cr

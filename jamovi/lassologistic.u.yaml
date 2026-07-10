@@ -56,8 +56,14 @@ children:
           - type: TextBox
             name: nfolds
             format: number
-      - type: CheckBox
-        name: standardize
+          - type: TextBox
+            name: random_seed
+            format: number
+      - type: Label
+        label: Preprocessing
+        children:
+          - type: CheckBox
+            name: standardize
   - type: CollapseBox
     label: Validation
     collapsed: true
@@ -97,12 +103,6 @@ children:
         name: coef_plot
       - type: CheckBox
         name: roc_plot
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: random_seed
-        format: number
   - type: CollapseBox
     label: Output Options
     collapsed: true

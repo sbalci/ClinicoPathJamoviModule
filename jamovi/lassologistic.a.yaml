@@ -1,11 +1,11 @@
 ---
 name: lassologistic
 title: LASSO Logistic Regression
-menuGroup: meddecideT
+menuGroup: meddecide
 menuSubgroup: Prediction Models
 menuTitle: LASSO Logistic
 menuSubtitle: Penalized feature selection for binary classification
-version: '0.0.46'
+version: '0.0.5'
 jas: '1.2'
 
 description:
@@ -206,7 +206,11 @@ options:
       min: 3
       max: 20
       description:
-        R: Maximum points assigned to the strongest predictor (Beta10 method).
+        R: >
+          Points assigned to the strongest predictor in the reference-scaled
+          Sullivan method. The Beta10 method uses a fixed x10 coefficient
+          scaling and ignores this value; the Schneeweiss method scales by the
+          smallest coefficient and also ignores it.
 
     - name: scoreLookupTable
       title: Score-to-Probability Lookup Table

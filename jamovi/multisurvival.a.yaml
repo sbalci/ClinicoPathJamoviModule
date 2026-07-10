@@ -4,7 +4,7 @@ title: Multivariable Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '0.0.47'
+version: '0.0.5'
 jas: '1.2'
 
 description:
@@ -552,6 +552,29 @@ options:
         R: >
           If true, stratifies individuals into risk groups based on their calculated risk scores
           and plots their survival curves.
+
+    - name: ci_optimism
+      title: Optimism-corrected C-index (bootstrap)
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, computes a bootstrap optimism-corrected Harrell's C-index
+          (apparent, optimism, and corrected) to quantify overfitting of the
+          Cox model's discrimination. Not available for competing-risks
+          (Fine-Gray) models.
+
+    - name: ci_optimism_boot
+      title: Bootstrap resamples (optimism)
+      type: Integer
+      default: 150
+      min: 20
+      max: 2000
+      description:
+        R: >
+          Number of bootstrap resamples used for optimism correction of the
+          C-index. Larger values give more stable estimates but take longer to
+          compute.
 
     - name: addRiskScore
       title: Add Risk Score to Data

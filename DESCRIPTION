@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.47
-Date: 2026-07-05
+Version: 0.0.5
+Date: 2026-07-10
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: ClinicoPath is a comprehensive jamovi module designed specifically 
@@ -20,7 +20,7 @@ Description: ClinicoPath is a comprehensive jamovi module designed specifically
     and advanced statistical methods including bootstrap confidence intervals and 
     effect size calculations. The package serves as an umbrella coordinating 
     multiple specialized sub-modules and can be used through jamovi's GUI or 
-    directly in R for programmatic analysis.
+    directly in R for programmatic analysis. For comments, suggestions, feature requests or reporting bugs, please open an issue <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/" target="_blank">here</a>. 
 License: GPL-2
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
     https://github.com/sbalci/ClinicoPathJamoviModule/,
@@ -857,6 +857,7 @@ Collate:
     'multistatesurvival.b.R'
     'multistatesurvival.h.R'
     'multisurvival-interactions.R'
+    'multisurvival-metrics.R'
     'multisurvival.b.R'
     'multisurvival.h.R'
     'ncvregcox.b.R'
@@ -1132,5 +1133,7 @@ Collate:
     'waterfallrecist.h.R'
     'weightedlogrank.b.R'
     'weightedlogrank.h.R'
+    'winratio.b.R'
+    'winratio.h.R'
     'zzz.R'
 Config/roxygen2/version: 8.0.0

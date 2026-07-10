@@ -371,18 +371,6 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `type`="number", 
                         `format`="zto"),
                     list(
-                        `name`="ci_lower", 
-                        `title`="Lower", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `superTitle`="95% CI"),
-                    list(
-                        `name`="ci_upper", 
-                        `title`="Upper", 
-                        `type`="number", 
-                        `format`="zto", 
-                        `superTitle`="95% CI"),
-                    list(
                         `name`="importance", 
                         `title`="Importance", 
                         `type`="number", 
@@ -772,7 +760,7 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelComparison",
-                title="LASSO vs Standard Logistic",
+                title="LASSO vs Unpenalized Logistic",
                 visible="(showModelComparison)",
                 rows=0,
                 columns=list(
@@ -817,7 +805,7 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "lassologistic",
-                version = c(0,0,46),
+                version = c(0,0,5),
                 options = options,
                 results = lassologisticResults$new(options=options),
                 data = data,
@@ -874,8 +862,10 @@ lassologisticBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   Schneeweiss: divide by smallest absolute coefficient (Mehta et al. 2016).
 #'   Sullivan: reference-variable scaling (Sullivan et al. 2004, Framingham
 #'   method). Compare: generate all three and show performance comparison.
-#' @param scoringMaxPoints Maximum points assigned to the strongest predictor
-#'   (Beta10 method).
+#' @param scoringMaxPoints Points assigned to the strongest predictor in the
+#'   reference-scaled Sullivan method. The Beta10 method uses a fixed x10
+#'   coefficient scaling and ignores this value; the Schneeweiss method scales
+#'   by the smallest coefficient and also ignores it.
 #' @param scoreLookupTable Generate a lookup table mapping each possible total
 #'   score to predicted probability of the positive class.
 #' @param showSummary Display a natural-language summary of the main results.

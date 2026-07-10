@@ -37,16 +37,29 @@
   vapply(real_terms, paste, character(1), collapse = ":", USE.NAMES = FALSE)
 }
 
-# Describe a single interaction term: focal (first), moderator (second),
-# whether it is 2-way, and whether the moderator is categorical.
+# Describe a single interaction term: focal, moderator, whether it is 2-way,
+# and whether the moderator is categorical. Convention: for term A:B the
+# moderator is the SECOND variable (B). But subgroup HRs need a categorical
+# moderator, so if the second variable is not categorical while the first is,
+# swap them (categorical variable becomes the moderator) and set swapped=TRUE.
 .interactionModeratorInfo <- function(real_term, data) {
   twoway <- length(real_term) == 2
-  focal <- real_term[1]
-  moderator <- if (twoway) real_term[2] else NA_character_
-  cat_mod <- twoway && !is.na(moderator) &&
-    (is.factor(data[[moderator]]) || is.character(data[[moderator]]))
-  list(focal = focal, moderator = moderator,
-       twoway = twoway, categorical_moderator = cat_mod)
+  if (!twoway) {
+    return(list(focal = real_term[1], moderator = NA_character_,
+                twoway = FALSE, categorical_moderator = FALSE, swapped = FALSE))
+  }
+  v1 <- real_term[1]; v2 <- real_term[2]
+  is_cat <- function(v) is.factor(data[[v]]) || is.character(data[[v]])
+  cat1 <- is_cat(v1); cat2 <- is_cat(v2)
+  if (cat2) {                     # second var categorical -> convention
+    focal <- v1; moderator <- v2; swapped <- FALSE
+  } else if (cat1) {              # only first is categorical -> swap
+    focal <- v2; moderator <- v1; swapped <- TRUE
+  } else {                        # neither categorical
+    focal <- v1; moderator <- v2; swapped <- FALSE
+  }
+  list(focal = focal, moderator = moderator, twoway = twoway,
+       categorical_moderator = is_cat(moderator), swapped = swapped)
 }
 
 # One row per interaction coefficient (name contains ":"): HR, CI, p.

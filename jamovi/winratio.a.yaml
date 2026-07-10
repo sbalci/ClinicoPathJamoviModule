@@ -1,0 +1,214 @@
+---
+name:  winratio
+title: Win Ratio for Hierarchical Composite Endpoints
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuSubtitle: 'Win Ratio, Win Odds & Net Benefit'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Analyzes prioritized (hierarchically ordered) composite endpoints using the
+        win ratio, win odds, and net benefit. Every subject in the index group is
+        compared with every subject in the reference group. Each pair is classified
+        as a win, loss, or tie by examining endpoints in order of clinical priority
+        (e.g. death, then hospitalization, then a continuous biomarker): the first
+        endpoint that can distinguish the pair decides it. The win ratio is the
+        number of wins divided by the number of losses. Confidence intervals use the
+        Dong et al. (2016) analytic variance of the log win ratio; a subject-level
+        bootstrap option is also provided. This complements hazard-ratio and RMST
+        analyses when outcomes of differing severity must be combined and ranked.
+    R:
+        dontrun: true
+        usage: |
+            # data: one row per subject
+            # arm: two-level group; deathTime/deathEvent primary endpoint
+            winratio(
+                data = mydata,
+                group = "arm",
+                refLevel = "Control",
+                time1 = "deathTime", status1 = "deathEvent", eventLevel1 = "1",
+                time2 = "hospTime",  status2 = "hospEvent",  eventLevel2 = "1",
+                contEndpoint = "biomarker", contDirection = "lower")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per subject).
+
+    - name: group
+      title: Group / Treatment Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: >
+            Two-level grouping variable. The level NOT chosen as the reference is
+            treated as the index (e.g. treatment) group; the win ratio expresses the
+            index group's chance of winning relative to the reference group.
+
+    - name: refLevel
+      title: Reference (Control) Level
+      type: Level
+      variable: (group)
+      description:
+          R: >
+            The level of the group variable to treat as the reference (control).
+
+    - name: time1
+      title: 'Primary Endpoint: Time'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Time to the primary (highest priority) time-to-event endpoint.
+
+    - name: status1
+      title: 'Primary Endpoint: Event'
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: Event indicator for the primary endpoint.
+
+    - name: eventLevel1
+      title: 'Primary Event Level'
+      type: Level
+      variable: (status1)
+      description:
+          R: The level of the primary event indicator that denotes the event occurred.
+
+    - name: time2
+      title: 'Secondary Endpoint: Time (optional)'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            Time to a secondary time-to-event endpoint, examined only when the primary
+            endpoint ties a pair. Leave empty to skip.
+
+    - name: status2
+      title: 'Secondary Endpoint: Event (optional)'
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      default: NULL
+      description:
+          R: Event indicator for the secondary endpoint.
+
+    - name: eventLevel2
+      title: 'Secondary Event Level'
+      type: Level
+      variable: (status2)
+      description:
+          R: The level of the secondary event indicator that denotes the event occurred.
+
+    - name: contEndpoint
+      title: 'Continuous Endpoint (optional tiebreaker)'
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            A continuous endpoint used as the lowest-priority tiebreaker, examined only
+            when all time-to-event endpoints tie a pair.
+
+    - name: contDirection
+      title: Continuous Endpoint Direction
+      type: List
+      options:
+        - title: Higher is better
+          name: higher
+        - title: Lower is better
+          name: lower
+      default: higher
+      description:
+          R: Whether a higher or lower value of the continuous endpoint is the better outcome.
+
+    - name: contTol
+      title: Continuous Tie Margin
+      type: Number
+      min: 0
+      default: 0
+      description:
+          R: >
+            Minimum absolute difference on the continuous endpoint required to declare a
+            win or loss; smaller differences are counted as ties.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for interval estimates.
+
+    - name: ciMethod
+      title: Confidence Interval Method
+      type: List
+      options:
+        - title: Analytic (Dong et al. 2016)
+          name: analytic
+        - title: Bootstrap (subject-level)
+          name: bootstrap
+      default: analytic
+      description:
+          R: Method for the win ratio confidence interval and p-value.
+
+    - name: bootstrap_n
+      title: Bootstrap Replicates
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: Number of bootstrap replicates when the bootstrap CI method is selected.
+
+    - name: showWinOdds
+      title: Show Win Odds
+      type: Bool
+      default: true
+      description:
+          R: Report the win odds (ties split evenly), an estimand defined even when there are no losses.
+
+    - name: showNetBenefit
+      title: Show Net Benefit
+      type: Bool
+      default: true
+      description:
+          R: Report the net benefit (proportion of wins minus proportion of losses).
+
+    - name: showComponents
+      title: Show Endpoint Contributions
+      type: Bool
+      default: true
+      description:
+          R: Break down wins, losses and ties by the endpoint that decided each pair.
+
+    - name: showPlot
+      title: Win/Loss/Tie Plot
+      type: Bool
+      default: true
+      description:
+          R: Display a stacked bar of the win, loss and tie proportions.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language summary of the results.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the win ratio methodology.
+...
