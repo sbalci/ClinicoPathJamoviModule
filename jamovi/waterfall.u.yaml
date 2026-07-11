@@ -48,6 +48,20 @@ children:
             name: groupVar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Confirmation Status (optional)
+        children:
+          - type: VariablesListBox
+            name: confirmationVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: On-Treatment / Ongoing (optional)
+        children:
+          - type: VariablesListBox
+            name: ongoingVar
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Waterfall Plot Options
     collapsed: true
@@ -65,6 +79,9 @@ children:
             children:
               - type: ComboBox
                 name: sortBy
+                enable: (showWaterfallPlot)
+              - type: ComboBox
+                name: sortDirection
                 enable: (showWaterfallPlot)
               - type: ComboBox
                 name: colorBy
@@ -86,6 +103,9 @@ children:
                 enable: (showWaterfallPlot)
               - type: CheckBox
                 name: showCI
+                enable: (showWaterfallPlot)
+              - type: CheckBox
+                name: showBaseline
                 enable: (showWaterfallPlot)
           - type: Label
             label: Plot Customization

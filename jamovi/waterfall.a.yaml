@@ -1,7 +1,7 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: OncoPath
+menuGroup: OncoPathT
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
 version: '0.0.5'
@@ -122,6 +122,66 @@ options:
             Sort the waterfall plot by best response or patient ID.
           jamovi: >
             Sort the waterfall plot by best response or patient ID.
+
+    - name: sortDirection
+      title: Sort Direction
+      type: List
+      options:
+        - title: "Conventional (worst on left, best on right)"
+          name: conventional
+        - title: "Reverse (best on left, worst on right)"
+          name: reverse
+      default: conventional
+      description:
+          R: >
+            Direction for the response sort. 'conventional' places the highest
+            (worst) response on the left and the lowest (best, most negative) on
+            the right, following the standard oncology waterfall convention.
+          jamovi: >
+            Direction for the response sort. Conventional = worst (highest) on the
+            left, best (lowest/most negative) on the right — the standard oncology
+            waterfall layout.
+
+    - name: showBaseline
+      title: Show Baseline (Y = 0) Line
+      type: Bool
+      default: true
+      description:
+          R: >
+            Draw a horizontal reference line at 0 percent change to mark the
+            baseline.
+          jamovi: >
+            Draw a horizontal reference line at 0% change to mark the baseline.
+
+    - name: confirmationVar
+      title: Confirmation Status (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Optional categorical variable indicating response confirmation status
+            (e.g., Confirmed vs Unconfirmed CR/PR). A distinct marker is drawn at
+            each bar tip according to the level of this variable.
+          jamovi: >
+            Optional variable indicating confirmation status (e.g., Confirmed vs
+            Unconfirmed). A distinct marker is drawn at each bar tip per level.
+
+    - name: ongoingVar
+      title: On-Treatment / Ongoing (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      default: NULL
+      description:
+          R: >
+            Optional variable flagging patients still on treatment / with an
+            ongoing response. Truthy values (TRUE, non-zero, or text matching
+            yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.
+          jamovi: >
+            Optional flag for patients still on treatment / ongoing response.
+            'Yes'/TRUE/1 draws an upward arrow at the bar tip.
 
     # Clinical Preset Options
     # - name: clinicalPreset

@@ -152,12 +152,16 @@ items:
         - patientID
         - responseVar
         - sortBy
+        - sortDirection
         - showThresholds
         - labelOutliers
         - colorBy
         - colorScheme
         - showMedian
         - showCI
+        - showBaseline
+        - confirmationVar
+        - ongoingVar
         - groupVar
         - inputType
 
