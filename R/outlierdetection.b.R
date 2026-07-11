@@ -378,7 +378,11 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 # For very large datasets, offer sampling
                 if (nrow(analysis_data) > 10000) {
                     sample_size <- 5000
-                    set.seed(123)  # For reproducibility
+                    # User-configurable seed for reproducible subsampling;
+                    # falls back to 123 (previous fixed value) when unset.
+                    seed_val <- self$options$seed
+                    if (is.null(seed_val)) seed_val <- 123
+                    set.seed(seed_val)
                     sample_idx <- sample(nrow(analysis_data), sample_size)
                     # Keep original_n preserved from above
                     analysis_data <- analysis_data[sample_idx, , drop = FALSE]

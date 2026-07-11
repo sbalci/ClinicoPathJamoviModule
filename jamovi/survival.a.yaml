@@ -783,5 +783,15 @@ options:
       min: 50
       max: 1000
 
+    - name: seed
+      title: "Random Seed"
+      type: Integer
+      default: 42
+      description:
+          R: >
+            Random seed for the reproducible bootstrap internal validation.
+            Change this value to obtain a different bootstrap draw; the default
+            (42) reproduces the previous fixed behaviour.
+
 
 ...

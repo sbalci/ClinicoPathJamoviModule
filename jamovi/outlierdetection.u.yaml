@@ -66,6 +66,12 @@ children:
           - type: TextBox
             name: confidence_level
             format: number
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: seed
+            format: number
 
   # Output Selection Section
   - type: CollapseBox

@@ -18,7 +18,8 @@ outlierdetection(
   show_method_comparison = FALSE,
   show_exclusion_summary = FALSE,
   show_visualization = FALSE,
-  show_interpretation = FALSE
+  show_interpretation = FALSE,
+  seed = 123
 )
 }
 \arguments{
@@ -76,6 +77,11 @@ and distribution of outlier scores.}
 
 \item{show_interpretation}{Display detailed interpretation of outlier
 detection results and methodological notes.}
+
+\item{seed}{Random seed used for the reproducible random subsample that is
+drawn when the dataset is large (more than 10000 rows). Change this value
+to draw a different sample; the default of 123 reproduces the previous
+fixed behaviour.}
 }
 \value{
 A results object containing:

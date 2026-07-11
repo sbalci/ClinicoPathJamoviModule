@@ -221,6 +221,9 @@ gsdesignResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="",
                 title="Group-Sequential Design & Sample Size",
                 refs=list(
+                    "gsDesign_anderson",
+                    "obrien1979",
+                    "trialplots_highwind",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
                 options=options,

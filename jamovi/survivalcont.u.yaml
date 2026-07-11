@@ -350,3 +350,7 @@ children:
               - type: CheckBox
                 name: showExplanations
                 label: Show Analysis Explanations
+              - type: TextBox
+                name: seed
+                format: number
+                label: Random Seed

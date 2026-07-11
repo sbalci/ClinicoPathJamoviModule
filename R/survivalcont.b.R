@@ -2809,7 +2809,7 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                 current_data <- mydata
 
                 for (i in 1:num_cuts) {
-                    tryCatch({
+                    fit_err <- tryCatch({
                         res.cut <- survminer::surv_cutpoint(
                             current_data,
                             time = mytime,
@@ -2828,12 +2828,15 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
                                 abs(current_data[[mycontexpl]] - cutoff_val) > margin,
                             ]
                         }
-                    }, error = function(e) {
-                        # Fallback to quantile method
+                        NULL
+                    }, error = function(e) e)
+                    if (!is.null(fit_err)) {
+                        # Fallback to quantile method (applied here with `<-`
+                        # instead of `<<-` from inside the error handler).
                         remaining_cuts <- num_cuts - i + 1
                         fallback_cuts <- private$.quantileCutoffs(current_data[[mycontexpl]], remaining_cuts)
-                        cutoffs[i:num_cuts] <<- fallback_cuts
-                    })
+                        cutoffs[i:num_cuts] <- fallback_cuts
+                    }
                 }
 
                 return(sort(cutoffs))
@@ -2895,22 +2898,13 @@ survivalcontClass <- if (requireNamespace("jmvcore")) {
             ,
             .minPvalueCutoffs = function(mydata, mytime, myoutcome, mycontexpl, num_cuts) {
                 cont_var <- mydata[[mycontexpl]]
-                # Make search reproducible
-                prior_seed <- if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-                    get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-                } else {
-                    NULL
-                }
-                set.seed(12345)
-                on.exit({
-                    if (is.null(prior_seed)) {
-                        if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-                            rm(list = ".Random.seed", envir = .GlobalEnv)
-                        }
-                    } else {
-                        assign(".Random.seed", prior_seed, envir = .GlobalEnv)
-                    }
-                }, add = TRUE)
+                # Make search reproducible with a user-configurable seed
+                # (defaults to 12345). withr::local_seed sets the RNG here and
+                # restores the previous state when this method returns, without
+                # manually touching the global environment.
+                seed_val <- self$options$seed
+                if (is.null(seed_val)) seed_val <- 12345
+                withr::local_seed(seed_val)
                 sorted_vals <- sort(unique(cont_var))
 
                 # Ensure minimum group size

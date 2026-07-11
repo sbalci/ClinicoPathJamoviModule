@@ -2,7 +2,7 @@
 % Please edit documentation in R/eurostatmap.b.R
 \name{.eurostat_pkg_cache}
 \alias{.eurostat_pkg_cache}
-\title{Eurostat Map}
+\title{Package-local cache environment}
 \usage{
 .eurostat_pkg_cache
 }
@@ -10,8 +10,7 @@
 An environment used internally to cache Eurostat data between runs.
 }
 \description{
-Creates choropleth maps using Eurostat data.
-Supports both downloading data from Eurostat API and using local data.
-Maps can be static or interactive with customizable styling.
+Internal environment used to cache downloaded Eurostat data across runs,
+avoiding assignment to \code{.GlobalEnv}.
 }
 \keyword{internal}

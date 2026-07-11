@@ -5,23 +5,10 @@
 #' @importFrom stats prcomp kmeans dist hclust cutree sd
 #' @importFrom cluster silhouette pam clusGap
 
-# Source IHC utilities
-tryCatch(
-    {
-        utils_file <- system.file("R", "ihc_utilities.R", package = "ClinicoPath")
-        if (file.exists(utils_file)) {
-            source(utils_file)
-        } else {
-            local_utils <- file.path(dirname(sys.frame(1)$ofile), "ihc_utilities.R")
-            if (file.exists(local_utils)) {
-                source(local_utils)
-            }
-        }
-    },
-    error = function(e) {
-        # Utilities will be loaded by package
-    }
-)
+# IHC utility functions (calculateHScore, calculateIHCDistance, ...) are
+# provided by ihc_utilities.R via the package Collate/namespace and are
+# callable directly; no source() is needed (sourcing at load would define
+# them in .GlobalEnv and mask the package copies).
 
 ihcadvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(

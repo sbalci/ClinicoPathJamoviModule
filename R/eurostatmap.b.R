@@ -1,3 +1,12 @@
+#' Package-local cache environment
+#'
+#' Internal environment used to cache downloaded Eurostat data across runs,
+#' avoiding assignment to \code{.GlobalEnv}.
+#'
+#' @return An environment used internally to cache Eurostat data between runs.
+#' @keywords internal
+.eurostat_pkg_cache <- new.env(parent = emptyenv())
+
 #' @title Eurostat Map
 #' @description Creates choropleth maps using Eurostat data.
 #' Supports both downloading data from Eurostat API and using local data.
@@ -9,16 +18,6 @@
 #' @import sf
 #' @import dplyr
 #' @import giscoR
-
-#' Package-local cache environment
-#'
-#' Internal environment used to cache downloaded Eurostat data across runs,
-#' avoiding assignment to \code{.GlobalEnv}.
-#'
-#' @return An environment used internally to cache Eurostat data between runs.
-#' @keywords internal
-.eurostat_pkg_cache <- new.env(parent = emptyenv())
-
 eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "eurostatmapClass",
     inherit = eurostatmapBase,

@@ -548,8 +548,10 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Run analysis ----
         .run = function() {
-            # Initialize messages list for errors, warnings, and info
-            messages <- list()
+            # Initialize messages list (backed by an environment so the nested
+            # add_message() helper can append without `<<-`).
+            msg_env <- new.env(parent = emptyenv())
+            msg_env$messages <- list()
 
             # Helper function to add messages
             add_message <- function(type, content) {
@@ -560,7 +562,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "info" = list(bg = "#d1ecf1", border = "#17a2b8", text = "#0c5460", icon = ""),
                     list(bg = "#e2e3e5", border = "#6c757d", text = "#383d41", icon = "\u2022")
                 )
-                messages <<- c(messages, list(sprintf(
+                msg_env$messages <- c(msg_env$messages, list(sprintf(
                     "<div style='background-color: %s; padding: 12px; border-left: 4px solid %s; margin: 10px 0; color: %s;'>
                         <strong>%s %s:</strong> %s
                     </div>",
@@ -596,7 +598,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!validation$valid) {
                 # Add validation error message
                 add_message("error", validation$error)
-                self$results$messages$setContent(paste(messages, collapse = "\n"))
+                self$results$messages$setContent(paste(msg_env$messages, collapse = "\n"))
                 return()
             }
 
@@ -616,7 +618,7 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # Add calculation error message
                 add_message("error", as.character(e$message))
-                self$results$messages$setContent(paste(messages, collapse = "\n"))
+                self$results$messages$setContent(paste(msg_env$messages, collapse = "\n"))
             })
 
             # If calculation failed, stop here
@@ -1075,8 +1077,8 @@ timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Output all collected messages
-            if (length(messages) > 0) {
-                self$results$messages$setContent(paste(messages, collapse = "\n"))
+            if (length(msg_env$messages) > 0) {
+                self$results$messages$setContent(paste(msg_env$messages, collapse = "\n"))
             }
         }
     )

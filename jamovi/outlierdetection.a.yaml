@@ -190,3 +190,13 @@ options:
       description:
           R: >
             Display detailed interpretation of outlier detection results and methodological notes.
+
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Random seed used for the reproducible random subsample that is drawn when
+            the dataset is large (more than 10000 rows). Change this value to draw a
+            different sample; the default of 123 reproduces the previous fixed behaviour.

@@ -53,7 +53,8 @@ population}
 \item{reference_percentiles}{Lower and upper percentiles for reference
 interval}
 
-\item{minimum_sample_size}{Minimum required sample size (CLSI recommends=120)}
+\item{minimum_sample_size}{Minimum required sample size (CLSI recommends
+at least 120)}
 
 \item{outlier_detection}{Method for identifying and handling outliers}
 

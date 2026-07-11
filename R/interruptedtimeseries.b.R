@@ -1,7 +1,7 @@
 #' @title Interrupted Time Series Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom stats lm pmax predict as.formula
+#' @importFrom stats lm predict as.formula
 #' @export
 
 interruptedtimeseriesClass <- R6::R6Class(

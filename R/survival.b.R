@@ -2773,9 +2773,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     c_apparent <- apparent_concordance$concordance
 
                     # Bootstrap internal validation (Harrell's optimism approach)
-                    set.seed(42)
-                    optimism_values <- numeric(n_boot)
-                    slope_values <- numeric(n_boot)
+                    # User-configurable seed for reproducibility (defaults to 42).
+                    seed_val <- self$options$seed
+                    if (is.null(seed_val)) seed_val <- 42
+                    set.seed(seed_val)
+                    # Pre-initialise to NA so failed bootstrap draws stay NA
+                    # without needing `<<-` from the error handler below.
+                    optimism_values <- rep(NA_real_, n_boot)
+                    slope_values <- rep(NA_real_, n_boot)
                     successful_boots <- 0
 
                     for (b in seq_len(n_boot)) {
@@ -2826,8 +2831,9 @@ survivalClass <- if (requireNamespace('jmvcore'))
                                 slope_values[b] <- NA
                             }
                         }, error = function(e) {
-                            optimism_values[b] <<- NA
-                            slope_values[b] <<- NA
+                            # optimism_values[b] / slope_values[b] remain NA
+                            # (arrays pre-initialised to NA_real_); no <<- needed.
+                            NULL
                         })
                     }
 

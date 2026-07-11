@@ -18,7 +18,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             show_method_comparison = FALSE,
             show_exclusion_summary = FALSE,
             show_visualization = FALSE,
-            show_interpretation = FALSE, ...) {
+            show_interpretation = FALSE,
+            seed = 123, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -106,6 +107,10 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 "show_interpretation",
                 show_interpretation,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=123)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..method_category)
@@ -120,6 +125,7 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$.addOption(private$..show_exclusion_summary)
             self$.addOption(private$..show_visualization)
             self$.addOption(private$..show_interpretation)
+            self$.addOption(private$..seed)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -134,7 +140,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         show_method_comparison = function() private$..show_method_comparison$value,
         show_exclusion_summary = function() private$..show_exclusion_summary$value,
         show_visualization = function() private$..show_visualization$value,
-        show_interpretation = function() private$..show_interpretation$value),
+        show_interpretation = function() private$..show_interpretation$value,
+        seed = function() private$..seed$value),
     private = list(
         ..vars = NA,
         ..method_category = NA,
@@ -148,7 +155,8 @@ outlierdetectionOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
         ..show_method_comparison = NA,
         ..show_exclusion_summary = NA,
         ..show_visualization = NA,
-        ..show_interpretation = NA)
+        ..show_interpretation = NA,
+        ..seed = NA)
 )
 
 outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -336,6 +344,10 @@ outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
 #'   and distribution of outlier scores.
 #' @param show_interpretation Display detailed interpretation of outlier
 #'   detection results and methodological notes.
+#' @param seed Random seed used for the reproducible random subsample that is
+#'   drawn when the dataset is large (more than 10000 rows). Change this value
+#'   to draw a different sample; the default of 123 reproduces the previous
+#'   fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -362,7 +374,8 @@ outlierdetection <- function(
     show_method_comparison = FALSE,
     show_exclusion_summary = FALSE,
     show_visualization = FALSE,
-    show_interpretation = FALSE) {
+    show_interpretation = FALSE,
+    seed = 123) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("outlierdetection requires jmvcore to be installed (restart may be required)")
@@ -387,7 +400,8 @@ outlierdetection <- function(
         show_method_comparison = show_method_comparison,
         show_exclusion_summary = show_exclusion_summary,
         show_visualization = show_visualization,
-        show_interpretation = show_interpretation)
+        show_interpretation = show_interpretation,
+        seed = seed)
 
     analysis <- outlierdetectionClass$new(
         options = options,

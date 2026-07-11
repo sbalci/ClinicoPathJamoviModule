@@ -122,14 +122,17 @@
   for (b in mod_levels) {
     d2 <- data
     d2[[moderator]] <- stats::relevel(d2[[moderator]], ref = b)
-    warned <- FALSE
+    # Capture warnings via an environment flag instead of `<<-`.
+    warn_env <- new.env(parent = emptyenv())
+    warn_env$warned <- FALSE
     fit <- tryCatch(
       withCallingHandlers(
         survival::coxph(cox_formula, data = d2),
-        warning = function(w) { warned <<- TRUE; invokeRestart("muffleWarning") }
+        warning = function(w) { warn_env$warned <- TRUE; invokeRestart("muffleWarning") }
       ),
       error = function(e) NULL
     )
+    warned <- warn_env$warned
     if (is.null(fit)) next
     sm <- summary(fit)$coefficients
     for (i in seq_along(focal_coef_names)) {

@@ -131,7 +131,7 @@ options:
       default: 120
       description:
           R: >
-            Minimum required sample size (CLSI recommends >=120)
+            Minimum required sample size (CLSI recommends at least 120)
 
     - name: outlier_detection
       title: Outlier Detection Method

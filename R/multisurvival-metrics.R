@@ -64,16 +64,10 @@
     error = function(e) NA_real_)
   if (!is.finite(apparent)) return(NULL)
 
-  # Save and restore the global RNG so the bootstrap is reproducible without
-  # perturbing any downstream randomness in the same session.
-  had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-  old_seed <- if (had_seed) get(".Random.seed", envir = .GlobalEnv) else NULL
-  set.seed(seed)
-  on.exit({
-    if (had_seed) assign(".Random.seed", old_seed, envir = .GlobalEnv)
-    else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-      rm(".Random.seed", envir = .GlobalEnv)
-  }, add = TRUE)
+  # Set the RNG seed and restore the prior state when this function returns, so
+  # the bootstrap is reproducible without perturbing downstream randomness.
+  # withr::local_seed avoids manually reading/writing the global environment.
+  withr::local_seed(seed)
 
   n <- nrow(data)
   optimism <- rep(NA_real_, B)

@@ -138,7 +138,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 high_card <- n_unique > 50 && n_unique > 0.5 * n_nonmiss
             }
 
-            summary_rows[[length(summary_rows) + 1]] <<- data.frame(
+            # Return the row; the caller appends it (avoids `<<-` into the
+            # enclosing scope while keeping identical behaviour).
+            return(data.frame(
                 variable = var,
                 type = vtype,
                 n = n_total,
@@ -150,12 +152,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 high_card = high_card,
                 outlier_n = outlier_n,
                 stringsAsFactors = FALSE
-            )
+            ))
         }
 
         # Pre-compute per-variable summaries for downstream reporting
         for (nm in names(analysis_data)) {
-            add_summary_row(nm, analysis_data[[nm]])
+            summary_rows[[length(summary_rows) + 1]] <- add_summary_row(nm, analysis_data[[nm]])
         }
 
         # Check for high missingness (>50%) and issue STRONG_WARNING

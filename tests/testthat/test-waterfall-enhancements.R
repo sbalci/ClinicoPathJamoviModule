@@ -8,3 +8,18 @@ test_that("conventional sort puts worst (highest) response on the left", {
     # rightmost bar must be the smallest (best) value
     expect_equal(ordered$response[nrow(ordered)], -50)
 })
+
+test_that("responseCategoryVar overrides computed RECIST category (new-lesion PD)", {
+    d <- read.csv(testthat::test_path("..", "..", "data", "waterfall_annotation_test_data.csv"))
+    # without override: PT003 (-44.2%) computes as PR
+    r0 <- ClinicoPath::waterfall(data = d, patientID = "PatientID",
+            responseVar = "Response", inputType = "percentage")
+    wd0 <- r0$waterfallplot$state$data$waterfall
+    expect_equal(as.character(wd0$recist_category[wd0$PatientID == "PT003"]), "PR")
+    # with override: PT003 becomes PD (new lesion despite shrinkage)
+    r1 <- ClinicoPath::waterfall(data = d, patientID = "PatientID",
+            responseVar = "Response", inputType = "percentage",
+            responseCategoryVar = "Category")
+    wd1 <- r1$waterfallplot$state$data$waterfall
+    expect_equal(as.character(wd1$recist_category[wd1$PatientID == "PT003"]), "PD")
+})

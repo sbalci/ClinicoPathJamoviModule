@@ -70,6 +70,7 @@ Imports:
     segmented,
     survival,
     survminer,
+    withr,
     tableone,
     tangram,
     tibble,

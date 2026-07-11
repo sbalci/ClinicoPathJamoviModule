@@ -492,6 +492,15 @@ options:
         summaries provide plain-language interpretations of the statistical
         results. Turn off to reduce visual clutter when summaries are not needed.
 
+    - name: seed
+      title: "Random Seed"
+      type: Integer
+      default: 12345
+      description: >-
+        Random seed for the reproducible optimal cut-point search. Change this
+        value to obtain a different search; the default (12345) reproduces the
+        previous fixed behaviour.
+
 
 
 
