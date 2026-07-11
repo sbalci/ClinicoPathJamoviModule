@@ -361,6 +361,24 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           wdf
         },
 
+        # Override computed RECIST category with a user-supplied category variable.
+        # Matches by patient-ID VALUE; only rows with a supplied value are changed.
+        # Expected values: CR / PR / SD / PD (case-insensitive).
+        .applyCategoryOverride = function(wdf, source_df, pidCol, categoryVar) {
+          if (is.null(categoryVar) || is.null(source_df) ||
+              !(categoryVar %in% names(source_df)) || !(pidCol %in% names(wdf)) ||
+              !("recist_category" %in% names(wdf)))
+            return(wdf)
+          src_pid_name <- self$options$patientID
+          if (is.null(src_pid_name) || !(src_pid_name %in% names(source_df)))
+            return(wdf)
+          idx <- match(wdf[[pidCol]], source_df[[src_pid_name]])
+          user_cat <- toupper(trimws(as.character(source_df[[categoryVar]])[idx]))
+          ok <- !is.na(user_cat) & user_cat != ""
+          wdf$recist_category[ok] <- user_cat[ok]
+          wdf
+        },
+
         # Add a Y = 0 baseline reference line
         .addBaseline = function(plot, show_baseline) {
           if (isTRUE(show_baseline)) {
@@ -1699,6 +1717,15 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           safe_timeVar,
           safe_groupVar
         )
+
+        # Optional: override the computed RECIST category with a user-supplied one
+        # (e.g., new-lesion PD despite target-lesion shrinkage). Applied before
+        # metrics and plots so ORR/DCR and bar coloring all reflect it.
+        if (!is.null(processed_data) && !is.null(processed_data$waterfall)) {
+          processed_data$waterfall <- private$.applyCategoryOverride(
+            processed_data$waterfall, self$data, safe_patientID,
+            self$options$responseCategoryVar)
+        }
 
         # ============================================================================
         # CRITICAL: REGULATORY USE BLOCKING

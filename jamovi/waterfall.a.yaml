@@ -183,6 +183,23 @@ options:
             Optional flag for patients still on treatment / ongoing response.
             'Yes'/TRUE/1 draws an upward arrow at the bar tip.
 
+    - name: responseCategoryVar
+      title: Response Category Override (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Optional per-patient RECIST category (CR/PR/SD/PD). When supplied it
+            overrides the category computed from the percentage value, so a patient
+            with target-lesion shrinkage can still be classified PD (e.g., a new
+            lesion). Affects both bar coloring and response metrics (ORR/DCR).
+          jamovi: >
+            Optional per-patient RECIST category (CR/PR/SD/PD). When supplied it
+            overrides the category computed from the % value — e.g., a shrinking
+            tumor can still be PD due to a new lesion. Affects coloring and metrics.
+
     # Clinical Preset Options
     # - name: clinicalPreset
     #   title: Clinical Study Preset

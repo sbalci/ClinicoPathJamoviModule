@@ -162,6 +162,7 @@ items:
         - showBaseline
         - confirmationVar
         - ongoingVar
+        - responseCategoryVar
         - groupVar
         - inputType
 

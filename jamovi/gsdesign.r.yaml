@@ -1,0 +1,89 @@
+---
+name: gsdesign
+title: Group-Sequential Design & Sample Size
+jrs: '1.1'
+
+items:
+    - name: summary
+      title: Design Summary
+      type: Html
+      visible: true
+
+    - name: boundaryTable
+      title: Group-Sequential Boundaries
+      type: Table
+      rows: 0
+      columns:
+        - name: analysis
+          title: "Analysis"
+          type: integer
+        - name: infoFrac
+          title: "Info Fraction"
+          type: number
+        - name: n
+          title: "Sample Size / Events"
+          type: number
+        - name: zBound
+          title: "Efficacy Z"
+          type: number
+        - name: pNominal
+          title: "Nominal p"
+          type: number
+        - name: effBound
+          title: "Boundary (effect scale)"
+          type: number
+        - name: cumAlpha
+          title: "Cum. Alpha Spent"
+          type: number
+      clearWith:
+        - endpoint
+        - sided
+        - alpha
+        - power
+        - kMax
+        - sfu
+        - sfupar
+        - timing
+        - testType
+        - hr
+        - medianControl
+        - accrualDuration
+        - followupDuration
+        - ratio
+        - dropoutRate
+        - p1
+        - p2
+        - deltaMean
+        - stdDev
+
+    - name: boundaryPlot
+      title: Boundary Plot
+      type: Image
+      width: 700
+      height: 500
+      renderFun: .plot
+      requiresData: false
+      clearWith:
+        - endpoint
+        - sided
+        - alpha
+        - power
+        - kMax
+        - sfu
+        - sfupar
+        - timing
+        - testType
+        - hr
+        - medianControl
+        - accrualDuration
+        - followupDuration
+        - ratio
+        - dropoutRate
+        - p1
+        - p2
+        - deltaMean
+        - stdDev
+
+refs:
+    - ClinicoPathJamoviModule
+...

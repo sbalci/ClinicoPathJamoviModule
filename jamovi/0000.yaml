@@ -121,7 +121,7 @@ analyses:
   - title: Cross Tables
     name: crosstable
     ns: ClinicoPath
-    menuGroup: Exploration
+    menuGroup: ExplorationT
     menuSubgroup: ClinicoPath Comparisons
     menuTitle: Cross Tables
     description: Function for making Cross Tables with multiple table styles.
@@ -137,6 +137,28 @@ analyses:
       Creates waterfall and spider plots to analyze tumor response data
       following RECIST criteria.
     menuSubtitle: Waterfall Plot, Spider Plot
+    ribbon: analyses
+    category: analyses
+  - title: Adverse Events Butterfly Plot
+    name: aeplot
+    ns: ClinicoPath
+    menuGroup: OncoPathT
+    menuSubgroup: Patient Follow-Up Plots
+    menuTitle: Adverse Events Butterfly Plot
+    description: >
+      Back-to-back (butterfly) bar plot of adverse-event frequencies by
+      preferred
+
+      term, comparing a test arm against an optional control arm and splitting
+      each
+
+      bar into all-grade and high-grade (e.g. grade >= 3) severity.
+
+      Accepts patient-level data (incidence computed internally) or
+      pre-summarized
+
+      percentages. Inspired by the Jamovi-TrialPlots module by highwind.
+    menuSubtitle: Butterfly / Tornado Plot of Adverse Events
     ribbon: analyses
     category: analyses
   - title: Swimmer Plot
@@ -6090,6 +6112,92 @@ analyses:
       (1.36 and 3.28). Works on a cohort (one row per patient) or as a
       single-case calculator, and can optionally relate RCB class to a survival
       outcome.
+  - title: Hematologic Prognostic Indices
+    name: hematologicindices
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: ClinicoPath Biomarker Analysis
+    menuTitle: Hematologic Prognostic Indices
+    menuSubtitle: NLR, PLR, LMR, SII, PNI, GPS
+    description: >
+      Derives the commonly reported blood-count and inflammation-based
+      prognostic indices from routine complete-blood-count and biochemistry
+      variables: the neutrophil-to-lymphocyte ratio (NLR),
+      platelet-to-lymphocyte ratio (PLR), lymphocyte-to-monocyte ratio (LMR),
+      systemic immune-inflammation index (SII), Onodera's Prognostic Nutritional
+      Index (PNI), the C-reactive-protein-to-albumin ratio (CAR), and the
+      (modified) Glasgow Prognostic Score (GPS / mGPS). Each index is computed
+      per patient, summarized across the cohort, optionally dichotomized at a
+      literature or data-driven cutpoint, and optionally related to a survival
+      outcome.
+  - title: Group-Sequential Design & Sample Size
+    name: gsdesign
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathT
+    menuSubgroup: Trial Design
+    menuTitle: Group-Sequential Design & Sample Size
+    menuSubtitle: Interim Analyses, Boundaries, Sample Size
+    description: >
+      Group-sequential trial design and sample-size / events calculation for
+
+      survival (time-to-event), binary, and continuous endpoints using the
+
+      gsDesign package. Reports efficacy (and optional futility) boundaries,
+
+      per-look sample size, and a boundary plot. Inspired by the
+      Jamovi-TrialPlots
+
+      module by highwind.
+  - title: ctDNA / MRD Dynamics
+    name: ctdnadynamics
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: ClinicoPath Biomarker Analysis
+    menuTitle: ctDNA / MRD Dynamics
+    description: >
+      Analyses circulating-tumour-DNA (ctDNA) / minimal-residual-disease (MRD)
+      kinetics from paired baseline and follow-up variant allele fractions
+      (VAF): clearance vs persistence classification, log-fold change, and MRD
+      status as a predictor of survival by a landmark analysis.
+  - title: Multifocal / Primary-Metastasis Concordance
+    name: multifocalconcordance
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: ClinicoPath Biomarker Analysis
+    menuTitle: Multifocal / Primary-Metastasis Concordance
+    description: >
+      Assesses concordance of biomarkers or mutations across multiple foci of a
+      tumour, or between paired primary and metastasis samples. Reports
+      per-marker concordance rates, Cohen's kappa for paired (two-sample)
+      designs, and a case-level clonality summary.
+  - title: Synoptic Report Completeness
+    name: synopticcompleteness
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: ClinicoPath Data Quality
+    menuTitle: Synoptic Report Completeness
+    description: >
+      Audits the completeness of structured / synoptic pathology reports: the
+      proportion of required data elements present per report, per required
+      element, and by subspecialty or reporting pathologist, with an optional
+      completeness trend over time.
+  - title: Tumor Budding (ITBCC)
+    name: tumorbudding
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: IHC Analysis
+    menuTitle: Tumor Budding (ITBCC)
+    description: >
+      Quantifies tumor budding and assigns an ITBCC (2016) grade from the number
+      of buds counted in a hotspot. Supports a single hotspot count, multiple
+      candidate fields (hotspot = the densest field), and area normalization to
+      the standard 0.785 mm2 field.
 usesNative: true
 minApp: 2.7.27
 

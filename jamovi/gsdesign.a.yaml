@@ -1,0 +1,151 @@
+---
+name: gsdesign
+title: Group-Sequential Design & Sample Size
+menuGroup: OncoPathT
+menuSubgroup: 'Trial Design'
+menuSubtitle: 'Interim Analyses, Boundaries, Sample Size'
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: |
+        Group-sequential trial design and sample-size / events calculation for
+        survival (time-to-event), binary, and continuous endpoints using the
+        gsDesign package. Reports efficacy (and optional futility) boundaries,
+        per-look sample size, and a boundary plot. Inspired by the Jamovi-TrialPlots
+        module by highwind.
+
+options:
+    - name: data
+      type: Data
+
+    - name: endpoint
+      title: Endpoint Type
+      type: List
+      options:
+        - title: "Survival (time-to-event)"
+          name: survival
+        - title: "Binary (two proportions)"
+          name: binary
+        - title: "Continuous (two means)"
+          name: continuous
+      default: survival
+
+    - name: sided
+      title: Sided
+      type: List
+      options:
+        - title: "Two-sided"
+          name: '2'
+        - title: "One-sided"
+          name: '1'
+      default: '2'
+    - name: alpha
+      title: Alpha (total type I error)
+      type: Number
+      min: 0.0001
+      max: 0.5
+      default: 0.05
+    - name: power
+      title: Power (1 - beta)
+      type: Number
+      min: 0.5
+      max: 0.999
+      default: 0.9
+    - name: kMax
+      title: Number of Analyses (incl. final)
+      type: Integer
+      min: 1
+      max: 10
+      default: 2
+    - name: sfu
+      title: Spending Function
+      type: List
+      options:
+        - title: "O'Brien-Fleming (Lan-DeMets)"
+          name: OF
+        - title: "Pocock (Lan-DeMets)"
+          name: Pocock
+        - title: "Hwang-Shih-DeCani"
+          name: HSD
+        - title: "Wang-Tsiatis"
+          name: WT
+      default: OF
+    - name: sfupar
+      title: Spending Parameter (HSD gamma / WT delta)
+      type: Number
+      default: -4
+    - name: timing
+      title: Interim Timing (comma-separated info fractions; blank = equal)
+      type: String
+      default: ''
+    - name: testType
+      title: Boundaries
+      type: List
+      options:
+        - title: "Efficacy only"
+          name: efficacy
+        - title: "Efficacy + (non-binding) futility"
+          name: efffut
+      default: efficacy
+
+    # survival
+    - name: hr
+      title: Hazard Ratio (alternative)
+      type: Number
+      min: 0.01
+      max: 5
+      default: 0.7
+    - name: medianControl
+      title: Control Median Survival (months)
+      type: Number
+      min: 0.1
+      default: 12
+    - name: accrualDuration
+      title: Accrual Duration (months)
+      type: Number
+      min: 0.1
+      default: 12
+    - name: followupDuration
+      title: Follow-up Duration (months)
+      type: Number
+      min: 0
+      default: 18
+    - name: ratio
+      title: Allocation Ratio (exp/control)
+      type: Number
+      min: 0.1
+      max: 10
+      default: 1
+    - name: dropoutRate
+      title: Annual Dropout Rate
+      type: Number
+      min: 0
+      max: 0.99
+      default: 0.05
+
+    # binary
+    - name: p1
+      title: Control Event Rate
+      type: Number
+      min: 0.001
+      max: 0.999
+      default: 0.4
+    - name: p2
+      title: Treatment Event Rate
+      type: Number
+      min: 0.001
+      max: 0.999
+      default: 0.25
+
+    # continuous
+    - name: deltaMean
+      title: Mean Difference
+      type: Number
+      default: 0.5
+    - name: stdDev
+      title: Standard Deviation
+      type: Number
+      min: 0.0001
+      default: 1
+...

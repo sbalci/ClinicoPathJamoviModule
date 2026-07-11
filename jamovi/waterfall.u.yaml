@@ -62,6 +62,13 @@ children:
             name: ongoingVar
             maxItemCount: 1
             isTarget: true
+      - type: TargetLayoutBox
+        label: Response Category Override (optional)
+        children:
+          - type: VariablesListBox
+            name: responseCategoryVar
+            maxItemCount: 1
+            isTarget: true
   - type: CollapseBox
     label: Waterfall Plot Options
     collapsed: true

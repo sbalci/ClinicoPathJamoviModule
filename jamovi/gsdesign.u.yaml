@@ -1,0 +1,90 @@
+title: Group-Sequential Design & Sample Size
+name: gsdesign
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: endpoint
+  - type: CollapseBox
+    label: Design Parameters
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: sided
+          - type: TextBox
+            name: alpha
+            format: number
+          - type: TextBox
+            name: power
+            format: number
+          - type: TextBox
+            name: kMax
+            format: number
+          - type: ComboBox
+            name: sfu
+          - type: TextBox
+            name: sfupar
+            format: number
+          - type: TextBox
+            name: timing
+            format: string
+          - type: ComboBox
+            name: testType
+  - type: CollapseBox
+    label: Survival Endpoint
+    collapsed: false
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: hr
+            format: number
+          - type: TextBox
+            name: medianControl
+            format: number
+          - type: TextBox
+            name: accrualDuration
+            format: number
+          - type: TextBox
+            name: followupDuration
+            format: number
+          - type: TextBox
+            name: ratio
+            format: number
+          - type: TextBox
+            name: dropoutRate
+            format: number
+  - type: CollapseBox
+    label: Binary Endpoint
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: p1
+            format: number
+          - type: TextBox
+            name: p2
+            format: number
+  - type: CollapseBox
+    label: Continuous Endpoint
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: deltaMean
+            format: number
+          - type: TextBox
+            name: stdDev
+            format: number
