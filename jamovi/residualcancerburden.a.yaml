@@ -1,0 +1,218 @@
+---
+name:  residualcancerburden
+title: Residual Cancer Burden (RCB)
+menuGroup: OncoPathD
+menuSubgroup: Response Evaluation
+menuSubtitle: 'RCB Index and Class After Neoadjuvant Therapy'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Computes the Residual Cancer Burden (RCB) index and class (Symmans et al., 2007)
+        from the standard post-neoadjuvant pathology variables: the two dimensions of the
+        primary tumour bed, overall cancer cellularity, the in-situ fraction, the number of
+        positive lymph nodes, and the diameter of the largest nodal metastasis. The
+        continuous index is classified into RCB-0 (pathologic complete response), RCB-I
+        (minimal), RCB-II (moderate), and RCB-III (extensive) residual disease using the
+        established cut points (1.36 and 3.28). Works on a cohort (one row per patient) or as
+        a single-case calculator, and can optionally relate RCB class to a survival outcome.
+    R:
+        dontrun: true
+        usage: |
+            residualcancerburden(
+                data = mydata,
+                d1 = "tumor_dim1", d2 = "tumor_dim2",
+                cellularity = "pct_cellularity", cis = "pct_insitu",
+                positiveNodes = "n_pos_nodes", metSize = "largest_met_mm")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per patient in cohort mode).
+
+    - name: inputMode
+      title: Input Mode
+      type: List
+      options:
+        - title: Cohort (variables from data)
+          name: data
+        - title: Single case (enter values)
+          name: manual
+      default: data
+      description:
+          R: Compute RCB for every row using data variables, or for a single entered case.
+
+    # ---- cohort-mode variables ----
+    - name: d1
+      title: Tumor Bed Dimension 1 (mm)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: First bidimensional diameter of the primary tumour bed (mm).
+
+    - name: d2
+      title: Tumor Bed Dimension 2 (mm)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Second bidimensional diameter of the primary tumour bed (mm).
+
+    - name: cellularity
+      title: Overall Cancer Cellularity (%)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Overall percentage of the tumour bed area that is carcinoma (0-100).
+
+    - name: cis
+      title: In-situ Fraction (%) (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Percentage of the carcinoma that is in-situ disease (0-100). Defaults to 0.
+
+    - name: positiveNodes
+      title: Number of Positive Nodes
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Number of regional lymph nodes containing metastatic carcinoma.
+
+    - name: metSize
+      title: Largest Nodal Metastasis (mm) (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Diameter of the largest nodal metastasis (mm). Defaults to 0.
+
+    # ---- single-case values ----
+    - name: mD1
+      title: Tumor Bed Dimension 1 (mm)
+      type: Number
+      min: 0
+      default: 20
+      description:
+          R: Single-case first tumour-bed dimension (mm).
+
+    - name: mD2
+      title: Tumor Bed Dimension 2 (mm)
+      type: Number
+      min: 0
+      default: 15
+      description:
+          R: Single-case second tumour-bed dimension (mm).
+
+    - name: mCellularity
+      title: Overall Cancer Cellularity (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 10
+      description:
+          R: Single-case overall cellularity (percent).
+
+    - name: mCis
+      title: In-situ Fraction (%)
+      type: Number
+      min: 0
+      max: 100
+      default: 0
+      description:
+          R: Single-case in-situ fraction (percent).
+
+    - name: mNodes
+      title: Number of Positive Nodes
+      type: Integer
+      min: 0
+      default: 0
+      description:
+          R: Single-case number of positive nodes.
+
+    - name: mMetSize
+      title: Largest Nodal Metastasis (mm)
+      type: Number
+      min: 0
+      default: 0
+      description:
+          R: Single-case largest nodal metastasis (mm).
+
+    # ---- optional survival linkage ----
+    - name: survivalTime
+      title: Survival Time (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Follow-up time, to relate RCB class to outcome (cohort mode).
+
+    - name: survivalStatus
+      title: Event Status (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          R: Event indicator for the survival linkage.
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (survivalStatus)
+      description:
+          R: Level of the status variable representing the event.
+
+    # ---- output toggles ----
+    - name: showDistribution
+      title: Show Class Distribution
+      type: Bool
+      default: true
+      description:
+          R: Tabulate the RCB class distribution across the cohort.
+
+    - name: addIndexToData
+      title: Add RCB Index to Data
+      type: Output
+      description:
+          R: Add the per-patient RCB index (continuous) back to the dataset.
+
+    - name: addClassToData
+      title: Add RCB Class to Data
+      type: Output
+      description:
+          R: Add the per-patient RCB class (RCB-0/I/II/III) back to the dataset.
+
+    - name: showPlot
+      title: Show Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: Plot the RCB class distribution (cohort) or the case position (single case).
+
+    - name: survivalLink
+      title: Relate RCB Class to Survival
+      type: Bool
+      default: false
+      description:
+          R: If survival time and status are supplied, show a log-rank test across classes.
+
+    - name: showSummary
+      title: Show Summary
+      type: Bool
+      default: false
+      description:
+          R: Plain-language summary of the result.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Explanation of the RCB formula and classes.
+...

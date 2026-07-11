@@ -1,5 +1,6 @@
 #' @title Publication-Ready Tables with gtsummary
 #'
+#' @return An \code{R6} class generator object for the \code{gtsummaryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 gtsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "gtsummaryClass",

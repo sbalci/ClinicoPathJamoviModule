@@ -9,6 +9,7 @@
 #' @importFrom stats t.test wilcox.test aov kruskal.test shapiro.test
 #' @importFrom stringr str_to_title str_replace_all
 #' @export
+#' @return An \code{R6} class generator object for the \code{ggprismClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 ggprismClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("ggprismClass",

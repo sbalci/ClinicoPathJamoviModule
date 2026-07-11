@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{extratreesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 extratreesClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
@@ -394,6 +395,8 @@ extratreesClass <- if (requireNamespace("jmvcore"))
             },
 
             .plotImportance = function(image, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 # This will be implemented to create importance plot
                 # For now, create placeholder
                 vars <- paste0("Var", 1:10)
@@ -442,6 +445,8 @@ extratreesClass <- if (requireNamespace("jmvcore"))
             },
 
             .plotPartial = function(image, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 # This will be implemented to create partial dependence plots
                 # For now, create placeholder
                 par(mfrow = c(2, 2))

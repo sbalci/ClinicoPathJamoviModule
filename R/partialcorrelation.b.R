@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats cor cor.test lm residuals complete.cases
 #' @export
+#' @return An \code{R6} class generator object for the \code{partialcorrelationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 partialcorrelationClass <- R6::R6Class(
     "partialcorrelationClass",

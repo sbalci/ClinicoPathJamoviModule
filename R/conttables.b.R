@@ -3,6 +3,7 @@
 #' @description R6 class for performing contingency table analysis.
 #' @name contTablesClass
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{contTablesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 contTablesClass <- R6::R6Class(
     "contTablesClass",
     inherit=contTablesBase,

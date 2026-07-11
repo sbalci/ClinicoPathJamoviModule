@@ -9,6 +9,7 @@
 #'
 #' @description
 #' Modality Comparison Analysis for digital pathology validation studies.
+#' @return An \code{R6} class generator object for the \code{modalitycomparisonClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "modalitycomparisonClass",

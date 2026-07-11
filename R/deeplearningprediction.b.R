@@ -9,6 +9,7 @@
 #' @importFrom pROC roc auc multiclass.roc
 #' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme_minimal
 #' @importFrom viridis scale_color_viridis
+#' @return An \code{R6} class generator object for the \code{deeplearningpredictionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "deeplearningpredictionClass",

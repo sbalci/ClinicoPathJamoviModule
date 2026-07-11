@@ -3418,9 +3418,9 @@ survivalPowerClass <- R6::R6Class(
             # Convert from survival probability difference at follow-up
             if (type == "survival_difference") {
                 delta <- es
-                T <- self$options$follow_up_period
+                time_pt <- self$options$follow_up_period
                 mc <- self$options$control_median_survival
-                if (is.null(delta) || is.null(T) || is.null(mc) || T <= 0 || mc <= 0) {
+                if (is.null(delta) || is.null(time_pt) || is.null(mc) || time_pt <= 0 || mc <= 0) {
                     private$effect_hr_info <- list(
                         type = "survival_difference",
                         hr = NA_real_,
@@ -3431,8 +3431,8 @@ survivalPowerClass <- R6::R6Class(
                 lambda_c <- log(2) / mc
                 s_c <- function(t) exp(-lambda_c * t)
                 target_fn <- function(hr) {
-                    s_t <- exp(-(lambda_c * hr) * T)
-                    (s_t - s_c(T)) - delta
+                    s_t <- exp(-(lambda_c * hr) * time_pt)
+                    (s_t - s_c(time_pt)) - delta
                 }
                 a <- 0.2
                 b <- 3.0
@@ -3445,7 +3445,7 @@ survivalPowerClass <- R6::R6Class(
                             type = "survival_difference", hr = hr,
                             note = paste0(
                                 "Derived HR from survival difference ", sprintf("%.3f", delta),
-                                " at follow-up = ", sprintf("%.1f", T),
+                                " at follow-up = ", sprintf("%.1f", time_pt),
                                 " months under exponential assumption."
                             )
                         )
@@ -3457,7 +3457,7 @@ survivalPowerClass <- R6::R6Class(
                     hr = NA_real_,
                     note = paste0(
                         "Could not solve HR from survival difference (inputs: Δ=",
-                        sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", T),
+                        sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", time_pt),
                         ", median_c=", sprintf("%.1f", mc), ")."
                     )
                 )

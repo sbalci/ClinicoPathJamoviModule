@@ -244,6 +244,7 @@ stagemigration_competingRisksAnalysis <- function(data, old_stage, new_stage,
 #' @description
 #' Calculates time-dependent AUC and concordance for competing risks models.
 #'
+#' @return List with \code{time_dependent_auc} and \code{concordance} discrimination metrics for the competing risks models.
 #' @keywords internal
 stagemigration_competingRisksDiscrimination <- function(data, fg_old, fg_new,
                                                         time_points = c(12, 24, 60)) {

@@ -1334,6 +1334,9 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         },
 
         .plotNMB = function(image, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
+
             if (!self$options$plot_nmb)
                 return()
 
@@ -1429,6 +1432,9 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         },
 
         .plotTornado = function(image, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
+
             if (!self$options$plot_tornado)
                 return()
 

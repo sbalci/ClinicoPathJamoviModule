@@ -1071,7 +1071,9 @@ featurequalityClass <- R6::R6Class(
         # Plot functions
         .distributionPlot = function(image, ...) {
             # Generate comprehensive distribution plots
-            
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
+
             data <- self$data
             features <- self$options$features
             
@@ -1217,7 +1219,9 @@ featurequalityClass <- R6::R6Class(
         
         .qualityDashboard = function(image, ...) {
             # Generate comprehensive quality dashboard
-            
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
+
             data <- self$data
             features <- self$options$features
             

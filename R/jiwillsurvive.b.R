@@ -6,6 +6,7 @@
 #' @import ggplot2
 #' @import dplyr
 #' @import lubridate
+#' @return An \code{R6} class generator object for the \code{jiwillsurviveClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jiwillsurviveClass",

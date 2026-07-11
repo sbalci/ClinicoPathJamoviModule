@@ -32,6 +32,7 @@
 #' @importFrom rlang sym syms .data !! !!!
 #' @importFrom RColorBrewer brewer.pal
 #' @export
+#' @return An \code{R6} class generator object for the \code{groupedbarClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "groupedbarClass",

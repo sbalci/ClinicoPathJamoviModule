@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats chisq.test fisher.test prop.test binom.test t.test wilcox.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{outbreakanalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 outbreakanalysisClass <- R6::R6Class(

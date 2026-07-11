@@ -4,6 +4,7 @@
 
 #' @title Enhanced Factor Variable Analysis Class
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{enhancedfactorvariableClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 enhancedfactorvariableClass <- R6::R6Class(
     "enhancedfactorvariableClass",
     inherit = enhancedfactorvariableBase,

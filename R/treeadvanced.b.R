@@ -6,6 +6,7 @@
 #' @importFrom rpart.plot rpart.plot
 #' @importFrom caret createDataPartition createFolds confusionMatrix train trainControl
 #' @importFrom pROC roc auc
+#' @return An \code{R6} class generator object for the \code{treeadvancedClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 treeadvancedClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("treeadvancedClass",

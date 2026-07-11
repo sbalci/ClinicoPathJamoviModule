@@ -4,6 +4,7 @@
 #' @importFrom cluster daisy pam silhouette
 #' @importFrom stats hclust cutree kmeans dist kruskal.test
 #' @import ggplot2
+#' @return An \code{R6} class generator object for the \code{ihcbasicClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "ihcbasicClass",

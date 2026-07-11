@@ -34,6 +34,7 @@ NULL
 #' @importFrom httr GET status_code content timeout
 #' @importFrom rcrossref id_converter
 #' @keywords internal
+#' @return \code{NULL}; this placeholder function exists only to declare package imports.
 .retracted_imports <- function() NULL
 
 #' @noRd

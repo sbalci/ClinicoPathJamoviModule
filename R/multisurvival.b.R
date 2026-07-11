@@ -345,6 +345,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @keywords internal
+#' @return An \code{R6} class generator object for the \code{multisurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 multisurvivalClass <- if (requireNamespace('jmvcore'))
   R6::R6Class(
@@ -3612,6 +3613,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       ,
       # Plotting function
       .plot_nomogram = function(image, ggtheme, theme, ...) {
+        oldpar <- graphics::par(no.readonly = TRUE)
+        on.exit(graphics::par(oldpar), add = TRUE)
         if (private$.debug_dummy_plot_enabled()) {
           private$.debug_write(list(
             phase = ".plot_nomogram(dummy)",

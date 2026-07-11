@@ -150,6 +150,7 @@ if (length(start_line) > 0) {
 temp_file <- tempfile(fileext = ".R")
 writeLines(file_content, temp_file)
 source(temp_file)
+unlink(temp_file)
 
 # 3. Test Helper Function ----
 run_test <- function(test_name, data, options_list) {

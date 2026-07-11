@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom utils data
 #'
+#' @return An \code{R6} class generator object for the \code{decisioncalculatorClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("decisioncalculatorClass",

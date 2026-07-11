@@ -338,6 +338,7 @@ NULL
 #' @description R6 class for generating cross tables for clinicopathological comparisons.
 #' @name crosstableClass
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{crosstableClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 crosstableClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(
         "crosstableClass",

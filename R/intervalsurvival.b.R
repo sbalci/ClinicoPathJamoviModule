@@ -6,6 +6,7 @@
 #' @importFrom stats AIC BIC logLik
 #' @importFrom stats quantile median sd var optimize
 #' @export
+#' @return An \code{R6} class generator object for the \code{intervalsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 intervalsurvivalClass <- R6::R6Class(
     "intervalsurvivalClass",
     inherit = intervalsurvivalBase,

@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{treatmentSwitchingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
@@ -218,13 +219,6 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
                                                  covariates, method) {
                 tryCatch(
                     {
-                        # TODO (cleanup): library() inside package code modifies the user's search path
-                        #   and trips R CMD check. 7 sites in this file (L216 survival; L639-641
-                        #   ggplot2/survival/survminer; L686-687 ggplot2/dplyr; L1142 ggplot2). Drop them - 
-                        #   declare the packages in DESCRIPTION Imports and call survival::/ggplot2:: etc.,
-                        #   or rely on the @import roxygen + NAMESPACE.
-                        library(survival)
-
                         # Get switching data
                         data <- private$switching_data
 
@@ -636,10 +630,6 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
 
                 tryCatch(
                     {
-                        library(ggplot2)
-                        library(survival)
-                        library(survminer)
-
                         data <- private$switching_data
 
                         # Create survival curves by initial treatment
@@ -687,9 +677,6 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
 
                 tryCatch(
                     {
-                        library(ggplot2)
-                        library(dplyr)
-
                         data <- private$switching_data
 
                         # Create switching timeline plot
@@ -1157,8 +1144,6 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
 
                 tryCatch(
                     {
-                        library(ggplot2)
-
                         data <- private$sensitivity_results
 
                         p <- ggplot(data, aes(x = parameter, y = hr)) +

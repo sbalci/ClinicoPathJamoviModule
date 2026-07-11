@@ -467,6 +467,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
             .agreementHeatmap = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 # Render Agreement Heatmap from stored state
 
                 plotState <- image$state
@@ -1797,7 +1799,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Count concordant and discordant pairs
                 C <- 0 # Concordant
                 D <- 0 # Discordant
-                T <- 0 # Tied
+                tied <- 0 # Tied
 
                 for (i in 1:(n - 1)) {
                     for (j in (i + 1):n) {
@@ -1809,13 +1811,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         } else if (sign(diff_x) != sign(diff_y) && diff_x != 0 && diff_y != 0) {
                             D <- D + 1
                         } else {
-                            T <- T + 1
+                            tied <- tied + 1
                         }
                     }
                 }
 
                 # Calculate Robinson's A
-                total_pairs <- C + D + T
+                total_pairs <- C + D + tied
                 if ((C + D) == 0) {
                     # All pairs are tied - cannot compute meaningful A
                     A <- 0
@@ -1839,7 +1841,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
-                return(list(A = A, SE = SE, z = z, p = p, C = C, D = D, T = T))
+                return(list(A = A, SE = SE, z = z, p = p, C = C, D = D, T = tied))
             },
             .populateMeanSpearmanExplanation = function() {
                 # Provide educational content about Mean Spearman Rho
@@ -4293,6 +4295,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 self$results$raterClusterExplanation$setContent(jmvcore::format(html))
             },
             .raterDendrogram = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 plotState <- image$state
                 if (is.null(plotState)) {
                     return(FALSE)
@@ -4327,6 +4331,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
             .raterClusterHeatmap = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 plotState <- image$state
                 if (is.null(plotState)) {
                     return(FALSE)
@@ -4527,6 +4533,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 self$results$caseClusterExplanation$setContent(jmvcore::format(html))
             },
             .caseDendrogram = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 plotState <- image$state
                 if (is.null(plotState)) {
                     return(FALSE)
@@ -4561,6 +4569,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 return(TRUE)
             },
             .caseClusterHeatmap = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 plotState <- image$state
                 if (is.null(plotState)) {
                     return(FALSE)

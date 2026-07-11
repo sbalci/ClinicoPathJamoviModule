@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats cor t.test wilcox.test aov kruskal.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{qualityoflifeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 qualityoflifeClass <- R6::R6Class(

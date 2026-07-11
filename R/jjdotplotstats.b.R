@@ -6,6 +6,7 @@
 #' @importFrom rlang sym
 #' @importFrom digest digest
 #'
+#' @return An \code{R6} class generator object for the \code{jjdotplotstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(

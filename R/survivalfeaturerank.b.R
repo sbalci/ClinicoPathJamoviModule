@@ -62,6 +62,7 @@
 #' @import jmvcore
 #' @import survival
 #' @importFrom glue glue
+#' @return An \code{R6} class generator object for the \code{survivalfeaturerankClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "survivalfeaturerankClass",

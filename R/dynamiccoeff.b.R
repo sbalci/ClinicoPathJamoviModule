@@ -6,6 +6,7 @@
 #' @importFrom stats predict fitted residuals confint
 #' @importFrom utils capture.output
 #' @export
+#' @return An \code{R6} class generator object for the \code{dynamiccoeffClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 dynamiccoeffClass <- R6::R6Class(

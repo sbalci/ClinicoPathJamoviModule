@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats complete.cases predict
 #' @export
+#' @return An \code{R6} class generator object for the \code{excessmortalityClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 excessmortalityClass <- R6::R6Class(
     "excessmortalityClass",

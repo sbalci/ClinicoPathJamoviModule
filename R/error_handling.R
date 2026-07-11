@@ -2,7 +2,8 @@
 #' 
 #' Robust error handling system inspired by BlueSky R environment
 #' with enhanced features for clinical and pathological research.
-#' 
+#'
+#' @return An environment used internally to track error and warning counts and logs across ClinicoPath analyses.
 #' @import jmvcore
 #' @export
 
@@ -19,6 +20,7 @@
 #' @description Initialize error handling for a ClinicoPath function
 #' @param function_name Name of the function being initialized
 #' @param context Additional context information
+#' @return Invisibly returns `TRUE`; called for its side effect of resetting counters and pushing the function onto the tracking stack.
 #' @export
 clinicopath_init <- function(function_name, context = "") {
     # Reset counters for new function call
@@ -50,6 +52,7 @@ clinicopath_init <- function(function_name, context = "") {
 #' @param error The error object
 #' @param function_name Name of the function where error occurred
 #' @param clinical_context Clinical context for the error
+#' @return A list with `success` (FALSE), `error` (TRUE), a user-friendly `error_message`, an `error_id`, and the `detailed_log` entry.
 #' @export
 clinicopath_error_handler <- function(error, function_name = "unknown", clinical_context = "") {
     .clinicopath_errors$error_count <- .clinicopath_errors$error_count + 1
@@ -98,6 +101,7 @@ clinicopath_error_handler <- function(error, function_name = "unknown", clinical
 #' @param warning The warning object
 #' @param function_name Name of the function where warning occurred
 #' @param clinical_context Clinical context for the warning
+#' @return A list with `success` (TRUE), `warning` (TRUE), a user-friendly `warning_message`, a `warning_id`, and the `detailed_log` entry.
 #' @export
 clinicopath_warning_handler <- function(warning, function_name = "unknown", clinical_context = "") {
     .clinicopath_errors$warning_count <- .clinicopath_errors$warning_count + 1
@@ -190,6 +194,7 @@ safe_execute <- function(fn, function_name = "unknown", clinical_context = "", d
 #' @param required_vars Required variable names
 #' @param min_observations Minimum number of observations required
 #' @param clinical_checks Additional clinical validation checks
+#' @return A list with `valid` (logical), character vectors `errors` and `warnings`, and integer counts `n_observations` and `n_variables`.
 #' @export
 validate_clinical_data <- function(data, required_vars = NULL, min_observations = 1, clinical_checks = TRUE) {
     validation_errors <- c()
@@ -289,6 +294,7 @@ validate_clinical_data <- function(data, required_vars = NULL, min_observations 
 #' 
 #' @description Convert technical error to user-friendly clinical message
 #' @param error_entry Detailed error log entry
+#' @return A character string containing a user-friendly, clinically oriented error message.
 #' @export
 generate_user_friendly_error <- function(error_entry) {
     error_msg <- error_entry$error_message
@@ -323,6 +329,7 @@ generate_user_friendly_error <- function(error_entry) {
 #' 
 #' @description Convert technical warning to user-friendly clinical message
 #' @param warning_entry Detailed warning log entry
+#' @return A character string containing a user-friendly, clinically oriented warning message.
 #' @export
 generate_user_friendly_warning <- function(warning_entry) {
     warning_msg <- warning_entry$warning_message
@@ -346,6 +353,7 @@ generate_user_friendly_warning <- function(warning_entry) {
 #' Get Error Summary
 #' 
 #' @description Get summary of errors and warnings
+#' @return A list with `error_count`, `warning_count`, `last_function`, and logical flags `has_errors` and `has_warnings`.
 #' @export
 get_error_summary <- function() {
     return(list(
@@ -360,6 +368,7 @@ get_error_summary <- function() {
 #' Clear Error Log
 #' 
 #' @description Clear the error and warning logs
+#' @return Invisibly returns `TRUE`; called for its side effect of resetting all error and warning counters, logs, and the function stack.
 #' @export
 clear_error_log <- function() {
     .clinicopath_errors$error_count <- 0
@@ -374,6 +383,7 @@ clear_error_log <- function() {
 #' 
 #' @description Clean up function execution context
 #' @param function_name Name of the function being cleaned up
+#' @return Invisibly returns `TRUE`; called for its side effect of popping the function from the tracking stack.
 #' @export
 clinicopath_cleanup <- function(function_name) {
     # Remove function from stack
@@ -396,6 +406,7 @@ clinicopath_cleanup <- function(function_name) {
 #' @param context_type Type of clinical context (survival, diagnostic, screening, etc.)
 #' @param sample_size Sample size for power considerations
 #' @param effect_size Expected effect size
+#' @return A list with the clinical context `type`, `sample_size`, `effect_size`, and any context-specific `recommendations`.
 #' @export
 get_clinical_context <- function(context_type = "general", sample_size = NULL, effect_size = NULL) {
     context_info <- list(
@@ -434,6 +445,7 @@ get_clinical_context <- function(context_type = "general", sample_size = NULL, e
 #' @param results Main analysis results
 #' @param function_name Name of the analysis function
 #' @param success Whether the analysis succeeded
+#' @return A `clinicopath_result` object: a list with `results` and `metadata`, plus `errors`/`warnings` logs when any were recorded.
 #' @export
 create_enhanced_result <- function(results, function_name, success = TRUE) {
     enhanced_result <- list(

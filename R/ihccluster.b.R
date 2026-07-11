@@ -40,6 +40,7 @@
 #' @author ClinicoPath Development Team
 #' @keywords clustering immunohistochemistry pathology
 #'
+#' @return An \code{R6} class generator object for the \code{ihcclusterClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 # Backend for ihccluster
 ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(
@@ -2820,6 +2821,8 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Creates dendrogram showing hierarchical relationships between cases.
             # Only available for hierarchical clustering method.
             .plotDendrogram = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 if (!isTRUE(self$options$showDendrogram) || self$options$method != "hierarchical") {
                     return()
                 }
@@ -3200,6 +3203,8 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.plotPCA(image, ggtheme, theme, ...)
             },
             .plotBoxplots = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 if (!isTRUE(self$options$showBoxplots)) {
                     return()
                 }

@@ -1052,6 +1052,8 @@ ihcadvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 TRUE
             },
             .plotValidation = function(image, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 # Create a bar plot of validation metrics
                 if (is.null(private$.clusters)) {
                     plot(1, 1, type = "n", main = "No validation results", xlab = "", ylab = "")

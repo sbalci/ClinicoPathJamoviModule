@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats complete.cases predict glm poisson spline
 #' @export
+#' @return An \code{R6} class generator object for the \code{flexiblerelativesurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 flexiblerelativesurvivalClass <- R6::R6Class(
     "flexiblerelativesurvivalClass",

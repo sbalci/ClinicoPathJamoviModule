@@ -2,6 +2,7 @@
 #' @title Complex UpSet Plot Visualization
 #' @importFrom jmvcore .
 #' @export
+#' @return An \code{R6} class generator object for the \code{jcomplexupsetClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jcomplexupsetClass",

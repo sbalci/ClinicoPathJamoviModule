@@ -1820,6 +1820,8 @@ adaptivelassoClass <- R6::R6Class(
         },
 
         .renderBaselineHazardPlot = function(image, ggtheme, theme, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
             state <- image$state
             if (is.null(state) || nrow(state) == 0) return(FALSE)
 
@@ -1847,6 +1849,8 @@ adaptivelassoClass <- R6::R6Class(
         },
 
         .renderDiagnosticsPlot = function(image, ggtheme, theme, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
             state <- image$state
             if (is.null(state) || nrow(state) == 0) return(FALSE)
 

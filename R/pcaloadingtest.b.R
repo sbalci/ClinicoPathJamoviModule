@@ -8,6 +8,7 @@
 #' @import pracma
 #' @import scales
 #'
+#' @return An \code{R6} class generator object for the \code{pcaloadingtestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 pcaloadingtestClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
@@ -673,6 +674,9 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
 
 #' Variance explained helper for pcaloadingtest
 #'
+#' @return A data frame with one row per retained component and columns
+#'   \code{component} (index), \code{variance} (proportion of variance
+#'   explained) and \code{cumulative} (cumulative proportion explained).
 #' @keywords internal
 pcaloadingtest_variance_info <- function(pca, ncomp) {
     var <- pca$sdev^2

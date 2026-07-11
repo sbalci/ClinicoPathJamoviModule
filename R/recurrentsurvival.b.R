@@ -5,6 +5,7 @@
 #' @importFrom stats AIC BIC logLik
 #' @importFrom stats quantile median sd var optimize
 #' @export
+#' @return An \code{R6} class generator object for the \code{recurrentsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 recurrentsurvivalClass <- R6::R6Class(
     "recurrentsurvivalClass",
     inherit = recurrentsurvivalBase,

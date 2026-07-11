@@ -8,6 +8,7 @@
 #' @importFrom caret confusionMatrix
 #' @importFrom stats quantile binom.test glm predict
 #' @export
+#' @return An \code{R6} class generator object for the \code{enhancedROCClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 enhancedROCClass <- R6::R6Class(
     "enhancedROCClass",

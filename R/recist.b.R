@@ -6,6 +6,7 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom stats binom.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{recistClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 recistClass <- R6::R6Class(
     "recistClass",
@@ -940,7 +941,7 @@ recistClass <- R6::R6Class(
                 # user never chose it - a silent, unconfirmed write. Not RCE/exfiltration
                 # (fixed filename, user's own data), but route exports through a jamovi
                 # Output/path option (or tempdir()) instead of getwd().
-                filepath <- file.path(getwd(), "recist_lesion_data.csv")
+                filepath <- file.path(tempdir(), "recist_lesion_data.csv")
                 tryCatch(
                     {
                         write.csv(data, filepath, row.names = FALSE)

@@ -11,6 +11,7 @@
 #' for kappa coefficient confidence intervals. It supports 2-5 outcome categories
 #' and 2-6 raters, with customizable precision requirements and significance levels.
 #' Both two-sided and one-sided confidence intervals are supported.
+#' @return An \code{R6} class generator object for the \code{kappaSizeCIClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "kappaSizeCIClass",

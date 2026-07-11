@@ -8,6 +8,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats quantile sd median
 #' @export
+#' @return An \code{R6} class generator object for the \code{qtwistClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 qtwistClass <- R6::R6Class(
     "qtwistClass",

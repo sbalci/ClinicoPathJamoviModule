@@ -7,6 +7,7 @@
 #' @importFrom caret createDataPartition createFolds trainControl train
 #' @importFrom pROC roc auc
 #' @importFrom ggplot2 ggplot aes geom_boxplot geom_line labs theme_minimal
+#' @return An \code{R6} class generator object for the \code{treecompareClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "treecompareClass",
@@ -1398,22 +1399,21 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 if (!is.null(model_info$model)) {
                     # Create filename
-                    # TODO (cleanup): saveRDS below writes a RELATIVE filename to the process
-                    #   working directory as a side effect of the analysis (gated on save_best_models).
-                    #   On shared/cloud jamovi the cwd may be read-only or shared. Write to
-                    #   tempfile()/tempdir() or expose a proper user-chosen save path instead.
-                    #   (No injection risk: top_algorithm is a hardcoded algorithm label, not user data.)
+                    # Write to a per-session temp directory rather than the process working
+                    # directory: on shared/cloud jamovi the cwd may be read-only or shared.
+                    # (No injection risk: top_algorithm is a hardcoded algorithm label, not user data.)
                     safe_name <- tolower(gsub(" ", "_", top_algorithm))
                     filename <- paste0("best_model_", safe_name, "_", format(Sys.Date(), "%Y%m%d"), ".rds")
-                    
+                    filepath <- file.path(tempdir(), filename)
+
                     tryCatch({
                         # Save model
-                        saveRDS(model_info$model, file = filename)
-                        
+                        saveRDS(model_info$model, file = filepath)
+
                         # Update summary to indicate model was saved
                         current_content <- self$results$algorithm_summary$content
-                        updated_content <- gsub("</div>$", 
-                                              paste0("<p><strong>Model Saved:</strong> ", filename, "</p></div>"),
+                        updated_content <- gsub("</div>$",
+                                              paste0("<p><strong>Model Saved:</strong> ", filepath, "</p></div>"),
                                               current_content)
                         self$results$algorithm_summary$setContent(updated_content)
                         

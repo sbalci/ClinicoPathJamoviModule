@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @export
+#' @return An \code{R6} class generator object for the \code{modelvalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 modelvalClass <- if (requireNamespace('jmvcore'))
@@ -505,6 +506,8 @@ modelvalClass <- if (requireNamespace('jmvcore'))
 
             # Subgroup calibration plot ----
             .subgroupCalibrationPlot = function(image, ggtheme, theme, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 subgroup <- self$options$subgroup
                 if (is.null(subgroup)) return()
 

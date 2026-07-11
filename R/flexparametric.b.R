@@ -7,6 +7,7 @@
 #' @import dplyr
 #' @importFrom stats AIC BIC nobs vcov qnorm pnorm
 #'
+#' @return An \code{R6} class generator object for the \code{flexparametricClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(

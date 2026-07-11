@@ -4,6 +4,7 @@
 #' @importFrom grDevices dev.off png svg
 #' @importFrom ggplot2 ggplot aes geom_rect geom_text theme_void labs ggsave coord_cartesian
 #' @importFrom base64enc base64encode
+#' @return An \code{R6} class generator object for the \code{studydiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "studydiagramClass",

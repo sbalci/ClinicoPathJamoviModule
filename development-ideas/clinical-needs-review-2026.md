@@ -68,12 +68,15 @@ out method-comparison for pathology.
 
 ## A2 · Oncology
 
-**A2.1 — `waterfall` / `waterfallrecist`: add time-to-response and duration-of-response.**
-*Value: high · Effort: medium.* The waterfall/spider tools compute ORR, DCR, best response
-with confidence intervals — but **not time-to-response (TTR) or duration-of-response (DoR)**,
-which are required efficacy endpoints in every response-evaluable trial. Since the input
-already carries a time variable for the spider plot, TTR/DoR can be derived from the same
-data and reported alongside ORR/DCR.
+**A2.1 — `waterfall`: censoring-aware duration-of-response (Kaplan–Meier median).**
+*Value: high · Effort: low–medium.* The waterfall/spider tools compute ORR, DCR, best
+response with confidence intervals, and the backend already derives median time-to-response
+(TTR) and a duration-of-response (DoR) figure from the time variable. The methodological gap
+is that DoR was summarized with a **naive median that ignores censoring** — responders still
+in response at last follow-up are treated as if they had progressed, which systematically
+understates DoR (in a 48%-censored simulation, 7.6 vs a Kaplan–Meier median of 9.8). The
+improvement is to summarize DoR with the **Kaplan–Meier median using the censoring indicator
+the backend already computes**, surfaced in a dedicated TTR/DoR efficacy table.
 
 **A2.2 — `survival` (jsurvival): add a subgroup / forest-panel option.**
 *Value: high · Effort: medium.* The released `survival` has person-time, pairwise
@@ -186,7 +189,7 @@ primary/metastasis testing becomes routine.
 
 | # | Candidate | Type | Audience | Value | Effort |
 |---|-----------|------|----------|:-----:|:------:|
-| A2.1 | Waterfall: TTR + duration-of-response | improve | Onc | High | Med |
+| A2.1 | Waterfall: censoring-aware (KM) duration-of-response | improve | Onc | High | Low&ndash;Med |
 | A1.1 | ihcscoring: optimal cutpoint + reproducibility panel | improve | Path | High | Low–Med |
 | A2.2 | survival: subgroup HR forest option | improve | Onc | High | Med |
 | B1 | RCB / tumor-regression-grade calculator | **new** | Path/Onc | High | Low |
@@ -208,7 +211,7 @@ primary/metastasis testing becomes routine.
 1. **B1 — RCB / tumor-regression-grade calculator** (closed-form, no dependency, used daily in path reports)
 2. **B2 — Lymph node ratio** (simple, established prognostic factor, reuses cutpoint+survival engines)
 3. **B3 — Inflammatory prognostic indices** (arithmetic, high oncology demand)
-4. **A2.1 — waterfall TTR/DoR** (completes the RECIST efficacy endpoint set)
+4. **A2.1 — waterfall censoring-aware (KM) duration-of-response** (corrects a naive-median DoR)
 
 These four are all either dependency-free or reuse engines already in the module, and each
 maps to an analysis one of the three specialties runs routinely.

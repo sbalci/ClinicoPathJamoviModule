@@ -5,6 +5,7 @@
 #' @import survminer
 #' @import ggplot2
 #'
+#' @return An \code{R6} class generator object for the \code{mediansurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "mediansurvivalClass",

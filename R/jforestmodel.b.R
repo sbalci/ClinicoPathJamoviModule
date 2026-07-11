@@ -4,6 +4,7 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @export
+#' @return An \code{R6} class generator object for the \code{jforestmodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jforestmodelClass <- R6::R6Class(
     "jforestmodelClass",

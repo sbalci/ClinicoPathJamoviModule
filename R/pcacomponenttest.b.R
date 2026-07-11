@@ -5,6 +5,7 @@
 #' @import ggplot2
 #' @import dplyr
 #'
+#' @return An \code{R6} class generator object for the \code{pcacomponenttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "pcacomponenttestClass",

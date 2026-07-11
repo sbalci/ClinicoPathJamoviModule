@@ -1166,11 +1166,6 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                     # Enhanced parallel processing with proper error handling
                     tryCatch(
                         {
-                            # Export required functions and data to parallel workers
-                            parallel::clusterEvalQ(cl, {
-                                library(jmvcore)
-                            })
-
                             # Process combinations in parallel chunks
                             chunk_size <- max(1, floor(length(all_test_combinations) / (n_cores * 2)))
                             chunks <- split(

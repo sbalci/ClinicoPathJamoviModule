@@ -6,6 +6,7 @@
 #' @importFrom stats lm glm predict residuals fitted
 #' @importFrom stats quantile median sd var
 #' @export
+#' @return An \code{R6} class generator object for the \code{pseudosurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 pseudosurvivalClass <- R6::R6Class(
     "pseudosurvivalClass",
     inherit = pseudosurvivalBase,

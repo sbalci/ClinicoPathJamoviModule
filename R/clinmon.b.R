@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @import magrittr
 #' @importFrom clintools clinmon
+#' @return An \code{R6} class generator object for the \code{clinmonClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 clinmonClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(

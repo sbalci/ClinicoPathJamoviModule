@@ -6,6 +6,7 @@
 #' @import dplyr
 #' @import ggrepel
 #'
+#' @return An \code{R6} class generator object for the \code{jjsyndromicplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 # The syndromic plot visualization is based on the syndRomics R package
 # (https://github.com/ucsf-ferguson-lab/syndRomics) developed by the Ferguson Lab

@@ -30,6 +30,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom stringr str_to_title
 #' @importFrom rlang sym
+#' @return An \code{R6} class generator object for the \code{jjsegmentedtotalbarClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jjsegmentedtotalbarClass",

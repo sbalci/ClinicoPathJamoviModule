@@ -63,6 +63,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{oddsratioClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "oddsratioClass",
@@ -1188,6 +1189,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Plots the nomogram using base R graphics
         .plot_nomogram = function(image, ggtheme, theme, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
             if(is.null(private$.nom_object)) {
                 return(FALSE)
             }

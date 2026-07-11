@@ -8,6 +8,7 @@
 #' @importFrom dplyr filter mutate group_by summarise arrange
 #' @importFrom tidyr gather
 #' @importFrom stats quantile complete.cases
+#' @return An \code{R6} class generator object for the \code{decisioncurveClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "decisioncurveClass",

@@ -11,6 +11,7 @@
 #' @importFrom stats as.formula
 #' @importFrom grDevices rgb
 #'
+#' @return An \code{R6} class generator object for the \code{vartreeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 # Enhanced implementation supporting current CRAN vtree version 5.6.5
 # Consolidates functionality from legacy versions with modern vtree features
 

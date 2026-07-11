@@ -22,6 +22,7 @@
 #' @import lubridate
 #' @import dplyr
 #'
+#' @return An \code{R6} class generator object for the \code{datetimeconverterClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "datetimeconverterClass",

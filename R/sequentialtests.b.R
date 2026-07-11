@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom ggplot2 ggplot aes geom_text geom_line geom_point labs theme_void theme element_blank scale_x_continuous scale_y_continuous annotate
 #' @importFrom gridExtra grid.arrange
+#' @return An \code{R6} class generator object for the \code{sequentialtestsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 sequentialtestsClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(

@@ -36,6 +36,7 @@
 #' @importFrom grid unit
 #' @importFrom digest digest
 #' @export
+#' @return An \code{R6} class generator object for the \code{riverplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "riverplotClass",

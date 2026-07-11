@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom grDevices png svg pdf dev.off
 #' @export
+#' @return An \code{R6} class generator object for the \code{consortdiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 consortdiagramClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
@@ -1108,8 +1109,8 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # Fallback: Create a simple ggplot diagram
-                        # TODO (hygiene): drop `library(ggplot2)` here - `library()` inside package R files modifies the user's search path at source-load time and trips `R CMD check`. Replace each `ggplot()`, `aes()`, `geom_*()`, `theme_*()`, `labs()` reference in this fallback block with explicit `ggplot2::` namespacing, or add `@importFrom ggplot2 ...` roxygen at the top of the file. The primary plot path already uses `ggplot2::` namespacing so this is just the error-fallback branch.
-                        library(ggplot2)
+                        if (!requireNamespace("ggplot2", quietly = TRUE))
+                            stop("Package 'ggplot2' is required for this analysis; please install it.")
 
                         # Create simple flow diagram using rectangles
                         plot_data <- data.frame(
@@ -1121,18 +1122,18 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                             stringsAsFactors = FALSE
                         )
 
-                        p <- ggplot(plot_data, aes(x = x, y = y)) +
-                            geom_rect(
-                                aes(
+                        p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = y)) +
+                            ggplot2::geom_rect(
+                                ggplot2::aes(
                                     xmin = x - 0.3, xmax = x + 0.3,
                                     ymin = y - 0.3, ymax = y + 0.3
                                 ),
                                 fill = "#f0f0f0", color = "#333333"
                             ) +
-                            geom_text(aes(label = label), size = 3) +
-                            theme_void() +
-                            labs(title = self$options$study_title) +
-                            theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+                            ggplot2::geom_text(ggplot2::aes(label = label), size = 3) +
+                            ggplot2::theme_void() +
+                            ggplot2::labs(title = self$options$study_title) +
+                            ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 14, face = "bold"))
 
                         print(p)
                         return(TRUE)

@@ -10,6 +10,7 @@
 #' @importFrom grDevices rainbow
 #' @importFrom graphics abline legend lines plot points text
 #' @export
+#' @return An \code{R6} class generator object for the \code{factoranalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 factoranalysisClass <- R6::R6Class(
     "factoranalysisClass",

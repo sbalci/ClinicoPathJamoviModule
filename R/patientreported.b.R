@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats cor t.test aov kruskal.test wilcox.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{patientreportedClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 patientreportedClass <- R6::R6Class(
@@ -578,7 +579,6 @@ patientreportedClass <- R6::R6Class(
             scale_data <- private$.scale_data
             
             # Convert to long format
-            library(reshape2)
             long_data <- reshape2::melt(scale_data)
             long_data <- long_data[!is.na(long_data$value), ]
             

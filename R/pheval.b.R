@@ -5,6 +5,7 @@
 #' @importFrom stats predict fitted residuals confint cor.test
 #' @importFrom utils capture.output
 #' @export
+#' @return An \code{R6} class generator object for the \code{phevalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 phevalClass <- R6::R6Class(

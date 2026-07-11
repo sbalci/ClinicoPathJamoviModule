@@ -1,0 +1,153 @@
+---
+name:  hematologicindices
+title: Hematologic Prognostic Indices
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - neutrophils
+          - lymphocytes
+          - platelets
+          - indices
+
+    - name: indicesTable
+      title: Index Summary
+      type: Table
+      visible: (showIndicesTable)
+      clearWith:
+          - neutrophils
+          - lymphocytes
+          - platelets
+          - monocytes
+          - albumin
+          - albuminUnit
+          - crp
+          - indices
+          - gpsType
+      columns:
+          - name: index
+            title: Index
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+          - name: mean
+            title: Mean
+            type: number
+          - name: median
+            title: Median
+            type: number
+          - name: q1
+            title: Q1
+            type: number
+          - name: q3
+            title: Q3
+            type: number
+
+    - name: gpsTable
+      title: Glasgow Prognostic Score Distribution
+      type: Table
+      visible: (showIndicesTable)
+      clearWith:
+          - albumin
+          - albuminUnit
+          - crp
+          - gpsType
+      columns:
+          - name: score
+            title: Score
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+          - name: pct
+            title: '%'
+            type: number
+            format: pc
+
+    - name: survivalTable
+      title: Survival by Index Split
+      type: Table
+      visible: (showSurvival)
+      clearWith:
+          - survivalIndex
+          - splitMethod
+          - survivalTime
+          - survivalStatus
+          - eventLevel
+      columns:
+          - name: group
+            title: Group
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+          - name: events
+            title: Events
+            type: integer
+          - name: medianTime
+            title: Median Survival
+            type: number
+          - name: hr
+            title: HR
+            type: number
+          - name: hr_lower
+            title: Lower CI
+            type: number
+          - name: hr_upper
+            title: Upper CI
+            type: number
+
+    - name: plot
+      title: Indices
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - neutrophils
+          - lymphocytes
+          - platelets
+          - monocytes
+          - albumin
+          - crp
+          - indices
+          - showSurvival
+          - survivalIndex
+          - splitMethod
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+    - name: addIndexToData
+      title: Add Selected Index to Data
+      type: Output
+      varTitle: hematologic_index
+      varDescription: Selected hematologic prognostic index.
+      measureType: continuous
+      clearWith:
+          - survivalIndex
+          - neutrophils
+          - lymphocytes
+          - platelets
+
+
+refs:
+    - onodera1984pni
+    - mcmillan2013gps
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

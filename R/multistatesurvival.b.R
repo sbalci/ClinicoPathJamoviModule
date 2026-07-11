@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{multistatesurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "multistatesurvivalClass",

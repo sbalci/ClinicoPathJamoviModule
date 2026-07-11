@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{gradientboostingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 gradientboostingClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
@@ -529,6 +530,8 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
             },
 
             .plotPartial = function(image, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 # This will be implemented to create partial dependence plots
                 # For now, create placeholder
                 par(mfrow = c(2, 2))

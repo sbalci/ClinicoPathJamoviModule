@@ -63,6 +63,7 @@
 #' @importFrom ggplot2 ggplot aes labs theme_minimal ggtitle
 #' @importFrom dplyr summarise group_by mutate select
 #' @importFrom htmltools HTML
+#' @return An \code{R6} class generator object for the \code{missingdataClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataClass",
     inherit = missingdataBase,

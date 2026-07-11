@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @export
+#' @return An \code{R6} class generator object for the \code{mendelianrandomizationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "mendelianrandomizationClass",

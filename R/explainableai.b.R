@@ -7,6 +7,7 @@
 #' @importFrom ggplot2 ggplot aes geom_col geom_point geom_line labs theme_minimal
 #' @importFrom viridis scale_fill_viridis scale_color_viridis
 #' @importFrom corrplot corrplot
+#' @return An \code{R6} class generator object for the \code{explainableaiClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "explainableaiClass",

@@ -9,6 +9,7 @@
 #' @importFrom effectsize cohens_d hedges_g eta_squared omega_squared
 #' @importFrom rstatix wilcox_test t_test
 #'
+#' @return An \code{R6} class generator object for the \code{jjridgesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjridgesClass",
@@ -1999,14 +2000,13 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Apply DPI setting for high-resolution output
                 dpi <- self$options$dpi
                 if (!is.null(dpi) && dpi > 0) {
-                    # Store current setting
+                    # Store current setting and guarantee restoration on exit
                     old_dpi <- getOption("device.dpi", 72)
+                    on.exit(options(device.dpi = old_dpi), add = TRUE)
                     # Set requested DPI
                     options(device.dpi = dpi)
                     # Print plot with new DPI
                     print(plot)
-                    # Restore original DPI
-                    options(device.dpi = old_dpi)
                 } else {
                     print(plot)
                 }

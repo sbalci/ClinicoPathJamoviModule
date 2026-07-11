@@ -5,6 +5,7 @@
 #' @import ggplot2
 #' @import dplyr
 #' @export
+#' @return An \code{R6} class generator object for the \code{coxrobustClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 coxrobustClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "coxrobustClass",

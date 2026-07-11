@@ -749,8 +749,6 @@ betabinomialdiagnosticClass <- R6::R6Class(
             
             # This would create a forest plot for sensitivity
             # Placeholder implementation
-            library(ggplot2)
-            
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Forest Plot for Sensitivity\n(Requires meta-analysis data)"),
                          size = 6, hjust = 0.5) +
@@ -763,9 +761,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
         
         .plotForestSpecificity = function(image, ggtheme, theme, ...) {
             if (!self$options$forest_plot) return()
-            
-            library(ggplot2)
-            
+
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Forest Plot for Specificity\n(Requires meta-analysis data)"),
                          size = 6, hjust = 0.5) +
@@ -778,8 +774,6 @@ betabinomialdiagnosticClass <- R6::R6Class(
         
         .plotSummaryROC = function(image, ggtheme, theme, ...) {
             if (!self$options$summary_roc_curve) return()
-            
-            library(ggplot2)
             
             # Create summary ROC plot
             fpr_vals <- seq(0, 1, length.out = 100)
@@ -823,8 +817,6 @@ betabinomialdiagnosticClass <- R6::R6Class(
         .plotResiduals = function(image, ggtheme, theme, ...) {
             if (!self$options$residual_plots) return()
             
-            library(ggplot2)
-            
             # Placeholder residual plot
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "Residual Diagnostic Plots\n(Model-specific implementation needed)"),
@@ -839,8 +831,6 @@ betabinomialdiagnosticClass <- R6::R6Class(
         .plotConvergence = function(image, ggtheme, theme, ...) {
             if (self$options$estimation_method != "bayesian_mcmc" || !self$options$convergence_diagnostics) return()
             
-            library(ggplot2)
-            
             # Placeholder convergence plot
             p <- ggplot() +
                 geom_text(aes(x = 0.5, y = 0.5, label = "MCMC Convergence Plots\n(Requires Bayesian estimation)"),
@@ -854,8 +844,6 @@ betabinomialdiagnosticClass <- R6::R6Class(
         
         .plotFunnel = function(image, ggtheme, theme, ...) {
             if (!self$options$publication_bias) return()
-            
-            library(ggplot2)
             
             # Placeholder funnel plot
             p <- ggplot() +

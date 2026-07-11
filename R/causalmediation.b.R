@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @export
+#' @return An \code{R6} class generator object for the \code{causalmediationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "causalmediationClass",

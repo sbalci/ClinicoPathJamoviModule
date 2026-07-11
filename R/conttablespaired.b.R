@@ -3,6 +3,7 @@
 #' @description R6 class for performing paired contingency table analysis (McNemar test).
 #' @name contTablesPairedClass
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{contTablesPairedClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 contTablesPairedClass <- R6::R6Class(
     "contTablesPairedClass",
     inherit = contTablesPairedBase,

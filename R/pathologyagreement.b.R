@@ -3,6 +3,7 @@
 #' @description R6 class for performing pathology agreement analysis.
 #' @name pathologyagreementClass
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{pathologyagreementClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(
         "pathologyagreementClass",

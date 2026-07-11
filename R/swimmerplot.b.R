@@ -13,6 +13,7 @@
 #' @importFrom tibble tibble
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom scales pretty_breaks
+#' @return An \code{R6} class generator object for the \code{swimmerplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "swimmerplotClass",

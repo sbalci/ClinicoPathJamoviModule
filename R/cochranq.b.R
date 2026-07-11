@@ -1,6 +1,7 @@
 #' @title Cochran's Q Test for Paired Categorical Data
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @return An \code{R6} class generator object for the \code{cochranqClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 cochranqClass <- R6::R6Class(
     "cochranqClass",

@@ -8,6 +8,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom scales percent_format
 #' @importFrom rlang .data
+#' @return An \code{R6} class generator object for the \code{decisioncombineClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 decisioncombineClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(

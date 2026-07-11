@@ -7,6 +7,7 @@
 #' @import tidyr
 #' @import stats
 #'
+#' @return An \code{R6} class generator object for the \code{pcaloadingheatmapClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
@@ -562,6 +563,9 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 #' @param pca_data Numeric matrix used to fit the PCA.
 #' @param scaled Logical; whether the PCA was run with `scale.=TRUE`.
 #'
+#' @return A numeric matrix of normalized loadings (variables in rows,
+#'   components in columns) with values clipped to the (-1, 1) range.
+#'
 #' @keywords internal
 pcaloadingheatmap_normalized_loadings <- function(pca, pca_data, scaled) {
     loadings <- sweep(pca$rotation, 2, pca$sdev, `*`)
@@ -579,6 +583,10 @@ pcaloadingheatmap_normalized_loadings <- function(pca, pca_data, scaled) {
 }
 
 #' Variance explained by PCA components
+#'
+#' @return A data.frame with one row per retained component and columns
+#'   `component` (index), `variance` (proportion of variance explained), and
+#'   `cumulative` (cumulative proportion of variance explained).
 #'
 #' @keywords internal
 pcaloadingheatmap_variance_info <- function(pca, ncomp) {

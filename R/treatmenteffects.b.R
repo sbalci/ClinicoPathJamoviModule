@@ -2,6 +2,7 @@
 #' @description R6 class for performing causal treatment effects analysis.
 #' @name treatmenteffectsClass
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{treatmenteffectsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 treatmenteffectsClass <- R6::R6Class(
     "treatmenteffectsClass",
     inherit = treatmenteffectsBase,

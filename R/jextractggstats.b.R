@@ -2,6 +2,7 @@
 #' @title Statistical Data Extraction from ggstatsplot
 #' @importFrom jmvcore .
 #' @export
+#' @return An \code{R6} class generator object for the \code{jextractggstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "jextractggstatsClass",

@@ -7,6 +7,7 @@
 #' @import ggplot2
 #' @importFrom survminer ggsurvplot
 #' @export
+#' @return An \code{R6} class generator object for the \code{survivalendpointsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
@@ -1052,7 +1053,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         .exportEndpoints = function(derivedData) {
 
             # Create export directory
-            export_dir <- file.path(getwd(), "survival_exports")
+            export_dir <- file.path(tempdir(), "survival_exports")
             if (!dir.exists(export_dir)) {
                 dir.create(export_dir, recursive = TRUE)
             }

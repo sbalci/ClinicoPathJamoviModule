@@ -7,6 +7,7 @@
 #' @importFrom survminer ggsurvplot
 #' @importFrom dplyr mutate filter group_by summarise
 #' @export
+#' @return An \code{R6} class generator object for the \code{progressionsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 progressionsurvivalClass <- R6::R6Class(
     "progressionsurvivalClass",

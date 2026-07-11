@@ -7,6 +7,7 @@
 #' @author ClinicoPath Development Team
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @return An \code{R6} class generator object for the \code{modelperformanceClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "modelperformanceClass",
@@ -417,14 +418,6 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 return(FALSE)
             }
 
-            # TODO (cleanup): file-wide pattern - `library(ggplot2)` / `library(pROC)`
-            # calls at this site, L482 (.rocPlot), L483 (.rocPlot) modify the user's
-            # search path at runtime and trip R CMD check. Replace with
-            # `requireNamespace("ggplot2", quietly = TRUE)` + explicit `ggplot2::` /
-            # `pROC::` prefixes throughout the plot bodies (the file already uses
-            # namespaced calls like `pROC::roc` / `pROC::auc` elsewhere).
-            library(ggplot2)
-
             # Extract coefficients from all models
             plot_data <- list()
 
@@ -491,9 +484,6 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 message("Package 'pROC' required for ROC curves")
                 return(FALSE)
             }
-
-            library(ggplot2)
-            library(pROC)
 
             roc_data <- list()
 

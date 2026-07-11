@@ -5,6 +5,7 @@
 #' @importFrom ggplot2 ggplot aes geom_line geom_point geom_hline labs scale_y_continuous scale_x_continuous annotate
 #' @importFrom scales percent_format comma_format
 #'
+#' @return An \code{R6} class generator object for the \code{comprehensiveSurvivalPowerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "comprehensiveSurvivalPowerClass",

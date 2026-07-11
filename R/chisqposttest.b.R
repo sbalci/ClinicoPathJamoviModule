@@ -18,6 +18,7 @@
 #' @importFrom grDevices hcl.colors
 #' @importFrom htmltools HTML div h3 h4 h5 p strong em br
 #'
+#' @return An \code{R6} class generator object for the \code{chisqposttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "chisqposttestClass",

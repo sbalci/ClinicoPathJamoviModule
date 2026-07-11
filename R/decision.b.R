@@ -15,6 +15,7 @@
 #' @importFrom dplyr %>% mutate case_when
 #' @importFrom forcats as_factor fct_relevel
 #' @importFrom epiR epi.tests
+#' @return An \code{R6} class generator object for the \code{decisionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 #  @references

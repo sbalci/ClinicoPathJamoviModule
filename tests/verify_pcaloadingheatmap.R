@@ -149,6 +149,7 @@ full_content <- c(mocks_string, file_content)
 temp_file <- tempfile(fileext = ".R")
 writeLines(full_content, temp_file)
 source(temp_file)
+unlink(temp_file)
 
 # Ensure pcaloadingheatmapClass is available
 if (!exists("pcaloadingheatmapClass")) {

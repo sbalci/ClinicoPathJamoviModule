@@ -24,6 +24,7 @@
 #' @importFrom stats aov kruskal.test t.test wilcox.test
 #' @importFrom broom tidy glance
 #' @export
+#' @return An \code{R6} class generator object for the \code{economistplotsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(

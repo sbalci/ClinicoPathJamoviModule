@@ -1,0 +1,121 @@
+---
+name:  lymphnoderatio
+title: Lymph Node Ratio
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - positiveNodes
+          - examinedNodes
+
+    - name: ratioTable
+      title: LNR & Nodal Yield Summary
+      type: Table
+      visible: (showRatioSummary)
+      clearWith:
+          - positiveNodes
+          - examinedNodes
+          - minYield
+      columns:
+          - name: quantity
+            title: Quantity
+            type: text
+          - name: value
+            title: Value
+            type: number
+
+    - name: strataTable
+      title: LNR Strata
+      type: Table
+      visible: (showStrata)
+      clearWith:
+          - positiveNodes
+          - examinedNodes
+          - stratMethod
+          - thresholds
+          - survivalTime
+          - survivalStatus
+          - eventLevel
+      columns:
+          - name: stratum
+            title: LNR Stratum
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+          - name: meanLNR
+            title: Mean LNR
+            type: number
+          - name: events
+            title: Events
+            type: integer
+          - name: medianTime
+            title: Median Survival
+            type: number
+          - name: hr
+            title: HR
+            type: number
+          - name: hr_lower
+            title: Lower CI
+            type: number
+          - name: hr_upper
+            title: Upper CI
+            type: number
+
+    - name: plot
+      title: LNR
+      type: Image
+      width: 550
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - positiveNodes
+          - examinedNodes
+          - stratMethod
+          - thresholds
+          - survivalTime
+          - survivalStatus
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+    - name: addRatioToData
+      title: Add LNR to Data
+      type: Output
+      varTitle: LNR
+      varDescription: Lymph node ratio (positive / examined).
+      measureType: continuous
+      clearWith:
+          - positiveNodes
+          - examinedNodes
+
+    - name: addStratumToData
+      title: Add LNR Stratum to Data
+      type: Output
+      varTitle: LNR_stratum
+      varDescription: Lymph node ratio stratum.
+      measureType: nominal
+      clearWith:
+          - positiveNodes
+          - examinedNodes
+          - stratMethod
+          - thresholds
+
+
+refs:
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

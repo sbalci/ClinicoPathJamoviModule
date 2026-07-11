@@ -7,6 +7,7 @@
 #' @importFrom rlang sym %||%
 #' @importFrom glue glue
 #'
+#' @return An \code{R6} class generator object for the \code{jjbarstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jjbarstatsClass <- if (requireNamespace('jmvcore'))
     R6::R6Class(

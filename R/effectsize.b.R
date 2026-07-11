@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom stats t.test var sd
 #' @export
+#' @return An \code{R6} class generator object for the \code{effectsizeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 effectsizeClass <- R6::R6Class(
     "effectsizeClass",

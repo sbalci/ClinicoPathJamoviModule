@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats complete.cases median quantile sd
 #' @export
+#' @return An \code{R6} class generator object for the \code{clinicaldashboardClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 clinicaldashboardClass <- R6::R6Class(
     "clinicaldashboardClass",

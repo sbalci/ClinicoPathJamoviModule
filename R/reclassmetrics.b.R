@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{reclassmetricsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "reclassmetricsClass",

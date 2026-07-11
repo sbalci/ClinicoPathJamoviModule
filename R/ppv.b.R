@@ -26,6 +26,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom ggplot2 ggplot aes geom_point scale_color_manual scale_shape_manual theme element_blank element_rect
+#' @return An \code{R6} class generator object for the \code{ppvClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 ppvClass <- R6::R6Class(
     "ppvClass",

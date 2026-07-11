@@ -8,6 +8,7 @@
 #' @importFrom dplyr mutate group_by summarise arrange filter
 #' @importFrom stats confint pchisq qnorm
 #' @export
+#' @return An \code{R6} class generator object for the \code{finegrayClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "finegrayClass",

@@ -6,6 +6,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats binom.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{irecistClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 irecistClass <- R6::R6Class(
     "irecistClass",

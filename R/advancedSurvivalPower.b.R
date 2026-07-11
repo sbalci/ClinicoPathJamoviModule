@@ -41,6 +41,7 @@
 #' @importFrom powerSurvEpi powerCT.default
 #' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_vline labs theme_bw ylim scale_x_reverse
 #'
+#' @return An \code{R6} class generator object for the \code{advancedSurvivalPowerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 advancedSurvivalPowerClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(

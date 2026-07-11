@@ -36,6 +36,7 @@
 #' @importFrom stats kruskal.test
 #' @importFrom stats aov
 #' @export
+#' @return An \code{R6} class generator object for the \code{enhancedtablesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
     "enhancedtablesClass",

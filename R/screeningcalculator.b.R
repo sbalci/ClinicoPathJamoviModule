@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom ggplot2 ggplot geom_text aes xlim ylim theme_void theme element_rect ggtitle
+#' @return An \code{R6} class generator object for the \code{screeningcalculatorClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 screeningcalculatorClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(

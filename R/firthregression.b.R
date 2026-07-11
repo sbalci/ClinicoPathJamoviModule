@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @importFrom jmvcore .
 #' @import survival
+#' @return An \code{R6} class generator object for the \code{firthregressionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 firthregressionClass <- R6::R6Class(
     "firthregressionClass",

@@ -6,6 +6,7 @@
 #' @importFrom stats prcomp predict
 #' @importFrom cluster silhouette
 #' @export
+#' @return An \code{R6} class generator object for the \code{variablebiplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
@@ -1456,8 +1457,6 @@ print(lda_result$scaling)
 
             #---------------------------------------------
             .biplotPCA = function(image, ggtheme, theme, ...) {
-                library(ggplot2)
-
                 pca_result <- private$.pca_result
                 group_factor <- private$.group_factor
 
@@ -1558,8 +1557,6 @@ print(lda_result$scaling)
                     return()
                 }
 
-                library(ggplot2)
-
                 pca_result <- private$.pca_result
                 var_explained <- (pca_result$sdev^2) / sum(pca_result$sdev^2) * 100
 
@@ -1593,8 +1590,6 @@ print(lda_result$scaling)
                 if (is.null(private$.pca_result)) {
                     return()
                 }
-
-                library(ggplot2)
 
                 pca_result <- private$.pca_result
                 pc1 <- self$options$pc1

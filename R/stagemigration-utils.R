@@ -521,6 +521,9 @@ stagemigration_dataQualityReport <- function(data, old_stage, new_stage,
 #' Centralized constants used throughout stage migration analysis to avoid
 #' magic numbers and ensure consistency.
 #'
+#' @return A named list of numeric constants and threshold values used
+#'   internally throughout stage migration analysis.
+#'
 #' @keywords internal
 STAGEMIGRATION_CONSTANTS <- list(
     # Sample size thresholds

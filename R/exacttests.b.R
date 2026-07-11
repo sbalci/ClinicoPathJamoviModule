@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom stats fisher.test binom.test mcnemar.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{exacttestsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 exacttestsClass <- R6::R6Class(
     "exacttestsClass",

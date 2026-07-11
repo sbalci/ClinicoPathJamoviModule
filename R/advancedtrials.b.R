@@ -6,6 +6,7 @@
 #' @importFrom gsDesign gsDesign sfLDOF sfHSD sfPower
 #' @importFrom dplyr mutate filter group_by summarise
 #' @export
+#' @return An \code{R6} class generator object for the \code{advancedtrialsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 advancedtrialsClass <- R6::R6Class(
     "advancedtrialsClass",

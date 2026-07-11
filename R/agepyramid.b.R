@@ -11,6 +11,7 @@
 #'
 #' @param age The name of the column containing age data.
 #'
+#' @return An \code{R6} class generator object for the \code{agepyramidClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "agepyramidClass",

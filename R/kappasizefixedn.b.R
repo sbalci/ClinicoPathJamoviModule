@@ -1,6 +1,7 @@
 #' @title Lowest Expected Value for a fixed sample size
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @return An \code{R6} class generator object for the \code{kappaSizeFixedNClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 kappaSizeFixedNClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(

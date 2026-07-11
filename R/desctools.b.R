@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @import magrittr
 #' @importFrom DescTools CohenD HosmerLemeshowTest AndersonDarlingTest BarnardTest BreslowDayTest CochranArmitageTest JarqueBeraTest CramerVonMisesTest
+#' @return An \code{R6} class generator object for the \code{desctoolsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 desctoolsClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(

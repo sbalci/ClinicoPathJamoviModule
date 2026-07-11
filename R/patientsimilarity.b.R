@@ -43,6 +43,7 @@
 #' @author ClinicoPath Development Team
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @return An \code{R6} class generator object for the \code{patientsimilarityClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "patientsimilarityClass",
@@ -629,8 +630,6 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                 return()
             }
 
-            library(ggplot2)
-
             projection <- private$.projectionData
             coords <- as.data.frame(projection$coords)
 
@@ -727,9 +726,6 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
             if (is.null(private$.projectionData$clusters)) {
                 return(FALSE)
             }
-
-            library(survival)
-            library(survminer)
 
             # Get data
             complete_idx <- complete.cases(self$data[, self$options$vars, drop = FALSE])

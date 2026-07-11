@@ -1,0 +1,104 @@
+title: Residual Cancer Burden (RCB)
+name: residualcancerburden
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: inputMode
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Primary Tumor Bed
+        children:
+          - type: VariablesListBox
+            name: d1
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: d2
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: cellularity
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: cis
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Regional Nodes
+        children:
+          - type: VariablesListBox
+            name: positiveNodes
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: metSize
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Survival Linkage (optional)
+        children:
+          - type: VariablesListBox
+            name: survivalTime
+            maxItemCount: 1
+            isTarget: true
+          - type: VariablesListBox
+            name: survivalStatus
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: eventLevel
+        label: Event Level
+  - type: CollapseBox
+    label: Single-Case Values
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: TextBox
+        name: mD1
+        format: number
+      - type: TextBox
+        name: mD2
+        format: number
+      - type: TextBox
+        name: mCellularity
+        format: number
+      - type: TextBox
+        name: mCis
+        format: number
+      - type: TextBox
+        name: mNodes
+        format: number
+      - type: TextBox
+        name: mMetSize
+        format: number
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showDistribution
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: survivalLink
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation
+      - type: Output
+        name: addIndexToData
+      - type: Output
+        name: addClassToData

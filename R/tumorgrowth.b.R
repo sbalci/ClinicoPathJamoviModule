@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{tumorgrowthClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "tumorgrowthClass",
@@ -758,8 +759,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             tryCatch({
                 library(ggplot2)
-                library(dplyr)
-                
+
                 # Get original data
                 data <- self$data
                 time_var <- self$options$time

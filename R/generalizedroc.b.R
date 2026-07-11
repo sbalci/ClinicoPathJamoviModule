@@ -4,6 +4,7 @@
 #' @importFrom stats qnorm quantile var sd shapiro.test qqnorm qqline
 #' @importFrom graphics plot lines legend abline hist par
 #' @export
+#' @return An \code{R6} class generator object for the \code{generalizedrocClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 generalizedrocClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
@@ -722,6 +723,9 @@ generalizedrocClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # PLOT Q-Q PLOTS
             #---------------------------------------------
             .qqPlot = function(image, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
+
                 if (is.null(private$.data_prepared)) {
                     return()
                 }

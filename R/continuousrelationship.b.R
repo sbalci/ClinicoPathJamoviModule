@@ -12,6 +12,7 @@
 #' @importFrom stats lm glm AIC BIC logLik quantile median
 #' @importFrom dplyr mutate select filter
 #'
+#' @return An \code{R6} class generator object for the \code{continuousrelationshipClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "continuousrelationshipClass",

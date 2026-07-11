@@ -1,0 +1,154 @@
+---
+name:  residualcancerburden
+title: Residual Cancer Burden (RCB)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - inputMode
+          - d1
+          - d2
+          - cellularity
+          - positiveNodes
+
+    - name: caseTable
+      title: RCB Result
+      type: Table
+      visible: true
+      clearWith:
+          - inputMode
+          - mD1
+          - mD2
+          - mCellularity
+          - mCis
+          - mNodes
+          - mMetSize
+          - d1
+          - d2
+          - cellularity
+          - cis
+          - positiveNodes
+          - metSize
+      columns:
+          - name: quantity
+            title: Quantity
+            type: text
+          - name: value
+            title: Value
+            type: number
+
+    - name: distributionTable
+      title: RCB Class Distribution
+      type: Table
+      visible: (showDistribution)
+      clearWith:
+          - inputMode
+          - d1
+          - d2
+          - cellularity
+          - cis
+          - positiveNodes
+          - metSize
+      columns:
+          - name: rcbclass
+            title: RCB Class
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+          - name: pct
+            title: '%'
+            type: number
+            format: pc
+          - name: meanIndex
+            title: Mean Index
+            type: number
+
+    - name: survivalTable
+      title: RCB Class vs Survival
+      type: Table
+      visible: (survivalLink)
+      clearWith:
+          - inputMode
+          - survivalTime
+          - survivalStatus
+          - eventLevel
+      columns:
+          - name: rcbclass
+            title: RCB Class
+            type: text
+          - name: n
+            title: 'N'
+            type: integer
+          - name: events
+            title: Events
+            type: integer
+          - name: medianTime
+            title: Median Time
+            type: number
+
+    - name: plot
+      title: RCB Distribution
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - inputMode
+          - d1
+          - d2
+          - cellularity
+          - cis
+          - positiveNodes
+          - metSize
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+    - name: addIndexToData
+      title: Add RCB Index to Data
+      type: Output
+      varTitle: RCB_index
+      varDescription: Residual Cancer Burden continuous index (Symmans 2007).
+      measureType: continuous
+      clearWith:
+          - d1
+          - d2
+          - cellularity
+          - cis
+          - positiveNodes
+          - metSize
+
+    - name: addClassToData
+      title: Add RCB Class to Data
+      type: Output
+      varTitle: RCB_class
+      varDescription: Residual Cancer Burden class (RCB-0/I/II/III).
+      measureType: nominal
+      clearWith:
+          - d1
+          - d2
+          - cellularity
+          - cis
+          - positiveNodes
+          - metSize
+
+
+refs:
+    - symmans2007rcb
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

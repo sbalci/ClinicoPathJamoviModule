@@ -5,6 +5,7 @@
 #' @importFrom coefplot coefplot
 #' @importFrom jtools plot_summs plot_coefs
 #' @import ggplot2
+#' @return An \code{R6} class generator object for the \code{coefplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 coefplotClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(

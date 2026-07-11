@@ -6,6 +6,7 @@
 #' @import ggplot2
 #' @import dplyr
 #' @export
+#' @return An \code{R6} class generator object for the \code{robustaftClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 robustaftClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "robustaftClass",

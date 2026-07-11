@@ -7,6 +7,7 @@
 #' @importFrom survival Surv survfit coxph
 #' @importFrom graphics plot lines legend abline
 #' @export
+#' @return An \code{R6} class generator object for the \code{timedependentdcaClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(

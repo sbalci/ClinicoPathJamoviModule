@@ -6,6 +6,7 @@
 #' @importFrom ggplot2 ggplot aes geom_line geom_ribbon labs theme_minimal theme element_text
 #' @importFrom stringr str_to_title
 #' @export
+#' @return An \code{R6} class generator object for the \code{smoothhazardClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 smoothhazardClass <- R6::R6Class(
     "smoothhazardClass",
     inherit = smoothhazardBase,

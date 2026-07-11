@@ -4,6 +4,7 @@
 #' @importFrom survival Surv survfit coxph survdiff cox.zph
 #' @importFrom cluster daisy
 #' @import ggplot2
+#' @return An \code{R6} class generator object for the \code{ihcsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 ihcsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(

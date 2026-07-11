@@ -1624,6 +1624,8 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
             },
             .plotHeterogeneity = function(image, ...) {
+                oldpar <- graphics::par(no.readonly = TRUE)
+                on.exit(graphics::par(oldpar), add = TRUE)
                 if (!requireNamespace("metafor", quietly = TRUE)) {
                     return(FALSE)
                 }

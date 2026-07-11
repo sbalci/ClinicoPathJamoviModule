@@ -5,6 +5,7 @@
 #' @importFrom stats cor.test complete.cases cor
 #' @importFrom psych corr.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{enhancedcorrelationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 enhancedcorrelationClass <- R6::R6Class(
     "enhancedcorrelationClass",

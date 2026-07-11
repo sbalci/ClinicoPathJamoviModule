@@ -1566,6 +1566,9 @@ clinicalvalidationClass <- R6::R6Class(
 
     # Render residual plots for model diagnostics
     .residual_plots = function(image, ggtheme, theme, ...) {
+      oldpar <- graphics::par(no.readonly = TRUE)
+      on.exit(graphics::par(oldpar), add = TRUE)
+
       if (!self$.isReady()) {
         return()
       }

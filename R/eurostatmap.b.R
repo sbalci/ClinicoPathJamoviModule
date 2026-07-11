@@ -10,7 +10,13 @@
 #' @import dplyr
 #' @import giscoR
 
-# Package-local cache environment - avoids assigning to .GlobalEnv
+#' Package-local cache environment
+#'
+#' Internal environment used to cache downloaded Eurostat data across runs,
+#' avoiding assignment to \code{.GlobalEnv}.
+#'
+#' @return An environment used internally to cache Eurostat data between runs.
+#' @keywords internal
 .eurostat_pkg_cache <- new.env(parent = emptyenv())
 
 eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(

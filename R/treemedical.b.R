@@ -7,6 +7,7 @@
 #' @importFrom caret createDataPartition confusionMatrix
 #' @importFrom pROC roc auc
 #' @importFrom ggplot2 ggplot aes geom_col coord_flip labs theme_minimal
+#' @return An \code{R6} class generator object for the \code{treemedicalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalClass",
     inherit = treemedicalBase,

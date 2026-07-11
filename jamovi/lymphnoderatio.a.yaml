@@ -1,0 +1,160 @@
+---
+name:  lymphnoderatio
+title: Lymph Node Ratio
+menuGroup: OncoPathD
+menuSubgroup: Response Evaluation
+menuSubtitle: 'Nodal Ratio, Yield Adequacy, and Prognosis'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Computes the lymph node ratio (LNR = positive nodes / examined nodes) for each
+        patient, assesses nodal-yield adequacy against a minimum-examined threshold, and
+        relates LNR to a survival outcome. LNR can be stratified either by established
+        category thresholds or by a data-driven optimal cutpoint chosen to maximize the
+        log-rank separation, and the resulting strata are compared with Kaplan-Meier /
+        log-rank testing. LNR is an established prognostic factor across colorectal,
+        gastric, breast, and head-and-neck cancers, and is more robust than absolute node
+        counts when nodal yield varies between specimens.
+    R:
+        dontrun: true
+        usage: |
+            lymphnoderatio(
+                data = mydata,
+                positiveNodes = "n_positive",
+                examinedNodes = "n_examined",
+                survivalTime = "months", survivalStatus = "dead")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per patient).
+
+    - name: positiveNodes
+      title: Positive Nodes
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Number of lymph nodes containing metastatic carcinoma.
+
+    - name: examinedNodes
+      title: Examined Nodes
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Total number of lymph nodes examined.
+
+    - name: minYield
+      title: Minimum Adequate Yield
+      type: Integer
+      min: 1
+      default: 12
+      description:
+          R: Minimum examined-node count considered an adequate nodal yield (e.g. 12 for colorectal).
+
+    - name: stratMethod
+      title: Stratification Method
+      type: List
+      options:
+        - title: Established thresholds
+          name: fixed
+        - title: Optimal cutpoint (max log-rank)
+          name: optimal
+        - title: None (continuous only)
+          name: none
+      default: fixed
+      description:
+          R: How to categorize LNR for the survival comparison.
+
+    - name: thresholds
+      title: Category Thresholds
+      type: String
+      default: '0.2, 0.5'
+      description:
+          R: >
+            Comma-separated LNR cut points for the established-threshold stratification
+            (e.g. "0.2, 0.5" gives Low / Intermediate / High).
+
+    - name: survivalTime
+      title: Survival Time (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Follow-up time for the survival comparison.
+
+    - name: survivalStatus
+      title: Event Status (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          R: Event indicator for the survival comparison.
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (survivalStatus)
+      description:
+          R: Level of the status variable representing the event.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for hazard-ratio estimates.
+
+    - name: showRatioSummary
+      title: Show LNR Summary
+      type: Bool
+      default: true
+      description:
+          R: Summary statistics of LNR and nodal yield across the cohort.
+
+    - name: showStrata
+      title: Show Strata Table
+      type: Bool
+      default: true
+      description:
+          R: Table of LNR strata with n, events, and median survival.
+
+    - name: showPlot
+      title: Show Plot
+      type: Bool
+      default: true
+      description:
+          R: Distribution of LNR (and strata) or the survival curves by stratum.
+
+    - name: addRatioToData
+      title: Add LNR to Data
+      type: Output
+      description:
+          R: Add the per-patient LNR back to the dataset.
+
+    - name: addStratumToData
+      title: Add LNR Stratum to Data
+      type: Output
+      description:
+          R: Add the per-patient LNR stratum back to the dataset.
+
+    - name: showSummary
+      title: Show Summary
+      type: Bool
+      default: false
+      description:
+          R: Plain-language summary.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Explanation of LNR and its prognostic use.
+...

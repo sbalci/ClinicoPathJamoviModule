@@ -5,6 +5,7 @@
 #' @import ggplot2
 #' @importFrom digest digest
 #'
+#' @return An \code{R6} class generator object for the \code{jjbetweenstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(

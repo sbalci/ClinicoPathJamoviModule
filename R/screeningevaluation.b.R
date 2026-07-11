@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats chisq.test fisher.test prop.test binom.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{screeningevaluationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 screeningevaluationClass <- R6::R6Class(

@@ -8,6 +8,7 @@
 #' @importFrom epitools rateratio
 #' @importFrom dplyr mutate filter group_by summarise arrange
 #' @export
+#' @return An \code{R6} class generator object for the \code{epidemiosurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 epidemiosurvivalClass <- R6::R6Class(
     "epidemiosurvivalClass",

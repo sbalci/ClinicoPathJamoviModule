@@ -4,6 +4,7 @@
 
 #' @title Enhanced Frequency Analysis Class
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{enhancedfrequencyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 enhancedfrequencyClass <- R6::R6Class(
     "enhancedfrequencyClass",
     inherit = enhancedfrequencyBase,

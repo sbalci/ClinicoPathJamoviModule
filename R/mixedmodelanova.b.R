@@ -759,6 +759,8 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         },
 
         .diagnosticPlots = function(image, ggtheme, theme, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
             if (!self$options$show_plots) return()
             if (is.null(private$.model)) return()
 

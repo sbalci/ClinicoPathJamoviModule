@@ -15,6 +15,7 @@
 #' @importFrom htmltools HTML
 #' @importFrom viridis viridis
 #' @importFrom RColorBrewer brewer.pal
+#' @return An \code{R6} class generator object for the \code{parallelplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 parallelplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "parallelplotClass",

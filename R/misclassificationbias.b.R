@@ -6,6 +6,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @return An \code{R6} class generator object for the \code{misclassificationbiasClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "misclassificationbiasClass",

@@ -230,6 +230,7 @@ source_modified <- function(file_path) {
     
     # Write to temp file and source
     temp_file <- tempfile(fileext = ".R")
+    on.exit(unlink(temp_file, recursive = TRUE), add = TRUE)
     writeLines(lines, temp_file)
     source(temp_file)
 }

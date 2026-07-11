@@ -1,0 +1,227 @@
+---
+name:  hematologicindices
+title: Hematologic Prognostic Indices
+menuGroup: OncoPathD
+menuSubgroup: ClinicoPath Biomarker Analysis
+menuSubtitle: 'NLR, PLR, LMR, SII, PNI, GPS'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Derives the commonly reported blood-count and inflammation-based prognostic indices
+        from routine complete-blood-count and biochemistry variables: the
+        neutrophil-to-lymphocyte ratio (NLR), platelet-to-lymphocyte ratio (PLR),
+        lymphocyte-to-monocyte ratio (LMR), systemic immune-inflammation index (SII),
+        Onodera's Prognostic Nutritional Index (PNI), the C-reactive-protein-to-albumin
+        ratio (CAR), and the (modified) Glasgow Prognostic Score (GPS / mGPS). Each index is
+        computed per patient, summarized across the cohort, optionally dichotomized at a
+        literature or data-driven cutpoint, and optionally related to a survival outcome.
+    R:
+        dontrun: true
+        usage: |
+            hematologicindices(
+                data = mydata,
+                neutrophils = "neut", lymphocytes = "lymph",
+                platelets = "plt", albumin = "alb", crp = "crp")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per patient).
+
+    - name: neutrophils
+      title: Neutrophils (10^9/L)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Absolute neutrophil count (10^9/L).
+
+    - name: lymphocytes
+      title: Lymphocytes (10^9/L)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Absolute lymphocyte count (10^9/L).
+
+    - name: platelets
+      title: Platelets (10^9/L)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Platelet count (10^9/L).
+
+    - name: monocytes
+      title: Monocytes (10^9/L) (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Absolute monocyte count (10^9/L), for LMR.
+
+    - name: albumin
+      title: Albumin (g/dL) (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Serum albumin in g/dL (for PNI). If your data are in g/L, set the albumin unit.
+
+    - name: albuminUnit
+      title: Albumin Unit
+      type: List
+      options:
+        - title: g/dL
+          name: gdl
+        - title: g/L
+          name: gl
+      default: gdl
+      description:
+          R: Unit of the albumin variable.
+
+    - name: crp
+      title: CRP (mg/L) (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: C-reactive protein in mg/L (for CAR and GPS).
+
+    - name: indices
+      title: Indices to Compute
+      type: NMXList
+      options:
+        - name: nlr
+          title: "NLR"
+        - name: plr
+          title: "PLR"
+        - name: lmr
+          title: "LMR"
+        - name: sii
+          title: "SII"
+        - name: pni
+          title: "PNI"
+        - name: car
+          title: "CAR"
+        - name: gps
+          title: "GPS / mGPS"
+      default:
+        - nlr
+        - plr
+        - sii
+        - pni
+      description:
+          R: Which indices to compute (subject to the required inputs being supplied).
+
+    - name: gpsType
+      title: Glasgow Score Variant
+      type: List
+      options:
+        - title: Modified GPS (mGPS)
+          name: modified
+        - title: Original GPS
+          name: original
+      default: modified
+      description:
+          R: Original GPS scores low albumin even with normal CRP; mGPS requires elevated CRP.
+
+    - name: survivalTime
+      title: Survival Time (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Follow-up time, to relate an index to outcome.
+
+    - name: survivalStatus
+      title: Event Status (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          R: Event indicator for the survival linkage.
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (survivalStatus)
+      description:
+          R: Level of the status variable representing the event.
+
+    - name: survivalIndex
+      title: Index for Survival Split
+      type: List
+      options:
+        - name: nlr
+          title: "NLR"
+        - name: plr
+          title: "PLR"
+        - name: lmr
+          title: "LMR"
+        - name: sii
+          title: "SII"
+        - name: pni
+          title: "PNI"
+        - name: car
+          title: "CAR"
+      default: nlr
+      description:
+          R: Which continuous index to dichotomize for the survival comparison.
+
+    - name: splitMethod
+      title: Cutpoint Method
+      type: List
+      options:
+        - title: Median
+          name: median
+        - title: Optimal (max log-rank)
+          name: optimal
+      default: median
+      description:
+          R: How to dichotomize the chosen index for the survival split.
+
+    - name: showIndicesTable
+      title: Show Index Summary
+      type: Bool
+      default: true
+      description:
+          R: Summary statistics for each computed index.
+
+    - name: showSurvival
+      title: Relate Index to Survival
+      type: Bool
+      default: false
+      description:
+          R: Compare survival above vs below the cutpoint of the chosen index.
+
+    - name: showPlot
+      title: Show Plot
+      type: Bool
+      default: true
+      description:
+          R: Plot the index distributions (or survival split).
+
+    - name: addIndexToData
+      title: Add Selected Index to Data
+      type: Output
+      description:
+          R: Add the index chosen for the survival split back to the dataset as a new column.
+
+    - name: showSummary
+      title: Show Summary
+      type: Bool
+      default: false
+      description:
+          R: Plain-language summary.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Formulas and cut points.
+...

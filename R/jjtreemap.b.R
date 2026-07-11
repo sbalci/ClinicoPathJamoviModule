@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
+#' @return An \code{R6} class generator object for the \code{jjtreemapClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjtreemapClass",

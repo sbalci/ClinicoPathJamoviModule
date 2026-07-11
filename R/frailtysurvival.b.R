@@ -6,6 +6,7 @@
 #' @importFrom stats AIC BIC logLik anova pchisq qchisq
 #' @importFrom stats quantile median IQR sd var
 #' @export
+#' @return An \code{R6} class generator object for the \code{frailtysurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 frailtysurvivalClass <- R6::R6Class(
     "frailtysurvivalClass",
     inherit = frailtysurvivalBase,

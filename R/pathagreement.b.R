@@ -17,6 +17,7 @@
 #' @description
 #' Pathology interrater reliability analysis including Cohen's kappa, Fleiss' kappa,
 #' Krippendorff's alpha, diagnostic style clustering, and agreement visualization.
+#' @return An \code{R6} class generator object for the \code{pathagreementClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 pathagreementClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
@@ -1788,10 +1789,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 rater_names <- private$.rater_names
 
                 # Create dendrogram using ggdendro
-                require(ggdendro)
+                if (!requireNamespace("ggdendro", quietly = TRUE)) stop("Package 'ggdendro' is required for this analysis; please install it.")
 
                 # Convert hclust to ggplot-compatible format
-                dend_data <- dendro_data(hc)
+                dend_data <- ggdendro::dendro_data(hc)
 
                 # Assign colors to branches based on style groups
                 n_groups <- private$.style_clustering_results$n_clusters
@@ -1934,9 +1935,9 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 n_cases <- private$.n_cases
 
                 # Load required packages
-                require(ggdendro)
-                require(gridExtra)
-                require(grid)
+                if (!requireNamespace("ggdendro", quietly = TRUE)) stop("Package 'ggdendro' is required for this analysis; please install it.")
+                if (!requireNamespace("gridExtra", quietly = TRUE)) stop("Package 'gridExtra' is required for this analysis; please install it.")
+                if (!requireNamespace("grid", quietly = TRUE)) stop("Package 'grid' is required for this analysis; please install it.")
 
                 # === CLUSTER RATERS (COLUMNS) ===
                 # Order raters by style group (matching dendrogram order)
@@ -2033,7 +2034,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 # Create dendrograms for both dimensions
-                rater_dend_data <- dendro_data(private$.style_clustering_results$hclust_object)
+                rater_dend_data <- ggdendro::dendro_data(private$.style_clustering_results$hclust_object)
 
                 # Create the main heatmap
                 main_heatmap <- ggplot(heatmap_data, aes(x = Rater, y = Case, fill = Diagnosis)) +
@@ -2066,7 +2067,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Create case dendrogram (left) - rotated 90 degrees
                 if (!is.null(case_hc)) {
-                    case_dend_data <- dendro_data(case_hc)
+                    case_dend_data <- ggdendro::dendro_data(case_hc)
                     case_dend_plot <- ggplot() +
                         geom_segment(
                             data = case_dend_data$segments,
@@ -2094,18 +2095,18 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     theme_void()
 
                 # Combine all plots using grid.arrange with proper proportions
-                combined_plot <- grid.arrange(
+                combined_plot <- gridExtra::grid.arrange(
                     rater_dend_plot, empty_plot,
                     main_heatmap, case_dend_plot,
                     nrow = 2, ncol = 2,
                     widths = c(4, 1), # Main plot wider than case dendrogram
                     heights = c(1, 4), # Main plot taller than rater dendrogram
-                    top = textGrob("Two-Way Clustered Diagnostic Style Heatmap",
-                        gp = gpar(fontsize = 14, fontface = "bold")
+                    top = grid::textGrob("Two-Way Clustered Diagnostic Style Heatmap",
+                        gp = grid::gpar(fontsize = 14, fontface = "bold")
                     )
                 )
 
-                grid.draw(combined_plot)
+                grid::grid.draw(combined_plot)
                 TRUE
             },
 
@@ -2142,12 +2143,12 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Load required packages
-                require(ggdendro)
-                require(gridExtra)
-                require(grid)
+                if (!requireNamespace("ggdendro", quietly = TRUE)) stop("Package 'ggdendro' is required for this analysis; please install it.")
+                if (!requireNamespace("gridExtra", quietly = TRUE)) stop("Package 'gridExtra' is required for this analysis; please install it.")
+                if (!requireNamespace("grid", quietly = TRUE)) stop("Package 'grid' is required for this analysis; please install it.")
 
                 # === CREATE DENDROGRAM (TOP PART) ===
-                dend_data <- dendro_data(hc)
+                dend_data <- ggdendro::dendro_data(hc)
 
                 # Define colors
                 if (n_groups == 3) {
@@ -2333,7 +2334,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # === CREATE CASE DENDROGRAM (LEFT SIDE) ===
                 if (!is.null(case_hc)) {
-                    case_dend_data <- dendro_data(case_hc)
+                    case_dend_data <- ggdendro::dendro_data(case_hc)
 
                     # Create case dendrogram (rotated 90 degrees to align with heatmap)
                     case_dend_plot <- ggplot() +
@@ -2364,19 +2365,19 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # === COMBINE ALL PLOTS ===
                 # Create a comprehensive two-way clustered plot with dendrograms on both axes
-                combined_plot <- grid.arrange(
+                combined_plot <- gridExtra::grid.arrange(
                     empty_plot, dend_plot,
                     case_dend_plot, heatmap_plot,
                     nrow = 2, ncol = 2,
                     widths = c(1, 4), # Case dendrogram narrower than main plot
                     heights = c(1, 4), # Rater dendrogram shorter than main plot
-                    top = textGrob("Two-Way Clustered Diagnostic Patterns (Usubutun Style)",
-                        gp = gpar(fontsize = 14, fontface = "bold")
+                    top = grid::textGrob("Two-Way Clustered Diagnostic Patterns (Usubutun Style)",
+                        gp = grid::gpar(fontsize = 14, fontface = "bold")
                     )
                 )
 
                 # Print the combined plot
-                grid.draw(combined_plot)
+                grid::grid.draw(combined_plot)
                 TRUE
             },
 

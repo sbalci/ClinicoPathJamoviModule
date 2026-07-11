@@ -9,6 +9,7 @@
 #' @importFrom boot boot boot.ci
 #' @importFrom dcurves dca
 #' @export
+#' @return An \code{R6} class generator object for the \code{clinicalnomogramsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 clinicalnomogramsClass <- R6::R6Class(
     "clinicalnomogramsClass",

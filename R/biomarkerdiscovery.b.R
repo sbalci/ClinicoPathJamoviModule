@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats predict glm binomial cor
 #' @export
+#' @return An \code{R6} class generator object for the \code{biomarkerdiscoveryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 biomarkerdiscoveryClass <- R6::R6Class(

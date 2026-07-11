@@ -5,6 +5,7 @@
 #' @importFrom ggplot2 ggplot aes geom_point geom_errorbar labs theme_minimal element_text geom_hline
 #' @importFrom stats qt qnorm sd shapiro.test
 #'
+#' @return An \code{R6} class generator object for the \code{ciSingleClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "ciSingleClass",

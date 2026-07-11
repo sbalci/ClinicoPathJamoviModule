@@ -10,6 +10,7 @@
 #' @importFrom emmeans emmeans contrast
 # TODO (cleanup): The DoE.base, rsm, car, and emmeans @importFrom directives above import functions that the body never calls (no fac.design / oa.design / ccd / bbd / Anova / leveneTest / emmeans / contrast usage). They force unnecessary hard dependencies and load-time cost. Either drop the unused imports, or wire those packages into the analyses they were intended for (e.g., car::Anova for the ANOVA in .analyzeFactorEffects, emmeans for post-hoc contrasts in .performOptimization).
 #' @export
+#' @return An \code{R6} class generator object for the \code{assayoptimizationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 assayoptimizationClass <- R6::R6Class(
     "assayoptimizationClass",
     inherit = assayoptimizationBase,

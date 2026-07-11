@@ -5,6 +5,7 @@
 #' @importFrom metafor rma
 #' @importFrom stats qnorm pnorm qt pt
 #' @export
+#' @return An \code{R6} class generator object for the \code{diagnosticmetaClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 diagnosticmetaClass <- R6::R6Class(

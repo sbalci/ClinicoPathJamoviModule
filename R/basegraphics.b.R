@@ -769,6 +769,8 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         # Plot rendering function
         .plot_base = function(image, ggtheme, theme, ...) {
+            oldpar <- graphics::par(no.readonly = TRUE)
+            on.exit(graphics::par(oldpar), add = TRUE)
             plot_state <- image$state
             if (is.null(plot_state)) return()
             

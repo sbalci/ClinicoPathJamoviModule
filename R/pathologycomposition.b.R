@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom stats binom.test prop.test chisq.test fisher.test
 #' @export
+#' @return An \code{R6} class generator object for the \code{pathologycompositionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 pathologycompositionClass <- R6::R6Class(

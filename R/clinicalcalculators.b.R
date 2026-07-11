@@ -1,6 +1,7 @@
 #' Clinical Calculators Class
 #' @name clinicalcalculatorsClass
 #' @importFrom R6 R6Class
+#' @return An \code{R6} class generator object for the \code{clinicalcalculatorsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 clinicalcalculatorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
     "clinicalcalculatorsClass",

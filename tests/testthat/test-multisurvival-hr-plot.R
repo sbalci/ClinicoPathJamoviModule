@@ -21,6 +21,7 @@ test_that("multisurvival HR plot renders (finalfit)", {
   ))
 
   tmp <- tempfile(fileext = ".png")
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
   expect_silent(suppressWarnings(result$plot$saveAs(tmp)))
   expect_true(file.exists(tmp))
   expect_gt(file.info(tmp)$size, 0)

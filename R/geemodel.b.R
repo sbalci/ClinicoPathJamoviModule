@@ -38,6 +38,7 @@
 #' @importFrom R6 R6Class
 #'
 #' @export
+#' @return An \code{R6} class generator object for the \code{geemodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "geemodelClass",
     inherit = geemodelBase,

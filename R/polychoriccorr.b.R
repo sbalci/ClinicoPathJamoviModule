@@ -4,6 +4,7 @@
 #' @import ggplot2
 #' @importFrom stats cor cor.test complete.cases chisq.test qnorm pnorm
 #' @export
+#' @return An \code{R6} class generator object for the \code{polychoriccorrClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 polychoriccorrClass <- R6::R6Class(
     "polychoriccorrClass",

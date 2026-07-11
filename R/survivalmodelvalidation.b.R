@@ -10,6 +10,7 @@
 #' @importFrom dcurves dca
 #' @importFrom riskRegression Score
 #' @export
+#' @return An \code{R6} class generator object for the \code{survivalmodelvalidationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 survivalmodelvalidationClass <- R6::R6Class(
     "survivalmodelvalidationClass",

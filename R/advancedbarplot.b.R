@@ -30,6 +30,7 @@
 #' @importFrom tools toTitleCase
 #' @importFrom utils head tail
 #' @export
+#' @return An \code{R6} class generator object for the \code{advancedbarplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
     R6::R6Class(

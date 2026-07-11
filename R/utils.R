@@ -167,6 +167,7 @@ load_required_package <- function(package_name, install_if_missing = FALSE) {
 #' @aliases %||%
 #' @param x Left-hand side value
 #' @param y Right-hand side default value
+#' @return `x` if it is not `NULL`, otherwise `y`.
 #' @keywords internal
 #' @export
 #' @importFrom rlang %||%
@@ -177,6 +178,7 @@ load_required_package <- function(package_name, install_if_missing = FALSE) {
 #' @rdname na-coalescing
 #' @param x Left-hand side value
 #' @param y Right-hand side default value
+#' @return `x` if it is not `NA`, otherwise `y`.
 #' @keywords internal
 #' @export
 `%|%` <- function(x, y) {
@@ -188,6 +190,7 @@ load_required_package <- function(package_name, install_if_missing = FALSE) {
 #' @rdname not-in
 #' @param x Values to check
 #' @param table Values to check against
+#' @return A logical vector, `TRUE` where an element of `x` is not present in `table`.
 #' @keywords internal
 #' @export
 `%notin%` <- function(x, table) !(x %in% table)
@@ -197,6 +200,7 @@ load_required_package <- function(package_name, install_if_missing = FALSE) {
 #' @rdname not-in-alt
 #' @param x Values to check
 #' @param table Values to check against
+#' @return A logical vector, `TRUE` where an element of `x` is not present in `table`.
 #' @keywords internal
 #' @export
 `%!in%` <- function(x, table) !(x %in% table)
@@ -204,6 +208,9 @@ load_required_package <- function(package_name, install_if_missing = FALSE) {
 #' Pipe operator
 #' @name %>%
 #' @rdname pipe
+#' @param lhs A value passed into the right-hand side function.
+#' @param rhs A function call to which `lhs` is supplied as the first argument.
+#' @return The result of calling `rhs` with `lhs` as its first argument.
 #' @keywords internal
 #' @export
 #' @importFrom magrittr %>%

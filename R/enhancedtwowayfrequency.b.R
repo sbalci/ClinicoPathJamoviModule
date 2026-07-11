@@ -5,6 +5,7 @@
 #' @importFrom stats chisq.test fisher.test
 #' @importFrom vcd assocstats
 #' @export
+#' @return An \code{R6} class generator object for the \code{enhancedtwowayfrequencyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 enhancedtwowayfrequencyClass <- R6::R6Class(
     "enhancedtwowayfrequencyClass",

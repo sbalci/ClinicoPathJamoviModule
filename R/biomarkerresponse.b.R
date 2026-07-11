@@ -5,6 +5,7 @@
 #' @importFrom dplyr group_by summarise mutate
 #' @importFrom pROC roc auc ci.auc coords
 #' @description Analyzes and visualizes relationships between biomarker levels and treatment responses
+#' @return An \code{R6} class generator object for the \code{biomarkerresponseClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(

@@ -36,6 +36,7 @@
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 ggsave
 #' @export
+#' @return An \code{R6} class generator object for the \code{grafifyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "grafifyClass",

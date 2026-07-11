@@ -4,6 +4,7 @@
 #' @import igraph
 #' @import grDevices
 #' @import RColorBrewer
+#' @return An \code{R6} class generator object for the \code{jjarcdiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
 jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(

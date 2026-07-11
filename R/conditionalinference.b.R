@@ -2,6 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #'
+#' @return An \code{R6} class generator object for the \code{conditionalinferenceClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 conditionalinferenceClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
@@ -112,9 +113,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Create survival object
-                # TODO (hygiene): drop `library(survival)` here and at L155 (.buildConditionalTree), L213 (.createTreePlot), L292 (.createSurvivalPlot) - `library()` inside package R files modifies the user's search path at source-load time and trips `R CMD check`. Replace each `Surv(...)`, `survfit(...)`, `survdiff(...)` reference with explicit `survival::` namespacing, or add `@importFrom survival Surv survfit survdiff` (etc.) to the roxygen header alongside the existing `@import jmvcore`. Same applies to `library(party)` at L155.
-                library(survival)
-                surv_obj <- Surv(time_col, event_col)
+                surv_obj <- survival::Surv(time_col, event_col)
                 
                 # Extract predictor data
                 pred_data <- data[predictors]
@@ -152,8 +151,6 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
             },
 
             .buildConditionalTree = function(surv_data) {
-                library(party)
-                
                 # Prepare formula
                 rhs_terms <- if (is.null(surv_data$strata)) surv_data$predictors else c(surv_data$predictors, surv_data$strata)
                 rhs <- paste(vapply(rhs_terms, jmvcore::composeTerm, character(1)), collapse = " + ")
@@ -210,8 +207,6 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
             },
 
             .populateResults = function(ctree_model, surv_data) {
-                library(survival)
-                
                 # Model summary
                 if (self$options$show_splits) {
                     private$.populateModelSummary(ctree_model, surv_data)
@@ -289,8 +284,6 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
             },
 
             .populateNodeDetails = function(ctree_model, surv_data) {
-                library(survival)
-                
                 # Get terminal nodes
                 terminal_nodes <- unique(party::where(ctree_model))
                 
@@ -300,7 +293,7 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                     
                     if (nrow(node_data) > 0) {
                         # Fit Kaplan-Meier for this node
-                        km_fit <- survfit(node_data$survival_object ~ 1)
+                        km_fit <- survival::survfit(node_data$survival_object ~ 1)
                         
                         # Extract summary statistics
                         km_summary <- summary(km_fit)

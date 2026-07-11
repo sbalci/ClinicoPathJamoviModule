@@ -6,6 +6,7 @@
 #' @importFrom randomForest randomForest importance
 #' @importFrom caret createDataPartition createFolds confusionMatrix
 #' @importFrom ggplot2 ggplot aes geom_col geom_line geom_point coord_flip labs theme_minimal
+#' @return An \code{R6} class generator object for the \code{treeensembleClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "treeensembleClass",

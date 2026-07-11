@@ -1,6 +1,7 @@
 #' @title Ordinal Mixed Models (Cumulative Link)
 #' @importFrom R6 R6Class
 #' @import jmvcore
+#' @return An \code{R6} class generator object for the \code{ordinalmixedmodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 ordinalmixedmodelClass <- R6::R6Class(
     "ordinalmixedmodelClass",

@@ -5,6 +5,8 @@
 #' @name enhanced_wrapper_example
 #' @import jmvcore
 #' @importFrom stats t.test cor.test lm
+#' @return This is a documentation stub for the enhanced wrapper example and returns \code{NULL}.
+#' @keywords internal
 NULL
 
 #' Enhanced T-Test with Robust Error Handling
@@ -17,6 +19,9 @@ NULL
 #' @param alternative Alternative hypothesis ("two.sided", "less", "greater")
 #' @param conf_level Confidence level (default 0.95)
 #' @param clinical_context Clinical research context
+#' @return An enhanced result object (as produced by \code{create_enhanced_result})
+#'   containing the analysis success flag, formatted t-test results, clinical
+#'   interpretation, and any accumulated warnings or errors.
 #' @export
 enhanced_ttest <- function(data, dependent, group = NULL, test_value = 0, 
                           alternative = "two.sided", conf_level = 0.95,
@@ -165,6 +170,9 @@ enhanced_ttest <- function(data, dependent, group = NULL, test_value = 0,
 #' @description Calculate Cohen's d and other effect size measures
 #' @param ttest_result T-test result object
 #' @param clinical_context Clinical research context
+#' @return A list with the calculated Cohen's d (\code{cohens_d}), a qualitative
+#'   \code{magnitude} label, and a \code{clinical_relevance} assessment string.
+#' @keywords internal
 calculate_effect_size <- function(ttest_result, clinical_context) {
     
     # Extract statistics
@@ -198,6 +206,10 @@ calculate_effect_size <- function(ttest_result, clinical_context) {
 #' @description Assess clinical significance beyond statistical significance
 #' @param results Analysis results
 #' @param clinical_context Clinical research context
+#' @return A list with a logical \code{clinically_significant} flag, an
+#'   \code{interpretation} string, and a character vector of
+#'   \code{recommendations}.
+#' @keywords internal
 assess_clinical_significance <- function(results, clinical_context) {
     
     p_value <- results$p_value
@@ -241,6 +253,9 @@ assess_clinical_significance <- function(results, clinical_context) {
 #' @description Provide clinical relevance assessment
 #' @param effect_size Calculated effect size
 #' @param clinical_context Clinical research context
+#' @return A single character string describing the clinical relevance of the
+#'   effect size for the given clinical context.
+#' @keywords internal
 assess_clinical_relevance <- function(effect_size, clinical_context) {
     
     if (clinical_context == "survival") {
@@ -266,6 +281,10 @@ assess_clinical_relevance <- function(effect_size, clinical_context) {
 #' @param results Analysis results
 #' @param context Clinical context
 #' @param sample_size Sample size
+#' @return A list with a \code{statistical_summary}, \code{clinical_summary},
+#'   a character vector of \code{limitations}, and analysis
+#'   \code{recommendations}.
+#' @keywords internal
 generate_clinical_interpretation <- function(results, context, sample_size) {
     
     interpretation <- list(
@@ -282,6 +301,9 @@ generate_clinical_interpretation <- function(results, context, sample_size) {
 #' 
 #' @description Create statistical summary text
 #' @param results Analysis results
+#' @return A single character string summarising the t-statistic, degrees of
+#'   freedom, significance level, and effect size.
+#' @keywords internal
 generate_statistical_summary <- function(results) {
     p_val <- results$p_value
     t_stat <- results$statistic
@@ -303,6 +325,9 @@ generate_statistical_summary <- function(results) {
 #' @description Create clinical context summary
 #' @param results Analysis results
 #' @param context Clinical context
+#' @return A single character string providing a context-specific clinical
+#'   summary of the analysis results.
+#' @keywords internal
 generate_clinical_summary <- function(results, context) {
     
     base_text <- "Based on the analysis results, "
@@ -329,6 +354,9 @@ generate_clinical_summary <- function(results, context) {
 #' @description Identify potential limitations
 #' @param results Analysis results
 #' @param sample_size Sample size
+#' @return A character vector of identified analysis limitations (empty if none
+#'   are detected).
+#' @keywords internal
 assess_limitations <- function(results, sample_size) {
     
     limitations <- c()
@@ -351,8 +379,10 @@ assess_limitations <- function(results, sample_size) {
 #' Get Clinical Recommendations
 #' 
 #' @description Provide clinical recommendations based on results
-#' @param results Analysis results  
+#' @param results Analysis results
 #' @param context Clinical context
+#' @return A character vector of clinical recommendations (empty if none apply).
+#' @keywords internal
 get_clinical_recommendations <- function(results, context) {
     
     recommendations <- c()
@@ -379,6 +409,9 @@ get_clinical_recommendations <- function(results, context) {
 #' @param results Analysis results
 #' @param context Clinical context
 #' @param sample_size Sample size
+#' @return A character vector of comprehensive analysis recommendations (empty
+#'   if none apply).
+#' @keywords internal
 get_analysis_recommendations <- function(results, context, sample_size) {
     
     recommendations <- c()

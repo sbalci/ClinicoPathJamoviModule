@@ -16,6 +16,7 @@
 #' @importFrom data.table as.data.table data.table
 #' @importFrom ggpubr ggarrange
 #' @importFrom rpart.plot rpart.plot
+#' @return An \code{R6} class generator object for the \code{classificationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 # Enhanced for clinical applications - based on https://github.com/marusakonecnik/jamovi-plugin-for-machine-learning
 
@@ -88,20 +89,9 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                 return(factor_levels[1])
             },
             .run = function() {
-                # TODO (cleanup): library() calls inside .run() / plot helpers attach
-                # entire packages to the search path with side effects - anti-pattern
-                # for jamovi modules. Sites in this file:
-                #   - line ~85, ~86 (here): mlr3, mlr3pipelines
-                #   - line ~156: mlr3pipelines (duplicate)
-                #   - line ~839, ~840: pROC, ggplot2
-                #   - line ~900: rpart.plot
-                #   - line ~915: ggplot2 (duplicate)
-                # Replace with `package::function()` references throughout, declare
-                # the packages in DESCRIPTION under `Imports:` (jamovi's package
-                # manager pulls them in at module install time). Same convention
-                # noted for biomarkerdiscovery, causalmediation, classicalSurvivalPower.
-                library("mlr3")
-                library("mlr3pipelines")
+                # Packages (mlr3, mlr3pipelines, pROC, ggplot2, rpart.plot) are
+                # declared via @import/@importFrom and resolved through the package
+                # namespace - no library() attach needed here or in plot helpers.
 
                 if (length(self$options$dep) == 0 || length(self$options$indep) == 0) {
                     # Display welcome message
@@ -171,8 +161,6 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                 # Create pipeline with balancing
                 # This ensures balancing happens WITHIN each training fold during resampling
                 # preventing data leakage into test sets
-
-                library(mlr3pipelines)
 
                 if (self$options$balancingMethod == "upsample") {
                     # Oversample minority class to match majority class size
@@ -862,9 +850,6 @@ classificationClass <- if (requireNamespace("jmvcore")) {
 
                 prediction <- image$state
 
-                library(pROC)
-                library(ggplot2)
-
                 # Create ROC curve
                 truth_factor <- factor(prediction$truth)
                 positive_class <- private$.resolvePositiveClass(truth_factor)
@@ -923,7 +908,6 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
-                library(rpart.plot)
                 tryCatch(
                     {
                         rpart.plot(model, type = 2, extra = 101, cex = 0.8)
@@ -940,8 +924,6 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 prediction <- image$state
-
-                library(ggplot2)
 
                 # Create frequency table
                 freq_table <- table(Actual = prediction$truth, Predicted = prediction$response)
