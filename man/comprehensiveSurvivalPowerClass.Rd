@@ -3,6 +3,9 @@
 \name{comprehensiveSurvivalPowerClass}
 \alias{comprehensiveSurvivalPowerClass}
 \title{Comprehensive Survival Power Analysis}
+\value{
+An \code{R6} class generator object for the \code{comprehensiveSurvivalPowerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive Survival Power Analysis
 }

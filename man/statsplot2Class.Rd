@@ -3,6 +3,9 @@
 \name{statsplot2Class}
 \alias{statsplot2Class}
 \title{Plots and Graphs Based on Variable Types}
+\value{
+An \code{R6} class generator object for the \code{statsplot2Class} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Plots and Graphs Based on Variable Types
 }

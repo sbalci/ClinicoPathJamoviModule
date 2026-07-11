@@ -3,6 +3,9 @@
 \name{mendelianrandomizationClass}
 \alias{mendelianrandomizationClass}
 \title{Mendelian Randomization}
+\value{
+An \code{R6} class generator object for the \code{mendelianrandomizationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Mendelian Randomization
 }

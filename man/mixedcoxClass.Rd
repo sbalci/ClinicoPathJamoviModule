@@ -3,6 +3,9 @@
 \name{mixedcoxClass}
 \alias{mixedcoxClass}
 \title{Mixed-Effects Cox Regression Implementation}
+\value{
+An \code{R6} class generator object for the \code{mixedcoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for Cox proportional hazards regression with
 random effects for clustered survival data. This R6 class provides comprehensive

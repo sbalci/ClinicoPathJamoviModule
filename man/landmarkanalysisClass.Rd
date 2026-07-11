@@ -3,6 +3,9 @@
 \name{landmarkanalysisClass}
 \alias{landmarkanalysisClass}
 \title{Landmark Analysis for Time-varying Predictors}
+\value{
+An \code{R6} class generator object for the \code{landmarkanalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Landmark Analysis for Time-varying Predictors
 }

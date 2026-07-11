@@ -3,6 +3,9 @@
 \name{jforestmodelClass}
 \alias{jforestmodelClass}
 \title{Forest Plot Visualization}
+\value{
+An \code{R6} class generator object for the \code{jforestmodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Forest Plot Visualization
 }

@@ -44,21 +44,26 @@ option/output on an existing backend?).
 
 ## A1 · Pathology
 
-**A1.1 — `ihcscoring`: add formal cutpoint optimization + reproducibility output.**
+**A1.1 — `ihcscoring`: add formal cutpoint optimization + reproducibility output.** ✅ *(cutpoint half implemented)*
 *Value: high · Effort: low–medium.* The function already supports Allred, CPS, binary and
-multi-cutoff scoring. What a diagnostic report needs next is a **data-driven optimal
-cutpoint** (Youden / maxstat, with a bootstrap-validated confidence band) tied to an
-outcome, and an **inter-observer reproducibility panel** (ICC / weighted kappa across
-readers) rendered inline rather than as a separate `agreement` run. Both engines already
-exist elsewhere in the module (`optimalcutpoint`, `agreement`) — the improvement is to
-surface them within the IHC workflow so scoring, cutpoint, and reproducibility appear in
-one output.
+multi-cutoff scoring, but its "cutpoint optimization plot" was a **placeholder that drew a
+simulated ROC curve from random numbers** — no real optimization. **Implemented:** a
+data-driven optimal cutpoint tied to a clinical outcome — Youden's index (via `cutpointr`)
+for a binary outcome, or the maximally-selected log-rank statistic (via `maxstat`) for a
+survival outcome — optimizing the chosen score (H-score / Allred / proportion). Adds an
+`optimal_cutpoint` option, an outcome/time/event variable set, an `optimalCutpointTable`
+(cutpoint, Se/Sp/AUC or max-statistic + log-rank), and a **real** ROC / KM cutpoint plot
+replacing the placeholder. Both engines were already DESCRIPTION dependencies. The
+**inter-observer reproducibility panel** half remains for a future pass (`agreement`-style
+ICC/kappa surfaced inline); the module's standalone `agreement` already covers it externally.
 
 **A1.2 — `agreement`: category-collapse and per-category agreement.**
-*Value: medium · Effort: low.* Weighted kappa, Krippendorff, and Gwet AC are all present.
-The practical addition is **per-category (one-vs-rest) agreement** and an optional
-**level-collapse** control (e.g. G1+G2 vs G3), which is how grading-concordance studies are
-actually reported. This is an options + output-table change, no new engine.
+*Value: medium · Effort: low.* ~~Weighted kappa, Krippendorff, and Gwet AC are all present.
+The practical addition is per-category (one-vs-rest) agreement and an optional level-collapse
+control.~~ **Superseded on re-inspection:** `agreement` already provides a *Per-Category
+Item-Modal Agreement* output, so the per-category half of this item is already covered. Only
+an explicit **level-collapse** control (e.g. G1+G2 vs G3) would be additive, and it is a minor
+convenience rather than a genuine gap. **Deprioritized.**
 
 **A1.3 — `pathologyagreement` / `methodcomparison`: add bias-vs-magnitude regression.**
 *Value: medium · Effort: low.* Bland–Altman, Passing–Bablok and Deming are covered. Adding
@@ -87,10 +92,13 @@ subgroup option into the released survival function is higher clinical value tha
 standalone.
 
 **A2.3 — `stagemigration`: expose the internal Win Ratio and NRI as first-class output.**
-*Value: medium · Effort: low.* `stagemigration` already contains a Win Ratio helper and
-reclassification logic internally. Now that a standalone `winratio` exists, cross-link them
-and surface the staging-specific reclassification (Will Rogers quantification) as a labelled
-table.
+*Value: medium · Effort: low.* **Largely already done on re-inspection:** `stagemigration`
+already exposes Win Ratio as a first-class feature — a `performWinRatioAnalysis` option, full
+endpoint/matching/CI controls, and dedicated result tables (`winRatioOverview`,
+`winRatioPrimaryResults`, endpoint contributions). The only additive step, now applied, was a
+**cross-reference note** on the overview table pointing users to the standalone `winratio`
+(SurvivalD [Draft] ▸ Specialized Survival Methods) for a general two-group composite. NRI/reclassification
+surfacing remains available for a future pass if a labelled Will-Rogers table is wanted.
 
 ## A3 · General clinical
 
@@ -189,22 +197,22 @@ primary/metastasis testing becomes routine.
 
 | # | Candidate | Type | Audience | Value | Effort |
 |---|-----------|------|----------|:-----:|:------:|
-| A2.1 | Waterfall: censoring-aware (KM) duration-of-response | improve | Onc | High | Low&ndash;Med |
-| A1.1 | ihcscoring: optimal cutpoint + reproducibility panel | improve | Path | High | Low–Med |
-| A2.2 | survival: subgroup HR forest option | improve | Onc | High | Med |
-| B1 | RCB / tumor-regression-grade calculator | **new** | Path/Onc | High | Low |
-| B2 | Lymph node ratio / nodal yield | **new** | Path/Onc | High | Low |
-| B3 | Inflammatory prognostic indices (NLR/PLR/PNI/GPS) | **new** | Onc/Clin | High | Low |
-| A1.2 | agreement: per-category + level-collapse | improve | Path | Med | Low |
-| A2.3 | stagemigration: expose Win Ratio / NRI | improve | Onc | Med | Low |
-| A3.1 | crosstable: SMD balance-diagnostic column | improve | Clin | Med | Low |
-| A3.2 | decisioncurve: Δ net-benefit with CI | improve | Clin | Med | Low |
-| B4 | ctDNA / MRD dynamics | **new** | Onc | High | Med |
-| B5 | Tumor budding / hotspot quantification | **new** | Path | Med | Med |
-| B6 | Synoptic-report completeness auditor | **new** | Path/QA | Med | Med |
-| B7 | Multifocal concordance / clonality | **new** | Mol path | Med | Med |
-| A1.3 | methodcomparison: proportional-bias + %-diff | improve | Path | Med | Low |
-| A3.3 | reference-interval-aware flags | improve | Clin | Med | Low |
+| A2.1 | Waterfall: censoring-aware (KM) DoR &mdash; IMPLEMENTED | done | Onc | High | Low&ndash;Med |
+| A1.1 | ihcscoring: real outcome-linked optimal cutpoint IMPLEMENTED; reproducibility panel deferred | done | Path | High | Low&ndash;Med |
+| A2.2 | subgroup HR forest &mdash; delivered by standalone subgroupforest/groupedforest (fixed for release) | done | Onc | High | Med |
+| B1 | RCB calculator &mdash; IMPLEMENTED (residualcancerburden) | done | Path/Onc | High | Low |
+| B2 | Lymph node ratio / nodal yield &mdash; IMPLEMENTED (lymphnoderatio) | done | Path/Onc | High | Low |
+| B3 | Inflammatory indices (NLR/PLR/PNI/GPS) &mdash; IMPLEMENTED (hematologicindices) | done | Onc/Clin | High | Low |
+| A1.2 | agreement: per-category ALREADY present; level-collapse deferred (Low value vs regression risk on 11k-line released fn) | deferred | Path | Low | Low |
+| A2.3 | stagemigration: Win Ratio already first-class (cross-link added) | done | Onc | Med | Low |
+| A3.1 | crosstable: SMD balance-diagnostic column &mdash; IMPLEMENTED | done | Clin | Med | Low |
+| A3.2 | decisioncurve: model comparison + Integral Difference Test ALREADY present | done | Clin | Med | Low |
+| B4 | ctDNA / MRD dynamics &mdash; IMPLEMENTED (ctdnadynamics) | done | Onc | High | Med |
+| B5 | Tumor budding / hotspot (ITBCC) &mdash; IMPLEMENTED (tumorbudding) | done | Path | Med | Med |
+| B6 | Synoptic-report completeness auditor &mdash; IMPLEMENTED (synopticcompleteness) | done | Path/QA | Med | Med |
+| B7 | Multifocal concordance / clonality &mdash; IMPLEMENTED (multifocalconcordance) | done | Mol path | Med | Med |
+| A1.3 | methodcomparison: proportional-bias + mountain plot ALREADY present | done | Path | Med | Low |
+| A3.3 | reference-interval flags &mdash; standalone referenceintervals exists; cross-linking deferred (low value) | deferred | Clin | Low | Low |
 
 ## Recommended first wave (best value-per-effort)
 

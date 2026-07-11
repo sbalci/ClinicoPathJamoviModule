@@ -3,6 +3,9 @@
 \name{treemedicalClass}
 \alias{treemedicalClass}
 \title{Medical Decision Trees}
+\value{
+An \code{R6} class generator object for the \code{treemedicalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Simple decision tree analysis optimized for clinical research
 }

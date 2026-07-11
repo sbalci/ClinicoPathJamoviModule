@@ -3,6 +3,9 @@
 \name{jjridgesClass}
 \alias{jjridgesClass}
 \title{Advanced Ridge Plot}
+\value{
+An \code{R6} class generator object for the \code{jjridgesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates advanced ridgeline plots with robust statistical analysis
 }

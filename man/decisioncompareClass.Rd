@@ -3,6 +3,9 @@
 \name{decisioncompareClass}
 \alias{decisioncompareClass}
 \title{Compare Medical Decision Tests}
+\value{
+An \code{R6} class generator object for the \code{decisioncompareClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Compare Medical Decision Tests
 }

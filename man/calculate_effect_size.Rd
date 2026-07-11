@@ -11,6 +11,11 @@ calculate_effect_size(ttest_result, clinical_context)
 
 \item{clinical_context}{Clinical research context}
 }
+\value{
+A list with the calculated Cohen's d (\code{cohens_d}), a qualitative
+\code{magnitude} label, and a \code{clinical_relevance} assessment string.
+}
 \description{
 Calculate Cohen's d and other effect size measures
 }
+\keyword{internal}

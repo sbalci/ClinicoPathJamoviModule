@@ -3,6 +3,9 @@
 \name{survivalcalibrationClass}
 \alias{survivalcalibrationClass}
 \title{Time-Dependent Survival Calibration}
+\value{
+An \code{R6} class generator object for the \code{survivalcalibrationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Time-Dependent Survival Calibration
 }

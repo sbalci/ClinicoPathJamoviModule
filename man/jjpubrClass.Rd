@@ -3,6 +3,9 @@
 \name{jjpubrClass}
 \alias{jjpubrClass}
 \title{Publication-Ready Plots using ggpubr}
+\value{
+An \code{R6} class generator object for the \code{jjpubrClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Publication-Ready Plots using ggpubr
 }

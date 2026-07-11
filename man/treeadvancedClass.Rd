@@ -3,6 +3,9 @@
 \name{treeadvancedClass}
 \alias{treeadvancedClass}
 \title{Advanced Clinical Decision Trees}
+\value{
+An \code{R6} class generator object for the \code{treeadvancedClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Advanced decision tree analysis with enhanced CART, hyperparameter tuning, and clinical validation
 }

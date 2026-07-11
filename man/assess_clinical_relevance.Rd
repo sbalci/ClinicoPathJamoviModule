@@ -11,6 +11,11 @@ assess_clinical_relevance(effect_size, clinical_context)
 
 \item{clinical_context}{Clinical research context}
 }
+\value{
+A single character string describing the clinical relevance of the
+effect size for the given clinical context.
+}
 \description{
 Provide clinical relevance assessment
 }
+\keyword{internal}

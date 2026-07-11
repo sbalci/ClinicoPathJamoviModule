@@ -3,6 +3,9 @@
 \name{smoothhazardClass}
 \alias{smoothhazardClass}
 \title{Smooth Hazard Estimation & Analysis}
+\value{
+An \code{R6} class generator object for the \code{smoothhazardClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Smooth Hazard Estimation & Analysis
 }

@@ -3,6 +3,9 @@
 \name{enhancedtablesClass}
 \alias{enhancedtablesClass}
 \title{Enhanced Tables with gt}
+\value{
+An \code{R6} class generator object for the \code{enhancedtablesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Tables with gt
 }

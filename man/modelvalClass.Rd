@@ -3,6 +3,9 @@
 \name{modelvalClass}
 \alias{modelvalClass}
 \title{Model Validation Dashboard}
+\value{
+An \code{R6} class generator object for the \code{modelvalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Model Validation Dashboard
 }

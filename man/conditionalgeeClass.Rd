@@ -3,6 +3,9 @@
 \name{conditionalgeeClass}
 \alias{conditionalgeeClass}
 \title{Conditional GEE for Recurrent Events Gap Times}
+\value{
+An \code{R6} class generator object for the \code{conditionalgeeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Conditional GEE for Recurrent Events Gap Times
 }

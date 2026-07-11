@@ -3,6 +3,9 @@
 \name{ggprismClass}
 \alias{ggprismClass}
 \title{GraphPad Prism Style Plots}
+\value{
+An \code{R6} class generator object for the \code{ggprismClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 GraphPad Prism Style Plots
 }

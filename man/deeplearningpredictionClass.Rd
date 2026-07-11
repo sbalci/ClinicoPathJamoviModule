@@ -3,6 +3,9 @@
 \name{deeplearningpredictionClass}
 \alias{deeplearningpredictionClass}
 \title{Deep Learning Image Prediction}
+\value{
+An \code{R6} class generator object for the \code{deeplearningpredictionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Deep Learning Image Prediction
 }

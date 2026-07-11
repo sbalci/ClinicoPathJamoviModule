@@ -3,6 +3,9 @@
 \name{outcomeorganizerClass}
 \alias{outcomeorganizerClass}
 \title{Enhanced Outcome Organizer for Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{outcomeorganizerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Outcome Organizer for Survival Analysis
 }

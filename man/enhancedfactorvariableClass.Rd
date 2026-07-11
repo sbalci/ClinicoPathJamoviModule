@@ -3,6 +3,9 @@
 \name{enhancedfactorvariableClass}
 \alias{enhancedfactorvariableClass}
 \title{Enhanced Factor Variable Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{enhancedfactorvariableClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Factor Variable Analysis Class
 }

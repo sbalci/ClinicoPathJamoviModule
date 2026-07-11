@@ -3,6 +3,9 @@
 \name{timedependentClass}
 \alias{timedependentClass}
 \title{Time-Dependent Covariates & ROC Analysis}
+\value{
+An \code{R6} class generator object for the \code{timedependentClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Time-Dependent Covariates & ROC Analysis
 }

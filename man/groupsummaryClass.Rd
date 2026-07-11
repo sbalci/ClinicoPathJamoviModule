@@ -3,6 +3,9 @@
 \name{groupsummaryClass}
 \alias{groupsummaryClass}
 \title{Group and Summarize}
+\value{
+An \code{R6} class generator object for the \code{groupsummaryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Group and Summarize
 }

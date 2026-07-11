@@ -3,6 +3,9 @@
 \name{variablebiplotClass}
 \alias{variablebiplotClass}
 \title{Variable Importance Biplot}
+\value{
+An \code{R6} class generator object for the \code{variablebiplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Variable Importance Biplot
 }

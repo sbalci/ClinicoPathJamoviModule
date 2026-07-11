@@ -3,6 +3,9 @@
 \name{coxphwClass}
 \alias{coxphwClass}
 \title{Weighted Cox Regression}
+\value{
+An \code{R6} class generator object for the \code{coxphwClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Weighted Cox Regression
 }

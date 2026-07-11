@@ -11,6 +11,12 @@ assess_clinical_significance(results, clinical_context)
 
 \item{clinical_context}{Clinical research context}
 }
+\value{
+A list with a logical \code{clinically_significant} flag, an
+\code{interpretation} string, and a character vector of
+\code{recommendations}.
+}
 \description{
 Assess clinical significance beyond statistical significance
 }
+\keyword{internal}

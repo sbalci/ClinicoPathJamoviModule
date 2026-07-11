@@ -3,6 +3,9 @@
 \name{survivalcontClass}
 \alias{survivalcontClass}
 \title{Survival Analysis for Continuous Explanatory Variable}
+\value{
+An \code{R6} class generator object for the \code{survivalcontClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive survival analysis for continuous explanatory variables with optimal
 cut-off determination, multiple cut-offs analysis, RMST analysis, residual diagnostics,

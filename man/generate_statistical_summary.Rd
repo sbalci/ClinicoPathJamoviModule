@@ -9,6 +9,11 @@ generate_statistical_summary(results)
 \arguments{
 \item{results}{Analysis results}
 }
+\value{
+A single character string summarising the t-statistic, degrees of
+freedom, significance level, and effect size.
+}
 \description{
 Create statistical summary text
 }
+\keyword{internal}

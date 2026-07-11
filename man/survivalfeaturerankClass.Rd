@@ -3,6 +3,9 @@
 \name{survivalfeaturerankClass}
 \alias{survivalfeaturerankClass}
 \title{Survival Feature Ranking - Univariate Cox Screening}
+\value{
+An \code{R6} class generator object for the \code{survivalfeaturerankClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Performs univariate survival analysis for multiple features to identify potential prognostic factors.
 This analysis runs a separate Cox proportional hazards model for each selected feature and ranks them

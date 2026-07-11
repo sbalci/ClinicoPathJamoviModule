@@ -3,6 +3,9 @@
 \name{ppvClass}
 \alias{ppvClass}
 \title{Positive Predictive Value Calculator}
+\value{
+An \code{R6} class generator object for the \code{ppvClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 This module calculates the Positive Predictive Value (PPV) and False Discovery Rate (FDR)
 for research findings based on the framework described by Ioannidis (2005). It helps

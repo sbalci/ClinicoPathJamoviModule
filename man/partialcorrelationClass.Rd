@@ -3,6 +3,9 @@
 \name{partialcorrelationClass}
 \alias{partialcorrelationClass}
 \title{Partial Correlation Analysis}
+\value{
+An \code{R6} class generator object for the \code{partialcorrelationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Partial Correlation Analysis
 }

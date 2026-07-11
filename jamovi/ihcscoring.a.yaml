@@ -550,4 +550,65 @@ options:
           R: >
             base font size for improved readability
 
+    # ---- Data-driven optimal cutpoint (outcome-linked) ----
+    - name: optimal_cutpoint
+      title: Find Optimal Cutpoint (outcome-linked)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Determine a data-driven optimal cutpoint for the chosen score against a clinical
+            outcome, instead of relying only on the fixed cutpoint. Uses Youden's index for a
+            binary outcome or the maximally-selected log-rank statistic for a survival outcome.
+
+    - name: optimize_score
+      title: Score to Optimize
+      type: List
+      options:
+        - name: hscore
+          title: 'H-score (0-300)'
+        - name: allred
+          title: 'Allred total (0-8)'
+        - name: proportion
+          title: 'Proportion (%)'
+      default: hscore
+      description:
+          R: Which computed score to dichotomize at the optimal cutpoint.
+
+    - name: outcome_type
+      title: Outcome Type
+      type: List
+      options:
+        - name: binary
+          title: 'Binary outcome'
+        - name: survival
+          title: 'Survival (time-to-event)'
+      default: binary
+      description:
+          R: Type of outcome used to optimize the cutpoint.
+
+    - name: outcome_var
+      title: Outcome / Event
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Binary outcome (for Youden) or the event indicator (for survival).
+
+    - name: outcome_positive
+      title: Positive / Event Level
+      type: Level
+      variable: (outcome_var)
+      description:
+          R: Level of the outcome variable representing the positive class / event.
+
+    - name: cutpoint_time_var
+      title: Survival Time (for survival outcome)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Follow-up time, required when the outcome type is survival.
+
 ...

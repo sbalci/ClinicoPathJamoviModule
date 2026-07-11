@@ -3,6 +3,9 @@
 \name{lassocoxClass}
 \alias{lassocoxClass}
 \title{Lasso-Cox Regression for Variable Selection in Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{lassocoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Performs Lasso-penalized Cox proportional hazards regression for variable selection
 in survival analysis. This function uses penalized likelihood to identify the most

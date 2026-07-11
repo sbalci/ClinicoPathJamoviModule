@@ -3,6 +3,9 @@
 \name{kappaSizeFixedNClass}
 \alias{kappaSizeFixedNClass}
 \title{Lowest Expected Value for a fixed sample size}
+\value{
+An \code{R6} class generator object for the \code{kappaSizeFixedNClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Lowest Expected Value for a fixed sample size
 }

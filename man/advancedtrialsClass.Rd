@@ -3,6 +3,9 @@
 \name{advancedtrialsClass}
 \alias{advancedtrialsClass}
 \title{Advanced Clinical Trial Methods}
+\value{
+An \code{R6} class generator object for the \code{advancedtrialsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Advanced Clinical Trial Methods
 }

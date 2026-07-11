@@ -3,6 +3,9 @@
 \name{ihcsurvivalClass}
 \alias{ihcsurvivalClass}
 \title{IHC Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{ihcsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 IHC Survival Analysis
 }

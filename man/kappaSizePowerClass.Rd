@@ -3,6 +3,9 @@
 \name{kappaSizePowerClass}
 \alias{kappaSizePowerClass}
 \title{Power Approach for the Number of Subjects Required}
+\value{
+An \code{R6} class generator object for the \code{kappaSizePowerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Power Approach for the Number of Subjects Required
 }

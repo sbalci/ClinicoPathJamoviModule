@@ -20,6 +20,9 @@ validate_clinical_data(
 
 \item{clinical_checks}{Additional clinical validation checks}
 }
+\value{
+A list with \code{valid} (logical), character vectors \code{errors} and \code{warnings}, and integer counts \code{n_observations} and \code{n_variables}.
+}
 \description{
 Validate data with clinical research considerations
 }

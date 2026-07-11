@@ -3,6 +3,9 @@
 \name{riverplotClass}
 \alias{riverplotClass}
 \title{River Plots & Alluvial Diagrams}
+\value{
+An \code{R6} class generator object for the \code{riverplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive river plot, alluvial diagram, and stream chart visualization for
 categorical flow analysis. Combines functionality for temporal flows, individual

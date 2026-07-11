@@ -3,6 +3,9 @@
 \name{mediansurvivalClass}
 \alias{mediansurvivalClass}
 \title{Median Survival Comparisons}
+\value{
+An \code{R6} class generator object for the \code{mediansurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Median Survival Comparisons
 }

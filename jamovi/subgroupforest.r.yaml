@@ -115,6 +115,18 @@ items:
           type: number
           format: zto,pvalue
 
+    - name: heterogeneity
+      title: Between-Subgroup Heterogeneity
+      type: Html
+      visible: true
+      clearWith:
+          - outcome
+          - treatment
+          - subgroups
+          - outcomeType
+          - effectMeasure
+          - confidenceLevel
+
 refs:
     - survival
     - forestplot

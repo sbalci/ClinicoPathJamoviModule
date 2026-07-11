@@ -3,6 +3,9 @@
 \name{factoranalysisClass}
 \alias{factoranalysisClass}
 \title{Factor Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{factoranalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive factor analysis implementation inspired by BlueSky's BSkyFactorAnalysis
 with enhanced features for clinical and pathological research.

@@ -6,6 +6,9 @@
 \usage{
 clear_error_log()
 }
+\value{
+Invisibly returns \code{TRUE}; called for its side effect of resetting all error and warning counters, logs, and the function stack.
+}
 \description{
 Clear the error and warning logs
 }

@@ -3,6 +3,9 @@
 \name{clinmonClass}
 \alias{clinmonClass}
 \title{Clinical Hemodynamic Monitoring}
+\value{
+An \code{R6} class generator object for the \code{clinmonClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Clinical Hemodynamic Monitoring
 }

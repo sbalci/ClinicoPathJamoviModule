@@ -3,6 +3,9 @@
 \name{datetimeconverterClass}
 \alias{datetimeconverterClass}
 \title{DateTime Converter and Component Extractor}
+\value{
+An \code{R6} class generator object for the \code{datetimeconverterClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Convert datetime variables to standardized format and extract datetime components
 (year, month, day, hour, minute, day name, week number, quarter, etc.).

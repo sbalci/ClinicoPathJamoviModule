@@ -3,6 +3,9 @@
 \name{friedmantestClass}
 \alias{friedmantestClass}
 \title{Friedman Test for Non-Parametric Repeated Measures}
+\value{
+An \code{R6} class generator object for the \code{friedmantestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Friedman Test for Non-Parametric Repeated Measures
 }

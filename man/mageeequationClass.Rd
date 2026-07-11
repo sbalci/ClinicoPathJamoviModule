@@ -3,6 +3,9 @@
 \name{mageeequationClass}
 \alias{mageeequationClass}
 \title{Magee Equation - Oncotype DX Recurrence Score Estimator}
+\value{
+An \code{R6} class generator object for the \code{mageeequationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Implements the four Magee Equations from Klein et al. (2013, PMID: 23503643)
 for estimating Oncotype DX Recurrence Score from standard pathology variables.

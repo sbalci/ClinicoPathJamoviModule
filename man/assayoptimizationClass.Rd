@@ -3,6 +3,9 @@
 \name{assayoptimizationClass}
 \alias{assayoptimizationClass}
 \title{Assay Optimization & Experimental Design}
+\value{
+An \code{R6} class generator object for the \code{assayoptimizationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Assay Optimization & Experimental Design
 }

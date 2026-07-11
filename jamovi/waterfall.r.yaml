@@ -379,6 +379,7 @@ items:
 
 refs:
     - recist
+    - trialplots_highwind
     - ClinicoPathJamoviModule
 
 

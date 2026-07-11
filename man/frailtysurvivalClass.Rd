@@ -3,6 +3,9 @@
 \name{frailtysurvivalClass}
 \alias{frailtysurvivalClass}
 \title{Frailty & Random Effects Survival Models}
+\value{
+An \code{R6} class generator object for the \code{frailtysurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Frailty & Random Effects Survival Models
 }

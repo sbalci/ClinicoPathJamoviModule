@@ -3,6 +3,9 @@
 \name{clinicaldataintegrationClass}
 \alias{clinicaldataintegrationClass}
 \title{Clinical Data Integration}
+\value{
+An \code{R6} class generator object for the \code{clinicaldataintegrationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Clinical Data Integration
 }

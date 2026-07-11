@@ -55,7 +55,13 @@ ihcscoring(
   language = "english",
   colorblind_safe = TRUE,
   high_contrast = FALSE,
-  font_size = "normal"
+  font_size = "normal",
+  optimal_cutpoint = FALSE,
+  optimize_score = "hscore",
+  outcome_type = "binary",
+  outcome_var,
+  outcome_positive,
+  cutpoint_time_var
 )
 }
 \arguments{
@@ -180,6 +186,25 @@ interpretations}
 \item{high_contrast}{enable high contrast mode for better accessibility}
 
 \item{font_size}{base font size for improved readability}
+
+\item{optimal_cutpoint}{Determine a data-driven optimal cutpoint for the
+chosen score against a clinical outcome, instead of relying only on the
+fixed cutpoint. Uses Youden's index for a binary outcome or the
+maximally-selected log-rank statistic for a survival outcome.}
+
+\item{optimize_score}{Which computed score to dichotomize at the optimal
+cutpoint.}
+
+\item{outcome_type}{Type of outcome used to optimize the cutpoint.}
+
+\item{outcome_var}{Binary outcome (for Youden) or the event indicator (for
+survival).}
+
+\item{outcome_positive}{Level of the outcome variable representing the
+positive class / event.}
+
+\item{cutpoint_time_var}{Follow-up time, required when the outcome type is
+survival.}
 }
 \value{
 A results object containing:
@@ -196,6 +221,7 @@ A results object containing:
 \code{results$distributionplot} \tab \tab \tab \tab \tab Visual distribution of H-scores and Allred scores \cr
 \code{results$correlationplot} \tab \tab \tab \tab \tab Correlation between H-score and Allred score methods \cr
 \code{results$agreementplot} \tab \tab \tab \tab \tab Bland-Altman style agreement analysis between methods \cr
+\code{results$optimalCutpointTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$cutpointplot} \tab \tab \tab \tab \tab ROC analysis for optimal cutpoint determination \cr
 \code{results$biomarkerspecific$biomarkerresults} \tab \tab \tab \tab \tab Analysis tailored to specific biomarker characteristics \cr
 \code{results$biomarkerspecific$clinicalcutpoints} \tab \tab \tab \tab \tab Established clinical thresholds and their performance \cr

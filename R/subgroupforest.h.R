@@ -169,7 +169,8 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         plot = function() private$.items[["plot"]],
         summary = function() private$.items[["summary"]],
         interactions = function() private$.items[["interactions"]],
-        overall = function() private$.items[["overall"]]),
+        overall = function() private$.items[["overall"]],
+        heterogeneity = function() private$.items[["heterogeneity"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -307,7 +308,19 @@ subgroupforestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                         `name`="pvalue", 
                         `title`="P-value", 
                         `type`="number", 
-                        `format`="zto,pvalue"))))}))
+                        `format`="zto,pvalue"))))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="heterogeneity",
+                title="Between-Subgroup Heterogeneity",
+                visible=TRUE,
+                clearWith=list(
+                    "outcome",
+                    "treatment",
+                    "subgroups",
+                    "outcomeType",
+                    "effectMeasure",
+                    "confidenceLevel")))}))
 
 subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "subgroupforestBase",
@@ -384,6 +397,7 @@ subgroupforestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$summary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$interactions} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$overall} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$heterogeneity} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

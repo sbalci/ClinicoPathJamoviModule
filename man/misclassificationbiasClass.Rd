@@ -3,6 +3,9 @@
 \name{misclassificationbiasClass}
 \alias{misclassificationbiasClass}
 \title{Misclassification Bias Sensitivity Analysis}
+\value{
+An \code{R6} class generator object for the \code{misclassificationbiasClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Assesses the impact of non-differential or differential misclassification
 of an exposure/classifier on observed effect estimates (OR, RR, RD).

@@ -3,6 +3,9 @@
 \name{toxicityprofileClass}
 \alias{toxicityprofileClass}
 \title{Treatment Toxicity Profile}
+\value{
+An \code{R6} class generator object for the \code{toxicityprofileClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates comprehensive visualizations of adverse event profiles with enhanced statistical analysis
 }

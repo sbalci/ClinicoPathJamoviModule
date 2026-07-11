@@ -3,6 +3,9 @@
 \name{pathologycompositionClass}
 \alias{pathologycompositionClass}
 \title{Pathology Composition Analysis}
+\value{
+An \code{R6} class generator object for the \code{pathologycompositionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Pathology Composition Analysis
 }

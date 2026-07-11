@@ -3,6 +3,9 @@
 \name{surveysurvivalClass}
 \alias{surveysurvivalClass}
 \title{Survey-Weighted Survival Analysis Implementation}
+\value{
+An \code{R6} class generator object for the \code{surveysurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for survey-weighted survival analysis.
 This R6 class provides comprehensive functionality for survival analysis

@@ -3,6 +3,9 @@
 \name{irecistClass}
 \alias{irecistClass}
 \title{iRECIST Analysis}
+\value{
+An \code{R6} class generator object for the \code{irecistClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 iRECIST Analysis
 }

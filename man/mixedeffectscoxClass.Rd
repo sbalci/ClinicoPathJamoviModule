@@ -3,6 +3,9 @@
 \name{mixedeffectscoxClass}
 \alias{mixedeffectscoxClass}
 \title{Mixed-Effects Cox Models}
+\value{
+An \code{R6} class generator object for the \code{mixedeffectscoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Mixed-Effects Cox Models
 }

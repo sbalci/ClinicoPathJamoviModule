@@ -1177,6 +1177,88 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 #     self$results$reportSentences$setContent(fallback_msg)
                 # })
 
+                # Standardized mean differences (balance diagnostic)
+                if (isTRUE(self$options$showSMD))
+                    private$.populateSMD()
+
+            },
+
+            # ----------------------------------------------------------------
+            # Standardized mean differences (balance diagnostic for two groups)
+            # ----------------------------------------------------------------
+            .populateSMD = function() {
+                tab <- self$results$smdTable
+                if (is.null(self$options$vars) || is.null(self$options$group)) return()
+
+                data <- self$data
+                g <- data[[self$options$group]]
+                if (!is.factor(g)) g <- as.factor(g)
+                g <- droplevels(g)
+                if (nlevels(g) != 2) {
+                    tab$setNote("smd",
+                        "Standardized mean differences require exactly two groups; the SMD table is shown only for a two-level grouping variable.")
+                    return()
+                }
+                levs <- levels(g)
+                i1 <- g == levs[1]; i2 <- g == levs[2]
+
+                for (v in self$options$vars) {
+                    x <- data[[v]]
+                    isNum <- is.numeric(x) || (is.integer(x) && !is.factor(x))
+                    smd <- NA_real_; vtype <- "categorical"
+                    if (isNum) {
+                        vtype <- "continuous"
+                        x1 <- x[i1]; x2 <- x[i2]
+                        smd <- private$.smdContinuous(x1, x2)
+                    } else {
+                        smd <- private$.smdCategorical(x[i1], x[i2])
+                    }
+                    a <- abs(smd)
+                    bal <- if (is.na(a)) "-"
+                           else if (a < 0.1) "negligible (< 0.1)"
+                           else if (a < 0.2) "small (0.1-0.2)"
+                           else "notable (>= 0.2)"
+                    tab$addRow(rowKey = v, values = list(
+                        variable = v, vtype = vtype, smd = smd, absSMD = a, balance = bal))
+                }
+                tab$setNote("smd", sprintf(
+                    "SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2). Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance.",
+                    levs[1], levs[2]))
+            },
+
+            .smdContinuous = function(x1, x2) {
+                x1 <- x1[!is.na(x1)]; x2 <- x2[!is.na(x2)]
+                if (length(x1) < 2 || length(x2) < 2) return(NA_real_)
+                s1 <- stats::var(x1); s2 <- stats::var(x2)
+                denom <- sqrt((s1 + s2) / 2)
+                if (!is.finite(denom) || denom == 0) return(NA_real_)
+                (mean(x1) - mean(x2)) / denom
+            },
+
+            .smdCategorical = function(x1, x2) {
+                x1 <- x1[!is.na(x1)]; x2 <- x2[!is.na(x2)]
+                lv <- union(levels(factor(x1)), levels(factor(x2)))
+                k <- length(lv)
+                if (k < 2 || length(x1) < 1 || length(x2) < 1) return(NA_real_)
+                p1 <- as.numeric(prop.table(table(factor(x1, levels = lv))))
+                p2 <- as.numeric(prop.table(table(factor(x2, levels = lv))))
+                if (k == 2) {
+                    # binary reduces to the two-proportion SMD
+                    a <- p1[1]; b <- p2[1]
+                    denom <- sqrt((a * (1 - a) + b * (1 - b)) / 2)
+                    if (!is.finite(denom) || denom == 0) return(NA_real_)
+                    return((a - b) / denom)
+                }
+                # multinomial SMD (Yang & Dalton 2012): drop last (reference) level
+                P1 <- p1[-k]; P2 <- p2[-k]
+                Tm <- P1 - P2
+                covm <- function(P) { M <- -outer(P, P); diag(M) <- P * (1 - P); M }
+                S <- (covm(P1) + covm(P2)) / 2
+                Sinv <- tryCatch(MASS::ginv(S), error = function(e) NULL)
+                if (is.null(Sinv)) return(NA_real_)
+                val <- as.numeric(t(Tm) %*% Sinv %*% Tm)
+                if (!is.finite(val) || val < 0) return(NA_real_)
+                sqrt(val)
             },
 
             # ========================================================================

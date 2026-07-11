@@ -3,6 +3,9 @@
 \name{emfrailtyClass}
 \alias{emfrailtyClass}
 \title{EM-Algorithm Frailty Models}
+\value{
+An \code{R6} class generator object for the \code{emfrailtyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 EM-Algorithm Frailty Models
 }

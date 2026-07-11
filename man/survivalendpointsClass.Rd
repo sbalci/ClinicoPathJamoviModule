@@ -3,6 +3,9 @@
 \name{survivalendpointsClass}
 \alias{survivalendpointsClass}
 \title{Survival Endpoint Derivation}
+\value{
+An \code{R6} class generator object for the \code{survivalendpointsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Survival Endpoint Derivation
 }

@@ -3,6 +3,9 @@
 \name{economistplotsClass}
 \alias{economistplotsClass}
 \title{Economist-Style Distribution Plots}
+\value{
+An \code{R6} class generator object for the \code{economistplotsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates elegant Economist-style distribution plots using ggeconodist package
 for professional publication-quality visualizations. Provides diminutive

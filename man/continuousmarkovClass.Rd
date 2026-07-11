@@ -3,6 +3,9 @@
 \name{continuousmarkovClass}
 \alias{continuousmarkovClass}
 \title{Continuous-Time Markov Models}
+\value{
+An \code{R6} class generator object for the \code{continuousmarkovClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Continuous-Time Markov Models
 }

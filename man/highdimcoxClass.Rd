@@ -3,6 +3,9 @@
 \name{highdimcoxClass}
 \alias{highdimcoxClass}
 \title{High-Dimensional Cox Regression Implementation}
+\value{
+An \code{R6} class generator object for the \code{highdimcoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for high-dimensional Cox proportional hazards regression.
 This R6 class provides advanced functionality for regularized survival analysis

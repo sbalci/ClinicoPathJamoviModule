@@ -3,6 +3,9 @@
 \name{condsurvivalClass}
 \alias{condsurvivalClass}
 \title{Conditional Survival Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{condsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing conditional survival analysis.
 }

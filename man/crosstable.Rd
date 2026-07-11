@@ -12,7 +12,8 @@ crosstable(
   excl = FALSE,
   cont = "mean",
   pcat = "chisq",
-  p_adjust = "none"
+  p_adjust = "none",
+  showSMD = FALSE
 )
 }
 \arguments{
@@ -33,6 +34,11 @@ table.}
 
 \item{p_adjust}{Method for adjusting p-values for multiple comparisons
 across variables. Only available with gtsummary table style.}
+
+\item{showSMD}{Add a standardized mean difference (SMD) column comparing
+the groups for each variable — the standard balance diagnostic for matched,
+weighted, or propensity cohorts. Requires exactly two groups. |SMD| < 0.1
+conventionally indicates negligible imbalance.}
 }
 \value{
 A results object containing:
@@ -49,7 +55,14 @@ A results object containing:
 \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
+\code{results$smdTable} \tab \tab \tab \tab \tab a table \cr
 }
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$smdTable$asDF}
+
+\code{as.data.frame(results$smdTable)}
 }
 \description{
 Function for making Cross Tables with multiple table styles.

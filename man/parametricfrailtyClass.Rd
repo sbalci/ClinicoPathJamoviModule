@@ -3,6 +3,9 @@
 \name{parametricfrailtyClass}
 \alias{parametricfrailtyClass}
 \title{Parametric Frailty Models}
+\value{
+An \code{R6} class generator object for the \code{parametricfrailtyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Parametric Frailty Models
 }

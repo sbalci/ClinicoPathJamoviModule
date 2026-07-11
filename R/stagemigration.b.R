@@ -29905,6 +29905,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 }
                             }
                         }
+                        table$setNote("standalone",
+                            "This win ratio is specialised for staging comparison (old vs new stage). For a general hierarchical composite win ratio between any two groups, see the standalone 'Win Ratio' analysis (SurvivalD [Draft] > Specialized Survival Methods).")
                     },
                     error = function(e) {
                         # Silent error handling for table population

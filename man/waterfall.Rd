@@ -12,6 +12,11 @@ waterfall(
   groupVar = NULL,
   inputType = "percentage",
   sortBy = "response",
+  sortDirection = "conventional",
+  showBaseline = TRUE,
+  confirmationVar = NULL,
+  ongoingVar = NULL,
+  responseCategoryVar = NULL,
   showThresholds = TRUE,
   labelOutliers = FALSE,
   showMedian = FALSE,
@@ -30,7 +35,8 @@ waterfall(
   showClinicalSignificance = FALSE,
   showConfidenceIntervals = TRUE,
   enableGuidedMode = FALSE,
-  showExplanations = FALSE
+  showExplanations = FALSE,
+  showResponseDuration = FALSE
 )
 }
 \arguments{
@@ -60,6 +66,28 @@ RECIST category coloring to show group-based colors.}
 changes from baseline}
 
 \item{sortBy}{Sort the waterfall plot by best response or patient ID.}
+
+\item{sortDirection}{Direction for the response sort. 'conventional' places
+the highest (worst) response on the left and the lowest (best, most
+negative) on the right, following the standard oncology waterfall
+convention.}
+
+\item{showBaseline}{Draw a horizontal reference line at 0 percent change to
+mark the baseline.}
+
+\item{confirmationVar}{Optional categorical variable indicating response
+confirmation status (e.g., Confirmed vs Unconfirmed CR/PR). A distinct
+marker is drawn at each bar tip according to the level of this variable.}
+
+\item{ongoingVar}{Optional variable flagging patients still on treatment /
+with an ongoing response. Truthy values (TRUE, non-zero, or text matching
+yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.}
+
+\item{responseCategoryVar}{Optional per-patient RECIST category
+(CR/PR/SD/PD). When supplied it overrides the category computed from the
+percentage value, so a patient with target-lesion shrinkage can still be
+classified PD (e.g., a new lesion). Affects both bar coloring and response
+metrics (ORR/DCR).}
 
 \item{showThresholds}{Show +20 percent and -30 percent RECIST v1.1
 thresholds as dashed lines. Helps identify Progressive Disease (PD) and
@@ -113,6 +141,11 @@ confidence intervals for ORR and DCR}
 \item{showExplanations}{Display comprehensive explanation of what this
 analysis does, when to use it, data requirements, and key
 assumptions/limitations}
+
+\item{showResponseDuration}{Show a censoring-aware time-to-response (TTR)
+and duration-of-response (DoR) table. DoR is summarized with the
+Kaplan-Meier median (accounting for responders still in response at last
+follow-up), which the naive median understates.}
 }
 \value{
 A results object containing:
@@ -135,6 +168,7 @@ A results object containing:
 \code{results$spiderplot} \tab \tab \tab \tab \tab an image \cr
 \code{results$naturalLanguageSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
+\code{results$responseDurationTable} \tab \tab \tab \tab \tab a table \cr
 \code{results$addResponseCategory} \tab \tab \tab \tab \tab an output \cr
 \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 }

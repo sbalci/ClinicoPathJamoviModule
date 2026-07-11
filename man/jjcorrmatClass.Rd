@@ -3,6 +3,9 @@
 \name{jjcorrmatClass}
 \alias{jjcorrmatClass}
 \title{Correlation Matrix}
+\value{
+An \code{R6} class generator object for the \code{jjcorrmatClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Correlation Matrix
 }

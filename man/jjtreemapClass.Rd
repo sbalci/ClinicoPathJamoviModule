@@ -3,6 +3,9 @@
 \name{jjtreemapClass}
 \alias{jjtreemapClass}
 \title{Treemap}
+\value{
+An \code{R6} class generator object for the \code{jjtreemapClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Treemap
 }

@@ -3,6 +3,9 @@
 \name{multisurvivalClass}
 \alias{multisurvivalClass}
 \title{Multivariable Survival Analysis Implementation}
+\value{
+An \code{R6} class generator object for the \code{multisurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for comprehensive multivariable survival analysis.
 This R6 class provides the core functionality for the multisurvival jamovi module,

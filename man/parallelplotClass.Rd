@@ -3,6 +3,9 @@
 \name{parallelplotClass}
 \alias{parallelplotClass}
 \title{Parallel Coordinates Plot - Simplified Implementation}
+\value{
+An \code{R6} class generator object for the \code{parallelplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates parallel coordinates plots for multivariate data visualization.
 Parallel coordinates plots are excellent for exploring relationships

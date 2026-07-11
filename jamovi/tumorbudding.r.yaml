@@ -1,0 +1,115 @@
+---
+name:  tumorbudding
+title: Tumor Budding (ITBCC)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - budCount
+
+    - name: gradingTable
+      title: ITBCC Grade Distribution
+      type: Table
+      visible: (showGrading)
+      clearWith:
+          - budCount
+          - caseId
+          - fieldArea
+      columns:
+          - name: grade
+            title: "Grade"
+            type: text
+          - name: definition
+            title: "Buds / 0.785 mm2"
+            type: text
+          - name: n
+            title: "N cases"
+            type: integer
+          - name: pct
+            title: "%"
+            type: number
+            format: pc
+
+    - name: perCaseTable
+      title: Per-Case Hotspot Counts
+      type: Table
+      visible: (showPerCase)
+      clearWith:
+          - budCount
+          - caseId
+          - fieldArea
+      columns:
+          - name: case
+            title: "Case"
+            type: text
+          - name: rawMax
+            title: "Hotspot Raw Count"
+            type: number
+          - name: normalized
+            title: "Normalized / 0.785 mm2"
+            type: number
+          - name: grade
+            title: "Grade"
+            type: text
+
+    - name: survivalTable
+      title: Survival by Budding Grade
+      type: Table
+      visible: (showSurvival)
+      clearWith:
+          - budCount
+          - caseId
+          - fieldArea
+          - survivalTime
+          - survivalStatus
+          - eventLevel
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: plot
+      title: Grade Distribution
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - budCount
+          - caseId
+          - fieldArea
+          - group
+
+    - name: addGradeToData
+      title: Add Budding Grade to Data
+      type: Output
+      varTitle: Budding_Grade
+      varDescription: ITBCC tumor budding grade (Bd1/Bd2/Bd3)
+      measureType: nominal
+      clearWith:
+          - budCount
+          - caseId
+          - fieldArea
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+refs:
+    - ClinicoPathJamoviModule
+...

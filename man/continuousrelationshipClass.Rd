@@ -3,6 +3,9 @@
 \name{continuousrelationshipClass}
 \alias{continuousrelationshipClass}
 \title{Continuous Variable Relationship Analysis}
+\value{
+An \code{R6} class generator object for the \code{continuousrelationshipClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Analyzes relationships between continuous variables using evidence-based approaches
 from BMJ best practices. Implements splines, fractional polynomials, and provides

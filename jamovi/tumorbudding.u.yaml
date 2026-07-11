@@ -1,0 +1,82 @@
+title: Tumor Budding (ITBCC)
+name: tumorbudding
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Bud Count (per field)
+        children:
+          - type: VariablesListBox
+            name: budCount
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Case ID (multiple fields per case)
+        children:
+          - type: VariablesListBox
+            name: caseId
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: fieldArea
+        format: number
+  - type: CollapseBox
+    label: Survival (optional)
+    collapsed: false
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Survival Time
+            children:
+              - type: VariablesListBox
+                name: survivalTime
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Survival Event
+            children:
+              - type: VariablesListBox
+                name: survivalStatus
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LevelSelector
+            name: eventLevel
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showGrading
+      - type: CheckBox
+        name: showPerCase
+      - type: CheckBox
+        name: showSurvival
+      - type: CheckBox
+        name: showPlot
+      - type: Output
+        name: addGradeToData
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

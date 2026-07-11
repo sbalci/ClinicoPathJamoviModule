@@ -113,6 +113,31 @@ items:
           - sty
           - p_adjust
 
+    - name: smdTable
+      title: "Standardized Mean Differences (Balance)"
+      type: Table
+      visible: (showSMD)
+      clearWith:
+          - vars
+          - group
+          - showSMD
+      columns:
+          - name: variable
+            title: "Variable"
+            type: text
+          - name: vtype
+            title: "Type"
+            type: text
+          - name: smd
+            title: "SMD"
+            type: number
+          - name: absSMD
+            title: "|SMD|"
+            type: number
+          - name: balance
+            title: "Balance"
+            type: text
+
     # DISABLED - Stratified analysis feature not available
     # - name: mantelHaenszelResults
     #   title: "Stratified Analysis Results"

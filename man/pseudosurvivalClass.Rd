@@ -3,6 +3,9 @@
 \name{pseudosurvivalClass}
 \alias{pseudosurvivalClass}
 \title{Pseudo-Observations Survival Methods}
+\value{
+An \code{R6} class generator object for the \code{pseudosurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Pseudo-Observations Survival Methods
 }

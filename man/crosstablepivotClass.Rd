@@ -3,6 +3,9 @@
 \name{crosstablepivotClass}
 \alias{crosstablepivotClass}
 \title{Enhanced Cross Tables with Pivot Functionality}
+\value{
+An \code{R6} class generator object for the \code{crosstablepivotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates professional cross tables using pivottabler library
 for flexible clinical data analysis. Provides advanced formatting and statistics

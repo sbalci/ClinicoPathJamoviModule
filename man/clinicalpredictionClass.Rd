@@ -3,6 +3,9 @@
 \name{clinicalpredictionClass}
 \alias{clinicalpredictionClass}
 \title{Clinical Prediction Models with ML Interpretability}
+\value{
+An \code{R6} class generator object for the \code{clinicalpredictionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Clinical Prediction Models with ML Interpretability
 }

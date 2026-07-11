@@ -3,6 +3,9 @@
 \name{advancedbarplotClass}
 \alias{advancedbarplotClass}
 \title{Advanced Bar Charts - 5 Ways}
+\value{
+An \code{R6} class generator object for the \code{advancedbarplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Advanced bar chart visualization module implementing 5 different approaches
 for creating professional bar charts. Inspired by "A Bar Chart 5 Ways" methodology,

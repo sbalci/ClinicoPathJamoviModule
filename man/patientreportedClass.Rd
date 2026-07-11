@@ -3,6 +3,9 @@
 \name{patientreportedClass}
 \alias{patientreportedClass}
 \title{Patient-Reported Outcomes & Quality of Life Analysis}
+\value{
+An \code{R6} class generator object for the \code{patientreportedClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Patient-Reported Outcomes & Quality of Life Analysis
 }

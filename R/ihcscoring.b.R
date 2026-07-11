@@ -153,6 +153,13 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 private$.calculateScores(intensity, proportion, sample_ids, groups)
                 private$.performStatisticalAnalysis(intensity, proportion)
 
+                # Data-driven optimal cutpoint against a clinical outcome
+                if (isTRUE(self$options$optimal_cutpoint) &&
+                    !is.null(self$options$outcome_var)) {
+                    private$.performOptimalCutpoint(intensity, proportion,
+                                                    data[complete_cases, , drop = FALSE])
+                }
+
                 # Quality control analysis
                 if (self$options$quality_control) {
                     private$.performQualityControl(intensity, proportion)
@@ -1164,30 +1171,151 @@ def segment_nuclei(image_path):
             },
 
             # Missing plot render functions
+            # ---- Data-driven optimal cutpoint (outcome-linked) -------------
+            .optimizeScoreVector = function(intensity, proportion) {
+                which_score <- self$options$optimize_score
+                if (which_score == "proportion") return(proportion)
+                if (which_score == "allred") {
+                    allred_prop <- ifelse(proportion == 0, 0,
+                        ifelse(proportion <= 1, 1,
+                            ifelse(proportion <= 10, 2,
+                                ifelse(proportion <= 33, 3,
+                                    ifelse(proportion <= 66, 4, 5)))))
+                    return(intensity + allred_prop)
+                }
+                intensity * proportion   # hscore (default)
+            },
+
+            .performOptimalCutpoint = function(intensity, proportion, cdata) {
+                tab <- self$results$optimalCutpointTable
+                scoreLabel <- switch(self$options$optimize_score,
+                    hscore = "H-score", allred = "Allred total", proportion = "Proportion (%)")
+                score <- private$.optimizeScoreVector(intensity, proportion)
+
+                ov <- cdata[[self$options$outcome_var]]
+
+                if (self$options$outcome_type == "binary") {
+                    # define positive class
+                    pos <- self$options$outcome_positive
+                    if (is.factor(ov) || is.character(ov)) {
+                        if (is.null(pos) || pos == "")
+                            pos <- levels(as.factor(ov))[nlevels(as.factor(ov))]
+                        y <- as.integer(as.character(ov) == pos)
+                    } else {
+                        yn <- suppressWarnings(as.numeric(ov))
+                        y <- as.integer(yn == if (!is.null(pos) && pos != "")
+                                            suppressWarnings(as.numeric(pos)) else max(yn, na.rm = TRUE))
+                    }
+                    keep <- !is.na(score) & !is.na(y)
+                    if (sum(keep) < 10 || length(unique(y[keep])) < 2) {
+                        tab$setNote("cp", "Not enough complete observations with both outcome classes to optimize a cutpoint.")
+                        return()
+                    }
+                    if (!requireNamespace("cutpointr", quietly = TRUE)) {
+                        tab$setNote("cp", "Package 'cutpointr' is required for binary-outcome cutpoint optimization.")
+                        return()
+                    }
+                    df <- data.frame(.score = score[keep], .y = y[keep])
+                    cp <- tryCatch(
+                        cutpointr::cutpointr(df, .score, .y, pos_class = 1, neg_class = 0,
+                            method = cutpointr::maximize_metric,
+                            metric = cutpointr::youden, silent = TRUE),
+                        error = function(e) NULL)
+                    if (is.null(cp)) { tab$setNote("cp", "Cutpoint optimization failed."); return() }
+                    tab$addRow(rowKey = "score", values = list(quantity = "Score optimized", value = scoreLabel))
+                    tab$addRow(rowKey = "method", values = list(quantity = "Method", value = "Youden's index (ROC)"))
+                    tab$addRow(rowKey = "cut", values = list(quantity = "Optimal cutpoint", value = sprintf("%.3g", cp$optimal_cutpoint)))
+                    tab$addRow(rowKey = "sens", values = list(quantity = "Sensitivity", value = sprintf("%.3f", cp$sensitivity)))
+                    tab$addRow(rowKey = "spec", values = list(quantity = "Specificity", value = sprintf("%.3f", cp$specificity)))
+                    tab$addRow(rowKey = "auc", values = list(quantity = "AUC", value = sprintf("%.3f", cp$AUC)))
+                    tab$addRow(rowKey = "n", values = list(quantity = "N analyzed", value = as.character(sum(keep))))
+                    tab$setNote("cp", "Data-driven cutpoints are optimistic; validate externally before clinical use.")
+                    self$results$cutpointplot$setState(list(
+                        mode = "binary", score = score[keep], y = y[keep],
+                        cut = cp$optimal_cutpoint, label = scoreLabel, cp = cp))
+
+                } else {
+                    # survival outcome via maximally-selected log-rank statistic
+                    tvar <- self$options$cutpoint_time_var
+                    if (is.null(tvar)) {
+                        tab$setNote("cp", "A survival time variable is required for a survival outcome.")
+                        return()
+                    }
+                    time <- suppressWarnings(as.numeric(cdata[[tvar]]))
+                    pos <- self$options$outcome_positive
+                    if (is.factor(ov) || is.character(ov)) {
+                        if (is.null(pos) || pos == "")
+                            pos <- levels(as.factor(ov))[nlevels(as.factor(ov))]
+                        status <- as.integer(as.character(ov) == pos)
+                    } else {
+                        sn <- suppressWarnings(as.numeric(ov))
+                        status <- as.integer(sn == if (!is.null(pos) && pos != "")
+                                            suppressWarnings(as.numeric(pos)) else max(sn, na.rm = TRUE))
+                    }
+                    keep <- !is.na(score) & !is.na(time) & !is.na(status)
+                    if (sum(keep) < 10 || length(unique(status[keep])) < 2) {
+                        tab$setNote("cp", "Not enough complete survival observations to optimize a cutpoint.")
+                        return()
+                    }
+                    if (!requireNamespace("maxstat", quietly = TRUE)) {
+                        tab$setNote("cp", "Package 'maxstat' is required for survival cutpoint optimization.")
+                        return()
+                    }
+                    df <- data.frame(.time = time[keep], .status = status[keep], .score = score[keep])
+                    ms <- tryCatch(
+                        maxstat::maxstat.test(survival::Surv(.time, .status) ~ .score,
+                            data = df, smethod = "LogRank", pmethod = "condMC", B = 999),
+                        error = function(e) NULL)
+                    if (is.null(ms)) { tab$setNote("cp", "Cutpoint optimization failed."); return() }
+                    g <- factor(df$.score > ms$estimate)
+                    sd <- survival::survdiff(survival::Surv(.time, .status) ~ g, data = df)
+                    lr_p <- 1 - stats::pchisq(sd$chisq, length(sd$n) - 1)
+                    tab$addRow(rowKey = "score", values = list(quantity = "Score optimized", value = scoreLabel))
+                    tab$addRow(rowKey = "method", values = list(quantity = "Method", value = "Maximally-selected log-rank (maxstat)"))
+                    tab$addRow(rowKey = "cut", values = list(quantity = "Optimal cutpoint", value = sprintf("%.3g", ms$estimate)))
+                    tab$addRow(rowKey = "stat", values = list(quantity = "Max standardized statistic", value = sprintf("%.3f", ms$statistic)))
+                    tab$addRow(rowKey = "lr", values = list(quantity = "Log-rank at cutpoint", value = sprintf("chi-sq %.2f, p = %s", sd$chisq, format.pval(lr_p, digits = 3, eps = 1e-4))))
+                    tab$addRow(rowKey = "n", values = list(quantity = "N analyzed", value = as.character(sum(keep))))
+                    tab$setNote("cp", "Maximally-selected cutpoints are optimistic (multiplicity); the adjusted p-value and external validation are advised.")
+                    self$results$cutpointplot$setState(list(
+                        mode = "survival", score = df$.score, cut = ms$estimate,
+                        label = scoreLabel, time = df$.time, status = df$.status))
+                }
+            },
+
             .cutpointplot = function(image, ggtheme, theme, ...) {
-                # ROC analysis for cutpoint optimization
-                # This would require true positive/negative data for real implementation
-                # For now, create a placeholder ROC curve
-
-                set.seed(42)
-                fpr <- seq(0, 1, by = 0.01)
-                tpr <- pmax(0, pmin(1, fpr + rnorm(length(fpr), 0.3, 0.1)))
-
-                roc_data <- data.frame(FPR = fpr, TPR = tpr)
-
-                p <- ggplot2::ggplot(roc_data, ggplot2::aes(x = FPR, y = TPR)) +
-                    ggplot2::geom_line(color = "steelblue", size = 1.2) +
-                    ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
-                    ggplot2::labs(
-                        title = "ROC Curve for Cutpoint Optimization",
-                        subtitle = "Receiver Operating Characteristic Analysis",
-                        x = "False Positive Rate (1 - Specificity)",
-                        y = "True Positive Rate (Sensitivity)"
-                    ) +
-                    ggplot2::xlim(0, 1) +
-                    ggplot2::ylim(0, 1) +
-                    ggtheme
-
+                st <- image$state
+                if (is.null(st)) return(FALSE)
+                if (st$mode == "binary") {
+                    cp <- st$cp
+                    rc <- cp$roc_curve[[1]]
+                    df <- data.frame(fpr = rc$fpr, tpr = rc$tpr)
+                    df <- df[is.finite(df$fpr) & is.finite(df$tpr), , drop = FALSE]
+                    df <- df[order(df$fpr), ]
+                    p <- ggplot2::ggplot(df, ggplot2::aes(x = fpr, y = tpr)) +
+                        ggplot2::geom_line(color = "#2c7fb8", linewidth = 1.1) +
+                        ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "grey60") +
+                        ggplot2::labs(
+                            title = sprintf("ROC \u2014 optimal %s cutpoint = %.3g", st$label, st$cut),
+                            subtitle = sprintf("AUC = %.3f (Youden)", cp$AUC),
+                            x = "1 - Specificity", y = "Sensitivity") +
+                        ggplot2::coord_equal(xlim = c(0, 1), ylim = c(0, 1)) + ggtheme
+                } else {
+                    fit <- survival::survfit(survival::Surv(time, status) ~ (score > cut),
+                        data = data.frame(time = st$time, status = st$status, score = st$score, cut = st$cut))
+                    sf <- data.frame(time = fit$time, surv = fit$surv,
+                                     grp = rep(names(fit$strata), fit$strata))
+                    sf$grp <- ifelse(grepl("TRUE", sf$grp),
+                                     sprintf("%s > %.3g", st$label, st$cut),
+                                     sprintf("%s \u2264 %.3g", st$label, st$cut))
+                    p <- ggplot2::ggplot(sf, ggplot2::aes(x = time, y = surv, colour = grp)) +
+                        ggplot2::geom_step(linewidth = 0.9) +
+                        ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                        ggplot2::labs(
+                            title = sprintf("Survival by optimal %s cutpoint (%.3g)", st$label, st$cut),
+                            x = "Time", y = "Survival probability", colour = NULL) +
+                        ggtheme + ggplot2::theme(legend.position = "bottom")
+                }
                 print(p)
                 TRUE
             },

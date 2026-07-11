@@ -178,6 +178,27 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 warning("Odds ratio (or) or risk ratio (rr) are recommended for binary outcomes")
         },
         
+        # Modified-Poisson risk ratio (Zou 2004): Poisson working model with
+        # robust (HC0 sandwich) standard errors. Falls back to model-based SEs
+        # if the sandwich package is unavailable.
+        .modifiedPoisson = function(y, x, conf_level) {
+            y <- as.numeric(as.character(y)); 
+            m <- glm(y ~ x, family = poisson(link = "log"))
+            b <- coef(m)[2]
+            z <- stats::qnorm(1 - (1 - conf_level) / 2)
+            se <- tryCatch({
+                if (requireNamespace("sandwich", quietly = TRUE)) {
+                    sqrt(sandwich::vcovHC(m, type = "HC0")[2, 2])
+                } else {
+                    sqrt(stats::vcov(m)[2, 2])
+                }
+            }, error = function(e) sqrt(stats::vcov(m)[2, 2]))
+            list(estimate = exp(b),
+                 ci_lower = exp(b - z * se),
+                 ci_upper = exp(b + z * se),
+                 pvalue = 2 * stats::pnorm(-abs(b / se)))
+        },
+
         # Calculate effect estimates for subgroups
         .calculateSubgroupEffects = function(df, outcome_var, treatment_var, subgroup_var, 
                                            outcome_type, effect_measure, conf_level, 
@@ -217,28 +238,22 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         )
                         
                     } else if (outcome_type == "binary") {
-                        # Logistic regression
-                        glm_model <- glm(subset_df[[outcome_var]] ~ subset_df[[treatment_var]], 
-                                       family = binomial())
-                        
-                        if (effect_measure == "or") {
-                            estimate <- exp(coef(glm_model)[2])
-                            ci <- exp(confint(glm_model, level = conf_level))[2, ]
-                        } else if (effect_measure == "rr") {
-                            # Risk ratio calculation using modified Poisson regression
-                            # This is more appropriate than log-binomial which often fails to converge
-                            poisson_model <- glm(subset_df[[outcome_var]] ~ subset_df[[treatment_var]], 
-                                               family = poisson(link = "log"))
-                            
-                            estimate <- exp(coef(poisson_model)[2])
-                            ci <- exp(confint(poisson_model, level = conf_level))[2, ]
+                        if (effect_measure == "rr") {
+                            # Risk ratio via modified Poisson (Zou 2004): Poisson working
+                            # model with robust (sandwich) standard errors. More reliable
+                            # than log-binomial, which often fails to converge.
+                            fit <- private$.modifiedPoisson(
+                                subset_df[[outcome_var]], subset_df[[treatment_var]], conf_level)
+                            estimate <- fit$estimate; ci <- c(fit$ci_lower, fit$ci_upper)
+                            pval <- fit$pvalue
                         } else {
-                            # Default to OR if effect measure not recognized
+                            # Odds ratio via logistic regression (also the default)
+                            glm_model <- glm(subset_df[[outcome_var]] ~ subset_df[[treatment_var]],
+                                             family = binomial())
                             estimate <- exp(coef(glm_model)[2])
                             ci <- exp(confint(glm_model, level = conf_level))[2, ]
+                            pval <- summary(glm_model)$coefficients[2, "Pr(>|z|)"]
                         }
-                        
-                        pval <- summary(glm_model)$coefficients[2, "Pr(>|z|)"]
                         n_events <- sum(subset_df[[outcome_var]], na.rm = TRUE)
                         
                         results[[paste(subgroup_var, level, sep = ": ")]] <- list(
@@ -343,18 +358,27 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
         },
         
         # Calculate heterogeneity statistics between subgroups
-        .calculateHeterogeneity = function(effects_list) {
+        .calculateHeterogeneity = function(effects_list, effect_measure = "hr",
+                                          conf_level = 0.95) {
             if (length(effects_list) < 2) return(NULL)
-            
+
             tryCatch({
-                # Extract effect estimates and variances
-                estimates <- sapply(effects_list, function(x) log(x$estimate))
-                ci_lower <- sapply(effects_list, function(x) log(x$ci_lower))
-                ci_upper <- sapply(effects_list, function(x) log(x$ci_upper))
-                
-                # Calculate standard errors from confidence intervals
-                se <- (ci_upper - ci_lower) / (2 * 1.96)  # Assuming 95% CI
+                # Ratio measures (HR/OR/RR) combine on the log scale; a mean
+                # difference combines on its natural scale.
+                ratio_scale <- effect_measure %in% c("hr", "or", "rr")
+                tf <- if (ratio_scale) log else identity
+
+                estimates <- sapply(effects_list, function(x) tf(x$estimate))
+                ci_lower <- sapply(effects_list, function(x) tf(x$ci_lower))
+                ci_upper <- sapply(effects_list, function(x) tf(x$ci_upper))
+
+                # Recover standard errors from the CI width at the actual conf level
+                z <- stats::qnorm(1 - (1 - conf_level) / 2)
+                se <- (ci_upper - ci_lower) / (2 * z)
                 variances <- se^2
+                ok <- is.finite(estimates) & is.finite(variances) & variances > 0
+                estimates <- estimates[ok]; variances <- variances[ok]
+                if (length(estimates) < 2) return(NULL)
                 
                 # Calculate Q statistic for heterogeneity
                 weights <- 1 / variances
@@ -518,21 +542,20 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         
                     } else if (outcome_type == "binary") {
                         # Overall effect for binary outcomes
-                        glm_model <- glm(data[[outcome_var]] ~ data[[treatment_var]], family = binomial())
-                        
-                        if (effect_measure == "or") {
+                        if (effect_measure == "rr") {
+                            fit <- private$.modifiedPoisson(
+                                data[[outcome_var]], data[[treatment_var]], conf_level)
+                            estimate <- fit$estimate; ci <- c(fit$ci_lower, fit$ci_upper)
+                            pval <- fit$pvalue
+                            measure_name <- "Overall Risk Ratio"
+                        } else {
+                            glm_model <- glm(data[[outcome_var]] ~ data[[treatment_var]], family = binomial())
                             estimate <- exp(coef(glm_model)[2])
                             ci <- exp(confint(glm_model, level = conf_level))[2, ]
+                            pval <- summary(glm_model)$coefficients[2, "Pr(>|z|)"]
                             measure_name <- "Overall Odds Ratio"
-                        } else if (effect_measure == "rr") {
-                            poisson_model <- glm(data[[outcome_var]] ~ data[[treatment_var]], family = poisson(link = "log"))
-                            estimate <- exp(coef(poisson_model)[2])
-                            ci <- exp(confint(poisson_model, level = conf_level))[2, ]
-                            measure_name <- "Overall Risk Ratio"
                         }
-                        
-                        pval <- summary(glm_model)$coefficients[2, "Pr(>|z|)"]
-                        
+
                         self$results$overall$addRow(rowKey = 1, values = list(
                             measure = measure_name,
                             estimate = estimate,
@@ -564,18 +587,24 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
             
             # Calculate heterogeneity if multiple subgroups
             if (length(all_effects) > 1) {
-                heterogeneity <- private$.calculateHeterogeneity(all_effects)
-                if (!is.null(heterogeneity)) {
-                    # Add heterogeneity summary
+                heterogeneity <- private$.calculateHeterogeneity(
+                    all_effects, effect_measure, conf_level)
+                if (!is.null(heterogeneity) && !is.na(heterogeneity$Q)) {
                     het_text <- paste0(
-                        "<b>Heterogeneity Analysis:</b><br>",
-                        "Q-statistic: ", round(heterogeneity$Q, 2), " (df=", heterogeneity$df, ")<br>",
-                        "I²: ", round(heterogeneity$I_squared, 1), "%<br>",
-                        "P-value: ", format.pval(heterogeneity$p_value, digits = 3), "<br>",
-                        "Interpretation: ", heterogeneity$interpretation
+                        "<b>Between-subgroup heterogeneity (Cochran's Q):</b><br>",
+                        "Q-statistic: ", round(heterogeneity$Q, 2),
+                        " (df = ", heterogeneity$df, ")<br>",
+                        "I&sup2;: ", round(heterogeneity$I_squared, 1), "%<br>",
+                        "P-value: ", format.pval(heterogeneity$p_value, digits = 3, eps = 1e-4), "<br>",
+                        "Interpretation: ", heterogeneity$interpretation,
+                        "<br><span style='color:#666;font-size:90%'>Q tests whether subgroup ",
+                        "effects differ more than expected by chance; it is descriptive and ",
+                        "distinct from the formal treatment-by-subgroup interaction test above.</span>"
                     )
-                    
-                    # You can add this to a summary table or notes section if available
+                    self$results$heterogeneity$setContent(het_text)
+                } else {
+                    self$results$heterogeneity$setContent(
+                        "<i>Heterogeneity could not be computed (need \u22652 subgroups with finite variances).</i>")
                 }
             }
             

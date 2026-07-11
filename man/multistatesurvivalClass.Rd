@@ -3,6 +3,9 @@
 \name{multistatesurvivalClass}
 \alias{multistatesurvivalClass}
 \title{Multistate Survival Models}
+\value{
+An \code{R6} class generator object for the \code{multistatesurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Multistate Survival Models
 }

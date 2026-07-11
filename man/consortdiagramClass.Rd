@@ -3,6 +3,9 @@
 \name{consortdiagramClass}
 \alias{consortdiagramClass}
 \title{CONSORT Flow Diagram}
+\value{
+An \code{R6} class generator object for the \code{consortdiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 CONSORT Flow Diagram
 }

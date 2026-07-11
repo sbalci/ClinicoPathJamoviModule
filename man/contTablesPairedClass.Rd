@@ -3,6 +3,9 @@
 \name{contTablesPairedClass}
 \alias{contTablesPairedClass}
 \title{Paired Contingency Tables Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{contTablesPairedClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing paired contingency table analysis (McNemar test).
 }

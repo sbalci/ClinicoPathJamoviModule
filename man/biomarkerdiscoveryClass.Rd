@@ -3,6 +3,9 @@
 \name{biomarkerdiscoveryClass}
 \alias{biomarkerdiscoveryClass}
 \title{Biomarker Discovery Platform with ML Interpretability}
+\value{
+An \code{R6} class generator object for the \code{biomarkerdiscoveryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Biomarker Discovery Platform with ML Interpretability
 }

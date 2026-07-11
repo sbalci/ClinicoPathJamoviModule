@@ -1,0 +1,111 @@
+---
+name:  synopticcompleteness
+title: Synoptic Report Completeness
+menuGroup: OncoPathD
+menuSubgroup: ClinicoPath Data Quality
+menuTitle: Synoptic Report Completeness
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Audits the completeness of structured / synoptic pathology reports: the proportion of
+        required data elements present per report, per required element, and by subspecialty or
+        reporting pathologist, with an optional completeness trend over time.
+
+options:
+    - name: data
+      type: Data
+
+    - name: items
+      title: Required Data Elements
+      type: Variables
+      suggested: [nominal, ordinal, continuous]
+      description:
+          R: >
+            The required synoptic data elements. Each is counted as present for a report when it
+            is non-missing (and, for text, not blank or an explicit absence marker).
+
+    - name: presenceRule
+      title: Element Counts as Present When
+      type: List
+      options:
+        - name: nonmissing
+          title: 'Non-missing (not NA / blank)'
+        - name: value
+          title: 'Equal to a specified present value'
+      default: nonmissing
+      description:
+          R: How each element is judged present.
+
+    - name: presentValue
+      title: Present Value (for value rule)
+      type: String
+      default: ""
+      description:
+          R: When the rule is "specified value", the value that marks an element present.
+
+    - name: group
+      title: Group By (subspecialty / pathologist)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: Optional grouping for stratified completeness (e.g. subspecialty or reporting pathologist).
+
+    - name: timeVar
+      title: Time / Period (optional)
+      type: Variable
+      suggested: [continuous, ordinal]
+      permitted: [numeric]
+      description:
+          R: Optional ordered time/period variable for a completeness trend.
+
+    - name: completeThreshold
+      title: "Complete-report threshold (%)"
+      type: Number
+      min: 1
+      max: 100
+      default: 100
+      description:
+          R: A report counts as complete when at least this percentage of elements are present.
+
+    - name: showOverall
+      title: Overall Completeness
+      type: Bool
+      default: true
+
+    - name: showPerItem
+      title: Per-Element Completeness
+      type: Bool
+      default: true
+
+    - name: showByGroup
+      title: Completeness by Group
+      type: Bool
+      default: true
+
+    - name: showTrend
+      title: Completeness Trend Over Time
+      type: Bool
+      default: true
+
+    - name: showPlot
+      title: Completeness Plot
+      type: Bool
+      default: true
+
+    - name: addCompletenessToData
+      title: Add Report Completeness (%) to Data
+      type: Output
+
+    - name: showSummary
+      title: Plain-Language Summary
+      type: Bool
+      default: true
+
+    - name: showExplanation
+      title: Methodology
+      type: Bool
+      default: false
+...

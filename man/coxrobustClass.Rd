@@ -3,6 +3,9 @@
 \name{coxrobustClass}
 \alias{coxrobustClass}
 \title{Robust Cox Regression}
+\value{
+An \code{R6} class generator object for the \code{coxrobustClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Robust Cox Regression
 }

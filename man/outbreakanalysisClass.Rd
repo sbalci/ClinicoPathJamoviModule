@@ -3,6 +3,9 @@
 \name{outbreakanalysisClass}
 \alias{outbreakanalysisClass}
 \title{Outbreak Analysis & Epidemiological Investigation}
+\value{
+An \code{R6} class generator object for the \code{outbreakanalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Outbreak Analysis & Epidemiological Investigation
 }

@@ -3,6 +3,9 @@
 \name{tumorgrowthClass}
 \alias{tumorgrowthClass}
 \title{Tumor Growth Models}
+\value{
+An \code{R6} class generator object for the \code{tumorgrowthClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Tumor Growth Models
 }

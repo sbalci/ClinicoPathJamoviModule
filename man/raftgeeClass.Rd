@@ -3,6 +3,9 @@
 \name{raftgeeClass}
 \alias{raftgeeClass}
 \title{Rank-based AFT Estimation with GEE}
+\value{
+An \code{R6} class generator object for the \code{raftgeeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Rank-based AFT Estimation with GEE
 }

@@ -3,6 +3,9 @@
 \name{pcacomponenttestClass}
 \alias{pcacomponenttestClass}
 \title{PCA Component Significance Test}
+\value{
+An \code{R6} class generator object for the \code{pcacomponenttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 PCA Component Significance Test
 }

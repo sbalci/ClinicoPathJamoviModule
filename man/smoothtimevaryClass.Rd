@@ -3,6 +3,9 @@
 \name{smoothtimevaryClass}
 \alias{smoothtimevaryClass}
 \title{Smoothly Time-Varying Effects Implementation}
+\value{
+An \code{R6} class generator object for the \code{smoothtimevaryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for smooth estimation of time-varying covariate effects.
 This R6 class provides comprehensive functionality for continuous modeling of how

@@ -12,7 +12,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             excl = FALSE,
             cont = "mean",
             pcat = "chisq",
-            p_adjust = "none", ...) {
+            p_adjust = "none",
+            showSMD = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -70,6 +71,10 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "BH",
                     "BY"),
                 default="none")
+            private$..showSMD <- jmvcore::OptionBool$new(
+                "showSMD",
+                showSMD,
+                default=FALSE)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..group)
@@ -78,6 +83,7 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..cont)
             self$.addOption(private$..pcat)
             self$.addOption(private$..p_adjust)
+            self$.addOption(private$..showSMD)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -86,7 +92,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         excl = function() private$..excl$value,
         cont = function() private$..cont$value,
         pcat = function() private$..pcat$value,
-        p_adjust = function() private$..p_adjust$value),
+        p_adjust = function() private$..p_adjust$value,
+        showSMD = function() private$..showSMD$value),
     private = list(
         ..vars = NA,
         ..group = NA,
@@ -94,7 +101,8 @@ crosstableOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..excl = NA,
         ..cont = NA,
         ..pcat = NA,
-        ..p_adjust = NA)
+        ..p_adjust = NA,
+        ..showSMD = NA)
 )
 
 crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -112,7 +120,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         tablestyle3 = function() private$.items[["tablestyle3"]],
         tablestyle4 = function() private$.items[["tablestyle4"]],
         qvalueExplanation = function() private$.items[["qvalueExplanation"]],
-        testInformation = function() private$.items[["testInformation"]]),
+        testInformation = function() private$.items[["testInformation"]],
+        smdTable = function() private$.items[["smdTable"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -234,7 +243,37 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty",
-                    "p_adjust")))}))
+                    "p_adjust")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="smdTable",
+                title="Standardized Mean Differences (Balance)",
+                visible="(showSMD)",
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "showSMD"),
+                columns=list(
+                    list(
+                        `name`="variable", 
+                        `title`="Variable", 
+                        `type`="text"),
+                    list(
+                        `name`="vtype", 
+                        `title`="Type", 
+                        `type`="text"),
+                    list(
+                        `name`="smd", 
+                        `title`="SMD", 
+                        `type`="number"),
+                    list(
+                        `name`="absSMD", 
+                        `title`="|SMD|", 
+                        `type`="number"),
+                    list(
+                        `name`="balance", 
+                        `title`="Balance", 
+                        `type`="text"))))}))
 
 crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "crosstableBase",
@@ -283,6 +322,10 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param pcat .
 #' @param p_adjust Method for adjusting p-values for multiple comparisons
 #'   across variables. Only available with gtsummary table style.
+#' @param showSMD Add a standardized mean difference (SMD) column comparing
+#'   the groups for each variable — the standard balance diagnostic for matched,
+#'   weighted, or propensity cohorts. Requires exactly two groups. |SMD| < 0.1
+#'   conventionally indicates negligible imbalance.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$errorNotice} \tab \tab \tab \tab \tab a html \cr
@@ -297,7 +340,14 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$tablestyle4} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qvalueExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$testInformation} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$smdTable} \tab \tab \tab \tab \tab a table \cr
 #' }
+#'
+#' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+#'
+#' \code{results$smdTable$asDF}
+#'
+#' \code{as.data.frame(results$smdTable)}
 #'
 #' @export
 crosstable <- function(
@@ -308,7 +358,8 @@ crosstable <- function(
     excl = FALSE,
     cont = "mean",
     pcat = "chisq",
-    p_adjust = "none") {
+    p_adjust = "none",
+    showSMD = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("crosstable requires jmvcore to be installed (restart may be required)")
@@ -330,7 +381,8 @@ crosstable <- function(
         excl = excl,
         cont = cont,
         pcat = pcat,
-        p_adjust = p_adjust)
+        p_adjust = p_adjust,
+        showSMD = showSMD)
 
     analysis <- crosstableClass$new(
         options = options,

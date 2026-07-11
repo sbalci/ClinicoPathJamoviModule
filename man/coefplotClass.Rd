@@ -3,6 +3,9 @@
 \name{coefplotClass}
 \alias{coefplotClass}
 \title{Coefficient Plots}
+\value{
+An \code{R6} class generator object for the \code{coefplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Coefficient Plots
 }

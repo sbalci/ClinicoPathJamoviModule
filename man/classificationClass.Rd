@@ -3,6 +3,9 @@
 \name{classificationClass}
 \alias{classificationClass}
 \title{Enhanced Clinical Classification Analysis}
+\value{
+An \code{R6} class generator object for the \code{classificationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Clinical Classification Analysis
 }

@@ -3,6 +3,9 @@
 \name{decisioncalculatorClass}
 \alias{decisioncalculatorClass}
 \title{Decision Calculator}
+\value{
+An \code{R6} class generator object for the \code{decisioncalculatorClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Decision Calculator
 }

@@ -3,6 +3,9 @@
 \name{phevalClass}
 \alias{phevalClass}
 \title{Proportional Hazards Testing}
+\value{
+An \code{R6} class generator object for the \code{phevalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Proportional Hazards Testing
 }

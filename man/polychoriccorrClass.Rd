@@ -3,6 +3,9 @@
 \name{polychoriccorrClass}
 \alias{polychoriccorrClass}
 \title{Polychoric Correlation Analysis}
+\value{
+An \code{R6} class generator object for the \code{polychoriccorrClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Polychoric Correlation Analysis
 }

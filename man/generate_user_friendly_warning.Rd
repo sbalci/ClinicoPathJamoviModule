@@ -9,6 +9,9 @@ generate_user_friendly_warning(warning_entry)
 \arguments{
 \item{warning_entry}{Detailed warning log entry}
 }
+\value{
+A character string containing a user-friendly, clinically oriented warning message.
+}
 \description{
 Convert technical warning to user-friendly clinical message
 }

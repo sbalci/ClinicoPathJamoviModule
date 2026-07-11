@@ -3,6 +3,9 @@
 \name{timedependentdcaClass}
 \alias{timedependentdcaClass}
 \title{Time-Dependent Decision Curve Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{timedependentdcaClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing time-dependent decision curve analysis.
 }

@@ -3,6 +3,9 @@
 \name{extratreesClass}
 \alias{extratreesClass}
 \title{Extremely Randomized Trees for Survival}
+\value{
+An \code{R6} class generator object for the \code{extratreesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Extremely Randomized Trees for Survival
 }

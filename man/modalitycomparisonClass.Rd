@@ -3,6 +3,9 @@
 \name{modalitycomparisonClass}
 \alias{modalitycomparisonClass}
 \title{Modality Comparison Analysis}
+\value{
+An \code{R6} class generator object for the \code{modalitycomparisonClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Modality Comparison Analysis for digital pathology validation studies.
 }

@@ -3,6 +3,9 @@
 \name{sequentialtestsClass}
 \alias{sequentialtestsClass}
 \title{Sequential Testing Analysis}
+\value{
+An \code{R6} class generator object for the \code{sequentialtestsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Sequential Testing Analysis
 }

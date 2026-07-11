@@ -3,6 +3,9 @@
 \name{bbcplotsClass}
 \alias{bbcplotsClass}
 \title{BBC-Style Data Visualization}
+\value{
+An \code{R6} class generator object for the \code{bbcplotsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 BBC-Style Data Visualization
 }

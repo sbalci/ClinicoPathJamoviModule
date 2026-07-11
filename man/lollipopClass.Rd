@@ -3,6 +3,9 @@
 \name{lollipopClass}
 \alias{lollipopClass}
 \title{Lollipop Charts for Categorical Data Visualization}
+\value{
+An \code{R6} class generator object for the \code{lollipopClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates comprehensive lollipop charts for categorical data visualization with
 emphasis on clinical applications. Lollipop charts are particularly effective

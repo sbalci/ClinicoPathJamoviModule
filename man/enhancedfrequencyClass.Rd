@@ -3,6 +3,9 @@
 \name{enhancedfrequencyClass}
 \alias{enhancedfrequencyClass}
 \title{Enhanced Frequency Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{enhancedfrequencyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Frequency Analysis Class
 }

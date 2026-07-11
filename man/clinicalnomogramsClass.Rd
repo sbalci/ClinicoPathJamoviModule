@@ -3,6 +3,9 @@
 \name{clinicalnomogramsClass}
 \alias{clinicalnomogramsClass}
 \title{Clinical Nomograms And Risk Calculators}
+\value{
+An \code{R6} class generator object for the \code{clinicalnomogramsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Clinical Nomograms And Risk Calculators
 }

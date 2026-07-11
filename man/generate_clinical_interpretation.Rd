@@ -13,6 +13,12 @@ generate_clinical_interpretation(results, context, sample_size)
 
 \item{sample_size}{Sample size}
 }
+\value{
+A list with a \code{statistical_summary}, \code{clinical_summary},
+a character vector of \code{limitations}, and analysis
+\code{recommendations}.
+}
 \description{
 Generate comprehensive clinical interpretation
 }
+\keyword{internal}

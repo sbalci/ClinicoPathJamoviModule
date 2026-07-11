@@ -3,6 +3,9 @@
 \name{jppsClass}
 \alias{jppsClass}
 \title{Predictive Power Score Analysis}
+\value{
+An \code{R6} class generator object for the \code{jppsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Predictive Power Score Analysis
 }

@@ -7,6 +7,9 @@
 \usage{
 .retracted_imports()
 }
+\value{
+\code{NULL}; this placeholder function exists only to declare package imports.
+}
 \description{
 Retracted Helpers Imports
 }

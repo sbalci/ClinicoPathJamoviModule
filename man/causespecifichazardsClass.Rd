@@ -3,6 +3,9 @@
 \name{causespecifichazardsClass}
 \alias{causespecifichazardsClass}
 \title{Cause-Specific Hazards Models}
+\value{
+An \code{R6} class generator object for the \code{causespecifichazardsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Cause-Specific Hazards Models
 }

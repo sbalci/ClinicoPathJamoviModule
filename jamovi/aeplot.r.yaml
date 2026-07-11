@@ -1,0 +1,75 @@
+---
+name: aeplot
+title: Adverse Events Butterfly Plot
+jrs: '1.1'
+
+items:
+    - name: instructions
+      title: Instructions
+      type: Html
+      visible: true
+
+    - name: freqTable
+      title: Adverse Event Frequencies
+      type: Table
+      rows: 0
+      columns:
+        - name: ae
+          title: "Adverse Event"
+          type: text
+        - name: arm
+          title: "Arm"
+          type: text
+        - name: allGrade
+          title: "All-Grade (%)"
+          type: number
+        - name: highGrade
+          title: "High-Grade (%)"
+          type: number
+      clearWith:
+        - inputMode
+        - subjectID
+        - aeTerm
+        - armVar
+        - gradeVar
+        - gradeThreshold
+        - aeTermS
+        - testAll
+        - testHigh
+        - controlAll
+        - controlHigh
+        - topN
+
+    - name: plot
+      title: Butterfly Plot
+      type: Image
+      width: 700
+      height: 600
+      renderFun: .plot
+      requiresData: true
+      clearWith:
+        - inputMode
+        - subjectID
+        - aeTerm
+        - armVar
+        - gradeVar
+        - gradeThreshold
+        - aeTermS
+        - testAll
+        - testHigh
+        - controlAll
+        - controlHigh
+        - barShape
+        - colorScheme
+        - showValues
+        - topN
+
+    - name: interpretation
+      title: Interpretation
+      type: Html
+      visible: true
+
+refs:
+    - trialplots_highwind
+    - ClinicoPathJamoviModule
+...

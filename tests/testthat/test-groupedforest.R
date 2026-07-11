@@ -479,3 +479,30 @@ test_that("groupedforest required methods exist", {
     expect_true(exists(".perform_grouped_analysis", envir = result$.__enclos_env__$private))
   }
 })
+test_that("groupedforest interaction test uses a joint LR test (not min per-term p)", {
+  skip_if_not_installed("jmvcore")
+  skip_if_not_installed("broom")
+
+  set.seed(9); n <- 400
+  grp <- sample(c("A", "B", "C"), n, replace = TRUE)   # 3-level -> 2 interaction terms
+  trt <- sample(c("Ctrl", "Tx"), n, replace = TRUE)
+  lp  <- 0.3 * (trt == "Tx") + 0.6 * (grp == "B") + 0.9 * (grp == "C") -
+         1.2 * (trt == "Tx") * (grp == "C")
+  time   <- rexp(n, exp(lp) * 0.05)
+  status <- rbinom(n, 1, 0.7)
+  data <- data.frame(time = time, status = status, trt = trt, grp = grp)
+
+  expect_no_error({
+    model <- groupedforest(
+      data = data, time_var = "time", event_var = "status",
+      treatment_var = "trt", grouping_var = "grp",
+      reference_treatment = "Ctrl", interaction_test = TRUE,
+      show_overall = TRUE, show_statistics = TRUE)
+  })
+  expect_true(inherits(model, "jmvcoreClass"))
+
+  it <- model$results$interaction_test$content
+  # overall test reported as a single likelihood-ratio chi-square on df
+  expect_true(grepl("likelihood-ratio", it, ignore.case = TRUE))
+  expect_true(grepl("df", it))
+})

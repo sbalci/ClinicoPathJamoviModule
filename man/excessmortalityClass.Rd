@@ -3,6 +3,9 @@
 \name{excessmortalityClass}
 \alias{excessmortalityClass}
 \title{Excess Mortality Analysis}
+\value{
+An \code{R6} class generator object for the \code{excessmortalityClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Excess Mortality Analysis
 }

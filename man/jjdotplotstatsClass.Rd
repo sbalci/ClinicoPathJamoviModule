@@ -3,6 +3,9 @@
 \name{jjdotplotstatsClass}
 \alias{jjdotplotstatsClass}
 \title{Dot Chart}
+\value{
+An \code{R6} class generator object for the \code{jjdotplotstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Dot Chart
 }

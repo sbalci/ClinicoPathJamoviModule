@@ -3,6 +3,9 @@
 \name{cotestClass}
 \alias{cotestClass}
 \title{Co-Testing Analysis}
+\value{
+An \code{R6} class generator object for the \code{cotestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Co-Testing Analysis
 }

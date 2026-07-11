@@ -11,6 +11,10 @@ get_clinical_recommendations(results, context)
 
 \item{context}{Clinical context}
 }
+\value{
+A character vector of clinical recommendations (empty if none apply).
+}
 \description{
 Provide clinical recommendations based on results
 }
+\keyword{internal}

@@ -3,6 +3,9 @@
 \name{jjsyndromicplotClass}
 \alias{jjsyndromicplotClass}
 \title{Syndromic Plot for PCA}
+\value{
+An \code{R6} class generator object for the \code{jjsyndromicplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Syndromic Plot for PCA
 }

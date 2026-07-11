@@ -3,6 +3,9 @@
 \name{decisioncombineClass}
 \alias{decisioncombineClass}
 \title{Combine Medical Decision Tests}
+\value{
+An \code{R6} class generator object for the \code{decisioncombineClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Combine Medical Decision Tests
 }

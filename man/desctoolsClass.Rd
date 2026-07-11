@@ -3,6 +3,9 @@
 \name{desctoolsClass}
 \alias{desctoolsClass}
 \title{Advanced Statistical Tests}
+\value{
+An \code{R6} class generator object for the \code{desctoolsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Advanced Statistical Tests
 }

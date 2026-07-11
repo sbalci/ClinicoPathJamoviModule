@@ -3,6 +3,9 @@
 \name{modelperformanceClass}
 \alias{modelperformanceClass}
 \title{Multi-Model Performance Comparison}
+\value{
+An \code{R6} class generator object for the \code{modelperformanceClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Compare performance of multiple statistical models side-by-side. Supports Cox proportional hazards,
 logistic regression, and linear regression. Provides unified comparison with AIC, BIC, R^2, C-index.

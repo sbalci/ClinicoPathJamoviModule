@@ -2752,4 +2752,72 @@ refs:
         publisher: '[R package version 1.3.6]. Retrieved from https://CRAN.R-project.org/package=dunn.test'
         url: https://CRAN.R-project.org/package=dunn.test
 
+    trialplots_highwind:
+        type: 'software'
+        author: highwind
+        year: 2025
+        title: "Jamovi-TrialPlots: Plot data for clinical trials (jamovi module)"
+        publisher: 'GitHub'
+        url: https://github.com/highwindmx/Jamovi-TrialPlots
+
+    gsDesign_anderson:
+        type: 'software'
+        author: Anderson, K.
+        year: 2024
+        title: "gsDesign: Group Sequential Design"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gsDesign'
+        url: https://CRAN.R-project.org/package=gsDesign
+
+    ggsci_xiao:
+        type: 'software'
+        author: Xiao, N.
+        year: 2024
+        title: "ggsci: Scientific Journal and Sci-Fi Themed Color Palettes for ggplot2"
+        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggsci'
+        url: https://CRAN.R-project.org/package=ggsci
+
+    obrien1979:
+        type: 'article'
+        author: O'Brien, P. C., & Fleming, T. R.
+        year: 1979
+        title: "A multiple testing procedure for clinical trials"
+        publisher: 'Biometrics'
+        volume: 35
+        issue: 3
+        pages: 549-556
+        doi: 10.2307/2530245
+
+    pocock1977:
+        type: 'article'
+        author: Pocock, S. J.
+        year: 1977
+        title: "Group sequential methods in the design and analysis of clinical trials"
+        publisher: 'Biometrika'
+        volume: 64
+        issue: 2
+        pages: 191-199
+        doi: 10.1093/biomet/64.2.191
+
+    lan1983:
+        type: 'article'
+        author: Lan, K. K. G., & DeMets, D. L.
+        year: 1983
+        title: "Discrete sequential boundaries for clinical trials"
+        publisher: 'Biometrika'
+        volume: 70
+        issue: 3
+        pages: 659-663
+        doi: 10.1093/biomet/70.3.659
+
+    hwang1990:
+        type: 'article'
+        author: Hwang, I. K., Shih, W. J., & de Cani, J. S.
+        year: 1990
+        title: "Group sequential designs using a family of type I error probability spending functions"
+        publisher: 'Statistics in Medicine'
+        volume: 9
+        issue: 12
+        pages: 1439-1445
+        doi: 10.1002/sim.4780091207
+
 ...

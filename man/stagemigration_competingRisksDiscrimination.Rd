@@ -11,6 +11,9 @@ stagemigration_competingRisksDiscrimination(
   time_points = c(12, 24, 60)
 )
 }
+\value{
+List with \code{time_dependent_auc} and \code{concordance} discrimination metrics for the competing risks models.
+}
 \description{
 Calculates time-dependent AUC and concordance for competing risks models.
 }

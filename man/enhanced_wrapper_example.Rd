@@ -3,6 +3,10 @@
 \name{enhanced_wrapper_example}
 \alias{enhanced_wrapper_example}
 \title{Enhanced Wrapper Example for ClinicoPath Functions}
+\value{
+This is a documentation stub for the enhanced wrapper example and returns \code{NULL}.
+}
 \description{
 Demonstrates how to integrate robust error handling into existing ClinicoPath analyses
 }
+\keyword{internal}

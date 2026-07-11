@@ -3,6 +3,9 @@
 \name{firthregressionClass}
 \alias{firthregressionClass}
 \title{Firth's Penalized Likelihood Regression}
+\value{
+An \code{R6} class generator object for the \code{firthregressionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Firth's Penalized Likelihood Regression
 }

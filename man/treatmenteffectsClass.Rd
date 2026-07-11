@@ -3,6 +3,9 @@
 \name{treatmenteffectsClass}
 \alias{treatmenteffectsClass}
 \title{Treatment Effects Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{treatmenteffectsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing causal treatment effects analysis.
 }

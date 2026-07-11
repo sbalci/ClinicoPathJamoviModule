@@ -3,6 +3,9 @@
 \name{conditionalinferenceClass}
 \alias{conditionalinferenceClass}
 \title{Conditional Inference Trees for Survival}
+\value{
+An \code{R6} class generator object for the \code{conditionalinferenceClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Conditional Inference Trees for Survival
 }

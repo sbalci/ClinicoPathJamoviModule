@@ -3,6 +3,9 @@
 \name{crosstableClass}
 \alias{crosstableClass}
 \title{Cross Tables Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{crosstableClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for generating cross tables for clinicopathological comparisons.
 }

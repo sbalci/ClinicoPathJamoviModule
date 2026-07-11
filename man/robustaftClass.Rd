@@ -3,6 +3,9 @@
 \name{robustaftClass}
 \alias{robustaftClass}
 \title{Robust AFT Models}
+\value{
+An \code{R6} class generator object for the \code{robustaftClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Robust AFT Models
 }

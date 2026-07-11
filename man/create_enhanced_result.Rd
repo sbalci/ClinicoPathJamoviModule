@@ -13,6 +13,9 @@ create_enhanced_result(results, function_name, success = TRUE)
 
 \item{success}{Whether the analysis succeeded}
 }
+\value{
+A \code{clinicopath_result} object: a list with \code{results} and \code{metadata}, plus \code{errors}/\code{warnings} logs when any were recorded.
+}
 \description{
 Create enhanced result structure with error handling metadata
 }

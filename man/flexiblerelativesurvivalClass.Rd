@@ -3,6 +3,9 @@
 \name{flexiblerelativesurvivalClass}
 \alias{flexiblerelativesurvivalClass}
 \title{Flexible Relative Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{flexiblerelativesurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Flexible Relative Survival Analysis
 }

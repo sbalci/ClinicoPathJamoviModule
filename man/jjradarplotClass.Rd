@@ -3,6 +3,9 @@
 \name{jjradarplotClass}
 \alias{jjradarplotClass}
 \title{Radar Plot}
+\value{
+An \code{R6} class generator object for the \code{jjradarplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Radar Plot
 }

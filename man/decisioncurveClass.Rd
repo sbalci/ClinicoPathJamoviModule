@@ -3,6 +3,9 @@
 \name{decisioncurveClass}
 \alias{decisioncurveClass}
 \title{Decision Curve Analysis}
+\value{
+An \code{R6} class generator object for the \code{decisioncurveClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Decision Curve Analysis
 }

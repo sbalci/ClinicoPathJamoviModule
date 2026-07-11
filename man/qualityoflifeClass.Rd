@@ -3,6 +3,9 @@
 \name{qualityoflifeClass}
 \alias{qualityoflifeClass}
 \title{Quality of Life Analysis & Patient-Centered Outcomes}
+\value{
+An \code{R6} class generator object for the \code{qualityoflifeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Quality of Life Analysis & Patient-Centered Outcomes
 }

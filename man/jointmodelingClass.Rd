@@ -3,6 +3,9 @@
 \name{jointmodelingClass}
 \alias{jointmodelingClass}
 \title{Joint Longitudinal-Survival Models}
+\value{
+An \code{R6} class generator object for the \code{jointmodelingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Joint Longitudinal-Survival Models
 }

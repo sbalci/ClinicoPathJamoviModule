@@ -6,6 +6,11 @@
 \usage{
 pcaloadingtest_variance_info(pca, ncomp)
 }
+\value{
+A data frame with one row per retained component and columns
+\code{component} (index), \code{variance} (proportion of variance
+explained) and \code{cumulative} (cumulative proportion explained).
+}
 \description{
 Variance explained helper for pcaloadingtest
 }

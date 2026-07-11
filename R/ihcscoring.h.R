@@ -55,7 +55,13 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             language = "english",
             colorblind_safe = TRUE,
             high_contrast = FALSE,
-            font_size = "normal", ...) {
+            font_size = "normal",
+            optimal_cutpoint = FALSE,
+            optimize_score = "hscore",
+            outcome_type = "binary",
+            outcome_var = NULL,
+            outcome_positive = NULL,
+            cutpoint_time_var = NULL, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -362,6 +368,45 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "large",
                     "extra_large"),
                 default="normal")
+            private$..optimal_cutpoint <- jmvcore::OptionBool$new(
+                "optimal_cutpoint",
+                optimal_cutpoint,
+                default=FALSE)
+            private$..optimize_score <- jmvcore::OptionList$new(
+                "optimize_score",
+                optimize_score,
+                options=list(
+                    "hscore",
+                    "allred",
+                    "proportion"),
+                default="hscore")
+            private$..outcome_type <- jmvcore::OptionList$new(
+                "outcome_type",
+                outcome_type,
+                options=list(
+                    "binary",
+                    "survival"),
+                default="binary")
+            private$..outcome_var <- jmvcore::OptionVariable$new(
+                "outcome_var",
+                outcome_var,
+                suggested=list(
+                    "nominal",
+                    "ordinal"),
+                permitted=list(
+                    "factor",
+                    "numeric"))
+            private$..outcome_positive <- jmvcore::OptionLevel$new(
+                "outcome_positive",
+                outcome_positive,
+                variable="(outcome_var)")
+            private$..cutpoint_time_var <- jmvcore::OptionVariable$new(
+                "cutpoint_time_var",
+                cutpoint_time_var,
+                suggested=list(
+                    "continuous"),
+                permitted=list(
+                    "numeric"))
 
             self$.addOption(private$..guided_biomarker)
             self$.addOption(private$..intensity_var)
@@ -413,6 +458,12 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..colorblind_safe)
             self$.addOption(private$..high_contrast)
             self$.addOption(private$..font_size)
+            self$.addOption(private$..optimal_cutpoint)
+            self$.addOption(private$..optimize_score)
+            self$.addOption(private$..outcome_type)
+            self$.addOption(private$..outcome_var)
+            self$.addOption(private$..outcome_positive)
+            self$.addOption(private$..cutpoint_time_var)
         }),
     active = list(
         guided_biomarker = function() private$..guided_biomarker$value,
@@ -464,7 +515,13 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         language = function() private$..language$value,
         colorblind_safe = function() private$..colorblind_safe$value,
         high_contrast = function() private$..high_contrast$value,
-        font_size = function() private$..font_size$value),
+        font_size = function() private$..font_size$value,
+        optimal_cutpoint = function() private$..optimal_cutpoint$value,
+        optimize_score = function() private$..optimize_score$value,
+        outcome_type = function() private$..outcome_type$value,
+        outcome_var = function() private$..outcome_var$value,
+        outcome_positive = function() private$..outcome_positive$value,
+        cutpoint_time_var = function() private$..cutpoint_time_var$value),
     private = list(
         ..guided_biomarker = NA,
         ..intensity_var = NA,
@@ -515,7 +572,13 @@ ihcscoringOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..language = NA,
         ..colorblind_safe = NA,
         ..high_contrast = NA,
-        ..font_size = NA)
+        ..font_size = NA,
+        ..optimal_cutpoint = NA,
+        ..optimize_score = NA,
+        ..outcome_type = NA,
+        ..outcome_var = NA,
+        ..outcome_positive = NA,
+        ..cutpoint_time_var = NA)
 )
 
 ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -534,6 +597,7 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         distributionplot = function() private$.items[["distributionplot"]],
         correlationplot = function() private$.items[["correlationplot"]],
         agreementplot = function() private$.items[["agreementplot"]],
+        optimalCutpointTable = function() private$.items[["optimalCutpointTable"]],
         cutpointplot = function() private$.items[["cutpointplot"]],
         biomarkerspecific = function() private$.items[["biomarkerspecific"]],
         digitalvalidation = function() private$.items[["digitalvalidation"]],
@@ -823,15 +887,43 @@ ihcscoringResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "bootstrap_n",
                     "confidence_level",
                     "biomarker_type")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="optimalCutpointTable",
+                title="Optimal Cutpoint (Outcome-Linked)",
+                visible="(optimal_cutpoint)",
+                clearWith=list(
+                    "optimal_cutpoint",
+                    "optimize_score",
+                    "outcome_type",
+                    "outcome_var",
+                    "outcome_positive",
+                    "cutpoint_time_var"),
+                columns=list(
+                    list(
+                        `name`="quantity", 
+                        `title`="Quantity", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="text"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="cutpointplot",
                 title="Cutpoint Optimization Plot",
                 width=500,
                 height=400,
-                visible=FALSE,
+                visible="(optimal_cutpoint)",
                 requiresData=TRUE,
-                renderFun=".cutpointplot"))
+                renderFun=".cutpointplot",
+                clearWith=list(
+                    "optimal_cutpoint",
+                    "optimize_score",
+                    "outcome_type",
+                    "outcome_var",
+                    "outcome_positive",
+                    "cutpoint_time_var")))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -1640,6 +1732,19 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param colorblind_safe use colorblind-safe palette for all visualizations
 #' @param high_contrast enable high contrast mode for better accessibility
 #' @param font_size base font size for improved readability
+#' @param optimal_cutpoint Determine a data-driven optimal cutpoint for the
+#'   chosen score against a clinical outcome, instead of relying only on the
+#'   fixed cutpoint. Uses Youden's index for a binary outcome or the
+#'   maximally-selected log-rank statistic for a survival outcome.
+#' @param optimize_score Which computed score to dichotomize at the optimal
+#'   cutpoint.
+#' @param outcome_type Type of outcome used to optimize the cutpoint.
+#' @param outcome_var Binary outcome (for Youden) or the event indicator (for
+#'   survival).
+#' @param outcome_positive Level of the outcome variable representing the
+#'   positive class / event.
+#' @param cutpoint_time_var Follow-up time, required when the outcome type is
+#'   survival.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
@@ -1654,6 +1759,7 @@ ihcscoringBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$distributionplot} \tab \tab \tab \tab \tab Visual distribution of H-scores and Allred scores \cr
 #'   \code{results$correlationplot} \tab \tab \tab \tab \tab Correlation between H-score and Allred score methods \cr
 #'   \code{results$agreementplot} \tab \tab \tab \tab \tab Bland-Altman style agreement analysis between methods \cr
+#'   \code{results$optimalCutpointTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$cutpointplot} \tab \tab \tab \tab \tab ROC analysis for optimal cutpoint determination \cr
 #'   \code{results$biomarkerspecific$biomarkerresults} \tab \tab \tab \tab \tab Analysis tailored to specific biomarker characteristics \cr
 #'   \code{results$biomarkerspecific$clinicalcutpoints} \tab \tab \tab \tab \tab Established clinical thresholds and their performance \cr
@@ -1742,7 +1848,13 @@ ihcscoring <- function(
     language = "english",
     colorblind_safe = TRUE,
     high_contrast = FALSE,
-    font_size = "normal") {
+    font_size = "normal",
+    optimal_cutpoint = FALSE,
+    optimize_score = "hscore",
+    outcome_type = "binary",
+    outcome_var,
+    outcome_positive,
+    cutpoint_time_var) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("ihcscoring requires jmvcore to be installed (restart may be required)")
@@ -1758,6 +1870,8 @@ ihcscoring <- function(
     if ( ! missing(secondary_marker)) secondary_marker <- jmvcore::resolveQuo(jmvcore::enquo(secondary_marker))
     if ( ! missing(pd1_marker)) pd1_marker <- jmvcore::resolveQuo(jmvcore::enquo(pd1_marker))
     if ( ! missing(pdl1_marker)) pdl1_marker <- jmvcore::resolveQuo(jmvcore::enquo(pdl1_marker))
+    if ( ! missing(outcome_var)) outcome_var <- jmvcore::resolveQuo(jmvcore::enquo(outcome_var))
+    if ( ! missing(cutpoint_time_var)) cutpoint_time_var <- jmvcore::resolveQuo(jmvcore::enquo(cutpoint_time_var))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
@@ -1771,7 +1885,9 @@ ihcscoring <- function(
             `if`( ! missing(primary_marker2), primary_marker2, NULL),
             `if`( ! missing(secondary_marker), secondary_marker, NULL),
             `if`( ! missing(pd1_marker), pd1_marker, NULL),
-            `if`( ! missing(pdl1_marker), pdl1_marker, NULL))
+            `if`( ! missing(pdl1_marker), pdl1_marker, NULL),
+            `if`( ! missing(outcome_var), outcome_var, NULL),
+            `if`( ! missing(cutpoint_time_var), cutpoint_time_var, NULL))
 
     for (v in group_var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
@@ -1825,7 +1941,13 @@ ihcscoring <- function(
         language = language,
         colorblind_safe = colorblind_safe,
         high_contrast = high_contrast,
-        font_size = font_size)
+        font_size = font_size,
+        optimal_cutpoint = optimal_cutpoint,
+        optimize_score = optimize_score,
+        outcome_type = outcome_type,
+        outcome_var = outcome_var,
+        outcome_positive = outcome_positive,
+        cutpoint_time_var = cutpoint_time_var)
 
     analysis <- ihcscoringClass$new(
         options = options,

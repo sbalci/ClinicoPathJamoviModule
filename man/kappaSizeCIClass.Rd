@@ -3,6 +3,9 @@
 \name{kappaSizeCIClass}
 \alias{kappaSizeCIClass}
 \title{Confidence Interval Approach for the Number of Subjects Required}
+\value{
+An \code{R6} class generator object for the \code{kappaSizeCIClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Calculate sample size for interobserver agreement studies using Cohen's kappa statistic.
 This function provides confidence interval-based sample size determination for studies

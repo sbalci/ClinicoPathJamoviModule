@@ -3,6 +3,9 @@
 \name{vartreeClass}
 \alias{vartreeClass}
 \title{Variable Tree}
+\value{
+An \code{R6} class generator object for the \code{vartreeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Variable Tree
 }

@@ -3,6 +3,9 @@
 \name{competingsurvivalClass}
 \alias{competingsurvivalClass}
 \title{Competing Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{competingsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Competing Survival Analysis
 }

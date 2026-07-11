@@ -1,0 +1,48 @@
+title: Multifocal / Primary-Metastasis Concordance
+name: multifocalconcordance
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Case ID
+        children:
+          - type: VariablesListBox
+            name: caseId
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Focus / Sample ID
+        children:
+          - type: VariablesListBox
+            name: focusId
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Biomarkers / Mutations
+        children:
+          - type: VariablesListBox
+            name: markers
+            isTarget: true
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showPerMarker
+      - type: CheckBox
+        name: showKappa
+      - type: CheckBox
+        name: showCaseLevel
+      - type: CheckBox
+        name: showDiscordance
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

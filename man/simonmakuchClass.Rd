@@ -3,6 +3,9 @@
 \name{simonmakuchClass}
 \alias{simonmakuchClass}
 \title{Simon-Makuch Time-Dependent Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{simonmakuchClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Simon-Makuch Time-Dependent Survival Analysis
 }

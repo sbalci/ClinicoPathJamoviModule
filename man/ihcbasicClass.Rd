@@ -3,6 +3,9 @@
 \name{ihcbasicClass}
 \alias{ihcbasicClass}
 \title{Basic IHC Analysis}
+\value{
+An \code{R6} class generator object for the \code{ihcbasicClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Basic IHC Analysis
 }

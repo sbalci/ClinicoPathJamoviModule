@@ -3,6 +3,9 @@
 \name{linechartClass}
 \alias{linechartClass}
 \title{Line Chart for Time Series and Trend Analysis}
+\value{
+An \code{R6} class generator object for the \code{linechartClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates comprehensive line charts for time series analysis and trend visualization
 in clinical and pathological research. This function supports multiple groups,

@@ -1,0 +1,105 @@
+---
+name:  multifocalconcordance
+title: Multifocal / Primary-Metastasis Concordance
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - caseId
+          - markers
+
+    - name: perMarkerTable
+      title: Per-Marker Concordance
+      type: Table
+      visible: (showPerMarker)
+      clearWith:
+          - caseId
+          - focusId
+          - markers
+      columns:
+          - name: marker
+            title: "Marker"
+            type: text
+          - name: nCases
+            title: "Cases (>=2 foci)"
+            type: integer
+          - name: concordant
+            title: "Concordant"
+            type: integer
+          - name: rate
+            title: "Concordance"
+            type: number
+            format: pc
+          - name: kappa
+            title: "Cohen's kappa (paired)"
+            type: text
+
+    - name: caseLevelTable
+      title: Case-Level Clonality
+      type: Table
+      visible: (showCaseLevel)
+      clearWith:
+          - caseId
+          - focusId
+          - markers
+      columns:
+          - name: pattern
+            title: "Case Pattern"
+            type: text
+          - name: n
+            title: "N cases"
+            type: integer
+          - name: pct
+            title: "%"
+            type: number
+            format: pc
+
+    - name: discordanceTable
+      title: Discordance Pattern (paired)
+      type: Table
+      visible: (showDiscordance)
+      clearWith:
+          - caseId
+          - focusId
+          - markers
+      columns:
+          - name: marker
+            title: "Marker"
+            type: text
+          - name: gainDir
+            title: "Primary-neg -> Second-pos"
+            type: integer
+          - name: lossDir
+            title: "Primary-pos -> Second-neg"
+            type: integer
+
+    - name: plot
+      title: Concordance by Marker
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - caseId
+          - focusId
+          - markers
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+refs:
+    - ClinicoPathJamoviModule
+...

@@ -6,8 +6,12 @@
 \usage{
 .eurostat_pkg_cache
 }
+\value{
+An environment used internally to cache Eurostat data between runs.
+}
 \description{
 Creates choropleth maps using Eurostat data.
 Supports both downloading data from Eurostat API and using local data.
 Maps can be static or interactive with customizable styling.
 }
+\keyword{internal}

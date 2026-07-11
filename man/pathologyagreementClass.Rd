@@ -3,6 +3,9 @@
 \name{pathologyagreementClass}
 \alias{pathologyagreementClass}
 \title{Pathology Agreement Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{pathologyagreementClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing pathology agreement analysis.
 }

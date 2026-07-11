@@ -3,6 +3,9 @@
 \name{exacttestsClass}
 \alias{exacttestsClass}
 \title{Exact Tests for Small Samples}
+\value{
+An \code{R6} class generator object for the \code{exacttestsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Exact Tests for Small Samples
 }

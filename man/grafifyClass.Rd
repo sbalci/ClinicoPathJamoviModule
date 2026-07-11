@@ -3,6 +3,9 @@
 \name{grafifyClass}
 \alias{grafifyClass}
 \title{Scientific Visualization with Grafify}
+\value{
+An \code{R6} class generator object for the \code{grafifyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Scientific Visualization with Grafify
 }

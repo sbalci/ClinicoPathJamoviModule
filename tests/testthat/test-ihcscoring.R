@@ -88,3 +88,58 @@ test_that('ihcscoring analysis works', {
   expect_true(file.exists(omv_path))
 })
 
+
+
+test_that("ihcscoring finds a binary-outcome optimal cutpoint (Youden)", {
+  skip_if_not_installed("jmvcore")
+  skip_if_not_installed("cutpointr")
+
+  set.seed(11); n <- 220
+  intensity  <- sample(0:3, n, TRUE)
+  proportion <- round(runif(n, 0, 100))
+  hscore <- intensity * proportion
+  outcome <- factor(ifelse(rbinom(n, 1, plogis((hscore - 120) / 60)) == 1, "Pos", "Neg"),
+                    levels = c("Neg", "Pos"))
+  data <- data.frame(intensity_var = intensity, proportion_var = proportion,
+                     outcome = outcome)
+
+  expect_no_error({
+    model <- ihcscoring(
+      data = data, intensity_var = "intensity_var", proportion_var = "proportion_var",
+      optimal_cutpoint = TRUE, optimize_score = "hscore",
+      outcome_type = "binary", outcome_var = "outcome", outcome_positive = "Pos")
+  })
+  expect_true(inherits(model, "jmvcoreClass"))
+
+  ct <- model$results$optimalCutpointTable$asDF
+  expect_true(nrow(ct) >= 5)
+  expect_true("Optimal cutpoint" %in% ct$quantity)
+  expect_true("AUC" %in% ct$quantity)
+})
+
+test_that("ihcscoring finds a survival-outcome optimal cutpoint (maxstat)", {
+  skip_if_not_installed("jmvcore")
+  skip_if_not_installed("maxstat")
+
+  set.seed(11); n <- 220
+  intensity  <- sample(0:3, n, TRUE)
+  proportion <- round(runif(n, 0, 100))
+  hscore <- intensity * proportion
+  time   <- rexp(n, 0.02 * (0.5 + hscore / 150))
+  status <- rbinom(n, 1, 0.7)
+  data <- data.frame(intensity_var = intensity, proportion_var = proportion,
+                     time = time, event = status)
+
+  expect_no_error({
+    model <- ihcscoring(
+      data = data, intensity_var = "intensity_var", proportion_var = "proportion_var",
+      optimal_cutpoint = TRUE, optimize_score = "hscore",
+      outcome_type = "survival", outcome_var = "event", outcome_positive = "1",
+      cutpoint_time_var = "time")
+  })
+  expect_true(inherits(model, "jmvcoreClass"))
+
+  ct <- model$results$optimalCutpointTable$asDF
+  expect_true("Optimal cutpoint" %in% ct$quantity)
+  expect_true(any(grepl("log-rank", ct$quantity, ignore.case = TRUE)))
+})

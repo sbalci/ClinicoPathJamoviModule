@@ -1,0 +1,107 @@
+---
+name:  tumorbudding
+title: Tumor Budding (ITBCC)
+menuGroup: OncoPathD
+menuSubgroup: IHC Analysis
+menuTitle: Tumor Budding (ITBCC)
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Quantifies tumor budding and assigns an ITBCC (2016) grade from the number of buds
+        counted in a hotspot. Supports a single hotspot count, multiple candidate fields
+        (hotspot = the densest field), and area normalization to the standard 0.785 mm2 field.
+
+options:
+    - name: data
+      type: Data
+
+    - name: budCount
+      title: Bud Count (per field)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Number of tumor buds counted. With multiple fields per case (see Case ID), the
+            densest field is taken as the hotspot.
+
+    - name: caseId
+      title: Case ID (for multiple fields per case)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      description:
+          R: >
+            Optional case identifier. When several rows share a case ID (multiple fields),
+            the maximum bud count is used as the hotspot for that case.
+
+    - name: fieldArea
+      title: Field Area (mm2, for normalization)
+      type: Number
+      min: 0.01
+      default: 0.785
+      description:
+          R: >
+            Area of the counted field in mm2. Counts are normalized to the ITBCC standard
+            0.785 mm2 field (20x objective, 0.55 mm field diameter) before grading.
+
+    - name: group
+      title: Grouping Variable (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+
+    # optional survival linkage across budding grades
+    - name: survivalTime
+      title: Survival Time (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: survivalStatus
+      title: Survival Event (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (survivalStatus)
+
+    - name: showGrading
+      title: Grade Distribution
+      type: Bool
+      default: true
+
+    - name: showPerCase
+      title: Per-Case Counts
+      type: Bool
+      default: false
+
+    - name: showSurvival
+      title: Survival by Budding Grade
+      type: Bool
+      default: true
+
+    - name: showPlot
+      title: Grade Distribution Plot
+      type: Bool
+      default: true
+
+    - name: addGradeToData
+      title: Add Budding Grade to Data
+      type: Output
+
+    - name: showSummary
+      title: Plain-Language Summary
+      type: Bool
+      default: true
+
+    - name: showExplanation
+      title: Methodology
+      type: Bool
+      default: false
+...

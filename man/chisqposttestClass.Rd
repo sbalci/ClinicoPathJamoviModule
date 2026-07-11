@@ -3,6 +3,9 @@
 \name{chisqposttestClass}
 \alias{chisqposttestClass}
 \title{Chi-Square Post-Hoc Tests - Enhanced Implementation}
+\value{
+An \code{R6} class generator object for the \code{chisqposttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive post-hoc analysis for chi-square tests including residuals analysis,
 pairwise comparisons, and multiple testing corrections. Integrates methods from

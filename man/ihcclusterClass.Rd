@@ -3,6 +3,9 @@
 \name{ihcclusterClass}
 \alias{ihcclusterClass}
 \title{IHC Clustering Analysis Backend}
+\value{
+An \code{R6} class generator object for the \code{ihcclusterClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation for IHC clustering analysis. Clusters cases based on
 immunohistochemistry (IHC) staining patterns using various clustering algorithms

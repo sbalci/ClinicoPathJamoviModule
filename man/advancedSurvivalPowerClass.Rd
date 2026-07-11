@@ -3,6 +3,9 @@
 \name{advancedSurvivalPowerClass}
 \alias{advancedSurvivalPowerClass}
 \title{Power Analysis for Survival Studies}
+\value{
+An \code{R6} class generator object for the \code{advancedSurvivalPowerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 This module provides comprehensive power analysis for survival studies,
 allowing researchers to calculate statistical power, required sample size,

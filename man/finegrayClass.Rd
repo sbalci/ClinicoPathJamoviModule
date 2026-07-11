@@ -3,6 +3,9 @@
 \name{finegrayClass}
 \alias{finegrayClass}
 \title{Fine-Gray Competing Risks Regression}
+\value{
+An \code{R6} class generator object for the \code{finegrayClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Fine-Gray Competing Risks Regression
 }

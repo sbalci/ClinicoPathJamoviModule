@@ -17,6 +17,9 @@ clinicopath_warning_handler(
 
 \item{clinical_context}{Clinical context for the warning}
 }
+\value{
+A list with \code{success} (TRUE), \code{warning} (TRUE), a user-friendly \code{warning_message}, a \code{warning_id}, and the \code{detailed_log} entry.
+}
 \description{
 Enhanced warning handler with clinical context
 }

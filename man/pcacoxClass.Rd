@@ -3,6 +3,9 @@
 \name{pcacoxClass}
 \alias{pcacoxClass}
 \title{Principal Component Cox Models}
+\value{
+An \code{R6} class generator object for the \code{pcacoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Principal Component Cox Models
 }

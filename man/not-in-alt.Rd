@@ -12,6 +12,9 @@ x \%!in\% table
 
 \item{table}{Values to check against}
 }
+\value{
+A logical vector, \code{TRUE} where an element of \code{x} is not present in \code{table}.
+}
 \description{
 Alternative not-in operator
 }

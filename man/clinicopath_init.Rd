@@ -11,6 +11,9 @@ clinicopath_init(function_name, context = "")
 
 \item{context}{Additional context information}
 }
+\value{
+Invisibly returns \code{TRUE}; called for its side effect of resetting counters and pushing the function onto the tracking stack.
+}
 \description{
 Initialize error handling for a ClinicoPath function
 }

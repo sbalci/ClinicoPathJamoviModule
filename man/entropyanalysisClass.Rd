@@ -3,6 +3,9 @@
 \name{entropyanalysisClass}
 \alias{entropyanalysisClass}
 \title{Entropy and Mutual Information Analysis}
+\value{
+An \code{R6} class generator object for the \code{entropyanalysisClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Entropy and Mutual Information Analysis
 }

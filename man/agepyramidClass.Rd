@@ -3,6 +3,9 @@
 \name{agepyramidClass}
 \alias{agepyramidClass}
 \title{Age Pyramid}
+\value{
+An \code{R6} class generator object for the \code{agepyramidClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Generates an age pyramid plot from the provided data.
 The function allows customization of bin width (age group granularity) and plot title.

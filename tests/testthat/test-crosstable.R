@@ -193,3 +193,45 @@ test_that("crosstable works", {
   })
   
 })
+
+
+test_that("crosstable SMD balance column computes correctly", {
+  skip_if_not_installed("jmvcore")
+
+  set.seed(1)
+  df <- data.frame(
+    grp  = factor(rep(c("A", "B"), c(200, 180))),
+    xcon = c(rnorm(200, 10, 2), rnorm(180, 11, 2.2)),
+    xbin = factor(c(rbinom(200, 1, 0.3), rbinom(180, 1, 0.45))),
+    xcat = factor(c(sample(c("L1","L2","L3"), 200, TRUE, c(.5,.3,.2)),
+                    sample(c("L1","L2","L3"), 180, TRUE, c(.4,.3,.3)))))
+
+  expect_no_error({
+    model <- crosstable(
+      data = df, vars = c("xcon", "xbin", "xcat"), group = "grp",
+      sty = "gtsummary", showSMD = TRUE)
+  })
+  expect_true(inherits(model, "jmvcoreClass"))
+
+  smd <- model$results$smdTable$asDF
+  expect_equal(nrow(smd), 3)
+  # continuous SMD ~ -0.49 (magnitude ~0.49)
+  expect_equal(round(abs(smd$absSMD[smd$variable == "xcon"]), 1), 0.5)
+  # types classified
+  expect_equal(smd$vtype[smd$variable == "xcon"], "continuous")
+  expect_equal(smd$vtype[smd$variable == "xcat"], "categorical")
+  # all |SMD| finite and >= 0
+  expect_true(all(smd$absSMD >= 0 & is.finite(smd$absSMD)))
+})
+
+test_that("crosstable SMD requires exactly two groups", {
+  skip_if_not_installed("jmvcore")
+  set.seed(2)
+  df <- data.frame(
+    grp = factor(sample(c("A", "B", "C"), 150, TRUE)),
+    x   = rnorm(150))
+  model <- crosstable(data = df, vars = "x", group = "grp",
+                      sty = "gtsummary", showSMD = TRUE)
+  smd <- model$results$smdTable$asDF
+  expect_equal(nrow(smd), 0)   # no rows for 3-group data; note explains why
+})

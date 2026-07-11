@@ -238,9 +238,15 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                     model_summary <- broom::tidy(cox_model, conf.int = TRUE, 
                                                conf.level = self$options$confidence_level)
                     
-                    # Find treatment coefficient
-                    treatment_coef <- model_summary[grepl(treatment_var, model_summary$term), ]
-                    
+                    # Find the treatment coefficient. A factor treatment is named
+                    # "<var><level>" by the model; match on the exact variable-name
+                    # prefix (fixed, so regex metacharacters are literal) and exclude
+                    # any interaction terms, so a covariate whose name merely contains
+                    # the treatment-variable string is never picked up.
+                    is_trt <- startsWith(model_summary$term, treatment_var) &
+                              !grepl(":", model_summary$term, fixed = TRUE)
+                    treatment_coef <- model_summary[is_trt, ]
+
                     if (nrow(treatment_coef) > 0) {
                         results_list[[group]] <- list(
                             group = group,
@@ -478,7 +484,29 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
 
             cox_formula <- jmvcore::asFormula(formula_str)
             cox_model <- survival::coxph(cox_formula, data = data)
-            
+
+            # Joint likelihood-ratio test of ALL interaction terms (model with
+            # interaction vs the additive model). This is the correct overall
+            # interaction test; taking the minimum per-term p-value would inflate
+            # the type-I error for a multi-level grouping variable.
+            if (length(covariates) > 0) {
+                add_rhs <- paste(c(jmvcore::composeTerm(treatment_var),
+                                   jmvcore::composeTerm(grouping_var),
+                                   jmvcore::composeTerms(as.list(covariates))),
+                                 collapse = " + ")
+            } else {
+                add_rhs <- paste(c(jmvcore::composeTerm(treatment_var),
+                                   jmvcore::composeTerm(grouping_var)),
+                                 collapse = " + ")
+            }
+            additive_model <- survival::coxph(
+                jmvcore::asFormula(paste0(lhs, " ~ ", add_rhs)), data = data)
+            lr <- tryCatch(anova(additive_model, cox_model, test = "Chisq"),
+                           error = function(e) NULL)
+            lr_stat <- if (!is.null(lr)) lr$Chisq[2] else NA_real_
+            lr_df   <- if (!is.null(lr)) abs(lr$Df[2]) else NA_real_
+            lr_p    <- if (!is.null(lr)) lr[["Pr(>|Chi|)"]][2] else NA_real_
+
             # Extract interaction terms
             model_summary <- broom::tidy(cox_model)
             interaction_terms <- model_summary[grepl(":", model_summary$term), ]
@@ -509,18 +537,23 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                     )
                 }
                 
-                # Overall interaction p-value
-                min_p <- min(interaction_terms$p.value)
-                interaction_significant <- min_p < 0.05
-                
+                # Overall interaction: joint likelihood-ratio test (not min p-value)
+                interaction_significant <- !is.na(lr_p) && lr_p < 0.05
+                lr_txt <- if (!is.na(lr_p)) {
+                    paste0("Overall likelihood-ratio test: &chi;&sup2; = ", sprintf("%.2f", lr_stat),
+                           " on ", lr_df, " df, p = ", format.pval(lr_p, digits = 3, eps = 1e-4), ". ")
+                } else {
+                    "Overall likelihood-ratio test could not be computed. "
+                }
                 interaction_html <- paste0(interaction_html,
                     "</table>",
-                    "<p style='margin-top: 15px;'><strong>Interpretation:</strong> ",
+                    "<p style='margin-top: 15px;'><strong>Interpretation:</strong> ", lr_txt,
                     if (interaction_significant) {
-                        paste0("Significant interaction detected (min p = ", sprintf("%.4f", min_p), "). Treatment effects differ significantly across subgroups.")
+                        "Treatment effects differ significantly across subgroups."
                     } else {
-                        paste0("No significant interaction detected (min p = ", sprintf("%.4f", min_p), "). Treatment effects are relatively consistent across subgroups.")
+                        "Treatment effects are relatively consistent across subgroups (no significant interaction)."
                     },
+                    "<br><span style='color:#666;font-size:90%'>The per-term rows above are components of this single joint test; interpret the overall p-value, not individual term p-values.</span>",
                     "</p>"
                 )
             } else {

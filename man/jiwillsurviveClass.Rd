@@ -3,6 +3,9 @@
 \name{jiwillsurviveClass}
 \alias{jiwillsurviveClass}
 \title{Intuitive Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{jiwillsurviveClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Intuitive Survival Analysis
 }

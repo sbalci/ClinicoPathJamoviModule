@@ -29,6 +29,11 @@ enhanced_ttest(
 
 \item{clinical_context}{Clinical research context}
 }
+\value{
+An enhanced result object (as produced by \code{create_enhanced_result})
+containing the analysis success flag, formatted t-test results, clinical
+interpretation, and any accumulated warnings or errors.
+}
 \description{
 Enhanced t-test implementation with clinical context error handling
 }

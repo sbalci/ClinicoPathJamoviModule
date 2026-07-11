@@ -11,6 +11,11 @@ generate_clinical_summary(results, context)
 
 \item{context}{Clinical context}
 }
+\value{
+A single character string providing a context-specific clinical
+summary of the analysis results.
+}
 \description{
 Create clinical context summary
 }
+\keyword{internal}

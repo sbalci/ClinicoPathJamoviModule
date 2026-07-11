@@ -1,0 +1,122 @@
+---
+name:  ctdnadynamics
+title: ctDNA / MRD Dynamics
+menuGroup: OncoPathD
+menuSubgroup: ClinicoPath Biomarker Analysis
+menuTitle: ctDNA / MRD Dynamics
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Analyses circulating-tumour-DNA (ctDNA) / minimal-residual-disease (MRD) kinetics
+        from paired baseline and follow-up variant allele fractions (VAF): clearance vs
+        persistence classification, log-fold change, and MRD status as a predictor of
+        survival by a landmark analysis.
+
+options:
+    - name: data
+      type: Data
+
+    - name: baselineVaf
+      title: Baseline VAF / ctDNA level
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Variant allele fraction (or ctDNA concentration) at baseline / pre-treatment.
+
+    - name: followupVaf
+      title: Follow-up VAF / ctDNA level
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Variant allele fraction (or ctDNA concentration) at the follow-up / MRD timepoint.
+
+    - name: detectionThreshold
+      title: Detection threshold (VAF units)
+      type: Number
+      min: 0
+      default: 0.05
+      description:
+          R: >
+            VAF at or below which the follow-up sample is classed as cleared / MRD-negative.
+
+    - name: timeBetween
+      title: Time Between Draws (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Time between the baseline and follow-up draws, used to report a clearance rate
+            (change in log VAF per unit time).
+
+    - name: group
+      title: Grouping Variable (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: Optional grouping variable (e.g. treatment arm) for stratified clearance rates.
+
+    # ---- optional survival linkage (landmark by MRD status) ----
+    - name: survivalTime
+      title: Survival Time (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+
+    - name: survivalStatus
+      title: Survival Event (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+
+    - name: eventLevel
+      title: Event Level
+      type: Level
+      variable: (survivalStatus)
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+
+    - name: showClassification
+      title: Clearance / MRD Classification
+      type: Bool
+      default: true
+
+    - name: showDynamics
+      title: Dynamics Summary (fold-change, clearance rate)
+      type: Bool
+      default: true
+
+    - name: showSurvival
+      title: Landmark Survival by MRD Status
+      type: Bool
+      default: true
+
+    - name: showPlot
+      title: Trajectory Plot
+      type: Bool
+      default: true
+
+    - name: addStatusToData
+      title: Add MRD Status to Data
+      type: Output
+
+    - name: showSummary
+      title: Plain-Language Summary
+      type: Bool
+      default: true
+
+    - name: showExplanation
+      title: Methodology
+      type: Bool
+      default: false
+...

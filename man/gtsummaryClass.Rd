@@ -3,6 +3,9 @@
 \name{gtsummaryClass}
 \alias{gtsummaryClass}
 \title{Publication-Ready Tables with gtsummary}
+\value{
+An \code{R6} class generator object for the \code{gtsummaryClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Publication-Ready Tables with gtsummary
 }

@@ -1,0 +1,92 @@
+title: ctDNA / MRD Dynamics
+name: ctdnadynamics
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Baseline VAF / ctDNA
+        children:
+          - type: VariablesListBox
+            name: baselineVaf
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Follow-up VAF / ctDNA
+        children:
+          - type: VariablesListBox
+            name: followupVaf
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Time Between Draws (optional)
+        children:
+          - type: VariablesListBox
+            name: timeBetween
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Grouping Variable (optional)
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: detectionThreshold
+        format: number
+  - type: CollapseBox
+    label: Landmark Survival (optional)
+    collapsed: false
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Survival Time
+            children:
+              - type: VariablesListBox
+                name: survivalTime
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Survival Event
+            children:
+              - type: VariablesListBox
+                name: survivalStatus
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LevelSelector
+            name: eventLevel
+          - type: TextBox
+            name: conf_level
+            format: number
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    children:
+      - type: CheckBox
+        name: showClassification
+      - type: CheckBox
+        name: showDynamics
+      - type: CheckBox
+        name: showSurvival
+      - type: CheckBox
+        name: showPlot
+      - type: Output
+        name: addStatusToData
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

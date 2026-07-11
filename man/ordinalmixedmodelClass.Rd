@@ -3,6 +3,9 @@
 \name{ordinalmixedmodelClass}
 \alias{ordinalmixedmodelClass}
 \title{Ordinal Mixed Models (Cumulative Link)}
+\value{
+An \code{R6} class generator object for the \code{ordinalmixedmodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Ordinal Mixed Models (Cumulative Link)
 }

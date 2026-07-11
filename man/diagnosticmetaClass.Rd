@@ -3,6 +3,9 @@
 \name{diagnosticmetaClass}
 \alias{diagnosticmetaClass}
 \title{Diagnostic Test Meta-Analysis for Pathology}
+\value{
+An \code{R6} class generator object for the \code{diagnosticmetaClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Diagnostic Test Meta-Analysis for Pathology
 }

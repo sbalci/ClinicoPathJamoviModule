@@ -3,6 +3,9 @@
 \name{groupedbarClass}
 \alias{groupedbarClass}
 \title{Grouped Bar Chart Comparison}
+\value{
+An \code{R6} class generator object for the \code{groupedbarClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Creates grouped bar charts to compare measurements across different groups,
 inspired by Pew Research Center and similar professional visualizations.

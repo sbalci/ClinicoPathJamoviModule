@@ -3,6 +3,9 @@
 \name{treatmentSwitchingClass}
 \alias{treatmentSwitchingClass}
 \title{Treatment Switching Analysis}
+\value{
+An \code{R6} class generator object for the \code{treatmentSwitchingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Treatment Switching Analysis
 }

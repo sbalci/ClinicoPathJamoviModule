@@ -3,6 +3,9 @@
 \name{geemodelClass}
 \alias{geemodelClass}
 \title{Generalized Estimating Equations}
+\value{
+An \code{R6} class generator object for the \code{geemodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Fits Generalized Estimating Equation (GEE) models for analyzing correlated/clustered data.
 GEE provides population-averaged (marginal) estimates for studies with repeated measures,

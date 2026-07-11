@@ -11,6 +11,11 @@ assess_limitations(results, sample_size)
 
 \item{sample_size}{Sample size}
 }
+\value{
+A character vector of identified analysis limitations (empty if none
+are detected).
+}
 \description{
 Identify potential limitations
 }
+\keyword{internal}

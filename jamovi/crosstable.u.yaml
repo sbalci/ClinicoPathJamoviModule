@@ -53,6 +53,11 @@ children:
           - type: ComboBox
             name: p_adjust
             enable: (sty:gtsummary)
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showSMD
   # - type: CollapseBox
   #   label: Stratified Analysis
   #   collapsed: true

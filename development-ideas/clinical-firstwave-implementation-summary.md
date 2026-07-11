@@ -104,3 +104,71 @@ for (a in c("residualcancerburden","lymphnoderatio","hematologicindices","waterf
 - **Deferred** (from the review's later tiers): A3.1 crosstable SMD column, A1.1 ihcscoring
   cutpoint/reproducibility panel, A2.2 survival subgroup forest, B4 ctDNA/MRD, B5 tumor budding,
   B6 synoptic completeness, B7 multifocal concordance, and the remaining Part-A improvements.
+
+---
+
+## Second wave — Part-A improvements (this round)
+
+Following the first wave, the highest-value **improvements to existing functions** were
+addressed. Two turned out to be already covered on close inspection of the source.
+
+| # | Item | Outcome |
+|---|------|---------|
+| A3.1 | `crosstable`: SMD balance-diagnostic column | **Implemented** |
+| A2.3 | `stagemigration`: Win Ratio as first-class output | **Already present** — cross-link note added |
+| A1.2 | `agreement`: per-category agreement | **Already present** (Per-Category Item-Modal Agreement) — deprioritized |
+
+### A3.1 · `crosstable` — standardized mean differences *(improvement)*
+**Files touched:** `R/crosstable.b.R`, `jamovi/crosstable.{a,r,u}.yaml`, `tests/testthat/test-crosstable.R`
+**Audience:** general clinical
+
+`crosstable` renders grouped "Table 1" through five style engines (tableone, finalfit,
+gtsummary, arsenal, tangram). Weaving SMD into every engine would be fragile, so the SMD is
+computed **independently from the raw data** and shown in a dedicated, engine-agnostic table
+gated by a new `showSMD` option.
+
+- **Engine:** continuous SMD = (m₁ − m₂) / √((s₁² + s₂²)/2); binary = the two-proportion form;
+  categorical (>2 levels) = the Yang & Dalton (2012) multinomial SMD via `MASS::ginv`
+  (already a dependency). Requires exactly two groups; each row is flagged negligible
+  (|SMD| < 0.1) / small / notable.
+- **Validation:** continuous SMD −0.49, binary ±0.08, 3-level categorical 0.175; the
+  categorical path reproduces the binary magnitude exactly (0.0806), and the two-group guard
+  yields an empty table with an explanatory note for 3+ groups.
+- No new dependency; no change to any of the five existing render paths.
+
+### A2.3 · `stagemigration` — Win Ratio cross-link *(minor)*
+`stagemigration` (OncoPathT, Testing) already implements Win Ratio as a first-class feature
+with its own option, controls, and result tables. Added a note on `winRatioOverview` pointing
+to the standalone `winratio` for general two-group composites. No structural change.
+
+### Notes on deferred Part-A items
+- **A1.1 `ihcscoring` optimal cutpoint** — genuine gap (only fixed cutpoints exist today), but
+  medium-effort: needs an outcome variable and a maxstat/Youden engine wired into the IHC
+  workflow. Not a drop-in.
+- **A2.2 `survival` subgroup forest** — the standalone `subgroupforest` and `groupedforest`
+  analyses already deliver this capability; wiring a subgroup panel into the *released*
+  `survival` is a larger change to production code and was left for a deliberate pass.
+
+New DESCRIPTION Imports this round: none (SMD uses `MASS`, already a dependency).
+
+### A1.1 · `ihcscoring` — outcome-linked optimal cutpoint *(improvement)*
+**Files touched:** `R/ihcscoring.b.R`, `jamovi/ihcscoring.{a,r,u}.yaml`, `tests/testthat/test-ihcscoring.R`
+**Audience:** pathology
+
+The IHC scoring function had a "Cutpoint Optimization Plot" whose backend was a **placeholder
+drawing a simulated ROC curve from `rnorm()`** — it optimized nothing. Replaced with a real,
+outcome-linked optimal-cutpoint analysis, gated by a new `optimal_cutpoint` option so default
+behavior is unchanged.
+
+- **Engine:** for a **binary** outcome, Youden's index via `cutpointr` (cutpoint, sensitivity,
+  specificity, AUC); for a **survival** outcome, the maximally-selected log-rank statistic via
+  `maxstat` (cutpoint, max standardized statistic, confirmatory log-rank χ²/p). The score to
+  dichotomize is user-selectable (H-score / Allred total / proportion).
+- **Outputs:** an `optimalCutpointTable` and a **real** cutpoint plot — an ROC curve (binary)
+  or Kaplan–Meier curves split at the optimal cutpoint (survival) — replacing the placeholder.
+  Both carry a note that data-driven cutpoints are optimistic and need external validation.
+- **Validation:** binary cut = 51 (Se 0.84, Sp 0.67, AUC 0.81); survival cut = 87 (log-rank
+  χ² = 50.6, p < 1e-4); Allred-score path cut = 7.0 (AUC 0.79). Guards for < 10 complete
+  observations and single-class outcomes.
+- Both `cutpointr` and `maxstat` were already DESCRIPTION Imports (used by `optimalcutpoint`);
+  no new dependency. The reproducibility-panel half of the review item is deferred.

@@ -82,6 +82,7 @@ Imports:
     ggcorrplot,
     ggdendro,
     ggExtra,
+    ggsci,
     ggrepel,
     ggsignif,
     insight,

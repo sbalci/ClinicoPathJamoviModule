@@ -3,6 +3,9 @@
 \name{treecompareClass}
 \alias{treecompareClass}
 \title{Clinical Tree Algorithm Comparison}
+\value{
+An \code{R6} class generator object for the \code{treecompareClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive comparison of decision tree algorithms for clinical research
 }

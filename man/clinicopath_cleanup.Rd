@@ -9,6 +9,9 @@ clinicopath_cleanup(function_name)
 \arguments{
 \item{function_name}{Name of the function being cleaned up}
 }
+\value{
+Invisibly returns \code{TRUE}; called for its side effect of popping the function from the tracking stack.
+}
 \description{
 Clean up function execution context
 }

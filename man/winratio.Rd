@@ -116,16 +116,3 @@ subject-level bootstrap option is also provided. This complements
 hazard-ratio and RMST analyses when outcomes of differing severity must be
 combined and ranked.
 }
-\examples{
-\donttest{
-# data: one row per subject
-# arm: two-level group; deathTime/deathEvent primary endpoint
-winratio(
-    data = mydata,
-    group = "arm",
-    refLevel = "Control",
-    time1 = "deathTime", status1 = "deathEvent", eventLevel1 = "1",
-    time2 = "hospTime",  status2 = "hospEvent",  eventLevel2 = "1",
-    contEndpoint = "biomarker", contDirection = "lower")
-}
-}

@@ -3,6 +3,9 @@
 \name{patientsimilarityClass}
 \alias{patientsimilarityClass}
 \title{Patient Similarity Clustering - Discover Patient Subgroups}
+\value{
+An \code{R6} class generator object for the \code{patientsimilarityClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Visualizes patient similarity using dimensionality reduction techniques (PCA, t-SNE, UMAP, MDS).
 Projects high-dimensional patient data into 2D or 3D space to reveal natural patient groupings.

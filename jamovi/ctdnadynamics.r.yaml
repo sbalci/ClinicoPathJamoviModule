@@ -1,0 +1,113 @@
+---
+name:  ctdnadynamics
+title: ctDNA / MRD Dynamics
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - baselineVaf
+          - followupVaf
+
+    - name: classificationTable
+      title: Clearance / MRD Classification
+      type: Table
+      visible: (showClassification)
+      clearWith:
+          - baselineVaf
+          - followupVaf
+          - detectionThreshold
+          - group
+      columns:
+          - name: category
+            title: "Status"
+            type: text
+          - name: n
+            title: "N"
+            type: integer
+          - name: pct
+            title: "%"
+            type: number
+            format: pc
+
+    - name: dynamicsTable
+      title: ctDNA Dynamics
+      type: Table
+      visible: (showDynamics)
+      clearWith:
+          - baselineVaf
+          - followupVaf
+          - timeBetween
+          - detectionThreshold
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: cleared
+            title: "Cleared / MRD-neg"
+            type: text
+          - name: persistent
+            title: "Persistent / MRD-pos"
+            type: text
+
+    - name: survivalTable
+      title: Landmark Survival by MRD Status
+      type: Table
+      visible: (showSurvival)
+      clearWith:
+          - baselineVaf
+          - followupVaf
+          - detectionThreshold
+          - survivalTime
+          - survivalStatus
+          - eventLevel
+          - conf_level
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: plot
+      title: ctDNA Trajectory
+      type: Image
+      width: 550
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - baselineVaf
+          - followupVaf
+          - detectionThreshold
+          - group
+
+    - name: addStatusToData
+      title: Add MRD Status to Data
+      type: Output
+      varTitle: MRD_Status
+      varDescription: MRD status (cleared / persistent) from ctDNA dynamics
+      measureType: nominal
+      clearWith:
+          - baselineVaf
+          - followupVaf
+          - detectionThreshold
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+refs:
+    - ClinicoPathJamoviModule
+...

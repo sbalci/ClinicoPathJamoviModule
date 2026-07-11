@@ -3,6 +3,9 @@
 \name{jointfrailtyClass}
 \alias{jointfrailtyClass}
 \title{Joint Frailty Models for Recurrent Events}
+\value{
+An \code{R6} class generator object for the \code{jointfrailtyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Joint Frailty Models for Recurrent Events
 }

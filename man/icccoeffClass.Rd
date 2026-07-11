@@ -3,6 +3,9 @@
 \name{icccoeffClass}
 \alias{icccoeffClass}
 \title{Intraclass Correlation Coefficient}
+\value{
+An \code{R6} class generator object for the \code{icccoeffClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Intraclass Correlation Coefficient
 }

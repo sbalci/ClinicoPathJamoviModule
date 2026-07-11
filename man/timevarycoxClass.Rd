@@ -3,6 +3,9 @@
 \name{timevarycoxClass}
 \alias{timevarycoxClass}
 \title{Time-Varying Covariates Cox Regression Implementation}
+\value{
+An \code{R6} class generator object for the \code{timevarycoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for Cox proportional hazards regression with
 time-varying covariates. This R6 class provides comprehensive functionality

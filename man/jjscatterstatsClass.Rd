@@ -3,6 +3,9 @@
 \name{jjscatterstatsClass}
 \alias{jjscatterstatsClass}
 \title{Scatter Plot}
+\value{
+An \code{R6} class generator object for the \code{jjscatterstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Scatter Plot
 }

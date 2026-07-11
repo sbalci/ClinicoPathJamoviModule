@@ -3,6 +3,9 @@
 \name{studydiagramClass}
 \alias{studydiagramClass}
 \title{Study Diagram}
+\value{
+An \code{R6} class generator object for the \code{studydiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Study Diagram
 }

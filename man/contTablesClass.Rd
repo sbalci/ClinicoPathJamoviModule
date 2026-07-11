@@ -3,6 +3,9 @@
 \name{contTablesClass}
 \alias{contTablesClass}
 \title{Contingency Tables Analysis Class}
+\value{
+An \code{R6} class generator object for the \code{contTablesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing contingency table analysis.
 }

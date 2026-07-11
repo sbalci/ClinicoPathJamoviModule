@@ -3,6 +3,9 @@
 \name{aalenhazardClass}
 \alias{aalenhazardClass}
 \title{Aalen's Additive Hazard Models Implementation}
+\value{
+An \code{R6} class generator object for the \code{aalenhazardClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for Aalen's additive hazard regression models.
 This R6 class provides comprehensive functionality for non-proportional hazards

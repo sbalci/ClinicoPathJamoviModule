@@ -3,6 +3,9 @@
 \name{marginalrecurrentClass}
 \alias{marginalrecurrentClass}
 \title{Marginal Models for Recurrent Events}
+\value{
+An \code{R6} class generator object for the \code{marginalrecurrentClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Marginal Models for Recurrent Events
 }

@@ -3,6 +3,9 @@
 \name{clinicalscoreClass}
 \alias{clinicalscoreClass}
 \title{Clinical Scoring System Generator}
+\value{
+An \code{R6} class generator object for the \code{clinicalscoreClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Builds clinical integer-point scoring systems from regression models using
 three published methods: Sullivan/D'Agostino (2004), Schneeweiss (Mehta et al.

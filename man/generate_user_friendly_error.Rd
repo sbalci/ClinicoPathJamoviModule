@@ -9,6 +9,9 @@ generate_user_friendly_error(error_entry)
 \arguments{
 \item{error_entry}{Detailed error log entry}
 }
+\value{
+A character string containing a user-friendly, clinically oriented error message.
+}
 \description{
 Convert technical error to user-friendly clinical message
 }

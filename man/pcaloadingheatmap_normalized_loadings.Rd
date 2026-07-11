@@ -13,6 +13,10 @@ pcaloadingheatmap_normalized_loadings(pca, pca_data, scaled)
 
 \item{scaled}{Logical; whether the PCA was run with \code{scale.=TRUE}.}
 }
+\value{
+A numeric matrix of normalized loadings (variables in rows,
+components in columns) with values clipped to the (-1, 1) range.
+}
 \description{
 Converts PCA rotation matrices to correlation-style loadings that are
 comparable across different \code{scale} settings. Values are clipped within the

@@ -3,6 +3,9 @@
 \name{gradientboostingClass}
 \alias{gradientboostingClass}
 \title{Gradient Boosting for Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{gradientboostingClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Gradient Boosting for Survival Analysis
 }

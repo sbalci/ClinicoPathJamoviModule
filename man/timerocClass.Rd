@@ -3,6 +3,9 @@
 \name{timerocClass}
 \alias{timerocClass}
 \title{Enhanced ROC Analysis for Clinical Research}
+\value{
+An \code{R6} class generator object for the \code{timerocClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive evaluation of biomarker predictive performance using both
 time-dependent and general binary ROC analysis. Supports multiple ROC estimation

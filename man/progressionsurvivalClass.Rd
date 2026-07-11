@@ -3,6 +3,9 @@
 \name{progressionsurvivalClass}
 \alias{progressionsurvivalClass}
 \title{Progression-Free Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{progressionsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Progression-Free Survival Analysis
 }

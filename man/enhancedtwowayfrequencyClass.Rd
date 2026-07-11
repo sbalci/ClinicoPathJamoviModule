@@ -3,6 +3,9 @@
 \name{enhancedtwowayfrequencyClass}
 \alias{enhancedtwowayfrequencyClass}
 \title{Enhanced Two-Way Frequency Analysis}
+\value{
+An \code{R6} class generator object for the \code{enhancedtwowayfrequencyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Two-Way Frequency Analysis
 }

@@ -17,6 +17,9 @@ get_clinical_context(
 
 \item{effect_size}{Expected effect size}
 }
+\value{
+A list with the clinical context \code{type}, \code{sample_size}, \code{effect_size}, and any context-specific \code{recommendations}.
+}
 \description{
 Wrapper for clinical research contexts
 }

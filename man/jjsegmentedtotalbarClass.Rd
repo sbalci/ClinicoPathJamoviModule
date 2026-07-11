@@ -3,6 +3,9 @@
 \name{jjsegmentedtotalbarClass}
 \alias{jjsegmentedtotalbarClass}
 \title{Segmented Total Bar Charts}
+\value{
+An \code{R6} class generator object for the \code{jjsegmentedtotalbarClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Create segmented total bar charts (100\% stacked bars) that show proportional
 breakdowns within categories. Perfect for displaying composition data where

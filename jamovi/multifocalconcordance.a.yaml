@@ -1,0 +1,80 @@
+---
+name:  multifocalconcordance
+title: Multifocal / Primary-Metastasis Concordance
+menuGroup: OncoPathD
+menuSubgroup: ClinicoPath Biomarker Analysis
+menuTitle: Multifocal / Primary-Metastasis Concordance
+version: '0.0.1'
+jas: '1.2'
+
+description:
+    main: >
+        Assesses concordance of biomarkers or mutations across multiple foci of a tumour, or
+        between paired primary and metastasis samples. Reports per-marker concordance rates,
+        Cohen's kappa for paired (two-sample) designs, and a case-level clonality summary.
+
+options:
+    - name: data
+      type: Data
+
+    - name: caseId
+      title: Case ID
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      description:
+          R: Identifier grouping the foci / samples that belong to the same patient.
+
+    - name: focusId
+      title: Focus / Sample ID
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, id]
+      description:
+          R: >
+            Identifier of the focus or sample within a case (e.g. primary vs metastasis, or
+            focus 1/2/3). Used to order paired comparisons.
+
+    - name: markers
+      title: Biomarkers / Mutations
+      type: Variables
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: One or more categorical biomarker / mutation status variables to assess.
+
+    - name: showPerMarker
+      title: Per-Marker Concordance
+      type: Bool
+      default: true
+
+    - name: showKappa
+      title: Cohen's Kappa (paired designs)
+      type: Bool
+      default: true
+
+    - name: showCaseLevel
+      title: Case-Level Clonality Summary
+      type: Bool
+      default: true
+
+    - name: showDiscordance
+      title: Discordance Pattern (paired)
+      type: Bool
+      default: false
+
+    - name: showPlot
+      title: Concordance Plot
+      type: Bool
+      default: true
+
+    - name: showSummary
+      title: Plain-Language Summary
+      type: Bool
+      default: true
+
+    - name: showExplanation
+      title: Methodology
+      type: Bool
+      default: false
+...

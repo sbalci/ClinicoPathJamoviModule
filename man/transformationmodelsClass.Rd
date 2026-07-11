@@ -3,6 +3,9 @@
 \name{transformationmodelsClass}
 \alias{transformationmodelsClass}
 \title{Transformation Models}
+\value{
+An \code{R6} class generator object for the \code{transformationmodelsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Transformation Models
 }

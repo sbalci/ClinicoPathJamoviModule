@@ -3,6 +3,9 @@
 \name{dynamiccoeffClass}
 \alias{dynamiccoeffClass}
 \title{Dynamic Coefficient Models}
+\value{
+An \code{R6} class generator object for the \code{dynamiccoeffClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Dynamic Coefficient Models
 }

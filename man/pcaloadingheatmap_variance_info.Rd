@@ -6,6 +6,11 @@
 \usage{
 pcaloadingheatmap_variance_info(pca, ncomp)
 }
+\value{
+A data.frame with one row per retained component and columns
+\code{component} (index), \code{variance} (proportion of variance explained), and
+\code{cumulative} (cumulative proportion of variance explained).
+}
 \description{
 Variance explained by PCA components
 }

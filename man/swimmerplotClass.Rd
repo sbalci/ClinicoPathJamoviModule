@@ -3,6 +3,9 @@
 \name{swimmerplotClass}
 \alias{swimmerplotClass}
 \title{Swimmer Plot}
+\value{
+An \code{R6} class generator object for the \code{swimmerplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive swimmer plot function with full ggswim integration.
 Creates swimmer plots for visualizing patient timelines, treatments, milestones, and clinical events.

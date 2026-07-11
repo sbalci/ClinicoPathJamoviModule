@@ -3,6 +3,9 @@
 \name{oneSurvivalClass}
 \alias{oneSurvivalClass}
 \title{Kaplan-Meier Survival Analysis for Single Group}
+\value{
+An \code{R6} class generator object for the \code{oneSurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Performs Kaplan-Meier survival analysis for a single group of subjects.
 This function estimates survival probabilities over time and provides

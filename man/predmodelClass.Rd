@@ -3,6 +3,9 @@
 \name{predmodelClass}
 \alias{predmodelClass}
 \title{Clinical Prediction Model}
+\value{
+An \code{R6} class generator object for the \code{predmodelClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Clinical Prediction Model
 }

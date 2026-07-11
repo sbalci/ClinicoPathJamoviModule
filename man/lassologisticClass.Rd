@@ -3,6 +3,9 @@
 \name{lassologisticClass}
 \alias{lassologisticClass}
 \title{LASSO Logistic Regression for Binary Classification}
+\value{
+An \code{R6} class generator object for the \code{lassologisticClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Performs LASSO-penalized logistic regression for variable selection in binary
 classification problems. Supports LASSO, Ridge, and Elastic Net penalties.

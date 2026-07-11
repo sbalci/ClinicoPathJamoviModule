@@ -3,6 +3,9 @@
 \name{winratioClass}
 \alias{winratioClass}
 \title{Win Ratio for Hierarchical Composite Endpoints}
+\value{
+An \code{R6} class generator object for the \code{winratioClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Win Ratio for Hierarchical Composite Endpoints
 }

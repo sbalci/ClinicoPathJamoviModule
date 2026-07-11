@@ -3,6 +3,9 @@
 \name{comparingSurvivalClass}
 \alias{comparingSurvivalClass}
 \title{Comparing Survival Outcomes}
+\value{
+An \code{R6} class generator object for the \code{comparingSurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comparing Survival Outcomes
 }

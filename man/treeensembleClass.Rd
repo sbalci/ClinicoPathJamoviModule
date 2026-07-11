@@ -3,6 +3,9 @@
 \name{treeensembleClass}
 \alias{treeensembleClass}
 \title{Clinical Random Forest Analysis}
+\value{
+An \code{R6} class generator object for the \code{treeensembleClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Random Forest ensemble methods for clinical research and biomarker discovery
 }

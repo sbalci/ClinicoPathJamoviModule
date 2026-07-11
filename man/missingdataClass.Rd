@@ -3,6 +3,9 @@
 \name{missingdataClass}
 \alias{missingdataClass}
 \title{Missing Data Analysis and Multiple Imputation}
+\value{
+An \code{R6} class generator object for the \code{missingdataClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Comprehensive missing data analysis and multiple imputation using mice and ggmice packages.
 This function provides a complete workflow for analyzing missing data patterns, performing

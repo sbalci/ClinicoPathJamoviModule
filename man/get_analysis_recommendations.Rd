@@ -13,6 +13,11 @@ get_analysis_recommendations(results, context, sample_size)
 
 \item{sample_size}{Sample size}
 }
+\value{
+A character vector of comprehensive analysis recommendations (empty
+if none apply).
+}
 \description{
 Get comprehensive analysis recommendations
 }
+\keyword{internal}

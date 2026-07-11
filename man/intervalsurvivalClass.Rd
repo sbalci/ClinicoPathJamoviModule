@@ -3,6 +3,9 @@
 \name{intervalsurvivalClass}
 \alias{intervalsurvivalClass}
 \title{Interval-Censored Survival Analysis}
+\value{
+An \code{R6} class generator object for the \code{intervalsurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Interval-Censored Survival Analysis
 }

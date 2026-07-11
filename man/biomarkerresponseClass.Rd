@@ -3,6 +3,9 @@
 \name{biomarkerresponseClass}
 \alias{biomarkerresponseClass}
 \title{Biomarker Response Association}
+\value{
+An \code{R6} class generator object for the \code{biomarkerresponseClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Analyzes and visualizes relationships between biomarker levels and treatment responses
 }

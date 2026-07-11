@@ -3,6 +3,9 @@
 \name{mlpathologyClass}
 \alias{mlpathologyClass}
 \title{Classification Performance Metrics for Digital Pathology}
+\value{
+An \code{R6} class generator object for the \code{mlpathologyClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Classification Performance Metrics for Digital Pathology
 }

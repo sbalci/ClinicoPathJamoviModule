@@ -6,6 +6,9 @@
 \usage{
 .clinicopath_errors
 }
+\value{
+An environment used internally to track error and warning counts and logs across ClinicoPath analyses.
+}
 \description{
 Robust error handling system inspired by BlueSky R environment
 with enhanced features for clinical and pathological research.

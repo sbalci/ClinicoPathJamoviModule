@@ -3,6 +3,9 @@
 \name{esquisseautoClass}
 \alias{esquisseautoClass}
 \title{Auto-Plot using esquisse}
+\value{
+An \code{R6} class generator object for the \code{esquisseautoClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Auto-Plot using esquisse
 }

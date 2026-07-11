@@ -1,7 +1,7 @@
 ---
 name:  crosstable
 title: Cross Tables
-menuGroup: Exploration
+menuGroup: ExplorationT
 menuSubgroup: ClinicoPath Comparisons
 version: '0.0.51'
 jas: '1.2'
@@ -149,6 +149,21 @@ options:
       description: >
             Method for adjusting p-values for multiple comparisons across variables.
             Only available with gtsummary table style.
+
+    - name: showSMD
+      title: Standardized Mean Differences (balance)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Add a standardized mean difference (SMD) column comparing the groups for each
+            variable — the standard balance diagnostic for matched, weighted, or propensity
+            cohorts. Requires exactly two groups. |SMD| < 0.1 conventionally indicates
+            negligible imbalance.
+          jamovi: >
+            Show a standardized mean difference (SMD) table quantifying between-group balance
+            for each variable (continuous and categorical). Requires a two-level grouping
+            variable. |SMD| below 0.1 indicates good balance.
 
     # Advanced Post-hoc Testing Options
     # - name: posthoc_method

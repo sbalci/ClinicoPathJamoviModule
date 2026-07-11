@@ -3,6 +3,9 @@
 \name{pathagreementClass}
 \alias{pathagreementClass}
 \title{Pathology Interrater Reliability Analysis}
+\value{
+An \code{R6} class generator object for the \code{pathagreementClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Pathology interrater reliability analysis including Cohen's kappa, Fleiss' kappa,
 Krippendorff's alpha, diagnostic style clustering, and agreement visualization.

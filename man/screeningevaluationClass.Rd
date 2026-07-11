@@ -3,6 +3,9 @@
 \name{screeningevaluationClass}
 \alias{screeningevaluationClass}
 \title{Screening Program Evaluation & Performance Analysis}
+\value{
+An \code{R6} class generator object for the \code{screeningevaluationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Screening Program Evaluation & Performance Analysis
 }

@@ -3,6 +3,9 @@
 \name{waterfallClass}
 \alias{waterfallClass}
 \title{Treatment Response Analysis (Waterfall) Class}
+\value{
+An \code{R6} class generator object for the \code{waterfallClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 R6 class for performing treatment response analysis using waterfall plots.
 }

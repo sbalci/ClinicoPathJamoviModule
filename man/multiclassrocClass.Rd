@@ -3,6 +3,9 @@
 \name{multiclassrocClass}
 \alias{multiclassrocClass}
 \title{Multi-class ROC Analysis}
+\value{
+An \code{R6} class generator object for the \code{multiclassrocClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Multi-class ROC Analysis
 }

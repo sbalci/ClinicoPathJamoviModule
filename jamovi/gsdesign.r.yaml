@@ -85,5 +85,8 @@ items:
         - stdDev
 
 refs:
+    - gsDesign_anderson
+    - obrien1979
+    - trialplots_highwind
     - ClinicoPathJamoviModule
 ...

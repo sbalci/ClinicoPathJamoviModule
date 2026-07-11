@@ -17,6 +17,9 @@ clinicopath_error_handler(
 
 \item{clinical_context}{Clinical context for the error}
 }
+\value{
+A list with \code{success} (FALSE), \code{error} (TRUE), a user-friendly \code{error_message}, an \code{error_id}, and the \code{detailed_log} entry.
+}
 \description{
 Enhanced error handler with clinical context
 }

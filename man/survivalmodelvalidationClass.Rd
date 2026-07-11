@@ -3,6 +3,9 @@
 \name{survivalmodelvalidationClass}
 \alias{survivalmodelvalidationClass}
 \title{Enhanced Survival Model Validation}
+\value{
+An \code{R6} class generator object for the \code{survivalmodelvalidationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Survival Model Validation
 }

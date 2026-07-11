@@ -52,3 +52,57 @@ test_that('subgroupforest analysis works', {
   expect_true(file.exists(omv_path))
 })
 
+
+test_that('subgroupforest binary RR uses modified Poisson and reports heterogeneity', {
+  skip_if_not_installed('jmvcore')
+
+  set.seed(42); n <- 400
+  trt <- sample(c('Ctrl', 'Tx'), n, replace = TRUE)
+  sg  <- sample(c('Low', 'High'), n, replace = TRUE)
+  # event risk depends on treatment and subgroup
+  p <- plogis(-0.5 + 0.4 * (trt == 'Tx') + 0.5 * (sg == 'High'))
+  data <- data.frame(
+    outcome = rbinom(n, 1, p),
+    treatment = trt, sg = sg)
+
+  # Risk-ratio path (modified Poisson)
+  expect_no_error({
+    model <- subgroupforest(
+      data = data, outcome = 'outcome', treatment = 'treatment',
+      subgroups = 'sg', outcomeType = 'binary', effectMeasure = 'rr',
+      confidenceLevel = '0.95', showOverall = TRUE, showInteraction = TRUE,
+      sortBy = 'none', showSampleSizes = TRUE, logScale = TRUE, nullLine = 1)
+  })
+  expect_true(inherits(model, 'jmvcoreClass'))
+
+  sm <- model$results$summary$asDF
+  expect_true(nrow(sm) >= 2)                 # one row per subgroup level
+  expect_true(all(sm$estimate > 0))          # RR positive
+  # heterogeneity Html populated (two subgroups)
+  het <- model$results$heterogeneity$content
+  expect_true(grepl('Cochran', het) || grepl('heterogeneity', het, ignore.case = TRUE))
+})
+
+test_that('subgroupforest continuous outcome does not fail on negative mean differences', {
+  skip_if_not_installed('jmvcore')
+
+  set.seed(7); n <- 300
+  trt <- sample(c('Ctrl', 'Tx'), n, replace = TRUE)
+  sg  <- sample(c('G1', 'G2', 'G3'), n, replace = TRUE)
+  # Tx lowers the outcome (negative mean difference) — old heterogeneity log() would NaN
+  y <- 10 - 2 * (trt == 'Tx') + rnorm(n, 0, 3)
+  data <- data.frame(outcome = y, treatment = trt, sg = sg)
+
+  expect_no_error({
+    model <- subgroupforest(
+      data = data, outcome = 'outcome', treatment = 'treatment',
+      subgroups = 'sg', outcomeType = 'continuous', effectMeasure = 'md',
+      confidenceLevel = '0.95', showOverall = TRUE, showInteraction = FALSE,
+      sortBy = 'effect', showSampleSizes = FALSE, logScale = FALSE, nullLine = 0)
+  })
+  sm <- model$results$summary$asDF
+  expect_true(any(sm$estimate < 0))          # negative MDs present
+  het <- model$results$heterogeneity$content
+  # heterogeneity computed without NaN wipeout
+  expect_false(grepl('NaN', het))
+})

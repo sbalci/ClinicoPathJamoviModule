@@ -297,6 +297,45 @@ children:
           - type: CheckBox
             name: subtype_visualization
 
+  # ============ OPTIMAL CUTPOINT (OUTCOME-LINKED) ============
+  - type: CollapseBox
+    label: " Optimal Cutpoint (Outcome-Linked)"
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: optimal_cutpoint
+          - type: ComboBox
+            name: optimize_score
+          - type: ComboBox
+            name: outcome_type
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Outcome / Event
+            children:
+              - type: VariablesListBox
+                name: outcome_var
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Survival Time (survival outcome)
+            children:
+              - type: VariablesListBox
+                name: cutpoint_time_var
+                maxItemCount: 1
+                isTarget: true
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: LevelSelector
+            name: outcome_positive
+            label: "Positive / Event Level"
+
   # ============ ACCESSIBILITY & LANGUAGE ============
   - type: CollapseBox
     label: " Accessibility & Language"

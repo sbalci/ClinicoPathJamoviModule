@@ -3,6 +3,9 @@
 \name{recistClass}
 \alias{recistClass}
 \title{RECIST 1.1 Multi-Lesion Aggregation}
+\value{
+An \code{R6} class generator object for the \code{recistClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 RECIST 1.1 Multi-Lesion Aggregation
 }

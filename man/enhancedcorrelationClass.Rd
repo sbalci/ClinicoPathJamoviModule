@@ -3,6 +3,9 @@
 \name{enhancedcorrelationClass}
 \alias{enhancedcorrelationClass}
 \title{Enhanced Correlation Analysis}
+\value{
+An \code{R6} class generator object for the \code{enhancedcorrelationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced Correlation Analysis
 }

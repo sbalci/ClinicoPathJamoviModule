@@ -3,6 +3,9 @@
 \name{qtwistClass}
 \alias{qtwistClass}
 \title{Q-TWiST Analysis}
+\value{
+An \code{R6} class generator object for the \code{qtwistClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Quality-adjusted Time Without Symptoms or Toxicity Analysis
 }

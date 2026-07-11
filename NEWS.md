@@ -1,5 +1,30 @@
 # ClinicoPath News
 
+# ClinicoPath 0.0.51 (2026-07-11)
+
+## OncoPath: Jamovi-TrialPlots parity & waterfall enhancements
+
+### Added
+
+* **Adverse Events Butterfly Plot** (`aeplot`) — back-to-back adverse-event
+  frequency plot by preferred term and severity (all-grade vs high-grade), with
+  patient-level input (incidence computed internally) and a pre-summarized
+  percentages mode. Inspired by the Jamovi-TrialPlots module by highwind.
+* **Group-Sequential Design & Sample Size** (`gsdesign`) — interim-analysis
+  boundaries and sample-size / events for survival, binary, and continuous
+  endpoints via `gsDesign`, with O'Brien-Fleming / Pocock / Hwang-Shih-DeCani /
+  Wang-Tsiatis spending, efficacy (and optional futility) boundaries, and a
+  boundary plot. Inspired by the Jamovi-TrialPlots module by highwind.
+
+### Changed
+
+* **Waterfall plot** now sorts responses in the conventional oncology order
+  (worst on the left, best on the right) by default, adds an optional Y = 0
+  baseline line, supports confirmation-status and on-treatment/ongoing annotation
+  markers, and accepts a Response Category override so a shrinking target lesion
+  can still be classified PD (e.g., a new lesion). Thanks to @highwindmx
+  (OncoPath issue #1).
+
 # ClinicoPath 0.0.47 (2026-07-05)
 
 ## Submodule distribution integrity

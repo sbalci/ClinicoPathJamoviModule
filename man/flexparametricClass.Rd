@@ -3,6 +3,9 @@
 \name{flexparametricClass}
 \alias{flexparametricClass}
 \title{Flexible Parametric Survival Models}
+\value{
+An \code{R6} class generator object for the \code{flexparametricClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Flexible Parametric Survival Models
 }

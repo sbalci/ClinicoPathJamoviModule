@@ -3,6 +3,9 @@
 \name{flexmultistateClass}
 \alias{flexmultistateClass}
 \title{Flexible Multi-State Survival Models}
+\value{
+An \code{R6} class generator object for the \code{flexmultistateClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Flexible Multi-State Survival Models
 }

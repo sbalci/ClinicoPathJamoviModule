@@ -1,0 +1,191 @@
+---
+name: aeplot
+title: Adverse Events Butterfly Plot
+menuGroup: OncoPathT
+menuSubgroup: 'Patient Follow-Up Plots'
+menuSubtitle: 'Butterfly / Tornado Plot of Adverse Events'
+version: '0.0.51'
+jas: '1.2'
+
+description:
+    main: |
+        Back-to-back (butterfly) bar plot of adverse-event frequencies by preferred
+        term, comparing a test arm against an optional control arm and splitting each
+        bar into all-grade and high-grade (e.g. grade >= 3) severity.
+        Accepts patient-level data (incidence computed internally) or pre-summarized
+        percentages. Inspired by the Jamovi-TrialPlots module by highwind.
+
+options:
+    - name: data
+      type: Data
+
+    - name: inputMode
+      title: Input Mode
+      type: List
+      options:
+        - title: "Patient-level data (compute incidence)"
+          name: patient
+        - title: "Pre-summarized percentages"
+          name: summary
+      default: patient
+      description:
+          R: >
+            'patient' computes adverse-event incidence from patient-level rows;
+            'summary' reads pre-computed all-grade and high-grade percentages.
+
+    # --- patient-level mode ---
+    - name: subjectID
+      title: Subject ID
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, id, numeric]
+      default: NULL
+      description:
+          R: >
+            Subject identifier used as the incidence denominator (distinct subjects).
+
+    - name: aeTerm
+      title: Adverse Event Term
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Adverse-event preferred term (one row per subject-event).
+
+    - name: armVar
+      title: Treatment Arm (optional)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Optional treatment arm. When omitted the plot shows a single arm.
+
+    - name: gradeVar
+      title: Severity Grade (optional)
+      type: Variable
+      suggested: [ordinal, continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            Optional numeric severity grade used to derive the high-grade split.
+
+    - name: gradeThreshold
+      title: High-Grade Threshold (grade >=)
+      type: Number
+      min: 1
+      max: 5
+      default: 3
+      description:
+          R: >
+            Events with grade greater than or equal to this value count as high grade.
+
+    # --- summary mode ---
+    - name: aeTermS
+      title: Adverse Event Term (summary)
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      default: NULL
+      description:
+          R: >
+            Adverse-event term column for pre-summarized input.
+
+    - name: testAll
+      title: Test Arm All-Grade (%)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            Test-arm all-grade incidence percentage.
+
+    - name: testHigh
+      title: Test Arm High-Grade (%)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            Test-arm high-grade incidence percentage.
+
+    - name: controlAll
+      title: Control Arm All-Grade (%)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            Control-arm all-grade incidence percentage (optional).
+
+    - name: controlHigh
+      title: Control Arm High-Grade (%)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      default: NULL
+      description:
+          R: >
+            Control-arm high-grade incidence percentage (optional).
+
+    # --- display ---
+    - name: barShape
+      title: Bar Shape
+      type: List
+      options:
+        - title: "Inside (nested severity)"
+          name: inside
+        - title: "Outside (stacked severity)"
+          name: outside
+      default: inside
+      description:
+          R: >
+            'inside' overlays high-grade on all-grade; 'outside' stacks the two.
+
+    - name: colorScheme
+      title: Color Scheme
+      type: List
+      options:
+        - title: "NEJM"
+          name: nejm
+        - title: "Lancet"
+          name: lancet
+        - title: "JAMA"
+          name: jama
+        - title: "JCO"
+          name: jco
+        - title: "Nature (NPG)"
+          name: npg
+        - title: "Science (AAAS)"
+          name: aaas
+        - title: "Colorblind"
+          name: colorblind
+      default: nejm
+      description:
+          R: >
+            Journal-style color palette (via ggsci) for the test arm.
+
+    - name: showValues
+      title: Show Data Labels
+      type: Bool
+      default: false
+      description:
+          R: >
+            Print the all-grade percentage next to each bar.
+
+    - name: topN
+      title: Show Top N Terms (0 = all)
+      type: Integer
+      min: 0
+      default: 0
+      description:
+          R: >
+            Keep only the N most frequent terms (by test-arm all-grade); 0 shows all.
+...

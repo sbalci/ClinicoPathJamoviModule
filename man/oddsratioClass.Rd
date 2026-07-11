@@ -3,6 +3,9 @@
 \name{oddsratioClass}
 \alias{oddsratioClass}
 \title{Odds Ratio Analysis for Binary Outcomes}
+\value{
+An \code{R6} class generator object for the \code{oddsratioClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Performs logistic regression analysis to calculate odds ratios for binary outcomes.
 This function provides comprehensive odds ratio tables, forest plots, and optional

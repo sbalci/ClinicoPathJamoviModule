@@ -248,15 +248,41 @@ items:
           - confidence_level
           - biomarker_type
 
+    - name: optimalCutpointTable
+      title: Optimal Cutpoint (Outcome-Linked)
+      type: Table
+      visible: (optimal_cutpoint)
+      clearWith:
+          - optimal_cutpoint
+          - optimize_score
+          - outcome_type
+          - outcome_var
+          - outcome_positive
+          - cutpoint_time_var
+      columns:
+          - name: quantity
+            title: "Quantity"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
     - name: cutpointplot
       title: Cutpoint Optimization Plot
       type: Image
       description: ROC analysis for optimal cutpoint determination
       width: 500
       height: 400
-      visible: false
+      visible: (optimal_cutpoint)
       requiresData: true
       renderFun: .cutpointplot
+      clearWith:
+          - optimal_cutpoint
+          - optimize_score
+          - outcome_type
+          - outcome_var
+          - outcome_positive
+          - cutpoint_time_var
 
     - name: biomarkerspecific
       title: Biomarker-Specific Analysis

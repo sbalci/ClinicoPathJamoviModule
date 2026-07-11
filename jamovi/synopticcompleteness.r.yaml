@@ -1,0 +1,131 @@
+---
+name:  synopticcompleteness
+title: Synoptic Report Completeness
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - items
+
+    - name: overallTable
+      title: Overall Completeness
+      type: Table
+      visible: (showOverall)
+      clearWith:
+          - items
+          - presenceRule
+          - presentValue
+          - completeThreshold
+      columns:
+          - name: metric
+            title: "Metric"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: perItemTable
+      title: Per-Element Completeness
+      type: Table
+      visible: (showPerItem)
+      clearWith:
+          - items
+          - presenceRule
+          - presentValue
+      columns:
+          - name: element
+            title: "Data Element"
+            type: text
+          - name: present
+            title: "Present (n)"
+            type: integer
+          - name: pct
+            title: "Completeness"
+            type: number
+            format: pc
+
+    - name: byGroupTable
+      title: Completeness by Group
+      type: Table
+      visible: (showByGroup)
+      clearWith:
+          - items
+          - presenceRule
+          - presentValue
+          - group
+      columns:
+          - name: grp
+            title: "Group"
+            type: text
+          - name: n
+            title: "Reports"
+            type: integer
+          - name: meanComp
+            title: "Mean Completeness"
+            type: number
+            format: pc
+          - name: fullyComplete
+            title: "Fully Complete"
+            type: number
+            format: pc
+
+    - name: trendTable
+      title: Completeness Trend
+      type: Table
+      visible: (showTrend)
+      clearWith:
+          - items
+          - presenceRule
+          - presentValue
+          - timeVar
+      columns:
+          - name: statistic
+            title: "Statistic"
+            type: text
+          - name: value
+            title: "Value"
+            type: text
+
+    - name: plot
+      title: Completeness
+      type: Image
+      width: 550
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - items
+          - presenceRule
+          - presentValue
+          - group
+          - timeVar
+
+    - name: addCompletenessToData
+      title: Add Report Completeness to Data
+      type: Output
+      varTitle: Report_Completeness
+      varDescription: Percentage of required synoptic elements present per report
+      measureType: continuous
+      clearWith:
+          - items
+          - presenceRule
+          - presentValue
+
+    - name: summary
+      title: Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+refs:
+    - ClinicoPathJamoviModule
+...

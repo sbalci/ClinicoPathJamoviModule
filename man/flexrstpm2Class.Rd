@@ -3,6 +3,9 @@
 \name{flexrstpm2Class}
 \alias{flexrstpm2Class}
 \title{Royston-Parmar Flexible Parametric Models Implementation}
+\value{
+An \code{R6} class generator object for the \code{flexrstpm2Class} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Backend implementation class for Royston-Parmar flexible parametric survival models.
 This R6 class provides comprehensive functionality for flexible parametric modeling

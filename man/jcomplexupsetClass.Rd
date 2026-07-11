@@ -3,6 +3,9 @@
 \name{jcomplexupsetClass}
 \alias{jcomplexupsetClass}
 \title{Complex UpSet Plot Visualization}
+\value{
+An \code{R6} class generator object for the \code{jcomplexupsetClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Complex UpSet Plot Visualization
 }

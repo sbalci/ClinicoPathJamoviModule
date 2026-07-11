@@ -3,6 +3,9 @@
 \name{decisionClass}
 \alias{decisionClass}
 \title{Medical Decision Analysis}
+\value{
+An \code{R6} class generator object for the \code{decisionClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Implements comprehensive medical decision analysis including:
 }

@@ -3,6 +3,9 @@
 \name{ciSingleClass}
 \alias{ciSingleClass}
 \title{Enhanced confidence intervals for mean values}
+\value{
+An \code{R6} class generator object for the \code{ciSingleClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Enhanced confidence intervals for mean values
 }

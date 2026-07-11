@@ -6,6 +6,9 @@
 \usage{
 get_error_summary()
 }
+\value{
+A list with \code{error_count}, \code{warning_count}, \code{last_function}, and logical flags \code{has_errors} and \code{has_warnings}.
+}
 \description{
 Get summary of errors and warnings
 }

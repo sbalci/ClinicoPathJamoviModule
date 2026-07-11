@@ -3,6 +3,9 @@
 \name{pagetrendtestClass}
 \alias{pagetrendtestClass}
 \title{Page's Trend Test for Ordered Alternatives}
+\value{
+An \code{R6} class generator object for the \code{pagetrendtestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Page's Trend Test for Ordered Alternatives
 }

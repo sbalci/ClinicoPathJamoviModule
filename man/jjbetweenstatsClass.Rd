@@ -3,6 +3,9 @@
 \name{jjbetweenstatsClass}
 \alias{jjbetweenstatsClass}
 \title{Violin Plots to Compare Between Groups}
+\value{
+An \code{R6} class generator object for the \code{jjbetweenstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Violin Plots to Compare Between Groups
 }

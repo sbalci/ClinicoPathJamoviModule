@@ -3,6 +3,9 @@
 \name{clinicaldashboardClass}
 \alias{clinicaldashboardClass}
 \title{Interactive Clinical Dashboard}
+\value{
+An \code{R6} class generator object for the \code{clinicaldashboardClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Interactive Clinical Dashboard
 }

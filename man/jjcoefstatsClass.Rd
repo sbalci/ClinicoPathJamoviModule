@@ -3,6 +3,9 @@
 \name{jjcoefstatsClass}
 \alias{jjcoefstatsClass}
 \title{Coefficient Forest Plot (ggcoefstats)}
+\value{
+An \code{R6} class generator object for the \code{jjcoefstatsClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Coefficient Forest Plot (ggcoefstats)
 }

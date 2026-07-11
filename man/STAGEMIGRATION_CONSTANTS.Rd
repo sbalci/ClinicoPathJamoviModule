@@ -6,6 +6,10 @@
 \usage{
 STAGEMIGRATION_CONSTANTS
 }
+\value{
+A named list of numeric constants and threshold values used
+internally throughout stage migration analysis.
+}
 \description{
 Centralized constants used throughout stage migration analysis to avoid
 magic numbers and ensure consistency.

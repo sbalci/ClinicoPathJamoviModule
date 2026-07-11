@@ -12,6 +12,16 @@ stagemigration_bootstrapConcordance(
   checkpoint_callback = NULL
 )
 }
+\value{
+A list with the bootstrap comparison of the C-index difference:
+\code{c_diff} (original new-vs-old C-index difference), \code{p_value}
+(two-sided bootstrap p-value), \code{ci_lower} and \code{ci_upper}
+(2.5\\% and 97.5\\% percentile confidence limits), \code{se} (bootstrap
+standard error), and \code{n_successful_boots} (number of successful
+bootstrap resamples). If fewer than 50 resamples succeed or an error
+occurs, a reduced list with \code{NA} values for \code{p_value},
+\code{se}, \code{ci_lower}, and \code{ci_upper} is returned.
+}
 \description{
 Bootstrap validation of C-index difference accounting for correlation
 between staging systems (same patients).

@@ -3,6 +3,9 @@
 \name{explainableaiClass}
 \alias{explainableaiClass}
 \title{Explainable AI Analysis}
+\value{
+An \code{R6} class generator object for the \code{explainableaiClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Explainable AI Analysis
 }

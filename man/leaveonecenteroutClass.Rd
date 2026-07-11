@@ -3,6 +3,9 @@
 \name{leaveonecenteroutClass}
 \alias{leaveonecenteroutClass}
 \title{Leave-One-Center-Out Cross-Validation}
+\value{
+An \code{R6} class generator object for the \code{leaveonecenteroutClass} backend; used internally by the jamovi analysis wrapper and not called directly.
+}
 \description{
 Internal-external validation for multi-institutional prediction models.
 Trains on all-but-one center and evaluates on held-out center, repeating
