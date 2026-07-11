@@ -6053,6 +6053,43 @@ analyses:
       null value of 1 are provided. This is the standard analysis for registry,
       cohort, and occupational studies comparing an observed event count with
       population expectation.
+  - title: Lymph Node Ratio
+    name: lymphnoderatio
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: Response Evaluation
+    menuTitle: Lymph Node Ratio
+    menuSubtitle: Nodal Ratio, Yield Adequacy, and Prognosis
+    description: >
+      Computes the lymph node ratio (LNR = positive nodes / examined nodes) for
+      each patient, assesses nodal-yield adequacy against a minimum-examined
+      threshold, and relates LNR to a survival outcome. LNR can be stratified
+      either by established category thresholds or by a data-driven optimal
+      cutpoint chosen to maximize the log-rank separation, and the resulting
+      strata are compared with Kaplan-Meier / log-rank testing. LNR is an
+      established prognostic factor across colorectal, gastric, breast, and
+      head-and-neck cancers, and is more robust than absolute node counts when
+      nodal yield varies between specimens.
+  - title: Residual Cancer Burden (RCB)
+    name: residualcancerburden
+    ns: ClinicoPath
+    category: analyses
+    menuGroup: OncoPathD
+    menuSubgroup: Response Evaluation
+    menuTitle: Residual Cancer Burden (RCB)
+    menuSubtitle: RCB Index and Class After Neoadjuvant Therapy
+    description: >
+      Computes the Residual Cancer Burden (RCB) index and class (Symmans et al.,
+      2007) from the standard post-neoadjuvant pathology variables: the two
+      dimensions of the primary tumour bed, overall cancer cellularity, the
+      in-situ fraction, the number of positive lymph nodes, and the diameter of
+      the largest nodal metastasis. The continuous index is classified into
+      RCB-0 (pathologic complete response), RCB-I (minimal), RCB-II (moderate),
+      and RCB-III (extensive) residual disease using the established cut points
+      (1.36 and 3.28). Works on a cohort (one row per patient) or as a
+      single-case calculator, and can optionally relate RCB class to a survival
+      outcome.
 usesNative: true
 minApp: 2.7.27
 

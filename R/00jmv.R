@@ -24,6 +24,17 @@
         `pages`="430-437", 
         `doi`="10.1002/pst.1763", 
         `url`="https://pubmed.ncbi.nlm.nih.gov/27435905/"), 
+    `symmans2007rcb`=list(
+        `type`="article", 
+        `author`="Symmans, W. F., Peintinger, F., Hatzis, C., et al.", 
+        `year`=2007, 
+        `title`="Measurement of residual breast cancer burden to predict survival after neoadjuvant chemotherapy", 
+        `publisher`="Journal of Clinical Oncology", 
+        `volume`=25, 
+        `issue`=28, 
+        `pages`="4414-4422", 
+        `doi`="10.1200/JCO.2007.10.6823", 
+        `url`="https://pubmed.ncbi.nlm.nih.gov/17785706/"), 
     `vanderweele2017evalue`=list(
         `type`="article", 
         `author`="VanderWeele, T. J., & Ding, P.", 

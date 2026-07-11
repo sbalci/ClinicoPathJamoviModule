@@ -326,6 +326,26 @@ items:
       clearWith:
          - showExplanations
 
+    - name: responseDurationTable
+      title: Time-to-Response & Duration of Response
+      type: Table
+      visible: (showResponseDuration)
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
+      columns:
+         - name: metric
+           title: "Metric"
+           type: text
+         - name: value
+           title: "Value"
+           type: number
+         - name: detail
+           title: "Detail"
+           type: text
+
     - name: addResponseCategory
       title: Add Response Category to Data
       type: Output

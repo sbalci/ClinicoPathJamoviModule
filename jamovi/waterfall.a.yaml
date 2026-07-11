@@ -478,6 +478,22 @@ options:
             • Key assumptions and limitations (RECIST thresholds, baseline handling)
             Recommended for new users or when documenting analysis methods
 
+    - name: showResponseDuration
+      title: Time-to-Response & Duration of Response (KM)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Show a censoring-aware time-to-response (TTR) and duration-of-response (DoR)
+            table. DoR is summarized with the Kaplan-Meier median (accounting for responders
+            still in response at last follow-up), which the naive median understates.
+          jamovi: >
+            Add a dedicated efficacy table with:
+            • Median time to first response (RECIST PR or better)
+            • Kaplan-Meier median duration of response (censoring-aware)
+            • Number of responders and events
+            Requires a time variable and raw (per-visit) input.
+
     - name: addResponseCategory
       title: Add Response Category to Data
       type: Output

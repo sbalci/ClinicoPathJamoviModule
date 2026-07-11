@@ -80,6 +80,7 @@ Imports:
     correlation,
     cowplot,
     ggcorrplot,
+    ggdendro,
     ggExtra,
     ggrepel,
     ggsignif,

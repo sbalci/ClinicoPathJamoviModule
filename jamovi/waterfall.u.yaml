@@ -125,6 +125,11 @@ children:
           - type: LayoutBox
             margin: large
             children:
+              - type: CheckBox
+                name: showResponseDuration
+          - type: LayoutBox
+            margin: large
+            children:
               - type: Label
                 label: Update Data
                 children:
