@@ -13,7 +13,7 @@ description: >-
   dataset, generate cross tables with statistical tests, and survival analysis
   with survival tables, survival plots, and natural language summaries. For
   comments, suggestions, feature requests or reporting bugs, please open an
-  issue at https://github.com/sbalci/ClinicoPathJamoviModule/issues/.
+  issue at <https://github.com/sbalci/ClinicoPathJamoviModule/issues/>.
 analyses:
   - title: Table One
     name: tableone
@@ -1465,7 +1465,7 @@ analyses:
     name: kappaSizeCI
     ns: ClinicoPath
     menuGroup: Power
-    menuSubgroup: Power Analysis
+    menuSubgroup: Power Analysis by meddecide
     menuTitle: Confidence Interval Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on Kappa confidence
     description: |
@@ -1476,7 +1476,7 @@ analyses:
     name: kappaSizeFixedN
     ns: ClinicoPath
     menuGroup: Power
-    menuSubgroup: Power Analysis
+    menuSubgroup: Power Analysis by meddecide
     menuTitle: Lowest Expected Value for a fixed sample size
     menuSubtitle: Find lower Kappa based on sample size
     description: |
@@ -1487,7 +1487,7 @@ analyses:
     name: kappaSizePower
     ns: ClinicoPath
     menuGroup: Power
-    menuSubgroup: Power Analysis
+    menuSubgroup: Power Analysis by meddecide
     menuTitle: Power Approach for the Number of Subjects Required
     menuSubtitle: Find sample size based on power
     description: |
@@ -6019,7 +6019,7 @@ analyses:
       model is fitted conditional on treatment and covariates; the fitted model
       then predicts each subject's outcome under treatment and under no
       treatment, and these predictions are averaged (standardized) over the
-      covariate distribution to give the counterfactual means E[Y^1] and E[Y^0].
+      covariate distribution to give the counterfactual means E(Y^1) and E(Y^0).
       The average treatment effect is reported as a difference (and, for binary
       outcomes, a risk ratio), with percentile bootstrap confidence intervals.
       This standardization removes confounding by the measured covariates

@@ -275,7 +275,7 @@ rmstregressionClass <- R6::R6Class(
             }
             
             times <- unique(sort(times))
-            surv_extended <- surv_extended[1:length(times)]
+            surv_extended <- surv_extended[seq_along(times)]
             
             # Calculate RMST as area under curve
             rmst <- 0
@@ -460,7 +460,7 @@ rmstregressionClass <- R6::R6Class(
             ci <- confint(model, level = ci_level)
             
             # Populate results table
-            for (i in 1:nrow(coeffs)) {
+            for (i in seq_len(nrow(coeffs))) {
                 row <- list(
                     term = rownames(coeffs)[i],
                     estimate = coeffs[i, "Estimate"],
@@ -507,7 +507,7 @@ rmstregressionClass <- R6::R6Class(
             coeffs <- summary(model)$table
             
             # Populate results table
-            for (i in 1:nrow(coeffs)) {
+            for (i in seq_len(nrow(coeffs))) {
                 row <- list(
                     term = rownames(coeffs)[i],
                     estimate = coeffs[i, "Value"],
@@ -579,7 +579,7 @@ rmstregressionClass <- R6::R6Class(
                 
                 # Calculate cumulative RMST (area under curve up to each time point)
                 cumulative_rmst <- numeric(length(time_seq))
-                for (i in 1:length(time_seq)) {
+                for (i in seq_along(time_seq)) {
                     t_current <- time_seq[i]
                     if (i == 1) {
                         cumulative_rmst[i] <- 0

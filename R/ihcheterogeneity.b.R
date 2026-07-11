@@ -1782,7 +1782,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             # Attempt ICC calculation
-            tryCatch({
+            icc_err <- tryCatch({
                 icc_result <- psych::ICC(icc_data)
                 # Use ICC(3,1) - consistency, single measurements
                 icc_value <- icc_result$results$ICC[6]
@@ -1794,11 +1794,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     icc_value <- mean(correlations, na.rm = TRUE)
                     icc_lower <- icc_upper <- NA
                 }
-            }, error = function(e) {
-                # Fallback to mean correlation
-                icc_value <<- mean(correlations, na.rm = TRUE)
-                icc_lower <<- icc_upper <<- NA
-            })
+                NULL
+            }, error = function(e) e)
+            if (!is.null(icc_err)) {
+                # Fallback to mean correlation (assigned here with `<-` instead
+                # of `<<-` from inside the error handler).
+                icc_value <- mean(correlations, na.rm = TRUE)
+                icc_lower <- icc_upper <- NA
+            }
 
             return(list(
                 value = icc_value,
@@ -1833,7 +1836,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Check coefficient of variation
             cv_values <- c()
-            for (i in 1:nrow(biopsy_data)) {
+            for (i in seq_len(nrow(biopsy_data))) {
                 row_data <- c(whole_section[i], as.numeric(biopsy_data[i, ]))
                 row_data <- row_data[!is.na(row_data)]
                 if (length(row_data) >= 2) {
@@ -2176,7 +2179,6 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             p_value = levene_p,
                             interpretation = interpretation
                         ))
-                        row_key <- row_key + 1
                     }, error = function(e) {
                         # Failed to compute Levene's test
                         test_table$addRow(rowKey = row_key, values = list(
@@ -2186,8 +2188,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             p_value = NA,
                             interpretation = "Could not compute: insufficient data or computational error"
                         ))
-                        row_key <<- row_key + 1
                     })
+                    # Increment once after either branch (avoids `<<-` in the handler).
+                    row_key <- row_key + 1
                 }
             }
 
@@ -2220,7 +2223,6 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             p_value = kw_p,
                             interpretation = interpretation
                         ))
-                        row_key <- row_key + 1
                     }, error = function(e) {
                         test_table$addRow(rowKey = row_key, values = list(
                             test_type = "Kruskal-Wallis Test (Distribution)",
@@ -2229,8 +2231,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             p_value = NA,
                             interpretation = "Could not compute: insufficient data or computational error"
                         ))
-                        row_key <<- row_key + 1
                     })
+                    # Increment once after either branch (avoids `<<-` in the handler).
+                    row_key <- row_key + 1
                 }
             }
         }

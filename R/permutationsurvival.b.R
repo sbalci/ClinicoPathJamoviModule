@@ -336,7 +336,7 @@ permutationsurvivalClass <- R6::R6Class(
 
             stats <- numeric(nrow(all_perms))
 
-            for (i in 1:nrow(all_perms)) {
+            for (i in seq_len(nrow(all_perms))) {
                 permuted_data <- data
                 permuted_data$group <- factor(all_perms[i, ], levels = levels(data$group))
 

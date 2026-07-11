@@ -217,7 +217,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             # Add observation identifiers
-            modelData$obs_id <- 1:nrow(modelData)
+            modelData$obs_id <- seq_len(nrow(modelData))
             
             return(list(data = modelData, frailty_info = frailtyInfo, error = NULL))
         },
@@ -655,7 +655,7 @@ emfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             table <- self$results$frailtyPredictions
             
-            for (i in 1:nrow(predictions)) {
+            for (i in seq_len(nrow(predictions))) {
                 table$addRow(rowKey = i, values = list(
                     group = predictions$group[i],
                     eb_prediction = predictions$eb_prediction[i],

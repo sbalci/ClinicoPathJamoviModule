@@ -181,7 +181,7 @@ raftgeeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
             } else {
                 # If no cluster specified, each observation is its own cluster
-                modelData$cluster <- 1:nrow(modelData)
+                modelData$cluster <- seq_len(nrow(modelData))
             }
             
             # Add weights
@@ -382,7 +382,7 @@ raftgeeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 coeffs <- coef_summary$coefficient
                 
                 if (!is.null(coeffs) && nrow(coeffs) > 0) {
-                    for (i in 1:nrow(coeffs)) {
+                    for (i in seq_len(nrow(coeffs))) {
                         term <- rownames(coeffs)[i]
                         estimate <- coeffs[i, "Estimate"]
                         se <- coeffs[i, "SE"]

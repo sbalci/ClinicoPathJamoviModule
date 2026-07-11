@@ -543,7 +543,7 @@ featurequalityClass <- R6::R6Class(
             importance_ranks <- rank(-importance_scores, ties.method = "min")
             total_importance <- sum(importance_scores)
             
-            for (i in 1:length(features)) {
+            for (i in seq_along(features)) {
                 feature <- features[i]
                 score <- importance_scores[i]
                 rank_val <- importance_ranks[i]
@@ -977,7 +977,7 @@ featurequalityClass <- R6::R6Class(
                 # Correlation-based importance
                 group_numeric <- as.numeric(as.factor(feature_data[[group_var]]))
                 
-                for (i in 1:length(features)) {
+                for (i in seq_along(features)) {
                     corr_test <- tryCatch({
                         cor.test(feature_data[[features[i]]], group_numeric)
                     }, error = function(e) list(estimate = 0))
@@ -987,7 +987,7 @@ featurequalityClass <- R6::R6Class(
                 
             } else if (method == "chi_square") {
                 # Chi-square based importance (for discretized features)
-                for (i in 1:length(features)) {
+                for (i in seq_along(features)) {
                     # Discretize continuous feature
                     feature_discrete <- cut(feature_data[[features[i]]], breaks = 4, labels = FALSE)
                     
@@ -1000,7 +1000,7 @@ featurequalityClass <- R6::R6Class(
                 
             } else {
                 # Default to simple variance-based importance
-                for (i in 1:length(features)) {
+                for (i in seq_along(features)) {
                     group_means <- aggregate(feature_data[[features[i]]], 
                                            by = list(feature_data[[group_var]]), 
                                            FUN = mean, na.rm = TRUE)
@@ -1132,19 +1132,19 @@ featurequalityClass <- R6::R6Class(
             corr_matrix <- cor(feature_data, use = "complete.obs")
             
             # Create heatmap
-            image(1:ncol(corr_matrix), 1:nrow(corr_matrix), 
+            image(seq_len(ncol(corr_matrix)), seq_len(nrow(corr_matrix)), 
                   as.matrix(corr_matrix),
                   col = colorRampPalette(c("blue", "white", "red"))(100),
                   xlab = "", ylab = "", axes = FALSE,
                   main = "Feature Correlation Heatmap")
             
             # Add labels
-            axis(1, at = 1:ncol(corr_matrix), labels = colnames(corr_matrix), las = 2)
-            axis(2, at = 1:nrow(corr_matrix), labels = rownames(corr_matrix), las = 2)
+            axis(1, at = seq_len(ncol(corr_matrix)), labels = colnames(corr_matrix), las = 2)
+            axis(2, at = seq_len(nrow(corr_matrix)), labels = rownames(corr_matrix), las = 2)
             
             # Add correlation values
-            for (i in 1:nrow(corr_matrix)) {
-                for (j in 1:ncol(corr_matrix)) {
+            for (i in seq_len(nrow(corr_matrix))) {
+                for (j in seq_len(ncol(corr_matrix))) {
                     text(j, i, round(corr_matrix[i, j], 2), 
                          col = if (abs(corr_matrix[i, j]) > 0.5) "white" else "black")
                 }
@@ -1172,7 +1172,7 @@ featurequalityClass <- R6::R6Class(
                     ylab = "Values", las = 2, col = "lightgreen")
             
             # Add outlier counts as text
-            for (i in 1:length(selected_features)) {
+            for (i in seq_along(selected_features)) {
                 feature_data <- plot_data[[i]]
                 Q1 <- quantile(feature_data, 0.25, na.rm = TRUE)
                 Q3 <- quantile(feature_data, 0.75, na.rm = TRUE)
@@ -1200,7 +1200,7 @@ featurequalityClass <- R6::R6Class(
             missing_pattern <- as.matrix(missing_data)
             
             # Create heatmap of missing data
-            image(1:ncol(missing_pattern), 1:nrow(missing_pattern), 
+            image(seq_len(ncol(missing_pattern)), seq_len(nrow(missing_pattern)), 
                   t(missing_pattern),
                   col = c("lightblue", "red"),
                   xlab = "Features", ylab = "Observations",
@@ -1208,7 +1208,7 @@ featurequalityClass <- R6::R6Class(
                   axes = FALSE)
             
             # Add feature labels
-            axis(1, at = 1:ncol(missing_pattern), labels = colnames(missing_pattern), las = 2)
+            axis(1, at = seq_len(ncol(missing_pattern)), labels = colnames(missing_pattern), las = 2)
             
             # Add legend
             legend("topright", legend = c("Observed", "Missing"), 
@@ -1238,7 +1238,7 @@ featurequalityClass <- R6::R6Class(
             
             # 2. Quality scores
             quality_scores <- numeric(length(features))
-            for (i in 1:length(features)) {
+            for (i in seq_along(features)) {
                 feature_data <- data[[features[i]]]
                 missing_pct <- sum(is.na(feature_data)) / length(feature_data)
                 quality_scores[i] <- private$.calculateQualityScore(missing_pct, 0, 0.5, 0, 0, 1)

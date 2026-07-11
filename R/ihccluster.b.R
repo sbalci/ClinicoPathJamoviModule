@@ -2924,7 +2924,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Compute contributions: squared loadings normalized to 100%
                     # This is mathematically equivalent to cos2 in PCA
                     result$contributions <- list()
-                    for (i in 1:ncol(loadings)) {
+                    for (i in seq_len(ncol(loadings))) {
                         dim_name <- paste0("PC", i)
                         loading_vals <- loadings[, i]
                         contrib_vals <- (loading_vals^2 / sum(loading_vals^2)) * 100

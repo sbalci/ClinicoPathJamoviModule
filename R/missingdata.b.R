@@ -481,7 +481,7 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
                     "</tr></thead><tbody>"
                 )
                 
-                for (i in 1:length(var_missing)) {
+                for (i in seq_along(var_missing)) {
                     var_name <- names(var_missing)[i]
                     missing_count <- var_missing[i]
                     missing_pct <- var_pct_missing[i]

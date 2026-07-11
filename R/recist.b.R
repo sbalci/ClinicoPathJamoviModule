@@ -284,7 +284,7 @@ recistClass <- R6::R6Class(
                 organs_count <- table(character(0))
 
                 # Select up to max
-                for (i in 1:nrow(patient_baseline)) {
+                for (i in seq_len(nrow(patient_baseline))) {
                     lesion <- patient_baseline$lesionId[i]
                     organ <- patient_baseline$organ[i]
 
@@ -692,7 +692,7 @@ recistClass <- R6::R6Class(
             table <- self$results$targetSumTable
             data <- private$.targetSumData
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     assessmentTime = data$assessmentTime[i],
@@ -711,7 +711,7 @@ recistClass <- R6::R6Class(
             table <- self$results$responseTable
             data <- private$.responseData
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     assessmentTime = data$assessmentTime[i],
@@ -729,7 +729,7 @@ recistClass <- R6::R6Class(
             table <- self$results$bestResponseTable
             data <- private$.bestResponseData
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     bestResponse = data$bestResponse[i],
@@ -830,7 +830,7 @@ recistClass <- R6::R6Class(
                     .groups = "drop"
                 )
 
-            for (i in 1:nrow(stratData)) {
+            for (i in seq_len(nrow(stratData))) {
                 table$addRow(rowKey = i, values = list(
                     group = stratData$group[i],
                     n = as.integer(stratData$n[i]),

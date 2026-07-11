@@ -466,7 +466,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 # Test each parameter combination
-                for (i in 1:nrow(param_grid)) {
+                for (i in seq_len(nrow(param_grid))) {
                     params <- param_grid[i, ]
                     fold_scores <- numeric(cv_folds)
 
@@ -947,8 +947,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
 
                 for (i in 1:n_bootstrap) {
                     # Bootstrap sample
-                    boot_indices <- sample(1:nrow(data), nrow(data), replace = TRUE)
-                    oob_indices <- setdiff(1:nrow(data), boot_indices)
+                    boot_indices <- sample(seq_len(nrow(data)), nrow(data), replace = TRUE)
+                    oob_indices <- setdiff(seq_len(nrow(data)), boot_indices)
 
                     if (length(oob_indices) == 0) next
 
@@ -1208,7 +1208,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Populate table
-                for (i in 1:nrow(metrics)) {
+                for (i in seq_len(nrow(metrics))) {
                     self$results$performancetable$addRow(
                         rowKey = i,
                         values = list(
@@ -1235,7 +1235,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 cm_with_totals <- addmargins(cm)
 
                 # Populate table
-                for (i in 1:nrow(cm_with_totals)) {
+                for (i in seq_len(nrow(cm_with_totals))) {
                     row_name <- rownames(cm_with_totals)[i]
 
                     self$results$confusionmatrix$addRow(
@@ -1258,7 +1258,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 importance_df <- data.frame(
                     variable = names(importance),
                     importance = as.numeric(importance),
-                    rank = 1:length(importance)
+                    rank = seq_along(importance)
                 )
 
                 # Normalize importance to 0-100 scale
@@ -1267,7 +1267,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Populate table
-                for (i in 1:nrow(importance_df)) {
+                for (i in seq_len(nrow(importance_df))) {
                     self$results$variableimportance$addRow(
                         rowKey = i,
                         values = list(

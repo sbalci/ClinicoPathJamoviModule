@@ -467,7 +467,7 @@ recurrentsurvivalClass <- R6::R6Class(
                         html <- paste0(html, "<table class='jamovi-table'>")
                         html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>95% CI</th></tr>")
 
-                        for (i in 1:nrow(coefficients)) {
+                        for (i in seq_len(nrow(coefficients))) {
                             var_name <- rownames(coefficients)[i]
 
                             # Skip frailty terms in output
@@ -521,7 +521,7 @@ recurrentsurvivalClass <- R6::R6Class(
 
                 total_subjects <- length(unique(analysis_data$subject_id))
 
-                for (i in 1:length(event_counts)) {
+                for (i in seq_along(event_counts)) {
                     num_events <- names(event_counts)[i]
                     num_subjects <- event_counts[i]
                     percentage <- round(100 * num_subjects / total_subjects, 1)
@@ -803,7 +803,7 @@ recurrentsurvivalClass <- R6::R6Class(
                 html <- paste0(html, "<th>p-value</th>")
                 html <- paste0(html, "</tr></thead><tbody>")
 
-                for (i in 1:nrow(coef_matrix)) {
+                for (i in seq_len(nrow(coef_matrix))) {
                     html <- paste0(html, "<tr>")
                     html <- paste0(html, "<td>", htmltools::htmlEscape(rownames(coef_matrix)[i]), "</td>")
                     html <- paste0(html, "<td>", round(coef_matrix[i, "Estimate"], 4), "</td>")

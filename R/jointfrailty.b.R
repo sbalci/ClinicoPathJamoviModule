@@ -191,7 +191,7 @@ jointfrailtyClass <- R6::R6Class(
                 # honors the jamovi `values` attribute. Applies to L185 (recurrent) and
                 # L200 (terminal) covariate loops below.
                 if (ncol(rec_covariates) > 0) {
-                    for (i in 1:ncol(rec_covariates)) {
+                    for (i in seq_len(ncol(rec_covariates))) {
                         if (is.factor(rec_covariates[[i]])) {
                             rec_covariates[[i]] <- as.numeric(rec_covariates[[i]]) - 1
                         }
@@ -206,7 +206,7 @@ jointfrailtyClass <- R6::R6Class(
                     term_covariates <- cbind(term_covariates, term_specific)
                 }
                 if (ncol(term_covariates) > 0) {
-                    for (i in 1:ncol(term_covariates)) {
+                    for (i in seq_len(ncol(term_covariates))) {
                         if (is.factor(term_covariates[[i]])) {
                             term_covariates[[i]] <- as.numeric(term_covariates[[i]]) - 1
                         }
@@ -376,7 +376,7 @@ jointfrailtyClass <- R6::R6Class(
                     # Filter for recurrent process coefficients (implementation specific)
                     rec_coeff <- coeff_data  # This would be filtered appropriately
                     
-                    for (i in 1:length(rec_coeff)) {
+                    for (i in seq_along(rec_coeff)) {
                         estimate <- as.numeric(rec_coeff[i])
                         se <- if (!is.null(model_results$se)) model_results$se[i] else NA
                         z_val <- if (!is.na(se)) estimate / se else NA
@@ -427,7 +427,7 @@ jointfrailtyClass <- R6::R6Class(
                     alpha <- 1 - conf_level
                     z_crit <- qnorm(1 - alpha/2)
                     
-                    for (i in 1:length(coeff_data)) {
+                    for (i in seq_along(coeff_data)) {
                         estimate <- as.numeric(coeff_data[i])
                         se <- if (!is.null(model_results$se.ter)) model_results$se.ter[i] else NA
                         z_val <- if (!is.na(se)) estimate / se else NA

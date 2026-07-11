@@ -194,7 +194,7 @@ cochranqClass <- R6::R6Class(
                     data_matrix$id <- self$data[[self$options$id]]
                 }
             } else {
-                data_matrix$id <- 1:nrow(data_matrix)
+                data_matrix$id <- seq_len(nrow(data_matrix))
             }
 
             # Remove missing cases (listwise deletion)
@@ -318,7 +318,7 @@ cochranqClass <- R6::R6Class(
             for (i in 1:n_permutations) {
                 # Permute columns for each subject
                 permuted_matrix <- data_matrix
-                for (j in 1:nrow(data_matrix)) {
+                for (j in seq_len(nrow(data_matrix))) {
                     permuted_matrix[j, ] <- sample(data_matrix[j, ])
                 }
 

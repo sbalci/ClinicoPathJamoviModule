@@ -521,7 +521,7 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
                     loadings <- as.data.frame((pca$rotation %*% diag(pca$sdev)) / apply(pca_data, 2, sd))
                 }
 
-                colnames(loadings) <- paste0("PC", 1:ncol(pca$x))
+                colnames(loadings) <- paste0("PC", seq_len(ncol(pca$x)))
                 rownames(loadings) <- colnames(pca_data)
 
                 return(loadings)
@@ -546,7 +546,7 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
                         filter(.data$component == comp_requested)
                 }
 
-                for (i in 1:nrow(results_df)) {
+                for (i in seq_len(nrow(results_df))) {
                     row <- results_df[i, ]
                     table$addRow(rowKey = i, values = list(
                         variable = row$variable,

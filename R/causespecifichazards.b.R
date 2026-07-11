@@ -348,7 +348,7 @@ causespecifichazardsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                         summary_model <- summary(model)
                         coefs <- summary_model$coefficients
                         
-                        for (i in 1:nrow(coefs)) {
+                        for (i in seq_len(nrow(coefs))) {
                             param_name <- rownames(coefs)[i]
                             estimate <- coefs[i, "coef"]
                             hr <- exp(estimate)
@@ -384,7 +384,7 @@ causespecifichazardsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                         summary_model <- summary(model)
                         coefs <- summary_model$table
                         
-                        for (i in 1:nrow(coefs)) {
+                        for (i in seq_len(nrow(coefs))) {
                             param_name <- rownames(coefs)[i]
                             estimate <- coefs[i, "Value"]
                             se <- coefs[i, "Std. Error"]
@@ -562,7 +562,7 @@ causespecifichazardsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                     tryCatch({
                         ph_test <- survival::cox.zph(model)
                         
-                        for (i in 1:nrow(ph_test$table)) {
+                        for (i in seq_len(nrow(ph_test$table))) {
                             var_name <- rownames(ph_test$table)[i]
                             rho <- ph_test$table[i, "rho"]
                             chi_square <- ph_test$table[i, "chisq"]

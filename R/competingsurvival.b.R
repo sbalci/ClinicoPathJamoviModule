@@ -856,7 +856,7 @@ This function uses survival, survminer, finalfit, and cmprsk packages.
                     variable_name <- NULL
                     
                     # Process each row of results
-                    for (i in 1:nrow(result)) {
+                    for (i in seq_len(nrow(result))) {
                         label <- if ("label" %in% names(result)) result$label[i] else result[[1]][i]
                         levels <- if ("levels" %in% names(result)) result$levels[i] else result[[2]][i]
                         hr_text <- result[[hr_col[1]]][i]

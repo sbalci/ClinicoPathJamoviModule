@@ -197,7 +197,7 @@ coxrobustClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Add row identifiers for outlier tracking
-            modelData$obs_id <- 1:nrow(modelData)
+            modelData$obs_id <- seq_len(nrow(modelData))
             
             return(list(data = modelData, error = NULL))
         },
@@ -587,7 +587,7 @@ coxrobustClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (n_show > 0) {
                     outliers_to_show <- outliers[outliers$outlier_flag, ][1:n_show, ]
                     
-                    for (i in 1:nrow(outliers_to_show)) {
+                    for (i in seq_len(nrow(outliers_to_show))) {
                         obs <- outliers_to_show[i, ]
                         
                         table$addRow(rowKey = obs$obs_id, values = list(

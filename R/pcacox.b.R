@@ -539,12 +539,12 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # Store scores
                     private$pc_scores <- spca_res$transform
-                    colnames(private$pc_scores) <- paste0("PC", 1:ncol(private$pc_scores))
+                    colnames(private$pc_scores) <- paste0("PC", seq_len(ncol(private$pc_scores)))
                     
                     # Store loadings
                     private$loadings <- spca_res$loadings
                     rownames(private$loadings) <- colnames(private$X_matrix)
-                    colnames(private$loadings) <- paste0("PC", 1:ncol(private$loadings))
+                    colnames(private$loadings) <- paste0("PC", seq_len(ncol(private$loadings)))
                     
                     # Store eigenvalues
                     private$eigenvalues <- spca_res$eigenvalues
@@ -587,7 +587,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     # Store scores (rotated data)
                     private$pc_scores <- kernlab::rotated(kpca_res)
-                    colnames(private$pc_scores) <- paste0("PC", 1:ncol(private$pc_scores))
+                    colnames(private$pc_scores) <- paste0("PC", seq_len(ncol(private$pc_scores)))
                     
                     # Store eigenvalues
                     private$eigenvalues <- kernlab::eig(kpca_res)
@@ -831,7 +831,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             conf_level <- self$options$confidence_level %||% 0.95
             confint_result <- confint(private$cox_model, level = conf_level)
             
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
                 
                 var_name <- rownames(coef_summary)[i]
                 coef_val <- coef_summary[i, "coef"]

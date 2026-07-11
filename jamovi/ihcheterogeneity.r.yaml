@@ -158,7 +158,7 @@ items:
     - name: compartmentComparison
       title: Compartment Heterogeneity Comparison
       type: Table
-      visible: (compareCompartments && spatial_id)
+      visible: (compareCompartments && length(spatial_id) > 0)
       description: Statistical comparison of heterogeneity metrics between compartments
       columns:
         - name: metric
@@ -186,7 +186,7 @@ items:
     - name: compartmentTests
       title: Statistical Tests for Compartment Differences
       type: Table
-      visible: (compartmentTests && spatial_id)
+      visible: (compartmentTests && length(spatial_id) > 0)
       description: Formal statistical tests comparing heterogeneity across compartments
       columns:
         - name: test_type

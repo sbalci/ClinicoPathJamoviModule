@@ -501,7 +501,7 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
               conf_int <- model_results$summary$conf.int
             }
             
-            for (i in 1:nrow(coef_matrix)) {
+            for (i in seq_len(nrow(coef_matrix))) {
               var_name <- rownames(coef_matrix)[i]
               coef_val <- coef_matrix[i, "coef"]
               se_val <- coef_matrix[i, "se(coef)"]

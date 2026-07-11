@@ -279,7 +279,7 @@ excessmortalityClass <- R6::R6Class(
             ci_upper <- estimates + ci_multiplier * std_errors
             
             # Create coefficient rows
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
                 term_name <- rownames(coef_summary)[i]
                 
                 coefficients_table$addRow(values = list(

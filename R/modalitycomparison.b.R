@@ -270,13 +270,13 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             cross_tab <- table(private$.modality1_data, private$.modality2_data)
             
             # Add rows to table
-            for (i in 1:nrow(cross_tab)) {
+            for (i in seq_len(nrow(cross_tab))) {
                 mod1_score <- rownames(cross_tab)[i]
                 
                 values <- list(modality1_score = mod1_score, total = sum(cross_tab[i, ]))
                 
                 # Add columns based on score categories
-                for (j in 1:ncol(cross_tab)) {
+                for (j in seq_len(ncol(cross_tab))) {
                     mod2_score <- colnames(cross_tab)[j]
                     
                     # Map to appropriate column names based on category system
@@ -343,7 +343,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             total_discordant <- length(discordant_indices)
             
             # Add to discordance table
-            for (i in 1:length(pattern_counts)) {
+            for (i in seq_along(pattern_counts)) {
                 pattern <- names(pattern_counts)[i]
                 count <- pattern_counts[i]
                 percentage <- (count / total_discordant) * 100
@@ -363,7 +363,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             # Add individual case details
-            for (i in 1:nrow(discordance_patterns)) {
+            for (i in seq_len(nrow(discordance_patterns))) {
                 case_detail_table$addRow(rowKey = discordance_patterns$case_id[i], values = list(
                     case_id = discordance_patterns$case_id[i],
                     modality1_score = discordance_patterns$mod1[i],

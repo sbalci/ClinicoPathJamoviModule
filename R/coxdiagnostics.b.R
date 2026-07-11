@@ -281,7 +281,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             summary_html <- paste0(summary_html, "<th>Variable</th><th>Coef</th><th>Exp(coef)</th><th>SE(coef)</th><th>z</th><th>Pr(>|z|)</th>")
                             summary_html <- paste0(summary_html, "</tr></thead><tbody>")
 
-                            for (i in 1:nrow(cox_summary$coefficients)) {
+                            for (i in seq_len(nrow(cox_summary$coefficients))) {
                                 row_name <- rownames(cox_summary$coefficients)[i]
                                 coef <- round(cox_summary$coefficients[i, "coef"], 3)
                                 exp_coef <- round(cox_summary$coefficients[i, "exp(coef)"], 3)
@@ -330,7 +330,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         ph_html <- paste0(ph_html, "<table class='table table-striped' style='margin: 10px 0; max-width: 600px;'>")
                         ph_html <- paste0(ph_html, "<thead><tr><th>Variable</th><th>Chi-square</th><th>df</th><th>p-value</th></tr></thead><tbody>")
 
-                        for (i in 1:nrow(zph$table)) {
+                        for (i in seq_len(nrow(zph$table))) {
                             var_name <- rownames(zph$table)[i]
                             chisq <- round(zph$table[i, "chisq"], 3)
                             df <- zph$table[i, "df"]
@@ -434,7 +434,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         max_vif <- max(vif_df$VIF, na.rm = TRUE)
                         threshold <- self$options$vif_threshold
 
-                        for (i in 1:nrow(vif_df)) {
+                        for (i in seq_len(nrow(vif_df))) {
                             var_name <- vif_df$Variable[i]
                             vif_val <- round(vif_df$VIF[i], 3)
 

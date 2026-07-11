@@ -581,7 +581,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             table <- self$results$fixed_effects
             coef_summary <- summary(model)$coefficients
 
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
                 table$addRow(rowKey = i, values = list(
                     term = rownames(coef_summary)[i],
                     estimate = coef_summary[i, "Estimate"],
@@ -599,7 +599,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             table <- self$results$anova_table
             anova_result <- anova(model)
 
-            for (i in 1:nrow(anova_result)) {
+            for (i in seq_len(nrow(anova_result))) {
                 table$addRow(rowKey = i, values = list(
                     term = rownames(anova_result)[i],
                     sumsq = anova_result[i, "Sum Sq"],
@@ -618,7 +618,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             table <- self$results$random_effects
             vc <- as.data.frame(lme4::VarCorr(model))
 
-            for (i in 1:nrow(vc)) {
+            for (i in seq_len(nrow(vc))) {
                 if (!is.na(vc$grp[i])) {
                     # TODO (cleanup): when var1 is NA this paste() leaves a
                     # trailing space ("Subject "). Use paste0 or trimws to clean it.
@@ -682,7 +682,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             table <- self$results$effect_sizes
             anova_result <- anova(model)
 
-            for (i in 1:nrow(anova_result)) {
+            for (i in seq_len(nrow(anova_result))) {
                 # Calculate partial eta squared
                 f_val <- anova_result[i, "F value"]
                 df1 <- anova_result[i, "NumDF"]
@@ -721,7 +721,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 pairs <- emmeans::pairs(emm, adjust = self$options$posthoc_method)
                 pairs_summary <- summary(pairs)
 
-                for (i in 1:nrow(pairs_summary)) {
+                for (i in seq_len(nrow(pairs_summary))) {
                     table$addRow(rowKey = i, values = list(
                         contrast = as.character(pairs_summary$contrast[i]),
                         estimate = pairs_summary$estimate[i],

@@ -52,3 +52,7 @@ children:
             name: excl
           - type: CheckBox
             name: sampleLarge
+          - type: TextBox
+            name: seed
+            format: number
+            label: Random Seed

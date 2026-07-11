@@ -1367,7 +1367,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         op_results <- private$.calculateObsPred(firstDetectionData, pEstimate, maxSamp)
 
                         if (nrow(op_results) > 0) {
-                            for (i in 1:nrow(op_results)) {
+                            for (i in seq_len(nrow(op_results))) {
                                 obsPredTable$addRow(rowKey = paste0("op_", i), values = list(
                                     nSamples = op_results$nSamples[i],
                                     observed = op_results$observed[i],
@@ -2582,7 +2582,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Populate table
                         prev_cum <- 0
-                        for (n in 1:nrow(boot_results)) {
+                        for (n in seq_len(nrow(boot_results))) {
                             incremental <- boot_results$mean[n] - prev_cum
                             empiricalCumulativeTable$addRow(rowKey = paste0("n_", n), values = list(
                                 nSamples = n,
@@ -4612,7 +4612,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # that flow into HTML. Either remove this dead block or htmlEscape the prefix
                     # at the .appendCalculatedVariables boundary before column-name construction.
                     enhanced_data <- private$.appendCalculatedVariables(
-                        data = data.frame(row_id = 1:length(firstDetectionData)), # Dummy df for context
+                        data = data.frame(row_id = seq_along(firstDetectionData)), # Dummy df for context
                         q_estimate = pEstimate,
                         recommended_samples = rec_samples,
                         first_detection = firstDetectionData,

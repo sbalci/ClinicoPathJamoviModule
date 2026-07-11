@@ -288,8 +288,8 @@ partialcorrelationClass <- R6::R6Class(
             }
             
             # Fill correlation matrix
-            for (i in 1:length(vars)) {
-                for (j in 1:length(vars)) {
+            for (i in seq_along(vars)) {
+                for (j in seq_along(vars)) {
                     if (i != j) {
                         partial_corr_matrix[i, j] <- cor(residuals_data[[vars[i]]], 
                                                        residuals_data[[vars[j]]], 

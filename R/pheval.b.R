@@ -334,7 +334,7 @@ phevalClass <- R6::R6Class(
 
             covariate_names <- rownames(ph_test$table)
 
-            for (i in 1:length(covariate_names)) {
+            for (i in seq_along(covariate_names)) {
                 if (covariate_names[i] != "GLOBAL") {
                     test_results[[covariate_names[i]]] <- list(
                         covariate = covariate_names[i],
@@ -419,7 +419,7 @@ phevalClass <- R6::R6Class(
             test_results <- list()
 
             if (is.matrix(schoenfeld_resid)) {
-                for (i in 1:ncol(schoenfeld_resid)) {
+                for (i in seq_len(ncol(schoenfeld_resid))) {
                     covariate_name <- colnames(schoenfeld_resid)[i]
                     if (is.null(covariate_name)) covariate_name <- paste("Covariate", i)
 
@@ -530,7 +530,7 @@ phevalClass <- R6::R6Class(
             analysis_results <- list()
 
             if (is.matrix(schoenfeld_resid)) {
-                for (i in 1:ncol(schoenfeld_resid)) {
+                for (i in seq_len(ncol(schoenfeld_resid))) {
                     covariate_name <- colnames(schoenfeld_resid)[i]
                     if (is.null(covariate_name)) covariate_name <- paste("Covariate", i)
 
@@ -619,7 +619,7 @@ phevalClass <- R6::R6Class(
             html <- paste0(html, "<table class='coef-table'>")
             html <- paste0(html, "<tr><th>Covariate</th><th>β</th><th>SE(β)</th><th>HR</th><th>95% CI</th><th>p-value</th></tr>")
 
-            for (i in 1:nrow(coef_table)) {
+            for (i in seq_len(nrow(coef_table))) {
                 covariate <- htmltools::htmlEscape(rownames(coef_table)[i])
                 beta <- sprintf("%.4f", coef_table[i, "coef"])
                 se <- sprintf("%.4f", coef_table[i, "se(coef)"])

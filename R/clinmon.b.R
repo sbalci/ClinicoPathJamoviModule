@@ -305,7 +305,7 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                     html_content <- paste0(html_content, "<tr style='background-color: #f0f0f0; font-weight: bold;'>")
                     html_content <- paste0(html_content, "<th>Index</th><th>Description</th><th>Mean</th><th>SD</th><th>Min</th><th>Max</th><th>N</th></tr>")
                     
-                    for (i in 1:nrow(summary_stats)) {
+                    for (i in seq_len(nrow(summary_stats))) {
                         row <- summary_stats[i, ]
                         html_content <- paste0(html_content, "<tr>")
                         html_content <- paste0(html_content, "<td><strong>", row$Index, "</strong></td>")
@@ -359,9 +359,9 @@ clinmonClass <- if (requireNamespace("jmvcore")) {
                 html_content <- paste0(html_content, "</tr>")
                 
                 # Data rows
-                for (i in 1:nrow(display_results)) {
+                for (i in seq_len(nrow(display_results))) {
                     html_content <- paste0(html_content, "<tr>")
-                    for (j in 1:ncol(display_results)) {
+                    for (j in seq_len(ncol(display_results))) {
                         value <- display_results[i, j]
                         if (is.numeric(value)) {
                             value <- round(value, 3)

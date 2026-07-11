@@ -125,7 +125,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(info_data)) {
+            for (i in seq_len(nrow(info_data))) {
                 self$results$dataInfo$addRow(rowKey = i, values = info_data[i, ])
             }
         },
@@ -218,7 +218,7 @@ bayesianciClass <- R6::R6Class(
                 )
             }
             
-            for (i in 1:nrow(prior_data)) {
+            for (i in seq_len(nrow(prior_data))) {
                 self$results$priorSpecification$addRow(rowKey = i, values = prior_data[i, ])
             }
         },
@@ -276,7 +276,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(summary_data)) {
+            for (i in seq_len(nrow(summary_data))) {
                 self$results$posteriorSummary$addRow(rowKey = i, values = summary_data[i, ])
             }
             
@@ -337,7 +337,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(summary_data)) {
+            for (i in seq_len(nrow(summary_data))) {
                 self$results$posteriorSummary$addRow(rowKey = i, values = summary_data[i, ])
             }
             
@@ -393,7 +393,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(summary_data)) {
+            for (i in seq_len(nrow(summary_data))) {
                 self$results$posteriorSummary$addRow(rowKey = i, values = summary_data[i, ])
             }
             
@@ -446,7 +446,7 @@ bayesianciClass <- R6::R6Class(
                 ci_data <- rbind(ci_data, ci_row)
             }
             
-            for (i in 1:nrow(ci_data)) {
+            for (i in seq_len(nrow(ci_data))) {
                 self$results$credibleIntervals$addRow(rowKey = i, values = ci_data[i, ])
             }
         },
@@ -489,7 +489,7 @@ bayesianciClass <- R6::R6Class(
                 ci_data <- rbind(ci_data, ci_row)
             }
             
-            for (i in 1:nrow(ci_data)) {
+            for (i in seq_len(nrow(ci_data))) {
                 self$results$credibleIntervals$addRow(rowKey = i, values = ci_data[i, ])
             }
         },
@@ -522,7 +522,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(hpd_data)) {
+            for (i in seq_len(nrow(hpd_data))) {
                 self$results$hpdIntervals$addRow(rowKey = i, values = hpd_data[i, ])
             }
         },
@@ -570,7 +570,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(comparison_data)) {
+            for (i in seq_len(nrow(comparison_data))) {
                 self$results$comparisonTable$addRow(rowKey = i, values = comparison_data[i, ])
             }
         },
@@ -612,7 +612,7 @@ bayesianciClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(comparison_data)) {
+            for (i in seq_len(nrow(comparison_data))) {
                 self$results$comparisonTable$addRow(rowKey = i, values = comparison_data[i, ])
             }
         },
@@ -675,7 +675,7 @@ bayesianciClass <- R6::R6Class(
                     sens_data <- rbind(sens_data, sens_row)
                 }
                 
-                for (i in 1:nrow(sens_data)) {
+                for (i in seq_len(nrow(sens_data))) {
                     self$results$sensitivityAnalysis$addRow(rowKey = i, values = sens_data[i, ])
                 }
             }
@@ -756,7 +756,7 @@ bayesianciClass <- R6::R6Class(
                 )
             }
             
-            for (i in 1:length(clinical_aspects)) {
+            for (i in seq_along(clinical_aspects)) {
                 interp_row <- data.frame(
                     clinical_aspect = clinical_aspects[i],
                     bayesian_finding = findings[i],
@@ -768,7 +768,7 @@ bayesianciClass <- R6::R6Class(
                 interpretation_data <- rbind(interpretation_data, interp_row)
             }
             
-            for (i in 1:nrow(interpretation_data)) {
+            for (i in seq_len(nrow(interpretation_data))) {
                 self$results$clinicalInterpretation$addRow(rowKey = i, values = interpretation_data[i, ])
             }
         },

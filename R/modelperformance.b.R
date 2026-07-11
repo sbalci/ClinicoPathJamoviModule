@@ -393,7 +393,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                              "<th style='padding: 5px; border: 1px solid #ddd;'>Coefficient</th>",
                              "<th style='padding: 5px; border: 1px solid #ddd;'>p-value</th></tr>")
 
-                for (i in 1:nrow(coefs)) {
+                for (i in seq_len(nrow(coefs))) {
                     var_name <- rownames(coefs)[i]
                     coef_val <- coefs[i, 1]
                     p_val <- coefs[i, ncol(coefs)]
@@ -429,7 +429,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                     hr <- exp(coefs[, "coef"])
                     ci <- exp(confint(model$fit))
 
-                    for (i in 1:length(hr)) {
+                    for (i in seq_along(hr)) {
                         plot_data[[length(plot_data) + 1]] <- data.frame(
                             model = model$name,
                             variable = rownames(coefs)[i],
@@ -440,7 +440,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                     }
                 } else {
                     # Logistic/Linear: OR/Coef
-                    for (i in 1:nrow(coefs)) {
+                    for (i in seq_len(nrow(coefs))) {
                         plot_data[[length(plot_data) + 1]] <- data.frame(
                             model = model$name,
                             variable = rownames(coefs)[i],

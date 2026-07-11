@@ -446,7 +446,7 @@ rmstClass <- R6::R6Class(
             if (nrow(sensitivity_results) > 0) {
                 table <- self$results$tauAnalysisTable
                 
-                for (i in 1:nrow(sensitivity_results)) {
+                for (i in seq_len(nrow(sensitivity_results))) {
                     table$addRow(rowKey = i, values = list(
                         tau = sensitivity_results$tau[i],
                         rmst_diff = sensitivity_results$rmst_diff[i],

@@ -490,6 +490,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         notices = function() private$.items[["notices"]],
+        warnings = function() private$.items[["warnings"]],
         instructions = function() private$.items[["instructions"]],
         clinicalSummary = function() private$.items[["clinicalSummary"]],
         reportSummary = function() private$.items[["reportSummary"]],
@@ -521,6 +522,15 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "test_type",
                     "show_stats",
                     "effsize_type")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Preset Overrides",
+                visible=FALSE,
+                clearWith=list(
+                    "clinicalPreset",
+                    "x_var",
+                    "y_var")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -827,6 +837,7 @@ jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$reportSummary} \tab \tab \tab \tab \tab a html \cr

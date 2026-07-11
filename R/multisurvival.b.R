@@ -3055,7 +3055,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         # Populate AFT results table
         row_num <- 1
-        for (i in 1:nrow(coef_table)) {
+        for (i in seq_len(nrow(coef_table))) {
           var_name <- rownames(coef_table)[i]
 
           # Skip intercept for the table
@@ -7212,7 +7212,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Initialize long format data
         long_data <- data.frame()
 
-        for (i in 1:nrow(mydata)) {
+        for (i in seq_len(nrow(mydata))) {
           subject_data <- mydata[i, ]
 
           # Get subject's total follow-up time
@@ -7839,7 +7839,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           feature_results <- feature_results[order(-feature_results$selection_frequency), ]
 
           table <- self$results$ml_feature_selection_results
-          for (i in 1:nrow(feature_results)) {
+          for (i in seq_len(nrow(feature_results))) {
             table$addRow(rowKey = i, values = list(
               variable = feature_results$variable[i],
               selected = feature_results$selected[i],
@@ -8246,7 +8246,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
                 # Parse the table to identify significant predictors
                 if (!is.null(cox_table) && nrow(cox_table) > 0) {
-                    for (i in 1:nrow(cox_table)) {
+                    for (i in seq_len(nrow(cox_table))) {
                         if (!is.na(cox_table[i, "p"]) && cox_table[i, "p"] != "") {
                             p_value <- as.numeric(cox_table[i, "p"])
                             if (!is.na(p_value)) {

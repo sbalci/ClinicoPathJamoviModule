@@ -288,8 +288,8 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Calculate person-years at risk
             # This is simplified - proper calculation would use mstate package
             
-            for (i in 1:nrow(private$transition_matrix)) {
-                for (j in 1:ncol(private$transition_matrix)) {
+            for (i in seq_len(nrow(private$transition_matrix))) {
+                for (j in seq_len(ncol(private$transition_matrix))) {
                     if (!is.na(private$transition_matrix[i, j])) {
                         
                         from_state <- private$states[i]
@@ -332,7 +332,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     coef_summary <- summary(model)$coefficients
                     
                     if (!is.null(coef_summary) && nrow(coef_summary) > 0) {
-                        for (i in 1:nrow(coef_summary)) {
+                        for (i in seq_len(nrow(coef_summary))) {
                             results_table$addRow(rowKey = paste0(model_name, "_", i), values = list(
                                 transition = paste("Transition", trans_id),
                                 parameter = rownames(coef_summary)[i],
@@ -376,8 +376,8 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Calculate transition probabilities for each time point
                 for (time_point in pred_times) {
-                    for (i in 1:length(private$states)) {
-                        for (j in 1:length(private$states)) {
+                    for (i in seq_along(private$states)) {
+                        for (j in seq_along(private$states)) {
                             if (!is.na(private$transition_matrix[i, j])) {
                                 
                                 # Simplified calculation - proper implementation would use
@@ -593,7 +593,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             legend("topright", 
-                   legend = paste("Transition", 1:length(private$transition_models)),
+                   legend = paste("Transition", seq_along(private$transition_models)),
                    col = colors, lwd = 2)
             
             TRUE
@@ -620,7 +620,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             legend("topleft", 
-                   legend = paste("Transition", 1:length(private$transition_models)),
+                   legend = paste("Transition", seq_along(private$transition_models)),
                    col = colors, lwd = 2)
             
             TRUE

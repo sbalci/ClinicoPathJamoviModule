@@ -806,7 +806,7 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 return()
             }
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     category = as.character(data$category[i]),
                     segment = as.character(data$segment[i]),

@@ -509,7 +509,7 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             if (is.matrix(median_surv)) {
                 stats_text <- paste(stats_text, "<h4>Median Survival Times:</h4><ul>", sep = "\n")
-                for (i in 1:nrow(median_surv)) {
+                for (i in seq_len(nrow(median_surv))) {
                     group_name <- rownames(median_surv)[i]
                     median_time <- median_surv[i, "median"]
                     lcl <- median_surv[i, "0.95LCL"]

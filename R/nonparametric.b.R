@@ -819,7 +819,7 @@ nonparametricClass <- R6::R6Class(
             posthoc_results <- private$.runPostHocTest(outcome, groups, posthoc_method, p_adjust)
             
             if (!is.null(posthoc_results)) {
-                for (i in 1:nrow(posthoc_results)) {
+                for (i in seq_len(nrow(posthoc_results))) {
                     private$.checkpoint(flush = FALSE)
                     
                     comparison <- posthoc_results$comparison[i]

@@ -316,8 +316,8 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
                 
                 for (i in 1:n_bootstrap) {
                     # Bootstrap sample
-                    boot_indices <- sample(1:nrow(data), nrow(data), replace = TRUE)
-                    oob_indices <- setdiff(1:nrow(data), boot_indices)
+                    boot_indices <- sample(seq_len(nrow(data)), nrow(data), replace = TRUE)
+                    oob_indices <- setdiff(seq_len(nrow(data)), boot_indices)
                     
                     if (length(oob_indices) == 0) next
                     
@@ -505,7 +505,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             }
 
             # Populate table
-            for (i in 1:nrow(metrics)) {
+            for (i in seq_len(nrow(metrics))) {
                 self$results$performance_table$addRow(
                     rowKey = i,
                     values = list(
@@ -533,7 +533,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             cm_with_totals <- addmargins(cm)
             
             # Populate table
-            for (i in 1:nrow(cm_with_totals)) {
+            for (i in seq_len(nrow(cm_with_totals))) {
                 row_name <- rownames(cm_with_totals)[i]
                 
                 self$results$confusion_matrix$addRow(
@@ -557,7 +557,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             importance_df <- data.frame(
                 variable = names(importance),
                 importance = as.numeric(importance),
-                rank = 1:length(importance)
+                rank = seq_along(importance)
             )
             
             # Normalize importance to 0-100 scale
@@ -566,7 +566,7 @@ treemedicalClass <- if (requireNamespace("jmvcore")) R6::R6Class("treemedicalCla
             }
             
             # Populate table
-            for (i in 1:nrow(importance_df)) {
+            for (i in seq_len(nrow(importance_df))) {
                 self$results$variable_importance$addRow(
                     rowKey = i,
                     values = list(

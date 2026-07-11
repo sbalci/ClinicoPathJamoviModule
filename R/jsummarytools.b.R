@@ -525,7 +525,7 @@ jsummarytoolsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             table_data <- list()
             
-            for (i in 1:ncol(data)) {
+            for (i in seq_len(ncol(data))) {
                 var_name <- names(data)[i]
                 var_data <- data[[i]]
                 

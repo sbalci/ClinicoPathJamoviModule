@@ -544,7 +544,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         }
 
                         # Plot heatmap
-                        image(1:ncol(confusion), 1:nrow(confusion),
+                        image(seq_len(ncol(confusion)), seq_len(nrow(confusion)),
                             t(confusion_pct),
                             col = colors,
                             xlab = paste(rater_names[j], "(Rater 2)"),
@@ -554,17 +554,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         )
 
                         # Add axes
-                        axis(1, at = 1:ncol(confusion), labels = colnames(confusion), las = 2)
-                        axis(2, at = 1:nrow(confusion), labels = rownames(confusion), las = 1)
+                        axis(1, at = seq_len(ncol(confusion)), labels = colnames(confusion), las = 2)
+                        axis(2, at = seq_len(nrow(confusion)), labels = rownames(confusion), las = 1)
 
                         # Add grid
-                        abline(h = (1:nrow(confusion)) + 0.5, col = "gray80", lwd = 0.5)
-                        abline(v = (1:ncol(confusion)) + 0.5, col = "gray80", lwd = 0.5)
+                        abline(h = (seq_len(nrow(confusion))) + 0.5, col = "gray80", lwd = 0.5)
+                        abline(v = (seq_len(ncol(confusion))) + 0.5, col = "gray80", lwd = 0.5)
 
                         # Add cell annotations
                         if (!is.null(cell_labels)) {
-                            for (r in 1:nrow(confusion)) {
-                                for (c in 1:ncol(confusion)) {
+                            for (r in seq_len(nrow(confusion))) {
+                                for (c in seq_len(ncol(confusion))) {
                                     text(c, r, cell_labels[r, c], cex = annot_size / 3.5)
                                 }
                             }
@@ -1444,7 +1444,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Convert factors to numeric if needed (preserving ordinal structure)
                 ratings_matrix <- as.matrix(ratings_clean)
-                for (i in 1:ncol(ratings_matrix)) {
+                for (i in seq_len(ncol(ratings_matrix))) {
                     if (is.factor(ratings_clean[[i]]) || is.ordered(ratings_clean[[i]])) {
                         ratings_matrix[, i] <- as.numeric(ratings_clean[[i]])
                     }
@@ -1691,7 +1691,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Convert factors to numeric (preserving ordinal structure)
                 ratings_matrix <- as.matrix(ratings_clean)
-                for (i in 1:ncol(ratings_matrix)) {
+                for (i in seq_len(ncol(ratings_matrix))) {
                     if (is.factor(ratings_clean[[i]]) || is.ordered(ratings_clean[[i]])) {
                         ratings_matrix[, i] <- as.numeric(ratings_clean[[i]])
                     }
@@ -2042,7 +2042,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Convert factors to numeric (preserving ordinal structure)
                 ratings_matrix <- as.matrix(ratings_clean)
-                for (i in 1:ncol(ratings_matrix)) {
+                for (i in seq_len(ncol(ratings_matrix))) {
                     if (is.factor(ratings_clean[[i]]) || is.ordered(ratings_clean[[i]])) {
                         ratings_matrix[, i] <- as.numeric(ratings_clean[[i]])
                     }
@@ -5783,7 +5783,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             all_data <- unlist(inter_ratings)
                             all_levels <- sort(unique(all_data[!is.na(all_data)]))
 
-                            for (i in 1:ncol(inter_ratings)) {
+                            for (i in seq_len(ncol(inter_ratings))) {
                                 inter_ratings[[i]] <- factor(inter_ratings[[i]], levels = all_levels)
                             }
 
@@ -8083,9 +8083,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             lm_result <- lm(diff ~ avg)
                             prop_bias_p <- summary(lm_result)$coefficients[2, 4] # p-value for slope
                         },
-                        error = function(e) {
-                            prop_bias_p <<- NA
-                        }
+                        error = function(e) NULL
                     )
                 }
 
@@ -8101,10 +8099,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             normality_p <- sw$p.value
                         }
                     },
-                    error = function(e) {
-                        normality_w <<- NA
-                        normality_p <<- NA
-                    }
+                    error = function(e) NULL
                 )
 
                 # Populate statistics table
@@ -8560,9 +8555,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 model <- NULL
                 model_fit_ok <- FALSE
 
-                tryCatch(
+                fit_result <- tryCatch(
                     {
-                        model <- lme4::lmer(
+                        m <- lme4::lmer(
                             score ~ 1 + (1 | case_id) + (1 | rater) + (1 | cluster),
                             data = long_df,
                             control = lme4::lmerControl(
@@ -8570,13 +8565,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 calc.derivs = FALSE
                             )
                         )
-                        model_fit_ok <- TRUE
+                        list(model = m, ok = TRUE)
                     },
                     error = function(e) {
                         # Try simpler model without rater effect
                         tryCatch(
                             {
-                                model <<- lme4::lmer(
+                                m <- lme4::lmer(
                                     score ~ 1 + (1 | case_id) + (1 | cluster),
                                     data = long_df,
                                     control = lme4::lmerControl(
@@ -8584,11 +8579,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         calc.derivs = FALSE
                                     )
                                 )
-                                model_fit_ok <<- TRUE
                                 self$results$hierarchicalOverallTable$setNote(
                                     "model_note",
                                     "Rater random effect was singular; a reduced model (case + cluster) was fit."
                                 )
+                                list(model = m, ok = TRUE)
                             },
                             error = function(e2) {
                                 self$results$hierarchicalOverallTable$setNote(
@@ -8598,10 +8593,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         ". Data may have insufficient variability."
                                     )
                                 )
+                                list(model = NULL, ok = FALSE)
                             }
                         )
                     }
                 )
+                model <- fit_result$model
+                model_fit_ok <- fit_result$ok
 
                 if (!model_fit_ok || is.null(model)) {
                     return()
@@ -9050,9 +9048,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 model <- NULL
                 model_ok <- FALSE
 
-                tryCatch(
+                fit_result <- tryCatch(
                     {
-                        model <- lme4::lmer(
+                        m <- lme4::lmer(
                             score ~ condition + (1 | case_id) + (1 | rater),
                             data = long_df,
                             control = lme4::lmerControl(
@@ -9060,12 +9058,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 calc.derivs = FALSE
                             )
                         )
-                        model_ok <- TRUE
+                        list(model = m, ok = TRUE)
                     },
                     error = function(e) {
                         tryCatch(
                             {
-                                model <<- lme4::lmer(
+                                m <- lme4::lmer(
                                     score ~ condition + (1 | case_id),
                                     data = long_df,
                                     control = lme4::lmerControl(
@@ -9073,21 +9071,24 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                         calc.derivs = FALSE
                                     )
                                 )
-                                model_ok <<- TRUE
                                 self$results$mixedEffectsTable$setNote(
                                     "model_note",
                                     "Rater random effect was singular; reduced model (case only) was fit."
                                 )
+                                list(model = m, ok = TRUE)
                             },
                             error = function(e2) {
                                 self$results$mixedEffectsTable$setNote(
                                     "error",
                                     paste0("Model fitting failed: ", htmltools::htmlEscape(e2$message))
                                 )
+                                list(model = NULL, ok = FALSE)
                             }
                         )
                     }
                 )
+                model <- fit_result$model
+                model_ok <- fit_result$ok
 
                 if (!model_ok || is.null(model)) {
                     return()
@@ -9412,43 +9413,38 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             is_categorical <- all(sapply(boot_ratings, function(x) is.factor(x) || is.character(x) || length(unique(na.omit(x))) <= 20))
                             if (is_categorical) {
                                 char_ratings <- as.data.frame(lapply(boot_ratings, as.character), stringsAsFactors = FALSE)
+                                result$kappa <- NA
                                 if (n_raters == 2) {
                                     tryCatch(
                                         {
                                             result$kappa <- irr::kappa2(char_ratings, weight = "unweighted")$value
                                         },
-                                        error = function(e) {
-                                            result$kappa <<- NA
-                                        }
+                                        error = function(e) NULL
                                     )
                                 } else {
                                     tryCatch(
                                         {
                                             result$kappa <- irr::kappam.fleiss(char_ratings)$value
                                         },
-                                        error = function(e) {
-                                            result$kappa <<- NA
-                                        }
+                                        error = function(e) NULL
                                     )
                                 }
+                                result$kripp_alpha <- NA
                                 tryCatch(
                                     {
                                         ka_result <- irr::kripp.alpha(t(as.matrix(sapply(char_ratings, function(x) as.numeric(factor(x))))))
                                         result$kripp_alpha <- ka_result$value
                                     },
-                                    error = function(e) {
-                                        result$kripp_alpha <<- NA
-                                    }
+                                    error = function(e) NULL
                                 )
                             } else {
+                                result$icc <- NA
                                 tryCatch(
                                     {
                                         icc_result <- irr::icc(boot_ratings, model = "twoway", type = "agreement", unit = "single")
                                         result$icc <- icc_result$value
                                     },
-                                    error = function(e) {
-                                        result$icc <<- NA
-                                    }
+                                    error = function(e) NULL
                                 )
                                 result$kappa <- NA
                                 result$kripp_alpha <- NA
@@ -9458,7 +9454,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         obs <- compute_metrics(ratings)
 
-                        set.seed(42)
+                        seed_val <- self$options$seed
+                        if (is.null(seed_val)) seed_val <- 42
+                        set.seed(seed_val)
                         boot_results <- lapply(seq_len(n_boot), function(b) {
                             idx <- sample(n_cases, replace = TRUE)
                             compute_metrics(ratings[idx, , drop = FALSE])
@@ -9792,7 +9790,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         kappa_B <- compute_kappa(ratings_B)
 
                         n_boot <- self$options$pairedBootN
-                        set.seed(42)
+                        seed_val <- self$options$seed
+                        if (is.null(seed_val)) seed_val <- 42
+                        set.seed(seed_val)
                         boot_pct_diff <- numeric(n_boot)
                         boot_kappa_diff <- numeric(n_boot)
 
@@ -10836,12 +10836,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                             # Calculate bootstrap CI if requested
                             if (self$options$bootstrap) {
-                                set.seed(42) # consistent with other bootstraps in this module
+                                # consistent with other bootstraps in this module
+                                seed_val <- self$options$seed
+                                if (is.null(seed_val)) seed_val <- 42
+                                set.seed(seed_val)
                                 n_boot <- self$options$nBoot
                                 alpha_boots <- rep(NA_real_, n_boot)
 
                                 for (i in 1:n_boot) {
-                                    boot_indices <- sample(1:nrow(ratings_matrix), replace = TRUE)
+                                    boot_indices <- sample(seq_len(nrow(ratings_matrix)), replace = TRUE)
                                     boot_data <- ratings_matrix[boot_indices, , drop = FALSE]
 
                                     boot_alpha <- try(

@@ -510,9 +510,9 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             matrix_html <- paste0(matrix_html, "</tr>")
 
             # Matrix cells
-            for (i in 1:nrow(trans_matrix)) {
+            for (i in seq_len(nrow(trans_matrix))) {
                 matrix_html <- paste0(matrix_html, "<tr><th>", htmltools::htmlEscape(rownames(trans_matrix)[i]), "</th>")
-                for (j in 1:ncol(trans_matrix)) {
+                for (j in seq_len(ncol(trans_matrix))) {
                     cell_value <- if (is.na(trans_matrix[i, j])) "-" else trans_matrix[i, j]
                     matrix_html <- paste0(matrix_html, "<td style='text-align: center;'>", cell_value, "</td>")
                 }

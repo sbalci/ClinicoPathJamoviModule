@@ -233,4 +233,14 @@ options:
           R: >
             Show detailed progress messages during bootstrap analysis.
 
+    - name: seed
+      title: "Random Seed"
+      type: Integer
+      default: 0
+      description:
+          R: >
+            Base random seed for the reproducible latent-class multi-start search.
+            Each start is offset from this base, so changing it shifts the whole
+            reproducible sequence; the default (0) reproduces the previous behaviour.
+
 ...

@@ -283,7 +283,7 @@ factoranalysisClass <- R6::R6Class(
             total_variance <- sum(eigenvals)
             cumulative <- 0
 
-            for (i in 1:length(eigenvals)) {
+            for (i in seq_along(eigenvals)) {
                 variance_percent <- (eigenvals[i] / total_variance) * 100
                 cumulative <- cumulative + variance_percent
 
@@ -316,7 +316,7 @@ factoranalysisClass <- R6::R6Class(
             parallelTable <- self$results$parallelAnalysis
             parallel <- private$.parallelResults
 
-            for (i in 1:length(parallel$fa.values)) {
+            for (i in seq_along(parallel$fa.values)) {
                 row <- list(
                     factor = i,
                     actual_eigenvalue = parallel$fa.values[i],
@@ -340,7 +340,7 @@ factoranalysisClass <- R6::R6Class(
             # Extracted communalities
             extracted_comm <- private$.faResult$communalities
 
-            for (i in 1:length(vars)) {
+            for (i in seq_along(vars)) {
                 row <- list(
                     variable = vars[i],
                     initial = initial_comm[i],
@@ -373,7 +373,7 @@ factoranalysisClass <- R6::R6Class(
                 vars <- private$.vars
                 nFactors <- ncol(loadings)
 
-                for (i in 1:length(vars)) {
+                for (i in seq_along(vars)) {
                     row <- list(variable = vars[i])
 
                     for (j in 1:nFactors) {
@@ -451,7 +451,7 @@ factoranalysisClass <- R6::R6Class(
             scoresTable <- self$results$factorScoresStats
             scores <- private$.faResult$scores
 
-            for (i in 1:ncol(scores)) {
+            for (i in seq_len(ncol(scores))) {
                 factor_scores <- scores[, i]
 
                 row <- list(
@@ -492,7 +492,7 @@ factoranalysisClass <- R6::R6Class(
                 )
             )
 
-            for (i in 1:length(measures)) {
+            for (i in seq_along(measures)) {
                 measure <- measures[[i]]
                 row <- list(
                     measure = measure[[1]],
@@ -590,7 +590,7 @@ factoranalysisClass <- R6::R6Class(
             }
 
             eigenvals <- private$.eigenvalues
-            factors <- 1:length(eigenvals)
+            factors <- seq_along(eigenvals)
 
             plotData <- data.frame(
                 Factor = factors,
@@ -654,7 +654,7 @@ factoranalysisClass <- R6::R6Class(
             }
 
             parallel <- private$.parallelResults
-            factors <- 1:length(parallel$fa.values)
+            factors <- seq_along(parallel$fa.values)
 
             plotData <- data.frame(
                 Factor = rep(factors, 2),

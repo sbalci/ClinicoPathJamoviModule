@@ -752,7 +752,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
             html <- paste0(html, "</tr></thead><tbody>")
 
             # Add data rows
-            for (i in 1:nrow(df_data)) {
+            for (i in seq_len(nrow(df_data))) {
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#f9f9f9"
                 html <- paste0(html, "<tr style='background-color: ", row_bg, ";'>")
 

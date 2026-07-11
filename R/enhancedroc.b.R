@@ -1224,7 +1224,7 @@ enhancedROCClass <- R6::R6Class(
 
                 # Add custom cutoffs if available
                 if (!is.null(custom_cutoffs) && nrow(custom_cutoffs) > 0) {
-                    for (i in 1:nrow(custom_cutoffs)) {
+                    for (i in seq_len(nrow(custom_cutoffs))) {
                         custom_cm <- private$.calculateConfusionMatrix(predictor, custom_cutoffs$cutoff[i])
 
                         custom_row <- list(
@@ -2060,7 +2060,7 @@ enhancedROCClass <- R6::R6Class(
                 )
             }
 
-            for (i in 1:length(measures)) {
+            for (i in seq_along(measures)) {
                 measure <- measures[[i]]
                 row <- list(
                     measure = measure[[1]],
@@ -3974,7 +3974,7 @@ enhancedROCClass <- R6::R6Class(
 
                             # Per-pair AUC breakdown
                             pairs <- combn(levels(outcome), 2)
-                            for (i in 1:ncol(pairs)) {
+                            for (i in seq_len(ncol(pairs))) {
                                 class1 <- pairs[1, i]
                                 class2 <- pairs[2, i]
 

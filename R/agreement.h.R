@@ -154,7 +154,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             ssNCategories = 4,
             ssAlpha = 0.05,
             ssPower = 0.8,
-            showSampleSizeGuide = FALSE, ...) {
+            showSampleSizeGuide = FALSE,
+            seed = 42, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -915,6 +916,10 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "showSampleSizeGuide",
                 showSampleSizeGuide,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..baConfidenceLevel)
@@ -1066,6 +1071,7 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..ssAlpha)
             self$.addOption(private$..ssPower)
             self$.addOption(private$..showSampleSizeGuide)
+            self$.addOption(private$..seed)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -1217,7 +1223,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ssNCategories = function() private$..ssNCategories$value,
         ssAlpha = function() private$..ssAlpha$value,
         ssPower = function() private$..ssPower$value,
-        showSampleSizeGuide = function() private$..showSampleSizeGuide$value),
+        showSampleSizeGuide = function() private$..showSampleSizeGuide$value,
+        seed = function() private$..seed$value),
     private = list(
         ..vars = NA,
         ..baConfidenceLevel = NA,
@@ -1368,7 +1375,8 @@ agreementOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..ssNCategories = NA,
         ..ssAlpha = NA,
         ..ssPower = NA,
-        ..showSampleSizeGuide = NA)
+        ..showSampleSizeGuide = NA,
+        ..seed = NA)
 )
 
 agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -4420,6 +4428,9 @@ agreementBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param ssPower Target power (1 - Type II error rate).
 #' @param showSampleSizeGuide Show educational guide for planning agreement
 #'   study sample size.
+#' @param seed Random seed for the reproducible bootstrap resampling used in
+#'   the agreement analyses. Change this value to obtain a different bootstrap
+#'   draw; the default (42) reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
@@ -4698,7 +4709,8 @@ agreement <- function(
     ssNCategories = 4,
     ssAlpha = 0.05,
     ssPower = 0.8,
-    showSampleSizeGuide = FALSE) {
+    showSampleSizeGuide = FALSE,
+    seed = 42) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("agreement requires jmvcore to be installed (restart may be required)")
@@ -4872,7 +4884,8 @@ agreement <- function(
         ssNCategories = ssNCategories,
         ssAlpha = ssAlpha,
         ssPower = ssPower,
-        showSampleSizeGuide = showSampleSizeGuide)
+        showSampleSizeGuide = showSampleSizeGuide,
+        seed = seed)
 
     analysis <- agreementClass$new(
         options = options,

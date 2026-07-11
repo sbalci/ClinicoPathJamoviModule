@@ -1930,11 +1930,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         orr_interpretation <- private$.interpretORR(metrics$ORR)
         dcr_interpretation <- private$.interpretDCR(metrics$DCR)
 
-        metric_row_index <- 1
+        # Row counter held in an environment so the nested add_metric_row()
+        # helper can advance it without `<<-` into the enclosing method scope.
+        idx_env <- new.env(parent = emptyenv())
+        idx_env$metric_row_index <- 1
         add_metric_row <- function(values) {
-          row_key <- sprintf("metric_%02d", metric_row_index)
+          row_key <- sprintf("metric_%02d", idx_env$metric_row_index)
           self$results$clinicalMetrics$addRow(rowKey = row_key, values = values)
-          metric_row_index <<- metric_row_index + 1
+          idx_env$metric_row_index <- idx_env$metric_row_index + 1
         }
 
         # Add Total Patients
@@ -2190,6 +2193,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             "barAlpha" = self$options$barAlpha,
             "showMedian" = self$options$showMedian,
             "showCI" = self$options$showCI,
+            "seed" = self$options$seed,
             "showBaseline" = self$options$showBaseline,
             "confirmationVar" = self$options$confirmationVar,
             "ongoingVar" = self$options$ongoingVar,
@@ -2612,8 +2616,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           # REPLACED: t.test CI is inappropriate for skewed response data and computes CI for MEAN not MEDIAN
           # NEW: Bootstrap percentile CI for median (appropriate for skewed/ordinal data)
           tryCatch({
-            # REPRODUCIBILITY: Set seed for reproducible bootstrap results
-            set.seed(123)
+            # REPRODUCIBILITY: user-configurable seed for reproducible bootstrap
+            # results (defaults to 123 when unset).
+            seed_val <- plotData$options$seed
+            if (is.null(seed_val)) seed_val <- 123
+            set.seed(seed_val)
 
             # Get sample size for bootstrap
             n_data <- sum(!is.na(df$response))

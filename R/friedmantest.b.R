@@ -417,7 +417,7 @@ friedmantestClass <- R6::R6Class(
             table <- self$results$descriptiveStats
             desc_stats <- friedman_result$desc_stats
 
-            for (i in 1:nrow(desc_stats)) {
+            for (i in seq_len(nrow(desc_stats))) {
                 table$addRow(rowKey = i, values = list(
                     condition = as.character(desc_stats$within[i]),
                     n = friedman_result$n_subjects,
@@ -472,7 +472,7 @@ friedmantestClass <- R6::R6Class(
             rank_sums <- friedman_result$rank_sums
             expected_rank <- friedman_result$expected_rank
 
-            for (i in 1:nrow(rank_sums)) {
+            for (i in seq_len(nrow(rank_sums))) {
                 deviation <- rank_sums$mean_rank[i] - expected_rank
 
                 table$addRow(rowKey = i, values = list(

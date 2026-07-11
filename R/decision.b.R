@@ -937,7 +937,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 }
 
                 # Generate clinical interpretation
-                tryCatch({
+                results$clinical_summary <- tryCatch({
                     interpretation <- private$.getDiagnosticInterpretation(lr_pos, lr_neg, sens, spec)
 
                     sens_text <- format_percent(sens)
@@ -946,7 +946,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     lr_pos_text <- ifelse(is.na(lr_pos), "undefined", sprintf("%.2f", lr_pos))
                     lr_neg_text <- ifelse(is.na(lr_neg), "undefined", sprintf("%.2f", lr_neg))
 
-                    results$clinical_summary <- paste0(
+                    paste0(
                         "<div style='margin: 15px; padding: 10px; border-left: 4px solid #2196F3; background: #f8f9fa;'>",
                         "<h4 style='color: #1976D2; margin-top: 0;'>Clinical Interpretation</h4>",
                         "<p><strong>Test Performance Summary:</strong></p>",
@@ -970,7 +970,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                         "</ul></div>"
                     )
                 }, error = function(e) {
-                    results$clinical_summary <<- paste0(
+                    paste0(
                         "<div style='margin: 15px; padding: 10px; border-left: 4px solid #ff9800; background: #fff3e0;'>",
                         "<h4 style='color: #f57c00; margin-top: 0;'>Clinical Interpretation</h4>",
                         "<p>Unable to generate detailed clinical interpretation due to data limitations.</p>",
@@ -982,15 +982,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 })
 
                 # Generate about content
-                tryCatch({
-                    results$about_content <- private$.generateAboutAnalysis()
+                results$about_content <- tryCatch({
+                    private$.generateAboutAnalysis()
                 }, error = function(e) {
-                    results$about_content <<- "<div>About analysis content unavailable</div>"
+                    "<div>About analysis content unavailable</div>"
                 })
 
                 # Generate natural language summary
-                tryCatch({
-                    results$natural_summary <- private$.generateNaturalLanguageSummary(
+                results$natural_summary <- tryCatch({
+                    private$.generateNaturalLanguageSummary(
                         sens, spec, ppv, npv, lr_pos, lr_neg,
                         prior_prob, post_test_prob_disease, post_test_prob_healthy,
                         total_pop, test_name, gold_name
@@ -998,15 +998,15 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     fallback_template <- .("<div style='margin: 15px; padding: 15px; border-left: 5px solid #FF9800; background: #fff3e0;'><h3 style='color: #F57C00; margin-top: 0;'>Clinical Summary</h3><p>Basic diagnostic test evaluation completed with %d cases.</p><p><strong>Results:</strong> Sensitivity %.1f%%, Specificity %.1f%%</p></div>")
 
-                    results$natural_summary <<- sprintf(
+                    sprintf(
                         fallback_template,
                         total_pop, sens * 100, spec * 100
                     )
                 })
 
                 # Generate report template
-                tryCatch({
-                    results$report_template <- private$.generateReportTemplate(
+                results$report_template <- tryCatch({
+                    private$.generateReportTemplate(
                         sens, spec, ppv, npv, lr_pos, lr_neg,
                         test_name = test_name,
                         gold_name = gold_name
@@ -1014,7 +1014,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 }, error = function(e) {
                     fallback_template <- .("<div style='margin: 15px; padding: 15px; border: 2px dashed #2196F3; background: #e3f2fd;'><h3 style='color: #1976D2; margin-top: 0;'>Copy-Ready Clinical Report</h3><p>Diagnostic test evaluation shows sensitivity of %.1f%% and specificity of %.1f%%.</p></div>")
 
-                    results$report_template <<- sprintf(
+                    sprintf(
                         fallback_template,
                         sens * 100, spec * 100
                     )

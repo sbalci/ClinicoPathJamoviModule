@@ -573,7 +573,7 @@ qtwistClass <- R6::R6Class(
 
                     # Restrict to tau
                     times <- times[times <= tau]
-                    surv <- surv[1:length(times)]
+                    surv <- surv[seq_along(times)]
 
                     # Add tau if not already present
                     if (max(times) < tau) {
@@ -1001,7 +1001,7 @@ qtwistClass <- R6::R6Class(
 
             for (i in 1:n_boot) {
                 # Bootstrap resample
-                boot_idx <- sample(1:nrow(data), nrow(data), replace = TRUE)
+                boot_idx <- sample(seq_len(nrow(data)), nrow(data), replace = TRUE)
                 boot_data <- data[boot_idx, ]
 
                 # Calculate state partitions for bootstrap sample

@@ -189,6 +189,7 @@ methodological notes for the selected test type.}
 A results object containing:
 \tabular{llllll}{
 \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 \code{results$clinicalSummary} \tab \tab \tab \tab \tab a html \cr
 \code{results$reportSummary} \tab \tab \tab \tab \tab a html \cr

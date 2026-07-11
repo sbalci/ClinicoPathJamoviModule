@@ -293,7 +293,7 @@ jforestmodelClass <- R6::R6Class(
                 # Handle exponentiation
                 exponentiate <- self$options$exponentiate
                 
-                for (i in 1:nrow(coef_matrix)) {
+                for (i in seq_len(nrow(coef_matrix))) {
                     var_name <- rownames(coef_matrix)[i]
                     coef_val <- coef_matrix[i, 1]
                     se_val <- coef_matrix[i, 2]

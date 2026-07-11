@@ -199,7 +199,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
             } else if (smoothing_method == "ns") {
                 # Natural splines (simplified)
                 for (k in 1:min(knots_time, 3)) {
-                    data[[paste0("time_ns_", k)]] <- spline(data$time, n = knots_time, method = "natural")$y[1:nrow(data)]
+                    data[[paste0("time_ns_", k)]] <- spline(data$time, n = knots_time, method = "natural")$y[seq_len(nrow(data))]
                 }
             }
 

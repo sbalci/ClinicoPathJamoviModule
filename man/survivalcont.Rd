@@ -51,7 +51,8 @@ survivalcont(
   strata_variable,
   loglog = FALSE,
   showExplanations = FALSE,
-  showSummaries = FALSE
+  showSummaries = FALSE,
+  seed = 12345
 )
 }
 \arguments{
@@ -229,6 +230,10 @@ component to help interpret the statistical methods and results.}
 and plots. These summaries provide plain-language interpretations of the
 statistical results. Turn off to reduce visual clutter when summaries are
 not needed.}
+
+\item{seed}{Random seed for the reproducible optimal cut-point search.
+Change this value to obtain a different search; the default (12345)
+reproduces the previous fixed behaviour.}
 }
 \value{
 A results object containing:

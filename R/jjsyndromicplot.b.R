@@ -538,7 +538,7 @@ jjsyndromicplotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            colnames(loadings) <- paste0('PC', 1:ncol(pca$x))
+            colnames(loadings) <- paste0('PC', seq_len(ncol(pca$x)))
             rownames(loadings) <- colnames(pca_data)
 
             return(loadings)

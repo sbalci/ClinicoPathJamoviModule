@@ -142,8 +142,8 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             p_matrix <- matrix(NA, ncol = length(vars), nrow = length(vars))
             rownames(p_matrix) <- colnames(p_matrix) <- vars
             
-            for (i in 1:length(vars)) {
-                for (j in 1:length(vars)) {
+            for (i in seq_along(vars)) {
+                for (j in seq_along(vars)) {
                     if (i != j) {
                         test_result <- cor.test(cor_data[[vars[i]]], cor_data[[vars[j]]], 
                                                method = method, 
@@ -156,10 +156,10 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Populate matrix table
-            for (i in 1:length(vars)) {
+            for (i in seq_along(vars)) {
                 row_values <- list(var = vars[i])
                 
-                for (j in 1:length(vars)) {
+                for (j in seq_along(vars)) {
                     if (i == j) {
                         row_values[[vars[j]]] <- " - "
                     } else {

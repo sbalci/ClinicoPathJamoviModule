@@ -112,7 +112,7 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 sample_ids <- if (!is.null(self$options$sample_id_var)) {
                     data[[self$options$sample_id_var]]
                 } else {
-                    1:nrow(data)
+                    seq_len(nrow(data))
                 }
 
                 groups <- if (!is.null(self$options$group_var)) {
@@ -540,7 +540,7 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 dist_data <- data.frame(
-                    Sample = 1:length(hscore),
+                    Sample = seq_along(hscore),
                     Hscore = hscore,
                     Allred = allred_total,
                     Intensity = intensity,
@@ -1865,7 +1865,7 @@ def segment_nuclei(image_path):
             .populateClassificationTable = function(results) {
                 table <- self$results$molecularclassification$classificationtable
 
-                for (i in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
                     row <- list()
                     row$sample_id <- results$sample_id[i]
                     row$marker1_status <- results$marker1_status[i]

@@ -1216,7 +1216,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 best_match <- NULL
                 best_score <- 0
 
-                for (i in 1:nrow(optimalPanels)) {
+                for (i in seq_len(nrow(optimalPanels))) {
                     panel <- optimalPanels[i, ]
                     markers <- strsplit(panel$panel, " \\+ ")[[1]]
 
@@ -1368,7 +1368,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .generateAlternatives = function(predictions, nAlternatives) {
                 alternatives <- data.frame()
 
-                for (i in 1:nrow(predictions)) {
+                for (i in seq_len(nrow(predictions))) {
                     pred <- predictions[i, ]
                     all_scores <- pred$all_scores[[1]]
 
@@ -1409,7 +1409,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .generateEvidence = function(predictions, trainingModel) {
                 evidence <- data.frame()
 
-                for (i in 1:nrow(predictions)) {
+                for (i in seq_len(nrow(predictions))) {
                     pred <- predictions[i, ]
 
                     panel_match_text <- if (!is.null(pred$panel_match[[1]])) {
@@ -1463,7 +1463,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 results <- data.frame()
 
-                for (i in 1:nrow(low_conf)) {
+                for (i in seq_len(nrow(low_conf))) {
                     pred <- low_conf[i, ]
 
                     quality_flag <- if (pred$confidence < 0) {
@@ -1513,7 +1513,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .compareMarkers = function(queryData, trainingModel, predictions, markerVars) {
                 comparison <- data.frame()
 
-                for (i in 1:nrow(predictions)) {
+                for (i in seq_len(nrow(predictions))) {
                     pred <- predictions[i, ]
                     case_row <- queryData[i, , drop = FALSE]
                     predicted_dx <- pred$predicted_diagnosis
@@ -1626,7 +1626,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 table <- self$results$validationResults
 
-                for (i in 1:nrow(validation)) {
+                for (i in seq_len(nrow(validation))) {
                     row <- validation[i, ]
                     table$addRow(rowKey = i, values = list(
                         marker = row$marker,
@@ -1646,7 +1646,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 table <- self$results$predictions
 
-                for (i in 1:nrow(predictions)) {
+                for (i in seq_len(nrow(predictions))) {
                     row <- predictions[i, ]
                     table$addRow(rowKey = i, values = list(
                         case_id = row$case_id,
@@ -1667,7 +1667,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 table <- self$results$alternativeDiagnoses
 
-                for (i in 1:nrow(alternatives)) {
+                for (i in seq_len(nrow(alternatives))) {
                     row <- alternatives[i, ]
                     table$addRow(rowKey = i, values = list(
                         case_id = row$case_id,
@@ -1687,7 +1687,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 table <- self$results$predictionEvidence
 
-                for (i in 1:nrow(evidence)) {
+                for (i in seq_len(nrow(evidence))) {
                     row <- evidence[i, ]
                     table$addRow(rowKey = i, values = list(
                         case_id = row$case_id,
@@ -1711,7 +1711,7 @@ ihcpredictClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 table <- self$results$lowConfidenceCases
 
-                for (i in 1:nrow(lowConf)) {
+                for (i in seq_len(nrow(lowConf))) {
                     row <- lowConf[i, ]
                     table$addRow(rowKey = i, values = list(
                         case_id = row$case_id,

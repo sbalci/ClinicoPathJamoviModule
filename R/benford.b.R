@@ -563,7 +563,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste(rep("-", 50), collapse = ""), "\n"
                 )
 
-                for (i in 1:length(observed_props)) {
+                for (i in seq_along(observed_props)) {
                     dist_table <- paste0(dist_table,
                         sprintf("%-8d | %9.1f%% | %9.1f%% | %+9.1f%%\n",
                                digit_labels[i],

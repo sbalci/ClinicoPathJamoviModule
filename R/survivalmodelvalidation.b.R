@@ -754,7 +754,7 @@ survivalmodelvalidationClass <- R6::R6Class(
                     # Legend with AUC values
                     legend("bottomright", 
                            legend = paste("t =", pred_times, " (AUC:", round(roc_res$AUC, 3), ")"), 
-                           col = colors[1:length(pred_times)], 
+                           col = colors[seq_along(pred_times)], 
                            lwd = 2, 
                            bg = "white",
                            box.col = "#eeeeee",
@@ -789,7 +789,7 @@ survivalmodelvalidationClass <- R6::R6Class(
             }
             
             # Map labels to the actual unique values found
-            plot_labels <- status_labels[1:length(unique_status)]
+            plot_labels <- status_labels[seq_along(unique_status)]
             
             # Premium Density + Rug Plot
             p <- ggplot2::ggplot(data, ggplot2::aes(x = !!ggplot2::sym(vars$risk_score), 

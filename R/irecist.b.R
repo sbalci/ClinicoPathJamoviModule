@@ -649,7 +649,7 @@ irecistClass <- R6::R6Class(
             table <- self$results$responseTable
             data <- private$.responseData
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     assessmentTime = data$assessmentTime[i],
@@ -671,7 +671,7 @@ irecistClass <- R6::R6Class(
             table <- self$results$bestResponseTable
             data <- private$.bestResponseData
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     bestResponse = data$bestResponse[i],
@@ -778,7 +778,7 @@ irecistClass <- R6::R6Class(
                 return()
             }
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 row <- list(
                     patientId = as.character(data$patientId[i]),
                     iupdTime = data$iupdTime[i],
@@ -824,7 +824,7 @@ irecistClass <- R6::R6Class(
                     .groups = "drop"
                 )
 
-            for (i in 1:nrow(summary)) {
+            for (i in seq_len(nrow(summary))) {
                 table$addRow(rowKey = i, values = list(
                     group = as.character(summary$group[i]),
                     n = as.integer(summary$n[i]),
@@ -1093,7 +1093,7 @@ irecistClass <- R6::R6Class(
                 left_join(bestResp, by = "patientId")
 
             # Add patient ordering
-            waterfallData$patientOrder <- 1:nrow(waterfallData)
+            waterfallData$patientOrder <- seq_len(nrow(waterfallData))
 
             # Define colors
             colors <- c(
@@ -1146,7 +1146,7 @@ irecistClass <- R6::R6Class(
                 arrange(desc(maxTime))
 
             # Add ordering
-            swimData$patientOrder <- 1:nrow(swimData)
+            swimData$patientOrder <- seq_len(nrow(swimData))
 
             # Create plot
             p <- ggplot(swimData, aes(y = factor(patientOrder))) +

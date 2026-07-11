@@ -107,10 +107,10 @@ enhancedcorrelationClass <- R6::R6Class(
                 matrix_table <- self$results$correlationMatrix
                 matrix_table$addRows(length(vars))
 
-                for (i in 1:length(vars)) {
+                for (i in seq_along(vars)) {
                     row_values <- list(variable = vars[i])
 
-                    for (j in 1:length(vars)) {
+                    for (j in seq_along(vars)) {
                         if (i == j) {
                             row_values[[paste0("cor", j)]] <- 1.0
                         } else {
@@ -231,7 +231,7 @@ enhancedcorrelationClass <- R6::R6Class(
                 adjusted_p <- p.adjust(p_values, method = self$options$pValueAdjustment)
 
                 # Update the table with adjusted p-values
-                for (i in 1:length(adjusted_p)) {
+                for (i in seq_along(adjusted_p)) {
                     current_row <- details$getRow(rowNo = i)
                     current_row$p <- adjusted_p[i]
                     details$setRow(rowNo = i, values = current_row)

@@ -338,7 +338,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
 
                     table <- self$results$variancecomponents
 
-                    for (i in 1:nrow(var_comp)) {
+                    for (i in seq_len(nrow(var_comp))) {
 
                         component <- var_comp$grp[i]
                         if (is.na(component)) component <- "Residual"
@@ -467,7 +467,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                 # Fixed effects
                 fixed_effects <- model_summary$coefficients
 
-                for (i in 1:nrow(fixed_effects)) {
+                for (i in seq_len(nrow(fixed_effects))) {
                     term <- rownames(fixed_effects)[i]
                     estimate <- fixed_effects[i, "Estimate"]
                     se <- fixed_effects[i, "Std. Error"]
@@ -491,7 +491,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                 model_summary <- summary(model)
                 fixed_effects <- model_summary$coefficients
 
-                for (i in 1:nrow(fixed_effects)) {
+                for (i in seq_len(nrow(fixed_effects))) {
                     term <- rownames(fixed_effects)[i]
                     estimate <- fixed_effects[i, "Estimate"]
                     se <- fixed_effects[i, "Std. Error"]
@@ -522,7 +522,7 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
 
             if (inherits(model, "lmerMod")) {
                 # Linear mixed model random effects
-                for (i in 1:length(random_summary)) {
+                for (i in seq_along(random_summary)) {
                     group_name <- names(random_summary)[i]
                     variance <- attr(random_summary[[i]], "stddev")^2
                     std_dev <- attr(random_summary[[i]], "stddev")

@@ -169,7 +169,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Populate table
                 table <- self$results$baselineModel
                 
-                for (i in 1:nrow(coef_summary)) {
+                for (i in seq_len(nrow(coef_summary))) {
                     table$addRow(rowKey = i, values = list(
                         parameter = rownames(coef_summary)[i],
                         hr = round(exp(coef_summary[i, "coef"]), 3),
@@ -246,7 +246,7 @@ landmarkanalysisClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     coef_summary <- summary(lm_model)$coefficients
                     
                     # Add to results table
-                    for (i in 1:nrow(coef_summary)) {
+                    for (i in seq_len(nrow(coef_summary))) {
                         table$addRow(rowKey = paste0(lm_time, "_", i), values = list(
                             landmark_time = paste0(lm_time, " months"),
                             n_subjects = nrow(lm_data),

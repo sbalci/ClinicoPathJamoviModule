@@ -21,7 +21,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             bootstrap = FALSE,
             nboot = 1000,
             alpha = 0.05,
-            verbose = FALSE, ...) {
+            verbose = FALSE,
+            seed = 0, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -127,6 +128,10 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "verbose",
                 verbose,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=0)
 
             self$.addOption(private$..clinicalPreset)
             self$.addOption(private$..test1)
@@ -144,6 +149,7 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..nboot)
             self$.addOption(private$..alpha)
             self$.addOption(private$..verbose)
+            self$.addOption(private$..seed)
         }),
     active = list(
         clinicalPreset = function() private$..clinicalPreset$value,
@@ -161,7 +167,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         bootstrap = function() private$..bootstrap$value,
         nboot = function() private$..nboot$value,
         alpha = function() private$..alpha$value,
-        verbose = function() private$..verbose$value),
+        verbose = function() private$..verbose$value,
+        seed = function() private$..seed$value),
     private = list(
         ..clinicalPreset = NA,
         ..test1 = NA,
@@ -178,7 +185,8 @@ nogoldstandardOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..bootstrap = NA,
         ..nboot = NA,
         ..alpha = NA,
-        ..verbose = NA)
+        ..verbose = NA,
+        ..seed = NA)
 )
 
 nogoldstandardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -426,6 +434,10 @@ nogoldstandardBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param nboot Number of bootstrap samples for confidence intervals.
 #' @param alpha Alpha level for confidence intervals.
 #' @param verbose Show detailed progress messages during bootstrap analysis.
+#' @param seed Base random seed for the reproducible latent-class multi-start
+#'   search. Each start is offset from this base, so changing it shifts the
+#'   whole reproducible sequence; the default (0) reproduces the previous
+#'   behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -465,7 +477,8 @@ nogoldstandard <- function(
     bootstrap = FALSE,
     nboot = 1000,
     alpha = 0.05,
-    verbose = FALSE) {
+    verbose = FALSE,
+    seed = 0) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("nogoldstandard requires jmvcore to be installed (restart may be required)")
@@ -506,7 +519,8 @@ nogoldstandard <- function(
         bootstrap = bootstrap,
         nboot = nboot,
         alpha = alpha,
-        verbose = verbose)
+        verbose = verbose,
+        seed = seed)
 
     analysis <- nogoldstandardClass$new(
         options = options,

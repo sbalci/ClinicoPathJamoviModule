@@ -275,7 +275,7 @@ gcomputationBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' is fitted conditional on treatment and covariates; the fitted model then 
 #' predicts each subject's outcome under treatment and under no treatment, and 
 #' these predictions are averaged (standardized) over the covariate 
-#' distribution to give the counterfactual means E(Y^1) and E(Y^0). The
+#' distribution to give the counterfactual means E(Y^1) and E(Y^0). The 
 #' average treatment effect is reported as a difference (and, for binary 
 #' outcomes, a risk ratio), with percentile bootstrap confidence intervals. 
 #' This standardization removes confounding by the measured covariates without 

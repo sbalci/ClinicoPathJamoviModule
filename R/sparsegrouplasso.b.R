@@ -612,7 +612,7 @@ sparsegrouplassoClass <- R6::R6Class(
 
             if (is.null(groups)) {
                 # Default: each variable in its own group
-                groups <- 1:ncol(X)
+                groups <- seq_len(ncol(X))
             }
 
             return(groups)
@@ -777,7 +777,7 @@ sparsegrouplassoClass <- R6::R6Class(
             groups <- rep(0L, ncol(X))
             current_group <- 1L
 
-            for (i in 1:ncol(X)) {
+            for (i in seq_len(ncol(X))) {
                 if (groups[i] != 0L) next  # Already assigned
 
                 # Find unassigned variables highly correlated with variable i
@@ -868,7 +868,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 }
             } else if (self$options$weight_type == "univariate_based") {
                 # Univariate association-based weights
-                for (i in 1:ncol(X)) {
+                for (i in seq_len(ncol(X))) {
                     univar_coef <- private$.fitUnivariateCox(X[, i, drop = FALSE], y_time, y_event)
                     individual_weights[i] <- 1 / (abs(univar_coef) + 1e-8)^self$options$weight_power
                 }

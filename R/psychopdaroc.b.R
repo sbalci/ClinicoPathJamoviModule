@@ -1221,7 +1221,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         result_message <- NULL
         results <- NULL
 
-        tryCatch(
+        result_message <- tryCatch(
           {
             results <- cutpointr::cutpointr(
               x = dependentVar,
@@ -1238,10 +1238,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               na.rm = TRUE
             )
             result_success <- TRUE
+            NULL
           },
-          error = function(e) {
-            result_message <<- e$message
-          }
+          error = function(e) e$message
         )
 
         if (!result_success) {
@@ -1251,7 +1250,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             x.sorted = sort(unique(dependentVar)),
             direction = ifelse(direction == ">=", ">", "<")
           )
-          for (i in 1:nrow(roc_data)) {
+          for (i in seq_len(nrow(roc_data))) {
             threshold <- roc_data$x.sorted[i]
             if (direction == ">=") {
               predicted_pos <- dependentVar >= threshold
@@ -1904,18 +1903,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         # -----------------------------------------------------------------------
         # 0. SET SEED FOR REPRODUCIBILITY (preserve and restore global RNG state)
         # -----------------------------------------------------------------------
-        if (!is.null(self$options$seed)) {
-          old_seed <- if (exists(".Random.seed", envir = .GlobalEnv)) get(".Random.seed", envir = .GlobalEnv) else NULL
-          on.exit(
-            {
-              if (!is.null(old_seed)) {
-                assign(".Random.seed", old_seed, envir = .GlobalEnv)
-              } else if (exists(".Random.seed", envir = .GlobalEnv)) rm(".Random.seed", envir = .GlobalEnv)
-            },
-            add = TRUE
-          )
-          set.seed(self$options$seed)
-        }
+        if (!is.null(self$options$seed)) withr::local_seed(self$options$seed)
 
         # -----------------------------------------------------------------------
         # 0a. MANUAL RUN GATE
@@ -2717,7 +2705,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             # Extract pairwise comparisons from DeLong test results
             diff_data <- delongResults$difference
 
-            for (i in 1:nrow(diff_data)) {
+            for (i in seq_len(nrow(diff_data))) {
               comparison <- rownames(diff_data)[i]
               delongTable$addRow(rowKey = comparison, values = list(
                 comparison = comparison,
@@ -4491,8 +4479,13 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         tryCatch(
           {
             LSL_matrix <- L %*% S %*% t(L)
-            z_score <<- as.numeric(t(aucdiff) %*% MASS::ginv(LSL_matrix) %*% aucdiff)
-            global_p <<- pchisq(z_score, df = qr(LSL_matrix)$rank, lower.tail = FALSE)
+            # NOTE: plain `<-` (not `<<-`). This tryCatch body runs in the method
+            # frame, so `<-` assigns the z_score/global_p locals used below for
+            # global.z/global.p. The former `<<-` searched parent scopes, missed
+            # these locals, and wrote to .GlobalEnv, so global.z/global.p were
+            # always NA and the global DeLong test was never reported.
+            z_score <- as.numeric(t(aucdiff) %*% MASS::ginv(LSL_matrix) %*% aucdiff)
+            global_p <- pchisq(z_score, df = qr(LSL_matrix)$rank, lower.tail = FALSE)
           },
           error = function(e) {
             warning(paste("Error in global test calculation:", e$message))

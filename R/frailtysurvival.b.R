@@ -332,7 +332,7 @@ frailtysurvivalClass <- R6::R6Class(
                             frailty_quantiles <- quantile(frailty_terms, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
                             html <- paste0(html, "<h4>Frailty Distribution Quantiles</h4>")
                             html <- paste0(html, "<table class='jamovi-table'>")
-                            for (i in 1:length(frailty_quantiles)) {
+                            for (i in seq_along(frailty_quantiles)) {
                                 percentile <- names(frailty_quantiles)[i]
                                 value <- round(frailty_quantiles[i], 4)
                                 html <- paste0(html, "<tr><td><b>", percentile, ":</b></td><td>", value, "</td></tr>")
@@ -392,7 +392,7 @@ frailtysurvivalClass <- R6::R6Class(
                             html <- paste0(html, "<table class='jamovi-table'>")
                             html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>95% CI</th></tr>")
 
-                            for (i in 1:nrow(covariate_coefs)) {
+                            for (i in seq_len(nrow(covariate_coefs))) {
                                 var_name <- rownames(covariate_coefs)[i]
                                 coef <- round(covariate_coefs[i, "coef"], 4)
                                 exp_coef <- round(covariate_coefs[i, "exp(coef)"], 4)
@@ -427,7 +427,7 @@ frailtysurvivalClass <- R6::R6Class(
                             html <- paste0(html, "<table class='jamovi-table'>")
                             html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>p-value</th></tr>")
 
-                            for (i in 1:nrow(coefficients)) {
+                            for (i in seq_len(nrow(coefficients))) {
                                 var_name <- rownames(coefficients)[i]
                                 coef <- round(coefficients[i, 1], 4)
                                 exp_coef <- round(exp(coef), 4)
@@ -513,11 +513,11 @@ frailtysurvivalClass <- R6::R6Class(
                         html <- paste0(html, "<tr><th>Component</th><th>Variance</th><th>SD</th><th>% of Total</th></tr>")
 
                         total_var <- 0
-                        for (i in 1:length(var_comp)) {
+                        for (i in seq_along(var_comp)) {
                             total_var <- total_var + var_comp[[i]][1]
                         }
 
-                        for (i in 1:length(var_comp)) {
+                        for (i in seq_along(var_comp)) {
                             comp_name <- names(var_comp)[i]
                             if (is.null(comp_name)) comp_name <- paste("Component", i)
 

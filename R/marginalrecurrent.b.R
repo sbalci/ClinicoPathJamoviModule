@@ -380,7 +380,7 @@ marginalrecurrentClass <- R6::R6Class(
                     alpha <- 1 - conf_level
                     z_crit <- qnorm(1 - alpha/2)
                     
-                    for (i in 1:nrow(coeff_data)) {
+                    for (i in seq_len(nrow(coeff_data))) {
                         estimate <- as.numeric(coeff_data[i, "Estimate"])
                         se <- as.numeric(coeff_data[i, "SE"])
                         z_val <- as.numeric(coeff_data[i, "z"])

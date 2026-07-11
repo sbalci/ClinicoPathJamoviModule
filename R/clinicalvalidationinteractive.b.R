@@ -491,7 +491,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       sens <- validation_results$sensitivity$estimate
       spec <- validation_results$specificity$estimate
 
-      for (i in 1:length(prevalences)) {
+      for (i in seq_along(prevalences)) {
         prev <- prevalences[i]
         ppv <- (sens * prev) / (sens * prev + (1 - spec) * (1 - prev))
         npv <- (spec * (1 - prev)) / (spec * (1 - prev) + (1 - sens) * prev)

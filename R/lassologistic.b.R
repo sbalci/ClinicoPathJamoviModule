@@ -547,7 +547,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Stratified CV folds for balanced sampling
                 foldid <- NULL
-                tryCatch(
+                fold_err <- tryCatch(
                     {
                         pos_idx <- which(data$y == 1)
                         neg_idx <- which(data$y == 0)
@@ -556,11 +556,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         foldid <- integer(data$n)
                         foldid[pos_idx] <- folds_pos
                         foldid[neg_idx] <- folds_neg
+                        NULL
                     },
-                    error = function(e) {
-                        foldid <<- NULL
-                    }
+                    error = function(e) e
                 )
+                if (!is.null(fold_err)) foldid <- NULL
 
                 # Fit CV model
                 cv_args <- list(

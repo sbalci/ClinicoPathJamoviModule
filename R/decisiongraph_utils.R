@@ -81,7 +81,9 @@ createDecisionTreePlot <- function(treeData, layout = "horizontal", colorScheme 
 #' @param baseResults Data frame
 #' @param distributionType Character string
 #'
-#' @return NULL
+#' @return \code{NULL}. This function is deprecated and performs no computation;
+#'   it only emits a deprecation warning directing callers to use the internal
+#'   PSA methods of \code{decisiongraphClass}.
 #' @export
 performMonteCarloSimulation <- function(numSimulations, parameters, baseResults,
                                        distributionType = "normal") {
@@ -116,7 +118,7 @@ calculateCEAC <- function(psaResults, thresholds, strategies) {
 
     # Get unique simulation IDs (if available)
     if (!"simulation" %in% names(psaResults)) {
-      psaResults$simulation <- 1:nrow(psaResults)
+      psaResults$simulation <- seq_len(nrow(psaResults))
     }
 
     for (threshold in thresholds) {

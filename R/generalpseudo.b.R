@@ -421,7 +421,7 @@ generalpseudoClass <- R6::R6Class(
                 ci <- confint(model, level = ci_level)
                 
                 # Populate results table
-                for (i in 1:nrow(coeffs)) {
+                for (i in seq_len(nrow(coeffs))) {
                     row <- list()
                     row$time_point <- t
                     row$term <- rownames(coeffs)[i]

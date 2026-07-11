@@ -978,7 +978,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                 total_n <- nrow(data)
 
                 # Create individual variable sentences
-                individual_sentences <- sapply(1:nrow(summaryData), function(i) {
+                individual_sentences <- sapply(seq_len(nrow(summaryData)), function(i) {
                     sprintf("%s was positive in %s of %s cases (%s%%).",
                             htmltools::htmlEscape(summaryData$Variable[i]),
                             summaryData$TrueCount[i],

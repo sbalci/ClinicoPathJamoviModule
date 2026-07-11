@@ -655,7 +655,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 mydata <- private$.processDataSafely(mydata, testVariables, goldVariable, goldPositive, testPositiveLevels)
 
                 # Update summary with analysis information
-                test_level_info <- paste(sapply(1:length(testVariables), function(i) {
+                test_level_info <- paste(sapply(seq_along(testVariables), function(i) {
                     paste0(
                         "<strong>", htmltools::htmlEscape(testVariables[i]),
                         ":</strong> '", htmltools::htmlEscape(testPositiveLevels[i]),
@@ -1661,7 +1661,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 # Create structure list
                 structure <- list()
 
-                for (i in 1:nrow(frame)) {
+                for (i in seq_len(nrow(frame))) {
                     node_data <- frame[i, ]
 
                     structure[[i]] <- list(
@@ -1878,7 +1878,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                         valid_results <- chunk_results[!sapply(chunk_results, is.null)]
                         if (length(valid_results) > 0) {
                             # Vectorized assignment for better performance
-                            result_indices <- chunk_indices[1:length(valid_results)]
+                            result_indices <- chunk_indices[seq_along(valid_results)]
                             boot_sens[result_indices] <- sapply(valid_results, function(x) x$sensitivity)
                             boot_spec[result_indices] <- sapply(valid_results, function(x) x$specificity)
                             boot_acc[result_indices] <- sapply(valid_results, function(x) x$accuracy)

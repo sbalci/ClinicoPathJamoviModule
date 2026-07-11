@@ -191,7 +191,7 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
                         # Populate switching patterns table
                         patterns_table <- self$results$switchingPatternsTable
 
-                        for (i in 1:nrow(pattern_summary)) {
+                        for (i in seq_len(nrow(pattern_summary))) {
                             iqr_text <- if (!is.na(pattern_summary$q1_switch_time[i])) {
                                 paste0("(", pattern_summary$q1_switch_time[i], ", ", pattern_summary$q3_switch_time[i], ")")
                             } else {

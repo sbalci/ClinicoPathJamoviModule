@@ -201,7 +201,7 @@ pathologycompositionClass <- R6::R6Class(
             low_risk_compositions <- list()
             high_risk_compositions <- list()
 
-            for (i in 1:nrow(all_compositions)) {
+            for (i in seq_len(nrow(all_compositions))) {
                 comp_pattern <- all_compositions[i, ]
                 pattern_mask <- private$.matchCompositionPattern(data, component_vars, comp_pattern)
 

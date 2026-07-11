@@ -195,7 +195,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Add observation identifiers
-            modelData$obs_id <- 1:nrow(modelData)
+            modelData$obs_id <- seq_len(nrow(modelData))
             
             return(list(data = modelData, error = NULL))
         },

@@ -963,7 +963,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Add row IDs if no ID variable
             if (is.null(id_var)) {
-                processed$alluvium <- as.factor(1:nrow(processed))
+                processed$alluvium <- as.factor(seq_len(nrow(processed)))
             } else {
                 names(processed)[names(processed) == id_var] <- "alluvium"
             }

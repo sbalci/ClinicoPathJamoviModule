@@ -337,7 +337,7 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                         summary_model <- summary(model)
                         coefs <- summary_model$table
                         
-                        for (i in 1:nrow(coefs)) {
+                        for (i in seq_len(nrow(coefs))) {
                             param_name <- rownames(coefs)[i]
                             estimate <- coefs[i, "Value"]
                             se <- coefs[i, "Std. Error"]
@@ -369,7 +369,7 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                         summary_model <- summary(model)
                         coefs <- summary_model$coefficients
                         
-                        for (i in 1:nrow(coefs)) {
+                        for (i in seq_len(nrow(coefs))) {
                             param_name <- rownames(coefs)[i]
                             estimate <- coefs[i, "coef"]
                             se <- coefs[i, "se(coef)"]
@@ -403,7 +403,7 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     if (!is.null(model$coefficients)) {
                         coefs <- model$coefficients
                         
-                        for (i in 1:length(coefs)) {
+                        for (i in seq_along(coefs)) {
                             param_name <- names(coefs)[i]
                             estimate <- coefs[i]
                             
@@ -508,7 +508,7 @@ parametricfrailtyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                         preds <- model$frailty_predictions
                         groups <- unique(prepared_data$frailty_group)
                         
-                        for (i in 1:length(groups)) {
+                        for (i in seq_along(groups)) {
                             group_name <- as.character(groups[i])
                             pred_value <- if (i <= length(preds)) preds[i] else NA
                             

@@ -453,7 +453,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
 
             # Populate table
-            for (i in 1:nrow(metrics)) {
+            for (i in seq_len(nrow(metrics))) {
                 self$results$performance_table$addRow(
                     rowKey = i,
                     values = list(
@@ -481,7 +481,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cm_with_totals <- addmargins(cm)
             
             # Populate table
-            for (i in 1:nrow(cm_with_totals)) {
+            for (i in seq_len(nrow(cm_with_totals))) {
                 row_name <- rownames(cm_with_totals)[i]
                 
                 self$results$confusion_matrix$addRow(
@@ -521,7 +521,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Sort by importance and add ranks
             importance_df <- importance_df[order(importance_df$importance, decreasing = TRUE), ]
-            importance_df$rank <- 1:nrow(importance_df)
+            importance_df$rank <- seq_len(nrow(importance_df))
             
             # Normalize importance to 0-100 scale
             if (max(importance_df$importance) > 0) {
@@ -534,7 +534,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Populate table
-            for (i in 1:nrow(importance_df)) {
+            for (i in seq_len(nrow(importance_df))) {
                 self$results$importance_table$addRow(
                     rowKey = i,
                     values = list(
@@ -690,7 +690,7 @@ treeensembleClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 # Prepare OOB error data
                 error_data <- data.frame(
-                    tree = 1:nrow(private$.oob_errors),
+                    tree = seq_len(nrow(private$.oob_errors)),
                     oob_error = private$.oob_errors[, "OOB"] * 100
                 )
                 

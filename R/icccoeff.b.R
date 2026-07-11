@@ -313,7 +313,7 @@ icccoeffClass <- R6::R6Class(
             
             table <- self$results$descriptive_stats
             
-            for (i in 1:ncol(data)) {
+            for (i in seq_len(ncol(data))) {
                 col_data <- data[, i]
                 rater_name <- names(data)[i]
                 
@@ -347,7 +347,7 @@ icccoeffClass <- R6::R6Class(
                      assessment = if (icc_value >= 0.90) " Excellent" else "")
             )
             
-            for (i in 1:length(assessments)) {
+            for (i in seq_along(assessments)) {
                 table$addRow(rowKey = i, values = assessments[[i]])
             }
         },

@@ -2444,7 +2444,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Add milestone markers if available  
             if (!is.null(milestone_data) && nrow(milestone_data) > 0) {
                 unique_milestones <- unique(milestone_data$label)
-                milestone_shapes <- c(15, 16, 17, 18, 19)[1:length(unique_milestones)]
+                milestone_shapes <- c(15, 16, 17, 18, 19)[seq_along(unique_milestones)]
                 milestone_colors <- RColorBrewer::brewer.pal(max(3, min(length(unique_milestones), 8)), "Dark2")
                 
                 names(milestone_shapes) <- unique_milestones

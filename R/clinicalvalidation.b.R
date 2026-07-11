@@ -1699,7 +1699,7 @@ clinicalvalidationClass <- R6::R6Class(
         dfbeta_resid <- residuals(model, type = "dfbeta")
 
         if (!is.null(dfbeta_resid) && ncol(as.matrix(dfbeta_resid)) > 0) {
-          plot(1:nrow(dfbeta_resid), dfbeta_resid[, 1],
+          plot(seq_len(nrow(dfbeta_resid)), dfbeta_resid[, 1],
             xlab = "Observation",
             ylab = "dfbeta",
             main = "dfbeta for First Predictor",

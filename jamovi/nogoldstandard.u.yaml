@@ -109,3 +109,7 @@ children:
             name: verbose
             label: Verbose Output
             enable: (bootstrap)
+          - type: TextBox
+            name: seed
+            format: number
+            label: Random Seed

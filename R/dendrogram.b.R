@@ -867,7 +867,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         edges <<- rbind(edges, data.frame(from = parent_name, to = node_name, stringsAsFactors = FALSE))
                     }
                     
-                    for (i in 1:length(node)) {
+                    for (i in seq_along(node)) {
                         extractEdges(node[[i]], node_name)
                     }
                 }

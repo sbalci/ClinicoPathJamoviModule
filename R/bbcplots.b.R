@@ -1108,7 +1108,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 
                 summary_html <- paste0(summary_html, "<p><strong>Sample Sizes by ", htmltools::htmlEscape(x_var), ":</strong></p>")
                 summary_html <- paste0(summary_html, "<ul>")
-                for (i in 1:nrow(group_summary)) {
+                for (i in seq_len(nrow(group_summary))) {
                     summary_html <- paste0(summary_html, "<li>", htmltools::htmlEscape(as.character(group_summary[[x_var]][i])), ": n = ", group_summary$n[i], "</li>")
                 }
                 summary_html <- paste0(summary_html, "</ul>")

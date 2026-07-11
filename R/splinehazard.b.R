@@ -399,7 +399,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             conf_level <- self$options$confidence_level
             
             # Extract parameter information
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
                 
                 param_name <- rownames(coef_summary)[i]
                 estimate <- coef_summary[i, "est"]
@@ -433,7 +433,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             knots <- models$knots$internal
             
             if (length(knots) > 0) {
-                for (i in 1:length(knots)) {
+                for (i in seq_along(knots)) {
                     
                     # Calculate quantile position
                     all_times <- sort(unique(c(knots, models$knots$boundary)))
@@ -456,7 +456,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             table <- self$results$modelComparison
             
-            for (i in 1:nrow(comparison)) {
+            for (i in seq_len(nrow(comparison))) {
                 
                 row <- list(
                     n_knots = comparison$n_knots[i],

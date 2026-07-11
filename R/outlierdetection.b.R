@@ -568,7 +568,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
                 # Create plot data with composite scores
                 plot_data <- data.frame(
-                    row_id = 1:length(outlier_score),
+                    row_id = seq_along(outlier_score),
                     outlier_score = outlier_score,
                     is_outlier = outlier_score >= self$options$composite_threshold
                 )
@@ -592,7 +592,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             } else {
                 # Binary results
                 plot_data <- data.frame(
-                    row_id = 1:nrow(analysis_data),
+                    row_id = seq_len(nrow(analysis_data)),
                     is_outlier = as.logical(outlier_results)
                 )
 
@@ -954,7 +954,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             }
 
             # Add row indices
-            outlier_df$Row <- 1:nrow(outlier_df)
+            outlier_df$Row <- seq_len(nrow(outlier_df))
 
             # CRITICAL FIX: Apply composite threshold to proportion, not binary flag
             threshold <- self$options$composite_threshold
@@ -1021,7 +1021,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             table_html <- paste0(table_html, "</tr></thead><tbody>")
             
             # Add data rows
-            for (i in 1:nrow(display_df)) {
+            for (i in seq_len(nrow(display_df))) {
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                 
                 # Highlight outlier rows

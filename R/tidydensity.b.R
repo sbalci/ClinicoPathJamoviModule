@@ -310,7 +310,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         )
 
                         # Add rows for each simulation
-                        for (i in 1:nrow(stats_tbl)) {
+                        for (i in seq_len(nrow(stats_tbl))) {
                             row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                             stats_html <- paste0(
                                 stats_html,
@@ -372,7 +372,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                             "</tr></thead><tbody>"
                         )
 
-                        for (i in 1:nrow(summary_stats)) {
+                        for (i in seq_len(nrow(summary_stats))) {
                             row_bg <- if (i %% 2 == 0) "#ffffff" else "#f1f8e9"
                             summary_html <- paste0(
                                 summary_html,

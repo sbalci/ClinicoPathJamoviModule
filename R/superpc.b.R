@@ -214,7 +214,7 @@ superpcClass <- R6::R6Class(
             
             # Fit Cox model with principal components
             surv_obj <- survival::Surv(model_data$time, model_data$event)
-            pc_names <- paste0("PC", 1:ncol(pc_scores))
+            pc_names <- paste0("PC", seq_len(ncol(pc_scores)))
             formula_str <- paste("surv_obj ~", paste(pc_names, collapse = " + "))
             
             cox_model <- survival::coxph(as.formula(formula_str), data = model_data)
@@ -449,7 +449,7 @@ superpcClass <- R6::R6Class(
                 loadings <- private$.pca_result$rotation
                 n_comp <- min(3, ncol(loadings))  # Show first 3 components
                 
-                for (i in 1:nrow(loadings)) {
+                for (i in seq_len(nrow(loadings))) {
                     feature_name <- rownames(loadings)[i]
                     
                     pc1_loading <- if (n_comp >= 1) loadings[i, 1] else 0

@@ -154,7 +154,8 @@ agreement(
   ssNCategories = 4,
   ssAlpha = 0.05,
   ssPower = 0.8,
-  showSampleSizeGuide = FALSE
+  showSampleSizeGuide = FALSE,
+  seed = 42
 )
 }
 \arguments{
@@ -864,6 +865,10 @@ hypothesis. This is the minimum clinically meaningful agreement.}
 
 \item{showSampleSizeGuide}{Show educational guide for planning agreement
 study sample size.}
+
+\item{seed}{Random seed for the reproducible bootstrap resampling used in
+the agreement analyses. Change this value to obtain a different bootstrap
+draw; the default (42) reproduces the previous fixed behaviour.}
 }
 \value{
 A results object containing:

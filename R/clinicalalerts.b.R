@@ -434,7 +434,7 @@ clinicalalertsClass <- R6::R6Class(
             )
             
             # Populate summary table row by row
-            for (i in 1:nrow(summary_data)) {
+            for (i in seq_len(nrow(summary_data))) {
                 self$results$alertSummary$addRow(rowKey = i, values = as.list(summary_data[i, ]))
             }
         },
@@ -459,7 +459,7 @@ clinicalalertsClass <- R6::R6Class(
                 combined_alerts$priority_num <- NULL
                 
                 # Populate detailed alerts table row by row
-                for (i in 1:nrow(combined_alerts)) {
+                for (i in seq_len(nrow(combined_alerts))) {
                     self$results$detailedAlerts$addRow(rowKey = i, values = as.list(combined_alerts[i, ]))
                 }
             }
@@ -522,7 +522,7 @@ clinicalalertsClass <- R6::R6Class(
             if (length(recommendations) > 0) {
                 rec_df <- do.call(rbind, lapply(recommendations, function(x) data.frame(x, stringsAsFactors = FALSE)))
                 
-                for (i in 1:nrow(rec_df)) {
+                for (i in seq_len(nrow(rec_df))) {
                     self$results$clinicalRecommendations$addRow(rowKey = i, values = as.list(rec_df[i, ]))
                 }
             }
@@ -594,7 +594,7 @@ clinicalalertsClass <- R6::R6Class(
                 patient_summary <- patient_summary[order(patient_summary$risk_num, -patient_summary$total_alerts), ]
                 patient_summary$risk_num <- NULL
                 
-                for (i in 1:nrow(patient_summary)) {
+                for (i in seq_len(nrow(patient_summary))) {
                     self$results$patientAnalysis$addRow(rowKey = i, values = as.list(patient_summary[i, ]))
                 }
             }
@@ -624,7 +624,7 @@ clinicalalertsClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(trend_summary)) {
+            for (i in seq_len(nrow(trend_summary))) {
                 self$results$trendAnalysis$addRow(rowKey = i, values = as.list(trend_summary[i, ]))
             }
         },

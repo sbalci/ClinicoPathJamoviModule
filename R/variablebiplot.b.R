@@ -665,7 +665,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 contrib_df <- contrib_df[order(-contrib_df$total_contrib), ]
 
                 # Populate table
-                for (i in 1:nrow(contrib_df)) {
+                for (i in seq_len(nrow(contrib_df))) {
                     contribTable$addRow(rowKey = i, values = list(
                         variable = contrib_df$variable[i],
                         pc1_contrib = contrib_df$pc1_contrib[i],
@@ -804,7 +804,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     overall_mean <- colMeans(scores_2d)
 
                     # Between-group variance
-                    bss <- sum(sapply(1:nrow(group_means), function(i) {
+                    bss <- sum(sapply(seq_len(nrow(group_means)), function(i) {
                         n_i <- sum(group_factor == group_means[i, 1])
                         sum((group_means[i, -1] - overall_mean)^2) * n_i
                     }))
@@ -1562,7 +1562,7 @@ print(lda_result$scaling)
 
                 # Create data frame
                 scree_df <- data.frame(
-                    Component = factor(1:length(var_explained), levels = 1:length(var_explained)),
+                    Component = factor(seq_along(var_explained), levels = seq_along(var_explained)),
                     Variance = var_explained
                 )
 
@@ -1683,7 +1683,7 @@ print(lda_result$scaling)
                 contrib_df <- contrib_df[order(-contrib_df$total_contrib), ]
 
                 # Populate table
-                for (i in 1:nrow(contrib_df)) {
+                for (i in seq_len(nrow(contrib_df))) {
                     contribTable$addRow(rowKey = i, values = list(
                         variable = contrib_df$variable[i],
                         pc1_contrib = contrib_df$pc1_contrib[i],
@@ -1758,7 +1758,7 @@ print(lda_result$scaling)
                 contrib_df <- contrib_df[order(-contrib_df$total_contrib), ]
 
                 # Populate table
-                for (i in 1:nrow(contrib_df)) {
+                for (i in seq_len(nrow(contrib_df))) {
                     contribTable$addRow(rowKey = i, values = list(
                         variable = contrib_df$variable[i],
                         pc1_contrib = contrib_df$pc1_contrib[i],

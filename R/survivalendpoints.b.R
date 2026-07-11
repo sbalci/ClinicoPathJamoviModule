@@ -645,7 +645,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         .populateDerivedTable = function(derivedData) {
             table <- self$results$derivedEndpoints
 
-            for (i in 1:nrow(derivedData)) {
+            for (i in seq_len(nrow(derivedData))) {
                 row <- list(patientId = derivedData$patientId[i])
 
                 if (self$options$calculatePFS) {
@@ -1030,12 +1030,12 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 )
             }, error = function(e) {
                 # Fallback to base plot
-                plot(km_fit, col = 1:length(unique(plot_data$endpoint)),
+                plot(km_fit, col = seq_along(unique(plot_data$endpoint)),
                      xlab = paste("Time (", time_unit, ")", sep = ""),
                      ylab = "Survival Probability",
                      main = "Kaplan-Meier Survival Curves")
                 legend("topright", legend = levels(factor(plot_data$endpoint)),
-                       col = 1:length(unique(plot_data$endpoint)), lty = 1)
+                       col = seq_along(unique(plot_data$endpoint)), lty = 1)
                 return(NULL)
             })
 

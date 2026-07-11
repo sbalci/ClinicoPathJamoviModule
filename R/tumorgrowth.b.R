@@ -462,7 +462,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             model_table <- self$results$modelTable
             
             
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
                 param_name <- rownames(coef_summary)[i]
                 # Biological interpretation
                 interpretation <- private$.interpretParameter(param_name, growth_model)

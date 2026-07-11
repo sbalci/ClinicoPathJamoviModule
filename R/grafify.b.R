@@ -282,7 +282,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>Mean ± SD</th>")
             html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>Median</th></tr>")
             
-            for (i in 1:nrow(group_summary)) {
+            for (i in seq_len(nrow(group_summary))) {
                 html <- paste(html,
                     "<tr><td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(group_summary[[group_var]][i]), "</td>",
                     "<td style='border: 1px solid #ddd; padding: 8px;'>", group_summary$n[i], "</td>",
@@ -979,7 +979,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create a simple bar plot to show colors
             preview_data <- data.frame(
-                x = 1:length(colors),
+                x = seq_along(colors),
                 y = rep(1, length(colors)),
                 color = colors
             )

@@ -187,7 +187,7 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
             
             # Add observation identifiers
-            modelData$obs_id <- 1:nrow(modelData)
+            modelData$obs_id <- seq_len(nrow(modelData))
             
             return(list(data = modelData, hierarchical_info = hierarchicalInfo, error = NULL))
         },

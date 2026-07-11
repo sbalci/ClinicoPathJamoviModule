@@ -1725,6 +1725,16 @@ options:
           R: >
             Show educational guide for planning agreement study sample size.
 
+    - name: seed
+      title: "Random Seed"
+      type: Integer
+      default: 42
+      description:
+          R: >
+            Random seed for the reproducible bootstrap resampling used in the
+            agreement analyses. Change this value to obtain a different bootstrap
+            draw; the default (42) reproduces the previous fixed behaviour.
+
 
 
 ...

@@ -746,7 +746,7 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            for (i in 1:nrow(tidy_coefs)) {
+            for (i in seq_len(nrow(tidy_coefs))) {
                 # Optional p-value symbols
                 p_out <- NA
                 if ("p.value" %in% names(tidy_coefs)) {

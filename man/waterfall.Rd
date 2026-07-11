@@ -36,7 +36,8 @@ waterfall(
   showConfidenceIntervals = TRUE,
   enableGuidedMode = FALSE,
   showExplanations = FALSE,
-  showResponseDuration = FALSE
+  showResponseDuration = FALSE,
+  seed = 123
 )
 }
 \arguments{
@@ -146,6 +147,11 @@ assumptions/limitations}
 and duration-of-response (DoR) table. DoR is summarized with the
 Kaplan-Meier median (accounting for responders still in response at last
 follow-up), which the naive median understates.}
+
+\item{seed}{Random seed for the reproducible bootstrap confidence interval
+of the median response (used when 'Show Confidence Interval' is enabled).
+Change it to draw a different bootstrap sample; the default (123)
+reproduces the previous fixed behaviour.}
 }
 \value{
 A results object containing:

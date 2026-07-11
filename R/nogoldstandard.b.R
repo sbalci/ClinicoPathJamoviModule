@@ -111,12 +111,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 table_data <- data.frame()
                 total_obs <- nrow(binary_results)
 
-                for (i in 1:nrow(patterns)) {
+                for (i in seq_len(nrow(patterns))) {
                     pattern <- patterns[i, ]
 
                     # Check which rows match this pattern
                     matches <- rep(TRUE, nrow(binary_results))
-                    for (j in 1:ncol(pattern)) {
+                    for (j in seq_len(ncol(pattern))) {
                         matches <- matches & (binary_results[[j]] == pattern[[j]])
                     }
 
@@ -125,7 +125,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                     # Create descriptive label for the pattern
                     pattern_labels <- character(ncol(pattern))
-                    for (j in 1:ncol(pattern)) {
+                    for (j in seq_len(ncol(pattern))) {
                         test_name <- names(pattern)[j]
                         result <- ifelse(pattern[[j]] == 1, "+", "-")
                         pattern_labels[j] <- paste0(test_name, result)
@@ -146,7 +146,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate the results table
                 crosstab_table <- self$results$crosstab
-                for (i in 1:nrow(table_data)) {
+                for (i in seq_len(nrow(table_data))) {
                     crosstab_table$addRow(rowKey = paste0("pattern_", i), values = list(
                         test_combination = table_data$test_combination[i],
                         count = table_data$count[i],
@@ -463,8 +463,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 colnames(agreement_matrix) <- unlist(tests)
                 rownames(agreement_matrix) <- unlist(tests)
 
-                for (i in 1:length(tests)) {
-                    for (j in 1:length(tests)) {
+                for (i in seq_along(tests)) {
+                    for (j in seq_along(tests)) {
                         test1_pos <- test_data[[tests[[i]]]] == test_levels[[i]]
                         test2_pos <- test_data[[tests[[j]]]] == test_levels[[j]]
                         agreement_matrix[i, j] <- mean(test1_pos == test2_pos, na.rm = TRUE)
@@ -675,7 +675,10 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         }
                     }
 
-                    set.seed(start * 100)
+                    seed_val <- self$options$seed
+                    if (is.null(seed_val)) seed_val <- 0
+                    iter_seed <- seed_val + start * 100
+                    set.seed(iter_seed)
 
                     tryCatch(
                         {
@@ -1180,8 +1183,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                         # Create the heatmap
                         image(
-                            1:nrow(agreement_matrix),
-                            1:ncol(agreement_matrix),
+                            seq_len(nrow(agreement_matrix)),
+                            seq_len(ncol(agreement_matrix)),
                             agreement_matrix,
                             axes = FALSE,
                             xlab = "",
@@ -1192,12 +1195,12 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         )
 
                         # Add test names with better formatting
-                        axis(1, at = 1:length(tests), labels = tests, las = 2, cex.axis = 1.2)
-                        axis(2, at = 1:length(tests), labels = tests, las = 2, cex.axis = 1.2)
+                        axis(1, at = seq_along(tests), labels = tests, las = 2, cex.axis = 1.2)
+                        axis(2, at = seq_along(tests), labels = tests, las = 2, cex.axis = 1.2)
 
                         # Add agreement values with improved visibility
-                        for (i in 1:nrow(agreement_matrix)) {
-                            for (j in 1:ncol(agreement_matrix)) {
+                        for (i in seq_len(nrow(agreement_matrix))) {
+                            for (j in seq_len(ncol(agreement_matrix))) {
                                 # Determine text color based on background brightness
                                 # Use white text on dark backgrounds, black text on light backgrounds
                                 color_idx <- round(agreement_matrix[i, j] * 99) + 1
@@ -1285,8 +1288,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                         # Convert matrix to long format for ggplot
                         plot_data <- data.frame()
-                        for (i in 1:nrow(agreement_matrix)) {
-                            for (j in 1:ncol(agreement_matrix)) {
+                        for (i in seq_len(nrow(agreement_matrix))) {
+                            for (j in seq_len(ncol(agreement_matrix))) {
                                 plot_data <- rbind(plot_data, data.frame(
                                     Test1 = factor(tests[i], levels = tests),
                                     Test2 = factor(tests[j], levels = tests),
@@ -1349,8 +1352,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 # Simple heatmap
                                 par(mar = c(5, 5, 4, 5))
                                 image(
-                                    1:nrow(agreement_matrix),
-                                    1:ncol(agreement_matrix),
+                                    seq_len(nrow(agreement_matrix)),
+                                    seq_len(ncol(agreement_matrix)),
                                     agreement_matrix,
                                     axes = FALSE,
                                     xlab = "",
@@ -1361,8 +1364,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                                 )
 
                                 # Add labels
-                                axis(1, at = 1:length(tests), labels = tests, las = 2)
-                                axis(2, at = 1:length(tests), labels = tests, las = 2)
+                                axis(1, at = seq_along(tests), labels = tests, las = 2)
+                                axis(2, at = seq_along(tests), labels = tests, las = 2)
                                 box()
 
                                 return(TRUE)

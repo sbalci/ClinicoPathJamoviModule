@@ -184,7 +184,7 @@ robustaftClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Add observation identifiers
-            modelData$obs_id <- 1:nrow(modelData)
+            modelData$obs_id <- seq_len(nrow(modelData))
             
             return(list(data = modelData, error = NULL))
         },
@@ -787,7 +787,7 @@ robustaftClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return()
             }
             
-            for (i in 1:nrow(outliers)) {
+            for (i in seq_len(nrow(outliers))) {
                 obs_id <- outliers$observation[i]
                 
                 table$addRow(rowKey = obs_id, values = list(

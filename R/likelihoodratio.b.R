@@ -415,7 +415,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Simplified multilevel results population
             if (self$options$showLikelihoodRatios) {
                 lr_table <- self$results$likelihoodRatios
-                for (i in 1:nrow(lr_results)) {
+                for (i in seq_len(nrow(lr_results))) {
                     lr_table$addRow(rowKey = i, values = list(
                         ratio_type = paste("LR for", lr_results$level[i]),
                         value = as.numeric(lr_results$lr[i]),

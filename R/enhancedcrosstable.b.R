@@ -207,12 +207,12 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                         html_content <- paste0(html_content, "</tr></thead><tbody>")
                         
                         # Rows
-                        for (j in 1:nrow(ct)) {
+                        for (j in seq_len(nrow(ct))) {
                             row_name <- rownames(ct)[j]
                             html_content <- paste0(html_content, "<tr><td><strong>", htmltools::htmlEscape(row_name), "</strong></td>")
                             
                             row_total <- 0
-                            for (k in 1:ncol(ct)) {
+                            for (k in seq_len(ncol(ct))) {
                                 count <- ct[j, k]
                                 percent <- round(prop_table[j, k], 1)
                                 
@@ -240,7 +240,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                         if (self$options$show_total_row) {
                             html_content <- paste0(html_content, "<tr><td><strong>Total</strong></td>")
                             grand_total <- 0
-                            for (k in 1:ncol(ct)) {
+                            for (k in seq_len(ncol(ct))) {
                                 col_total <- sum(ct[, k])
                                 html_content <- paste0(html_content, "<td><strong>", col_total, "</strong></td>")
                                 grand_total <- grand_total + col_total

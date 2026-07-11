@@ -152,7 +152,7 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Check marker data types and ranges
                 marker_data <- data[self$options$marker_vars]
-                for (i in 1:ncol(marker_data)) {
+                for (i in seq_len(ncol(marker_data))) {
                     col_data <- marker_data[[i]]
                     if (!is.numeric(col_data)) {
                         return(list(
@@ -277,7 +277,7 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .performExpressionAnalysis = function(marker_data, marker_names) {
                 table <- self$results$expressiontable
 
-                for (i in 1:length(marker_names)) {
+                for (i in seq_along(marker_names)) {
                     marker_name <- marker_names[i]
                     marker_values <- marker_data[[i]]
 
@@ -427,7 +427,7 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             # Create mean expression pattern string
                             mean_expr_pattern <- paste(
-                                sapply(1:length(marker_names), function(i) {
+                                sapply(seq_along(marker_names), function(i) {
                                     paste0(marker_names[i], ": ", round(cluster_means[i], 2))
                                 }),
                                 collapse = "; "
@@ -620,7 +620,7 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             table$addColumn(name = "spatial_clustering", title = "Spatial Clustering Index", type = "number")
                             table$addColumn(name = "interpretation", title = "Interpretation", type = "text")
 
-                            for (i in 1:length(marker_names)) {
+                            for (i in seq_along(marker_names)) {
                                 marker_name <- marker_names[i]
                                 marker_values <- spatial_marker_data[[i]]
 
@@ -751,7 +751,7 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Create heatmap using base plotting (more stable)
                 if (requireNamespace("stats", quietly = TRUE)) {
                     # Create a simple correlation heatmap
-                    cor_data <- expand.grid(X = 1:ncol(cor_matrix), Y = 1:nrow(cor_matrix))
+                    cor_data <- expand.grid(X = seq_len(ncol(cor_matrix)), Y = seq_len(nrow(cor_matrix)))
                     cor_data$value <- as.vector(cor_matrix)
 
                     p <- ggplot2::ggplot(cor_data, ggplot2::aes(x = X, y = Y, fill = value)) +
@@ -760,8 +760,8 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             low = "darkblue", high = "darkred", mid = "white",
                             midpoint = 0, name = "r"
                         ) +
-                        ggplot2::scale_x_continuous(breaks = 1:length(marker_names), labels = marker_names) +
-                        ggplot2::scale_y_continuous(breaks = 1:length(marker_names), labels = marker_names) +
+                        ggplot2::scale_x_continuous(breaks = seq_along(marker_names), labels = marker_names) +
+                        ggplot2::scale_y_continuous(breaks = seq_along(marker_names), labels = marker_names) +
                         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
                         ggplot2::labs(
                             title = "Multiplex Marker Correlation Heatmap",

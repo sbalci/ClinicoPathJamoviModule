@@ -719,3 +719,7 @@ children:
             enable: (agreementSampleSize)
           - type: CheckBox
             name: showSampleSizeGuide
+          - type: TextBox
+            name: seed
+            format: number
+            label: Random Seed

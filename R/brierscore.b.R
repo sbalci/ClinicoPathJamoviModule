@@ -810,7 +810,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             results$rank <- rank(results$brier, ties.method = "min")
 
             # Populate table
-            for (i in 1:nrow(results)) {
+            for (i in seq_len(nrow(results))) {
                 table$addRow(rowKey=i, values=list(
                     model = results$model[i],
                     brier_score = results$brier[i],

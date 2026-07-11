@@ -190,7 +190,7 @@ illnessdeathClass <- R6::R6Class(
 
             # Create subject IDs if not provided
             if (is.null(id_var)) {
-                subject_ids <- 1:nrow(analysis_data)
+                subject_ids <- seq_len(nrow(analysis_data))
             } else {
                 subject_ids <- analysis_data[[id_var]]
             }
@@ -350,7 +350,7 @@ illnessdeathClass <- R6::R6Class(
                 msdata <- trans_data
                 
                 # Add transition numbers
-                for (i in 1:nrow(msdata)) {
+                for (i in seq_len(nrow(msdata))) {
                     from_state <- msdata$from[i] + 1  # Convert to 1-based indexing
                     to_state <- msdata$to[i] + 1
                     if (!is.na(tmat[from_state, to_state])) {
@@ -599,7 +599,7 @@ illnessdeathClass <- R6::R6Class(
                     coef_table <- summary_cox$coefficients
                     conf_int <- summary_cox$conf.int
                     
-                    for (j in 1:nrow(coef_table)) {
+                    for (j in seq_len(nrow(coef_table))) {
                         hr_row <- data.frame(
                             transition = paste("Transition", i),
                             covariate = rownames(coef_table)[j],

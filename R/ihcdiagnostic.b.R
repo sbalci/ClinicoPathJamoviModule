@@ -817,8 +817,8 @@ ihcdiagnosticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 text(1, 72, "Acceptable (70%)", col = "red", cex = 0.7)
 
                 # Add value labels on bars
-                for (i in 1:ncol(perf_matrix)) {
-                    for (j in 1:nrow(perf_matrix)) {
+                for (i in seq_len(ncol(perf_matrix))) {
+                    for (j in seq_len(nrow(perf_matrix))) {
                         if (!is.na(perf_matrix[j, i])) {
                             text(bp[j, i], perf_matrix[j, i] + 2,
                                 sprintf("%.1f", perf_matrix[j, i]),

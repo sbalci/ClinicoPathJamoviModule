@@ -221,7 +221,7 @@ jforesterClass <- R6::R6Class(
             
             table <- self$results$data_table
             
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 table$addRow(rowKey = i, values = list(
                     study = data$study[i],
                     estimate = data$estimate[i],

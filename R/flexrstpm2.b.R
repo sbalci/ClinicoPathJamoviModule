@@ -1058,7 +1058,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
               }
 
               # Process each coefficient
-              for (i in 1:nrow(coefs)) {
+              for (i in seq_len(nrow(coefs))) {
                 param_name <- rownames(coefs)[i]
 
                 # Skip spline terms for cleaner display
@@ -1273,7 +1273,7 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
               if (!is.null(model) && (inherits(model, "stpm2") || inherits(model, "coxph"))) {
                 coefs <- if (inherits(model, "stpm2")) summary(model)$coefficients else summary(model)$coefficients
 
-                for (i in 1:nrow(coefs)) {
+                for (i in seq_len(nrow(coefs))) {
                   param_name <- rownames(coefs)[i]
                   if (grepl("spline", param_name, ignore.case = TRUE)) next
 

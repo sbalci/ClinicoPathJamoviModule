@@ -321,7 +321,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 comparison_data <- comparison_data[order(comparison_data$aicc), ]
             }
             
-            comparison_data$rank <- 1:nrow(comparison_data)
+            comparison_data$rank <- seq_len(nrow(comparison_data))
             best_model <- comparison_data$distribution[1]
             
             return(list(
@@ -446,7 +446,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             table <- self$results$modelComparison
             comparison_data <- comparison_results$comparison
             
-            for (i in 1:nrow(comparison_data)) {
+            for (i in seq_len(nrow(comparison_data))) {
                 
                 row <- list(
                     distribution = comparison_data$distribution[i],
@@ -468,7 +468,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             table <- self$results$goodnessOfFit
             
-            for (i in 1:nrow(gof_results)) {
+            for (i in seq_len(nrow(gof_results))) {
                 
                 row <- list(
                     distribution = gof_results$distribution[i],
@@ -495,7 +495,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             # Get parameter estimates and confidence intervals
             coef_summary <- summary(model)$t
             
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
                 
                 param_name <- rownames(coef_summary)[i]
                 estimate <- coef_summary[i, "est"]
@@ -522,7 +522,7 @@ distributionfitClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             table <- self$results$distributionSummary
             
-            for (i in 1:length(fitted_models)) {
+            for (i in seq_along(fitted_models)) {
                 
                 dist_name <- names(fitted_models)[i]
                 model <- fitted_models[[dist_name]]

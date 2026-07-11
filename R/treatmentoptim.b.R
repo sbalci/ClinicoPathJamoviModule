@@ -183,7 +183,7 @@ treatmentoptimClass <- R6::R6Class(
             # Create treatment selection results
             table_data <- list()
             
-            for (i in 1:length(treatments$name)) {
+            for (i in seq_along(treatments$name)) {
                 # Simulate personalized treatment selection algorithm
                 # In real implementation, this would use ML models and clinical databases
                 predicted_response <- private$.predictTreatmentResponse(treatments$name[i], patient_data)
@@ -233,7 +233,7 @@ treatmentoptimClass <- R6::R6Class(
             #   1:length() loops L186/260/283/304 (currently safe only because those lists are
             #   hardcoded non-empty) - switch all to seq_len()/seq_along().
             interactionTable <- self$results$drugInteractions
-            for (i in 1:nrow(interactions)) {
+            for (i in seq_len(nrow(interactions))) {
                 interactionTable$addRow(rowKey = paste0("interaction_", i), values = list(
                     drug_combination = interactions$combination[i],
                     interaction_type = interactions$type[i],
@@ -263,7 +263,7 @@ treatmentoptimClass <- R6::R6Class(
             
             # Populate dose optimization table
             doseTable <- self$results$doseOptimization
-            for (i in 1:length(dose_recommendations)) {
+            for (i in seq_along(dose_recommendations)) {
                 dose <- dose_recommendations[[i]]
                 doseTable$addRow(rowKey = paste0("med_", i), values = dose)
             }
@@ -286,7 +286,7 @@ treatmentoptimClass <- R6::R6Class(
             
             # Populate safety assessment table
             safetyTable <- self$results$safetyAssessment
-            for (i in 1:length(safety_results)) {
+            for (i in seq_along(safety_results)) {
                 safety <- safety_results[[i]]
                 safetyTable$addRow(rowKey = paste0("safety_", i), values = safety)
             }
@@ -307,7 +307,7 @@ treatmentoptimClass <- R6::R6Class(
             
             # Populate comparison table
             comparisonTable <- self$results$treatmentComparison
-            for (i in 1:length(comparison_results)) {
+            for (i in seq_along(comparison_results)) {
                 comp <- comparison_results[[i]]
                 comparisonTable$addRow(rowKey = paste0("comp_", i), values = comp)
             }

@@ -424,7 +424,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
             if (font_size != "1em") {
                 tt_obj <- tt_obj %>%
                     tinytable::style_tt(
-                        i = 1:nrow(table_data),  # All data rows
+                        i = seq_len(nrow(table_data)),  # All data rows
                         fontsize = font_size
                     )
             }

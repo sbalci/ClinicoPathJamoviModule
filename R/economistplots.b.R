@@ -425,7 +425,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 summary_html <- paste0(summary_html, "<th>10th %ile</th><th>90th %ile</th><th>Range</th>")
                 summary_html <- paste0(summary_html, "</tr></thead><tbody>")
 
-                for (i in 1:nrow(summary_stats)) {
+                for (i in seq_len(nrow(summary_stats))) {
                     group_name <- summary_stats[[x_var]][i]
                     n <- summary_stats$n[i]
                     mean_val <- round(summary_stats$mean[i], 2)

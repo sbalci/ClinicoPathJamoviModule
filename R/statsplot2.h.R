@@ -13,7 +13,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             distribution = "p",
             alluvsty = "t1",
             excl = FALSE,
-            sampleLarge = FALSE, ...) {
+            sampleLarge = FALSE,
+            seed = 42, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -62,6 +63,10 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "sampleLarge",
                 sampleLarge,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42)
 
             self$.addOption(private$..dep)
             self$.addOption(private$..group)
@@ -71,6 +76,7 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..alluvsty)
             self$.addOption(private$..excl)
             self$.addOption(private$..sampleLarge)
+            self$.addOption(private$..seed)
         }),
     active = list(
         dep = function() private$..dep$value,
@@ -80,7 +86,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         distribution = function() private$..distribution$value,
         alluvsty = function() private$..alluvsty$value,
         excl = function() private$..excl$value,
-        sampleLarge = function() private$..sampleLarge$value),
+        sampleLarge = function() private$..sampleLarge$value,
+        seed = function() private$..seed$value),
     private = list(
         ..dep = NA,
         ..group = NA,
@@ -89,7 +96,8 @@ statsplot2Options <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..distribution = NA,
         ..alluvsty = NA,
         ..excl = NA,
-        ..sampleLarge = NA)
+        ..sampleLarge = NA,
+        ..seed = NA)
 )
 
 statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -214,6 +222,9 @@ statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param excl If TRUE, excludes rows with missing values before analysis.
 #' @param sampleLarge If TRUE, automatically samples large datasets (>10,000
 #'   rows) to 5,000 rows for improved performance.
+#' @param seed Random seed for the reproducible sampling of large datasets
+#'   (used when 'Sample Large Datasets' is enabled). Change it to draw a
+#'   different sample; the default (42) reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -232,7 +243,8 @@ statsplot2 <- function(
     distribution = "p",
     alluvsty = "t1",
     excl = FALSE,
-    sampleLarge = FALSE) {
+    sampleLarge = FALSE,
+    seed = 42) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("statsplot2 requires jmvcore to be installed (restart may be required)")
@@ -256,7 +268,8 @@ statsplot2 <- function(
         distribution = distribution,
         alluvsty = alluvsty,
         excl = excl,
-        sampleLarge = sampleLarge)
+        sampleLarge = sampleLarge,
+        seed = seed)
 
     analysis <- statsplot2Class$new(
         options = options,

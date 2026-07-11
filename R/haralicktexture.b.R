@@ -490,7 +490,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     if (nrow(high_cor_pairs) > 0) {
                         # Remove features with highest average correlation
                         features_to_remove <- c()
-                        for (i in 1:nrow(high_cor_pairs)) {
+                        for (i in seq_len(nrow(high_cor_pairs))) {
                             feature1 <- features[high_cor_pairs[i, 1]]
                             feature2 <- features[high_cor_pairs[i, 2]]
 

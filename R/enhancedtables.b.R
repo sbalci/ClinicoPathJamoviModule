@@ -320,7 +320,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         ))
                     } else {
                         stats <- private$.get_clinical_categorical_summary(data[[var]])
-                        for (i in 1:nrow(stats)) {
+                        for (i in seq_len(nrow(stats))) {
                             clinical_data <- rbind(clinical_data, data.frame(
                                 Characteristic = if (i == 1) var else "",
                                 Value = paste(stats$Level[i], stats$Summary[i], sep = ": "),

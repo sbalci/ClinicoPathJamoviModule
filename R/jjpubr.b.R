@@ -1173,7 +1173,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             df <- private$..stats_df
             infer <- private$..inferredMethod %||% list(omnibus_label = "None")
             
-            for (i in 1:nrow(df)) {
+            for (i in seq_len(nrow(df))) {
                 if (is.na(df$p[i])) next
 
                 row_vals <- list(

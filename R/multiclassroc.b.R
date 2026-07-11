@@ -670,7 +670,7 @@ multiclassrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             # Predict using max score across predictors
             y_pred <- character(length(y))
 
-            for (i in 1:length(y)) {
+            for (i in seq_along(y)) {
                 scores <- numeric(n_classes)
                 for (j in 1:n_classes) {
                     if (ncol(X) >= j) {

@@ -271,7 +271,7 @@ weightedlogrankClass <- if (requireNamespace('jmvcore'))
             p_values <- sapply(test_results, function(x) x$p_value)
             adjusted_p <- p.adjust(p_values, method = self$options$multiple_comparison)
             
-            for (i in 1:length(test_results)) {
+            for (i in seq_along(test_results)) {
               test_results[[i]]$p_adjusted <- adjusted_p[i]
             }
           }

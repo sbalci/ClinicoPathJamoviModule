@@ -259,7 +259,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                     "</tr>"
                 )
                 
-                for (i in 1:nrow(missing_profile)) {
+                for (i in seq_len(nrow(missing_profile))) {
                     row_data <- missing_profile[i, ]
                     pct_missing <- round(row_data$pct_missing * 100, 1)
                     status_color <- if (pct_missing > threshold) "#f44336" else if (pct_missing > 0) "#ff9800" else "#4caf50"
@@ -592,7 +592,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                         "</tr>"
                     )
                     
-                    for (i in 1:length(target_table)) {
+                    for (i in seq_along(target_table)) {
                         level_name <- names(target_table)[i]
                         if (is.na(level_name)) level_name <- "Missing"
                         count <- target_table[i]

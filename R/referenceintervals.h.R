@@ -394,8 +394,8 @@ referenceintervalsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
 #' @param confidence_level Confidence level for reference interval limits
 #' @param reference_percentiles Lower and upper percentiles for reference
 #'   interval
-#' @param minimum_sample_size Minimum required sample size (CLSI recommends
-#'   at least 120)
+#' @param minimum_sample_size Minimum required sample size (CLSI recommends at
+#'   least 120)
 #' @param outlier_detection Method for identifying and handling outliers
 #' @param transformation_test Test normality and suggest appropriate
 #'   transformations

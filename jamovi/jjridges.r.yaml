@@ -14,6 +14,15 @@ items:
         - show_stats
         - effsize_type
 
+    - name: warnings
+      title: Preset Overrides
+      type: Html
+      visible: false
+      clearWith:
+        - clinicalPreset
+        - x_var
+        - y_var
+
     - name: instructions
       title: Instructions
       type: Html

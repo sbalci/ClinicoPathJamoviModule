@@ -720,7 +720,7 @@ semimarkovClass <- R6::R6Class(
             # Create data for plotting distributions
             plot_data <- data.frame()
 
-            for (i in 1:nrow(sojourn_data)) {
+            for (i in seq_len(nrow(sojourn_data))) {
                 state <- sojourn_data$state[i]
                 param1 <- sojourn_data$parameter1[i]
                 param2 <- sojourn_data$parameter2[i]
@@ -805,7 +805,7 @@ semimarkovClass <- R6::R6Class(
 
             transitions <- c("State1 → State2", "State2 → State3", "State1 → State3")
 
-            for (i in 1:length(transitions)) {
+            for (i in seq_along(transitions)) {
                 if (dist_type == "weibull") {
                     # Weibull hazard function
                     shape <- 1.5 + i * 0.3

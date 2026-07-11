@@ -242,7 +242,7 @@ hiddenmarkovClass <- R6::R6Class(
             table <- self$results$modelSummary
             table$deleteRows()
             
-            for (i in 1:nrow(estimates)) {
+            for (i in seq_len(nrow(estimates))) {
                 row <- list(
                     parameter = rownames(estimates)[i],
                     estimate = estimates[i, "estimate"],

@@ -146,15 +146,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Parse ratio once; capture and muffle warnings to avoid noisy console output
-            ratio_warnings <- character()
+            # Parse ratio once; capture and muffle warnings to avoid noisy console output.
+            # Accumulate into an environment (not `<<-`) so the handler does not
+            # write to an enclosing/global scope.
+            rw_env <- new.env(parent = emptyenv())
+            rw_env$ratio_warnings <- character()
             opts$ratio <- withCallingHandlers(
                 private$.parseRatio(opts$ratio_raw),
                 warning = function(w) {
-                    ratio_warnings <<- c(ratio_warnings, conditionMessage(w))
+                    rw_env$ratio_warnings <- c(rw_env$ratio_warnings, conditionMessage(w))
                     invokeRestart("muffleWarning")
                 }
             )
+            ratio_warnings <- rw_env$ratio_warnings
             # TODO (cleanup): File-wide pattern - many commented-out jmvcore::Notice
             #   blocks preserved as dead code. Sites: L122-130 (here), L401-408,
             #   L425-434, L676-691, L832-839, L1108-1119, L1209-1218, L1226-1240,

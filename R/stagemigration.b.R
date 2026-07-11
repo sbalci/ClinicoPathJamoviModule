@@ -538,7 +538,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     '<div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">'
                 )
 
-                for (i in 1:length(steps)) {
+                for (i in seq_along(steps)) {
                     status_color <- if (i <= current_step) "#27ae60" else if (i == current_step + 1) "#f39c12" else "#bdc3c7"
                     status_icon <- if (i < current_step) "[DONE]" else if (i == current_step) "[CURRENT]" else "[PENDING]"
 
@@ -1081,7 +1081,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Calculate stage-wise migration
                 stage_migration <- list()
-                for (i in 1:nrow(migration_table)) {
+                for (i in seq_len(nrow(migration_table))) {
                     stage_name <- rownames(migration_table)[i]
                     stage_total <- sum(migration_table[i, ])
                     # Check if this stage exists in new staging
@@ -1112,8 +1112,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 names(new_level_order) <- levels(data[[new_stage]])
 
                 if (length(old_level_order) > 0 && length(new_level_order) > 0) {
-                    for (i in 1:nrow(migration_table)) {
-                        for (j in 1:ncol(migration_table)) {
+                    for (i in seq_len(nrow(migration_table))) {
+                        for (j in seq_len(ncol(migration_table))) {
                             if (i != j && migration_table[i, j] > 0) {
                                 old_name <- rownames(migration_table)[i]
                                 new_name <- colnames(migration_table)[j]
@@ -1190,7 +1190,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Extract survival probabilities for each patient at specific time point
                 probs <- numeric(nrow(data))
 
-                for (i in 1:nrow(data)) {
+                for (i in seq_len(nrow(data))) {
                     stage_level <- data[[stage_var]][i]
 
                     # Find corresponding stratum in survival fit
@@ -2376,7 +2376,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 if (any(is.na(numeric_stages))) {
                     # If stages are not clearly numeric, use rank order
-                    numeric_stages <- 1:length(stage_levels)
+                    numeric_stages <- seq_along(stage_levels)
                 }
 
                 # Create mapping from stage levels to numeric values
@@ -11697,7 +11697,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     coord_cartesian(clip = "off")
 
                 # Add HR text annotations outside the plot area
-                for (i in 1:nrow(forest_data)) {
+                for (i in seq_len(nrow(forest_data))) {
                     # HR and CI text
                     hr_text <- sprintf(
                         "%.2f (%.2f-%.2f)%s",
@@ -12289,7 +12289,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 risk_data <- data.frame()
                 strata_names <- names(surv_fit$strata)
 
-                for (i in 1:length(surv_fit$strata)) {
+                for (i in seq_along(surv_fit$strata)) {
                     strata_name <- strata_names[i]
                     clean_strata <- gsub(".*=", "", strata_name) # Clean strata name
 
@@ -15024,7 +15024,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             combination_results <- list()
 
-                            for (i in 1:nrow(stage_combinations)) {
+                            for (i in seq_len(nrow(stage_combinations))) {
                                 old_s <- stage_combinations$old_stage[i]
                                 new_s <- stage_combinations$new_stage[i]
 
@@ -15949,7 +15949,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # New format: advanced interaction detection results
                         interaction_df <- multifactorial_results$interaction_tests
 
-                        for (i in 1:nrow(interaction_df)) {
+                        for (i in seq_len(nrow(interaction_df))) {
                             row_data <- interaction_df[i, ]
                             row_key <- paste0("interaction_", i)
 
@@ -16389,7 +16389,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             self$results$willRogersEvidenceSummaryExplanation$setContent(explanation_html)
                         }
 
-                        for (i in 1:nrow(evidence_summary)) {
+                        for (i in seq_len(nrow(evidence_summary))) {
                             table$addRow(rowKey = paste0("criterion_", i), values = list(
                                 Criterion = evidence_summary$Criterion[i],
                                 Assessment = evidence_summary$Assessment[i],
@@ -17470,7 +17470,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         stage_info <- aggregate(n_patients ~ stage + period, data = plot_data, FUN = function(x) x[1])
 
                         # Add text annotations for sample sizes
-                        for (i in 1:nrow(stage_info)) {
+                        for (i in seq_len(nrow(stage_info))) {
                             stage_name <- stage_info$stage[i]
                             period_name <- stage_info$period[i]
                             n_pat <- stage_info$n_patients[i]
@@ -17885,7 +17885,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         # Analyze each migration pattern
-                        for (i in 1:nrow(migration_patterns)) {
+                        for (i in seq_len(nrow(migration_patterns))) {
                             from_stage <- rownames(migration_table)[migration_patterns[i, 1]]
                             to_stage <- colnames(migration_table)[migration_patterns[i, 2]]
                             n_migrated <- migration_table[from_stage, to_stage]
@@ -18591,7 +18591,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         # Add individual fold results to table
-                        for (i in 1:nrow(cv_results)) {
+                        for (i in seq_len(nrow(cv_results))) {
                             row <- cv_results[i, ]
 
                             validation_type <- if (is.na(row$old_cindex) || is.na(row$new_cindex)) {
@@ -18750,7 +18750,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             new_pooled_ci <- private$.calculatePooledCIndexCI(valid_results$new_cindex)
 
                             # Calculate fold qualities for overall assessment
-                            fold_qualities <- sapply(1:nrow(cv_results), function(i) {
+                            fold_qualities <- sapply(seq_len(nrow(cv_results)), function(i) {
                                 row <- cv_results[i, ]
                                 private$.assessFoldValidationQuality(row$old_cindex, row$new_cindex, row$test_events)
                             })
@@ -19924,8 +19924,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         downstaging <- 0
                         stage_levels <- levels(as.factor(data[[old_stage]]))
 
-                        for (i in 1:nrow(migration_table)) {
-                            for (j in 1:ncol(migration_table)) {
+                        for (i in seq_len(nrow(migration_table))) {
+                            for (j in seq_len(ncol(migration_table))) {
                                 if (i < j) upstaging <- upstaging + migration_table[i, j]
                                 if (i > j) downstaging <- downstaging + migration_table[i, j]
                             }
@@ -20478,8 +20478,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Identify major migration patterns (>10%)
                         major_migrations <- list()
-                        for (i in 1:nrow(migration_prop)) {
-                            for (j in 1:ncol(migration_prop)) {
+                        for (i in seq_len(nrow(migration_prop))) {
+                            for (j in seq_len(ncol(migration_prop))) {
                                 if (i != j && migration_prop[i, j] > 10) {
                                     from_stage <- rownames(migration_prop)[i]
                                     to_stage <- colnames(migration_prop)[j]
@@ -23342,7 +23342,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add methods comparison if available
                         if (!is.null(cutpoint_results$methods_comparison)) {
                             comparison <- cutpoint_results$methods_comparison
-                            for (i in 1:nrow(comparison)) {
+                            for (i in seq_len(nrow(comparison))) {
                                 if (i > 1) { # Skip the first one as it's already added
                                     method_name <- comparison$Method[i]
                                     table$addRow(rowKey = paste0("method_", i), values = list(
@@ -23528,7 +23528,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         # Add rows for each stage
-                        for (i in 1:nrow(stage_stats)) {
+                        for (i in seq_len(nrow(stage_stats))) {
                             stage_name <- stage_stats$Stage[i]
                             n_patients <- stage_stats$N[i]
                             n_events <- stage_stats$Events[i]
@@ -24234,7 +24234,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             return()
                         }
 
-                        for (i in 1:nrow(global_importance)) {
+                        for (i in seq_len(nrow(global_importance))) {
                             row_data <- global_importance[i, ]
 
                             # Determine clinical impact
@@ -24281,7 +24281,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             return()
                         }
 
-                        for (i in 1:nrow(individual_explanations)) {
+                        for (i in seq_len(nrow(individual_explanations))) {
                             row_data <- individual_explanations[i, ]
 
                             # Parse top features and SHAP values
@@ -24326,7 +24326,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             return()
                         }
 
-                        for (i in 1:nrow(interactions)) {
+                        for (i in seq_len(nrow(interactions))) {
                             row_data <- interactions[i, ]
 
                             # Calculate population frequency (simplified)
@@ -24362,7 +24362,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             return()
                         }
 
-                        for (i in 1:nrow(summary_stats)) {
+                        for (i in seq_len(nrow(summary_stats))) {
                             row_data <- summary_stats[i, ]
 
                             table$addRow(rowKey = paste0("stat_", i), values = list(
@@ -27522,7 +27522,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         coef_summary <- summary(ic_fit)
 
                         # Format results
-                        for (i in 1:length(coef_summary$coefficients[, 1])) {
+                        for (i in seq_along(coef_summary$coefficients[, 1])) {
                             param_name <- rownames(coef_summary$coefficients)[i]
 
                             result <- list(
@@ -28855,7 +28855,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Get weights at observed times
                         weights <- numeric(length(time))
-                        for (i in 1:length(time)) {
+                        for (i in seq_along(time)) {
                             surv_at_time <- summary(cens_km, times = time[i])
                             if (length(surv_at_time$surv) > 0) {
                                 weights[i] <- 1 / max(surv_at_time$surv, 0.01) # Prevent division by zero
@@ -29199,7 +29199,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # Outlier sensitivity analysis
                             outlier_indices <- which(time > quantile(time, 0.95, na.rm = TRUE))
                             if (length(outlier_indices) > 0) {
-                                robust_indices <- setdiff(1:length(time), outlier_indices)
+                                robust_indices <- setdiff(seq_along(time), outlier_indices)
                                 outlier_robust <- self$.calculateHarrellCIndex(surv_obj[robust_indices], current_stage[robust_indices])
 
                                 result <- list(
@@ -29216,7 +29216,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # Censoring sensitivity analysis
                             high_cens_indices <- which(event == 0 & time < quantile(time[event == 0], 0.5, na.rm = TRUE))
                             if (length(high_cens_indices) > 0) {
-                                cens_robust_indices <- setdiff(1:length(time), high_cens_indices)
+                                cens_robust_indices <- setdiff(seq_along(time), high_cens_indices)
                                 cens_robust <- self$.calculateHarrellCIndex(surv_obj[cens_robust_indices], current_stage[cens_robust_indices])
 
                                 result <- list(
@@ -29234,7 +29234,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (self$options$concordanceProbabilityBootstrap) {
                                 boot_concordances <- numeric(100)
                                 for (b in 1:100) {
-                                    boot_indices <- sample(1:length(time), replace = TRUE)
+                                    boot_indices <- sample(seq_along(time), replace = TRUE)
                                     boot_concordance <- self$.calculateHarrellCIndex(surv_obj[boot_indices], current_stage[boot_indices])
                                     boot_concordances[b] <- boot_concordance$concordance
                                 }

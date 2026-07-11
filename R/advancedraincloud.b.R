@@ -548,7 +548,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 # Try ggrain first, with immediate fallback on any error
                 if (!use_fallback) {
                     private$.checkpoint(flush = FALSE) # Before expensive ggrain operation
-                    tryCatch(
+                    # Capture the error instead of setting the flag via `<<-`
+                    # inside the handler; set flag/warning after the tryCatch.
+                    rain_err <- tryCatch(
                         {
                             # Validate rain.side parameter with all official options
                             valid_sides <- c("l", "r", "f", "f1x1", "f2x2")
@@ -558,13 +560,15 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                             }
 
                             p <- p + do.call(ggrain::geom_rain, rain_params)
+                            NULL
                         },
-                        error = function(e) {
-                            # Set fallback flag for any ggrain error
-                            use_fallback <<- TRUE
-                            warning(.("ggrain failed with error: "), e$message, .("Using standard geom fallback."))
-                        }
+                        error = function(e) e
                     )
+                    if (!is.null(rain_err)) {
+                        # Set fallback flag for any ggrain error
+                        use_fallback <- TRUE
+                        warning(.("ggrain failed with error: "), rain_err$message, .("Using standard geom fallback."))
+                    }
                 }
 
                 # Use fallback geoms if ggrain failed or was skipped
@@ -751,7 +755,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         FUN = mean, na.rm = TRUE
                     )
 
-                    for (i in 1:nrow(group_means)) {
+                    for (i in seq_len(nrow(group_means))) {
                         p <- p + ggplot2::annotate(
                             "rect",
                             xmin = i - 0.4, xmax = i + 0.4,
@@ -796,7 +800,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         FUN = function(x) c(mean = mean(x), sd = sd(x))
                     )
 
-                    for (i in 1:nrow(group_stats)) {
+                    for (i in seq_len(nrow(group_stats))) {
                         mean_val <- group_stats$x[i, "mean"]
                         cv_1 <- mean_val * cv_1_pct
                         cv_2 <- mean_val * cv_2_pct

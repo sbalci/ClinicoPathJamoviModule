@@ -352,7 +352,7 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                                 ))
                             }
 
-                            boot_results <- boot::boot(data = 1:length(predictions), statistic = boot_func, R = self$options$bootstrapSamples)
+                            boot_results <- boot::boot(data = seq_along(predictions), statistic = boot_func, R = self$options$bootstrapSamples)
 
                             # Extract confidence intervals
                             for (i in 1:4) {

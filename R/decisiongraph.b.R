@@ -1121,7 +1121,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         totalUtility <- 0
 
                         if (nrow(outgoingEdges) > 0) {
-                            for (i in 1:nrow(outgoingEdges)) {
+                            for (i in seq_len(nrow(outgoingEdges))) {
                                 edge <- outgoingEdges[i, ]
                                 childResult <- evaluate_node(edge$to)
 
@@ -1139,7 +1139,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         wtp <- if (!is.null(self$options$willingnessToPay)) self$options$willingnessToPay else 50000
 
                         if (nrow(outgoingEdges) > 0) {
-                            for (i in 1:nrow(outgoingEdges)) {
+                            for (i in seq_len(nrow(outgoingEdges))) {
                                 edge <- outgoingEdges[i, ]
                                 childResult <- evaluate_node(edge$to)
 
@@ -1189,7 +1189,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 nmb_sensitivity <- data.frame()
 
                 for (threshold in wtp_thresholds) {
-                    for (i in 1:nrow(results)) {
+                    for (i in seq_len(nrow(results))) {
                         nmb_value <- results$expectedUtility[i] * threshold - results$expectedCost[i]
                         nmb_sensitivity <- rbind(nmb_sensitivity, data.frame(
                             strategy = results$strategy[i],
@@ -1225,7 +1225,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     results <- results[order(results$netBenefit, decreasing = TRUE), ]
 
                     results$incrementalNMB <- c(0, diff(results$netBenefit))
-                    results$nmbRank <- 1:nrow(results)
+                    results$nmbRank <- seq_len(nrow(results))
                 }
 
                 # Identify optimal decision based on maximum NMB
@@ -1239,7 +1239,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     psa_data <- private$.psaResults$results
                     if ("nmb" %in% names(psa_data)) {
                         # Calculate strategy-specific NMB confidence intervals
-                        for (i in 1:nrow(results)) {
+                        for (i in seq_len(nrow(results))) {
                             strategy_psa <- psa_data[psa_data$strategy == results$strategy[i] | i == 1, ]
                             if (nrow(strategy_psa) > 0) {
                                 ci_95 <- quantile(strategy_psa$nmb, c(0.025, 0.975), na.rm = TRUE)
@@ -1268,11 +1268,11 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 private$.checkpoint(flush = FALSE)
 
                 # Determine dominance relationships
-                for (i in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
                     results$dominance_status[i] <- "Non-dominated"
 
                     # Check for simple dominance (higher utility, lower cost)
-                    for (j in 1:nrow(results)) {
+                    for (j in seq_len(nrow(results))) {
                         if (i != j) {
                             if (results$expectedCost[i] > results$expectedCost[j] &&
                                 results$expectedUtility[i] < results$expectedUtility[j]) {
@@ -1387,7 +1387,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 # Clear existing data
                 icerTable$setVisible(TRUE)
 
-                for (i in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
                     # Format values
                     cost <- results$expectedCost[i]
                     utility <- results$expectedUtility[i]
@@ -2206,7 +2206,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 )
 
                 # Add strategy rankings
-                for (i in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
                     dominance_color <- if (results$dominance_status[i] == "Dominated") " style='color: red;'" else ""
                     html_content <- paste0(
                         html_content,
@@ -2235,7 +2235,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         "<tbody>"
                     )
 
-                    for (i in 1:nrow(threshold_analysis)) {
+                    for (i in seq_len(nrow(threshold_analysis))) {
                         html_content <- paste0(
                             html_content,
                             "<tr>",
@@ -2259,7 +2259,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     "<p>Alternative measure: NHB = Utility - (Cost / WTP)</p>"
                 )
 
-                for (i in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
                     html_content <- paste0(
                         html_content,
                         "<p><strong>", htmltools::htmlEscape(results$strategy[i]), ":</strong> ", round(results$netHealthBenefit[i], 3), " QALYs</p>"
@@ -2274,7 +2274,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     "<p>Maximum acceptable cost for cost-effectiveness:</p>"
                 )
 
-                for (i in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
                     html_content <- paste0(
                         html_content,
                         "<p><strong>", htmltools::htmlEscape(results$strategy[i]), ":</strong> $", format(round(results$max_acceptable_cost[i], 2), big.mark = ","), "</p>"
@@ -2485,8 +2485,8 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
 
                 # Determine dominance status
                 results$dominanceStatus <- "Non-dominated"
-                for (i in 1:nrow(results)) {
-                    for (j in 1:nrow(results)) {
+                for (i in seq_len(nrow(results))) {
+                    for (j in seq_len(nrow(results))) {
                         if (i != j) {
                             if (results$expectedCost[i] > results$expectedCost[j] &&
                                 results$expectedUtility[i] < results$expectedUtility[j]) {
@@ -2500,7 +2500,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 # Update comparison table in results
                 comparisonTable <- self$results$decisionComparisonTable
                 if (!is.null(comparisonTable)) {
-                    for (i in 1:nrow(results)) {
+                    for (i in seq_len(nrow(results))) {
                         comparisonTable$addRow(rowKey = i, values = list(
                             strategy = results$strategy[i],
                             expectedCost = round(results$expectedCost[i], 2),
@@ -2750,7 +2750,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 recentCycles <- max(1, numCycles - 4):numCycles
                 maxChange <- 0
 
-                for (state in 1:ncol(cohortTrace)) {
+                for (state in seq_len(ncol(cohortTrace))) {
                     stateValues <- cohortTrace[recentCycles, state]
                     if (length(stateValues) > 1) {
                         maxChange <- max(maxChange, max(diff(stateValues)))
@@ -2934,7 +2934,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                             # Ensure we have a clean data frame
                             results <- as.data.frame(private$.results)
 
-                            for (i in 1:nrow(results)) {
+                            for (i in seq_len(nrow(results))) {
                                 summaryTable$addRow(rowKey = i, values = list(
                                     strategy = as.character(results$strategy[i]),
                                     expectedCost = as.numeric(results$expectedCost[i]),
@@ -2969,7 +2969,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(private$.nodeData) && !is.null(private$.nodeData$nodes)) {
                     nodes <- private$.nodeData$nodes
 
-                    for (i in 1:nrow(nodes)) {
+                    for (i in seq_len(nrow(nodes))) {
                         nodeTable$addRow(rowKey = i, values = list(
                             nodeId = nodes$id[i],
                             nodeType = nodes$type[i],
@@ -3000,7 +3000,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         {
                             sensData <- private$.performSensitivityAnalysis()
                             if (!is.null(sensData) && nrow(sensData) > 0) {
-                                for (i in 1:nrow(sensData)) {
+                                for (i in seq_len(nrow(sensData))) {
                                     sensitivityTable$addRow(rowKey = i, values = list(
                                         parameter = sensData$parameter[i],
                                         baseValue = sensData$baseValue[i],
@@ -3048,7 +3048,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(private$.markovData) && !is.null(private$.markovData$transitions)) {
                     transitions <- private$.markovData$transitions
 
-                    for (i in 1:nrow(transitions)) {
+                    for (i in seq_len(nrow(transitions))) {
                         markovTable$addRow(rowKey = i, values = list(
                             fromState = transitions$from[i],
                             toState = transitions$to[i],
@@ -3073,7 +3073,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     if (!is.null(private$.markovData) && !is.null(private$.markovData$cohortTrace)) {
                         cohortTrace <- private$.markovData$cohortTrace
 
-                        for (i in 1:nrow(cohortTrace)) {
+                        for (i in seq_len(nrow(cohortTrace))) {
                             markovCohortTable$addRow(rowKey = i, values = list(
                                 cycle = cohortTrace$cycle[i],
                                 healthyProp = if ("healthy" %in% names(cohortTrace)) cohortTrace$healthy[i] else 0,

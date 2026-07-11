@@ -237,7 +237,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
 
             table <- self$results$markerStats
-            for (i in 1:nrow(stats)) {
+            for (i in seq_len(nrow(stats))) {
                 table$addRow(rowKey = i, values = list(
                     statistic = stats$statistic[i],
                     value = stats$value[i]
@@ -820,7 +820,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             timepoints <- private$.timepoints
             fit <- private$.fit
 
-            colors <- c("blue", "red", "green", "purple", "orange", "brown")[1:length(timepoints)]
+            colors <- c("blue", "red", "green", "purple", "orange", "brown")[seq_along(timepoints)]
 
             plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 1),
                  xlab = "1 - Specificity (False Positive Rate)",
@@ -866,7 +866,7 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (is.list(private$.fit$inference) &&
                 !is.null(private$.fit$inference$vect_sd_1) &&
                 length(private$.fit$inference$vect_sd_1) >= length(auc)) {
-                se <- private$.fit$inference$vect_sd_1[1:length(auc)]
+                se <- private$.fit$inference$vect_sd_1[seq_along(auc)]
             } else {
                 se <- rep(0, length(auc))
             }

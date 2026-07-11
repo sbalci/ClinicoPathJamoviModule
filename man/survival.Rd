@@ -82,7 +82,8 @@ survival(
   rcs_variable = NULL,
   rcs_knots = 4,
   bootstrapValidation = FALSE,
-  bootstrapValN = 200
+  bootstrapValN = 200,
+  seed = 42
 )
 }
 \arguments{
@@ -351,6 +352,10 @@ samples.}
 \item{bootstrapValidation}{.}
 
 \item{bootstrapValN}{.}
+
+\item{seed}{Random seed for the reproducible bootstrap internal validation.
+Change this value to obtain a different bootstrap draw; the default (42)
+reproduces the previous fixed behaviour.}
 }
 \value{
 A results object containing:

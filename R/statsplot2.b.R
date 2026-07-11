@@ -943,7 +943,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Handle large dataset sampling if requested
                 original_nrow <- nrow(mydata)
                 if (self$options$sampleLarge && original_nrow > 10000) {
-                    set.seed(42)  # For reproducible sampling
+                    # User-configurable seed for reproducible sampling (default 42).
+                    seed_val <- self$options$seed
+                    if (is.null(seed_val)) seed_val <- 42
+                    set.seed(seed_val)
                     sample_size <- 5000
                     mydata <- mydata[sample(nrow(mydata), sample_size), ]
                     message(glue::glue("Large dataset detected ({format(original_nrow, big.mark = ',')} rows). Sampled {format(sample_size, big.mark = ',')} rows for visualization performance. Disable 'Sample Large Datasets' option to use full dataset."))

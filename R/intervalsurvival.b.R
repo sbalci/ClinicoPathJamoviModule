@@ -407,7 +407,7 @@ intervalsurvivalClass <- R6::R6Class(
                         html <- paste0(html, "<table class='jamovi-table'>")
                         html <- paste0(html, "<tr><th>Parameter</th><th>Estimate</th><th>SE</th><th>Z</th><th>p-value</th><th>Acceleration Factor</th></tr>")
 
-                        for (i in 1:nrow(coef_table)) {
+                        for (i in seq_len(nrow(coef_table))) {
                             param_name <- rownames(coef_table)[i]
                             estimate <- round(coef_table[i, "Value"], 4)
                             se <- round(coef_table[i, "Std. Error"], 4)
@@ -520,7 +520,7 @@ intervalsurvivalClass <- R6::R6Class(
                         html <- paste0(html, "<table class='jamovi-table'>")
                         html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>95% CI</th></tr>")
 
-                        for (i in 1:nrow(coefficients)) {
+                        for (i in seq_len(nrow(coefficients))) {
                             var_name <- rownames(coefficients)[i]
                             coef <- round(coefficients[i, "coef"], 4)
                             exp_coef <- round(coefficients[i, "exp(coef)"], 4)
@@ -555,7 +555,7 @@ intervalsurvivalClass <- R6::R6Class(
                         html <- paste0(html, "<table class='jamovi-table'>")
                         html <- paste0(html, "<tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>Z</th><th>p-value</th><th>Acceleration Factor</th></tr>")
 
-                        for (i in 1:nrow(coef_table)) {
+                        for (i in seq_len(nrow(coef_table))) {
                             var_name <- rownames(coef_table)[i]
                             estimate <- round(coef_table[i, "Value"], 4)
                             se <- round(coef_table[i, "Std. Error"], 4)

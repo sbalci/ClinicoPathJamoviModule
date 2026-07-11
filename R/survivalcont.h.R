@@ -51,7 +51,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             strata_variable = NULL,
             loglog = FALSE,
             showExplanations = FALSE,
-            showSummaries = FALSE, ...) {
+            showSummaries = FALSE,
+            seed = 12345, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -309,6 +310,10 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 "showSummaries",
                 showSummaries,
                 default=FALSE)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=12345)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -360,6 +365,7 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$.addOption(private$..loglog)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showSummaries)
+            self$.addOption(private$..seed)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -411,7 +417,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         strata_variable = function() private$..strata_variable$value,
         loglog = function() private$..loglog$value,
         showExplanations = function() private$..showExplanations$value,
-        showSummaries = function() private$..showSummaries$value),
+        showSummaries = function() private$..showSummaries$value,
+        seed = function() private$..seed$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -462,7 +469,8 @@ survivalcontOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
         ..strata_variable = NA,
         ..loglog = NA,
         ..showExplanations = NA,
-        ..showSummaries = NA)
+        ..showSummaries = NA,
+        ..seed = NA)
 )
 
 survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -1715,6 +1723,9 @@ survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   and plots. These summaries provide plain-language interpretations of the
 #'   statistical results. Turn off to reduce visual clutter when summaries are
 #'   not needed.
+#' @param seed Random seed for the reproducible optimal cut-point search.
+#'   Change this value to obtain a different search; the default (12345)
+#'   reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
@@ -1823,7 +1834,8 @@ survivalcont <- function(
     strata_variable,
     loglog = FALSE,
     showExplanations = FALSE,
-    showSummaries = FALSE) {
+    showSummaries = FALSE,
+    seed = 12345) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survivalcont requires jmvcore to be installed (restart may be required)")
@@ -1891,7 +1903,8 @@ survivalcont <- function(
         strata_variable = strata_variable,
         loglog = loglog,
         showExplanations = showExplanations,
-        showSummaries = showSummaries)
+        showSummaries = showSummaries,
+        seed = seed)
 
     analysis <- survivalcontClass$new(
         options = options,

@@ -365,11 +365,11 @@ flexcompriskClass <- R6::R6Class(
             # Create prediction results (simplified)
             predictions_data <- data.frame(
                 time_point = prediction_times,
-                cif_estimate = c(0.15, 0.25, 0.35)[1:length(prediction_times)],
-                cif_se = c(0.02, 0.03, 0.04)[1:length(prediction_times)],
-                cif_lower = c(0.11, 0.19, 0.27)[1:length(prediction_times)],
-                cif_upper = c(0.19, 0.31, 0.43)[1:length(prediction_times)],
-                risk_level = c("Low", "Moderate", "High")[1:length(prediction_times)],
+                cif_estimate = c(0.15, 0.25, 0.35)[seq_along(prediction_times)],
+                cif_se = c(0.02, 0.03, 0.04)[seq_along(prediction_times)],
+                cif_lower = c(0.11, 0.19, 0.27)[seq_along(prediction_times)],
+                cif_upper = c(0.19, 0.31, 0.43)[seq_along(prediction_times)],
+                risk_level = c("Low", "Moderate", "High")[seq_along(prediction_times)],
                 stringsAsFactors = FALSE
             )
             

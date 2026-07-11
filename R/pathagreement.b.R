@@ -1185,7 +1185,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate style clustering results table
                 rater_names <- private$.rater_names
-                for (i in 1:length(rater_names)) {
+                for (i in seq_along(rater_names)) {
                     # Calculate rater characteristics if available
                     experience <- if (self$options$raterCharacteristics && !is.null(self$options$experienceVar)) {
                         # Extract from experienceVar if available
@@ -1213,7 +1213,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     }
 
                     # Calculate agreement with other raters in same style group
-                    same_group_raters <- which(style_groups == style_groups[i] & 1:length(rater_names) != i)
+                    same_group_raters <- which(style_groups == style_groups[i] & seq_along(rater_names) != i)
                     within_group_agreement <- if (length(same_group_raters) > 0) {
                         private$.calculateWithinGroupAgreement(i, same_group_raters)
                     } else {
@@ -1470,14 +1470,14 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Populate individual rater frequency table
                 freq_table <- self$results$raterFrequencyTables$frequencyTable
 
-                for (i in 1:length(rater_names)) {
+                for (i in seq_along(rater_names)) {
                     # Checkpoint before processing each rater
                     private$.checkpoint(flush = FALSE)
 
                     rater_data <- data_matrix[, i]
                     freq_counts <- table(rater_data)
 
-                    for (j in 1:length(freq_counts)) {
+                    for (j in seq_along(freq_counts)) {
                         category <- names(freq_counts)[j]
                         frequency <- as.numeric(freq_counts[j])
                         percentage <- round(frequency / sum(freq_counts) * 100, 1)
@@ -1525,7 +1525,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # For now, let's create a simple representation
-                for (i in 1:nrow(cross_table)) {
+                for (i in seq_len(nrow(cross_table))) {
                     rater1_cat <- rownames(cross_table)[i]
 
                     # Create a text representation of the row
@@ -1596,10 +1596,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                         total_pairs <- 0
                         disagreements <- 0
 
-                        for (i in 1:nrow(kripp_data)) {
-                            for (j in 1:nrow(kripp_data)) {
+                        for (i in seq_len(nrow(kripp_data))) {
+                            for (j in seq_len(nrow(kripp_data))) {
                                 if (i != j) {
-                                    for (k in 1:ncol(kripp_data)) {
+                                    for (k in seq_len(ncol(kripp_data))) {
                                         if (!is.na(kripp_data[i, k]) && !is.na(kripp_data[j, k])) {
                                             total_pairs <- total_pairs + 1
                                             if (kripp_data[i, k] != kripp_data[j, k]) {
@@ -1812,7 +1812,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Create color mapping for raters based on their style groups
                 rater_colors <- rep("black", length(rater_names))
-                for (i in 1:length(rater_names)) {
+                for (i in seq_along(rater_names)) {
                     group_id <- style_groups[i]
                     if (!is.null(group_id) && !is.na(group_id) && group_id > 0 && group_id <= length(group_colors)) {
                         rater_colors[i] <- group_colors[group_id]
@@ -1950,8 +1950,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 numeric_matrix <- data_matrix
 
                 # Convert to numeric with proper handling of missing values
-                for (i in 1:nrow(numeric_matrix)) {
-                    for (j in 1:ncol(numeric_matrix)) {
+                for (i in seq_len(nrow(numeric_matrix))) {
+                    for (j in seq_len(ncol(numeric_matrix))) {
                         val <- as.character(numeric_matrix[i, j])
                         if (is.na(val) || val == "" || val == "NA") {
                             numeric_matrix[i, j] <- 1 # Default to Benign for missing
@@ -1994,8 +1994,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 ordered_data <- numeric_matrix[case_order, rater_order]
 
                 # Convert back to diagnostic labels
-                for (i in 1:nrow(ordered_data)) {
-                    for (j in 1:ncol(ordered_data)) {
+                for (i in seq_len(nrow(ordered_data))) {
+                    for (j in seq_len(ncol(ordered_data))) {
                         ordered_data[i, j] <- switch(as.character(ordered_data[i, j]),
                             "1" = "Benign",
                             "2" = "EIN",
@@ -2009,7 +2009,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 heatmap_data <- data.frame()
                 for (case_idx in 1:n_cases) {
                     original_case_id <- case_order[case_idx]
-                    for (rater_idx in 1:length(ordered_raters)) {
+                    for (rater_idx in seq_along(ordered_raters)) {
                         diagnosis <- ordered_data[case_idx, rater_idx]
                         heatmap_data <- rbind(heatmap_data, data.frame(
                             Case = case_idx,
@@ -2164,7 +2164,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 # Create color mapping for raters
                 rater_colors <- rep("black", length(rater_names))
-                for (i in 1:length(rater_names)) {
+                for (i in seq_along(rater_names)) {
                     group_id <- style_groups[i]
                     if (!is.null(group_id) && !is.na(group_id) && group_id > 0 && group_id <= length(group_colors)) {
                         rater_colors[i] <- group_colors[group_id]
@@ -2238,8 +2238,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 numeric_matrix <- data_matrix
 
                 # Convert to numeric with proper handling of missing values
-                for (i in 1:nrow(numeric_matrix)) {
-                    for (j in 1:ncol(numeric_matrix)) {
+                for (i in seq_len(nrow(numeric_matrix))) {
+                    for (j in seq_len(ncol(numeric_matrix))) {
                         val <- as.character(numeric_matrix[i, j])
                         if (is.na(val) || val == "" || val == "NA") {
                             numeric_matrix[i, j] <- 1 # Default to Benign for missing
@@ -2285,7 +2285,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 heatmap_data <- data.frame()
                 for (case_idx in 1:n_cases) {
                     original_case_id <- case_order[case_idx]
-                    for (rater_id in 1:length(ordered_raters)) {
+                    for (rater_id in seq_along(ordered_raters)) {
                         diagnosis <- ordered_data[case_idx, rater_id]
                         heatmap_data <- rbind(heatmap_data, data.frame(
                             Case = case_idx,
@@ -2310,7 +2310,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     geom_tile(color = "white", size = 0.1) +
                     scale_fill_manual(values = diagnosis_colors, name = "Diagnosis") +
                     scale_x_continuous(
-                        breaks = 1:length(ordered_raters),
+                        breaks = seq_along(ordered_raters),
                         labels = ordered_raters,
                         expand = c(0, 0)
                     ) +

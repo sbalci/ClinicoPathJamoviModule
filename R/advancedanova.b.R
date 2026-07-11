@@ -454,7 +454,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 # Extract pairwise comparisons
                 comparisons <- tukey_result$group_data
                 
-                for (i in 1:nrow(comparisons)) {
+                for (i in seq_len(nrow(comparisons))) {
                     comparison_name <- rownames(comparisons)[i]
                     diff <- comparisons[i, "diff"]
                     lwr <- comparisons[i, "lwr"]

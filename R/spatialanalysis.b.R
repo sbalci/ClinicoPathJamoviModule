@@ -276,7 +276,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Add results to table
                 distances <- K_result$r[seq(1, length(K_result$r), length.out = 10)]
                 
-                for (i in 1:length(distances)) {
+                for (i in seq_along(distances)) {
                     r <- distances[i]
                     idx <- which.min(abs(K_result$r - r))
                     
@@ -647,7 +647,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 # Count points in each quadrat
                 quadrat_counts <- matrix(0, n_quadrats_x, n_quadrats_y)
                 
-                for (i in 1:length(x_coords)) {
+                for (i in seq_along(x_coords)) {
                     x_idx <- findInterval(x_coords[i], x_breaks, rightmost.closed = TRUE)
                     y_idx <- findInterval(y_coords[i], y_breaks, rightmost.closed = TRUE)
                     
@@ -777,7 +777,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                                 pcf_obs <- pcf_result[[pcf_column]]
                                 pcf_theo <- rep(1, length(pcf_obs))  # Theoretical value for random pattern
                                 
-                                for (k in 1:length(distances)) {
+                                for (k in seq_along(distances)) {
                                     r <- distances[k]
                                     idx <- which.min(abs(pcf_result$r - r))
                                     

@@ -210,8 +210,8 @@ mlpathologyClass <- R6::R6Class(
                 
                 # Add confusion matrix values
                 cm_matrix <- cm$table
-                for (i in 1:nrow(cm_matrix)) {
-                    for (j in 1:ncol(cm_matrix)) {
+                for (i in seq_len(nrow(cm_matrix))) {
+                    for (j in seq_len(ncol(cm_matrix))) {
                         cm_table$addRow(rowKey = paste0("cell_", i, "_", j), values = list(
                             actual = rownames(cm_matrix)[i],
                             predicted = colnames(cm_matrix)[j],

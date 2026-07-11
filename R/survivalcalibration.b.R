@@ -303,7 +303,7 @@ survivalcalibrationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Bootstrap sample
-                boot_idx <- sample(1:length(time_vec), replace = TRUE)
+                boot_idx <- sample(seq_along(time_vec), replace = TRUE)
                 boot_time <- time_vec[boot_idx]
                 boot_event <- event_vec[boot_idx]
                 boot_pred <- pred_vec[boot_idx]

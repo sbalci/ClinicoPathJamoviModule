@@ -487,7 +487,7 @@ jppsClass <- R6::R6Class(
                 
                 # Create comparison dataframe
                 comparison <- data.frame()
-                for (i in 1:nrow(pps_subset)) {
+                for (i in seq_len(nrow(pps_subset))) {
                     pred <- pps_subset$predictor[i]
                     targ <- pps_subset$target[i]
                     
@@ -531,7 +531,7 @@ jppsClass <- R6::R6Class(
             }
             
             # Populate table
-            for (i in 1:nrow(results)) {
+            for (i in seq_len(nrow(results))) {
                 table$addRow(rowKey = i, values = list(
                     predictor = results$predictor[i],
                     target = results$target[i],
@@ -550,7 +550,7 @@ jppsClass <- R6::R6Class(
             
             results <- private$.correlation_results
             
-            for (i in 1:nrow(results)) {
+            for (i in seq_len(nrow(results))) {
                 table$addRow(rowKey = i, values = list(
                     variable_pair = results$variable_pair[i],
                     pps_score = results$pps_score[i],
@@ -593,7 +593,7 @@ jppsClass <- R6::R6Class(
                 stringsAsFactors = FALSE
             )
             
-            for (i in 1:nrow(summary_data)) {
+            for (i in seq_len(nrow(summary_data))) {
                 table$addRow(rowKey = i, values = summary_data[i, ])
             }
         },

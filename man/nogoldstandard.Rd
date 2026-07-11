@@ -21,7 +21,8 @@ nogoldstandard(
   bootstrap = FALSE,
   nboot = 1000,
   alpha = 0.05,
-  verbose = FALSE
+  verbose = FALSE,
+  seed = 0
 )
 }
 \arguments{
@@ -59,6 +60,11 @@ and method recommendations.}
 \item{alpha}{Alpha level for confidence intervals.}
 
 \item{verbose}{Show detailed progress messages during bootstrap analysis.}
+
+\item{seed}{Base random seed for the reproducible latent-class multi-start
+search. Each start is offset from this base, so changing it shifts the
+whole reproducible sequence; the default (0) reproduces the previous
+behaviour.}
 }
 \value{
 A results object containing:

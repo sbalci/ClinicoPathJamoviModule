@@ -616,7 +616,7 @@ batcheffectClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Calculate overall batch effect using average F-statistic across features
                 f_stats <- c()
 
-                for (i in 1:nrow(feature_matrix)) {
+                for (i in seq_len(nrow(feature_matrix))) {
                     feature_values <- feature_matrix[i, ]
                     if (var(feature_values, na.rm = TRUE) > 1e-10) {
                         tryCatch(
@@ -802,7 +802,7 @@ batcheffectClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Convert to long format for ggplot
                     plot_data <- expand.grid(
-                        Sample = 1:nrow(missing_matrix),
+                        Sample = seq_len(nrow(missing_matrix)),
                         Feature = colnames(missing_matrix)
                     )
                     plot_data$Missing <- as.vector(missing_matrix)

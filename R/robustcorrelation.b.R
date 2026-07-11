@@ -383,7 +383,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     outlier_indicators <- matrix(FALSE, nrow = nrow(data), ncol = ncol(data))
                     distances <- rep(0, nrow(data))
 
-                    for (j in 1:ncol(data)) {
+                    for (j in seq_len(ncol(data))) {
                         Q1 <- quantile(data[[j]], 0.25, na.rm = TRUE)
                         Q3 <- quantile(data[[j]], 0.75, na.rm = TRUE)
                         IQR <- Q3 - Q1
@@ -407,7 +407,7 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             extreme_idx <- which(abs(data_scaled[i, ]) > threshold)
                         } else {
                             outlier_indicators <- matrix(FALSE, nrow = nrow(data), ncol = ncol(data))
-                            for (j in 1:ncol(data)) {
+                            for (j in seq_len(ncol(data))) {
                                 Q1 <- quantile(data[[j]], 0.25, na.rm = TRUE)
                                 Q3 <- quantile(data[[j]], 0.75, na.rm = TRUE)
                                 IQR <- Q3 - Q1
@@ -423,13 +423,13 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
 
-                outliers$indices <- 1:nrow(data)
+                outliers$indices <- seq_len(nrow(data))
                 outliers$distances <- distances
                 outliers$is_outlier <- is_outlier
                 outliers$extreme_vars <- extreme_vars
 
             }, error = function(e) {
-                outliers$indices <<- 1:nrow(data)
+                outliers$indices <<- seq_len(nrow(data))
                 outliers$distances <<- rep(NA, nrow(data))
                 outliers$is_outlier <<- rep(FALSE, nrow(data))
                 outliers$extreme_vars <<- rep("", nrow(data))

@@ -267,7 +267,7 @@ cohenskappaClass <- R6::R6Class(
                     }
 
                     # Populate kappa table row by row
-                    for (i in 1:nrow(kappa_table_data)) {
+                    for (i in seq_len(nrow(kappa_table_data))) {
                         self$results$kappaTable$addRow(rowKey = i, values = as.list(kappa_table_data[i, ]))
                     }
 
@@ -297,7 +297,7 @@ cohenskappaClass <- R6::R6Class(
                         )
 
                         # Populate agreement stats table row by row
-                        for (i in 1:nrow(agreement_data)) {
+                        for (i in seq_len(nrow(agreement_data))) {
                             self$results$agreementStats$addRow(rowKey = i, values = as.list(agreement_data[i, ]))
                         }
                     }
@@ -309,7 +309,7 @@ cohenskappaClass <- R6::R6Class(
                         confusion_df$rater2_categories <- apply(confusion_df[, -ncol(confusion_df)], 1, function(x) paste(names(x)[x > 0], collapse = ", "))
 
                         # Populate confusion matrix table row by row
-                        for (i in 1:nrow(confusion_df)) {
+                        for (i in seq_len(nrow(confusion_df))) {
                             self$results$confusionMatrix$addRow(rowKey = i, values = as.list(confusion_df[i, ]))
                         }
                     }
@@ -336,7 +336,7 @@ cohenskappaClass <- R6::R6Class(
                         }
 
                         # Populate category stats table row by row
-                        for (i in 1:nrow(category_data)) {
+                        for (i in seq_len(nrow(category_data))) {
                             self$results$categoryStats$addRow(rowKey = i, values = as.list(category_data[i, ]))
                         }
                     }
@@ -392,7 +392,7 @@ cohenskappaClass <- R6::R6Class(
                             bootstrap_kappas <- numeric(n_bootstrap)
 
                             for (i in 1:n_bootstrap) {
-                                boot_indices <- sample(1:length(rater1_data), replace = TRUE)
+                                boot_indices <- sample(seq_along(rater1_data), replace = TRUE)
                                 boot_table <- table(rater1_data[boot_indices], rater2_data[boot_indices])
                                 boot_result <- psych::cohen.kappa(boot_table)
                                 bootstrap_kappas[i] <- boot_result$kappa
@@ -755,7 +755,7 @@ cohenskappaClass <- R6::R6Class(
             # Generate all pairs
             pairs <- combn(n_raters, 2)
 
-            for (i in 1:ncol(pairs)) {
+            for (i in seq_len(ncol(pairs))) {
                 rater_i <- pairs[1, i]
                 rater_j <- pairs[2, i]
 

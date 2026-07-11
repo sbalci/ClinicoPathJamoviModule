@@ -989,7 +989,7 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 reg_table$deleteRows()
 
-                for (i in 1:nrow(coefs)) {
+                for (i in seq_len(nrow(coefs))) {
                     var_name <- rownames(coefs)[i]
                     est <- coefs[i, 1]
                     se <- if (ncol(coefs) >= 2) coefs[i, 2] else NA

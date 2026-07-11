@@ -606,7 +606,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                     "</tr></thead><tbody>"
                 )
 
-                for (i in 1:nrow(stats_summary)) {
+                for (i in seq_len(nrow(stats_summary))) {
                     row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                     summary_html <- paste0(
                         summary_html,

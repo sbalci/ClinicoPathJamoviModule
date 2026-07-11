@@ -600,7 +600,7 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     legend("topright",
                         legend = outcome_levels,
-                        col = 1:length(outcome_levels),
+                        col = seq_along(outcome_levels),
                         lwd = 2,
                         bty = "n"
                     )

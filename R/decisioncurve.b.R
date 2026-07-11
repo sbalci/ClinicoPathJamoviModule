@@ -2072,7 +2072,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             plot_data$relative_utility <- NA
             
-            for (i in 1:nrow(plot_data)) {
+            for (i in seq_len(nrow(plot_data))) {
                 thresh <- plot_data$threshold[i]
                 nb <- plot_data$net_benefit[i]
                 

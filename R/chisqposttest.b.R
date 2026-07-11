@@ -134,8 +134,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dimnames = dimnames(residuals)
             )
             
-            for (i in 1:nrow(residuals)) {
-                for (j in 1:ncol(residuals)) {
+            for (i in seq_len(nrow(residuals))) {
+                for (j in seq_len(ncol(residuals))) {
                     residual_val <- residuals[i, j]
                     is_sig <- significant_cells[i, j]
                     mag <- magnitude[i, j]

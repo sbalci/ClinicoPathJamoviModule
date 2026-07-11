@@ -454,7 +454,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 "</tr>"
             )
             
-            for (i in 1:nrow(counts_table)) {
+            for (i in seq_len(nrow(counts_table))) {
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#fff3e0"
                 counts_html <- paste0(counts_html,
                     "<tr style='background-color: ", row_bg, ";'>",
@@ -527,7 +527,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                     "</tr>"
                 )
                 
-                for (i in 1:nrow(interaction_terms)) {
+                for (i in seq_len(nrow(interaction_terms))) {
                     interaction_html <- paste0(interaction_html,
                         "<tr>",
                         "<td style='padding: 8px; border: 1px solid #ddd;'>", htmltools::htmlEscape(interaction_terms$term[i]), "</td>",

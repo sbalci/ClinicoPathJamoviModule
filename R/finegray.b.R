@@ -276,11 +276,11 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Get covariate names
                 cov_names <- names(coef)
                 if (is.null(cov_names)) {
-                    cov_names <- paste0("Covariate_", 1:length(coef))
+                    cov_names <- paste0("Covariate_", seq_along(coef))
                 }
 
                 # Populate table
-                for (i in 1:length(estimate)) {
+                for (i in seq_along(estimate)) {
 
                     row <- list(
                         term = cov_names[i],
@@ -482,7 +482,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
 
                 if (!is.null(self$options$groupVar)) {
                     # Grouped plots
-                    for (i in 1:length(cifData)) {
+                    for (i in seq_along(cifData)) {
                         if (is.list(cifData[[i]])) {
                             group_name <- names(cifData)[i]
                             event_type <- gsub(".*\\s", "", group_name)
@@ -511,7 +511,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     }
                 } else {
                     # Overall plot
-                    for (i in 1:length(cifData)) {
+                    for (i in seq_along(cifData)) {
                         if (is.list(cifData[[i]])) {
                             event_type <- names(cifData)[i]
 

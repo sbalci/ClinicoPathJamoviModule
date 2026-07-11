@@ -646,7 +646,7 @@ dynamicpredictionClass <- R6::R6Class(
             
             if (nrow(all_predictions) == 0) return()
             
-            for (i in 1:nrow(all_predictions)) {
+            for (i in seq_len(nrow(all_predictions))) {
                 row <- list(
                     subject_id = all_predictions$subject_id[i],
                     prediction_time = all_predictions$prediction_time[i],

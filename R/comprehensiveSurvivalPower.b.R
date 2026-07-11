@@ -560,7 +560,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
             }
 
             # Populate the table
-            for (i in 1:nrow(main_results)) {
+            for (i in seq_len(nrow(main_results))) {
                 row_values <- list(
                     parameter = as.character(main_results[i, "parameter"]),
                     value = as.character(main_results[i, "value"]),
@@ -611,7 +611,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
                 ))
             }
 
-            for (i in 1:nrow(details_df)) {
+            for (i in seq_len(nrow(details_df))) {
                 row_values <- list(
                     aspect = as.character(details_df[i, "aspect"]),
                     value = as.character(details_df[i, "value"]),
@@ -626,7 +626,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
             assumptions <- private$.getMethodAssumptions()
 
-            for (i in 1:nrow(assumptions)) {
+            for (i in seq_len(nrow(assumptions))) {
                 self$results$assumptions$addRow(rowKey = i, values = assumptions[i, ])
             }
         },
@@ -809,7 +809,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
             }
 
             # Populate sensitivity table
-            for (i in 1:nrow(sensitivity_data)) {
+            for (i in seq_len(nrow(sensitivity_data))) {
                 row_values <- list(
                     parameter_varied = as.character(sensitivity_data[i, "parameter_varied"]),
                     variation = as.character(sensitivity_data[i, "variation"]),
@@ -865,7 +865,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
             }
 
             # Populate method comparison table
-            for (i in 1:nrow(comparison_data)) {
+            for (i in seq_len(nrow(comparison_data))) {
                 row_values <- list(
                     method = as.character(comparison_data[i, "method"]),
                     sample_size_est = as.integer(comparison_data[i, "sample_size_est"]),

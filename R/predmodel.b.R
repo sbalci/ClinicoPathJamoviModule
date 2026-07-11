@@ -135,7 +135,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
 
                 table <- self$results$coefficients
 
-                for (i in 1:nrow(coef_summary)) {
+                for (i in seq_len(nrow(coef_summary))) {
                     term <- rownames(coef_summary)[i]
                     estimate <- coef_summary[i, "Estimate"]
                     se <- coef_summary[i, "Std. Error"]
@@ -335,7 +335,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 optimism_brier <- 0
 
                 for (i in 1:min(n_boot, 50)) {  # Limit to 50 for performance
-                    boot_idx <- sample(1:nrow(private$.data), replace = TRUE)
+                    boot_idx <- sample(seq_len(nrow(private$.data)), replace = TRUE)
                     boot_data <- private$.data[boot_idx, ]
 
                     boot_model <- glm(formula, data = boot_data, family = binomial)

@@ -430,7 +430,7 @@ coefplotClass <- if (requireNamespace("jmvcore")) {
                 ci_results <- confint(model, level = ci_level)
 
                 # Table rows
-                for (i in 1:nrow(coef_summary)) {
+                for (i in seq_len(nrow(coef_summary))) {
                     var_name <- rownames(coef_summary)[i]
 
                     # Skip intercept if not requested

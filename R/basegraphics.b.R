@@ -996,13 +996,13 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                xlab = x_label,
                                ylab = y_label,
                                col = colors,
-                               lty = 1:ncol(numeric_data),
+                               lty = seq_len(ncol(numeric_data)),
                                xlim = xlim, ylim = ylim)
                         
                         # Add legend
                         if (options$add_legend) {
                             legend("topright", legend = colnames(numeric_data), 
-                                  col = colors, lty = 1:ncol(numeric_data), bty = "n")
+                                  col = colors, lty = seq_len(ncol(numeric_data)), bty = "n")
                         }
                     }
                 }

@@ -388,7 +388,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 alpha <- 1 - self$options$conf_level
                 z_crit <- qnorm(1 - alpha/2)
 
-                for (i in 1:nrow(coef_summary)) {
+                for (i in seq_len(nrow(coef_summary))) {
 
                     term <- as.character(rownames(coef_summary)[i])
                     estimate <- as.numeric(coef_summary[i, "Estimate"])
@@ -522,7 +522,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 pairs <- emmeans::pairs(emm, adjust = adjust_method)
                 pairs_summary <- summary(pairs)
 
-                for (i in 1:nrow(pairs_summary)) {
+                for (i in seq_len(nrow(pairs_summary))) {
                     table$addRow(rowKey=i, values=list(
                         contrast = as.character(pairs_summary[i, "contrast"]),
                         estimate = as.numeric(pairs_summary[i, "estimate"]),

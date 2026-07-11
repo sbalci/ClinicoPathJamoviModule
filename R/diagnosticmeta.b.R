@@ -1161,7 +1161,7 @@ diagnosticmetaClass <- R6::R6Class(
                 # Add pooled estimate diamond (standard meta-analysis convention)
                 if (!is.null(pooled_data)) {
                     # Create diamond shape data for each metric
-                    diamond_data <- do.call(rbind, lapply(1:nrow(pooled_data), function(i) {
+                    diamond_data <- do.call(rbind, lapply(seq_len(nrow(pooled_data)), function(i) {
                         row <- pooled_data[i, ]
                         y_pos <- "POOLED ESTIMATE"
                         y_offset <- 0.3  # Half-height of diamond
@@ -1536,7 +1536,7 @@ diagnosticmetaClass <- R6::R6Class(
             meta_data$spec <- meta_data$tn / (meta_data$tn + meta_data$fp)
             meta_data$sample_size <- meta_data$tp + meta_data$fp + meta_data$fn + meta_data$tn
 
-            for (i in 1:nrow(meta_data)) {
+            for (i in seq_len(nrow(meta_data))) {
                 table$addRow(rowKey = i, values = list(
                     study = as.character(meta_data$study[i]),
                     sensitivity = meta_data$sens[i],

@@ -605,7 +605,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
         .populateStudyLevelResults = function(study_data) {
             study_table <- self$results$studyLevelResults
             
-            for (i in 1:nrow(study_data)) {
+            for (i in seq_len(nrow(study_data))) {
                 study_row <- study_data[i, ]
                 
                 study_table$addRow(rowKey = paste0("study_", i), values = list(

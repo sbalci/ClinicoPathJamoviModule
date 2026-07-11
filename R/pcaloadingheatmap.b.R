@@ -351,7 +351,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 # Check ndim
                 if (max(ndim) > ncol(load_df)) {
-                    ndim <- 1:ncol(load_df)
+                    ndim <- seq_len(ncol(load_df))
                 }
 
                 # Prepare data
@@ -421,7 +421,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 # Check ndim
                 if (max(ndim) > ncol(load_df)) {
-                    ndim <- 1:ncol(load_df)
+                    ndim <- seq_len(ncol(load_df))
                 }
 
                 # Prepare data

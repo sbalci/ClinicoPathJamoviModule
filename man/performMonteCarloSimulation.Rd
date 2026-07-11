@@ -20,6 +20,11 @@ performMonteCarloSimulation(
 
 \item{distributionType}{Character string}
 }
+\value{
+\code{NULL}. This function is deprecated and performs no computation;
+it only emits a deprecation warning directing callers to use the internal
+PSA methods of \code{decisiongraphClass}.
+}
 \description{
 This function is deprecated. PSA is now handled internally by decisiongraphClass.
 }

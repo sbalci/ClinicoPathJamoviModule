@@ -304,7 +304,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Table
             table <- self$results$summary
-            for(i in 1:nrow(flow_data)) {
+            for(i in seq_len(nrow(flow_data))) {
                  row <- list(
                       step = flow_data$step[i],
                       count = flow_data$n[i],
@@ -505,7 +505,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             flow_data <- list()
 
-            for (i in 1:nrow(data)) {
+            for (i in seq_len(nrow(data))) {
                 step_name <- as.character(data[[step_var]][i])
                 count <- data[[count_var]][i]
 

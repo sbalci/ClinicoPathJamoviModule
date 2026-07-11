@@ -370,7 +370,7 @@ spatialautocorrelationClass <- R6::R6Class(
                     FUN = function(x) c(length(x), mean(x, na.rm = TRUE))
                 )
 
-                for (i in 1:nrow(cluster_summary)) {
+                for (i in seq_len(nrow(cluster_summary))) {
                     table$addRow(rowKey = paste0("cluster_", i), values = list(
                         cluster_id = i,
                         cluster_type = cluster_summary[i, 1],
@@ -438,7 +438,7 @@ spatialautocorrelationClass <- R6::R6Class(
             table <- self$results$spatialRegimes
             regime_summary <- table(regimes)
 
-            for (i in 1:length(regime_summary)) {
+            for (i in seq_along(regime_summary)) {
                 regime_name <- names(regime_summary)[i]
                 regime_indices <- which(regimes == regime_name)
 

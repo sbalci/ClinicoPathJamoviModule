@@ -404,7 +404,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     )
 
                     # Calculate median OS and 5-year survival per group
-                    for (i in 1:nrow(riskSummary)) {
+                    for (i in seq_len(nrow(riskSummary))) {
                         groupIdx <- riskGroup == labels[i]
                         kmFit <- survival::survfit(survival::Surv(timeVar[groupIdx], eventNumeric[groupIdx]) ~ 1)
 

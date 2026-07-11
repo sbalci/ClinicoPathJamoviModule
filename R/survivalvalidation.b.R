@@ -610,7 +610,7 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 res <- calibration_results[[t_point]]
                 
                 # Add rows for each group
-                for (i in 1:nrow(res)) {
+                for (i in seq_len(nrow(res))) {
                     table$addRow(rowKey = row_idx, values = list(
                         time = as.numeric(t_point),
                         group = as.character(res$group[i]),

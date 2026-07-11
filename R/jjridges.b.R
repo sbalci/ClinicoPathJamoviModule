@@ -382,7 +382,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add group-specific summaries
             text_summary <- paste0(text_summary, "<p><strong>DESCRIPTIVE STATISTICS BY GROUP:</strong></p>")
-            for (i in 1:nrow(stats_by_group)) {
+            for (i in seq_len(nrow(stats_by_group))) {
                 row <- stats_by_group[i, ]
                 text_summary <- paste0(text_summary,
                     "<p>", htmltools::htmlEscape(as.character(row$y)), " (n=", row$n, "): ",
@@ -394,7 +394,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add statistical test results if available
-            if (has_stats && !is.null(self$results$tests) && self$results$tests$rowCount() > 0) {
+            if (has_stats && !is.null(self$results$tests) && self$results$tests$rowCount > 0) {
                 text_summary <- paste0(text_summary, "<p></p><p><strong>STATISTICAL COMPARISONS:</strong></p>")
                 test_type <- self$options$test_type
                 test_name <- switch(test_type,
@@ -406,7 +406,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
 
                 # Get first row as example (multiple comparisons handled in full table)
-                if (self$results$tests$rowCount() > 0) {
+                if (self$results$tests$rowCount > 0) {
                     text_summary <- paste0(text_summary,
                         "<p>Method: ", tools::toTitleCase(gsub("_", " ", test_type)), "</p>",
                         "<p>See full statistical table for p-values, effect sizes, and confidence intervals.</p>"
@@ -630,8 +630,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 opt <- self$options$option(name)
                 if (!is.null(opt) && !is.null(value)) {
                     if (!identical(opt$value, value)) {
-                        private$overrides[[name]] <<- value
-                        attr(private$overrides[[name]], "label") <<- if (!is.null(label)) label else paste0(name, " set to ", value)
+                        # `private` is an environment reference, so plain `<-`
+                        # modifies private$overrides in place (identical to the
+                        # former `<<-`, without an enclosing-scope assignment).
+                        private$overrides[[name]] <- value
+                        attr(private$overrides[[name]], "label") <- if (!is.null(label)) label else paste0(name, " set to ", value)
                     }
                     opt$value <- value
                 }

@@ -1315,7 +1315,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     if (!is.null(rmst_results$table)) {
                         # Populate RMST table
                         rmst_table <- self$results$rmstTable
-                        for (i in 1:nrow(rmst_results$table)) {
+                        for (i in seq_len(nrow(rmst_results$table))) {
                             rmst_table$addRow(rowKey = i, values = list(
                                 group = rmst_results$table$Group[i],
                                 rmst = rmst_results$table$RMST[i],
@@ -2112,7 +2112,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                         # Populate residuals table
                         if (!is.null(residuals_data)) {
                             residuals_table <- self$results$residualsTable
-                            for (i in 1:nrow(residuals_data)) {
+                            for (i in seq_len(nrow(residuals_data))) {
                                 residuals_table$addRow(rowKey = i, values = list(
                                     observation = residuals_data$observation[i],
                                     martingale = residuals_data$martingale[i],
@@ -2148,7 +2148,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     
                     # Create data frame with residuals
                     residuals_df <- data.frame(
-                        observation = 1:length(martingale_res),
+                        observation = seq_along(martingale_res),
                         martingale = round(martingale_res, 4),
                         deviance = round(deviance_res, 4),
                         score = if (is.matrix(score_res)) round(score_res[,1], 4) else round(score_res, 4),

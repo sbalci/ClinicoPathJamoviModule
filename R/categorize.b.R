@@ -626,7 +626,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 x_cat_values <- as.character(x_cat)
 
                 # Set row numbers (1-based indices for all rows)
-                self$results$addtodata$setRowNums(1:length(x_cat_values))
+                self$results$addtodata$setRowNums(seq_along(x_cat_values))
                 self$results$addtodata$setValues(x_cat_values)
             }
 

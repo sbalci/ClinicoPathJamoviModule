@@ -302,7 +302,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         
         table <- self$results$cox_results
         
-        for (i in 1:nrow(coef_summary)) {
+        for (i in seq_len(nrow(coef_summary))) {
           term <- rownames(coef_summary)[i]
           estimate <- coef_summary[i, "coef"]
           se <- coef_summary[i, "se(coef)"]
@@ -339,7 +339,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           table <- self$results$time_varying_effects
           
           # Individual tests
-          for (i in 1:nrow(ph_test$table)) {
+          for (i in seq_len(nrow(ph_test$table))) {
             var_name <- rownames(ph_test$table)[i]
             if (var_name == "GLOBAL") next
             
@@ -423,7 +423,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
             coef_summary <- summary(landmark_model)$coefficients
             conf_int <- confint(landmark_model, level = self$options$confidence_level)
             
-            for (i in 1:nrow(coef_summary)) {
+            for (i in seq_len(nrow(coef_summary))) {
               term <- rownames(coef_summary)[i]
               estimate <- coef_summary[i, "coef"]
               hr <- exp(estimate)

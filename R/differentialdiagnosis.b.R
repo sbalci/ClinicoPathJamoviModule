@@ -192,7 +192,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             # Populate likelihood ratio table
             lrTable <- self$results$likelihoodRatios
-            for (i in 1:length(lr_results)) {
+            for (i in seq_along(lr_results)) {
                 lr <- lr_results[[i]]
                 lrTable$addRow(rowKey = paste0("lr_", i), values = lr)
             }
@@ -205,7 +205,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             # Populate Bayesian analysis table
             bayesianTable <- self$results$bayesianAnalysis
-            for (i in 1:length(bayesian_steps)) {
+            for (i in seq_along(bayesian_steps)) {
                 step <- bayesian_steps[[i]]
                 bayesianTable$addRow(rowKey = paste0("step_", i), values = step)
             }
@@ -218,7 +218,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             # Populate uncertainty analysis table
             uncertaintyTable <- self$results$uncertaintyAnalysis
-            for (i in 1:length(uncertainty_sources)) {
+            for (i in seq_along(uncertainty_sources)) {
                 uncertainty <- uncertainty_sources[[i]]
                 uncertaintyTable$addRow(rowKey = paste0("uncertainty_", i), values = uncertainty)
             }
@@ -231,7 +231,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             # Populate clinical context table
             contextTable <- self$results$clinicalContext
-            for (i in 1:length(context_factors)) {
+            for (i in seq_along(context_factors)) {
                 context <- context_factors[[i]]
                 contextTable$addRow(rowKey = paste0("context_", i), values = context)
             }
@@ -244,7 +244,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             # Populate sensitivity analysis table
             sensitivityTable <- self$results$sensitivityAnalysis
-            for (i in 1:length(sensitivity_results)) {
+            for (i in seq_along(sensitivity_results)) {
                 result <- sensitivity_results[[i]]
                 sensitivityTable$addRow(rowKey = paste0("param_", i), values = result)
             }
@@ -257,7 +257,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             # Populate performance table
             performanceTable <- self$results$modelPerformance
-            for (i in 1:length(performance_metrics)) {
+            for (i in seq_along(performance_metrics)) {
                 metric <- performance_metrics[[i]]
                 performanceTable$addRow(rowKey = paste0("metric_", i), values = metric)
             }
@@ -270,7 +270,7 @@ differentialdiagnosisClass <- R6::R6Class(
             diagnoses_db <- private$.getDiagnosisDatabase()
             differential_list <- list()
             
-            for (i in 1:length(diagnoses_db$name)) {
+            for (i in seq_along(diagnoses_db$name)) {
                 # Simulate Bayesian calculation for each diagnosis
                 bayes_result <- private$.calculateBayesianProbability(
                     diagnoses_db$name[i], 
@@ -300,7 +300,7 @@ differentialdiagnosisClass <- R6::R6Class(
             # Calculate likelihood ratios for each clinical finding
             lr_results <- list()
             
-            for (i in 1:ncol(clinical_data)) {
+            for (i in seq_len(ncol(clinical_data))) {
                 finding_name <- colnames(clinical_data)[i]
                 finding_data <- clinical_data[, i]
                 

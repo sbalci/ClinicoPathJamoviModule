@@ -406,7 +406,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 high_cor_pairs <- which(abs(cor_matrix) > 0.9 & cor_matrix != 1, arr.ind = TRUE)
                 
                 if (nrow(high_cor_pairs) > 0) {
-                    for (i in 1:nrow(high_cor_pairs)) {
+                    for (i in seq_len(nrow(high_cor_pairs))) {
                         var1 <- rownames(cor_matrix)[high_cor_pairs[i, 1]]
                         var2 <- colnames(cor_matrix)[high_cor_pairs[i, 2]]
                         cor_value <- cor_matrix[high_cor_pairs[i, 1], high_cor_pairs[i, 2]]
@@ -475,7 +475,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<tr><th>", "Operation", "</th><th>", "Time (s)", "</th><th>", "Timestamp", "</th></tr>"
             )
             
-            for (i in 1:nrow(private$.performanceMetrics)) {
+            for (i in seq_len(nrow(private$.performanceMetrics))) {
                 row <- private$.performanceMetrics[i, ]
                 perf_html <- paste0(perf_html,
                     "<tr><td>", row$operation, "</td>",
@@ -530,7 +530,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             neg_train_idx <- sample(negative_indices, neg_train_n)
             
             train_idx <- c(pos_train_idx, neg_train_idx)
-            val_idx <- setdiff(1:nrow(data), train_idx)
+            val_idx <- setdiff(seq_len(nrow(data)), train_idx)
             
             training_data <- data[train_idx, ]
             validation_data <- data[val_idx, ]
@@ -1121,7 +1121,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                                 spline_basis <- rms::rcs(data[[var]], nk = 3)
                                 
                                 # Add spline terms to data
-                                for (i in 1:ncol(spline_basis)) {
+                                for (i in seq_len(ncol(spline_basis))) {
                                     data[[paste0(var, "_spline", i)]] <- spline_basis[, i]
                                 }
                             }, error = function(e) {
@@ -2071,7 +2071,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     conf_int <- confint(model, level = 0.95)
 
                     # Populate table
-                    for (i in 1:nrow(coefficients)) {
+                    for (i in seq_len(nrow(coefficients))) {
                         term_name <- rownames(coefficients)[i]
                         estimate <- coefficients[i, "Estimate"]
                         std_error <- coefficients[i, "Std. Error"]
@@ -2243,7 +2243,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 score_data <- private$.generateClinicalRiskScore(first_model, models_built[1])
 
                 if (!is.null(score_data)) {
-                    for (i in 1:nrow(score_data)) {
+                    for (i in seq_len(nrow(score_data))) {
                         risk_score_table$addRow(rowKey = i, values = list(
                             variable = score_data$variable[i],
                             category = score_data$category[i],

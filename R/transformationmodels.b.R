@@ -207,7 +207,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             }
             
             # Add observation identifiers
-            modelData$obs_id <- 1:nrow(modelData)
+            modelData$obs_id <- seq_len(nrow(modelData))
             
             return(list(data = modelData, error = NULL))
         },
@@ -795,7 +795,7 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             table <- self$results$lambdaSearch
             
-            for (i in 1:nrow(lambdaSearch)) {
+            for (i in seq_len(nrow(lambdaSearch))) {
                 table$addRow(rowKey = i, values = list(
                     lambda = lambdaSearch$lambda[i],
                     loglik = lambdaSearch$loglik[i],

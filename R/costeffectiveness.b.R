@@ -449,7 +449,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             }
 
             # Check for dominance
-            for (i in 1:nrow(strategy_data)) {
+            for (i in seq_len(nrow(strategy_data))) {
                 strat <- strategy_data$strategy[i]
                 cost_i <- strategy_data$mean_cost[i]
                 effect_i <- strategy_data$mean_effect[i]
@@ -460,7 +460,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 on_frontier <- TRUE
 
                 # Check if dominated by any other strategy
-                for (j in 1:nrow(strategy_data)) {
+                for (j in seq_len(nrow(strategy_data))) {
                     if (i != j) {
                         cost_j <- strategy_data$mean_cost[j]
                         effect_j <- strategy_data$mean_effect[j]
@@ -670,7 +670,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 rank_order <- order(ranges, decreasing = TRUE)
 
                 # Add rows to table in order of sensitivity
-                for (rank in 1:length(rank_order)) {
+                for (rank in seq_along(rank_order)) {
                     idx <- rank_order[rank]
                     result <- all_results[[idx]]
                     result$sensitivity_rank <- rank
@@ -1315,8 +1315,8 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # Add legend
             legend("right",
                    legend = strategy_levels,
-                   col = colors[1:length(strategy_levels)],
-                   lty = lty_types[1:length(strategy_levels)],
+                   col = colors[seq_along(strategy_levels)],
+                   lty = lty_types[seq_along(strategy_levels)],
                    lwd = 2,
                    bty = "n",
                    cex = 0.8)
@@ -1579,13 +1579,13 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                  las = 1)
 
             # Add parameter labels
-            axis(2, at = 1:length(params), labels = params, las = 1, cex.axis = 0.8)
+            axis(2, at = seq_along(params), labels = params, las = 1, cex.axis = 0.8)
 
             # Add base case line
             abline(v = base_icer, lty = 2, col = "red", lwd = 2)
 
             # Plot horizontal bars
-            for (i in 1:length(params)) {
+            for (i in seq_along(params)) {
                 # Bar from low to high
                 segments(x0 = icer_low[i],
                         y0 = i,

@@ -1069,10 +1069,10 @@ clinicalnomogramsClass <- R6::R6Class(
                     
                     if (nrow(imp_data) > 0) {
                         imp_data <- imp_data[order(imp_data$importance, decreasing = TRUE), ]
-                        imp_data$rank <- 1:nrow(imp_data)
+                        imp_data$rank <- seq_len(nrow(imp_data))
                         imp_data$contribution <- (imp_data$importance / sum(imp_data$importance)) * 100
                         
-                        for (i in 1:nrow(imp_data)) {
+                        for (i in seq_len(nrow(imp_data))) {
                             table$addRow(rowKey = imp_data$variable[i], values = list(
                                 variable = imp_data$variable[i],
                                 importance = imp_data$importance[i],
@@ -1345,10 +1345,10 @@ clinicalnomogramsClass <- R6::R6Class(
             
             if (requireNamespace("survival", quietly = TRUE)) {
                 km <- survival::survfit(Surv(time, status) ~ group, data = data)
-                plot(km, col = 1:length(levels(data$group)), 
+                plot(km, col = seq_along(levels(data$group)), 
                      xlab = "Time", ylab = "Survival Probability",
                      main = "Survival by Risk Groups")
-                legend("bottomleft", legend = levels(data$group), col = 1:length(levels(data$group)), lty = 1)
+                legend("bottomleft", legend = levels(data$group), col = seq_along(levels(data$group)), lty = 1)
                 return(TRUE)
             }
             return(FALSE)

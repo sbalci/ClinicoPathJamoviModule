@@ -830,10 +830,10 @@ dynamiccoeffClass <- R6::R6Class(
             confidence_level <- self$options$confidence_level
             z_score <- qnorm(1 - (1 - confidence_level) / 2)
             
-            for (i in 1:ncol(coeffs)) {
+            for (i in seq_len(ncol(coeffs))) {
                 covariate_name <- results$covariate_cols[i]
                 
-                for (t in 1:nrow(coeffs)) {
+                for (t in seq_len(nrow(coeffs))) {
                     coef_val <- coeffs[t, i]
                     se_val <- coef_se[t, i]
                     lower_ci <- coef_val - z_score * se_val
@@ -1014,7 +1014,7 @@ dynamiccoeffClass <- R6::R6Class(
             
             # Convergence rates for each parameter
             if (length(metrics$convergence_rate) > 0) {
-                for (i in 1:length(metrics$convergence_rate)) {
+                for (i in seq_along(metrics$convergence_rate)) {
                     param_name <- if (i <= length(results$covariate_cols)) results$covariate_cols[i] else paste("Parameter", i)
                     table_data[[length(table_data) + 1]] <- list(
                         parameter = param_name,

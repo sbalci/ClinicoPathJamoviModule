@@ -490,7 +490,7 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 }
                 
                 # Populate summary table
-                for (i in 1:nrow(effects_df)) {
+                for (i in seq_len(nrow(effects_df))) {
                     self$results$summary$addRow(rowKey = i, values = list(
                         subgroup = effects_df$subgroup[i],
                         n = effects_df$n[i],

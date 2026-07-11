@@ -346,7 +346,7 @@ pagetrendtestClass <- R6::R6Class(
                     all_ranks <- numeric()
                     all_weights <- numeric()
 
-                    for (i in 1:nrow(rank_sums)) {
+                    for (i in seq_len(nrow(rank_sums))) {
                         condition <- rank_sums$condition[i]
                         rank_sum <- rank_sums$rank_sum[i]
                         weight <- rank_sums$trend_weight[i]
@@ -489,7 +489,7 @@ pagetrendtestClass <- R6::R6Class(
         .populateTrendOrdering = function(trend_ordering) {
             table <- self$results$trendOrdering
 
-            for (i in 1:nrow(trend_ordering)) {
+            for (i in seq_len(nrow(trend_ordering))) {
                 table$addRow(rowKey = i, values = list(
                     position = trend_ordering$position[i],
                     condition = trend_ordering$condition[i],

@@ -235,7 +235,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 trans_summary <- aggregate(time_at_risk ~ from + to, data = transitions, 
                                          FUN = function(x) c(count = length(x), total_time = sum(x)))
                 
-                for (i in 1:nrow(trans_summary)) {
+                for (i in seq_len(nrow(trans_summary))) {
                     from_state <- private$state_labels[trans_summary$from[i]]
                     to_state <- private$state_labels[trans_summary$to[i]]
                     n_trans <- trans_summary$time_at_risk[i, 1]
@@ -462,7 +462,7 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Calculate sojourn times from Q matrix
                 Q_matrix <- private$msm_model$Qmatrices$baseline
                 
-                for (i in 1:nrow(Q_matrix)) {
+                for (i in seq_len(nrow(Q_matrix))) {
                     if (sum(Q_matrix[i, ]) > 0) {
                         sojourn_time <- 1 / sum(Q_matrix[i, ])
                         
@@ -500,8 +500,8 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     tryCatch({
                         P_t <- msm::pmatrix.msm(private$msm_model, t = t)
                         
-                        for (i in 1:nrow(P_t)) {
-                            for (j in 1:ncol(P_t)) {
+                        for (i in seq_len(nrow(P_t))) {
+                            for (j in seq_len(ncol(P_t))) {
                                 if (P_t[i, j] > 0.001) {  # Only show meaningful probabilities
                                     
                                     prob_table$addRow(rowKey = paste0(t, "_", i, "_", j), values = list(

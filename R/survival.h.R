@@ -82,7 +82,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             rcs_variable = NULL,
             rcs_knots = 4,
             bootstrapValidation = FALSE,
-            bootstrapValN = 200, ...) {
+            bootstrapValN = 200,
+            seed = 42, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -511,6 +512,10 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=200,
                 min=50,
                 max=1000)
+            private$..seed <- jmvcore::OptionInteger$new(
+                "seed",
+                seed,
+                default=42)
 
             self$.addOption(private$..elapsedtime)
             self$.addOption(private$..tint)
@@ -592,6 +597,7 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..rcs_knots)
             self$.addOption(private$..bootstrapValidation)
             self$.addOption(private$..bootstrapValN)
+            self$.addOption(private$..seed)
         }),
     active = list(
         elapsedtime = function() private$..elapsedtime$value,
@@ -673,7 +679,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         rcs_variable = function() private$..rcs_variable$value,
         rcs_knots = function() private$..rcs_knots$value,
         bootstrapValidation = function() private$..bootstrapValidation$value,
-        bootstrapValN = function() private$..bootstrapValN$value),
+        bootstrapValN = function() private$..bootstrapValN$value,
+        seed = function() private$..seed$value),
     private = list(
         ..elapsedtime = NA,
         ..tint = NA,
@@ -754,7 +761,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..rcs_variable = NA,
         ..rcs_knots = NA,
         ..bootstrapValidation = NA,
-        ..bootstrapValN = NA)
+        ..bootstrapValN = NA,
+        ..seed = NA)
 )
 
 survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -2581,6 +2589,9 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   samples.
 #' @param bootstrapValidation .
 #' @param bootstrapValN .
+#' @param seed Random seed for the reproducible bootstrap internal validation.
+#'   Change this value to obtain a different bootstrap draw; the default (42)
+#'   reproduces the previous fixed behaviour.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
@@ -2754,7 +2765,8 @@ survival <- function(
     rcs_variable = NULL,
     rcs_knots = 4,
     bootstrapValidation = FALSE,
-    bootstrapValN = 200) {
+    bootstrapValN = 200,
+    seed = 42) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("survival requires jmvcore to be installed (restart may be required)")
@@ -2859,7 +2871,8 @@ survival <- function(
         rcs_variable = rcs_variable,
         rcs_knots = rcs_knots,
         bootstrapValidation = bootstrapValidation,
-        bootstrapValN = bootstrapValN)
+        bootstrapValN = bootstrapValN,
+        seed = seed)
 
     analysis <- survivalClass$new(
         options = options,

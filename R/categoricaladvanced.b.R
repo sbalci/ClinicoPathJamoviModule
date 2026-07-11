@@ -200,7 +200,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 col_names <- colnames(cont_table)
 
                 # Add column headers
-                for (j in 1:length(col_names)) {
+                for (j in seq_along(col_names)) {
                     table$addColumn(
                         name = paste0("col_", j),
                         title = col_names[j],
@@ -212,11 +212,11 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 table$addColumn(name = "total", title = "Total", type = "integer")
 
                 # Add rows
-                for (i in 1:length(row_names)) {
+                for (i in seq_along(row_names)) {
                     row_values <- list()
                     row_values[["row_label"]] <- row_names[i]
 
-                    for (j in 1:length(col_names)) {
+                    for (j in seq_along(col_names)) {
                         row_values[[paste0("col_", j)]] <- cont_table[i, j]
                     }
 
@@ -229,7 +229,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 total_row <- list()
                 total_row[["row_label"]] <- "Total"
 
-                for (j in 1:length(col_names)) {
+                for (j in seq_along(col_names)) {
                     total_row[[paste0("col_", j)]] <- sum(cont_table[, j])
                 }
 
@@ -457,8 +457,8 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         col_names <- colnames(cont_table)
 
                         # Add residuals to table
-                        for (i in 1:length(row_names)) {
-                            for (j in 1:length(col_names)) {
+                        for (i in seq_along(row_names)) {
+                            for (j in seq_along(col_names)) {
                                 observed <- cont_table[i, j]
                                 expected <- chi_result$expected[i, j]
                                 std_resid <- std_residuals[i, j]

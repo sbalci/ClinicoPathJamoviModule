@@ -524,7 +524,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 "</tr></thead><tbody>"
             )
             
-            for (i in 1:nrow(group_stats)) {
+            for (i in seq_len(nrow(group_stats))) {
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                 stats_html <- paste0(stats_html,
                     "<tr style='background-color: ", row_bg, ";'>",
@@ -738,7 +738,7 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             )
 
             # Add specific findings for each group
-            for (i in 1:nrow(group_stats)) {
+            for (i in seq_len(nrow(group_stats))) {
                 group_name <- group_stats[[group_var]][i]
                 n_points <- group_stats$n[i]
                 summary_html <- paste0(summary_html,

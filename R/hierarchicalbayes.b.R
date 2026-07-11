@@ -233,7 +233,7 @@ hierarchicalbayesClass <- R6::R6Class(
         .populateStudySummary = function(study_data) {
             study_table <- self$results$studySummary
             
-            for (i in 1:nrow(study_data)) {
+            for (i in seq_len(nrow(study_data))) {
                 study_row <- study_data[i, ]
                 
                 study_table$addRow(rowKey = paste0("study_", i), values = list(
@@ -468,7 +468,7 @@ hierarchicalbayesClass <- R6::R6Class(
             means <- c(mu_sens, mu_spec, tau_sens, tau_spec)
             sds <- c(0.2, 0.2, 0.1, 0.1) # Simplified
             
-            for (i in 1:length(parameters)) {
+            for (i in seq_along(parameters)) {
                 hier_table$addRow(rowKey = paste0("param_", i), values = list(
                     parameter = parameters[i],
                     posterior_mean = means[i],
@@ -540,7 +540,7 @@ hierarchicalbayesClass <- R6::R6Class(
             # Simulate good convergence diagnostics
             parameters <- c("μ_Sensitivity", "μ_Specificity", "τ_Sensitivity", "τ_Specificity", "ρ")
             
-            for (i in 1:length(parameters)) {
+            for (i in seq_along(parameters)) {
                 rhat <- runif(1, 0.999, 1.005)
                 ess_bulk <- sample(2000:5000, 1)
                 ess_tail <- sample(1500:4000, 1)

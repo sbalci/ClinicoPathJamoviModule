@@ -189,7 +189,7 @@ pseudosurvivalClass <- R6::R6Class(
                 html <- paste0(html, "<table class='jamovi-table'>")
                 html <- paste0(html, "<tr><th>Time</th><th>Survival Probability</th><th>SE</th><th>95% CI Lower</th><th>95% CI Upper</th><th>At Risk</th></tr>")
 
-                for (i in 1:length(time_points)) {
+                for (i in seq_along(time_points)) {
                     if (i <= length(surv_probs$time)) {
                         time_point <- surv_probs$time[i]
                         surv_prob <- surv_probs$surv[i]
@@ -403,7 +403,7 @@ pseudosurvivalClass <- R6::R6Class(
                             html <- paste0(html, "<table class='jamovi-table'>")
                             html <- paste0(html, "<tr><th>Variable</th><th>Coefficient</th><th>SE</th><th>t-value</th><th>p-value</th><th>95% CI</th><th>Clinical Interpretation</th></tr>")
                             
-                            for (i in 1:nrow(coef_table)) {
+                            for (i in seq_len(nrow(coef_table))) {
                                 # htmlEscape at assignment - var_name reaches `<td>` HTML at L428.
                                 # The L418 == "(Intercept)" string-equality check still works since
                                 # htmlEscape is identity on plain ASCII.
@@ -485,7 +485,7 @@ pseudosurvivalClass <- R6::R6Class(
                                 html <- paste0(html, "<table class='jamovi-table'>")
                                 html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>Robust SE</th><th>Wald Z</th><th>p-value</th></tr>")
                                 
-                                for (i in 1:nrow(gee_coef)) {
+                                for (i in seq_len(nrow(gee_coef))) {
                                     # htmlEscape at assignment - reaches `<td>` HTML below.
                                     var_name <- htmltools::htmlEscape(rownames(gee_coef)[i])
                                     estimate <- round(gee_coef[i, "Estimate"], 4)
@@ -548,7 +548,7 @@ pseudosurvivalClass <- R6::R6Class(
                 # This is a basic implementation for demonstration
                 individual_rmst <- numeric(nrow(analysis_data))
 
-                for (i in 1:nrow(analysis_data)) {
+                for (i in seq_len(nrow(analysis_data))) {
                     obs_time <- analysis_data$time[i]
                     event_status <- analysis_data$status[i]
 
@@ -589,7 +589,7 @@ pseudosurvivalClass <- R6::R6Class(
                     html <- paste0(html, "<table class='jamovi-table'>")
                     html <- paste0(html, "<tr><th>Variable</th><th>Estimate</th><th>SE</th><th>t value</th><th>Pr(&gt;|t|)</th><th>Interpretation</th></tr>")
 
-                    for (i in 1:nrow(coef_table)) {
+                    for (i in seq_len(nrow(coef_table))) {
                         # htmlEscape at assignment - reaches `<td>` HTML below.
                         # The == "(Intercept)" check still works since htmlEscape
                         # is identity on plain ASCII identifiers.
@@ -656,7 +656,7 @@ pseudosurvivalClass <- R6::R6Class(
                     rmst_values <- numeric(length(groups))
                     names(rmst_values) <- groups
 
-                    for (i in 1:length(groups)) {
+                    for (i in seq_along(groups)) {
                         group <- groups[i]
                         group_data <- analysis_data[analysis_data[[group_var]] == group, ]
                         group_surv <- Surv(group_data$time, group_data$status)

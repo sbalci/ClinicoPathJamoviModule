@@ -338,7 +338,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             table1 <- self$results$compsurvTable1
             
-            for (i in 1:length(logrank_results$n)) {
+            for (i in seq_along(logrank_results$n)) {
                 table1$setRow(rowNo=i, values=list(
                     n = logrank_results$n[i],
                     obs = logrank_results$obs[i],
@@ -376,7 +376,7 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             table3 <- self$results$compsurvTable3
             
-            for (i in 1:nrow(temp_df)) {
+            for (i in seq_len(nrow(temp_df))) {
                 median_val <- if ("median" %in% colnames(temp_df)) temp_df[i, "median"] else NA
                 cilb_val <- if ("0.95LCL" %in% colnames(temp_df)) temp_df[i, "0.95LCL"] else NA
                 ciub_val <- if ("0.95UCL" %in% colnames(temp_df)) temp_df[i, "0.95UCL"] else NA

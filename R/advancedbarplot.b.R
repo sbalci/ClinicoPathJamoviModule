@@ -480,7 +480,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     freq_data <- table(self$data[[x_var]])
                     total_n <- sum(freq_data)
 
-                    for (i in 1:length(freq_data)) {
+                    for (i in seq_along(freq_data)) {
                         category <- names(freq_data)[i]
                         count <- freq_data[i]
                         percentage <- round(count / total_n * 100, 1)
@@ -493,7 +493,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 } else {
                     # For other statistics
-                    for (i in 1:nrow(data)) {
+                    for (i in seq_len(nrow(data))) {
                         category <- data[[x_var]][i]
                         value <- round(data$value[i], 3)
 

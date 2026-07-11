@@ -550,7 +550,7 @@ raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
                 "</tr></thead><tbody>"
             )
             
-            for (i in 1:nrow(stats_summary)) {
+            for (i in seq_len(nrow(stats_summary))) {
                 row_bg <- if (i %% 2 == 0) "#ffffff" else "#f8f9fa"
                 stats_html <- paste0(
                     stats_html,

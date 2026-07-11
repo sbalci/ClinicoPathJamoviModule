@@ -647,7 +647,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 html_table <- paste0(html_table, "<th style='border: 1px solid #ddd; padding: 8px;'>p value</th>")
                 html_table <- paste0(html_table, "</tr>")
                 
-                for (i in 1:nrow(coefs)) {
+                for (i in seq_len(nrow(coefs))) {
                     html_table <- paste0(html_table, "<tr>")
                     # htmlEscape coefficient row names - derived from formula RHS (user column names)
                     html_table <- paste0(html_table, "<td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(rownames(coefs)[i]), "</td>")
@@ -842,10 +842,10 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             cor_html <- paste0(cor_html, "</tr>")
 
             # Data rows
-            for (i in 1:nrow(cor_matrix)) {
+            for (i in seq_len(nrow(cor_matrix))) {
                 cor_html <- paste0(cor_html, "<tr>")
                 cor_html <- paste0(cor_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(rownames(cor_matrix)[i]), "</td>")
-                for (j in 1:ncol(cor_matrix)) {
+                for (j in seq_len(ncol(cor_matrix))) {
                     cor_val <- round(cor_matrix[i, j], 3)
                     cor_html <- paste0(cor_html, "<td style='border: 1px solid #ddd; padding: 8px;'>", cor_val, "</td>")
                 }

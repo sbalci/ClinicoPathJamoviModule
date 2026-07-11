@@ -520,6 +520,17 @@ options:
           jamovi: >
             Add RECIST response categories (CR/PR/SD/PD) as a new variable to your dataset.
 
+    - name: seed
+      title: Random Seed
+      type: Integer
+      default: 123
+      description:
+          R: >
+            Random seed for the reproducible bootstrap confidence interval of the
+            median response (used when 'Show Confidence Interval' is enabled).
+            Change it to draw a different bootstrap sample; the default (123)
+            reproduces the previous fixed behaviour.
+
 
 
 ...

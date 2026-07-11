@@ -1079,7 +1079,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                         q3 = tapply(biomarker_values, response_factor, quantile, 0.75, na.rm = TRUE)
                     )
 
-                    for (i in 1:nrow(group_stats)) {
+                    for (i in seq_len(nrow(group_stats))) {
                         self$results$groupComparison$addRow(rowKey = i, values = list(
                             response_group = group_stats$response_group[i],
                             n = group_stats$n[i],

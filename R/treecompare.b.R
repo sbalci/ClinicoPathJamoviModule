@@ -1261,7 +1261,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .populate_comparison_table = function() {
             if (is.null(private$.performance_data)) return()
             
-            for (i in 1:nrow(private$.performance_data)) {
+            for (i in seq_len(nrow(private$.performance_data))) {
                 self$results$comparison_table$addRow(
                     rowKey = i,
                     values = list(
@@ -1281,7 +1281,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .populate_statistical_tests = function() {
             if (is.null(private$.statistical_tests)) return()
             
-            for (i in 1:nrow(private$.statistical_tests)) {
+            for (i in seq_len(nrow(private$.statistical_tests))) {
                 # Format test type and statistic display
                 stat_display <- if (is.na(private$.statistical_tests$statistic[i])) {
                     "N/A"
@@ -1309,7 +1309,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .populate_ranking_table = function() {
             if (is.null(private$.ranking_data)) return()
             
-            for (i in 1:nrow(private$.ranking_data)) {
+            for (i in seq_len(nrow(private$.ranking_data))) {
                 self$results$ranking_table$addRow(
                     rowKey = i,
                     values = list(

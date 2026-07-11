@@ -464,7 +464,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           if (self$options$show_fixed_effects && !is.null(model_results$fixed_effects)) {
             fixed_table <- self$results$fixedEffectsTable
             
-            for (i in 1:nrow(model_results$fixed_effects)) {
+            for (i in seq_len(nrow(model_results$fixed_effects))) {
               coef_name <- rownames(model_results$fixed_effects)[i]
               coef_val <- model_results$fixed_effects[i, "coef"]
               se_val <- model_results$fixed_effects[i, "se(coef)"]
@@ -486,7 +486,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           # Random effects summary
           if (self$options$show_random_effects && !is.null(model_results$variance_components)) {
             random_text <- "<h3>Random Effects Variance Components</h3>"
-            for (i in 1:length(model_results$variance_components)) {
+            for (i in seq_along(model_results$variance_components)) {
               var_comp <- model_results$variance_components[[i]]
               # Escape cluster variable name (from user data) before HTML interpolation.
               comp_name <- htmltools::htmlEscape(names(model_results$variance_components)[i])

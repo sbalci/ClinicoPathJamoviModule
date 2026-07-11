@@ -258,8 +258,8 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
 
             # Populate detailed table
             row_idx <- 1
-            for (i in 1:nrow(mytable)) {
-                for (j in 1:ncol(mytable)) {
+            for (i in seq_len(nrow(mytable))) {
+                for (j in seq_len(ncol(mytable))) {
                     row_values <- list(
                         rowVar_level = rownames(mytable)[i],
                         colVar_level = colnames(mytable)[j],

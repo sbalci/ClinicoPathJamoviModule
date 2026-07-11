@@ -558,16 +558,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
 .run = function() {
-    # Save and restore RNG state to avoid leaking global RNG entropy via
-    # internal sample() calls (.detectOutliers uses sample() for >5000-row datasets)
-    .rng_saved_seed <- if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-        get(".Random.seed", envir = .GlobalEnv) else NULL
-    on.exit({
-        if (!is.null(.rng_saved_seed))
-            assign(".Random.seed", .rng_saved_seed, envir = .GlobalEnv)
-        else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
-            rm(".Random.seed", envir = .GlobalEnv)
-    }, add = TRUE)
+    # Preserve and restore the RNG state to avoid leaking global RNG entropy via
+    # internal sample() calls (.detectOutliers uses sample() for >5000-row datasets).
+    # withr::local_preserve_seed() does the save/restore without touching .GlobalEnv.
+    withr::local_preserve_seed()
 
     # Always generate About content
     private$.generateAboutContent()
