@@ -1,0 +1,56 @@
+title: Circos Chord Diagram
+name: circos
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: From (source)
+        children:
+          - type: VariablesListBox
+            name: fromVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: To (target)
+        children:
+          - type: VariablesListBox
+            name: toVar
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Value / Weight (optional)
+        children:
+          - type: VariablesListBox
+            name: valueVar
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: inputMode
+      - type: ComboBox
+        name: gridPalette
+      - type: TextBox
+        name: transparency
+        format: number
+      - type: CheckBox
+        name: directional
+      - type: CheckBox
+        name: symmetric
+      - type: CheckBox
+        name: showLabels
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showMatrix
+      - type: CheckBox
+        name: showExplanation

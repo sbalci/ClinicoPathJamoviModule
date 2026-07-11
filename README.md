@@ -99,8 +99,8 @@ accelerate the translation of clinical data into meaningful insights.
 ## Documentation
 
 For a comprehensive guide to all the documentation available for this
-package, please see the [Documentation
-Hub](vignettes/documentation_hub.md).
+package, please see the Documentation
+Hub.
 
 ------------------------------------------------------------------------
 
@@ -154,20 +154,20 @@ download.file(
 
 **NEW!** Comprehensive tutorial series for ClinicoPath users:
 
-- **[Tutorial Series Home](tutorials/README.md)** - Complete learning
+- **[Tutorial Series Home](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/README.md)** - Complete learning
   paths for clinical trials, diagnostic pathology, and advanced analyses
 - **Quick Start:** [Getting Started with
-  ClinicoPath](tutorials/01-getting-started.qmd) (30 min)
+  ClinicoPath](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/01-getting-started.qmd) (30 min)
 - **Clinical Trials:** [Table One for Baseline
-  Characteristics](tutorials/02-table-one-clinical-trial.qmd) (45 min)
+  Characteristics](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/02-table-one-clinical-trial.qmd) (45 min)
 - **Survival Analysis:** [Kaplan-Meier & Cox
-  Regression](tutorials/03-survival-analysis-cancer.qmd) (45 min)
+  Regression](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/03-survival-analysis-cancer.qmd) (45 min)
 - **Diagnostic Testing:** [ROC Analysis & Optimal
-  Cutpoints](tutorials/04-roc-diagnostic-test.qmd) (45 min)
+  Cutpoints](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/04-roc-diagnostic-test.qmd) (45 min)
 - **Advanced Modeling:** [Decision Curve
-  Analysis](tutorials/05-decision-curve-analysis.qmd) (50 min)
+  Analysis](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/05-decision-curve-analysis.qmd) (50 min)
 - **Reproducibility:** [Automated Reports & Version
-  Control](tutorials/06-reproducible-reports.qmd) (40 min)
+  Control](https://github.com/sbalci/ClinicoPathJamoviModule/blob/master/tutorials/06-reproducible-reports.qmd) (40 min)
 
 **Total Learning Time:** 4.5 hours \| **No Programming Required**
 
@@ -590,13 +590,11 @@ remotes::install_github("sbalci/OncoPath")
 
 ##### [Swimmer Plot](https://www.serdarbalci.com/OncoPath/articles/swimmerplot_documentation.html)
 
-<img src="man/figures/jamovi-OncoPath-swimmerplot.gif" align="center" width = 75% />
 (Comprehensive swimmer plots for visualizing patient timelines, clinical
 events, and treatment responses)
 
 ##### [Waterfall Plot](https://www.serdarbalci.com/OncoPath/articles/waterfall_documentation.html)
 
-<img src="man/figures/jamovi-OncoPath-waterfall.gif" align="center" width = 75% />
 (Treatment response analysis with RECIST criteria, waterfall plots, and
 spider plots)
 
@@ -803,7 +801,7 @@ Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saytha
 <!-- badges: start -->
 
 [![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
+Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
 [![Gitpod
 Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sbalci/ClinicoPathJamoviModule)
 [![Download
@@ -876,7 +874,7 @@ coverage](https://codecov.io/gh/sbalci/ClinicoPathJamoviModule/graph/badge.svg)]
 
 **Code**  
 [![Launch Rstudio
-Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
+Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbalci/ClinicoPathJamoviModule/master?urlpath=rstudio)
 [![Gitpod
 Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sbalci/ClinicoPathJamoviModule)
 [![Download

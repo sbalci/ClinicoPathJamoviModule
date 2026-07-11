@@ -1,0 +1,113 @@
+---
+name:  joinpoint
+title: Joinpoint Trend Analysis
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuSubtitle: 'Segmented Trends with Annual Percent Change'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Fits a joinpoint (segmented log-linear) regression to a series of rates measured
+        over time - the standard analysis for cancer-registry incidence and mortality
+        trends. The number of joinpoints (change points in trend) is selected
+        data-adaptively, and each segment is summarized by its Annual Percent Change
+        (APC). The overall Average Annual Percent Change (AAPC) summarizes the whole
+        period. Use it to detect when a rate began rising or falling and to quantify the
+        rate of change in each period.
+    R:
+        dontrun: true
+        usage: |
+            joinpoint(
+                data = mydata,
+                time = "year",
+                rate = "incidence_rate",
+                maxJoinpoints = 3)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per time point).
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Time variable (e.g. calendar year).
+
+    - name: rate
+      title: Rate / Outcome Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            The rate or count measured at each time point. Modelled on the log scale, so
+            all values must be positive.
+
+    - name: maxJoinpoints
+      title: Maximum Joinpoints
+      type: Integer
+      min: 0
+      max: 5
+      default: 3
+      description:
+          R: >
+            The maximum number of joinpoints (change points) to consider. The best number
+            up to this maximum is selected using the Bayesian Information Criterion.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for APC / AAPC intervals.
+
+    - name: showSegments
+      title: Show Segment APC Table
+      type: Bool
+      default: true
+      description:
+          R: Report the Annual Percent Change for each fitted segment.
+
+    - name: showAAPC
+      title: Show Average APC
+      type: Bool
+      default: true
+      description:
+          R: Report the Average Annual Percent Change over the whole period.
+
+    - name: showPlot
+      title: Show Trend Plot
+      type: Bool
+      default: true
+      description:
+          R: Display the observed rates with the fitted joinpoint trend.
+
+    - name: logScale
+      title: Plot on Log Scale
+      type: Bool
+      default: false
+      description:
+          R: Plot the y-axis on a logarithmic scale (log-linear segments become straight).
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language summary of the trend.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of joinpoint regression.
+...

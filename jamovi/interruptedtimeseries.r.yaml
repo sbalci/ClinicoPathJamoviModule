@@ -1,0 +1,114 @@
+---
+name:  interruptedtimeseries
+title: Interrupted Time Series Analysis
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - time
+          - outcome
+          - interventionTime
+
+    - name: coefTable
+      title: Segmented Regression Coefficients
+      type: Table
+      visible: true
+      clearWith:
+          - time
+          - outcome
+          - interventionTime
+          - hac
+          - lag
+      columns:
+          - name: term
+            title: Parameter
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: se
+            title: SE
+            type: number
+          - name: statistic
+            title: t
+            type: number
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+
+    - name: effectTable
+      title: Estimated Intervention Effect
+      type: Table
+      visible: (predictAt != 0)
+      clearWith:
+          - time
+          - outcome
+          - interventionTime
+          - predictAt
+          - hac
+      columns:
+          - name: measure
+            title: ''
+            type: text
+          - name: value
+            title: Value
+            type: number
+
+    - name: diagnostics
+      title: Autocorrelation Diagnostics
+      type: Table
+      visible: (showDiagnostics)
+      clearWith:
+          - time
+          - outcome
+          - interventionTime
+      columns:
+          - name: test
+            title: Test
+            type: text
+          - name: statistic
+            title: Statistic
+            type: number
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+
+    - name: plot
+      title: Interrupted Time Series
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - time
+          - outcome
+          - interventionTime
+          - counterfactual
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - wagner2002its
+    - bernal2017its
+    - ClinicoPathJamoviModule
+    - sandwich
+    - lmtest
+    - ggplot2
+...

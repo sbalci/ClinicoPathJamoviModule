@@ -1,0 +1,97 @@
+---
+name:  door
+title: Desirability of Outcome Ranking (DOOR)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - group
+          - refLevel
+          - doorRank
+
+    - name: mainTable
+      title: DOOR Probability
+      type: Table
+      visible: true
+      clearWith:
+          - group
+          - refLevel
+          - doorRank
+          - rankDirection
+          - conf_level
+      columns:
+          - name: statistic
+            title: ''
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+
+    - name: distributionTable
+      title: DOOR Category Distribution
+      type: Table
+      visible: (showDistribution)
+      clearWith:
+          - group
+          - refLevel
+          - doorRank
+          - rankDirection
+      columns:
+          - name: category
+            title: DOOR Category
+            type: text
+          - name: n_index
+            title: Index (n)
+            type: integer
+          - name: pct_index
+            title: Index (%)
+            type: number
+            format: pc
+          - name: n_ref
+            title: Reference (n)
+            type: integer
+          - name: pct_ref
+            title: Reference (%)
+            type: number
+            format: pc
+
+    - name: plot
+      title: DOOR Distribution by Group
+      type: Image
+      width: 500
+      height: 350
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - group
+          - refLevel
+          - doorRank
+          - rankDirection
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - evans2015door
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

@@ -1,0 +1,140 @@
+---
+name:  gcomputation
+title: G-computation (Parametric G-formula)
+menuGroup: meddecideD
+menuSubgroup: Study Design
+menuSubtitle: 'Standardized Causal Effects for a Point Treatment'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Estimates the marginal (population-average) causal effect of a binary point
+        treatment using the parametric g-formula (g-computation). An outcome model is
+        fitted conditional on treatment and covariates; the fitted model then predicts
+        each subject's outcome under treatment and under no treatment, and these
+        predictions are averaged (standardized) over the covariate distribution to give
+        the counterfactual means E[Y^1] and E[Y^0]. The average treatment effect is
+        reported as a difference (and, for binary outcomes, a risk ratio), with
+        percentile bootstrap confidence intervals. This standardization removes
+        confounding by the measured covariates without requiring a propensity model.
+    R:
+        dontrun: true
+        usage: |
+            gcomputation(
+                data = mydata,
+                outcome = "death",
+                treatment = "treated",
+                covariates = vars(age, stage, grade),
+                outcomeType = "binary")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per subject).
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      description:
+          R: The outcome. Continuous, or a two-level factor / 0-1 numeric for binary.
+
+    - name: outcomeType
+      title: Outcome Type
+      type: List
+      options:
+        - title: Continuous
+          name: continuous
+        - title: Binary
+          name: binary
+      default: continuous
+      description:
+          R: Whether the outcome is continuous (linear model) or binary (logistic model).
+
+    - name: outcomeEvent
+      title: Outcome Event Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: For a binary factor outcome, the level treated as the event.
+
+    - name: treatment
+      title: Treatment Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor, numeric]
+      description:
+          R: The binary treatment / exposure variable.
+
+    - name: treatmentLevel
+      title: Treated Level
+      type: Level
+      variable: (treatment)
+      description:
+          R: The level of the treatment variable representing "treated".
+
+    - name: covariates
+      title: Covariates (confounders)
+      type: Variables
+      suggested: [continuous, nominal, ordinal]
+      permitted: [numeric, factor]
+      description:
+          R: Covariates to adjust for (measured confounders).
+
+    - name: interactions
+      title: Treatment x Covariate Interactions
+      type: Bool
+      default: false
+      description:
+          R: >
+            Include treatment-by-covariate interactions in the outcome model, allowing
+            effect modification. The marginal effect is still standardized over the
+            covariate distribution.
+
+    - name: bootstrap_n
+      title: Bootstrap Replications
+      type: Integer
+      min: 100
+      max: 10000
+      default: 1000
+      description:
+          R: Number of bootstrap resamples for the confidence interval.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for the bootstrap interval.
+
+    - name: showCounterfactual
+      title: Show Counterfactual Means
+      type: Bool
+      default: true
+      description:
+          R: Report the standardized counterfactual means E[Y^1] and E[Y^0].
+
+    - name: showPlot
+      title: Show Effect Plot
+      type: Bool
+      default: true
+      description:
+          R: Display the counterfactual means with the treatment effect.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language summary of the estimated effect.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the g-formula.
+...

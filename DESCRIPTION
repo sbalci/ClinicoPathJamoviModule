@@ -1,18 +1,18 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 0.0.5
-Date: 2026-07-10
-Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
+Version: 0.0.51
+Date: 2026-07-11
+Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-Description: ClinicoPath is a comprehensive jamovi module designed specifically 
+Description: Provides a comprehensive jamovi module designed specifically
     for clinicopathological research and medical data analysis. It provides an 
     integrated suite of statistical tools, visualization methods, and reporting 
     functions tailored for pathology, clinical research, and medical decision-making. 
     The package organizes analysis tools into five main functional areas: 
     ClinicoPath Descriptives (Table One generation, cross-tabulation, data quality 
     assessment), ClinicoPath Survival (Kaplan-Meier curves, Cox regression, 
-    competing risks), Medical Decision Analysis (ROC curves, diagnostic tests, 
+    competing risks), Medical Decision Analysis (ROC (Receiver Operating Characteristic) curves, diagnostic tests,
     decision curves), Statistical Plots (publication-ready visualizations), and 
     Specialized Visualizations (waterfall plots, alluvial diagrams, forest plots). 
     Key features include integration with jamovi's user-friendly interface, 
@@ -20,7 +20,7 @@ Description: ClinicoPath is a comprehensive jamovi module designed specifically
     and advanced statistical methods including bootstrap confidence intervals and 
     effect size calculations. The package serves as an umbrella coordinating 
     multiple specialized sub-modules and can be used through jamovi's GUI or 
-    directly in R for programmatic analysis. For comments, suggestions, feature requests or reporting bugs, please open an issue <a href="https://github.com/sbalci/ClinicoPathJamoviModule/issues/" target="_blank">here</a>. 
+    directly in 'R' for programmatic analysis. For comments, suggestions, feature requests or reporting bugs, please open an issue at <https://github.com/sbalci/ClinicoPathJamoviModule/issues/>.
 License: GPL-2
 URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
     https://github.com/sbalci/ClinicoPathJamoviModule/,
@@ -39,6 +39,7 @@ Imports:
     utils,
     e1071,
     arsenal,
+    circlize,
     DiagrammeRsvg,
     dplyr,
     easyalluvial,
@@ -57,13 +58,16 @@ Imports:
     jmvcore,
     kableExtra,
     KMunicate,
+    lmtest,
     lubridate,
+    sandwich,
     purrr,
     R6,
     rcrossref,
     rpart,
     rpart.plot,
     scales,
+    segmented,
     survival,
     survminer,
     tableone,

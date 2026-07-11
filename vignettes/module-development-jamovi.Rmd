@@ -4616,7 +4616,7 @@ sass
 # #
 # #
 # #     # repeated, factor, factor ----
-# #     # http://corybrunson.github.io/ggalluvial/
+# #     # https://corybrunson.github.io/ggalluvial/
 # #
 # #     if (direction == "repeated" && class(mygroup) == "factor" && class(mydep) == "factor") {
 # #             plotData <- data.frame(gr = mygroup,
@@ -4748,7 +4748,7 @@ sass
 # #
 # #
 # #     # repeated, factor, factor ----
-# #     # http://corybrunson.github.io/ggalluvial/
+# #     # https://corybrunson.github.io/ggalluvial/
 # #     # networkD3
 # #
 # #
@@ -5933,7 +5933,7 @@ mypairwisedescription)
             #
             # ggscatterstats 	scatterplots 	for correlations between two variables
 
-            # http://corybrunson.github.io/ggalluvial/
+            # https://corybrunson.github.io/ggalluvial/
 
 
             # plot <- ggplot(plotData, aes(x = gr,
@@ -6180,7 +6180,7 @@ available::available("lens2r")
 ## bench
 
 
-High Precision Timing of R Expressions http://bench.r-lib.org/
+High Precision Timing of R Expressions https://bench.r-lib.org/
 
 https://github.com/r-lib/bench
 

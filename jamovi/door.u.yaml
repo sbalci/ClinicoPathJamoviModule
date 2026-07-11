@@ -1,0 +1,48 @@
+title: Desirability of Outcome Ranking (DOOR)
+name: door
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Group Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: DOOR Outcome (ordinal)
+        children:
+          - type: VariablesListBox
+            name: doorRank
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: LevelSelector
+        name: refLevel
+        label: Reference Level
+      - type: ComboBox
+        name: rankDirection
+      - type: TextBox
+        name: conf_level
+        format: number
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showDistribution
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

@@ -1,0 +1,120 @@
+---
+name:  evalue
+title: E-value for Unmeasured Confounding
+menuGroup: meddecideD
+menuSubgroup: Study Design
+menuSubtitle: 'Sensitivity Analysis (VanderWeele & Ding)'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Computes the E-value, the minimum strength of association that an unmeasured
+        confounder would need to have with both the exposure and the outcome - above and
+        beyond the measured covariates - to fully explain away an observed
+        exposure-outcome association (VanderWeele & Ding, 2017). An E-value is reported
+        for the point estimate and for the confidence-interval limit closest to the null.
+        Larger E-values indicate results more robust to unmeasured confounding. Accepts
+        risk ratios, odds ratios, hazard ratios, or standardized mean differences.
+    R:
+        dontrun: true
+        usage: |
+            evalue(
+                effectType = "RR",
+                estimate = 3.9,
+                ci_lower = 1.8,
+                ci_upper = 8.7,
+                rare = FALSE)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: >
+            Optional data frame. The E-value is computed from the estimate and confidence
+            limits entered below; a data frame is not required.
+
+    - name: effectType
+      title: Effect Measure
+      type: List
+      options:
+        - title: Risk ratio (RR)
+          name: RR
+        - title: Odds ratio (OR)
+          name: OR
+        - title: Hazard ratio (HR)
+          name: HR
+        - title: Standardized mean difference (d)
+          name: SMD
+      default: RR
+      description:
+          R: >
+            The type of effect estimate. Odds and hazard ratios are converted to an
+            approximate risk-ratio scale before the E-value is computed.
+
+    - name: estimate
+      title: Point Estimate
+      type: Number
+      default: 2
+      description:
+          R: >
+            The observed effect estimate (ratio measures on their natural scale, > 0; a
+            standardized mean difference on the d scale).
+
+    - name: ci_lower
+      title: Lower Confidence Limit
+      type: Number
+      default: 0
+      description:
+          R: >
+            Lower confidence limit of the estimate. Set both limits to 0 to compute the
+            E-value for the point estimate only.
+
+    - name: ci_upper
+      title: Upper Confidence Limit
+      type: Number
+      default: 0
+      description:
+          R: Upper confidence limit of the estimate.
+
+    - name: rare
+      title: Rare Outcome (< 15%)
+      type: Bool
+      default: false
+      description:
+          R: >
+            Whether the outcome is rare (affects the odds-ratio / hazard-ratio to
+            risk-ratio conversion). When rare, OR and HR approximate the RR directly.
+
+    - name: trueValue
+      title: True (Null) Value
+      type: Number
+      default: 1
+      description:
+          R: >
+            The value of the effect measure representing no effect (1 for ratio measures).
+            The E-value is computed for the association relative to this value.
+
+    - name: showPlot
+      title: Show Bias Plot
+      type: Bool
+      default: true
+      description:
+          R: >
+            Display the bounding curve of confounder associations that would explain away
+            the estimate, with the E-value marked.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language interpretation of the E-value.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the E-value methodology.
+...

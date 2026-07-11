@@ -1,0 +1,85 @@
+title: Fragility Index for Dichotomous Outcomes
+name: fragilityindex
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: ComboBox
+    name: dataFormat
+  - type: CollapseBox
+    label: Summary Counts
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: Label
+            label: Group 1
+            children:
+              - type: TextBox
+                name: events1
+                format: number
+              - type: TextBox
+                name: n1
+                format: number
+          - type: Label
+            label: Group 2
+            children:
+              - type: TextBox
+                name: events2
+                format: number
+              - type: TextBox
+                name: n2
+                format: number
+  - type: CollapseBox
+    label: Raw Data Variables
+    collapsed: true
+    stretchFactor: 0
+    children:
+      - type: VariableSupplier
+        persistentItems: false
+        stretchFactor: 1
+        children:
+          - type: TargetLayoutBox
+            label: Group Variable
+            children:
+              - type: VariablesListBox
+                name: group
+                maxItemCount: 1
+                isTarget: true
+          - type: TargetLayoutBox
+            label: Outcome Variable
+            children:
+              - type: VariablesListBox
+                name: outcome
+                maxItemCount: 1
+                isTarget: true
+      - type: LevelSelector
+        name: outcomeEvent
+        label: Event Level
+  - type: CollapseBox
+    label: Test Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: ComboBox
+        name: testType
+      - type: TextBox
+        name: alpha
+        format: number
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showCounts
+      - type: CheckBox
+        name: showTrajectory
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

@@ -2371,7 +2371,7 @@ survivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "survival",
-                version = c(0,0,5),
+                version = c(0,0,51),
                 options = options,
                 results = survivalResults$new(options=options),
                 data = data,

@@ -1,0 +1,112 @@
+---
+name:  door
+title: Desirability of Outcome Ranking (DOOR)
+menuGroup: meddecideD
+menuSubgroup: Study Design
+menuSubtitle: 'Ordinal Benefit-Risk Comparison of Two Groups'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Compares two groups on an ordinal Desirability of Outcome Ranking (DOOR), a
+        composite that ranks each patient by overall clinical desirability combining
+        efficacy and safety. The DOOR probability is the chance that a randomly chosen
+        patient from the index group has a more desirable outcome than a randomly chosen
+        patient from the reference group (ties split evenly) - equivalent to a
+        Mann-Whitney / AUC estimand. Values above 0.5 favour the index group. This
+        approach, developed for antimicrobial and benefit-risk trials, avoids collapsing
+        outcomes of differing severity into a single binary endpoint.
+    R:
+        dontrun: true
+        usage: |
+            door(
+                data = mydata,
+                group = "arm",
+                refLevel = "Control",
+                doorRank = "door_category")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per subject).
+
+    - name: group
+      title: Group Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: Two-level group variable.
+
+    - name: refLevel
+      title: Reference Level
+      type: Level
+      variable: (group)
+      description:
+          R: >
+            The level of the group variable to treat as the reference. The DOOR
+            probability expresses the chance the other (index) group is more desirable.
+
+    - name: doorRank
+      title: DOOR Outcome (ordinal)
+      type: Variable
+      suggested: [ordinal, nominal]
+      permitted: [factor, numeric]
+      description:
+          R: >
+            Ordinal DOOR category for each subject. Combined with the ranking direction
+            to determine which outcomes are more desirable.
+
+    - name: rankDirection
+      title: Rank Direction
+      type: List
+      options:
+        - title: Lower value is more desirable
+          name: lower
+        - title: Higher value is more desirable
+          name: higher
+      default: lower
+      description:
+          R: >
+            Whether a lower or higher DOOR category value represents the more desirable
+            outcome.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for the DOOR probability interval.
+
+    - name: showDistribution
+      title: Show DOOR Distribution
+      type: Bool
+      default: true
+      description:
+          R: Display the distribution of DOOR categories within each group.
+
+    - name: showPlot
+      title: Show Distribution Plot
+      type: Bool
+      default: true
+      description:
+          R: Display a stacked bar of DOOR category proportions by group.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language summary of the DOOR probability.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the DOOR methodology.
+...

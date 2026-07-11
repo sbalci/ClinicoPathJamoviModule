@@ -1,0 +1,59 @@
+title: Interrupted Time Series Analysis
+name: interruptedtimeseries
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: outcome
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: interventionTime
+        format: number
+      - type: TextBox
+        name: predictAt
+        format: number
+  - type: CollapseBox
+    label: Standard Errors
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: hac
+      - type: TextBox
+        name: lag
+        format: number
+        enable: (hac)
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: counterfactual
+      - type: CheckBox
+        name: showDiagnostics
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

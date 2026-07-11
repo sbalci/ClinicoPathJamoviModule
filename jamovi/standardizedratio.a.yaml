@@ -1,0 +1,143 @@
+---
+name:  standardizedratio
+title: Standardized Incidence / Mortality Ratio (SIR / SMR)
+menuGroup: SurvivalD
+menuSubgroup: Specialized Survival Methods
+menuSubtitle: 'Indirect Standardization with Exact Poisson CIs'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Computes standardized incidence ratios (SIR) or standardized mortality ratios
+        (SMR) by indirect standardization. For each stratum the number of expected
+        events is obtained by applying reference-population rates to the observed
+        person-time; the SIR/SMR is the ratio of total observed to total expected
+        events. Exact Poisson confidence intervals and a test against the null value of
+        1 are provided. This is the standard analysis for registry, cohort, and
+        occupational studies comparing an observed event count with population
+        expectation.
+    R:
+        dontrun: true
+        usage: |
+            # Long data: one row per stratum with observed events, person-time,
+            # and a reference rate (events per person-time unit).
+            standardizedratio(
+                data = mydata,
+                observed = "obs_events",
+                personTime = "person_years",
+                refRate = "reference_rate")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per stratum).
+
+    - name: inputMode
+      title: Expected Events From
+      type: List
+      options:
+        - title: Reference rate x person-time
+          name: rate
+        - title: Expected events column
+          name: expected
+      default: rate
+      description:
+          R: >
+            Whether expected events are computed from a reference rate times person-time,
+            or supplied directly as a column of expected counts.
+
+    - name: observed
+      title: Observed Events
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Observed number of events in each stratum.
+
+    - name: personTime
+      title: Person-Time
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Person-time at risk in each stratum (used when expected events are computed
+            from a reference rate).
+
+    - name: refRate
+      title: Reference Rate
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Reference-population event rate for each stratum, expressed per person-time
+            unit (used with inputMode = "rate").
+
+    - name: expected
+      title: Expected Events
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Directly supplied expected events per stratum (used with inputMode = "expected").
+
+    - name: stratum
+      title: Stratum Label (optional)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor]
+      description:
+          R: Optional stratum label used to report a per-stratum SIR/SMR table.
+
+    - name: ratioType
+      title: Ratio Type
+      type: List
+      options:
+        - title: SIR (incidence)
+          name: sir
+        - title: SMR (mortality)
+          name: smr
+      default: sir
+      description:
+          R: Whether to label results as a standardized incidence or mortality ratio.
+
+    - name: conf_level
+      title: Confidence Level
+      type: Number
+      min: 0.50
+      max: 0.999
+      default: 0.95
+      description:
+          R: Confidence level for the exact Poisson interval.
+
+    - name: perStratum
+      title: Show Per-Stratum Table
+      type: Bool
+      default: true
+      description:
+          R: Report the SIR/SMR for each stratum in addition to the overall value.
+
+    - name: showPlot
+      title: Show Forest Plot
+      type: Bool
+      default: true
+      description:
+          R: Display a forest plot of the per-stratum and overall SIR/SMR.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language summary of the result.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of indirect standardization.
+...

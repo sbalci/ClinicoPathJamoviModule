@@ -302,7 +302,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           # Sort data
           if (plotData$options$sortBy == "response") {
-            df <- df[order(df$response, na.last = TRUE),]
+            # conventional oncology waterfall: worst (highest) on left, best (lowest) on right
+            decreasing <- !identical(plotData$options$sortDirection, "reverse")
+            df <- df[order(df$response, decreasing = decreasing, na.last = TRUE),]
           } else if (plotData$options$sortBy == "id") {
             df <- df[order(df[[plotData$options$patientID]], na.last = TRUE),]
           }
@@ -2281,7 +2283,9 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Sort data
         if (plotData$options$sortBy == "response") {
-          df <- df[order(df$response, na.last = TRUE),]
+          # conventional oncology waterfall: worst (highest) on left, best (lowest) on right
+          decreasing <- !identical(plotData$options$sortDirection, "reverse")
+          df <- df[order(df$response, decreasing = decreasing, na.last = TRUE),]
         } else if (plotData$options$sortBy == "id") {
           df <- df[order(df[[plotData$options$patientID]], na.last = TRUE),]
         }

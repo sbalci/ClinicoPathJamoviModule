@@ -1,0 +1,4 @@
+"study","effect_type","estimate","ci_lower","ci_upper"
+"Cohort A","RR",3.9,1.8,8.7
+"Cohort B","HR",1.6,1.2,2.1
+"Case-control C","OR",2.5,1.3,4.8

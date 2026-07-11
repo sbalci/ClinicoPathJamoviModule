@@ -1,0 +1,50 @@
+title: Joinpoint Trend Analysis
+name: joinpoint
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Time Variable
+        children:
+          - type: VariablesListBox
+            name: time
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Rate / Outcome Variable
+        children:
+          - type: VariablesListBox
+            name: rate
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: maxJoinpoints
+        format: number
+      - type: TextBox
+        name: conf_level
+        format: number
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showSegments
+      - type: CheckBox
+        name: showAAPC
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: logScale
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation

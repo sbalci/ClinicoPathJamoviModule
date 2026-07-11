@@ -1,0 +1,57 @@
+---
+name:  circos
+title: Circos Chord Diagram
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - fromVar
+          - toVar
+          - valueVar
+          - inputMode
+
+    - name: plot
+      title: Chord Diagram
+      type: Image
+      width: 600
+      height: 600
+      renderFun: .plot
+      visible: true
+      requiresData: true
+      clearWith:
+          - fromVar
+          - toVar
+          - valueVar
+          - inputMode
+          - directional
+          - symmetric
+          - gridPalette
+          - transparency
+          - showLabels
+
+    - name: matrixTable
+      title: Adjacency Matrix
+      type: Table
+      visible: (showMatrix)
+      columns: []
+      clearWith:
+          - fromVar
+          - toVar
+          - valueVar
+          - inputMode
+          - symmetric
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - gu2014circlize
+    - ClinicoPathJamoviModule
+...

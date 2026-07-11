@@ -1,0 +1,126 @@
+---
+name:  interruptedtimeseries
+title: Interrupted Time Series Analysis
+menuGroup: ClinicoPathD
+menuSubgroup: Statistical Tests
+menuSubtitle: 'Segmented Regression for Intervention Effects'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Evaluates the effect of an intervention on an outcome measured repeatedly over
+        time using segmented regression of an interrupted time series. The model
+        estimates the pre-intervention level and trend, the immediate change in level
+        at the intervention point, and the change in trend (slope) afterwards.
+        Standard errors can be adjusted for autocorrelation using Newey-West (HAC)
+        estimators, and a Durbin-Watson test reports residual autocorrelation. This is
+        the standard quasi-experimental design for evaluating quality-improvement,
+        policy, or laboratory-process interventions where randomization is not possible.
+    R:
+        dontrun: true
+        usage: |
+            interruptedtimeseries(
+                data = mydata,
+                time = "month",
+                outcome = "turnaround_time",
+                interventionTime = 25,
+                hac = TRUE)
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (one row per time point).
+
+    - name: time
+      title: Time Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: Sequential time index (e.g. month or week number), evenly spaced.
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: The continuous outcome measured at each time point.
+
+    - name: interventionTime
+      title: Intervention Time Point
+      type: Number
+      default: 0
+      description:
+          R: >
+            The value of the time variable at which the intervention began. The first
+            post-intervention observation is the first time point at or after this value.
+
+    - name: hac
+      title: Newey-West (HAC) Standard Errors
+      type: Bool
+      default: true
+      description:
+          R: >
+            Adjust standard errors for autocorrelation and heteroscedasticity using the
+            Newey-West estimator. Recommended for time series data.
+
+    - name: lag
+      title: Newey-West Lag (0 = automatic)
+      type: Integer
+      min: 0
+      default: 0
+      description:
+          R: >
+            Maximum lag for the Newey-West estimator. Set to 0 to choose the lag
+            automatically from the series length.
+
+    - name: counterfactual
+      title: Show Counterfactual
+      type: Bool
+      default: true
+      description:
+          R: >
+            Overlay the projected counterfactual (the pre-intervention trend extrapolated
+            forward as if no intervention had occurred) on the plot.
+
+    - name: predictAt
+      title: Predict Effect at Time
+      type: Number
+      default: 0
+      description:
+          R: >
+            A post-intervention time point at which to report the absolute and relative
+            effect of the intervention (observed model prediction minus counterfactual).
+            Set to 0 to skip.
+
+    - name: showDiagnostics
+      title: Show Autocorrelation Diagnostics
+      type: Bool
+      default: true
+      description:
+          R: Report the Durbin-Watson test for residual autocorrelation.
+
+    - name: showPlot
+      title: Show Time Series Plot
+      type: Bool
+      default: true
+      description:
+          R: Display the observed series with fitted segments and intervention marker.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language summary of the intervention effect.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the segmented regression methodology.
+...

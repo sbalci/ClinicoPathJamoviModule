@@ -4,7 +4,7 @@ title: Outcome Organizer for Survival Analysis
 menuGroup: Survival
 menuSubgroup: Data Preparation
 menuSubtitle: 'Comprehensive Outcome Preparation for Survival Analysis'
-version: '0.0.5'
+version: '0.0.51'
 jas: '1.2'
 
 description:

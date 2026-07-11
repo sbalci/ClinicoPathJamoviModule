@@ -1,0 +1,69 @@
+---
+name:  evalue
+title: E-value for Unmeasured Confounding
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - effectType
+          - estimate
+          - ci_lower
+          - ci_upper
+
+    - name: mainTable
+      title: E-values
+      type: Table
+      visible: true
+      clearWith:
+          - effectType
+          - estimate
+          - ci_lower
+          - ci_upper
+          - rare
+          - trueValue
+      columns:
+          - name: quantity
+            title: ''
+            type: text
+          - name: rr_scale
+            title: RR scale
+            type: number
+          - name: evalue
+            title: E-value
+            type: number
+
+    - name: plot
+      title: Bias Bounding Curve
+      type: Image
+      width: 500
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      clearWith:
+          - effectType
+          - estimate
+          - ci_lower
+          - ci_upper
+          - rare
+          - trueValue
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - vanderweele2017evalue
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

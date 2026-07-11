@@ -1,0 +1,135 @@
+---
+name:  circos
+title: Circos Chord Diagram
+menuGroup: OncoPathD
+menuSubgroup: ClinicoPath Descriptives
+menuSubtitle: 'Circular Visualization of Relationships'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Draws a circular chord diagram visualizing the flow or co-occurrence between
+        categories - for example transitions between disease states, co-mutation of
+        genes, referral patterns between sites, or migration between diagnostic
+        categories. Each category occupies a sector on a circle and ribbons connect
+        categories with a width proportional to the strength of their relationship. Input
+        may be an edge list (from / to / value) or the two categorical variables whose
+        cross-tabulation defines the links. Built on the circlize package.
+    R:
+        dontrun: true
+        usage: |
+            circos(
+                data = mydata,
+                fromVar = "referring_site",
+                toVar = "treating_site",
+                valueVar = "n_patients")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame.
+
+    - name: inputMode
+      title: Input Format
+      type: List
+      options:
+        - title: Edge list (from / to / value)
+          name: edges
+        - title: Two categorical variables (cross-tabulated)
+          name: crosstab
+      default: edges
+      description:
+          R: >
+            Whether links are given as an edge list with an optional value column, or
+            derived by cross-tabulating two categorical variables.
+
+    - name: fromVar
+      title: From (source)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: Source category for each link.
+
+    - name: toVar
+      title: To (target)
+      type: Variable
+      suggested: [nominal, ordinal]
+      permitted: [factor, numeric]
+      description:
+          R: Target category for each link.
+
+    - name: valueVar
+      title: Value / Weight (optional)
+      type: Variable
+      suggested: [continuous]
+      permitted: [numeric]
+      description:
+          R: >
+            Link weight (edge-list mode). If omitted, each row counts as 1 and identical
+            from/to pairs are summed.
+
+    - name: directional
+      title: Directional Ribbons
+      type: Bool
+      default: true
+      description:
+          R: Draw ribbons with directionality (arrows from source to target).
+
+    - name: symmetric
+      title: Treat as Symmetric
+      type: Bool
+      default: false
+      description:
+          R: >
+            Treat the relationship as undirected (combine A->B and B->A). Useful for
+            co-occurrence such as co-mutation.
+
+    - name: gridPalette
+      title: Sector Colour Palette
+      type: List
+      options:
+        - title: Category (Set2)
+          name: Set2
+        - title: Category (Dark2)
+          name: Dark2
+        - title: Category (Paired)
+          name: Paired
+        - title: Spectral
+          name: Spectral
+      default: Set2
+      description:
+          R: Colour palette for the category sectors.
+
+    - name: transparency
+      title: Ribbon Transparency
+      type: Number
+      min: 0
+      max: 0.9
+      default: 0.5
+      description:
+          R: Transparency of the connecting ribbons (0 = opaque, higher = more transparent).
+
+    - name: showLabels
+      title: Show Sector Labels
+      type: Bool
+      default: true
+      description:
+          R: Label each category sector.
+
+    - name: showMatrix
+      title: Show Adjacency Table
+      type: Bool
+      default: true
+      description:
+          R: Report the from-to matrix underlying the diagram.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the chord diagram.
+...

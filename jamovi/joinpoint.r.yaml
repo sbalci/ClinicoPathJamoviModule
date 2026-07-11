@@ -1,0 +1,111 @@
+---
+name:  joinpoint
+title: Joinpoint Trend Analysis
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - time
+          - rate
+
+    - name: joinpointTable
+      title: Detected Joinpoints
+      type: Table
+      visible: true
+      clearWith:
+          - time
+          - rate
+          - maxJoinpoints
+      columns:
+          - name: idx
+            title: '#'
+            type: integer
+          - name: location
+            title: Joinpoint (time)
+            type: number
+
+    - name: segmentTable
+      title: Segment Annual Percent Change (APC)
+      type: Table
+      visible: (showSegments)
+      clearWith:
+          - time
+          - rate
+          - maxJoinpoints
+          - conf_level
+      columns:
+          - name: segment
+            title: Segment
+            type: text
+          - name: apc
+            title: APC (%/period)
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+
+    - name: aapcTable
+      title: Average Annual Percent Change (AAPC)
+      type: Table
+      visible: (showAAPC)
+      clearWith:
+          - time
+          - rate
+          - maxJoinpoints
+          - conf_level
+      columns:
+          - name: label
+            title: ''
+            type: text
+          - name: aapc
+            title: AAPC (%/period)
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+
+    - name: plot
+      title: Joinpoint Trend
+      type: Image
+      width: 600
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - time
+          - rate
+          - maxJoinpoints
+          - logScale
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - kim2000joinpoint
+    - ClinicoPathJamoviModule
+    - segmented
+    - ggplot2
+...

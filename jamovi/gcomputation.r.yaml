@@ -1,0 +1,92 @@
+---
+name:  gcomputation
+title: G-computation (Parametric G-formula)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - outcome
+          - treatment
+          - covariates
+          - outcomeType
+
+    - name: mainTable
+      title: Average Treatment Effect
+      type: Table
+      visible: true
+      clearWith:
+          - outcome
+          - treatment
+          - covariates
+          - outcomeType
+          - interactions
+          - bootstrap_n
+          - conf_level
+      columns:
+          - name: measure
+            title: Measure
+            type: text
+          - name: estimate
+            title: Estimate
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+
+    - name: counterfactualTable
+      title: Standardized Counterfactual Means
+      type: Table
+      visible: (showCounterfactual)
+      clearWith:
+          - outcome
+          - treatment
+          - covariates
+          - outcomeType
+          - interactions
+      columns:
+          - name: scenario
+            title: Scenario
+            type: text
+          - name: mean
+            title: Standardized Mean
+            type: number
+
+    - name: plot
+      title: Counterfactual Means
+      type: Image
+      width: 450
+      height: 350
+      renderFun: .plot
+      visible: (showPlot)
+      requiresData: true
+      clearWith:
+          - outcome
+          - treatment
+          - covariates
+          - outcomeType
+          - interactions
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - robins1986gformula
+    - hernan2020whatif
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

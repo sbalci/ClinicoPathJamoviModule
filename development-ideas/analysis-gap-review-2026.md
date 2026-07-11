@@ -2,6 +2,15 @@
 
 **Date:** 2026-07-10 · **Module version:** 0.0.47 · **Analyses in catalog:** 370 (`jamovi/*.a.yaml` + `R/*.b.R`)
 
+> **Update 2026-07-10:** All three Tier-1 gaps have been implemented — `winratio`,
+> `fragilityindex`, and `interruptedtimeseries` — see `tier1-gaps-implementation-summary.md`.
+> All three Tier-2 gaps have now also been implemented — `joinpoint` (Joinpoint/APC trend),
+> `standardizedratio` (SIR/SMR), and `door` (Desirability of Outcome Ranking) — see
+> `tier2-gaps-implementation-summary.md`. All three Tier-3 gaps have now also been
+> implemented — `evalue` (E-value sensitivity analysis), `gcomputation` (parametric
+> g-formula), and `circos` (chord diagram) — see `tier3-gaps-implementation-summary.md`.
+> All nine recommended gaps (Tier-1 through Tier-3) are now implemented.
+
 ## Method
 
 Enumerated all 370 registered analyses and their menu groups/subgroups, then cross-checked a

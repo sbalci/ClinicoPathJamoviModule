@@ -1,0 +1,119 @@
+---
+name:  standardizedratio
+title: Standardized Incidence / Mortality Ratio (SIR / SMR)
+jrs:   '1.1'
+
+items:
+    - name: todo
+      title: Instructions
+      type: Html
+      visible: true
+      clearWith:
+          - observed
+          - personTime
+          - refRate
+          - expected
+          - inputMode
+
+    - name: overallTable
+      title: Overall Standardized Ratio
+      type: Table
+      visible: true
+      clearWith:
+          - observed
+          - personTime
+          - refRate
+          - expected
+          - inputMode
+          - ratioType
+          - conf_level
+      columns:
+          - name: label
+            title: ''
+            type: text
+          - name: observed
+            title: Observed
+            type: number
+          - name: expected
+            title: Expected
+            type: number
+          - name: ratio
+            title: SIR/SMR
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+          - name: p
+            title: p
+            type: number
+            format: zto,pvalue
+
+    - name: stratumTable
+      title: Per-Stratum Standardized Ratios
+      type: Table
+      visible: (perStratum)
+      clearWith:
+          - observed
+          - personTime
+          - refRate
+          - expected
+          - inputMode
+          - stratum
+          - ratioType
+          - conf_level
+      columns:
+          - name: stratum
+            title: Stratum
+            type: text
+          - name: observed
+            title: Observed
+            type: number
+          - name: expected
+            title: Expected
+            type: number
+          - name: ratio
+            title: SIR/SMR
+            type: number
+          - name: ci_lower
+            title: Lower CI
+            type: number
+          - name: ci_upper
+            title: Upper CI
+            type: number
+
+    - name: plot
+      title: Forest Plot
+      type: Image
+      width: 550
+      height: 400
+      renderFun: .plot
+      visible: (showPlot)
+      clearWith:
+          - observed
+          - personTime
+          - refRate
+          - expected
+          - inputMode
+          - stratum
+          - ratioType
+          - conf_level
+
+    - name: summary
+      title: Analysis Summary
+      type: Html
+      visible: (showSummary)
+
+    - name: explanation
+      title: Methodology
+      type: Html
+      visible: (showExplanation)
+
+
+refs:
+    - breslowday1987
+    - ClinicoPathJamoviModule
+    - ggplot2
+...

@@ -1,0 +1,8 @@
+"from_site","to_site","n_patients"
+"Primary","Regional",120
+"Primary","Tertiary",45
+"Regional","Tertiary",80
+"Regional","Primary",15
+"Tertiary","Regional",20
+"Primary","Tertiary",30
+"Regional","Regional",25

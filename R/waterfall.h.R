@@ -12,6 +12,10 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             groupVar = NULL,
             inputType = "percentage",
             sortBy = "response",
+            sortDirection = "conventional",
+            showBaseline = TRUE,
+            confirmationVar = NULL,
+            ongoingVar = NULL,
             showThresholds = TRUE,
             labelOutliers = FALSE,
             showMedian = FALSE,
@@ -86,6 +90,34 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "response",
                     "id"),
                 default="response")
+            private$..sortDirection <- jmvcore::OptionList$new(
+                "sortDirection",
+                sortDirection,
+                options=list(
+                    "conventional",
+                    "reverse"),
+                default="conventional")
+            private$..showBaseline <- jmvcore::OptionBool$new(
+                "showBaseline",
+                showBaseline,
+                default=TRUE)
+            private$..confirmationVar <- jmvcore::OptionVariable$new(
+                "confirmationVar",
+                confirmationVar,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor"),
+                default=NULL)
+            private$..ongoingVar <- jmvcore::OptionVariable$new(
+                "ongoingVar",
+                ongoingVar,
+                suggested=list(
+                    "nominal"),
+                permitted=list(
+                    "factor",
+                    "numeric"),
+                default=NULL)
             private$..showThresholds <- jmvcore::OptionBool$new(
                 "showThresholds",
                 showThresholds,
@@ -200,6 +232,10 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$.addOption(private$..groupVar)
             self$.addOption(private$..inputType)
             self$.addOption(private$..sortBy)
+            self$.addOption(private$..sortDirection)
+            self$.addOption(private$..showBaseline)
+            self$.addOption(private$..confirmationVar)
+            self$.addOption(private$..ongoingVar)
             self$.addOption(private$..showThresholds)
             self$.addOption(private$..labelOutliers)
             self$.addOption(private$..showMedian)
@@ -228,6 +264,10 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         groupVar = function() private$..groupVar$value,
         inputType = function() private$..inputType$value,
         sortBy = function() private$..sortBy$value,
+        sortDirection = function() private$..sortDirection$value,
+        showBaseline = function() private$..showBaseline$value,
+        confirmationVar = function() private$..confirmationVar$value,
+        ongoingVar = function() private$..ongoingVar$value,
         showThresholds = function() private$..showThresholds$value,
         labelOutliers = function() private$..labelOutliers$value,
         showMedian = function() private$..showMedian$value,
@@ -255,6 +295,10 @@ waterfallOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         ..groupVar = NA,
         ..inputType = NA,
         ..sortBy = NA,
+        ..sortDirection = NA,
+        ..showBaseline = NA,
+        ..confirmationVar = NA,
+        ..ongoingVar = NA,
         ..showThresholds = NA,
         ..labelOutliers = NA,
         ..showMedian = NA,
@@ -456,12 +500,16 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "sortBy",
+                    "sortDirection",
                     "showThresholds",
                     "labelOutliers",
                     "colorBy",
                     "colorScheme",
                     "showMedian",
                     "showCI",
+                    "showBaseline",
+                    "confirmationVar",
+                    "ongoingVar",
                     "groupVar",
                     "inputType")))
             self$add(jmvcore::Html$new(
@@ -707,6 +755,18 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   (requires time variable) or 'percentage' for pre-calculated percentage
 #'   changes from baseline
 #' @param sortBy Sort the waterfall plot by best response or patient ID.
+#' @param sortDirection Direction for the response sort. 'conventional' places
+#'   the highest (worst) response on the left and the lowest (best, most
+#'   negative) on the right, following the standard oncology waterfall
+#'   convention.
+#' @param showBaseline Draw a horizontal reference line at 0 percent change to
+#'   mark the baseline.
+#' @param confirmationVar Optional categorical variable indicating response
+#'   confirmation status (e.g., Confirmed vs Unconfirmed CR/PR). A distinct
+#'   marker is drawn at each bar tip according to the level of this variable.
+#' @param ongoingVar Optional variable flagging patients still on treatment /
+#'   with an ongoing response. Truthy values (TRUE, non-zero, or text matching
+#'   yes/y/true/on/ongoing/1) draw an upward arrow at the bar tip.
 #' @param showThresholds Show +20 percent and -30 percent RECIST v1.1
 #'   thresholds as dashed lines. Helps identify Progressive Disease (PD) and
 #'   Partial Response (PR) cutoffs.
@@ -780,6 +840,10 @@ waterfall <- function(
     groupVar = NULL,
     inputType = "percentage",
     sortBy = "response",
+    sortDirection = "conventional",
+    showBaseline = TRUE,
+    confirmationVar = NULL,
+    ongoingVar = NULL,
     showThresholds = TRUE,
     labelOutliers = FALSE,
     showMedian = FALSE,
@@ -807,14 +871,19 @@ waterfall <- function(
     if ( ! missing(responseVar)) responseVar <- jmvcore::resolveQuo(jmvcore::enquo(responseVar))
     if ( ! missing(timeVar)) timeVar <- jmvcore::resolveQuo(jmvcore::enquo(timeVar))
     if ( ! missing(groupVar)) groupVar <- jmvcore::resolveQuo(jmvcore::enquo(groupVar))
+    if ( ! missing(confirmationVar)) confirmationVar <- jmvcore::resolveQuo(jmvcore::enquo(confirmationVar))
+    if ( ! missing(ongoingVar)) ongoingVar <- jmvcore::resolveQuo(jmvcore::enquo(ongoingVar))
     if (missing(data))
         data <- jmvcore::marshalData(
             parent.frame(),
             `if`( ! missing(patientID), patientID, NULL),
             `if`( ! missing(responseVar), responseVar, NULL),
             `if`( ! missing(timeVar), timeVar, NULL),
-            `if`( ! missing(groupVar), groupVar, NULL))
+            `if`( ! missing(groupVar), groupVar, NULL),
+            `if`( ! missing(confirmationVar), confirmationVar, NULL),
+            `if`( ! missing(ongoingVar), ongoingVar, NULL))
 
+    for (v in confirmationVar) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- waterfallOptions$new(
         patientID = patientID,
@@ -823,6 +892,10 @@ waterfall <- function(
         groupVar = groupVar,
         inputType = inputType,
         sortBy = sortBy,
+        sortDirection = sortDirection,
+        showBaseline = showBaseline,
+        confirmationVar = confirmationVar,
+        ongoingVar = ongoingVar,
         showThresholds = showThresholds,
         labelOutliers = labelOutliers,
         showMedian = showMedian,

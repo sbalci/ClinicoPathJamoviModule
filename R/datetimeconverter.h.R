@@ -490,7 +490,7 @@ datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             super$initialize(
                 package = "ClinicoPath",
                 name = "datetimeconverter",
-                version = c(0,0,5),
+                version = c(0,0,51),
                 options = options,
                 results = datetimeconverterResults$new(options=options),
                 data = data,

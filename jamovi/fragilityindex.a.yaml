@@ -1,0 +1,160 @@
+---
+name:  fragilityindex
+title: Fragility Index for Dichotomous Outcomes
+menuGroup: meddecideD
+menuSubgroup: Study Design
+menuSubtitle: 'Robustness of a Statistically Significant Result'
+version: '1.0.0'
+jas: '1.2'
+
+description:
+    main: >
+        Computes the Fragility Index (FI) and Fragility Quotient (FQ) for a two-group
+        trial with a dichotomous (binary) outcome. The Fragility Index is the minimum
+        number of patients whose outcome would need to change (from non-event to event,
+        or vice versa) to reverse the statistical significance of the result. A small
+        Fragility Index means a "significant" finding hinges on only a handful of events
+        and should be interpreted with caution. The Fragility Quotient normalizes the
+        index by total sample size. For a non-significant result, the reverse fragility
+        index is reported: the number of outcome changes needed to reach significance.
+    R:
+        dontrun: true
+        usage: |
+            # From a 2x2 summary:
+            fragilityindex(
+                dataFormat = "summary",
+                events1 = 10, n1 = 100,
+                events2 = 25, n2 = 100,
+                alpha = 0.05, testType = "fisher")
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: The data as a data frame (used only when dataFormat = "raw").
+
+    - name: dataFormat
+      title: Data Input
+      type: List
+      options:
+        - title: Summary counts (enter 2x2 numbers)
+          name: summary
+        - title: Raw data (group + outcome variables)
+          name: raw
+      default: summary
+      description:
+          R: >
+            Whether to enter summary 2x2 counts directly or supply raw group and
+            outcome variables from the dataset.
+
+    - name: group
+      title: Group Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: Two-level grouping variable (used when dataFormat = "raw").
+
+    - name: outcome
+      title: Outcome Variable
+      type: Variable
+      suggested: [nominal]
+      permitted: [factor]
+      description:
+          R: Two-level binary outcome variable (used when dataFormat = "raw").
+
+    - name: outcomeEvent
+      title: Event Level
+      type: Level
+      variable: (outcome)
+      description:
+          R: The level of the outcome variable that denotes the event of interest.
+
+    - name: events1
+      title: 'Group 1: Events'
+      type: Integer
+      min: 0
+      default: 10
+      description:
+          R: Number of events in group 1 (dataFormat = "summary").
+
+    - name: n1
+      title: 'Group 1: Total N'
+      type: Integer
+      min: 1
+      default: 100
+      description:
+          R: Total number of subjects in group 1 (dataFormat = "summary").
+
+    - name: events2
+      title: 'Group 2: Events'
+      type: Integer
+      min: 0
+      default: 25
+      description:
+          R: Number of events in group 2 (dataFormat = "summary").
+
+    - name: n2
+      title: 'Group 2: Total N'
+      type: Integer
+      min: 1
+      default: 100
+      description:
+          R: Total number of subjects in group 2 (dataFormat = "summary").
+
+    - name: testType
+      title: Significance Test
+      type: List
+      options:
+        - title: Fisher's exact test
+          name: fisher
+        - title: Chi-square test
+          name: chisq
+      default: fisher
+      description:
+          R: The test used to assess statistical significance at each step.
+
+    - name: alpha
+      title: Significance Level (alpha)
+      type: Number
+      min: 0.0001
+      max: 0.5
+      default: 0.05
+      description:
+          R: The two-sided significance threshold.
+
+    - name: showCounts
+      title: Show 2x2 Table
+      type: Bool
+      default: true
+      description:
+          R: Display the reconstructed 2x2 contingency table.
+
+    - name: showTrajectory
+      title: Show Reversal Trajectory
+      type: Bool
+      default: true
+      description:
+          R: Display the step-by-step p-value trajectory as outcomes are reversed.
+
+    - name: showPlot
+      title: P-value Trajectory Plot
+      type: Bool
+      default: true
+      description:
+          R: Plot the p-value against the number of outcome reversals.
+
+    - name: showSummary
+      title: Show Analysis Summary
+      type: Bool
+      default: false
+      description:
+          R: Display a plain-language interpretation of the fragility index.
+
+    - name: showExplanation
+      title: Show Methodology
+      type: Bool
+      default: false
+      description:
+          R: Display an explanation of the fragility index methodology.
+...

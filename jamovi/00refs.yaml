@@ -24,6 +24,118 @@ refs:
         doi: 10.1002/pst.1763
         url: https://pubmed.ncbi.nlm.nih.gov/27435905/
 
+    vanderweele2017evalue:
+        type: 'article'
+        author: VanderWeele, T. J., & Ding, P.
+        year: 2017
+        title: "Sensitivity analysis in observational research: introducing the E-value"
+        publisher: 'Annals of Internal Medicine'
+        volume: 167
+        issue: 4
+        pages: 268-274
+        doi: 10.7326/M16-2607
+        url: https://pubmed.ncbi.nlm.nih.gov/28693043/
+
+    robins1986gformula:
+        type: 'article'
+        author: Robins, J.
+        year: 1986
+        title: "A new approach to causal inference in mortality studies with a sustained exposure period - application to control of the healthy worker survivor effect"
+        publisher: 'Mathematical Modelling'
+        volume: 7
+        issue: 9-12
+        pages: 1393-1512
+        doi: 10.1016/0270-0255(86)90088-6
+        url: https://doi.org/10.1016/0270-0255(86)90088-6
+
+    hernan2020whatif:
+        type: 'book'
+        author: "Hern\u00e1n, M. A., & Robins, J. M."
+        year: 2020
+        title: "Causal Inference: What If"
+        publisher: 'Boca Raton: Chapman & Hall/CRC'
+        url: https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/
+
+    gu2014circlize:
+        type: 'article'
+        author: Gu, Z., Gu, L., Eils, R., Schlesner, M., & Brors, B.
+        year: 2014
+        title: "circlize implements and enhances circular visualization in R"
+        publisher: 'Bioinformatics'
+        volume: 30
+        issue: 19
+        pages: 2811-2812
+        doi: 10.1093/bioinformatics/btu393
+        url: https://pubmed.ncbi.nlm.nih.gov/24930139/
+
+    breslowday1987:
+        type: 'book'
+        author: Breslow, N. E., & Day, N. E.
+        year: 1987
+        title: "Statistical Methods in Cancer Research, Volume II: The Design and Analysis of Cohort Studies"
+        publisher: 'International Agency for Research on Cancer (IARC Scientific Publications No. 82)'
+        url: https://publications.iarc.fr/Book-And-Report-Series/Iarc-Scientific-Publications/Statistical-Methods-In-Cancer-Research-Volume-II-The-Design-And-Analysis-Of-Cohort-Studies-1987
+
+    kim2000joinpoint:
+        type: 'article'
+        author: Kim, H. J., Fay, M. P., Feuer, E. J., & Midthune, D. N.
+        year: 2000
+        title: "Permutation tests for joinpoint regression with applications to cancer rates"
+        publisher: 'Statistics in Medicine'
+        volume: 19
+        issue: 3
+        pages: 335-351
+        doi: 10.1002/(SICI)1097-0258(20000215)19:3<335::AID-SIM336>3.0.CO;2-Z
+        url: https://pubmed.ncbi.nlm.nih.gov/10649300/
+
+    evans2015door:
+        type: 'article'
+        author: Evans, S. R., Rubin, D., Follmann, D., et al.
+        year: 2015
+        title: "Desirability of Outcome Ranking (DOOR) and Response Adjusted for Duration of Antibiotic Risk (RADAR)"
+        publisher: 'Clinical Infectious Diseases'
+        volume: 61
+        issue: 5
+        pages: 800-806
+        doi: 10.1093/cid/civ495
+        url: https://pubmed.ncbi.nlm.nih.gov/26113652/
+
+    walsh2014fragility:
+        type: 'article'
+        author: Walsh, M., Srinathan, S. K., McAuley, D. F., et al.
+        year: 2014
+        title: "The statistical significance of randomized controlled trial results is frequently fragile: a case for a Fragility Index"
+        publisher: 'Journal of Clinical Epidemiology'
+        volume: 67
+        issue: 6
+        pages: 622-628
+        doi: 10.1016/j.jclinepi.2013.10.019
+        url: https://pubmed.ncbi.nlm.nih.gov/24508144/
+
+    wagner2002its:
+        type: 'article'
+        author: Wagner, A. K., Soumerai, S. B., Zhang, F., & Ross-Degnan, D.
+        year: 2002
+        title: "Segmented regression analysis of interrupted time series studies in medication use research"
+        publisher: 'Journal of Clinical Pharmacy and Therapeutics'
+        volume: 27
+        issue: 4
+        pages: 299-309
+        doi: 10.1046/j.1365-2710.2002.00430.x
+        url: https://pubmed.ncbi.nlm.nih.gov/12174032/
+
+    bernal2017its:
+        type: 'article'
+        author: Bernal, J. L., Cummins, S., & Gasparrini, A.
+        year: 2017
+        title: "Interrupted time series regression for the evaluation of public health interventions: a tutorial"
+        publisher: 'International Journal of Epidemiology'
+        volume: 46
+        issue: 1
+        pages: 348-355
+        doi: 10.1093/ije/dyw098
+        url: https://pubmed.ncbi.nlm.nih.gov/27283160/
+
     willrogers1985:
         type: 'article'
         author: Feinstein, A. R., Sosin, D. M., & Wells, C. K.

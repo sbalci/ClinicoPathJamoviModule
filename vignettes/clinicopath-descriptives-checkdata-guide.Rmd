@@ -1033,7 +1033,7 @@ Specific actions taken:
 
 - STROBE Statement (observational studies): https://www.strobe-statement.org/
 - RECORD Guidelines (routinely collected data): https://www.record-statement.org/
-- CONSORT (clinical trials): http://www.consort-statement.org/
+- CONSORT (clinical trials): https://www.consort-statement.org/
 
 ### R Packages Used
 

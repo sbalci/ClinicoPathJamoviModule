@@ -1,0 +1,36 @@
+title: E-value for Unmeasured Confounding
+name: evalue
+jus: '3.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: ComboBox
+        name: effectType
+      - type: TextBox
+        name: estimate
+        format: number
+      - type: TextBox
+        name: ci_lower
+        format: number
+      - type: TextBox
+        name: ci_upper
+        format: number
+      - type: TextBox
+        name: trueValue
+        format: number
+      - type: CheckBox
+        name: rare
+  - type: CollapseBox
+    label: Output Options
+    collapsed: false
+    stretchFactor: 0
+    children:
+      - type: CheckBox
+        name: showPlot
+      - type: CheckBox
+        name: showSummary
+      - type: CheckBox
+        name: showExplanation
