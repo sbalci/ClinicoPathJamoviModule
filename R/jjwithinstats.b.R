@@ -1059,38 +1059,6 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # CRITICAL FIX: Set plot state for efficient caching
-            # This ensures plot only regenerates when data or visual options actually change
-            state_data <- list(
-                # Data content (convert to base data.frame to avoid serialization issues)
-                data = as.data.frame(long_data),
-                # All visual options that affect plot appearance
-                visual_opts = list(
-                    typestatistics = opts$typestatistics,
-                    pairwisecomparisons = opts$pairwisecomparisons,
-                    pairwisedisplay = opts$pairwisedisplay,
-                    padjustmethod = opts$padjustmethod,
-                    effsizetype = opts$effsizetype,
-                    centralityplotting = opts$centralityplotting,
-                    centralitytype = opts$centralitytype,
-                    pointpath = opts$pointpath,
-                    centralitypath = opts$centralitypath,
-                    violin = self$options$violin,
-                    boxplot = self$options$boxplot,
-                    point = self$options$point,
-                    mytitle = opts$mytitle,
-                    xtitle = opts$xtitle,
-                    ytitle = opts$ytitle,
-                    originaltheme = opts$originaltheme,
-                    resultssubtitle = opts$resultssubtitle,
-                    bfmessage = opts$bfmessage,
-                    conflevel = opts$conflevel,
-                    k = self$options$k
-                )
-            )
-
-            # Set state - jamovi will only regenerate if state changes
-            image$setState(state_data)
 
             # Checkpoint before expensive plot creation
             private$.checkpoint()

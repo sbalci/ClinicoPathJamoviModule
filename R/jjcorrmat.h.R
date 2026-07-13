@@ -242,6 +242,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
+                    "statsExpressions",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
                     "dep",

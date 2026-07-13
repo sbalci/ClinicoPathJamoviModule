@@ -84,6 +84,8 @@ items:
     - name: plot
       title: 'Violin Plots'
       type: Image
+      width:  600
+      height: 450
       renderFun: .plot
       requiresData: true
       clearWith:
@@ -151,6 +153,7 @@ items:
 
 refs:
     - ggstatsplot
+    - statsExpressions
     - ggpubr
     - ClinicoPathJamoviModule
 

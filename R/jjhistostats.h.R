@@ -365,6 +365,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 refs=list(
                     "ggplot2",
                     "ggstatsplot",
+                    "statsExpressions",
                     "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
@@ -402,6 +403,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="plot2",
                 title="`Histogram Splitted by {grvar}`",
+                width=600,
+                height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 visible="(grvar)"))
@@ -409,6 +412,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 options=options,
                 name="plot",
                 title="Histogram",
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE))
             self$add(jmvcore::Html$new(

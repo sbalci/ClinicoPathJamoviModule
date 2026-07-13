@@ -905,24 +905,6 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Generate color palette using cached method
             sel_palette <- private$.generateColorPalette(n_groups)
 
-            # CRITICAL FIX: Set plot state for efficient caching
-            # This ensures plot only regenerates when data or visual options actually change
-            state_data <- list(
-                # Data content (convert to base data.frame to avoid serialization issues)
-                data = as.data.frame(plotdata),
-                # All visual options that affect plot appearance
-                visual_opts = list(
-                    rows = self$options$rows,
-                    flip = self$options$flip,
-                    color_palette = self$options$color_palette,
-                    show_legend = self$options$show_legend,
-                    mytitle = self$options$mytitle,
-                    legendtitle = self$options$legendtitle
-                )
-            )
-
-            # Set state - jamovi will only regenerate if state changes
-            image$setState(state_data)
 
             # Create base plot
             p <- ggplot2::ggplot(

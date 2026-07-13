@@ -313,6 +313,7 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Bar Charts",
                 refs=list(
                     "ggstatsplot",
+                    "statsExpressions",
                     "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
@@ -384,6 +385,8 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plot2",
                 title="`Bar Chart Grouped by {grvar}`",
+                width=600,
+                height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 visible="(grvar)"))
@@ -391,6 +394,8 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plot",
                 title="Bar Chart",
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE))
             self$add(jmvcore::Image$new(

@@ -763,6 +763,64 @@ copy_jamovi_assets <- function(module_names, source_base_dir, dest_base_dir, mod
 }
 
 # Copy 00refs.yaml to module jamovi folder
+# Collect every citation key referenced (refs: blocks + inline refs: [a, b]) across a
+# module's jamovi/*.r.yaml, *.a.yaml and 0000.yaml. Over-inclusive by design (better to
+# keep a few extra entries than to trim a genuinely-cited one).
+collect_used_refs <- function(jamovi_dir) {
+  files <- list.files(jamovi_dir, pattern = "(\\.r\\.yaml|\\.a\\.yaml|0000\\.yaml)$", full.names = TRUE)
+  used <- character(0)
+  for (f in files) {
+    ln <- tryCatch(readLines(f, warn = FALSE), error = function(e) character(0))
+    in_refs <- FALSE
+    for (line in ln) {
+      inl <- regmatches(line, regexec("refs:\\s*\\[([^]]*)\\]", line))[[1]]
+      if (length(inl) == 2) {
+        used <- c(used, trimws(gsub("['\"]", "", strsplit(inl[2], ",")[[1]])))
+        next
+      }
+      if (grepl("^\\s*refs:\\s*$", line)) { in_refs <- TRUE; next }
+      if (in_refs) {
+        item <- regmatches(line, regexec("^\\s*-\\s*(\\S+)\\s*$", line))[[1]]
+        if (length(item) == 2) {
+          used <- c(used, gsub("['\"]", "", item[2]))
+        } else if (nchar(trimws(line)) > 0 && !grepl("^\\s*#", line)) {
+          in_refs <- FALSE
+        }
+      }
+    }
+  }
+  unique(used[nchar(used) > 0])
+}
+
+# Rewrite a copied 00refs.yaml keeping only blocks whose key is cited by the module
+# (plus the always-present module self-reference). Preserves the header/footer and the
+# exact text of each kept block.
+trim_refs_file <- function(refs_file, used_keys) {
+  ln <- readLines(refs_file, warn = FALSE)
+  keep <- union(used_keys, "ClinicoPathJamoviModule")
+  n <- length(ln); i <- 1; out <- character(0)
+  while (i <= n) {           # copy header through the top-level `refs:` line
+    out <- c(out, ln[i])
+    if (grepl("^refs:\\s*$", ln[i])) { i <- i + 1; break }
+    i <- i + 1
+  }
+  key_re <- "^    ([A-Za-z0-9._-]+):\\s*$"
+  kept <- 0; dropped <- 0
+  while (i <= n) {
+    m <- regmatches(ln[i], regexec(key_re, ln[i]))[[1]]
+    if (length(m) == 2) {
+      key <- m[2]; block <- ln[i]; j <- i + 1
+      while (j <= n && !grepl(key_re, ln[j]) && !grepl("^\\.\\.\\.", ln[j])) {
+        block <- c(block, ln[j]); j <- j + 1
+      }
+      if (key %in% keep) { out <- c(out, block); kept <- kept + 1 } else dropped <- dropped + 1
+      i <- j
+    } else { out <- c(out, ln[i]); i <- i + 1 }
+  }
+  writeLines(out, refs_file)
+  cat("  ✂️  Trimmed 00refs.yaml: kept", kept, "cited entries, dropped", dropped, "unused\n")
+}
+
 copy_refs_yaml <- function(dest_base_dir, module_type = "unknown") {
   cat("\n📚 Copying references file (00refs.yaml) to", module_type, "module...\n")
 
@@ -782,6 +840,10 @@ copy_refs_yaml <- function(dest_base_dir, module_type = "unknown") {
 
   tryCatch({
     file.copy(source_file, dest_file, overwrite = TRUE)
+    # Trim the copy to only the references this module actually cites (keeps the shared
+    # main 00refs.yaml complete while each shipped submodule carries only what it uses).
+    used <- tryCatch(collect_used_refs(dest_dir), error = function(e) NULL)
+    if (!is.null(used) && length(used) > 0) trim_refs_file(dest_file, used)
     cat("  ✅ Copied 00refs.yaml to", module_type, "module\n")
     return(list(copied = 1, failed = 0))
   }, error = function(e) {

@@ -971,8 +971,6 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Print Plot ----
-                # Store plot object for testing
-                image$setState(plot)
                 
                 print(plot)
                 TRUE

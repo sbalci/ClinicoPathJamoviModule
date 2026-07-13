@@ -511,6 +511,7 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "ClinicoPathJamoviModule",
                     "ggridges",
                     "ggstatsplot",
+                    "statsExpressions",
                     "RGraphGallery"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -577,6 +578,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="plot",
                 title="Ridge Plot",
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE,
                 clearWith=list(

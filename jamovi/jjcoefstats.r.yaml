@@ -127,6 +127,7 @@ refs:
     - labelled
     - glue
     - ggstatsplot
+    - statsExpressions
     - ggplot2
     - broom
     - survival

@@ -336,6 +336,7 @@ jjcoefstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "labelled",
                     "glue",
                     "ggstatsplot",
+                    "statsExpressions",
                     "ggplot2",
                     "broom",
                     "survival",

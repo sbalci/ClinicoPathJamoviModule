@@ -92,6 +92,7 @@ items:
 refs:
     - ggplot2
     - ggstatsplot
+    - statsExpressions
     - ClinicoPathJamoviModule
     - glue
     - digest

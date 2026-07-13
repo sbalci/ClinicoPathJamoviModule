@@ -68,6 +68,8 @@ items:
     - name: plot
       title: Ridge Plot
       type: Image
+      width:  600
+      height: 450
       renderFun: .plot
       requiresData: true
       clearWith:
@@ -201,6 +203,7 @@ refs:
     - ClinicoPathJamoviModule
     - ggridges
     - ggstatsplot
+    - statsExpressions
     - RGraphGallery
 
 ...

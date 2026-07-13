@@ -77,6 +77,8 @@ items:
     - name: plot2
       title: '`Violin Plot by ${grvar}`'
       type: Image
+      width:  600
+      height: 450
       renderFun: .plot2
       requiresData: true
       visible: (grvar)
@@ -84,6 +86,8 @@ items:
     - name: plot
       title: 'Violin Plot'
       type: Image
+      width:  600
+      height: 450
       renderFun: .plot
       requiresData: true
 
@@ -106,6 +110,8 @@ items:
     - name: ggpubrPlot2
       title: '`Publication-Ready Plot by ${grvar} (ggpubr)`'
       type: Image
+      width:  600
+      height: 450
       renderFun: .plotGGPubr2
       requiresData: true
       visible: (addGGPubrPlot && grvar)
@@ -121,6 +127,7 @@ items:
 
 refs:
     - ggstatsplot
+    - statsExpressions
     - ggpubr
     - ClinicoPathJamoviModule
 

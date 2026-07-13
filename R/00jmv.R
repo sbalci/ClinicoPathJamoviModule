@@ -2944,4 +2944,14 @@
         `volume`=15, 
         `issue`=2, 
         `pages`="155-163", 
-        `doi`="10.1016/j.jcm.2016.02.012"))
+        `doi`="10.1016/j.jcm.2016.02.012"), 
+    `statsExpressions`=list(
+        `type`="article", 
+        `author`="Patil, I.", 
+        `year`=2021, 
+        `title`="statsExpressions: R Package for Tidy Dataframes and Expressions with Statistical Details", 
+        `publisher`="Journal of Open Source Software", 
+        `volume`=6, 
+        `issue`=61, 
+        `pages`="3236", 
+        `doi`="10.21105/joss.03236"))

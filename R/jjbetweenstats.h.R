@@ -343,6 +343,7 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Box-Violin Plots to Compare Between Groups",
                 refs=list(
                     "ggstatsplot",
+                    "statsExpressions",
                     "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
@@ -415,6 +416,8 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="plot2",
                 title="`Violin Plot by ${grvar}`",
+                width=600,
+                height=450,
                 renderFun=".plot2",
                 requiresData=TRUE,
                 visible="(grvar)"))
@@ -422,6 +425,8 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="plot",
                 title="Violin Plot",
+                width=600,
+                height=450,
                 renderFun=".plot",
                 requiresData=TRUE))
             self$add(jmvcore::Image$new(
@@ -444,6 +449,8 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="ggpubrPlot2",
                 title="`Publication-Ready Plot by ${grvar} (ggpubr)`",
+                width=600,
+                height=450,
                 renderFun=".plotGGPubr2",
                 requiresData=TRUE,
                 visible="(addGGPubrPlot && grvar)",

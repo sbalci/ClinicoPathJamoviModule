@@ -923,8 +923,6 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     y = y_label
                 )
 
-                # Store plot object for testing and further modification
-                image$setState(p)
 
                 print(p)
                 TRUE

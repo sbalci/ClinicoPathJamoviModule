@@ -52,6 +52,8 @@ items:
     - name: plot2
       title: '`Histogram Splitted by {grvar}`'
       type: Image
+      width:  600
+      height: 450
       # width:  800
       # height: 600
       renderFun: .plot2
@@ -64,6 +66,8 @@ items:
     - name: plot
       title: Histogram
       type: Image
+      width:  600
+      height: 450
       # width:  800
       # height: 600
       renderFun: .plot
@@ -152,6 +156,7 @@ items:
 refs:
     - ggplot2
     - ggstatsplot
+    - statsExpressions
     - ggpubr
     - ClinicoPathJamoviModule
 
