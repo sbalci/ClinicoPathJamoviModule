@@ -195,6 +195,56 @@ bayesiandiagnosticClass <- R6::R6Class(
              
              # Method Explanation
              # self$results$methodsExplanation$setContent(...) # Already in init
+        },
+
+        # --- Plot render methods ---
+        # These 10 Image outputs are declared in bayesiandiagnostic.r.yaml with
+        # renderFun references. The base class (.h.R) resolves each renderFun via
+        # private[[funName]] and, in the .render/.createPlotObject path, wraps it in
+        # do.call(private[[funName]], ...) with NO is.function() guard. If the method
+        # is undefined, private[[funName]] is NULL and rendering throws
+        # "attempt to apply non-function". These methods must therefore exist.
+        # No plot state is currently set in .run(), so each returns FALSE (jamovi's
+        # "nothing to draw" signal). Full Bayesian plotting is a pending TODO.
+        .plotROCCurve = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotPosteriorDistributions = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotSensitivitySpecificity = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotPredictiveValues = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotLikelihoodRatios = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotConvergence = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotForestPlot = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotHeterogeneity = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotThresholdOptimization = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
+        },
+        .plotDecisionCurve = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            return(FALSE)
         }
     )
 )

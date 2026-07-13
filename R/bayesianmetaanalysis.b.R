@@ -119,11 +119,11 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 
                 # Create plots if requested
                 if (self$options$plotForest) {
-                    private$.forestPlot(results)
+                    private$.prepareForestPlot(results)
                 }
-                
+
                 if (self$options$plotPosterior) {
-                    private$.posteriorPlot(results)
+                    private$.preparePosteriorPlot(results)
                 }
                 
             }, error = function(e) {
@@ -429,7 +429,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         
         .setupPriors = function() {
             # Set up priors based on user selection
-            if (self$options$priorType == "noninformative") {
+            if (self$options$priorType == "non_informative") {
                 priors <- brms::prior(normal(0, 100), class = Intercept)
             } else if (self$options$priorType == "weakly_informative") {
                 priors <- brms::prior(normal(0, 1), class = Intercept)
@@ -457,16 +457,13 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             table <- self$results$modelSummary
             
             table$addRow(rowKey = 1, values = list(
-                model = results$model_type,
-                pooledEffect = results$pooled_effect,
-                se = results$pooled_se,
-                ciLower = results$ci_lower,
-                ciUpper = results$ci_upper,
-                tau2 = results$tau2,
-                I2 = results$I2,
-                Q = results$Q_statistic,
-                Qp = results$Q_pvalue,
-                nStudies = results$n_studies
+                parameter = "Pooled Effect",
+                posterior_mean = results$pooled_effect,
+                posterior_sd = results$pooled_se,
+                credible_lower = results$ci_lower,
+                credible_upper = results$ci_upper,
+                effective_sample_size = results$convergence$n_eff,
+                rhat = results$convergence$Rhat
             ))
         },
         
@@ -475,18 +472,17 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             table <- self$results$studyEffects
             
+            z <- qnorm((1 + self$options$credibleInterval/100) / 2)
             for (i in seq_len(nrow(results$study_effects))) {
                 table$addRow(rowKey = i, values = list(
                     study = results$study_effects$study[i],
-                    effect = results$study_effects$effect[i],
-                    se = results$study_effects$se[i],
-                    weight = results$study_effects$weight[i],
-                    ciLower = results$study_effects$effect[i] - 
-                              qnorm((1 + self$options$credibleInterval/100) / 2) * 
-                              results$study_effects$se[i],
-                    ciUpper = results$study_effects$effect[i] + 
-                              qnorm((1 + self$options$credibleInterval/100) / 2) * 
-                              results$study_effects$se[i]
+                    observed_effect = results$study_effects$effect[i],
+                    # posterior_effect (per-study shrinkage) not computed; left NA
+                    posterior_effect = NA,
+                    credible_lower = results$study_effects$effect[i] -
+                              z * results$study_effects$se[i],
+                    credible_upper = results$study_effects$effect[i] +
+                              z * results$study_effects$se[i]
                 ))
             }
         },
@@ -498,19 +494,19 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             
             table$addRow(rowKey = 1, values = list(
                 parameter = "Pooled Effect",
-                Rhat = results$convergence$Rhat,
-                nEff = results$convergence$n_eff,
-                converged = results$convergence$converged
+                n_effective = results$convergence$n_eff,
+                rhat = results$convergence$Rhat,
+                mcmc_se = NA
             ))
-            
+
             # Add model fit statistics
             if (!is.null(results$model)) {
                 table <- self$results$modelComparison
                 table$addRow(rowKey = 1, values = list(
                     model = results$model_type,
-                    DIC = results$DIC,
-                    WAIC = results$WAIC,
-                    effectiveParams = NA
+                    waic = results$WAIC,
+                    looic = NA,
+                    effective_params = NA
                 ))
             }
         },
@@ -544,18 +540,16 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             }
         },
         
-        .forestPlot = function(results) {
+        .prepareForestPlot = function(results) {
             if (is.null(results)) return()
-            
-            plot <- self$results$forestPlot
-            
+
             # Prepare data for forest plot
             plotData <- results$study_effects
-            plotData$lower <- plotData$effect - 
-                            qnorm((1 + self$options$credibleInterval/100) / 2) * plotData$se
-            plotData$upper <- plotData$effect + 
-                            qnorm((1 + self$options$credibleInterval/100) / 2) * plotData$se
-            
+            plotData$study <- as.character(plotData$study)
+            z <- qnorm((1 + self$options$credibleInterval/100) / 2)
+            plotData$lower <- plotData$effect - z * plotData$se
+            plotData$upper <- plotData$effect + z * plotData$se
+
             # Add pooled effect
             pooledData <- data.frame(
                 study = "Pooled Effect",
@@ -565,25 +559,14 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 lower = results$ci_lower,
                 upper = results$ci_upper
             )
-            
+
             plotData <- rbind(plotData, pooledData)
-            
-            # Create the plot
-            image <- jmvcore::Image$new(
-                options = self$options,
-                name = "forestPlot",
-                renderFun = ".forestPlotRender",
-                clearWith = list("effectSize", "standardError"),
-                width = 600,
-                height = 400 + nrow(plotData) * 20
-            )
-            
-            # Store data for rendering
-            image$setState(plotData)
-            plot$setContent(image)
+
+            # Store data on the output image for rendering
+            self$results$forestPlot$setState(plotData)
         },
-        
-        .forestPlotRender = function(image, ...) {
+
+        .forestPlot = function(image, ...) {
             if (!requireNamespace("ggplot2", quietly = TRUE))
                 return(FALSE)
             
@@ -622,27 +605,23 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             return(TRUE)
         },
         
-        .posteriorPlot = function(results) {
+        .preparePosteriorPlot = function(results) {
             if (is.null(results)) return()
-            
-            plot <- self$results$posteriorPlot
-            
-            # Create the plot
-            image <- jmvcore::Image$new(
-                options = self$options,
-                name = "posteriorPlot",
-                renderFun = ".posteriorPlotRender",
-                clearWith = list("effectSize", "standardError"),
-                width = 600,
-                height = 400
+
+            # Store a slim state for rendering (avoid serializing large model objects)
+            state <- list(
+                pooled_effect = results$pooled_effect,
+                pooled_se = results$pooled_se,
+                posterior = if (!is.null(results$posterior) &&
+                                "b_Intercept" %in% names(results$posterior))
+                    data.frame(b_Intercept = results$posterior$b_Intercept)
+                else NULL
             )
-            
-            # Store results for rendering
-            image$setState(results)
-            plot$setContent(image)
+
+            self$results$posteriorPlot$setState(state)
         },
-        
-        .posteriorPlotRender = function(image, ...) {
+
+        .posteriorPlot = function(image, ...) {
             if (!requireNamespace("ggplot2", quietly = TRUE))
                 return(FALSE)
             

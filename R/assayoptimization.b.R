@@ -320,7 +320,7 @@ assayoptimizationClass <- R6::R6Class(
                 }
                 formula_str <- jmvcore::constructFormula(response_var, all_terms)
 
-                model_data <- data.frame(response = response, factor_data)
+                model_data <- data.frame(response = response, factor_data, check.names = FALSE)
                 names(model_data)[1] <- response_var
 
                 model <- lm(jmvcore::asFormula(formula_str), data = model_data)
@@ -383,7 +383,7 @@ assayoptimizationClass <- R6::R6Class(
             tryCatch({
                 
                 # Fit ANOVA model
-                model_data <- data.frame(response = response, factor_data)
+                model_data <- data.frame(response = response, factor_data, check.names = FALSE)
                 names(model_data)[1] <- response_var
                 
                 # Convert continuous factors to categorical for ANOVA if they have few unique values
@@ -492,7 +492,7 @@ assayoptimizationClass <- R6::R6Class(
             tryCatch({
                 
                 # Fit second-order polynomial model
-                model_data <- data.frame(response = response, factor_data)
+                model_data <- data.frame(response = response, factor_data, check.names = FALSE)
                 names(model_data)[1] <- response_var
                 
                 # Create formula with quadratic and interaction terms
@@ -711,7 +711,7 @@ assayoptimizationClass <- R6::R6Class(
                 
                 if (length(factors) > 0) {
                     # Calculate factor effects for robustness
-                    model_data <- data.frame(response = response, factor_data)
+                    model_data <- data.frame(response = response, factor_data, check.names = FALSE)
                     names(model_data)[1] <- response_var
                     
                     robustness_model <- lm(jmvcore::asFormula(jmvcore::constructFormula(response_var, as.list(factors))), data = model_data)

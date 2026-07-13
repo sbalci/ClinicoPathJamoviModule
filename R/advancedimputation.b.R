@@ -117,5 +117,17 @@ advancedimputationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             "
             self$results$methodExplanation$setContent(explanation)
 
+        },
+
+        .plotDiagnostics = function(image, ggtheme, theme, ...) {
+            # The diagnosticPlot image (.r.yaml) declares renderFun ".plotDiagnostics".
+            # No plot state is set until the full MICE pipeline (see .run TODO) is
+            # wired up, so guard on image$state and render nothing rather than leaving
+            # the declared renderFun pointing at a missing method.
+            if (is.null(image$state))
+                return(FALSE)
+
+            print(image$state)
+            TRUE
         })
 )

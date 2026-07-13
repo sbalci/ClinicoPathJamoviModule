@@ -158,7 +158,17 @@ options:
       description:
           R: >
             number of warmup (burn-in) iterations per chain
-            
+
+    - name: credibleInterval
+      title: Credible Interval (%)
+      type: Number
+      min: 50
+      max: 99.9
+      default: 95
+      description:
+          R: >
+            width of the credible/confidence interval as a percentage
+
     - name: publicationBias
       title: Publication Bias Assessment
       type: Bool

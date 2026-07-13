@@ -921,13 +921,17 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                             main = main_title, 
                             xlab = x_label, 
                             ylab = y_label,
-                            col = colors, xlim = xlim, ylim = ylim)
+                            col = colors, xlim = xlim, ylim = ylim,
+                            lty = as.numeric(options$line_type),
+                            lwd = options$line_width)
                     } else {
                         plot(data$x, type = "l", 
                             main = main_title, 
                             xlab = "Index", 
                             ylab = x_label,
-                            col = colors, xlim = xlim, ylim = ylim)
+                            col = colors, xlim = xlim, ylim = ylim,
+                            lty = as.numeric(options$line_type),
+                            lwd = options$line_width)
                     }
                 } else if (options$plot_type == "pairs") {
                     # Pairs plot for multiple variable relationships

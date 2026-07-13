@@ -99,20 +99,33 @@ bayesianclinicalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                             # Let's look for 'difference' or similar
                             
                             params <- colnames(s_df)
+
+                            # Wire the credible interval level and the minimum clinically
+                            # important difference (MID) options instead of hardcoding them.
+                            ci_level <- self$options$credible_interval
+                            alpha <- (1 - ci_level) / 2
+                            mid <- self$options$minimum_effect_size
+
+                            # Keep the CI column headers honest with the selected level
+                            tablePost$getColumn("ci_lower")$setTitle(paste0(round(ci_level * 100, 2), "% CrI Lower"))
+                            tablePost$getColumn("ci_upper")$setTitle(paste0(round(ci_level * 100, 2), "% CrI Upper"))
+
                             for (p in params) {
                                 if (p == "g") next # Skip g parameter
-                                
+
                                 p_data <- s_df[[p]]
-                                q <- quantile(p_data, probs = c(0.025, 0.975))
+                                q <- quantile(p_data, probs = c(alpha, 1 - alpha))
                                 prob_pos <- mean(p_data > 0)
-                                
+                                prob_meaningful <- mean(abs(p_data) > mid)
+
                                 tablePost$addRow(rowKey=p, values=list(
                                     parameter = p,
                                     mean = mean(p_data),
                                     sd = sd(p_data),
                                     ci_lower = q[1],
                                     ci_upper = q[2],
-                                    prob_positive = prob_pos
+                                    prob_positive = prob_pos,
+                                    prob_meaningful = prob_meaningful
                                 ))
                             }
                         }

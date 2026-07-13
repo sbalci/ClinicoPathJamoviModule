@@ -71,6 +71,12 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: TextBox
+        name: credibleInterval
+        format: number
+  - type: LayoutBox
+    margin: large
+    children:
       - type: CheckBox
         name: publicationBias
       - type: CheckBox

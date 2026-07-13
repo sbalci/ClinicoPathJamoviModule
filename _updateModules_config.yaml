@@ -66,7 +66,12 @@ modes:
   
   # File copying control modes
   copy_vignettes: false       # Enable/disable vignette file copying
-  copy_data_files: false      # Enable/disable data file copying
+  copy_data_files: true       # Distribute example data to submodules: copy each module's data_files
+                              # (.rda) from main data/, auto-generate roxygen docs for them, copy the
+                              # .omv referenced in the submodule 0000.yaml datasets: from main
+                              # inst/extdata/, and add omv rules to .Rbuildignore.
+  generate_data_docs: true    # Auto-generate roxygen dataset docs (clears R CMD check "undocumented data")
+  distribute_omv: true        # Copy .omv referenced in each submodule's 0000.yaml datasets: section
   copy_test_files: false      # Distribute the umbrella's per-analysis functional tests to submodules
                               # (name-keyed + namespace-translated). Leave FALSE until the umbrella
                               # test suite is green -- otherwise a submodule's R CMD check goes red.
@@ -92,6 +97,17 @@ modules:
     r_files:
       - "utils.R"
       - "arcdiagram_vendored.R"
+    # Example datasets shipped to jjstatsplot (copied from main data/, auto-documented).
+    data_files:
+      - "histopathology.rda"
+      - "categorical_quality_data.rda"
+      - "groupsummary_financial_data.rda"
+      - "groupsummary_simple.rda"
+      - "hullplot_clinical_data.rda"
+      - "hullplot_customer_data.rda"
+      - "hullplot_experimental_data.rda"
+      - "hullplot_quality_data.rda"
+      - "hullplot_survey_data.rda"
   meddecide:
     directory: "/Users/serdarbalci/Documents/GitHub/meddecide"
     r_files:
@@ -101,6 +117,16 @@ modules:
       - "decisiongraph_utils.R"
       - "psychopdaROC_utilities.R"
       - "nomogrammer.R"
+    data_files:
+      - "histopathology.rda"
+      - "bayesdca_test_data.rda"
+      - "breast_cancer_data.rda"
+      - "breast_diagnostic_styles.rda"
+      - "lymphoma_diagnostic_styles.rda"
+      - "thyroid_function_data.rda"
+      # NOTE: roc_analysis_test_data.RData (bundles master/cancer/cardiac/sepsis/thyroid_data)
+      # exists only in the submodule (not main data/); left in place + auto-documented.
+      # Add it to main data/ to bring under single-source management.
   jsurvival:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     r_files:
@@ -113,10 +139,51 @@ modules:
       # re-add here when survivalPower is promoted to a production Survival menuGroup.
       - "multisurvival-interactions.R"
       - "multisurvival-metrics.R"
+    data_files:
+      - "histopathology.rda"
+      - "melanoma.rda"
+      - "data_longitudinal.rda"
+      # stagemigration_*.rda kept: used by jsurvival survival-staging analyses.
+      - "stagemigration_breast_cancer.rda"
+      - "stagemigration_colorectal_cancer.rda"
+      - "stagemigration_combined.rda"
+      - "stagemigration_large_performance.rda"
+      - "stagemigration_lung_cancer.rda"
+      - "stagemigration_problematic.rda"
+      - "stagemigration_small_sample.rda"
+      - "stagemigration_summary_stats.rda"
   ClinicoPathDescriptives:
     directory: "/Users/serdarbalci/Documents/GitHub/ClinicoPathDescriptives"
     r_files:
       - "utils.R"
+    data_files:
+      - "histopathology.rda"
+      - "agepyramid_cancer.rda"
+      - "agepyramid_geriatric.rda"
+      - "agepyramid_pediatric.rda"
+      - "agepyramid_reproductive.rda"
+      - "agepyramid_test.rda"
+      - "agepyramid_unbalanced.rda"
+      - "chisqposttest_test_data.rda"
+      - "complex_alluvial_data.rda"
+      - "election_survey_data.rda"
+      - "ihc_test_data.rda"
+      - "multi_group_workflow.rda"
+      - "outlierdetection_basic.rda"
+      - "outlierdetection_clinical.rda"
+      - "outlierdetection_edge_cases.rda"
+      - "outlierdetection_international.rda"
+      - "outlierdetection_large.rda"
+      - "outlierdetection_multivariate.rda"
+      - "outlierdetection_problematic.rda"
+      - "outlierdetection_psychological.rda"
+      - "outlierdetection_temporal.rda"
+      - "raw_with_time.rda"
+      - "sarcoma_ihc_data.rda"
+      - "tableone_test.rda"
+      - "treatmentResponse.rda"
+      # NOTE: ggflowchart_comprehensive_data.rda exists only in the submodule (not main data/);
+      # it is left in place + auto-documented, but add it to main data/ to bring under management.
   OncoPath:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
     r_files:
@@ -127,6 +194,13 @@ modules:
       # these files would be orphaned dead weight in the OncoPath release build. They stay
       # in main + JamoviTest (see JamoviTest r_files below); re-add here when the analysis
       # is promoted to a production OncoPath menuGroup.
+    data_files:
+      - "histopathology.rda"
+      - "waterfall_percentage_basic.rda"
+      - "waterfall_raw_longitudinal.rda"
+      # NOTE: diagnostic_studies.rda + swimmerplot_sample.rda exist only in the submodule
+      # (not main data/); they are left in place + auto-documented. Add them to main data/
+      # to bring under single-source management.
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     enabled: false  # Automatically enabled when TEST mode is active

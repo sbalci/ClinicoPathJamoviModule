@@ -155,6 +155,7 @@ items:
     - name: pca_plot
       title: PCA Batch Effect Visualization
       type: Image
+      renderFun: .pca_plot
       width: 800
       height: 600
       description: PCA plots showing batch effects before and after correction
@@ -169,6 +170,7 @@ items:
     - name: quality_plot
       title: Feature Quality Plots
       type: Image
+      renderFun: .quality_plot
       width: 800
       height: 600
       description: Distribution and quality assessment plots for features
@@ -182,6 +184,7 @@ items:
     - name: correlation_plot
       title: Feature Correlation Heatmap
       type: Image
+      renderFun: .correlation_plot
       width: 800
       height: 600
       description: Correlation matrix heatmap for redundancy analysis
