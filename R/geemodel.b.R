@@ -571,7 +571,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 value = as.character(median_cluster)
             ))
             table$setRow(rowNo=4, values=list(
-                diagnostic = as.character("Working Correlation (α)"),
+                diagnostic = as.character("Working Correlation (\u{03B1})"),
                 value = as.character(if (!is.na(working_corr)) sprintf("%.3f", working_corr) else "N/A")
             ))
             # Check convergence (geeglm models may not have a 'converged' field)
@@ -648,7 +648,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     corstr
                 )
 
-                title_text <- sprintf("Working Correlation Structure: %s (α = %.3f)", corstr_label, alpha)
+                title_text <- sprintf("Working Correlation Structure: %s (\u{03B1} = %.3f)", corstr_label, alpha)
 
                 p <- ggplot2::ggplot(corr_df, ggplot2::aes(x=Var1, y=Var2, fill=value)) +
                     ggplot2::geom_tile(color = "white", linewidth = 1) +
@@ -661,7 +661,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     ) +
                     ggplot2::labs(
                         title = title_text,
-                        subtitle = "(5×5 example matrix showing the correlation structure)",
+                        subtitle = "(5\u{00D7}5 example matrix showing the correlation structure)",
                         x = "Observation within cluster",
                         y = "Observation within cluster"
                     ) +
@@ -733,8 +733,8 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             interp <- switch(family_type,
                 "gaussian" = "For continuous outcomes, coefficients represent the average change in the outcome for a one-unit change in the predictor.",
-                "binomial" = "For binary outcomes, coefficients are log-odds ratios. Exponentiate (exp(β)) to get odds ratios.",
-                "poisson" = "For count outcomes, coefficients are log rate ratios. Exponentiate (exp(β)) to get rate ratios.",
+                "binomial" = "For binary outcomes, coefficients are log-odds ratios. Exponentiate (exp(\u{03B2})) to get odds ratios.",
+                "poisson" = "For count outcomes, coefficients are log rate ratios. Exponentiate (exp(\u{03B2})) to get rate ratios.",
                 "gamma" = "For positive continuous outcomes, coefficients represent multiplicative effects on the mean."
             )
 
@@ -758,7 +758,7 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <li><strong>SE</strong>: Standard error (",
             if(self$options$robust_se) "robust sandwich estimator" else "model-based",
             ")</li>
-            <li><strong>Wald</strong>: Wald test statistic for testing H₀: β = 0</li>
+            <li><strong>Wald</strong>: Wald test statistic for testing H\u{2080}: \u{03B2} = 0</li>
             <li><strong>p-value</strong>: Probability of observing this effect by chance</li>
             <li><strong>CI</strong>: ", 100*self$options$conf_level, "% confidence interval for the coefficient</li>
             </ul>

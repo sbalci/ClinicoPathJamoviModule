@@ -483,7 +483,7 @@ timevarycoxClass <- if (requireNamespace('jmvcore'))
               "<p><b>Formula:</b> ", htmltools::htmlEscape(deparse(model_results$formula)), "</p>",
               "<p><b>Events:</b> ", model_results$model$nevent, "</p>",
               "<p><b>Log-likelihood:</b> ", round(model_results$summary$loglik[2], 4), "</p>",
-              "<p><b>Likelihood ratio test:</b> χ² = ", round(model_results$summary$logtest["test"], 4), 
+              "<p><b>Likelihood ratio test:</b> \u{03C7}\u{00B2} = ", round(model_results$summary$logtest["test"], 4), 
               ", p = ", round(model_results$summary$logtest["pvalue"], 4), "</p>"
             )
             

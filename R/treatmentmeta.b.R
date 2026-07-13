@@ -617,7 +617,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Heterogeneity Synthesis
             i2 <- res$I2
-            interp <- paste0(interp, "<li>Heterogeneity is <b>", private$.getI2Interpretation(i2), "</b> (I² = ", round(i2*100, 1), "%).")
+            interp <- paste0(interp, "<li>Heterogeneity is <b>", private$.getI2Interpretation(i2), "</b> (I\u{00B2} = ", round(i2*100, 1), "%).")
             if (i2 > 0.5) {
                 interp <- paste0(interp, " High heterogeneity suggests that the effect varies considerably across settings.</li>")
             } else {
@@ -633,7 +633,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             methods <- paste0(methods, "Pooled effect sizes were calculated using a <b>", 
                              ifelse(res$common, "fixed-effect", "random-effects"), "</b> model with the <b>", 
                              res$method.tau, "</b> estimator for tau-squared. ")
-            methods <- paste0(methods, "Heterogeneity was assessed using Cochran's Q and the I² statistic. ")
+            methods <- paste0(methods, "Heterogeneity was assessed using Cochran's Q and the I\u{00B2} statistic. ")
             if (self$options$publication_bias) {
                 methods <- paste0(methods, "Publication bias was evaluated using Egger's regression and Begg's rank correlation tests. ")
             }

@@ -40,7 +40,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             <div class='jmv-info-box'>
             <h3>Net Benefit Formula (Time-Dependent):</h3>
-            <p class='formula'>NB(t, p<sub>t</sub>) = [TP(t) / N] - [FP(t) / N] × [p<sub>t</sub> / (1 - p<sub>t</sub>)]</p>
+            <p class='formula'>NB(t, p<sub>t</sub>) = [TP(t) / N] - [FP(t) / N] \u{00D7} [p<sub>t</sub> / (1 - p<sub>t</sub>)]</p>
 
             <h4>Where:</h4>
             <ul>

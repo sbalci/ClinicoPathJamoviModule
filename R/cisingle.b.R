@@ -118,9 +118,9 @@ ciSingleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br>Welcome to ClinicoPath Confidence Intervals for Mean Values
                 <br><br>
                 This tool calculates confidence intervals for continuous variables using multiple methods:
-                <br>• t-distribution (assumes normality)
-                <br>• Bootstrap (distribution-free)
-                <br>• Normal approximation (large samples)
+                <br>\u{2022} t-distribution (assumes normality)
+                <br>\u{2022} Bootstrap (distribution-free)
+                <br>\u{2022} Normal approximation (large samples)
                 <br><br>
                 Select continuous variables to analyze.
                 <hr><br>

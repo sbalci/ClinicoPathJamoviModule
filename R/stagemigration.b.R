@@ -586,15 +586,15 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         clinical_significance = "clinical significance"
                     ),
                     tr = list(
-                        title = "Klinik Özet: TNM Evre Migrasyonu Analizi",
-                        methods_header = "Yöntem",
+                        title = "Klinik \u{00D6}zet: TNM Evre Migrasyonu Analizi",
+                        methods_header = "Y\u{00F6}ntem",
                         results_header = "Temel Bulgular",
-                        interpretation_header = "Klinik Değerlendirme",
-                        recommendation_header = "Öneri",
+                        interpretation_header = "Klinik De\u{011F}erlendirme",
+                        recommendation_header = "\u{00D6}neri",
                         patients_analyzed = "hasta analiz edildi",
-                        migration_rate = "migrasyon oranı",
-                        statistical_significance = "istatistiksel anlamlılık",
-                        clinical_significance = "klinik anlamlılık"
+                        migration_rate = "migrasyon oran\u{0131}",
+                        statistical_significance = "istatistiksel anlaml\u{0131}l\u{0131}k",
+                        clinical_significance = "klinik anlaml\u{0131}l\u{0131}k"
                     )
                 )
 
@@ -2088,7 +2088,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Debug log-likelihood values with more detail
                         message(paste(
-                            "Pseudo R² Calculation - Null LL:", round(ll_null, 4),
+                            "Pseudo R\u{00B2} Calculation - Null LL:", round(ll_null, 4),
                             "Old fitted LL:", round(ll_fitted_old, 4),
                             "New fitted LL:", round(ll_fitted_new, 4)
                         ))
@@ -3421,7 +3421,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 <li><strong>Event Indicator:</strong> Death or event of interest</li>
                 </ul>
             </li>
-            <li><strong>Configure Analysis:</strong> Choose scope (Basic → Standard → Comprehensive → Publication)</li>
+            <li><strong>Configure Analysis:</strong> Choose scope (Basic \u{2192} Standard \u{2192} Comprehensive \u{2192} Publication)</li>
             <li><strong>Advanced Options:</strong> Enable NRI, IDI, ROC analysis, and bootstrap validation</li>
             <li><strong>Visualization:</strong> Select plots for comprehensive reporting</li>
             </ol>
@@ -3708,8 +3708,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><strong>Time-specific Analysis:</strong> NRI is calculated at specific time points (12, 24, 60 months)</li>
                             <li><strong>Reclassification Tracking:</strong> For each time point, we identify patients who:
                                 <ul style="margin-left: 15px; margin-top: 5px;">
-                                    <li>Move UP in risk (Low→Intermediate, Low→High, Intermediate→High)</li>
-                                    <li>Move DOWN in risk (High→Intermediate, High→Low, Intermediate→Low)</li>
+                                    <li>Move UP in risk (Low\u{2192}Intermediate, Low\u{2192}High, Intermediate\u{2192}High)</li>
+                                    <li>Move DOWN in risk (High\u{2192}Intermediate, High\u{2192}Low, Intermediate\u{2192}Low)</li>
                                     <li>Stay in the SAME risk category</li>
                                 </ul>
                             </li>
@@ -3724,7 +3724,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 <br/><em>Good reclassification: Events moved UP to higher risk categories</em></li>
                             <li><strong>NRI- (Non-events):</strong> Net improvement in patients who survived to time point
                                 <br/><em>Good reclassification: Non-events moved DOWN to lower risk categories</em></li>
-                            <li><strong>p-value:</strong> Tests H₀: NRI = 0 (no improvement vs. improvement)</li>
+                            <li><strong>p-value:</strong> Tests H\u{2080}: NRI = 0 (no improvement vs. improvement)</li>
                         </ul>
 
                         <h5 style="color: #e91e63; margin-bottom: 8px;">Clinical Interpretation:</h5>
@@ -3857,18 +3857,18 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         <h4 style="margin-top: 0; color: #2c3e50;">Understanding Pseudo R-squared Measures</h4>
                         <p style="margin-bottom: 10px;">Pseudo R-squared measures quantify the explanatory power of Cox proportional hazards models:</p>
                         <ul style="margin-left: 20px;">
-                            <li><strong>Nagelkerke R²:</strong> Normalized measure (0-1), most commonly used for interpretation</li>
-                            <li><strong>McFadden R²:</strong> Based on likelihood ratio, values 0.2-0.4 indicate excellent fit</li>
-                            <li><strong>Cox-Snell R²:</strong> Conservative measure, cannot reach 1.0 theoretically</li>
-                            <li><strong>Adjusted McFadden R²:</strong> Penalizes for model complexity, can be negative if overfitted</li>
-                            <li><strong>Royston & Sauerbrei R²:</strong> Measures explained variation in survival times, accounts for censoring patterns</li>
+                            <li><strong>Nagelkerke R\u{00B2}:</strong> Normalized measure (0-1), most commonly used for interpretation</li>
+                            <li><strong>McFadden R\u{00B2}:</strong> Based on likelihood ratio, values 0.2-0.4 indicate excellent fit</li>
+                            <li><strong>Cox-Snell R\u{00B2}:</strong> Conservative measure, cannot reach 1.0 theoretically</li>
+                            <li><strong>Adjusted McFadden R\u{00B2}:</strong> Penalizes for model complexity, can be negative if overfitted</li>
+                            <li><strong>Royston & Sauerbrei R\u{00B2}:</strong> Measures explained variation in survival times, accounts for censoring patterns</li>
                         </ul>
                         <div style="background-color: #f0f8f0; padding: 10px; border-radius: 5px; margin: 10px 0;">
                             <p style="margin: 0; color: #2e7d32;"><strong> Clinical Interpretation:</strong></p>
                             <ul style="margin: 5px 0 0 20px; color: #2e7d32;">
-                                <li><strong>Nagelkerke R² >0.3:</strong> Acceptable explanatory power</li>
-                                <li><strong>McFadden R² >0.2:</strong> Good model fit</li>
-                                <li><strong>Royston & Sauerbrei R² >0.3:</strong> Good explained variation</li>
+                                <li><strong>Nagelkerke R\u{00B2} >0.3:</strong> Acceptable explanatory power</li>
+                                <li><strong>McFadden R\u{00B2} >0.2:</strong> Good model fit</li>
+                                <li><strong>Royston & Sauerbrei R\u{00B2} >0.3:</strong> Good explained variation</li>
                                 <li><strong>Positive improvements:</strong> New staging system explains more variance</li>
                                 <li><strong>Higher values:</strong> Better discrimination between risk groups</li>
                             </ul>
@@ -3927,7 +3927,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         </div>
                         <p style="margin-bottom: 5px;"><strong>Clinical interpretation:</strong></p>
                         <ul style="margin-left: 20px;">
-                            <li><strong>Traditional:</strong> Well-calibrated model has H-L p >0.05, slope ≈ 1.0, intercept ≈ 0.0</li>
+                            <li><strong>Traditional:</strong> Well-calibrated model has H-L p >0.05, slope \u{2248} 1.0, intercept \u{2248} 0.0</li>
                             <li><strong>Spline:</strong> H-L test not applicable; focus on spline slope and visual calibration plots</li>
                             <li>Over-prediction: Slope <1.0 (predictions too high)</li>
                             <li>Under-prediction: Slope >1.0 (predictions too low)</li>
@@ -4167,16 +4167,16 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         <p style="margin-bottom: 10px;">Effect sizes quantify the magnitude of differences between staging systems, independent of sample size:</p>
                         <ul style="margin-left: 20px;">
                             <li><strong>Cohen\'s d:</strong> Standardized difference in C-index improvement</li>
-                            <li><strong>Glass\'s Δ:</strong> Alternative effect size using pooled standard deviation</li>
-                            <li><strong>Eta-squared (η²):</strong> Proportion of variance explained by staging system</li>
-                            <li><strong>Omega-squared (ω²):</strong> Unbiased estimate of effect size</li>
+                            <li><strong>Glass\'s \u{0394}:</strong> Alternative effect size using pooled standard deviation</li>
+                            <li><strong>Eta-squared (\u{03B7}\u{00B2}):</strong> Proportion of variance explained by staging system</li>
+                            <li><strong>Omega-squared (\u{03C9}\u{00B2}):</strong> Unbiased estimate of effect size</li>
                         </ul>
                         <div style="margin-top: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
                             <strong>Interpretation Guidelines:</strong>
                             <ul style="margin-left: 20px; margin-bottom: 0;">
-                                <li><strong>Small Effect:</strong> d ≈ 0.2, η² ≈ 0.01 (minimal practical importance)</li>
-                                <li><strong>Medium Effect:</strong> d ≈ 0.5, η² ≈ 0.06 (moderate practical importance)</li>
-                                <li><strong>Large Effect:</strong> d ≈ 0.8, η² ≈ 0.14 (substantial practical importance)</li>
+                                <li><strong>Small Effect:</strong> d \u{2248} 0.2, \u{03B7}\u{00B2} \u{2248} 0.01 (minimal practical importance)</li>
+                                <li><strong>Medium Effect:</strong> d \u{2248} 0.5, \u{03B7}\u{00B2} \u{2248} 0.06 (moderate practical importance)</li>
+                                <li><strong>Large Effect:</strong> d \u{2248} 0.8, \u{03B7}\u{00B2} \u{2248} 0.14 (substantial practical importance)</li>
                             </ul>
                         </div>
                         <p style="margin-bottom: 0; font-style: italic; color: #666;">Effect sizes help determine practical significance beyond statistical significance.</p>
@@ -4853,7 +4853,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ))
 
                 # Row 5: Chi-square test
-                chi_stat <- if (!is.null(basic_results$chi_test)) sprintf("χ² = %.2f, df = %d", basic_results$chi_test$statistic, basic_results$chi_test$parameter) else "Not calculated"
+                chi_stat <- if (!is.null(basic_results$chi_test)) sprintf("\u{03C7}\u{00B2} = %.2f, df = %d", basic_results$chi_test$statistic, basic_results$chi_test$parameter) else "Not calculated"
                 table$addRow(rowKey = 5, values = list(
                     statistic = "Chi-square Test",
                     value = chi_stat
@@ -5120,7 +5120,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 aic_improvement <- private$.safeAtomic(advanced_results$aic_improvement, "numeric", NA)
 
                 table$addRow(rowKey = "aic", values = list(
-                    metric = "AIC Difference (Δ)",
+                    metric = "AIC Difference (\u{0394})",
                     value = if (!is.na(aic_improvement)) sprintf("%.2f", aic_improvement) else "NA",
                     ci = "N/A",
                     interpretation = if (is.na(aic_improvement)) {
@@ -5140,7 +5140,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 bic_improvement <- private$.safeAtomic(advanced_results$bic_improvement, "numeric", NA)
 
                 table$addRow(rowKey = "bic", values = list(
-                    metric = "BIC Difference (Δ)",
+                    metric = "BIC Difference (\u{0394})",
                     value = if (!is.na(bic_improvement)) sprintf("%.2f", bic_improvement) else "NA",
                     ci = "N/A",
                     interpretation = if (is.na(bic_improvement)) {
@@ -6033,7 +6033,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <div style='margin: 10px;'>
                     <h4>Stage Migration Effect Formula (SME)</h4>
                     <p><strong>Purpose:</strong> Quantifies the cumulative difference in survival between corresponding stages of old and new staging systems.</p>
-                    <p><strong>Formula:</strong> SME = Σ(S<sub>new,i</sub> - S<sub>old,i</sub>) where S represents stage-specific survival rates</p>
+                    <p><strong>Formula:</strong> SME = \u{03A3}(S<sub>new,i</sub> - S<sub>old,i</sub>) where S represents stage-specific survival rates</p>
                     <ul>
                         <li><strong>Positive SME:</strong> New staging system shows better survival (possible Will Rogers phenomenon)</li>
                         <li><strong>Negative SME:</strong> Old staging system shows better survival (possible understaging in new system)</li>
@@ -6111,7 +6111,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (!is.null(sme_results$formula_explanation)) {
                             assessment_table$addRow(rowKey = "formula", values = list(
                                 Metric = "Formula",
-                                Value = as.character(sme_results$formula_explanation$formula %||% "SME = Σ(S_new_i - S_old_i)")
+                                Value = as.character(sme_results$formula_explanation$formula %||% "SME = \u{03A3}(S_new_i - S_old_i)")
                             ))
                         }
 
@@ -6136,11 +6136,11 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <div style='margin: 10px;'>
                     <h4>Restricted Mean Survival Time (RMST) Analysis</h4>
                     <p><strong>Purpose:</strong> RMST provides a robust alternative to median survival and hazard ratios, especially when proportional hazards assumptions are violated.</p>
-                    <p><strong>Definition:</strong> RMST(τ) = ∫₀^τ S(t)dt, the area under the survival curve up to time τ</p>
-                    <p><strong>Clinical Interpretation:</strong> Mean survival time within the restriction period τ</p>
+                    <p><strong>Definition:</strong> RMST(\u{03C4}) = \u{222B}\u{2080}^\u{03C4} S(t)dt, the area under the survival curve up to time \u{03C4}</p>
+                    <p><strong>Clinical Interpretation:</strong> Mean survival time within the restriction period \u{03C4}</p>
                     <h5>Advantages:</h5>
                     <ul>
-                        <li>Clinically interpretable (mean survival time up to τ)</li>
+                        <li>Clinically interpretable (mean survival time up to \u{03C4})</li>
                         <li>Robust to non-proportional hazards</li>
                         <li>Less sensitive to tail behavior than median survival</li>
                         <li>Allows direct comparison of absolute survival benefit</li>
@@ -6196,7 +6196,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add note
                         if (!is.null(rmst_results$tau_selection)) {
                             tau_info <- sprintf(
-                                "τ = %.1f months (%s)",
+                                "\u{03C4} = %.1f months (%s)",
                                 rmst_results$tau_selection$value,
                                 rmst_results$tau_selection$method
                             )
@@ -6205,7 +6205,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         table$setNote(
                             "rmst_interpretation",
-                            "RMST represents mean survival time up to restriction time τ. Higher values indicate better survival."
+                            "RMST represents mean survival time up to restriction time \u{03C4}. Higher values indicate better survival."
                         )
                     }
                 }
@@ -6235,7 +6235,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         comparison_table$addRow(rowKey = "recommendation", values = list(
                             System = "Overall Assessment",
                             RMST_Range = if (!is.na(old_range) && !is.na(new_range)) {
-                                sprintf("Δ = %.2f months", new_range - old_range)
+                                sprintf("\u{0394} = %.2f months", new_range - old_range)
                             } else {
                                 "Unable to compare"
                             },
@@ -6600,7 +6600,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add Nagelkerke R-squared
                 table$addRow(rowKey = "nagelkerke", values = list(
-                    Measure = "Nagelkerke R²",
+                    Measure = "Nagelkerke R\u{00B2}",
                     Original = private$.safeAtomic(pseudo_r2_results$nagelkerke_old, "numeric", NA),
                     New = private$.safeAtomic(pseudo_r2_results$nagelkerke_new, "numeric", NA),
                     Improvement = private$.safeAtomic(pseudo_r2_results$nagelkerke_improvement, "numeric", NA),
@@ -6609,7 +6609,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add McFadden R-squared
                 table$addRow(rowKey = "mcfadden", values = list(
-                    Measure = "McFadden R²",
+                    Measure = "McFadden R\u{00B2}",
                     Original = private$.safeAtomic(pseudo_r2_results$mcfadden_old, "numeric", NA),
                     New = private$.safeAtomic(pseudo_r2_results$mcfadden_new, "numeric", NA),
                     Improvement = private$.safeAtomic(pseudo_r2_results$mcfadden_improvement, "numeric", NA),
@@ -6618,7 +6618,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add Cox-Snell R-squared
                 table$addRow(rowKey = "cox_snell", values = list(
-                    Measure = "Cox-Snell R²",
+                    Measure = "Cox-Snell R\u{00B2}",
                     Original = private$.safeAtomic(pseudo_r2_results$cox_snell_old, "numeric", NA),
                     New = private$.safeAtomic(pseudo_r2_results$cox_snell_new, "numeric", NA),
                     Improvement = private$.safeAtomic(pseudo_r2_results$cox_snell_improvement, "numeric", NA),
@@ -6627,7 +6627,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add Adjusted McFadden R-squared
                 table$addRow(rowKey = "adj_mcfadden", values = list(
-                    Measure = "Adjusted McFadden R²",
+                    Measure = "Adjusted McFadden R\u{00B2}",
                     Original = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_old, "numeric", NA),
                     New = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_new, "numeric", NA),
                     Improvement = private$.safeAtomic(pseudo_r2_results$adj_mcfadden_improvement, "numeric", NA),
@@ -6636,7 +6636,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add Royston & Sauerbrei R-squared
                 table$addRow(rowKey = "royston", values = list(
-                    Measure = "Royston & Sauerbrei R²",
+                    Measure = "Royston & Sauerbrei R\u{00B2}",
                     Original = private$.safeAtomic(pseudo_r2_results$royston_old, "numeric", NA),
                     New = private$.safeAtomic(pseudo_r2_results$royston_new, "numeric", NA),
                     Improvement = private$.safeAtomic(pseudo_r2_results$royston_improvement, "numeric", NA),
@@ -6910,7 +6910,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # AIC/BIC Comparison
                         if (!is.null(c_adv)) {
                             table$addRow(rowKey = "aic_diff", values = list(
-                                Method = "AIC Difference (Δ)",
+                                Method = "AIC Difference (\u{0394})",
                                 Result = "8.05", # From statistical comparison
                                 CI = "N/A",
                                 p_value = NA,
@@ -6918,7 +6918,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ))
 
                             table$addRow(rowKey = "bic_diff", values = list(
-                                Method = "BIC Difference (Δ)",
+                                Method = "BIC Difference (\u{0394})",
                                 Result = "8.05", # From statistical comparison
                                 CI = "N/A",
                                 p_value = NA,
@@ -7035,7 +7035,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ))
 
                 table$addRow(rowKey = "r2_old", values = list(
-                    Measure = "R² equivalent (Original System)",
+                    Measure = "R\u{00B2} equivalent (Original System)",
                     Effect_Size = old_r2_equiv,
                     Magnitude = "Small",
                     Interpretation = sprintf("Variance explained: %.1f%% (C-index: %.3f)", old_r2_equiv * 100, old_c_index),
@@ -7043,7 +7043,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 ))
 
                 table$addRow(rowKey = "r2_new", values = list(
-                    Measure = "R² equivalent (New System)",
+                    Measure = "R\u{00B2} equivalent (New System)",
                     Effect_Size = new_r2_equiv,
                     Magnitude = "Small",
                     Interpretation = sprintf("Variance explained: %.1f%% (C-index: %.3f)", new_r2_equiv * 100, new_c_index),
@@ -7595,7 +7595,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     <dt style="font-weight: bold;">TBD (To Be Determined)</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">Analysis pending or needs to be enabled</dd>
 
-                                    <dt style="font-weight: bold;">± (Plus/Minus)</dt>
+                                    <dt style="font-weight: bold;">&#xB1; (Plus/Minus)</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">Indicates confidence interval range</dd>
                                 </dl>
                             </div>
@@ -7649,7 +7649,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     <dt style="font-weight: bold;">LR (Likelihood Ratio)</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">Test statistic for model comparison</dd>
 
-                                    <dt style="font-weight: bold;">Pseudo R²</dt>
+                                    <dt style="font-weight: bold;">Pseudo R&#xB2;</dt>
                                     <dd style="margin-left: 20px; margin-bottom: 10px;">Variance explained by staging (0-1)</dd>
                                 </dl>
                             </div>
@@ -7861,7 +7861,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 <h5 style="color: #1565c0; margin-bottom: 8px;">Metrics Included:</h5>
                                 <ul style="margin-left: 20px;">
                                     <li><strong>C-index Improvement:</strong> Discrimination enhancement with optimism correction</li>
-                                    <li><strong>Pseudo R² Improvements:</strong> Model fit enhancement across multiple measures</li>
+                                    <li><strong>Pseudo R\u{00B2} Improvements:</strong> Model fit enhancement across multiple measures</li>
                                     <li><strong>NRI/IDI:</strong> Reclassification and discrimination improvements (when enabled)</li>
                                     <li><strong>Bootstrap Statistics:</strong> Mean, standard error, and 95% confidence intervals</li>
                                 </ul>
@@ -8114,7 +8114,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 return(list(
-                    Migration_Pattern = paste(old_stage, "→", new_stage),
+                    Migration_Pattern = paste(old_stage, "\u{2192}", new_stage),
                     Count = count,
                     Survival_Change_Old = if (!is.na(old_median)) old_median else NA,
                     Survival_Change_New = if (!is.na(new_median)) new_median else NA,
@@ -8446,19 +8446,19 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add results to table
                         measures <- list(
                             list(
-                                name = "Nagelkerke R²", old = old_nagelkerke, new = new_nagelkerke,
-                                desc = "Most commonly used pseudo R² for survival models"
+                                name = "Nagelkerke R\u{00B2}", old = old_nagelkerke, new = new_nagelkerke,
+                                desc = "Most commonly used pseudo R\u{00B2} for survival models"
                             ),
                             list(
-                                name = "Cox & Snell R²", old = old_cox_snell, new = new_cox_snell,
+                                name = "Cox & Snell R\u{00B2}", old = old_cox_snell, new = new_cox_snell,
                                 desc = "Based on likelihood ratio, bounded below 1"
                             ),
                             list(
-                                name = "McFadden R²", old = old_mcfadden, new = new_mcfadden,
+                                name = "McFadden R\u{00B2}", old = old_mcfadden, new = new_mcfadden,
                                 desc = "Likelihood ratio index, ranges 0-1"
                             ),
                             list(
-                                name = "Royston & Sauerbrei R²", old = old_royston, new = new_royston,
+                                name = "Royston & Sauerbrei R\u{00B2}", old = old_royston, new = new_royston,
                                 desc = "Explained variation in survival times"
                             )
                         )
@@ -8511,7 +8511,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             New_System = NA,
                             Improvement = NA,
                             Relative_Improvement = NA,
-                            Interpretation = paste("Enhanced pseudo R² calculation failed:", e$message)
+                            Interpretation = paste("Enhanced pseudo R\u{00B2} calculation failed:", e$message)
                         ))
                     }
                 )
@@ -10878,7 +10878,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     significance <- ifelse(imp_ci[1] > 0, "Significant", "Non-significant")
 
                                     table$addRow(rowKey = paste0(measure_name, "_bootstrap"), values = list(
-                                        Metric = paste(tools::toTitleCase(measure_name), "R² Improvement (Bootstrap)"),
+                                        Metric = paste(tools::toTitleCase(measure_name), "R\u{00B2} Improvement (Bootstrap)"),
                                         Original_System = sprintf("%.4f (SE: %.4f)", mean(improvements), imp_se),
                                         New_System = sprintf("%.0f%% CI: [%.4f, %.4f]", self$options$confidenceLevel * 100, imp_ci[1], imp_ci[2]),
                                         Comparison = significance,
@@ -11022,7 +11022,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 clinical_interpretation <- private$.interpretBootstrapOptimism(optimism, success_rate)
 
                                 table$addRow(rowKey = "nagelkerke_improvement", values = list(
-                                    Metric = "Nagelkerke R² Improvement",
+                                    Metric = "Nagelkerke R\u{00B2} Improvement",
                                     Apparent = apparent_improvement,
                                     Bootstrap_Mean = boot_mean,
                                     Bootstrap_SE = boot_se,
@@ -11210,8 +11210,8 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             "Total patients: ", total_patients, " | Migration rate: ",
                             round(sum(matrix_long$Count[!matrix_long$IsDiagonal]) / total_patients * 100, 1), "%"
                         ),
-                        x = "New Staging System →",
-                        y = "← Original Staging System"
+                        x = "New Staging System \u{2192}",
+                        y = "\u{2190} Original Staging System"
                     ) +
                     # Theme
                     ggtheme +
@@ -11519,7 +11519,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 data = annotation_data,
                                 aes(
                                     x = x_pos, y = y_diff,
-                                    label = sprintf("Δ: %+.3f", improvement)
+                                    label = sprintf("\u{0394}: %+.3f", improvement)
                                 ),
                                 color = ifelse(annotation_data$improvement > 0, "#2e7d32", "#c62828"),
                                 size = 3, fontface = "bold", inherit.aes = FALSE
@@ -11659,7 +11659,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         subtitle = "Forest plot showing hazard ratios with 95% confidence intervals",
                         x = "Hazard Ratio (log scale)",
                         y = "Stage Groups",
-                        caption = "Reference line at HR = 1.0 (no effect) • * p<0.05, ** p<0.01, *** p<0.001"
+                        caption = "Reference line at HR = 1.0 (no effect) \u{2022} * p<0.05, ** p<0.01, *** p<0.001"
                     ) +
                     # Enhanced log scale with better breaks
                     scale_x_log10(
@@ -13244,7 +13244,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Calibration slope interpretation (key metric per document)
                         if (!is.na(cal_slope)) {
                             if (abs(cal_slope - 1.0) < 0.1) {
-                                interpretations <- c(interpretations, "Perfect calibration slope (≈1.0)")
+                                interpretations <- c(interpretations, "Perfect calibration slope (\u{2248}1.0)")
                             } else if (cal_slope < 0.8) {
                                 interpretations <- c(interpretations, "Over-prediction (slope < 0.8)")
                             } else if (cal_slope > 1.2) {
@@ -16482,7 +16482,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     Pattern_Type = "Major Migration",
                                     Count = pattern$count,
                                     Percentage = pattern$percentage / 100,
-                                    Flow_Direction = paste(pattern$from, "→", pattern$to),
+                                    Flow_Direction = paste(pattern$from, "\u{2192}", pattern$to),
                                     Clinical_Impact = "Significant reclassification pattern"
                                 ))
                             }
@@ -16590,7 +16590,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 for (flow_name in names(heatmap_data$major_migrations)) {
                                     flow <- heatmap_data$major_migrations[[flow_name]]
                                     if (flow$from == stage || flow$to == stage) {
-                                        major_flows <- c(major_flows, paste0(flow$from, "→", flow$to, " (", flow$percentage, "%)"))
+                                        major_flows <- c(major_flows, paste0(flow$from, "\u{2192}", flow$to, " (", flow$percentage, "%)"))
                                     }
                                 }
                                 major_flows_text <- if (length(major_flows) > 0) {
@@ -17284,7 +17284,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ggplot2::labs(
                                 title = "Will Rogers Effect: Median Survival by Stage and Period",
                                 subtitle = paste0(
-                                    "Migration pattern: ", from_stage, " → ", to_stage,
+                                    "Migration pattern: ", from_stage, " \u{2192} ", to_stage,
                                     " (", migration_counts[from_stage, to_stage], " patients)"
                                 ),
                                 x = "Stage",
@@ -17677,7 +17677,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ggplot2::labs(
                                 title = "Stage Migration Flow Diagram",
                                 subtitle = paste0(
-                                    "Patient migration patterns: ", old_stage, " → ", new_stage,
+                                    "Patient migration patterns: ", old_stage, " \u{2192} ", new_stage,
                                     "\nOrange = Upstaging, Blue = Downstaging, Gray = No change"
                                 ),
                                 x = "",
@@ -17945,7 +17945,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     ),
                                     Survival_Change = survival_improvement,
                                     P_Value = if (!is.na(p_value_original)) p_value_original else NA,
-                                    Statistical_Test = paste0("Log-rank test (", from_stage, "→", to_stage, " migration)")
+                                    Statistical_Test = paste0("Log-rank test (", from_stage, "\u{2192}", to_stage, " migration)")
                                 ))
                             }
 
@@ -18004,7 +18004,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     ),
                                     Survival_Change = survival_improvement_new,
                                     P_Value = if (!is.na(p_value_new)) p_value_new else NA,
-                                    Statistical_Test = paste0("Log-rank test (", from_stage, "→", to_stage, " migration)")
+                                    Statistical_Test = paste0("Log-rank test (", from_stage, "\u{2192}", to_stage, " migration)")
                                 ))
                             }
                         }
@@ -21385,7 +21385,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Formula explanation
                         sme_results$formula_explanation <- list(
-                            formula = "SME = Σ(S_new_i - S_old_i)",
+                            formula = "SME = \u{03A3}(S_new_i - S_old_i)",
                             description = "Stage Migration Effect quantifies the cumulative difference in survival between corresponding stages",
                             interpretation_guide = list(
                                 positive_sme = "New staging system shows better survival (possible Will Rogers phenomenon)",
@@ -22700,12 +22700,12 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (c_improvement > 0.02) {
                                 summary_parts <- c(
                                     summary_parts,
-                                    paste("The new staging system demonstrated clinically significant improvement (ΔC-index =", c_improvement, ").")
+                                    paste("The new staging system demonstrated clinically significant improvement (\u{0394}C-index =", c_improvement, ").")
                                 )
                             } else {
                                 summary_parts <- c(
                                     summary_parts,
-                                    paste("The new staging system showed marginal improvement (ΔC-index =", c_improvement, ").")
+                                    paste("The new staging system showed marginal improvement (\u{0394}C-index =", c_improvement, ").")
                                 )
                             }
                         }

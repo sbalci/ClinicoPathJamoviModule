@@ -436,8 +436,8 @@ directregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 "</ul>",
                 "<p><strong>Pseudo-observation Calculation:</strong></p>",
                 "<p>For each individual <em>i</em> and time point <em>t</em>:</p>",
-                "<p><em>θ̂<sub>i</sub>(t) = n·Ŝ(t) - (n-1)·Ŝ<sub>-i</sub>(t)</em></p>",
-                "<p>Where Ŝ(t) is the Kaplan-Meier estimate and Ŝ<sub>-i</sub>(t) is the estimate without observation <em>i</em>.</p>"
+                "<p><em>\u{03B8}\u{0302}<sub>i</sub>(t) = n\u{00B7}\u{015C}(t) - (n-1)\u{00B7}\u{015C}<sub>-i</sub>(t)</em></p>",
+                "<p>Where \u{015C}(t) is the Kaplan-Meier estimate and \u{015C}<sub>-i</sub>(t) is the estimate without observation <em>i</em>.</p>"
             )
 
             self$results$methodologyExplanation$setContent(html)

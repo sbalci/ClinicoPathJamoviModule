@@ -167,13 +167,13 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Alpha level recommendation
                 alpha_rec <- if (self$options$trial_type == "non_inferiority") {
-                    "Consider α=0.025 for non-inferiority (more stringent)"
+                    "Consider \u{03B1}=0.025 for non-inferiority (more stringent)"
                 } else {
-                    "Standard α=0.05 appropriate for superiority trials"
+                    "Standard \u{03B1}=0.05 appropriate for superiority trials"
                 }
 
                 design_table$addRow(rowKey = "alpha", values = list(
-                    parameter = "Significance Level (α)",
+                    parameter = "Significance Level (\u{03B1})",
                     value = self$options$alpha,
                     recommendation = alpha_rec,
                     rationale = "Balances Type I error risk with study feasibility"
@@ -189,7 +189,7 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 design_table$addRow(rowKey = "power", values = list(
-                    parameter = "Statistical Power (1-β)",
+                    parameter = "Statistical Power (1-\u{03B2})",
                     value = self$options$power,
                     recommendation = power_rec,
                     rationale = "Higher power reduces risk of missing true effects"
@@ -668,9 +668,9 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     regulatory_table$addRow(rowKey = "alpha_ni", values = list(
                         regulatory_aspect = "Alpha Level (Non-Inferiority)",
-                        requirement = "Often α=0.025 (one-sided) for more stringent testing",
+                        requirement = "Often \u{03B1}=0.025 (one-sided) for more stringent testing",
                         compliance_status = if (self$options$alpha <= 0.025) "Appropriate" else "Consider Adjustment",
-                        recommendation = "Use α=0.025 for non-inferiority claims",
+                        recommendation = "Use \u{03B1}=0.025 for non-inferiority claims",
                         reference = "ICH E9 Statistical Principles"
                     ))
                 }
@@ -701,7 +701,7 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<h3>Clinical Trial Design - Interpretation & Guidelines</h3>",
                     "<h4>Study Design Summary</h4>",
                     "<p><b>Trial Type:</b> ", self$options$trial_type, " trial with ", self$options$outcome_type, " primary outcome</p>",
-                    "<p><b>Statistical Approach:</b> ", self$options$test_type, " with α=", self$options$alpha, " and power=", self$options$power, "</p>",
+                    "<p><b>Statistical Approach:</b> ", self$options$test_type, " with \u{03B1}=", self$options$alpha, " and power=", self$options$power, "</p>",
                     "<h4>Sample Size Interpretation</h4>",
                     "<p>The calculated sample size ensures adequate statistical power to detect clinically meaningful differences. ",
                     "Consider the following factors in your interpretation:</p>",
@@ -763,8 +763,8 @@ clinicaltrialdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<p><b>Primary Outcome:</b> ", self$options$outcome_type, " outcome analyzed using ", self$options$test_type, "</p>",
                     "<p><b>Statistical Parameters:</b></p>",
                     "<ul>",
-                    "<li>Type I error rate (α): ", self$options$alpha, "</li>",
-                    "<li>Statistical power (1-β): ", self$options$power, "</li>",
+                    "<li>Type I error rate (\u{03B1}): ", self$options$alpha, "</li>",
+                    "<li>Statistical power (1-\u{03B2}): ", self$options$power, "</li>",
                     "<li>Effect size: ", if (self$options$outcome_type == "continuous") {
                         paste("Cohen's d =", self$options$effect_size)
                     } else {

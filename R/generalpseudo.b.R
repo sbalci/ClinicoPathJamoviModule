@@ -516,8 +516,8 @@ generalpseudoClass <- R6::R6Class(
         .initModelDiagnostics = function() {
             table <- self$results$modelDiagnostics
             table$getColumn('time_point')$setTitle('Time Point')
-            table$getColumn('r_squared')$setTitle('R²')
-            table$getColumn('adj_r_squared')$setTitle('Adj. R²')
+            table$getColumn('r_squared')$setTitle('R\u{00B2}')
+            table$getColumn('adj_r_squared')$setTitle('Adj. R\u{00B2}')
             table$getColumn('aic')$setTitle('AIC')
             table$getColumn('bic')$setTitle('BIC')
             table$getColumn('rmse')$setTitle('RMSE')
@@ -771,7 +771,7 @@ generalpseudoClass <- R6::R6Class(
                                    <p>Cumulative incidence functions calculated for cause ', self$options$cause_specific, '.</p>')
                 } else if (self$options$functional_type == "restricted_mean") {
                     html <- paste0(html, '<h4>Restricted Mean Survival Time:</h4>
-                                   <p>RMST calculated with restriction time τ = ', self$options$rmst_tau, '.</p>')
+                                   <p>RMST calculated with restriction time \u{03C4} = ', self$options$rmst_tau, '.</p>')
                 } else if (self$options$functional_type == "quantile") {
                     html <- paste0(html, '<h4>Quantile Analysis:</h4>
                                    <p>Quantile pseudo-observations for probability = ', self$options$quantile_prob, '.</p>')

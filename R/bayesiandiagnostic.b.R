@@ -32,12 +32,12 @@ bayesiandiagnosticClass <- R6::R6Class(
                     <h3>Bayesian Diagnostic Analysis</h3>
                     <div class='formula'>
                         <b>Bayes' Theorem:</b><br>
-                        P(D+|T+) = P(T+|D+) × P(D+) / P(T+)<br><br>
+                        P(D+|T+) = P(T+|D+) \u{00D7} P(D+) / P(T+)<br><br>
                         <b>Likelihood Ratios:</b><br>
                         LR+ = Sensitivity / (1 - Specificity)<br>
                         LR- = (1 - Sensitivity) / Specificity<br><br>
                         <b>Posterior Odds:</b><br>
-                        Posterior Odds = LR × Prior Odds
+                        Posterior Odds = LR \u{00D7} Prior Odds
                     </div>
                     <div class='interpretation'>
                         <b>Interpretation:</b> Bayesian diagnostic analysis updates prior disease probability 

@@ -154,8 +154,8 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             <h4>Key Metrics:</h4>
             <ul>
-                <li><b>ICER:</b> Incremental Cost-Effectiveness Ratio = ΔCost / ΔEffect</li>
-                <li><b>NMB:</b> Net Monetary Benefit = (Effect × WTP) - Cost</li>
+                <li><b>ICER:</b> Incremental Cost-Effectiveness Ratio = \u{0394}Cost / \u{0394}Effect</li>
+                <li><b>NMB:</b> Net Monetary Benefit = (Effect \u{00D7} WTP) - Cost</li>
                 <li><b>Dominance:</b> Strategy with lower cost AND higher effect dominates</li>
                 <li><b>WTP Threshold:</b> Maximum acceptable cost per unit of effectiveness</li>
             </ul>
@@ -1573,7 +1573,7 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                                self$options$currency,
                                self$options$effectiveness_label),
                  ylab = "",
-                 main = sprintf("Tornado Diagram: One-Way Sensitivity Analysis\n(±%d%% variation)",
+                 main = sprintf("Tornado Diagram: One-Way Sensitivity Analysis\n(\u{00B1}%d%% variation)",
                                self$options$sensitivity_range_pct),
                  yaxt = "n",
                  las = 1)

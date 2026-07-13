@@ -1276,13 +1276,13 @@ dynamiccoeffClass <- R6::R6Class(
                     aic_improvement <- results$model_comparison$static$aic - results$model_comparison$dynamic$aic
                     if (aic_improvement > 2) {
                         html <- paste0(html, "<p>The dynamic coefficient model shows <strong>substantial improvement</strong> ")
-                        html <- paste0(html, "over the static model (ΔAic = ", sprintf("%.1f", aic_improvement), ").</p>")
+                        html <- paste0(html, "over the static model (\u{0394}Aic = ", sprintf("%.1f", aic_improvement), ").</p>")
                     } else if (aic_improvement > 0) {
                         html <- paste0(html, "<p>The dynamic coefficient model shows <strong>modest improvement</strong> ")
-                        html <- paste0(html, "over the static model (ΔAic = ", sprintf("%.1f", aic_improvement), ").</p>")
+                        html <- paste0(html, "over the static model (\u{0394}Aic = ", sprintf("%.1f", aic_improvement), ").</p>")
                     } else {
                         html <- paste0(html, "<p>The static model may be more appropriate based on AIC comparison ")
-                        html <- paste0(html, "(ΔAic = ", sprintf("%.1f", aic_improvement), ").</p>")
+                        html <- paste0(html, "(\u{0394}Aic = ", sprintf("%.1f", aic_improvement), ").</p>")
                     }
                 }
                 
@@ -1327,9 +1327,9 @@ dynamiccoeffClass <- R6::R6Class(
             html <- paste0(html, "<div class='method-section'>")
             html <- paste0(html, "<h4>Mathematical Framework</h4>")
             html <- paste0(html, "<p>The dynamic coefficient model represents the hazard function as:</p>")
-            html <- paste0(html, "<div class='equation'>h(t|X) = h₀(t) × exp(β(t)ᵀX)</div>")
-            html <- paste0(html, "<p>where β(t) represents time-varying coefficients following a state space model:</p>")
-            html <- paste0(html, "<div class='equation'>β(t+1) = F×β(t) + w(t)<br>y(t) = H×β(t) + v(t)</div>")
+            html <- paste0(html, "<div class='equation'>h(t|X) = h\u{2080}(t) \u{00D7} exp(\u{03B2}(t)\u{1D40}X)</div>")
+            html <- paste0(html, "<p>where \u{03B2}(t) represents time-varying coefficients following a state space model:</p>")
+            html <- paste0(html, "<div class='equation'>\u{03B2}(t+1) = F\u{00D7}\u{03B2}(t) + w(t)<br>y(t) = H\u{00D7}\u{03B2}(t) + v(t)</div>")
             html <- paste0(html, "<p>with process noise w(t) and observation noise v(t).</p>")
             html <- paste0(html, "</div>")
             

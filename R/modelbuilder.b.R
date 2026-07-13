@@ -2217,7 +2217,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     "</ul>",
                     "<p><strong>Next Steps:</strong></p>",
                     "<ol>",
-                    "<li>Go to meddecide → Decision → Decision Curve Analysis</li>",
+                    "<li>Go to meddecide \u{2192} Decision \u{2192} Decision Curve Analysis</li>",
                     "<li>Set Outcome Variable: ", htmltools::htmlEscape(self$options$outcome), "</li>",
                     "<li>Set Positive Outcome: ", htmltools::htmlEscape(self$options$outcomePositive), "</li>",
                     "<li>Add the prediction model columns listed above</li>",

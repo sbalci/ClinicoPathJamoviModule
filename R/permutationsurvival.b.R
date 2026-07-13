@@ -13,16 +13,16 @@ permutationsurvivalClass <- R6::R6Class(
                 "<b>Permutation Tests for Survival</b>
                 <br><br>
                 Select variables:
-                <br>• Time Variable: {ifelse(is.null(self$options$elapsedtime), ' Not selected', ' Selected')}
-                <br>• Event Variable: {ifelse(is.null(self$options$outcome), ' Not selected', ' Selected')}
-                <br>• Group Variable: {ifelse(is.null(self$options$explanatory), ' Not selected', ' Selected')}
+                <br>\u{2022} Time Variable: {ifelse(is.null(self$options$elapsedtime), ' Not selected', ' Selected')}
+                <br>\u{2022} Event Variable: {ifelse(is.null(self$options$outcome), ' Not selected', ' Selected')}
+                <br>\u{2022} Group Variable: {ifelse(is.null(self$options$explanatory), ' Not selected', ' Selected')}
                 <br><br>
                 <b>About Permutation Tests:</b>
-                <br>• Non-parametric alternative to traditional log-rank tests
-                <br>• No assumptions about data distribution or asymptotic theory
-                <br>• Ideal for small samples or violated assumptions
-                <br>• Provides exact p-values through resampling
-                <br>• Controls Type I error rate exactly under null hypothesis
+                <br>\u{2022} Non-parametric alternative to traditional log-rank tests
+                <br>\u{2022} No assumptions about data distribution or asymptotic theory
+                <br>\u{2022} Ideal for small samples or violated assumptions
+                <br>\u{2022} Provides exact p-values through resampling
+                <br>\u{2022} Controls Type I error rate exactly under null hypothesis
                 "
             )
 
@@ -547,21 +547,21 @@ permutationsurvivalClass <- R6::R6Class(
                 "<b>Permutation Test Summary</b>
                 <br><br>
                 <b>Test Configuration:</b>
-                <br>• Method: {private$.getMethodName(self$options$permutation_method)}
-                <br>• Test Statistic: {results$test_statistic_name}
-                <br>• Number of Permutations: {format(results$n_permutations, big.mark = ',')}
-                <br>• Multiple Comparison: {private$.getMultipleComparisonName(self$options$multiple_comparison)}
+                <br>\u{2022} Method: {private$.getMethodName(self$options$permutation_method)}
+                <br>\u{2022} Test Statistic: {results$test_statistic_name}
+                <br>\u{2022} Number of Permutations: {format(results$n_permutations, big.mark = ',')}
+                <br>\u{2022} Multiple Comparison: {private$.getMultipleComparisonName(self$options$multiple_comparison)}
                 <br><br>
                 <b>Data Summary:</b>
-                <br>• Total Subjects: {n_total}
-                <br>• Total Events: {n_events} ({round(n_events/n_total*100, 1)}%)
-                <br>• Groups Compared: {paste(htmltools::htmlEscape(groups), collapse = ', ')}
+                <br>\u{2022} Total Subjects: {n_total}
+                <br>\u{2022} Total Events: {n_events} ({round(n_events/n_total*100, 1)}%)
+                <br>\u{2022} Groups Compared: {paste(htmltools::htmlEscape(groups), collapse = ', ')}
                 <br><br>
                 <b>Test Results:</b>
-                <br>• Observed Statistic: {round(results$observed_statistic, 4)}
-                <br>• P-value: {format(results$p_value, digits = 4)}
-                <br>• Adjusted P-value: {format(results$p_adjusted, digits = 4)}
-                <br>• Result: {ifelse(results$p_value < 0.05, 'Significant difference detected', 'No significant difference')}
+                <br>\u{2022} Observed Statistic: {round(results$observed_statistic, 4)}
+                <br>\u{2022} P-value: {format(results$p_value, digits = 4)}
+                <br>\u{2022} Adjusted P-value: {format(results$p_adjusted, digits = 4)}
+                <br>\u{2022} Result: {ifelse(results$p_value < 0.05, 'Significant difference detected', 'No significant difference')}
                 "
             )
 
@@ -577,21 +577,21 @@ permutationsurvivalClass <- R6::R6Class(
                 and calculating the test statistic under all possible (or many random) permutations.
                 <br><br>
                 <b>Key Advantages:</b>
-                <br>• <b>Distribution-free:</b> No assumptions about underlying data distribution
-                <br>• <b>Exact p-values:</b> Provides exact Type I error control under null hypothesis
-                <br>• <b>Small sample validity:</b> Valid for small sample sizes where asymptotic theory fails
-                <br>• <b>Robust to outliers:</b> Less sensitive to extreme observations than parametric tests
+                <br>\u{2022} <b>Distribution-free:</b> No assumptions about underlying data distribution
+                <br>\u{2022} <b>Exact p-values:</b> Provides exact Type I error control under null hypothesis
+                <br>\u{2022} <b>Small sample validity:</b> Valid for small sample sizes where asymptotic theory fails
+                <br>\u{2022} <b>Robust to outliers:</b> Less sensitive to extreme observations than parametric tests
                 <br><br>
                 <b>Test Statistics Available:</b>
-                <br>• <b>Log-rank:</b> Standard survival test statistic (equal weighting across time)
-                <br>• <b>Wilcoxon:</b> Emphasizes early differences (Gehan-Breslow weighting)
-                <br>• <b>Tarone-Ware:</b> Intermediate weighting between log-rank and Wilcoxon
-                <br>• <b>Maximum Deviation:</b> Focuses on largest difference between survival curves
+                <br>\u{2022} <b>Log-rank:</b> Standard survival test statistic (equal weighting across time)
+                <br>\u{2022} <b>Wilcoxon:</b> Emphasizes early differences (Gehan-Breslow weighting)
+                <br>\u{2022} <b>Tarone-Ware:</b> Intermediate weighting between log-rank and Wilcoxon
+                <br>\u{2022} <b>Maximum Deviation:</b> Focuses on largest difference between survival curves
                 <br><br>
                 <b>Permutation Methods:</b>
-                <br>• <b>Approximate:</b> Random sampling of permutations (recommended for n > 10)
-                <br>• <b>Exact:</b> All possible permutations (only for very small samples)
-                <br>• <b>Stratified:</b> Permutation within strata to control for confounding
+                <br>\u{2022} <b>Approximate:</b> Random sampling of permutations (recommended for n > 10)
+                <br>\u{2022} <b>Exact:</b> All possible permutations (only for very small samples)
+                <br>\u{2022} <b>Stratified:</b> Permutation within strata to control for confounding
                 <br><br>
                 <b>Interpretation:</b>
                 <br>The p-value represents the proportion of permutations that produced a test statistic

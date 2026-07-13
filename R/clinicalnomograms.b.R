@@ -1363,7 +1363,7 @@ clinicalnomogramsClass <- R6::R6Class(
                 if (requireNamespace("rms", quietly = TRUE)) {
                     # rms::anova followed by plot is a standard way to show variable importance
                     imp_anova <- rms::anova(model)
-                    plot(imp_anova, main = "Variable Importance (Partial χ² - df)")
+                    plot(imp_anova, main = "Variable Importance (Partial \u{03C7}\u{00B2} - df)")
                     return(TRUE) 
                 }
             }, error = function(e) {

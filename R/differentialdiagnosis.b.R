@@ -443,21 +443,21 @@ differentialdiagnosisClass <- R6::R6Class(
                     base_case = 0.85,
                     low_estimate = 0.75,
                     high_estimate = 0.95,
-                    impact_range = "Diagnostic accuracy: ±8%"
+                    impact_range = "Diagnostic accuracy: \u{00B1}8%"
                 ),
                 list(
                     parameter = "Test Specificity",
                     base_case = 0.92,
                     low_estimate = 0.85,
                     high_estimate = 0.98,
-                    impact_range = "False positive rate: ±5%"
+                    impact_range = "False positive rate: \u{00B1}5%"
                 ),
                 list(
                     parameter = "Clinical Likelihood Ratio",
                     base_case = 3.2,
                     low_estimate = 2.1,
                     high_estimate = 4.8,
-                    impact_range = "Posterior probability: ±12%"
+                    impact_range = "Posterior probability: \u{00B1}12%"
                 )
             )
             
@@ -760,7 +760,7 @@ differentialdiagnosisClass <- R6::R6Class(
             
             <h5>Step 3: Posterior Probability Calculation</h5>
             <ul>
-                <li>Bayes' theorem application: P(Disease|Findings) = P(Findings|Disease) × P(Disease) / P(Findings)</li>
+                <li>Bayes' theorem application: P(Disease|Findings) = P(Findings|Disease) \u{00D7} P(Disease) / P(Findings)</li>
                 <li>Sequential updating with each new piece of evidence</li>
                 <li>Normalization across all considered diagnoses</li>
             </ul>

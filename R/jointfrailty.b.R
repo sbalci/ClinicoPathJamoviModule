@@ -57,18 +57,18 @@ jointfrailtyClass <- R6::R6Class(
 
                     <h2> Joint Model Structure:</h2>
                     <div class='formula'>
-                    <strong>Recurrent Process:</strong> λᵣ(t|uᵢ,Xᵣᵢ) = uᵢ λ₀ᵣ(t) exp(βᵣᵀXᵣᵢ)<br>
-                    <strong>Terminal Process:</strong> λₜ(t|vᵢ,Xₜᵢ) = vᵢ λ₀ₜ(t) exp(βₜᵀXₜᵢ)<br>
-                    <strong>Frailty Association:</strong> (uᵢ, vᵢ) ~ Bivariate Frailty Distribution
+                    <strong>Recurrent Process:</strong> \u{03BB}\u{1D63}(t|u\u{1D62},X\u{1D63}\u{1D62}) = u\u{1D62} \u{03BB}\u{2080}\u{1D63}(t) exp(\u{03B2}\u{1D63}\u{1D40}X\u{1D63}\u{1D62})<br>
+                    <strong>Terminal Process:</strong> \u{03BB}\u{209C}(t|v\u{1D62},X\u{209C}\u{1D62}) = v\u{1D62} \u{03BB}\u{2080}\u{209C}(t) exp(\u{03B2}\u{209C}\u{1D40}X\u{209C}\u{1D62})<br>
+                    <strong>Frailty Association:</strong> (u\u{1D62}, v\u{1D62}) ~ Bivariate Frailty Distribution
                     </div>
 
                     <div class='interpretation'>
                     <strong> Key Features:</strong><br>
-                    • Joint modeling of recurrent and terminal events<br>
-                    • Flexible frailty distributions (Gamma, Log-normal, Positive Stable)<br>
-                    • Multiple association structures (Shared frailty, Copula, Joint random effects)<br>
-                    • Individual risk predictions based on frailty estimates<br>
-                    • Comprehensive model diagnostics and residual analysis
+                    \u{2022} Joint modeling of recurrent and terminal events<br>
+                    \u{2022} Flexible frailty distributions (Gamma, Log-normal, Positive Stable)<br>
+                    \u{2022} Multiple association structures (Shared frailty, Copula, Joint random effects)<br>
+                    \u{2022} Individual risk predictions based on frailty estimates<br>
+                    \u{2022} Comprehensive model diagnostics and residual analysis
                     </div>
 
                     <p><strong> Please assign the required variables to continue with the analysis.</strong></p>
@@ -632,13 +632,13 @@ jointfrailtyClass <- R6::R6Class(
             <strong>Model Structure:</strong><br>
             <div class='formula'>
             <strong>Recurrent Process:</strong><br>
-            λᵣ(t|uᵢ,Xᵣᵢ) = uᵢ λ₀ᵣ(t) exp(βᵣᵀXᵣᵢ)<br><br>
+            \u{03BB}\u{1D63}(t|u\u{1D62},X\u{1D63}\u{1D62}) = u\u{1D62} \u{03BB}\u{2080}\u{1D63}(t) exp(\u{03B2}\u{1D63}\u{1D40}X\u{1D63}\u{1D62})<br><br>
             
             <strong>Terminal Process:</strong><br>
-            λₜ(t|vᵢ,Xₜᵢ) = vᵢ λ₀ₜ(t) exp(βₜᵀXₜᵢ)<br><br>
+            \u{03BB}\u{209C}(t|v\u{1D62},X\u{209C}\u{1D62}) = v\u{1D62} \u{03BB}\u{2080}\u{209C}(t) exp(\u{03B2}\u{209C}\u{1D40}X\u{209C}\u{1D62})<br><br>
             
             <strong>Frailty Distribution:</strong><br>
-            (uᵢ, vᵢ) ~ Bivariate Frailty(θ, α)
+            (u\u{1D62}, v\u{1D62}) ~ Bivariate Frailty(\u{03B8}, \u{03B1})
             </div>
             </div>
 
@@ -653,11 +653,11 @@ jointfrailtyClass <- R6::R6Class(
 
             <div class='interpretation'>
             <strong>Clinical Applications:</strong><br>
-            • <strong>Cancer recurrence and mortality:</strong> Tumor recurrence with competing mortality<br>
-            • <strong>Hospital readmissions and death:</strong> Readmission patterns with mortality risk<br>
-            • <strong>Infection episodes and cure:</strong> Recurrent infections with treatment success<br>
-            • <strong>Seizure episodes and control:</strong> Seizure frequency with disease progression<br>
-            • <strong>Medical procedures and complications:</strong> Procedure repetition with adverse outcomes
+            \u{2022} <strong>Cancer recurrence and mortality:</strong> Tumor recurrence with competing mortality<br>
+            \u{2022} <strong>Hospital readmissions and death:</strong> Readmission patterns with mortality risk<br>
+            \u{2022} <strong>Infection episodes and cure:</strong> Recurrent infections with treatment success<br>
+            \u{2022} <strong>Seizure episodes and control:</strong> Seizure frequency with disease progression<br>
+            \u{2022} <strong>Medical procedures and complications:</strong> Procedure repetition with adverse outcomes
             </div>
 
             </body>
@@ -694,43 +694,43 @@ jointfrailtyClass <- R6::R6Class(
             
             <div class='summary'>
             <strong>Model Summary:</strong><br>
-            • <strong>Number of subjects:</strong> ", prepared_data$n_subjects, "<br>
-            • <strong>Recurrent events:</strong> ", prepared_data$n_recurrent_events, "<br>
-            • <strong>Terminal events:</strong> ", prepared_data$n_terminal_events, "<br>
-            • <strong>Frailty distribution:</strong> ", frailty_dist, "<br>
-            • <strong>Events per subject (mean):</strong> ", round(prepared_data$n_recurrent_events / prepared_data$n_subjects, 2), "
+            \u{2022} <strong>Number of subjects:</strong> ", prepared_data$n_subjects, "<br>
+            \u{2022} <strong>Recurrent events:</strong> ", prepared_data$n_recurrent_events, "<br>
+            \u{2022} <strong>Terminal events:</strong> ", prepared_data$n_terminal_events, "<br>
+            \u{2022} <strong>Frailty distribution:</strong> ", frailty_dist, "<br>
+            \u{2022} <strong>Events per subject (mean):</strong> ", round(prepared_data$n_recurrent_events / prepared_data$n_subjects, 2), "
             </div>
 
             <div class='interpretation'>
             <strong> Recurrent Process Coefficients:</strong><br>
-            • Positive coefficients indicate increased recurrent event hazard<br>
-            • Hazard ratios exp(β) show multiplicative effects on recurrent event rate<br>
-            • Confidence intervals quantify uncertainty in covariate effects<br>
-            • These represent population-average effects adjusted for frailty
+            \u{2022} Positive coefficients indicate increased recurrent event hazard<br>
+            \u{2022} Hazard ratios exp(\u{03B2}) show multiplicative effects on recurrent event rate<br>
+            \u{2022} Confidence intervals quantify uncertainty in covariate effects<br>
+            \u{2022} These represent population-average effects adjusted for frailty
             </div>
 
             <div class='interpretation'>
             <strong> Terminal Process Coefficients:</strong><br>
-            • Positive coefficients indicate increased terminal event hazard<br>
-            • Effects are interpreted similarly to standard survival models<br>
-            • Association with recurrent process is captured through frailty terms<br>
-            • Important for understanding competing risk structure
+            \u{2022} Positive coefficients indicate increased terminal event hazard<br>
+            \u{2022} Effects are interpreted similarly to standard survival models<br>
+            \u{2022} Association with recurrent process is captured through frailty terms<br>
+            \u{2022} Important for understanding competing risk structure
             </div>
 
             <div class='interpretation'>
             <strong> Frailty Parameters:</strong><br>
-            • <strong>Frailty variance:</strong> Measures unexplained heterogeneity between subjects<br>
-            • <strong>Association parameter:</strong> Quantifies dependence between processes<br>
-            • <strong>Individual frailties:</strong> Subject-specific risk multipliers<br>
-            • High frailty indicates higher risk for both processes
+            \u{2022} <strong>Frailty variance:</strong> Measures unexplained heterogeneity between subjects<br>
+            \u{2022} <strong>Association parameter:</strong> Quantifies dependence between processes<br>
+            \u{2022} <strong>Individual frailties:</strong> Subject-specific risk multipliers<br>
+            \u{2022} High frailty indicates higher risk for both processes
             </div>
 
             <div class='warning'>
             <strong> Important Considerations:</strong><br>
-            • Joint modeling accounts for informative censoring by terminal events<br>
-            • Frailty estimates are shrinkage estimates (borrowing strength across subjects)<br>
-            • Model selection should consider goodness-of-fit and biological plausibility<br>
-            • Individual predictions incorporate both covariate effects and estimated frailty
+            \u{2022} Joint modeling accounts for informative censoring by terminal events<br>
+            \u{2022} Frailty estimates are shrinkage estimates (borrowing strength across subjects)<br>
+            \u{2022} Model selection should consider goodness-of-fit and biological plausibility<br>
+            \u{2022} Individual predictions incorporate both covariate effects and estimated frailty
             </div>
 
             </body>

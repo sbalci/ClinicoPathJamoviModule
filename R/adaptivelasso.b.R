@@ -197,7 +197,7 @@ adaptivelassoClass <- R6::R6Class(
             
             if (missing_pct > 10) {
                 missing_text <- paste0("<div style='color: orange; margin-top: 5px;'>",
-                                     "⚠️ <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded via listwise deletion.",
+                                     "\u{26A0}\u{FE0F} <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded via listwise deletion.",
                                      "</div>")
             }
 
@@ -224,13 +224,13 @@ adaptivelassoClass <- R6::R6Class(
                     
                     <div style='margin-top: 10px;'>
                         <b>Assessment:</b><br>",
-                        if(is.na(events)) "<span style='color: orange;'>⚠️ <b>EPV Cannot Be Calculated:</b> Multiple event levels detected and no Event Level specified.</span>"
+                        if(is.na(events)) "<span style='color: orange;'>\u{26A0}\u{FE0F} <b>EPV Cannot Be Calculated:</b> Multiple event levels detected and no Event Level specified.</span>"
                         else if (epv < 5) 
-                               "<span style='color: red;'>⚠️ <b>High Dimensionality:</b> EPV is very low. Regularization via Adaptive LASSO is strictly necessary to prevent severe overfitting.</span>"
+                               "<span style='color: red;'>\u{26A0}\u{FE0F} <b>High Dimensionality:</b> EPV is very low. Regularization via Adaptive LASSO is strictly necessary to prevent severe overfitting.</span>"
                         else if (epv < 10) 
-                               "<span style='color: orange;'>⚠️ <b>Moderate Dimensionality:</b> Adaptive LASSO will effectively shrink weak predictors and select the most relevant ones.</span>"
+                               "<span style='color: orange;'>\u{26A0}\u{FE0F} <b>Moderate Dimensionality:</b> Adaptive LASSO will effectively shrink weak predictors and select the most relevant ones.</span>"
                         else 
-                               "<span style='color: green;'>✓ <b>Adequate Events:</b> Sample size is sufficient for this number of predictors without regularization, but Adaptive LASSO may still improve parsimony.</span>",
+                               "<span style='color: green;'>\u{2713} <b>Adequate Events:</b> Sample size is sufficient for this number of predictors without regularization, but Adaptive LASSO may still improve parsimony.</span>",
                     "</div>",
                     missing_text,
                     if (missing_pct > 0) paste0(

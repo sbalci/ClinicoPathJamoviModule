@@ -71,7 +71,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 <div style='font-size: 14px; color: #333;'>
                 <p><strong>What this tool does:</strong></p>
                 <p>Evaluates diagnostic test performance by calculating sensitivity, specificity,
-                predictive values, likelihood ratios, and advanced metrics from a 2×2 confusion matrix.</p>
+                predictive values, likelihood ratios, and advanced metrics from a 2\u{00D7}2 confusion matrix.</p>
 
                 <p><strong>To get started:</strong></p>
                 <ol style='margin: 10px 0; padding-left: 25px;'>
@@ -133,59 +133,59 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 # Input validation ----
                 # Enforce mutual exclusion of CI and custom prevalence (epiR limitation)
                 if (ci && pp) {
-                    private$.addNotice("ERROR", "CI and Population Prevalence Conflict", 'Confidence intervals are unavailable when using population prevalence. • epiR::epi.tests() computes CIs from the study sample, not an externally supplied prevalence. • Disable either "95% Confidence Intervals" or "Use Known Population Prevalence" to proceed. • Point estimates will still be Bayes-adjusted when prevalence is supplied.')
+                    private$.addNotice("ERROR", "CI and Population Prevalence Conflict", 'Confidence intervals are unavailable when using population prevalence. \u{2022} epiR::epi.tests() computes CIs from the study sample, not an externally supplied prevalence. \u{2022} Disable either "95% Confidence Intervals" or "Use Known Population Prevalence" to proceed. \u{2022} Point estimates will still be Bayes-adjusted when prevalence is supplied.')
                     return()
                 }
 
                 # Inform user that CIs are unavailable when using population prevalence
                 if (!ci && pp) {
-                    private$.addNotice("INFO", "CI Unavailable With Population Prevalence", "Confidence intervals are not calculated when using population prevalence. • epiR::epi.tests() provides CIs only for sample-based prevalence. • Point estimates shown here are Bayes-adjusted to the supplied prevalence without CIs.")
+                    private$.addNotice("INFO", "CI Unavailable With Population Prevalence", "Confidence intervals are not calculated when using population prevalence. \u{2022} epiR::epi.tests() provides CIs only for sample-based prevalence. \u{2022} Point estimates shown here are Bayes-adjusted to the supplied prevalence without CIs.")
                 }
 
                 # Validate prevalence when provided programmatically
                 if (pp && (is.na(pprob) || pprob <= 0 || pprob >= 1)) {
-                    private$.addNotice("ERROR", "Invalid Prior Probability", 'Invalid prior probability. • Prior probability must be between 0 and 1 (exclusive). • Update the "Prior Probability (prevalence)" value.')
+                    private$.addNotice("ERROR", "Invalid Prior Probability", 'Invalid prior probability. \u{2022} Prior probability must be between 0 and 1 (exclusive). \u{2022} Update the "Prior Probability (prevalence)" value.')
                     return()
                 }
 
                 # Reject non-finite inputs
                 if (any(!is.finite(c(TP, FP, TN, FN)))) {
-                    private$.addNotice("ERROR", "Non-Finite Counts", "Non-finite counts detected. • TP, FP, TN, and FN must be finite numbers. • Please check your input values.")
+                    private$.addNotice("ERROR", "Non-Finite Counts", "Non-finite counts detected. \u{2022} TP, FP, TN, and FN must be finite numbers. \u{2022} Please check your input values.")
                     return()
                 }
 
                 # Check for non-negative values
                 if (TP < 0 || FP < 0 || TN < 0 || FN < 0) {
-                    private$.addNotice("ERROR", "Negative Counts Detected", "Negative counts detected. • All counts (TP, FP, TN, FN) must be non-negative. • Please check your input values for errors.")
+                    private$.addNotice("ERROR", "Negative Counts Detected", "Negative counts detected. \u{2022} All counts (TP, FP, TN, FN) must be non-negative. \u{2022} Please check your input values for errors.")
                     return()
                 }
 
                 # Check for at least some data
                 if (TP + FP + TN + FN == 0) {
-                    private$.addNotice("ERROR", "All Counts Zero", "All counts are zero. • Please provide valid diagnostic test data. • Ensure TP, FP, TN, and FN values are entered correctly.")
+                    private$.addNotice("ERROR", "All Counts Zero", "All counts are zero. \u{2022} Please provide valid diagnostic test data. \u{2022} Ensure TP, FP, TN, and FN values are entered correctly.")
                     return()
                 }
 
                 # Check for diseased subjects
                 if (TP + FN == 0) {
-                    private$.addNotice("ERROR", "No Diseased Subjects", "No diseased subjects detected (TP + FN = 0). • Cannot calculate sensitivity and related metrics. • Ensure your confusion matrix includes cases with disease present.")
+                    private$.addNotice("ERROR", "No Diseased Subjects", "No diseased subjects detected (TP + FN = 0). \u{2022} Cannot calculate sensitivity and related metrics. \u{2022} Ensure your confusion matrix includes cases with disease present.")
                     return()
                 }
 
                 # Check for healthy subjects
                 if (TN + FP == 0) {
-                    private$.addNotice("ERROR", "No Healthy Subjects", "No healthy subjects detected (TN + FP = 0). • Cannot calculate specificity and related metrics. • Ensure your confusion matrix includes cases without disease.")
+                    private$.addNotice("ERROR", "No Healthy Subjects", "No healthy subjects detected (TN + FP = 0). \u{2022} Cannot calculate specificity and related metrics. \u{2022} Ensure your confusion matrix includes cases without disease.")
                     return()
                 }
 
                 # Check for positive tests
                 if (TP + FP == 0) {
-                    private$.addNotice("WARNING", "No Positive Tests", "No positive test results detected (TP + FP = 0). • Positive Predictive Value (PPV) is undefined. • Ensure your confusion matrix includes both positive and negative test results.")
+                    private$.addNotice("WARNING", "No Positive Tests", "No positive test results detected (TP + FP = 0). \u{2022} Positive Predictive Value (PPV) is undefined. \u{2022} Ensure your confusion matrix includes both positive and negative test results.")
                 }
 
                 # Check for negative tests
                 if (TN + FN == 0) {
-                    private$.addNotice("WARNING", "No Negative Tests", "No negative test results detected (TN + FN = 0). • Negative Predictive Value (NPV) is undefined. • Ensure your confusion matrix includes both positive and negative test results.")
+                    private$.addNotice("WARNING", "No Negative Tests", "No negative test results detected (TN + FN = 0). \u{2022} Negative Predictive Value (NPV) is undefined. \u{2022} Ensure your confusion matrix includes both positive and negative test results.")
                 }
 
 
@@ -264,7 +264,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                 # Warn on non-integer counts (allowed but unusual)
                 if (any(abs(c(TP, FP, TN, FN) - round(c(TP, FP, TN, FN))) > 1e-6)) {
-                    private$.addNotice("WARNING", "Non-Integer Counts", "Non-integer counts detected. • Diagnostic test counts are typically whole numbers. • Proceeding with calculations, but verify your inputs.")
+                    private$.addNotice("WARNING", "Non-Integer Counts", "Non-integer counts detected. \u{2022} Diagnostic test counts are typically whole numbers. \u{2022} Proceeding with calculations, but verify your inputs.")
                 }
 
                 # Continuity correction for zero-cell issues (stabilizes LR/DOR and CIs)
@@ -617,7 +617,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 if (ci) {
                     # Check if epiR package is available
                     if (!requireNamespace("epiR", quietly = TRUE)) {
-                        private$.addNotice("ERROR", "epiR Package Missing", 'epiR package is required for confidence intervals. • Install with install.packages("epiR"). • Or disable "95% Confidence Intervals" option.')
+                        private$.addNotice("ERROR", "epiR Package Missing", 'epiR package is required for confidence intervals. \u{2022} Install with install.packages("epiR"). \u{2022} Or disable "95% Confidence Intervals" option.')
                         return()
                     }
 
@@ -754,7 +754,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     calculate_cutoff_metrics <- function(tp, fp, tn, fn, cutoff_name) {
                         # Validate inputs and guard against zero/NA division
                         if (any(is.na(c(tp, fp, tn, fn))) || any(c(tp, fp, tn, fn) < 0)) {
-                            private$.addNotice("ERROR", "Invalid Cut-off Inputs", sprintf('Invalid inputs for cut-off "%s". • All values (TP=%s, FP=%s, TN=%s, FN=%s) must be non-negative numbers. • Check your input values for errors.', cutoff_name, tp, fp, tn, fn))
+                            private$.addNotice("ERROR", "Invalid Cut-off Inputs", sprintf('Invalid inputs for cut-off "%s". \u{2022} All values (TP=%s, FP=%s, TN=%s, FN=%s) must be non-negative numbers. \u{2022} Check your input values for errors.', cutoff_name, tp, fp, tn, fn))
                             return(NULL)
                         }
 
@@ -764,7 +764,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                         # Validate that we have cases to analyze
                         if (total == 0) {
-                            private$.addNotice("ERROR", "No Cases For Cut-off", sprintf('No cases for cut-off "%s". • Total cases (TP+FP+TN+FN) = 0. • Check your confusion matrix inputs.', cutoff_name))
+                            private$.addNotice("ERROR", "No Cases For Cut-off", sprintf('No cases for cut-off "%s". \u{2022} Total cases (TP+FP+TN+FN) = 0. \u{2022} Check your confusion matrix inputs.', cutoff_name))
                             return(NULL)
                         }
 
@@ -781,9 +781,9 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         # Warn if metrics are undefined
                         if (diseased == 0 || healthy == 0) {
                             msg <- sprintf('Cut-off "%s" has incomplete data.', cutoff_name)
-                            if (diseased == 0) msg <- paste0(msg, " • No diseased cases (TP+FN=0): Sensitivity is undefined.")
-                            if (healthy == 0) msg <- paste0(msg, " • No healthy cases (TN+FP=0): Specificity is undefined.")
-                            msg <- paste0(msg, " • Consider this cut-off unreliable for clinical decisions.")
+                            if (diseased == 0) msg <- paste0(msg, " \u{2022} No diseased cases (TP+FN=0): Sensitivity is undefined.")
+                            if (healthy == 0) msg <- paste0(msg, " \u{2022} No healthy cases (TN+FP=0): Specificity is undefined.")
+                            msg <- paste0(msg, " \u{2022} Consider this cut-off unreliable for clinical decisions.")
                             private$.addNotice("WARNING", "Incomplete Cut-off Data", msg)
                         }
 
@@ -828,7 +828,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     # Skip table population if validation failed
                     if (is.null(cutoff1_metrics) || is.null(cutoff2_metrics)) {
-                        private$.addNotice("ERROR", "Cut-off Validation Failed", "Cut-off comparison cannot be performed due to invalid inputs. • Check the error messages above for specific issues. • Ensure all TP, FP, TN, FN values are non-negative numbers.")
+                        private$.addNotice("ERROR", "Cut-off Validation Failed", "Cut-off comparison cannot be performed due to invalid inputs. \u{2022} Check the error messages above for specific issues. \u{2022} Ensure all TP, FP, TN, FN values are non-negative numbers.")
                         return()
                     }
 

@@ -15,15 +15,15 @@ rmstClass <- R6::R6Class(
                 "<b>Restricted Mean Survival Time Tests</b>
                 <br><br>
                 Select variables:
-                <br>• Time Variable: {ifelse(is.null(self$options$elapsedtime), ' Not selected', ' Selected')}
-                <br>• Event Variable: {ifelse(is.null(self$options$outcome), ' Not selected', ' Selected')}  
-                <br>• Group Variable: {ifelse(is.null(self$options$explanatory), ' Not selected', ' Selected')}
+                <br>\u{2022} Time Variable: {ifelse(is.null(self$options$elapsedtime), ' Not selected', ' Selected')}
+                <br>\u{2022} Event Variable: {ifelse(is.null(self$options$outcome), ' Not selected', ' Selected')}  
+                <br>\u{2022} Group Variable: {ifelse(is.null(self$options$explanatory), ' Not selected', ' Selected')}
                 <br><br>
                 <b>About RMST Analysis:</b>
-                <br>• Compares average survival time within a specified period (tau)
-                <br>• More intuitive than hazard ratios for clinical interpretation
-                <br>• Provides absolute difference in restricted mean survival time
-                <br>• Robust alternative when proportional hazards assumption is violated
+                <br>\u{2022} Compares average survival time within a specified period (tau)
+                <br>\u{2022} More intuitive than hazard ratios for clinical interpretation
+                <br>\u{2022} Provides absolute difference in restricted mean survival time
+                <br>\u{2022} Robust alternative when proportional hazards assumption is violated
                 "
             )
             
@@ -490,7 +490,7 @@ rmstClass <- R6::R6Class(
             for (group in groups) {
                 result <- rmst_results[[group]]
                 summary_text <- paste0(summary_text, glue::glue(
-                    "• {htmltools::htmlEscape(group)}: RMST = {round(result$rmst, 2)}
+                    "\u{2022} {htmltools::htmlEscape(group)}: RMST = {round(result$rmst, 2)}
                     (95% CI: {round(result$rmst_lower, 2)} - {round(result$rmst_upper, 2)}),
                     N = {result$n}, Events = {result$events}<br>"
                 ))
@@ -500,8 +500,8 @@ rmstClass <- R6::R6Class(
                 diff <- rmst_results[[groups[1]]]$rmst - rmst_results[[groups[2]]]$rmst
                 summary_text <- paste0(summary_text, glue::glue(
                     "<br><b>Group Comparison:</b>
-                    <br>• Difference in RMST: {round(diff, 2)} time units
-                    <br>• {htmltools::htmlEscape(groups[1])} has {ifelse(diff > 0, 'longer', 'shorter')} average survival time within tau
+                    <br>\u{2022} Difference in RMST: {round(diff, 2)} time units
+                    <br>\u{2022} {htmltools::htmlEscape(groups[1])} has {ifelse(diff > 0, 'longer', 'shorter')} average survival time within tau
                     "
                 ))
             }
@@ -520,20 +520,20 @@ rmstClass <- R6::R6Class(
                 clinically meaningful alternative to hazard ratios.
                 <br><br>
                 <b>Key Advantages:</b>
-                <br>• Direct clinical interpretation as average survival time
-                <br>• Robust when proportional hazards assumption is violated
-                <br>• Provides absolute rather than relative treatment effects
-                <br>• Less sensitive to long-term tail behavior of survival curves
+                <br>\u{2022} Direct clinical interpretation as average survival time
+                <br>\u{2022} Robust when proportional hazards assumption is violated
+                <br>\u{2022} Provides absolute rather than relative treatment effects
+                <br>\u{2022} Less sensitive to long-term tail behavior of survival curves
                 <br><br>
                 <b>Tau Selection:</b>
-                <br>• Should be chosen based on clinical relevance
-                <br>• Commonly set to a clinically meaningful follow-up period
-                <br>• Can be automatic (minimum of group maxima) or manual
+                <br>\u{2022} Should be chosen based on clinical relevance
+                <br>\u{2022} Commonly set to a clinically meaningful follow-up period
+                <br>\u{2022} Can be automatic (minimum of group maxima) or manual
                 <br><br>
                 <b>Interpretation:</b>
-                <br>• RMST difference: Absolute difference in average survival time
-                <br>• RMST ratio: Relative difference in average survival time
-                <br>• Confidence intervals provide uncertainty quantification
+                <br>\u{2022} RMST difference: Absolute difference in average survival time
+                <br>\u{2022} RMST ratio: Relative difference in average survival time
+                <br>\u{2022} Confidence intervals provide uncertainty quantification
                 "
             )
             

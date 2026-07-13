@@ -381,7 +381,7 @@ markovmultistateClass <- R6::R6Class(
             # Add covariate effects if covariates are specified
             if (length(self$options$covs) > 0) {
                 results$covariate_effects <- data.frame(
-                    transition = rep(c("Healthy → Disease", "Disease → Death", "Healthy → Death"), 
+                    transition = rep(c("Healthy \u{2192} Disease", "Disease \u{2192} Death", "Healthy \u{2192} Death"), 
                                    length(self$options$covs)),
                     covariate = rep(self$options$covs, each = 3),
                     coefficient = rnorm(3 * length(self$options$covs), 0, 0.5),
@@ -530,7 +530,7 @@ markovmultistateClass <- R6::R6Class(
             <li><strong>Non-homogeneous Markov:</strong> Transition intensities can vary over time</li>
             <li><strong>Semi-Markov:</strong> Transition intensities depend on time since last transition</li>
             <li><strong>Cox Multi-State:</strong> Semi-parametric proportional hazards approach</li>
-            <li><strong>Illness-Death:</strong> Special 3-state model (healthy → illness → death)</li>
+            <li><strong>Illness-Death:</strong> Special 3-state model (healthy \u{2192} illness \u{2192} death)</li>
             <li><strong>Progressive:</strong> Forward-only transitions between ordered states</li>
             </ul>
             

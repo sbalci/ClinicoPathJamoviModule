@@ -44,15 +44,15 @@ friedmantestClass <- R6::R6Class(
                             <h3>Statistical Framework</h3>
                             <div class='formula'>
                                 Friedman Test Statistic:<br/>
-                                χ²r = 12/[nk(k+1)] * Σ(Rj)² - 3n(k+1)<br/><br/>
+                                \u{03C7}\u{00B2}r = 12/[nk(k+1)] * \u{03A3}(Rj)\u{00B2} - 3n(k+1)<br/><br/>
 
                                 Where:<br/>
-                                • n = number of subjects<br/>
-                                • k = number of conditions/time points<br/>
-                                • Rj = sum of ranks for condition j<br/>
-                                • Data ranked within each subject across conditions<br/><br/>
+                                \u{2022} n = number of subjects<br/>
+                                \u{2022} k = number of conditions/time points<br/>
+                                \u{2022} Rj = sum of ranks for condition j<br/>
+                                \u{2022} Data ranked within each subject across conditions<br/><br/>
 
-                                Under H0: χ²r ~ χ²(k-1)
+                                Under H0: \u{03C7}\u{00B2}r ~ \u{03C7}\u{00B2}(k-1)
                             </div>
                         </div>
 

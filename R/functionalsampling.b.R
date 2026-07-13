@@ -273,7 +273,7 @@ their spatial distribution pattern.</p>
 <p><strong>Galectin-1 Binding Cells in Lung Carcinoma:</strong></p>
 <ul>
 <li>Frequency: < 5% (rare) </li>
-<li>Mean distance between rare cells: 245 ± 198 μm (high CV = random) </li>
+<li>Mean distance between rare cells: 245 \u{00B1} 198 \u{03BC}m (high CV = random) </li>
 <li>Distance to nearest neighbors: Consistent (low CV) </li>
 <li><strong>Conclusion:</strong> Evidence of regulatory/catalyst function</li>
 <li><strong>Biological validation:</strong> Galectin-1 has growth regulatory and immunomodulatory properties</li>

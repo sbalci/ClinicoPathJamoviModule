@@ -587,7 +587,7 @@ advancedbarplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             k_result <- kruskal.test(jmvcore::asFormula(formula_str), data = selected_data)
 
                             stat_html <- paste0(stat_html, "<p><strong>Kruskal-Wallis Test Results:</strong></p>")
-                            stat_html <- paste0(stat_html, "<p>χ² = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
+                            stat_html <- paste0(stat_html, "<p>\u{03C7}\u{00B2} = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
                         }
 
                         # Add interpretation

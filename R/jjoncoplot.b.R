@@ -1270,8 +1270,8 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                     clinical_text <- paste0(
                         clinical_text,
                         "<p><strong>Actionable mutations detected:</strong> ", paste(present_actionable, collapse = ", "), "</p>\n",
-                        "<p>• Consider targeted therapy options and clinical trial eligibility</p>\n",
-                        "<p>• Review FDA-approved drugs and companion diagnostics</p>\n"
+                        "<p>\u{2022} Consider targeted therapy options and clinical trial eligibility</p>\n",
+                        "<p>\u{2022} Review FDA-approved drugs and companion diagnostics</p>\n"
                     )
                 }
 
@@ -1280,8 +1280,8 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                     clinical_text <- paste0(
                         clinical_text,
                         "<p><strong>Mutation co-occurrence analysis recommended:</strong></p>\n",
-                        "<p>• Use co-occurrence plot to identify mutually exclusive or concurrent mutations</p>\n",
-                        "<p>• Consider pathway analysis for therapeutic strategy</p>\n"
+                        "<p>\u{2022} Use co-occurrence plot to identify mutually exclusive or concurrent mutations</p>\n",
+                        "<p>\u{2022} Consider pathway analysis for therapeutic strategy</p>\n"
                     )
                 }
 

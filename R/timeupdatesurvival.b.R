@@ -27,8 +27,8 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                     
                     <p><b>Available Methods:</b></p>
                     <ul>
-                    <li><b>Aalen Additive Hazards</b>: λ(t|X) = α₀(t) + α₁(t)X₁ + ... + αₚ(t)Xₚ</li>
-                    <li><b>Cox Time-Varying</b>: λ(t|X) = λ₀(t)exp[β₁(t)X₁ + ... + βₚ(t)Xₚ]</li>
+                    <li><b>Aalen Additive Hazards</b>: \u{03BB}(t|X) = \u{03B1}\u{2080}(t) + \u{03B1}\u{2081}(t)X\u{2081} + ... + \u{03B1}\u{209A}(t)X\u{209A}</li>
+                    <li><b>Cox Time-Varying</b>: \u{03BB}(t|X) = \u{03BB}\u{2080}(t)exp[\u{03B2}\u{2081}(t)X\u{2081} + ... + \u{03B2}\u{209A}(t)X\u{209A}]</li>
                     <li><b>Smoothing Splines</b>: Flexible non-parametric coefficient estimation</li>
                     <li><b>Kernel-Weighted</b>: Local weighted regression approaches</li>
                     <li><b>Local Likelihood</b>: Maximum likelihood with local weighting</li>
@@ -682,21 +682,21 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             <h4>Available Methods</h4>
             
             <p><b>1. Aalen Additive Hazards Model:</b></p>
-            <p><code>λ(t|X) = α₀(t) + α₁(t)X₁ + ... + αₚ(t)Xₚ</code></p>
-            <p>• Non-parametric estimation of cumulative regression functions</p>
-            <p>• Allows for negative hazards (conditional on covariates)</p>
-            <p>• Interpretable additive effects on hazard scale</p>
+            <p><code>\u{03BB}(t|X) = \u{03B1}\u{2080}(t) + \u{03B1}\u{2081}(t)X\u{2081} + ... + \u{03B1}\u{209A}(t)X\u{209A}</code></p>
+            <p>\u{2022} Non-parametric estimation of cumulative regression functions</p>
+            <p>\u{2022} Allows for negative hazards (conditional on covariates)</p>
+            <p>\u{2022} Interpretable additive effects on hazard scale</p>
             
             <p><b>2. Cox Time-Varying Coefficients:</b></p>
-            <p><code>λ(t|X) = λ₀(t)exp[β₁(t)X₁ + ... + βₚ(t)Xₚ]</code></p>
-            <p>• Extension of Cox model with time-dependent coefficients</p>
-            <p>• Maintains proportional hazards within time intervals</p>
-            <p>• Local likelihood estimation at each time point</p>
+            <p><code>\u{03BB}(t|X) = \u{03BB}\u{2080}(t)exp[\u{03B2}\u{2081}(t)X\u{2081} + ... + \u{03B2}\u{209A}(t)X\u{209A}]</code></p>
+            <p>\u{2022} Extension of Cox model with time-dependent coefficients</p>
+            <p>\u{2022} Maintains proportional hazards within time intervals</p>
+            <p>\u{2022} Local likelihood estimation at each time point</p>
             
             <p><b>3. Smoothing Methods:</b></p>
-            <p>• <b>Smoothing Splines:</b> Flexible non-parametric coefficient curves</p>
-            <p>• <b>Kernel Weighting:</b> Local weighted regression approaches</p>
-            <p>• <b>Local Likelihood:</b> Maximum likelihood with time-varying parameters</p>
+            <p>\u{2022} <b>Smoothing Splines:</b> Flexible non-parametric coefficient curves</p>
+            <p>\u{2022} <b>Kernel Weighting:</b> Local weighted regression approaches</p>
+            <p>\u{2022} <b>Local Likelihood:</b> Maximum likelihood with time-varying parameters</p>
             
             <h4>Clinical Interpretation</h4>
             
@@ -770,17 +770,17 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             <h4>Best Practices</h4>
             
-            <p>• Start with formal tests for time-varying effects before fitting complex models</p>
-            <p>• Use cross-validation for smoothing parameter selection</p>
-            <p>• Generate confidence bands to quantify uncertainty in coefficient estimates</p>
-            <p>• Validate predictions in independent datasets when possible</p>
-            <p>• Consider clinical plausibility when interpreting coefficient patterns</p>
+            <p>\u{2022} Start with formal tests for time-varying effects before fitting complex models</p>
+            <p>\u{2022} Use cross-validation for smoothing parameter selection</p>
+            <p>\u{2022} Generate confidence bands to quantify uncertainty in coefficient estimates</p>
+            <p>\u{2022} Validate predictions in independent datasets when possible</p>
+            <p>\u{2022} Consider clinical plausibility when interpreting coefficient patterns</p>
             
             <p><b>References:</b></p>
-            <p>• Aalen OO. A linear regression model for the analysis of life times. Stat Med. 1989.</p>
-            <p>• Martinussen T, Scheike TH. Dynamic Regression Models for Survival Data. 2006.</p>
-            <p>• Bellera CA, et al. Variables with time-varying effects in survival analysis. Eur J Epidemiol. 2010.</p>
-            <p>• Perperoglou A, et al. A review of spline function procedures in R. BMC Med Res Methodol. 2019.</p>
+            <p>\u{2022} Aalen OO. A linear regression model for the analysis of life times. Stat Med. 1989.</p>
+            <p>\u{2022} Martinussen T, Scheike TH. Dynamic Regression Models for Survival Data. 2006.</p>
+            <p>\u{2022} Bellera CA, et al. Variables with time-varying effects in survival analysis. Eur J Epidemiol. 2010.</p>
+            <p>\u{2022} Perperoglou A, et al. A review of spline function procedures in R. BMC Med Res Methodol. 2019.</p>
             </body>
             </html>"
             

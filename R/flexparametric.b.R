@@ -958,19 +958,19 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         if (hr > 1.1) {
                             findings <- paste0(
-                                findings, "<p>• <strong>", cov_safe,
+                                findings, "<p>\u{2022} <strong>", cov_safe,
                                 ":</strong> Associated with ", round((hr - 1) * 100, 1),
                                 "% increased hazard (HR=", round(hr, 2), ")</p>"
                             )
                         } else if (hr < 0.9) {
                             findings <- paste0(
-                                findings, "<p>• <strong>", cov_safe,
+                                findings, "<p>\u{2022} <strong>", cov_safe,
                                 ":</strong> Associated with ", round((1 - hr) * 100, 1),
                                 "% decreased hazard (HR=", round(hr, 2), ")</p>"
                             )
                         } else {
                             findings <- paste0(
-                                findings, "<p>• <strong>", cov_safe,
+                                findings, "<p>\u{2022} <strong>", cov_safe,
                                 ":</strong> Minimal effect on hazard (HR=", round(hr, 2), ")</p>"
                             )
                         }

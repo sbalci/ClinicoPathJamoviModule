@@ -1809,7 +1809,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (correction_method == "bonferroni" && length(p_values) > 0) {
                             bonf_threshold <- 0.05 / length(p_values)
                             note <- sprintf(
-                                "Bonferroni-corrected significance threshold: p < %.6f (α=0.05 / %d markers)",
+                                "Bonferroni-corrected significance threshold: p < %.6f (\u{03B1}=0.05 / %d markers)",
                                 bonf_threshold, length(p_values)
                             )
                             at$setNote("bonferroni", note)
@@ -2313,7 +2313,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <li>Consider technical factors: antibody clones, staining protocols, scoring methods</li>
             <li>Account for inter-observer variability in IHC scoring</li>
             <li>Heatmap visualisations illustrate continuous markers; categorical markers appear as annotation bands</li>
-            <li>Statistical significance ≠ clinical significance</li>
+            <li>Statistical significance \u{2260} clinical significance</li>
             </ul>
             </div>
 
@@ -2727,7 +2727,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             if (i <= 5) { # Show max 5 variables
                                 na_pct <- round(100 * na_counts[vars_with_na[i]] / nrow(df), 1)
                                 text(1, y_pos, sprintf(
-                                    "  • %s: %d NAs (%.1f%%)",
+                                    "  \u{2022} %s: %d NAs (%.1f%%)",
                                     vars_with_na[i], na_counts[vars_with_na[i]], na_pct
                                 ),
                                 cex = 0.75, col = "darkred"
@@ -2746,9 +2746,9 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         text(1, y_pos, "Option 1 (Recommended):", font = 2, cex = 0.85)
                         y_pos <- y_pos - 0.05
-                        text(1, y_pos, "Data Preprocessing → Missing Data Handling", cex = 0.8)
+                        text(1, y_pos, "Data Preprocessing \u{2192} Missing Data Handling", cex = 0.8)
                         y_pos <- y_pos - 0.05
-                        text(1, y_pos, "→ Select 'Complete cases only'", cex = 0.8)
+                        text(1, y_pos, "\u{2192} Select 'Complete cases only'", cex = 0.8)
                         y_pos <- y_pos - 0.05
                         complete_cases <- sum(complete.cases(df[, numericVars, drop = FALSE]))
                         text(1, y_pos, sprintf("(Will use %d of %d cases)", complete_cases, nrow(df)),
@@ -2760,7 +2760,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         y_pos <- y_pos - 0.05
                         text(1, y_pos, "Add categorical variables (ER, PR, HER2, etc.)", cex = 0.8)
                         y_pos <- y_pos - 0.05
-                        text(1, y_pos, "→ Pairwise handling works with mixed data", cex = 0.8)
+                        text(1, y_pos, "\u{2192} Pairwise handling works with mixed data", cex = 0.8)
 
                         return()
                     }
@@ -5174,7 +5174,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     min_dim <- min(nrow(tbl) - 1, ncol(tbl) - 1)
                                     cramers_v <- sqrt(test_result$statistic / (n * min_dim))
 
-                                    effect_size_text <- sprintf("Cramér's V = %.3f", cramers_v)
+                                    effect_size_text <- sprintf("Cram\u{00E9}r's V = %.3f", cramers_v)
 
                                     results <- rbind(results, data.frame(
                                         marker = marker,
@@ -6379,7 +6379,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "</td>",
                     "</tr>",
                     "</table>",
-                    "<h4 style='color: #34495e; margin-top: 20px;'> 2×2 Confusion Matrix</h4>",
+                    "<h4 style='color: #34495e; margin-top: 20px;'> 2\u{00D7}2 Confusion Matrix</h4>",
                     "<table style='width: 80%; margin: 15px auto; border-collapse: collapse; text-align: center;'>",
                     "<tr>",
                     "<td style='border: none;'></td>",
@@ -6414,7 +6414,7 @@ ihcclusterClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<li><strong>Panel Combinations:</strong> Using multiple markers can improve performance. ",
                     "Markers in <strong>series</strong> (all must be positive) increases specificity. ",
                     "Markers in <strong>parallel</strong> (any can be positive) increases sensitivity.</li>",
-                    "<li><strong>Clinical Context:</strong> Statistical significance ≠ clinical utility. ",
+                    "<li><strong>Clinical Context:</strong> Statistical significance \u{2260} clinical utility. ",
                     "A marker with sensitivity=60% and specificity=70% may be statistically significant but clinically useless. ",
                     "Consider minimum acceptable thresholds for your use case.</li>",
                     "<li><strong>Confidence Intervals:</strong> Small sample sizes produce wide confidence intervals. ",

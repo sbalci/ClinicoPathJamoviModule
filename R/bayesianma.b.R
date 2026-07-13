@@ -30,7 +30,7 @@ bayesianmaClass <- R6::R6Class(
                                 <p><b>Key Features:</b></p>
                                 <ul>
                                     <li>Multiple prior specifications for model space</li>
-                                    <li>Advanced MCMC methods (MC³, Birth-Death, Gibbs)</li>
+                                    <li>Advanced MCMC methods (MC\u{00B3}, Birth-Death, Gibbs)</li>
                                     <li>Comprehensive uncertainty quantification</li>
                                     <li>Model selection and variable inclusion probabilities</li>
                                     <li>Convergence diagnostics and sensitivity analysis</li>
@@ -1047,7 +1047,7 @@ bayesianmaClass <- R6::R6Class(
                         <ul>
                             <li><strong>Prior Type:</strong> ", self$options$prior_type, "</li>
                             <li><strong>MCMC Method:</strong> ", self$options$mcmc_method, "</li>
-                            <li><strong>Chains:</strong> ", self$options$mcmc_chains, " chains × ", self$options$mcmc_iterations, " iterations</li>
+                            <li><strong>Chains:</strong> ", self$options$mcmc_chains, " chains \u{00D7} ", self$options$mcmc_iterations, " iterations</li>
                             <li><strong>Selection Method:</strong> ", self$options$model_selection_method, "</li>
                         </ul>
                     </div>

@@ -206,17 +206,17 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<br><br>",
                     "<b>Required Variables:</b>",
                     if (self$options$cdisc_format) {
-                        "<br>• AVAL Variable (Analysis Value - time to event)<br>• CNSR Variable (Censor indicator)"
+                        "<br>\u{2022} AVAL Variable (Analysis Value - time to event)<br>\u{2022} CNSR Variable (Censor indicator)"
                     } else {
-                        "<br>• Time Variable (time to event or censoring)<br>• Event Variable (event indicator)"
+                        "<br>\u{2022} Time Variable (time to event or censoring)<br>\u{2022} Event Variable (event indicator)"
                     },
                     "<br><br>",
                     "<b>Analysis Types Available:</b>",
-                    "<br>• Kaplan-Meier Survival Curves",
-                    "<br>• Cumulative Incidence Plots",
-                    "<br>• Table One Summaries",
-                    "<br>• Attrition Flowcharts",
-                    "<br>• Risk Tables",
+                    "<br>\u{2022} Kaplan-Meier Survival Curves",
+                    "<br>\u{2022} Cumulative Incidence Plots",
+                    "<br>\u{2022} Table One Summaries",
+                    "<br>\u{2022} Attrition Flowcharts",
+                    "<br>\u{2022} Risk Tables",
                     "<br><hr>"
                 )
                 
@@ -697,7 +697,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 var_data <- data[[var]][!is.na(data[[var]])]
                 if (length(var_data) > 0) {
                     summary_text <- paste0(
-                        round(mean(var_data), 2), " ± ", round(sd(var_data), 2),
+                        round(mean(var_data), 2), " \u{00B1} ", round(sd(var_data), 2),
                         " (median: ", round(median(var_data), 2), ")"
                     )
                     results <- rbind(results, data.frame(

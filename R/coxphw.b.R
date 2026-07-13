@@ -601,7 +601,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 list(term = "Event rate", value = paste0(round(100 * n_events / n_obs, 1), "%")),
                 list(term = "Number of covariates", value = toString(n_covariates)),
                 list(term = "Weight method", value = method_names[[self$options$weight_method]]),
-                list(term = "Weight parameter (α)", value = toString(self$options$alpha))
+                list(term = "Weight parameter (\u{03B1})", value = toString(self$options$alpha))
             )
             
             # Add convergence information if available
@@ -787,7 +787,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             rows <- list(
                 list(criterion = "Method", value = self$options$weight_method),
-                list(criterion = "Weight parameter (α)", value = toString(self$options$alpha)),
+                list(criterion = "Weight parameter (\u{03B1})", value = toString(self$options$alpha)),
                 list(criterion = "Maximum iterations", value = toString(self$options$max_iterations)),
                 list(criterion = "Convergence tolerance", value = sprintf("%.2e", self$options$convergence_tolerance))
             )
@@ -886,7 +886,7 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<p><strong>Weighting Strategy:</strong></p>",
                 "<ul>",
                 "<li>Method: ", self$options$weight_method, "</li>",
-                "<li>Weight parameter (α): ", self$options$alpha, "</li>",
+                "<li>Weight parameter (\u{03B1}): ", self$options$alpha, "</li>",
                 "<li>Weight range: ", round(min(weights), 3), " - ", round(max(weights), 3), "</li>",
                 "</ul>",
                 
@@ -914,8 +914,8 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 "<h4>Weighting Methods</h4>",
                 "<ul>",
-                "<li><strong>Average Hazard Weights (AHW):</strong> Uses parameter α to control the weight ",
-                "between log-rank (α=0), average hazard (α=0.5), and Breslow (α=1) approaches.</li>",
+                "<li><strong>Average Hazard Weights (AHW):</strong> Uses parameter \u{03B1} to control the weight ",
+                "between log-rank (\u{03B1}=0), average hazard (\u{03B1}=0.5), and Breslow (\u{03B1}=1) approaches.</li>",
                 "<li><strong>Schoenfeld Residual Weights:</strong> Weights based on the magnitude of ",
                 "Schoenfeld residuals, down-weighting observations with large residuals.</li>",
                 "<li><strong>Prentice Weights:</strong> Weights proportional to the square root of the ",
@@ -924,12 +924,12 @@ coxphwClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "log-rank statistics, optimizing for specific test statistics.</li>",
                 "</ul>",
                 
-                "<h4>Weight Parameter (α)</h4>",
-                "<p>The α parameter controls the weighting strategy:</p>",
+                "<h4>Weight Parameter (\u{03B1})</h4>",
+                "<p>The \u{03B1} parameter controls the weighting strategy:</p>",
                 "<ul>",
-                "<li>α = 0: Log-rank weights (equal weighting of event times)</li>",
-                "<li>α = 0.5: Average hazard weights (balanced approach)</li>",
-                "<li>α = 1: Breslow weights (emphasizes early failures)</li>",
+                "<li>\u{03B1} = 0: Log-rank weights (equal weighting of event times)</li>",
+                "<li>\u{03B1} = 0.5: Average hazard weights (balanced approach)</li>",
+                "<li>\u{03B1} = 1: Breslow weights (emphasizes early failures)</li>",
                 "</ul>",
                 
                 "<h4>When to Use Weighted Cox Regression</h4>",

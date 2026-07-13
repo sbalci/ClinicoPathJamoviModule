@@ -336,7 +336,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             )
             
             # Create pattern descriptions
-            discordance_patterns$pattern <- paste(discordance_patterns$mod1, "→", discordance_patterns$mod2)
+            discordance_patterns$pattern <- paste(discordance_patterns$mod1, "\u{2192}", discordance_patterns$mod2)
             
             # Count pattern frequencies
             pattern_counts <- table(discordance_patterns$pattern)
@@ -349,7 +349,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 percentage <- (count / total_discordant) * 100
                 
                 # Determine direction and clinical significance
-                parts <- strsplit(pattern, " → ")[[1]]
+                parts <- strsplit(pattern, " \u{2192} ")[[1]]
                 direction <- private$.determineDirection(parts[1], parts[2])
                 clinical_sig <- private$.assessClinicalSignificance(parts[1], parts[2])
                 
@@ -590,7 +590,7 @@ modalitycomparisonClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             pattern_data <- data.frame(
-                Pattern = paste(private$.modality1_data[discordant_indices], "→", 
+                Pattern = paste(private$.modality1_data[discordant_indices], "\u{2192}", 
                                private$.modality2_data[discordant_indices]),
                 stringsAsFactors = FALSE
             )

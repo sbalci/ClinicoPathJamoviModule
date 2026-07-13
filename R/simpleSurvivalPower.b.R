@@ -296,17 +296,17 @@ simpleSurvivalPowerClass <- R6::R6Class(
                 "<p><strong>Power Analysis & Sample Size Calculation</strong></p>",
                 "<p>This module provides comprehensive power analysis and sample size calculations for survival studies and clinical trials.</p>",
                 "<p><strong>Current Configuration:</strong><br>",
-                "• Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
-                "• Statistical Test: ", private$.format_test_type(test_type), "</p>",
+                "\u{2022} Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
+                "\u{2022} Statistical Test: ", private$.format_test_type(test_type), "</p>",
                 "<p><strong>Key Features:</strong><br>",
-                "• Log-rank test and Cox regression power calculations<br>",
-                "• Competing risks and RMST-based analyses<br>",
-                "• Non-inferiority trial designs<br>",
-                "• SNP-based survival studies<br>",
-                "• Multi-arm and cluster randomized trials<br>",
-                "• Interim analysis planning with alpha spending functions<br>",
-                "• Sensitivity analysis across parameter ranges<br>",
-                "• Regulatory compliance assessment</p>",
+                "\u{2022} Log-rank test and Cox regression power calculations<br>",
+                "\u{2022} Competing risks and RMST-based analyses<br>",
+                "\u{2022} Non-inferiority trial designs<br>",
+                "\u{2022} SNP-based survival studies<br>",
+                "\u{2022} Multi-arm and cluster randomized trials<br>",
+                "\u{2022} Interim analysis planning with alpha spending functions<br>",
+                "\u{2022} Sensitivity analysis across parameter ranges<br>",
+                "\u{2022} Regulatory compliance assessment</p>",
                 "<p><strong>Note:</strong> All calculations are based on established statistical methods and validated formulas. ",
                 "Results should be interpreted by qualified biostatisticians in the context of specific study requirements.</p>"
             )
@@ -921,7 +921,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
                         z_statistic <- abs(expected_rmst_diff) / se_diff
                         power_calc <- pnorm(z_statistic - z_alpha) + pnorm(-z_statistic - z_alpha)
 
-                        return(paste("Statistical Power:", round(power_calc * 100, 1), "% (RMST difference:", round(expected_rmst_diff, 1), "months at τ =", rmst_tau, "months)"))
+                        return(paste("Statistical Power:", round(power_calc * 100, 1), "% (RMST difference:", round(expected_rmst_diff, 1), "months at \u{03C4} =", rmst_tau, "months)"))
                     } else if (analysis_type == "effect_size") {
                         # Calculate minimum detectable RMST difference
                         n_total <- self$options$sample_size_input
@@ -937,7 +937,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
                         z_beta <- qnorm(power)
                         min_detectable_diff <- (z_alpha + z_beta) * se_diff
 
-                        return(paste("Minimum Detectable RMST Difference:", round(min_detectable_diff, 1), "months (at τ =", rmst_tau, "months)"))
+                        return(paste("Minimum Detectable RMST Difference:", round(min_detectable_diff, 1), "months (at \u{03C4} =", rmst_tau, "months)"))
                     } else if (analysis_type == "duration") {
                         # Calculate required study duration for RMST analysis
                         n_total <- self$options$sample_size_input
@@ -950,7 +950,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
                         current_duration <- accrual_period + follow_up
 
                         if (current_duration >= min_duration_for_rmst) {
-                            return(paste("Current Study Duration Adequate:", current_duration, "months (>", min_duration_for_rmst, "months needed for τ =", rmst_tau, ")"))
+                            return(paste("Current Study Duration Adequate:", current_duration, "months (>", min_duration_for_rmst, "months needed for \u{03C4} =", rmst_tau, ")"))
                         } else {
                             additional_time <- min_duration_for_rmst - current_duration
                             return(paste("Required Study Duration:", min_duration_for_rmst, "months (additional", round(additional_time, 1), "months needed)"))
@@ -2347,23 +2347,23 @@ simpleSurvivalPowerClass <- R6::R6Class(
             explanation <- paste0(
                 "<p><strong>Power Analysis for Survival Study</strong></p>",
                 "<p><strong>Study Design:</strong><br>",
-                "• Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
-                "• Statistical Test: ", private$.format_test_type(test_type), "<br>",
-                "• Design: ", private$.format_study_design(self$options$study_design), "<br>",
-                "• Primary Endpoint: ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
+                "\u{2022} Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
+                "\u{2022} Statistical Test: ", private$.format_test_type(test_type), "<br>",
+                "\u{2022} Design: ", private$.format_study_design(self$options$study_design), "<br>",
+                "\u{2022} Primary Endpoint: ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
                 "<p><strong>Statistical Parameters:</strong><br>",
-                "• Hazard Ratio: ", round(hr, 3), "<br>",
-                "• Significance Level (alpha): ", round(alpha, 3), " (", round(alpha * 100, 1), "%)<br>",
-                "• Statistical Power: ", round(power, 3), " (", round(power * 100, 1), "%)<br>",
-                "• Allocation Ratio: ", self$options$allocation_ratio, ":1<br>",
-                if (analysis_type != "sample_size") paste0("• Sample Size: ", self$options$sample_size_input, " subjects<br>") else "",
+                "\u{2022} Hazard Ratio: ", round(hr, 3), "<br>",
+                "\u{2022} Significance Level (alpha): ", round(alpha, 3), " (", round(alpha * 100, 1), "%)<br>",
+                "\u{2022} Statistical Power: ", round(power, 3), " (", round(power * 100, 1), "%)<br>",
+                "\u{2022} Allocation Ratio: ", self$options$allocation_ratio, ":1<br>",
+                if (analysis_type != "sample_size") paste0("\u{2022} Sample Size: ", self$options$sample_size_input, " subjects<br>") else "",
                 "</p>",
                 "<p><strong>Population Characteristics:</strong><br>",
-                "• Control Median Survival: ", median_survival, " months<br>",
-                "• Expected Treatment Median: ", round(median_survival / hr, 1), " months<br>",
-                "• Accrual Period: ", accrual, " months<br>",
-                "• Follow-up Period: ", follow_up, " months<br>",
-                "• Annual Dropout Rate: ", round(dropout * 100, 1), "%</p>",
+                "\u{2022} Control Median Survival: ", median_survival, " months<br>",
+                "\u{2022} Expected Treatment Median: ", round(median_survival / hr, 1), " months<br>",
+                "\u{2022} Accrual Period: ", accrual, " months<br>",
+                "\u{2022} Follow-up Period: ", follow_up, " months<br>",
+                "\u{2022} Annual Dropout Rate: ", round(dropout * 100, 1), "%</p>",
                 "<p><strong>Objective:</strong><br>",
                 private$.generate_objective_text(),
                 "</p>"
@@ -3050,7 +3050,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
                 private$effect_hr_info <- list(
                     type = "rmst_difference", hr = hr,
                     note = paste0(
-                        "Could not uniquely solve HR from RMST difference (inputs: Δ=",
+                        "Could not uniquely solve HR from RMST difference (inputs: \u{0394}=",
                         sprintf("%.3f", delta), ", tau=", sprintf("%.1f", tau),
                         ", median_c=", sprintf("%.1f", mc), "). Using fallback HR=0.75 for calculation."
                     )
@@ -3099,7 +3099,7 @@ simpleSurvivalPowerClass <- R6::R6Class(
                 private$effect_hr_info <- list(
                     type = "survival_difference", hr = hr,
                     note = paste0(
-                        "Could not uniquely solve HR from survival difference (inputs: Δ=",
+                        "Could not uniquely solve HR from survival difference (inputs: \u{0394}=",
                         sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", time_pt),
                         ", median_c=", sprintf("%.1f", mc), "). Using fallback HR=0.75 for calculation."
                     )

@@ -322,7 +322,7 @@ ihcbasicClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
                     cluster_data <- marker_data[clusters == i]
                     mean_val <- mean(cluster_data, na.rm = TRUE)
                     sd_val <- sd(cluster_data, na.rm = TRUE)
-                    row_values[[paste0("cluster", i)]] <- sprintf("%.2f ± %.2f", mean_val, sd_val)
+                    row_values[[paste0("cluster", i)]] <- sprintf("%.2f \u{00B1} %.2f", mean_val, sd_val)
                 }
 
                 # Kruskal-Wallis test for differences

@@ -273,7 +273,7 @@ mantelhaenszelClass <- R6::R6Class(
                 <ul>
                 <li>The odds of outcome are <strong>%.2f times</strong> %s in exposed vs. unexposed,
                     adjusting for the stratifying variable</li>
-                <li>MH Chi-Square = %.3f, p %s 0.001 → Association is %s</li>
+                <li>MH Chi-Square = %.3f, p %s 0.001 \u{2192} Association is %s</li>
                 </ul>
 
                 <p><strong>Confounding Assessment:</strong></p>
@@ -286,8 +286,8 @@ mantelhaenszelClass <- R6::R6Class(
 
                 <p><strong>Homogeneity of Odds Ratios Across Strata:</strong></p>
                 <ul>
-                <li>Woolf test: p = %.3f → %s</li>
-                <li>Breslow-Day test: p = %.3f → %s</li>
+                <li>Woolf test: p = %.3f \u{2192} %s</li>
+                <li>Breslow-Day test: p = %.3f \u{2192} %s</li>
                 %s
                 </ul>
 
@@ -335,7 +335,7 @@ observational epidemiology for case-control and cohort studies.</p>
 
 <h4>Mantel-Haenszel Common Odds Ratio</h4>
 <p>The common odds ratio pooled across K strata is:</p>
-<pre>OR_MH = Σ(a_i × d_i / n_i) / Σ(b_i × c_i / n_i)</pre>
+<pre>OR_MH = \u{03A3}(a_i \u{00D7} d_i / n_i) / \u{03A3}(b_i \u{00D7} c_i / n_i)</pre>
 
 <p>Where for each stratum i:</p>
 <ul>
@@ -351,19 +351,19 @@ observational epidemiology for case-control and cohort studies.</p>
 <h4>Mantel-Haenszel Chi-Square Test</h4>
 <p>Tests the null hypothesis of no association between exposure and outcome,
 adjusting for strata:</p>
-<pre>χ²_MH = [|Σa_i - ΣE(a_i)| - 0.5]² / ΣVar(a_i)</pre>
+<pre>\u{03C7}\u{00B2}_MH = [|\u{03A3}a_i - \u{03A3}E(a_i)| - 0.5]\u{00B2} / \u{03A3}Var(a_i)</pre>
 
 <p>Where:</p>
 <ul>
 <li>E(a_i) = (a_i + b_i)(a_i + c_i) / n_i (expected value under H0)</li>
-<li>Var(a_i) = [(a_i + b_i)(c_i + d_i)(a_i + c_i)(b_i + d_i)] / [n_i² × (n_i - 1)]</li>
+<li>Var(a_i) = [(a_i + b_i)(c_i + d_i)(a_i + c_i)(b_i + d_i)] / [n_i\u{00B2} \u{00D7} (n_i - 1)]</li>
 <li>Continuity correction of 0.5 is optional</li>
 </ul>
 
 <h4>Tests of Homogeneity</h4>
 
 <p><strong>Woolf Test:</strong> Tests whether the odds ratios are homogeneous across strata.</p>
-<pre>χ²_Woolf = Σw_i[ln(OR_i) - ln(OR_MH)]²</pre>
+<pre>\u{03C7}\u{00B2}_Woolf = \u{03A3}w_i[ln(OR_i) - ln(OR_MH)]\u{00B2}</pre>
 <p>Where w_i = 1 / Var(ln(OR_i))</p>
 
 <p><strong>Breslow-Day Test:</strong> Similar to Woolf but uses observed vs. expected cell counts
@@ -371,16 +371,16 @@ under the assumption of a common odds ratio. More robust when sample sizes are s
 
 <p><strong>Interpretation:</strong></p>
 <ul>
-<li>p < 0.05 → Heterogeneous (ORs differ across strata; MH common OR may be misleading)</li>
-<li>p >= 0.05 → Homogeneous (ORs are similar; MH common OR is appropriate)</li>
+<li>p < 0.05 \u{2192} Heterogeneous (ORs differ across strata; MH common OR may be misleading)</li>
+<li>p >= 0.05 \u{2192} Homogeneous (ORs are similar; MH common OR is appropriate)</li>
 </ul>
 
 <h4>Confounding Assessment</h4>
 <p>Confounding is assessed by comparing crude (unadjusted) OR to Mantel-Haenszel adjusted OR:</p>
 <ul>
-<li><strong>Percent change = |(Crude OR - MH OR) / Crude OR| × 100</strong></li>
-<li>>10% change → Confounding is present</li>
-<li><=10% change → Minimal confounding</li>
+<li><strong>Percent change = |(Crude OR - MH OR) / Crude OR| \u{00D7} 100</strong></li>
+<li>>10% change \u{2192} Confounding is present</li>
+<li><=10% change \u{2192} Minimal confounding</li>
 </ul>
 
 <h4>Assumptions</h4>

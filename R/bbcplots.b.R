@@ -42,7 +42,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<h3 style='color: #1380A1; margin: 0 0 15px 0;'> Key Features</h3>",
                 "<ul style='margin: 0; padding-left: 20px; line-height: 1.8;'>",
                 "<li><strong>BBC Design Standards:</strong> Authentic Helvetica typography and professional color schemes</li>",
-                "<li><strong>Publication Ready:</strong> Standard 640×450px export with proper branding</li>",
+                "<li><strong>Publication Ready:</strong> Standard 640\u{00D7}450px export with proper branding</li>",
                 "<li><strong>Statistical Integration:</strong> Built-in statistical tests with publication-quality annotations</li>",
                 "<li><strong>Multiple Chart Types:</strong> Columns, bars, lines, points, areas, and grouped variations</li>",
                 "<li><strong>News Quality:</strong> Clean aesthetics optimized for digital journalism</li>",
@@ -108,13 +108,13 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     private$.show_error_message(
                         "No data available after processing",
                         "This usually occurs when:<br/>
-                        • All observations have missing values in selected variables<br/>
-                        • Data filtering removed all observations<br/>
-                        • Variables contain only invalid values<br/><br/>
+                        \u{2022} All observations have missing values in selected variables<br/>
+                        \u{2022} Data filtering removed all observations<br/>
+                        \u{2022} Variables contain only invalid values<br/><br/>
                         <strong>Solutions:</strong><br/>
-                        • Check for missing values in your data<br/>
-                        • Ensure variables contain appropriate data types<br/>
-                        • Try different variable combinations"
+                        \u{2022} Check for missing values in your data<br/>
+                        \u{2022} Ensure variables contain appropriate data types<br/>
+                        \u{2022} Try different variable combinations"
                     )
                     return()
                 }
@@ -630,7 +630,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "</ul>",
                 "<h5>Export Recommendations:</h5>",
                 "<ul>",
-                "<li>Export at 640×450px for web, 1280×900px for print</li>",
+                "<li>Export at 640\u{00D7}450px for web, 1280\u{00D7}900px for print</li>",
                 "<li>Include data tables as alternative formats</li>",
                 "<li>Provide chart descriptions in accompanying text</li>",
                 "<li>Test with screen readers and accessibility tools</li>",
@@ -782,8 +782,8 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<p>F(", df1, ", ", df2, ") = ", f_stat, ", p = ", format.pval(p_value, digits = 3), "</p>",
                 "<p><strong>Effect Sizes:</strong></p>",
                 "<ul>",
-                "<li>η² (eta-squared): ", round(eta_squared, 3), " (", private$.interpret_effect_size(eta_squared, "eta"), ")</li>",
-                "<li>ω² (omega-squared): ", round(max(0, omega_squared), 3), " (more conservative estimate)</li>",
+                "<li>\u{03B7}\u{00B2} (eta-squared): ", round(eta_squared, 3), " (", private$.interpret_effect_size(eta_squared, "eta"), ")</li>",
+                "<li>\u{03C9}\u{00B2} (omega-squared): ", round(max(0, omega_squared), 3), " (more conservative estimate)</li>",
                 "</ul>",
                 private$.add_post_hoc_note(p_value, length(unique(data[[x_var]]))),
                 "</div>"
@@ -865,7 +865,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<p><strong>95% Confidence Interval:</strong> [", round(primary_result$conf.int[1], 3), 
                 ", ", round(primary_result$conf.int[2], 3), "]</p>",
                 "<p><strong>Effect Size:</strong> ", private$.interpret_correlation_strength(abs(primary_result$estimate)), "</p>",
-                "<p><strong>Coefficient of Determination (r²):</strong> ", round(primary_result$estimate^2, 3), 
+                "<p><strong>Coefficient of Determination (r\u{00B2}):</strong> ", round(primary_result$estimate^2, 3), 
                 " (", round(primary_result$estimate^2 * 100, 1), "% shared variance)</p>",
                 if (!use_pearson) "<p style='color: #f57c00;'><em>Note: Non-normal distribution detected, Spearman correlation reported</em></p>" else "",
                 "</div>"
@@ -889,11 +889,11 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             result_html <- paste0(
                 "<div style='border-left: 4px solid #990000; padding-left: 15px; margin: 10px 0;'>",
                 "<p><strong>Chi-square Test of Independence:</strong></p>",
-                "<p>χ²(", chi_result$parameter, ") = ", round(chi_result$statistic, 3), 
+                "<p>\u{03C7}\u{00B2}(", chi_result$parameter, ") = ", round(chi_result$statistic, 3), 
                 ", p = ", format.pval(chi_result$p.value, digits = 3), "</p>",
                 "<p><strong>Effect Sizes:</strong></p>",
                 "<ul>",
-                "<li>Cramér's V: ", round(cramers_v, 3), " (", private$.interpret_effect_size(cramers_v, "cramers_v"), ")</li>",
+                "<li>Cram\u{00E9}r's V: ", round(cramers_v, 3), " (", private$.interpret_effect_size(cramers_v, "cramers_v"), ")</li>",
                 if (all(dim(contingency_table) == 2)) paste0("<li>Phi coefficient: ", round(phi, 3), "</li>") else "",
                 "</ul>",
                 private$.add_chi_square_assumptions_note(contingency_table),
@@ -937,18 +937,18 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             if (stat_method %in% c("anova", "ttest")) {
                 guide_html <- paste0(guide_html,
                     "<p style='margin: 0; font-size: 0.9em;'>",
-                    "• Report p-values with appropriate precision (avoid 'p < 0.05')<br/>",
-                    "• Always include effect sizes for practical significance<br/>",
-                    "• Consider confidence intervals for key comparisons<br/>",
-                    "• Mention sample sizes for transparency</p>"
+                    "\u{2022} Report p-values with appropriate precision (avoid 'p < 0.05')<br/>",
+                    "\u{2022} Always include effect sizes for practical significance<br/>",
+                    "\u{2022} Consider confidence intervals for key comparisons<br/>",
+                    "\u{2022} Mention sample sizes for transparency</p>"
                 )
             } else if (stat_method == "correlation") {
                 guide_html <- paste0(guide_html,
                     "<p style='margin: 0; font-size: 0.9em;'>",
-                    "• Remember: correlation does not imply causation<br/>",
-                    "• Report both correlation coefficient and confidence interval<br/>",
-                    "• Consider potential confounding variables<br/>",
-                    "• Use appropriate correlation method for your data type</p>"
+                    "\u{2022} Remember: correlation does not imply causation<br/>",
+                    "\u{2022} Report both correlation coefficient and confidence interval<br/>",
+                    "\u{2022} Consider potential confounding variables<br/>",
+                    "\u{2022} Use appropriate correlation method for your data type</p>"
                 )
             }
             
@@ -994,7 +994,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<p>H = ", round(kruskal_result$statistic, 3), 
                 ", df = ", kruskal_result$parameter, 
                 ", p = ", format.pval(kruskal_result$p.value, digits = 3), "</p>",
-                "<p><strong>Effect Size (η²H):</strong> ", round(eta_squared_h, 3), 
+                "<p><strong>Effect Size (\u{03B7}\u{00B2}H):</strong> ", round(eta_squared_h, 3), 
                 " (", private$.interpret_effect_size(eta_squared_h, "eta"), ")</p>",
                 "<p style='color: #666; font-style: italic;'>",
                 "Note: Kruskal-Wallis is used when ANOVA assumptions are violated (non-normal distributions)</p>",
@@ -1036,15 +1036,15 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 result_html <- paste0(
                     "<div style='border-left: 4px solid #333333; padding-left: 15px; margin: 10px 0;'>",
                     "<p><strong>Simple Linear Regression:</strong></p>",
-                    "<p><strong>Model:</strong> ", htmltools::htmlEscape(y_var), " = ", round(intercept, 3), " + ", round(slope, 3), " × ", htmltools::htmlEscape(x_var), "</p>",
-                    "<p><strong>Slope:</strong> β = ", round(slope, 3), 
+                    "<p><strong>Model:</strong> ", htmltools::htmlEscape(y_var), " = ", round(intercept, 3), " + ", round(slope, 3), " \u{00D7} ", htmltools::htmlEscape(x_var), "</p>",
+                    "<p><strong>Slope:</strong> \u{03B2} = ", round(slope, 3), 
                     " (SE = ", round(slope_se, 3), ", t = ", round(slope_t, 3), 
                     ", p = ", format.pval(slope_p, digits = 3), ")</p>",
                     "<p><strong>95% CI for slope:</strong> [", round(conf_int[1], 3), ", ", round(conf_int[2], 3), "]</p>",
                     "<p><strong>Model Fit:</strong></p>",
                     "<ul>",
-                    "<li>R² = ", round(r_squared, 3), " (", round(r_squared * 100, 1), "% variance explained)</li>",
-                    "<li>Adjusted R² = ", round(adj_r_squared, 3), "</li>",
+                    "<li>R\u{00B2} = ", round(r_squared, 3), " (", round(r_squared * 100, 1), "% variance explained)</li>",
+                    "<li>Adjusted R\u{00B2} = ", round(adj_r_squared, 3), "</li>",
                     "<li>F(1, ", lm_summary$fstatistic[3], ") = ", round(f_stat, 3), 
                     ", p = ", format.pval(f_p_value, digits = 3), "</li>",
                     "</ul>",
@@ -1060,7 +1060,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 result_html <- paste0(
                     "<div style='border-left: 4px solid #333333; padding-left: 15px; margin: 10px 0;'>",
                     "<p><strong>Regression with Categorical Predictor:</strong></p>",
-                    "<p><strong>R² = </strong>", round(lm_summary$r.squared, 3), 
+                    "<p><strong>R\u{00B2} = </strong>", round(lm_summary$r.squared, 3), 
                     " (", round(lm_summary$r.squared * 100, 1), "% variance explained)</p>",
                     "<p style='color: #666; font-style: italic;'>",
                     "Note: This is equivalent to ANOVA. Use ANOVA for better interpretation of categorical predictors.</p>",
@@ -1263,7 +1263,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "<li><strong>Colors:</strong> Strategic use of BBC brand colors for maximum impact</li>",
                 "<li><strong>Gridlines:</strong> Horizontal only, light gray (#cbcbcb) for readability</li>",
                 "<li><strong>Spacing:</strong> Generous white space for clarity</li>",
-                "<li><strong>Dimensions:</strong> Standard 640×450px for digital publication</li>",
+                "<li><strong>Dimensions:</strong> Standard 640\u{00D7}450px for digital publication</li>",
                 "</ul>",
                 "<h5>Editorial Guidelines:</h5>",
                 "<ul>",
@@ -1293,7 +1293,7 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "</ul>",
                 "<h5>Export Recommendations:</h5>",
                 "<ul>",
-                "<li>Export at 640×450px for web, 1280×900px for print</li>",
+                "<li>Export at 640\u{00D7}450px for web, 1280\u{00D7}900px for print</li>",
                 "<li>Include data tables as alternative formats</li>",
                 "<li>Provide chart descriptions in accompanying text</li>",
                 "<li>Test with screen readers and accessibility tools</li>",

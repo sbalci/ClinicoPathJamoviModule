@@ -97,7 +97,7 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
                 
                 if (!inherits(model, "try-error")) {
                     tableFit <- self$results$modelFit
-                    tableFit$addRow(rowKey=1, values=list(statistic="Smoothing Parameter (λ)", value=model$lambda, interpretation="Penalty applied to curvature"))
+                    tableFit$addRow(rowKey=1, values=list(statistic="Smoothing Parameter (\u{03BB})", value=model$lambda, interpretation="Penalty applied to curvature"))
                     tableFit$addRow(rowKey=2, values=list(statistic="Generalized CV Score", value=model$cv.crit, interpretation="Estimate of prediction error"))
                     
                     # Bandwidth Table

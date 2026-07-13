@@ -756,7 +756,7 @@ jsummarytoolsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                     "<ul>",
                     "<li><strong>Chi-square Test:</strong> Tests independence of variables</li>",
                     "<li><strong>p < 0.05:</strong> Significant association between variables</li>",
-                    "<li><strong>Cramér's V:</strong> Strength of association (0 = no association, 1 = perfect association)</li>",
+                    "<li><strong>Cram\u{00E9}r's V:</strong> Strength of association (0 = no association, 1 = perfect association)</li>",
                     "</ul>"
                 ),
                 

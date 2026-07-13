@@ -1,10 +1,10 @@
 ---
 name: waterfall
 title: Treatment Response Analysis
-menuGroup: OncoPathT
+menuGroup: OncoPath
 menuSubgroup: 'Patient Follow-Up Plots'
 menuSubtitle: 'Waterfall Plot, Spider Plot'
-version: '0.0.5'
+version: '1.0.0'
 jas: '1.2'
 
 description:

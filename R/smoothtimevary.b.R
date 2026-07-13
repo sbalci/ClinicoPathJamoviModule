@@ -929,8 +929,8 @@ smoothtimevaryClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           
           "<h5>Statistical Framework</h5>",
           "<p>The model extends Cox regression to allow time-varying coefficients:</p>",
-          "<p><strong>λ(t|x) = λ₀(t) exp(Σᵢ βᵢ(t)xᵢ)</strong></p>",
-          "<p>where βᵢ(t) are smooth functions of time estimated using the selected smoothing method.</p>",
+          "<p><strong>\u{03BB}(t|x) = \u{03BB}\u{2080}(t) exp(\u{03A3}\u{1D62} \u{03B2}\u{1D62}(t)x\u{1D62})</strong></p>",
+          "<p>where \u{03B2}\u{1D62}(t) are smooth functions of time estimated using the selected smoothing method.</p>",
           
           "<h5>Constancy Testing</h5>",
           "<p>Statistical tests assess whether covariate effects remain constant over time:</p>",

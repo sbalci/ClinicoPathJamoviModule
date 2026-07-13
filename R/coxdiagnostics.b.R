@@ -252,7 +252,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Likelihood ratio test
                         summary_html <- paste0(summary_html, "<p><strong>Likelihood ratio test:</strong> ")
                         summary_html <- paste0(
-                            summary_html, "χ² = ", round(cox_summary$logtest["test"], 3),
+                            summary_html, "\u{03C7}\u{00B2} = ", round(cox_summary$logtest["test"], 3),
                             ", df = ", cox_summary$logtest["df"],
                             ", p = ", format.pval(cox_summary$logtest["pvalue"], digits = 3)
                         )
@@ -532,7 +532,7 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 interp_html <- paste0(interp_html, "<h6 style='color: #7b1fa2;'>DFBeta Plots:</h6>")
                 interp_html <- paste0(interp_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
                 interp_html <- paste0(interp_html, "<li>Assess influence of individual observations</li>")
-                interp_html <- paste0(interp_html, "<li>Values > 2/√n suggest influential observations</li>")
+                interp_html <- paste0(interp_html, "<li>Values > 2/\u{221A}n suggest influential observations</li>")
                 interp_html <- paste0(interp_html, "<li>Consider removing/investigating extreme values</li>")
                 interp_html <- paste0(interp_html, "</ul>")
                 interp_html <- paste0(interp_html, "</div>")

@@ -204,7 +204,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     private$.addNotice(
                         type = "ERROR",
                         title = sprintf('Insufficient data: %d cases found', nrow(self$data)),
-                        content = "At least 4 cases are required for diagnostic test analysis. Each cell of the 2×2 table should have at least one observation."
+                        content = "At least 4 cases are required for diagnostic test analysis. Each cell of the 2\u{00D7}2 table should have at least one observation."
                     )
                     return(FALSE)
                 }
@@ -760,10 +760,10 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     "<h4 style='color: #424242;'>", .("Clinical Interpretation Guidelines"), "</h4>",
                     "<div style='background: #e8f5e8; padding: 10px; border-radius: 5px; margin: 10px 0;'>",
                     "<strong>", .("Excellent Tests"), ":</strong><br>",
-                    "• ", .("Sensitivity >90% excellent for ruling OUT disease"), "<br>",
-                    "• ", .("Specificity >90% excellent for ruling IN disease"), "<br>",
-                    "• ", .("LR+ >10 strong evidence FOR disease, LR+ 5-10 moderate, LR+ 2-5 weak but useful"), "<br>",
-                    "• ", .("LR- <0.1 strong evidence AGAINST disease, LR- 0.1-0.2 moderate, LR- 0.2-0.5 weak"), "<br>",
+                    "\u{2022} ", .("Sensitivity >90% excellent for ruling OUT disease"), "<br>",
+                    "\u{2022} ", .("Specificity >90% excellent for ruling IN disease"), "<br>",
+                    "\u{2022} ", .("LR+ >10 strong evidence FOR disease, LR+ 5-10 moderate, LR+ 2-5 weak but useful"), "<br>",
+                    "\u{2022} ", .("LR- <0.1 strong evidence AGAINST disease, LR- 0.1-0.2 moderate, LR- 0.2-0.5 weak"), "<br>",
                     "</div>",
 
                     "<h4 style='color: #424242;'>", .("Analysis Options Explained"), "</h4>",

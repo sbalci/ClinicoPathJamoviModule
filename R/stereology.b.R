@@ -137,7 +137,7 @@ stereologyClass <- R6::R6Class(
                     mean = mean(ba, na.rm = TRUE),
                     sd = sd(ba, na.rm = TRUE),
                     values = ba,
-                    unit = "μm⁻¹"
+                    unit = "\u{03BC}m\u{207B}\u{00B9}"
                 )
             }
 
@@ -149,7 +149,7 @@ stereologyClass <- R6::R6Class(
                     mean = mean(na_vals, na.rm = TRUE),
                     sd = sd(na_vals, na.rm = TRUE),
                     values = na_vals,
-                    unit = "per μm²"
+                    unit = "per \u{03BC}m\u{00B2}"
                 )
             }
 
@@ -163,7 +163,7 @@ stereologyClass <- R6::R6Class(
                     mean = mean(sv, na.rm = TRUE),
                     sd = sd(sv, na.rm = TRUE),
                     values = sv,
-                    unit = "μm⁻¹"
+                    unit = "\u{03BC}m\u{207B}\u{00B9}"
                 )
             }
 
@@ -478,26 +478,26 @@ histological sections using systematic sampling methods. It provides unbiased es
 
 <p><strong>3. Boundary Density (Ba)</strong></p>
 <ul>
-<li>Formula: Ba = (2 × boundary_intersections) / line_length</li>
+<li>Formula: Ba = (2 \u{00D7} boundary_intersections) / line_length</li>
 <li>Meaning: Total boundary length per unit area</li>
-<li>Units: μm⁻¹ (micrometers per square micrometer)</li>
-<li>Example: Ba = 0.05 μm⁻¹ means 0.05 μm of boundary per μm² of tissue</li>
+<li>Units: \u{03BC}m\u{207B}\u{00B9} (micrometers per square micrometer)</li>
+<li>Example: Ba = 0.05 \u{03BC}m\u{207B}\u{00B9} means 0.05 \u{03BC}m of boundary per \u{03BC}m\u{00B2} of tissue</li>
 </ul>
 
 <p><strong>4. Numerical Density (Na)</strong></p>
 <ul>
 <li>Formula: Na = object_count / reference_area</li>
 <li>Meaning: Number of objects per unit area</li>
-<li>Units: per μm²</li>
-<li>Example: Na = 0.001 per μm² means 1 object per 1000 μm²</li>
+<li>Units: per \u{03BC}m\u{00B2}</li>
+<li>Example: Na = 0.001 per \u{03BC}m\u{00B2} means 1 object per 1000 \u{03BC}m\u{00B2}</li>
 </ul>
 
 <p><strong>5. Surface Density (Sv)</strong></p>
 <ul>
-<li>Formula: Sv = 2 × Ba (for isotropic sections)</li>
+<li>Formula: Sv = 2 \u{00D7} Ba (for isotropic sections)</li>
 <li>Meaning: Surface area per unit volume</li>
-<li>Units: μm⁻¹</li>
-<li>Example: Sv = 0.10 μm⁻¹ means 0.10 μm² of surface per μm³ of volume</li>
+<li>Units: \u{03BC}m\u{207B}\u{00B9}</li>
+<li>Example: Sv = 0.10 \u{03BC}m\u{207B}\u{00B9} means 0.10 \u{03BC}m\u{00B2} of surface per \u{03BC}m\u{00B3} of volume</li>
 </ul>
 
 <h4>Clinical Applications</h4>
@@ -534,7 +534,7 @@ histological sections using systematic sampling methods. It provides unbiased es
 <h3>References</h3>
 
 <h4>Stereology Theory</h4>
-<p><strong>Kayser, K., Schultz, H., Goldmann, T., Görtler, J., Kayser, G., & Vollmer, E. (2009).</strong>
+<p><strong>Kayser, K., Schultz, H., Goldmann, T., G\u{00F6}rtler, J., Kayser, G., & Vollmer, E. (2009).</strong>
 Theory of sampling and its application in tissue based diagnosis.
 <em>Diagnostic Pathology</em>, 4:6. doi:10.1186/1746-1596-4-6</p>
 

@@ -178,29 +178,29 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (length(unique(timedep_time[timedep_time > 0 & !is.na(timedep_time)])) > 1) {
                 # Multiple different change times detected
                 warning(
-                    "\n╔══════════════════════════════════════════════════════════════════╗\n",
-                    "║ IMPORTANT LIMITATION: Multiple Exposure Change Times Detected   ║\n",
-                    "╠══════════════════════════════════════════════════════════════════╣\n",
-                    "║                                                                  ║\n",
-                    "║ Your data contains patients with different exposure change      ║\n",
-                    "║ times. The current implementation assumes AT MOST ONE exposure   ║\n",
-                    "║ change per patient (scalar change time).                        ║\n",
-                    "║                                                                  ║\n",
-                    "║ If individual patients have MULTIPLE exposure changes           ║\n",
-                    "║ (e.g., start treatment → stop treatment → restart), only the    ║\n",
-                    "║ FIRST change will be captured, and subsequent changes will be   ║\n",
-                    "║ IGNORED. This will produce INCORRECT results.                   ║\n",
-                    "║                                                                  ║\n",
-                    "║ RECOMMENDATION:                                                  ║\n",
-                    "║ • If patients have single exposure changes at different times:  ║\n",
-                    "║   → Proceed (this is expected and properly handled)             ║\n",
-                    "║                                                                  ║\n",
-                    "║ • If individual patients have multiple exposure changes:        ║\n",
-                    "║   → DO NOT USE THIS FUNCTION                                     ║\n",
-                    "║   → Use survival::tmerge() to create counting-process data      ║\n",
-                    "║   → Manually fit time-dependent Cox models                      ║\n",
-                    "║                                                                  ║\n",
-                    "╚══════════════════════════════════════════════════════════════════╝\n",
+                    "\n\u{2554}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2557}\n",
+                    "\u{2551} IMPORTANT LIMITATION: Multiple Exposure Change Times Detected   \u{2551}\n",
+                    "\u{2560}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2563}\n",
+                    "\u{2551}                                                                  \u{2551}\n",
+                    "\u{2551} Your data contains patients with different exposure change      \u{2551}\n",
+                    "\u{2551} times. The current implementation assumes AT MOST ONE exposure   \u{2551}\n",
+                    "\u{2551} change per patient (scalar change time).                        \u{2551}\n",
+                    "\u{2551}                                                                  \u{2551}\n",
+                    "\u{2551} If individual patients have MULTIPLE exposure changes           \u{2551}\n",
+                    "\u{2551} (e.g., start treatment \u{2192} stop treatment \u{2192} restart), only the    \u{2551}\n",
+                    "\u{2551} FIRST change will be captured, and subsequent changes will be   \u{2551}\n",
+                    "\u{2551} IGNORED. This will produce INCORRECT results.                   \u{2551}\n",
+                    "\u{2551}                                                                  \u{2551}\n",
+                    "\u{2551} RECOMMENDATION:                                                  \u{2551}\n",
+                    "\u{2551} \u{2022} If patients have single exposure changes at different times:  \u{2551}\n",
+                    "\u{2551}   \u{2192} Proceed (this is expected and properly handled)             \u{2551}\n",
+                    "\u{2551}                                                                  \u{2551}\n",
+                    "\u{2551} \u{2022} If individual patients have multiple exposure changes:        \u{2551}\n",
+                    "\u{2551}   \u{2192} DO NOT USE THIS FUNCTION                                     \u{2551}\n",
+                    "\u{2551}   \u{2192} Use survival::tmerge() to create counting-process data      \u{2551}\n",
+                    "\u{2551}   \u{2192} Manually fit time-dependent Cox models                      \u{2551}\n",
+                    "\u{2551}                                                                  \u{2551}\n",
+                    "\u{255A}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{255D}\n",
                     call. = FALSE
                 )
             }
@@ -443,7 +443,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 to handle covariates that change value over time.</p>
                 
                 <h4>Model Specification:</h4>
-                <p>h(t|X(t)) = h₀(t) × exp(β × X(t))</p>
+                <p>h(t|X(t)) = h\u{2080}(t) \u{00D7} exp(\u{03B2} \u{00D7} X(t))</p>
                 <p>Where X(t) represents the time-dependent covariate value at time t.</p>
                 
                 <h4>Data Format:</h4>
@@ -1058,7 +1058,7 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
                 table$addRow(rowKey = 1, values = list(
-                    Variable = "Exposure × Time",
+                    Variable = "Exposure \u{00D7} Time",
                     ChiSquare = interaction_test$Chisq[2],
                     df = interaction_test$Df[2],
                     p_value = interaction_test$`Pr(>Chi)`[2],

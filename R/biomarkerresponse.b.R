@@ -601,7 +601,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                                 "<p><strong>Solutions:</strong></p>",
                                 "<ol style='margin-left: 20px;'>",
                                 "<li>Select a different variable with numeric values</li>",
-                                "<li>Convert variable to numeric in jamovi (Data → Transform)</li>",
+                                "<li>Convert variable to numeric in jamovi (Data \u{2192} Transform)</li>",
                                 "<li>Check for non-numeric characters in the data</li>",
                                 "</ol>",
                                 "</div>"
@@ -641,7 +641,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
                                     "<p><strong>Solutions:</strong></p>",
                                     "<ol style='margin-left: 20px;'>",
                                     "<li>Change Response Type to 'Binary' or 'Categorical' for non-numeric responses</li>",
-                                    "<li>Convert response variable to numeric in jamovi (Data → Transform)</li>",
+                                    "<li>Convert response variable to numeric in jamovi (Data \u{2192} Transform)</li>",
                                     "<li>Select a different response variable</li>",
                                     "</ol>",
                                     "</div>"
@@ -1447,7 +1447,7 @@ biomarkerresponseClass <- if (requireNamespace("jmvcore")) {
 
                 return(paste0(
                     significance, " difference (p = ", round(p_value, 4), "). ",
-                    effect_size, " effect size (δ = ", round(cliff_delta, 3), "). ",
+                    effect_size, " effect size (\u{03B4} = ", round(cliff_delta, 3), "). ",
                     "Probability that ", group_levels[1], " has ", direction, " biomarker levels: ", prob, "%. ",
                     "Typical difference: ", round(abs_shift, 2), " units (",
                     ifelse(hodges_lehmann > 0, paste(group_levels[1], "typically higher"),

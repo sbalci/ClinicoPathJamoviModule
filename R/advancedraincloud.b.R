@@ -1059,7 +1059,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     test_stat <- round(kw_result$statistic, 4)
                     raw_p <- kw_result$p.value
                     p_value <- round(raw_p, 4)
-                    test_details <- paste0("χ² = ", test_stat, ", df = ", kw_result$parameter)
+                    test_details <- paste0("\u{03C7}\u{00B2} = ", test_stat, ", df = ", kw_result$parameter)
                     df_value <- kw_result$parameter
                 }
 
@@ -1553,7 +1553,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<h4>", .("Change Score Summary"), "</h4>",
                     "<table style='width: 100%; border-collapse: collapse;'>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Mean change:"), "</strong></td>",
-                    "<td style='padding: 8px; border: 1px solid #ddd;'>", mean_change, " ± ", sd_change, "</td></tr>",
+                    "<td style='padding: 8px; border: 1px solid #ddd;'>", mean_change, " \u{00B1} ", sd_change, "</td></tr>",
                     "<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>", .("Median change:"), "</strong></td>",
                     "<td style='padding: 8px; border: 1px solid #ddd;'>", median_change, "</td></tr>",
                     "</table>",

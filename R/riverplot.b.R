@@ -2918,7 +2918,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     if (dominant_percentage > 70) {
                         insights <- append(insights, 
-                            sprintf(.("Primary pathway detected: %s → %s accounts for %.1f%% of all transitions."), 
+                            sprintf(.("Primary pathway detected: %s \u{2192} %s accounts for %.1f%% of all transitions."), 
                                    top_flow$from_category, top_flow$to_category, dominant_percentage))
                         recommendations <- append(recommendations,
                             .("Consider developing standardized protocols for this dominant care pathway."))

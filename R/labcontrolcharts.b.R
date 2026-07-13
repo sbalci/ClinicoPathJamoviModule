@@ -25,19 +25,19 @@ labcontrolchartsClass <- R6::R6Class(
                         <div class='section'>
                             <b>Required Variables:</b>
                             <div class='list'>
-                                • <b>Measurement Variable:</b> Laboratory measurement values to monitor<br>
-                                • <b>Run Number:</b> Sequential run number or time point<br>
-                                • <b>Batch ID (Optional):</b> Batch or lot identifier<br>
-                                • <b>Control Level (Optional):</b> Control material level
+                                \u{2022} <b>Measurement Variable:</b> Laboratory measurement values to monitor<br>
+                                \u{2022} <b>Run Number:</b> Sequential run number or time point<br>
+                                \u{2022} <b>Batch ID (Optional):</b> Batch or lot identifier<br>
+                                \u{2022} <b>Control Level (Optional):</b> Control material level
                             </div>
                         </div>
                         <div class='section'>
                             <b>Available Chart Types:</b>
                             <div class='list'>
-                                <div class='feature'>• <b>Shewhart Chart:</b> Classic control chart for detecting large shifts</div>
-                                <div class='feature'>• <b>CUSUM Chart:</b> Cumulative sum for detecting small persistent shifts</div>
-                                <div class='feature'>• <b>EWMA Chart:</b> Exponentially weighted for trend detection</div>
-                                <div class='feature'>• <b>Multi-rule Westgard:</b> Combined rules for comprehensive QC</div>
+                                <div class='feature'>\u{2022} <b>Shewhart Chart:</b> Classic control chart for detecting large shifts</div>
+                                <div class='feature'>\u{2022} <b>CUSUM Chart:</b> Cumulative sum for detecting small persistent shifts</div>
+                                <div class='feature'>\u{2022} <b>EWMA Chart:</b> Exponentially weighted for trend detection</div>
+                                <div class='feature'>\u{2022} <b>Multi-rule Westgard:</b> Combined rules for comprehensive QC</div>
                             </div>
                         </div>
                         <div class='important'>
@@ -46,11 +46,11 @@ labcontrolchartsClass <- R6::R6Class(
                         <div class='section'>
                             <b>Key Features:</b>
                             <div class='list'>
-                                • Westgard multi-rule violation detection<br>
-                                • Trend and shift analysis<br>
-                                • Performance metrics (ARL, power)<br>
-                                • Corrective action recommendations<br>
-                                • Export capabilities for documentation
+                                \u{2022} Westgard multi-rule violation detection<br>
+                                \u{2022} Trend and shift analysis<br>
+                                \u{2022} Performance metrics (ARL, power)<br>
+                                \u{2022} Corrective action recommendations<br>
+                                \u{2022} Export capabilities for documentation
                             </div>
                         </div>
                     </div>
@@ -429,8 +429,8 @@ labcontrolchartsClass <- R6::R6Class(
 
             metrics_data <- data.frame(
                 metric = c(
-                    "ARL (in-control)", "ARL (1σ shift)", "Power (1σ shift)",
-                    "Power (2σ shift)", "False Alarm Rate", "Sigma Level"
+                    "ARL (in-control)", "ARL (1\u{03C3} shift)", "Power (1\u{03C3} shift)",
+                    "Power (2\u{03C3} shift)", "False Alarm Rate", "Sigma Level"
                 ),
                 value = c(
                     arl_in_control, arl_1sigma, power_1sigma * 100,
@@ -439,12 +439,12 @@ labcontrolchartsClass <- R6::R6Class(
                 interpretation = c(
                     sprintf("Expected %.0f runs between false alarms", arl_in_control),
                     sprintf("Shift detected in ~%.0f runs", arl_1sigma),
-                    sprintf("%.1f%% chance to detect 1σ shift", power_1sigma * 100),
-                    sprintf("%.1f%% chance to detect 2σ shift", power_2sigma * 100),
+                    sprintf("%.1f%% chance to detect 1\u{03C3} shift", power_1sigma * 100),
+                    sprintf("%.1f%% chance to detect 2\u{03C3} shift", power_2sigma * 100),
                     sprintf("%.2f%% false positive rate", (1 - p_in_control) * 100),
                     "Using 3-sigma control limits"
                 ),
-                acceptable_range = c(">200", "<10", ">50%", ">90%", "<1%", "2-3σ"),
+                acceptable_range = c(">200", "<10", ">50%", ">90%", "<1%", "2-3\u{03C3}"),
                 stringsAsFactors = FALSE
             )
 
@@ -534,10 +534,10 @@ labcontrolchartsClass <- R6::R6Class(
             westgard_data <- data.frame(
                 rule = c("13s", "22s", "R4s", "41s", "10x"),
                 description = c(
-                    "One control exceeds mean ± 3SD",
-                    "Two consecutive controls exceed mean ± 2SD (same side)",
+                    "One control exceeds mean \u{00B1} 3SD",
+                    "Two consecutive controls exceed mean \u{00B1} 2SD (same side)",
                     "Range between consecutive controls exceeds 4SD",
-                    "Four consecutive controls exceed mean ± 1SD (same side)",
+                    "Four consecutive controls exceed mean \u{00B1} 1SD (same side)",
                     "Ten consecutive controls fall on same side of mean"
                 ),
                 error_detected = c(
@@ -578,57 +578,57 @@ labcontrolchartsClass <- R6::R6Class(
                     <div class='formula'>
                         <h4>Control Chart Formulas</h4>
                         <b>Shewhart Chart:</b><br>
-                        UCL = μ + 3σ, LCL = μ - 3σ<br>
-                        UWL = μ + 2σ, LWL = μ - 2σ<br><br>
+                        UCL = \u{03BC} + 3\u{03C3}, LCL = \u{03BC} - 3\u{03C3}<br>
+                        UWL = \u{03BC} + 2\u{03C3}, LWL = \u{03BC} - 2\u{03C3}<br><br>
 
                         <b>CUSUM Chart:</b><br>
-                        C⁺ᵢ = max(0, xᵢ - (μ₀ + k) + C⁺ᵢ₋₁)<br>
-                        C⁻ᵢ = max(0, (μ₀ - k) - xᵢ + C⁻ᵢ₋₁)<br><br>
+                        C\u{207A}\u{1D62} = max(0, x\u{1D62} - (\u{03BC}\u{2080} + k) + C\u{207A}\u{1D62}\u{208B}\u{2081})<br>
+                        C\u{207B}\u{1D62} = max(0, (\u{03BC}\u{2080} - k) - x\u{1D62} + C\u{207B}\u{1D62}\u{208B}\u{2081})<br><br>
 
                         <b>EWMA Chart:</b><br>
-                        zᵢ = λxᵢ + (1 - λ)zᵢ₋₁<br>
-                        UCL = μ₀ + L·σ·√(λ/(2-λ)[1-(1-λ)²ⁱ])
+                        z\u{1D62} = \u{03BB}x\u{1D62} + (1 - \u{03BB})z\u{1D62}\u{208B}\u{2081}<br>
+                        UCL = \u{03BC}\u{2080} + L\u{00B7}\u{03C3}\u{00B7}\u{221A}(\u{03BB}/(2-\u{03BB})[1-(1-\u{03BB})\u{00B2}\u{2071}])
                     </div>
 
                     <div class='interpretation'>
                         <h4>Westgard Multi-Rule System</h4>
                         <b>Common Rules:</b><br>
-                        • <b>1₃ₛ:</b> Warning rule - one control exceeds ±3SD<br>
-                        • <b>2₂ₛ:</b> Reject rule - two consecutive controls exceed ±2SD (same side)<br>
-                        • <b>R₄ₛ:</b> Reject rule - range exceeds 4SD within run<br>
-                        • <b>4₁ₛ:</b> Reject rule - four consecutive exceed ±1SD (same side)<br>
-                        • <b>10ₓ:</b> Reject rule - ten consecutive on same side of mean<br><br>
+                        \u{2022} <b>1\u{2083}\u{209B}:</b> Warning rule - one control exceeds \u{00B1}3SD<br>
+                        \u{2022} <b>2\u{2082}\u{209B}:</b> Reject rule - two consecutive controls exceed \u{00B1}2SD (same side)<br>
+                        \u{2022} <b>R\u{2084}\u{209B}:</b> Reject rule - range exceeds 4SD within run<br>
+                        \u{2022} <b>4\u{2081}\u{209B}:</b> Reject rule - four consecutive exceed \u{00B1}1SD (same side)<br>
+                        \u{2022} <b>10\u{2093}:</b> Reject rule - ten consecutive on same side of mean<br><br>
 
                         <b>Error Detection:</b><br>
-                        • Random errors: 1₃ₛ, R₄ₛ<br>
-                        • Systematic errors: 2₂ₛ, 4₁ₛ, 10ₓ
+                        \u{2022} Random errors: 1\u{2083}\u{209B}, R\u{2084}\u{209B}<br>
+                        \u{2022} Systematic errors: 2\u{2082}\u{209B}, 4\u{2081}\u{209B}, 10\u{2093}
                     </div>
 
                     <div class='clinical'>
                         <h4>Clinical Laboratory Applications</h4>
                         <b>Laboratory Accreditation Requirements:</b><br>
-                        • Regular internal quality control<br>
-                        • Statistical evaluation of QC data<br>
-                        • Defined acceptance criteria<br>
-                        • Corrective action procedures<br><br>
+                        \u{2022} Regular internal quality control<br>
+                        \u{2022} Statistical evaluation of QC data<br>
+                        \u{2022} Defined acceptance criteria<br>
+                        \u{2022} Corrective action procedures<br><br>
 
                         <b>Six Sigma Metrics:</b><br>
-                        • Sigma = (TEa - |Bias|) / CV<br>
-                        • World-class: >=6 sigma<br>
-                        • Excellent: 5-6 sigma<br>
-                        • Good: 4-5 sigma<br>
-                        • Acceptable: 3-4 sigma<br>
-                        • Poor: <3 sigma
+                        \u{2022} Sigma = (TEa - |Bias|) / CV<br>
+                        \u{2022} World-class: >=6 sigma<br>
+                        \u{2022} Excellent: 5-6 sigma<br>
+                        \u{2022} Good: 4-5 sigma<br>
+                        \u{2022} Acceptable: 3-4 sigma<br>
+                        \u{2022} Poor: <3 sigma
                     </div>
 
                     <div class='warning'>
                         <h4>Important Considerations</h4>
-                        • Establish baseline with >=20 data points<br>
-                        • Review control limits monthly<br>
-                        • Document all QC failures and actions<br>
-                        • Consider biological variation in limit setting<br>
-                        • Match QC material to patient samples<br>
-                        • Use appropriate rules for analyte characteristics
+                        \u{2022} Establish baseline with >=20 data points<br>
+                        \u{2022} Review control limits monthly<br>
+                        \u{2022} Document all QC failures and actions<br>
+                        \u{2022} Consider biological variation in limit setting<br>
+                        \u{2022} Match QC material to patient samples<br>
+                        \u{2022} Use appropriate rules for analyte characteristics
                     </div>
                 </div>
                 </body>

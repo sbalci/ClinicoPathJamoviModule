@@ -224,7 +224,7 @@ diagnosticsamplesizeClass <- R6::R6Class(
                 <li>Target population disease prevalence: <strong>%.1f%%</strong></li>
                 <li>Target sensitivity: <strong>%.1f%%</strong> (95%% CI width: %.2f)</li>
                 <li>Target specificity: <strong>%.1f%%</strong> (95%% CI width: %.2f)</li>
-                <li>Significance level (α): <strong>%.2f</strong> (two-sided)</li>
+                <li>Significance level (\u{03B1}): <strong>%.2f</strong> (two-sided)</li>
                 </ul>
 
                 <p><strong>Sample Size Calculations:</strong></p>
@@ -475,21 +475,21 @@ or small sample sizes.</p>
 
 <p><strong>1. Target Sensitivity/Specificity Values</strong></p>
 <ul>
-<li>Lower target values → Larger sample size needed</li>
+<li>Lower target values \u{2192} Larger sample size needed</li>
 <li>Recommendation: 0.95 = excellent, 0.90 = nearly excellent, 0.80 = good, 0.70 = fair</li>
 </ul>
 
 <p><strong>2. Disease Prevalence</strong></p>
 <ul>
-<li>Low prevalence → Larger N for sensitivity estimation (need more diseased cases)</li>
-<li>High prevalence → Larger N for specificity estimation (need more non-diseased cases)</li>
+<li>Low prevalence \u{2192} Larger N for sensitivity estimation (need more diseased cases)</li>
+<li>High prevalence \u{2192} Larger N for specificity estimation (need more non-diseased cases)</li>
 <li>Critical consideration: Prevalence should reflect target population, not general population</li>
 </ul>
 
 <p><strong>3. Desired CI Width</strong></p>
 <ul>
-<li>Narrower width → Larger sample size</li>
-<li>0.05 = very high precision (±2.5%); 0.10 = high precision (±5%); 0.20 = moderate precision (±10%)</li>
+<li>Narrower width \u{2192} Larger sample size</li>
+<li>0.05 = very high precision (\u{00B1}2.5%); 0.10 = high precision (\u{00B1}5%); 0.20 = moderate precision (\u{00B1}10%)</li>
 <li>Recommendation: Use 0.10 for most diagnostic studies, 0.20 for screening studies</li>
 </ul>
 
@@ -506,7 +506,7 @@ or specific N based on screening emphasis</p>
 <h4>Non-Response Adjustment</h4>
 <p>If non-response/dropout is expected, inflate final N:
 <code>N_adjusted = ceiling(N / (1 - non_response_rate))</code></p>
-<p>Example: N=100, 20% non-response → N_adjusted = ceiling(100/0.8) = 125</p>
+<p>Example: N=100, 20% non-response \u{2192} N_adjusted = ceiling(100/0.8) = 125</p>
 "
             self$results$methodology$setContent(html)
         },

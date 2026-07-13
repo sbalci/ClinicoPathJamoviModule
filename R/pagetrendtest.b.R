@@ -45,16 +45,16 @@ pagetrendtestClass <- R6::R6Class(
                             <h3>Statistical Framework</h3>
                             <div class='formula'>
                                 Page's L Statistic:<br/>
-                                L = Σ(i=1 to k) i × Ri<br/><br/>
+                                L = \u{03A3}(i=1 to k) i \u{00D7} Ri<br/><br/>
 
                                 Where:<br/>
-                                • k = number of conditions<br/>
-                                • i = position in predicted ordering<br/>
-                                • Ri = sum of ranks for condition i<br/>
-                                • Higher L indicates stronger trend alignment<br/><br/>
+                                \u{2022} k = number of conditions<br/>
+                                \u{2022} i = position in predicted ordering<br/>
+                                \u{2022} Ri = sum of ranks for condition i<br/>
+                                \u{2022} Higher L indicates stronger trend alignment<br/><br/>
 
-                                Under H0: E[L] = n×k×(k+1)²/4<br/>
-                                Var[L] = n×k²×(k+1)×(k-1)/144
+                                Under H0: E[L] = n\u{00D7}k\u{00D7}(k+1)\u{00B2}/4<br/>
+                                Var[L] = n\u{00D7}k\u{00B2}\u{00D7}(k+1)\u{00D7}(k-1)/144
                             </div>
                         </div>
 

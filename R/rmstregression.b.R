@@ -608,7 +608,7 @@ rmstregressionClass <- R6::R6Class(
                     ggplot2::geom_ribbon(ggplot2::aes(ymin = 0, ymax = survival, fill = group), alpha = 0.3) +
                     ggplot2::geom_vline(xintercept = tau, linetype = "dashed", color = "red") +
                     ggplot2::labs(
-                        title = paste("Survival Curves and RMST Areas (τ =", tau, ")"),
+                        title = paste("Survival Curves and RMST Areas (\u{03C4} =", tau, ")"),
                         x = "Time",
                         y = "Survival Probability",
                         color = "Group",
@@ -641,7 +641,7 @@ rmstregressionClass <- R6::R6Class(
                     ggplot2::geom_ribbon(ggplot2::aes(ymin = 0, ymax = survival), alpha = 0.3, fill = "blue") +
                     ggplot2::geom_vline(xintercept = tau, linetype = "dashed", color = "red") +
                     ggplot2::labs(
-                        title = paste("Survival Curve and RMST Area (τ =", tau, ")"),
+                        title = paste("Survival Curve and RMST Area (\u{03C4} =", tau, ")"),
                         x = "Time",
                         y = "Survival Probability"
                     ) +
@@ -695,9 +695,9 @@ rmstregressionClass <- R6::R6Class(
                 ggplot2::geom_vline(xintercept = tau, linetype = "dotted", color = "green") +
                 ggplot2::labs(
                     title = paste("RMST Difference Over Time:", groups[1], "vs", groups[2]),
-                    x = "Restriction Time (τ)",
+                    x = "Restriction Time (\u{03C4})",
                     y = "RMST Difference",
-                    subtitle = "Green line shows selected τ"
+                    subtitle = "Green line shows selected \u{03C4}"
                 ) +
                 ggplot2::theme_minimal()
             
@@ -714,10 +714,10 @@ rmstregressionClass <- R6::R6Class(
         .initTauSelection = function() {
             table <- self$results$tauSelection
             table$getColumn('method')$setTitle('Method')
-            table$getColumn('tau_selected')$setTitle('Selected τ')
+            table$getColumn('tau_selected')$setTitle('Selected \u{03C4}')
             table$getColumn('rationale')$setTitle('Rationale')
             table$getColumn('followup_pct')$setTitle('Follow-up %')
-            table$getColumn('events_by_tau')$setTitle('Events by τ')
+            table$getColumn('events_by_tau')$setTitle('Events by \u{03C4}')
         },
         
         .initRMSTSummary = function() {
@@ -729,7 +729,7 @@ rmstregressionClass <- R6::R6Class(
             table$getColumn('se')$setTitle('SE')
             table$getColumn('ci_lower')$setTitle('Lower CI')
             table$getColumn('ci_upper')$setTitle('Upper CI')
-            table$getColumn('tau_reached')$setTitle('τ Reached')
+            table$getColumn('tau_reached')$setTitle('\u{03C4} Reached')
         },
         
         .initRMSTDifferences = function() {
@@ -786,7 +786,7 @@ rmstregressionClass <- R6::R6Class(
         
         .addMethodologyExplanation = function(tau) {
             html <- paste0('<h3>Restricted Mean Survival Time (RMST) Analysis</h3>
-                    <p><b>Overview:</b> RMST provides a clinically interpretable summary measure that represents the mean survival time up to a specified time point τ = ', tau, '.</p>
+                    <p><b>Overview:</b> RMST provides a clinically interpretable summary measure that represents the mean survival time up to a specified time point \u{03C4} = ', tau, '.</p>
                     
                     <h4>Method:</h4>
                     <ul>
@@ -796,7 +796,7 @@ rmstregressionClass <- R6::R6Class(
                     </ul>
                     
                     <h4>Interpretation:</h4>
-                    <p><b>RMST (τ = ', tau, '):</b> The expected survival time from 0 to ', tau, ' time units, calculated as the area under the survival curve.</p>
+                    <p><b>RMST (\u{03C4} = ', tau, '):</b> The expected survival time from 0 to ', tau, ' time units, calculated as the area under the survival curve.</p>
                     
                     <h4>Advantages of RMST:</h4>
                     <ul>
@@ -804,7 +804,7 @@ rmstregressionClass <- R6::R6Class(
                     <li>No proportional hazards assumption required</li>
                     <li>Robust to late differences in survival</li>
                     <li>Suitable when curves cross</li>
-                    <li>Accounts for entire follow-up period up to τ</li>
+                    <li>Accounts for entire follow-up period up to \u{03C4}</li>
                     </ul>
                     
                     <h4>Regression Coefficients:</h4>
@@ -824,7 +824,7 @@ rmstregressionClass <- R6::R6Class(
             html <- paste0('<h3>Analysis Summary</h3>
                           <p><b>Sample Size:</b> ', nrow(data), ' observations</p>
                           <p><b>Number of Events:</b> ', sum(data$event), '</p>
-                          <p><b>Restriction Time (τ):</b> ', tau, '</p>')
+                          <p><b>Restriction Time (\u{03C4}):</b> ', tau, '</p>')
             
             if (length(groups) > 1) {
                 html <- paste0(html, '<p><b>Number of Groups:</b> ', length(groups), '</p>

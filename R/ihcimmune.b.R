@@ -721,7 +721,7 @@ ihcimmuneClass <- R6::R6Class(
             } else if (length(detected_presets) > 1) {
                 # Multiple presets detected - show options
                 preset_options <- paste(sapply(names(detected_presets), function(x) {
-                    paste0("• <strong>", detected_presets[[x]]$name, ":</strong> ", detected_presets[[x]]$description)
+                    paste0("\u{2022} <strong>", detected_presets[[x]]$name, ":</strong> ", detected_presets[[x]]$description)
                 }), collapse = "<br>")
 
                 preset_message <- paste0(

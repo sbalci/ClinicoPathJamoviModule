@@ -123,7 +123,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "ERROR",
                         "Empty Dataset",
-                        "Dataset contains no complete rows. • Please check your data for missing values. • Ensure at least one row has complete data before running date validation."
+                        "Dataset contains no complete rows. \u{2022} Please check your data for missing values. \u{2022} Ensure at least one row has complete data before running date validation."
                     )
                     return()
                 }
@@ -152,7 +152,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                             "WARNING",
                             "Missing Optional Packages",
                             sprintf(
-                                'Optional package(s) not found: %s • The selected method "%s" requires these packages. • Falling back to basic date validation (lubridate) where possible. • Please install the full version of the module for advanced date correction features.',
+                                'Optional package(s) not found: %s \u{2022} The selected method "%s" requires these packages. \u{2022} Falling back to basic date validation (lubridate) where possible. \u{2022} Please install the full version of the module for advanced date correction features.',
                                 paste(missing_pkgs, collapse = ", "),
                                 requested_method
                             )
@@ -168,7 +168,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "ERROR",
                         "Date Variables Required",
-                        'Date/DateTime variables are required. • Please select at least one variable containing date or datetime information. • Use the "Date/DateTime Variables to Validate" box in the left panel to add variables.'
+                        'Date/DateTime variables are required. \u{2022} Please select at least one variable containing date or datetime information. \u{2022} Use the "Date/DateTime Variables to Validate" box in the left panel to add variables.'
                     )
                     return()
                 }
@@ -187,7 +187,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                         "ERROR",
                         "Variables Not Found",
                         sprintf(
-                            "Selected variables not found in dataset: %s • Available variables: %s • Check variable names for typos. • Ensure variables are present in the active dataset.",
+                            "Selected variables not found in dataset: %s \u{2022} Available variables: %s \u{2022} Check variable names for typos. \u{2022} Ensure variables are present in the active dataset.",
                             paste(missing_vars, collapse = ", "),
                             available_preview
                         )
@@ -225,12 +225,12 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
 
                     content <- if (success_rate < 70) {
                         sprintf(
-                            'Low date/datetime validation success rate: %.1f%% • Only %d of %d dates/datetimes were successfully parsed. • Clinical analysis may be unreliable with <70%% success rate. • Consider: Using a different validation method (try "consensus"), Reviewing data source for systematic formatting issues, Manual review of failed validations in the audit table, Consulting with data management team.',
+                            'Low date/datetime validation success rate: %.1f%% \u{2022} Only %d of %d dates/datetimes were successfully parsed. \u{2022} Clinical analysis may be unreliable with <70%% success rate. \u{2022} Consider: Using a different validation method (try "consensus"), Reviewing data source for systematic formatting issues, Manual review of failed validations in the audit table, Consulting with data management team.',
                             success_rate, successful_corrections, total_observations
                         )
                     } else {
                         sprintf(
-                            'Moderate date/datetime validation success rate: %.1f%% • %d of %d dates/datetimes were successfully parsed. • Review failed validations in the "Validated Date/DateTime Data" table. • Consider: Trying the "consensus" method for better results, Checking common error patterns in quality assessment, Manual verification of critical dates/datetimes.',
+                            'Moderate date/datetime validation success rate: %.1f%% \u{2022} %d of %d dates/datetimes were successfully parsed. \u{2022} Review failed validations in the "Validated Date/DateTime Data" table. \u{2022} Consider: Trying the "consensus" method for better results, Checking common error patterns in quality assessment, Manual verification of critical dates/datetimes.',
                             success_rate, successful_corrections, total_observations
                         )
                     }
@@ -270,7 +270,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                         "INFO",
                         "Validation Complete",
                         sprintf(
-                            'Date/datetime validation completed successfully. • Processed %d observations across %d variable(s). • Successfully validated %d dates/datetimes (%.1f%%). • Full audit trail available in "Validated Date/DateTime Data" table. • Export table to CSV for documentation or downstream use.',
+                            'Date/datetime validation completed successfully. \u{2022} Processed %d observations across %d variable(s). \u{2022} Successfully validated %d dates/datetimes (%.1f%%). \u{2022} Full audit trail available in "Validated Date/DateTime Data" table. \u{2022} Export table to CSV for documentation or downstream use.',
                             total_observations,
                             length(correction_results),
                             successful_corrections,
@@ -344,7 +344,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                             "WARNING",
                             "Variable All Missing",
                             sprintf(
-                                'Variable "%s" contains only missing values (NA). • No date/datetime validation possible for this variable. • %d row(s) affected. • Consider removing this variable or checking your data source.',
+                                'Variable "%s" contains only missing values (NA). \u{2022} No date/datetime validation possible for this variable. \u{2022} %d row(s) affected. \u{2022} Consider removing this variable or checking your data source.',
                                 var, length(var_data)
                             )
                         )
@@ -614,7 +614,7 @@ datevalidatorClass <- if (requireNamespace("jmvcore")) {
                         "INFO",
                         "Consensus Conflicts Detected",
                         sprintf(
-                            'Consensus method detected %d conflict(s) where date/datetime parsers disagreed. • Using datefixR as primary resolver when conflicts occur. • Review "Method" column in audit table to see affected rows. • Consider specifying exact date/datetime format if conflicts are widespread. • Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
+                            'Consensus method detected %d conflict(s) where date/datetime parsers disagreed. \u{2022} Using datefixR as primary resolver when conflicts occur. \u{2022} Review "Method" column in audit table to see affected rows. \u{2022} Consider specifying exact date/datetime format if conflicts are widespread. \u{2022} Conflicts often indicate ambiguous date formats (e.g., 03/04/2020 could be March 4 or April 3).',
                             conflict_count
                         )
                     )

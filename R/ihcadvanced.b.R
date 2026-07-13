@@ -611,7 +611,7 @@ ihcadvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         } else {
                             "Loose clusters"
                         },
-                        range = "[0, ∞)"
+                        range = "[0, \u{221E})"
                     ),
                     list(
                         metric = "Dunn Index",
@@ -623,7 +623,7 @@ ihcadvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         } else {
                             "Poor separation"
                         },
-                        range = "[0, ∞)"
+                        range = "[0, \u{221E})"
                     )
                 )
 

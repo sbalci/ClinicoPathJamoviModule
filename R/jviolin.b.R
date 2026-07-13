@@ -180,8 +180,8 @@ jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
                     "<b>Violin plots</b> are ideal for visualizing the distribution of continuous data across groups.",
                     "<br><br>",
                     "<b>Required:</b>",
-                    "<br>• Dependent Variable (continuous)",
-                    "<br>• Grouping Variable (categorical)",
+                    "<br>\u{2022} Dependent Variable (continuous)",
+                    "<br>\u{2022} Grouping Variable (categorical)",
                     "<br><hr>"
                 )
                 

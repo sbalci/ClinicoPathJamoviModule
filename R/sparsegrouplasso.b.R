@@ -286,7 +286,7 @@ sparsegrouplassoClass <- R6::R6Class(
             
             if (missing_pct > 10) {
                 missing_text <- paste0("<div style='color: orange; margin-top: 5px;'>",
-                                     "⚠️ <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded.",
+                                     "\u{26A0}\u{FE0F} <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded.",
                                      "</div>")
             }
 
@@ -334,10 +334,10 @@ sparsegrouplassoClass <- R6::R6Class(
                     <div style='margin-top: 10px;'>
                         <b>Assessment:</b><br>",
                         ifelse(epv < 5, 
-                               "<span style='color: red;'>⚠️ <b>High Dimensionality:</b> EPV is very low. Regularization (SGL) is strictly necessary, but results may still be highly unstable.</span>", 
+                               "<span style='color: red;'>\u{26A0}\u{FE0F} <b>High Dimensionality:</b> EPV is very low. Regularization (SGL) is strictly necessary, but results may still be highly unstable.</span>", 
                                ifelse(epv < 10, 
-                                      "<span style='color: orange;'>⚠️ <b>Moderate Dimensionality:</b> SGL will effectively reduce dimensions.</span>",
-                                      "<span style='color: green;'>✓ <b>Adequate Events:</b> Sample size is sufficient for this number of predictors. SGL will focus on variable selection.</span>"
+                                      "<span style='color: orange;'>\u{26A0}\u{FE0F} <b>Moderate Dimensionality:</b> SGL will effectively reduce dimensions.</span>",
+                                      "<span style='color: green;'>\u{2713} <b>Adequate Events:</b> Sample size is sufficient for this number of predictors. SGL will focus on variable selection.</span>"
                                )),
                     "</div>",
                     missing_text,
@@ -1697,7 +1697,7 @@ sparsegrouplassoClass <- R6::R6Class(
                 grp_w <- weights$group[g]
                 combined <- ind_w * grp_w
 
-                rationale <- if (ind_w < 1) "Strong initial effect → less penalty" else "Weak initial effect → more penalty"
+                rationale <- if (ind_w < 1) "Strong initial effect \u{2192} less penalty" else "Weak initial effect \u{2192} more penalty"
 
                 table$addRow(rowKey = var_names[i], values = list(
                     variable = var_names[i],

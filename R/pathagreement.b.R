@@ -2627,7 +2627,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
                     "<li><strong>Sample size:</strong> At least 30 cases recommended for reliable kappa estimates</li>",
                     "<li><strong>Category balance:</strong> Avoid rare categories (<5% of cases) if possible</li>",
-                    "<li><strong>Interpretation:</strong> κ < 0.4 = poor/fair, 0.4-0.6 = moderate, 0.6-0.8 = good, >0.8 = excellent</li>",
+                    "<li><strong>Interpretation:</strong> \u{03BA} < 0.4 = poor/fair, 0.4-0.6 = moderate, 0.6-0.8 = good, >0.8 = excellent</li>",
                     "<li><strong>Clinical context:</strong> Consider the clinical consequences of disagreement when interpreting results</li>",
                     "</ul></div></div>"
                 )
@@ -2755,7 +2755,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</div>",
                     "<div style='background: #f8f8f8; border: 1px solid #ddd; padding: 15px; margin-bottom: 15px;'>",
                     "<h4 style='margin: 0 0 10px 0; color: #333; font-size: 15px;'>Key Findings</h4>",
-                    "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>", method_name, ":</strong> κ = ",
+                    "<p style='margin: 0 0 10px 0; font-size: 14px;'><strong>", method_name, ":</strong> \u{03BA} = ",
                     round(kappa_val, 3), " (", interpretation, ")</p>",
                     if (!is.na(overall_agreement)) {
                         paste0(
@@ -2814,7 +2814,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 # Generate main result sentence
                 main_sentence <- if (!is.na(kappa_val)) {
                     sprintf(
-                        .("Inter-rater agreement was %s (κ = %.3f%s%s), indicating %s reliability for the %d raters evaluating %d cases."),
+                        .("Inter-rater agreement was %s (\u{03BA} = %.3f%s%s), indicating %s reliability for the %d raters evaluating %d cases."),
                         tolower(interpretation),
                         kappa_val,
                         ci_text,
@@ -2939,7 +2939,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "</ul>",
                     "<h4 style='margin: 15px 0 8px 0; color: #333; font-size: 15px;'>Key outputs:</h4>",
                     "<ul style='margin: 0; padding-left: 20px; font-size: 14px;'>",
-                    "<li><strong>Kappa coefficient (κ)</strong> - primary agreement measure corrected for chance</li>",
+                    "<li><strong>Kappa coefficient (\u{03BA})</strong> - primary agreement measure corrected for chance</li>",
                     "<li><strong>95% Confidence intervals</strong> - precision of the agreement estimate</li>",
                     "<li><strong>P-values</strong> - statistical significance testing</li>",
                     "<li><strong>Clinical interpretation</strong> - practical meaning of agreement levels</li>",
@@ -2981,12 +2981,12 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<div style='background: #f8f8f8; padding: 12px; border-radius: 4px; font-size: 14px;'>",
                     "<p style='margin: 0 0 8px 0;'><strong>Kappa Interpretation (Landis & Koch, 1977):</strong></p>",
                     "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
-                    "<li>κ < 0.00: Poor agreement (worse than chance)</li>",
-                    "<li>κ 0.00-0.20: Slight agreement</li>",
-                    "<li>κ 0.21-0.40: Fair agreement</li>",
-                    "<li>κ 0.41-0.60: Moderate agreement</li>",
-                    "<li>κ 0.61-0.80: Substantial agreement</li>",
-                    "<li>κ 0.81-1.00: Almost perfect agreement</li>",
+                    "<li>\u{03BA} < 0.00: Poor agreement (worse than chance)</li>",
+                    "<li>\u{03BA} 0.00-0.20: Slight agreement</li>",
+                    "<li>\u{03BA} 0.21-0.40: Fair agreement</li>",
+                    "<li>\u{03BA} 0.41-0.60: Moderate agreement</li>",
+                    "<li>\u{03BA} 0.61-0.80: Substantial agreement</li>",
+                    "<li>\u{03BA} 0.81-1.00: Almost perfect agreement</li>",
                     "</ul>",
                     "<p style='margin: 0; color: #666; font-style: italic;'>",
                     "Note: Consider clinical consequences when interpreting - higher agreement may be needed for critical diagnoses.</p>",
@@ -3031,12 +3031,12 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<h5 style='margin: 0 0 8px 0; color: #1976d2; font-size: 14px;'> Quadratic/Squared Weighting (",
                     if (current_weighting == "squared") "<span style='background: #c8e6c9; padding: 2px 6px; border-radius: 3px;'>SELECTED</span>" else "Not selected", ")</h5>",
                     "<div style='font-size: 13px; margin-left: 15px;'>",
-                    "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / (k - 1)]²</p>",
+                    "<p style='margin: 0 0 6px 0;'><strong>Formula:</strong> w = 1 - [(i - j) / (k - 1)]\u{00B2}</p>",
                     "<p style='margin: 0 0 6px 0;'><strong>When to use:</strong></p>",
                     "<ul style='margin: 0 0 8px 0; padding-left: 20px;'>",
                     "<li>Large disagreements are disproportionately more serious</li>",
                     "<li>Clinical consequences increase exponentially with distance</li>",
-                    "<li>Example: Disease severity (mild → moderate has different impact than moderate → severe)</li>",
+                    "<li>Example: Disease severity (mild \u{2192} moderate has different impact than moderate \u{2192} severe)</li>",
                     "</ul>",
                     "<p style='margin: 0; color: #666;'><em>Heavily penalizes distant disagreements, lenient on close ones</em></p>",
                     "</div></div>",
@@ -3064,8 +3064,8 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     "<p style='margin: 0 0 8px 0;'><strong>Choose Quadratic weighting when:</strong></p>",
                     "<ul style='margin: 0 0 12px 0; padding-left: 20px;'>",
                     "<li>Diagnosis severity where distant errors are critical</li>",
-                    "<li>Treatment response categories (complete → partial → progressive)</li>",
-                    "<li>Risk stratification (low → intermediate → high)</li>",
+                    "<li>Treatment response categories (complete \u{2192} partial \u{2192} progressive)</li>",
+                    "<li>Risk stratification (low \u{2192} intermediate \u{2192} high)</li>",
                     "</ul>",
                     "<p style='margin: 0; font-weight: 500; color: #d84315;'>",
                     " <em>When in doubt, quadratic weighting is often preferred in medical research as it better reflects clinical reality.</em></p>",
@@ -3097,7 +3097,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     # Cohen's Kappa
                     "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
-                    "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Cohen's Kappa (κ)</h4>",
+                    "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Cohen's Kappa (\u{03BA})</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Agreement between exactly 2 raters, corrected for chance agreement</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> -1 to +1 (0 = chance agreement, 1 = perfect agreement)</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Clinical use:</strong> Most common for comparing two pathologists, radiologists, or clinicians</p>",
@@ -3115,7 +3115,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                     # Krippendorff's Alpha
                     "<div style='border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; background: #fafafa;'>",
-                    "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Krippendorff's Alpha (α)</h4>",
+                    "<h4 style='margin: 0 0 10px 0; color: #1976d2; font-size: 16px;'>Krippendorff's Alpha (\u{03B1})</h4>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>What it measures:</strong> Universal reliability measure for any number of raters and data types</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Range:</strong> 0 to 1 (0 = no agreement, 1 = perfect agreement)</p>",
                     "<p style='margin: 0 0 8px 0; font-size: 14px;'><strong>Clinical use:</strong> Complex studies with missing data, different measurement scales</p>",
@@ -3583,7 +3583,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 results[["2 Raters"]] <- list(
                     n_required = paste0(n_2raters, " cases"),
-                    recommendation = paste0("For κ = ", target_kappa, " with ±", target_precision, " precision")
+                    recommendation = paste0("For \u{03BA} = ", target_kappa, " with \u{00B1}", target_precision, " precision")
                 )
 
                 # For 3 raters (Fleiss' kappa)
@@ -3592,7 +3592,7 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
 
                 results[["3 Raters"]] <- list(
                     n_required = paste0(n_3raters, " cases"),
-                    recommendation = paste0("For Fleiss' κ = ", target_kappa, " with ±", target_precision, " precision")
+                    recommendation = paste0("For Fleiss' \u{03BA} = ", target_kappa, " with \u{00B1}", target_precision, " precision")
                 )
 
                 # Conservative estimate for multiple comparisons
@@ -4357,28 +4357,28 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .generateInterpretationGuide = function() {
                 guides <- c(
                     "<strong>Kappa Interpretation (Landis & Koch):</strong>",
-                    "• 0.00-0.20: Slight agreement",
-                    "• 0.21-0.40: Fair agreement",
-                    "• 0.41-0.60: Moderate agreement",
-                    "• 0.61-0.80: Substantial agreement",
-                    "• 0.81-1.00: Almost perfect agreement",
+                    "\u{2022} 0.00-0.20: Slight agreement",
+                    "\u{2022} 0.21-0.40: Fair agreement",
+                    "\u{2022} 0.41-0.60: Moderate agreement",
+                    "\u{2022} 0.61-0.80: Substantial agreement",
+                    "\u{2022} 0.81-1.00: Almost perfect agreement",
                     "",
                     if (self$options$gwetAC) {
                         c(
                             "<strong>Gwet's AC vs Kappa:</strong>",
-                            "• AC coefficients are less affected by prevalence imbalance",
-                            "• Often higher than kappa in high-agreement scenarios",
-                            "• AC1 assumes uniform category distribution",
-                            "• AC2 accounts for actual marginal distributions"
+                            "\u{2022} AC coefficients are less affected by prevalence imbalance",
+                            "\u{2022} Often higher than kappa in high-agreement scenarios",
+                            "\u{2022} AC1 assumes uniform category distribution",
+                            "\u{2022} AC2 accounts for actual marginal distributions"
                         )
                     } else {
                         NULL
                     },
                     "",
                     "<strong>Clinical Significance:</strong>",
-                    "• Values >0.60 generally acceptable for clinical decisions",
-                    "• Values >0.80 excellent for critical diagnoses",
-                    "• Consider confidence intervals - wide CIs suggest instability"
+                    "\u{2022} Values >0.60 generally acceptable for clinical decisions",
+                    "\u{2022} Values >0.80 excellent for critical diagnoses",
+                    "\u{2022} Consider confidence intervals - wide CIs suggest instability"
                 )
 
                 return(paste(guides[!sapply(guides, is.null)], collapse = "<br>"))
@@ -4388,33 +4388,33 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .generateEducationalInsights = function() {
                 insights <- c(
                     " <strong>Why Agreement Matters:</strong>",
-                    "• Ensures consistent patient care across different clinicians",
-                    "• Validates diagnostic criteria and protocols",
-                    "• Identifies training needs and calibration opportunities",
-                    "• Essential for research reproducibility and multi-center studies",
+                    "\u{2022} Ensures consistent patient care across different clinicians",
+                    "\u{2022} Validates diagnostic criteria and protocols",
+                    "\u{2022} Identifies training needs and calibration opportunities",
+                    "\u{2022} Essential for research reproducibility and multi-center studies",
                     "",
                     " <strong>Advanced Features Explained:</strong>",
                     if (self$options$agreementStabilityAnalysis) {
-                        "• <em>Stability Analysis:</em> Bootstrap resampling assesses how consistent your agreement statistics would be with different case samples."
+                        "\u{2022} <em>Stability Analysis:</em> Bootstrap resampling assesses how consistent your agreement statistics would be with different case samples."
                     } else {
                         NULL
                     },
                     if (self$options$agreementTrendAnalysis) {
-                        "• <em>Trend Analysis:</em> Tracks whether agreement improves over case sequence - useful for detecting learning effects or fatigue."
+                        "\u{2022} <em>Trend Analysis:</em> Tracks whether agreement improves over case sequence - useful for detecting learning effects or fatigue."
                     } else {
                         NULL
                     },
                     if (self$options$sampleSizePlanning) {
-                        "• <em>Sample Size Planning:</em> Helps design future studies with adequate power to detect meaningful agreement levels."
+                        "\u{2022} <em>Sample Size Planning:</em> Helps design future studies with adequate power to detect meaningful agreement levels."
                     } else {
                         NULL
                     },
                     "",
                     " <strong>Best Practices:</strong>",
-                    "• Pre-specify agreement thresholds before data collection",
-                    "• Use multiple agreement measures for comprehensive assessment",
-                    "• Consider clinical context when interpreting statistical significance",
-                    "• Regular calibration sessions improve and maintain agreement"
+                    "\u{2022} Pre-specify agreement thresholds before data collection",
+                    "\u{2022} Use multiple agreement measures for comprehensive assessment",
+                    "\u{2022} Consider clinical context when interpreting statistical significance",
+                    "\u{2022} Regular calibration sessions improve and maintain agreement"
                 )
 
                 return(paste(insights[!sapply(insights, is.null)], collapse = "<br>"))
@@ -4424,16 +4424,16 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
             .generateImportantConsiderations = function() {
                 considerations <- c(
                     " <strong>Statistical Assumptions:</strong>",
-                    "• Raters should be independent (no collaboration during rating)",
-                    "• Cases should be representative of the target population",
-                    "• Missing data patterns may affect results",
-                    "• Category definitions should be clear and consistent",
+                    "\u{2022} Raters should be independent (no collaboration during rating)",
+                    "\u{2022} Cases should be representative of the target population",
+                    "\u{2022} Missing data patterns may affect results",
+                    "\u{2022} Category definitions should be clear and consistent",
                     "",
                     " <strong>Clinical Interpretation:</strong>",
-                    "• High statistical agreement ≠ automatically clinically acceptable",
-                    "• Consider consequence of disagreements in your specific context",
-                    "• Some diagnostic categories may inherently have lower agreement",
-                    "• Training and protocols can improve agreement over time",
+                    "\u{2022} High statistical agreement \u{2260} automatically clinically acceptable",
+                    "\u{2022} Consider consequence of disagreements in your specific context",
+                    "\u{2022} Some diagnostic categories may inherently have lower agreement",
+                    "\u{2022} Training and protocols can improve agreement over time",
                     "",
                     if (private$.data_matrix %>% nrow() < 30) {
                         " <strong>Sample Size Note:</strong> Small sample sizes may produce unstable agreement estimates. Consider collecting additional data for more reliable results."
@@ -4442,10 +4442,10 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                     },
                     "",
                     " <strong>Next Steps:</strong>",
-                    "• Review cases with poor agreement for learning opportunities",
-                    "• Consider whether disagreements reveal protocol ambiguities",
-                    "• Plan follow-up calibration sessions if agreement is suboptimal",
-                    "• Document agreement thresholds in your research protocols"
+                    "\u{2022} Review cases with poor agreement for learning opportunities",
+                    "\u{2022} Consider whether disagreements reveal protocol ambiguities",
+                    "\u{2022} Plan follow-up calibration sessions if agreement is suboptimal",
+                    "\u{2022} Document agreement thresholds in your research protocols"
                 )
 
                 return(paste(considerations[!sapply(considerations, is.null)], collapse = "<br>"))

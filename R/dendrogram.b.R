@@ -797,7 +797,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     badVars <- names(clusterData)[nonBinary]
                     result$ok <- FALSE
                     result$message <- jmvcore::format(
-                        'Binary distance requires variables coded as 0/1 only. • Non-binary values detected in: {vars}. • Please recode variables to binary (0/1) or select a different distance method (e.g., Euclidean, Manhattan).',
+                        'Binary distance requires variables coded as 0/1 only. \u{2022} Non-binary values detected in: {vars}. \u{2022} Please recode variables to binary (0/1) or select a different distance method (e.g., Euclidean, Manhattan).',
                         vars = paste(badVars, collapse = ", ")
                     )
                     return(result)
@@ -1097,7 +1097,7 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 result$message <- jmvcore::format(
-                    'Invalid distance/linkage combination: {method} clustering requires Euclidean distance. • Current distance: {dist}. • Why this matters: {reason} • Solutions: Change distance to Euclidean, OR change clustering to Complete/Average/Single linkage.',
+                    'Invalid distance/linkage combination: {method} clustering requires Euclidean distance. \u{2022} Current distance: {dist}. \u{2022} Why this matters: {reason} \u{2022} Solutions: Change distance to Euclidean, OR change clustering to Complete/Average/Single linkage.',
                     method = clusterMethod,
                     dist = distanceMethod,
                     reason = reason

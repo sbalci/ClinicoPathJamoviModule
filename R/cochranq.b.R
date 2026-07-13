@@ -43,15 +43,15 @@ cochranqClass <- R6::R6Class(
                             <h3>Statistical Framework</h3>
                             <div class='formula'>
                                 Cochran's Q Statistic:<br/>
-                                Q = k(k-1) * [Σ(Tj)² - (ΣΣXij)²] / [k*ΣΣXij - Σ(Ri)²]<br/><br/>
+                                Q = k(k-1) * [\u{03A3}(Tj)\u{00B2} - (\u{03A3}\u{03A3}Xij)\u{00B2}] / [k*\u{03A3}\u{03A3}Xij - \u{03A3}(Ri)\u{00B2}]<br/><br/>
 
                                 Where:<br/>
-                                • k = number of treatments/time points<br/>
-                                • Tj = sum of successes for treatment j<br/>
-                                • Ri = sum of successes for subject i<br/>
-                                • Xij = response for subject i at treatment j<br/><br/>
+                                \u{2022} k = number of treatments/time points<br/>
+                                \u{2022} Tj = sum of successes for treatment j<br/>
+                                \u{2022} Ri = sum of successes for subject i<br/>
+                                \u{2022} Xij = response for subject i at treatment j<br/><br/>
 
-                                Under H0: Q ~ χ²(k-1)
+                                Under H0: Q ~ \u{03C7}\u{00B2}(k-1)
                             </div>
                         </div>
 

@@ -210,7 +210,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
                     private$.addNotice(
                         "WARNING", "Small Sample Size",
                         sprintf(
-                            "Sample size (%d observations) is less than 3× the number of variables (%d). PCA results may be unstable. Ideally n >= %d.",
+                            "Sample size (%d observations) is less than 3\u{00D7} the number of variables (%d). PCA results may be unstable. Ideally n >= %d.",
                             n_obs, n_vars, 5 * n_vars
                         )
                     )
@@ -268,7 +268,7 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
                     "<br>Center: {ifelse(self$options$center, 'Yes', 'No')} | Scale: {ifelse(self$options$scale, 'Yes', 'No')}",
                     "<br>Components displayed: PC1 - PC{ncomp_used} (requested {self$options$ncomp}, available {ncomp_available})",
                     "<br>Variance explained: {var_fmt}",
-                    "<br>{cum_var_fmt} | Cutoff: ±{self$options$cutoff}",
+                    "<br>{cum_var_fmt} | Cutoff: \u{00B1}{self$options$cutoff}",
                     "<br><hr>"
                 )
 

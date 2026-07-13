@@ -392,7 +392,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Cramér's V
                         row <- list(
-                            measure = "Cramér's V",
+                            measure = "Cram\u{00E9}r's V",
                             value = round(cramers_v, 4),
                             ci_lower = NA,
                             ci_upper = NA,
@@ -809,11 +809,11 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Chi-square test:</strong> Use when all expected frequencies >= 5</li>")
                 html <- paste0(html, "<li><strong>Fisher's exact test:</strong> Use for small samples or when expected frequencies < 5</li>")
-                html <- paste0(html, "<li><strong>Yates correction:</strong> Apply for 2×2 tables with small samples</li>")
+                html <- paste0(html, "<li><strong>Yates correction:</strong> Apply for 2\u{00D7}2 tables with small samples</li>")
                 html <- paste0(html, "</ul>")
 
                 html <- paste0(html, "<h4>Effect Size Interpretation</h4>")
-                html <- paste0(html, "<p><strong>Cramér's V:</strong></p>")
+                html <- paste0(html, "<p><strong>Cram\u{00E9}r's V:</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li>< 0.1: Negligible association</li>")
                 html <- paste0(html, "<li>0.1-0.3: Weak association</li>")
@@ -821,7 +821,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 html <- paste0(html, "<li>> 0.5: Strong association</li>")
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Phi coefficient (2×2 tables):</strong></p>")
+                html <- paste0(html, "<p><strong>Phi coefficient (2\u{00D7}2 tables):</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li>< 0.1: Negligible</li>")
                 html <- paste0(html, "<li>0.1-0.3: Small</li>")
@@ -889,7 +889,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 table$addColumn(name = "expected", title = "Expected", type = "number")
                 table$addColumn(name = "std_residual", title = "Std Residual", type = "number")
                 table$addColumn(name = "adj_residual", title = "Adj Residual", type = "number")
-                table$addColumn(name = "contribution", title = "Chi² Contribution", type = "number")
+                table$addColumn(name = "contribution", title = "Chi\u{00B2} Contribution", type = "number")
                 table$addColumn(name = "interpretation", title = "Interpretation", type = "text")
             },
             .initPostHocTable = function() {
@@ -928,14 +928,14 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "</ul>",
                     "<h3>Effect Sizes</h3>",
                     "<ul>",
-                    "<li><strong>Phi coefficient:</strong> For 2×2 tables only</li>",
-                    "<li><strong>Cramér's V:</strong> For any size contingency table</li>",
+                    "<li><strong>Phi coefficient:</strong> For 2\u{00D7}2 tables only</li>",
+                    "<li><strong>Cram\u{00E9}r's V:</strong> For any size contingency table</li>",
                     "<li><strong>Cohen's w:</strong> Effect size for chi-square test</li>",
                     "<li><strong>Contingency coefficient:</strong> Alternative association measure</li>",
                     "</ul>",
                     "<h3>Advanced Features</h3>",
                     "<p><strong>Residual Analysis:</strong> Identifies cells that contribute most to the association</p>",
-                    "<p><strong>Post Hoc Tests:</strong> Pairwise comparisons for tables larger than 2×2</p>",
+                    "<p><strong>Post Hoc Tests:</strong> Pairwise comparisons for tables larger than 2\u{00D7}2</p>",
                     "<p><strong>Association Measures:</strong> Lambda, Tau, Gamma for predictive power and ordinal associations</p>"
                 )
 

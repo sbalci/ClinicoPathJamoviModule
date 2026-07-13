@@ -260,15 +260,15 @@ ppvClass <- R6::R6Class(
                 "<h4 style='margin-top: 0;'> Study Parameters Used</h4>",
                 "<ul style='margin: 5px 0;'>",
                 "<li><strong>Prior probability of true hypotheses:</strong> ", self$options$percTrue, "%</li>",
-                "<li><strong>Significance level (α):</strong> ", self$options$alpha, "</li>",
+                "<li><strong>Significance level (\u{03B1}):</strong> ", self$options$alpha, "</li>",
                 "<li><strong>Statistical power:</strong> ", self$options$power, "</li>",
                 "<li><strong>Percentage of p-hacked studies:</strong> ", self$options$percHack, "%</li>",
                 "</ul>",
                 "<p style='margin-top: 15px; padding: 10px; background-color: #fff; border-left: 4px solid #ffc107; font-size: 0.9em;'>",
                 "<strong>Reference:</strong> Ioannidis, J. P. (2005). Why most published research findings are false. ",
                 "<em>PLoS Medicine</em>, 2(8), e124. ",
-                "<br><strong>Formula:</strong> PPV = (Power × R + u × β × R) / (R + α - β × R + u - u × α + u × β × R)",
-                "<br>where R = prior odds, u = bias factor, β = Type II error rate",
+                "<br><strong>Formula:</strong> PPV = (Power \u{00D7} R + u \u{00D7} \u{03B2} \u{00D7} R) / (R + \u{03B1} - \u{03B2} \u{00D7} R + u - u \u{00D7} \u{03B1} + u \u{00D7} \u{03B2} \u{00D7} R)",
+                "<br>where R = prior odds, u = bias factor, \u{03B2} = Type II error rate",
                 "</p>",
                 "</div>"
             )

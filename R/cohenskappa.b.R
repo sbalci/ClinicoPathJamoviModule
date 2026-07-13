@@ -45,12 +45,12 @@ cohenskappaClass <- R6::R6Class(
             <br>
             <b>Kappa Interpretation (Landis & Koch):</b>
             <ul>
-            <li><b>κ < 0.00:</b> Poor agreement</li>
-            <li><b>κ 0.00-0.20:</b> Slight agreement</li>
-            <li><b>κ 0.21-0.40:</b> Fair agreement</li>
-            <li><b>κ 0.41-0.60:</b> Moderate agreement</li>
-            <li><b>κ 0.61-0.80:</b> Substantial agreement</li>
-            <li><b>κ 0.81-1.00:</b> Almost perfect agreement</li>
+            <li><b>\u{03BA} < 0.00:</b> Poor agreement</li>
+            <li><b>\u{03BA} 0.00-0.20:</b> Slight agreement</li>
+            <li><b>\u{03BA} 0.21-0.40:</b> Fair agreement</li>
+            <li><b>\u{03BA} 0.41-0.60:</b> Moderate agreement</li>
+            <li><b>\u{03BA} 0.61-0.80:</b> Substantial agreement</li>
+            <li><b>\u{03BA} 0.81-1.00:</b> Almost perfect agreement</li>
             </ul>
 
             <br>
@@ -497,10 +497,10 @@ cohenskappaClass <- R6::R6Class(
 
                     <h4>Clinical Applications</h4>
                     <ul>
-                    <li><b>Diagnostic Agreement:</b> κ >= 0.60 typically acceptable for clinical diagnosis</li>
-                    <li><b>Grading Systems:</b> κ >= 0.80 preferred for critical grading decisions</li>
-                    <li><b>Quality Assurance:</b> κ >= 0.70 often required for certification purposes</li>
-                    <li><b>Research Studies:</b> κ >= 0.60 generally acceptable, κ >= 0.80 preferred</li>
+                    <li><b>Diagnostic Agreement:</b> \u{03BA} >= 0.60 typically acceptable for clinical diagnosis</li>
+                    <li><b>Grading Systems:</b> \u{03BA} >= 0.80 preferred for critical grading decisions</li>
+                    <li><b>Quality Assurance:</b> \u{03BA} >= 0.70 often required for certification purposes</li>
+                    <li><b>Research Studies:</b> \u{03BA} >= 0.60 generally acceptable, \u{03BA} >= 0.80 preferred</li>
                     </ul>
 
                     <h4>Sample Size Considerations</h4>
@@ -520,14 +520,14 @@ cohenskappaClass <- R6::R6Class(
 
                 <h4>Cohen's Kappa Methodology</h4>
                 <p>Cohen's kappa measures inter-rater agreement for categorical items, correcting for agreement that could occur by chance alone:</p>
-                <p><b>κ = (P<sub>o</sub> - P<sub>e</sub>) / (1 - P<sub>e</sub>)</b></p>
+                <p><b>\u{03BA} = (P<sub>o</sub> - P<sub>e</sub>) / (1 - P<sub>e</sub>)</b></p>
                 <p>Where P<sub>o</sub> is observed agreement and P<sub>e</sub> is expected agreement by chance.</p>
 
                 <h4>Weighted Kappa</h4>
                 <p>For ordinal data, weighted kappa accounts for the degree of disagreement:</p>
                 <ul>
                 <li><b>Linear weights:</b> w<sub>ij</sub> = 1 - |i-j|/(k-1)</li>
-                <li><b>Quadratic weights:</b> w<sub>ij</sub> = 1 - (i-j)²/(k-1)²</li>
+                <li><b>Quadratic weights:</b> w<sub>ij</sub> = 1 - (i-j)\u{00B2}/(k-1)\u{00B2}</li>
                 </ul>
 
                 <h4>Assumptions</h4>

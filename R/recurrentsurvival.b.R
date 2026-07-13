@@ -757,18 +757,18 @@ recurrentsurvivalClass <- R6::R6Class(
                     detailed_msg <- paste(
                         "Data preparation error:", error_msg,
                         "\n\nSuggestions:",
-                        "• Verify subject_id variable uniquely identifies subjects",
-                        "• Ensure event times are numeric and non-negative",
-                        "• Check terminal event and status variables if provided"
+                        "\u{2022} Verify subject_id variable uniquely identifies subjects",
+                        "\u{2022} Ensure event times are numeric and non-negative",
+                        "\u{2022} Check terminal event and status variables if provided"
                     )
                 } else if (grepl("convergence|iteration", error_msg, ignore.case = TRUE)) {
                     detailed_msg <- paste(
                         "Model convergence failed:", error_msg,
                         "\n\nSuggestions:",
-                        "• Try different model type",
-                        "• Reduce number of covariates",
-                        "• Check for data quality issues",
-                        "• Increase max_iterations"
+                        "\u{2022} Try different model type",
+                        "\u{2022} Reduce number of covariates",
+                        "\u{2022} Check for data quality issues",
+                        "\u{2022} Increase max_iterations"
                     )
                 } else {
                     detailed_msg <- paste("reReg model fitting failed:", error_msg)

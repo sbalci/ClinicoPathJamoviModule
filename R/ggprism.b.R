@@ -721,7 +721,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
 
                     test_stat <- round(kw_result$statistic, 4)
                     p_value <- round(kw_result$p.value, 4)
-                    test_details <- paste0("χ² = ", test_stat, ", df = ", kw_result$parameter)
+                    test_details <- paste0("\u{03C7}\u{00B2} = ", test_stat, ", df = ", kw_result$parameter)
                 }
 
                 # Format p-value based on user preference
@@ -1198,7 +1198,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                             "<ul>",
                             "<li><strong>Center line:</strong> Median (50th percentile)</li>",
                             "<li><strong>Box edges:</strong> 25th and 75th percentiles (interquartile range)</li>",
-                            "<li><strong>Whiskers:</strong> Range of typical values (within 1.5 × IQR)</li>",
+                            "<li><strong>Whiskers:</strong> Range of typical values (within 1.5 \u{00D7} IQR)</li>",
                             "<li><strong>Points beyond whiskers:</strong> Potential outliers</li>",
                             "</ul>",
                             "<p><strong>Clinical Use:</strong> Robust summary that's not affected by extreme values.</p>"

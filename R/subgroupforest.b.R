@@ -402,7 +402,7 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     interpretation = if (p_heterogeneity < 0.05) {
                         "Significant heterogeneity detected"
                     } else if (I_squared > 50) {
-                        "Moderate heterogeneity (I² > 50%)"
+                        "Moderate heterogeneity (I\u{00B2} > 50%)"
                     } else {
                         "Low heterogeneity"
                     }

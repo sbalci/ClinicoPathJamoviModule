@@ -35,21 +35,21 @@ betabinomialdiagnosticClass <- R6::R6Class(
                         <div class='section'>
                             <b>Required:</b>
                             <div class='list'>
-                                • Test Result Variable (diagnostic test outcome)<br>
-                                • Disease Status Variable (gold standard)<br>
-                                • Study/Center ID (for multiple studies)
+                                \u{2022} Test Result Variable (diagnostic test outcome)<br>
+                                \u{2022} Disease Status Variable (gold standard)<br>
+                                \u{2022} Study/Center ID (for multiple studies)
                             </div>
                         </div>
                         <div class='section'>
                             <b>Key Features:</b>
                             <div class='list'>
-                                • Beta-binomial overdispersion models<br>
-                                • Logit-normal and probit-normal random effects<br>
-                                • Correlated sensitivity-specificity modeling<br>
-                                • Hierarchical Bayesian estimation<br>
-                                • Publication bias assessment<br>
-                                • Influence diagnostics<br>
-                                • Summary ROC curves with confidence regions
+                                \u{2022} Beta-binomial overdispersion models<br>
+                                \u{2022} Logit-normal and probit-normal random effects<br>
+                                \u{2022} Correlated sensitivity-specificity modeling<br>
+                                \u{2022} Hierarchical Bayesian estimation<br>
+                                \u{2022} Publication bias assessment<br>
+                                \u{2022} Influence diagnostics<br>
+                                \u{2022} Summary ROC curves with confidence regions
                             </div>
                         </div>
                     </div>
@@ -73,13 +73,13 @@ betabinomialdiagnosticClass <- R6::R6Class(
                     <h3>Beta-Binomial Diagnostic Accuracy Models</h3>
                     <div class='formula'>
                         <b>Beta-Binomial Model:</b><br>
-                        Y_i ~ BetaBinomial(n_i, π_i, φ)<br>
-                        logit(π_i) = X_i β + u_i<br>
-                        u_i ~ N(0, τ²)<br><br>
+                        Y_i ~ BetaBinomial(n_i, \u{03C0}_i, \u{03C6})<br>
+                        logit(\u{03C0}_i) = X_i \u{03B2} + u_i<br>
+                        u_i ~ N(0, \u{03C4}\u{00B2})<br><br>
                         <b>Overdispersion Parameter:</b><br>
-                        φ = α + β (shape parameters)<br>
-                        Var(Y_i) = n_i π_i (1-π_i) [1 + (n_i-1)ρ]<br>
-                        ρ = 1/(1 + φ) (intraclass correlation)
+                        \u{03C6} = \u{03B1} + \u{03B2} (shape parameters)<br>
+                        Var(Y_i) = n_i \u{03C0}_i (1-\u{03C0}_i) [1 + (n_i-1)\u{03C1}]<br>
+                        \u{03C1} = 1/(1 + \u{03C6}) (intraclass correlation)
                     </div>
                     <div class='interpretation'>
                         <b>Interpretation:</b> Beta-binomial models account for overdispersion in diagnostic 
@@ -365,7 +365,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
             spec_phi <- spec_alpha + spec_beta
             
             overdispersion_table$addRow(rowKey = "sens_alpha", values = list(
-                parameter = "Sensitivity α",
+                parameter = "Sensitivity \u{03B1}",
                 estimate = sens_alpha,
                 se = sqrt(sens_alpha),  # Simplified
                 lower_ci = max(0.01, sens_alpha - 1.96 * sqrt(sens_alpha)),
@@ -374,7 +374,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
             ))
             
             overdispersion_table$addRow(rowKey = "sens_beta", values = list(
-                parameter = "Sensitivity β", 
+                parameter = "Sensitivity \u{03B2}", 
                 estimate = sens_beta,
                 se = sqrt(sens_beta),  # Simplified
                 lower_ci = max(0.01, sens_beta - 1.96 * sqrt(sens_beta)),
@@ -383,7 +383,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
             ))
             
             overdispersion_table$addRow(rowKey = "sens_phi", values = list(
-                parameter = "Sensitivity φ",
+                parameter = "Sensitivity \u{03C6}",
                 estimate = sens_phi,
                 se = sqrt(sens_phi),  # Simplified
                 lower_ci = max(0.01, sens_phi - 1.96 * sqrt(sens_phi)),
@@ -393,7 +393,7 @@ betabinomialdiagnosticClass <- R6::R6Class(
             
             # Similar for specificity
             overdispersion_table$addRow(rowKey = "spec_phi", values = list(
-                parameter = "Specificity φ",
+                parameter = "Specificity \u{03C6}",
                 estimate = spec_phi,
                 se = sqrt(spec_phi),  # Simplified  
                 lower_ci = max(0.01, spec_phi - 1.96 * sqrt(spec_phi)),

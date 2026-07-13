@@ -279,7 +279,7 @@ assayoptimizationClass <- R6::R6Class(
                     html <- paste0(html, "<tr><td><b>Current Power:</b></td><td>", round(current_power, 3), "</td></tr>")
                     html <- paste0(html, "<tr><td><b>Required Sample Size:</b></td><td>", ceiling(required_n), "</td></tr>")
                     html <- paste0(html, "<tr><td><b>Target Power:</b></td><td>", power_level, "</td></tr>")
-                    html <- paste0(html, "<tr><td><b>Effect Size (f²):</b></td><td>", round(effect_size^2, 3), "</td></tr>")
+                    html <- paste0(html, "<tr><td><b>Effect Size (f\u{00B2}):</b></td><td>", round(effect_size^2, 3), "</td></tr>")
                     html <- paste0(html, "<tr><td><b>Significance Level:</b></td><td>", alpha_level, "</td></tr>")
                     html <- paste0(html, "</table>")
                     
@@ -449,9 +449,9 @@ assayoptimizationClass <- R6::R6Class(
                 
                 # Effect sizes (eta-squared)
                 total_ss <- sum(anova_result$"Sum Sq")
-                html <- paste0(html, "<h4>Effect Sizes (η²)</h4>")
+                html <- paste0(html, "<h4>Effect Sizes (\u{03B7}\u{00B2})</h4>")
                 html <- paste0(html, "<table class='jamovi-table'>")
-                html <- paste0(html, "<tr><th>Factor</th><th>η²</th><th>Interpretation</th></tr>")
+                html <- paste0(html, "<tr><th>Factor</th><th>\u{03B7}\u{00B2}</th><th>Interpretation</th></tr>")
                 
                 for (i in 1:(nrow(anova_result) - 1)) {
                     factor_name <- rownames(anova_result)[i]

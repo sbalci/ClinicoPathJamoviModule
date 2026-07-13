@@ -563,10 +563,10 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<br>Welcome to ClinicoPath Robust Correlation Analysis
                     <br><br>
                     This tool provides comprehensive robust correlation analysis including:
-                    <br>• Multiple robust correlation methods (Spearman, Kendall, Percentage Bend, etc.)
-                    <br>• Outlier detection and diagnostics
-                    <br>• Bootstrap confidence intervals
-                    <br>• Correlation heatmaps and diagnostic plots
+                    <br>\u{2022} Multiple robust correlation methods (Spearman, Kendall, Percentage Bend, etc.)
+                    <br>\u{2022} Outlier detection and diagnostics
+                    <br>\u{2022} Bootstrap confidence intervals
+                    <br>\u{2022} Correlation heatmaps and diagnostic plots
                     <br><br>
                     Please select at least 2 continuous variables to begin.
                     <br><hr>"

@@ -589,11 +589,11 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 language <- self$options$language %||% "english"
 
                 # Translate labels based on language
-                title_text <- if (language == "turkish") "İHK Skorlama Dağılımı" else "IHC Scoring Distribution"
-                subtitle_text <- if (language == "turkish") "Örnekler boyunca H-skoru ve Allred skorları" else "H-score and Allred scores across samples"
-                x_label <- if (language == "turkish") "Örnek Numarası" else "Sample Number"
-                y_label <- if (language == "turkish") "Skor Değeri" else "Score Value"
-                color_label <- if (language == "turkish") "Skor Türü" else "Score Type"
+                title_text <- if (language == "turkish") "\u{0130}HK Skorlama Da\u{011F}\u{0131}l\u{0131}m\u{0131}" else "IHC Scoring Distribution"
+                subtitle_text <- if (language == "turkish") "\u{00D6}rnekler boyunca H-skoru ve Allred skorlar\u{0131}" else "H-score and Allred scores across samples"
+                x_label <- if (language == "turkish") "\u{00D6}rnek Numaras\u{0131}" else "Sample Number"
+                y_label <- if (language == "turkish") "Skor De\u{011F}eri" else "Score Value"
+                color_label <- if (language == "turkish") "Skor T\u{00FC}r\u{00FC}" else "Score Type"
 
                 # Create distribution plot with accessibility features
                 p <- ggplot2::ggplot(data, ggplot2::aes(x = Sample)) +
@@ -627,8 +627,8 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Translate labels based on language
                 title_text <- if (language == "turkish") "H-skoru vs Allred Skoru Korelasyonu" else "H-score vs Allred Score Correlation"
-                subtitle_text <- if (language == "turkish") "Skorlama yöntemleri arasında korelasyon analizi" else "Correlation analysis between scoring methods"
-                x_label <- if (language == "turkish") "Allred Skoru (ölçeklenmiş)" else "Allred Score (scaled)"
+                subtitle_text <- if (language == "turkish") "Skorlama y\u{00F6}ntemleri aras\u{0131}nda korelasyon analizi" else "Correlation analysis between scoring methods"
+                x_label <- if (language == "turkish") "Allred Skoru (\u{00F6}l\u{00E7}eklenmi\u{015F})" else "Allred Score (scaled)"
                 y_label <- if (language == "turkish") "H-skoru" else "H-score"
 
                 # Create correlation plot with accessibility features
@@ -660,9 +660,9 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Translate labels based on language
                 title_text <- if (language == "turkish") "Uyum Analizi: H-skoru vs Allred" else "Agreement Analysis: H-score vs Allred"
-                subtitle_text <- if (language == "turkish") "Yöntem uyumunu gösteren Bland-Altman stili grafik" else "Bland-Altman style plot showing method agreement"
-                x_label <- if (language == "turkish") "Yöntemlerin Ortalaması" else "Mean of Methods"
-                y_label <- if (language == "turkish") "Fark (H-skoru - Allred ölçekli)" else "Difference (H-score - Allred scaled)"
+                subtitle_text <- if (language == "turkish") "Y\u{00F6}ntem uyumunu g\u{00F6}steren Bland-Altman stili grafik" else "Bland-Altman style plot showing method agreement"
+                x_label <- if (language == "turkish") "Y\u{00F6}ntemlerin Ortalamas\u{0131}" else "Mean of Methods"
+                y_label <- if (language == "turkish") "Fark (H-skoru - Allred \u{00F6}l\u{00E7}ekli)" else "Difference (H-score - Allred scaled)"
 
                 # Create Bland-Altman style agreement plot with accessibility features
                 p <- ggplot2::ggplot(data, ggplot2::aes(x = Mean, y = Difference)) +
@@ -833,7 +833,7 @@ ihcscoringClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 alpha_equivalent <- (2 * correlation) / (1 + correlation)
 
                 rel_table$addRow(rowKey = 1, values = list(
-                    measure = "Method Consistency (α-equivalent)",
+                    measure = "Method Consistency (\u{03B1}-equivalent)",
                     value = alpha_equivalent,
                     ci_lower = alpha_equivalent - 0.1,
                     ci_upper = alpha_equivalent + 0.1,
@@ -2131,7 +2131,7 @@ def segment_nuclei(image_path):
                     "</ul>",
                     "<p><strong>Key Outputs:</strong></p>",
                     "<ul>",
-                    "<li><strong>H-scores:</strong> Weighted intensity × proportion (0-300 scale)</li>",
+                    "<li><strong>H-scores:</strong> Weighted intensity \u{00D7} proportion (0-300 scale)</li>",
                     "<li><strong>Allred scores:</strong> Combined intensity + proportion categories (0-8 scale)</li>",
                     "<li><strong>Binary classification:</strong> Positive/negative based on clinical cutoffs</li>",
                     "<li><strong>Method agreement:</strong> Correlation and reliability statistics</li>",
@@ -2312,7 +2312,7 @@ def segment_nuclei(image_path):
                     "SCORING RESULTS:\n",
                     "---------------\n",
                     "H-score Statistics:\n",
-                    "  Mean ± SD: ", hscore_mean, " ± ", hscore_sd, "\n",
+                    "  Mean \u{00B1} SD: ", hscore_mean, " \u{00B1} ", hscore_sd, "\n",
                     "  Median (IQR): ", hscore_median, " (", hscore_q1, "-", hscore_q3, ")\n",
                     "  Range: ", round(min(hscore, na.rm = TRUE), 1), "-", round(max(hscore, na.rm = TRUE), 1), "\n\n",
                     "Binary Classification (H-score >=", cutpoint, "):\n",
@@ -2390,7 +2390,7 @@ def segment_nuclei(image_path):
                 if (length(warnings) > 0) {
                     warning_html <- paste0(
                         "The following issues were detected:<br>",
-                        paste("• ", warnings, collapse = "<br>")
+                        paste("\u{2022} ", warnings, collapse = "<br>")
                     )
                     # This would ideally update the contextual-warnings div via JavaScript
                     # For now, we'll add to the interpretation
@@ -2422,14 +2422,14 @@ def segment_nuclei(image_path):
                         recommendations = "Recommendations"
                     ),
                     turkish = list(
-                        analysis_complete = "Analiz başarıyla tamamlandı",
-                        scoring_method = "Skorlama Yöntemi",
+                        analysis_complete = "Analiz ba\u{015F}ar\u{0131}yla tamamland\u{0131}",
+                        scoring_method = "Skorlama Y\u{00F6}ntemi",
                         positive_cases = "Pozitif Olgular",
                         negative_cases = "Negatif Olgular",
-                        correlation = "Yöntem Korelasyonu",
-                        clinical_significance = "Klinik Önem",
-                        quality_control = "Kalite Kontrolü",
-                        recommendations = "Öneriler"
+                        correlation = "Y\u{00F6}ntem Korelasyonu",
+                        clinical_significance = "Klinik \u{00D6}nem",
+                        quality_control = "Kalite Kontrol\u{00FC}",
+                        recommendations = "\u{00D6}neriler"
                     )
                 )
 

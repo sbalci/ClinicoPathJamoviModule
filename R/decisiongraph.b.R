@@ -466,7 +466,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                     "markov_model" = list(
                         term = .("Markov Model"),
                         definition = .("A way to model how patients move between different health states over time"),
-                        example = .("Patients can be Healthy → Sick → Dead, with probabilities of transition each year"),
+                        example = .("Patients can be Healthy \u{2192} Sick \u{2192} Dead, with probabilities of transition each year"),
                         interpretation = .("Useful for chronic diseases where health status changes over time")
                     ),
                     "discount_rate" = list(
@@ -620,28 +620,28 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                         if (treeType == "costeffectiveness") {
                             summaryContent <- c(summaryContent, list(
                                 paste("<h3>", .("Key Findings"), ":</h3>"),
-                                .("• Cost-effectiveness ratios calculated for all strategies"),
-                                .("• Dominated strategies identified and excluded"),
-                                .("• Net monetary benefit analysis performed"),
-                                .("• Results compared against willingness-to-pay threshold")
+                                .("\u{2022} Cost-effectiveness ratios calculated for all strategies"),
+                                .("\u{2022} Dominated strategies identified and excluded"),
+                                .("\u{2022} Net monetary benefit analysis performed"),
+                                .("\u{2022} Results compared against willingness-to-pay threshold")
                             ))
                         } else if (treeType == "markov") {
                             summaryContent <- c(summaryContent, list(
                                 paste("<h3>", .("Key Findings"), ":</h3>"),
-                                .("• Long-term health state transitions modeled"),
-                                .("• Cohort trace analysis performed"),
-                                .("• Lifetime costs and utilities calculated"),
-                                .("• Discounting applied for future benefits")
+                                .("\u{2022} Long-term health state transitions modeled"),
+                                .("\u{2022} Cohort trace analysis performed"),
+                                .("\u{2022} Lifetime costs and utilities calculated"),
+                                .("\u{2022} Discounting applied for future benefits")
                             ))
                         }
 
                         # Recommendations
                         summaryContent <- c(summaryContent, list(
                             paste("<h3>", .("Recommendations"), ":</h3>"),
-                            .("• Review the detailed results tables below"),
-                            .("• Consider sensitivity analysis for uncertain parameters"),
-                            .("• Validate assumptions with clinical experts"),
-                            .("• Consider budget impact if implementing recommendations")
+                            .("\u{2022} Review the detailed results tables below"),
+                            .("\u{2022} Consider sensitivity analysis for uncertain parameters"),
+                            .("\u{2022} Validate assumptions with clinical experts"),
+                            .("\u{2022} Consider budget impact if implementing recommendations")
                         ))
 
                         html <- createSafeHTMLContent(
@@ -2191,7 +2191,7 @@ decisiongraphClass <- if (requireNamespace("jmvcore")) {
                 html_content <- paste0(
                     "<h3>Enhanced Net Monetary Benefit Analysis</h3>",
                     "<p><strong>Primary Willingness-to-Pay Threshold:</strong> $", format(wtp, big.mark = ","), " per QALY</p>",
-                    "<p><strong>Analysis Method:</strong> NMB = (Utility × WTP) - Cost</p>",
+                    "<p><strong>Analysis Method:</strong> NMB = (Utility \u{00D7} WTP) - Cost</p>",
                     "<div style='background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-left: 4px solid #007bff;'>",
                     "<h4 style='margin-top: 0;'>Key Findings</h4>",
                     "<p><strong>Optimal Strategy:</strong> ", htmltools::htmlEscape(summary$optimal_strategy), "</p>",

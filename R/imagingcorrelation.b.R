@@ -555,9 +555,9 @@ imagingcorrelationClass <- R6::R6Class(
             summary_html <- paste0(summary_html, 
                 "<div class='summary-section'>",
                 "<b>Data Integration Overview:</b><br>",
-                "• Imaging Findings: ", totalFindings, "<br>",
-                "• Laboratory Results: ", labCount, "<br>",
-                "• Clinical Variables: ", clinicalCount, "<br>",
+                "\u{2022} Imaging Findings: ", totalFindings, "<br>",
+                "\u{2022} Laboratory Results: ", labCount, "<br>",
+                "\u{2022} Clinical Variables: ", clinicalCount, "<br>",
                 "<b>Integration Method:</b> ", self$options$integration_method,
                 "</div>"
             )
@@ -573,7 +573,7 @@ imagingcorrelationClass <- R6::R6Class(
                 
                 for (correlation in keyCorrelations) {
                     summary_html <- paste0(summary_html, 
-                        "• ", correlation$description, "<br>"
+                        "\u{2022} ", correlation$description, "<br>"
                     )
                 }
                 
@@ -628,10 +628,10 @@ imagingcorrelationClass <- R6::R6Class(
             recommendations_html <- paste0(recommendations_html,
                 "<div class='rec-section'>",
                 "<b>Imaging Guidelines:</b><br>",
-                "• Follow ACR Appropriateness Criteria for imaging selection<br>",
-                "• Consider radiation exposure in follow-up imaging protocols<br>",
-                "• Integrate findings with clinical context and patient preferences<br>",
-                "• Document all significant findings in structured reports",
+                "\u{2022} Follow ACR Appropriateness Criteria for imaging selection<br>",
+                "\u{2022} Consider radiation exposure in follow-up imaging protocols<br>",
+                "\u{2022} Integrate findings with clinical context and patient preferences<br>",
+                "\u{2022} Document all significant findings in structured reports",
                 "</div>"
             )
             
@@ -663,10 +663,10 @@ imagingcorrelationClass <- R6::R6Class(
             confidence_html <- paste0(confidence_html, 
                 "<div class='conf-section'>",
                 "<b>Confidence Scores:</b><br>",
-                "• Imaging Quality: ", private$.formatConfidence(imagingConfidence$quality), "<br>",
-                "• Inter-modality Agreement: ", private$.formatConfidence(correlationConfidence$agreement), "<br>",
-                "• Pattern Recognition: ", private$.formatConfidence(correlationConfidence$pattern), "<br>",
-                "• Overall Diagnostic Confidence: ", private$.formatConfidence(overallConfidence), "<br>",
+                "\u{2022} Imaging Quality: ", private$.formatConfidence(imagingConfidence$quality), "<br>",
+                "\u{2022} Inter-modality Agreement: ", private$.formatConfidence(correlationConfidence$agreement), "<br>",
+                "\u{2022} Pattern Recognition: ", private$.formatConfidence(correlationConfidence$pattern), "<br>",
+                "\u{2022} Overall Diagnostic Confidence: ", private$.formatConfidence(overallConfidence), "<br>",
                 "</div>"
             )
             
@@ -679,7 +679,7 @@ imagingcorrelationClass <- R6::R6Class(
             factors <- private$.identifyConfidenceFactors(data, imagingFindings)
             for (factor in factors) {
                 confidence_html <- paste0(confidence_html, 
-                    "• ", factor, "<br>"
+                    "\u{2022} ", factor, "<br>"
                 )
             }
             
@@ -1309,17 +1309,17 @@ imagingcorrelationClass <- R6::R6Class(
         .generateConfidenceImprovementRecs = function(confidence) {
             
             if (confidence >= 0.85) {
-                return("• Current confidence level is adequate for clinical decision-making<br>
-                        • Continue with standard imaging protocols")
+                return("\u{2022} Current confidence level is adequate for clinical decision-making<br>
+                        \u{2022} Continue with standard imaging protocols")
             } else if (confidence >= 0.70) {
-                return("• Consider additional imaging modality for confirmation<br>
-                        • Obtain tissue diagnosis if clinically feasible<br>
-                        • Review in multidisciplinary team setting")
+                return("\u{2022} Consider additional imaging modality for confirmation<br>
+                        \u{2022} Obtain tissue diagnosis if clinically feasible<br>
+                        \u{2022} Review in multidisciplinary team setting")
             } else {
-                return("• Recommend comprehensive imaging workup<br>
-                        • Obtain pathological correlation when possible<br>
-                        • Consider advanced imaging techniques (functional/molecular)<br>
-                        • Ensure complete clinical data collection")
+                return("\u{2022} Recommend comprehensive imaging workup<br>
+                        \u{2022} Obtain pathological correlation when possible<br>
+                        \u{2022} Consider advanced imaging techniques (functional/molecular)<br>
+                        \u{2022} Ensure complete clinical data collection")
             }
         },
 

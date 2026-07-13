@@ -617,7 +617,7 @@ phevalClass <- R6::R6Class(
             coef_table <- summary_cox$coefficients
 
             html <- paste0(html, "<table class='coef-table'>")
-            html <- paste0(html, "<tr><th>Covariate</th><th>β</th><th>SE(β)</th><th>HR</th><th>95% CI</th><th>p-value</th></tr>")
+            html <- paste0(html, "<tr><th>Covariate</th><th>\u{03B2}</th><th>SE(\u{03B2})</th><th>HR</th><th>95% CI</th><th>p-value</th></tr>")
 
             for (i in seq_len(nrow(coef_table))) {
                 covariate <- htmltools::htmlEscape(rownames(coef_table)[i])
@@ -969,9 +969,9 @@ phevalClass <- R6::R6Class(
             html <- paste0(html, "<div class='method-section'>")
             html <- paste0(html, "<h4>Mathematical Foundation</h4>")
             html <- paste0(html, "<p>The Cox model assumes:</p>")
-            html <- paste0(html, "<div class='equation'>h(t|X) = h₀(t) × exp(βᵀX)</div>")
+            html <- paste0(html, "<div class='equation'>h(t|X) = h\u{2080}(t) \u{00D7} exp(\u{03B2}\u{1D40}X)</div>")
             html <- paste0(html, "<p>The proportional hazards assumption requires that the hazard ratio is constant:</p>")
-            html <- paste0(html, "<div class='equation'>HR = h(t|X₁)/h(t|X₂) = exp(βᵀ(X₁-X₂)) = constant</div>")
+            html <- paste0(html, "<div class='equation'>HR = h(t|X\u{2081})/h(t|X\u{2082}) = exp(\u{03B2}\u{1D40}(X\u{2081}-X\u{2082})) = constant</div>")
             html <- paste0(html, "</div>")
 
             # Test methods

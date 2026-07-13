@@ -549,10 +549,10 @@ labinterpretClass <- R6::R6Class(
             recommendations_html <- paste0(recommendations_html,
                 "<div class='rec-section'>",
                 "<b>General Guidelines:</b><br>",
-                "• Results should be interpreted in clinical context<br>",
-                "• Consider patient demographics and medical history<br>",
-                "• Follow institutional protocols for critical values<br>",
-                "• Repeat abnormal results when clinically indicated",
+                "\u{2022} Results should be interpreted in clinical context<br>",
+                "\u{2022} Consider patient demographics and medical history<br>",
+                "\u{2022} Follow institutional protocols for critical values<br>",
+                "\u{2022} Repeat abnormal results when clinically indicated",
                 "</div>"
             )
             
@@ -591,9 +591,9 @@ labinterpretClass <- R6::R6Class(
                 "Potassium" = "mEq/L",
                 "Chloride" = "mEq/L",
                 "BUN" = "mg/dL",
-                "WBC" = "×10³/μL",
-                "RBC" = "×10⁶/μL",
-                "Platelets" = "×10³/μL"
+                "WBC" = "\u{00D7}10\u{00B3}/\u{03BC}L",
+                "RBC" = "\u{00D7}10\u{2076}/\u{03BC}L",
+                "Platelets" = "\u{00D7}10\u{00B3}/\u{03BC}L"
             )
             
             return(units_map[[labVar]] %||% "units")
@@ -942,14 +942,14 @@ labinterpretClass <- R6::R6Class(
                 if (status != "Normal") {
                     # labVar is a column name from the user's dataset; escape before
                     # it flows into the HTML returned to .generateInterpretationSummary.
-                    finding <- paste("•", htmltools::htmlEscape(labVar), "is",
+                    finding <- paste("\u{2022}", htmltools::htmlEscape(labVar), "is",
                                      tolower(status), sprintf("(%.2f)", meanValue))
                     findings <- c(findings, finding)
                 }
             }
             
             if (length(findings) == 0) {
-                return("• All laboratory values are within normal limits")
+                return("\u{2022} All laboratory values are within normal limits")
             }
             
             return(paste(findings, collapse = "<br>"))
@@ -958,21 +958,21 @@ labinterpretClass <- R6::R6Class(
         # Generate recommendations
         .generateRecommendations = function(data, labValues) {
             
-            recommendations <- c("• Interpret results in clinical context")
+            recommendations <- c("\u{2022} Interpret results in clinical context")
             
             abnormalCount <- private$.countAbnormalValues(data, labValues)
             
             if (abnormalCount > 0) {
-                recommendations <- c(recommendations, "• Consider repeat testing for abnormal values")
-                recommendations <- c(recommendations, "• Correlate with patient symptoms and history")
+                recommendations <- c(recommendations, "\u{2022} Consider repeat testing for abnormal values")
+                recommendations <- c(recommendations, "\u{2022} Correlate with patient symptoms and history")
             }
             
             if (self$options$trend_analysis) {
-                recommendations <- c(recommendations, "• Monitor trends over time")
+                recommendations <- c(recommendations, "\u{2022} Monitor trends over time")
             }
             
             if (self$options$medication_interaction) {
-                recommendations <- c(recommendations, "• Review medication effects on laboratory values")
+                recommendations <- c(recommendations, "\u{2022} Review medication effects on laboratory values")
             }
             
             return(paste(recommendations, collapse = "<br>"))

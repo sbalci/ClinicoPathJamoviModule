@@ -201,14 +201,14 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     freq_table <- tryCatch({
                         # Check if variable exists and has data
                         if (!var %in% names(data)) {
-                            stop("Variable '", htmltools::htmlEscape(display_var), "' not found in data")
+                            jmvcore::reject(paste0("Variable '", htmltools::htmlEscape(display_var), "' not found in data"))
                         }
 
                         # Remove missing values for this variable to avoid issues
                         var_data <- data[!is.na(data[[var]]), ]
 
                         if (nrow(var_data) == 0) {
-                            stop("Variable '", htmltools::htmlEscape(display_var), "' has no non-missing values")
+                            jmvcore::reject(paste0("Variable '", htmltools::htmlEscape(display_var), "' has no non-missing values"))
                         }
 
                         # Create tabyl table using actual column name
@@ -244,9 +244,9 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     }, error = function(e) {
                         # Provide more detailed error information using display name
                         safe_var <- htmltools::htmlEscape(display_var)
-                        stop("Error processing variable '", safe_var, "' with janitor: ", e$message,
+                        jmvcore::reject(paste0("Error processing variable '", safe_var, "' with janitor: ", e$message,
                              " (Variable type: ", class(data[[var]])[1],
-                             ", Non-missing values: ", sum(!is.na(data[[var]])), ")")
+                             ", Non-missing values: ", sum(!is.na(data[[var]])), ")"))
                     })
 
                     # Add a header for clarity for each variable's table, plus a top margin.

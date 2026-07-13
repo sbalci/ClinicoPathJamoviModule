@@ -179,7 +179,7 @@ roc2dClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 list(name = "AND (Min)", rule = "min(M1, M2)", auc = auc_and, use = "High specificity"),
                 list(name = "OR (Max)", rule = "max(M1, M2)", auc = auc_or, use = "High sensitivity"),
                 list(name = "Average", rule = "(M1 + M2)/2", auc = auc_avg, use = "Balanced"),
-                list(name = "Product", rule = "M1 × M2", auc = auc_prod, use = "Both required"),
+                list(name = "Product", rule = "M1 \u{00D7} M2", auc = auc_prod, use = "Both required"),
                 list(name = "Maximum", rule = "max(M1, M2)", auc = auc_max, use = "Either sufficient")
             )
 
@@ -228,7 +228,7 @@ roc2dClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 weight1 = best_w1,
                 weight2 = best_w2,
                 auc_optimal = best_auc,
-                formula = sprintf("%.2f × %s + %.2f × %s",
+                formula = sprintf("%.2f \u{00D7} %s + %.2f \u{00D7} %s",
                                 best_w1, self$options$marker1,
                                 best_w2, self$options$marker2),
                 improvement = sprintf("%.3f vs individual", best_auc)

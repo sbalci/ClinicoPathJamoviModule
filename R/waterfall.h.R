@@ -767,7 +767,7 @@ waterfallBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "waterfall",
-                version = c(0,0,5),
+                version = c(1,0,0),
                 options = options,
                 results = waterfallResults$new(options=options),
                 data = data,

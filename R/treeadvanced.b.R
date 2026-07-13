@@ -1508,7 +1508,7 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                                 title = paste("Validation Curves -", self$options$tuning_metric, "vs Complexity Parameter"),
                                 x = "Complexity Parameter (log scale)",
                                 y = paste("Cross-Validation", self$options$tuning_metric),
-                                caption = "Error bars show ±1 standard deviation across CV folds"
+                                caption = "Error bars show \u{00B1}1 standard deviation across CV folds"
                             ) +
                             ggplot2::theme_minimal() +
                             ggtheme

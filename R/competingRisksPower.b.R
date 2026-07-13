@@ -10,7 +10,7 @@ competingRisksPowerClass <- R6::R6Class(
                 "<p><b>Required Setup:</b></p>",
                 "<ul>",
                 "<li>Select analysis type (power, sample size, effect size, or detectable difference)</li>",
-                "<li>Set significance level (α) and power (1-β)</li>",
+                "<li>Set significance level (\u{03B1}) and power (1-\u{03B2})</li>",
                 "<li>Specify event rates for both groups</li>",
                 "<li>Define study design parameters</li>",
                 "</ul>"
@@ -587,7 +587,7 @@ competingRisksPowerClass <- R6::R6Class(
                 low_value = paste0(round(base_params$event_rate1 * 0.85 * 100, 1), "%"),
                 base_value = paste0(round(base_params$event_rate1 * 100, 1), "%"),
                 high_value = paste0(round(base_params$event_rate1 * 1.15 * 100, 1), "%"),
-                power_change = paste0("±", round(power_range1 * 100, 1), "%"),
+                power_change = paste0("\u{00B1}", round(power_range1 * 100, 1), "%"),
                 robustness = ifelse(power_range1 < 0.05, "Robust", ifelse(power_range1 < 0.15, "Moderate", "Sensitive"))
             )
 
@@ -604,7 +604,7 @@ competingRisksPowerClass <- R6::R6Class(
                 low_value = paste0(round(base_params$event_rate2 * 0.85 * 100, 1), "%"),
                 base_value = paste0(round(base_params$event_rate2 * 100, 1), "%"),
                 high_value = paste0(round(base_params$event_rate2 * 1.15 * 100, 1), "%"),
-                power_change = paste0("±", round(power_range2 * 100, 1), "%"),
+                power_change = paste0("\u{00B1}", round(power_range2 * 100, 1), "%"),
                 robustness = ifelse(power_range2 < 0.05, "Robust", ifelse(power_range2 < 0.15, "Moderate", "Sensitive"))
             )
 
@@ -621,7 +621,7 @@ competingRisksPowerClass <- R6::R6Class(
                 low_value = round(base_params$hazard_ratio * 0.85, 2),
                 base_value = round(base_params$hazard_ratio, 2),
                 high_value = round(base_params$hazard_ratio * 1.15, 2),
-                power_change = paste0("±", round(power_range3 * 100, 1), "%"),
+                power_change = paste0("\u{00B1}", round(power_range3 * 100, 1), "%"),
                 robustness = ifelse(power_range3 < 0.05, "Robust", ifelse(power_range3 < 0.15, "Moderate", "Sensitive"))
             )
 
@@ -638,7 +638,7 @@ competingRisksPowerClass <- R6::R6Class(
                 low_value = round(base_params$total_n * 0.8),
                 base_value = base_params$total_n,
                 high_value = round(base_params$total_n * 1.2),
-                power_change = paste0("±", round(power_range4 * 100, 1), "%"),
+                power_change = paste0("\u{00B1}", round(power_range4 * 100, 1), "%"),
                 robustness = ifelse(power_range4 < 0.05, "Robust", ifelse(power_range4 < 0.15, "Moderate", "Sensitive"))
             )
 
@@ -660,7 +660,7 @@ competingRisksPowerClass <- R6::R6Class(
         .populateSimulationDiagnostics = function() {
             diagnostics_data <- data.frame(
                 metric = c("Simulation Convergence", "Monte Carlo Error", "Confidence Interval Width"),
-                value = c("Converged", "< 0.01", "±0.05"),
+                value = c("Converged", "< 0.01", "\u{00B1}0.05"),
                 status = c(" Good", " Good", " Good"),
                 recommendation = c("Results reliable", "Sufficient precision", "Adequate precision"),
                 stringsAsFactors = FALSE

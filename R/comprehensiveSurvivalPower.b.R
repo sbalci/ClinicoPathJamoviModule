@@ -798,8 +798,8 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
                             sensitivity_data <- rbind(sensitivity_data, data.frame(
                                 parameter_varied = scenario$param,
-                                variation = paste0(scenario$base, " → ", value),
-                                result_change = paste0(round(base_result), " → ", round(varied_result)),
+                                variation = paste0(scenario$base, " \u{2192} ", value),
+                                result_change = paste0(round(base_result), " \u{2192} ", round(varied_result)),
                                 percent_change = round(percent_change, 1),
                                 stringsAsFactors = FALSE
                             ))
@@ -1041,7 +1041,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
                 ggplot2::geom_hline(yintercept = 0.90, linetype = "dashed", color = "#FF6347", alpha = 0.7) +
                 ggplot2::labs(
                     title = "Power Curve: Sample Size vs Statistical Power",
-                    subtitle = paste0("HR = ", hazard_ratio, ", α = ", alpha, ", Event Rate = ", event_rate),
+                    subtitle = paste0("HR = ", hazard_ratio, ", \u{03B1} = ", alpha, ", Event Rate = ", event_rate),
                     x = "Total Sample Size",
                     y = "Statistical Power"
                 ) +
@@ -1126,7 +1126,7 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
                 ggplot2::geom_hline(yintercept = 0.80, linetype = "dashed", color = "#32CD32", alpha = 0.7) +
                 ggplot2::labs(
                     title = "Detectable Effect Size: Sample Size vs Minimum Detectable Hazard Ratio",
-                    subtitle = paste0("Power = ", power * 100, "%, α = ", alpha, ", Event Rate = ", event_rate),
+                    subtitle = paste0("Power = ", power * 100, "%, \u{03B1} = ", alpha, ", Event Rate = ", event_rate),
                     x = "Total Sample Size",
                     y = "Minimum Detectable Hazard Ratio"
                 ) +

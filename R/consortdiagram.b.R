@@ -153,7 +153,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                                 self$results$flowImbalanceNotice$setContent(
                                     private$.htmlWarning(
                                         "Flow Count Inconsistency Detected",
-                                        "Final analyzed + excluded ≠ total participants. Verify exclusion columns to prevent double-counting.",
+                                        "Final analyzed + excluded \u{2260} total participants. Verify exclusion columns to prevent double-counting.",
                                         c(
                                             "Participant IDs are unique",
                                             "Exclusion columns are stage-specific (no double-counting)",
@@ -646,7 +646,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                     "<p><strong>Export Settings:</strong></p>",
                     "<ul>",
                     "<li>Format: ", format_desc, "</li>",
-                    "<li>Dimensions: ", width, " × ", height, " pixels</li>",
+                    "<li>Dimensions: ", width, " \u{00D7} ", height, " pixels</li>",
                     "<li>Text wrap: ", self$options$text_width, " characters</li>",
                     "</ul>",
                     "<p style='font-size: 0.9em;'>",

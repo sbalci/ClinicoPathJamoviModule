@@ -41,7 +41,7 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             <li><b>Use when:</b> Omics-scale mediators (thousands to millions)</li>
             <li><b>Provides:</b> Automatic mediator selection, FDR control</li>
             <li><b>Applications:</b> Methylation, gene expression, metabolomics</li>
-            <li><b>Example:</b> 'Which of 500,000 methylation sites mediate trauma → cortisol?'</li>
+            <li><b>Example:</b> 'Which of 500,000 methylation sites mediate trauma \u{2192} cortisol?'</li>
             </ul>
 
             <h4>Getting Started:</h4>
@@ -75,9 +75,9 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
 
             <h4>HIGH-DIMENSIONAL Interpretation:</h4>
             <ul>
-            <li><b>α (alpha):</b> Effect of X on mediator</li>
-            <li><b>β (beta):</b> Effect of mediator on Y (adjusting for X)</li>
-            <li><b>Indirect Effect:</b> α × β (product method)</li>
+            <li><b>\u{03B1} (alpha):</b> Effect of X on mediator</li>
+            <li><b>\u{03B2} (beta):</b> Effect of mediator on Y (adjusting for X)</li>
+            <li><b>Indirect Effect:</b> \u{03B1} \u{00D7} \u{03B2} (product method)</li>
             <li><b>FDR:</b> False Discovery Rate (controls for multiple testing)</li>
             </ul>
 
@@ -410,9 +410,9 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     detailed_msg <- paste(
                         "Data dimension error:", error_msg,
                         "\n\nSuggestions:",
-                        "• Ensure all mediators are numeric",
-                        "• Check for missing values",
-                        "• Verify sample size is sufficient (n > p recommended)"
+                        "\u{2022} Ensure all mediators are numeric",
+                        "\u{2022} Check for missing values",
+                        "\u{2022} Verify sample size is sufficient (n > p recommended)"
                     )
                 } else {
                     detailed_msg <- paste("HD mediation error:", error_msg)
@@ -466,9 +466,9 @@ causalmediationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 summary_html <- paste0(summary_html, "<h4>Interpretation:</h4>")
                 summary_html <- paste0(summary_html, "<ul>")
                 summary_html <- paste0(summary_html, "<li>These mediators show significant mediation effects after FDR correction</li>")
-                summary_html <- paste0(summary_html, "<li>α (alpha) = effect of treatment on mediator</li>")
-                summary_html <- paste0(summary_html, "<li>β (beta) = effect of mediator on outcome</li>")
-                summary_html <- paste0(summary_html, "<li>Indirect Effect = α × β (product of coefficients)</li>")
+                summary_html <- paste0(summary_html, "<li>\u{03B1} (alpha) = effect of treatment on mediator</li>")
+                summary_html <- paste0(summary_html, "<li>\u{03B2} (beta) = effect of mediator on outcome</li>")
+                summary_html <- paste0(summary_html, "<li>Indirect Effect = \u{03B1} \u{00D7} \u{03B2} (product of coefficients)</li>")
                 summary_html <- paste0(summary_html, "</ul>")
 
                 if (n_sig > 0) {

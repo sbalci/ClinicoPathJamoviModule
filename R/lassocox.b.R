@@ -1330,24 +1330,24 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             <h4> Key Concepts:</h4>
             <ul>
-                <li><strong>Regularization (λ):</strong> A penalty parameter that controls the strength of variable selection
+                <li><strong>Regularization (\u{03BB}):</strong> A penalty parameter that controls the strength of variable selection
                     <ul>
-                        <li>Higher λ → More variables excluded (simpler model)</li>
-                        <li>Lower λ → More variables included (complex model)</li>
-                        <li>λ = 0 → Standard Cox regression (no penalty)</li>
+                        <li>Higher \u{03BB} \u{2192} More variables excluded (simpler model)</li>
+                        <li>Lower \u{03BB} \u{2192} More variables included (complex model)</li>
+                        <li>\u{03BB} = 0 \u{2192} Standard Cox regression (no penalty)</li>
                     </ul>
                 </li>
                 
                 <li><strong>Variable Selection:</strong> LASSO automatically sets coefficients of unimportant variables to exactly zero</li>
                 
-                <li><strong>Cross-Validation:</strong> K-fold CV determines optimal λ that minimizes prediction error</li>
+                <li><strong>Cross-Validation:</strong> K-fold CV determines optimal \u{03BB} that minimizes prediction error</li>
                 
                 <li><strong>Shrinkage:</strong> Coefficients of selected variables are shrunk toward zero, reducing overfitting</li>
             </ul>
             
             <h4> How to Interpret Results:</h4>
             <ul>
-                <li><strong>Selected Variables:</strong> Variables with non-zero coefficients at optimal λ</li>
+                <li><strong>Selected Variables:</strong> Variables with non-zero coefficients at optimal \u{03BB}</li>
                 <li><strong>Coefficients:</strong> Log hazard ratios (positive = increased risk, negative = decreased risk)</li>
                 <li><strong>Risk Scores:</strong> Linear combination of selected variables weighted by their coefficients</li>
                 <li><strong>C-index:</strong> Discrimination ability (0.5 = no discrimination, 1.0 = perfect discrimination)</li>
@@ -1387,11 +1387,11 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <div class='alert alert-primary'>
                 <h5>Mathematical Foundation</h5>
                 <p>LASSO Cox regression minimizes the negative partial log-likelihood with an L1 penalty:</p>
-                <p><strong>Objective Function:</strong> -ℓ(β) + λ Σ|βⱼ|</p>
+                <p><strong>Objective Function:</strong> -\u{2113}(\u{03B2}) + \u{03BB} \u{03A3}|\u{03B2}\u{2C7C}|</p>
                 <ul>
-                    <li>ℓ(β): Partial log-likelihood from Cox model</li>
-                    <li>λ: Regularization parameter</li>
-                    <li>Σ|βⱼ|: L1 penalty (sum of absolute coefficients)</li>
+                    <li>\u{2113}(\u{03B2}): Partial log-likelihood from Cox model</li>
+                    <li>\u{03BB}: Regularization parameter</li>
+                    <li>\u{03A3}|\u{03B2}\u{2C7C}|: L1 penalty (sum of absolute coefficients)</li>
                 </ul>
             </div>
             
@@ -1408,17 +1408,17 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Cross-Validation:</strong>
                     <ul>
                         <li>Divide data into K folds (typically K=10)</li>
-                        <li>For each λ value, train on K-1 folds and validate on remaining fold</li>
+                        <li>For each \u{03BB} value, train on K-1 folds and validate on remaining fold</li>
                         <li>Calculate cross-validated partial likelihood deviance</li>
-                        <li>Select λ that minimizes CV error</li>
+                        <li>Select \u{03BB} that minimizes CV error</li>
                     </ul>
                 </li>
                 
                 <li><strong>Final Model:</strong>
                     <ul>
-                        <li>Fit LASSO Cox model on full data using optimal λ</li>
+                        <li>Fit LASSO Cox model on full data using optimal \u{03BB}</li>
                         <li>Extract non-zero coefficients (selected variables)</li>
-                        <li>Calculate risk scores: Σ(βⱼ × xⱼ)</li>
+                        <li>Calculate risk scores: \u{03A3}(\u{03B2}\u{2C7C} \u{00D7} x\u{2C7C})</li>
                     </ul>
                 </li>
                 
@@ -1433,14 +1433,14 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             <h4> Hyperparameter Selection:</h4>
             <ul>
-                <li><strong>λ.min:</strong> Lambda that minimizes CV error</li>
-                <li><strong>λ.1se:</strong> Largest lambda within 1 SE of minimum (more parsimonious)</li>
-                <li><strong>Choice:</strong> λ.1se often preferred for better generalizability</li>
+                <li><strong>\u{03BB}.min:</strong> Lambda that minimizes CV error</li>
+                <li><strong>\u{03BB}.1se:</strong> Largest lambda within 1 SE of minimum (more parsimonious)</li>
+                <li><strong>Choice:</strong> \u{03BB}.1se often preferred for better generalizability</li>
             </ul>
             
             <h4> Variable Importance Metrics:</h4>
             <ul>
-                <li><strong>Coefficient Magnitude:</strong> Larger |β| indicates stronger effect</li>
+                <li><strong>Coefficient Magnitude:</strong> Larger |\u{03B2}| indicates stronger effect</li>
                 <li><strong>Path Inclusion Proportion:</strong> Fraction of lambda values in the regularization path where the variable has a non-zero coefficient</li>
                 <li><strong>Stability:</strong> Consistency of coefficient estimates across folds</li>
                 <li><strong>Path Entry:</strong> Lambda value at which variable first enters the model</li>
@@ -1483,7 +1483,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         <li><strong>Positive coefficient:</strong> Higher values increase hazard (worse prognosis)</li>
                         <li><strong>Negative coefficient:</strong> Higher values decrease hazard (better prognosis)</li>
                         <li><strong>Hazard Ratio = exp(coefficient)</strong></li>
-                        <li><strong>Example:</strong> Coefficient = 0.693 → HR = 2.0 (doubled risk)</li>
+                        <li><strong>Example:</strong> Coefficient = 0.693 \u{2192} HR = 2.0 (doubled risk)</li>
                     </ul>
                 </div>
                 
@@ -1533,7 +1533,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <div class='alert alert-info'>
                 <h4> Reporting Recommendations:</h4>
                 <ul>
-                    <li>Report both λ.min and λ.1se results</li>
+                    <li>Report both \u{03BB}.min and \u{03BB}.1se results</li>
                     <li>Describe variable selection process and stability</li>
                     <li>Provide confidence intervals for C-index</li>
                     <li>Include calibration assessment when possible</li>
@@ -1559,23 +1559,23 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             <h4> Understanding the Cross-Validation Plot</h4>
             
             <div class='alert alert-info'>
-                <p>The cross-validation plot shows how model performance varies with different levels of regularization (λ values).</p>
+                <p>The cross-validation plot shows how model performance varies with different levels of regularization (\u{03BB} values).</p>
             </div>
             
             <ul>
-                <li><strong>X-axis:</strong> Log(λ) - Regularization strength (left = weak, right = strong)</li>
+                <li><strong>X-axis:</strong> Log(\u{03BB}) - Regularization strength (left = weak, right = strong)</li>
                 <li><strong>Y-axis:</strong> Partial likelihood deviance (lower = better fit)</li>
                 <li><strong>Error bars:</strong> Standard errors across CV folds</li>
                 <li><strong>Vertical lines:</strong> 
                     <ul>
-                        <li>Left line: λ.min (minimum CV error)</li>
-                        <li>Right line: λ.1se (most regularization within 1 SE)</li>
+                        <li>Left line: \u{03BB}.min (minimum CV error)</li>
+                        <li>Right line: \u{03BB}.1se (most regularization within 1 SE)</li>
                     </ul>
                 </li>
-                <li><strong>Numbers at top:</strong> Number of non-zero variables at each λ</li>
+                <li><strong>Numbers at top:</strong> Number of non-zero variables at each \u{03BB}</li>
             </ul>
             
-            <p><strong>Interpretation:</strong> Choose λ.1se (right line) for more robust, generalizable models with fewer variables.</p>
+            <p><strong>Interpretation:</strong> Choose \u{03BB}.1se (right line) for more robust, generalizable models with fewer variables.</p>
             "
             
             self$results$crossValidationExplanation$setContent(html_content)
@@ -1596,7 +1596,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li><strong>Magnitude:</strong> Larger absolute coefficients indicate stronger contribution to risk score</li>
             </ul>
             
-            <p><strong>Variable Selection:</strong> Variables with non-zero coefficients at the chosen λ are included in the final model.</p>
+            <p><strong>Variable Selection:</strong> Variables with non-zero coefficients at the chosen \u{03BB} are included in the final model.</p>
             "
             
             self$results$regularizationPathExplanation$setContent(html_content)
@@ -1612,7 +1612,7 @@ lassocoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             <h5>Risk Score Calculation:</h5>
             <ul>
-                <li><strong>Formula:</strong> Risk Score = β₁×X₁ + β₂×X₂ + ... + βₖ×Xₖ</li>
+                <li><strong>Formula:</strong> Risk Score = \u{03B2}\u{2081}\u{00D7}X\u{2081} + \u{03B2}\u{2082}\u{00D7}X\u{2082} + ... + \u{03B2}\u{2096}\u{00D7}X\u{2096}</li>
                 <li><strong>Higher scores:</strong> Increased risk (worse prognosis)</li>
                 <li><strong>Lower scores:</strong> Decreased risk (better prognosis)</li>
                 <li><strong>Risk groups:</strong> Often split at median (low vs high risk)</li>

@@ -108,7 +108,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<li>Clinical decision-making without proper statistical analysis</li>",
                 "<li>Publication-quality statistical reporting</li>",
                 "</ul>",
-                "<p style='margin: 5px 0;'><strong>Statistical overlays (correlation, R²) are exploratory estimates only</strong> and should NOT be interpreted as rigorous statistical tests. For clinical research, always use appropriate statistical methods with proper validation.</p>",
+                "<p style='margin: 5px 0;'><strong>Statistical overlays (correlation, R\u{00B2}) are exploratory estimates only</strong> and should NOT be interpreted as rigorous statistical tests. For clinical research, always use appropriate statistical methods with proper validation.</p>",
                 "</div>",
                 "<div style='background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 10px 0;'>",
                 "<h3 style='color: #2e7d32; margin-top: 0;'>Base Graphics Visualization</h3>",
@@ -314,7 +314,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     }, error = function(e) 1)
 
                     if (!is.na(p_value) && p_value < 0.05) {
-                        private$.addNotice('WARNING', 'Non-Linear Relationship', 'Non-linear relationship detected. Linear correlation (r) and R² may not adequately describe this relationship.')
+                        private$.addNotice('WARNING', 'Non-Linear Relationship', 'Non-linear relationship detected. Linear correlation (r) and R\u{00B2} may not adequately describe this relationship.')
                     }
                 }
 
@@ -333,7 +333,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 # CRITICAL: Exploratory statistics disclaimer
-                private$.addNotice('STRONG_WARNING', 'Exploratory Statistics Only', 'Correlation and R² displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation.')
+                private$.addNotice('STRONG_WARNING', 'Exploratory Statistics Only', 'Correlation and R\u{00B2} displayed on plot are EXPLORATORY estimates only. These do NOT constitute formal hypothesis tests and should not be used for clinical decision-making without proper statistical validation.')
             }
         },
 
@@ -568,12 +568,12 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             glossary_html <- paste0(glossary_html, "<dt><strong>Pearson Correlation (r)</strong></dt>")
             glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
             glossary_html <- paste0(glossary_html, "Measures linear relationship strength between two continuous variables. ")
-            glossary_html <- paste0(glossary_html, "Range: -1 to +1. Values near 0 indicate weak relationship; values near ±1 indicate strong relationship. ")
+            glossary_html <- paste0(glossary_html, "Range: -1 to +1. Values near 0 indicate weak relationship; values near \u{00B1}1 indicate strong relationship. ")
             glossary_html <- paste0(glossary_html, "Assumes bivariate normality and is sensitive to outliers.")
             glossary_html <- paste0(glossary_html, "</dd>")
 
             # Spearman correlation
-            glossary_html <- paste0(glossary_html, "<dt><strong>Spearman Correlation (ρ)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dt><strong>Spearman Correlation (\u{03C1})</strong></dt>")
             glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
             glossary_html <- paste0(glossary_html, "Non-parametric measure of monotonic relationship strength based on ranked data. ")
             glossary_html <- paste0(glossary_html, "Range: -1 to +1. Does not assume normality and is robust to outliers. ")
@@ -581,11 +581,11 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             glossary_html <- paste0(glossary_html, "</dd>")
 
             # R-squared
-            glossary_html <- paste0(glossary_html, "<dt><strong>R² (Coefficient of Determination)</strong></dt>")
+            glossary_html <- paste0(glossary_html, "<dt><strong>R\u{00B2} (Coefficient of Determination)</strong></dt>")
             glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
             glossary_html <- paste0(glossary_html, "Proportion of variance in Y explained by X in linear regression. ")
             glossary_html <- paste0(glossary_html, "Range: 0 to 1. Higher values indicate better model fit. ")
-            glossary_html <- paste0(glossary_html, "R² = 0.70 means 70% of variance is explained by the model.")
+            glossary_html <- paste0(glossary_html, "R\u{00B2} = 0.70 means 70% of variance is explained by the model.")
             glossary_html <- paste0(glossary_html, "</dd>")
 
             # Mean
@@ -604,7 +604,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             glossary_html <- paste0(glossary_html, "<dt><strong>Standard Deviation (SD)</strong></dt>")
             glossary_html <- paste0(glossary_html, "<dd style='margin-left: 20px; margin-bottom: 10px;'>")
             glossary_html <- paste0(glossary_html, "Measure of data spread around the mean. ")
-            glossary_html <- paste0(glossary_html, "About 68% of values fall within ±1 SD, 95% within ±2 SD (for normal distributions).")
+            glossary_html <- paste0(glossary_html, "About 68% of values fall within \u{00B1}1 SD, 95% within \u{00B1}2 SD (for normal distributions).")
             glossary_html <- paste0(glossary_html, "</dd>")
 
             # Sample size
@@ -724,7 +724,7 @@ basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     abline(lm(data$y ~ data$x), col = "red", lty = 2)
                     lm_fit <- lm(data$y ~ data$x)
                     r_squared <- round(summary(lm_fit)$r.squared, 3)
-                    stats_text <- paste0(stats_text, "\nR² = ", r_squared)
+                    stats_text <- paste0(stats_text, "\nR\u{00B2} = ", r_squared)
                 }
 
                 # Position text in upper-left corner

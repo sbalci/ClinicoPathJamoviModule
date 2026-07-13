@@ -40,10 +40,10 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     <h4>Common Applications:</h4>
                     <ul>
-                    <li><b>Disease Progression:</b> Healthy → Disease → Death</li>
-                    <li><b>Treatment Response:</b> Treatment → Response → Relapse → Death</li>
-                    <li><b>Transplantation:</b> Transplant → Rejection → Re-transplant → Death</li>
-                    <li><b>Cancer Staging:</b> Stage I → Stage II → Stage III → Stage IV → Death</li>
+                    <li><b>Disease Progression:</b> Healthy \u{2192} Disease \u{2192} Death</li>
+                    <li><b>Treatment Response:</b> Treatment \u{2192} Response \u{2192} Relapse \u{2192} Death</li>
+                    <li><b>Transplantation:</b> Transplant \u{2192} Rejection \u{2192} Re-transplant \u{2192} Death</li>
+                    <li><b>Cancer Staging:</b> Stage I \u{2192} Stage II \u{2192} Stage III \u{2192} Stage IV \u{2192} Death</li>
                     </ul>
 
                     <h4>Required Data Format:</h4>

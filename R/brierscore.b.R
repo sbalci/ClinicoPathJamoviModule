@@ -224,7 +224,7 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 <li>Standardized relative to null model (Kaplan-Meier curve)</li>
                 <li>Scaled = 1 - (Brier_model / Brier_null)</li>
                 <li>Positive values indicate improvement over KM prediction</li>
-                <li>Analogous to R² in linear regression</li>
+                <li>Analogous to R\u{00B2} in linear regression</li>
             </ul>
 
             <h4>Integrated Brier Score (IBS):</h4>

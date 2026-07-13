@@ -201,7 +201,7 @@ remains constant.</p>
 
 <p><strong>1. Coefficient of Variation (CV) - RECOMMENDED</strong></p>
 <ul>
-<li>Formula: CV = (SD / Mean) × 100</li>
+<li>Formula: CV = (SD / Mean) \u{00D7} 100</li>
 <li>Lower CV = more consistent across areas</li>
 <li>CV < 10%: Excellent, CV < 20%: Good, CV < 30%: Acceptable</li>
 </ul>
@@ -265,7 +265,7 @@ Theory and implementation of an electronic, automated measurement system for ima
 obtained from immunohistochemically stained slides.
 <em>Anal Quant Cytol Histol</em>, 28:27-38.</p>
 
-<p><strong>Kayser, K., Görtler, J., Goldmann, T., et al. (2008).</strong>
+<p><strong>Kayser, K., G\u{00F6}rtler, J., Goldmann, T., et al. (2008).</strong>
 Image standards in tissue-based diagnosis (Diagnostic Surgical Pathology).
 <em>Diagn Pathol</em>, 3:17.</p>
 

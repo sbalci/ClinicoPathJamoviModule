@@ -406,8 +406,8 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         title = "Normal (Gaussian) Distribution",
                         description = "The normal distribution is the most important probability distribution in statistics. It is symmetric, bell-shaped, and completely characterized by its mean and standard deviation.",
                         parameters = list(
-                            "Mean (μ)" = paste("Location parameter, currently set to:", self$options$normal_mean),
-                            "Standard Deviation (σ)" = paste("Scale parameter, currently set to:", self$options$normal_sd)
+                            "Mean (\u{03BC})" = paste("Location parameter, currently set to:", self$options$normal_mean),
+                            "Standard Deviation (\u{03C3})" = paste("Scale parameter, currently set to:", self$options$normal_sd)
                         ),
                         applications = "Clinical measurements, biomarkers, measurement errors, many biological variables"
                     ),
@@ -415,8 +415,8 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         title = "Beta Distribution",
                         description = "The beta distribution is defined on the interval [0,1] and is useful for modeling proportions, probabilities, and percentages.",
                         parameters = list(
-                            "Shape 1 (α)" = paste("First shape parameter, currently set to:", self$options$beta_shape1),
-                            "Shape 2 (β)" = paste("Second shape parameter, currently set to:", self$options$beta_shape2)
+                            "Shape 1 (\u{03B1})" = paste("First shape parameter, currently set to:", self$options$beta_shape1),
+                            "Shape 2 (\u{03B2})" = paste("Second shape parameter, currently set to:", self$options$beta_shape2)
                         ),
                         applications = "Response rates, compliance rates, sensitivity/specificity modeling"
                     ),
@@ -425,7 +425,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         description = "The gamma distribution is a two-parameter family of continuous probability distributions. It's often used to model waiting times and survival data.",
                         parameters = list(
                             "Shape (k)" = paste("Shape parameter, currently set to:", self$options$gamma_shape),
-                            "Scale (θ)" = paste("Scale parameter, currently set to:", self$options$gamma_scale)
+                            "Scale (\u{03B8})" = paste("Scale parameter, currently set to:", self$options$gamma_scale)
                         ),
                         applications = "Survival times, time between events, concentration measurements"
                     ),
@@ -433,7 +433,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         title = "Exponential Distribution",
                         description = "The exponential distribution models the time between events in a Poisson process. It has the memoryless property.",
                         parameters = list(
-                            "Rate (λ)" = paste("Rate parameter (1/mean), currently set to:", self$options$exponential_rate)
+                            "Rate (\u{03BB})" = paste("Rate parameter (1/mean), currently set to:", self$options$exponential_rate)
                         ),
                         applications = "Time between hospital arrivals, survival analysis, reliability engineering"
                     ),
@@ -484,7 +484,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         title = "Poisson Distribution",
                         description = "The Poisson distribution models the number of events occurring in a fixed interval of time or space.",
                         parameters = list(
-                            "Rate (λ)" = paste("Average rate of occurrence, currently set to:", self$options$poisson_lambda)
+                            "Rate (\u{03BB})" = paste("Average rate of occurrence, currently set to:", self$options$poisson_lambda)
                         ),
                         applications = "Adverse event counting, hospital arrivals, infection rates"
                     ),
@@ -493,7 +493,7 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                         description = "The Weibull distribution is widely used in survival analysis and reliability engineering. It can model various hazard rate patterns.",
                         parameters = list(
                             "Shape (k)" = paste("Shape parameter controlling distribution form, currently set to:", self$options$weibull_shape),
-                            "Scale (λ)" = paste("Scale parameter affecting spread, currently set to:", self$options$weibull_scale)
+                            "Scale (\u{03BB})" = paste("Scale parameter affecting spread, currently set to:", self$options$weibull_scale)
                         ),
                         applications = "Survival analysis, time-to-failure, reliability studies"
                     ),

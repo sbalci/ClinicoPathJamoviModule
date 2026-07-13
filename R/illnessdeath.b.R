@@ -34,8 +34,8 @@ illnessdeathClass <- R6::R6Class(
                     <div class='step'>
                     <strong> Model Structures:</strong>
                     <ul>
-                        <li><strong>Standard:</strong> 0→1, 1→2, 0→2 (illness onset, mortality from each state)</li>
-                        <li><strong>Reversible:</strong> Add 1→0 (recovery from illness to healthy)</li>
+                        <li><strong>Standard:</strong> 0\u{2192}1, 1\u{2192}2, 0\u{2192}2 (illness onset, mortality from each state)</li>
+                        <li><strong>Reversible:</strong> Add 1\u{2192}0 (recovery from illness to healthy)</li>
                         <li><strong>Progressive:</strong> Only forward transitions (no recovery)</li>
                         <li><strong>Competing:</strong> Illness and death compete from healthy state</li>
                     </ul>

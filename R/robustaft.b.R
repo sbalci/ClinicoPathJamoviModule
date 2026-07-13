@@ -887,7 +887,7 @@ robustaftClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "</ul>",
                 
                 "<h4>Acceleration Factors</h4>",
-                "<p>AFT models estimate acceleration factors (AF = exp(-β)) that represent:</p>",
+                "<p>AFT models estimate acceleration factors (AF = exp(-\u{03B2})) that represent:</p>",
                 "<ul>",
                 "<li>AF > 1: Accelerated failure (shorter survival)</li>",
                 "<li>AF = 1: No effect on survival time</li>",

@@ -62,10 +62,10 @@ greyzonerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             <h4>Clinical Examples:</h4>
             <ul>
-                <li><b>Pap Smear:</b> ASCUS (Atypical Squamous Cells of Undetermined Significance) → HPV test</li>
-                <li><b>HER2 IHC 2+:</b> Equivocal → FISH confirmation</li>
-                <li><b>AI Diagnosis 40-60%:</b> Uncertain → Expert review</li>
-                <li><b>PSA 4-10 ng/mL:</b> Grey zone → Additional markers or biopsy</li>
+                <li><b>Pap Smear:</b> ASCUS (Atypical Squamous Cells of Undetermined Significance) \u{2192} HPV test</li>
+                <li><b>HER2 IHC 2+:</b> Equivocal \u{2192} FISH confirmation</li>
+                <li><b>AI Diagnosis 40-60%:</b> Uncertain \u{2192} Expert review</li>
+                <li><b>PSA 4-10 ng/mL:</b> Grey zone \u{2192} Additional markers or biopsy</li>
             </ul>
 
             <h4>Key Outputs:</h4>

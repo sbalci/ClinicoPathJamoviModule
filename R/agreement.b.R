@@ -138,7 +138,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <span style='font-size: 18px;'>", perc_agree, "%</span>
                         </td>
                         <td style='border: 1px solid #ccc; padding: 10px; background: #f9f9f9;'>
-                        <strong>Kappa (κ)</strong><br>
+                        <strong>Kappa (\u{03BA})</strong><br>
                         <span style='font-size: 18px;'>", kappa_val, "</span>
                         </td>
                     </tr>
@@ -299,7 +299,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 } else if (weight_type == "squared") {
                     weight_name <- "Squared (Quadratic) Weights"
                     weight_desc <- "Disagreements are weighted by the squared distance, penalizing larger disagreements more heavily."
-                    formula <- "Weight = 1 - [(i - j) / (k - 1)]²"
+                    formula <- "Weight = 1 - [(i - j) / (k - 1)]\u{00B2}"
                     formula_desc <- "where i and j are category positions, k is number of categories"
 
                     example_table <- "
@@ -686,7 +686,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Fibrosis stage</strong> - F0, F1, F2, F3, F4</li>
                         </ul>
                         <p style='margin: 0; padding: 10px; background: #f9f9f9; border-left: 3px solid #333; font-size: 13px;'>
-                            <strong> Important:</strong> Use \"Show Level Ordering Information\" to verify proper ordering (e.g., F0 → F1 → F2 → F3 → F4)
+                            <strong> Important:</strong> Use \"Show Level Ordering Information\" to verify proper ordering (e.g., F0 &#x2192; F1 &#x2192; F2 &#x2192; F3 &#x2192; F4)
                         </p>
                     </div>
 
@@ -726,7 +726,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <li><strong>Tumor size</strong> - Diameter measurements (mm or cm)</li>
                             <li><strong>Biomarker quantification</strong> - Ki-67 proliferation index (%)</li>
                             <li><strong>Cell counts</strong> - Mitotic figures per 10 HPF</li>
-                            <li><strong>Morphometric analysis</strong> - Nuclear area (μm²), gland perimeter</li>
+                            <li><strong>Morphometric analysis</strong> - Nuclear area (&#x3BC;m&#xB2;), gland perimeter</li>
                             <li><strong>Digital pathology</strong> - Automated vs manual measurements</li>
                             <li><strong>Continuous scores</strong> - Visual analog scales (0-100)</li>
                         </ul>
@@ -1587,7 +1587,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Fibrosis Stage Concordance (Chronic Liver Disease):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
                         <li><strong>Scenario:</strong> Two hepatopathologists stage fibrosis using Metavir (F0-F4)</li>
-                        <li><strong>Ordinal progression:</strong> F0 → F1 → F2 → F3 → F4 represents increasing severity</li>
+                        <li><strong>Ordinal progression:</strong> F0 &#x2192; F1 &#x2192; F2 &#x2192; F3 &#x2192; F4 represents increasing severity</li>
                         <li><strong>Focus:</strong> Agreement on progression severity more important than exact stage</li>
                         <li><strong>A = 0.81:</strong> Excellent ordinal agreement on disease severity trajectory</li>
                         <li><strong>Clinical decision:</strong> Reliable staging for antiviral treatment timing</li>
@@ -1851,7 +1851,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Mean Spearman Rho?</h3>
                     <p style='margin: 0; color: #333;'>
-                        Mean Spearman Rho (ρ) is the <strong>average rank correlation coefficient</strong> across all
+                        Mean Spearman Rho (&#x3C1;) is the <strong>average rank correlation coefficient</strong> across all
                         pairs of raters. Spearman's rho measures the <strong>monotonic association</strong> between two
                         ordinal variables. It ranges from <strong>-1 (perfect negative correlation)</strong> through
                         <strong>0 (no correlation)</strong> to <strong>+1 (perfect positive correlation)</strong>.
@@ -1920,7 +1920,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
                         <li><strong>Scenario:</strong> Four pathologists grade 50 neuroendocrine tumors (G1, G2, G3) based on Ki-67 and mitotic count</li>
                         <li><strong>Purpose:</strong> Assess if pathologists rank tumors by aggressiveness consistently</li>
-                        <li><strong>Mean ρ = 0.85:</strong> Strong rank correlation - pathologists agree on relative tumor aggressiveness</li>
+                        <li><strong>Mean &#x3C1; = 0.85:</strong> Strong rank correlation - pathologists agree on relative tumor aggressiveness</li>
                         <li><strong>Clinical value:</strong> High correlation validates grading system reliability for prognostic stratification</li>
                         <li><strong>Advantage:</strong> Less sensitive to exact grade disagreement (G1 vs. G2) than kappa; focuses on ordinal progression</li>
                     </ul>
@@ -1929,7 +1929,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
                         <li><strong>Scenario:</strong> GI pathologist and general pathologist rank 60 IBD biopsies by inflammatory activity (quiescent, mild, moderate, severe)</li>
                         <li><strong>Challenge:</strong> Specialists may use different thresholds but recognize same severity progression</li>
-                        <li><strong>Mean ρ = 0.78:</strong> Good rank correlation despite potential systematic differences in grading</li>
+                        <li><strong>Mean &#x3C1; = 0.78:</strong> Good rank correlation despite potential systematic differences in grading</li>
                         <li><strong>Interpretation:</strong> Both pathologists recognize severity trajectory; category-specific calibration may still be needed</li>
                         <li><strong>Application:</strong> Validates general pathologist competency for IBD assessment with specialist oversight</li>
                     </ul>
@@ -1938,7 +1938,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
                         <li><strong>Scenario:</strong> Three hepatopathologists rank 40 liver biopsies by fibrosis severity (Ishak 0-6 or Metavir F0-F4)</li>
                         <li><strong>Ordinal nature:</strong> Fibrosis stages represent clear progression from none to cirrhosis</li>
-                        <li><strong>Mean ρ = 0.89:</strong> Excellent rank correlation on disease progression</li>
+                        <li><strong>Mean &#x3C1; = 0.89:</strong> Excellent rank correlation on disease progression</li>
                         <li><strong>Clinical decision:</strong> Consistent severity ranking supports reliable treatment timing recommendations</li>
                         <li><strong>Robust to staging system:</strong> Correlation reflects biological progression regardless of exact staging scheme</li>
                     </ul>
@@ -1947,7 +1947,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
                         <li><strong>Scenario:</strong> Five dermatopathologists rank 30 melanocytic lesions by diagnostic difficulty (1 = easiest, 30 = most difficult)</li>
                         <li><strong>Educational goal:</strong> Identify cases with consensus difficulty for training curriculum</li>
-                        <li><strong>Mean ρ = 0.72:</strong> Good correlation on difficulty progression</li>
+                        <li><strong>Mean &#x3C1; = 0.72:</strong> Good correlation on difficulty progression</li>
                         <li><strong>Case selection:</strong> High-correlation difficult cases become core teaching material</li>
                         <li><strong>Low-correlation cases:</strong> Reveal pathologist-specific knowledge gaps requiring targeted education</li>
                     </ul>
@@ -1956,7 +1956,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0; padding-left: 20px; line-height: 1.6;'>
                         <li><strong>Scenario:</strong> Compare AI algorithm vs. three expert pathologists on Gleason grading (6-10) for 100 prostate cores</li>
                         <li><strong>Validation focus:</strong> AI should rank cases by prognostic severity similar to experts</li>
-                        <li><strong>Mean ρ = 0.81:</strong> Strong rank correlation between AI and expert consensus</li>
+                        <li><strong>Mean &#x3C1; = 0.81:</strong> Strong rank correlation between AI and expert consensus</li>
                         <li><strong>Regulatory value:</strong> High correlation demonstrates AI captures prognostic progression</li>
                         <li><strong>Advantage:</strong> Robust measure unaffected by systematic grade shifts (AI consistently one grade higher/lower)</li>
                         <li><strong>Clinical deployment:</strong> Supports AI as decision support for risk stratification</li>
@@ -1967,28 +1967,28 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Interpretation Guidelines</h4>
                     <table style='width: 100%; border-collapse: collapse; font-size: 14px;'>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>ρ &lt; 0.30</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>&#x3C1; &lt; 0.30</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Negligible correlation</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.30 <= ρ &lt; 0.50</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.30 <= &#x3C1; &lt; 0.50</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Low correlation</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 <= ρ &lt; 0.70</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.50 <= &#x3C1; &lt; 0.70</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>Moderate correlation</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.70 <= ρ &lt; 0.90</td>
+                            <td style='padding: 5px; font-weight: bold; border-bottom: 1px solid #ddd;'>0.70 <= &#x3C1; &lt; 0.90</td>
                             <td style='padding: 5px; border-bottom: 1px solid #ddd;'>High correlation</td>
                         </tr>
                         <tr>
-                            <td style='padding: 5px; font-weight: bold;'>ρ >= 0.90</td>
+                            <td style='padding: 5px; font-weight: bold;'>&#x3C1; >= 0.90</td>
                             <td style='padding: 5px;'>Very high correlation (nearly identical rankings)</td>
                         </tr>
                     </table>
                     <p style='margin: 10px 0 0 0; font-size: 13px;'>
-                        <strong>Note:</strong> For interrater agreement, Mean ρ represents the average correlation
+                        <strong>Note:</strong> For interrater agreement, Mean &#x3C1; represents the average correlation
                         across all rater pairs. Min/Max values show range of pairwise correlations, indicating
                         heterogeneity among rater pairs.
                     </p>
@@ -2115,7 +2115,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         self$results$meanSpearmanTable$setNote(
                             "interpretation",
                             sprintf(
-                                "Interpretation: %s (Mean ρ = %.3f). Pairwise correlations range from %s, indicating %s among rater pairs. High positive correlations indicate raters rank cases similarly.",
+                                "Interpretation: %s (Mean \u{03C1} = %.3f). Pairwise correlations range from %s, indicating %s among rater pairs. High positive correlations indicate raters rank cases similarly.",
                                 interp, mean_rho, range_text,
                                 if (max_rho - min_rho < 0.20) "consistent agreement" else "variability in agreement"
                             )
@@ -2217,7 +2217,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                     <p style='margin: 0 0 10px 0; font-weight: bold;'>3. Digital Image Analysis (Nuclear Area Measurement):</p>
                     <ul style='margin: 0 0 15px 0; padding-left: 20px; line-height: 1.6;'>
-                        <li><strong>Scenario:</strong> Compare three image analysis algorithms measuring nuclear area (μm²) on 100 lymphoma cells</li>
+                        <li><strong>Scenario:</strong> Compare three image analysis algorithms measuring nuclear area (&#x3BC;m&#xB2;) on 100 lymphoma cells</li>
                         <li><strong>Continuous output:</strong> Algorithms provide precise continuous measurements</li>
                         <li><strong>Mean r = 0.96:</strong> Excellent correlation - algorithms rank nuclear sizes identically</li>
                         <li><strong>Systematic bias:</strong> One algorithm may consistently measure 5% larger, but correlation remains perfect</li>
@@ -2300,7 +2300,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Sensitive to linear trends:</strong> Detects proportional relationships between raters</li>
                         <li><strong>Complements ICC:</strong> Provides different perspective (correlation vs. agreement)</li>
                         <li><strong>Scale-independent:</strong> Unaffected by systematic shifts (all measurements +10 mm)</li>
-                        <li><strong>Hypothesis testing:</strong> Built-in significance test for correlation ≠ 0</li>
+                        <li><strong>Hypothesis testing:</strong> Built-in significance test for correlation &#x2260; 0</li>
                     </ul>
                 </div>
 
@@ -2435,10 +2435,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Accuracy</strong> - How close measurements are to perfect agreement (bias correction factor C<sub>b</sub>)</li>
                     </ul>
                     <p style='margin: 10px 0 0 0; color: #333;'>
-                        <strong>Formula:</strong> CCC = r × C<sub>b</sub>, where C<sub>b</sub> = 2 / (v + 1/v + u²)
+                        <strong>Formula:</strong> CCC = r &#xD7; C<sub>b</sub>, where C<sub>b</sub> = 2 / (v + 1/v + u&#xB2;)
                     </p>
                     <p style='margin: 5px 0 0 0; color: #666; font-size: 0.9em;'>
-                        v = σ<sub>x</sub> / σ<sub>y</sub> (scale shift), u = (μ<sub>x</sub> - μ<sub>y</sub>) / √(σ<sub>x</sub>σ<sub>y</sub>) (location shift)
+                        v = &#x3C3;<sub>x</sub> / &#x3C3;<sub>y</sub> (scale shift), u = (&#x3BC;<sub>x</sub> - &#x3BC;<sub>y</sub>) / &#x221A;(&#x3C3;<sub>x</sub>&#x3C3;<sub>y</sub>) (location shift)
                     </p>
                 </div>
 
@@ -2528,7 +2528,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </tr>
                     </table>
                     <p style='margin: 15px 0 0 0;'>
-                        <strong>Example:</strong> Two methods with r = 1.0 but Method B = 2 × Method A have perfect correlation
+                        <strong>Example:</strong> Two methods with r = 1.0 but Method B = 2 &#xD7; Method A have perfect correlation
                         but poor agreement. CCC would be substantially < 1.0, correctly identifying the systematic difference.
                     </p>
                 </div>
@@ -2547,10 +2547,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Pearson's r = 0.96 (excellent correlation)<br>
-                            • CCC = 0.88 (moderate agreement)<br>
-                            • Bias correction factor C<sub>b</sub> = 0.92 (8% accuracy loss)<br>
-                            • Digital consistently 3-5% lower than manual
+                            &#x2022; Pearson's r = 0.96 (excellent correlation)<br>
+                            &#x2022; CCC = 0.88 (moderate agreement)<br>
+                            &#x2022; Bias correction factor C<sub>b</sub> = 0.92 (8% accuracy loss)<br>
+                            &#x2022; Digital consistently 3-5% lower than manual
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> High correlation (r=0.96) masks systematic underestimation
@@ -2574,10 +2574,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results (averaged across pathologists):</strong><br>
-                            • Pearson's r = 0.94<br>
-                            • CCC = 0.93<br>
-                            • Bias correction factor C<sub>b</sub> = 0.99 (minimal bias)<br>
-                            • Mean difference: WSI 0.3 mitoses/10HPF higher (not significant)
+                            &#x2022; Pearson's r = 0.94<br>
+                            &#x2022; CCC = 0.93<br>
+                            &#x2022; Bias correction factor C<sub>b</sub> = 0.99 (minimal bias)<br>
+                            &#x2022; Mean difference: WSI 0.3 mitoses/10HPF higher (not significant)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Excellent agreement (CCC=0.93) with minimal systematic
@@ -2600,10 +2600,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Pearson's r = 0.89<br>
-                            • CCC = 0.75<br>
-                            • Bias correction factor C<sub>b</sub> = 0.84 (16% accuracy loss)<br>
-                            • SP263 scores average 8% higher than 22C3
+                            &#x2022; Pearson's r = 0.89<br>
+                            &#x2022; CCC = 0.75<br>
+                            &#x2022; Bias correction factor C<sub>b</sub> = 0.84 (16% accuracy loss)<br>
+                            &#x2022; SP263 scores average 8% higher than 22C3
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Poor agreement (CCC=0.75) despite good correlation
@@ -2626,10 +2626,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Pearson's r = 0.82<br>
-                            • CCC = 0.67<br>
-                            • Bias correction factor C<sub>b</sub> = 0.82<br>
-                            • Imaging overestimates by 3.2 mm on average (includes surrounding edema)
+                            &#x2022; Pearson's r = 0.82<br>
+                            &#x2022; CCC = 0.67<br>
+                            &#x2022; Bias correction factor C<sub>b</sub> = 0.82<br>
+                            &#x2022; Imaging overestimates by 3.2 mm on average (includes surrounding edema)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Poor agreement (CCC=0.67) due to both imperfect
@@ -2654,10 +2654,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Pearson's r = 0.97<br>
-                            • CCC = 0.96<br>
-                            • Bias correction factor C<sub>b</sub> = 0.99 (minimal bias)<br>
-                            • Mean difference: CISH 0.05 ratio units lower (not clinically significant)
+                            &#x2022; Pearson's r = 0.97<br>
+                            &#x2022; CCC = 0.96<br>
+                            &#x2022; Bias correction factor C<sub>b</sub> = 0.99 (minimal bias)<br>
+                            &#x2022; Mean difference: CISH 0.05 ratio units lower (not clinically significant)
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Excellent agreement (CCC=0.96) with both high precision
@@ -2686,12 +2686,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Statistical Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>CCC formula:</strong> ρ<sub>c</sub> = 2ρσ<sub>x</sub>σ<sub>y</sub> / (σ<sub>x</sub>² + σ<sub>y</sub>² + (μ<sub>x</sub> - μ<sub>y</sub>)²)</li>
-                        <li><strong>Components:</strong> CCC = r × C<sub>b</sub>, where C<sub>b</sub> is bias correction factor</li>
+                        <li><strong>CCC formula:</strong> &#x3C1;<sub>c</sub> = 2&#x3C1;&#x3C3;<sub>x</sub>&#x3C3;<sub>y</sub> / (&#x3C3;<sub>x</sub>&#xB2; + &#x3C3;<sub>y</sub>&#xB2; + (&#x3BC;<sub>x</sub> - &#x3BC;<sub>y</sub>)&#xB2;)</li>
+                        <li><strong>Components:</strong> CCC = r &#xD7; C<sub>b</sub>, where C<sub>b</sub> is bias correction factor</li>
                         <li><strong>Confidence intervals:</strong> Calculated using Fisher's Z-transformation</li>
                         <li><strong>Null hypothesis:</strong> CCC = 0 (no concordance); test using asymptotic variance</li>
                         <li><strong>Assumptions:</strong> Bivariate normal distribution preferred but not strictly required</li>
-                        <li><strong>Relationship to ICC:</strong> CCC for 2 raters ≈ ICC(2,1) under certain conditions</li>
+                        <li><strong>Relationship to ICC:</strong> CCC for 2 raters &#x2248; ICC(2,1) under certain conditions</li>
                     </ul>
                 </div>
             </div>
@@ -2921,8 +2921,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mm (clinical decision threshold)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5 mm</li>")
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm → <span style="color: green;">Methods equivalent</span></li>')
-                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm → <span style="color: red;">Methods not equivalent</span></li>')
+                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 3.8 mm \u{2192} <span style="color: green;">Methods equivalent</span></li>')
+                html <- paste0(html, '<li><strong>Result:</strong> If TDI = 6.2 mm \u{2192} <span style="color: red;">Methods not equivalent</span></li>')
                 html <- paste0(html, "<li><strong>Action:</strong> Acceptable agreement allows replacement of manual with digital measurements</li>")
                 html <- paste0(html, "</ul>")
 
@@ -2931,7 +2931,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 10% absolute difference (clinical cutoff significance)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 95% of differences should be <=10%</li>")
-                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 7.5% → Automated method acceptable for clinical use</li>")
+                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 7.5% \u{2192} Automated method acceptable for clinical use</li>")
                 html <- paste0(html, "<li><strong>Clinical Impact:</strong> Supports FDA 510(k) submission for digital pathology system</li>")
                 html <- paste0(html, "</ul>")
 
@@ -2940,7 +2940,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li><strong>Acceptable Limit:</strong> 5 mitoses (affects tumor grade)</li>")
                 html <- paste0(html, "<li><strong>Coverage:</strong> 90% of differences should be <=5</li>")
-                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 4.2 → Inter-observer agreement acceptable</li>")
+                html <- paste0(html, "<li><strong>Result:</strong> If TDI = 4.2 \u{2192} Inter-observer agreement acceptable</li>")
                 html <- paste0(html, "<li><strong>Quality Control:</strong> Can be used to certify pathologist performance</li>")
                 html <- paste0(html, "</ul>")
 
@@ -3184,7 +3184,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<h3>Why Use Specific Agreement?</h3>")
                 html <- paste0(html, "<p><strong>Limitations of Overall Kappa:</strong></p>")
                 html <- paste0(html, "<ul>")
-                html <- paste0(html, "<li>Treats all disagreements equally (benign→malignant = malignant→benign)</li>")
+                html <- paste0(html, "<li>Treats all disagreements equally (benign\u{2192}malignant = malignant\u{2192}benign)</li>")
                 html <- paste0(html, "<li>Cannot identify which specific categories have poor agreement</li>")
                 html <- paste0(html, "<li>May mask problems with critical categories (e.g., cancer diagnosis)</li>")
                 html <- paste0(html, "<li>Affected by category prevalence (low prevalence categories contribute less)</li>")
@@ -3220,7 +3220,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
                 html <- paste0(html, "</ul>")
 
-                html <- paste0(html, "<p><strong>Asymmetric Agreement:</strong> When PSA ≠ NSA, suggests systematic bias:</p>")
+                html <- paste0(html, "<p><strong>Asymmetric Agreement:</strong> When PSA \u{2260} NSA, suggests systematic bias:</p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li>PSA > NSA: Better agreement on positive cases (over-diagnosis tendency)</li>")
                 html <- paste0(html, "<li>NSA > PSA: Better agreement on negative cases (under-diagnosis tendency)</li>")
@@ -3283,12 +3283,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Calculation Method
                 html <- paste0(html, "<h3>Calculation Method</h3>")
                 html <- paste0(html, '<p><strong>For Binary Data (Category = "Positive"):</strong></p>')
-                html <- paste0(html, "<p>PSA = 2 × (Both Positive) / (Rater1 Positive + Rater2 Positive)</p>")
+                html <- paste0(html, "<p>PSA = 2 \u{00D7} (Both Positive) / (Rater1 Positive + Rater2 Positive)</p>")
                 html <- paste0(html, "<p>This represents: Of all cases either rater called positive, what proportion did both raters agree were positive?</p>")
 
                 html <- paste0(html, "<p><strong>For Multi-Category Data:</strong></p>")
                 html <- paste0(html, "<p>For each category C:</p>")
-                html <- paste0(html, "<p>Specific Agreement(C) = 2 × (Both rated C) / (Rater1 rated C + Rater2 rated C)</p>")
+                html <- paste0(html, "<p>Specific Agreement(C) = 2 \u{00D7} (Both rated C) / (Rater1 rated C + Rater2 rated C)</p>")
 
                 html <- paste0(html, "<p><strong>Confidence Intervals:</strong> Wilson score method (recommended for proportions)</p>")
 
@@ -3320,7 +3320,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 )
                 html <- paste0(
                     html, "de Vet HC, Mokkink LB, Terwee CB, Hoekstra OS, Knol DL. Clinicians are right not to like ",
-                    "Cohen's κ. <em>BMJ.</em> 2013;346:f2125.<br>"
+                    "Cohen's \u{03BA}. <em>BMJ.</em> 2013;346:f2125.<br>"
                 )
                 html <- paste0(
                     html, "Graham P, Jackson R. The analysis of ordinal agreement data: beyond weighted kappa. ",
@@ -3580,8 +3580,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 html <- paste0(html, "<p><strong>Heatmap Pattern Observed:</strong></p>")
                 html <- paste0(html, "<ul>")
                 html <- paste0(html, "<li>Upper triangle darker than lower triangle</li>")
-                html <- paste0(html, "<li>Specifically: Negative→Low cell dark (Rater 2 upgrades many cases)</li>")
-                html <- paste0(html, "<li>Low→High cell: Minimal</li>")
+                html <- paste0(html, "<li>Specifically: Negative\u{2192}Low cell dark (Rater 2 upgrades many cases)</li>")
+                html <- paste0(html, "<li>Low\u{2192}High cell: Minimal</li>")
                 html <- paste0(html, "</ul>")
                 html <- paste0(
                     html, "<p><strong>Interpretation:</strong> Rater 2 is systematically more aggressive, ",
@@ -3868,7 +3868,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'> Important Interpretation Notes</h4>
                     <ul style='margin: 0; padding-left: 20px;'>
-                        <li><strong>Distribution differences ≠ poor agreement:</strong> Raters can have different distributions
+                        <li><strong>Distribution differences &#x2260; poor agreement:</strong> Raters can have different distributions
                             but still agree well on relative rankings</li>
                         <li><strong>Context matters:</strong> Some distribution differences may reflect genuine expertise
                             (expert vs. trainee) rather than error</li>
@@ -4853,17 +4853,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Intervention Strategy</th>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE ≈ 0 - 0.30</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE &#x2248; 0 - 0.30</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Predominantly systematic error</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Calibration, standardization, bias correction</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE ≈ 0.30 - 0.70</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE &#x2248; 0.30 - 0.70</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mixed error sources</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Combined approach: calibration + training</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE ≈ 0.70 - 1.00</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>RE &#x2248; 0.70 - 1.00</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Predominantly random error</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Rater training, standardized protocols, quality control</td>
                         </tr>
@@ -4884,10 +4884,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Total variance: 145.2<br>
-                            • Systematic variance: 112.4 (77.4%) - digital consistently scores 5-8% lower<br>
-                            • Random variance: 32.8 (22.6%)<br>
-                            • RE = 0.23
+                            &#x2022; Total variance: 145.2<br>
+                            &#x2022; Systematic variance: 112.4 (77.4%) - digital consistently scores 5-8% lower<br>
+                            &#x2022; Random variance: 32.8 (22.6%)<br>
+                            &#x2022; RE = 0.23
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Low RE (0.23) indicates disagreement is primarily systematic
@@ -4905,15 +4905,15 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             Mitotic Count Agreement in Melanoma
                         </h5>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Scenario:</strong> Three dermatopathologists count mitoses per mm² in 80 melanocytic lesions.
+                            <strong>Scenario:</strong> Three dermatopathologists count mitoses per mm&#xB2; in 80 melanocytic lesions.
                             Goal: Understand if disagreement stems from systematic differences in counting approach or random errors.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Total variance: 8.7 mitoses²/mm⁴<br>
-                            • Systematic variance: 1.9 (21.8%) - minimal systematic differences<br>
-                            • Random variance: 6.8 (78.2%)<br>
-                            • RE = 0.78
+                            &#x2022; Total variance: 8.7 mitoses&#xB2;/mm&#x2074;<br>
+                            &#x2022; Systematic variance: 1.9 (21.8%) - minimal systematic differences<br>
+                            &#x2022; Random variance: 6.8 (78.2%)<br>
+                            &#x2022; RE = 0.78
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> High RE (0.78) indicates disagreement is predominantly random
@@ -4938,10 +4938,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Total variance: 42.5 mm²<br>
-                            • Systematic variance: 28.3 (66.6%) - calipers average 2.1 mm larger than digital<br>
-                            • Random variance: 14.2 (33.4%)<br>
-                            • RE = 0.33
+                            &#x2022; Total variance: 42.5 mm&#xB2;<br>
+                            &#x2022; Systematic variance: 28.3 (66.6%) - calipers average 2.1 mm larger than digital<br>
+                            &#x2022; Random variance: 14.2 (33.4%)<br>
+                            &#x2022; RE = 0.33
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Moderate-low RE (0.33) indicates mixed error sources with
@@ -4965,10 +4965,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Total variance: 1.84 (Gleason scale units²)<br>
-                            • Systematic variance: 1.12 (60.9%) - community pathologists average 0.7 points higher<br>
-                            • Random variance: 0.72 (39.1%)<br>
-                            • RE = 0.39
+                            &#x2022; Total variance: 1.84 (Gleason scale units&#xB2;)<br>
+                            &#x2022; Systematic variance: 1.12 (60.9%) - community pathologists average 0.7 points higher<br>
+                            &#x2022; Random variance: 0.72 (39.1%)<br>
+                            &#x2022; RE = 0.39
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> Mixed error pattern (RE = 0.39) with systematic error
@@ -4994,17 +4994,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results - Pre-Training:</strong><br>
-                            • Total variance: 0.89<br>
-                            • Systematic variance: 0.15 (16.9%)<br>
-                            • Random variance: 0.74 (83.1%)<br>
-                            • RE = 0.83
+                            &#x2022; Total variance: 0.89<br>
+                            &#x2022; Systematic variance: 0.15 (16.9%)<br>
+                            &#x2022; Random variance: 0.74 (83.1%)<br>
+                            &#x2022; RE = 0.83
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results - Post-Training:</strong><br>
-                            • Total variance: 0.42 (53% reduction)<br>
-                            • Systematic variance: 0.09 (21.4%)<br>
-                            • Random variance: 0.33 (78.6%)<br>
-                            • RE = 0.79
+                            &#x2022; Total variance: 0.42 (53% reduction)<br>
+                            &#x2022; Systematic variance: 0.09 (21.4%)<br>
+                            &#x2022; Random variance: 0.33 (78.6%)<br>
+                            &#x2022; RE = 0.79
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> High RE both pre (0.83) and post (0.79) training indicates
@@ -5030,8 +5030,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>RE Index</strong> = Random Variance / Total Variance</li>
                     </ul>
                     <p style='margin: 10px 0 0 0;'>
-                        <em>Example:</em> If two methods differ by a constant offset but each is internally consistent, RE ≈ 0
-                        (systematic). If two methods have identical means but high variability, RE ≈ 1 (random).
+                        <em>Example:</em> If two methods differ by a constant offset but each is internally consistent, RE &#x2248; 0
+                        (systematic). If two methods have identical means but high variability, RE &#x2248; 1 (random).
                     </p>
                 </div>
 
@@ -5042,7 +5042,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <li><strong>Interpretation context:</strong> RE alone doesn't indicate good/bad reliability - must consider
                             total variance magnitude</li>
                         <li><strong>Complementary use:</strong> Use with ICC/kappa for complete reliability assessment</li>
-                        <li><strong>Intervention planning:</strong> Low RE → calibration/standardization; High RE → training/protocols</li>
+                        <li><strong>Intervention planning:</strong> Low RE &#x2192; calibration/standardization; High RE &#x2192; training/protocols</li>
                         <li><strong>Monitoring over time:</strong> Track RE changes after interventions to assess effectiveness</li>
                         <li><strong>Data type:</strong> Best suited for continuous or ordinal data with meaningful numeric scale</li>
                     </ul>
@@ -5259,12 +5259,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <div style='background: #fff; padding: 10px; border-radius: 5px; font-family: monospace;'>
                         <strong>Pattern:</strong> RaterID<span style='color: #333;'>[separator]</span>TimePoint<br>
                         <strong>Example with underscore (_):</strong><br>
-                        • Rater1_Time1, Rater1_Time2, Rater1_Time3<br>
-                        • Rater2_Time1, Rater2_Time2, Rater2_Time3<br>
-                        • PathA_T1, PathA_T2 (works with any separator)<br>
+                        &#x2022; Rater1_Time1, Rater1_Time2, Rater1_Time3<br>
+                        &#x2022; Rater2_Time1, Rater2_Time2, Rater2_Time3<br>
+                        &#x2022; PathA_T1, PathA_T2 (works with any separator)<br>
                         <strong>Example with dot (.):</strong><br>
-                        • Observer1.Pre, Observer1.Post<br>
-                        • Observer2.Pre, Observer2.Post
+                        &#x2022; Observer1.Pre, Observer1.Post<br>
+                        &#x2022; Observer2.Pre, Observer2.Post
                     </div>
                     <p style='margin: 10px 0 0 0;'><em>The separator character (default: underscore) is specified in the analysis options.</em></p>
                 </div>
@@ -5322,13 +5322,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Intra-rater: Resident1 κ=0.72, Resident2 κ=0.58, Resident3 κ=0.81<br>
-                            • Inter-rater: Overall κ=0.64
+                            &#x2022; Intra-rater: Resident1 &#x3BA;=0.72, Resident2 &#x3BA;=0.58, Resident3 &#x3BA;=0.81<br>
+                            &#x2022; Inter-rater: Overall &#x3BA;=0.64
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
-                            <strong>Clinical Interpretation:</strong> Resident3 shows excellent individual consistency (κ=0.81),
-                            Resident2 shows fair consistency (κ=0.58) and may need additional training. Overall inter-rater
-                            agreement is good (κ=0.64), indicating residents are learning similar grading criteria.
+                            <strong>Clinical Interpretation:</strong> Resident3 shows excellent individual consistency (&#x3BA;=0.81),
+                            Resident2 shows fair consistency (&#x3BA;=0.58) and may need additional training. Overall inter-rater
+                            agreement is good (&#x3BA;=0.64), indicating residents are learning similar grading criteria.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Application:</strong> Identifies which residents need additional mentoring and whether
@@ -5350,8 +5350,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Intra-rater: PathA ICC=0.89, PathB ICC=0.85, PathC ICC=0.78, PathD ICC=0.91<br>
-                            • Inter-rater: Overall ICC=0.82
+                            &#x2022; Intra-rater: PathA ICC=0.89, PathB ICC=0.85, PathC ICC=0.78, PathD ICC=0.91<br>
+                            &#x2022; Inter-rater: Overall ICC=0.82
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> All pathologists show excellent individual consistency
@@ -5378,12 +5378,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Intra-rater: Path1 κ=0.91, Path2 κ=0.88, Path3 κ=0.76, Path4 κ=0.85, Path5 κ=0.82<br>
-                            • Inter-rater: Hour 0 κ=0.84, Hour 8 κ=0.79
+                            &#x2022; Intra-rater: Path1 &#x3BA;=0.91, Path2 &#x3BA;=0.88, Path3 &#x3BA;=0.76, Path4 &#x3BA;=0.85, Path5 &#x3BA;=0.82<br>
+                            &#x2022; Inter-rater: Hour 0 &#x3BA;=0.84, Hour 8 &#x3BA;=0.79
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> All pathologists maintain good-to-excellent individual
-                            consistency despite fatigue. Slight decrease in inter-rater agreement (0.84→0.79) suggests
+                            consistency despite fatigue. Slight decrease in inter-rater agreement (0.84&#x2192;0.79) suggests
                             mild group-level fatigue effect but still within acceptable range.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
@@ -5406,12 +5406,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Intra-rater: Range κ=0.68-0.84 (all experts maintain good consistency)<br>
-                            • Inter-rater: Baseline κ=0.72, Month 6 κ=0.76
+                            &#x2022; Intra-rater: Range &#x3BA;=0.68-0.84 (all experts maintain good consistency)<br>
+                            &#x2022; Inter-rater: Baseline &#x3BA;=0.72, Month 6 &#x3BA;=0.76
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> All experts demonstrate good individual test-retest
-                            reliability (κ>=0.68). Inter-rater agreement actually improved after recalibration session (0.72→0.76),
+                            reliability (&#x3BA;>=0.68). Inter-rater agreement actually improved after recalibration session (0.72&#x2192;0.76),
                             indicating successful standardization.
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
@@ -5434,8 +5434,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Results:</strong><br>
-                            • Intra-rater: Scorer1 ICC=0.88, Scorer2 ICC=0.92, Scorer3 ICC=0.79, Scorer4 ICC=0.86<br>
-                            • Inter-rater: Overall ICC=0.81
+                            &#x2022; Intra-rater: Scorer1 ICC=0.88, Scorer2 ICC=0.92, Scorer3 ICC=0.79, Scorer4 ICC=0.86<br>
+                            &#x2022; Inter-rater: Overall ICC=0.81
                         </p>
                         <p style='margin: 5px 0; padding-left: 30px;'>
                             <strong>Clinical Interpretation:</strong> All scorers show good-to-excellent individual reproducibility
@@ -5654,11 +5654,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     if (is_ordinal) {
                                         # Weighted kappa for ordinal
                                         kappa_result <- irr::kappa2(cbind(data1, data2), weight = "squared")
-                                        stat_name <- "Weighted κ"
+                                        stat_name <- "Weighted \u{03BA}"
                                     } else {
                                         # Unweighted kappa for nominal
                                         kappa_result <- irr::kappa2(cbind(data1, data2), weight = "unweighted")
-                                        stat_name <- "Cohen's κ"
+                                        stat_name <- "Cohen's \u{03BA}"
                                     }
 
                                     kappa_value <- kappa_result$value
@@ -5766,7 +5766,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 }
 
                                 self$results$interIntraRaterInterTable$setRow(rowNo = 1, list(
-                                    method = "Inter-Rater Reliability (All Raters × Time Points)",
+                                    method = "Inter-Rater Reliability (All Raters \u{00D7} Time Points)",
                                     n_cases = n_cases,
                                     n_raters = n_raters,
                                     statistic_name = "ICC(2,1)",
@@ -5820,10 +5820,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 }
 
                                 self$results$interIntraRaterInterTable$setRow(rowNo = 1, list(
-                                    method = "Inter-Rater Reliability (All Raters × Time Points)",
+                                    method = "Inter-Rater Reliability (All Raters \u{00D7} Time Points)",
                                     n_cases = n_cases,
                                     n_raters = n_raters,
-                                    statistic_name = "Fleiss' κ",
+                                    statistic_name = "Fleiss' \u{03BA}",
                                     value = kappa_value,
                                     ci_lower = ci_lower,
                                     ci_upper = ci_upper,
@@ -5932,7 +5932,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Important Considerations</h4>
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Sample size matters:</strong> Test has limited power with small samples (< 30 cases)</li>
-                        <li><strong>Bias ≠ Poor agreement:</strong> Raters can be biased but still agree (all systematically lenient)</li>
+                        <li><strong>Bias \u{2260} Poor agreement:</strong> Raters can be biased but still agree (all systematically lenient)</li>
                         <li><strong>Clinical context:</strong> Some bias may be acceptable (e.g., erring on side of caution)</li>
                         <li><strong>Training intervention:</strong> Significant bias often correctable with feedback and training</li>
                         <li><strong>Follow-up:</strong> After detecting bias, examine individual rater frequency distributions</li>
@@ -6059,7 +6059,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         The Bhapkar test is a <strong>chi-square test for marginal homogeneity</strong> between
                         <strong>two raters</strong> with <strong>multiple categories</strong>. It tests whether two
                         raters use rating categories with equal frequency. This is the extension of <strong>McNemar's test</strong>
-                        (which is limited to 2×2 tables) to larger contingency tables.
+                        (which is limited to 2&#xD7;2 tables) to larger contingency tables.
                     </p>
                 </div>
 
@@ -6198,7 +6198,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Exactly 2 raters:</strong> Test designed for paired comparisons only</li>
                         <li><strong>Same subjects rated twice:</strong> Data must be paired (same cases)</li>
-                        <li><strong>Multiple categories (&gt;2):</strong> For 2×2 tables, use McNemar's test instead</li>
+                        <li><strong>Multiple categories (&gt;2):</strong> For 2&#xD7;2 tables, use McNemar's test instead</li>
                         <li><strong>Large sample:</strong> More reliable with n &gt; 30 cases</li>
                         <li><strong>Categorical data:</strong> Ordered or unordered categories</li>
                     </ul>
@@ -6270,7 +6270,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (n_categories == 2) {
                     self$results$bhapkarTable$setNote(
                         "warning",
-                        "Only 2 categories detected. For 2×2 tables, McNemar's test is more appropriate. Bhapkar test is designed for >2 categories."
+                        "Only 2 categories detected. For 2\u{00D7}2 tables, McNemar's test is more appropriate. Bhapkar test is designed for >2 categories."
                     )
                 }
 
@@ -6355,7 +6355,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         The Stuart-Maxwell test is a <strong>classic chi-square test for marginal homogeneity</strong>
                         between <strong>two raters</strong> with <strong>multiple categories</strong>. It tests whether
                         two raters use rating categories with equal frequency in <strong>matched/paired data</strong>.
-                        This is the traditional extension of <strong>McNemar's test</strong> (which is for 2×2 tables) to
+                        This is the traditional extension of <strong>McNemar's test</strong> (which is for 2&#xD7;2 tables) to
                         larger contingency tables.
                     </p>
                 </div>
@@ -6485,7 +6485,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0; padding-left: 20px; font-size: 13px;'>
                         <li><strong>Paired/matched data:</strong> Same subjects rated twice or same cases by two raters</li>
                         <li><strong>Two raters only:</strong> Designed for comparing exactly 2 sets of ratings</li>
-                        <li><strong>Multiple categories (&gt;2):</strong> Use McNemar for 2×2 tables</li>
+                        <li><strong>Multiple categories (&gt;2):</strong> Use McNemar for 2&#xD7;2 tables</li>
                         <li><strong>Categorical data:</strong> Works with nominal or ordinal categories</li>
                         <li><strong>Sample size:</strong> More reliable with n &gt; 30; consider Bhapkar for n &gt; 50</li>
                         <li><strong>Complete pairs:</strong> Cases with missing data are excluded</li>
@@ -6563,7 +6563,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (n_categories == 2) {
                     self$results$stuartMaxwellTable$setNote(
                         "warning",
-                        "Only 2 categories detected. For 2×2 tables, McNemar's test is the standard choice. Stuart-Maxwell is designed for >2 categories."
+                        "Only 2 categories detected. For 2\u{00D7}2 tables, McNemar's test is the standard choice. Stuart-Maxwell is designed for >2 categories."
                     )
                 }
 
@@ -6684,7 +6684,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Training Status</th>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>κ < 0.40</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>\u{03BA} < 0.40</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Poor to fair</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Needs significant training</td>
                         </tr>
@@ -6699,7 +6699,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'> Acceptable performance</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px;'><strong>κ > 0.75</strong></td>
+                            <td style='padding: 8px;'><strong>\u{03BA} > 0.75</strong></td>
                             <td style='padding: 8px;'>Excellent</td>
                             <td style='padding: 8px;'> Certified/Expert level</td>
                         </tr>
@@ -6738,11 +6738,11 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         <strong>Scenario:</strong> Five pathology residents (Raters 1-5) grade 100 tumor samples.
                         A senior pathologist provides reference diagnoses.<br><br>
                         <strong>Results:</strong><br>
-                        • Resident 1: κ = 0.82 (Excellent)  Ready for certification<br>
-                        • Resident 2: κ = 0.68 (Substantial)  Acceptable, continue monitoring<br>
-                        • Resident 3: κ = 0.52 (Moderate)  Additional training needed<br>
-                        • Resident 4: κ = 0.45 (Moderate)  Review difficult cases with expert<br>
-                        • Resident 5: κ = 0.28 (Poor)  Requires intensive retraining<br><br>
+                        \u{2022} Resident 1: \u{03BA} = 0.82 (Excellent)  Ready for certification<br>
+                        \u{2022} Resident 2: \u{03BA} = 0.68 (Substantial)  Acceptable, continue monitoring<br>
+                        \u{2022} Resident 3: \u{03BA} = 0.52 (Moderate)  Additional training needed<br>
+                        \u{2022} Resident 4: \u{03BA} = 0.45 (Moderate)  Review difficult cases with expert<br>
+                        \u{2022} Resident 5: \u{03BA} = 0.28 (Poor)  Requires intensive retraining<br><br>
                         <strong>Action:</strong> Residents 1-2 certified. Residents 3-5 receive targeted training
                         based on specific error patterns, then retest after 3 months.
                     </p>
@@ -6763,9 +6763,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Pairwise vs Overall Agreement</h4>
                     <p style='margin: 0; font-size: 13px;'>
                         <strong>Pairwise Kappa (vs Reference):</strong> Measures each rater's agreement with gold standard<br>
-                        → <em>Focus: Individual performance assessment</em><br><br>
+                        \u{2192} <em>Focus: Individual performance assessment</em><br><br>
                         <strong>Fleiss'/Light's Kappa:</strong> Measures overall agreement among all raters<br>
-                        → <em>Focus: General reliability of rating system</em><br><br>
+                        \u{2192} <em>Focus: General reliability of rating system</em><br><br>
                         <strong>Recommendation:</strong> Use both! Overall kappa shows if your rating system is reliable.
                         Pairwise kappa identifies which specific raters need training.
                     </p>
@@ -7705,7 +7705,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <div style='background: #E8F5E9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0;'>
                         <h4 style='margin: 0 0 10px 0; color: #333;'>What is Iota?</h4>
                         <p style='margin: 0; line-height: 1.6;'>
-                            Iota (ι) is a <strong>chance-corrected agreement index</strong> for multivariate observations. Unlike ICC which
+                            Iota (\u{03B9}) is a <strong>chance-corrected agreement index</strong> for multivariate observations. Unlike ICC which
                             analyzes one variable at a time, Iota assesses <strong>overall agreement across multiple variables simultaneously</strong>.
                         </p>
                     </div>
@@ -7979,7 +7979,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     if (is_factor) {
                         levels_list <- levels(var_data)
                         n_levels <- length(levels_list)
-                        levels_str <- paste(levels_list, collapse = " → ")
+                        levels_str <- paste(levels_list, collapse = " \u{2192} ")
 
                         if (is_ordered) {
                             data_type <- "Ordinal (ordered factor)"
@@ -7994,7 +7994,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         n_levels <- length(unique_vals)
 
                         if (n_levels <= 20) {
-                            levels_str <- paste(unique_vals, collapse = " → ")
+                            levels_str <- paste(unique_vals, collapse = " \u{2192} ")
                         } else {
                             levels_str <- paste("Range:", min(unique_vals), "to", max(unique_vals))
                         }
@@ -8022,7 +8022,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 if (any(sapply(ratings, is.ordered))) {
                     table$setNote(
                         "weighted_info",
-                        "For weighted kappa, verify that ordinal levels are in the correct order (e.g., G1 → G2 → G3 for tumor grades). Use jamovi's Data → Setup tab to reorder levels if needed."
+                        "For weighted kappa, verify that ordinal levels are in the correct order (e.g., G1 \u{2192} G2 \u{2192} G3 for tumor grades). Use jamovi's Data \u{2192} Setup tab to reorder levels if needed."
                     )
                 }
             },

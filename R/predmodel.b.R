@@ -220,7 +220,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 table <- self$results$calibrationMetrics
 
                 table$addRow(rowKey = 1, values = list(
-                    metric = "Hosmer-Lemeshow χ²",
+                    metric = "Hosmer-Lemeshow \u{03C7}\u{00B2}",
                     value = hl_stat,
                     df = hl_df,
                     p = hl_p

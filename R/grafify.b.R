@@ -256,7 +256,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             paste(
                 "<p><strong>", htmltools::htmlEscape(var_name), ":</strong>",
-                sprintf("%.3f ± %.3f", central_val, sd_val),
+                sprintf("%.3f \u{00B1} %.3f", central_val, sd_val),
                 "(n =", n_val, ")</p>"
             )
         },
@@ -279,7 +279,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             html <- "<h5>Group-wise Summary:</h5><table style='border-collapse: collapse; width: 100%;'>"
             html <- paste(html, "<tr><th style='border: 1px solid #ddd; padding: 8px;'>Group</th>")
             html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>N</th>")
-            html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>Mean ± SD</th>")
+            html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>Mean \u{00B1} SD</th>")
             html <- paste(html, "<th style='border: 1px solid #ddd; padding: 8px;'>Median</th></tr>")
             
             for (i in seq_len(nrow(group_summary))) {
@@ -287,7 +287,7 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<tr><td style='border: 1px solid #ddd; padding: 8px;'>", htmltools::htmlEscape(group_summary[[group_var]][i]), "</td>",
                     "<td style='border: 1px solid #ddd; padding: 8px;'>", group_summary$n[i], "</td>",
                     "<td style='border: 1px solid #ddd; padding: 8px;'>", 
-                    sprintf("%.3f ± %.3f", group_summary$mean[i], group_summary$sd[i]), "</td>",
+                    sprintf("%.3f \u{00B1} %.3f", group_summary$mean[i], group_summary$sd[i]), "</td>",
                     "<td style='border: 1px solid #ddd; padding: 8px;'>", 
                     sprintf("%.3f", group_summary$median[i]), "</td></tr>"
                 )

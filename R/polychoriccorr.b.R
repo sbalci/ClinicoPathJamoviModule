@@ -53,7 +53,7 @@ polychoriccorrClass <- R6::R6Class(
                         # htmlEscape both names - pair_name becomes the Array
                         # item key and the .r.yaml `title: $key` substitution
                         # renders it as live HTML in the panel heading.
-                        pair_name <- paste(htmltools::htmlEscape(vars[i]), "×",
+                        pair_name <- paste(htmltools::htmlEscape(vars[i]), "\u{00D7}",
                                            htmltools::htmlEscape(vars[j]))
                         frequencies$addItem(key = pair_name)
                     }
@@ -257,7 +257,7 @@ polychoriccorrClass <- R6::R6Class(
                     var2 <- vars[j]
                     # Same shape as the producer in .init() so frequencies$get()
                     # matches the key written there.
-                    pair_name <- paste(htmltools::htmlEscape(var1), "×",
+                    pair_name <- paste(htmltools::htmlEscape(var1), "\u{00D7}",
                                        htmltools::htmlEscape(var2))
 
                     # Create frequency table

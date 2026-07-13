@@ -519,7 +519,7 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
               "<h3>Model Comparison</h3>",
               "<p><b>Standard Cox Log-likelihood:</b> ", round(private$.standard_cox$loglik[2], 4), "</p>",
               "<p><b>Mixed-Effects Cox Log-likelihood:</b> ", round(model_results$loglik[2], 4), "</p>",
-              "<p><b>Likelihood Ratio Test:</b> χ² = ", round(lr_test_stat, 4), ", p = ", round(lr_p_value, 4), "</p>"
+              "<p><b>Likelihood Ratio Test:</b> \u{03C7}\u{00B2} = ", round(lr_test_stat, 4), ", p = ", round(lr_p_value, 4), "</p>"
             )
             
             self$results$modelComparison$setContent(comparison_text)

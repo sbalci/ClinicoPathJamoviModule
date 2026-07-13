@@ -638,7 +638,7 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         <p><b>Model Fit:</b></p>
                         <ul>
                         <li>Concordance: ", round(surv_model$concordance["C"], 4), "</li>
-                        <li>R²: ", round(summary(surv_model)$rsq["rsq"], 4), "</li>
+                        <li>R\u{00B2}: ", round(summary(surv_model)$rsq["rsq"], 4), "</li>
                         </ul>
                         </div>"
                     )

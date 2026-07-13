@@ -862,7 +862,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     comparisonTable$addRow(
                         rowKey = paste0(escaped_test_name, "_interp"),
                         values = list(
-                            test = paste0("  → ", clinical_interpretation, ifelse(metrics$zero_cells, " (zero cell; LR may be unstable)", "")),
+                            test = paste0("  \u{2192} ", clinical_interpretation, ifelse(metrics$zero_cells, " (zero cell; LR may be unstable)", "")),
                             Sens = "", Spec = "", AccurT = "", PPV = "", NPV = "", LRP = "", LRN = ""
                         )
                     )
@@ -1982,11 +1982,11 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                     '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; color: #2e7d32;">',
                     "<div>",
                     '<h4 style="margin-bottom: 5px;">Screening Tests (Rule-Out):</h4>',
-                    '<p style="margin-top: 0;">• Sensitivity >=95%: Excellent<br>• NPV >=95%: High confidence<br>• Goal: Minimize false negatives</p>',
+                    '<p style="margin-top: 0;">\u{2022} Sensitivity >=95%: Excellent<br>\u{2022} NPV >=95%: High confidence<br>\u{2022} Goal: Minimize false negatives</p>',
                     "</div>",
                     "<div>",
                     '<h4 style="margin-bottom: 5px;">Confirmatory Tests (Rule-In):</h4>',
-                    '<p style="margin-top: 0;">• Specificity >=95%: Excellent<br>• PPV >=90%: High confidence<br>• Goal: Minimize false positives</p>',
+                    '<p style="margin-top: 0;">\u{2022} Specificity >=95%: Excellent<br>\u{2022} PPV >=90%: High confidence<br>\u{2022} Goal: Minimize false positives</p>',
                     "</div>",
                     "</div>",
                     "</div>",
@@ -2204,7 +2204,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         q_p <- mcnemar_table$getCell(rowKey = q_row, col = "p")$value
 
                         html <- paste0(html, sprintf(
-                            "<p><b>Overall comparison:</b> Cochran's Q test (χ² = %.2f, p = %.3f) ",
+                            "<p><b>Overall comparison:</b> Cochran's Q test (\u{03C7}\u{00B2} = %.2f, p = %.3f) ",
                             q_stat, q_p
                         ))
 
@@ -2259,7 +2259,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         ))
 
                         html <- paste0(html, sprintf(
-                            "<p><b>McNemar's test:</b> χ² = %.2f, p = %.3f - ",
+                            "<p><b>McNemar's test:</b> \u{03C7}\u{00B2} = %.2f, p = %.3f - ",
                             mcn_stat, mcn_p
                         ))
 
@@ -2307,7 +2307,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         q_p <- mcnemar_table$getCell(rowKey = q_row, col = "p")$value
 
                         report <- sprintf(
-                            "Cochran's Q test revealed %s significant difference in diagnostic accuracy among the three tests (χ²(%d) = %.2f, p = %.3f). ",
+                            "Cochran's Q test revealed %s significant difference in diagnostic accuracy among the three tests (\u{03C7}\u{00B2}(%d) = %.2f, p = %.3f). ",
                             if (q_p < private$P_THRESHOLD_SIGNIFICANT) "a" else "no",
                             q_df, q_stat, q_p
                         )
@@ -2344,7 +2344,7 @@ decisioncompareClass <- if (requireNamespace("jmvcore")) {
                         test2_name <- test_names[2]
 
                         report <- sprintf(
-                            "McNemar's test comparing %s and %s showed %s significant difference in diagnostic accuracy (χ²(%d) = %.2f, p = %.3f).",
+                            "McNemar's test comparing %s and %s showed %s significant difference in diagnostic accuracy (\u{03C7}\u{00B2}(%d) = %.2f, p = %.3f).",
                             private$.safeHtmlOutput(test1_name),
                             private$.safeHtmlOutput(test2_name),
                             if (mcn_p < private$P_THRESHOLD_SIGNIFICANT) "a" else "no",

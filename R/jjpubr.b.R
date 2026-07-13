@@ -952,7 +952,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         else if (eta_sq < 0.06) "small"
                                         else if (eta_sq < 0.14) "medium"
                                         else "large"
-                        paste0("η²=", round(eta_sq, 3), " (", effect_interp, ")")
+                        paste0("\u{03B7}\u{00B2}=", round(eta_sq, 3), " (", effect_interp, ")")
                     } else {
                         # Epsilon-squared for Kruskal-Wallis: (H - k + 1) / (n - k)
                         H <- omnibus_result$statistic
@@ -963,7 +963,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         else if (epsilon_sq < 0.06) "small"
                                         else if (epsilon_sq < 0.14) "medium"
                                         else "large"
-                        paste0("ε²=", round(epsilon_sq, 3), " (", effect_interp, ")")
+                        paste0("\u{03B5}\u{00B2}=", round(epsilon_sq, 3), " (", effect_interp, ")")
                     }
 
                     # Add omnibus test result to statistics table

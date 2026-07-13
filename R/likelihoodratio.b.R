@@ -550,7 +550,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             </ul>
             
             <h5>Post-test Probability:</h5>
-            <p>Post-test probability = (LR × Pre-test odds) / (LR × Pre-test odds + 1)</p>
+            <p>Post-test probability = (LR \u{00D7} Pre-test odds) / (LR \u{00D7} Pre-test odds + 1)</p>
             <p>Where Pre-test odds = Pre-test probability / (1 - Pre-test probability)</p>
             
             <h5>Clinical Decision Making:</h5>
@@ -561,7 +561,7 @@ likelihoodratioClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             </ul>
             
             <h5>Diagnostic Odds Ratio (DOR):</h5>
-            <p>DOR = (TP × TN) / (FP × FN). Higher values indicate better discriminative ability.</p>
+            <p>DOR = (TP \u{00D7} TN) / (FP \u{00D7} FN). Higher values indicate better discriminative ability.</p>
             </div>'
             
             self$results$clinicalInterpretation$setContent(html)

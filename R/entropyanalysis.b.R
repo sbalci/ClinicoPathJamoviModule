@@ -36,7 +36,7 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             html <- "<h3>Entropy and Mutual Information Analysis</h3>
             <p>Quantifies uncertainty and information content in predictions and features.</p>
             <h4>Shannon Entropy:</h4>
-            <p style='font-family: monospace;'>H(X) = -Σ p(x) × log₂(p(x))</p>
+            <p style='font-family: monospace;'>H(X) = -\u{03A3} p(x) \u{00D7} log\u{2082}(p(x))</p>
             <p>Where p(x) is the probability of outcome x. Higher entropy = more uncertainty.</p>
             <h4>Mutual Information:</h4>
             <p style='font-family: monospace;'>I(X;Y) = H(X) + H(Y) - H(X,Y)</p>
@@ -65,7 +65,7 @@ entropyanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             <li><b>I(X;Y) = 0:</b> X provides no information about Y (independent)</li>
             <li><b>I(X;Y) > 0:</b> X reduces uncertainty about Y</li>
             <li><b>I(X;Y) = H(Y):</b> X completely determines Y</li>
-            <li><b>Normalized MI ∈ [0,1]:</b> I(X;Y) / min(H(X), H(Y))</li>
+            <li><b>Normalized MI \u{2208} [0,1]:</b> I(X;Y) / min(H(X), H(Y))</li>
             </ul>
             <h4>Clinical Decision Rules:</h4>
             <ul>

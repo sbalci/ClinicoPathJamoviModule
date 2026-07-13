@@ -330,7 +330,7 @@ jcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 " variables with ", n, " complete observations. ",
                 "Out of ", total_count, " pairwise correlations, ", sig_count, 
                 " (", round(sig_count/total_count * 100, 1), "%) were statistically significant ",
-                "at α = ", self$options$flagAlpha, ".</p>"
+                "at \u{03B1} = ", self$options$flagAlpha, ".</p>"
             )
             
             return(report)

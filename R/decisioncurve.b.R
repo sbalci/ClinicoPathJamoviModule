@@ -303,27 +303,27 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             if (cancer_screening_range) {
                 guidance_messages <- c(guidance_messages, 
-                    "• Threshold range suitable for cancer screening decisions (typical range: 5-20%)")
+                    "\u{2022} Threshold range suitable for cancer screening decisions (typical range: 5-20%)")
             }
             
             if (surgical_decision_range) {
                 guidance_messages <- c(guidance_messages, 
-                    "• Threshold range suitable for surgical intervention decisions (typical range: 10-50%)")
+                    "\u{2022} Threshold range suitable for surgical intervention decisions (typical range: 10-50%)")
             }
             
             if (treatment_selection_range) {
                 guidance_messages <- c(guidance_messages, 
-                    "• Threshold range suitable for treatment selection decisions (typical range: 15-40%)")
+                    "\u{2022} Threshold range suitable for treatment selection decisions (typical range: 15-40%)")
             }
             
             if (max_thresh <= 0.05) {
                 guidance_messages <- c(guidance_messages, 
-                    "• Very low threshold range - consider if this aligns with your clinical decision context")
+                    "\u{2022} Very low threshold range - consider if this aligns with your clinical decision context")
             }
             
             if (min_thresh >= 0.60) {
                 guidance_messages <- c(guidance_messages, 
-                    "• Very high threshold range - ensure this reflects actual clinical decision thresholds")
+                    "\u{2022} Very high threshold range - ensure this reflects actual clinical decision thresholds")
             }
             
             if (length(guidance_messages) > 0) {
@@ -922,7 +922,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Performance monitoring for large analyses
             n_calculations <- length(model_vars) * length(thresholds)
             if (n_calculations >= private$DECISIONCURVE_DEFAULTS$performance_threshold_count) {
-                message(sprintf("Decision curve analysis: Processing %d models × %d thresholds (%d total calculations)...", 
+                message(sprintf("Decision curve analysis: Processing %d models \u{00D7} %d thresholds (%d total calculations)...", 
                                length(model_vars), length(thresholds), n_calculations))
             }
 
@@ -1758,7 +1758,7 @@ decisioncurveClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             # Net benefit formula explanation
             footnotes <- paste0(footnotes, 
-                "<li><strong>Net Benefit Formula:</strong> NB = (TP/n) - (FP/n) × [pt/(1-pt)], where pt is threshold probability</li>")
+                "<li><strong>Net Benefit Formula:</strong> NB = (TP/n) - (FP/n) \u{00D7} [pt/(1-pt)], where pt is threshold probability</li>")
             
             # Reference strategies explanation
             footnotes <- paste0(footnotes,

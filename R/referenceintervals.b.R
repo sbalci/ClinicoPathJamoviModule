@@ -88,7 +88,7 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                 s <- sd(x)
                 lower <- m - 1.96 * s
                 upper <- m + 1.96 * s
-                method_desc <- "Parametric (Mean ± 1.96 SD)"
+                method_desc <- "Parametric (Mean \u{00B1} 1.96 SD)"
             } else {
                 # TODO (stub): the DEFAULT ri_method is "robust_nonparametric", but it (and
                 # "bootstrap"/"box_cox"/"log_normal") is NOT implemented - all fall through to this

@@ -270,7 +270,7 @@ pseudosurvivalClass <- R6::R6Class(
 
                 html <- paste0(html, "<h4>RMST Results</h4>")
                 html <- paste0(html, "<table class='jamovi-table'>")
-                html <- paste0(html, "<tr><td><b>Restriction Time (τ):</b></td><td>", tau_rmst, "</td></tr>")
+                html <- paste0(html, "<tr><td><b>Restriction Time (\u{03C4}):</b></td><td>", tau_rmst, "</td></tr>")
                 html <- paste0(html, "<tr><td><b>RMST Estimate:</b></td><td>", round(rmst_value, 3), "</td></tr>")
                 html <- paste0(html, "<tr><td><b>Sample Size:</b></td><td>", nrow(analysis_data), "</td></tr>")
                 html <- paste0(html, "<tr><td><b>Events:</b></td><td>", sum(analysis_data$status), "</td></tr>")

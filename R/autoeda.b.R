@@ -656,8 +656,8 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(report_html,
                 "<div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #2e7d32; margin-top: 0;'>1⃣ Dataset Overview</h4>",
-                "<p><strong>Dimensions:</strong> ", intro_result$rows, " rows × ", intro_result$columns, " columns</p>",
+                "<h4 style='color: #2e7d32; margin-top: 0;'>1\u{20E3} Dataset Overview</h4>",
+                "<p><strong>Dimensions:</strong> ", intro_result$rows, " rows \u{00D7} ", intro_result$columns, " columns</p>",
                 "<p><strong>Data Types:</strong> ", intro_result$continuous_columns, " continuous, ", intro_result$discrete_columns, " discrete</p>",
                 "<p><strong>Completeness:</strong> ", round(intro_result$complete_rows/intro_result$rows*100, 1), "% complete rows</p>",
                 "</div>"
@@ -669,7 +669,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(report_html,
                 "<div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #f57c00; margin-top: 0;'>2⃣ Missing Value Summary</h4>",
+                "<h4 style='color: #f57c00; margin-top: 0;'>2\u{20E3} Missing Value Summary</h4>",
                 "<p><strong>Overall Missing:</strong> ", total_missing_pct, "% of all data points</p>",
                 "<p><strong>Variables with Missing:</strong> ", sum(missing_profile$num_missing > 0), " / ", nrow(missing_profile), "</p>",
                 "</div>"
@@ -681,7 +681,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
             
             report_html <- paste0(report_html,
                 "<div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                "<h4 style='color: #7b1fa2; margin-top: 0;'>3⃣ Variable Distribution Summary</h4>",
+                "<h4 style='color: #7b1fa2; margin-top: 0;'>3\u{20E3} Variable Distribution Summary</h4>",
                 "<p><strong>Numeric Variables:</strong> ", numeric_vars, " (suitable for correlation, regression)</p>",
                 "<p><strong>Categorical Variables:</strong> ", categorical_vars, " (suitable for frequency, cross-tabulation)</p>",
                 "</div>"
@@ -695,7 +695,7 @@ autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
                 
                 report_html <- paste0(report_html,
                     "<div style='background-color: #e1f5fe; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>",
-                    "<h4 style='color: #0277bd; margin-top: 0;'>4⃣ Correlation Insights</h4>",
+                    "<h4 style='color: #0277bd; margin-top: 0;'>4\u{20E3} Correlation Insights</h4>",
                     "<p><strong>Strong Correlations:</strong> ", strong_correlations, " pairs (|r| > 0.7)</p>",
                     "<p><strong>Analysis Ready:</strong> Suitable for multivariate analysis</p>",
                     "</div>"

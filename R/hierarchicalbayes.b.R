@@ -37,23 +37,23 @@ hierarchicalbayesClass <- R6::R6Class(
                         <div class='section'>
                             <b>Required:</b>
                             <div class='list'>
-                                • True Positives (TP) variable<br>
-                                • False Positives (FP) variable<br>
-                                • False Negatives (FN) variable<br>
-                                • True Negatives (TN) variable<br>
-                                • Study/Center ID variable
+                                \u{2022} True Positives (TP) variable<br>
+                                \u{2022} False Positives (FP) variable<br>
+                                \u{2022} False Negatives (FN) variable<br>
+                                \u{2022} True Negatives (TN) variable<br>
+                                \u{2022} Study/Center ID variable
                             </div>
                         </div>
                         <div class='section'>
                             <b>Key Features:</b>
                             <div class='list'>
-                                • Bivariate normal and HSROC models<br>
-                                • Between-study heterogeneity assessment<br>
-                                • Sensitivity-specificity correlation modeling<br>
-                                • Meta-regression analysis<br>
-                                • MCMC convergence diagnostics<br>
-                                • Prediction intervals for new studies<br>
-                                • Outlier detection and influence analysis
+                                \u{2022} Bivariate normal and HSROC models<br>
+                                \u{2022} Between-study heterogeneity assessment<br>
+                                \u{2022} Sensitivity-specificity correlation modeling<br>
+                                \u{2022} Meta-regression analysis<br>
+                                \u{2022} MCMC convergence diagnostics<br>
+                                \u{2022} Prediction intervals for new studies<br>
+                                \u{2022} Outlier detection and influence analysis
                             </div>
                         </div>
                     </div>
@@ -77,13 +77,13 @@ hierarchicalbayesClass <- R6::R6Class(
                     <h3>Hierarchical Bayesian Meta-Analysis</h3>
                     <div class='formula'>
                         <b>Bivariate Normal Model:</b><br>
-                        (logit(Se_i), logit(Sp_i)) ~ N(μ, Σ)<br>
-                        μ = (μ_Se, μ_Sp) (population means)<br>
-                        Σ = [[τ²_Se, ρτ_Se τ_Sp], [ρτ_Se τ_Sp, τ²_Sp]]<br><br>
+                        (logit(Se_i), logit(Sp_i)) ~ N(\u{03BC}, \u{03A3})<br>
+                        \u{03BC} = (\u{03BC}_Se, \u{03BC}_Sp) (population means)<br>
+                        \u{03A3} = [[\u{03C4}\u{00B2}_Se, \u{03C1}\u{03C4}_Se \u{03C4}_Sp], [\u{03C1}\u{03C4}_Se \u{03C4}_Sp, \u{03C4}\u{00B2}_Sp]]<br><br>
                         <b>HSROC Model:</b><br>
-                        Θ_i = α + β × Λ_i + s_i (threshold)<br>
-                        Λ_i = (λ + u_i) (accuracy)<br>
-                        s_i ~ N(0, σ²_s), u_i ~ N(0, σ²_u)
+                        \u{0398}_i = \u{03B1} + \u{03B2} \u{00D7} \u{039B}_i + s_i (threshold)<br>
+                        \u{039B}_i = (\u{03BB} + u_i) (accuracy)<br>
+                        s_i ~ N(0, \u{03C3}\u{00B2}_s), u_i ~ N(0, \u{03C3}\u{00B2}_u)
                     </div>
                     <div class='interpretation'>
                         <b>Interpretation:</b> Hierarchical models account for between-study heterogeneity 
@@ -282,7 +282,7 @@ hierarchicalbayesClass <- R6::R6Class(
             model_table$addRow(rowKey = "correlation", values = list(
                 component = "Correlation Structure",
                 specification = correlation_model,
-                parameters = "Correlation coefficient ρ",
+                parameters = "Correlation coefficient \u{03C1}",
                 description = corr_desc
             ))
             
@@ -464,7 +464,7 @@ hierarchicalbayesClass <- R6::R6Class(
             rhat_good <- runif(4, 0.99, 1.02)
             ess_good <- sample(1000:4000, 4, replace = TRUE)
             
-            parameters <- c("μ_Sensitivity", "μ_Specificity", "τ_Sensitivity", "τ_Specificity")
+            parameters <- c("\u{03BC}_Sensitivity", "\u{03BC}_Specificity", "\u{03C4}_Sensitivity", "\u{03C4}_Specificity")
             means <- c(mu_sens, mu_spec, tau_sens, tau_spec)
             sds <- c(0.2, 0.2, 0.1, 0.1) # Simplified
             
@@ -538,7 +538,7 @@ hierarchicalbayesClass <- R6::R6Class(
             conv_table <- self$results$convergenceDiagnostics
             
             # Simulate good convergence diagnostics
-            parameters <- c("μ_Sensitivity", "μ_Specificity", "τ_Sensitivity", "τ_Specificity", "ρ")
+            parameters <- c("\u{03BC}_Sensitivity", "\u{03BC}_Specificity", "\u{03C4}_Sensitivity", "\u{03C4}_Specificity", "\u{03C1}")
             
             for (i in seq_along(parameters)) {
                 rhat <- runif(1, 0.999, 1.005)

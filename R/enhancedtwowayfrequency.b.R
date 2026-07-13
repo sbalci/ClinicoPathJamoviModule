@@ -29,7 +29,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                 <ul>
                 <li><b>Multiple percentage types:</b> Cell, row, and column percentages (BlueSky BSkyTwoWayFrequency)</li>
                 <li><b>Statistical tests:</b> Chi-square test of independence and Fisher\'s exact test</li>
-                <li><b>Association measures:</b> Cramér\'s V, Phi coefficient, and contingency coefficient</li>
+                <li><b>Association measures:</b> Cram\u{00E9}r\'s V, Phi coefficient, and contingency coefficient</li>
                 <li><b>Residual analysis:</b> Standardized residuals for pattern detection</li>
                 <li><b>Robust error handling:</b> BlueSky-style graceful degradation with informative messages</li>
                 <li><b>Assumption validation:</b> Expected frequency checks and recommendations</li>
@@ -326,7 +326,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                     effect_size <- ""
                     if (self$options$associationMeasures) {
                         cramers_v <- private$.calculateCramersV(mytable)
-                        effect_size <- sprintf("Cramér's V = %.3f", cramers_v)
+                        effect_size <- sprintf("Cram\u{00E9}r's V = %.3f", cramers_v)
                     }
 
                     test_table$setRow(rowNo = row_idx, values = list(
@@ -384,7 +384,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
             cramers_interp <- private$.interpretCramersV(cramers_v)
 
             assoc_table$setRow(rowNo = row_idx, values = list(
-                measure = "Cramér's V",
+                measure = "Cram\u{00E9}r's V",
                 value = cramers_v,
                 confidence_interval = "",  # Would need bootstrap for CI
                 interpretation = cramers_interp$interpretation,

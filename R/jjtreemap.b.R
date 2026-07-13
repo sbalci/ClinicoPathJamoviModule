@@ -153,14 +153,14 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     This tool will help you create treemap visualizations for hierarchical categorical data.
                     <br><br>
                     Treemaps display hierarchical data as nested rectangles, where:
-                    <br>• Rectangle size represents a quantitative value
-                    <br>• Rectangle color can represent categories
-                    <br>• Nested rectangles show hierarchical relationships
+                    <br>\u{2022} Rectangle size represents a quantitative value
+                    <br>\u{2022} Rectangle color can represent categories
+                    <br>\u{2022} Nested rectangles show hierarchical relationships
                     <br><br>
                     Please provide at least:
-                    <br>• <b>Group Variable</b>: Categories to create rectangles
-                    <br>• <b>Size Variable</b>: Numeric values for rectangle areas
-                    <br>• <b>Color Variable</b> (optional): Additional categorization
+                    <br>\u{2022} <b>Group Variable</b>: Categories to create rectangles
+                    <br>\u{2022} <b>Size Variable</b>: Numeric values for rectangle areas
+                    <br>\u{2022} <b>Color Variable</b> (optional): Additional categorization
                     <br><br>
                     This function uses the treemap and ggplot2 R packages.
                     <br><hr>"
@@ -300,10 +300,10 @@ jjtreemapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 error_msg <- paste0(
                     "<br>Error creating treemap: ", htmltools::htmlEscape(e$message),
                     "<br><br>Please check that:",
-                    "<br>• Group variable is categorical",
-                    "<br>• Size variable contains numeric values",
-                    "<br>• All size values are positive (negative values are converted to 0.01)",
-                    "<br>• Data has at least one complete row",
+                    "<br>\u{2022} Group variable is categorical",
+                    "<br>\u{2022} Size variable contains numeric values",
+                    "<br>\u{2022} All size values are positive (negative values are converted to 0.01)",
+                    "<br>\u{2022} Data has at least one complete row",
                     "<br><hr>"
                 )
                 self$results$todo$setContent(error_msg)

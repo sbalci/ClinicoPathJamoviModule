@@ -140,7 +140,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "ERROR",
                     title = "Missing Variables",
-                    content = "Please select an outcome variable and at least one predictor variable for ROC analysis. • Outcome variable: required (binary/factor). • Predictor variables: at least one numeric variable required for ROC curve calculation."
+                    content = "Please select an outcome variable and at least one predictor variable for ROC analysis. \u{2022} Outcome variable: required (binary/factor). \u{2022} Predictor variables: at least one numeric variable required for ROC curve calculation."
                 )
                 private$.renderNotices()
                 return()
@@ -330,7 +330,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "INFO",
                     title = "Analysis Complete",
-                    content = paste0("ROC analysis completed successfully. • Analyzed ", predictor_text, " with n=", n_obs, " observations. • Review AUC values, confidence intervals, and optimal cutoffs in results tables below. • Check any warnings or recommendations above for data quality concerns.")
+                    content = paste0("ROC analysis completed successfully. \u{2022} Analyzed ", predictor_text, " with n=", n_obs, " observations. \u{2022} Review AUC values, confidence intervals, and optimal cutoffs in results tables below. \u{2022} Check any warnings or recommendations above for data quality concerns.")
                 )
             }
 
@@ -812,7 +812,7 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = notice_type,
                                 title = paste0("Small Sample Size: ", predictor),
-                                content = paste0("Small sample size for ", predictor, ": n=", n_obs, " (", n_positive, " positive, ", n_negative, " negative). • ROC curve confidence intervals may be unreliable with limited data. • Consider collecting more data or using bootstrap resampling for more stable estimates. • Results should be interpreted cautiously and validated in larger samples.")
+                                content = paste0("Small sample size for ", predictor, ": n=", n_obs, " (", n_positive, " positive, ", n_negative, " negative). \u{2022} ROC curve confidence intervals may be unreliable with limited data. \u{2022} Consider collecting more data or using bootstrap resampling for more stable estimates. \u{2022} Results should be interpreted cautiously and validated in larger samples.")
                             )
                         }
 
@@ -833,7 +833,7 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = notice_type,
                                 title = paste0("Limited Diagnostic Performance: ", predictor),
-                                content = paste0("Limited diagnostic performance for ", predictor, ": AUC=", round(auc_value, 3), ". • ", interpretation, ". • Consider: (1) Adding predictor variables or interaction terms, (2) Verifying data quality and coding, (3) Using multivariate models to improve discrimination, (4) Checking if direction setting is appropriate for your biomarker.")
+                                content = paste0("Limited diagnostic performance for ", predictor, ": AUC=", round(auc_value, 3), ". \u{2022} ", interpretation, ". \u{2022} Consider: (1) Adding predictor variables or interaction terms, (2) Verifying data quality and coding, (3) Using multivariate models to improve discrimination, (4) Checking if direction setting is appropriate for your biomarker.")
                             )
                         }
 
@@ -849,7 +849,7 @@ enhancedROCClass <- R6::R6Class(
                             private$.addNotice(
                                 type = "STRONG_WARNING",
                                 title = paste0("Extreme Prevalence: ", predictor),
-                                content = paste0("Extreme prevalence for ", predictor, ": ", round(prevalence * 100, 1), "% (", prev_direction, "). • ", metric_concern, ". • ROC/AUC analysis may be misleading - consider Precision-Recall Curve (PRC) instead. • Sensitivity and specificity remain valid, but predictive values (PPV/NPV) are heavily influenced by prevalence.")
+                                content = paste0("Extreme prevalence for ", predictor, ": ", round(prevalence * 100, 1), "% (", prev_direction, "). \u{2022} ", metric_concern, ". \u{2022} ROC/AUC analysis may be misleading - consider Precision-Recall Curve (PRC) instead. \u{2022} Sensitivity and specificity remain valid, but predictive values (PPV/NPV) are heavily influenced by prevalence.")
                             )
                         }
                     },
@@ -2005,15 +2005,15 @@ enhancedROCClass <- R6::R6Class(
 
                 # Build concise, single-line notice content
                 prc_recommendation <- if (self$options$recommendPRC) {
-                    " • Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data."
+                    " \u{2022} Consider using Precision-Recall Curve (PRC) analysis instead of ROC for more reliable performance assessment with imbalanced data."
                 } else {
-                    " • Interpret ROC results cautiously given class imbalance."
+                    " \u{2022} Interpret ROC results cautiously given class imbalance."
                 }
 
                 private$.addNotice(
                     type = notice_type,
                     title = "Class Imbalance Detected",
-                    content = paste0("Class imbalance detected: ", ratio_text, " ratio (", n_positive, " positive, ", n_negative, " negative, prevalence ", round(prevalence * 100, 1), "%). • ", severity, ". • ROC curves may be optimistic because specificity is dominated by majority class. • High AUC may mask poor minority class performance.", prc_recommendation)
+                    content = paste0("Class imbalance detected: ", ratio_text, " ratio (", n_positive, " positive, ", n_negative, " negative, prevalence ", round(prevalence * 100, 1), "%). \u{2022} ", severity, ". \u{2022} ROC curves may be optimistic because specificity is dominated by majority class. \u{2022} High AUC may mask poor minority class performance.", prc_recommendation)
                 )
             }
         },
@@ -2528,7 +2528,7 @@ enhancedROCClass <- R6::R6Class(
                 private$.addNotice(
                     type = "WARNING",
                     title = "No Valid ROC Results",
-                    content = "No valid ROC results available for report generation. • ROC analysis may have failed for all predictors. • Check that outcome variable is binary and predictors are numeric. • Verify sufficient data for each predictor-outcome combination."
+                    content = "No valid ROC results available for report generation. \u{2022} ROC analysis may have failed for all predictors. \u{2022} Check that outcome variable is binary and predictors are numeric. \u{2022} Verify sufficient data for each predictor-outcome combination."
                 )
                 return()
             }
@@ -2828,11 +2828,11 @@ enhancedROCClass <- R6::R6Class(
                 "<div style='display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0;'>",
                 "<div style='background: #fff3cd; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
                 "<strong>AUC (Area Under Curve):</strong><br>",
-                "• Below 0.60 = No discrimination<br>",
-                "• 0.60-0.69 = Poor<br>",
-                "• 0.70-0.79 = Fair<br>",
-                "• 0.80-0.89 = Good<br>",
-                "• 0.90-1.00 = Excellent",
+                "\u{2022} Below 0.60 = No discrimination<br>",
+                "\u{2022} 0.60-0.69 = Poor<br>",
+                "\u{2022} 0.70-0.79 = Fair<br>",
+                "\u{2022} 0.80-0.89 = Good<br>",
+                "\u{2022} 0.90-1.00 = Excellent",
                 "</div>",
                 "<div style='background: #d1ecf1; padding: 10px; border-radius: 4px; flex: 1; min-width: 250px;'>",
                 "<strong>Youden Index:</strong><br>",

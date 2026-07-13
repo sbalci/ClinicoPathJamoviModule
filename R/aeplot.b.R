@@ -212,7 +212,7 @@ aeplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             paste0(
                 "<div style='padding:8px;'>",
                 "<b>", .("Adverse Events Butterfly Plot"), "</b><br>",
-                .("Patient mode: select Subject ID, AE Term, and (optionally) Arm and Grade — incidence is computed internally."),
+                .("Patient mode: select Subject ID, AE Term, and (optionally) Arm and Grade \u{2014} incidence is computed internally."),
                 "<br>",
                 .("Summary mode: provide pre-computed all-grade and high-grade percentages per AE term."),
                 "</div>"

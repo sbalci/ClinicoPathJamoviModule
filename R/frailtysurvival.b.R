@@ -584,7 +584,7 @@ frailtysurvivalClass <- R6::R6Class(
                     standard_loglik <- logLik(standard_model)
 
                     html <- paste0(html, "<table class='jamovi-table'>")
-                    html <- paste0(html, "<tr><th>Model</th><th>Log-Likelihood</th><th>AIC</th><th>BIC</th><th>Δ AIC</th><th>Δ BIC</th></tr>")
+                    html <- paste0(html, "<tr><th>Model</th><th>Log-Likelihood</th><th>AIC</th><th>BIC</th><th>\u{0394} AIC</th><th>\u{0394} BIC</th></tr>")
 
                     delta_aic <- frailty_aic - standard_aic
                     delta_bic <- frailty_bic - standard_bic
@@ -612,19 +612,19 @@ frailtysurvivalClass <- R6::R6Class(
                     # Interpretation
                     html <- paste0(html, "<h4>Model Selection</h4>")
                     if (delta_aic < -2) {
-                        html <- paste0(html, "<p style='color: green;'><b> Frailty Model Preferred:</b> The frailty model has substantially lower AIC (Δ AIC = ", round(delta_aic, 2), "), indicating better fit.</p>")
+                        html <- paste0(html, "<p style='color: green;'><b> Frailty Model Preferred:</b> The frailty model has substantially lower AIC (\u{0394} AIC = ", round(delta_aic, 2), "), indicating better fit.</p>")
                     } else if (delta_aic < 2) {
-                        html <- paste0(html, "<p style='color: orange;'><b>≈ Similar Performance:</b> Both models have similar AIC values (Δ AIC = ", round(delta_aic, 2), "). Consider parsimony.</p>")
+                        html <- paste0(html, "<p style='color: orange;'><b>\u{2248} Similar Performance:</b> Both models have similar AIC values (\u{0394} AIC = ", round(delta_aic, 2), "). Consider parsimony.</p>")
                     } else {
-                        html <- paste0(html, "<p style='color: red;'><b> Standard Model Preferred:</b> The standard Cox model has lower AIC (Δ AIC = ", round(delta_aic, 2), ").</p>")
+                        html <- paste0(html, "<p style='color: red;'><b> Standard Model Preferred:</b> The standard Cox model has lower AIC (\u{0394} AIC = ", round(delta_aic, 2), ").</p>")
                     }
 
                     if (delta_bic < -2) {
-                        html <- paste0(html, "<p><b>BIC Assessment:</b> Frailty model strongly preferred (Δ BIC = ", round(delta_bic, 2), ").</p>")
+                        html <- paste0(html, "<p><b>BIC Assessment:</b> Frailty model strongly preferred (\u{0394} BIC = ", round(delta_bic, 2), ").</p>")
                     } else if (delta_bic < 2) {
-                        html <- paste0(html, "<p><b>BIC Assessment:</b> Weak evidence for either model (Δ BIC = ", round(delta_bic, 2), ").</p>")
+                        html <- paste0(html, "<p><b>BIC Assessment:</b> Weak evidence for either model (\u{0394} BIC = ", round(delta_bic, 2), ").</p>")
                     } else {
-                        html <- paste0(html, "<p><b>BIC Assessment:</b> Standard model preferred (Δ BIC = ", round(delta_bic, 2), ").</p>")
+                        html <- paste0(html, "<p><b>BIC Assessment:</b> Standard model preferred (\u{0394} BIC = ", round(delta_bic, 2), ").</p>")
                     }
                 },
                 error = function(e) {

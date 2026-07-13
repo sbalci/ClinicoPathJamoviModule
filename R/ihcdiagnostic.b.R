@@ -144,7 +144,7 @@ ihcdiagnosticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     small_names <- names(group_counts)[small_groups]
                     # Add clinical warning for small sample sizes
                     warning_msg <- sprintf(
-                        "Groups with insufficient samples: %s (need >=%d for reliable analysis).\n\nClinical Note: Small sample sizes may lead to unreliable diagnostic performance estimates. Consider:\n• Combining similar diagnostic groups\n• Collecting additional cases\n• Using bootstrap resampling for confidence intervals",
+                        "Groups with insufficient samples: %s (need >=%d for reliable analysis).\n\nClinical Note: Small sample sizes may lead to unreliable diagnostic performance estimates. Consider:\n\u{2022} Combining similar diagnostic groups\n\u{2022} Collecting additional cases\n\u{2022} Using bootstrap resampling for confidence intervals",
                         paste(small_names, collapse = ", "), min_size
                     )
                     return(list(valid = FALSE, message = warning_msg))

@@ -39,7 +39,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <p><b>Key Features:</b></p>
                     <ul>
                     <li>Forest plots with prediction intervals</li>
-                    <li>Comprehensive heterogeneity assessment (I², τ², Q-test)</li>
+                    <li>Comprehensive heterogeneity assessment (I\u{00B2}, \u{03C4}\u{00B2}, Q-test)</li>
                     <li>Publication bias detection (Egger's test, funnel plots, trim-and-fill)</li>
                     <li>Meta-regression and subgroup analysis</li>
                     <li>Sensitivity analysis and outlier detection</li>
@@ -511,7 +511,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 interpretation <- switch(analysis_type,
                     "generic" = sprintf(
-                        "A meta-analysis of %d studies was conducted to examine %s using a %s. [INSERT MAIN FINDINGS HERE: pooled effect size with 95%% confidence interval and p-value]. Heterogeneity between studies was [INSERT I² VALUE AND INTERPRETATION]. [INSERT PUBLICATION BIAS ASSESSMENT IF CONDUCTED]. These findings suggest [INSERT CLINICAL INTERPRETATION AND IMPLICATIONS].",
+                        "A meta-analysis of %d studies was conducted to examine %s using a %s. [INSERT MAIN FINDINGS HERE: pooled effect size with 95%% confidence interval and p-value]. Heterogeneity between studies was [INSERT I\u{00B2} VALUE AND INTERPRETATION]. [INSERT PUBLICATION BIAS ASSESSMENT IF CONDUCTED]. These findings suggest [INSERT CLINICAL INTERPRETATION AND IMPLICATIONS].",
                         n_studies, effect_name, model_desc
                     ),
                     "diagnostic_accuracy" = sprintf(
@@ -619,7 +619,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
 
                     het_table$addRow(rowKey = "i2", values = list(
-                        statistic = "I² (%)",
+                        statistic = "I\u{00B2} (%)",
                         value = i2,
                         confidence_interval = "",
                         p_value = NA,
@@ -644,7 +644,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
 
                     het_table$addRow(rowKey = "tau2", values = list(
-                        statistic = "τ² (tau-squared)",
+                        statistic = "\u{03C4}\u{00B2} (tau-squared)",
                         value = tau2,
                         confidence_interval = tau2_ci_text,
                         p_value = NA,
@@ -652,7 +652,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ))
 
                     het_table$addRow(rowKey = "tau", values = list(
-                        statistic = "τ (tau)",
+                        statistic = "\u{03C4} (tau)",
                         value = tau,
                         confidence_interval = "",
                         p_value = NA,
@@ -936,7 +936,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Add model R²
                         if (!is.null(meta_reg$R2)) {
                             regression_table$addRow(rowKey = "model_r2", values = list(
-                                moderator = "Model R² (explained heterogeneity)",
+                                moderator = "Model R\u{00B2} (explained heterogeneity)",
                                 coefficient = meta_reg$R2,
                                 standard_error = NA,
                                 confidence_interval = sprintf("%.1f%% of heterogeneity explained", meta_reg$R2 * 100),
@@ -1039,7 +1039,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             excluded_studies = "None",
                             pooled_effect = fe_effect,
                             confidence_interval = sprintf("RE = %.3f, FE = %.3f", re_effect, fe_effect),
-                            i2_change = -original_i2 # Fixed-effects has I² = 0
+                            i2_change = -original_i2 # Fixed-effects has I^2 = 0
                         ))
                     },
                     error = function(e) {
@@ -1250,7 +1250,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # Add sensitivity result
                             het_info <- if (exists("ma_sens") && !is.null(ma_sens)) {
                                 sprintf(
-                                    "I² = %.1f%%, τ² = %.3f",
+                                    "I\u{00B2} = %.1f%%, \u{03C4}\u{00B2} = %.3f",
                                     max(0, (ma_sens$QE - ma_sens$k + 1) / ma_sens$QE * 100),
                                     ma_sens$tau2
                                 )
@@ -1269,7 +1269,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             # Add specificity result
                             het_info_spec <- if (exists("ma_spec") && !is.null(ma_spec)) {
                                 sprintf(
-                                    "I² = %.1f%%, τ² = %.3f",
+                                    "I\u{00B2} = %.1f%%, \u{03C4}\u{00B2} = %.3f",
                                     max(0, (ma_spec$QE - ma_spec$k + 1) / ma_spec$QE * 100),
                                     ma_spec$tau2
                                 )
@@ -1471,14 +1471,14 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <h4>Heterogeneity Assessment</h4>
             <p><b>Q-test:</b> Tests null hypothesis of homogeneity. p < 0.05 suggests significant heterogeneity.</p>
-            <p><b>I² statistic:</b> Percentage of variation due to heterogeneity rather than sampling error.</p>
+            <p><b>I\u{00B2} statistic:</b> Percentage of variation due to heterogeneity rather than sampling error.</p>
             <ul>
-            <li>I² < 25%: Low heterogeneity</li>
-            <li>I² 25-50%: Moderate heterogeneity</li>
-            <li>I² 50-75%: Substantial heterogeneity</li>
-            <li>I² > 75%: Considerable heterogeneity</li>
+            <li>I\u{00B2} < 25%: Low heterogeneity</li>
+            <li>I\u{00B2} 25-50%: Moderate heterogeneity</li>
+            <li>I\u{00B2} 50-75%: Substantial heterogeneity</li>
+            <li>I\u{00B2} > 75%: Considerable heterogeneity</li>
             </ul>
-            <p><b>τ² (tau-squared):</b> Estimate of between-study variance in random-effects model.</p>
+            <p><b>\u{03C4}\u{00B2} (tau-squared):</b> Estimate of between-study variance in random-effects model.</p>
 
             <h4>Publication Bias Assessment</h4>
             <p><b>Egger's Test:</b> Regression test for funnel plot asymmetry. p < 0.05 suggests bias.</p>
@@ -1493,7 +1493,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <h4>Meta-Regression</h4>
             <p><b>Purpose:</b> Investigate sources of heterogeneity using study-level covariates.</p>
-            <p><b>R² interpretation:</b> Proportion of between-study variance explained by covariates.</p>
+            <p><b>R\u{00B2} interpretation:</b> Proportion of between-study variance explained by covariates.</p>
             <p><b>Residual heterogeneity:</b> Remaining unexplained between-study variation.</p>
 
             <h4>Reporting Guidelines</h4>
@@ -1507,10 +1507,10 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </ul>
 
             <p><b>References:</b></p>
-            <p>• Borenstein M, et al. Introduction to Meta-Analysis. 2009.</p>
-            <p>• Higgins JPT, et al. Cochrane Handbook for Systematic Reviews. 2019.</p>
-            <p>• DerSimonian R, Laird N. Meta-analysis in clinical trials. Control Clin Trials. 1986.</p>
-            <p>• Viechtbauer W. Conducting meta-analyses in R with the metafor package. JSS. 2010.</p>
+            <p>\u{2022} Borenstein M, et al. Introduction to Meta-Analysis. 2009.</p>
+            <p>\u{2022} Higgins JPT, et al. Cochrane Handbook for Systematic Reviews. 2019.</p>
+            <p>\u{2022} DerSimonian R, Laird N. Meta-analysis in clinical trials. Control Clin Trials. 1986.</p>
+            <p>\u{2022} Viechtbauer W. Conducting meta-analyses in R with the metafor package. JSS. 2010.</p>
             </body>
             </html>"
 

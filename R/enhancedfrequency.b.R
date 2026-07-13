@@ -593,9 +593,9 @@ enhancedfrequencyClass <- R6::R6Class(
             
             <h4>Quality Assessment Metrics</h4>
             <ul>
-                <li><strong>Shannon Entropy:</strong> H = -Σ(p_i * log₂(p_i)) - measures information content</li>
-                <li><strong>Gini Impurity:</strong> G = 1 - Σ(p_i²) - measures probability of misclassification</li>
-                <li><strong>Herfindahl-Hirschman Index:</strong> HHI = Σ(p_i²) - concentration measure</li>
+                <li><strong>Shannon Entropy:</strong> H = -\u{03A3}(p_i * log\u{2082}(p_i)) - measures information content</li>
+                <li><strong>Gini Impurity:</strong> G = 1 - \u{03A3}(p_i\u{00B2}) - measures probability of misclassification</li>
+                <li><strong>Herfindahl-Hirschman Index:</strong> HHI = \u{03A3}(p_i\u{00B2}) - concentration measure</li>
                 <li><strong>Completeness Ratio:</strong> (Total - Missing) / Total - data completeness measure</li>
             </ul>
             

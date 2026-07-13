@@ -1899,20 +1899,27 @@ if (!TEST) {
   cat("\n🧪 Distributing test infrastructure to submodules...\n")
   for (nm in names(test_targets)) {
     tt <- test_targets[[nm]]
+    # The dependency-guard test is self-contained and ALWAYS-GREEN (it is the runtime
+    # twin of the pkg::-vs-DESCRIPTION reconciliation check below, and skips cleanly
+    # under R CMD check). Ship it to EVERY submodule -- including ones that already
+    # have functional tests -- so the undeclared-dependency net (and its guarded/
+    # recommended-but-undeclared WARNING pass) exists everywhere. Historically this was
+    # skipped for submodules with pre-existing tests, which is exactly why meddecide
+    # never got the guard and its undeclared `glmnet` (lassologistic) slipped through.
+    # Only the umbrella's FULL functional suite (which can be red) stays gated behind
+    # copy_test_files.
+    write_dependency_guard_test(tt$dir, guard_template)
+    ensure_testthat_runner(tt$dir)
     if (copy_test_files) {
       copied <- copy_module_tests(tt$mods, umbrella_tests,
                                   file.path(tt$dir, "tests", "testthat"),
                                   module_name = nm)
-      write_dependency_guard_test(tt$dir, guard_template)
-      ensure_testthat_runner(tt$dir)
       cat("  🧪 ", nm, ": distributed ", length(copied),
           " functional test file(s) + dependency-guard test\n", sep = "")
-    } else if (n_existing_tests(tt$dir) == 0L) {
-      write_dependency_guard_test(tt$dir, guard_template)
-      ensure_testthat_runner(tt$dir)
     } else {
-      cat("  ⏭️  ", nm, ": has pre-existing tests; skipping auto test-infra ",
-          "(set copy_test_files: true to distribute the full suite)\n", sep = "")
+      cat("  🧪 ", nm, ": dependency-guard test shipped",
+          if (n_existing_tests(tt$dir) > 0L) " (alongside pre-existing tests)" else "",
+          "\n", sep = "")
     }
   }
 }

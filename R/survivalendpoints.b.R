@@ -183,7 +183,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 if (is.null(self$options$lastFollowup)) missingVars <- c(missingVars, 'Last Follow-up Date')
 
                 private$.addNotice('ERROR', 'Required Variables Missing',
-                    sprintf('Required variables missing: %s • Please select all required variables to derive survival endpoints.',
+                    sprintf('Required variables missing: %s \u{2022} Please select all required variables to derive survival endpoints.',
                             paste(missingVars, collapse=', '))
                 )
                 return()
@@ -194,7 +194,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             # Check for empty dataset
             if (nrow(data) == 0) {
-                private$.addNotice('ERROR', 'No Data Available', 'No data available • Dataset contains no rows • Please load data to derive survival endpoints.')
+                private$.addNotice('ERROR', 'No Data Available', 'No data available \u{2022} Dataset contains no rows \u{2022} Please load data to derive survival endpoints.')
                 return()
             }
 
@@ -208,7 +208,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 !self$options$calculateTTP && !self$options$calculateDOR &&
                 !self$options$calculateTOT) {
 
-                private$.addNotice('INFO', 'No Endpoints Selected', 'No survival endpoints selected • Please select at least one endpoint to calculate: PFS (Progression-Free Survival), OS (Overall Survival), TTP (Time to Progression), DOR (Duration of Response), or Time on Treatment.')
+                private$.addNotice('INFO', 'No Endpoints Selected', 'No survival endpoints selected \u{2022} Please select at least one endpoint to calculate: PFS (Progression-Free Survival), OS (Overall Survival), TTP (Time to Progression), DOR (Duration of Response), or Time on Treatment.')
                 return()
             }
 
@@ -318,7 +318,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
                 if (total_neg > 0) {
                     private$.addNotice('ERROR', 'Negative Times Detected',
-                        sprintf('Data error: %d observations have event dates BEFORE start dates • This indicates incorrect date entry • Please fix your data before proceeding with analysis.', total_neg)
+                        sprintf('Data error: %d observations have event dates BEFORE start dates \u{2022} This indicates incorrect date entry \u{2022} Please fix your data before proceeding with analysis.', total_neg)
                     )
                     return()  # STOP analysis - data must be corrected
                 }
@@ -330,12 +330,12 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 !is.null(progressionEvent)) {
 
                 if (is.null(progressionDate)) {
-                    private$.addNotice('WARNING', 'Progression Date Not Provided', 'Progression Date not provided • Progression events without dates were timed to Last Follow-up • Provide progression dates for accurate PFS/TTP.')
+                    private$.addNotice('WARNING', 'Progression Date Not Provided', 'Progression Date not provided \u{2022} Progression events without dates were timed to Last Follow-up \u{2022} Provide progression dates for accurate PFS/TTP.')
                 } else {
                     imputed_prog <- sum(progressionEvent == 1 & is.na(progressionDate), na.rm = TRUE)
                     if (imputed_prog > 0) {
                         private$.addNotice('WARNING', 'Progression Date Missing',
-                            sprintf('Progression Date missing for %d patient(s) with progression event • Time imputed using Last Follow-up Date • This may overestimate time-to-event.', imputed_prog)
+                            sprintf('Progression Date missing for %d patient(s) with progression event \u{2022} Time imputed using Last Follow-up Date \u{2022} This may overestimate time-to-event.', imputed_prog)
                         )
                     }
                 }
@@ -346,12 +346,12 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 !is.null(deathEvent)) {
 
                 if (is.null(deathDate)) {
-                    private$.addNotice('WARNING', 'Death Date Not Provided', 'Death Date not provided • Death events without dates were timed to Last Follow-up • Provide death dates for accurate OS/PFS.')
+                    private$.addNotice('WARNING', 'Death Date Not Provided', 'Death Date not provided \u{2022} Death events without dates were timed to Last Follow-up \u{2022} Provide death dates for accurate OS/PFS.')
                 } else {
                     imputed_death <- sum(deathEvent == 1 & is.na(deathDate), na.rm = TRUE)
                     if (imputed_death > 0) {
                         private$.addNotice('WARNING', 'Death Date Missing',
-                            sprintf('Death Date missing for %d patient(s) with death event • Time imputed using Last Follow-up Date.', imputed_death)
+                            sprintf('Death Date missing for %d patient(s) with death event \u{2022} Time imputed using Last Follow-up Date.', imputed_death)
                         )
                     }
                 }
@@ -397,7 +397,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             if (length(endpointsList) > 0) {
                 private$.addNotice('INFO', 'Analysis Complete',
-                    sprintf('Analysis complete: Successfully derived %s for %d patients • Variables created and ready for survival analysis.',
+                    sprintf('Analysis complete: Successfully derived %s for %d patients \u{2022} Variables created and ready for survival analysis.',
                             paste(endpointsList, collapse=', '), nrow(derivedData))
                 )
             }
@@ -594,7 +594,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                     total_count <- length(x)
 
                     private$.addNotice('ERROR', 'Date Conversion Failed',
-                        sprintf('Date conversion failed: Could not convert %d of %d date values to Date format • Ensure dates are in standard format (YYYY-MM-DD or YYYY/MM/DD) or use Numeric input type.', na_count, total_count)
+                        sprintf('Date conversion failed: Could not convert %d of %d date values to Date format \u{2022} Ensure dates are in standard format (YYYY-MM-DD or YYYY/MM/DD) or use Numeric input type.', na_count, total_count)
                     )
                     rep(NA, length(x))
                 })
@@ -603,7 +603,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
             # Check if conversion resulted in many NAs
             if (sum(is.na(result)) > length(result) * 0.5 && sum(!is.na(x)) > 0) {
                 private$.addNotice('WARNING', 'Partial Date Conversion',
-                    sprintf('Partial date conversion issues: More than 50%% of date values could not be converted • Converted: %d / %d values • Please check your date format or use Numeric input type.', sum(!is.na(result)), length(result))
+                    sprintf('Partial date conversion issues: More than 50%% of date values could not be converted \u{2022} Converted: %d / %d values \u{2022} Please check your date format or use Numeric input type.', sum(!is.na(result)), length(result))
                 )
             }
 
@@ -723,7 +723,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 # Check for all-censored scenario (no events observed)
                 if (n_events == 0) {
                     private$.addNotice('ERROR', 'All Observations Censored',
-                        sprintf('%s: All %d observations are censored (no events observed) • Survival analysis cannot be performed without observed events • Check event definitions or extend follow-up time.',
+                        sprintf('%s: All %d observations are censored (no events observed) \u{2022} Survival analysis cannot be performed without observed events \u{2022} Check event definitions or extend follow-up time.',
                                 name, n)
                     )
                     next  # Skip this endpoint - no events to analyze
@@ -732,18 +732,18 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 # Event count validation - ensure reliable statistical estimates
                 if (n_events < 3) {
                     private$.addNotice('ERROR', 'Insufficient Events',
-                        sprintf('%s: Only %d event(s) observed • Minimum 3 events required for reliable survival analysis • Cannot estimate median or confidence intervals with fewer than 3 events.',
+                        sprintf('%s: Only %d event(s) observed \u{2022} Minimum 3 events required for reliable survival analysis \u{2022} Cannot estimate median or confidence intervals with fewer than 3 events.',
                                 name, n_events)
                     )
                     next  # Skip this endpoint - cannot analyze reliably
                 } else if (n_events < 10) {
                     private$.addNotice('STRONG_WARNING', 'Few Events',
-                        sprintf('%s: Only %d events observed • Median and confidence intervals are UNRELIABLE with <10 events • Results should be interpreted with extreme caution and confirmed with larger sample.',
+                        sprintf('%s: Only %d events observed \u{2022} Median and confidence intervals are UNRELIABLE with <10 events \u{2022} Results should be interpreted with extreme caution and confirmed with larger sample.',
                                 name, n_events)
                     )
                 } else if (n_events < 20) {
                     private$.addNotice('WARNING', 'Limited Events',
-                        sprintf('%s: %d events observed • Statistical power is limited with <20 events • Confidence intervals may be wide and median estimate less precise.',
+                        sprintf('%s: %d events observed \u{2022} Statistical power is limited with <20 events \u{2022} Confidence intervals may be wide and median estimate less precise.',
                                 name, n_events)
                     )
                 }
@@ -824,7 +824,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 # Validate minimum sample size for meaningful event rate
                 if (total < 10) {
                     private$.addNotice('WARNING', 'Event Rate Small Sample',
-                        sprintf('%s event rates: Only %d observations • Event rates and censoring percentages are unreliable with <10 observations • Interpret with caution.',
+                        sprintf('%s event rates: Only %d observations \u{2022} Event rates and censoring percentages are unreliable with <10 observations \u{2022} Interpret with caution.',
                                 name, total)
                     )
                 }
@@ -888,7 +888,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
                 n_events <- sum(event == 1)
                 if (n_events < 3) {
                     private$.addNotice('WARNING', 'Milestone Insufficient Events',
-                        sprintf('%s milestone analysis: Only %d event(s) observed • Minimum 3 events required for reliable survival probability estimates at specific time points • Skipping milestone analysis for this endpoint.',
+                        sprintf('%s milestone analysis: Only %d event(s) observed \u{2022} Minimum 3 events required for reliable survival probability estimates at specific time points \u{2022} Skipping milestone analysis for this endpoint.',
                                 name, n_events)
                     )
                     next  # Skip milestone calculation for this endpoint
@@ -990,7 +990,7 @@ survivalendpointsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
 
             if (length(insufficient_endpoints) > 0) {
                 private$.addNotice('WARNING', 'KM Plot Insufficient Events',
-                    sprintf('KM plot warning: Endpoint(s) %s have <3 events • Survival curves may be unreliable • Consider using only endpoints with adequate event counts.',
+                    sprintf('KM plot warning: Endpoint(s) %s have <3 events \u{2022} Survival curves may be unreliable \u{2022} Consider using only endpoints with adequate event counts.',
                             paste(insufficient_endpoints, collapse=', '))
                 )
 

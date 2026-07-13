@@ -99,12 +99,12 @@ classificationClass <- if (requireNamespace("jmvcore")) {
             <br>Welcome to ClinicoPath Clinical Classification Analysis
             <br><br>
             This tool provides comprehensive machine learning classification for clinical data:
-            <br>• Decision Trees and Random Forests
-            <br>• K-Nearest Neighbors (KNN)
-            <br>• Naive Bayes and Logistic Regression
-            <br>• Support Vector Machines (SVM)
-            <br>• Clinical performance metrics with confidence intervals
-            <br>• Class imbalance handling (correctly implemented to prevent data leakage)
+            <br>\u{2022} Decision Trees and Random Forests
+            <br>\u{2022} K-Nearest Neighbors (KNN)
+            <br>\u{2022} Naive Bayes and Logistic Regression
+            <br>\u{2022} Support Vector Machines (SVM)
+            <br>\u{2022} Clinical performance metrics with confidence intervals
+            <br>\u{2022} Class imbalance handling (correctly implemented to prevent data leakage)
             <br><br>
             Select a dependent variable (outcome) and independent variables (predictors) to begin analysis.
             <hr><br>
@@ -281,7 +281,7 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                 n_features <- length(self$options$indep)
                 if (n_features > 0 && n / n_features < 10) {
                     private$.addWarning(sprintf(
-                        "High feature-to-sample ratio: %d features with %d samples (ratio: %.1f). Risk of overfitting. Consider feature selection, regularization, or collecting more data. Recommended: n >= 10 × features.",
+                        "High feature-to-sample ratio: %d features with %d samples (ratio: %.1f). Risk of overfitting. Consider feature selection, regularization, or collecting more data. Recommended: n >= 10 \u{00D7} features.",
                         n_features, n, n / n_features
                     ), "WARNING")
                 }

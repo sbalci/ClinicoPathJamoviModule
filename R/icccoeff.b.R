@@ -99,9 +99,9 @@ icccoeffClass <- R6::R6Class(
                 </div>
                 <div class='requirements'>
                     <strong>Required:</strong><br>
-                    • At least 2 rater variables (columns represent different raters)<br>
-                    • Subjects/cases as rows<br>
-                    • Numeric rating scales
+                    \u{2022} At least 2 rater variables (columns represent different raters)<br>
+                    \u{2022} Subjects/cases as rows<br>
+                    \u{2022} Numeric rating scales
                 </div>
                 <div class='note'>
                     <strong>Data Structure:</strong><br>
@@ -300,7 +300,7 @@ icccoeffClass <- R6::R6Class(
                 "<div style='margin-top: 15px; padding: 10px; background-color: #e3f2fd; border-radius: 6px;'>",
                 "<strong>Interpretation:</strong> The ICC indicates ", 
                 private$.interpretICCValue(results$icc_value), " reliability and is ",
-                sig_text, " at α = ", alpha, ".",
+                sig_text, " at \u{03B1} = ", alpha, ".",
                 "</div>",
                 "</div>"
             )
@@ -361,30 +361,30 @@ icccoeffClass <- R6::R6Class(
                 
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
                     <strong>ICC Value Interpretation (Koo & Li, 2016):</strong><br>
-                    • <strong>< 0.50:</strong> Poor reliability<br>
-                    • <strong>0.50-0.75:</strong> Moderate reliability<br>
-                    • <strong>0.75-0.90:</strong> Good reliability<br>
-                    • <strong>> 0.90:</strong> Excellent reliability
+                    \u{2022} <strong>< 0.50:</strong> Poor reliability<br>
+                    \u{2022} <strong>0.50-0.75:</strong> Moderate reliability<br>
+                    \u{2022} <strong>0.75-0.90:</strong> Good reliability<br>
+                    \u{2022} <strong>> 0.90:</strong> Excellent reliability
                 </div>
                 
                 <div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px;'>
                     <strong>ICC Types:</strong><br>
-                    • <strong>ICC(1,1):</strong> One-way random, single measures<br>
-                    • <strong>ICC(2,1):</strong> Two-way random, single measures<br>
-                    • <strong>ICC(3,1):</strong> Two-way mixed, single measures<br>
-                    • <strong>ICC(1,k):</strong> One-way random, average measures<br>
-                    • <strong>ICC(2,k):</strong> Two-way random, average measures<br>
-                    • <strong>ICC(3,k):</strong> Two-way mixed, average measures
+                    \u{2022} <strong>ICC(1,1):</strong> One-way random, single measures<br>
+                    \u{2022} <strong>ICC(2,1):</strong> Two-way random, single measures<br>
+                    \u{2022} <strong>ICC(3,1):</strong> Two-way mixed, single measures<br>
+                    \u{2022} <strong>ICC(1,k):</strong> One-way random, average measures<br>
+                    \u{2022} <strong>ICC(2,k):</strong> Two-way random, average measures<br>
+                    \u{2022} <strong>ICC(3,k):</strong> Two-way mixed, average measures
                 </div>
                 
                 <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
                     <strong>Agreement Types:</strong><br>
-                    • <strong>Consistency (C):</strong> Measures if raters maintain consistent relative ranking<br>
-                    • <strong>Absolute Agreement (A):</strong> Measures if raters give identical scores<br><br>
+                    \u{2022} <strong>Consistency (C):</strong> Measures if raters maintain consistent relative ranking<br>
+                    \u{2022} <strong>Absolute Agreement (A):</strong> Measures if raters give identical scores<br><br>
                     <strong>Model Selection:</strong><br>
-                    • <strong>One-way:</strong> Raters are randomly selected from population<br>
-                    • <strong>Two-way:</strong> Same raters rate all subjects<br>
-                    • <strong>Mixed:</strong> Raters are specifically chosen, not random
+                    \u{2022} <strong>One-way:</strong> Raters are randomly selected from population<br>
+                    \u{2022} <strong>Two-way:</strong> Same raters rate all subjects<br>
+                    \u{2022} <strong>Mixed:</strong> Raters are specifically chosen, not random
                 </div>
             </div>"
             

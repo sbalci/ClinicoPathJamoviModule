@@ -755,7 +755,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 summary_html <- paste(summary_html,
                     "<p><strong>Model Interpretation:</strong>", interpretation, 
-                    "relationship detected (R² =", round(r_sq, 3), ")</p>"
+                    "relationship detected (R\u{00B2} =", round(r_sq, 3), ")</p>"
                 )
             }
             

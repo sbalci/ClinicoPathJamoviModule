@@ -248,7 +248,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Two unique values - assume higher value is event
                 sorted_vals <- sort(unique_vals)
                 result <- ifelse(status_data == sorted_vals[2], 1, 0)
-                warning(paste("Status variable '", original_var_name, "' converted: '", sorted_vals[1], "' → 0 (censored), '", sorted_vals[2], "' → 1 (event)", sep=""))
+                warning(paste("Status variable '", original_var_name, "' converted: '", sorted_vals[1], "' \u{2192} 0 (censored), '", sorted_vals[2], "' \u{2192} 1 (event)", sep=""))
                 return(result)
             } else {
                 # Multiple values - try to convert to numeric and use threshold
@@ -256,7 +256,7 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!all(is.na(numeric_attempt))) {
                     # Use 0 as censored, anything > 0 as event
                     result <- ifelse(numeric_attempt > 0, 1, 0)
-                    warning(paste("Status variable '", original_var_name, "' converted: 0 → censored, >0 → event", sep=""))
+                    warning(paste("Status variable '", original_var_name, "' converted: 0 \u{2192} censored, >0 \u{2192} event", sep=""))
                     return(result)
                 } else {
                     jmvcore::reject("Cannot convert status variable '{}' to binary format. Please ensure it contains binary values (0/1, TRUE/FALSE) or contact support.", original_var_name)
@@ -275,18 +275,18 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         This tool performs Kaplan-Meier survival analysis for a single group.
                     <br><br>
                         <b>Required variables:</b>
-                        <br>• Time variable: Time to event or censoring (positive numeric values)
-                        <br>• Status variable: Event indicator (0 = censored, 1 = event occurred)
+                        <br>\u{2022} Time variable: Time to event or censoring (positive numeric values)
+                        <br>\u{2022} Status variable: Event indicator (0 = censored, 1 = event occurred)
                     <br><br>
                         <b>What you'll get:</b>
-                        <br>• Median survival time with 95% confidence intervals
-                        <br>• Number of subjects and events
-                        <br>• Kaplan-Meier survival curve
+                        <br>\u{2022} Median survival time with 95% confidence intervals
+                        <br>\u{2022} Number of subjects and events
+                        <br>\u{2022} Kaplan-Meier survival curve
                     <br><br>
                         <b>Data requirements:</b>
-                        <br>• Time values must be non-negative
-                        <br>• Status should be binary (0/1, TRUE/FALSE, or similar)
-                        <br>• At least some events must have occurred
+                        <br>\u{2022} Time values must be non-negative
+                        <br>\u{2022} Status should be binary (0/1, TRUE/FALSE, or similar)
+                        <br>\u{2022} At least some events must have occurred
                     <br><br>
                         This function uses the survival package for analysis.
                     <br><br>
@@ -311,14 +311,14 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<div style='background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
                     "<b> Data Error:</b> No data available for survival analysis<br><br>",
                     "<b> Possible reasons:</b><br>",
-                    "• Dataset has no rows<br>",
-                    "• All rows contain missing values<br>",
-                    "• Data filtering has removed all observations<br><br>",
+                    "\u{2022} Dataset has no rows<br>",
+                    "\u{2022} All rows contain missing values<br>",
+                    "\u{2022} Data filtering has removed all observations<br><br>",
                     "<b> Solutions:</b><br>",
-                    "• Check your data import process<br>",
-                    "• Verify variable selections<br>",
-                    "• Review data quality and missing value patterns<br>",
-                    "• Ensure your dataset contains complete observations",
+                    "\u{2022} Check your data import process<br>",
+                    "\u{2022} Verify variable selections<br>",
+                    "\u{2022} Review data quality and missing value patterns<br>",
+                    "\u{2022} Ensure your dataset contains complete observations",
                     "</div>",
                     collapse = ""
                 )
@@ -340,10 +340,10 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<b> Critical Error(s) Detected:</b><br>",
                     paste(validation_results$errors, collapse = "<br>"),
                     "<br><br><b> Suggestions:</b><br>",
-                    "• Verify that selected variables exist in your dataset<br>",
-                    "• Ensure time variable contains positive numeric values<br>",
-                    "• Ensure status variable is binary (0/1) or can be converted<br>",
-                    "• Check that at least some events have occurred (not all censored)",
+                    "\u{2022} Verify that selected variables exist in your dataset<br>",
+                    "\u{2022} Ensure time variable contains positive numeric values<br>",
+                    "\u{2022} Ensure status variable is binary (0/1) or can be converted<br>",
+                    "\u{2022} Check that at least some events have occurred (not all censored)",
                     "</div>",
                     collapse = ""
                 )
@@ -411,15 +411,15 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<b> Survival Analysis Error:</b><br>",
                     paste("Technical error:", htmltools::htmlEscape(conditionMessage(e))), "<br><br>",
                     "<b> Common causes and solutions:</b><br>",
-                    "• Invalid survival times: Check for negative or non-numeric time values<br>",
-                    "• All subjects censored: Ensure some events have occurred<br>",
-                    "• Data format issues: Verify time and status variables are correctly formatted<br>",
-                    "• Insufficient data: Need adequate sample size for survival analysis<br><br>",
+                    "\u{2022} Invalid survival times: Check for negative or non-numeric time values<br>",
+                    "\u{2022} All subjects censored: Ensure some events have occurred<br>",
+                    "\u{2022} Data format issues: Verify time and status variables are correctly formatted<br>",
+                    "\u{2022} Insufficient data: Need adequate sample size for survival analysis<br><br>",
                     "<b> Suggested next steps:</b><br>",
-                    "• Review your time and status variable definitions<br>",
-                    "• Check data quality and completeness<br>",
-                    "• Ensure proper coding of event indicator (0 = censored, 1 = event)<br>",
-                    "• Contact support if problem persists",
+                    "\u{2022} Review your time and status variable definitions<br>",
+                    "\u{2022} Check data quality and completeness<br>",
+                    "\u{2022} Ensure proper coding of event indicator (0 = censored, 1 = event)<br>",
+                    "\u{2022} Contact support if problem persists",
                     "</div>",
                     collapse = ""
                 )

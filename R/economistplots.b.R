@@ -126,9 +126,9 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "<div style='color: red; padding: 10px; border-radius: 5px; background-color: #f8d7da;'>",
                         "<strong>Package Required:</strong> The 'ggeconodist' package is required for Economist-style plots.",
                         "<br><br><strong>Installation Options:</strong>",
-                        "<br>• CRAN: <code>install.packages('ggeconodist')</code>",
-                        "<br>• GitHub: <code>remotes::install_github('hrbrmstr/ggeconodist')</code>",
-                        "<br>• Alternative: <code>install.packages('ggeconodist', repos = 'https://cinc.rud.is')</code>",
+                        "<br>\u{2022} CRAN: <code>install.packages('ggeconodist')</code>",
+                        "<br>\u{2022} GitHub: <code>remotes::install_github('hrbrmstr/ggeconodist')</code>",
+                        "<br>\u{2022} Alternative: <code>install.packages('ggeconodist', repos = 'https://cinc.rud.is')</code>",
                         "</div>",
                         font_guidance
                     )
@@ -305,7 +305,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 ss_total <- sum(aov_summary[[1]]$`Sum Sq`)
                                 ss_between <- aov_summary[[1]]$`Sum Sq`[1]
                                 eta_squared <- ss_between / ss_total
-                                stat_html <- paste0(stat_html, "<p><strong>Effect Size (η²):</strong> ", round(eta_squared, 3), "</p>")
+                                stat_html <- paste0(stat_html, "<p><strong>Effect Size (\u{03B7}\u{00B2}):</strong> ", round(eta_squared, 3), "</p>")
 
                                 # Interpretation
                                 if (eta_squared < 0.01) {
@@ -328,7 +328,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             k_result <- kruskal.test(jmvcore::asFormula(formula_str), data = data)
 
                             stat_html <- paste0(stat_html, "<p><strong>Kruskal-Wallis Test Results:</strong></p>")
-                            stat_html <- paste0(stat_html, "<p>χ² = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
+                            stat_html <- paste0(stat_html, "<p>\u{03C7}\u{00B2} = ", round(k_result$statistic, 3), ", df = ", k_result$parameter, ", p = ", format.pval(k_result$p.value, digits = 3), "</p>")
                         } else if (stat_method == "ttest") {
                             # T-test (assuming two groups)
                             groups <- unique(data[[x_var]])
@@ -469,7 +469,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$tenth_color), "; font-weight: bold;'></span> <strong>10th Percentile:</strong> 10% of values fall below this point</li>")
                 legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$median_color), "; font-weight: bold;'></span> <strong>Median (50th Percentile):</strong> Middle value of the distribution</li>")
                 legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$ninetieth_color), "; font-weight: bold;'></span> <strong>90th Percentile:</strong> 90% of values fall below this point</li>")
-                legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$distribution_fill), "; font-weight: bold;'>▓</span> <strong>Distribution Area:</strong> Shows the shape and spread of data</li>")
+                legend_html <- paste0(legend_html, "<li><span style='color: ", htmltools::htmlEscape(self$options$distribution_fill), "; font-weight: bold;'>\u{2593}</span> <strong>Distribution Area:</strong> Shows the shape and spread of data</li>")
                 legend_html <- paste0(legend_html, "</ul>")
 
                 legend_html <- paste0(legend_html, "<h5>Visual Design Principles:</h5>")

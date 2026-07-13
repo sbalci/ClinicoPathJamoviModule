@@ -1601,11 +1601,11 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                                                 test_used <- if (prod(dim(tbl)) > 2) " (Fisher's exact, simulated)" else " (Fisher's exact)"
                                             } else {
                                                 p_value <- chi_test$p.value
-                                                test_used <- " (χ², low expected counts)"
+                                                test_used <- " (\u{03C7}\u{00B2}, low expected counts)"
                                             }
                                         } else {
                                             p_value <- chi_test$p.value
-                                            test_used <- " (χ²)"
+                                            test_used <- " (\u{03C7}\u{00B2})"
                                         }
 
                                         # Get frequencies by cluster

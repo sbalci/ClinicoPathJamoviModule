@@ -1555,9 +1555,9 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</ul>")
             } else if (growth_model == "power") {
                 html <- paste0(html,
-                    "<p><b>Power Law Model:</b> Growth follows a power relationship with time (V ∝ t^α).</p>",
+                    "<p><b>Power Law Model:</b> Growth follows a power relationship with time (V \u{221D} t^\u{03B1}).</p>",
                     "<p><b>Clinical Implications:</b></p><ul>",
-                    "<li>Exponent (α) indicates growth pattern: α=1 is linear, α>1 is accelerating, α<1 is decelerating</li>",
+                    "<li>Exponent (\u{03B1}) indicates growth pattern: \u{03B1}=1 is linear, \u{03B1}>1 is accelerating, \u{03B1}<1 is decelerating</li>",
                     "<li>Can capture early rapid growth or plateau phases</li>",
                     "<li>Useful for empirical fitting when biological mechanism is uncertain</li>",
                     "</ul>")
@@ -1566,7 +1566,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # General interpretation guidance
             html <- paste0(html,
                 "<p><b>Model Fit Assessment:</b></p><ul>",
-                "<li><b>R²:</b> Proportion of variance explained by the model. Values >0.8 suggest good fit.</li>",
+                "<li><b>R\u{00B2}:</b> Proportion of variance explained by the model. Values >0.8 suggest good fit.</li>",
                 "<li><b>AIC/BIC:</b> Lower values indicate better model fit accounting for complexity. Use to compare different models.</li>",
                 "<li><b>Residual plots:</b> Check for systematic patterns - random scatter indicates appropriate model.</li>",
                 "</ul>")
@@ -1697,7 +1697,7 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Model fit quality
-                html <- paste0(html, "<p><b>Model Fit:</b> Review the Model Fit Statistics table and Residual Analysis plot to assess how well the model fits the observed data. Higher R² values and randomly scattered residuals indicate better fit.</p>")
+                html <- paste0(html, "<p><b>Model Fit:</b> Review the Model Fit Statistics table and Residual Analysis plot to assess how well the model fits the observed data. Higher R\u{00B2} values and randomly scattered residuals indicate better fit.</p>")
 
                 # Clinical implications
                 html <- paste0(html, "<h5>Clinical Implications</h5>")
@@ -1744,35 +1744,35 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Growth models
             html <- paste0(html, "<dt><b>Exponential Growth Model</b></dt>")
-            html <- paste0(html, "<dd>V(t) = V₀ × e<sup>kt</sup> - Assumes constant percentage growth rate; typical of early-stage unrestricted tumor growth</dd>")
+            html <- paste0(html, "<dd>V(t) = V\u{2080} \u{00D7} e<sup>kt</sup> - Assumes constant percentage growth rate; typical of early-stage unrestricted tumor growth</dd>")
 
             html <- paste0(html, "<dt><b>Gompertz Growth Model</b></dt>")
-            html <- paste0(html, "<dd>V(t) = V₀ × e<sup>(α/β)(1-e<sup>-βt</sup>)</sup> - Most common solid tumor pattern with decelerating growth due to nutrient limitations</dd>")
+            html <- paste0(html, "<dd>V(t) = V\u{2080} \u{00D7} e<sup>(\u{03B1}/\u{03B2})(1-e<sup>-\u{03B2}t</sup>)</sup> - Most common solid tumor pattern with decelerating growth due to nutrient limitations</dd>")
 
             html <- paste0(html, "<dt><b>Logistic Growth Model</b></dt>")
-            html <- paste0(html, "<dd>V(t) = K / (1 + e<sup>-r(t-t₀)</sup>) - Growth approaches maximum carrying capacity K; describes tumors with environmental constraints</dd>")
+            html <- paste0(html, "<dd>V(t) = K / (1 + e<sup>-r(t-t\u{2080})</sup>) - Growth approaches maximum carrying capacity K; describes tumors with environmental constraints</dd>")
 
             html <- paste0(html, "<dt><b>von Bertalanffy Growth Model</b></dt>")
-            html <- paste0(html, "<dd>V(t) = (V∞<sup>1/3</sup> - (V∞<sup>1/3</sup> - V₀<sup>1/3</sup>)e<sup>-kt</sup>)<sup>3</sup> - Used for organisms with metabolic scaling; slower deceleration than Gompertz</dd>")
+            html <- paste0(html, "<dd>V(t) = (V\u{221E}<sup>1/3</sup> - (V\u{221E}<sup>1/3</sup> - V\u{2080}<sup>1/3</sup>)e<sup>-kt</sup>)<sup>3</sup> - Used for organisms with metabolic scaling; slower deceleration than Gompertz</dd>")
 
             html <- paste0(html, "<dt><b>Power Law Growth Model</b></dt>")
-            html <- paste0(html, "<dd>V(t) = V₀ × t<sup>α</sup> - Describes accelerating (α > 1) or decelerating (α < 1) growth following a power function</dd>")
+            html <- paste0(html, "<dd>V(t) = V\u{2080} \u{00D7} t<sup>\u{03B1}</sup> - Describes accelerating (\u{03B1} > 1) or decelerating (\u{03B1} < 1) growth following a power function</dd>")
 
             html <- paste0(html, "<dt><b>Linear Growth Model</b></dt>")
-            html <- paste0(html, "<dd>V(t) = V₀ + kt - Constant absolute growth rate per time unit; less common in biological systems</dd>")
+            html <- paste0(html, "<dd>V(t) = V\u{2080} + kt - Constant absolute growth rate per time unit; less common in biological systems</dd>")
 
             # Key parameters
             html <- paste0(html, "<dt><b>Growth Rate (k)</b></dt>")
             html <- paste0(html, "<dd>Rate parameter controlling speed of growth; higher values = faster growth</dd>")
 
-            html <- paste0(html, "<dt><b>Deceleration Parameter (β)</b></dt>")
+            html <- paste0(html, "<dt><b>Deceleration Parameter (\u{03B2})</b></dt>")
             html <- paste0(html, "<dd>In Gompertz model, controls how quickly growth rate decreases over time</dd>")
 
             html <- paste0(html, "<dt><b>Doubling Time</b></dt>")
             html <- paste0(html, "<dd>Time required for tumor volume to double; calculated as ln(2)/k for exponential growth</dd>")
 
             # Statistical metrics
-            html <- paste0(html, "<dt><b>R² (Coefficient of Determination)</b></dt>")
+            html <- paste0(html, "<dt><b>R\u{00B2} (Coefficient of Determination)</b></dt>")
             html <- paste0(html, "<dd>Proportion of variance explained by the model (0-1 scale); higher values indicate better fit</dd>")
 
             html <- paste0(html, "<dt><b>AIC (Akaike Information Criterion)</b></dt>")

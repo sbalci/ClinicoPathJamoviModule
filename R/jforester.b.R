@@ -120,10 +120,10 @@ jforesterClass <- R6::R6Class(
                 </div>
                 <div class='requirements'>
                     <strong>Required Variables:</strong><br>
-                    • Study/Group Labels: Names or identifiers for each study/group<br>
-                    • Effect Estimates: Point estimates (odds ratios, mean differences, etc.)<br>
-                    • Lower CI: Lower confidence interval bounds<br>
-                    • Upper CI: Upper confidence interval bounds
+                    \u{2022} Study/Group Labels: Names or identifiers for each study/group<br>
+                    \u{2022} Effect Estimates: Point estimates (odds ratios, mean differences, etc.)<br>
+                    \u{2022} Lower CI: Lower confidence interval bounds<br>
+                    \u{2022} Upper CI: Upper confidence interval bounds
                 </div>
                 <div class='steps'>
                     <div class='step'>Select study or group labels variable</div>
@@ -305,7 +305,7 @@ jforesterClass <- R6::R6Class(
                     }
                     
                     table$addRow(rowKey = "i_squared", values = list(
-                        statistic = "I² (Heterogeneity)",
+                        statistic = "I\u{00B2} (Heterogeneity)",
                         value = sprintf("%.1f%%", I_squared)
                     ))
                     
@@ -352,18 +352,18 @@ jforesterClass <- R6::R6Class(
                 
                 <div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px;'>
                     <strong>Reading the Forest Plot:</strong><br>
-                    • Each horizontal line represents a study with point estimate and confidence interval<br>
-                    • Point size may reflect sample size or study weight<br>
-                    • Vertical reference line typically represents 'no effect' (", self$options$reference_line, ")<br>
-                    • Confidence intervals crossing the reference line suggest non-significance
+                    \u{2022} Each horizontal line represents a study with point estimate and confidence interval<br>
+                    \u{2022} Point size may reflect sample size or study weight<br>
+                    \u{2022} Vertical reference line typically represents 'no effect' (", self$options$reference_line, ")<br>
+                    \u{2022} Confidence intervals crossing the reference line suggest non-significance
                 </div>
                 
                 <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
                     <strong> Important Considerations:</strong><br>
-                    • Consider heterogeneity between studies when interpreting results<br>
-                    • Check for outliers or studies with unusually wide confidence intervals<br>
-                    • Publication bias may affect the pattern of results<br>
-                    • Clinical significance may differ from statistical significance
+                    \u{2022} Consider heterogeneity between studies when interpreting results<br>
+                    \u{2022} Check for outliers or studies with unusually wide confidence intervals<br>
+                    \u{2022} Publication bias may affect the pattern of results<br>
+                    \u{2022} Clinical significance may differ from statistical significance
                 </div>
             </div>")
             
@@ -497,14 +497,14 @@ jforesterClass <- R6::R6Class(
                         ggplot2::annotate("text", 
                                         x = left_x, 
                                         y = y_bottom, 
-                                        label = paste0("← ", self$options$left_arrow_label),
+                                        label = paste0("\u{2190} ", self$options$left_arrow_label),
                                         hjust = 0, 
                                         size = 3.5, 
                                         color = "gray40") +
                         ggplot2::annotate("text", 
                                         x = right_x, 
                                         y = y_bottom, 
-                                        label = paste0(self$options$right_arrow_label, " →"),
+                                        label = paste0(self$options$right_arrow_label, " \u{2192}"),
                                         hjust = 1, 
                                         size = 3.5, 
                                         color = "gray40")

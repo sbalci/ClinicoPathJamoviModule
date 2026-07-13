@@ -201,10 +201,10 @@ patientdashboardClass <- R6::R6Class(
             summary_html <- paste0(summary_html, 
                 "<div class='summary-section'>",
                 "<b>Dashboard Configuration:</b><br>",
-                "• Type: ", self$options$dashboard_type, "<br>",
-                "• Monitoring Frequency: ", self$options$monitoring_frequency, "<br>",
-                "• Alert Thresholds: ", self$options$alert_thresholds, "<br>",
-                "• Time Window: ", self$options$time_window, " hours<br>",
+                "\u{2022} Type: ", self$options$dashboard_type, "<br>",
+                "\u{2022} Monitoring Frequency: ", self$options$monitoring_frequency, "<br>",
+                "\u{2022} Alert Thresholds: ", self$options$alert_thresholds, "<br>",
+                "\u{2022} Time Window: ", self$options$time_window, " hours<br>",
                 "<span class='timestamp'>Last Updated: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "</span>",
                 "</div>"
             )
@@ -216,10 +216,10 @@ patientdashboardClass <- R6::R6Class(
             summary_html <- paste0(summary_html, 
                 "<div class='summary-section'>",
                 "<b>Monitoring Overview:</b><br>",
-                "• Vital Signs Parameters: ", vitalCount, "<br>",
-                "• Laboratory Values: ", labCount, "<br>",
-                "• Real-time Monitoring: ", if (self$options$realtime_monitoring) "ENABLED" else "DISABLED", "<br>",
-                "• Alert System: ", if (self$options$alert_system) "ACTIVE" else "INACTIVE",
+                "\u{2022} Vital Signs Parameters: ", vitalCount, "<br>",
+                "\u{2022} Laboratory Values: ", labCount, "<br>",
+                "\u{2022} Real-time Monitoring: ", if (self$options$realtime_monitoring) "ENABLED" else "DISABLED", "<br>",
+                "\u{2022} Alert System: ", if (self$options$alert_system) "ACTIVE" else "INACTIVE",
                 "</div>"
             )
             
@@ -623,10 +623,10 @@ patientdashboardClass <- R6::R6Class(
             summary_html <- paste0(summary_html, 
                 "<div class='summary-section'>",
                 "<b>Key Findings:</b><br>",
-                "• ", vitalCount, " vital signs parameters monitored<br>",
-                "• ", labCount, " laboratory values tracked<br>",
-                "• Patient status: ", sample(c("Stable", "Improving", "Requires Monitoring"), 1), "<br>",
-                "• Overall risk level: ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.6, 0.3, 0.1)),
+                "\u{2022} ", vitalCount, " vital signs parameters monitored<br>",
+                "\u{2022} ", labCount, " laboratory values tracked<br>",
+                "\u{2022} Patient status: ", sample(c("Stable", "Improving", "Requires Monitoring"), 1), "<br>",
+                "\u{2022} Overall risk level: ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.6, 0.3, 0.1)),
                 "</div>"
             )
             
@@ -634,10 +634,10 @@ patientdashboardClass <- R6::R6Class(
             summary_html <- paste0(summary_html, 
                 "<div class='summary-section'>",
                 "<b>Clinical Recommendations:</b><br>",
-                "• Continue current monitoring protocol<br>",
-                "• Review medication adherence<br>",
-                "• Consider preventive measures based on risk assessment<br>",
-                "• Schedule follow-up as clinically indicated",
+                "\u{2022} Continue current monitoring protocol<br>",
+                "\u{2022} Review medication adherence<br>",
+                "\u{2022} Consider preventive measures based on risk assessment<br>",
+                "\u{2022} Schedule follow-up as clinically indicated",
                 "</div>"
             )
             
@@ -662,9 +662,9 @@ patientdashboardClass <- R6::R6Class(
             predictive_html <- paste0(predictive_html, 
                 "<div class='pred-section'>",
                 "<b>Early Warning Indicators:</b><br>",
-                "• Deterioration Risk (24h): ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.7, 0.2, 0.1)), "<br>",
-                "• Readmission Risk (30d): ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.6, 0.3, 0.1)), "<br>",
-                "• Medication Compliance Risk: ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.5, 0.4, 0.1)),
+                "\u{2022} Deterioration Risk (24h): ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.7, 0.2, 0.1)), "<br>",
+                "\u{2022} Readmission Risk (30d): ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.6, 0.3, 0.1)), "<br>",
+                "\u{2022} Medication Compliance Risk: ", sample(c("Low", "Moderate", "High"), 1, prob = c(0.5, 0.4, 0.1)),
                 "</div>"
             )
             
@@ -672,10 +672,10 @@ patientdashboardClass <- R6::R6Class(
             predictive_html <- paste0(predictive_html, 
                 "<div class='pred-section'>",
                 "<b>Predictive Recommendations:</b><br>",
-                "• Monitor vital signs trends closely<br>",
-                "• Consider preemptive interventions if risk increases<br>",
-                "• Ensure patient education and support systems<br>",
-                "• Schedule proactive follow-up appointments",
+                "\u{2022} Monitor vital signs trends closely<br>",
+                "\u{2022} Consider preemptive interventions if risk increases<br>",
+                "\u{2022} Ensure patient education and support systems<br>",
+                "\u{2022} Schedule proactive follow-up appointments",
                 "</div>"
             )
             
@@ -699,10 +699,10 @@ patientdashboardClass <- R6::R6Class(
             outcomes_html <- paste0(outcomes_html, 
                 "<div class='outcome-section'>",
                 "<b>Clinical Outcomes:</b><br>",
-                "<div class='metric'>• Length of Stay: ", round(runif(1, 3, 8), 1), " days</div>",
-                "<div class='metric'>• Complication Rate: ", round(runif(1, 5, 15), 1), "%</div>",
-                "<div class='metric'>• Patient Satisfaction: ", round(runif(1, 8, 10), 1), "/10</div>",
-                "<div class='metric'>• Treatment Adherence: ", round(runif(1, 80, 95), 1), "%</div>",
+                "<div class='metric'>\u{2022} Length of Stay: ", round(runif(1, 3, 8), 1), " days</div>",
+                "<div class='metric'>\u{2022} Complication Rate: ", round(runif(1, 5, 15), 1), "%</div>",
+                "<div class='metric'>\u{2022} Patient Satisfaction: ", round(runif(1, 8, 10), 1), "/10</div>",
+                "<div class='metric'>\u{2022} Treatment Adherence: ", round(runif(1, 80, 95), 1), "%</div>",
                 "</div>"
             )
             
@@ -710,10 +710,10 @@ patientdashboardClass <- R6::R6Class(
             outcomes_html <- paste0(outcomes_html, 
                 "<div class='outcome-section'>",
                 "<b>Quality Indicators:</b><br>",
-                "<div class='metric'>• Safety Events: 0</div>",
-                "<div class='metric'>• Care Plan Adherence: ", round(runif(1, 85, 98), 1), "%</div>",
-                "<div class='metric'>• Documentation Quality: ", round(runif(1, 90, 99), 1), "%</div>",
-                "<div class='metric'>• Team Communication Score: ", round(runif(1, 8.5, 9.8), 1), "/10</div>",
+                "<div class='metric'>\u{2022} Safety Events: 0</div>",
+                "<div class='metric'>\u{2022} Care Plan Adherence: ", round(runif(1, 85, 98), 1), "%</div>",
+                "<div class='metric'>\u{2022} Documentation Quality: ", round(runif(1, 90, 99), 1), "%</div>",
+                "<div class='metric'>\u{2022} Team Communication Score: ", round(runif(1, 8.5, 9.8), 1), "/10</div>",
                 "</div>"
             )
             

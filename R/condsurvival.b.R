@@ -570,10 +570,10 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <p><b>Assumption Validity:</b> Assumes that future hazards remain similar to observed patterns.</p>
 
             <p><b>References:</b></p>
-            <p>• Hieke S, et al. Conditional survival: A useful concept to provide information on how
+            <p>\u{2022} Hieke S, et al. Conditional survival: A useful concept to provide information on how
             prognosis evolves over time. Clin Cancer Res. 2015.</p>
-            <p>• Zabor EC, et al. Dynamic prognostication using conditional survival estimates. Cancer. 2013.</p>
-            <p>• Cucchetti A, et al. Conditional survival after hepatic resection for colorectal metastases.
+            <p>\u{2022} Zabor EC, et al. Dynamic prognostication using conditional survival estimates. Cancer. 2013.</p>
+            <p>\u{2022} Cucchetti A, et al. Conditional survival after hepatic resection for colorectal metastases.
             Clin Colorectal Cancer. 2010.</p>
             </body>
             </html>"

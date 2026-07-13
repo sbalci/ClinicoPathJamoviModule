@@ -76,9 +76,9 @@ jforestmodelClass <- R6::R6Class(
                         </div>
                         <div class='requirements'>
                             <strong>Required Variables:</strong><br>
-                            • Dependent Variable: Outcome variable for modeling<br>
-                            • Predictor Variables: Independent variables for the model<br>
-                            • For Cox models: Time and Event variables
+                            \u{2022} Dependent Variable: Outcome variable for modeling<br>
+                            \u{2022} Predictor Variables: Independent variables for the model<br>
+                            \u{2022} For Cox models: Time and Event variables
                         </div>
                         <div class='steps'>
                             <div class='step'>Select your dependent variable</div>
@@ -413,10 +413,10 @@ jforestmodelClass <- R6::R6Class(
                 
                 <div style='margin-top: 15px; padding: 15px; background-color: #fff3e0; border-radius: 8px; border-left: 4px solid #ff9800;'>
                     <strong> Important Considerations:</strong><br>
-                    • Check model assumptions before interpreting results<br>
-                    • Consider potential confounders not included in the model<br>
-                    • Correlation does not imply causation<br>
-                    • Clinical significance may differ from statistical significance
+                    \u{2022} Check model assumptions before interpreting results<br>
+                    \u{2022} Consider potential confounders not included in the model<br>
+                    \u{2022} Correlation does not imply causation<br>
+                    \u{2022} Clinical significance may differ from statistical significance
                 </div>
             </div>")
             

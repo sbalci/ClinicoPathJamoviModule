@@ -55,21 +55,21 @@ conditionalgeeClass <- R6::R6Class(
                     <h2> Model Framework:</h2>
                     <div class='formula'>
                     <strong>Conditional GEE Model:</strong><br>
-                    g(E[T_{ij} | H_{i(j-1)}]) = β₀ + βᵀX_{ij} + γᵀH_{i(j-1)}<br>
+                    g(E[T_{ij} | H_{i(j-1)}]) = \u{03B2}\u{2080} + \u{03B2}\u{1D40}X_{ij} + \u{03B3}\u{1D40}H_{i(j-1)}<br>
                     <strong>Where:</strong><br>
-                    • T_{ij} = j-th gap time for subject i<br>
-                    • H_{i(j-1)} = Event history up to (j-1)-th event<br>
-                    • g(·) = Link function (log, identity, sqrt)<br>
-                    • Corr(T_{ij}, T_{ik}) = Working correlation structure
+                    \u{2022} T_{ij} = j-th gap time for subject i<br>
+                    \u{2022} H_{i(j-1)} = Event history up to (j-1)-th event<br>
+                    \u{2022} g(\u{00B7}) = Link function (log, identity, sqrt)<br>
+                    \u{2022} Corr(T_{ij}, T_{ik}) = Working correlation structure
                     </div>
 
                     <div class='interpretation'>
                     <strong> Key Features:</strong><br>
-                    • Conditional modeling given previous event history<br>
-                    • Multiple distribution families (Exponential, Weibull, Gamma, Log-normal)<br>
-                    • Various correlation structures (Exchangeable, AR(1), Unstructured)<br>
-                    • Robust standard errors for inference<br>
-                    • Model diagnostics and goodness-of-fit assessment
+                    \u{2022} Conditional modeling given previous event history<br>
+                    \u{2022} Multiple distribution families (Exponential, Weibull, Gamma, Log-normal)<br>
+                    \u{2022} Various correlation structures (Exchangeable, AR(1), Unstructured)<br>
+                    \u{2022} Robust standard errors for inference<br>
+                    \u{2022} Model diagnostics and goodness-of-fit assessment
                     </div>
 
                     <p><strong> Please assign the required variables to continue with the analysis.</strong></p>
@@ -555,13 +555,13 @@ conditionalgeeClass <- R6::R6Class(
             <strong>Model Structure:</strong><br>
             <div class='formula'>
             <strong>Conditional Mean Model:</strong><br>
-            g(E[T_{ij} | H_{i(j-1)}]) = β₀ + βᵀX_{ij} + γᵀH_{i(j-1)}<br><br>
+            g(E[T_{ij} | H_{i(j-1)}]) = \u{03B2}\u{2080} + \u{03B2}\u{1D40}X_{ij} + \u{03B3}\u{1D40}H_{i(j-1)}<br><br>
             
             <strong>Correlation Structure:</strong><br>
-            Corr(T_{ij}, T_{ik}) = R(α) for j ≠ k<br><br>
+            Corr(T_{ij}, T_{ik}) = R(\u{03B1}) for j \u{2260} k<br><br>
             
             <strong>Robust Variance:</strong><br>
-            Var(β̂) = I₁⁻¹ I₂ I₁⁻¹ (sandwich estimator)
+            Var(\u{03B2}\u{0302}) = I\u{2081}\u{207B}\u{00B9} I\u{2082} I\u{2081}\u{207B}\u{00B9} (sandwich estimator)
             </div>
             </div>
 
@@ -577,11 +577,11 @@ conditionalgeeClass <- R6::R6Class(
 
             <div class='interpretation'>
             <strong>Clinical Applications:</strong><br>
-            • <strong>Infection recurrence:</strong> Time between infection episodes<br>
-            • <strong>Seizure intervals:</strong> Gap times between seizure occurrences<br>
-            • <strong>Hospital readmissions:</strong> Time between consecutive admissions<br>
-            • <strong>Treatment cycles:</strong> Intervals between therapy cycles<br>
-            • <strong>Disease flares:</strong> Time between symptom exacerbations
+            \u{2022} <strong>Infection recurrence:</strong> Time between infection episodes<br>
+            \u{2022} <strong>Seizure intervals:</strong> Gap times between seizure occurrences<br>
+            \u{2022} <strong>Hospital readmissions:</strong> Time between consecutive admissions<br>
+            \u{2022} <strong>Treatment cycles:</strong> Intervals between therapy cycles<br>
+            \u{2022} <strong>Disease flares:</strong> Time between symptom exacerbations
             </div>
 
             </body>
@@ -619,43 +619,43 @@ conditionalgeeClass <- R6::R6Class(
             
             <div class='summary'>
             <strong>Model Summary:</strong><br>
-            • <strong>Distribution:</strong> ", distribution_family, "<br>
-            • <strong>Number of subjects:</strong> ", prepared_data$n_subjects, "<br>
-            • <strong>Gap time observations:</strong> ", prepared_data$n_gaps, "<br>
-            • <strong>Maximum events per subject:</strong> ", prepared_data$max_events, "<br>
-            • <strong>Mean gap time:</strong> ", round(mean(prepared_data$gap_time, na.rm = TRUE), 2), "
+            \u{2022} <strong>Distribution:</strong> ", distribution_family, "<br>
+            \u{2022} <strong>Number of subjects:</strong> ", prepared_data$n_subjects, "<br>
+            \u{2022} <strong>Gap time observations:</strong> ", prepared_data$n_gaps, "<br>
+            \u{2022} <strong>Maximum events per subject:</strong> ", prepared_data$max_events, "<br>
+            \u{2022} <strong>Mean gap time:</strong> ", round(mean(prepared_data$gap_time, na.rm = TRUE), 2), "
             </div>
 
             <div class='interpretation'>
             <strong> Coefficient Interpretation:</strong><br>
-            • Coefficients represent effects on the transformed gap time scale<br>
-            • Positive coefficients indicate longer gap times (lower event rate)<br>
-            • Negative coefficients indicate shorter gap times (higher event rate)<br>
-            • Effects are conditional on the specified event history
+            \u{2022} Coefficients represent effects on the transformed gap time scale<br>
+            \u{2022} Positive coefficients indicate longer gap times (lower event rate)<br>
+            \u{2022} Negative coefficients indicate shorter gap times (higher event rate)<br>
+            \u{2022} Effects are conditional on the specified event history
             </div>
 
             <div class='interpretation'>
             <strong> Correlation Structure:</strong><br>
-            • Accounts for dependence between gap times within subjects<br>
-            • Provides robust standard errors despite correlation<br>
-            • Choice of structure affects efficiency but not consistency<br>
-            • Working correlation need not be correctly specified
+            \u{2022} Accounts for dependence between gap times within subjects<br>
+            \u{2022} Provides robust standard errors despite correlation<br>
+            \u{2022} Choice of structure affects efficiency but not consistency<br>
+            \u{2022} Working correlation need not be correctly specified
             </div>
 
             <div class='interpretation'>
             <strong> Clinical Implications:</strong><br>
-            • Results apply to population-average gap times<br>
-            • Useful for understanding factors affecting recurrence patterns<br>
-            • Can inform intervention timing and resource planning<br>
-            • Predictions help identify high-risk recurrence patterns
+            \u{2022} Results apply to population-average gap times<br>
+            \u{2022} Useful for understanding factors affecting recurrence patterns<br>
+            \u{2022} Can inform intervention timing and resource planning<br>
+            \u{2022} Predictions help identify high-risk recurrence patterns
             </div>
 
             <div class='warning'>
             <strong> Important Considerations:</strong><br>
-            • Gap time distribution assumption should be validated<br>
-            • Correlation structure choice affects efficiency<br>
-            • Large cluster sizes improve asymptotic properties<br>
-            • Missing data patterns may affect conditional interpretation
+            \u{2022} Gap time distribution assumption should be validated<br>
+            \u{2022} Correlation structure choice affects efficiency<br>
+            \u{2022} Large cluster sizes improve asymptotic properties<br>
+            \u{2022} Missing data patterns may affect conditional interpretation
             </div>
 
             </body>

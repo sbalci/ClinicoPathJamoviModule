@@ -457,7 +457,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <ul style='margin-bottom: 0;'>
                       <li><strong>Patient flow:</strong> Track progression through treatment stages</li>
                       <li><strong>Tumor progression:</strong> Visualize grade/stage transitions</li>
-                      <li><strong>Diagnostic pathways:</strong> Show relationships between symptoms → diagnosis → outcomes</li>
+                      <li><strong>Diagnostic pathways:</strong> Show relationships between symptoms \u{2192} diagnosis \u{2192} outcomes</li>
                       <li><strong>Demographics:</strong> Explore patterns across age/sex/location categories</li>
                     </ul>
                   </div>
@@ -465,7 +465,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                   <div style='background-color: #fff8e1; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0;'>
                     <h3 style='margin-top: 0;'> Tips</h3>
                     <ul style='margin-bottom: 0;'>
-                      <li>Arrange variables in <strong>logical order</strong> (e.g., temporal sequence: Grade → Stage → Response)</li>
+                      <li>Arrange variables in <strong>logical order</strong> (e.g., temporal sequence: Grade \u{2192} Stage \u{2192} Response)</li>
                       <li>Start with <strong>fewer variables</strong> and add more once you understand the patterns</li>
                       <li>Use <strong>weighted flows</strong> (GG Alluvial engine) for aggregated data with frequency counts</li>
                       <li>Enable <strong>marginal histograms</strong> to see individual variable distributions</li>

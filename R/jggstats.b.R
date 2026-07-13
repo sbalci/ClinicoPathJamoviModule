@@ -639,7 +639,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                     interpretation <- paste0(interpretation,
                         "<p>The model includes ", nrow(model_results), " terms, of which ",
-                        n_significant, " are statistically significant at α = 0.05.</p>"
+                        n_significant, " are statistically significant at \u{03B1} = 0.05.</p>"
                     )
                     
                     if (requireNamespace('broom', quietly = TRUE)) {

@@ -374,7 +374,7 @@ methodcomparisonClass <- R6::R6Class(
                 estimate = accuracy,
                 lower_ci = NA,
                 upper_ci = NA,
-                interpretation = "Measures how far the best-fit line deviates from 45° line"
+                interpretation = "Measures how far the best-fit line deviates from 45\u{00B0} line"
             ))
         },
         .populateBlandAltmanStats = function(method1, method2) {
@@ -475,7 +475,7 @@ methodcomparisonClass <- R6::R6Class(
             beta_ci <- c(sorted_slopes[lower_idx], sorted_slopes[upper_idx])
 
             table$addRow(rowKey = "intercept", values = list(
-                parameter = "Intercept (α)",
+                parameter = "Intercept (\u{03B1})",
                 estimate = alpha,
                 lower_ci = NA, # Would need proper PB calculation
                 upper_ci = NA,
@@ -483,7 +483,7 @@ methodcomparisonClass <- R6::R6Class(
             ))
 
             table$addRow(rowKey = "slope", values = list(
-                parameter = "Slope (β)",
+                parameter = "Slope (\u{03B2})",
                 estimate = beta,
                 lower_ci = beta_ci[1],
                 upper_ci = beta_ci[2],
@@ -523,7 +523,7 @@ methodcomparisonClass <- R6::R6Class(
             t_val <- qt((1 + self$options$confidence_level) / 2, df = n - 2)
 
             table$addRow(rowKey = "intercept", values = list(
-                parameter = "Intercept (α)",
+                parameter = "Intercept (\u{03B1})",
                 estimate = alpha,
                 se = se_alpha,
                 lower_ci = alpha - t_val * se_alpha,
@@ -531,7 +531,7 @@ methodcomparisonClass <- R6::R6Class(
             ))
 
             table$addRow(rowKey = "slope", values = list(
-                parameter = "Slope (β)",
+                parameter = "Slope (\u{03B2})",
                 estimate = beta,
                 se = se_beta,
                 lower_ci = beta - t_val * se_beta,
@@ -746,7 +746,7 @@ methodcomparisonClass <- R6::R6Class(
                         paste0(
                             "Calibration model: Test = ", round(intercept, 3),
                             " + ", round(slope, 3), " x Reference. ",
-                            "Perfect calibration: intercept = 0, slope = 1, R² = 1. ",
+                            "Perfect calibration: intercept = 0, slope = 1, R\u{00B2} = 1. ",
                             "N = ", length(method1), " paired observations."
                         )
                     )
@@ -776,7 +776,7 @@ methodcomparisonClass <- R6::R6Class(
             <ul>
                 <li><strong>Good Agreement:</strong> Mean bias near zero, narrow limits of agreement, high correlation</li>
                 <li><strong>Clinical Acceptability:</strong> Differences within predefined clinical limits for >=95% of observations</li>
-                <li><strong>Method Equivalence:</strong> Slope ≈ 1, intercept ≈ 0 in regression analysis</li>
+                <li><strong>Method Equivalence:</strong> Slope \u{2248} 1, intercept \u{2248} 0 in regression analysis</li>
             </ul>
             "
             self$results$methodGuidance$setContent(content)
@@ -795,7 +795,7 @@ methodcomparisonClass <- R6::R6Class(
                 "<ul>",
                 "<li><strong>Bland-Altman:</strong> Standard approach for method comparison, assumes normal distribution of differences</li>",
                 "<li><strong>Passing-Bablok:</strong> Robust to non-normal distributions and outliers, no assumptions about error distribution</li>",
-                "<li><strong>Deming Regression:</strong> When both methods have measurement error, specify error variance ratio λ</li>",
+                "<li><strong>Deming Regression:</strong> When both methods have measurement error, specify error variance ratio \u{03BB}</li>",
                 "</ul>",
                 "<h4>Sample Size:</h4>",
                 "<p>Minimum 30-50 observations recommended for reliable estimates. Larger samples (>100) preferred for robust confidence intervals.</p>"

@@ -210,7 +210,7 @@ concordanceindexClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 <li><b>Time-dependent C-index:</b> Discrimination at specific time points (placeholder only)</li>
                 <li><b>Competing risks:</b> C-index for cause-specific events (not yet implemented)</li>
                 <li><b>Stratified analysis:</b> C-index by subgroups (not yet implemented)</li>
-                <li><b>Advanced methods:</b> Uno's IPCW, Gönen-Heller estimators (planned)</li>
+                <li><b>Advanced methods:</b> Uno's IPCW, G\u{00F6}nen-Heller estimators (planned)</li>
             </ul>
 
             <h4>Clinical Applications:</h4>
@@ -469,7 +469,7 @@ concordanceindexClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 } else if (clinical_app == "ml_model") {
                     html <- paste0(html, "
             <ul>
-                <li>ML models should substantially outperform simple scores (ΔC > 0.05)</li>
+                <li>ML models should substantially outperform simple scores (\u{0394}C > 0.05)</li>
                 <li>Beware of overfitting - external validation essential</li>
                 <li>High C-index alone insufficient - assess calibration and fairness</li>
             </ul>")

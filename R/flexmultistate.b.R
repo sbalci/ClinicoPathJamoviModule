@@ -44,9 +44,9 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     
                     <h4>Common Multi-State Model Types:</h4>
                     <ul>
-                    <li><b>Illness-Death:</b> Healthy → Disease → Death (with direct Healthy → Death)</li>
-                    <li><b>Competing Risks:</b> Initial state → Multiple competing terminal states</li>
-                    <li><b>Progressive:</b> Sequential states without recovery (Stage I → II → III → Death)</li>
+                    <li><b>Illness-Death:</b> Healthy \u{2192} Disease \u{2192} Death (with direct Healthy \u{2192} Death)</li>
+                    <li><b>Competing Risks:</b> Initial state \u{2192} Multiple competing terminal states</li>
+                    <li><b>Progressive:</b> Sequential states without recovery (Stage I \u{2192} II \u{2192} III \u{2192} Death)</li>
                     <li><b>Reversible:</b> States with possible transitions back to earlier states</li>
                     </ul>
                     
@@ -294,7 +294,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         
                         from_state <- private$states[i]
                         to_state <- private$states[j]
-                        trans_name <- paste(from_state, "→", to_state)
+                        trans_name <- paste(from_state, "\u{2192}", to_state)
                         
                         n_trans <- ifelse(dim(trans_counts) > 0 && i <= nrow(trans_counts) && j <= ncol(trans_counts),
                                         trans_counts[i, j], 0)

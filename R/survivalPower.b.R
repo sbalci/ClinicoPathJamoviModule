@@ -94,7 +94,7 @@ survivalPowerClass <- R6::R6Class(
 
             # Add completion notice at bottom
             private$.addNotice("INFO", "Analysis Complete", sprintf(
-                "Power analysis completed: %s with %s endpoint • Assumes exponential survival and uniform accrual",
+                "Power analysis completed: %s with %s endpoint \u{2022} Assumes exponential survival and uniform accrual",
                 private$.format_test_type(self$options$test_type),
                 tolower(private$.format_primary_endpoint(self$options$primary_endpoint))
             ))
@@ -117,18 +117,18 @@ survivalPowerClass <- R6::R6Class(
                 if (!is.finite(hr)) {
                     private$.addNotice(
                         "ERROR", "Invalid Effect Size",
-                        "Unable to derive a valid hazard ratio from the selected effect size inputs • Check effect size type and related parameters"
+                        "Unable to derive a valid hazard ratio from the selected effect size inputs \u{2022} Check effect size type and related parameters"
                     )
                     valid <- FALSE
                 } else if (hr <= 0 || hr > 5) {
                     private$.addNotice("ERROR", "Invalid Hazard Ratio", sprintf(
-                        "Hazard ratio must be between 0 and 5 (current: %.2f) • Common values: 0.5-0.8 (treatment benefit), 1.2-2.0 (increased risk)",
+                        "Hazard ratio must be between 0 and 5 (current: %.2f) \u{2022} Common values: 0.5-0.8 (treatment benefit), 1.2-2.0 (increased risk)",
                         hr
                     ))
                     valid <- FALSE
                 } else if (hr < 0.3 || hr > 3) {
                     private$.addNotice("STRONG_WARNING", "Extreme Hazard Ratio", sprintf(
-                        "Extreme hazard ratio detected (%.2f) • Most trials detect HR between 0.5-2.0 • Verify this effect size is clinically plausible",
+                        "Extreme hazard ratio detected (%.2f) \u{2022} Most trials detect HR between 0.5-2.0 \u{2022} Verify this effect size is clinically plausible",
                         hr
                     ))
                 }
@@ -139,13 +139,13 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(power)) {
                 if (power <= 0 || power >= 1) {
                     private$.addNotice("ERROR", "Invalid Power", sprintf(
-                        "Power must be between 0 and 1 (current: %.2f) • Standard values: 0.80 (80%%) or 0.90 (90%%)",
+                        "Power must be between 0 and 1 (current: %.2f) \u{2022} Standard values: 0.80 (80%%) or 0.90 (90%%)",
                         power
                     ))
                     valid <- FALSE
                 } else if (power < 0.7) {
                     private$.addNotice("WARNING", "Low Power", sprintf(
-                        "Power below 70%% (current: %.0f%%) may result in underpowered study • Consider increasing to 80%% or 90%%",
+                        "Power below 70%% (current: %.0f%%) may result in underpowered study \u{2022} Consider increasing to 80%% or 90%%",
                         power * 100
                     ))
                 }
@@ -156,7 +156,7 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(alpha)) {
                 if (alpha <= 0 || alpha >= 1) {
                     private$.addNotice("ERROR", "Invalid Alpha", sprintf(
-                        "Alpha level must be between 0 and 1 (current: %.3f) • Standard value: 0.05 (5%%)",
+                        "Alpha level must be between 0 and 1 (current: %.3f) \u{2022} Standard value: 0.05 (5%%)",
                         alpha
                     ))
                     valid <- FALSE
@@ -187,7 +187,7 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(distribution) && distribution != "exponential") {
                 private$.addNotice(
                     "ERROR", "Distribution Not Supported",
-                    'Only exponential survival distribution is validated in this release • Select "Exponential" to proceed'
+                    'Only exponential survival distribution is validated in this release \u{2022} Select "Exponential" to proceed'
                 )
                 valid <- FALSE
             }
@@ -212,7 +212,7 @@ survivalPowerClass <- R6::R6Class(
                     valid <- FALSE
                 } else if (dropout > 0.3) {
                     private$.addNotice("STRONG_WARNING", "High Dropout Rate", sprintf(
-                        "Dropout rate > 30%% (current: %.0f%%) may significantly impact study power • Review retention strategies",
+                        "Dropout rate > 30%% (current: %.0f%%) may significantly impact study power \u{2022} Review retention strategies",
                         dropout * 100
                     ))
                 }
@@ -224,7 +224,7 @@ survivalPowerClass <- R6::R6Class(
             # Multiplicity handling
             if (!isTRUE(self$options$multiple_comparisons %in% c("none", "bonferroni", "holm", "dunnett"))) {
                 private$.addNotice("ERROR", "Unsupported Multiplicity Adjustment", sprintf(
-                    'Multiplicity adjustment "%s" not yet supported • Please select "none", "bonferroni", "holm", or "dunnett"',
+                    'Multiplicity adjustment "%s" not yet supported \u{2022} Please select "none", "bonferroni", "holm", or "dunnett"',
                     self$options$multiple_comparisons
                 ))
                 valid <- FALSE
@@ -241,7 +241,7 @@ survivalPowerClass <- R6::R6Class(
             # Stratification info
             if (!is.null(self$options$stratification_factors) && self$options$stratification_factors > 0) {
                 private$.addNotice("INFO", "Stratification Not Used", sprintf(
-                    "Stratification factors (%d) not currently used to adjust variance • Plan stratified analyses separately",
+                    "Stratification factors (%d) not currently used to adjust variance \u{2022} Plan stratified analyses separately",
                     self$options$stratification_factors
                 ))
             }
@@ -260,7 +260,7 @@ survivalPowerClass <- R6::R6Class(
             unsupported_tests <- c("competing_risks", "rmst_test", "snp_survival", "weighted_log_rank")
             if (isTRUE(self$options$test_type %in% unsupported_tests)) {
                 private$.addNotice("ERROR", "Unsupported Test Type", sprintf(
-                    'Test "%s" temporarily unavailable pending validation • Choose log-rank, Cox regression, or non-inferiority',
+                    'Test "%s" temporarily unavailable pending validation \u{2022} Choose log-rank, Cox regression, or non-inferiority',
                     self$options$test_type
                 ))
                 valid <- FALSE
@@ -288,7 +288,7 @@ survivalPowerClass <- R6::R6Class(
                 total_duration <- accrual + followup
                 if (total_duration < median_survival * 1.5) {
                     private$.addNotice("WARNING", "Short Study Duration", sprintf(
-                        "Study duration (%.1f mo) may be too short for median survival %.1f mo • Consider extending follow-up to at least %.1f mo",
+                        "Study duration (%.1f mo) may be too short for median survival %.1f mo \u{2022} Consider extending follow-up to at least %.1f mo",
                         total_duration, median_survival, median_survival * 1.5
                     ))
                 }
@@ -298,7 +298,7 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(hr) && !is.null(power)) {
                 if ((hr > 0.9 && hr < 1.1) && power > 0.8) {
                     private$.addNotice("WARNING", "Small Effect Size", sprintf(
-                        "Detecting very small effect (HR=%.2f near 1.0) with %.0f%% power requires very large sample • Consider clinical meaningfulness",
+                        "Detecting very small effect (HR=%.2f near 1.0) with %.0f%% power requires very large sample \u{2022} Consider clinical meaningfulness",
                         hr, power * 100
                     ))
                 }
@@ -308,7 +308,7 @@ survivalPowerClass <- R6::R6Class(
             if (!is.null(hr) && !is.null(power) && !is.null(alpha)) {
                 if (hr < 0.6 && power > 0.9 && alpha < 0.05) {
                     private$.addNotice("STRONG_WARNING", "Optimistic Assumptions", sprintf(
-                        "Assumes large effect (HR=%.2f) with high power (%.0f%%) • Ensure assumptions justified by prior data",
+                        "Assumes large effect (HR=%.2f) with high power (%.0f%%) \u{2022} Ensure assumptions justified by prior data",
                         hr, power * 100
                     ))
                 }
@@ -320,7 +320,7 @@ survivalPowerClass <- R6::R6Class(
                 if (ratio < 0.5 || ratio > 2) {
                     efficiency_loss <- (1 + ratio)^2 / (4 * ratio)
                     private$.addNotice("WARNING", "Allocation Ratio Inefficiency", sprintf(
-                        "Allocation ratio %.2f:1 reduces efficiency by %.1f%% vs 1:1 randomization • Consider balancing if feasible",
+                        "Allocation ratio %.2f:1 reduces efficiency by %.1f%% vs 1:1 randomization \u{2022} Consider balancing if feasible",
                         ratio, (efficiency_loss - 1) * 100
                     ))
                 }
@@ -343,7 +343,7 @@ survivalPowerClass <- R6::R6Class(
 
             if (length(missing_packages) > 0) {
                 private$.addNotice("ERROR", "Missing Packages", sprintf(
-                    'Missing required R package: %s • Install with: install.packages("%s")',
+                    'Missing required R package: %s \u{2022} Install with: install.packages("%s")',
                     paste(missing_packages, collapse = ", "),
                     paste(missing_packages, collapse = '", "')
                 ))
@@ -380,17 +380,17 @@ survivalPowerClass <- R6::R6Class(
                 "<p><strong>Power Analysis & Sample Size Calculation</strong></p>",
                 "<p>This module provides power analysis and sample size calculations for survival studies and clinical trials.</p>",
                 "<p><strong>Current Configuration:</strong><br>",
-                "• Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
-                "• Statistical Test: ", private$.format_test_type(test_type), "</p>",
+                "\u{2022} Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
+                "\u{2022} Statistical Test: ", private$.format_test_type(test_type), "</p>",
                 "<p><strong>Currently validated calculations:</strong><br>",
-                "• Log-rank test (sample size, power, detectable effect, duration)<br>",
-                "• Cox regression under proportional hazards<br>",
-                "• Non-inferiority designs using hazard-ratio margins<br>",
-                "• Cluster design effects for randomized trials</p>",
+                "\u{2022} Log-rank test (sample size, power, detectable effect, duration)<br>",
+                "\u{2022} Cox regression under proportional hazards<br>",
+                "\u{2022} Non-inferiority designs using hazard-ratio margins<br>",
+                "\u{2022} Cluster design effects for randomized trials</p>",
                 "<p><strong>Temporarily unavailable pending validation:</strong><br>",
-                "• Competing risks (Fine-Gray)<br>",
-                "• Restricted mean survival time comparisons<br>",
-                "• SNP-based survival analyses and other specialised endpoints</p>",
+                "\u{2022} Competing risks (Fine-Gray)<br>",
+                "\u{2022} Restricted mean survival time comparisons<br>",
+                "\u{2022} SNP-based survival analyses and other specialised endpoints</p>",
                 "<p><strong>Note:</strong> Calculations assume exponential survival distributions and uniform accrual. ",
                 "Results should be interpreted by qualified biostatisticians in the context of specific study requirements.</p>"
             )
@@ -969,7 +969,7 @@ survivalPowerClass <- R6::R6Class(
 
                         # Warn user about approximation method
                         private$.addNotice("INFO", "Duration Approximation", sprintf(
-                            "Duration calculation uses simplified event rate model (%.3f events/month/subject) • For precise estimates, consider simulation-based methods",
+                            "Duration calculation uses simplified event rate model (%.3f events/month/subject) \u{2022} For precise estimates, consider simulation-based methods",
                             event_rate_monthly
                         ))
 
@@ -1491,7 +1491,7 @@ survivalPowerClass <- R6::R6Class(
 
             # Add table notes with convergence diagnostics
             convergence_note <- sprintf(
-                "Simulation Diagnostics:\n• Monte Carlo SE: %.4f (target: %.4f)\n• %d simulations completed\n• %s\n• Recommendation: %s",
+                "Simulation Diagnostics:\n\u{2022} Monte Carlo SE: %.4f (target: %.4f)\n\u{2022} %d simulations completed\n\u{2022} %s\n\u{2022} Recommendation: %s",
                 sim_results$convergence$mc_se,
                 sim_results$convergence$target_mc_se,
                 sim_results$n_sims,
@@ -2637,25 +2637,25 @@ survivalPowerClass <- R6::R6Class(
             explanation <- paste0(
                 "<p><strong>Power Analysis for Survival Study</strong></p>",
                 "<p><strong>Study Design:</strong><br>",
-                "• Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
-                "• Statistical Test: ", private$.format_test_type(test_type), "<br>",
-                "• Design: ", private$.format_study_design(self$options$study_design), "<br>",
-                "• Primary Endpoint: ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
+                "\u{2022} Analysis Type: ", private$.format_analysis_type(analysis_type), "<br>",
+                "\u{2022} Statistical Test: ", private$.format_test_type(test_type), "<br>",
+                "\u{2022} Design: ", private$.format_study_design(self$options$study_design), "<br>",
+                "\u{2022} Primary Endpoint: ", private$.format_primary_endpoint(self$options$primary_endpoint), "</p>",
                 "<p><strong>Statistical Parameters:</strong><br>",
-                "• Hazard Ratio: ", round(hr, 3), "<br>",
-                "• Significance Level (alpha): ", round(alpha, 3), " (", round(alpha * 100, 1), "%)<br>",
-                "• Statistical Power: ", round(power, 3), " (", round(power * 100, 1), "%)<br>",
-                "• Allocation Ratio: ", self$options$allocation_ratio, ":1<br>",
-                if (analysis_type != "sample_size") paste0("• Sample Size: ", self$options$sample_size_input, " subjects<br>") else "",
+                "\u{2022} Hazard Ratio: ", round(hr, 3), "<br>",
+                "\u{2022} Significance Level (alpha): ", round(alpha, 3), " (", round(alpha * 100, 1), "%)<br>",
+                "\u{2022} Statistical Power: ", round(power, 3), " (", round(power * 100, 1), "%)<br>",
+                "\u{2022} Allocation Ratio: ", self$options$allocation_ratio, ":1<br>",
+                if (analysis_type != "sample_size") paste0("\u{2022} Sample Size: ", self$options$sample_size_input, " subjects<br>") else "",
                 "</p>",
                 "<p><strong>Population Characteristics:</strong><br>",
-                "• Control Median Survival: ", median_survival, " months<br>",
-                "• Expected Treatment Median: ",
+                "\u{2022} Control Median Survival: ", median_survival, " months<br>",
+                "\u{2022} Expected Treatment Median: ",
                 if (is.finite(hr) && hr > 0) round(median_survival / hr, 1) else "NA",
                 " months<br>",
-                "• Accrual Period: ", accrual, " months<br>",
-                "• Follow-up Period: ", follow_up, " months<br>",
-                "• Annual Dropout Rate: ", round(dropout * 100, 1), "%</p>",
+                "\u{2022} Accrual Period: ", accrual, " months<br>",
+                "\u{2022} Follow-up Period: ", follow_up, " months<br>",
+                "\u{2022} Annual Dropout Rate: ", round(dropout * 100, 1), "%</p>",
                 "<p><strong>Objective:</strong><br>",
                 private$.generate_objective_text(),
                 "</p>"
@@ -3407,7 +3407,7 @@ survivalPowerClass <- R6::R6Class(
                     type = "rmst_difference",
                     hr = NA_real_,
                     note = paste0(
-                        "Could not solve HR from RMST difference (inputs: Δ=",
+                        "Could not solve HR from RMST difference (inputs: \u{0394}=",
                         sprintf("%.3f", delta), ", tau=", sprintf("%.1f", tau),
                         ", median_c=", sprintf("%.1f", mc), ")."
                     )
@@ -3456,7 +3456,7 @@ survivalPowerClass <- R6::R6Class(
                     type = "survival_difference",
                     hr = NA_real_,
                     note = paste0(
-                        "Could not solve HR from survival difference (inputs: Δ=",
+                        "Could not solve HR from survival difference (inputs: \u{0394}=",
                         sprintf("%.3f", delta), ", follow-up=", sprintf("%.1f", time_pt),
                         ", median_c=", sprintf("%.1f", mc), ")."
                     )
@@ -3747,8 +3747,8 @@ survivalPowerClass <- R6::R6Class(
             } else {
                 stop(paste(
                     "Unsupported distribution:", distribution,
-                    "• Supported: exponential, weibull, log_normal",
-                    "• For piecewise exponential, contact package maintainer"
+                    "\u{2022} Supported: exponential, weibull, log_normal",
+                    "\u{2022} For piecewise exponential, contact package maintainer"
                 ))
             }
         },

@@ -179,10 +179,10 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Error in survival comparison: ", htmltools::htmlEscape(e$message),
                     "<br><br>",
                     "Please check your variable selections and data format:",
-                    "<br>• Time variable should be numeric and non-negative",
-                    "<br>• Event indicator should be binary (0/1 or logical)",  
-                    "<br>• Grouping variable should be a factor with 2+ levels",
-                    "<br>• Ensure adequate sample size in each group",
+                    "<br>\u{2022} Time variable should be numeric and non-negative",
+                    "<br>\u{2022} Event indicator should be binary (0/1 or logical)",  
+                    "<br>\u{2022} Grouping variable should be a factor with 2+ levels",
+                    "<br>\u{2022} Ensure adequate sample size in each group",
                     "</div>"
                 )
                 self$results$text$setContent(error_msg)
@@ -292,11 +292,11 @@ comparingSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             exclusion_msg <- paste0(
                 "<div style='background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;'>",
                 "<strong>Landmark Analysis Applied:</strong><br>",
-                "• Landmark time: ", self$options$landmarkTime, " ",
+                "\u{2022} Landmark time: ", self$options$landmarkTime, " ",
                 if (self$options$landmarkUnit != "same") self$options$landmarkUnit else "time units", "<br>",
-                "• Early events excluded: ", n_early_events, "<br>",
-                "• Total patients excluded: ", n_excluded, "<br>",
-                "• Patients remaining: ", n_after, " (", round(n_after/n_before * 100, 1), "%)",
+                "\u{2022} Early events excluded: ", n_early_events, "<br>",
+                "\u{2022} Total patients excluded: ", n_excluded, "<br>",
+                "\u{2022} Patients remaining: ", n_after, " (", round(n_after/n_before * 100, 1), "%)",
                 "</div>"
             )
             

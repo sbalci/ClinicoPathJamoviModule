@@ -366,9 +366,9 @@ directbinomialClass <- R6::R6Class(
                 
                 "<p><b>Model Specification:</b></p>",
                 "<ul>",
-                "<li><b>Cumulative incidence modeling:</b> F(t|x) = ∫₀ᵗ h(s|x) S(s-|x) ds</li>",
-                "<li><b>Additive hazard structure:</b> h(t|x) = h₀(t) + βᵀx</li>",
-                "<li><b>Direct parameter interpretation:</b> β represents additive effects on cumulative incidence</li>",
+                "<li><b>Cumulative incidence modeling:</b> F(t|x) = \u{222B}\u{2080}\u{1D57} h(s|x) S(s-|x) ds</li>",
+                "<li><b>Additive hazard structure:</b> h(t|x) = h\u{2080}(t) + \u{03B2}\u{1D40}x</li>",
+                "<li><b>Direct parameter interpretation:</b> \u{03B2} represents additive effects on cumulative incidence</li>",
                 "</ul>",
                 
                 "<p><b>Estimation Method:</b> Maximum likelihood estimation with martingale-based inference.</p>",

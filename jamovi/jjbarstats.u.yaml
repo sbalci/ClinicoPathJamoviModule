@@ -74,7 +74,7 @@ children:
                 label: Test type
               - type: CheckBox
                 name: proportiontest
-                label: Include proportion tests
+                label: Proportion tests
               - type: CheckBox
                 name: bfmessage
                 label: Bayes factor (for Bayesian)
@@ -125,7 +125,7 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
-                label: Use ggstatsplot theme
+                label: ggstatsplot theme
               - type: CheckBox
                 name: resultssubtitle
                 label: Statistics in plot subtitle

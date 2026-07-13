@@ -256,7 +256,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                             # Chi-square test
                             test_result <- chisq.test(ct)
                             html_content <- paste0(html_content, "<p style='margin: 5px 0; font-size: 0.9em; color: #666;'>")
-                            html_content <- paste0(html_content, "Chi-square test: χ² = ", round(test_result$statistic, 3), 
+                            html_content <- paste0(html_content, "Chi-square test: \u{03C7}\u{00B2} = ", round(test_result$statistic, 3), 
                                                  ", df = ", test_result$parameter, 
                                                  ", p = ", format.pval(test_result$p.value, digits = 3))
                             html_content <- paste0(html_content, "</p>")

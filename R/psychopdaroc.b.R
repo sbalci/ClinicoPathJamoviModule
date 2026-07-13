@@ -1990,7 +1990,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                     <p>Procedure Notes</p>
                     <hr>",
             "<p> The ROC analysis has been completed using the following specifications: ",
-            "<p>&nbsp;</p>",
+            "<p>\u{00A0}</p>",
             "<p> Measure Variable(s): ",
             paste(unlist(self$options$dependentVars), collapse = ", "),
             "</p>",
@@ -2028,7 +2028,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # Add enhanced analysis settings with more detail
           procedureNotes <- paste0(
             procedureNotes,
-            "<p>&nbsp;</p>",
+            "<p>\u{00A0}</p>",
             "<p> Method: ",
             self$options$method,
             "</p>",
@@ -2047,7 +2047,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "<p> Metric Tolerance: ",
             self$options$tol_metric,
             "</p>",
-            "<p>&nbsp;</p>"
+            "<p>\u{00A0}</p>"
           )
 
           # Add bootstrap info if applicable

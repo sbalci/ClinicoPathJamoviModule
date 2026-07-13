@@ -251,8 +251,8 @@ semimarkovClass <- R6::R6Class(
                 # Transition rate parameters
                 transition_rates = data.frame(
                     transition = c(
-                        "State1 → State2", "State2 → State3", "State1 → State3",
-                        "State1 → State2", "State2 → State3", "State1 → State3"
+                        "State1 \u{2192} State2", "State2 \u{2192} State3", "State1 \u{2192} State3",
+                        "State1 \u{2192} State2", "State2 \u{2192} State3", "State1 \u{2192} State3"
                     ),
                     parameter = rep(c("Shape", "Scale"), 3),
                     estimate = c(1.8, 2.5, 2.1, 3.2, 1.6, 4.8),
@@ -355,7 +355,7 @@ semimarkovClass <- R6::R6Class(
             if (length(self$options$covs) > 0) {
                 results$covariate_effects <- data.frame(
                     transition = rep(
-                        c("State1 → State2", "State2 → State3", "State1 → State3"),
+                        c("State1 \u{2192} State2", "State2 \u{2192} State3", "State1 \u{2192} State3"),
                         length(self$options$covs)
                     ),
                     covariate = rep(self$options$covs, each = 3),
@@ -596,27 +596,27 @@ semimarkovClass <- R6::R6Class(
             <li><strong>State space:</strong> S = {1, 2, ..., k}</li>
             <li><strong>Transition probabilities:</strong> P<sub>ij</sub> = P(X<sub>n+1</sub> = j | X<sub>n</sub> = i)</li>
             <li><strong>Sojourn time distributions:</strong> F<sub>ij</sub>(t) = P(T<sub>n+1</sub> <= t | X<sub>n</sub> = i, X<sub>n+1</sub> = j)</li>
-            <li><strong>Kernel:</strong> Q<sub>ij</sub>(t) = P<sub>ij</sub> · F<sub>ij</sub>(t)</li>
+            <li><strong>Kernel:</strong> Q<sub>ij</sub>(t) = P<sub>ij</sub> \u{00B7} F<sub>ij</sub>(t)</li>
             </ul>")
 
             if (distribution_type == "weibull") {
                 methods_content <- paste0(methods_content, "
                 <h4>Weibull Distribution Parameters:</h4>
-                <p>Sojourn times follow Weibull distribution: f(t) = (k/λ)(t/λ)^(k-1) exp(-(t/λ)^k)</p>
+                <p>Sojourn times follow Weibull distribution: f(t) = (k/\u{03BB})(t/\u{03BB})^(k-1) exp(-(t/\u{03BB})^k)</p>
                 <ul>
                 <li><strong>Shape parameter (k):</strong> Controls hazard rate pattern</li>
-                <li><strong>Scale parameter (λ):</strong> Controls characteristic time</li>
-                <li><strong>Hazard function:</strong> h(t) = (k/λ)(t/λ)^(k-1)</li>
+                <li><strong>Scale parameter (\u{03BB}):</strong> Controls characteristic time</li>
+                <li><strong>Hazard function:</strong> h(t) = (k/\u{03BB})(t/\u{03BB})^(k-1)</li>
                 </ul>")
             } else if (distribution_type == "gamma") {
                 methods_content <- paste0(methods_content, "
                 <h4>Gamma Distribution Parameters:</h4>
-                <p>Sojourn times follow Gamma distribution: f(t) = (β^α/Γ(α)) t^(α-1) exp(-βt)</p>
+                <p>Sojourn times follow Gamma distribution: f(t) = (\u{03B2}^\u{03B1}/\u{0393}(\u{03B1})) t^(\u{03B1}-1) exp(-\u{03B2}t)</p>
                 <ul>
-                <li><strong>Shape parameter (α):</strong> Controls distribution shape</li>
-                <li><strong>Rate parameter (β):</strong> Controls rate of occurrence</li>
-                <li><strong>Mean:</strong> E[T] = α/β</li>
-                <li><strong>Variance:</strong> Var[T] = α/β²</li>
+                <li><strong>Shape parameter (\u{03B1}):</strong> Controls distribution shape</li>
+                <li><strong>Rate parameter (\u{03B2}):</strong> Controls rate of occurrence</li>
+                <li><strong>Mean:</strong> E[T] = \u{03B1}/\u{03B2}</li>
+                <li><strong>Variance:</strong> Var[T] = \u{03B1}/\u{03B2}\u{00B2}</li>
                 </ul>")
             }
 
@@ -803,7 +803,7 @@ semimarkovClass <- R6::R6Class(
             # Mock intensity data based on distribution
             intensity_data <- data.frame()
 
-            transitions <- c("State1 → State2", "State2 → State3", "State1 → State3")
+            transitions <- c("State1 \u{2192} State2", "State2 \u{2192} State3", "State1 \u{2192} State3")
 
             for (i in seq_along(transitions)) {
                 if (dist_type == "weibull") {

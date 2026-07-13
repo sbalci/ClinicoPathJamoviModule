@@ -30,9 +30,9 @@ effectsizeClass <- R6::R6Class(
                 </ul>
                 <h4>Effect Size Interpretation (Cohen, 1988):</h4>
                 <ul>
-                <li>Small: d ≈ 0.2</li>
-                <li>Medium: d ≈ 0.5</li>
-                <li>Large: d ≈ 0.8</li>
+                <li>Small: d \u{2248} 0.2</li>
+                <li>Medium: d \u{2248} 0.5</li>
+                <li>Large: d \u{2248} 0.8</li>
                 </ul>
                 <p><b>Note:</b> Effect sizes are essential for clinical significance assessment and meta-analyses.</p>
                 </div>
@@ -135,7 +135,7 @@ effectsizeClass <- R6::R6Class(
                 ci_upper <- private$.glassD_CI_upper(ncp, df, ci_level)
                 
                 results_table$addRow(rowKey = "glass_delta", values = list(
-                    measure = "Glass' Δ",
+                    measure = "Glass' \u{0394}",
                     estimate = glass_delta,
                     lower = ci_lower,
                     upper = ci_upper,
@@ -263,7 +263,7 @@ effectsizeClass <- R6::R6Class(
                 ci_upper <- glass_delta + t_crit * se_glass
                 
                 results_table$addRow(rowKey = "glass_delta", values = list(
-                    measure = "Glass' Δ",
+                    measure = "Glass' \u{0394}",
                     estimate = glass_delta,
                     lower = ci_lower,
                     upper = ci_upper,

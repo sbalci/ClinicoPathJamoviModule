@@ -278,9 +278,9 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 "<strong> Low Event Count Warning</strong><br>",
                 "Only ", n_events, " events detected. Flexible parametric models work best with >=30 events.<br>",
                 "Recommendations:<br>",
-                "• Use df=2-3 (lower complexity)<br>",
-                "• Avoid time-varying effects<br>",
-                "• Interpret results with caution",
+                "\u{2022} Use df=2-3 (lower complexity)<br>",
+                "\u{2022} Avoid time-varying effects<br>",
+                "\u{2022} Interpret results with caution",
                 "</div>"
               )
             }
@@ -984,8 +984,8 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
           "</ul>",
           "<h5>Time-Varying Effects</h5>",
           "<p>When specified, time-varying covariate effects are modeled using spline interactions:</p>",
-          "<p><strong>log h(t|x) = s₀(log t) + Σᵢ βᵢxᵢ + Σⱼ sⱼ(log t)xⱼ</strong></p>",
-          "<p>where s₀(log t) is the baseline spline and sⱼ(log t) are time-varying effect splines.</p>",
+          "<p><strong>log h(t|x) = s\u{2080}(log t) + \u{03A3}\u{1D62} \u{03B2}\u{1D62}x\u{1D62} + \u{03A3}\u{2C7C} s\u{2C7C}(log t)x\u{2C7C}</strong></p>",
+          "<p>where s\u{2080}(log t) is the baseline spline and s\u{2C7C}(log t) are time-varying effect splines.</p>",
           "<h5>Advanced Features</h5>",
           "<ul>",
           "<li><strong>Cure Fractions:</strong> Model long-term survivors who will never experience the event</li>",
@@ -1544,9 +1544,9 @@ flexrstpm2Class <- if (requireNamespace("jmvcore", quietly = TRUE)) {
           "</dl>",
           "<h4> References</h4>",
           "<p style='font-size:0.9em;'>",
-          "• Royston P, Parmar MKB. Flexible parametric proportional-hazards and proportional-odds models ",
+          "\u{2022} Royston P, Parmar MKB. Flexible parametric proportional-hazards and proportional-odds models ",
           "for censored survival data. Stat Med 2002;21:2175-97.<br>",
-          "• Lambert PC, Royston P. Further development of flexible parametric models for survival analysis. ",
+          "\u{2022} Lambert PC, Royston P. Further development of flexible parametric models for survival analysis. ",
           "Stata J 2009;9:265-90.",
           "</p>",
           "</div>"

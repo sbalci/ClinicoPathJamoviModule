@@ -383,7 +383,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Post violations as STRONG_WARNING
                 if (length(violations) > 0) {
-                    private$.addNotice("STRONG_WARNING", "RECIST v1.1 Compliance Violations", paste0("RECIST v1.1 COMPLIANCE VIOLATIONS: ", paste(violations, collapse = " • "), " • Results may not be suitable for regulatory submissions."))
+                    private$.addNotice("STRONG_WARNING", "RECIST v1.1 Compliance Violations", paste0("RECIST v1.1 COMPLIANCE VIOLATIONS: ", paste(violations, collapse = " \u{2022} "), " \u{2022} Results may not be suitable for regulatory submissions."))
                 }
 
                 return(list(

@@ -159,13 +159,13 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
                             ctrl_to_trt <- data$switched &
                                 data$initial_treatment != data$actual_treatment &
                                 data$initial_treatment == levels(data$initial_treatment)[1]
-                            data$switching_pattern[ctrl_to_trt] <- "Control → Treatment"
+                            data$switching_pattern[ctrl_to_trt] <- "Control \u{2192} Treatment"
 
                             # Treatment to control switching
                             trt_to_ctrl <- data$switched &
                                 data$initial_treatment != data$actual_treatment &
                                 data$initial_treatment == levels(data$initial_treatment)[2]
-                            data$switching_pattern[trt_to_ctrl] <- "Treatment → Control"
+                            data$switching_pattern[trt_to_ctrl] <- "Treatment \u{2192} Control"
                         }
 
                         # Store switching data
@@ -530,7 +530,7 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
 
                         method_properties <- list(
                             "itt" = list(
-                                bias = "Underestimates effect with control→treatment switching",
+                                bias = "Underestimates effect with control\u{2192}treatment switching",
                                 assumptions = "None (maintains randomization)",
                                 recommendation = "Conservative estimate"
                             ),

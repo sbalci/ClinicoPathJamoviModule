@@ -662,16 +662,16 @@ enhancedfactorvariableClass <- R6::R6Class(
             
             <h4>Diversity and Complexity Measures</h4>
             <ul>
-                <li><strong>Shannon Entropy:</strong> H = -Σ(p_i * log₂(p_i)) - measures category information content</li>
-                <li><strong>Simpson Diversity:</strong> D = 1 - Σ(p_i²) - probability of different category selection</li>
+                <li><strong>Shannon Entropy:</strong> H = -\u{03A3}(p_i * log\u{2082}(p_i)) - measures category information content</li>
+                <li><strong>Simpson Diversity:</strong> D = 1 - \u{03A3}(p_i\u{00B2}) - probability of different category selection</li>
                 <li><strong>Berger-Parker Dominance:</strong> d = max(p_i) - proportion of most abundant category</li>
                 <li><strong>Effective Categories:</strong> exp(H) - number of equally frequent categories</li>
             </ul>
             
             <h4>Balance and Inequality Measures</h4>
             <ul>
-                <li><strong>Gini Coefficient:</strong> G = (2Σ(i×x_i))/(n×Σx_i) - (n+1)/n - inequality measure</li>
-                <li><strong>Coefficient of Variation:</strong> CV = σ/μ - relative variability measure</li>
+                <li><strong>Gini Coefficient:</strong> G = (2\u{03A3}(i\u{00D7}x_i))/(n\u{00D7}\u{03A3}x_i) - (n+1)/n - inequality measure</li>
+                <li><strong>Coefficient of Variation:</strong> CV = \u{03C3}/\u{03BC} - relative variability measure</li>
                 <li><strong>Balance Ratio:</strong> min(counts)/max(counts) - relative frequency balance</li>
                 <li><strong>Rare Category Threshold:</strong> Categories with <5% frequency (adjustable)</li>
             </ul>

@@ -801,13 +801,13 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         lower <- q1 - 1.5 * iqr
                         upper <- q3 + 1.5 * iqr
                         outliers <- which(data < lower | data > upper)
-                        threshold_text <- paste0("Q1-1.5×IQR to Q3+1.5×IQR (", round(lower, 3), " to ", round(upper, 3), ")")
+                        threshold_text <- paste0("Q1-1.5\u{00D7}IQR to Q3+1.5\u{00D7}IQR (", round(lower, 3), " to ", round(upper, 3), ")")
                     } else if (method == "zscore") {
                         mean_val <- mean(data)
                         sd_val <- sd(data)
                         z_scores <- abs((data - mean_val) / sd_val)
                         outliers <- which(z_scores > 3)
-                        threshold_text <- "±3 standard deviations"
+                        threshold_text <- "\u{00B1}3 standard deviations"
                     }
 
                     outlier_rate <- length(outliers) / length(data) * 100

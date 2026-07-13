@@ -158,8 +158,8 @@ jppsClass <- R6::R6Class(
                 </div>
                 <div class='requirements'>
                     <strong>Required:</strong><br>
-                    • Target Variable: Variable to predict<br>
-                    • Single Predictor: Variable used for prediction
+                    \u{2022} Target Variable: Variable to predict<br>
+                    \u{2022} Single Predictor: Variable used for prediction
                 </div>",
                 
                 "predictors" = "
@@ -169,8 +169,8 @@ jppsClass <- R6::R6Class(
                 </div>
                 <div class='requirements'>
                     <strong>Required:</strong><br>
-                    • Target Variable: Variable to predict<br>
-                    • Multiple Predictors: Variables to evaluate as predictors
+                    \u{2022} Target Variable: Variable to predict<br>
+                    \u{2022} Multiple Predictors: Variables to evaluate as predictors
                 </div>",
                 
                 "matrix" = "
@@ -180,7 +180,7 @@ jppsClass <- R6::R6Class(
                 </div>
                 <div class='requirements'>
                     <strong>Required:</strong><br>
-                    • Matrix Variables: At least 2 variables for PPS matrix
+                    \u{2022} Matrix Variables: At least 2 variables for PPS matrix
                 </div>",
                 
                 "compare" = "
@@ -190,7 +190,7 @@ jppsClass <- R6::R6Class(
                 </div>
                 <div class='requirements'>
                     <strong>Required:</strong><br>
-                    • Matrix Variables: At least 2 variables for comparison
+                    \u{2022} Matrix Variables: At least 2 variables for comparison
                 </div>",
                 
                 "ready" = "
@@ -496,7 +496,7 @@ jppsClass <- R6::R6Class(
                     if (length(cor_val) == 0) cor_val <- NA
                     
                     comparison <- rbind(comparison, data.frame(
-                        variable_pair = paste(pred, "→", targ),
+                        variable_pair = paste(pred, "\u{2192}", targ),
                         pps_score = pps_subset$pps_score[i],
                         correlation = abs(cor_val),  # Use absolute correlation
                         pps_advantage = pps_subset$pps_score[i] - abs(cor_val),
@@ -577,7 +577,7 @@ jppsClass <- R6::R6Class(
             
             # Best predictor
             best_idx <- which.max(results$pps_score)
-            best_predictor <- paste(results$predictor[best_idx], "→", results$target[best_idx])
+            best_predictor <- paste(results$predictor[best_idx], "\u{2192}", results$target[best_idx])
             
             summary_data <- data.frame(
                 statistic = c("Number of Relationships", "Mean PPS Score", "Maximum PPS Score", 
@@ -607,28 +607,28 @@ jppsClass <- R6::R6Class(
                 
                 <div style='background-color: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 15px;'>
                     <strong>PPS Score Interpretation:</strong><br>
-                    • <strong>0.0:</strong> No predictive power (random prediction)<br>
-                    • <strong>0.0-0.2:</strong> Weak predictive relationship<br>
-                    • <strong>0.2-0.5:</strong> Moderate predictive relationship<br>
-                    • <strong>0.5-0.8:</strong> Strong predictive relationship<br>
-                    • <strong>0.8-1.0:</strong> Very strong to perfect prediction
+                    \u{2022} <strong>0.0:</strong> No predictive power (random prediction)<br>
+                    \u{2022} <strong>0.0-0.2:</strong> Weak predictive relationship<br>
+                    \u{2022} <strong>0.2-0.5:</strong> Moderate predictive relationship<br>
+                    \u{2022} <strong>0.5-0.8:</strong> Strong predictive relationship<br>
+                    \u{2022} <strong>0.8-1.0:</strong> Very strong to perfect prediction
                 </div>
                 
                 <div style='background-color: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #9c27b0; margin-bottom: 15px;'>
                     <strong>Key Advantages of PPS:</strong><br>
-                    • Detects non-linear relationships that correlation might miss<br>
-                    • Asymmetric: X→Y may differ from Y→X predictive power<br>
-                    • Works with mixed data types (numeric, categorical)<br>
-                    • Uses machine learning for robust relationship detection
+                    \u{2022} Detects non-linear relationships that correlation might miss<br>
+                    \u{2022} Asymmetric: X\u{2192}Y may differ from Y\u{2192}X predictive power<br>
+                    \u{2022} Works with mixed data types (numeric, categorical)<br>
+                    \u{2022} Uses machine learning for robust relationship detection
                 </div>
                 
                 <div style='background-color: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;'>
                     <strong> Important Considerations:</strong><br>
-                    • PPS is a \"quick and dirty\" exploration tool<br>
-                    • High PPS doesn't necessarily imply causation<br>
-                    • Results may vary with different algorithms and sample sizes<br>
-                    • Consider domain knowledge when interpreting relationships<br>
-                    • Use PPS to guide further, more detailed analysis
+                    \u{2022} PPS is a \"quick and dirty\" exploration tool<br>
+                    \u{2022} High PPS doesn't necessarily imply causation<br>
+                    \u{2022} Results may vary with different algorithms and sample sizes<br>
+                    \u{2022} Consider domain knowledge when interpreting relationships<br>
+                    \u{2022} Use PPS to guide further, more detailed analysis
                 </div>
             </div>"
             

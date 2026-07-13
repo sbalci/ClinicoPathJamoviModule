@@ -458,7 +458,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             interpretation <- paste0(
                 "<h3>Heatmap Analysis Summary</h3>",
-                "<p>This heatmap visualizes a ", n_rows, " × ", n_cols, " data matrix with ",
+                "<p>This heatmap visualizes a ", n_rows, " \u{00D7} ", n_cols, " data matrix with ",
                 n_values, " non-missing values (", 100 - na_percent, "% complete).</p>",
                 
                 "<p><strong>Data characteristics:</strong></p>",

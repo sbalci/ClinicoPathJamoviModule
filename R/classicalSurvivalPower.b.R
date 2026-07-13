@@ -337,8 +337,8 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
 
                 summary_html <- paste0(summary_html, "<p><strong>Statistical Power:</strong> ", round(data$power * 100, 1), "%</p>")
                 summary_html <- paste0(summary_html, "<p><strong>Hazard Ratio:</strong> ", round(data$hazard_ratio, 3), "</p>")
-                summary_html <- paste0(summary_html, "<p><strong>Type I Error (α):</strong> ", data$alpha, "</p>")
-                summary_html <- paste0(summary_html, "<p><strong>Type II Error (β):</strong> ", round(data$beta, 3), "</p>")
+                summary_html <- paste0(summary_html, "<p><strong>Type I Error (\u{03B1}):</strong> ", data$alpha, "</p>")
+                summary_html <- paste0(summary_html, "<p><strong>Type II Error (\u{03B2}):</strong> ", round(data$beta, 3), "</p>")
 
                 # Study design parameters (Lachin-Foulkes)
                 if (data$method == "Lachin-Foulkes") {
@@ -390,12 +390,12 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 } else if (data$method == "Schoenfeld") {
                     formulas_html <- paste0(formulas_html, "<h5>Schoenfeld Method</h5>")
                     formulas_html <- paste0(formulas_html, "<p><strong>Number of Events Formula:</strong></p>")
-                    formulas_html <- paste0(formulas_html, "<p>n = [(z<sub>α</sub> + z<sub>β</sub>)<sup>2</sup> × (1+r)<sup>2</sup>] / [r × (log HR)<sup>2</sup>]</p>")
+                    formulas_html <- paste0(formulas_html, "<p>n = [(z<sub>\u{03B1}</sub> + z<sub>\u{03B2}</sub>)<sup>2</sup> \u{00D7} (1+r)<sup>2</sup>] / [r \u{00D7} (log HR)<sup>2</sup>]</p>")
                     formulas_html <- paste0(formulas_html, "<p>Where:</p>")
                     formulas_html <- paste0(formulas_html, "<ul style='margin: 5px 0; padding-left: 20px;'>")
                     formulas_html <- paste0(formulas_html, "<li>n = number of events required</li>")
-                    formulas_html <- paste0(formulas_html, "<li>z<sub>α</sub> = critical value for Type I error</li>")
-                    formulas_html <- paste0(formulas_html, "<li>z<sub>β</sub> = critical value for Type II error</li>")
+                    formulas_html <- paste0(formulas_html, "<li>z<sub>\u{03B1}</sub> = critical value for Type I error</li>")
+                    formulas_html <- paste0(formulas_html, "<li>z<sub>\u{03B2}</sub> = critical value for Type II error</li>")
                     formulas_html <- paste0(formulas_html, "<li>r = allocation ratio</li>")
                     formulas_html <- paste0(formulas_html, "<li>HR = hazard ratio</li>")
                     formulas_html <- paste0(formulas_html, "</ul>")
@@ -420,7 +420,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 if (grepl("Sample Size", data$calculation)) {
                     interp_html <- paste0(interp_html, "<h5>Sample Size Recommendations:</h5>")
                     if (!is.null(data$sample_size)) {
-                        interp_html <- paste0(interp_html, "<p>• <strong>Total enrollment:</strong> ", round(data$sample_size), " patients")
+                        interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Total enrollment:</strong> ", round(data$sample_size), " patients")
                         if (!is.null(data$allocation_ratio) && data$allocation_ratio != 1) {
                             control_n <- round(data$sample_size / (1 + data$allocation_ratio))
                             treatment_n <- round(data$sample_size - control_n)
@@ -429,21 +429,21 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                         interp_html <- paste0(interp_html, "</p>")
                     }
                     if (!is.null(data$events)) {
-                        interp_html <- paste0(interp_html, "<p>• <strong>Events required:</strong> ", round(data$events), " events for analysis</p>")
+                        interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Events required:</strong> ", round(data$events), " events for analysis</p>")
                     }
-                    interp_html <- paste0(interp_html, "<p>• <strong>Statistical power:</strong> ", round(data$power * 100, 1), "% chance of detecting the specified effect size</p>")
+                    interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Statistical power:</strong> ", round(data$power * 100, 1), "% chance of detecting the specified effect size</p>")
                 } else if (grepl("Power", data$calculation)) {
                     interp_html <- paste0(interp_html, "<h5>Power Analysis Results:</h5>")
                     power_pct <- round(data$power * 100, 1)
                     if (power_pct >= 80) {
-                        interp_html <- paste0(interp_html, "<p style='color: green;'>• <strong>Adequate power:</strong> ", power_pct, "% (>=80% recommended)</p>")
+                        interp_html <- paste0(interp_html, "<p style='color: green;'>\u{2022} <strong>Adequate power:</strong> ", power_pct, "% (>=80% recommended)</p>")
                     } else {
-                        interp_html <- paste0(interp_html, "<p style='color: red;'>• <strong>Insufficient power:</strong> ", power_pct, "% (<80%, consider increasing sample size)</p>")
+                        interp_html <- paste0(interp_html, "<p style='color: red;'>\u{2022} <strong>Insufficient power:</strong> ", power_pct, "% (<80%, consider increasing sample size)</p>")
                     }
                 } else if (grepl("Events", data$calculation)) {
                     interp_html <- paste0(interp_html, "<h5>Event Requirements:</h5>")
-                    interp_html <- paste0(interp_html, "<p>• <strong>Target events:</strong> ", round(data$events), " events needed for ", round(data$power * 100, 1), "% power</p>")
-                    interp_html <- paste0(interp_html, "<p>• <strong>Effect size:</strong> Hazard ratio of ", round(data$hazard_ratio, 3), "</p>")
+                    interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Target events:</strong> ", round(data$events), " events needed for ", round(data$power * 100, 1), "% power</p>")
+                    interp_html <- paste0(interp_html, "<p>\u{2022} <strong>Effect size:</strong> Hazard ratio of ", round(data$hazard_ratio, 3), "</p>")
                 }
 
                 # General recommendations

@@ -41,10 +41,10 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
 <h4>Key Clinical Scenarios</h4>
 <ul>
-<li><strong>Either Test Positive (Parallel Rule)</strong>: At least one test is positive → rule in disease (high sensitivity strategy)</li>
+<li><strong>Either Test Positive (Parallel Rule)</strong>: At least one test is positive \u{2192} rule in disease (high sensitivity strategy)</li>
 <li><strong>Both Tests Positive</strong>: Maximum certainty for disease presence (high specificity strategy)</li>
 <li><strong>Both Tests Negative</strong>: Strong evidence against disease (rule out strategy)</li>
-<li><strong>Single Positive</strong>: Only one test positive → intermediate probability requiring clinical judgment</li>
+<li><strong>Single Positive</strong>: Only one test positive \u{2192} intermediate probability requiring clinical judgment</li>
 </ul>
 
 <h4>Preset Scenarios Include</h4>
@@ -800,16 +800,16 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
 <p><strong>Independent Tests:</strong> When tests are independent, joint probabilities are simply the product of individual probabilities:</p>
 <ul>
-  <li>P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) × P(Test2+ | Disease+) = Sens₁ × Sens₂</li>
-  <li>P(Test1+ and Test2+ | Disease−) = P(Test1+ | Disease−) × P(Test2+ | Disease−) = (1−Spec₁) × (1−Spec₂)</li>
-  <li>P(Test1− and Test2− | Disease+) = P(Test1− | Disease+) × P(Test2− | Disease+) = (1−Sens₁) × (1−Sens₂)</li>
-  <li>P(Test1− and Test2− | Disease−) = P(Test1− | Disease−) × P(Test2− | Disease−) = Spec₁ × Spec₂</li>
+  <li>P(Test1+ and Test2+ | Disease+) = P(Test1+ | Disease+) \u{00D7} P(Test2+ | Disease+) = Sens\u{2081} \u{00D7} Sens\u{2082}</li>
+  <li>P(Test1+ and Test2+ | Disease\u{2212}) = P(Test1+ | Disease\u{2212}) \u{00D7} P(Test2+ | Disease\u{2212}) = (1\u{2212}Spec\u{2081}) \u{00D7} (1\u{2212}Spec\u{2082})</li>
+  <li>P(Test1\u{2212} and Test2\u{2212} | Disease+) = P(Test1\u{2212} | Disease+) \u{00D7} P(Test2\u{2212} | Disease+) = (1\u{2212}Sens\u{2081}) \u{00D7} (1\u{2212}Sens\u{2082})</li>
+  <li>P(Test1\u{2212} and Test2\u{2212} | Disease\u{2212}) = P(Test1\u{2212} | Disease\u{2212}) \u{00D7} P(Test2\u{2212} | Disease\u{2212}) = Spec\u{2081} \u{00D7} Spec\u{2082}</li>
 </ul>
 
-<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as ρ or ψ) that ranges from -1 (inverse correlation) to 1 (maximum possible dependence):</p>
+<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u{03C1} or \u{03C8}) that ranges from -1 (inverse correlation) to 1 (maximum possible dependence):</p>
 <ul>
-  <li>P(Test1+ and Test2+ | Disease+) = (Sens₁ × Sens₂) + ρᵨₒₛ × √(Sens₁ × (1−Sens₁) × Sens₂ × (1−Sens₂))</li>
-  <li>P(Test1+ and Test2+ | Disease−) = ((1−Spec₁) × (1−Spec₂)) + ρₙₑ𝑔 × √((1−Spec₁) × Spec₁ × (1−Spec₂) × Spec₂)</li>
+  <li>P(Test1+ and Test2+ | Disease+) = (Sens\u{2081} \u{00D7} Sens\u{2082}) + \u{03C1}\u{1D68}\u{2092}\u{209B} \u{00D7} \u{221A}(Sens\u{2081} \u{00D7} (1\u{2212}Sens\u{2081}) \u{00D7} Sens\u{2082} \u{00D7} (1\u{2212}Sens\u{2082}))</li>
+  <li>P(Test1+ and Test2+ | Disease\u{2212}) = ((1\u{2212}Spec\u{2081}) \u{00D7} (1\u{2212}Spec\u{2082})) + \u{03C1}\u{2099}\u{2091}\U{0001D454} \u{00D7} \u{221A}((1\u{2212}Spec\u{2081}) \u{00D7} Spec\u{2081} \u{00D7} (1\u{2212}Spec\u{2082}) \u{00D7} Spec\u{2082})</li>
 </ul>
 
 <p>Extreme values are automatically truncated to stay within feasible joint bounds; the realized correlation after truncation is reported.</p>
@@ -845,7 +845,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 </ul>
 
 <h4>Estimating Dependency Parameters</h4>
-<p>The conditional dependence parameters (ρᵨₒₛ for diseased subjects and ρₙₑ𝑔 for non-diseased subjects) ideally should be estimated from paired testing data with known disease status. Values typically range from 0 to 0.5 in practice, with higher values indicating stronger dependence. When no data is available, sensitivity analyses using a range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much dependence affects results.</p>
+<p>The conditional dependence parameters (\u{03C1}\u{1D68}\u{2092}\u{209B} for diseased subjects and \u{03C1}\u{2099}\u{2091}\U{0001D454} for non-diseased subjects) ideally should be estimated from paired testing data with known disease status. Values typically range from 0 to 0.5 in practice, with higher values indicating stronger dependence. When no data is available, sensitivity analyses using a range of plausible values (e.g., 0.05, 0.1, 0.2) can reveal how much dependence affects results.</p>
 
 <h4>Impact of Ignoring Dependence</h4>
 <p>Ignoring conditional dependence when it exists tends to:</p>

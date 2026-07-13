@@ -392,13 +392,13 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             if (length(x) == 0) return("No data")
             
             switch(self$options$stats_continuous,
-                "mean_sd" = sprintf("%.2f ± %.2f", mean(x), sd(x)),
+                "mean_sd" = sprintf("%.2f \u{00B1} %.2f", mean(x), sd(x)),
                 "median_iqr" = sprintf("%.2f [%.2f, %.2f]", median(x), quantile(x, 0.25), quantile(x, 0.75)),
-                "both" = sprintf("%.2f ± %.2f, %.2f [%.2f, %.2f]", 
+                "both" = sprintf("%.2f \u{00B1} %.2f, %.2f [%.2f, %.2f]", 
                                mean(x), sd(x), median(x), quantile(x, 0.25), quantile(x, 0.75)),
-                "mean_sd_range" = sprintf("%.2f ± %.2f (%.2f - %.2f)", 
+                "mean_sd_range" = sprintf("%.2f \u{00B1} %.2f (%.2f - %.2f)", 
                                         mean(x), sd(x), min(x), max(x)),
-                "all" = sprintf("Mean: %.2f ± %.2f, Median: %.2f [%.2f, %.2f], Range: %.2f - %.2f",
+                "all" = sprintf("Mean: %.2f \u{00B1} %.2f, Median: %.2f [%.2f, %.2f], Range: %.2f - %.2f",
                                mean(x), sd(x), median(x), quantile(x, 0.25), quantile(x, 0.75), min(x), max(x))
             )
         },
@@ -433,7 +433,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             x <- x[!is.na(x)]
             if (length(x) == 0) return("No data")
             
-            sprintf("%.2f ± %.2f", mean(x), sd(x))
+            sprintf("%.2f \u{00B1} %.2f", mean(x), sd(x))
         },
         
         .get_clinical_categorical_summary = function(x) {
@@ -452,7 +452,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             x <- x[!is.na(x)]
             if (length(x) == 0) return("No data")
             
-            sprintf("%.1f ± %.1f", mean(x), sd(x))
+            sprintf("%.1f \u{00B1} %.1f", mean(x), sd(x))
         },
         
         .get_tableone_categorical = function(x) {
@@ -648,7 +648,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                         return(sprintf("Wilcoxon test: W = %.3f, p = %.3f", test_result$statistic, test_result$p.value))
                     } else {
                         test_result <- kruskal.test(x ~ group)
-                        return(sprintf("Kruskal-Wallis test: χ² = %.3f, p = %.3f", test_result$statistic, test_result$p.value))
+                        return(sprintf("Kruskal-Wallis test: \u{03C7}\u{00B2} = %.3f, p = %.3f", test_result$statistic, test_result$p.value))
                     }
                 }
             }, error = function(e) {
@@ -676,7 +676,7 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     return(sprintf("Fisher's exact test: p = %.3f", test_result$p.value))
                 } else {
                     test_result <- chisq.test(contingency_table)
-                    return(sprintf("χ² test: χ² = %.3f, p = %.3f", test_result$statistic, test_result$p.value))
+                    return(sprintf("\u{03C7}\u{00B2} test: \u{03C7}\u{00B2} = %.3f, p = %.3f", test_result$statistic, test_result$p.value))
                 }
             }, error = function(e) {
                 return(paste("Test failed:", e$message))
@@ -704,10 +704,10 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 "<ul>",
                 "<li><strong>Continuous Variables:</strong> Displayed as ", 
                 switch(self$options$stats_continuous,
-                       "mean_sd" = "mean ± standard deviation",
+                       "mean_sd" = "mean \u{00B1} standard deviation",
                        "median_iqr" = "median [interquartile range]",
-                       "both" = "mean ± SD and median [IQR]",
-                       "mean_sd_range" = "mean ± SD with range",
+                       "both" = "mean \u{00B1} SD and median [IQR]",
+                       "mean_sd_range" = "mean \u{00B1} SD with range",
                        "all" = "comprehensive statistics"), "</li>",
                 "<li><strong>Categorical Variables:</strong> Displayed as ", 
                 switch(self$options$stats_categorical,

@@ -99,8 +99,8 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <ul>
                 <li><b>VUS = 1:</b> Perfect discrimination across all classes</li>
                 <li><b>VUS = 1/k!:</b> Random classification (k = number of classes)</li>
-                <li><b>For 3 classes:</b> Null VUS = 1/6 ≈ 0.167</li>
-                <li><b>For 4 classes:</b> Null VUS = 1/24 ≈ 0.042</li>
+                <li><b>For 3 classes:</b> Null VUS = 1/6 \u{2248} 0.167</li>
+                <li><b>For 4 classes:</b> Null VUS = 1/24 \u{2248} 0.042</li>
             </ul>
 
             <h4>Clinical Applications:</h4>

@@ -26,7 +26,7 @@ children:
             fitToGrid: true
           - type: CheckBox
             name: useHighlight
-            label: Use highlighting
+            label: Highlighting
           - type: LevelSelector
             name: highlight
             enable: (group && useHighlight)
@@ -99,7 +99,7 @@ children:
         children:
           - type: CheckBox
             name: conditionalColor
-            label: Use conditional coloring
+            label: Conditional coloring
           - type: TextBox
             name: colorThreshold
             format: number

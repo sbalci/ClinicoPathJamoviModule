@@ -932,17 +932,17 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             switch(self$options$expScaleLabel,
                                 "or" = "OR",
                                 "hr" = "HR",
-                                "exp(β)"
+                                "exp(\u{03B2})"
                             )
                         } else {
                             switch(self$options$modelType,
                                 "glm" = "OR",
                                 "cox" = "HR",
-                                "exp(β)"
+                                "exp(\u{03B2})"
                             )
                         }
                     } else {
-                        "β"
+                        "\u{03B2}"
                     }
 
                     example_text <- sprintf(

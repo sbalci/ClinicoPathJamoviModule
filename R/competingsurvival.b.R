@@ -80,20 +80,20 @@ competingsurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 The explanation below is adopted from <a href = 'https://finalfit.org/articles/survival.html#death-status'>finalfit website documentation</a>.
 <br><br>
 <b>Outcome</b> is the status at the time of study:<br>
-• <b>Dead of Disease</b>: Patients had died from disease<br>
-• <b>Dead of Other</b>: Patients had died from other causes<br>
-• <b>Alive w Disease</b>: Patients are alive and still have disease<br>
-• <b>Alive w/o Disease</b>: Patients are alive and free of disease<br>
+\u{2022} <b>Dead of Disease</b>: Patients had died from disease<br>
+\u{2022} <b>Dead of Other</b>: Patients had died from other causes<br>
+\u{2022} <b>Alive w Disease</b>: Patients are alive and still have disease<br>
+\u{2022} <b>Alive w/o Disease</b>: Patients are alive and free of disease<br>
 <br>
 <b>Analysis Types:</b><br>
-• <b>Overall survival</b>: All-cause mortality (Alive vs All Deaths)<br>
-• <b>Cause-specific survival</b>: Disease-specific mortality only<br>
-• <b>Competing risks</b>: Disease death accounting for other deaths<br>
+\u{2022} <b>Overall survival</b>: All-cause mortality (Alive vs All Deaths)<br>
+\u{2022} <b>Cause-specific survival</b>: Disease-specific mortality only<br>
+\u{2022} <b>Competing risks</b>: Disease death accounting for other deaths<br>
 <br>
 <b>Required Variables:</b><br>
-• Explanatory Variable: Treatment group or other factor<br>
-• Overall Time: Follow-up time in months<br>
-• Outcome: Multi-level factor with death/alive status<br>
+\u{2022} Explanatory Variable: Treatment group or other factor<br>
+\u{2022} Overall Time: Follow-up time in months<br>
+\u{2022} Outcome: Multi-level factor with death/alive status<br>
 <br>
 This function uses survival, survminer, finalfit, and cmprsk packages.
 <br><hr>

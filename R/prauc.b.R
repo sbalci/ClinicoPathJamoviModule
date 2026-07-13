@@ -96,7 +96,7 @@ praucClass <- R6::R6Class(
               <li><b>Precision (PPV):</b> TP / (TP + FP) - What proportion of positive predictions are correct?</li>
               <li><b>Recall (Sensitivity):</b> TP / (TP + FN) - What proportion of actual positives are detected?</li>
               <li><b>PR-AUC:</b> Area under precision-recall curve (Average Precision)</li>
-              <li><b>F1-Score:</b> Harmonic mean of precision and recall (2 × Precision × Recall / (Precision + Recall))</li>
+              <li><b>F1-Score:</b> Harmonic mean of precision and recall (2 \u{00D7} Precision \u{00D7} Recall / (Precision + Recall))</li>
               <li><b>Baseline PR-AUC:</b> Equals the prevalence (random classifier performance)</li>
             </ul>
             <p><b>Clinical Applications:</b></p>

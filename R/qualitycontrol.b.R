@@ -470,7 +470,7 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Linearity assessment (simplified)
                     # This would typically involve multiple concentration levels
                     validation_table$addRow(rowKey = "linearity", values = list(
-                        parameter = "Linearity (R²)",
+                        parameter = "Linearity (R\u{00B2})",
                         estimate = 0.995, # Example value
                         confidence_interval = "0.990-0.999",
                         specification_limit = 0.975,
@@ -516,7 +516,7 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Confidence intervals for limits (approximate)
                     se_quantile <- sqrt((lower_p / 100) * (1 - lower_p / 100) / n_clean)
-                    ci_text <- sprintf("±%.2f", 1.96 * se_quantile * diff(range(clean_measurements)))
+                    ci_text <- sprintf("\u{00B1}%.2f", 1.96 * se_quantile * diff(range(clean_measurements)))
 
                     validity <- if (n_clean >= 120) "Adequate sample size" else "Sample size may be insufficient"
                 } else if (method == "parametric") {
@@ -530,7 +530,7 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Confidence intervals
                     se_sd <- sd_val / sqrt(2 * (n_clean - 1))
-                    ci_text <- sprintf("±%.2f", 1.96 * se_sd * z_score)
+                    ci_text <- sprintf("\u{00B1}%.2f", 1.96 * se_sd * z_score)
 
                     # Test for normality
                     if (requireNamespace("nortest", quietly = TRUE)) {
@@ -652,32 +652,32 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Westgard rules
                 rules <- list(
-                    "1₂ₛ" = list(
+                    "1\u{2082}\u{209B}" = list(
                         description = "1 observation > 2SD",
                         violations = sum(abs(measurements - mean_val) > 2 * sd_val),
                         action = "Warning - investigate"
                     ),
-                    "1₃ₛ" = list(
+                    "1\u{2083}\u{209B}" = list(
                         description = "1 observation > 3SD",
                         violations = sum(abs(measurements - mean_val) > 3 * sd_val),
                         action = "Reject run - corrective action"
                     ),
-                    "2₂ₛ" = list(
+                    "2\u{2082}\u{209B}" = list(
                         description = "2 consecutive obs > 2SD (same side)",
                         violations = private$.countConsecutiveOutliers(measurements, mean_val, 2 * sd_val, 2),
                         action = "Reject run - systematic error"
                     ),
-                    "R₄ₛ" = list(
+                    "R\u{2084}\u{209B}" = list(
                         description = "1 obs > 2SD both sides in same run",
                         violations = private$.countRangeViolations(measurements, mean_val, 2 * sd_val),
                         action = "Reject run - random error"
                     ),
-                    "4₁ₛ" = list(
+                    "4\u{2081}\u{209B}" = list(
                         description = "4 consecutive obs > 1SD (same side)",
                         violations = private$.countConsecutiveOutliers(measurements, mean_val, 1 * sd_val, 4),
                         action = "Reject run - systematic error"
                     ),
-                    "10x̄" = list(
+                    "10x\u{0304}" = list(
                         description = "10 consecutive obs same side of mean",
                         violations = private$.countConsecutiveSameSide(measurements, mean_val, 10),
                         action = "Reject run - systematic shift"
@@ -785,7 +785,7 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     cap <- capability_indices[[i]]
 
                     # Rough confidence interval (simplified)
-                    ci_text <- sprintf("%.3f ± %.3f", cap$estimate, 0.1 * cap$estimate)
+                    ci_text <- sprintf("%.3f \u{00B1} %.3f", cap$estimate, 0.1 * cap$estimate)
 
                     capability_table$addRow(rowKey = cap$index, values = list(
                         index = cap$index,
@@ -923,7 +923,7 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <h4>Sigma Metrics</h4>
             <p><b>Six Sigma Quality:</b> Method for assessing laboratory performance using sigma scale (1-6).</p>
-            <p><b>Quality Levels:</b> 6σ = World Class, 5σ = Excellent, 4σ = Good, 3σ = Marginal, <3σ = Poor</p>
+            <p><b>Quality Levels:</b> 6\u{03C3} = World Class, 5\u{03C3} = Excellent, 4\u{03C3} = Good, 3\u{03C3} = Marginal, <3\u{03C3} = Poor</p>
 
             <h4>Method Validation</h4>
             <p><b>Precision:</b> Repeatability (within-run) and reproducibility (between-run) assessment following CLSI EP5-A3.</p>
@@ -932,25 +932,25 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             <h4>Reference Intervals</h4>
             <p><b>Non-parametric:</b> Percentile-based intervals (recommended by CLSI C28-A3).</p>
-            <p><b>Parametric:</b> Mean ± z*SD intervals (assumes normal distribution).</p>
+            <p><b>Parametric:</b> Mean \u{00B1} z*SD intervals (assumes normal distribution).</p>
             <p><b>Robust:</b> Median and MAD-based intervals (resistant to outliers).</p>
 
             <h4>Westgard Multi-Rules</h4>
             <p>Comprehensive quality control rules for detecting random and systematic errors:</p>
             <ul>
-            <li><b>1₂ₛ:</b> Single observation >2SD (warning)</li>
-            <li><b>1₃ₛ:</b> Single observation >3SD (reject)</li>
-            <li><b>2₂ₛ:</b> Two consecutive >2SD same side (systematic error)</li>
-            <li><b>R₄ₛ:</b> Range >4SD in same run (random error)</li>
-            <li><b>4₁ₛ:</b> Four consecutive >1SD same side (shift)</li>
-            <li><b>10x̄:</b> Ten consecutive same side of mean (drift)</li>
+            <li><b>1\u{2082}\u{209B}:</b> Single observation >2SD (warning)</li>
+            <li><b>1\u{2083}\u{209B}:</b> Single observation >3SD (reject)</li>
+            <li><b>2\u{2082}\u{209B}:</b> Two consecutive >2SD same side (systematic error)</li>
+            <li><b>R\u{2084}\u{209B}:</b> Range >4SD in same run (random error)</li>
+            <li><b>4\u{2081}\u{209B}:</b> Four consecutive >1SD same side (shift)</li>
+            <li><b>10x\u{0304}:</b> Ten consecutive same side of mean (drift)</li>
             </ul>
 
             <p><b>References:</b></p>
-            <p>• CLSI EP5-A3: Evaluation of Precision of Quantitative Measurement Procedures</p>
-            <p>• CLSI C28-A3: Defining, Establishing, and Verifying Reference Intervals</p>
-            <p>• Medical Laboratories Requirements for Quality and Competence</p>
-            <p>• Westgard QC: Statistical Quality Control for Quantitative Measurements</p>
+            <p>\u{2022} CLSI EP5-A3: Evaluation of Precision of Quantitative Measurement Procedures</p>
+            <p>\u{2022} CLSI C28-A3: Defining, Establishing, and Verifying Reference Intervals</p>
+            <p>\u{2022} Medical Laboratories Requirements for Quality and Competence</p>
+            <p>\u{2022} Westgard QC: Statistical Quality Control for Quantitative Measurements</p>
             </body>
             </html>"
 

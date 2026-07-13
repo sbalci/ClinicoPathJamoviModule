@@ -464,7 +464,7 @@ survivalfeaturerankClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6:
             if (n_significant == 0) {
                 html <- paste0(html,
                     "<p><b>No significant features found.</b> None of the tested features ",
-                    "showed statistically significant association with survival at α = ", alpha, ".</p>",
+                    "showed statistically significant association with survival at \u{03B1} = ", alpha, ".</p>",
                     "<p>Consider:</p><ul>",
                     "<li>Increasing sample size</li>",
                     "<li>Testing different features</li>",

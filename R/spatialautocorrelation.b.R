@@ -570,7 +570,7 @@ spatialautocorrelationClass <- R6::R6Class(
                 recommendation <- "Examine local patterns for clinically relevant clusters"
             } else if (abs(moran_result$estimate[1]) < 0.1 || moran_result$p.value >= 0.05) {
                 pattern <- "Random Spatial Distribution"
-                statistical <- "Moran's I ≈ 0 or p >= 0.05"
+                statistical <- "Moran's I \u{2248} 0 or p >= 0.05"
                 biological <- "No significant spatial autocorrelation detected"
                 clinical <- "Features distributed randomly across tissue"
                 recommendation <- "Consider other analysis approaches or different spatial scales"

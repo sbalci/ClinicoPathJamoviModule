@@ -625,7 +625,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     summary_html <- paste0(
                         summary_html,
                         sprintf(
-                            '<p style="margin-top: 15px;"><b>Statistical test:</b> Log-rank χ² = %.2f (df = %d), p %s, indicating <b>%s differences</b> between risk groups.</p>',
+                            '<p style="margin-top: 15px;"><b>Statistical test:</b> Log-rank \u{03C7}\u{00B2} = %.2f (df = %d), p %s, indicating <b>%s differences</b> between risk groups.</p>',
                             logrankTable$chisq,
                             logrankTable$df,
                             ifelse(logrankTable$pvalue < 0.001, "< 0.001", paste0("= ", round(logrankTable$pvalue, 4))),
@@ -649,7 +649,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     interp_html <- paste0(interp_html, "<li>Numbers show sample size and event rate in each node</li></ul>")
 
                     interp_html <- paste0(interp_html, "<p><b>Risk Group Table:</b></p><ul>")
-                    interp_html <- paste0(interp_html, "<li><b>Risk groups are ordered by prognosis</b> (best → worst survival)</li>")
+                    interp_html <- paste0(interp_html, "<li><b>Risk groups are ordered by prognosis</b> (best \u{2192} worst survival)</li>")
                     interp_html <- paste0(interp_html, "<li><b>Median OS</b> = time when 50% of patients in that group are still alive</li>")
                     interp_html <- paste0(interp_html, "<li><b>5-yr OS</b> = percentage of patients alive at 5 years (with 95% CI)</li>")
                     interp_html <- paste0(interp_html, "<li>Groups with higher median OS and 5-yr OS have better prognosis</li></ul>")
@@ -681,7 +681,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     report_html <- paste0(report_html, '<p style="background: white; padding: 10px; border: 1px dashed #66bb6a; border-radius: 3px;">')
 
                     report_text <- sprintf(
-                        "Recursive partitioning analysis of %d patients with %d predictor variable%s identified %d prognostic risk groups (log-rank χ² = %.2f, df = %d, p %s). ",
+                        "Recursive partitioning analysis of %d patients with %d predictor variable%s identified %d prognostic risk groups (log-rank \u{03C7}\u{00B2} = %.2f, df = %d, p %s). ",
                         nTotal,
                         nPredictors,
                         ifelse(nPredictors > 1, "s", ""),

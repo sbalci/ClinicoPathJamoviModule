@@ -177,7 +177,7 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
                 if (length(validation_errors) > 0) {
                     error_msg <- paste0(
                         "Data validation failed:\n",
-                        paste("• ", validation_errors, collapse = "\n"),
+                        paste("\u{2022} ", validation_errors, collapse = "\n"),
                         "\n\nPlease review your data before proceeding."
                     )
                     jmvcore::reject(error_msg)

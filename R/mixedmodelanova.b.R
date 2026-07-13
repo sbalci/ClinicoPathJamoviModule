@@ -267,12 +267,12 @@ mixedmodelanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options = options,
                 name = "effect_sizes",
-                title = "Effect Sizes (Partial η²)",
+                title = "Effect Sizes (Partial \u{03B7}\u{00B2})",
                 visible = "(show_effect_sizes)",
                 rows = 0,
                 columns = list(
                     list(name = "term", title = "Effect", type = "text"),
-                    list(name = "partial_eta_sq", title = "Partial η²", type = "number"),
+                    list(name = "partial_eta_sq", title = "Partial \u{03B7}\u{00B2}", type = "number"),
                     list(name = "interpretation", title = "Interpretation", type = "text"))))
             self$add(jmvcore::Table$new(
                 options = options,
@@ -786,7 +786,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             <p><strong>Random Effects:</strong> Show variance at different levels (e.g., between subjects).</p>
             <p><strong>ICC (Intraclass Correlation):</strong> Proportion of variance due to grouping.
                Values > 0.10 indicate substantial clustering.</p>
-            <p><strong>Effect Sizes (Partial η²):</strong> 0.01 = small, 0.06 = medium, 0.14 = large.</p>
+            <p><strong>Effect Sizes (Partial \u{03B7}\u{00B2}):</strong> 0.01 = small, 0.06 = medium, 0.14 = large.</p>
             "
 
             html$setContent(interpretation_text)
@@ -819,7 +819,7 @@ mixedmodelanovaClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             references_text <- "
             <h3>References</h3>
             <ul>
-            <li>Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4.
+            <li>Bates, D., M\u{00E4}chler, M., Bolker, B., & Walker, S. (2015). Fitting Linear Mixed-Effects Models Using lme4.
                 <em>Journal of Statistical Software</em>, 67(1), 1-48.</li>
             <li>Kuznetsova, A., Brockhoff, P. B., & Christensen, R. H. B. (2017). lmerTest Package: Tests in Linear Mixed Effects Models.
                 <em>Journal of Statistical Software</em>, 82(13), 1-26.</li>

@@ -474,14 +474,14 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Third, show Chi-square goodness-of-fit test
                 self$results$summary$addRow(rowKey=3, values=list(
                     statistic=.("Chi-square Test"),
-                    value=sprintf("X² = %.2f, df = %d", interpretation$chisq_statistic, interpretation$chisq_df),
+                    value=sprintf("X\u{00B2} = %.2f, df = %d", interpretation$chisq_statistic, interpretation$chisq_df),
                     interpretation=sprintf(.("p-value = %.4f"), interpretation$chisq_pvalue)
                 ))
 
                 # Fourth, show Mantissa Arc Test
                 self$results$summary$addRow(rowKey=4, values=list(
                     statistic=.("Mantissa Arc Test"),
-                    value=sprintf("L² = %.4f, df = %d", interpretation$mat_statistic, interpretation$mat_df),
+                    value=sprintf("L\u{00B2} = %.4f, df = %d", interpretation$mat_statistic, interpretation$mat_df),
                     interpretation=sprintf(.("p-value = %.4e"), interpretation$mat_pvalue)
                 ))
 
@@ -595,7 +595,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "  Chi-square: ", round(benford_obj$stats$chisq$statistic, 4),
                 " (p = ", format.pval(benford_obj$stats$chisq$p.value, digits = 4, eps = 0.0001), ")\n",
                 "  MAD: ", round(benford_obj$MAD, 6), " (", benford_obj$MAD.conformity, ")\n",
-                "  Mantissa Arc Test: L² = ", round(benford_obj$stats$mantissa.arc.test$statistic, 4),
+                "  Mantissa Arc Test: L\u{00B2} = ", round(benford_obj$stats$mantissa.arc.test$statistic, 4),
                 " (p = ", format.pval(benford_obj$stats$mantissa.arc.test$p.value, digits = 4, eps = 0.0001), ")\n"
             )
 

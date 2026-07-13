@@ -210,17 +210,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                                     max(case_missing),
                                     ncol(analysis_data))
 
-            # Little's MCAR test if available and >1 var
-            mcar_msg <- ""
-            if (ncol(analysis_data) > 1 && requireNamespace("BaylorEdPsych", quietly = TRUE)) {
-                try({
-                    mcar <- BaylorEdPsych::LittleMCAR(analysis_data)
-                    mcar_msg <- sprintf("Little's MCAR test: chi-square=%.2f, df=%s, p=%.4f",
-                                        mcar$chi.square, mcar$df, mcar$p.value)
-                }, silent = TRUE)
-            } else if (ncol(analysis_data) > 1) {
-                mcar_msg <- "Little's MCAR test skipped (BaylorEdPsych not installed)."
-            }
+            # # Little's MCAR test if available and >1 var
+            # mcar_msg <- ""
+            # if (ncol(analysis_data) > 1 && requireNamespace("BaylorEdPsych", quietly = TRUE)) {
+            #     try({
+            #         mcar <- BaylorEdPsych::LittleMCAR(analysis_data)
+            #         mcar_msg <- sprintf("Little's MCAR test: chi-square=%.2f, df=%s, p=%.4f",
+            #                             mcar$chi.square, mcar$df, mcar$p.value)
+            #     }, silent = TRUE)
+            # } else if (ncol(analysis_data) > 1) {
+            #     mcar_msg <- "Little's MCAR test skipped (BaylorEdPsych not installed)."
+            # }
 
             # Threshold flagging
             threshold <- self$options$missing_threshold_visual

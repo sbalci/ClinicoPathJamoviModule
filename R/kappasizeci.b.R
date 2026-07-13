@@ -226,7 +226,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             is_one_sided <- (params$citype == "one_sided")
 
             if (is_one_sided) {
-                ci_text <- paste0("• Lower confidence limit (κL): ", params$kappaL)
+                ci_text <- paste0("\u{2022} Lower confidence limit (\u{03BA}L): ", params$kappaL)
                 ci_type_text <- "One-sided (lower bound only)"
                 objective_text <- paste0(
                     "Determine the required sample size to estimate \u03ba\u2080 = ", params$kappa0,
@@ -235,8 +235,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
             } else {
                 ci_text <- paste0(
-                    "• Confidence interval: [", params$kappaL, ", ", params$kappaU, "]\n",
-                    "• Precision width: ", round(params$kappaU - params$kappaL, 3)
+                    "\u{2022} Confidence interval: [", params$kappaL, ", ", params$kappaU, "]\n",
+                    "\u{2022} Precision width: ", round(params$kappaU - params$kappaL, 3)
                 )
                 ci_type_text <- "Two-sided"
                 objective_text <- paste0(
@@ -249,15 +249,15 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             explanation <- paste0(
                 "Sample Size Calculation for Interobserver Agreement Study\n\n",
                 "Study Design:\n",
-                "• Number of outcome categories: ", params$outcome, "\n",
-                "• Number of raters: ", params$raters, "\n",
-                "• Significance level (\u03b1): ", params$alpha, "\n",
-                "• CI type: ", ci_type_text, "\n\n",
+                "\u{2022} Number of outcome categories: ", params$outcome, "\n",
+                "\u{2022} Number of raters: ", params$raters, "\n",
+                "\u{2022} Significance level (\u03b1): ", params$alpha, "\n",
+                "\u{2022} CI type: ", ci_type_text, "\n\n",
                 "Kappa Parameters:\n",
-                "• Null hypothesis kappa (\u03ba\u2080): ", params$kappa0, "\n",
+                "\u{2022} Null hypothesis kappa (\u03ba\u2080): ", params$kappa0, "\n",
                 ci_text, "\n\n",
                 "Population Characteristics:\n",
-                "• Expected category ", props_text, "\n\n",
+                "\u{2022} Expected category ", props_text, "\n\n",
                 "Objective:\n",
                 objective_text
             )

@@ -53,19 +53,19 @@ marginalrecurrentClass <- R6::R6Class(
 
                     <h2> Model Types Available:</h2>
                     <div class='formula'>
-                    <strong>Marginal Rate Model:</strong> λ(t|X) = λ₀(t) exp(βᵀX)<br>
-                    <strong>Accelerated Rate Model:</strong> λ(t|X) = λ₀(t exp(βᵀX)) exp(βᵀX)<br>
-                    <strong>Gamma Frailty Model:</strong> λ(t|X,Z) = Z λ₀(t) exp(βᵀX)
+                    <strong>Marginal Rate Model:</strong> \u{03BB}(t|X) = \u{03BB}\u{2080}(t) exp(\u{03B2}\u{1D40}X)<br>
+                    <strong>Accelerated Rate Model:</strong> \u{03BB}(t|X) = \u{03BB}\u{2080}(t exp(\u{03B2}\u{1D40}X)) exp(\u{03B2}\u{1D40}X)<br>
+                    <strong>Gamma Frailty Model:</strong> \u{03BB}(t|X,Z) = Z \u{03BB}\u{2080}(t) exp(\u{03B2}\u{1D40}X)
                     </div>
 
                     <div class='interpretation'>
                     <strong> Analysis Output:</strong><br>
-                    • Model coefficient estimates with confidence intervals<br>
-                    • Cumulative rate function estimates<br>
-                    • Survival function for terminal events<br>
-                    • Goodness-of-fit tests<br>
-                    • Visual plots for model assessment<br>
-                    • Bootstrap confidence intervals when requested
+                    \u{2022} Model coefficient estimates with confidence intervals<br>
+                    \u{2022} Cumulative rate function estimates<br>
+                    \u{2022} Survival function for terminal events<br>
+                    \u{2022} Goodness-of-fit tests<br>
+                    \u{2022} Visual plots for model assessment<br>
+                    \u{2022} Bootstrap confidence intervals when requested
                     </div>
 
                     <p><strong> Please assign the required variables to continue with the analysis.</strong></p>
@@ -694,13 +694,13 @@ marginalrecurrentClass <- R6::R6Class(
             <strong>Model Types:</strong><br>
             <div class='formula'>
             <strong>Marginal Rate Model:</strong><br>
-            λ(t|X) = λ₀(t) exp(βᵀX)<br><br>
+            \u{03BB}(t|X) = \u{03BB}\u{2080}(t) exp(\u{03B2}\u{1D40}X)<br><br>
             
             <strong>Accelerated Rate Model:</strong><br>
-            λ(t|X) = λ₀(t exp(βᵀX)) exp(βᵀX)<br><br>
+            \u{03BB}(t|X) = \u{03BB}\u{2080}(t exp(\u{03B2}\u{1D40}X)) exp(\u{03B2}\u{1D40}X)<br><br>
             
             <strong>Gamma Frailty Model:</strong><br>
-            λ(t|X,Z) = Z λ₀(t) exp(βᵀX), where Z ~ Gamma(1/θ, 1/θ)
+            \u{03BB}(t|X,Z) = Z \u{03BB}\u{2080}(t) exp(\u{03B2}\u{1D40}X), where Z ~ Gamma(1/\u{03B8}, 1/\u{03B8})
             </div>
             </div>
 
@@ -716,11 +716,11 @@ marginalrecurrentClass <- R6::R6Class(
 
             <div class='interpretation'>
             <strong>Clinical Applications:</strong><br>
-            • <strong>Hospital readmissions:</strong> Modeling repeated admissions over time<br>
-            • <strong>Infection recurrence:</strong> Analyzing patterns of recurrent infections<br>
-            • <strong>Seizure episodes:</strong> Understanding seizure frequency and triggers<br>
-            • <strong>Tumor recurrence:</strong> Studying cancer recurrence patterns<br>
-            • <strong>Medical appointments:</strong> Analyzing healthcare utilization patterns
+            \u{2022} <strong>Hospital readmissions:</strong> Modeling repeated admissions over time<br>
+            \u{2022} <strong>Infection recurrence:</strong> Analyzing patterns of recurrent infections<br>
+            \u{2022} <strong>Seizure episodes:</strong> Understanding seizure frequency and triggers<br>
+            \u{2022} <strong>Tumor recurrence:</strong> Studying cancer recurrence patterns<br>
+            \u{2022} <strong>Medical appointments:</strong> Analyzing healthcare utilization patterns
             </div>
 
             </body>
@@ -757,34 +757,34 @@ marginalrecurrentClass <- R6::R6Class(
             
             <div class='summary'>
             <strong>Model Summary:</strong><br>
-            • <strong>Analysis type:</strong> ", model_type, "<br>
-            • <strong>Number of subjects:</strong> ", length(unique(prepared_data$id)), "<br>
-            • <strong>Total events:</strong> ", sum(prepared_data$event), "<br>
-            • <strong>Events per subject (mean):</strong> ", round(sum(prepared_data$event) / length(unique(prepared_data$id)), 2), "
+            \u{2022} <strong>Analysis type:</strong> ", model_type, "<br>
+            \u{2022} <strong>Number of subjects:</strong> ", length(unique(prepared_data$id)), "<br>
+            \u{2022} <strong>Total events:</strong> ", sum(prepared_data$event), "<br>
+            \u{2022} <strong>Events per subject (mean):</strong> ", round(sum(prepared_data$event) / length(unique(prepared_data$id)), 2), "
             </div>
 
             <div class='interpretation'>
             <strong> Key Findings:</strong><br>
-            • The model estimates the rate of recurrent events over time<br>
-            • Coefficients represent the log-rate ratio for each covariate<br>
-            • Positive coefficients indicate increased event rates<br>
-            • Confidence intervals quantify estimation uncertainty
+            \u{2022} The model estimates the rate of recurrent events over time<br>
+            \u{2022} Coefficients represent the log-rate ratio for each covariate<br>
+            \u{2022} Positive coefficients indicate increased event rates<br>
+            \u{2022} Confidence intervals quantify estimation uncertainty
             </div>
 
             <div class='interpretation'>
             <strong> Clinical Interpretation:</strong><br>
-            • <strong>Rate ratios:</strong> exp(coefficient) gives the multiplicative effect on event rate<br>
-            • <strong>Cumulative rate:</strong> Expected number of events by each time point<br>
-            • <strong>Population average:</strong> Results apply to the average subject in the population<br>
-            • <strong>Within-subject correlation:</strong> Model accounts for dependence between events within subjects
+            \u{2022} <strong>Rate ratios:</strong> exp(coefficient) gives the multiplicative effect on event rate<br>
+            \u{2022} <strong>Cumulative rate:</strong> Expected number of events by each time point<br>
+            \u{2022} <strong>Population average:</strong> Results apply to the average subject in the population<br>
+            \u{2022} <strong>Within-subject correlation:</strong> Model accounts for dependence between events within subjects
             </div>
 
             <div class='warning'>
             <strong> Important Considerations:</strong><br>
-            • Verify that the proportional rate assumption is reasonable<br>
-            • Check goodness-of-fit to assess model adequacy<br>
-            • Consider terminal events if they affect recurrent event processes<br>
-            • Bootstrap confidence intervals are recommended for small samples
+            \u{2022} Verify that the proportional rate assumption is reasonable<br>
+            \u{2022} Check goodness-of-fit to assess model adequacy<br>
+            \u{2022} Consider terminal events if they affect recurrent event processes<br>
+            \u{2022} Bootstrap confidence intervals are recommended for small samples
             </div>
 
             </body>

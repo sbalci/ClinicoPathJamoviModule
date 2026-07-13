@@ -388,7 +388,7 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             if (missing_pct > 10) {
                 missing_text <- paste0("<div style='color: orange; margin-top: 5px;'>",
-                                     "⚠️ <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded.",
+                                     "\u{26A0}\u{FE0F} <b>Note:</b> ", round(missing_pct, 1), "% of cases have missing data and will be excluded.",
                                      "</div>")
             }
 
@@ -416,10 +416,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <div style='margin-top: 10px;'>
                         <b>Assessment:</b><br>",
                         ifelse(epv < 5, 
-                               "<span style='color: red;'>⚠️ <b>High Dimensionality:</b> EPV is very low. Regularization via dimensionality reduction (PCA) is strictly necessary, but results may still be highly unstable.</span>", 
+                               "<span style='color: red;'>\u{26A0}\u{FE0F} <b>High Dimensionality:</b> EPV is very low. Regularization via dimensionality reduction (PCA) is strictly necessary, but results may still be highly unstable.</span>", 
                                ifelse(epv < 10, 
-                                      "<span style='color: orange;'>⚠️ <b>Moderate Dimensionality:</b> PCA will effectively perform dimension reduction and manage multicollinearity.</span>",
-                                      "<span style='color: green;'>✓ <b>Adequate Events:</b> Sample size is sufficient for this number of predictors. PCA will focus on identifying feature patterns.</span>"
+                                      "<span style='color: orange;'>\u{26A0}\u{FE0F} <b>Moderate Dimensionality:</b> PCA will effectively perform dimension reduction and manage multicollinearity.</span>",
+                                      "<span style='color: green;'>\u{2713} <b>Adequate Events:</b> Sample size is sufficient for this number of predictors. PCA will focus on identifying feature patterns.</span>"
                                )),
                     "</div>",
                     missing_text,

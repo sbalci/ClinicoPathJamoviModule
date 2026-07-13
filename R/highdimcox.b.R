@@ -639,11 +639,11 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         summary_content <- paste0(
           "<h4>High-Dimensional Cox Regression Results</h4>",
           "<p><strong>Regularization:</strong> ", self$options$regularization_method, 
-          " (α = ", round(model_results$alpha, 3), ")</p>",
+          " (\u{03B1} = ", round(model_results$alpha, 3), ")</p>",
           "<p><strong>Selected Lambda:</strong> ", 
           format(model_results$selected_lambda, scientific = TRUE, digits = 3), "</p>",
           "<p><strong>Variables:</strong> ", 
-          length(self$options$predictors), " candidate variables → ",
+          length(self$options$predictors), " candidate variables \u{2192} ",
           model_results$n_selected, " selected</p>",
           "<p><strong>Cross-Validation:</strong> ", self$options$cv_folds, "-fold CV</p>",
           if (!is.na(model_results$concordance)) {
@@ -716,7 +716,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
             round(cv_fit$cvm[which.min(abs(cv_fit$lambda - model_results$selected_lambda))], 3),
             as.character(conc_val),
             model_results$n_selected,
-            paste0(self$options$regularization_method, " (α=", round(model_results$alpha, 2), ")")
+            paste0(self$options$regularization_method, " (\u{03B1}=", round(model_results$alpha, 2), ")")
           ),
           interpretation = c(
             "Optimal regularization strength",
@@ -984,8 +984,8 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           "</ul>",
           
           "<h5>Cross-Validation</h5>",
-          "<p>The regularization parameter (λ) is selected using cross-validation to optimize prediction performance. ",
-          "The '1-SE rule' selects a more parsimonious model by choosing the largest λ within one standard error ",
+          "<p>The regularization parameter (\u{03BB}) is selected using cross-validation to optimize prediction performance. ",
+          "The '1-SE rule' selects a more parsimonious model by choosing the largest \u{03BB} within one standard error ",
           "of the minimum cross-validation error.</p>",
           
           "<h5>Stability Selection</h5>",

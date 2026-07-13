@@ -1651,7 +1651,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 <div style='%s'>
                     <h5 style='%s'>
-                        1⃣ Conditional Detection (Sensitivity) - \"If metastasis is present\"
+                        1\u{20E3} Conditional Detection (Sensitivity) - \"If metastasis is present\"
                     </h5>
                     <p style='%s'>
                         <strong>Clinical question:</strong> If metastasis is truly present, how many blocks do I need to detect it?
@@ -1679,7 +1679,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 <div style='%s'>
                     <h5 style='%s'>
-                        2⃣ Population-Level Detection - \"Overall detection rate\"
+                        2\u{20E3} Population-Level Detection - \"Overall detection rate\"
                     </h5>
                     <p style='%s'>
                         <strong>Clinical question:</strong> Across all specimens submitted (positive + negative), how often do we detect tumour with n blocks?
@@ -1688,7 +1688,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         <strong>Best used for:</strong> Monitoring service-level performance, comparing surgeons/protocols, or highlighting when low prevalence - not sampling - limits detection.
                     </p>
                     <p style='%s'>
-                        <strong>Formula:</strong> P(detect overall) = Prevalence × Sensitivity = π × [1 - (1-q)<sup>n</sup>]
+                        <strong>Formula:</strong> P(detect overall) = Prevalence \u{00D7} Sensitivity = \u{03C0} \u{00D7} [1 - (1-q)<sup>n</sup>]
                     </p>
                     <p style='%s'>
                         <strong>In Your Data:</strong> Observed prevalence = %.1f%% (%d/%d cases had metastasis):
@@ -1710,10 +1710,10 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         <strong> Important:</strong> These are fundamentally different quantities!
                     </p>
                     <p style='%s'>
-                        • <strong>Conditional (sensitivity)</strong> assumes metastasis is present
+                        \u{2022} <strong>Conditional (sensitivity)</strong> assumes metastasis is present
                     </p>
                     <p style='%s'>
-                        • <strong>Population-level</strong> includes cases without metastasis
+                        \u{2022} <strong>Population-level</strong> includes cases without metastasis
                     </p>
                     <p style='%s'>
                         The ratio between them equals the prevalence (%.1f%% in your data).
@@ -2240,7 +2240,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             tumorBurdenInfo$addRow(rowKey = "correlation", values = list(
                                 measure = "Correlation (samples examined vs positive)",
                                 value = sprintf(
-                                    "ρ = %.3f (p %s %.3f)",
+                                    "\u{03C1} = %.3f (p %s %.3f)",
                                     cor_result$estimate,
                                     if (cor_result$p.value < 0.001) "<" else "=",
                                     if (cor_result$p.value < 0.001) 0.001 else cor_result$p.value
@@ -2671,7 +2671,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             <li><b>Prevalence:</b> Proportion of cases with positive findings</li>
                             <li><b>Per-sample probability (q):</b> Detection probability given positivity</li>
                             <li><b>Conditional detection:</b> P(detect | present) - diagnostic sensitivity</li>
-                            <li><b>Population detection:</b> P(detect overall) = prevalence × sensitivity</li>
+                            <li><b>Population detection:</b> P(detect overall) = prevalence \u{00D7} sensitivity</li>
                         </ul>
                     </div>",
                             private$.buildStyle(private$.styleConstants$font),
@@ -2749,7 +2749,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <p style='%s'>Distinguishes between:</p>
                     <ul style='%s'>
                         <li><b>Conditional (Sensitivity):</b> P(detect | lesion present) - assumes disease exists</li>
-                        <li><b>Population (Overall):</b> P(detect in general) = prevalence × sensitivity</li>
+                        <li><b>Population (Overall):</b> P(detect in general) = prevalence \u{00D7} sensitivity</li>
                     </ul>
                     <p style='%s'><b>Observed prevalence:</b> %.1f%% (%d/%d cases positive)</p>
                     <p style='%s'><em>Note:</em> Prevalence reflects this specific dataset and may not generalize.</p>
@@ -3057,7 +3057,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 <p><b>Typical case:</b> median total nodes = %.0f, median positive nodes = %.0f.</p>
                 %s
                 <p><b>Model:</b> For each case i with population N<sub>i</sub> and positives K<sub>i</sub>, the probability of detecting >=%d positives after n draws is averaged across cases:</p>
-                <p style='margin-left: 15px;'>P(detect >= %d) = mean<sub>i</sub>[1 - Σ<sub>x=0</sub><sup>%d-1</sup> dhyper(x, K<sub>i</sub>, N<sub>i</sub>-K<sub>i</sub>, min(n, N<sub>i</sub>))]</p>
+                <p style='margin-left: 15px;'>P(detect >= %d) = mean<sub>i</sub>[1 - \u{03A3}<sub>x=0</sub><sup>%d-1</sup> dhyper(x, K<sub>i</sub>, N<sub>i</sub>-K<sub>i</sub>, min(n, N<sub>i</sub>))]</p>
                 <p><b>Reference:</b> Orange-peeling LN dissection study (2025) - Hypergeometric adequacy thresholds.</p>",
                         nHyperCases, medianN, medianK, notesHtml, target, target, max(target - 1, 0)
                     )
@@ -3297,7 +3297,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                             if (alpha < 0.01 || beta < 0.01) {
                                                 betaBinomNotes <- c(
                                                     betaBinomNotes,
-                                                    sprintf(" CAUTION: Extreme parameter values (α=%.4f, β=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta)
+                                                    sprintf(" CAUTION: Extreme parameter values (\u{03B1}=%.4f, \u{03B2}=%.4f) suggest poor model fit or extreme skew. Results should be interpreted with caution.", alpha, beta)
                                                 )
                                             }
 
@@ -3305,14 +3305,14 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                             if (rho_fit < 0.001) {
                                                 betaBinomNotes <- c(
                                                     betaBinomNotes,
-                                                    sprintf(" Very low overdispersion (ρ=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit)
+                                                    sprintf(" Very low overdispersion (\u{03C1}=%.4f): Cases have nearly identical detection rates. Simple binomial model may be more appropriate.", rho_fit)
                                                 )
                                             }
 
                                             # Add note about N-weighted estimation
                                             betaBinomNotes <- c(
                                                 betaBinomNotes,
-                                                sprintf(" Parameters estimated using N-weighted MLE via VGAM (μ=%.3f, ρ=%.3f, α=%.3f, β=%.3f)", mu_fit, rho_fit, alpha, beta)
+                                                sprintf(" Parameters estimated using N-weighted MLE via VGAM (\u{03BC}=%.3f, \u{03C1}=%.3f, \u{03B1}=%.3f, \u{03B2}=%.3f)", mu_fit, rho_fit, alpha, beta)
                                             )
                                         }
                                     },
@@ -3375,8 +3375,8 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <p>This model is more robust than the hypergeometric model when there is case-by-case variability in the number of positive items.</p>
                     <p><b>Model parameters (estimated from data):</b></p>
                     <ul>
-                        <li>Alpha (α): %.3f</li>
-                        <li>Beta (β): %.3f</li>
+                        <li>Alpha (\u{03B1}): %.3f</li>
+                        <li>Beta (\u{03B2}): %.3f</li>
                     </ul>
                     %s
                     <p><b>Reference:</b> Zhou J, et al. Beta-binomial model for lymph node yield. <i>Front Oncol.</i> 2022;12:872527.</p>",
@@ -3505,23 +3505,23 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 <p>Based on validated lymph node adequacy studies in pancreatic adenocarcinoma:</p>
                 <ul>
                     <li><b>Tomlinson et al. 2007 (UCLA/SEER, n=1,150 pN0):</b> minELN=15
-                        <br>• 8-month survival advantage (27 vs 19 mo, P<0.001), HR=0.63
-                        <br>• 90% of pN1a disease detected with <=15 nodes</li>
+                        <br>\u{2022} 8-month survival advantage (27 vs 19 mo, P<0.001), HR=0.63
+                        <br>\u{2022} 90% of pN1a disease detected with <=15 nodes</li>
                     <li><b>Pu et al. 2021 (Johns Hopkins, n=1,837):</b> minELN=12
-                        <br>• Binomial: P=1-(1-p)^n >=0.95 → n=11.6 → 12
-                        <br>• LNR classification (X-tile: 0.1, 0.3), LNR superior when ELN 12-28</li>
+                        <br>\u{2022} Binomial: P=1-(1-p)^n >=0.95 \u{2192} n=11.6 \u{2192} 12
+                        <br>\u{2022} LNR classification (X-tile: 0.1, 0.3), LNR superior when ELN 12-28</li>
                     <li><b>Yoon et al. 2025 (Korean dual-cohort, n=1,252):</b> minELN=12-16
-                        <br>• False N0 modeling: 16 LN → 18.9% false N0 (exploration)
-                        <br>• Independent validation: 12 LN → 19.5% false N0 (validation)
-                        <br>• Survival benefit up to 21 LNs in N0 patients</li>
+                        <br>\u{2022} False N0 modeling: 16 LN \u{2192} 18.9% false N0 (exploration)
+                        <br>\u{2022} Independent validation: 12 LN \u{2192} 19.5% false N0 (validation)
+                        <br>\u{2022} Survival benefit up to 21 LNs in N0 patients</li>
                 </ul>
                 <p><b>False N0:</b> Probability of node-positive patient misclassified as N0 due to inadequate sampling</p>
                 <p><b>LNR:</b> Metastatic lymph nodes / Total examined lymph nodes</p>
                 <p><b>Consensus:</b> 12-16 lymph nodes optimal (12=minimum, 16=quality target)</p>
                 <p><b>References:</b>
-                <br>• Tomlinson JS, et al. <i>Arch Surg.</i> 2007;142(8):767-774.
-                <br>• Pu N, et al. <i>J Natl Compr Canc Netw.</i> 2021;19(9):1029-1036.
-                <br>• Yoon SJ, et al. <i>Ann Surg Oncol.</i> 2025. doi:10.1245/s10434-025-18029-7</p>"
+                <br>\u{2022} Tomlinson JS, et al. <i>Arch Surg.</i> 2007;142(8):767-774.
+                <br>\u{2022} Pu N, et al. <i>J Natl Compr Canc Netw.</i> 2021;19(9):1029-1036.
+                <br>\u{2022} Yoon SJ, et al. <i>Ann Surg Oncol.</i> 2025. doi:10.1245/s10434-025-18029-7</p>"
                     if (self$options$showLNAnalysis) {
                         lnAnalysisText$setContent(html)
                     }
@@ -4266,7 +4266,7 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     <ul>
                         <li>Skala SL, Hagemann IS. Pathologic Sampling of the Omentum.
                             <i>Int J Gynecol Pathol.</i> 2015;34(4):374-378.</li>
-                        <li>Gönen M, et al. Nodal Staging Score for Colon Cancer.
+                        <li>G\u{00F6}nen M, et al. Nodal Staging Score for Colon Cancer.
                             <i>J Clin Oncol.</i> 2009;27(36):6166-6171.</li>
                         <li>Zhou J, et al. Beta-binomial model for lymph node yield.
                             <i>Front Oncol.</i> 2022;12:872527.</li>
@@ -4537,13 +4537,13 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <p><b>Recent Evidence:</b></p>
             <ul>
                 <li><b>Maglalang & Fadare 2025 (UCSD, n=1,055):</b>
-                    <br>• Grossly normal: 8.0% MPR, 1-2 blocks showed similar MPR to 5-6 blocks (P>.50)
-                    <br>• Post-neoadjuvant: 19.0% MPR (5× higher, P=.03)
-                    <br>• <b>Critical limitation:</b> No gold standard comparison, false negative rate unknown</li>
+                    <br>\u{2022} Grossly normal: 8.0% MPR, 1-2 blocks showed similar MPR to 5-6 blocks (P>.50)
+                    <br>\u{2022} Post-neoadjuvant: 19.0% MPR (5\u{00D7} higher, P=.03)
+                    <br>\u{2022} <b>Critical limitation:</b> No gold standard comparison, false negative rate unknown</li>
                 <li><b>ISGyP Guidelines (2019):</b> >=4 blocks for grossly normal omentum</li>
                 <li><b>Skala & Hagemann 2015 (n=44, simulation):</b>
-                    <br>• 5 blocks → 82% sensitivity
-                    <br>• 10 blocks → 95% sensitivity</li>
+                    <br>\u{2022} 5 blocks \u{2192} 82% sensitivity
+                    <br>\u{2022} 10 blocks \u{2192} 95% sensitivity</li>
             </ul>
 
             <p><b>Risk-Stratified Recommendations:</b></p>

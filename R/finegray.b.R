@@ -328,7 +328,7 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     pseudo_r2 <- 1 - exp(-2 * (loglik - loglik_null) / length(model$ftime))
 
                     fitTable$addRow(rowKey = "r2", values = list(
-                        statistic = "Pseudo R²",
+                        statistic = "Pseudo R\u{00B2}",
                         value = pseudo_r2
                     ))
                 }

@@ -513,7 +513,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             
             interaction_html <- paste0(
                 "<div style='background-color: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
-                "<h3 style='color: #7b1fa2; margin-top: 0;'> Treatment × Subgroup Interaction Test</h3>",
+                "<h3 style='color: #7b1fa2; margin-top: 0;'> Treatment \u{00D7} Subgroup Interaction Test</h3>",
                 "<p><strong>Interaction Terms:</strong></p>",
                 "<table style='width: 100%; border-collapse: collapse;'>"
             )

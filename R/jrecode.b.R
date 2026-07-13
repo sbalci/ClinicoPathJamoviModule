@@ -472,7 +472,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 "<div style='padding: 10px; background-color: #e7f3ff; border-left: 4px solid #2196F3;'>",
                 "<b>To create the new variable '", htmltools::htmlEscape(new_var_name), "':</b><br>",
                 "1. Copy the generated R code below<br>",
-                "2. Use Data → Compute to create a new variable<br>",
+                "2. Use Data \u{2192} Compute to create a new variable<br>",
                 "3. Or run the code in an R console with your data<br>",
                 "<br><i>Note: Direct variable creation in jamovi requires additional setup. ",
                 "This analysis generates the code for you to apply.</i>",

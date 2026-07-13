@@ -86,14 +86,14 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             <h4>Heterogeneity Assessment:</h4>
             <ul>
             <li><b>Q statistic p < 0.05:</b> Significant heterogeneity</li>
-            <li><b>I² > 50%:</b> Substantial heterogeneity</li>
+            <li><b>I\u{00B2} > 50%:</b> Substantial heterogeneity</li>
             <li><b>High heterogeneity:</b> Consider random effects IVW or weighted median</li>
             </ul>
 
             <h4>Pleiotropy Test (MR-Egger):</h4>
             <ul>
-            <li><b>Intercept ≠ 0 (p < 0.05):</b> Evidence of horizontal pleiotropy</li>
-            <li><b>Intercept ≈ 0:</b> No evidence of pleiotropy (IVW valid)</li>
+            <li><b>Intercept \u{2260} 0 (p < 0.05):</b> Evidence of horizontal pleiotropy</li>
+            <li><b>Intercept \u{2248} 0:</b> No evidence of pleiotropy (IVW valid)</li>
             </ul>
 
             <h4>Leave-One-Out Analysis:</h4>

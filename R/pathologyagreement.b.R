@@ -51,7 +51,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "STRONG_WARNING" = "",
                     "WARNING" = "",
                     "INFO" = "",
-                    "•"
+                    "\u{2022}"
                 )
 
                 label <- switch(type,
@@ -1119,7 +1119,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "</ul>",
                     "<h4>Common Pitfalls to Avoid:</h4>",
                     "<ul>",
-                    "<li> Using correlation alone to assess agreement (correlation ≠ agreement)</li>",
+                    "<li> Using correlation alone to assess agreement (correlation \u{2260} agreement)</li>",
                     "<li> Ignoring Bland-Altman plots (visual inspection reveals patterns missed by statistics)</li>",
                     "<li> Relying on small samples (n<30) for validation studies</li>",
                     "<li> Comparing methods across different ranges (e.g., one method only in high values)</li>",
@@ -1179,7 +1179,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 correlation_sentence <- sprintf(
-                    "Spearman rank correlation showed %s agreement (ρ = %.3f, p = %.3f).",
+                    "Spearman rank correlation showed %s agreement (\u{03C1} = %.3f, p = %.3f).",
                     if (abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_STRONG) {
                         "strong"
                     } else if (abs(spearman_r) >= private$.CLINICAL_CONSTANTS$CORRELATION_MODERATE) {
@@ -1251,12 +1251,12 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "<div style='margin: 10px 0;'>",
                     "<p><strong>ICC (Intraclass Correlation Coefficient):</strong> Measures reliability and agreement between measurement methods. ",
                     "Values: 0.90+ excellent, 0.75+ good, 0.50+ moderate reliability.</p>",
-                    "<p><strong>Spearman Correlation (ρ):</strong> Measures strength of monotonic relationship between methods, robust to outliers. ",
+                    "<p><strong>Spearman Correlation (\u{03C1}):</strong> Measures strength of monotonic relationship between methods, robust to outliers. ",
                     "Clinical interpretation: 0.90+ very strong, 0.70+ strong, 0.50+ moderate association.</p>",
                     "<p><strong>Concordance Correlation Coefficient (CCC):</strong> Measures agreement combining precision and accuracy. ",
                     "Values: 0.99+ almost perfect, 0.95+ substantial, 0.90+ moderate agreement.</p>",
                     "<p><strong>Bland-Altman Plot:</strong> Visualizes agreement by plotting differences vs. means. ",
-                    "Shows systematic bias (mean difference) and limits of agreement (±1.96 SD).</p>",
+                    "Shows systematic bias (mean difference) and limits of agreement (\u{00B1}1.96 SD).</p>",
                     "<p><strong>Bootstrap Confidence Intervals:</strong> Robust estimation method using resampling. ",
                     "1000+ samples recommended for reliable intervals in clinical studies.</p>",
                     "<p><strong>Clinical Presets:</strong></p>",

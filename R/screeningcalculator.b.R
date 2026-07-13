@@ -109,11 +109,11 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 <p>These calculations use Bayes\' theorem to update probabilities based on test results:</p>
                 
                 <p><strong>Positive Predictive Value (PPV)</strong>: Probability of disease after a positive test<br>
-                PPV = (Sensitivity × Prevalence) / [(Sensitivity × Prevalence) + (1-Specificity) × (1-Prevalence)]<br>
+                PPV = (Sensitivity \u{00D7} Prevalence) / [(Sensitivity \u{00D7} Prevalence) + (1-Specificity) \u{00D7} (1-Prevalence)]<br>
                 <em>Clinical use: Determines confidence in positive results. PPV <10% suggests confirmatory testing needed.</em></p>
                 
                 <p><strong>Negative Predictive Value (NPV)</strong>: Probability of being disease-free after a negative test<br>
-                NPV = (Specificity × (1-Prevalence)) / [(Specificity × (1-Prevalence)) + (1-Sensitivity) × Prevalence]<br>
+                NPV = (Specificity \u{00D7} (1-Prevalence)) / [(Specificity \u{00D7} (1-Prevalence)) + (1-Sensitivity) \u{00D7} Prevalence]<br>
                 <em>Clinical use: Determines confidence in negative results. NPV >95% suggests disease can be ruled out.</em></p>
                 
                 <p><strong>Likelihood Ratios (LR)</strong>:<br>
@@ -190,8 +190,8 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 # Prepare values for table with handling of special cases
                 display_PPV <- if (is.infinite(PPV) || is.nan(PPV)) NA else PPV
                 display_NPV <- if (is.infinite(NPV) || is.nan(NPV)) NA else NPV
-                display_LRP <- if (is.infinite(LRP)) "∞" else if (is.nan(LRP)) NA else LRP
-                display_LRN <- if (is.infinite(LRN)) "∞" else if (is.nan(LRN)) NA else LRN
+                display_LRP <- if (is.infinite(LRP)) "\u{221E}" else if (is.nan(LRP)) NA else LRP
+                display_LRN <- if (is.infinite(LRN)) "\u{221E}" else if (is.nan(LRN)) NA else LRN
                 
                 # Fill single test table
                 singleTestTable <- self$results$singleTestTable
@@ -204,8 +204,8 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                         Prevalence = prev,
                         PPV = display_PPV,
                         NPV = display_NPV,
-                        LRP = if (is.character(display_LRP)) NA else display_LRP,  # Handle ∞ symbol
-                        LRN = if (is.character(display_LRN)) NA else display_LRN   # Handle ∞ symbol
+                        LRP = if (is.character(display_LRP)) NA else display_LRP,  # Handle Inf symbol
+                        LRN = if (is.character(display_LRN)) NA else display_LRN   # Handle Inf symbol
                     )
                 )
                 

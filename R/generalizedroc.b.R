@@ -818,17 +818,17 @@ generalizedrocClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             detailed_msg <- paste(
                                 "Formula specification error:", error_msg,
                                 "\n\nSuggestions:",
-                                "• Verify outcome and predictor variables are selected",
-                                "• Check that covariates exist in the data",
-                                "• Ensure variables have appropriate types"
+                                "\u{2022} Verify outcome and predictor variables are selected",
+                                "\u{2022} Check that covariates exist in the data",
+                                "\u{2022} Ensure variables have appropriate types"
                             )
                         } else if (grepl("convergence", error_msg, ignore.case = TRUE)) {
                             detailed_msg <- paste(
                                 "Model convergence failed:", error_msg,
                                 "\n\nSuggestions:",
-                                "• Try different transformation model type",
-                                "• Check for extreme values or outliers",
-                                "• Reduce number of covariates"
+                                "\u{2022} Try different transformation model type",
+                                "\u{2022} Check for extreme values or outliers",
+                                "\u{2022} Reduce number of covariates"
                             )
                         } else {
                             detailed_msg <- paste("tram model fitting failed:", error_msg)

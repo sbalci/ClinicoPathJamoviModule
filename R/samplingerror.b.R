@@ -223,7 +223,7 @@ samplingerrorClass <- R6::R6Class(
 <h3>Sampling Error & Efficiency (Kayser et al., 2009)</h3>
 
 <h4>The Sampling Error Formula</h4>
-<p><strong>E(p) = √[E²(Ne) + E²(B(n)) + E²(Ne/sv)]</strong></p>
+<p><strong>E(p) = \u{221A}[E\u{00B2}(Ne) + E\u{00B2}(B(n)) + E\u{00B2}(Ne/sv)]</strong></p>
 
 <p>Where:</p>
 
@@ -231,22 +231,22 @@ samplingerrorClass <- R6::R6Class(
 <ul>
 <li><strong>Formula:</strong> E(Ne) = 1 - sensitivity</li>
 <li><strong>Meaning:</strong> Probability of missing/misidentifying an event</li>
-<li><strong>Example:</strong> 95% sensitivity → E(Ne) = 5%</li>
+<li><strong>Example:</strong> 95% sensitivity \u{2192} E(Ne) = 5%</li>
 <li><strong>Controlled by:</strong> Observer training, staining quality, imaging resolution</li>
 </ul>
 
 <h5>2. E(B(n)): Biological Variance Error</h5>
 <ul>
-<li><strong>Formula:</strong> E(B(n)) = CV / √N</li>
+<li><strong>Formula:</strong> E(B(n)) = CV / \u{221A}N</li>
 <li><strong>Meaning:</strong> Error from tissue heterogeneity</li>
-<li><strong>Example:</strong> CV=15%, N=10 → E(B(n)) = 4.7%</li>
+<li><strong>Example:</strong> CV=15%, N=10 \u{2192} E(B(n)) = 4.7%</li>
 <li><strong>Controlled by:</strong> Increasing sample size N</li>
 <li><strong>Note:</strong> This is the standard error of the mean</li>
 </ul>
 
 <h5>3. E(Ne/sv): Frequency Estimation Error</h5>
 <ul>
-<li><strong>Formula:</strong> E(Ne/sv) = SE(proportion) × FPC</li>
+<li><strong>Formula:</strong> E(Ne/sv) = SE(proportion) \u{00D7} FPC</li>
 <li><strong>Meaning:</strong> Error from sampling fraction of reference volume</li>
 <li><strong>Controlled by:</strong> Sample volume relative to reference volume</li>
 <li><strong>Finite Population Correction (FPC):</strong> Accounts for sampling without replacement</li>
@@ -321,7 +321,7 @@ samplingerrorClass <- R6::R6Class(
             html <- "
 <h3>References</h3>
 
-<p><strong>Kayser, K., Schultz, H., Goldmann, T., Görtler, J., Kayser, G., & Vollmer, E. (2009).</strong>
+<p><strong>Kayser, K., Schultz, H., Goldmann, T., G\u{00F6}rtler, J., Kayser, G., & Vollmer, E. (2009).</strong>
 Theory of sampling and its application in tissue based diagnosis.
 <em>Diagnostic Pathology</em>, 4:6. doi:10.1186/1746-1596-4-6</p>
 

@@ -38,7 +38,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(list(valid = FALSE,
                     message = paste0("Break points are not strictly increasing. ",
                                    "This can occur with: (1) tied/constant values in quantile methods, ",
-                                   "(2) duplicate manual breaks, or (3) zero variance in mean/median±SD methods. ",
+                                   "(2) duplicate manual breaks, or (3) zero variance in mean/median\u{00B1}SD methods. ",
                                    "Please check your data or adjust the binning method.")))
             }
 
@@ -536,7 +536,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 if (outliers > 0) {
                     notice_html$outlierSensitivity <- .noticeBox("WARNING", jmvcore::format(
-                        "Outlier sensitivity: detected {} extreme outlier(s). Mean±SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.",
+                        "Outlier sensitivity: detected {} extreme outlier(s). Mean\u{00B1}SD binning is sensitive to outliers, which can create poorly distributed categories. Consider using quantile or natural breaks methods.",
                         outliers))
                 }
             }

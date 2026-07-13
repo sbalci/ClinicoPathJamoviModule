@@ -24,32 +24,32 @@ bayesianciClass <- R6::R6Class(
                         <div class='section'>
                             <b>Required Variables:</b>
                             <div class='list'>
-                                • <b>Outcome Variable:</b> Continuous, binary, count, or ordinal data<br>
-                                • <b>Grouping Variable (Optional):</b> For stratified analysis<br>
-                                • <b>Covariates (Optional):</b> For adjusted credible intervals
+                                \u{2022} <b>Outcome Variable:</b> Continuous, binary, count, or ordinal data<br>
+                                \u{2022} <b>Grouping Variable (Optional):</b> For stratified analysis<br>
+                                \u{2022} <b>Covariates (Optional):</b> For adjusted credible intervals
                             </div>
                         </div>
                         <div class='section'>
                             <b>Key Features:</b>
                             <div class='list'>
-                                <div class='feature'>• <b>Multiple Outcome Types:</b> Continuous, binary, count, ordinal data</div>
-                                <div class='feature'>• <b>Flexible Priors:</b> Uniform, Jeffreys, Beta, Normal, Gamma priors</div>
-                                <div class='feature'>• <b>MCMC Methods:</b> Analytical, Gibbs, Metropolis-Hastings, Stan, JAGS</div>
-                                <div class='feature'>• <b>HPD Intervals:</b> Highest Posterior Density credible intervals</div>
-                                <div class='feature'>• <b>Convergence Diagnostics:</b> R-hat, effective sample size assessment</div>
-                                <div class='feature'>• <b>Sensitivity Analysis:</b> Robustness to prior specification</div>
-                                <div class='feature'>• <b>Comparison with Frequentist:</b> Side-by-side credible vs confidence intervals</div>
-                                <div class='feature'>• <b>Clinical Interpretation:</b> Decision-focused interval interpretation</div>
+                                <div class='feature'>\u{2022} <b>Multiple Outcome Types:</b> Continuous, binary, count, ordinal data</div>
+                                <div class='feature'>\u{2022} <b>Flexible Priors:</b> Uniform, Jeffreys, Beta, Normal, Gamma priors</div>
+                                <div class='feature'>\u{2022} <b>MCMC Methods:</b> Analytical, Gibbs, Metropolis-Hastings, Stan, JAGS</div>
+                                <div class='feature'>\u{2022} <b>HPD Intervals:</b> Highest Posterior Density credible intervals</div>
+                                <div class='feature'>\u{2022} <b>Convergence Diagnostics:</b> R-hat, effective sample size assessment</div>
+                                <div class='feature'>\u{2022} <b>Sensitivity Analysis:</b> Robustness to prior specification</div>
+                                <div class='feature'>\u{2022} <b>Comparison with Frequentist:</b> Side-by-side credible vs confidence intervals</div>
+                                <div class='feature'>\u{2022} <b>Clinical Interpretation:</b> Decision-focused interval interpretation</div>
                             </div>
                         </div>
                         <div class='section'>
                             <b>Clinical Applications:</b>
                             <div class='list'>
-                                • Treatment effect estimation with uncertainty<br>
-                                • Diagnostic accuracy bounds assessment<br>
-                                • Biomarker threshold determination<br>
-                                • Risk prediction interval estimation<br>
-                                • Survival probability credible ranges
+                                \u{2022} Treatment effect estimation with uncertainty<br>
+                                \u{2022} Diagnostic accuracy bounds assessment<br>
+                                \u{2022} Biomarker threshold determination<br>
+                                \u{2022} Risk prediction interval estimation<br>
+                                \u{2022} Survival probability credible ranges
                             </div>
                         </div>
                     </div>
@@ -177,7 +177,7 @@ bayesianciClass <- R6::R6Class(
                 prior_data <- data.frame(
                     parameter = "Proportion",
                     distribution = sprintf("Beta(%.2f, %.2f)", alpha, beta),
-                    parameters = sprintf("α = %.2f, β = %.2f", alpha, beta),
+                    parameters = sprintf("\u{03B1} = %.2f, \u{03B2} = %.2f", alpha, beta),
                     mean = prior_mean,
                     variance = prior_var,
                     stringsAsFactors = FALSE
@@ -188,8 +188,8 @@ bayesianciClass <- R6::R6Class(
                 
                 prior_data <- data.frame(
                     parameter = "Mean",
-                    distribution = sprintf("Normal(%.2f, %.2f²)", mean, sd),
-                    parameters = sprintf("μ = %.2f, σ = %.2f", mean, sd),
+                    distribution = sprintf("Normal(%.2f, %.2f\u{00B2})", mean, sd),
+                    parameters = sprintf("\u{03BC} = %.2f, \u{03C3} = %.2f", mean, sd),
                     mean = mean,
                     variance = sd^2,
                     stringsAsFactors = FALSE
@@ -201,7 +201,7 @@ bayesianciClass <- R6::R6Class(
                 prior_data <- data.frame(
                     parameter = "Rate",
                     distribution = sprintf("Gamma(%.2f, %.2f)", shape, rate),
-                    parameters = sprintf("α = %.2f, β = %.2f", shape, rate),
+                    parameters = sprintf("\u{03B1} = %.2f, \u{03B2} = %.2f", shape, rate),
                     mean = shape / rate,
                     variance = shape / (rate^2),
                     stringsAsFactors = FALSE
@@ -792,67 +792,67 @@ bayesianciClass <- R6::R6Class(
                     <div class='formula'>
                         <h4>Mathematical Foundation</h4>
                         <b>Posterior Distribution:</b><br>
-                        π(θ|x) ∝ L(x|θ) × π(θ)<br><br>
+                        \u{03C0}(\u{03B8}|x) \u{221D} L(x|\u{03B8}) \u{00D7} \u{03C0}(\u{03B8})<br><br>
                         
                         <b>Credible Interval:</b><br>
-                        P(θ ∈ [L, U] | x) = 1 - α<br><br>
+                        P(\u{03B8} \u{2208} [L, U] | x) = 1 - \u{03B1}<br><br>
                         
                         <b>For Binary Data (Beta-Binomial):</b><br>
-                        Prior: θ ~ Beta(α, β)<br>
-                        Posterior: θ|x ~ Beta(α + s, β + n - s)<br><br>
+                        Prior: \u{03B8} ~ Beta(\u{03B1}, \u{03B2})<br>
+                        Posterior: \u{03B8}|x ~ Beta(\u{03B1} + s, \u{03B2} + n - s)<br><br>
                         
                         <b>For Continuous Data (Normal-Normal):</b><br>
-                        Prior: μ ~ N(μ₀, σ₀²)<br>
-                        Posterior: μ|x ~ N(μₙ, σₙ²)
+                        Prior: \u{03BC} ~ N(\u{03BC}\u{2080}, \u{03C3}\u{2080}\u{00B2})<br>
+                        Posterior: \u{03BC}|x ~ N(\u{03BC}\u{2099}, \u{03C3}\u{2099}\u{00B2})
                     </div>
                     
                     <div class='interpretation'>
                         <h4>Bayesian Interpretation</h4>
                         <b>Credible Intervals vs Confidence Intervals:</b><br>
-                        • <b>Credible:</b> \"There is a 95% probability that θ lies in [L, U]\"<br>
-                        • <b>Confidence:</b> \"95% of intervals constructed this way contain θ\"<br><br>
+                        \u{2022} <b>Credible:</b> \"There is a 95% probability that \u{03B8} lies in [L, U]\"<br>
+                        \u{2022} <b>Confidence:</b> \"95% of intervals constructed this way contain \u{03B8}\"<br><br>
                         
                         <b>Key Advantages:</b><br>
-                        • Direct probability statements about parameters<br>
-                        • Incorporates prior information<br>
-                        • Provides full posterior distribution<br>
-                        • Natural interpretation for decision making
+                        \u{2022} Direct probability statements about parameters<br>
+                        \u{2022} Incorporates prior information<br>
+                        \u{2022} Provides full posterior distribution<br>
+                        \u{2022} Natural interpretation for decision making
                     </div>
                     
                     <div class='clinical'>
                         <h4>Clinical Applications</h4>
                         <b>Treatment Effects:</b><br>
-                        • Response rates with uncertainty quantification<br>
-                        • Efficacy bounds for regulatory submissions<br>
-                        • Risk-benefit analysis support<br><br>
+                        \u{2022} Response rates with uncertainty quantification<br>
+                        \u{2022} Efficacy bounds for regulatory submissions<br>
+                        \u{2022} Risk-benefit analysis support<br><br>
                         
                         <b>Diagnostic Accuracy:</b><br>
-                        • Sensitivity/specificity credible ranges<br>
-                        • Test performance uncertainty assessment<br>
-                        • Multi-site validation bounds<br><br>
+                        \u{2022} Sensitivity/specificity credible ranges<br>
+                        \u{2022} Test performance uncertainty assessment<br>
+                        \u{2022} Multi-site validation bounds<br><br>
                         
                         <b>Biomarker Research:</b><br>
-                        • Threshold determination with uncertainty<br>
-                        • Predictive model parameter ranges<br>
-                        • Prognostic factor effect sizes
+                        \u{2022} Threshold determination with uncertainty<br>
+                        \u{2022} Predictive model parameter ranges<br>
+                        \u{2022} Prognostic factor effect sizes
                     </div>
                     
                     <div class='comparison'>
                         <h4>Prior Specification Guidelines</h4>
                         <b>Non-informative Priors:</b><br>
-                        • Uniform: Beta(1,1) for proportions<br>
-                        • Jeffreys: Beta(0.5,0.5) for proportions<br>
-                        • Use when minimal prior information available<br><br>
+                        \u{2022} Uniform: Beta(1,1) for proportions<br>
+                        \u{2022} Jeffreys: Beta(0.5,0.5) for proportions<br>
+                        \u{2022} Use when minimal prior information available<br><br>
                         
                         <b>Informative Priors:</b><br>
-                        • Incorporate expert knowledge or historical data<br>
-                        • Beta(α,β) where α,β > 1 for proportions<br>
-                        • Normal(μ₀,σ₀) for continuous parameters<br><br>
+                        \u{2022} Incorporate expert knowledge or historical data<br>
+                        \u{2022} Beta(\u{03B1},\u{03B2}) where \u{03B1},\u{03B2} > 1 for proportions<br>
+                        \u{2022} Normal(\u{03BC}\u{2080},\u{03C3}\u{2080}) for continuous parameters<br><br>
                         
                         <b>Sensitivity Analysis:</b><br>
-                        • Test robustness to prior specification<br>
-                        • Compare results across different priors<br>
-                        • Report sensitivity measures
+                        \u{2022} Test robustness to prior specification<br>
+                        \u{2022} Compare results across different priors<br>
+                        \u{2022} Report sensitivity measures
                     </div>
                 </div>
                 </body>
