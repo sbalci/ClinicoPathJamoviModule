@@ -80,23 +80,23 @@ children:
             children:
               - type: CheckBox
                 name: bivariate_analysis
-                label: Bivariate Random-Effects Model
+                label: Bivariate random-effects model
               - type: CheckBox
                 name: hsroc_analysis
-                label: HSROC Analysis (Summary ROC Curve)
+                label: HSROC analysis (summary ROC curve)
               - type: CheckBox
                 name: heterogeneity_analysis
-                label: Heterogeneity Assessment (Study Variability)
+                label: Heterogeneity assessment (study variability)
               - type: CheckBox
                 name: meta_regression
-                label: Meta-Regression (Explore Covariate Effects)
+                label: Meta-regression (explore covariate effects)
                 enable: (!is.null(covariate) && covariate !="")
               - type: CheckBox
                 name: publication_bias
-                label: Publication Bias Assessment (Deeks' Test)
+                label: Publication bias assessment (Deeks' test)
               - type: CheckBox
                 name: show_individual_studies
-                label: Show Individual Study Results
+                label: Individual study results
       - type: Label
         label: Advanced Options
         children:
@@ -110,7 +110,7 @@ children:
                 suffix: '%'
               - type: ComboBox
                 name: method
-                label: Estimation Method
+                label: Estimation method
       - type: Label
         label: Visualization Options
         children:
@@ -119,20 +119,20 @@ children:
             children:
               - type: CheckBox
                 name: forest_plot
-                label: Forest Plot (Sensitivity & Specificity)
+                label: Forest plot (sensitivity & specificity)
               - type: CheckBox
                 name: sroc_plot
-                label: Summary ROC Plot
+                label: Summary ROC plot
               - type: CheckBox
                 name: funnel_plot
-                label: Funnel Plot (Publication Bias)
+                label: Funnel plot (publication bias)
                 enable: (publication_bias)
               - type: ComboBox
                 name: color_palette
-                label: Plot Colors (Accessibility)
+                label: Plot colors (accessibility)
               - type: CheckBox
                 name: show_plot_explanations
-                label: Show Plot Explanations & Interpretation
+                label: Plot explanations & interpretation
       - type: Label
         label: Reporting Options
         children:
@@ -141,13 +141,13 @@ children:
             children:
               - type: CheckBox
                 name: show_interpretation
-                label: Show Clinical Interpretation
+                label: Clinical interpretation
               - type: CheckBox
                 name: show_methodology
-                label: Show Methodology Information
+                label: Methodology information
               - type: CheckBox
                 name: show_analysis_summary
-                label: Show Analysis Summary
+                label: Analysis summary
   - type: LayoutBox
     margin: large
     children:

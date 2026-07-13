@@ -199,7 +199,7 @@ options:
             Color palette for the diagram flows.
 
     - name: showCounts
-      title: Show Counts on Nodes
+      title: Counts on nodes
       type: Bool
       default: false
       description:
@@ -230,7 +230,7 @@ options:
             Theme style for the plot background and elements.
 
     - name: enhancedGradients
-      title: Enhanced Edge Gradients
+      title: Enhanced edge gradients
       type: Bool
       default: false
       description:
@@ -264,7 +264,7 @@ options:
             Optional weight variable for flow thickness. If not provided, counts are used.
 
     - name: sankeyStyle
-      title: Sankey Styling
+      title: Sankey styling
       type: Bool
       default: false
       description:
@@ -333,7 +333,7 @@ options:
             ggalluvial for manual control with curve types and Sankey styling.
 
     - name: labelNodes
-      title: Label Nodes
+      title: Label nodes
       type: Bool
       default: false
       description:

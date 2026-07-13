@@ -44,13 +44,13 @@ children:
             children:
               - type: CheckBox
                 name: showSummary
-                label: "Plain-Language Summary"
+                label: "Plain-language summary"
               - type: CheckBox
                 name: showRecommendations
-                label: "Action Recommendations"
+                label: "Action recommendations"
               - type: CheckBox
                 name: showExplanations
-                label: "Educational Explanations"
+                label: "Educational explanations"
 
   - type: CollapseBox
     label: Visual Data Exploration (visdat)

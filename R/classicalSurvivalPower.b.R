@@ -94,9 +94,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
 
                 # Check for required packages
                 if (!requireNamespace("gsDesign", quietly = TRUE)) {
-                    error_msg <- "Package 'gsDesign' is required for survival power analysis."
-                    self$results$power_results$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                    return()
+                    jmvcore::reject("Package 'gsDesign' is required for survival power analysis.")
                 }
 
                 # Perform calculations

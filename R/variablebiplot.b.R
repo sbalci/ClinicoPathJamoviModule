@@ -67,15 +67,15 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Validate group structure
-                # TODO (cleanup): this file ships with DEBUG SCAFFOLDING that should be removed before
-                #   release: (a) 23 ungated message("DEBUG: …") calls fire on every run (console spam /
-                #   tempdir log writes) - gate behind getOption("ClinicoPath.debug", FALSE) like the
-                #   project .debug() helper, or delete; (b) 10 "DISABLED FOR DEBUGGING" tryCatch blocks
-                #   (L70/146/402/419/485/489/529/570/784/805 approx) leave error handling commented out
-                #   throughout - restore the tryCatch wrappers so failures surface cleanly instead of
-                #   raw R errors. (c) The %s/%d reproducibility-code template (~L1124) interpolates
-                #   feature/group names - see the security audit re: codegen escaping.
-                # DISABLED FOR DEBUGGING - tryCatch({
+                # Cleanup status (2026-07-13 audit follow-up):
+                #   (a) the ungated message("DEBUG: ...") console-spam calls have been removed.
+                #   (b) the three main input/feature/PCA tryCatch error-handling wrappers and the LDA
+                #       MASS-package guard have been restored so failures surface cleanly.
+                # TODO (remaining): the PLS-DA mixOmics "fall back to PCA" branch and the cluster::
+                #   silhouette requireNamespace guard are still disabled — restoring them needs an
+                #   explicit else path (avoid undefined vars), so left for a focused pass. Also the
+                #   %s/%d reproducibility-code template (~L1100+) should escape feature/group names.
+                tryCatch({
                 group_data <- private$.getVarData(self$options$groupVar)
                 group_clean <- na.omit(group_data)
                 n_groups <- length(unique(group_clean))
@@ -131,7 +131,6 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         " is.ordered=", is.ordered(feat_data)
                     )
                     if (is.factor(feat_data) && !is.ordered(feat_data)) {
-                        message("DEBUG: Feature '", feat, "' is unordered factor - VALIDATION FAILED")
                         self$results$todo$setContent(paste0(
                             "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
                             "<p><b> Feature Type Error:</b></p>",
@@ -153,17 +152,16 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 self$results$todo$setContent("")
                 return(TRUE)
 
-                # DISABLED FOR DEBUGGING
-                # }, error = function(e) {
-                #     self$results$todo$setContent(paste0(
-                #         "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
-                #         "<p><b> Input Error:</b></p>",
-                #         "<p>", e$message, "</p>",
-                #         "</div>"
-                #     ))
-                #     return(FALSE)
-                # }
-                # )
+                }, error = function(e) {
+                    self$results$todo$setContent(paste0(
+                        "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
+                        "<p><b> Input Error:</b></p>",
+                        "<p>", e$message, "</p>",
+                        "</div>"
+                    ))
+                    return(FALSE)
+                }
+                )
             },
 
             #---------------------------------------------
@@ -368,13 +366,10 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             #---------------------------------------------
             .run = function() {
                 # DEBUG: Log entry to .run()
-                message("DEBUG: .run() called")
 
                 # Validate inputs first
                 valid <- private$.validateInputs()
-                message("DEBUG: validateInputs returned: ", valid)
                 if (!valid) {
-                    message("DEBUG: Exiting .run() due to validation failure")
                     return()
                 }
 
@@ -389,7 +384,6 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 features <- self$options$features
                 method <- self$options$method
 
-                message("DEBUG: groupVar=", groupVar, " features=", paste(features, collapse = ","), " method=", method)
 
                 # Progress feedback
                 self$results$biplot$setState(paste0(
@@ -401,11 +395,9 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 data <- self$data
 
                 # Extract variables using safe accessor with improved error handling
-                # DISABLED FOR DEBUGGING - tryCatch({
-                message("DEBUG: Extracting group data...")
+                tryCatch({
                 group_data <- jmvcore::toNumeric(private$.getVarData(groupVar))
                 group_factor <- factor(private$.getVarData(groupVar))
-                message("DEBUG: Group data extracted, n_groups=", length(unique(group_factor)))
 
                 feature_data <- sapply(features, function(f) {
                     var_data <- private$.getVarData(f)
@@ -418,12 +410,11 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         as.numeric(var_data)
                     }
                 })
-                # DISABLED FOR DEBUGGING
-                # }, error = function(e) {
-                #     stop(paste0("Error extracting features [", paste(features, collapse=", "),
-                #                 "]: ", e$message))
-                # }
-                # )
+                }, error = function(e) {
+                    stop(paste0("Error extracting features [", paste(features, collapse=", "),
+                                "]: ", e$message))
+                }
+                )
 
                 # Remove missing data
                 complete_cases <- complete.cases(feature_data, group_data)
@@ -450,48 +441,36 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Perform analysis based on method
                 method <- self$options$method
 
-                message("DEBUG: About to run analysis, method=", method)
 
                 if (method == "pca") {
                     self$results$biplot$setState("Running PCA...")
                     private$.checkpoint()
-                    message("DEBUG: Calling .runPCA()")
                     private$.runPCA(feature_data, group_factor, features)
-                    message("DEBUG: .runPCA() completed")
                 } else if (method == "plsda") {
                     self$results$biplot$setState("Running PLS-DA (this may take a moment)...")
                     private$.checkpoint()
-                    message("DEBUG: Calling .runPLSDA()")
                     private$.runPLSDA(feature_data, group_factor, features)
-                    message("DEBUG: .runPLSDA() completed")
                 } else if (method == "lda") {
                     self$results$biplot$setState("Running LDA...")
                     private$.checkpoint()
-                    message("DEBUG: Calling .runLDA()")
                     private$.runLDA(feature_data, group_factor, features)
-                    message("DEBUG: .runLDA() completed")
                 }
 
                 # Clear state after completion
                 self$results$biplot$setState(NULL)
-                message("DEBUG: .run() completed successfully")
             },
 
             #---------------------------------------------
             .runPCA = function(feature_data, group_factor, feature_names) {
-                message("DEBUG: .runPCA() entry, feature_data dim=", nrow(feature_data), "x", ncol(feature_data))
 
                 # Perform PCA with error context
-                # DISABLED FOR DEBUGGING - tryCatch({
-                message("DEBUG: Running prcomp()...")
+                tryCatch({
                 pca_result <- prcomp(feature_data, center = FALSE, scale. = FALSE)
-                message("DEBUG: prcomp() completed, sdev=", paste(head(pca_result$sdev, 3), collapse = ","))
-                # DISABLED FOR DEBUGGING
-                # }, error = function(e) {
-                #     stop(paste0("PCA failed: ", e$message,
-                #                 ". Check that features are numeric and have sufficient variance."))
-                # }
-                # )
+                }, error = function(e) {
+                    stop(paste0("PCA failed: ", e$message,
+                                ". Check that features are numeric and have sufficient variance."))
+                }
+                )
 
                 # Store for plotting
                 private$.pca_result <- pca_result
@@ -500,16 +479,12 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Variance explained
                 if (self$options$showVarianceExplained) {
-                    message("DEBUG: Populating variance table...")
                     private$.populateVarianceTable(pca_result)
-                    message("DEBUG: Variance table populated")
                 }
 
                 # Variable contributions
                 if (self$options$showContribTable) {
-                    message("DEBUG: Populating contribution table...")
                     private$.populateContributionTable(pca_result, feature_names)
-                    message("DEBUG: Contribution table populated")
                 }
 
                 # Group separation
@@ -565,10 +540,9 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
             #---------------------------------------------
             .runLDA = function(feature_data, group_factor, feature_names) {
-                # DISABLED FOR DEBUGGING - will error if MASS not available
-                # if (!requireNamespace("MASS", quietly = TRUE)) {
-                #     stop("LDA requires the 'MASS' package")
-                # }
+                if (!requireNamespace("MASS", quietly = TRUE)) {
+                    stop("LDA requires the 'MASS' package")
+                }
 
                 # Perform LDA
                 lda_result <- MASS::lda(feature_data, grouping = group_factor)

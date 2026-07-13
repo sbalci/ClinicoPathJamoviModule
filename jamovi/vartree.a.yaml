@@ -160,7 +160,7 @@ options:
             Second level for follow condition.
 
     - name: excl
-      title: Exclude Missing (NA)
+      title: Exclude missing (NA)
       type: Bool
       default: false
       description:
@@ -168,7 +168,7 @@ options:
             Exclude rows with missing values from analysis.
 
     - name: vp
-      title: Valid Percentages
+      title: Valid percentages
       type: Bool
       default: true
       description:
@@ -176,7 +176,7 @@ options:
             Calculate percentages based on valid (non-missing) values.
 
     - name: horizontal
-      title: Horizontal Layout
+      title: Horizontal layout
       type: Bool
       default: false
       description:
@@ -192,7 +192,7 @@ options:
             Display variable names and values on same line.
 
     - name: varnames
-      title: Variable Names
+      title: Variable names
       type: Bool
       default: false
       description:
@@ -200,7 +200,7 @@ options:
             Show variable names in tree nodes.
 
     - name: nodelabel
-      title: Node Labels
+      title: Node labels
       type: Bool
       default: true
       description:
@@ -232,7 +232,7 @@ options:
             Show legend for tree visualization.
 
     - name: pattern
-      title: Pattern Tree
+      title: Pattern tree
       type: Bool
       default: false
       description:
@@ -240,7 +240,7 @@ options:
             Generate pattern-based tree analysis.
 
     - name: sequence
-      title: Sequence Tree
+      title: Sequence tree
       type: Bool
       default: false
       description:
@@ -248,7 +248,7 @@ options:
             Generate sequence-based tree analysis.
 
     - name: ptable
-      title: Pattern Table
+      title: Pattern table
       type: Bool 
       default: false
       description:
@@ -264,7 +264,7 @@ options:
             Custom title for the tree root.
 
     - name: useprunesmaller
-      title: Prune Small Nodes
+      title: Prune small nodes
       type: Bool
       default: false
       description:
@@ -280,7 +280,7 @@ options:
             Minimum count threshold for node pruning.
 
     - name: showInterpretation
-      title: Show Interpretation
+      title: Interpretation
       type: Bool
       default: true
       description:

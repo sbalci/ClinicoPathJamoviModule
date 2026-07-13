@@ -36,7 +36,7 @@ options:
             entire dataset will be analyzed.
 
     - name: check_duplicates
-      title: "Check for Duplicates"
+      title: "Check for duplicates"
       type: Bool
       default: false
       description:
@@ -45,7 +45,7 @@ options:
           the entire dataset.
 
     - name: check_missing
-      title: "Missing Value Analysis"
+      title: "Missing value analysis"
       type: Bool
       default: false
       description:
@@ -53,7 +53,7 @@ options:
           If TRUE, provides detailed missing value statistics and patterns.
 
     - name: complete_cases_only
-      title: "Check for Duplicate Rows"
+      title: "Check for duplicate rows"
       type: Bool
       default: false
       description:
@@ -62,7 +62,7 @@ options:
           If FALSE, checks for duplicate values within each variable separately.
 
     - name: plot_data_overview
-      title: "Data Overview Plot (vis_dat)"
+      title: "Data overview plot (vis_dat)"
       type: Bool
       default: false
       description:
@@ -70,7 +70,7 @@ options:
           Show data overview visualization displaying variable types and missing values.
 
     - name: plot_missing_patterns
-      title: "Missing Patterns Plot (vis_miss)"
+      title: "Missing patterns plot (vis_miss)"
       type: Bool
       default: false
       description:
@@ -78,7 +78,7 @@ options:
           Show missing value patterns visualization.
 
     - name: plot_data_types
-      title: "Data Types Plot (vis_guess)"
+      title: "Data types plot (vis_guess)"
       type: Bool
       default: false
       description:
@@ -105,7 +105,7 @@ options:
           Threshold percentage for highlighting variables with missing values in visual analysis.
 
     - name: showSummary
-      title: "Show Plain-Language Summary"
+      title: "Plain-language summary"
       type: Bool
       default: true
       description:
@@ -113,7 +113,7 @@ options:
           If TRUE, displays a concise plain-language summary of quality issues and overall assessment.
 
     - name: showRecommendations
-      title: "Show Action Recommendations"
+      title: "Action recommendations"
       type: Bool
       default: true
       description:
@@ -121,7 +121,7 @@ options:
           If TRUE, provides specific recommendations for addressing identified quality issues.
 
     - name: showExplanations
-      title: "Show Educational Notes"
+      title: "Educational notes"
       type: Bool
       default: false
       description:

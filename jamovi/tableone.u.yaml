@@ -20,13 +20,13 @@ children:
     children:
       - type: ComboBox
         name: sty
-        label: "Table Style" 
+        label: "Table style"
   - type: LayoutBox
     margin: large
     children:
       - type: CheckBox
         name: excl
-        label: "Exclude Missing Values (NA)"
+        label: "Exclude missing values (NA)"
   - type: CollapseBox
     label: "Output Options"
     collapsed: true
@@ -37,11 +37,11 @@ children:
         margin: small
       - type: CheckBox
         name: showSummary
-        label: "Analysis Summary (sample size, missing data report)"
+        label: "Analysis summary (sample size, missing data report)"
       - type: CheckBox
         name: showAbout
-        label: "About This Analysis (educational content)"
+        label: "About this analysis (educational content)"
       - type: CheckBox
         name: showReportSentence
-        label: "Copy-Ready Report Sentence (for manuscripts)"
+        label: "Copy-ready report sentence (for manuscripts)"
 ...

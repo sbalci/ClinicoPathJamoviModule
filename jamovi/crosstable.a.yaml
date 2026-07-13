@@ -70,7 +70,7 @@ options:
           name: hmisc
       default: nejm
     - name: excl
-      title: Exclude Missing (NA)
+      title: Exclude missing (NA)
       type: Bool
       default: false
       description:
@@ -151,7 +151,7 @@ options:
             Only available with gtsummary table style.
 
     - name: showSMD
-      title: Standardized Mean Differences (balance)
+      title: Standardized mean differences (balance)
       type: Bool
       default: false
       description:

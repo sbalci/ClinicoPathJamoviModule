@@ -60,7 +60,7 @@ options:
         Choose the descriptive table format. 'tableone' style shows standard medical descriptives (mean ± SD, median [IQR], N ( percent)), 'gtsummary' provides polished formatting, 'arsenal' gives detailed summaries, and 'janitor' focuses on frequency counts.
         
   - name: excl
-    title: "Exclude Missing (NA)"
+    title: "Exclude missing (NA)"
     type: Bool
     default: false
     description:
@@ -70,7 +70,7 @@ options:
         Check to exclude missing values.
 
   - name: showSummary
-    title: "Show Analysis Summary"
+    title: "Analysis summary"
     type: Bool
     default: false
     description:
@@ -80,7 +80,7 @@ options:
         Display analysis summary with sample size and missing data information.
 
   - name: showAbout
-    title: "Show About This Analysis"
+    title: "About this analysis"
     type: Bool
     default: false
     description:
@@ -90,7 +90,7 @@ options:
         Display educational information about Table One analysis.
 
   - name: showReportSentence
-    title: "Show Copy-Ready Report Text"
+    title: "Copy-ready report text"
     type: Bool
     default: false
     description:

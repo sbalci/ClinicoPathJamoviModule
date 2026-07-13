@@ -171,22 +171,22 @@ options:
             The level in `var7` that represents the true condition.
 
     - name: show_upsetR
-      title: 'Show upsetR Plot'
+      title: "upsetR plot"
       type: Bool
       default: false
 
     - name: show_complexUpset
-      title: 'Show complexUpset Plot'
+      title: "complexUpset plot"
       type: Bool
       default: false
 
     - name: show_ggvenn
-      title: 'Show ggvenn Plot'
+      title: "ggvenn plot"
       type: Bool
       default: true
 
     - name: show_ggVennDiagram
-      title: 'Show ggVennDiagram Plot'
+      title: "ggVennDiagram plot"
       type: Bool
       default: false
 
@@ -221,7 +221,7 @@ options:
             Only show intersections with at least this many members.
 
     - name: showAnnotations
-      title: 'Show Percentage Labels'
+      title: "Percentage labels"
       type: Bool
       default: false
       description:
@@ -231,7 +231,7 @@ options:
             Add percentage labels and enhanced text formatting to the plot.
 
     - name: explanatory
-      title: 'Explanatory Output'
+      title: "Explanatory output"
       type: Bool
       default: false
       description:
@@ -241,7 +241,7 @@ options:
             Add detailed explanatory footnotes with interpretation guidance.
 
     - name: aboutAnalysis
-      title: 'Show About Analysis'
+      title: "About analysis"
       type: Bool
       default: false
       description:
@@ -251,7 +251,7 @@ options:
             Show detailed information about the analysis method.
 
     - name: clinicalSummary
-      title: 'Show Clinical Summary'
+      title: "Clinical summary"
       type: Bool
       default: false
       description:
@@ -261,7 +261,7 @@ options:
             Show clinical interpretation and key findings.
 
     - name: reportSentences
-      title: 'Show Report Sentences'
+      title: "Report sentences"
       type: Bool
       default: false
       description:
@@ -271,7 +271,7 @@ options:
             Generate copy-ready sentences for reports.
 
     - name: assumptions
-      title: 'Show Assumptions'
+      title: "Assumptions"
       type: Bool
       default: false
       description:
@@ -441,7 +441,7 @@ options:
             Set transparency of region fills.
 
     - name: showSetLabels
-      title: 'Show Set Names'
+      title: "Set names"
       type: Bool
       default: true
       description:
@@ -461,7 +461,7 @@ options:
             Set the color of set name labels.
 
     - name: fillColorMapping
-      title: 'Fill Color Mapping'
+      title: "Fill color mapping"
       type: Bool
       default: true
       description:
@@ -506,7 +506,7 @@ options:
             Choose color palette for regions.
 
     - name: showSetCalculations
-      title: 'Show Set Calculations'
+      title: "Set calculations"
       type: Bool
       default: false
       description:
@@ -516,7 +516,7 @@ options:
             Show detailed set calculations and membership tables.
 
     - name: calculateOverlap
-      title: 'Calculate Overlaps'
+      title: "Calculate overlaps"
       type: Bool
       default: false
       description:
@@ -526,7 +526,7 @@ options:
             Calculate overlap intersections.
 
     - name: calculateDiscern
-      title: 'Calculate Unique Members'
+      title: "Calculate unique members"
       type: Bool
       default: false
       description:
@@ -536,7 +536,7 @@ options:
             Calculate unique members per set.
 
     - name: calculateUnite
-      title: 'Calculate Unions'
+      title: "Calculate unions"
       type: Bool
       default: false
       description:
@@ -546,7 +546,7 @@ options:
             Calculate union of all sets.
 
     - name: showMembershipTable
-      title: 'Show Membership Table'
+      title: "Membership table"
       type: Bool
       default: false
       description:
@@ -565,7 +565,7 @@ options:
             Add a column with the membership group for each row.
 
     - name: showGlossary
-      title: 'Show Statistical Glossary'
+      title: "Statistical glossary"
       type: Bool
       default: false
       description:

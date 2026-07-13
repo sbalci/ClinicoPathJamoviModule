@@ -102,9 +102,7 @@ enhancedcrosstableClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
             
             # Package requirements check
             if (!requireNamespace("crosstable", quietly = TRUE)) {
-                error_msg <- "Package 'crosstable' is required for enhanced cross-table functionality. Please install it with: install.packages('crosstable')"
-                self$results$crosstable_main$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                return()
+                jmvcore::reject("Package 'crosstable' is required for enhanced cross-table functionality. Please install it with: install.packages('crosstable')")
             }
             
             if (!requireNamespace("officer", quietly = TRUE)) {

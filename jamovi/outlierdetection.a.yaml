@@ -151,7 +151,7 @@ options:
             the most extreme observations.
 
     - name: show_outlier_table
-      title: Show Outlier Summary Table
+      title: Outlier summary table
       type: Bool
       default: true
       description:
@@ -160,7 +160,7 @@ options:
             outlier scores, distances, and classification for each observation.
 
     - name: show_method_comparison
-      title: Show Method Comparison
+      title: Method comparison
       type: Bool
       default: false
       description:
@@ -168,7 +168,7 @@ options:
             Compare results across different detection methods when using composite approach.
 
     - name: show_exclusion_summary
-      title: Show Exclusion Recommendations
+      title: Exclusion recommendations
       type: Bool
       default: false
       description:
@@ -176,7 +176,7 @@ options:
             Provide summary of observations recommended for exclusion and impact analysis.
 
     - name: show_visualization
-      title: Show Outlier Visualization
+      title: Outlier visualization
       type: Bool
       default: false
       description:
@@ -184,7 +184,7 @@ options:
             Generate plots showing outlier detection results and distribution of outlier scores.
 
     - name: show_interpretation
-      title: Show Analysis Interpretation
+      title: Analysis interpretation
       type: Bool
       default: false
       description:

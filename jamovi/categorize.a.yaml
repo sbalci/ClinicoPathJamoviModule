@@ -180,7 +180,7 @@ options:
             Exclude missing values from the analysis.
 
     - name: showcode
-      title: Show R code
+      title: R code
       type: Bool
       default: true
       description:
@@ -190,7 +190,7 @@ options:
             Show R code to recreate this categorization in R.
 
     - name: showplot
-      title: Show distribution plot
+      title: Distribution plot
       type: Bool
       default: true
       description:

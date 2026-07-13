@@ -61,10 +61,10 @@ children:
     children:
       - type: ComboBox
         name: analysis_type
-        label: Analysis Type
+        label: Analysis type
       - type: ComboBox
         name: sampling_strategy
-        label: Sampling Strategy
+        label: Sampling strategy
   - type: LayoutBox
     margin: large
     children:
@@ -88,23 +88,23 @@ children:
     children:
       - type: CheckBox
         name: show_variability_plots
-        label: Show Variability Plots
+        label: Variability plots
       - type: CheckBox
         name: variance_components
-        label: Variance Components Analysis
+        label: Variance components analysis
       - type: CheckBox
         name: power_analysis
-        label: Power Analysis
+        label: Power analysis
       - type: CheckBox
         name: generate_recommendations
-        label: Generate Clinical Recommendations
+        label: Clinical recommendations
   - type: CollapseBox
     label: Output Options
     collapsed: true
     children:
       - type: CheckBox
         name: showSummary
-        label: Show Plain-Language Summary
+        label: Plain-language summary
       - type: CheckBox
         name: showGlossary
-        label: Show Statistical Glossary
+        label: Statistical glossary

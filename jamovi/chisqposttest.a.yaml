@@ -85,42 +85,42 @@ options:
                   alpha level for significance testing
 
     - name: excl
-      title: Exclude Missing (NA)
+      title: Exclude missing (NA)
       type: Bool
       default: false
       description: >
                   exclude missing values from analysis
 
     - name: exp
-      title: Show Expected Values
+      title: Expected values
       type: Bool
       default: false
       description: >
                   show expected values in the table
 
     - name: plot
-      title: Show Residual Plot
+      title: Residual plot
       type: Bool
       default: false
       description: >
                   display plot of standardized residuals
 
     - name: showResiduals
-      title: Show Residuals Analysis
+      title: Residuals analysis
       type: Bool
       default: false
       description: >
                   display standardized residuals analysis with interpretation
 
     - name: showEducational
-      title: Show Educational Panels
+      title: Educational panels
       type: Bool
       default: false
       description: >
                   display educational guidance and explanations
 
     - name: showDetailedTables
-      title: Show Detailed Comparison Tables
+      title: Detailed comparison tables
       type: Bool
       default: false
       description: >
@@ -136,7 +136,7 @@ options:
                   critical value for identifying significant residuals (typically 2.0 or 3.0)
 
     - name: phiCI
-      title: Bootstrap Confidence Intervals for Phi
+      title: Bootstrap confidence intervals for phi
       type: Bool
       default: false
       description: >
@@ -159,35 +159,35 @@ options:
                   method for selecting statistical test for pairwise comparisons
 
     - name: exportResults
-      title: Export Detailed Results
+      title: Export detailed results
       type: Bool
       default: false
       description: >
                   Export comprehensive analysis results to downloadable format for further analysis
 
     - name: showClinicalSummary
-      title: Show Clinical Summary
+      title: Clinical summary
       type: Bool
       default: false
       description: >
                   Display natural-language summary of results for clinical interpretation
 
     - name: copyReadySentences
-      title: Generate Report Sentences
+      title: Report sentences
       type: Bool
       default: false
       description: >
                   Generate copy-ready sentences for clinical reports
 
     - name: showAssumptionsCheck
-      title: Show Assumptions Check
+      title: Assumptions check
       type: Bool
       default: false
       description: >
                   Display validation of chi-square test assumptions
 
     - name: showGlossary
-      title: Show Statistical Glossary
+      title: Statistical glossary
       type: Bool
       default: false
       description: >

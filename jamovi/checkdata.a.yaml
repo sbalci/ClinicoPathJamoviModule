@@ -15,7 +15,7 @@ options:
       type: Variable
 
     - name: showOutliers
-      title: Show Outlier Analysis
+      title: Outlier analysis
       type: Bool
       default: true
       description:
@@ -23,7 +23,7 @@ options:
             Detect and display potential outliers using z-score method (|z| > 3).
 
     - name: showDistribution
-      title: Show Distribution Analysis
+      title: Distribution analysis
       type: Bool
       default: false
       description:
@@ -31,7 +31,7 @@ options:
             Display descriptive statistics and distribution characteristics.
 
     - name: showDuplicates
-      title: Show Duplicate Analysis
+      title: Duplicate analysis
       type: Bool
       default: false
       description:
@@ -39,7 +39,7 @@ options:
             Identify and count duplicate values in the dataset.
 
     - name: showPatterns
-      title: Show Data Patterns
+      title: Data patterns
       type: Bool
       default: false
       description:
@@ -57,7 +57,7 @@ options:
             Percentage threshold for flagging rare categories (important for chi-squared assumptions and modeling).
 
     - name: clinicalValidation
-      title: Enable Clinical Plausibility Checks
+      title: Clinical plausibility checks
       type: Bool
       default: true
       description:
@@ -95,7 +95,7 @@ options:
             Apply transformation before outlier detection to handle skewed distributions (especially right-skewed lab values).
 
     - name: mcarTest
-      title: Perform MCAR Statistical Test
+      title: Perform MCAR statistical test
       type: Bool
       default: false
       description:
@@ -113,7 +113,7 @@ options:
             Suppress coefficient of variation when absolute mean is below this threshold (avoids instability).
 
     - name: showSummary
-      title: Show Natural-Language Summary
+      title: Natural-language summary
       type: Bool
       default: false
       description:
@@ -121,7 +121,7 @@ options:
             Display a plain-language summary of data quality suitable for copying to reports.
 
     - name: showAbout
-      title: Show About This Analysis
+      title: About this analysis
       type: Bool
       default: false
       description:
@@ -129,7 +129,7 @@ options:
             Display information about data quality assessment methodology.
 
     - name: showCaveats
-      title: Show Caveats & Assumptions
+      title: Caveats & assumptions
       type: Bool
       default: false
       description:

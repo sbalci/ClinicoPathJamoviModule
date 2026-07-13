@@ -143,7 +143,7 @@ options:
             waterfall layout.
 
     - name: showBaseline
-      title: Show Baseline (Y = 0) Line
+      title: Baseline (Y = 0) line
       type: Bool
       default: true
       description:
@@ -228,7 +228,7 @@ options:
     #         • Publication: Clean, professional plots for manuscripts
 
     - name: showThresholds
-      title: Show RECIST Thresholds
+      title: RECIST thresholds
       type: Bool
       default: true
       description:
@@ -242,7 +242,7 @@ options:
             Recommended: Keep enabled for clinical interpretation
 
     - name: labelOutliers
-      title: Label Large Changes
+      title: Label large changes
       type: Bool
       default: false
       description:
@@ -252,7 +252,7 @@ options:
             Label responses exceeding the specified threshold.
 
     - name: showMedian
-      title: Show Median Response
+      title: Median response
       type: Bool
       default: false
       description:
@@ -262,7 +262,7 @@ options:
             Show median response as a horizontal line.
 
     - name: showCI
-      title: Show Confidence Interval
+      title: Confidence interval
       type: Bool
       default: false
       description:
@@ -346,7 +346,7 @@ options:
             Width of bars in waterfall plot.
 
     - name: showWaterfallPlot
-      title: Show Waterfall Plot
+      title: Waterfall plot
       type: Bool
       default: true
       description:
@@ -356,7 +356,7 @@ options:
             Display the waterfall plot showing best response for each patient.
 
     - name: showSpiderPlot
-      title: Show Spider Plot
+      title: Spider plot
       type: Bool
       default: false
       description:
@@ -424,7 +424,7 @@ options:
 
     # Clinical Reporting Options
     - name: generateCopyReadyReport
-      title: Generate Copy-Ready Report
+      title: Copy-ready report
       type: Bool
       default: false
       description:
@@ -438,7 +438,7 @@ options:
             Recommended for publication or clinical documentation
 
     - name: showClinicalSignificance
-      title: Show Clinical Significance Thresholds
+      title: Clinical significance thresholds
       type: Bool
       default: false
       description:
@@ -452,7 +452,7 @@ options:
             Helps interpret results in clinical context
 
     - name: showConfidenceIntervals
-      title: Show Confidence Intervals for Clinical Metrics
+      title: Confidence intervals for clinical metrics
       type: Bool
       default: true
       description:
@@ -466,7 +466,7 @@ options:
             Recommended: Keep enabled for statistical rigor
 
     - name: enableGuidedMode
-      title: Enable Guided Analysis Mode
+      title: Guided analysis mode
       type: Bool
       default: false
       description:
@@ -480,7 +480,7 @@ options:
             Recommended for new users or complex analyses
 
     - name: showExplanations
-      title: Show Analysis Explanations
+      title: Analysis explanations
       type: Bool
       default: false
       description:
@@ -496,7 +496,7 @@ options:
             Recommended for new users or when documenting analysis methods
 
     - name: showResponseDuration
-      title: Time-to-Response & Duration of Response (KM)
+      title: Time-to-response & duration of response (KM)
       type: Bool
       default: false
       description:

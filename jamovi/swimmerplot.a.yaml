@@ -314,7 +314,7 @@ options:
 
     # === Event Markers ===
     - name: showEventMarkers
-      title: "Show Event Markers"
+      title: "Event markers"
       type: Bool
       default: false
       description:
@@ -397,7 +397,7 @@ options:
             Select color palette for response categories and groups. Colorblind Safe uses perceptually uniform colors distinguishable by all color vision types. High Contrast is optimized for projectors and printing. Monochrome ensures clarity in grayscale publications.
 
     - name: showLegend
-      title: "Show Legend"
+      title: "Legend"
       type: Bool
       default: true
       description:
@@ -467,7 +467,7 @@ options:
 
     # === Analysis Options ===
     - name: showInterpretation
-      title: "Show Clinical Interpretation"
+      title: "Clinical interpretation"
       type: Bool
       default: true
       description:
@@ -475,7 +475,7 @@ options:
             Whether to display automated clinical interpretation of the timeline data.
 
     - name: personTimeAnalysis
-      title: "Include Person-Time Analysis"
+      title: "Include person-time analysis"
       type: Bool
       default: true
       description:
@@ -483,7 +483,7 @@ options:
             Whether to include epidemiological person-time metrics in the analysis.
 
     - name: responseAnalysis
-      title: "Include Response Analysis"
+      title: "Include response analysis"
       type: Bool
       default: true
       description:
@@ -492,7 +492,7 @@ options:
 
     # === Clinical Guidance Options ===
     - name: showGlossary
-      title: "Show Clinical Glossary"
+      title: "Clinical glossary"
       type: Bool
       default: false
       description:
@@ -500,7 +500,7 @@ options:
             Display a glossary of clinical terms and statistical concepts used in the analysis.
 
     - name: showCopyReady
-      title: "Show Copy-Ready Manuscript Text"
+      title: "Copy-ready manuscript text"
       type: Bool
       default: false
       description:
@@ -508,7 +508,7 @@ options:
             Generate copy-ready text suitable for manuscripts and clinical reports.
 
     - name: showAbout
-      title: "Show About This Analysis"
+      title: "About this analysis"
       type: Bool
       default: false
       description:
@@ -517,7 +517,7 @@ options:
 
     # === Export Options ===
     - name: exportTimeline
-      title: "Export Timeline Data"
+      title: "Export timeline data"
       type: Bool
       default: false
       description:
@@ -525,7 +525,7 @@ options:
             Export processed timeline data for external analysis.
 
     - name: exportSummary
-      title: "Export Summary Statistics"
+      title: "Export summary statistics"
       type: Bool
       default: false
       description:

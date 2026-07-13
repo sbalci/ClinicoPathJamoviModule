@@ -61,10 +61,7 @@ ihcsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 if (!requireNamespace("survival", quietly = TRUE)) {
-                    self$results$instructions$setContent(
-                        "<p style='color: red;'><b>Error:</b> The 'survival' package is required for this analysis. Please install it.</p>"
-                    )
-                    return()
+                    jmvcore::reject("The 'survival' package is required for this analysis. Please install it.")
                 }
 
                 validation <- private$.validateData()

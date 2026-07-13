@@ -99,7 +99,7 @@ options:
       default: NULL
 
     - name: compareCompartments
-      title: Compare Spatial Compartments
+      title: Compare spatial compartments
       type: Bool
       default: false
       description:
@@ -108,7 +108,7 @@ options:
             Requires spatial_id variable. Compares ICC, CV, and bias across compartments.
 
     - name: compartmentTests
-      title: Compartment Comparison Tests
+      title: Compartment comparison tests
       type: Bool
       default: false
       description:
@@ -125,7 +125,7 @@ options:
         - name: bias
           title: 'Sampling Bias Analysis'
         - name: variability
-          title: 'Variance Component Analysis'
+          title: "Variance component analysis"
         - name: comprehensive
           title: 'Comprehensive Analysis'
       default: comprehensive
@@ -177,7 +177,7 @@ options:
             Higher values indicate better representativeness of biopsy samples.
 
     - name: show_variability_plots
-      title: Show Variability Plots
+      title: Variability plots
       type: Bool
       default: false
       description:
@@ -185,7 +185,7 @@ options:
             display plots showing sampling variability
 
     - name: variance_components
-      title: Variance Component Analysis
+      title: Variance component analysis
       type: Bool
       default: false
       description:
@@ -193,7 +193,7 @@ options:
             perform variance component decomposition
 
     - name: power_analysis
-      title: Power Analysis
+      title: Power analysis
       type: Bool
       default: false
       description:
@@ -201,7 +201,7 @@ options:
             perform power analysis for sample size recommendations
 
     - name: generate_recommendations
-      title: Generate Clinical Recommendations
+      title: Clinical recommendations
       type: Bool
       default: false
       description:
@@ -209,7 +209,7 @@ options:
             provide recommendations for optimal heterogeneity assessment strategy
 
     - name: showSummary
-      title: Show Plain-Language Summary
+      title: Plain-language summary
       type: Bool
       default: false
       description:
@@ -217,7 +217,7 @@ options:
             Display natural-language summary of heterogeneity analysis results
 
     - name: showGlossary
-      title: Show Statistical Glossary
+      title: Statistical glossary
       type: Bool
       default: false
       description:

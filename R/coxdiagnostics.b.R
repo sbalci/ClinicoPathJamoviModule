@@ -112,15 +112,11 @@ coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Package requirements check
                 if (!requireNamespace("survival", quietly = TRUE)) {
-                    error_msg <- "Package 'survival' is required for Cox regression analysis."
-                    self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                    return()
+                    jmvcore::reject("Package 'survival' is required for Cox regression analysis.")
                 }
 
                 if (!requireNamespace("survminer", quietly = TRUE)) {
-                    error_msg <- "Package 'survminer' is required for Cox diagnostic plots."
-                    self$results$model_summary$setContent(paste("<p style='color: red;'>", error_msg, "</p>"))
-                    return()
+                    jmvcore::reject("Package 'survminer' is required for Cox diagnostic plots.")
                 }
 
                 # Process data

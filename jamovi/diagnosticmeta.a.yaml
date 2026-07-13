@@ -95,35 +95,35 @@ options:
           R: Optional covariate for meta-regression analysis
 
     - name: bivariate_analysis
-      title: Bivariate Random-Effects Model
+      title: Bivariate random-effects model
       type: Bool
       default: true
       description:
           R: Perform bivariate random-effects meta-analysis
 
     - name: hsroc_analysis
-      title: HSROC Analysis
+      title: HSROC analysis
       type: Bool
       default: false
       description:
           R: Perform hierarchical summary ROC (HSROC) analysis
 
     - name: meta_regression
-      title: Meta-Regression
+      title: Meta-regression
       type: Bool
       default: false
       description:
           R: Perform meta-regression with specified covariate
 
     - name: heterogeneity_analysis
-      title: Heterogeneity Analysis
+      title: Heterogeneity analysis
       type: Bool
       default: false
       description:
           R: Perform heterogeneity analysis including I-squared and Q statistics
 
     - name: publication_bias
-      title: Publication Bias Assessment
+      title: Publication bias assessment
       type: Bool
       default: false
       description:
@@ -174,49 +174,49 @@ options:
             Method for handling zero cells in 2x2 tables. 'none' relies on bivariate model (recommended). 'constant' adds 0.5 to all cells of affected studies. 'treatment_arm' adds correction only to zero cells. 'empirical' uses study-specific corrections.
 
     - name: forest_plot
-      title: Forest Plot
+      title: Forest plot
       type: Bool
       default: false
       description:
           R: Generate forest plot for sensitivity and specificity
 
     - name: sroc_plot
-      title: Summary ROC Plot
+      title: Summary ROC plot
       type: Bool
       default: false
       description:
           R: Generate summary receiver operating characteristic plot
 
     - name: funnel_plot
-      title: Funnel Plot
+      title: Funnel plot
       type: Bool
       default: false
       description:
           R: Generate funnel plot for publication bias assessment
 
     - name: show_individual_studies
-      title: Show Individual Study Results
+      title: Individual study results
       type: Bool
       default: false
       description:
           R: Display results for individual studies in summary tables
 
     - name: show_interpretation
-      title: Show Clinical Interpretation
+      title: Clinical interpretation
       type: Bool
       default: false
       description:
           R: Display clinical interpretation guidelines and recommendations
 
     - name: show_methodology
-      title: Show Methodology Information
+      title: Methodology information
       type: Bool
       default: false
       description:
           R: Display detailed methodology and statistical approach information
 
     - name: show_analysis_summary
-      title: Show Analysis Summary
+      title: Analysis summary
       type: Bool
       default: false
       description:
@@ -241,7 +241,7 @@ options:
           R: Color palette for all plots - choose color-blind safe options for accessibility
 
     - name: show_plot_explanations
-      title: Show Plot Explanations
+      title: Plot explanations
       type: Bool
       default: false
       description:

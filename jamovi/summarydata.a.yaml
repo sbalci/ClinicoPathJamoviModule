@@ -41,7 +41,7 @@ options:
 
 
     - name: distr
-      title: "Distribution Diagnostics"
+      title: "Distribution diagnostics"
       type: Bool
       default: false
       description:
@@ -61,7 +61,7 @@ options:
           Default of 2 aligns with standard laboratory reporting.
 
     - name: outliers
-      title: "Outlier Detection"
+      title: "Outlier detection"
       type: Bool
       default: false
       description:
@@ -70,7 +70,7 @@ options:
           Helpful for quality control and identifying data entry errors.
 
     - name: report_sentences
-      title: "Generate Report Sentences"
+      title: "Report sentences"
       type: Bool
       default: false
       description:

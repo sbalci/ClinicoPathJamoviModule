@@ -157,7 +157,7 @@ options:
             Custom color for male bars (hex code).
 
     - name: originaltheme
-      title: Use Original Custom Theme
+      title: Use original custom theme
       type: Bool
       default: false
       description:
@@ -170,7 +170,7 @@ options:
     # ---- GGCharts Pyramid Options ----
 
     - name: enableGGCharts
-      title: Enable GGCharts Pyramid
+      title: GGCharts pyramid
       type: Bool
       default: false
       description:
