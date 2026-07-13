@@ -135,6 +135,9 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (self$options$goodness_of_fit) {
                 private$.assessGoodnessOfFit()
             }
+
+            # Clinical interpretation (always shown)
+            private$.generateClinicalInterpretation()
         },
         
         .prepareMarkovData = function() {
@@ -693,12 +696,76 @@ continuousmarkovClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 
                 self$results$goodnessOfFit$setContent(gof_html)
-                
+
             }, error = function(e) {
                 message("Goodness of fit assessment failed: ", e$message)
             })
         },
-        
+
+        .generateClinicalInterpretation = function() {
+
+            tryCatch({
+
+                n_states <- private$n_states
+                state_labels <- private$state_labels
+                model_structure <- self$options$model_structure %||% "full"
+
+                interp <- paste0(
+                    "<h4>Clinical Interpretation</h4>",
+                    "<p>This continuous-time Markov model describes how subjects move ",
+                    "between ", n_states, " states (",
+                    paste(htmltools::htmlEscape(state_labels), collapse = ", "),
+                    ") under a <b>",
+                    stringr::str_to_title(gsub("_", " ", model_structure)),
+                    "</b> transition structure.</p>"
+                )
+
+                if (!is.null(private$msm_model)) {
+
+                    Q <- private$msm_model$Qmatrices$baseline
+                    offdiag <- Q
+                    diag(offdiag) <- 0
+
+                    if (any(offdiag > 0, na.rm = TRUE)) {
+                        idx <- which(offdiag == max(offdiag, na.rm = TRUE), arr.ind = TRUE)[1, ]
+                        fastest <- paste0(
+                            htmltools::htmlEscape(state_labels[idx[1]]), " &rarr; ",
+                            htmltools::htmlEscape(state_labels[idx[2]])
+                        )
+                        interp <- paste0(interp,
+                            "<p><b>Most frequent transition:</b> ", fastest,
+                            " (intensity = ", round(max(offdiag, na.rm = TRUE), 4), "). ",
+                            "Higher transition intensities correspond to shorter expected ",
+                            "time before that state change occurs.</p>"
+                        )
+                    }
+
+                    interp <- paste0(interp,
+                        "<p><b>How to read the results:</b></p>",
+                        "<ul>",
+                        "<li>Transition intensities are instantaneous rates; their reciprocals ",
+                        "approximate the expected sojourn time in the originating state.</li>",
+                        "<li>Transition probabilities P(t) give the chance of occupying a given ",
+                        "state after a specified follow-up time.</li>",
+                        "<li>Covariate hazard ratios above 1 indicate an accelerated transition; ",
+                        "below 1 indicate a slower transition.</li>",
+                        "</ul>"
+                    )
+
+                } else {
+                    interp <- paste0(interp,
+                        "<p>The model has not yet produced a valid fit; clinical conclusions ",
+                        "should not be drawn until convergence is achieved.</p>"
+                    )
+                }
+
+                self$results$clinicalInterpretation$setContent(interp)
+
+            }, error = function(e) {
+                message("Clinical interpretation failed: ", e$message)
+            })
+        },
+
         .plotIntensities = function(image, ...) {
             
             if (is.null(private$msm_model)) {

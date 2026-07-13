@@ -84,9 +84,10 @@ bayesiannetworkmaClass <- R6::R6Class(
             # Network Characteristics
             char_table <- self$results$networkCharacteristics
             
+            ss_var <- self$options$sample_size
             for(tr in treatments) {
                  n_s <- length(unique(data[[study_var]][ data[[treat_var]] == tr ]))
-                 n_p <- sum(data[[self$options$sample_size]][ data[[treat_var]] == tr ], na.rm = TRUE)
+                 n_p <- if (!is.null(ss_var)) sum(data[[ss_var]][ data[[treat_var]] == tr ], na.rm = TRUE) else NA_integer_
                  
                  char_table$addRow(rowKey = as.character(tr), values = list(
                      treatment = as.character(tr),
@@ -156,15 +157,22 @@ bayesiannetworkmaClass <- R6::R6Class(
                 ))
             }
 
-        }
+        },
 
-        # TODO (stub): jamovi/bayesiannetworkma.r.yaml declares 8 image outputs with
-        # renderFun: but none are implemented in this class:
-        #   .plotNetwork, .plotForestPlots, .plotRankings, .plotHeterogeneity,
-        #   .plotCoherence, .plotPosteriorDistributions, .plotConvergence,
-        #   .plotComparisonMatrix
-        # These will fail at render time once the user toggles plots on. Either
-        # implement them as private methods (each takes (image, ggtheme, theme, ...)
-        # and returns TRUE/FALSE) or remove the image entries from .r.yaml.
+        # Stub render methods for the 8 Image outputs declared in
+        # jamovi/bayesiannetworkma.r.yaml (renderFun: .plotNetwork, .plotForestPlots,
+        # .plotRankings, .plotHeterogeneity, .plotCoherence, .plotPosteriorDistributions,
+        # .plotConvergence, .plotComparisonMatrix). Without matching methods here jamovi
+        # throws "attempt to apply non-function" when rendering these (always-visible)
+        # images. Returning FALSE paints nothing (blank), preventing the crash. Replace
+        # with real ggplot code once the Bayesian NMA engine is implemented.
+        .plotNetwork = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotForestPlots = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotRankings = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotHeterogeneity = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotCoherence = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotPosteriorDistributions = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotConvergence = function(image, ggtheme, theme, ...) { return(FALSE) },
+        .plotComparisonMatrix = function(image, ggtheme, theme, ...) { return(FALSE) }
     )
 )

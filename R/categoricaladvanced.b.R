@@ -262,7 +262,10 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         # Perform chi-square test
-                        chi_result <- chisq.test(cont_table, correct = self$options$yates_correction)
+                        # Yates continuity correction is only defined for 2x2 tables;
+                        # apply it automatically in that case (matches chisq.test default).
+                        use_yates <- (nrow(cont_table) == 2 && ncol(cont_table) == 2)
+                        chi_result <- chisq.test(cont_table, correct = use_yates)
 
                         # Calculate expected frequencies
                         expected_min <- min(chi_result$expected)
@@ -270,7 +273,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         total_cells <- length(chi_result$expected)
 
                         row <- list(
-                            test = if (self$options$yates_correction) "Chi-square with Yates" else "Pearson Chi-square",
+                            test = if (use_yates) "Chi-square with Yates" else "Pearson Chi-square",
                             statistic = round(chi_result$statistic, 4),
                             df = chi_result$parameter,
                             p_value = round(chi_result$p.value, 4),
@@ -317,7 +320,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         # Perform Fisher's exact test
                         if (n_rows == 2 && n_cols == 2) {
                             # 2x2 table - can calculate odds ratio
-                            fisher_result <- fisher.test(cont_table, alternative = self$options$alternative)
+                            fisher_result <- fisher.test(cont_table)
 
                             row <- list(
                                 test = "Fisher's Exact Test",
@@ -331,7 +334,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             table$addRow(rowKey = "fisher", values = row)
                         } else {
                             # RxC table - Freeman-Halton extension
-                            fisher_result <- fisher.test(cont_table, simulate.p.value = TRUE, B = 2000)
+                            fisher_result <- fisher.test(cont_table, simulate.p.value = TRUE, B = self$options$simulation_runs)
 
                             row <- list(
                                 test = "Freeman-Halton Test",
@@ -515,15 +518,15 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                     # Create subset table
                                     subset_table <- cont_table[c(i, j), ]
 
-                                    # Perform chi-square test
-                                    chi_result <- chisq.test(subset_table, correct = self$options$yates_correction)
+                                    # Perform chi-square test (Yates applies only to 2x2 subsets)
+                                    chi_result <- chisq.test(subset_table, correct = (ncol(subset_table) == 2))
 
                                     # Apply multiple testing correction
                                     n_comparisons <- choose(length(row_levels), 2)
 
-                                    if (self$options$posthoc_correction == "bonferroni") {
+                                    if (self$options$correction_method == "bonferroni") {
                                         adj_p <- min(chi_result$p.value * n_comparisons, 1)
-                                    } else if (self$options$posthoc_correction == "holm") {
+                                    } else if (self$options$correction_method == "holm") {
                                         # This is simplified - proper Holm requires sorting all p-values
                                         adj_p <- chi_result$p.value
                                     } else {
@@ -536,7 +539,7 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                         df = chi_result$parameter,
                                         p_value = round(chi_result$p.value, 4),
                                         p_adjusted = round(adj_p, 4),
-                                        significant = if (adj_p < self$options$alpha_level) "Yes" else "No"
+                                        significant = if (adj_p < 0.05) "Yes" else "No"
                                     )
 
                                     table$addRow(rowKey = paste0("comp_", i, "_", j), values = row)
@@ -586,8 +589,14 @@ categoricaladvancedClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             table$addRow(rowKey = "tau", values = row)
                         }
 
-                        # Goodman-Kruskal Gamma (for ordinal data)
-                        if (self$options$ordinal_data) {
+                        # Goodman-Kruskal Gamma (only meaningful for ordinal variables).
+                        # Detect ordinality from the raw (pre-factor-coercion) data columns.
+                        is_ordinal <- tryCatch(
+                            is.ordered(self$data[[self$options$rows]]) &&
+                                is.ordered(self$data[[self$options$cols]]),
+                            error = function(e) FALSE
+                        )
+                        if (isTRUE(is_ordinal)) {
                             if (requireNamespace("DescTools", quietly = TRUE)) {
                                 gamma <- DescTools::GoodmanKruskalGamma(cont_table)
 

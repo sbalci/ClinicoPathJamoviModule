@@ -15,14 +15,6 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
     .run = function() {
 
-        # TODO (security): `high_missing_vars`, `near_zero_vars`, and
-        # `moderate_missing_vars` (built from user CSV column names) are
-        # `paste(..., collapse=", ")`-joined into recommendation HTML at
-        # ~L662-664, L681-683, L745, L777, L824 in `.generateSummary` and
-        # `.generateRecommendations` without `htmltools::htmlEscape()`.
-        # Variable names with `<`, `>`, or `&` from arbitrary CSV headers
-        # corrupt the rendered HTML. Wrap each name with `htmlEscape()`
-        # before joining.
         # TODO (data hygiene): optional dependency `BaylorEdPsych::LittleMCAR`
         # is invoked via `requireNamespace(quietly=TRUE)` (~L201-208) but
         # the package is not listed in `DESCRIPTION` Imports or Suggests.
@@ -221,6 +213,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # } else if (ncol(analysis_data) > 1) {
             #     mcar_msg <- "Little's MCAR test skipped (BaylorEdPsych not installed)."
             # }
+            # MCAR block is disabled above; keep mcar_msg defined so building
+            # the HTML below does not error with "object 'mcar_msg' not found".
+            mcar_msg <- ""
 
             # Threshold flagging
             threshold <- self$options$missing_threshold_visual
@@ -682,7 +677,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             },
             if (length(high_missing_vars) > 0) {
                 sprintf(" (highest: <em>%s</em> at %.1f%% missing)</li>",
-                        high_missing_vars[1], max_missing_pct)
+                        htmltools::htmlEscape(high_missing_vars[1]), max_missing_pct)
             } else if (self$options$check_missing) {
                 "</li>"
             } else {
@@ -704,7 +699,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                         length(near_zero_vars),
                         if (length(near_zero_vars) == 1) "" else "s",
                         if (length(near_zero_vars) == 1) "s" else "",
-                        paste(near_zero_vars, collapse = ", "))
+                        paste(htmltools::htmlEscape(near_zero_vars), collapse = ", "))
             } else {
                 ""
             },

@@ -129,7 +129,11 @@ crosstable2Class <- if (requireNamespace('jmvcore'))
                         digits.count = 1
                     )
                     tablearsenal <- summary(tablearsenal, text = 'html', pfootnote = 'html')
-                    tablearsenal <- capture.output(tablearsenal)
+                    # capture.output() returns a character vector (one element per printed
+                    # line); Html$setContent requires a SCALAR string. Passing the
+                    # multi-element vector triggers the jamovi 2.7 serialization error
+                    # "cannot set non-repeated field to vector of length > 1". Collapse first.
+                    tablearsenal <- paste(capture.output(tablearsenal), collapse = "\n")
                     self$results$tablestyle1$setContent(tablearsenal)
                 } else if (sty == "finalfit") {
                     myvars_term <- jmvcore::composeTerm(components = myvars)

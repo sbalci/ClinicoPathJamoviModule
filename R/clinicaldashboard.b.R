@@ -49,17 +49,17 @@ clinicaldashboardClass <- R6::R6Class(
             
             # Generate summary metrics
             if (self$options$showSummaryStats) {
-                self$.generateSummaryMetrics(data)
-                self$.generateOutcomeStats(data)
+                private$.generateSummaryMetrics(data)
+                private$.generateOutcomeStats(data)
             }
             
             # Generate clinical alerts
             if (self$options$showAlerts) {
-                self$.generateClinicalAlerts(data)
+                private$.generateClinicalAlerts(data)
             }
             
             # Generate dashboard summary
-            self$.generateDashboardSummary(data)
+            private$.generateDashboardSummary(data)
         },
         
         .generateSummaryMetrics = function(data) {
@@ -69,13 +69,13 @@ clinicaldashboardClass <- R6::R6Class(
             metrics <- list()
             
             if (dashboard_type == "patient") {
-                metrics <- self$.getPatientMetrics(data)
+                metrics <- private$.getPatientMetrics(data)
             } else if (dashboard_type == "population") {
-                metrics <- self$.getPopulationMetrics(data)
+                metrics <- private$.getPopulationMetrics(data)
             } else if (dashboard_type == "quality") {
-                metrics <- self$.getQualityMetrics(data)
+                metrics <- private$.getQualityMetrics(data)
             } else if (dashboard_type == "outcomes") {
-                metrics <- self$.getOutcomeMetrics(data)
+                metrics <- private$.getOutcomeMetrics(data)
             }
             
             for (i in seq_along(metrics)) {
@@ -165,7 +165,7 @@ clinicaldashboardClass <- R6::R6Class(
             metrics <- list()
             
             # Data quality score
-            quality_score <- self$.calculateDataQualityScore(data)
+            quality_score <- private$.calculateDataQualityScore(data)
             quality_status <- if (quality_score >= 80) "Excellent" else if (quality_score >= 60) "Good" else "Needs Improvement"
             
             metrics[[length(metrics) + 1]] <- list(

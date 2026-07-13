@@ -56,34 +56,31 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
             
-            # TODO (correctness): the helper methods (populate_basic_table, generate_summary_stats,
-            #   show_export_info, get_table_styling, populate_pivot_table) are declared in `private = list(...)`
-            #   but invoked here as `self$populate_basic_table()` etc. R6 will not find these on `self`.
-            #   Either (a) move them to `public = list(...)`, or (b) call them via `private$...`.
-            #   This file does not run successfully in its current state.
-            # TODO (stub): pivottabler integration is unfinished. populate_basic_table() at L103-134 is a
-            #   placeholder ("Status: Basic implementation - pivot functionality to be added", L132);
+            # TODO (stub): pivottabler integration is unfinished. populate_basic_table() is a
+            #   placeholder ("Status: Basic implementation - pivot functionality to be added");
             #   populate_pivot_table just delegates to populate_basic_table. Wire up real pivot logic.
-            # TODO (security): L73 interpolates `e$message` into HTML without `htmltools::htmlEscape()`;
-            #   wrap when this code path is reactivated after the correctness fix above.
+            # NOTE (unused options): `show_totals` is never read anywhere in this backend, and
+            #   `format_style` is read only inside get_table_styling(), which is currently never
+            #   called. Wire both into the real pivot logic when it lands.
             # Simplified implementation for testing - will be enhanced later
             tryCatch({
                 # Basic table creation without pivottabler for now
-                self$populate_basic_table()
+                private$populate_basic_table()
 
                 # Generate summary statistics
                 if (self$options$statistics) {
-                    self$generate_summary_stats()
+                    private$generate_summary_stats()
                 }
 
                 # Export information
                 if (self$options$export_excel) {
-                    self$show_export_info()
+                    private$show_export_info()
                 }
 
             }, error = function(e) {
                 self$results$instructions$setContent(
-                    paste("<p style='color: red;'>Error creating table:", e$message, "</p>")
+                    paste("<p style='color: red;'>Error creating table:",
+                          htmltools::htmlEscape(e$message), "</p>")
                 )
             })
         },
@@ -149,21 +146,24 @@ crosstablepivotClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         populate_pivot_table = function(pt) {
             # Future implementation for full pivottabler integration
             # Currently using populate_basic_table for testing
-            self$populate_basic_table()
+            private$populate_basic_table()
         },
         
         generate_summary_stats = function() {
             summary_table <- self$results$summary_stats
-            
+
+            # Clear any existing rows (table declares no fixed `rows:`, so use addRow)
+            summary_table$deleteRows()
+
             # Add summary statistics
-            summary_table$setRow(rowNo = 1, values = list(
+            summary_table$addRow(rowKey = 1, values = list(
                 variable = "Total Observations",
                 statistic = "Count",
                 value = nrow(self$data)
             ))
-            
-            summary_table$setRow(rowNo = 2, values = list(
-                variable = "Variables Analyzed", 
+
+            summary_table$addRow(rowKey = 2, values = list(
+                variable = "Variables Analyzed",
                 statistic = "Count",
                 value = length(self$options$vars)
             ))

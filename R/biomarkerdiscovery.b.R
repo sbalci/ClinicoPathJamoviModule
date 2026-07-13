@@ -772,6 +772,55 @@ biomarkerdiscoveryClass <- R6::R6Class(
             
             print(p)
             TRUE
+        },
+
+        # ------------------------------------------------------------------
+        # Placeholder render methods.
+        #
+        # These renderFun names are declared in biomarkerdiscovery.r.yaml but
+        # the underlying analyses (ROC comparison, SHAP, stability, decision
+        # curve, risk stratification, pathway network, per-outcome
+        # distribution, nomogram) are not yet computed/stored. jamovi calls
+        # the renderFun of every visible Image during rendering, so a MISSING
+        # method here produces a hard "attempt to apply non-function" error
+        # that aborts the whole analysis. Defining graceful no-op stubs (return
+        # FALSE = nothing rendered) keeps the analysis running; each image is
+        # simply left blank until its computation is implemented.
+        # ------------------------------------------------------------------
+        .plot_roc_comparison = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_shap_summary = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_shap_dependence = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_stability = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_risk_stratification = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_decision_curve = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_pathway_network = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_biomarker_distribution = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_nomogram = function(image, ggtheme, theme, ...) {
+            return(FALSE)
         }
     )
 )

@@ -297,10 +297,14 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             if (is.numeric(vector) && !inherits(vector, 'Date')) {
+                numeric_override <- self$options$datetime_format
+                numeric_force <- if (!is.null(numeric_override) && numeric_override %in% c('excel_serial', 'unix_epoch'))
+                    numeric_override else NULL
                 return(private$.processNumericVector(
                     numeric_vector = vector,
                     notes = notes,
-                    quality_vector = quality_vector
+                    quality_vector = quality_vector,
+                    force_format = numeric_force
                 ))
             }
 
@@ -363,7 +367,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         },
 
-        .processNumericVector = function(numeric_vector, notes, quality_vector, original_display = NULL) {
+        .processNumericVector = function(numeric_vector, notes, quality_vector, original_display = NULL, force_format = NULL) {
             quality_vector <- quality_vector %||% numeric_vector
             if (is.null(original_display)) {
                 original_display <- format(numeric_vector, trim = TRUE, scientific = FALSE)
@@ -381,6 +385,36 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     already_parsed = FALSE,
                     format_hint = NULL,
                     notes = c(notes, 'Numeric column contained only missing values.')
+                ))
+            }
+
+            # Honor manual override: force the requested numeric interpretation
+            # regardless of the range-based heuristics below.
+            if (!is.null(force_format) && force_format == 'excel_serial') {
+                parsed_dates <- as.POSIXct(numeric_vector, origin = '1899-12-30', tz = 'UTC')
+                notes <- c(notes, 'Forced Excel serial interpretation (1900 system); converted using origin 1899-12-30 (UTC).')
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = parsed_dates,
+                    quality_vector = quality_vector,
+                    parsed_dates = parsed_dates,
+                    already_parsed = TRUE,
+                    format_hint = 'excel_serial',
+                    notes = notes
+                ))
+            }
+
+            if (!is.null(force_format) && force_format == 'unix_epoch') {
+                parsed_dates <- as.POSIXct(numeric_vector, origin = '1970-01-01', tz = 'UTC')
+                notes <- c(notes, 'Forced Unix epoch interpretation; converted using origin 1970-01-01 (UTC).')
+                return(list(
+                    original_display = original_display,
+                    parsing_vector = parsed_dates,
+                    quality_vector = quality_vector,
+                    parsed_dates = parsed_dates,
+                    already_parsed = TRUE,
+                    format_hint = 'unix_epoch',
+                    notes = notes
                 ))
             }
 
@@ -1187,7 +1221,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             datetime_var <- self$options$datetime_var
             original_vector <- self$data[[datetime_var]]
 
-            if (self$options$datetime_format %in% c("ymd", "dmy", "mdy", "ymd_hms", "dmy_hms", "mdy_hms") &&
+            if (!(self$options$datetime_format %in% c("auto", "excel_serial", "unix_epoch")) &&
                 is.numeric(original_vector) && !all(is.na(original_vector))) {
                 warnings <- c(warnings,
                     "You selected a text date format (YMD/DMY/MDY) but your column appears to be numeric. Consider using 'Excel Serial Date' or 'Unix Epoch' instead.")

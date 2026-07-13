@@ -136,7 +136,7 @@ ctdnadynamicsClass <- R6::R6Class(
         },
 
         .writeStatus = function(p) {
-            if (!self$options$addStatusToData$isNotFilled) {
+            if (self$results$addStatusToData$isNotFilled()) {
                 status <- rep(NA_character_, length(p$keep))
                 status[p$keep] <- ifelse(p$cleared, "Cleared", "Persistent")
                 self$results$addStatusToData$setRowNums(rownames(self$data))

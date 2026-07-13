@@ -87,8 +87,9 @@ causespecifichazardsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                     }
                     
                     private$.populatePlots(models, prepared_data, causes)
+                    private$.populateModelSummary(models, prepared_data, causes)
                 }
-                
+
             }, error = function(e) {
                 jmvcore::reject(paste("Error in cause-specific hazards analysis:", e$message))
             })
@@ -587,6 +588,43 @@ causespecifichazardsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                     })
                 }
             }
+        },
+
+        .populateModelSummary = function(models, prepared_data, causes) {
+            # Populate the Model Summary Html output with a concise,
+            # data-driven interpretation of the cause-specific hazards analysis.
+            n_subjects <- nrow(prepared_data)
+            n_events <- sum(prepared_data$cause != 0, na.rm = TRUE)
+            n_causes <- length(causes)
+            model_type <- self$options$model_type
+            model_label <- switch(model_type,
+                "cox" = "Cox proportional hazards",
+                "weibull" = "Weibull accelerated failure time",
+                "exponential" = "exponential",
+                "lognormal" = "log-normal accelerated failure time",
+                model_type)
+
+            causes_txt <- paste(as.character(causes), collapse = ", ")
+
+            html <- paste0(
+                "<h3>Cause-Specific Hazards Analysis</h3>",
+                "<p>A separate <b>", model_label, "</b> model was fitted for each cause ",
+                "of failure, treating events from competing causes as censored ",
+                "observations.</p>",
+                "<ul>",
+                "<li><b>Subjects analysed:</b> ", n_subjects, "</li>",
+                "<li><b>Total events:</b> ", n_events, "</li>",
+                "<li><b>Competing causes:</b> ", n_causes, " (", causes_txt, ")</li>",
+                "<li><b>Reference cause:</b> ", self$options$reference_cause, "</li>",
+                "</ul>",
+                "<p><b>Interpretation:</b> Cause-specific hazard ratios describe the ",
+                "instantaneous rate of a given cause among subjects still at risk and ",
+                "quantify aetiological effects. They do not directly translate into the ",
+                "probability of experiencing that cause; use the cumulative incidence ",
+                "functions for absolute-risk statements.</p>"
+            )
+
+            self$results$model_summary$setContent(html)
         },
 
         .populatePlots = function(models, prepared_data, causes) {

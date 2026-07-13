@@ -1767,9 +1767,15 @@ costeffectivenessClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6C
         },
 
         .escapeVar = function(varName) {
-            # Escape variable names with special characters using jmvcore
+            # Columns in self$data are keyed by the ORIGINAL variable name, so
+            # use it verbatim for data[[...]] lookups. Do NOT run it through
+            # jmvcore::composeTerm(): composeTerm() backtick-quotes non-syntactic
+            # names (e.g. "my var" -> "`my var`"), which makes data[[...]] return
+            # NULL for any variable whose name contains a space or punctuation.
+            # composeTerm() is only appropriate when building a formula string,
+            # which this analysis never does.
             if (is.null(varName)) return(NULL)
-            return(jmvcore::composeTerm(varName))
+            return(varName)
         }
     )
 )

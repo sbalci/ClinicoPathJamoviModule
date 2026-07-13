@@ -18,6 +18,9 @@ clinicalpredictionClass <- R6::R6Class(
         .predictions = NULL,
         .shap_values = NULL,
         .feature_importance = NULL,
+        .roc_data = NULL,
+        .performance_metrics = NULL,
+        .risk_stratification = NULL,
         
         .init = function() {
             if (is.null(self$options$outcome_var)) {
@@ -633,6 +636,40 @@ clinicalpredictionClass <- R6::R6Class(
             
             print(p)
             TRUE
+        },
+
+        # --- Render stubs for Image outputs whose data pipeline is not yet
+        # implemented. Their renderFun is declared in clinicalprediction.r.yaml,
+        # so the method MUST exist or jamovi throws "attempt to apply
+        # non-function" when the (default-visible) plot renders. These return
+        # FALSE (blank plot) until the corresponding analysis is wired. See
+        # FLAGS in the function-checker report.
+        .plot_calibration = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_shap_summary = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_shap_dependence = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_decision_curve = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_model_comparison = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_stability = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_nomogram = function(image, ggtheme, theme, ...) {
+            return(FALSE)
         }
     )
 )

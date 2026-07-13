@@ -196,6 +196,14 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                     "</div>"
                 )
             },
+            .init = function() {
+                # Wire user-controlled plot dimensions to the heatmap image
+                # (these options are also listed in the result's clearWith).
+                self$results$heatmap$setSize(
+                    self$options$plotWidth,
+                    self$options$plotHeight
+                )
+            },
             .run = function() {
                 private$.noticeList <- list()
 
@@ -1758,7 +1766,7 @@ clinicalheatmapClass <- if (requireNamespace("jmvcore")) {
                             conf.int = TRUE,
                             risk.table = TRUE,
                             risk.table.height = 0.25,
-                            ggtheme = theme_minimal(),
+                            ggtheme = ggplot2::theme_minimal(),
                             palette = "jco",
                             legend.title = "Cluster",
                             legend.labs = paste("Cluster", unique(data$cluster)),

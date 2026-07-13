@@ -38,6 +38,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       }
 
       # Populate model summary with all current options
+      self$results$modelSummary$setVisible(self$options$show_model_summary)
       private$.populateModelSummary()
 
       # Run parameter validation and populate warnings
@@ -50,6 +51,7 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       validation_results <- private$.runValidationAnalysis(data)
 
       # Populate all result tables
+      self$results$validationResults$setVisible(self$options$show_performance_table)
       private$.populateValidationResults(validation_results)
       private$.populatePrevalenceAnalysis(validation_results)
       private$.populateCalibrationAssessment(validation_results)
@@ -388,22 +390,26 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
       # Adjust for sample size (smaller samples = more uncertainty)
       uncertainty <- max(0.02, 0.15 / sqrt(n / 100))
 
+      # Normal quantile driven by the user-selected confidence level
+      # (previously hardcoded to 1.96 / 95%, ignoring confidence_level)
+      z <- stats::qnorm(1 - (1 - self$options$confidence_level) / 2)
+
       # Create validation results
       results <- list(
         auc = list(
           estimate = base_auc,
-          lower_ci = max(0.5, base_auc - 1.96 * uncertainty),
-          upper_ci = min(1.0, base_auc + 1.96 * uncertainty)
+          lower_ci = max(0.5, base_auc - z * uncertainty),
+          upper_ci = min(1.0, base_auc + z * uncertainty)
         ),
         sensitivity = list(
           estimate = base_sens,
-          lower_ci = max(0.0, base_sens - 1.96 * uncertainty),
-          upper_ci = min(1.0, base_sens + 1.96 * uncertainty)
+          lower_ci = max(0.0, base_sens - z * uncertainty),
+          upper_ci = min(1.0, base_sens + z * uncertainty)
         ),
         specificity = list(
           estimate = base_spec,
-          lower_ci = max(0.0, base_spec - 1.96 * uncertainty),
-          upper_ci = min(1.0, base_spec + 1.96 * uncertainty)
+          lower_ci = max(0.0, base_spec - z * uncertainty),
+          upper_ci = min(1.0, base_spec + z * uncertainty)
         ),
         n_samples = n,
         validation_method = self$options$validation_method,
@@ -419,14 +425,14 @@ clinicalvalidationinteractiveClass <- R6::R6Class(
 
         results$ppv <- list(
           estimate = ppv,
-          lower_ci = max(0.0, ppv - 1.96 * uncertainty),
-          upper_ci = min(1.0, ppv + 1.96 * uncertainty)
+          lower_ci = max(0.0, ppv - z * uncertainty),
+          upper_ci = min(1.0, ppv + z * uncertainty)
         )
 
         results$npv <- list(
           estimate = npv,
-          lower_ci = max(0.0, npv - 1.96 * uncertainty),
-          upper_ci = min(1.0, npv + 1.96 * uncertainty)
+          lower_ci = max(0.0, npv - z * uncertainty),
+          upper_ci = min(1.0, npv + z * uncertainty)
         )
       }
 

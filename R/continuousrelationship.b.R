@@ -104,7 +104,12 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
             if (self$options$showModelFit) {
                 private$.showModelFit(model, self$options$modelType)
             }
-            
+
+            # Populate interpretation guide (matches visible: (showGuidance) in .r.yaml)
+            if (self$options$showGuidance) {
+                private$.showInterpretationGuide(self$options$modelType, is_binary)
+            }
+
             # Add predictions to data if requested
             if (self$options$exportPredictions) {
                 predictions <- predict(model, type = if(is_binary) "response" else "response")
@@ -264,7 +269,37 @@ continuousrelationshipClass <- if (requireNamespace('jmvcore', quietly = TRUE)) 
                 loglik = round(loglik_val, 2)
             ))
         },
-        
+
+        .showInterpretationGuide = function(model_type, is_binary) {
+            outcome_type <- if (is_binary) {
+                "binary outcome (logistic model, results on the log-odds scale)"
+            } else {
+                "continuous outcome (linear model, results on the outcome scale)"
+            }
+
+            method_note <- switch(model_type,
+                spline      = "Restricted cubic splines fit the relationship flexibly without assuming a shape. Read the fitted curve rather than a single slope; the effect can change across the predictor range.",
+                fp          = "Fractional polynomials fit a smooth, potentially non-linear curve. Interpret the overall shape rather than individual coefficients.",
+                linear      = "A linear model assumes a constant effect across the whole predictor range. Check the non-linearity test before trusting a single slope.",
+                categorized = "Categorization is shown for educational purposes only. It discards within-category information and can create artefactual step changes; prefer a flexible continuous model.",
+                "See the model fit statistics and non-linearity test below."
+            )
+
+            guide <- paste0(
+                "How to read these results\n",
+                "-------------------------\n",
+                "Outcome: ", outcome_type, "\n\n",
+                "Model: ", method_note, "\n\n",
+                "Non-linearity test: a small p-value (p < 0.05) indicates the relationship\n",
+                "departs from a straight line, favouring a flexible model.\n\n",
+                "Model fit: lower AIC/BIC indicate better fit after penalising complexity;\n",
+                "compare only models fitted to the same data and outcome.\n\n",
+                "Reference: Sauerbrei W, Royston P, Binder H. BMJ 2024;390:e082440."
+            )
+
+            self$results$interpretationGuide$setContent(guide)
+        },
+
         # TODO (stub): the four .plot methods below (.doseResponsePlot, .partialEffectPlot, .comparisonPlot, .categorizedPlot) are placeholders - no actual ggplot construction. They now safely return FALSE so jamovi renders an empty plot pane rather than crashing or showing whatever the device last contained. Each method needs a real ggplot2 implementation (the existing `image$state` is already wired with plotData for .doseResponsePlot).
         .doseResponsePlot = function(image, ggtheme, theme, ...) {
             # Stub - return FALSE until a real ggplot is built (see TODO above).

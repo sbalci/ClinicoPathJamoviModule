@@ -79,9 +79,6 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             
             # Initialize accessibility information
             private$.init_accessibility_info()
-            
-            # Initialize template system
-            private$.init_template_system()
         },
 
         .run = function() {
@@ -243,14 +240,6 @@ bbcplotsClass <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     details = paste("Need at least 3 valid observations for visualization.",
                                    "Y-variable has", valid_y, "valid values,",
                                    "X-variable has", valid_x, "valid values.")
-                )))
-            }
-            
-            # Validate threshold settings
-            if (self$options$thresholdMin >= self$options$thresholdMax) {
-                return(list(valid = FALSE, message = list(
-                    title = "Invalid threshold settings",
-                    details = "Minimum threshold must be less than maximum threshold."
                 )))
             }
             

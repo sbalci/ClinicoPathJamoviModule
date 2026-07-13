@@ -137,6 +137,12 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                     }
                 )
             },
+            # Map the `sided` List option ("one_sided"/"two_sided") to the numeric
+            # code (1/2) expected by gsDesign. as.numeric() on the option string
+            # returns NA, which silently propagates NA into all gsDesign results.
+            .sided_num = function() {
+                if (identical(self$options$sided, "two_sided")) 2 else 1
+            },
             .calculate_power = function() {
                 calc_type <- self$options$calculation_type
                 method <- self$options$method
@@ -159,7 +165,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 ratio <- self$options$allocation_ratio
                 alpha <- self$options$alpha
                 beta <- self$options$beta
-                sided <- as.numeric(self$options$sided)
+                sided <- private$.sided_num()
                 entry <- self$options$entry_type
                 gamma <- if (entry == "expo") self$options$gamma else NA
 
@@ -243,7 +249,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                 alpha <- self$options$alpha
                 beta <- self$options$beta
                 ratio <- self$options$allocation_ratio
-                sided <- as.numeric(self$options$sided)
+                sided <- private$.sided_num()
 
                 if (calc_type == "sample_size" || calc_type == "events") {
                     # Calculate number of events required
@@ -676,7 +682,7 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                                     ratio = self$options$allocation_ratio,
                                     alpha = self$options$alpha,
                                     beta = self$options$beta,
-                                    sided = as.numeric(self$options$sided),
+                                    sided = private$.sided_num(),
                                     entry = self$options$entry_type,
                                     gamma = if (self$options$entry_type == "expo") self$options$gamma else NA
                                 )
@@ -691,13 +697,13 @@ classicalSurvivalPowerClass <- if (requireNamespace("jmvcore", quietly = TRUE)) 
                                     alpha = self$options$alpha,
                                     beta = self$options$beta,
                                     ratio = self$options$allocation_ratio,
-                                    sided = as.numeric(self$options$sided)
+                                    sided = private$.sided_num()
                                 )$n[1]
 
                                 # Approximate power based on events (assuming ~50% event rate)
                                 approx_events <- sample_sizes[i] * 0.5
-                                z_value <- sqrt(approx_events / events_needed) * (qnorm(1 - self$options$alpha / as.numeric(self$options$sided)) + qnorm(1 - self$options$beta))
-                                powers[i] <- pnorm(z_value - qnorm(1 - self$options$alpha / as.numeric(self$options$sided)))
+                                z_value <- sqrt(approx_events / events_needed) * (qnorm(1 - self$options$alpha / private$.sided_num()) + qnorm(1 - self$options$beta))
+                                powers[i] <- pnorm(z_value - qnorm(1 - self$options$alpha / private$.sided_num()))
                             }
                         }
 

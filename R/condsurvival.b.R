@@ -172,6 +172,14 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (length(groups) > 1) {
                     private$.performGroupComparisons(data, conditional_times)
                 }
+
+                # Populate parametric model fit statistics (parametric method only)
+                if (self$options$survival_method == "parametric") {
+                    private$.populateModelFit(surv_models, groups)
+                }
+
+                # Store state consumed by the plot render functions
+                private$.setPlotState(data, conditional_times, prediction_times)
             },
             .populateDataOverview = function(data) {
                 overview_table <- self$results$dataOverview
@@ -579,6 +587,169 @@ condsurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </html>"
 
                 self$results$methodExplanation$setContent(html)
+            },
+            .setPlotState = function(data, conditional_times, prediction_times) {
+                # `data` is the internally-built clean data.frame (columns time,
+                # status, group) so it is safe to serialize into image state.
+                plot_state <- list(
+                    data = data,
+                    has_group = !is.null(self$options$group),
+                    time_scale = self$options$time_scale,
+                    conditional_times = conditional_times,
+                    prediction_times = prediction_times
+                )
+                self$results$conditionalSurvivalPlot$setState(plot_state)
+                self$results$conditionalImprovementPlot$setState(plot_state)
+                self$results$dynamicPredictionPlot$setState(plot_state)
+                self$results$landmarkPlot$setState(plot_state)
+            },
+            .populateModelFit = function(surv_models, groups) {
+                tbl <- self$results$modelFitStatistics
+                dist <- self$options$parametric_dist
+                for (group in groups) {
+                    model <- surv_models[[group]]
+                    ll <- NA_real_; aic <- NA_real_; bic <- NA_real_
+                    npar <- NA_real_; nobs <- NA_real_
+                    if (inherits(model, "flexsurvreg")) {
+                        ll   <- tryCatch(as.numeric(model$loglik), error = function(e) NA_real_)
+                        aic  <- tryCatch(as.numeric(model$AIC),    error = function(e) NA_real_)
+                        npar <- tryCatch(as.numeric(model$npars),  error = function(e) NA_real_)
+                        nobs <- tryCatch(as.numeric(model$N),      error = function(e) NA_real_)
+                    } else if (inherits(model, "survreg")) {
+                        ll   <- tryCatch(as.numeric(stats::logLik(model)), error = function(e) NA_real_)
+                        aic  <- tryCatch(stats::AIC(model),                error = function(e) NA_real_)
+                        npar <- tryCatch(as.numeric(model$df),             error = function(e) NA_real_)
+                        nobs <- tryCatch(nrow(model$y),                    error = function(e) NA_real_)
+                    }
+                    if (!is.na(ll) && !is.na(npar) && !is.na(nobs) && nobs > 0)
+                        bic <- -2 * ll + npar * log(nobs)
+                    tbl$addRow(rowKey = group, values = list(
+                        distribution   = if (length(groups) > 1) sprintf("%s (%s)", dist, group) else dist,
+                        log_likelihood = ll,
+                        aic            = aic,
+                        bic            = bic,
+                        parameters     = if (is.na(npar)) "" else as.character(round(npar))
+                    ))
+                }
+            },
+            .plotConditionalSurvival = function(image, ggtheme, theme, ...) {
+                if (is.null(image$state)) return(FALSE)
+                tryCatch({
+                    st <- image$state
+                    d <- st$data
+                    fit <- survival::survfit(survival::Surv(time, status) ~ group, data = d)
+                    grp_levels <- levels(d$group)
+                    cols <- if (length(grp_levels) > 1) seq_along(grp_levels) + 1L else "black"
+                    plot(fit, col = cols, lwd = 2, mark.time = TRUE,
+                        xlab = paste0("Time (", st$time_scale, ")"),
+                        ylab = "Survival probability",
+                        main = "Baseline survival with conditional time points")
+                    if (length(st$conditional_times) > 0)
+                        graphics::abline(v = st$conditional_times, lty = 2, col = "gray60")
+                    if (isTRUE(st$has_group) && length(grp_levels) > 1)
+                        graphics::legend("topright", legend = grp_levels,
+                            col = cols, lwd = 2, bty = "n")
+                    TRUE
+                }, error = function(e) FALSE)
+            },
+            .plotConditionalImprovement = function(image, ggtheme, theme, ...) {
+                if (is.null(image$state)) return(FALSE)
+                tryCatch({
+                    st <- image$state
+                    d <- st$data
+                    fit <- survival::survfit(survival::Surv(time, status) ~ 1, data = d)
+                    sm <- summary(fit)
+                    base_times <- sm$time
+                    base_surv <- sm$surv
+                    surv_at <- function(s) {
+                        idx <- which(base_times <= s)
+                        if (length(idx) == 0) return(1)
+                        base_surv[max(idx)]
+                    }
+                    cond_starts <- c(0, st$conditional_times)
+                    max_t <- max(d$time)
+                    cols <- seq_along(cond_starts)
+                    plot(NA, xlim = c(0, max_t), ylim = c(0, 1),
+                        xlab = paste0("Time since conditioning point (", st$time_scale, ")"),
+                        ylab = "Conditional survival probability",
+                        main = "Conditional survival by time already survived")
+                    for (i in seq_along(cond_starts)) {
+                        s <- cond_starts[i]
+                        ss <- surv_at(s)
+                        if (is.na(ss) || ss <= 0) next
+                        keep <- base_times >= s
+                        xs <- base_times[keep] - s
+                        ys <- pmin(1, pmax(0, base_surv[keep] / ss))
+                        graphics::lines(c(0, xs), c(1, ys), type = "s",
+                            col = cols[i], lwd = 2)
+                    }
+                    graphics::legend("topright",
+                        legend = paste0("Given survival to ", cond_starts, " ", st$time_scale),
+                        col = cols, lwd = 2, bty = "n")
+                    TRUE
+                }, error = function(e) FALSE)
+            },
+            .plotDynamicPrediction = function(image, ggtheme, theme, ...) {
+                if (is.null(image$state)) return(FALSE)
+                tryCatch({
+                    st <- image$state
+                    d <- st$data
+                    fit <- survival::survfit(survival::Surv(time, status) ~ 1, data = d)
+                    max_t <- max(d$time)
+                    horizon <- if (length(st$prediction_times) > 0) st$prediction_times[1] else 1
+                    surv_at <- function(t) {
+                        sm <- tryCatch(summary(fit, times = t, extend = TRUE),
+                            error = function(e) NULL)
+                        if (is.null(sm) || length(sm$surv) == 0) return(NA_real_)
+                        sm$surv[1]
+                    }
+                    s_grid <- seq(0, max(0, max_t - horizon), length.out = 50)
+                    probs <- vapply(s_grid, function(s) {
+                        sc <- surv_at(s); sf <- surv_at(s + horizon)
+                        if (is.na(sc) || sc <= 0 || is.na(sf)) return(NA_real_)
+                        min(1, max(0, sf / sc))
+                    }, numeric(1))
+                    plot(s_grid, probs, type = "l", lwd = 2, col = "steelblue",
+                        ylim = c(0, 1),
+                        xlab = paste0("Time already survived (", st$time_scale, ")"),
+                        ylab = sprintf("P(survive +%.1f %s)", horizon, st$time_scale),
+                        main = "Dynamic survival prediction")
+                    TRUE
+                }, error = function(e) FALSE)
+            },
+            .plotLandmarkAnalysis = function(image, ggtheme, theme, ...) {
+                if (is.null(image$state)) return(FALSE)
+                tryCatch({
+                    st <- image$state
+                    d <- st$data
+                    landmarks <- st$conditional_times
+                    if (length(landmarks) == 0) return(FALSE)
+                    max_t <- max(d$time)
+                    cols <- seq_along(landmarks) + 1L
+                    plot(NA, xlim = c(0, max_t), ylim = c(0, 1),
+                        xlab = paste0("Time since landmark (", st$time_scale, ")"),
+                        ylab = "Survival probability",
+                        main = "Landmark survival curves")
+                    drawn <- FALSE
+                    for (i in seq_along(landmarks)) {
+                        lm_t <- landmarks[i]
+                        ld <- d[d$time >= lm_t, , drop = FALSE]
+                        if (nrow(ld) < 2) next
+                        ld$ta <- ld$time - lm_t
+                        ld$sa <- ifelse(ld$time > lm_t, ld$status, 0)
+                        fit <- tryCatch(
+                            survival::survfit(survival::Surv(ta, sa) ~ 1, data = ld),
+                            error = function(e) NULL)
+                        if (is.null(fit)) next
+                        graphics::lines(fit, col = cols[i], lwd = 2, conf.int = FALSE)
+                        drawn <- TRUE
+                    }
+                    if (!drawn) return(FALSE)
+                    graphics::legend("topright",
+                        legend = paste0("Landmark ", landmarks, " ", st$time_scale),
+                        col = cols, lwd = 2, bty = "n")
+                    TRUE
+                }, error = function(e) FALSE)
             }
         ), # End of private list
         public = list(

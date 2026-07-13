@@ -185,6 +185,7 @@ contTablesClass <- R6::R6Class(
                 odds$addRow(rowKey=1, values=list())
                 gamma$addRow(rowKey=1, values=list())
                 taub$addRow(rowKey=1, values=list())
+                trendTest$addRow(rowKey=1, values=list())
 
             } else {
 
@@ -268,8 +269,9 @@ contTablesClass <- R6::R6Class(
                     corr <- try(chisq.test(mat, correct=TRUE))
 
                     # Only compute association stats if requested
+                    # (likeRat also reads asso$chisq_tests for the likelihood ratio)
                     asso <- NULL
-                    if (self$options$contCoef || self$options$phiCra)
+                    if (self$options$contCoef || self$options$phiCra || self$options$likeRat)
                         asso <- vcd::assocstats(mat)
 
                     # Only compute gamma if requested (can error on nominal tables)

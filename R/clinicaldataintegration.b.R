@@ -60,21 +60,21 @@ clinicaldataintegrationClass <- R6::R6Class(
             data <- self$data
             
             # Generate data overview
-            self$.generateDataOverview(data)
+            private$.generateDataOverview(data)
             
             # Perform quality assessment if requested
             if (self$options$qualityCheck) {
-                self$.performQualityAssessment(data)
+                private$.performQualityAssessment(data)
             }
             
             # Perform consistency checks if requested
             if (self$options$consistencyCheck) {
-                self$.performConsistencyChecks(data)
+                private$.performConsistencyChecks(data)
             }
             
             # Generate export summary
             if (self$options$generateReport) {
-                self$.generateExportSummary(data)
+                private$.generateExportSummary(data)
             }
         },
         
@@ -126,7 +126,7 @@ clinicaldataintegrationClass <- R6::R6Class(
             
             for (var in vars_to_assess) {
                 if (var %in% names(data)) {
-                    result <- self$.assessVariableQuality(data[[var]], var)
+                    result <- private$.assessVariableQuality(data[[var]], var)
                     quality_results[[length(quality_results) + 1]] <- result
                 }
             }
@@ -147,7 +147,7 @@ clinicaldataintegrationClass <- R6::R6Class(
             # Outlier detection for numeric variables
             n_outliers <- 0
             if (self$options$outlierDetection && is.numeric(var_data)) {
-                n_outliers <- self$.detectOutliers(var_data)
+                n_outliers <- private$.detectOutliers(var_data)
             }
             
             # Quality score based on completeness and other factors
@@ -199,7 +199,7 @@ clinicaldataintegrationClass <- R6::R6Class(
             # Check 1: Date consistency (if date variables are specified)
             date_vars <- self$options$dateVars
             if (length(date_vars) > 0) {
-                date_check <- self$.checkDateConsistency(data, date_vars)
+                date_check <- private$.checkDateConsistency(data, date_vars)
                 if (!is.null(date_check)) {
                     checks[[length(checks) + 1]] <- date_check
                 }
@@ -208,7 +208,7 @@ clinicaldataintegrationClass <- R6::R6Class(
             # Check 2: Patient ID uniqueness
             patient_id_var <- self$options$patientIdVar
             if (!is.null(patient_id_var) && patient_id_var %in% names(data)) {
-                id_check <- self$.checkPatientIdConsistency(data, patient_id_var)
+                id_check <- private$.checkPatientIdConsistency(data, patient_id_var)
                 if (!is.null(id_check)) {
                     checks[[length(checks) + 1]] <- id_check
                 }
@@ -217,7 +217,7 @@ clinicaldataintegrationClass <- R6::R6Class(
             # Check 3: Clinical variable ranges (basic range checks)
             clinical_vars <- self$options$clinicalVars
             if (length(clinical_vars) > 0) {
-                range_check <- self$.checkClinicalRanges(data, clinical_vars)
+                range_check <- private$.checkClinicalRanges(data, clinical_vars)
                 if (!is.null(range_check)) {
                     checks[[length(checks) + 1]] <- range_check
                 }
@@ -282,7 +282,7 @@ clinicaldataintegrationClass <- R6::R6Class(
                     var_data <- data[[var]][!is.na(data[[var]])]
                     if (length(var_data) > 0) {
                         # Basic range check - flag extreme values
-                        outliers <- self$.detectOutliers(data[[var]])
+                        outliers <- private$.detectOutliers(data[[var]])
                         total_issues <- total_issues + outliers
                     }
                 }

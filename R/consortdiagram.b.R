@@ -25,6 +25,25 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 }, character(1), USE.NAMES = FALSE)
             },
 
+            # self$data uses ORIGINAL variable names, but all downstream
+            # processing/lookup code references .escapeVar()-escaped names.
+            # Normalize once here (same rename that .plot() performs) so that
+            # data[[.escapeVar(var)]] resolves for variables whose names
+            # contain spaces / punctuation / Unicode. No-op for syntactic names.
+            .escapedData = function() {
+                data <- self$data
+                if (is.null(data) || ncol(data) == 0) {
+                    return(data)
+                }
+                for (nm in names(data)) {
+                    esc <- private$.escapeVar(nm)
+                    if (length(esc) == 1L && nzchar(esc) && esc != nm && !(esc %in% names(data))) {
+                        names(data)[names(data) == nm] <- esc
+                    }
+                }
+                data
+            },
+
             # HTML generation helpers ----
             # TODO (security): the .htmlError / .htmlWarning / .htmlInfo helpers (this method, L43, L60) interpolate `title`, `message`, `details`, and `content` directly into HTML strings without escaping. Callers feed user-controlled data through them: `e$message` from tryCatch (L171, L173), participant ID values (L198 `paste(head(dup_ids, 3), …)`), and free-text `OptionString` labels (study_title, screening_label, …). The fix is to add `htmltools::htmlEscape(...)` at the helper boundary so every caller is protected by default - define the escape once on `title`, `message`, and on each element of `details` (since details items are intentionally HTML for the `<strong>…</strong>` lead-in, those need a more selective escape OR a separate "raw" parameter). Defense-in-depth XSS guard; same shape as the comparingsurvival / competingRisksPower fixes but consolidated at the helper level.
             .htmlError = function(title, message, details = NULL) {
@@ -70,6 +89,13 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
 
             # init ----
             .init = function() {
+                # Honor user-specified diagram dimensions (options are otherwise
+                # only echoed in export info; the .r.yaml size is a static default)
+                self$results$diagram$setSize(
+                    self$options$diagram_width,
+                    self$options$diagram_height
+                )
+
                 # Check for data
                 if (is.null(self$data) || nrow(self$data) == 0) {
                     self$results$todo$setVisible(TRUE)
@@ -192,7 +218,8 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                 # Enforce unique participant IDs
                 if (!is.null(self$options$participant_id) && length(self$options$participant_id) > 0) {
                     pid <- private$.escapeVar(self$options$participant_id)
-                    dup_ids <- self$data[[pid]][duplicated(self$data[[pid]])]
+                    edata <- private$.escapedData()
+                    dup_ids <- edata[[pid]][duplicated(edata[[pid]])]
                     if (length(dup_ids) > 0) {
                         self$results$duplicateIdNotice$setContent(
                             private$.htmlError(
@@ -254,7 +281,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
             .processParticipantFlow = function() {
                 # Don't use naOmit - it drops rows with ANY NA in ANY column
                 # NA in exclusion columns means "participant continued"
-                data <- self$data
+                data <- private$.escapedData()
                 id_var <- private$.escapeVar(self$options$participant_id)
 
                 # Get total participants
@@ -330,7 +357,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                data <- self$data
+                data <- private$.escapedData()
                 id_var <- private$.escapeVar(self$options$participant_id)
                 arm_var <- private$.escapeVar(self$options$randomization_var)
 
@@ -384,7 +411,7 @@ consortdiagramClass <- if (requireNamespace("jmvcore")) {
                     return(character(0))
                 }
 
-                data <- self$data
+                data <- private$.escapedData()
                 id_var <- private$.escapeVar(self$options$participant_id)
 
                 excluded_ids <- character(0)

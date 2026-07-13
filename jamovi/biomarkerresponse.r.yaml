@@ -33,6 +33,7 @@ items:
       width: 600
       height: 400
       requiresData: true
+      renderFun: .plot
       
     - name: correlation
       title: Correlation Analysis

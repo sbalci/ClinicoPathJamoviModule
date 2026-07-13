@@ -1440,6 +1440,14 @@ comprehensiveSurvivalPowerClass <- if (requireNamespace('jmvcore', quietly=TRUE)
 
             results$note <- "Adjustment for confounding variables in observational studies"
             return(results)
+        },
+
+        .continuousExposure = function() {
+            # Continuous exposure power analysis
+            results <- list(method = "Continuous Exposure Analysis", package = "powerSurvEpi")
+
+            results$note <- "Power analysis for continuous exposure variables in survival models"
+            return(results)
         }
     )
 )

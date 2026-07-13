@@ -70,20 +70,11 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                     
                     # Generate results
                     private$.populateResults(ctree_model, surv_data)
-                    
-                    # Create plots
-                    if (self$options$plot_tree) {
-                        private$.createTreePlot(ctree_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_survival) {
-                        private$.createSurvivalPlot(ctree_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_importance) {
-                        private$.createImportancePlot(ctree_model, surv_data)
-                    }
-                    
+
+                    # Plots are produced on demand by jamovi via the renderFun
+                    # handlers declared in .r.yaml (.plotTree / .plotSurvival /
+                    # .plotImportance); no explicit setup call is needed here.
+
                 }, error = function(e) {
                     # TODO (UX): this error handler renders via setContent(<html>) rather than jmvcore::reject(). Switching would unify the error surface with the rest of the module (one structured error path), but it changes what the user sees, so it was deferred from the /jamovify-function pass.
                     self$results$todo$setContent(paste0(
@@ -128,7 +119,8 @@ conditionalinferenceClass <- if (requireNamespace("jmvcore"))
                 analysis_data <- data.frame(
                     survival_object = surv_obj,
                     pred_data,
-                    stringsAsFactors = FALSE
+                    stringsAsFactors = FALSE,
+                    check.names = FALSE
                 )
                 
                 # Remove rows with missing values

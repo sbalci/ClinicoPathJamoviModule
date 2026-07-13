@@ -501,19 +501,24 @@ concordanceindexClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 surv_obj <- survival::Surv(time_var, event_var)
 
-                # Use survival::concordance() from survival package
-                conc <- survival::concordance(surv_obj ~ predictor)
+                # Use survival::concordance() from survival package.
+                # reverse = TRUE because the predictor is a risk score where HIGHER values
+                # indicate HIGHER risk / shorter survival (the option contract in .a.yaml,
+                # and reverse_direction already negates protective predictors upstream).
+                # With the default (reverse = FALSE) concordance() assumes higher x = longer
+                # survival and returns 1 - C (an inverted c-index, e.g. 0.30 instead of 0.70).
+                conc <- survival::concordance(surv_obj ~ predictor, reverse = TRUE)
 
                 # Extract concordance statistics
                 cindex <- conc$concordance
                 n_pairs <- sum(conc$count)
-                concordant <- conc$count["concordant"]
-                discordant <- conc$count["discordant"]
-                tied_risk <- conc$count["tied.risk"]
-                tied_time <- conc$count["tied.time"]
+                concordant <- unname(conc$count["concordant"])
+                discordant <- unname(conc$count["discordant"])
 
-                # Total ties
-                tied <- tied_risk + tied_time
+                # Total tied pairs, derived by subtraction so it is robust to survival's
+                # count naming (current versions use tied.x / tied.y / tied.xy; older ones
+                # used tied.risk / tied.time). Reading the wrong names yields NA ties.
+                tied <- n_pairs - concordant - discordant
 
                 # Standard error
                 se <- sqrt(conc$var)

@@ -502,7 +502,9 @@ conditionalsurvivalClass <- R6::R6Class(
             if (condTime >= maxTime) {
                 jmvcore::reject(
                     "Conditioning time ({condTime}) is at or beyond maximum follow-up ({maxTime}). Choose an earlier time.",
-                    code = ""
+                    code = "",
+                    condTime = condTime,
+                    maxTime = maxTime
                 )
             }
 

@@ -65,11 +65,12 @@ cohenskappaClass <- R6::R6Class(
         },
         .run = function() {
             # Get options
-            # TODO (stub): the `agreement_plot` Bool option is declared in
-            # jamovi/cohenskappa.a.yaml:99-103 but never read in this backend.
-            # The UI exposes it (default TRUE) but toggling it has no effect.
-            # Either implement the agreement plot (e.g., observed vs expected
-            # agreement bar chart) or remove from the .a.yaml.
+            # NOTE: `agreement_plot` is intentionally not read in this backend;
+            # it is honored via jamovi/cohenskappa.r.yaml, where the
+            # `agreementPlot` Image declares `visible: (agreement_plot)` and
+            # `renderFun: .plotAgreement`. Toggling it shows/hides the (already
+            # implemented) plot, so the option is wired and functional -- do not
+            # remove it.
             rater1 <- self$options$rater1
             rater2 <- self$options$rater2
 

@@ -1046,6 +1046,28 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
 
+        .recodeEventVar = function(event_var_raw) {
+            # Recode event to binary 0/1 using event_code, mirroring .run().
+            # Returns NULL when a factor/character event has fewer than 2 levels.
+            if (!is.null(self$options$event_code) && self$options$event_code != "") {
+                as.numeric(event_var_raw == self$options$event_code)
+            } else if (is.factor(event_var_raw) || is.character(event_var_raw)) {
+                event_levels <- unique(event_var_raw)
+                event_levels <- event_levels[!is.na(event_levels)]
+                if (length(event_levels) > 1) {
+                    event_code <- event_levels[grep("^(1|Yes|TRUE|Event|Death)",
+                                                    event_levels, ignore.case = TRUE)[1]]
+                    if (is.na(event_code))
+                        event_code <- event_levels[2]
+                    as.numeric(event_var_raw == event_code)
+                } else {
+                    NULL
+                }
+            } else {
+                as.numeric(event_var_raw)
+            }
+        },
+
         .plotBrierOverTime = function(image, ...) {
             # Plot time-dependent Brier score across follow-up period
 
@@ -1057,7 +1079,8 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Get data
             data <- self$data
             time_var <- data[[self$options$time]]
-            event_var <- data[[self$options$event]]
+            event_var <- private$.recodeEventVar(data[[self$options$event]])
+            if (is.null(event_var)) return()
             pred_surv <- data[[self$options$predicted_survival]]
 
             # Remove missing
@@ -1166,7 +1189,8 @@ brierscoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Get data
             data <- self$data
             time_var <- data[[self$options$time]]
-            event_var <- data[[self$options$event]]
+            event_var <- private$.recodeEventVar(data[[self$options$event]])
+            if (is.null(event_var)) return()
             pred_surv <- data[[self$options$predicted_survival]]
 
             # Remove missing

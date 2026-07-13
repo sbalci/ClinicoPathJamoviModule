@@ -1235,12 +1235,12 @@ clinicalvalidationClass <- R6::R6Class(
 
     # Render validation learning curves
     .validation_curves_plot = function(image, ggtheme, theme, ...) {
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         return()
       }
 
       # Get data and prepare
-      data <- self$.getData()
+      data <- private$.getData()
       prepared_data <- private$.prepareData(data)
 
       if (is.null(prepared_data)) {
@@ -1327,12 +1327,12 @@ clinicalvalidationClass <- R6::R6Class(
 
     # Render calibration plot
     .calibration_plot = function(image, ggtheme, theme, ...) {
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         return()
       }
 
       # Get data
-      data <- self$.getData()
+      data <- private$.getData()
       prepared_data <- private$.prepareData(data)
 
       if (is.null(prepared_data)) {
@@ -1398,12 +1398,12 @@ clinicalvalidationClass <- R6::R6Class(
 
     # Render ROC curve with confidence intervals
     .roc_curve_plot = function(image, ggtheme, theme, ...) {
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         return()
       }
 
       # Get data
-      data <- self$.getData()
+      data <- private$.getData()
       prepared_data <- private$.prepareData(data)
 
       if (is.null(prepared_data)) {
@@ -1483,12 +1483,12 @@ clinicalvalidationClass <- R6::R6Class(
 
     # Render precision-recall curve
     .prc_curve_plot = function(image, ggtheme, theme, ...) {
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         return()
       }
 
       # Get data
-      data <- self$.getData()
+      data <- private$.getData()
       prepared_data <- private$.prepareData(data)
 
       if (is.null(prepared_data)) {
@@ -1569,12 +1569,12 @@ clinicalvalidationClass <- R6::R6Class(
       oldpar <- graphics::par(no.readonly = TRUE)
       on.exit(graphics::par(oldpar), add = TRUE)
 
-      if (!self$.isReady()) {
+      if (!private$.isReady()) {
         return()
       }
 
       # Get data
-      data <- self$.getData()
+      data <- private$.getData()
       prepared_data <- private$.prepareData(data)
 
       if (is.null(prepared_data)) {

@@ -544,7 +544,70 @@ clinicalnomogramsClass <- R6::R6Class(
             
             self$results$modelSummary$setContent(html)
         },
-        
+
+        .generateModelEquation = function(model) {
+            tryCatch({
+                nomogram_type <- self$options$nomogram_type
+
+                coefs <- coef(model)
+                if (is.null(coefs) || length(coefs) == 0) {
+                    self$results$nomogramEquation$setContent(
+                        "<p>Model equation is not available for this model.</p>"
+                    )
+                    return(invisible(NULL))
+                }
+
+                # Separate intercept (if any) from predictor terms
+                intercept_names <- c("(Intercept)", "Intercept")
+                intercept <- NA_real_
+                for (inm in intercept_names) {
+                    if (inm %in% names(coefs)) {
+                        intercept <- coefs[[inm]]
+                        break
+                    }
+                }
+
+                term_strings <- character(0)
+                for (nm in names(coefs)) {
+                    if (nm %in% intercept_names) next
+                    term_strings <- c(
+                        term_strings,
+                        paste0("(", formatC(coefs[[nm]], format = "f", digits = 4),
+                               " &times; ", htmltools::htmlEscape(nm), ")")
+                    )
+                }
+
+                rhs <- paste(term_strings, collapse = " + ")
+                if (!is.na(intercept)) {
+                    prefix <- formatC(intercept, format = "f", digits = 4)
+                    rhs <- if (length(term_strings) > 0) paste0(prefix, " + ", rhs) else prefix
+                }
+                if (identical(rhs, "")) rhs <- "0"
+
+                html <- "<h3>Model Equation</h3>"
+                if (nomogram_type == "survival_nomogram") {
+                    html <- paste0(html,
+                        "<p>Linear predictor (log relative hazard):</p>",
+                        "<p><b>LP = ", rhs, "</b></p>",
+                        "<p>The hazard ratio for each predictor equals exp(coefficient).</p>")
+                } else if (nomogram_type == "logistic_nomogram") {
+                    html <- paste0(html,
+                        "<p>Log-odds of the outcome:</p>",
+                        "<p><b>logit(p) = ", rhs, "</b></p>",
+                        "<p>Predicted probability = 1 / (1 + exp(-logit(p))).</p>")
+                } else {
+                    html <- paste0(html,
+                        "<p>Predicted value:</p>",
+                        "<p><b>Y = ", rhs, "</b></p>")
+                }
+
+                self$results$nomogramEquation$setContent(html)
+            }, error = function(e) {
+                # Non-fatal: leave the equation panel empty if extraction fails
+            })
+            invisible(NULL)
+        },
+
         .createNomogram = function(model, data) {
             
             tryCatch({
@@ -851,7 +914,7 @@ clinicalnomogramsClass <- R6::R6Class(
             })
         },
 
-        .assessCalibration = function(model, data) {
+        .assessCalibration = function(data, model) {
             tryCatch({
                 table <- self$results$calibrationResults
                 nomogram_type <- self$options$nomogram_type

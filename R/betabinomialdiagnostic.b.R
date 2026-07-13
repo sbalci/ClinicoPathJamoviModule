@@ -257,8 +257,8 @@ betabinomialdiagnosticClass <- R6::R6Class(
                     specificity <- tn / (tn + fp)
                     
                     # Confidence intervals (exact binomial)
-                    sens_ci <- private$.binomialCI(tp, tp + fn)
-                    spec_ci <- private$.binomialCI(tn, tn + fp)
+                    sens_ci <- private$.binomialCI(tp, tp + fn, conf_level = self$options$confidence_level)
+                    spec_ci <- private$.binomialCI(tn, tn + fp, conf_level = self$options$confidence_level)
                     
                     study_data <- rbind(study_data, data.frame(
                         study = as.character(study),

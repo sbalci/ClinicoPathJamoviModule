@@ -1128,7 +1128,9 @@ distribute_module_data <- function(module_name, module_cfg, module_dir, main_rep
     }
   }
 
-  # (3) copy .omv referenced in the submodule 0000.yaml `datasets:` from main inst/extdata (fallback data/)
+  # (3) copy .omv referenced in the submodule 0000.yaml `datasets:` from the canonical omv
+  # source `data-raw/non-rda/` (the full 994-file example-data store; build-ignored), falling
+  # back to inst/extdata/ then data/.
   n_omv <- 0L
   if (distribute_omv) {
     zero <- file.path(module_dir, "jamovi", "0000.yaml")
@@ -1136,11 +1138,13 @@ distribute_module_data <- function(module_name, module_cfg, module_dir, main_rep
       zl <- readLines(zero, warn = FALSE)
       omv <- unique(trimws(basename(gsub(".*path:\\s*", "", grep("path:.*\\.omv", zl, value = TRUE)))))
       for (o in omv) {
-        src <- file.path(main_repo_dir, "inst", "extdata", o)
-        if (!file.exists(src)) src <- file.path(main_repo_dir, "data", o)
-        if (file.exists(src)) {
-          fs::file_copy(src, file.path(data_dir, o), overwrite = TRUE); n_omv <- n_omv + 1L
-        } else cat("    ⚠️ omv in 0000.yaml datasets not found in main:", o, "\n")
+        cand <- c(file.path(main_repo_dir, "data-raw", "non-rda", o),
+                  file.path(main_repo_dir, "inst", "extdata", o),
+                  file.path(main_repo_dir, "data", o))
+        hit <- cand[file.exists(cand)]
+        if (length(hit) > 0) {
+          fs::file_copy(hit[1], file.path(data_dir, o), overwrite = TRUE); n_omv <- n_omv + 1L
+        } else cat("    ⚠️ omv in 0000.yaml datasets not found in main (data-raw/non-rda, inst/extdata, data):", o, "\n")
       }
     }
   }
@@ -1150,6 +1154,54 @@ distribute_module_data <- function(module_name, module_cfg, module_dir, main_rep
 
   cat(sprintf("    📊 data: %d rda copied, %d stale doc(s) pruned, %d doc(s) generated, %d omv distributed\n",
               length(copied), n_pruned, n_doc, n_omv))
+}
+
+# omv documentation: ensure every .omv in a submodule's data/ is listed in its 0000.yaml
+# `datasets:` (jamovi's dataset browser). prepare() preserves that section, so entries persist.
+.omv_title_map <- c(
+  agepyramid = "Age Pyramid", benford = "Benford Analysis", checkdata = "Data Quality Check",
+  dataquality = "Data Quality", reportcat = "Categorical Variables Report",
+  summarydata = "Continuous Variables Summary", treatmentResponse = "Treatment Response",
+  tableone = "Table One", swimmerplot = "Swimmer Plot", waterfall = "Treatment Response Waterfall")
+
+.omv_stem <- function(omv) sub("_(test|sample|example|basic|raw|longitudinal|percentage|data)([_.].*)?$", "",
+                              sub("\\.omv$", "", omv))
+
+.omv_entry <- function(omv) {
+  stem <- .omv_stem(omv)
+  title <- if (!is.na(.omv_title_map[stem])) unname(.omv_title_map[stem]) else tools::toTitleCase(gsub("[_-]", " ", stem))
+  c(paste0("  - name: ", title), paste0("    path: ", omv),
+    paste0("    description: Example dataset for the ", title, " analysis."),
+    "    tags:", paste0("      - ", title))
+}
+
+# Add datasets entries for present-but-undocumented omv, SKIPPING omv owned by another module
+# (documented in that module's 0000.yaml). Only appends to an EXISTING datasets: section.
+document_module_omv <- function(module_dir, module_name, other_module_dirs = character(0)) {
+  zero <- file.path(module_dir, "jamovi", "0000.yaml")
+  data_dir <- file.path(module_dir, "data")
+  if (!file.exists(zero) || !dir.exists(data_dir)) return(invisible())
+  zl <- readLines(zero, warn = FALSE)
+  omv_here <- basename(list.files(data_dir, pattern = "\\.omv$"))
+  if (length(omv_here) == 0) return(invisible())
+  path_of <- function(lines) basename(trimws(gsub(".*path:\\s*", "", grep("path:.*\\.omv", lines, value = TRUE))))
+  documented <- path_of(zl)
+  owned_elsewhere <- character(0)
+  for (od in other_module_dirs) {
+    oz <- file.path(od, "jamovi", "0000.yaml")
+    if (file.exists(oz)) owned_elsewhere <- c(owned_elsewhere, path_of(readLines(oz, warn = FALSE)))
+  }
+  to_add <- setdiff(omv_here, unique(c(documented, owned_elsewhere)))
+  if (length(to_add) == 0) return(invisible())
+  ds_line <- grep("^datasets:", zl)
+  if (length(ds_line) == 0) return(invisible())  # no datasets section -> don't fabricate
+  ds_line <- ds_line[1]
+  end <- length(zl) + 1L
+  if (ds_line < length(zl)) for (i in (ds_line + 1):length(zl)) if (grepl("^[A-Za-z]", zl[i])) { end <- i; break }
+  entries <- unlist(lapply(to_add, .omv_entry))
+  writeLines(append(zl, entries, after = end - 1L), zero)
+  cat(sprintf("    📄 documented %d omv in %s 0000.yaml datasets: %s\n",
+              length(to_add), module_name, paste(to_add, collapse = ", ")))
 }
 
 # Enhanced configuration-based asset copying ----
@@ -1187,6 +1239,15 @@ if (!WIP && !TEST) {
       })
     } else {
       cat("  ⏭️ Skipping", module_name, "data files (copy_data_files: false)\n")
+    }
+
+    # Document present-but-undocumented omv in the submodule 0000.yaml datasets: (skips omv
+    # owned by another production module). Keeps jamovi's dataset browser in sync with data/.
+    if (copy_data_files && (modes$distribute_omv %||% TRUE)) {
+      prod_mods <- c("jjstatsplot", "jsurvival", "meddecide", "ClinicoPathDescriptives", "OncoPath")
+      other_dirs <- unlist(module_dirs[setdiff(prod_mods, module_name)])
+      tryCatch(document_module_omv(module_dir, module_name, other_dirs),
+               error = function(e) warning("⚠️ Error documenting omv for ", module_name, ": ", e$message))
     }
 
     # Copy R files

@@ -73,6 +73,7 @@ items:
       width: 500
       height: 400
       visible: (showPlot)
+      renderFun: .plot
 
 
 refs:

@@ -109,7 +109,8 @@ conditionalgeeClass <- R6::R6Class(
             }
             
             prepared_data <- results$prepared_data
-            
+            private$.data_summary <- results
+
             # Fit the conditional GEE model
             model_results <- private$.fitConditionalGEE(prepared_data)
             if (is.null(model_results)) {
@@ -341,7 +342,7 @@ conditionalgeeClass <- R6::R6Class(
                 conditioning = conditioning_set,
                 observations = n_obs,
                 clusters = n_clusters,
-                max_events = prepared_data$max_events,
+                max_events = private$.data_summary$max_events,
                 link = self$options$link_function
             ))
         },
@@ -620,9 +621,9 @@ conditionalgeeClass <- R6::R6Class(
             <div class='summary'>
             <strong>Model Summary:</strong><br>
             \u{2022} <strong>Distribution:</strong> ", distribution_family, "<br>
-            \u{2022} <strong>Number of subjects:</strong> ", prepared_data$n_subjects, "<br>
-            \u{2022} <strong>Gap time observations:</strong> ", prepared_data$n_gaps, "<br>
-            \u{2022} <strong>Maximum events per subject:</strong> ", prepared_data$max_events, "<br>
+            \u{2022} <strong>Number of subjects:</strong> ", private$.data_summary$n_subjects, "<br>
+            \u{2022} <strong>Gap time observations:</strong> ", private$.data_summary$n_gaps, "<br>
+            \u{2022} <strong>Maximum events per subject:</strong> ", private$.data_summary$max_events, "<br>
             \u{2022} <strong>Mean gap time:</strong> ", round(mean(prepared_data$gap_time, na.rm = TRUE), 2), "
             </div>
 
@@ -693,14 +694,14 @@ conditionalgeeClass <- R6::R6Class(
             row_count <- row_count + 1
             table$addRow(rowKey = row_count, values = list(
                 parameter = "Number of Subjects",
-                value = as.character(prepared_data$n_subjects),
+                value = as.character(private$.data_summary$n_subjects),
                 interpretation = "Total number of individuals in analysis"
             ))
 
             row_count <- row_count + 1
             table$addRow(rowKey = row_count, values = list(
                 parameter = "Gap Time Observations",
-                value = as.character(prepared_data$n_gaps),
+                value = as.character(private$.data_summary$n_gaps),
                 interpretation = "Total number of inter-event time observations"
             ))
         },
@@ -829,6 +830,7 @@ conditionalgeeClass <- R6::R6Class(
 
         # Store model results
         .model_results = NULL,
-        .prepared_data = NULL
+        .prepared_data = NULL,
+        .data_summary = NULL
     )
 )
