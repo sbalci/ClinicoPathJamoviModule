@@ -7,12 +7,12 @@ items:
     - name: text1
       title: Original Data
       type: Preformatted
-      visible: false # (od)
+      visible: (od)
 
     - name: text2
       title: Original Data
       type: Html
-      visible: false (od)
+      visible: (od)
 
     # Tables for Test 1
     - name: cTable1

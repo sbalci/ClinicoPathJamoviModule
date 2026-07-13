@@ -161,9 +161,11 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             # Check for missing values
             if (any(is.na(image_paths)) || any(is.na(targets))) {
                 self$results$modelSummary$setContent(
-                    "<div style='color: red; padding: 10px; border: 1px solid red;'>",
-                    "<strong>Error:</strong> Missing values detected in image paths or targets.",
-                    "</div>"
+                    paste0(
+                        "<div style='color: red; padding: 10px; border: 1px solid red;'>",
+                        "<strong>Error:</strong> Missing values detected in image paths or targets.",
+                        "</div>"
+                    )
                 )
                 return(FALSE)
             }
@@ -171,27 +173,33 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             # Validate parameter ranges
             if (self$options$patch_size < 224 || self$options$patch_size > 1024) {
                 self$results$modelSummary$setContent(
-                    "<div style='color: red; padding: 10px; border: 1px solid red;'>",
-                    "<strong>Error:</strong> Patch size must be between 224 and 1024 pixels.",
-                    "</div>"
+                    paste0(
+                        "<div style='color: red; padding: 10px; border: 1px solid red;'>",
+                        "<strong>Error:</strong> Patch size must be between 224 and 1024 pixels.",
+                        "</div>"
+                    )
                 )
                 return(FALSE)
             }
             
             if (self$options$validation_split <= 0 || self$options$validation_split >= 1) {
                 self$results$modelSummary$setContent(
-                    "<div style='color: red; padding: 10px; border: 1px solid red;'>",
-                    "<strong>Error:</strong> Validation split must be between 0 and 1.",
-                    "</div>"
+                    paste0(
+                        "<div style='color: red; padding: 10px; border: 1px solid red;'>",
+                        "<strong>Error:</strong> Validation split must be between 0 and 1.",
+                        "</div>"
+                    )
                 )
                 return(FALSE)
             }
             
             if (self$options$epochs < 1 || self$options$epochs > 100) {
                 self$results$modelSummary$setContent(
-                    "<div style='color: red; padding: 10px; border: 1px solid red;'>",
-                    "<strong>Error:</strong> Number of epochs must be between 1 and 100.",
-                    "</div>"
+                    paste0(
+                        "<div style='color: red; padding: 10px; border: 1px solid red;'>",
+                        "<strong>Error:</strong> Number of epochs must be between 1 and 100.",
+                        "</div>"
+                    )
                 )
                 return(FALSE)
             }
@@ -644,6 +652,14 @@ deeplearningpredictionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
         
         .plotCumulativeLogit = function(image, ggtheme, theme, ...) {
             # Implementation would create cumulative logit plots
+        },
+
+        .plotCrossValidation = function(image, ggtheme, theme, ...) {
+            # Implementation would create cross-validation performance box plots
+        },
+
+        .plotModelArchitecture = function(image, ggtheme, theme, ...) {
+            # Implementation would create model architecture visualization
         }
     )
 )

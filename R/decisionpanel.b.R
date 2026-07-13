@@ -2102,12 +2102,17 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
 
                 # Simple text representation (would be enhanced with actual tree visualization)
                 for (node in tree_results$structure) {
+                    # node$condition embeds the split variable name; escape all
+                    # string fields since this is a type:Html sink.
                     html <- paste0(
                         html,
                         sprintf(
                             "Node %s: %s (n=%d, P(+)=%.2f, Decision=%s)\n",
-                            node$node, node$condition, node$nCases,
-                            node$probPositive, node$decision
+                            htmltools::htmlEscape(node$node),
+                            htmltools::htmlEscape(node$condition),
+                            node$nCases,
+                            node$probPositive,
+                            htmltools::htmlEscape(node$decision)
                         )
                     )
                 }
@@ -2151,17 +2156,37 @@ decisionpanelClass <- if (requireNamespace("jmvcore")) {
             .populateBootstrapTable = function(boot_results) {
                 table <- self$results$bootstrapResults
 
+                # .performBootstrap() returns, per panel, a list with $tests and
+                # nested per-metric lists ($sensitivity, $specificity, ...), each
+                # holding $mean/$sd/$ci_lower/$ci_upper. Emit one row per metric to
+                # match the r.yaml columns (panel, metric, estimate, lower, upper, se).
+                metric_labels <- list(
+                    sensitivity = "Sensitivity",
+                    specificity = "Specificity",
+                    accuracy = "Accuracy",
+                    ppv = "PPV",
+                    npv = "NPV"
+                )
+
                 for (key in names(boot_results)) {
                     result <- boot_results[[key]]
 
-                    table$addRow(rowKey = key, values = list(
-                        panel = result$panel,
-                        metric = result$metric,
-                        estimate = result$estimate,
-                        lower = result$lower,
-                        upper = result$upper,
-                        se = result$se
-                    ))
+                    for (metric_name in names(metric_labels)) {
+                        metric_data <- result[[metric_name]]
+                        if (is.null(metric_data)) next
+
+                        table$addRow(
+                            rowKey = paste(key, metric_name, sep = "_"),
+                            values = list(
+                                panel = result$tests,
+                                metric = metric_labels[[metric_name]],
+                                estimate = as.numeric(metric_data$mean),
+                                lower = as.numeric(metric_data$ci_lower),
+                                upper = as.numeric(metric_data$ci_upper),
+                                se = as.numeric(metric_data$sd)
+                            )
+                        )
+                    }
                 }
             },
 

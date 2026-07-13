@@ -485,7 +485,7 @@ refs:
 
     Fagan2:
         type: 'article'
-        author: ""
+        author: "Simon, S."
         title: 'StATS: What is a Fagan nomogram?'
         publisher: 'website'
         year: 2020
@@ -617,7 +617,7 @@ refs:
         type: 'article'
         title: Pathologists should probably forget about kappa. Percent agreement, diagnostic specificity and related metrics provide more clinically applicable measures of interobserver variability
         year: 2020
-        author: ""
+        author: "Marchevsky, A. M., & Thunnissen, E."
         publisher: Annals of Diagnostic Pathology
         volume: 47
         url: https://www.sciencedirect.com/science/article/abs/pii/S1092913420301040
@@ -861,6 +861,7 @@ refs:
 
     padjust:
         type: 'website'
+        author: R Core Team
         year: 2020
         title: "p.adjust {stats} Adjust P-values for Multiple Comparisons"
         publisher: '[R package]. Retrieved from https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html'

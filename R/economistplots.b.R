@@ -93,7 +93,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check for ggeconodist package
                 if (!requireNamespace("ggeconodist", quietly = TRUE)) {
                     # Check for fonts and provide guidance
-                    font_status <- self$.check_font_availability()
+                    font_status <- private$.check_font_availability()
 
                     # Create comprehensive error message with font guidance
                     font_guidance <- if (!font_status$optimal_available) {
@@ -132,7 +132,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "</div>",
                         font_guidance
                     )
-                    self$results$main_plot$setContent(error_msg)
+                    self$results$instructions$setContent(error_msg)
                     return()
                 }
 
@@ -174,6 +174,7 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Set plot state for rendering
                 self$results$main_plot$setState(private$.processed_data)
+                self$results$distribution_diagnostics$setState(private$.processed_data)
             },
             .process_data = function() {
                 mydata <- self$data
@@ -682,6 +683,34 @@ economistplotsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         return(private$.create_fallback_plot(data, x_var, y_var, ggtheme))
                     }
                 )
+            },
+            # Distribution diagnostics render function (declared in .r.yaml)
+            .plot_diagnostics = function(image, ggtheme, theme, ...) {
+                data <- image$state
+                if (is.null(data)) {
+                    return()
+                }
+
+                y_var <- self$options$y_var
+                x_var <- self$options$x_var
+
+                # Density overlay by group to diagnose distribution shape/spread.
+                # .data[[]] safely handles column names with spaces/punctuation.
+                plot <- ggplot2::ggplot(
+                    data,
+                    ggplot2::aes(x = .data[[y_var]], fill = .data[[x_var]])
+                ) +
+                    ggplot2::geom_density(alpha = self$options$alpha_level) +
+                    ggtheme +
+                    ggplot2::labs(
+                        title = "Distribution Diagnostics",
+                        x = self$options$y_var,
+                        y = "Density",
+                        fill = self$options$x_var
+                    )
+
+                print(plot)
+                TRUE
             },
             .create_fallback_plot = function(data, x_var, y_var, ggtheme, selected_font = "sans") {
                 # Fallback plot when ggeconodist is not available

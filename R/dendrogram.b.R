@@ -502,6 +502,29 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                           else if (heatmapScale == "row") "row"
                           else "column"
 
+            # Optional row (feature) dendrogram using user-selected distance/method.
+            # Computed BEFORE heatmapParams because cluster_rows references rowDendro.
+            rowDendro <- NULL
+            if (showRowDendro) {
+                # Validate compatibility for row clustering
+                rowValid <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
+                if (!rowValid$valid) {
+                    private$.checkpoint()  # Track progress for jamovi
+                } else {
+                    rowDendro <- tryCatch({
+                        # dataMatrix is features x samples; dist() over its rows
+                        # clusters the FEATURES (the heatmap rows).
+                        stats::as.dendrogram(stats::hclust(
+                            stats::dist(dataMatrix, method = distanceMethod),
+                            method = clusterMethod
+                        ))
+                    }, error = function(e) {
+                        private$.checkpoint()  # Track progress for jamovi
+                        NULL
+                    })
+                }
+            }
+
             # CRITICAL FIX: Build heatmap parameters to honor user options
             heatmapParams <- list(
                 .row = quote(feature),
@@ -520,26 +543,6 @@ dendrogramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # CRITICAL FIX: Add cell borders BEFORE annotation to ensure they persist
             if (showCellBorders) {
                 heatmapParams$rect_gp <- grid::gpar(col = "white", lwd = 0.5)
-            }
-
-            # Optional row dendrogram using user-selected distance/method
-            rowDendro <- NULL
-            if (showRowDendro) {
-                # Validate compatibility for row clustering
-                rowValid <- private$.validateDistanceLinkage(distanceMethod, clusterMethod)
-                if (!rowValid$valid) {
-                    private$.checkpoint()  # Track progress for jamovi
-                } else {
-                    rowDendro <- tryCatch({
-                        stats::as.dendrogram(stats::hclust(
-                            stats::dist(t(dataMatrix), method = distanceMethod),
-                            method = clusterMethod
-                        ))
-                    }, error = function(e) {
-                        private$.checkpoint()  # Track progress for jamovi
-                        NULL
-                    })
-                }
             }
 
             # Create base heatmap with all parameters

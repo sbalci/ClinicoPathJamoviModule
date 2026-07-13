@@ -102,7 +102,7 @@ digitalvalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 bias_table$addColumn(name = "interpretation", title = "Clinical Significance", type = "text")
 
                 # Decision impact table
-                decision_table <- self$results$decisiontable
+                decision_table <- self$results$thresholdtable
                 decision_table$addColumn(name = "threshold", title = "Clinical Threshold", type = "text")
                 decision_table$addColumn(name = "agreement", title = "Classification Agreement (%)", type = "number", format = "zto")
                 decision_table$addColumn(name = "kappa", title = "Cohen's Kappa", type = "number", format = "zto")
@@ -263,7 +263,7 @@ digitalvalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     thresholds <- list("Median" = median(c(reference, test), na.rm = TRUE))
                 }
 
-                decision_table <- self$results$decisiontable
+                decision_table <- self$results$thresholdtable
                 row_key <- 1
 
                 for (threshold_name in names(thresholds)) {
@@ -383,7 +383,7 @@ digitalvalidationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     ggtheme
 
                 print(p)
-                True
+                TRUE
             },
             .generateValidationInterpretation = function(reference, test) {
                 n <- length(reference)

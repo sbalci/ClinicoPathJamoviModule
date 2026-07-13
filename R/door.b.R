@@ -132,13 +132,17 @@ doorClass <- R6::R6Class(
 
         .populateSummary = function(res, d) {
             fav <- if (res$door > 0.5) d$idxLbl else d$refLbl
+            # escape data-derived group level labels before HTML interpolation
+            idxLbl <- htmltools::htmlEscape(d$idxLbl)
+            refLbl <- htmltools::htmlEscape(d$refLbl)
+            fav <- htmltools::htmlEscape(fav)
             strength <- if (res$low > 0.5 || res$high < 0.5)
                 "statistically favours" else "does not significantly favour"
             html <- glue::glue(
                 "<p>The DOOR probability is <b>{sprintf('%.3f', res$door)}</b>
                 ({sprintf('%.0f', 100*d$conf)}% CI {sprintf('%.3f', res$low)}\u{2013}{sprintf('%.3f', res$high)}):
-                a randomly selected <b>{d$idxLbl}</b> patient has a more desirable outcome
-                than a randomly selected <b>{d$refLbl}</b> patient
+                a randomly selected <b>{idxLbl}</b> patient has a more desirable outcome
+                than a randomly selected <b>{refLbl}</b> patient
                 {sprintf('%.1f', 100*res$door)}% of the time (ties split evenly). The
                 result {strength} <b>{fav}</b>.</p>")
             self$results$summary$setContent(html)

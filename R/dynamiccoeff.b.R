@@ -13,6 +13,11 @@ dynamiccoeffClass <- R6::R6Class(
     "dynamiccoeffClass",
     inherit = dynamiccoeffBase,
     private = list(
+        # Private field must be declared: R6 objects are locked, so assigning
+        # to an undeclared field (see .preparePlotTheme) throws
+        # "cannot add bindings to a locked environment".
+        .plotTheme = NULL,
+
         .init = function() {
             
             if (is.null(self$data) || is.null(self$options$elapsedtime) || is.null(self$options$outcome)) {
@@ -853,8 +858,8 @@ dynamiccoeffClass <- R6::R6Class(
             # Populate table
             table <- self$results$coefficientPaths
             
-            for (row in table_data) {
-                table$addRow(rowKey = length(table_data), values = row)
+            for (i in seq_along(table_data)) {
+                table$addRow(rowKey = i, values = table_data[[i]])
             }
         },
 
@@ -891,8 +896,8 @@ dynamiccoeffClass <- R6::R6Class(
             # Populate table
             table <- self$results$stateEvolution
             
-            for (row in table_data) {
-                table$addRow(rowKey = length(table_data), values = row)
+            for (i in seq_along(table_data)) {
+                table$addRow(rowKey = i, values = table_data[[i]])
             }
         },
 
@@ -947,8 +952,8 @@ dynamiccoeffClass <- R6::R6Class(
             # Populate table
             table <- self$results$adaptationMetrics
             
-            for (row in table_data) {
-                table$addRow(rowKey = length(table_data), values = row)
+            for (i in seq_along(table_data)) {
+                table$addRow(rowKey = i, values = table_data[[i]])
             }
         },
 
@@ -982,8 +987,8 @@ dynamiccoeffClass <- R6::R6Class(
             # Populate table
             table <- self$results$modelComparison
             
-            for (row in table_data) {
-                table$addRow(rowKey = length(table_data), values = row)
+            for (i in seq_along(table_data)) {
+                table$addRow(rowKey = i, values = table_data[[i]])
             }
         },
 
@@ -1028,8 +1033,8 @@ dynamiccoeffClass <- R6::R6Class(
             # Populate table
             table <- self$results$convergenceMetrics
             
-            for (row in table_data) {
-                table$addRow(rowKey = length(table_data), values = row)
+            for (i in seq_along(table_data)) {
+                table$addRow(rowKey = i, values = table_data[[i]])
             }
         },
 

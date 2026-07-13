@@ -155,10 +155,13 @@ dynamicpredictionClass <- R6::R6Class(
             data <- list()
             
             # Survival data
+            # Respect the user-selected event level (outcomeLevel) so that
+            # factor outcomes are recoded to 0/1; numeric 0/1 coding with the
+            # default outcomeLevel '1' yields the same result as before.
             data$survival <- data.frame(
                 subject_id = self$data[[subject_var]],
                 time = jmvcore::toNumeric(self$data[[time_var]]),
-                event = jmvcore::toNumeric(self$data[[event_var]])
+                event = ifelse(self$data[[event_var]] == self$options$outcomeLevel, 1, 0)
             )
             
             # Add baseline variables

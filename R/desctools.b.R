@@ -164,11 +164,14 @@ desctoolsClass <- if (requireNamespace("jmvcore")) {
 
                 if (length(group_levels) != 2) {
                     self$results$effect_size_results$setContent(
-                        "<div style='color: red;'>
-                        Error: Grouping variable must have exactly 2 levels for Cohen's D calculation.
-                        <br>
-                        Current variable has ", length(group_levels), " levels: ", paste(group_levels, collapse = ", "), "
-                        </div>"
+                        paste0(
+                            "<div style='color: red;'>
+                            Error: Grouping variable must have exactly 2 levels for Cohen's D calculation.
+                            <br>
+                            Current variable has ", length(group_levels), " levels: ",
+                            htmltools::htmlEscape(paste(group_levels, collapse = ", ")),
+                            "</div>"
+                        )
                     )
                     return()
                 }

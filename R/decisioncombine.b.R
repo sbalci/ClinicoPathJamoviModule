@@ -977,8 +977,23 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     pattern_values <- paste0(t1, "/", t2, "/", t3)
                 }
 
-                # Add column to original dataset
-                self$results$setColumn("test_pattern", pattern_values)
+                # Add column to original dataset.
+                # jmvcore has no `self$results$setColumn()` method; writing a
+                # column back to the dataset requires a `type: Output` result
+                # item (populated via setRowNums()/setValues()). Use that API
+                # when the accessor is present and degrade gracefully otherwise,
+                # so enabling this option never crashes the analysis.
+                if (!is.null(self$results$addedPattern)) {
+                    if (self$results$addedPattern$isNotFilled()) {
+                        self$results$addedPattern$setRowNums(rownames(data_prep))
+                        self$results$addedPattern$setValues(pattern_values)
+                    }
+                } else {
+                    private$.addNotice(
+                        "INFO", "Pattern Column Not Added",
+                        "Adding the test pattern back to the dataset is not available in this build. The combination pattern is shown in the results tables above."
+                    )
+                }
             },
             .plotBarChart = function(image, ...) {
                 combTable <- self$results$combinationTable
