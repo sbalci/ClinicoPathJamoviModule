@@ -150,8 +150,7 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Co-Testing Analysis",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "DiagnosticTests",
-                    "MultipleDiagnosticTests"))
+                    "DiagnosticTests"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",

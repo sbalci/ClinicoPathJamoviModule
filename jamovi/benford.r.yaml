@@ -45,7 +45,6 @@ items:
     - name:  text
       title: Detailed Analysis Results
       type:  Preformatted
-      visible: false
 
     - name:  text2
       title: Suspicious Data Points

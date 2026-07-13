@@ -17,8 +17,8 @@ hematologicindicesClass <- R6::R6Class(
                 <ul>
                   <li><b>NLR</b> = neutrophils / lymphocytes; <b>PLR</b> = platelets /
                       lymphocytes; <b>LMR</b> = lymphocytes / monocytes;
-                      <b>SII</b> = platelets &times; neutrophils / lymphocytes.</li>
-                  <li><b>PNI</b> (Onodera) = 10 &times; albumin (g/dL) + 0.005 &times; lymphocytes (/&micro;L).</li>
+                      <b>SII</b> = platelets \u{00D7} neutrophils / lymphocytes.</li>
+                  <li><b>PNI</b> (Onodera) = 10 \u{00D7} albumin (g/dL) + 0.005 \u{00D7} lymphocytes (/\u{00B5}L).</li>
                   <li><b>CAR</b> = CRP / albumin; <b>GPS / mGPS</b> from CRP and albumin thresholds.</li>
                 </ul>
                 <p>Provide the counts you have (10<sup>9</sup>/L); indices whose inputs are
@@ -243,10 +243,10 @@ hematologicindicesClass <- R6::R6Class(
                 "<h4>Inflammation-based prognostic indices</h4>
                 <p><b>NLR</b> = neutrophils / lymphocytes, <b>PLR</b> = platelets /
                 lymphocytes, <b>LMR</b> = lymphocytes / monocytes, and
-                <b>SII</b> = platelets &times; neutrophils / lymphocytes capture the balance
+                <b>SII</b> = platelets \u{00D7} neutrophils / lymphocytes capture the balance
                 between systemic inflammation and adaptive immunity.</p>
-                <p><b>PNI</b> (Onodera, 1984) = 10 &times; albumin (g/dL) + 0.005 &times;
-                total lymphocyte count (/&micro;L) combines nutrition and immunity.
+                <p><b>PNI</b> (Onodera, 1984) = 10 \u{00D7} albumin (g/dL) + 0.005 \u{00D7}
+                total lymphocyte count (/\u{00B5}L) combines nutrition and immunity.
                 <b>CAR</b> = CRP / albumin. The <b>Glasgow Prognostic Score</b> (McMillan)
                 scores elevated CRP (&gt; 10 mg/L) and low albumin (&lt; 35 g/L): the
                 <i>modified</i> GPS requires elevated CRP for any positive score, whereas the

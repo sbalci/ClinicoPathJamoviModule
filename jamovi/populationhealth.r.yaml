@@ -7,7 +7,6 @@ items:
     - name: todo
       title: Population Health Overview
       type: Html
-      refs: [patientID, healthOutcomes, demographics]
 
     - name: populationSummary
       title: Population Summary

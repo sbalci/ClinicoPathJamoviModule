@@ -32,6 +32,13 @@ Function: **`$ARGUMENTS`**
 
 ## Code Review Focus Areas
 
+> **jamovi library-acceptance checks** (the automated library reviewer flags these — include them):
+> - **UI labels**: checkbox `title:`/`label:` describe the thing, not the action (drop leading `Show`/`Enable`/`Include`/`Export`/`Generate`); sentence-case individual controls, Title Case only for group/section headings; advanced options in a collapsed `CollapseBox`; VariableSupplier near the top.
+> - **Rendering correctness**: named HTML symbol entities in `.b.R` output (`&plusmn;`, `&ge;`, `&times;`, `&beta;`…) → literal UTF-8 (`±`, `≥`, `×`, `β`). Keep structural `&lt;`/`&gt;`/`&amp;`/`&quot;`/`&nbsp;`.
+> - **i18n fragments**: no `paste0`-glued `.()` fragments, no leading/trailing space inside `.()` — one complete sentence per `.()` with `{}` placeholders via `jmvcore::format()`.
+> - **Dead code**: `if (FALSE)` blocks or half-wired removed options (reading `self$options$X` for an X no longer in `.a.yaml`); debug scaffolding shipped.
+> - **Citations**: `refs:` keys resolve in `00refs.yaml` (no undefined/case-mismatch/empty-author). Run `/update-refs <fn> --validate`.
+
 ### Architecture & Design
 
 - R6 class structure and inheritance

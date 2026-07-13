@@ -6971,7 +6971,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 0; color: #856404;'>
                         With k raters you compute C(k,2) p-values. For k=4 that is 6 tests; for
                         k=6 it is 15. Enable a multiple-testing correction (Bonferroni, BH, or
-                        Holm) under <em>Mixed-Effects Comparison &rarr; Multiple Testing
+                        Holm) under <em>Mixed-Effects Comparison \u{2192} Multiple Testing
                         Correction</em> to control familywise error or FDR.
                     </p>
                 </div>
@@ -10080,7 +10080,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Limits of Agreement (LoA)</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean &plusmn; 1.96 SD; 95% of differences fall within these limits</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Mean \u{00B1} 1.96 SD; 95% of differences fall within these limits</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Proportional Bias (p)</strong></td>
@@ -10096,9 +10096,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
                     <h4 style='margin: 0 0 10px 0; color: #333;'>Clinical Decision Rule</h4>
                     <p style='margin: 0; font-style: italic;'>
-                        The key question is: &ldquo;Are the limits of agreement clinically acceptable?&rdquo; For example,
-                        if two Ki-67 scoring methods have LoA of &plusmn;5%, and the clinical threshold is 20%,
-                        a &plusmn;5% discrepancy could change treatment decisions for patients near the cutoff.
+                        The key question is: \u{201C}Are the limits of agreement clinically acceptable?\u{201D} For example,
+                        if two Ki-67 scoring methods have LoA of \u{00B1}5%, and the clinical threshold is 20%,
+                        a \u{00B1}5% discrepancy could change treatment decisions for patients near the cutoff.
                         Clinical context - not statistical significance - determines acceptability.
                     </p>
                 </div>
@@ -10119,7 +10119,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 <div style='background: #f9f9f9; border-left: 4px solid #333; padding: 15px; margin-bottom: 20px;'>
                     <h3 style='margin: 0 0 10px 0; color: #333;'>What is Krippendorff's Alpha?</h3>
                     <p style='margin: 0; color: #333;'>
-                        Krippendorff's alpha (&alpha;) is a versatile reliability coefficient that works with
+                        Krippendorff's alpha (\u{03B1}) is a versatile reliability coefficient that works with
                         <strong>any number of raters</strong>, <strong>any measurement scale</strong>
                         (nominal, ordinal, interval, ratio), and <strong>handles missing data</strong> gracefully.
                         It is one of the most widely used agreement measures in content analysis and clinical research.
@@ -10145,17 +10145,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             <th style='padding: 8px; text-align: left; border-bottom: 2px solid #333;'>Action</th>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>&alpha; &ge; 0.80</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>\u{03B1} \u{2265} 0.80</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Reliable agreement</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Data can be used with confidence</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.667 &le; &alpha; &lt; 0.80</strong></td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>0.667 \u{2264} \u{03B1} &lt; 0.80</strong></td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Tentative conclusions</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Use cautiously; consider additional rater training</td>
                         </tr>
                         <tr>
-                            <td style='padding: 8px;'><strong>&alpha; &lt; 0.667</strong></td>
+                            <td style='padding: 8px;'><strong>\u{03B1} &lt; 0.667</strong></td>
                             <td style='padding: 8px;'>Insufficient agreement</td>
                             <td style='padding: 8px;'>Variable should be discarded or criteria revised</td>
                         </tr>
@@ -10173,26 +10173,26 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Handles missing data</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&cross;</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&cross;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2717}</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2717}</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Any number of raters</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Nominal/ordinal/interval</td>
-                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>&check;</td>
+                            <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>\u{2713}</td>
                             <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>Nominal only</td>
                             <td style='padding: 8px; text-align: center; border-bottom: 1px solid #ddd;'>Continuous only</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'>Kappa paradox resistant</td>
                             <td style='padding: 8px; text-align: center;'>Partially</td>
-                            <td style='padding: 8px; text-align: center;'>&cross;</td>
+                            <td style='padding: 8px; text-align: center;'>\u{2717}</td>
                             <td style='padding: 8px; text-align: center;'>N/A</td>
                         </tr>
                     </table>
@@ -10203,7 +10203,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 0; font-style: italic;'>
                         In a multi-site tumor grading study where 5 pathologists each reviewed a subset of cases
                         (not all pathologists reviewed every slide), Krippendorff's alpha is the ideal choice because
-                        it handles the incomplete design naturally. If &alpha; = 0.72 for histologic grade,
+                        it handles the incomplete design naturally. If \u{03B1} = 0.72 for histologic grade,
                         conclusions should be considered tentative and additional consensus training is recommended.
                     </p>
                 </div>
@@ -10236,7 +10236,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <ul style='margin: 0; padding-left: 20px;'>
                         <li><strong>Rare diagnoses</strong> - When one category is much more common than others (e.g., benign vs malignant in screening)</li>
                         <li><strong>Low kappa despite high agreement</strong> - The classic kappa paradox situation</li>
-                        <li><strong>Two raters only</strong> - PABAK is defined for 2&times;2 and multi-category tables with exactly 2 raters</li>
+                        <li><strong>Two raters only</strong> - PABAK is defined for 2\u{00D7}2 and multi-category tables with exactly 2 raters</li>
                         <li><strong>Alongside kappa</strong> - Report both to show whether prevalence/bias effects are distorting kappa</li>
                     </ul>
                 </div>
@@ -10251,17 +10251,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>PABAK</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2P<sub>o</sub> &minus; 1</td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement adjusted for both prevalence and bias; ranges from &minus;1 to 1</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>2P<sub>o</sub> \u{2212} 1</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>Agreement adjusted for both prevalence and bias; ranges from \u{2212}1 to 1</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'><strong>Prevalence Index</strong></td>
-                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>|a &minus; d| / n</td>
+                            <td style='padding: 8px; border-bottom: 1px solid #ddd;'>|a \u{2212} d| / n</td>
                             <td style='padding: 8px; border-bottom: 1px solid #ddd;'>High values (&gt;0.5) indicate unbalanced categories; kappa is deflated</td>
                         </tr>
                         <tr>
                             <td style='padding: 8px;'><strong>Bias Index</strong></td>
-                            <td style='padding: 8px;'>|b &minus; c| / n</td>
+                            <td style='padding: 8px;'>|b \u{2212} c| / n</td>
                             <td style='padding: 8px;'>High values (&gt;0.3) indicate systematic difference between raters</td>
                         </tr>
                     </table>
@@ -10272,8 +10272,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     <p style='margin: 0; font-style: italic;'>
                         Two pathologists classify 100 biopsies as benign/malignant. Results: 90 both say benign,
                         5 both say malignant, 3 and 2 disagree. Observed agreement = 95%, but kappa = 0.47
-                        (&ldquo;moderate&rdquo;). This is misleading! The Prevalence Index = 0.85 (highly
-                        imbalanced categories) is deflating kappa. PABAK = 0.90 (&ldquo;almost perfect&rdquo;)
+                        (\u{201C}moderate\u{201D}). This is misleading! The Prevalence Index = 0.85 (highly
+                        imbalanced categories) is deflating kappa. PABAK = 0.90 (\u{201C}almost perfect\u{201D})
                         better reflects the true agreement level.
                     </p>
                 </div>

@@ -7,7 +7,6 @@ items:
     - name: todo
       title: Analysis Summary
       type: Html
-      refs: [imagingFindings]
 
     - name: correlationTable
       title: Multi-Modal Correlation Analysis

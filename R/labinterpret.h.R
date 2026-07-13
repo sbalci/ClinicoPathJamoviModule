@@ -299,9 +299,7 @@ labinterpretResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Analysis Summary",
-                refs=list(
-                    "labValues")))
+                title="Analysis Summary"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="interpretationTable",

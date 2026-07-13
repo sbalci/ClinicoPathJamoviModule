@@ -20,8 +20,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
     inherit = swimmerplotBase,
     private = list(
         # Clinical preset context storage
-        .preset_context = NULL,
-        .preset_guidance = NULL,
 
         # Auto-detection variables (simplified since we now stop analysis)
         .auto_detected_dates = FALSE,
@@ -1275,17 +1273,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 self$options$timeUnit
             )
             
-            # Add preset-specific context if available
-            if (!is.null(private$.preset_context)) {
-                context <- private$.preset_context
-                context_text <- sprintf(
-                    .(" This %s analysis shows patterns typical of %s, with emphasis on %s."),
-                    context$context,
-                    context$typical_timeframe,
-                    context$interpretation_focus
-                )
-                summary_text <- paste(summary_text, context_text)
-            }
             
             # Add response analysis if available
             if (self$options$responseAnalysis && !is.null(stats$response_counts) && length(stats$response_counts) > 0) {
@@ -1317,20 +1304,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 
                 summary_text <- paste(summary_text, response_text)
                 
-                # Add preset-specific interpretation for response data
-                if (!is.null(private$.preset_context)) {
-                    preset_interp <- switch(self$options$clinicalPreset,
-                        "oncology_immunotherapy" = .("Response patterns are consistent with immunotherapy studies, where delayed responses and durable disease control are common outcomes."),
-                        "oncology_chemotherapy" = .("Response rates align with chemotherapy protocols, focusing on immediate tumor response and cycle completion rates."),
-                        "surgery_outcomes" = .("Outcome patterns reflect surgical intervention success and recovery trajectories."),
-                        "clinical_trial" = .("Results demonstrate protocol adherence and endpoint achievement within the structured trial framework."),
-                        "longitudinal_followup" = .("Long-term patterns show disease progression and outcome trends over the extended follow-up period."),
-                        ""
-                    )
-                    if (preset_interp != "") {
-                        summary_text <- paste(summary_text, preset_interp)
-                    }
-                }
             }
             
             # Add methodology note
@@ -1386,60 +1359,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         },
 
         # Apply clinical preset configurations with context
-        .applyClinicalPreset = function() {
-            preset <- self$options$clinicalPreset
-            
-            if (preset == "none") return()
-            
-            # Apply preset configurations by updating result interpretations
-            # rather than trying to modify options (which jamovi doesn't allow at runtime)
-            preset_contexts <- list(
-                "oncology_immunotherapy" = list(
-                    context = "immunotherapy clinical trial",
-                    typical_timeframe = "weeks to months", 
-                    key_milestones = c("Treatment Start", "Response Assessment", "Progression"),
-                    interpretation_focus = "response rates and progression-free survival"
-                ),
-                "oncology_chemotherapy" = list(
-                    context = "chemotherapy treatment cycles",
-                    typical_timeframe = "cycles over months",
-                    key_milestones = c("Cycle 1", "Mid-treatment Assessment", "End of Treatment"),
-                    interpretation_focus = "cycle completion and toxicity management"
-                ),
-                "surgery_outcomes" = list(
-                    context = "perioperative timeline",
-                    typical_timeframe = "days to months post-surgery", 
-                    key_milestones = c("Surgery", "30-day Follow-up", "Long-term Outcome"),
-                    interpretation_focus = "surgical outcomes and recovery metrics"
-                ),
-                "clinical_trial" = list(
-                    context = "structured clinical trial",
-                    typical_timeframe = "protocol-defined periods",
-                    key_milestones = c("Enrollment", "Primary Endpoint", "Study Completion"),
-                    interpretation_focus = "protocol compliance and endpoint achievement"
-                ),
-                "longitudinal_followup" = list(
-                    context = "long-term observational study",
-                    typical_timeframe = "months to years",
-                    key_milestones = c("Baseline", "Regular Follow-ups", "Final Assessment"),
-                    interpretation_focus = "longitudinal trends and outcomes"
-                )
-            )
-            
-            if (preset %in% names(preset_contexts)) {
-                private$.preset_context <- preset_contexts[[preset]]
-                
-                # Add preset-specific guidance to instructions
-                preset_guidance <- sprintf(
-                    .("<div style='background-color: #e8f4f8; padding: 10px; border-radius: 5px; margin: 10px 0;'><strong>Clinical Context:</strong> This analysis is optimized for %s studies. Typical timeframe: %s. Focus: %s.</div>"),
-                    preset_contexts[[preset]]$context,
-                    preset_contexts[[preset]]$typical_timeframe,
-                    preset_contexts[[preset]]$interpretation_focus
-                )
-                
-                private$.preset_guidance <- preset_guidance
-            }
-        },
 
         .init = function() {
             # Initialize instructions when no variables selected
@@ -1460,9 +1379,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Reset notice collection
             private$.noticeList <- list()
 
-            # Apply clinical preset configurations if selected
-            # DISABLED: Clinical presets only affect text interpretation, not calculations
-            # private$.applyClinicalPreset()
             
             # Enhanced instructions with comprehensive guidance
             if (is.null(self$options$patientID) ||
@@ -1816,7 +1732,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 "</div>",
                 
                 # Add preset guidance if available
-                if (!is.null(private$.preset_guidance)) private$.preset_guidance else ""
+                ""
             )
         },
         

@@ -48,11 +48,9 @@
 NULL
 
 # Helper function to create styled HTML notice (replaces jmvcore::Notice to avoid serialization errors)
-# TODO (security, forward-looking): `message` is interpolated raw into the
-# notice HTML (line ~91 below). All current callers pass static strings, but
-# any future caller that interpolates a variable name or factor label would
-# inject. Defence-in-depth: `message <- htmltools::htmlEscape(message)` at
-# the top of the function. Currently safe but easy to regress.
+# Security note: `message` is HTML-escaped via htmltools::htmlEscape() at the
+# interpolation site below, so a future caller passing a variable name or factor
+# label cannot inject markup. (Escaping is applied — do not remove it.)
 .createNoticeHTML <- function(message, type = c("ERROR", "STRONG_WARNING", "WARNING", "INFO")) {
     type <- match.arg(type)
 
@@ -999,95 +997,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     self$results$tablestyle4$setContent(tabletangram)
                 }
 
-                # ===== DISABLED: Stratified Analysis (Mantel-Haenszel) =====
-                # Feature temporarily disabled - options not available in .a.yaml
-                # if (self$options$mantel_haenszel && !is.null(self$options$stratify) && self$options$stratify != "") {
-                if (FALSE) {  # DISABLED
-                    # Match stratification variable to cleaned name
-                    strata_var <- NULL
-                    all_labels <- labelled::var_label(mydata)
-                    strata_match <- which(all_labels == self$options$stratify)
-                    if (length(strata_match) > 0) {
-                        strata_var <- names(all_labels)[strata_match[1]]
-                    }
-
-                    if (!is.null(strata_var) && strata_var %in% names(mydata)) {
-                        # Perform M-H test for each variable (only if binary)
-                        mh_results_html <- ""
-
-                        for (var in myvars) {
-                            # Check if variable is binary (2 levels)
-                            var_levels <- length(unique(stats::na.omit(mydata[[var]])))
-                            group_levels <- length(unique(stats::na.omit(mydata[[mygroup]])))
-
-                            if (var_levels == 2 && group_levels == 2) {
-                                # Perform Mantel-Haenszel test
-                                mh_result <- private$.performMantelHaenszel(
-                                    row_var = var,
-                                    col_var = mygroup,
-                                    strata_var = strata_var,
-                                    data = mydata
-                                )
-
-                                # Optionally perform Breslow-Day test
-                                bd_result <- NULL
-                                if (self$options$breslow_day && mh_result$success) {
-                                    bd_result <- private$.performBreslowDay(
-                                        row_var = var,
-                                        col_var = mygroup,
-                                        strata_var = strata_var,
-                                        data = mydata
-                                    )
-                                }
-
-                                # Format results with variable name header
-                                var_display_name <- .getDisplayName(var, original_names_mapping)
-                                mh_results_html <- paste0(
-                                    mh_results_html,
-                                    "<h3 style='margin-top: 20px; color: #333;'>Variable: ", var_display_name, "</h3>",
-                                    private$.formatMantelHaenszelResults(mh_result, bd_result)
-                                )
-                            } else {
-                                # Skip non-binary variables with informative message
-                                var_display_name <- .getDisplayName(var, original_names_mapping)
-                                mh_results_html <- paste0(
-                                    mh_results_html,
-                                    "<h3 style='margin-top: 20px; color: #333;'>Variable: ", var_display_name, "</h3>",
-                                    "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                                    "<p><strong>Note:</strong> Mantel-Haenszel test requires binary (2-level) variables. ",
-                                    "This variable has ", var_levels, " levels and grouping variable has ", group_levels, " levels. ",
-                                    "Consider recoding variables to binary if you want to perform stratified analysis.</p>",
-                                    "</div>"
-                                )
-                            }
-                        }
-
-                        # Display all M-H results
-                        if (mh_results_html != "") {
-                            strata_display_name <- .getDisplayName(strata_var, original_names_mapping)
-                            header_html <- paste0(
-                                "<div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #dee2e6;'>",
-                                "<h2 style='margin-top: 0; color: #495057;'>Stratified Analysis Results</h2>",
-                                "<p><strong>Stratification Variable:</strong> ", strata_display_name, "</p>",
-                                "<p><strong>Purpose:</strong> Mantel-Haenszel test examines the association between row and column variables ",
-                                "while controlling for the effect of the stratification variable. This helps identify whether an observed ",
-                                "association is confounded by a third variable.</p>",
-                                "</div>"
-                            )
-                            self$results$mantelHaenszelResults$setContent(paste0(header_html, mh_results_html))
-                        }
-                    } else {
-                        # Stratification variable not found
-                        error_html <- paste0(
-                            "<div style='background-color: #f8d7da; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #dc3545;'>",
-                            "<h4 style='margin-top: 0; color: #721c24;'>Stratification Variable Not Found</h4>",
-                            "<p>Could not find the selected stratification variable in the dataset. ",
-                            "Please verify that the variable exists and contains valid data.</p>",
-                            "</div>"
-                        )
-                        self$results$mantelHaenszelResults$setContent(error_html)
-                    }
-                }
 
                 # Add INFO notice for successful analysis completion (using HTML to avoid serialization errors)
                 n_vars <- length(self$options$vars)

@@ -324,10 +324,7 @@ patientdashboardResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Dashboard Overview",
-                refs=list(
-                    "patientID",
-                    "vitals")))
+                title="Dashboard Overview"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="patientSummary",

@@ -4,13 +4,6 @@ jus: '3.0'
 stage: 0
 compilerMode: tame
 children:
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: enableGuidedMode
-      - type: CheckBox
-        name: showExplanations
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -69,6 +62,13 @@ children:
             name: responseCategoryVar
             maxItemCount: 1
             isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: enableGuidedMode
+      - type: CheckBox
+        name: showExplanations
   - type: CollapseBox
     label: Waterfall Plot Options
     collapsed: true

@@ -20,7 +20,7 @@ winratioClass <- R6::R6Class(
                 <p><b>To run the analysis, provide:</b></p>
                 <ul>
                   <li>A two-level <b>group / treatment variable</b> and its reference level.</li>
-                  <li>A <b>primary time-to-event endpoint</b> (time + event) &mdash; highest priority.</li>
+                  <li>A <b>primary time-to-event endpoint</b> (time + event) \u{2014} highest priority.</li>
                   <li><i>Optionally</i> a secondary time-to-event endpoint and a continuous
                       tiebreaker, examined only when higher-priority endpoints tie.</li>
                 </ul>
@@ -317,11 +317,11 @@ winratioClass <- R6::R6Class(
             wrTxt <- if (is.infinite(r$win_ratio)) "infinite (no losses)"
                      else sprintf("%.2f", r$win_ratio)
             ciTxt <- if (is.na(r$ci_low)) ""
-                     else sprintf(" (%.0f%% CI %.2f&ndash;%.2f)",
+                     else sprintf(" (%.0f%% CI %.2f\u{2013}%.2f)",
                                   100 * r$conf, r$ci_low, r$ci_high)
             dir <- if (is.infinite(r$win_ratio) || r$win_ratio > 1) r$idxLbl else r$refLbl
             html <- glue::glue(
-                "<p>Across {format(r$Ttot, big.mark=',')} index&ndash;reference pairs,
+                "<p>Across {format(r$Ttot, big.mark=',')} index\u{2013}reference pairs,
                 the <b>{r$idxLbl}</b> group won {format(r$W, big.mark=',')} pairs and
                 lost {format(r$L, big.mark=',')} ({format(r$Ttie, big.mark=',')} ties).
                 The <b>win ratio was {wrTxt}</b>{ciTxt}, favouring <b>{dir}</b>. The net

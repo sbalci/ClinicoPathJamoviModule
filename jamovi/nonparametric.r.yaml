@@ -572,13 +572,6 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-    - nonparametric
-    - enhancednonparametric
-    - mannwhitney
-    - kruskalwallis
-    - wilcoxon
-    - friedman
-    - dunn
     - dunn.test
     - effectsize
     - robustbase

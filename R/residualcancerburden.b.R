@@ -20,7 +20,7 @@ residualcancerburdenClass <- R6::R6Class(
                 metastasis (mm, optional). <b>Single-case mode</b> \u2014 enter the values
                 directly.</p>
                 <p>The continuous index is classified as <b>RCB-0</b> (pCR),
-                <b>RCB-I</b> (minimal, &le;1.36), <b>RCB-II</b> (moderate, 1.36&ndash;3.28),
+                <b>RCB-I</b> (minimal, \u{2264}1.36), <b>RCB-II</b> (moderate, 1.36\u{2013}3.28),
                 or <b>RCB-III</b> (extensive, &gt;3.28).</p>"
             )
             self$results$todo$setContent(todo)
@@ -217,10 +217,10 @@ residualcancerburdenClass <- R6::R6Class(
                 "<h4>Residual Cancer Burden</h4>
                 <p>RCB (Symmans et al., 2007) quantifies residual disease after neoadjuvant
                 therapy from six routine pathology variables. The invasive fraction is
-                f<sub>inv</sub> = (1 &minus; %CIS/100) &times; (%CA/100); the primary bed size is
-                d<sub>prim</sub> = &radic;(d<sub>1</sub> &times; d<sub>2</sub>). The index is:</p>
+                f<sub>inv</sub> = (1 \u{2212} %CIS/100) \u{00D7} (%CA/100); the primary bed size is
+                d<sub>prim</sub> = \u{221A}(d<sub>1</sub> \u{00D7} d<sub>2</sub>). The index is:</p>
                 <p style='text-align:center'><i>RCB = 1.4 (f<sub>inv</sub> d<sub>prim</sub>)<sup>0.17</sup>
-                + [4 (1 &minus; 0.75<sup>LN</sup>) d<sub>met</sub>]<sup>0.17</sup></i></p>
+                + [4 (1 \u{2212} 0.75<sup>LN</sup>) d<sub>met</sub>]<sup>0.17</sup></i></p>
                 <p>where LN is the number of positive nodes and d<sub>met</sub> the largest
                 nodal metastasis (mm). Cut points of 1.36 and 3.28 define four classes:
                 RCB-0 (pCR), RCB-I (minimal), RCB-II (moderate), and RCB-III (extensive)

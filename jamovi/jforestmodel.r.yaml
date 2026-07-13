@@ -109,7 +109,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
-    - .step
     - survival
     - forestmodel
 ...

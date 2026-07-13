@@ -92,6 +92,4 @@ items:
 
 refs:
     - ClinicoPathJamoviModule
-
-    - .step
 ...

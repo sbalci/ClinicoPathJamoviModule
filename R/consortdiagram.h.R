@@ -242,7 +242,6 @@ consortdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="",
                 title="CONSORT Flow Diagram",
                 refs=list(
-                    "CONSORT",
                     "consort",
                     "ClinicoPathJamoviModule"))
             self$add(jmvcore::Html$new(
@@ -389,8 +388,7 @@ consortdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "followup_label",
                     "analysis_label"),
                 refs=list(
-                    "consort",
-                    "CONSORT")))
+                    "consort")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",

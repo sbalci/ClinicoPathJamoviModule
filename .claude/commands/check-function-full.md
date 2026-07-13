@@ -96,6 +96,11 @@ External sources (if available and `check_external=true`):
    - All .r.yaml outputs populated in .b.R via `self$results$[outputname]`
    - Data structures match definitions (Table/Image/Html)
    - Column schemas align between definition and implementation
+   - **Declared-but-never-populated** items (no setter anywhere) → dead schema, remove or wire
+   - **Computed-but-permanently-invisible** items (`visible: false`, populated, but no `setVisible(TRUE)` / `visible: (opt)`) → wasted compute the user never sees
+   - **clearWith completeness**: any option that changes the DATA (NA-exclusion `excl`/`exclude`, filters/subsets) must appear in the result's `clearWith` (else stale results on toggle)
+   - **Dead/disabled code vs schema**: `if (FALSE)` blocks or `self$options$X` reads for an X removed from `.a.yaml` → latent crash; debug scaffolding shipped
+   - **Citation integrity**: every `refs:` key resolves in `00refs.yaml` (no undefined/case-mismatch/empty-author-year; no option-names inside `refs:`) — `/update-refs <fn> --validate`
    - Visibility and clear conditions work correctly
 
 3. **Error Handling & Robustness**

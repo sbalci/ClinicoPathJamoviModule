@@ -83,6 +83,8 @@ Audit `R/SANITIZED_FN.b.R` for missing/weak **jamovi Notices** and propose **min
 - Notices are currently **single-line only**: do not include `\n` or any other newline characters inside `notice$setContent()`.
 - Keep messages specific, numeric where possible, and actionable, but compact enough to fit on one line. If you need a “bullet-like” structure, emulate it within one string using separators such as ` • `, commas, or semicolons.
 - Do **not** delete or replace existing Html results. Keep Html outputs for detailed, multi-line explanations and use notices as concise, single-line banners that reference or summarize those Html sections.
+- **Symbols in notice/Html text use literal UTF-8, not named HTML entities.** Write `±`, `≥`, `≤`, `×`, `≈`, `β`, `θ`, `α`, `µ`, `→` — not `&plusmn;`, `&ge;`, `&le;`, `&times;`, `&asymp;`, `&beta;`, … . Named entities render literally after an upcoming jamovi fix and don't survive Word/PDF export. (Structural `&lt;`/`&gt;`/`&amp;`/`&quot;`/`&nbsp;` inside literal HTML are fine.)
+- **Prefer `jmvcore::reject()` over hand-rolled red-HTML error panels for FATAL validation** (missing required inputs, insufficient data) — jamovi renders a clean analysis-level error. Reserve red-HTML/notice panels for *partial* failures where other outputs still populate (there `reject()` would wrongly halt everything).
 
 ## Patch templates
 

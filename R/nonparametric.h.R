@@ -598,13 +598,6 @@ nonparametricResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 title="Enhanced Non-Parametric Statistical Methods",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    "nonparametric",
-                    "enhancednonparametric",
-                    "mannwhitney",
-                    "kruskalwallis",
-                    "wilcoxon",
-                    "friedman",
-                    "dunn",
                     "dunn.test",
                     "effectsize",
                     "robustbase",

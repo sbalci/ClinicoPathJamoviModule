@@ -161,7 +161,7 @@ joinpointClass <- R6::R6Class(
                 apc <- private$.apc(fit$slopes[1, "Est"])
                 dir <- if (apc > 0) "increased" else "decreased"
                 self$results$summary$setContent(glue::glue(
-                    "<p>No change in trend was detected. Over {min(d$time)}&ndash;{max(d$time)}
+                    "<p>No change in trend was detected. Over {min(d$time)}\u{2013}{max(d$time)}
                     the rate {dir} by an average of <b>{sprintf('%.2f', abs(apc))}% per
                     period</b>.</p>"))
                 return()

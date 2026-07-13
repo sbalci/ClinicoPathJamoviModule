@@ -136,7 +136,7 @@ doorClass <- R6::R6Class(
                 "statistically favours" else "does not significantly favour"
             html <- glue::glue(
                 "<p>The DOOR probability is <b>{sprintf('%.3f', res$door)}</b>
-                ({sprintf('%.0f', 100*d$conf)}% CI {sprintf('%.3f', res$low)}&ndash;{sprintf('%.3f', res$high)}):
+                ({sprintf('%.0f', 100*d$conf)}% CI {sprintf('%.3f', res$low)}\u{2013}{sprintf('%.3f', res$high)}):
                 a randomly selected <b>{d$idxLbl}</b> patient has a more desirable outcome
                 than a randomly selected <b>{d$refLbl}</b> patient
                 {sprintf('%.1f', 100*res$door)}% of the time (ties split evenly). The

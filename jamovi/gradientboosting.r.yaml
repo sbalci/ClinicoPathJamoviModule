@@ -121,8 +121,7 @@ items:
       requiresData: true
 
 refs:
-    - GradientBoosting
-    - Survival
+    - survival
     - mboost
     - gbm
     - xgboost

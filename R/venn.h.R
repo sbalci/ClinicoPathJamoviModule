@@ -612,7 +612,7 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 visible="(show_upsetR)",
                 refs=list(
-                    "upsetR")))
+                    "UpSetR")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="ComplexUpset Plot",
@@ -623,7 +623,7 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 visible="(show_complexUpset)",
                 refs=list(
-                    "complexUpset")))
+                    "ComplexUpset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",

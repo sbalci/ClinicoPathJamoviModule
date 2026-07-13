@@ -934,7 +934,7 @@ refs:
 
     ggswim:
         type: 'software'
-        author: 
+        author: "Richard Hanna, Stephan Kadauke, Ezra Porter"
         year: 2025
         title: "ggswim: Create Swimmer Plots with ggplot2"
         publisher: '[R package]. Retrieved from https://github.com/CHOP-CGTInformatics/ggswim'
@@ -1046,8 +1046,8 @@ refs:
 
     moments:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Lukasz Komsta, Frederick Novomestky"
+        year: 2015
         title: "moments: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=moments'
         url: https://CRAN.R-project.org/package=moments
@@ -1072,40 +1072,40 @@ refs:
 
     pwr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Stephane Champely, Helios De Rosario"
+        year: 2020
         title: "pwr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=pwr'
         url: https://CRAN.R-project.org/package=pwr
 
     PMCMRplus:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thorsten Pohlert"
+        year: 2024
         title: "PMCMRplus: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=PMCMRplus'
         url: https://CRAN.R-project.org/package=PMCMRplus
 
     multcomp:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Torsten Hothorn, Frank Bretz, Peter Westfall"
+        year: 2026
         title: "multcomp: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=multcomp'
         url: https://CRAN.R-project.org/package=multcomp
 
     plotly:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Carson Sievert, Chris Parmer, Toby Hocking, Scott Chamberlain, Karthik Ram, Marianne Corvellec, Pedro Despouy"
+        year: 2026
         title: "plotly: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plotly'
         url: https://CRAN.R-project.org/package=plotly
 
     ggprism:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Charlotte Dawson"
+        year: 2025
         title: "ggprism: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggprism'
         url: https://CRAN.R-project.org/package=ggprism
@@ -1120,32 +1120,32 @@ refs:
 
     digest:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Dirk Eddelbuettel"
+        year: 2025
         title: "digest: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=digest'
         url: https://CRAN.R-project.org/package=digest
 
     tools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "R Core Team"
+        year: 2026
         title: "tools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tools'
         url: https://CRAN.R-project.org/package=tools
 
     htmltools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Joe Cheng, Carson Sievert, Barret Schloerke, Winston Chang, Yihui Xie, Jeff Allen"
+        year: 2025
         title: "htmltools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=htmltools'
         url: https://CRAN.R-project.org/package=htmltools
 
     viridis:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Simon Garnier"
+        year: 2024
         title: "viridis: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=viridis'
         url: https://CRAN.R-project.org/package=viridis
@@ -1160,64 +1160,64 @@ refs:
 
     patchwork:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thomas Lin Pedersen"
+        year: 2025
         title: "patchwork: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=patchwork'
         url: https://CRAN.R-project.org/package=patchwork
 
     grid:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Paul Murrell"
+        year: 2026
         title: "grid: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=grid'
         url: https://CRAN.R-project.org/package=grid
 
     gridExtra:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Baptiste Auguie"
+        year: 2026
         title: "gridExtra: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gridExtra'
         url: https://CRAN.R-project.org/package=gridExtra
 
     grDevices:
         type: 'software'
-        author: ""
-        year: ""
+        author: "R Core Team and contributors worldwide"
+        year: 2026
         title: "grDevices: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=grDevices'
         url: https://CRAN.R-project.org/package=grDevices
 
     RColorBrewer:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Erich Neuwirth"
+        year: 2022
         title: "RColorBrewer: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=RColorBrewer'
         url: https://CRAN.R-project.org/package=RColorBrewer
 
     powerSurvEpi:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Weiliang Qiu, Jorge Chavarro, Ross Lazarus, Bernard Rosner, Jing Ma"
+        year: 2025
         title: "powerSurvEpi: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=powerSurvEpi'
         url: https://CRAN.R-project.org/package=powerSurvEpi
 
     gsDesign:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Keaven Anderson"
+        year: 2026
         title: "gsDesign: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gsDesign'
         url: https://CRAN.R-project.org/package=gsDesign
 
     tidyr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hadley Wickham, Davis Vaughan, Maximilian Girlich"
+        year: 2025
         title: "tidyr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tidyr'
         url: https://CRAN.R-project.org/package=tidyr
@@ -1240,104 +1240,104 @@ refs:
 
     boot:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Angelo Canty, Brian Ripley, Alessandra R. Brazzale"
+        year: 2025
         title: "boot: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=boot'
         url: https://CRAN.R-project.org/package=boot
 
     ResourceSelection:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Subhash R. Lele, Jonah L. Keim, Peter Solymos"
+        year: 2023
         title: "ResourceSelection: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ResourceSelection'
         url: https://CRAN.R-project.org/package=ResourceSelection
 
     reshape2:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hadley Wickham"
+        year: 2025
         title: "reshape2: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=reshape2'
         url: https://CRAN.R-project.org/package=reshape2
 
     stringr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hadley Wickham"
+        year: 2025
         title: "stringr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=stringr'
         url: https://CRAN.R-project.org/package=stringr
 
     remotes:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Gábor Csárdi, Jim Hester, Hadley Wickham, Winston Chang, Martin Morgan, Dan Tenenbaum"
+        year: 2024
         title: "remotes: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=remotes'
         url: https://CRAN.R-project.org/package=remotes
 
     DataExplorer:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Boxuan Cui"
+        year: 2026
         title: "DataExplorer: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=DataExplorer'
         url: https://CRAN.R-project.org/package=DataExplorer
 
     labelled:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Joseph Larmarange"
+        year: 2025
         title: "labelled: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=labelled'
         url: https://CRAN.R-project.org/package=labelled
 
     sva:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jeffrey T. Leek, W. Evan Johnson, Hilary S. Parker, Elana J. Fertig, Andrew E. Jaffe, Yuqing Zhang, John D. Storey, Leonardo Collado Torres"
+        year: 2026
         title: "sva: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=sva'
         url: https://CRAN.R-project.org/package=sva
 
     parallel:
         type: 'software'
-        author: ""
-        year: ""
+        author: "R Core Team"
+        year: 2026
         title: "parallel: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=parallel'
         url: https://CRAN.R-project.org/package=parallel
 
     brms:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Paul-Christian Bürkner"
+        year: 2025
         title: "brms: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=brms'
         url: https://CRAN.R-project.org/package=brms
 
     metafor:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Wolfgang Viechtbauer"
+        year: 2026
         title: "metafor: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=metafor'
         url: https://CRAN.R-project.org/package=metafor
 
     devtools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hadley Wickham, Jim Hester, Winston Chang, Jennifer Bryan"
+        year: 2026
         title: "devtools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=devtools'
         url: https://CRAN.R-project.org/package=devtools
 
     glue:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jim Hester, Jennifer Bryan"
+        year: 2026
         title: "glue: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=glue'
         url: https://CRAN.R-project.org/package=glue
@@ -1352,48 +1352,48 @@ refs:
 
     randomForest:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Leo Breiman, Adele Cutler, Andy Liaw, Matthew Wiener"
+        year: 2022
         title: "randomForest: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=randomForest'
         url: https://CRAN.R-project.org/package=randomForest
 
     DescTools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Andri Signorell"
+        year: 2025
         title: "DescTools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=DescTools'
         url: https://CRAN.R-project.org/package=DescTools
 
     cmprsk:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Bob Gray"
+        year: 2024
         title: "cmprsk: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=cmprsk'
         url: https://CRAN.R-project.org/package=cmprsk
 
     base:
         type: 'software'
-        author: ""
-        year: ""
+        author: "R Core Team and contributors worldwide"
+        year: 2026
         title: "base: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=base'
         url: https://CRAN.R-project.org/package=base
 
     mlr3:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Michel Lang, Bernd Bischl, Jakob Richter, Patrick Schratz, Martin Binder, Florian Pfisterer, Raphael Sonabend, Marc Becker, Sebastian Fischer"
+        year: 2026
         title: "mlr3: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=mlr3'
         url: https://CRAN.R-project.org/package=mlr3
 
     tidyheatmaps:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jan Broder Engler"
+        year: 2024
         title: "tidyheatmaps: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tidyheatmaps'
         url: https://CRAN.R-project.org/package=tidyheatmaps
@@ -1408,8 +1408,8 @@ refs:
 
     mice:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Stef van Buuren, Karin Groothuis-Oudshoorn"
+        year: 2025
         title: "mice: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=mice'
         url: https://CRAN.R-project.org/package=mice
@@ -1424,8 +1424,8 @@ refs:
 
     e1071:
         type: 'software'
-        author: ""
-        year: ""
+        author: "David Meyer, Evgenia Dimitriadou, Kurt Hornik, Andreas Weingessel, Friedrich Leisch"
+        year: 2025
         title: "e1071: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=e1071'
         url: https://CRAN.R-project.org/package=e1071
@@ -1440,48 +1440,48 @@ refs:
 
     clintools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Markus Harboe Olsen"
+        year: 2023
         title: "clintools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=clintools'
         url: https://CRAN.R-project.org/package=clintools
 
     jtools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jacob A. Long"
+        year: 2026
         title: "jtools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=jtools'
         url: https://CRAN.R-project.org/package=jtools
 
     coefplot:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jared Lander"
+        year: 2025
         title: "coefplot: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=coefplot'
         url: https://CRAN.R-project.org/package=coefplot
 
     ggrepel:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Kamil Slowikowski"
+        year: 2026
         title: "ggrepel: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggrepel'
         url: https://CRAN.R-project.org/package=ggrepel
 
     ggfortify:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Masaaki Horikoshi, Yuan Tang"
+        year: 2025
         title: "ggfortify: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggfortify'
         url: https://CRAN.R-project.org/package=ggfortify
 
     geepack:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Søren Højsgaard, Ulrich Halekoh, Jun Yan"
+        year: 2025
         title: "geepack: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=geepack'
         url: https://CRAN.R-project.org/package=geepack
@@ -1489,8 +1489,8 @@ refs:
 
     party:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Torsten Hothorn, Kurt Hornik, Carolin Strobl, Achim Zeileis"
+        year: 2026
         title: "party: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=party'
         url: https://CRAN.R-project.org/package=party
@@ -1505,8 +1505,8 @@ refs:
 
     flexsurv:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Christopher Jackson"
+        year: 2024
         title: "flexsurv: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=flexsurv'
         url: https://CRAN.R-project.org/package=flexsurv
@@ -1529,8 +1529,8 @@ refs:
 
     coxphw:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Daniela Dunkler, Georg Heinze, Meinhard Ploner"
+        year: 2023
         title: "coxphw: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=coxphw'
         url: https://CRAN.R-project.org/package=coxphw
@@ -1553,8 +1553,8 @@ refs:
 
     purrr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hadley Wickham, Lionel Henry"
+        year: 2026
         title: "purrr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=purrr'
         url: https://CRAN.R-project.org/package=purrr
@@ -1593,24 +1593,24 @@ refs:
 
     visdat:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Nicholas Tierney"
+        year: 2023
         title: "visdat: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=visdat'
         url: https://CRAN.R-project.org/package=visdat
 
     datefixR:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Nathan Constantine-Cooke"
+        year: 2026
         title: "datefixR: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=datefixR'
         url: https://CRAN.R-project.org/package=datefixR
 
     anytime:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Dirk Eddelbuettel"
+        year: 2026
         title: "anytime: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=anytime'
         url: https://CRAN.R-project.org/package=anytime
@@ -1641,40 +1641,40 @@ refs:
 
     tibble:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Kirill Müller, Hadley Wickham"
+        year: 2026
         title: "tibble: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tibble'
         url: https://CRAN.R-project.org/package=tibble
 
     knitr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Yihui Xie"
+        year: 2025
         title: "knitr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=knitr'
         url: https://CRAN.R-project.org/package=knitr
 
     partykit:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Torsten Hothorn, Achim Zeileis"
+        year: 2026
         title: "partykit: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=partykit'
         url: https://CRAN.R-project.org/package=partykit
 
     torch:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Tomasz Kalinowski, Daniel Falbel, Javier Luraschi"
+        year: 2026
         title: "torch: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=torch'
         url: https://CRAN.R-project.org/package=torch
 
     magick:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jeroen Ooms"
+        year: 2026
         title: "magick: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=magick'
         url: https://CRAN.R-project.org/package=magick
@@ -1697,96 +1697,88 @@ refs:
 
     igraph:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Gábor Csárdi, Tamás Nepusz, Vincent Traag, Szabolcs Horvát, Fabio Zanini, Daniel Noom, Kirill Müller, David Schoch, Maëlle Salmon"
+        year: 2026
         title: "igraph: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=igraph'
         url: https://CRAN.R-project.org/package=igraph
 
     ggraph:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thomas Lin Pedersen"
+        year: 2025
         title: "ggraph: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggraph'
         url: https://CRAN.R-project.org/package=ggraph
 
     dendextend:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Tal Galili, Gregory Jefferis"
+        year: 2025
         title: "dendextend: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=dendextend'
         url: https://CRAN.R-project.org/package=dendextend
 
     viridisLite:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Simon Garnier"
+        year: 2026
         title: "viridisLite: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=viridisLite'
         url: https://CRAN.R-project.org/package=viridisLite
 
     mada:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Philipp Doebler"
+        year: 2025
         title: "mada: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=mada'
         url: https://CRAN.R-project.org/package=mada
 
     pseudo:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Maja Pohar Perme, Mette Gerster, Kevin Rodrigues"
+        year: 2017
         title: "pseudo: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=pseudo'
         url: https://CRAN.R-project.org/package=pseudo
 
     ggeconodist:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Bob Rudis"
+        year: 2019
         title: "ggeconodist: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggeconodist'
         url: https://CRAN.R-project.org/package=ggeconodist
 
     systemfonts:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thomas Lin Pedersen, Jeroen Ooms, Devon Govett"
+        year: 2026
         title: "systemfonts: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=systemfonts'
         url: https://CRAN.R-project.org/package=systemfonts
 
     GGally:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Barret Schloerke, Di Cook, Joseph Larmarange, Francois Briatte, Moritz Marbach, Edwin Thoen, Amos Elberg, Jason Crowley"
+        year: 2025
         title: "GGally: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=GGally'
         url: https://CRAN.R-project.org/package=GGally
 
     gt:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Richard Iannone, Joe Cheng, Barret Schloerke, Shannon Haughton, Ellis Hughes, Alexandra Lauer, Romain François, JooYoung Seo, Ken Brevoort, Olivier Roy"
+        year: 2026
         title: "gt: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=gt'
         url: https://CRAN.R-project.org/package=gt
 
-    urvminer:
-        type: 'software'
-        author: ""
-        year: ""
-        title: "urvminer: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=urvminer'
-        url: https://CRAN.R-project.org/package=urvminer
-
     epitools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Tomas J. Aragon, Adam Omidpanah"
+        year: 2017
         title: "epitools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=epitools'
         url: https://CRAN.R-project.org/package=epitools
@@ -1801,75 +1793,67 @@ refs:
 
     tmap:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Martijn Tennekes"
+        year: 2026
         title: "tmap: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tmap'
         url: https://CRAN.R-project.org/package=tmap
 
     eurostat:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Leo Lahti, Janne Huovari, Markus Kainu, Przemyslaw Biecek"
+        year: 2023
         title: "eurostat: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=eurostat'
         url: https://CRAN.R-project.org/package=eurostat
 
     reticulate:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Tomasz Kalinowski, Kevin Ushey, JJ Allaire, Yuan Tang"
+        year: 2026
         title: "reticulate: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=reticulate'
         url: https://CRAN.R-project.org/package=reticulate
 
     jsonlite:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jeroen Ooms"
+        year: 2025
         title: "jsonlite: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=jsonlite'
         url: https://CRAN.R-project.org/package=jsonlite
 
     ranger:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Marvin N. Wright"
+        year: 2026
         title: "ranger: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ranger'
         url: https://CRAN.R-project.org/package=ranger
 
     splines:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Douglas M. Bates and William N. Venables"
+        year: 2026
         title: "splines: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=splines'
         url: https://CRAN.R-project.org/package=splines
 
     mstate:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hein Putter, Liesbeth C. de Wreede, Marta Fiocco, Edouard F. Bonneville"
+        year: 2024
         title: "mstate: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=mstate'
         url: https://CRAN.R-project.org/package=mstate
 
     rstpm2:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Mark Clements, Xing-Rong Liu, Benjamin Christoffersen"
+        year: 2025
         title: "rstpm2: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=rstpm2'
         url: https://CRAN.R-project.org/package=rstpm2
-
-    plines:
-        type: 'software'
-        author: ""
-        year: ""
-        title: "plines: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plines'
-        url: https://CRAN.R-project.org/package=plines
 
     betareg:
         type: 'software'
@@ -1881,8 +1865,8 @@ refs:
 
     mboost:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Torsten Hothorn, Peter Buehlmann, Thomas Kneib, Matthias Schmid, Benjamin Hofner"
+        year: 2024
         title: "mboost: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=mboost'
         url: https://CRAN.R-project.org/package=mboost
@@ -1897,24 +1881,24 @@ refs:
 
     Matrix:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Douglas Bates, Martin Maechler, Mikael Jagan"
+        year: 2026
         title: "Matrix: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=Matrix'
         url: https://CRAN.R-project.org/package=Matrix
 
     grafify:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Avinash R Shenoy"
+        year: 2025
         title: "grafify: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=grafify'
         url: https://CRAN.R-project.org/package=grafify
 
     broom:
         type: 'software'
-        author: ""
-        year: ""
+        author: "David Robinson, Alex Hayes, Simon Couch, Emil Hvitfeldt"
+        year: 2026
         title: "broom: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=broom'
         url: https://CRAN.R-project.org/package=broom
@@ -1929,48 +1913,48 @@ refs:
 
     lme4:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Douglas Bates, Martin Maechler, Ben Bolker, Steven Walker, Mikael Jagan, Anna Ly"
+        year: 2026
         title: "lme4: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=lme4'
         url: https://CRAN.R-project.org/package=lme4
 
     glmmTMB:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Mollie Brooks, Ben Bolker, Kasper Kristensen, Martin Maechler, Arni Magnusson, Hans Skaug, Anders Nielsen, Casper Berg, Koen van Bentham"
+        year: 2026
         title: "glmmTMB: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=glmmTMB'
         url: https://CRAN.R-project.org/package=glmmTMB
 
     ggforce:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thomas Lin Pedersen"
+        year: 2025
         title: "ggforce: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggforce'
         url: https://CRAN.R-project.org/package=ggforce
 
     cluster:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Martin Maechler, Peter Rousseeuw, Anja Struyf, Mia Hubert"
+        year: 2026
         title: "cluster: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=cluster'
         url: https://CRAN.R-project.org/package=cluster
 
     proxy:
         type: 'software'
-        author: ""
-        year: ""
+        author: "David Meyer, Christian Buchta"
+        year: 2025
         title: "proxy: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=proxy'
         url: https://CRAN.R-project.org/package=proxy
 
     FactoMineR:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Francois Husson, Julie Josse, Sebastien Le, Jeremy Mazet"
+        year: 2026
         title: "FactoMineR: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=FactoMineR'
         url: https://CRAN.R-project.org/package=FactoMineR
@@ -1985,67 +1969,59 @@ refs:
 
     factoextra:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Alboukadel Kassambara, Fabian Mundt"
+        year: 2026
         title: "factoextra: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=factoextra'
         url: https://CRAN.R-project.org/package=factoextra
 
     circlize:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Zuguang Gu"
+        year: 2026
         title: "circlize: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=circlize'
         url: https://CRAN.R-project.org/package=circlize
 
     corrplot:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Taiyun Wei, Viliam Simko"
+        year: 2024
         title: "corrplot: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=corrplot'
         url: https://CRAN.R-project.org/package=corrplot
 
     pheatmap:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Raivo Kolde"
+        year: 2025
         title: "pheatmap: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=pheatmap'
         url: https://CRAN.R-project.org/package=pheatmap
 
     ComplexUpset:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Michał Krassowski"
+        year: 2021
         title: "ComplexUpset: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ComplexUpset'
         url: https://CRAN.R-project.org/package=ComplexUpset
 
     correlation:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Dominique Makowski, Brenton M. Wiernik, Indrajeet Patil, Daniel Lüdecke, Mattan S. Ben-Shachar, Rémi Thériault"
+        year: 2025
         title: "correlation: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=correlation'
         url: https://CRAN.R-project.org/package=correlation
 
     qgraph:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Sacha Epskamp, Giulio Costantini, Jonas Haslbeck, Adela Isvoranu"
+        year: 2023
         title: "qgraph: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=qgraph'
         url: https://CRAN.R-project.org/package=qgraph
-
-    .step:
-        type: 'software'
-        author: ""
-        year: ""
-        title: ".step: R package"
-        publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=.step'
-        url: https://CRAN.R-project.org/package=.step
 
     forestmodel:
         type: 'software'
@@ -2065,32 +2041,32 @@ refs:
 
     ggstats:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Joseph Larmarange"
+        year: 2026
         title: "ggstats: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggstats'
         url: https://CRAN.R-project.org/package=ggstats
 
     arcdiagram:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Gaston Sanchez"
+        year: 2018
         title: "arcdiagram: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=arcdiagram'
         url: https://CRAN.R-project.org/package=arcdiagram
 
     ggpubr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Alboukadel Kassambara"
+        year: 2026
         title: "ggpubr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggpubr'
         url: https://CRAN.R-project.org/package=ggpubr
 
     WRS2:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Patrick Mair, Rand Wilcox"
+        year: 2025
         title: "WRS2: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=WRS2'
         url: https://CRAN.R-project.org/package=WRS2
@@ -2105,8 +2081,8 @@ refs:
 
     ggsegmentedtotalbar:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Ozancan Ozdemir"
+        year: 2025
         title: "ggsegmentedtotalbar: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggsegmentedtotalbar'
         url: https://CRAN.R-project.org/package=ggsegmentedtotalbar
@@ -2129,16 +2105,16 @@ refs:
 
     frailtypack:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Virginie Rondeau, Juan R. Gonzalez, Yassin Mazroui, Audrey Mauguen, Amadou Diakite, Alexandre Laurent, Myriam Lopez, Agnieszka Krol, Casimir L. Sofeu, Julien Dumerc, Denis Rustand, Jocelyn Chauvet, Quentin Le Coent, Romain Pierlot, Lacey Etzkorn, Derek Dinart, Adrien Orué, Ayoub Bifenzi, Viviane Philipps"
+        year: 2025
         title: "frailtypack: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=frailtypack'
         url: https://CRAN.R-project.org/package=frailtypack
 
     nlme:
         type: 'software'
-        author: ""
-        year: ""
+        author: "José Pinheiro, Douglas Bates, R Core Team"
+        year: 2026
         title: "nlme: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=nlme'
         url: https://CRAN.R-project.org/package=nlme
@@ -2185,8 +2161,8 @@ refs:
 
     summarytools:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Dominic Comtois"
+        year: 2026
         title: "summarytools: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=summarytools'
         url: https://CRAN.R-project.org/package=summarytools
@@ -2201,8 +2177,8 @@ refs:
 
     waffle:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Bob Rudis, Dave Gandy"
+        year: 2023
         title: "waffle: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=waffle'
         url: https://CRAN.R-project.org/package=waffle
@@ -2217,8 +2193,8 @@ refs:
 
     reReg:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Sy Han Chiou, Chiung-Yu Huang"
+        year: 2024
         title: "reReg: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=reReg'
         url: https://CRAN.R-project.org/package=reReg
@@ -2233,32 +2209,32 @@ refs:
 
     ggmice:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hanne Oberman"
+        year: 2025
         title: "ggmice: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggmice'
         url: https://CRAN.R-project.org/package=ggmice
 
     coxme:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Terry M. Therneau"
+        year: 2024
         title: "coxme: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=coxme'
         url: https://CRAN.R-project.org/package=coxme
 
     vegan:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jari Oksanen, Gavin L. Simpson, F. Guillaume Blanchet, Roeland Kindt, Pierre Legendre, Peter R. Minchin, R.B. O'Hara, Peter Solymos, M. Henry H. Stevens, Eduard Szoecs, Helene Wagner, Michael Bedward, Ben Bolker, Daniel Borcard, Gustavo Carvalho, Miquel De Caceres, Sebastien Durand, Heloisa Beatriz Antoniazi Evangelista, Geoffrey Hannigan, Mark O. Hill, Leo Lahti, Cameron Martino, Marie-Helene Ouellette, Eduardo Ribeiro Cunha, Tyler Smith, Adrian Stier, Cajo J.F. Ter Braak, James Weedon"
+        year: 2026
         title: "vegan: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=vegan'
         url: https://CRAN.R-project.org/package=vegan
 
     randomForestSRC:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hemant Ishwaran, Udaya B. Kogalur"
+        year: 2026
         title: "randomForestSRC: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=randomForestSRC'
         url: https://CRAN.R-project.org/package=randomForestSRC
@@ -2273,48 +2249,48 @@ refs:
 
     ncvreg:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Patrick Breheny, Ryan Miller, Logan Harris"
+        year: 2025
         title: "ncvreg: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ncvreg'
         url: https://CRAN.R-project.org/package=ncvreg
 
     poLCA:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Drew Linzer, Jeffrey Lewis"
+        year: 2026
         title: "poLCA: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=poLCA'
         url: https://CRAN.R-project.org/package=poLCA
 
     nortest:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Juergen Gross, Uwe Ligges"
+        year: 2015
         title: "nortest: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=nortest'
         url: https://CRAN.R-project.org/package=nortest
 
     cutpointr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Christian Thiele"
+        year: 2025
         title: "cutpointr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=cutpointr'
         url: https://CRAN.R-project.org/package=cutpointr
 
     maxstat:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Torsten Hothorn"
+        year: 2025
         title: "maxstat: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=maxstat'
         url: https://CRAN.R-project.org/package=maxstat
 
     performance:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Daniel Lüdecke, Dominique Makowski, Mattan S. Ben-Shachar, Indrajeet Patil, Philip Waggoner, Brenton M. Wiernik, Rémi Thériault"
+        year: 2026
         title: "performance: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=performance'
         url: https://CRAN.R-project.org/package=performance
@@ -2329,8 +2305,8 @@ refs:
 
     ggdendro:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Andrie de Vries, Brian D. Ripley"
+        year: 2024
         title: "ggdendro: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggdendro'
         url: https://CRAN.R-project.org/package=ggdendro
@@ -2353,24 +2329,24 @@ refs:
 
     dbscan:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Michael Hahsler, Matthew Piekenbrock"
+        year: 2026
         title: "dbscan: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=dbscan'
         url: https://CRAN.R-project.org/package=dbscan
 
     superpc:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Eric Bair, Jean-Eudes Dazard"
+        year: 2020
         title: "superpc: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=superpc'
         url: https://CRAN.R-project.org/package=superpc
 
     pracma:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hans W. Borchers"
+        year: 2025
         title: "pracma: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=pracma'
         url: https://CRAN.R-project.org/package=pracma
@@ -2385,16 +2361,16 @@ refs:
 
     plsRcox:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Frederic Bertrand, Myriam Maumy-Bertrand"
+        year: 2026
         title: "plsRcox: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=plsRcox'
         url: https://CRAN.R-project.org/package=plsRcox
 
     Hmisc:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Frank E Harrell Jr"
+        year: 2026
         title: "Hmisc: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=Hmisc'
         url: https://CRAN.R-project.org/package=Hmisc
@@ -2425,16 +2401,16 @@ refs:
 
     relsurv:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Maja Pohar Perme, Damjan Manevski"
+        year: 2025
         title: "relsurv: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=relsurv'
         url: https://CRAN.R-project.org/package=relsurv
 
     httr:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hadley Wickham"
+        year: 2026
         title: "httr: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=httr'
         url: https://CRAN.R-project.org/package=httr
@@ -2457,8 +2433,8 @@ refs:
 
     survRM2:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Hajime Uno, Lu Tian, Miki Horiguchi, Angel Cronin, Chakib Battioui, James Bell"
+        year: 2022
         title: "survRM2: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survRM2'
         url: https://CRAN.R-project.org/package=survRM2
@@ -2473,32 +2449,32 @@ refs:
 
     robustbase:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Martin Maechler, Valentin Todorov, Andreas Ruckstuhl, Matias Salibian-Barrera, Manuel Koller, Eduardo L. T. Conceicao"
+        year: 2026
         title: "robustbase: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=robustbase'
         url: https://CRAN.R-project.org/package=robustbase
 
     ggcorrplot:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Alboukadel Kassambara"
+        year: 2026
         title: "ggcorrplot: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggcorrplot'
         url: https://CRAN.R-project.org/package=ggcorrplot
 
     spatstat.geom:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Adrian Baddeley, Rolf Turner, Ege Rubak"
+        year: 2026
         title: "spatstat.geom: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=spatstat.geom'
         url: https://CRAN.R-project.org/package=spatstat.geom
 
     spatstat.explore:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Adrian Baddeley, Rolf Turner, Ege Rubak"
+        year: 2026
         title: "spatstat.explore: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=spatstat.explore'
         url: https://CRAN.R-project.org/package=spatstat.explore
@@ -2521,8 +2497,8 @@ refs:
 
     dcurves:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Daniel D. Sjoberg"
+        year: 2025
         title: "dcurves: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=dcurves'
         url: https://CRAN.R-project.org/package=dcurves
@@ -2537,16 +2513,16 @@ refs:
 
     networkD3:
         type: 'software'
-        author: ""
-        year: ""
+        author: "J.J. Allaire, Christopher Gandrud, Kenton Russell, CJ Yetman"
+        year: 2025
         title: "networkD3: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=networkD3'
         url: https://CRAN.R-project.org/package=networkD3
 
     icenReg:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Clifford Anderson-Bergman"
+        year: 2024
         title: "icenReg: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=icenReg'
         url: https://CRAN.R-project.org/package=icenReg
@@ -2569,16 +2545,16 @@ refs:
 
     cowplot:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Claus O. Wilke"
+        year: 2025
         title: "cowplot: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=cowplot'
         url: https://CRAN.R-project.org/package=cowplot
 
     survey:
         type: 'software'
-        author: ""
-        year: ""
+        author: "\"Thomas Lumley\", Peter Gao, Ben Schneider, Stas Kolenkikov"
+        year: 2026
         title: "survey: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=survey'
         url: https://CRAN.R-project.org/package=survey
@@ -2593,48 +2569,48 @@ refs:
 
     pec:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thomas A. Gerds"
+        year: 2025
         title: "pec: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=pec'
         url: https://CRAN.R-project.org/package=pec
 
     TidyDensity:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Steven Sanderson"
+        year: 2025
         title: "TidyDensity: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=TidyDensity'
         url: https://CRAN.R-project.org/package=TidyDensity
 
     tidyplots:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jan Broder Engler"
+        year: 2026
         title: "tidyplots: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tidyplots'
         url: https://CRAN.R-project.org/package=tidyplots
 
     riskRegression:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Thomas Alexander Gerds, Johan Sebastian Ohlendorff, Brice Ozenne"
+        year: 2026
         title: "riskRegression: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=riskRegression'
         url: https://CRAN.R-project.org/package=riskRegression
 
     tinytable:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Vincent Arel-Bundock"
+        year: 2026
         title: "tinytable: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=tinytable'
         url: https://CRAN.R-project.org/package=tinytable
 
     binom:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Sundar Dorai-Raj"
+        year: 2014
         title: "binom: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=binom'
         url: https://CRAN.R-project.org/package=binom
@@ -2673,24 +2649,24 @@ refs:
 
     ggvenn:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Linlin Yan"
+        year: 2025
         title: "ggvenn: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggvenn'
         url: https://CRAN.R-project.org/package=ggvenn
 
     UpSetR:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Jake Conway, Nils Gehlenborg"
+        year: 2026
         title: "UpSetR: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=UpSetR'
         url: https://CRAN.R-project.org/package=UpSetR
 
     ggVennDiagram:
         type: 'software'
-        author: ""
-        year: ""
+        author: "Chun-Hui Gao, Adrian Dusa"
+        year: 2026
         title: "ggVennDiagram: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=ggVennDiagram'
         url: https://CRAN.R-project.org/package=ggVennDiagram
@@ -2713,32 +2689,32 @@ refs:
 
     doParallel:
         type: 'software'
-        author:
-        year:
+        author: "Folashade Daniel, Microsoft Corporation, Steve Weston"
+        year: 2022
         title: "doParallel: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=doParallel'
         url: https://CRAN.R-project.org/package=doParallel
 
     foreach:
         type: 'software'
-        author:
-        year:
+        author: "Folashade Daniel, Microsoft, Steve Weston"
+        year: 2022
         title: "foreach: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=foreach'
         url: https://CRAN.R-project.org/package=foreach
 
     sparsepca:
         type: 'software'
-        author:
-        year:
+        author: "N. Benjamin Erichson, Peng Zheng, and Sasha Aravkin"
+        year: 2018
         title: "sparsepca: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=sparsepca'
         url: https://CRAN.R-project.org/package=sparsepca
 
     kernlab:
         type: 'software'
-        author:
-        year:
+        author: "Alexandros Karatzoglou, Alex Smola, Kurt Hornik"
+        year: 2024
         title: "kernlab: R package"
         publisher: '[R package]. Retrieved from https://CRAN.R-project.org/package=kernlab'
         url: https://CRAN.R-project.org/package=kernlab
@@ -2819,5 +2795,542 @@ refs:
         issue: 12
         pages: 1439-1445
         doi: 10.1002/sim.4780091207
+
+    DT:
+        type: 'software'
+        author: "Yihui Xie, Joe Cheng, Xianying Tan, Garrick Aden-Buie"
+        year: 2025
+        title: "A Wrapper of the JavaScript Library 'DataTables'"
+        publisher: "[R package version 0.34.0]. Retrieved from https://CRAN.R-project.org/package=DT"
+        url: https://CRAN.R-project.org/package=DT
+    DiagrammeR:
+        type: 'software'
+        author: "Richard Iannone, Olivier Roy"
+        year: 2026
+        title: "Graph/Network Visualization"
+        publisher: "[R package version 1.0.12]. Retrieved from https://CRAN.R-project.org/package=DiagrammeR"
+        url: https://CRAN.R-project.org/package=DiagrammeR
+    PredictABEL:
+        type: 'software'
+        author: "Suman Kundu, Yurii S. Aulchenko, A. Cecile J.W. Janssens"
+        year: 2020
+        title: "Assessment of Risk Prediction Models"
+        publisher: "[R package version 1.2-4]. Retrieved from https://CRAN.R-project.org/package=PredictABEL"
+        url: https://CRAN.R-project.org/package=PredictABEL
+    R6:
+        type: 'software'
+        author: "Winston Chang"
+        year: 2025
+        title: "Encapsulated Classes with Reference Semantics"
+        publisher: "[R package version 2.6.1]. Retrieved from https://CRAN.R-project.org/package=R6"
+        url: https://CRAN.R-project.org/package=R6
+    crosstable:
+        type: 'software'
+        author: "Dan Chaltiel"
+        year: 2026
+        title: "Crosstables for Descriptive Analyses"
+        publisher: "[R package version 0.9.0]. Retrieved from https://CRAN.R-project.org/package=crosstable"
+        url: https://CRAN.R-project.org/package=crosstable
+    diagram:
+        type: 'software'
+        author: "Karline Soetaert"
+        year: 2020
+        title: "Functions for Visualising Simple Graphs (Networks), Plotting Flow Diagrams"
+        publisher: "[R package version 1.6.5]. Retrieved from https://CRAN.R-project.org/package=diagram"
+        url: https://CRAN.R-project.org/package=diagram
+    effectsize:
+        type: 'software'
+        author: "Mattan S. Ben-Shachar, Dominique Makowski, Daniel Lüdecke, Indrajeet Patil, Brenton M. Wiernik, Rémi Thériault, Philip Waggoner"
+        year: 2026
+        title: "Indices of Effect Size"
+        publisher: "[R package version 1.0.3]. Retrieved from https://CRAN.R-project.org/package=effectsize"
+        url: https://CRAN.R-project.org/package=effectsize
+    graphics:
+        type: 'software'
+        author: "R Core Team and contributors worldwide"
+        year: 2026
+        title: "The R Graphics Package"
+        publisher: "[R package version 4.6.0]. Retrieved from https://CRAN.R-project.org/package=graphics"
+        url: https://CRAN.R-project.org/package=graphics
+    haven:
+        type: 'software'
+        author: "Hadley Wickham, Evan Miller, Danny Smith"
+        year: 2025
+        title: "Import and Export 'SPSS', 'Stata' and 'SAS' Files"
+        publisher: "[R package version 2.5.5]. Retrieved from https://CRAN.R-project.org/package=haven"
+        url: https://CRAN.R-project.org/package=haven
+    jmvcore:
+        type: 'software'
+        author: "Jonathon Love"
+        year: 2026
+        title: "Dependencies for the 'jamovi' Framework"
+        publisher: "[R package version 2.7.35]. Retrieved from https://CRAN.R-project.org/package=jmvcore"
+        url: https://CRAN.R-project.org/package=jmvcore
+    leaps:
+        type: 'software'
+        author: "Thomas Lumley based on Fortran code by Alan Miller"
+        year: 2024
+        title: "Regression Subset Selection"
+        publisher: "[R package version 3.2]. Retrieved from https://CRAN.R-project.org/package=leaps"
+        url: https://CRAN.R-project.org/package=leaps
+    lmtest:
+        type: 'software'
+        author: "Torsten Hothorn, Achim Zeileis, Richard W. Farebrother, Clint Cummins"
+        year: 2022
+        title: "Testing Linear Regression Models"
+        publisher: "[R package version 0.9-40]. Retrieved from https://CRAN.R-project.org/package=lmtest"
+        url: https://CRAN.R-project.org/package=lmtest
+    meta:
+        type: 'software'
+        author: "Guido Schwarzer"
+        year: 2026
+        title: "General Package for Meta-Analysis"
+        publisher: "[R package version 8.5-0]. Retrieved from https://CRAN.R-project.org/package=meta"
+        url: https://CRAN.R-project.org/package=meta
+    officer:
+        type: 'software'
+        author: "David Gohel, Stefan Moog, Mark Heckmann"
+        year: 2026
+        title: "Manipulation of Microsoft Word and PowerPoint Documents"
+        publisher: "[R package version 0.7.5]. Retrieved from https://CRAN.R-project.org/package=officer"
+        url: https://CRAN.R-project.org/package=officer
+    rlang:
+        type: 'software'
+        author: "Lionel Henry, Hadley Wickham"
+        year: 2026
+        title: "Functions for Base Types and Core R and 'Tidyverse' Features"
+        publisher: "[R package version 1.3.0]. Retrieved from https://CRAN.R-project.org/package=rlang"
+        url: https://CRAN.R-project.org/package=rlang
+    rmarkdown:
+        type: 'software'
+        author: "JJ Allaire, Yihui Xie, Christophe Dervieux, Jonathan McPherson, Javier Luraschi, Kevin Ushey, Aron Atkins, Hadley Wickham, Joe Cheng, Winston Chang, Richard Iannone"
+        year: 2026
+        title: "Dynamic Documents for R"
+        publisher: "[R package version 2.31]. Retrieved from https://CRAN.R-project.org/package=rmarkdown"
+        url: https://CRAN.R-project.org/package=rmarkdown
+    sandwich:
+        type: 'software'
+        author: "Achim Zeileis, Thomas Lumley"
+        year: 2024
+        title: "Robust Covariance Matrix Estimators"
+        publisher: "[R package version 3.1-1]. Retrieved from https://CRAN.R-project.org/package=sandwich"
+        url: https://CRAN.R-project.org/package=sandwich
+    segmented:
+        type: 'software'
+        author: "Vito M. R. Muggeo"
+        year: 2026
+        title: "Regression Models with Break-Points / Change-Points Estimation (with Possibly Random Effects)"
+        publisher: "[R package version 2.2-1]. Retrieved from https://CRAN.R-project.org/package=segmented"
+        url: https://CRAN.R-project.org/package=segmented
+    shiny:
+        type: 'software'
+        author: "Winston Chang, Joe Cheng, JJ Allaire, Carson Sievert, Barret Schloerke, Garrick Aden-Buie, Yihui Xie, Jeff Allen, Jonathan McPherson, Alan Dipert, Barbara Borges"
+        year: 2026
+        title: "Web Application Framework for R"
+        publisher: "[R package version 1.14.0]. Retrieved from https://CRAN.R-project.org/package=shiny"
+        url: https://CRAN.R-project.org/package=shiny
+    stats:
+        type: 'software'
+        author: "R Core Team and contributors worldwide"
+        year: 2026
+        title: "The R Stats Package"
+        publisher: "[R package version 4.6.0]. Retrieved from https://CRAN.R-project.org/package=stats"
+        url: https://CRAN.R-project.org/package=stats
+
+    Schoenfeld1983:
+        type: 'article'
+        author: "Schoenfeld, D. A."
+        year: 1983
+        title: "Sample-size formula for the proportional-hazards regression model"
+        publisher: "Biometrics"
+        volume: 39
+        issue: 2
+        pages: "499-503"
+        doi: 10.2307/2531021
+    FreedmanAndSchoenfeld1982:
+        type: 'article'
+        author: "Freedman, L. S."
+        year: 1982
+        title: "Tables of the number of patients required in clinical trials using the logrank test"
+        publisher: "Statistics in Medicine"
+        volume: 1
+        issue: 2
+        pages: "121-129"
+        doi: 10.1002/sim.4780010204
+    LachinAndFoulkes1986:
+        type: 'article'
+        author: "Lachin, J. M., & Foulkes, M. A."
+        year: 1986
+        title: "Evaluation of sample size and power for analyses of survival with allowance for nonuniform patient entry, losses to follow-up, noncompliance, and stratification"
+        publisher: "Biometrics"
+        volume: 42
+        issue: 3
+        pages: "507-519"
+    DeLong1988:
+        type: 'article'
+        author: "DeLong, E. R., DeLong, D. M., & Clarke-Pearson, D. L."
+        year: 1988
+        title: "Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach"
+        publisher: "Biometrics"
+        volume: 44
+        issue: 3
+        pages: "837-845"
+    Cohen1988:
+        type: 'book'
+        author: "Cohen, J."
+        year: 1988
+        title: "Statistical Power Analysis for the Behavioral Sciences (2nd ed.)"
+        publisher: "Lawrence Erlbaum Associates"
+    DerSimonian1986:
+        type: 'article'
+        author: "DerSimonian, R., & Laird, N."
+        year: 1986
+        title: "Meta-analysis in clinical trials"
+        publisher: "Controlled Clinical Trials"
+        volume: 7
+        issue: 3
+        pages: "177-188"
+        doi: 10.1016/0197-2456(86)90046-2
+    Higgins2003:
+        type: 'article'
+        author: "Higgins, J. P. T., Thompson, S. G., Deeks, J. J., & Altman, D. G."
+        year: 2003
+        title: "Measuring inconsistency in meta-analyses"
+        publisher: "BMJ"
+        volume: 327
+        issue: 7414
+        pages: "557-560"
+        doi: 10.1136/bmj.327.7414.557
+    Hedges1981:
+        type: 'article'
+        author: "Hedges, L. V."
+        year: 1981
+        title: "Distribution theory for Glass's estimator of effect size and related estimators"
+        publisher: "Journal of Educational Statistics"
+        volume: 6
+        issue: 2
+        pages: "107-128"
+    Pencina2008:
+        type: 'article'
+        author: "Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S."
+        year: 2008
+        title: "Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond"
+        publisher: "Statistics in Medicine"
+        volume: 27
+        issue: 2
+        pages: "157-172"
+        doi: 10.1002/sim.2929
+    Pencina2011:
+        type: 'article'
+        author: "Pencina, M. J., D'Agostino Sr, R. B., & Steyerberg, E. W."
+        year: 2011
+        title: "Extensions of net reclassification improvement calculations to measure usefulness of new biomarkers"
+        publisher: "Statistics in Medicine"
+        volume: 30
+        issue: 1
+        pages: "11-21"
+        doi: 10.1002/sim.4085
+    Vickers2006:
+        type: 'article'
+        author: "Vickers, A. J., & Elkin, E. B."
+        year: 2006
+        title: "Decision curve analysis: a novel method for evaluating prediction models"
+        publisher: "Medical Decision Making"
+        volume: 26
+        issue: 6
+        pages: "565-574"
+        doi: 10.1177/0272989X06295361
+    Steyerberg2010:
+        type: 'article'
+        author: "Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., & Kattan, M. W."
+        year: 2010
+        title: "Assessing the performance of prediction models: a framework for traditional and novel measures"
+        publisher: "Epidemiology"
+        volume: 21
+        issue: 1
+        pages: "128-138"
+        doi: 10.1097/EDE.0b013e3181c30fb2
+    harrell2015:
+        type: 'book'
+        author: "Harrell Jr, F. E."
+        year: 2015
+        title: "Regression Modeling Strategies (2nd ed.)"
+        publisher: "Springer"
+        doi: 10.1007/978-3-319-19425-7
+    Faul2007:
+        type: 'article'
+        author: "Faul, F., Erdfelder, E., Lang, A.-G., & Buchner, A."
+        year: 2007
+        title: "G*Power 3: A flexible statistical power analysis program for the social, behavioral, and biomedical sciences"
+        publisher: "Behavior Research Methods"
+        volume: 39
+        issue: 2
+        pages: "175-191"
+        doi: 10.3758/BF03193146
+    Matthews1975:
+        type: 'article'
+        author: "Matthews, B. W."
+        year: 1975
+        title: "Comparison of the predicted and observed secondary structure of T4 phage lysozyme"
+        publisher: "Biochimica et Biophysica Acta"
+        volume: 405
+        issue: 2
+        pages: "442-451"
+        doi: 10.1016/0005-2795(75)90109-9
+    McClish1989:
+        type: 'article'
+        author: "McClish, D. K."
+        year: 1989
+        title: "Analyzing a portion of the ROC curve"
+        publisher: "Medical Decision Making"
+        volume: 9
+        issue: 3
+        pages: "190-195"
+        doi: 10.1177/0272989X8900900307
+    Saito2015:
+        type: 'article'
+        author: "Saito, T., & Rehmsmeier, M."
+        year: 2015
+        title: "The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets"
+        publisher: "PLoS ONE"
+        volume: 10
+        issue: 3
+        pages: "e0118432"
+        doi: 10.1371/journal.pone.0118432
+    Davis2006:
+        type: 'inproceedings'
+        author: "Davis, J., & Goadrich, M."
+        year: 2006
+        title: "The relationship between Precision-Recall and ROC curves"
+        publisher: "Proceedings of the 23rd International Conference on Machine Learning"
+        pages: "233-240"
+        doi: 10.1145/1143844.1143874
+    Swamidass2010:
+        type: 'article'
+        author: "Swamidass, S. J., Azencott, C.-A., Daily, K., & Baldi, P."
+        year: 2010
+        title: "A CROC stronger than ROC: measuring, visualizing and optimizing early retrieval"
+        publisher: "Bioinformatics"
+        volume: 26
+        issue: 10
+        pages: "1348-1356"
+        doi: 10.1093/bioinformatics/btq140
+    Kruschke2014:
+        type: 'book'
+        author: "Kruschke, J. K."
+        year: 2014
+        title: "Doing Bayesian Data Analysis: A Tutorial with R, JAGS, and Stan (2nd ed.)"
+        publisher: "Academic Press"
+    McElreath2020:
+        type: 'book'
+        author: "McElreath, R."
+        year: 2020
+        title: "Statistical Rethinking: A Bayesian Course with Examples in R and Stan (2nd ed.)"
+        publisher: "CRC Press"
+    Hothorn2006:
+        type: 'article'
+        author: "Hothorn, T., Hornik, K., & Zeileis, A."
+        year: 2006
+        title: "Unbiased recursive partitioning: A conditional inference framework"
+        publisher: "Journal of Computational and Graphical Statistics"
+        volume: 15
+        issue: 3
+        pages: "651-674"
+        doi: 10.1198/106186006X133933
+    Strobl2007:
+        type: 'article'
+        author: "Strobl, C., Boulesteix, A.-L., Zeileis, A., & Hothorn, T."
+        year: 2007
+        title: "Bias in random forest variable importance measures: Illustrations, sources and a solution"
+        publisher: "BMC Bioinformatics"
+        volume: 8
+        pages: "25"
+        doi: 10.1186/1471-2105-8-25
+    gelber1986:
+        type: 'article'
+        author: "Gelber, R. D., & Goldhirsch, A."
+        year: 1986
+        title: "A new endpoint for the assessment of adjuvant therapy in postmenopausal women with operable breast cancer"
+        publisher: "Journal of Clinical Oncology"
+        volume: 4
+        issue: 12
+        pages: "1772-1779"
+        doi: 10.1200/JCO.1986.4.12.1772
+    glasziou1990:
+        type: 'article'
+        author: "Glasziou, P. P., Simes, R. J., & Gelber, R. D."
+        year: 1990
+        title: "Quality adjusted survival analysis"
+        publisher: "Statistics in Medicine"
+        volume: 9
+        issue: 11
+        pages: "1259-1276"
+        doi: 10.1002/sim.4780091106
+    tripod:
+        type: 'article'
+        author: "Collins, G. S., Reitsma, J. B., Altman, D. G., & Moons, K. G. M."
+        year: 2015
+        title: "Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis (TRIPOD): the TRIPOD statement"
+        publisher: "Annals of Internal Medicine"
+        volume: 162
+        issue: 1
+        pages: "55-63"
+        doi: 10.7326/M14-0697
+    remark:
+        type: 'article'
+        author: "McShane, L. M., Altman, D. G., Sauerbrei, W., Taube, S. E., Gion, M., & Clark, G. M."
+        year: 2005
+        title: "Reporting recommendations for tumour marker prognostic studies (REMARK)"
+        publisher: "British Journal of Cancer"
+        volume: 93
+        issue: 4
+        pages: "387-391"
+        doi: 10.1038/sj.bjc.6602678
+    cole2004:
+        type: 'article'
+        author: "Cole, B. F., Gelber, R. D., Gelber, S., Coates, A. S., & Goldhirsch, A."
+        year: 2004
+        title: "Quality-of-life-adjusted survival analysis (Q-TWiST) for evaluating adjuvant therapy"
+    revicki2006:
+        type: 'article'
+        author: "Revicki, D. A., Osoba, D., Fairclough, D., et al."
+        year: 2006
+        title: "Recommendations on health-related quality of life research to support labeling and promotional claims"
+    BaylorEdPsych:
+        type: 'software'
+        author:
+        year:
+        title: "BaylorEdPsych: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=BaylorEdPsych"
+        url: https://CRAN.R-project.org/package=BaylorEdPsych
+    DecisionCurve:
+        type: 'software'
+        author:
+        year:
+        title: "DecisionCurve: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=DecisionCurve"
+        url: https://CRAN.R-project.org/package=DecisionCurve
+    DiagTest3Grp:
+        type: 'software'
+        author:
+        year:
+        title: "DiagTest3Grp: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=DiagTest3Grp"
+        url: https://CRAN.R-project.org/package=DiagTest3Grp
+    NPHMC:
+        type: 'software'
+        author:
+        year:
+        title: "NPHMC: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=NPHMC"
+        url: https://CRAN.R-project.org/package=NPHMC
+    ReliabilityTheory:
+        type: 'software'
+        author:
+        year:
+        title: "ReliabilityTheory: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ReliabilityTheory"
+        url: https://CRAN.R-project.org/package=ReliabilityTheory
+    SemiMarkov:
+        type: 'software'
+        author:
+        year:
+        title: "SemiMarkov: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=SemiMarkov"
+        url: https://CRAN.R-project.org/package=SemiMarkov
+    VIM:
+        type: 'software'
+        author:
+        year:
+        title: "VIM: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=VIM"
+        url: https://CRAN.R-project.org/package=VIM
+    forestplot:
+        type: 'software'
+        author:
+        year:
+        title: "forestplot: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=forestplot"
+        url: https://CRAN.R-project.org/package=forestplot
+    nricens:
+        type: 'software'
+        author:
+        year:
+        title: "nricens: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=nricens"
+        url: https://CRAN.R-project.org/package=nricens
+    regplot:
+        type: 'software'
+        author:
+        year:
+        title: "regplot: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=regplot"
+        url: https://CRAN.R-project.org/package=regplot
+    rmda:
+        type: 'software'
+        author:
+        year:
+        title: "rmda: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=rmda"
+        url: https://CRAN.R-project.org/package=rmda
+    rpact:
+        type: 'software'
+        author:
+        year:
+        title: "rpact: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=rpact"
+        url: https://CRAN.R-project.org/package=rpact
+    survSNP:
+        type: 'software'
+        author:
+        year:
+        title: "survSNP: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=survSNP"
+        url: https://CRAN.R-project.org/package=survSNP
+    tidycmprsk:
+        type: 'software'
+        author:
+        year:
+        title: "tidycmprsk: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=tidycmprsk"
+        url: https://CRAN.R-project.org/package=tidycmprsk
+    ICC:
+        type: 'software'
+        author:
+        year:
+        title: "ICC: R package"
+        publisher: "[R package]. Retrieved from https://CRAN.R-project.org/package=ICC"
+        url: https://CRAN.R-project.org/package=ICC
+
+    Shrout1979:
+        type: 'article'
+        author: "Shrout, P. E., & Fleiss, J. L."
+        year: 1979
+        title: "Intraclass correlations: uses in assessing rater reliability"
+        publisher: "Psychological Bulletin"
+        volume: 86
+        issue: 2
+        pages: "420-428"
+        doi: 10.1037/0033-2909.86.2.420
+    McGraw1996:
+        type: 'article'
+        author: "McGraw, K. O., & Wong, S. P."
+        year: 1996
+        title: "Forming inferences about some intraclass correlation coefficients"
+        publisher: "Psychological Methods"
+        volume: 1
+        issue: 1
+        pages: "30-46"
+        doi: 10.1037/1082-989X.1.1.30
+    Koo2016:
+        type: 'article'
+        author: "Koo, T. K., & Li, M. Y."
+        year: 2016
+        title: "A guideline of selecting and reporting intraclass correlation coefficients for reliability research"
+        publisher: "Journal of Chiropractic Medicine"
+        volume: 15
+        issue: 2
+        pages: "155-163"
+        doi: 10.1016/j.jcm.2016.02.012
 
 ...

@@ -181,12 +181,12 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
         },
 
         .run = function() {
-            # TODO (security): zero `htmltools::htmlEscape` calls across
-            # ~1.5k LOC. HTML constructed at ~L1440-1467 (validation summary)
-            # and the educational/clinical content blocks interpolate
-            # variable names from user CSV headers without escaping. Sweep
-            # all paste0 HTML construction with `htmltools::htmlEscape()`
-            # on dynamic interpolations.
+            # Security note: user-derived variable names / CSV headers that reach
+            # HTML output ARE escaped via htmltools::htmlEscape() (col at L367/L1018;
+            # error/warning/info at L1480-L1502; condition messages at L458). When
+            # adding new HTML that interpolates a dynamic (variable name, factor
+            # label, CSV header), escape it the same way. (Escaping is present here
+            # — do not remove it.)
             # TODO (forward-looking): no `.()` wrapping in this file (~1.5k
             # LOC of educational and method-description text). Address in
             # a /prepare-translation pass.

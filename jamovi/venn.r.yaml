@@ -97,7 +97,7 @@ items:
       requiresData: true
       visible: (show_upsetR)
       refs:
-        - upsetR
+        - UpSetR
 
     - title: ComplexUpset Plot
       name: plotComplexUpset
@@ -108,7 +108,7 @@ items:
       requiresData: true
       visible: (show_complexUpset)
       refs:
-        - complexUpset
+        - ComplexUpset
 
 
     - name: aboutAnalysis

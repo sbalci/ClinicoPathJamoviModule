@@ -757,9 +757,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="binaryConversionNote",
                 title="Binary Conversion Notice",
-                visible=FALSE,
-                refs=list(
-                    "distanceMethod")))
+                visible=FALSE))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summary",
@@ -1035,9 +1033,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="supervisedResults",
                 title="Supervised Clustering Details",
-                visible="(supervisedClustering)",
-                refs=list(
-                    "supervisedVariable")))
+                visible="(supervisedClustering)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioSummary",
@@ -1052,11 +1048,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `name`="value", 
                         `title`="Value", 
                         `type`="number", 
-                        `format`="zto")),
-                refs=list(
-                    "ratioNumerator",
-                    "ratioDenominator",
-                    "ratioName")))
+                        `format`="zto"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioClassificationTable",
@@ -1079,10 +1071,7 @@ ihcclusterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="range", 
                         `title`="Range", 
-                        `type`="text")),
-                refs=list(
-                    "ratioLowCutoff",
-                    "ratioHighCutoff")))
+                        `type`="text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="markerImportance",

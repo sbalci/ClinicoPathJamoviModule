@@ -18,11 +18,16 @@ args:
     description: Also check GitHub for packages not on CRAN
     required: false
     default: false
-usage: /update-refs <function_name>|--all [--fetch-metadata] [--validate-cran]
+  --validate:
+    description: Validate ref-key integrity (used-but-undefined, case-mismatch, empty author/year, option-names-in-refs) instead of adding refs. Report-only.
+    required: false
+    default: false
+usage: /update-refs <function_name>|--all [--fetch-metadata] [--validate-cran] [--validate]
 examples:
   /update-refs tableone                        # Basic update with placeholders
   /update-refs tableone --fetch-metadata       # Fetch real CRAN metadata
   /update-refs --all --fetch-metadata          # Update all with metadata
+  /update-refs --all --validate                # Report broken/mis-cased/empty citations, add nothing
 ---
 
 # Update References for Jamovi Function with CRAN Metadata Fetching
@@ -125,6 +130,34 @@ jamovi/00refs.yaml
      <file>.bak.YYYYMMDD-HHMMSS
      ```
 
+### Reference Validation Mode (`--validate`)
+
+When `--validate` is passed, the command does NOT add or modify anything — it reports
+citation-integrity problems the jamovi library reviewer flags. Build the set of DEFINED keys
+(2-space-indented top-level keys in `jamovi/00refs.yaml`) and the set of USED keys (every
+`refs:` list item across the target `.r.yaml`/`.a.yaml`, both block form and inline
+`refs: [a, b]`), then report four categories:
+
+1. **USED-but-UNDEFINED** — a `refs:` key with no `00refs.yaml` entry → a broken/missing citation
+   shown to users (e.g. `BaylorEdPsych`). Action: add the entry (see `--fetch-metadata` for
+   packages) or drop the ref.
+2. **CASE-MISMATCH** — a used key differing only in case from a defined key (`upsetR` vs `UpSetR`,
+   `CONSORT` vs `consort`). YAML keys are case-sensitive, so the citation silently doesn't
+   resolve. Action: fix the `refs:` value to match the defined key's casing.
+3. **EMPTY author/year on a USED entry** — a defined, cited entry with `author: ""` / `year: ""`
+   renders a citation with no author/year. Action: fill from `citation()` / CRAN (`--fetch-metadata`).
+4. **OPTION/ANALYSIS NAME inside a `refs:` block** — a `refs:` list item that is actually an
+   option/analysis name, not a citation key (e.g. `ratioNumerator`, `mannwhitney`). Action: remove it.
+
+Report each finding as `file:line — <category> — <key>`. `--all --validate` runs this across every
+function and prints a consolidated table.
+
+**Important — the add path must be case-INSENSITIVE when checking existence.** `ensure_refs_yaml_key`
+currently uses a case-sensitive `grep` for `^ {4}<key>:`, so passing `upsetR` when `UpSetR:` already
+exists would ADD a duplicate mis-cased entry (this is how casing dupes get created). When adding,
+first check case-insensitively: if a key exists under a different casing, WARN and skip (don't add) —
+and surface it as a CASE-MISMATCH to fix in the `refs:` usage, not a new `00refs.yaml` entry.
+
 ### Implementation Command
 
 The action runs:
@@ -218,6 +251,15 @@ ensure_refs_yaml_key() {
   local key="$1"
   # Check if key already exists under 'refs:' (allow 4 spaces indent)
   if grep -Eq "^ {4}${key}:" "$REFS_YAML"; then
+    return 0
+  fi
+
+  # Case-INSENSITIVE guard: if a differently-cased key already exists, do NOT add a
+  # duplicate mis-cased entry — warn and skip. (Adding it is how casing dupes like
+  # upsetR vs UpSetR get created; fix the .r.yaml usage's casing instead.)
+  existing_ci="$(grep -Ei "^ {4}${key}:" "$REFS_YAML" | head -1 | sed -E 's/^ {4}([^:]+):.*/\1/')"
+  if [[ -n "$existing_ci" ]]; then
+    echo " ! '${key}' matches existing key '${existing_ci}' by case only — skipping add; fix the ref usage to '${existing_ci}'." >&2
     return 0
   fi
 

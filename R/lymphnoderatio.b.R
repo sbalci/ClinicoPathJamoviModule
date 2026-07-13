@@ -30,7 +30,7 @@ lymphnoderatioClass <- R6::R6Class(
             if (sum(ok) < 2) {
                 self$results$todo$setContent(
                     "<p style='color:#a33'>Need at least two rows with valid node counts
-                    (examined &gt; 0 and 0 &le; positive &le; examined).</p>")
+                    (examined &gt; 0 and 0 \u{2264} positive \u{2264} examined).</p>")
                 return()
             }
             lnr <- ifelse(ok, pos / exm, NA_real_)

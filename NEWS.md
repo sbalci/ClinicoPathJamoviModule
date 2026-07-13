@@ -1,5 +1,29 @@
 # ClinicoPath News
 
+# ClinicoPath 1.0.0 (2026-07-13)
+
+## First stable release
+
+Crosses the 1.0 line for jamovi library acceptance. This release folds in the fixes from the
+2026-07-13 jamovi library audits (ClinicoPathDescriptives + OncoPath):
+
+### Fixed
+
+- **Citations:** repaired all broken/undefined bibliography keys (0 undefined refs remaining),
+  fixed case-mismatched keys, removed option/analysis names wrongly placed in `refs:` blocks,
+  and populated author/year for cited package entries.
+- **Dependencies:** declared `MASS`/`boot` (Imports) and `BaylorEdPsych` (Suggests) in the
+  submodules that ship the functions using them; removed unused OncoPath imports.
+- **Schema/behaviour:** `clearWith` now includes the NA-exclusion option on crosstable results;
+  removed dead/never-populated result items; added error handling around variable-tree generation;
+  routed fatal validation through `jmvcore::reject()`; surfaced benford's detailed output.
+- **Rendering:** replaced named HTML symbol entities (`&plusmn;`, `&ge;`, …) with Unicode escapes
+  so they render correctly and survive non-HTML export.
+- **Cleanup:** removed dead `if (FALSE)` / half-wired `clinicalPreset` code; stopped shipping
+  orphaned stage-migration helpers to the OncoPath build.
+- **Tooling:** the in-repo audit/review skills now catch these issue classes (version gate,
+  citation integrity, UI-label conventions, HTML-entity rendering, dependency blind spots).
+
 # ClinicoPath 0.0.51 (2026-07-11)
 
 ## OncoPath: Jamovi-TrialPlots parity & waterfall enhancements

@@ -267,7 +267,6 @@ jforestmodelResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 title="Forest Plot Visualization",
                 refs=list(
                     "ClinicoPathJamoviModule",
-                    ".step",
                     "survival",
                     "forestmodel"))
             self$add(jmvcore::Html$new(

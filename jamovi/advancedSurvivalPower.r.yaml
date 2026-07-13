@@ -34,8 +34,6 @@ items:
 refs:
     - ClinicoPathJamoviModule
     - powerSurvEpi
-    - powerSurvival
-    - survivalStats
     - Schoenfeld1983
     - FreedmanAndSchoenfeld1982
     - LachinAndFoulkes1986

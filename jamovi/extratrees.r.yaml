@@ -108,8 +108,7 @@ items:
       requiresData: true
 
 refs:
-    - ExtraTrees
-    - Survival
+    - survival
     - ranger
     - randomForestSRC
     - ClinicoPathJamoviModule

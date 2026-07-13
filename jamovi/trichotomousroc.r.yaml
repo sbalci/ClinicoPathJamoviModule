@@ -241,7 +241,6 @@ items:
 
 refs:
     - DiagTest3Grp
-    - ThreeWayROC
     - pROC
     - ggplot2
     - plotly

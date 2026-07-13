@@ -3,7 +3,7 @@ name:  jwaffle
 title: Waffle Charts
 menuGroup: JJStatsPlot
 menuSubgroup: 'Distribution'
-version: '0.0.51'
+version: '1.0.0'
 jas: '1.2'
 
 description:

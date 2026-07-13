@@ -270,7 +270,7 @@ treatmentswitchingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "survival",
-                    "urvminer",
+                    "survminer",
                     "glue",
                     "parallel"))
             self$add(jmvcore::Html$new(

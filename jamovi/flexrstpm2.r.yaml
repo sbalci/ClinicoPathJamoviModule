@@ -460,7 +460,7 @@ items:
 refs:
     - ClinicoPathJamoviModule
 
-    - plines
+    - splines
     - survival
     - rstpm2
 ...

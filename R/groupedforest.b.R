@@ -540,7 +540,7 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
                 # Overall interaction: joint likelihood-ratio test (not min p-value)
                 interaction_significant <- !is.na(lr_p) && lr_p < 0.05
                 lr_txt <- if (!is.na(lr_p)) {
-                    paste0("Overall likelihood-ratio test: &chi;&sup2; = ", sprintf("%.2f", lr_stat),
+                    paste0("Overall likelihood-ratio test: \u{03C7}\u{00B2} = ", sprintf("%.2f", lr_stat),
                            " on ", lr_df, " df, p = ", format.pval(lr_p, digits = 3, eps = 1e-4), ". ")
                 } else {
                     "Overall likelihood-ratio test could not be computed. "

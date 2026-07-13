@@ -143,7 +143,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=FALSE,
                 clearWith=list(
                     "vars",
-                    "group")))
+                    "group",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataQualityNotice",
@@ -151,7 +152,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=FALSE,
                 clearWith=list(
                     "vars",
-                    "group")))
+                    "group",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisInfo",
@@ -160,7 +162,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty")))
+                    "sty",
+                    "excl")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="subtitle",
@@ -173,7 +176,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty")))
+                    "sty",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo2",
@@ -181,7 +185,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty")))
+                    "sty",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle1",
@@ -189,7 +194,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:arsenal)",
                 refs="arsenal"))
             self$add(jmvcore::Html$new(
@@ -201,7 +207,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "group",
                     "cont",
                     "pcat",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:finalfit)",
                 refs="finalfit"))
             self$add(jmvcore::Html$new(
@@ -211,7 +218,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:gtsummary)",
                 refs="gtsummary"))
             self$add(jmvcore::Html$new(
@@ -221,7 +229,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:nejm || sty:lancet || sty:hmisc)",
                 refs="tangram"))
             self$add(jmvcore::Html$new(
@@ -233,7 +242,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty",
-                    "p_adjust")))
+                    "p_adjust",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="testInformation",
@@ -243,7 +253,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty",
-                    "p_adjust")))
+                    "p_adjust",
+                    "excl")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="smdTable",
@@ -252,7 +263,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
-                    "showSMD"),
+                    "showSMD",
+                    "excl"),
                 columns=list(
                     list(
                         `name`="variable", 

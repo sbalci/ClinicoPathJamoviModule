@@ -16,9 +16,9 @@ tumorbuddingClass <- R6::R6Class(
                 number of tumor buds in a hotspot.</p>
                 <p><b>Provide</b> a bud count per field. If several fields are recorded per case
                 (share a <b>Case ID</b>), the densest field is used as the hotspot. Counts are
-                normalized to the standard <b>0.785 mm&sup2;</b> field before grading:
-                <b>Bd1</b> (low) 0&ndash;4, <b>Bd2</b> (intermediate) 5&ndash;9,
-                <b>Bd3</b> (high) &ge;10 buds.</p>"))
+                normalized to the standard <b>0.785 mm\u{00B2}</b> field before grading:
+                <b>Bd1</b> (low) 0\u{2013}4, <b>Bd2</b> (intermediate) 5\u{2013}9,
+                <b>Bd3</b> (high) \u{2265}10 buds.</p>"))
         },
 
         .gradeOf = function(buds) {
@@ -187,11 +187,11 @@ tumorbuddingClass <- R6::R6Class(
                 <p>Tumor buds are single cells or clusters of up to four cells at the invasive
                 front. Following the International Tumor Budding Consensus Conference (ITBCC
                 2016), buds are counted in the single densest <b>hotspot</b> field, standardized
-                to an area of <b>0.785 mm&sup2;</b> (a 20x objective with a 0.55 mm field
+                to an area of <b>0.785 mm\u{00B2}</b> (a 20x objective with a 0.55 mm field
                 diameter). When the microscope field differs, counts are scaled to that
                 standard area before grading.</p>
-                <p>The grade is <b>Bd1</b> (low, 0&ndash;4 buds), <b>Bd2</b> (intermediate,
-                5&ndash;9), or <b>Bd3</b> (high, &ge;10). Higher grades carry worse prognosis;
+                <p>The grade is <b>Bd1</b> (low, 0\u{2013}4 buds), <b>Bd2</b> (intermediate,
+                5\u{2013}9), or <b>Bd3</b> (high, \u{2265}10). Higher grades carry worse prognosis;
                 when a survival outcome is supplied, a log-rank test across grades and a Cox
                 per-grade trend hazard ratio are reported.</p>")
         },

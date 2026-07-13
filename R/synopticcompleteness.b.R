@@ -13,7 +13,7 @@ synopticcompletenessClass <- R6::R6Class(
             self$results$todo$setContent(glue::glue(
                 "<h3>Synoptic Report Completeness</h3>
                 <p>Audits how completely structured / synoptic pathology reports capture the
-                required data elements &mdash; a laboratory-quality metric increasingly required
+                required data elements \u{2014} a laboratory-quality metric increasingly required
                 for accreditation.</p>
                 <p><b>Provide</b> the required data elements as variables (one per element). Each
                 is counted as <i>present</i> for a report when it is non-missing (or equals a
@@ -154,8 +154,8 @@ synopticcompletenessClass <- R6::R6Class(
                 "<h4>Synoptic-report completeness auditing</h4>
                 <p>Structured (synoptic) reporting standards such as CAP and ICCR specify a set of
                 required data elements. Completeness auditing measures the proportion of those
-                elements actually populated &mdash; per report, per element (to find the weakest
-                fields), and by subspecialty or reporting pathologist &mdash; and tracks it over
+                elements actually populated \u{2014} per report, per element (to find the weakest
+                fields), and by subspecialty or reporting pathologist \u{2014} and tracks it over
                 time. Each element is judged present when it is non-missing (or equals a
                 specified present value).</p>
                 <p>The completeness trend estimates the change per unit time by linear regression;

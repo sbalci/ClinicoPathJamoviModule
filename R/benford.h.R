@@ -106,8 +106,7 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Detailed Analysis Results",
-                visible=FALSE))
+                title="Detailed Analysis Results"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",

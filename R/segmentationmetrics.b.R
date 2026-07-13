@@ -1214,9 +1214,9 @@ segmentationmetricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             <h4>Key Metrics:</h4>
             <ul>
-                <li><b>Dice Coefficient:</b> 2|A&cap;B|/(|A|+|B|) - Most common metric (range 0-1)</li>
-                <li><b>IoU (Jaccard Index):</b> |A&cap;B|/|A&cup;B| - Standard in computer vision</li>
-                <li><b>Hausdorff Distance:</b> Maximum boundary deviation (pixels or &micro;m)</li>
+                <li><b>Dice Coefficient:</b> 2|A\u{2229}B|/(|A|+|B|) - Most common metric (range 0-1)</li>
+                <li><b>IoU (Jaccard Index):</b> |A\u{2229}B|/|A\u{222A}B| - Standard in computer vision</li>
+                <li><b>Hausdorff Distance:</b> Maximum boundary deviation (pixels or \u{00B5}m)</li>
                 <li><b>Surface Distance:</b> Average boundary error</li>
             </ul>
 
@@ -1227,7 +1227,7 @@ segmentationmetricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             <h4>Quality Benchmarks:</h4>
             <ul>
-                <li><b>Excellent:</b> Dice &ge;0.90 - Ready for clinical deployment</li>
+                <li><b>Excellent:</b> Dice \u{2265}0.90 - Ready for clinical deployment</li>
                 <li><b>Good:</b> Dice 0.80-0.89 - Acceptable with monitoring</li>
                 <li><b>Acceptable:</b> Dice 0.70-0.79 - Requires human review</li>
                 <li><b>Poor:</b> Dice &lt;0.70 - Needs improvement</li>
@@ -1263,12 +1263,12 @@ segmentationmetricsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             )
 
             context_threshold <- switch(ctx,
-                "tumor" = "For tumor boundary delineation, Dice &ge;0.85 is typically required for clinical use.",
-                "gland" = "For gland segmentation, Dice &ge;0.80 is generally considered acceptable.",
-                "nuclei" = "For nuclei detection, IoU &ge;0.70 combined with high detection F1 is the standard benchmark.",
-                "tissue" = "For tissue classification, macro-averaged Dice &ge;0.80 across classes indicates good performance.",
-                "stain" = "For stain separation, high Dice on each stain channel (&ge;0.85) is expected.",
-                "General segmentation benchmarks: Dice &ge;0.80 is considered good."
+                "tumor" = "For tumor boundary delineation, Dice \u{2265}0.85 is typically required for clinical use.",
+                "gland" = "For gland segmentation, Dice \u{2265}0.80 is generally considered acceptable.",
+                "nuclei" = "For nuclei detection, IoU \u{2265}0.70 combined with high detection F1 is the standard benchmark.",
+                "tissue" = "For tissue classification, macro-averaged Dice \u{2265}0.80 across classes indicates good performance.",
+                "stain" = "For stain separation, high Dice on each stain channel (\u{2265}0.85) is expected.",
+                "General segmentation benchmarks: Dice \u{2265}0.80 is considered good."
             )
 
             # Segmentation bias analysis

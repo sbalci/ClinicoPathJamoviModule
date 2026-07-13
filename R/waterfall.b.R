@@ -2506,7 +2506,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                            "patient_group" %in% names(df)
 
         # Preset-aware enhancements
-        preset <- "custom" # self$options$clinicalPreset
+        preset <- "custom"  # clinicalPreset option was removed; behavior fixed to "custom"
         if (preset == "biomarker" && !useGroupColoring) {
           message("Biomarker preset: Consider enabling group-based coloring for biomarker analysis")
         }
@@ -2837,7 +2837,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         useGroupColoring <- spiderColorBy == "group" && "patient_group" %in% names(df)
 
         # Preset-aware spider plot enhancements
-        preset <- "custom" # self$options$clinicalPreset
+        preset <- "custom"  # clinicalPreset option was removed; behavior fixed to "custom"
         if (preset == "biomarker" && !useGroupColoring) {
           message("Biomarker preset: Group-based spider plot coloring recommended for biomarker studies")
         }
@@ -3154,7 +3154,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       ,
       # Apply clinical presets ----
       .applyClinicalPreset = function() {
-        preset <- "custom" # self$options$clinicalPreset
+        preset <- "custom"  # clinicalPreset option was removed; behavior fixed to "custom"
         
 
         if (preset != "custom") {

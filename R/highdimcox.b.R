@@ -936,7 +936,7 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
           
           "<p><strong>Model Selection:</strong> ",
           "Cross-validation with ", self$options$cv_folds, " folds identified ",
-          "an optimal regularization parameter (&lambda; = ",
+          "an optimal regularization parameter (\u{03BB} = ",
           format(model_results$selected_lambda, scientific = TRUE, digits = 3), ") ",
           "that selected ", model_results$n_selected, " variables from the candidate set.</p>",
           if (!is.na(model_results$concordance)) {
@@ -949,8 +949,8 @@ highdimcoxClass <- if (requireNamespace('jmvcore', quietly=TRUE))
               "<p><strong>Stability Selection:</strong> ",
               "Bootstrap stability analysis with ", stability_results$n_successful, "/",
               stability_results$n_bootstrap, " successful iterations ",
-              "(&alpha; = ", round(stability_results$alpha_used, 2), ") ",
-              "identified ", stability_results$n_stable, " variables with selection probability &ge; ",
+              "(\u{03B1} = ", round(stability_results$alpha_used, 2), ") ",
+              "identified ", stability_results$n_stable, " variables with selection probability \u{2265} ",
               stability_results$stability_threshold, ".</p>"
             )
           } else "",

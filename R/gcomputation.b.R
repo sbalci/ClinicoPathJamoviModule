@@ -185,7 +185,7 @@ gcomputationClass <- R6::R6Class(
             self$results$explanation$setContent(
                 "<h4>The parametric g-formula</h4>
                 <p>G-computation estimates a marginal causal effect by standardization
-                (Robins, 1986; Hern&aacute;n &amp; Robins, 2020). An outcome regression is
+                (Robins, 1986; Hern\u{00E1}n &amp; Robins, 2020). An outcome regression is
                 fitted conditional on treatment A and covariates L. Using the fitted model,
                 each subject's outcome is predicted twice - once setting A = 1 and once
                 setting A = 0 - and the predictions are averaged over the observed

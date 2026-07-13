@@ -2966,7 +2966,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                     "<h4>Interpretation Guide</h4>",
                     "<table border='1' cellpadding='5' style='border-collapse:collapse;'>",
                     "<tr><th>Metric</th><th>Ideal Value</th><th>Concern Threshold</th></tr>",
-                    "<tr><td>C-index</td><td>&ge; 0.7</td><td>&lt; 0.6 (poor discrimination)</td></tr>",
+                    "<tr><td>C-index</td><td>\u{2265} 0.7</td><td>&lt; 0.6 (poor discrimination)</td></tr>",
                     "<tr><td>Optimism</td><td>&lt; 0.02</td><td>&gt; 0.05 (overfitting)</td></tr>",
                     "<tr><td>Calibration slope</td><td>1.0</td><td>&lt; 0.8 (predictions too extreme)</td></tr>",
                     "</table>",

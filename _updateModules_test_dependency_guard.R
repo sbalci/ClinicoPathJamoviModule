@@ -82,6 +82,24 @@ testthat::test_that("every pkg:: dependency is declared in DESCRIPTION Imports",
   # Genuine crash risk = used via pkg::, unguarded, undeclared, not transitively present.
   offenders <- setdiff(setdiff(undeclared, guarded), transitive)
 
+  # Non-failing WARNING pass: packages the hard test structurally excuses but the jamovi
+  # library reviewer still expects declared. Two blind spots of the crash-only rule above:
+  #   (1) R "recommended" packages (MASS, boot, cluster, survival, ...) are in `ignore`, so a
+  #       genuine `MASS::ginv` / `boot::boot` use never trips `offenders` even when undeclared.
+  #   (2) `requireNamespace`-guarded packages are subtracted, so a guarded optional dep
+  #       (e.g. BaylorEdPsych) is invisible too.
+  # These don't crash a clean install, but they SHOULD be declared (Imports if required for the
+  # feature, Suggests if graceful-degradation). Surface them without failing the build.
+  recommended <- rownames(ip)[!is.na(prio) & prio %in% "recommended"]
+  soft <- setdiff(intersect(used, c(recommended, guarded)),
+                  c(declared, pkg_name, transitive))
+  if (length(soft) > 0)
+    message(
+      "[dependency-guard WARNING] Used via pkg:: but NOT declared in DESCRIPTION ",
+      "(guarded and/or R-recommended, so not a clean-install crash, but the jamovi library ",
+      "reviewer flags these): ", paste(sort(soft), collapse = ", "),
+      ". Declare them in Imports (required) or Suggests (optional/guarded).")
+
   testthat::expect_true(
     length(offenders) == 0,
     info = paste0(

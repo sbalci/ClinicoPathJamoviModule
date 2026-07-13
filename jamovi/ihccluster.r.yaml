@@ -21,8 +21,6 @@ items:
       title: Binary Conversion Notice
       type: Html
       visible: false
-      refs:
-          - distanceMethod
 
     - name: summary
       title: Analysis Summary
@@ -257,8 +255,6 @@ items:
       title: Supervised Clustering Details
       type: Html
       visible: (supervisedClustering)
-      refs:
-          - supervisedVariable
 
     # Phase 3: Ratio Calculation Results
     - name: ratioSummary
@@ -273,10 +269,6 @@ items:
             title: Value
             type: number
             format: zto
-      refs:
-          - ratioNumerator
-          - ratioDenominator
-          - ratioName
 
     - name: ratioClassificationTable
       title: Ratio Classification
@@ -296,9 +288,6 @@ items:
           - name: range
             title: Range
             type: text
-      refs:
-          - ratioLowCutoff
-          - ratioHighCutoff
 
     - name: markerImportance
       title: Marker Importance for Clustering

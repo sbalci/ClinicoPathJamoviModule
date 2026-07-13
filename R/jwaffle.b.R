@@ -225,7 +225,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 combined_msg <- paste(private$.messages, collapse = "\n")
                 clean_msg <- gsub("<br>|<br/>|<hr>", "\n", combined_msg)
                 clean_msg <- gsub("<[^>]*>", "", clean_msg)
-                clean_msg <- gsub("&bull;", "\u2022", clean_msg)
+                clean_msg <- gsub("\u{2022}", "\u2022", clean_msg)
                 clean_msg <- gsub("&nbsp;", " ", clean_msg)
                 clean_msg <- trimws(clean_msg)
 

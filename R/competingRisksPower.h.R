@@ -268,7 +268,6 @@ competingRisksPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="",
                 title="Competing Risks Power Analysis",
                 refs=list(
-                    "powerCompRisk",
                     "cmprsk",
                     "survival",
                     "ClinicoPathJamoviModule",

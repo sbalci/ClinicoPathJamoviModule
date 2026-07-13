@@ -157,8 +157,6 @@ advancedSurvivalPowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "powerSurvEpi",
-                    "powerSurvival",
-                    "survivalStats",
                     "Schoenfeld1983",
                     "FreedmanAndSchoenfeld1982",
                     "LachinAndFoulkes1986"))

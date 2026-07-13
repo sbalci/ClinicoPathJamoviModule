@@ -296,7 +296,6 @@ patientsimilarityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                     "Rtsne",
                     "umap",
                     "survival",
-                    "urvminer",
                     "dbscan",
                     "cluster",
                     "survival",

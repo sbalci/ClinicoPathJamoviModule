@@ -134,8 +134,8 @@ evalueClass <- R6::R6Class(
         .populateExplanation = function() {
             self$results$explanation$setContent(
                 "<h4>E-value methodology</h4>
-                <p>For a risk ratio RR &ge; 1, the E-value is
-                <i>RR + sqrt(RR &times; (RR &minus; 1))</i>; for RR &lt; 1 the formula is
+                <p>For a risk ratio RR \u{2265} 1, the E-value is
+                <i>RR + sqrt(RR \u{00D7} (RR \u{2212} 1))</i>; for RR &lt; 1 the formula is
                 applied to 1/RR (VanderWeele &amp; Ding, 2017). It is the smallest value
                 such that a confounder associated with both exposure and outcome by that
                 risk ratio (on both) could reduce the observed association to the null.</p>
@@ -143,7 +143,7 @@ evalueClass <- R6::R6Class(
                 ratio: for a common outcome OR is converted as sqrt(OR); hazard ratios use
                 VanderWeele's approximation; a rare outcome allows OR and HR to approximate
                 RR directly. Standardized mean differences are mapped via
-                OR = exp(1.81 &times; d) (Chinn, 2000).</p>
+                OR = exp(1.81 \u{00D7} d) (Chinn, 2000).</p>
                 <p>An E-value near 1 indicates the association could be explained by weak
                 confounding; a large E-value indicates that only a strong unmeasured
                 confounder could account for it.</p>")

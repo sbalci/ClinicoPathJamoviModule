@@ -195,16 +195,11 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(labels)
         },
 
-        # Generate R code for reproducibility
-        # TODO (forward-looking): the generated code below embeds raw
-        # `varname` and `newvarname` into `data$<varname>` strings (~L212-231).
-        # The output is rendered in a `<pre>`-style block via htmlEscape on
-        # the whole code, but the *R code itself* breaks if a variable name
-        # contains `\n`, backticks, or other unbalanced quote chars. If users
-        # ever paste the generated snippet into an R script, the script will
-        # fail or behave unexpectedly. Wrap `varname` / `newvarname` with
-        # `jmvcore::composeTerm()` so generated code uses backtick-quoted
-        # identifiers when needed.
+        # Generate R code for reproducibility.
+        # Variable names are backtick-quoted via jmvcore::composeTerm() inside
+        # .generateRCode() (below), and custom labels have single quotes escaped,
+        # so the generated copy-paste snippet stays valid R for names with spaces
+        # or special characters.
         .generateRCode = function(varname, method, nbins, breaks, sdmult,
                                   labels, customlabels, newvarname,
                                   includelowest, rightclosed, ordered) {
@@ -212,6 +207,12 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (newvarname == "") {
                 newvarname <- paste0(varname, "_cat")
             }
+
+            # Backtick-quote names for the generated (display-only) R snippet so a variable
+            # name containing spaces / special characters still produces syntactically valid
+            # copy-paste R. Done after the default newvarname is derived from the raw name.
+            varname <- jmvcore::composeTerm(varname)
+            newvarname <- jmvcore::composeTerm(newvarname)
 
             code <- "# Categorize continuous variable\n"
 
@@ -242,8 +243,11 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add label generation
             if (labels == "custom" && customlabels != "") {
+                # Escape single quotes in labels so a label containing an apostrophe does not
+                # break the generated c('...') literal.
+                custom_parts <- gsub("'", "\\\\'", trimws(strsplit(customlabels, ",")[[1]]))
                 code <- paste0(code, "labels <- c('",
-                              paste(trimws(strsplit(customlabels, ",")[[1]]), collapse = "', '"), "')\n")
+                              paste(custom_parts, collapse = "', '"), "')\n")
             } else if (labels == "semantic") {
                 # Generate semantic labels based on number of categories
                 code <- paste0(code,

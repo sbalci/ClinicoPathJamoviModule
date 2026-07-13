@@ -594,7 +594,7 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         "<b>Between-subgroup heterogeneity (Cochran's Q):</b><br>",
                         "Q-statistic: ", round(heterogeneity$Q, 2),
                         " (df = ", heterogeneity$df, ")<br>",
-                        "I&sup2;: ", round(heterogeneity$I_squared, 1), "%<br>",
+                        "I\u{00B2}: ", round(heterogeneity$I_squared, 1), "%<br>",
                         "P-value: ", format.pval(heterogeneity$p_value, digits = 3, eps = 1e-4), "<br>",
                         "Interpretation: ", heterogeneity$interpretation,
                         "<br><span style='color:#666;font-size:90%'>Q tests whether subgroup ",

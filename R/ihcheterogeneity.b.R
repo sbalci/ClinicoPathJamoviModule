@@ -178,10 +178,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             if (regional_count < 2) {
-                self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> At least 2 regional measurements are required for heterogeneity analysis.</p>"
-                )
-                return()
+                jmvcore::reject("At least 2 regional measurements are required for heterogeneity analysis.")
             }
             
             data <- self$data
@@ -203,17 +200,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Check data sufficiency based on study design
             if (has_reference && (length(whole_section) < min_cases_needed || nrow(biopsy_data) < min_cases_needed)) {
-                self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for reference-based heterogeneity analysis.
-                    At least 5 complete cases with reference and regional measurements are required.</p>"
-                )
-                return()
+                jmvcore::reject("Insufficient data for reference-based heterogeneity analysis. At least 5 complete cases with reference and regional measurements are required.")
             } else if (!has_reference && nrow(biopsy_data) < min_cases_needed) {
-                self$results$interpretation$setContent(
-                    "<p style='color: red;'><strong>Error:</strong> Insufficient data for inter-regional heterogeneity analysis.
-                    At least 5 complete cases with regional measurements are required.</p>"
-                )
-                return()
+                jmvcore::reject("Insufficient data for inter-regional heterogeneity analysis. At least 5 complete cases with regional measurements are required.")
             }
 
             # Add misuse detection warnings
@@ -242,11 +231,9 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 if (spatial_id_var %in% names(data)) {
                     spatial_regions <- data[[spatial_id_var]]
                 } else {
-                    # Handle case where spatial_id is selected but not in data
-                    self$results$interpretation$setContent(
-                        paste0("<p style='color: red;'><strong>Error:</strong> Spatial ID variable '", htmltools::htmlEscape(self$options$spatial_id), "' not found in data.</p>")
-                    )
-                    return()
+                    # Handle case where spatial_id is selected but not in data.
+                    # reject() content renders as plain text (jamovi escapes it), so no htmlEscape needed.
+                    jmvcore::reject(paste0("Spatial ID variable '", self$options$spatial_id, "' not found in data."))
                 }
             }
             

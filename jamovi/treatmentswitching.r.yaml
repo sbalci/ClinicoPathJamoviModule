@@ -220,7 +220,7 @@ refs:
     - ClinicoPathJamoviModule
 
     - survival
-    - urvminer
+    - survminer
     - glue
     - parallel
 ...

@@ -122,7 +122,8 @@ crosstable2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty")))
+                    "sty",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo2",
@@ -130,7 +131,8 @@ crosstable2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty")))
+                    "sty",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tablestyle1",
@@ -138,7 +140,8 @@ crosstable2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:arsenal)",
                 refs="arsenal"))
             self$add(jmvcore::Html$new(
@@ -150,7 +153,8 @@ crosstable2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "group",
                     "cont",
                     "pcat",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:finalfit)",
                 refs="finalfit"))
             self$add(jmvcore::Html$new(
@@ -160,7 +164,8 @@ crosstable2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:gtsummary)",
                 refs="gtsummary"))
             self$add(jmvcore::Html$new(
@@ -170,7 +175,8 @@ crosstable2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 clearWith=list(
                     "vars",
                     "group",
-                    "sty"),
+                    "sty",
+                    "excl"),
                 visible="(sty:nejm || sty:lancet || sty:hmisc)",
                 refs="tangram"))}))
 

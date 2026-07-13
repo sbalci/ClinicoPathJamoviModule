@@ -16,6 +16,7 @@ items:
           - vars
           - group
           - sty
+          - excl
 
     - name: todo2
       title: To Do
@@ -24,6 +25,7 @@ items:
           - vars
           - group
           - sty
+          - excl
 
     - name: tablestyle1
       title: '`Cross Table - ${group}`'
@@ -32,6 +34,7 @@ items:
           - vars
           - group
           - sty
+          - excl
       visible: (sty:arsenal)
       refs: arsenal
 
@@ -44,6 +47,7 @@ items:
           - cont
           - pcat
           - sty
+          - excl
       visible: (sty:finalfit)
       refs: finalfit
 
@@ -54,6 +58,7 @@ items:
           - vars
           - group
           - sty
+          - excl
       visible: (sty:gtsummary)
       refs: gtsummary
 
@@ -64,6 +69,7 @@ items:
           - vars
           - group
           - sty
+          - excl
       visible: (sty:nejm || sty:lancet || sty:hmisc)
       refs: tangram
 

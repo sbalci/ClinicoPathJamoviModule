@@ -322,7 +322,6 @@ trichotomousrocResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 title="Trichotomous (Three-way) ROC Analysis",
                 refs=list(
                     "DiagTest3Grp",
-                    "ThreeWayROC",
                     "pROC",
                     "ggplot2",
                     "plotly",

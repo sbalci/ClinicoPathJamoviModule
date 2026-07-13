@@ -18,8 +18,8 @@ fragilityindexClass <- R6::R6Class(
                 size, allowing comparison across studies.</p>
                 <p><b>Provide either:</b></p>
                 <ul>
-                  <li><b>Summary counts</b> &mdash; events and totals for each of the two groups, or</li>
-                  <li><b>Raw data</b> &mdash; a two-level group variable and a binary outcome variable.</li>
+                  <li><b>Summary counts</b> \u{2014} events and totals for each of the two groups, or</li>
+                  <li><b>Raw data</b> \u{2014} a two-level group variable and a binary outcome variable.</li>
                 </ul>
                 <p>For a significant result, the index counts reversals toward
                 non-significance; for a non-significant result, the <b>reverse fragility
@@ -164,7 +164,7 @@ fragilityindexClass <- R6::R6Class(
             if (is.na(fr$fi)) {
                 self$results$summary$setContent(
                     "<p>The significance of this result could not be reversed within the
-                    available sample &mdash; the outcome is not fragile by this measure.</p>")
+                    available sample \u{2014} the outcome is not fragile by this measure.</p>")
                 return()
             }
             interp <- if (fr$sig0) {

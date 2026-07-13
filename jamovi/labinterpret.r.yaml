@@ -7,7 +7,6 @@ items:
     - name: todo
       title: Analysis Summary
       type: Html
-      refs: [labValues]
 
     - name: interpretationTable
       title: Laboratory Value Interpretation

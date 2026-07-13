@@ -421,8 +421,11 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mytitle <- paste0(mytitle, "\\n(", .("Interpretation will be shown below"), ")")
             }
 
-            # Run vtree function - Enhanced with modern vtree API and label support
-            results <- vtree::vtree(
+            # Run vtree function - Enhanced with modern vtree API and label support.
+            # Wrapped in tryCatch so an incompatible variable/option combination (too many
+            # factor levels, invalid prune/follow settings) surfaces a clean jamovi-level
+            # message via jmvcore::reject() instead of an opaque raw R crash.
+            results <- tryCatch(vtree::vtree(
                 z = mydata,
                 vars = myvars1,
                 sameline = sline,
@@ -454,10 +457,15 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summary = xsummary,
                 labelvar = xlabelvar,  # Use original variable names for display
                 pngknit = FALSE
-            )
+            ), error = function(e) jmvcore::reject(paste0(
+                "The variable tree could not be generated: ", conditionMessage(e),
+                ". Try selecting fewer variables, or adjusting the pruning / follow options.")))
 
             # export as svg ----
-            results1 <- DiagrammeRsvg::export_svg(gv = results)
+            results1 <- tryCatch(
+                DiagrammeRsvg::export_svg(gv = results),
+                error = function(e) jmvcore::reject(paste0(
+                    "The variable tree could not be rendered to SVG: ", conditionMessage(e), ".")))
 
             # Use maxwidth parameter or default values
             maxwidth <- self$options$maxwidth

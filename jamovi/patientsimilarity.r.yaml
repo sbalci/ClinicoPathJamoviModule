@@ -239,7 +239,6 @@ refs:
     - umap
 
     - survival
-    - urvminer
     - dbscan
     - cluster
     - survival

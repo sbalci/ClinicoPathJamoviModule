@@ -133,7 +133,6 @@ items:
         - analysis_label
       refs:
         - consort
-        - CONSORT
 
     - name: interpretation
       title: Clinical Interpretation
@@ -172,7 +171,6 @@ items:
       visible: (include_interpretation)
 
 refs:
-    - CONSORT
     - consort
     - ClinicoPathJamoviModule
 

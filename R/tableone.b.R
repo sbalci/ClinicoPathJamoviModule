@@ -132,7 +132,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     if (grepl("insufficient", tolower(e$message))) {
                         jmvcore::reject("Insufficient data for Table One analysis. Ensure you have at least 2 complete cases and check for missing values. Try selecting different variables or disabling 'Exclude Missing Values'.")
                     } else {
-                        stop("Error creating Table One: ", e$message, ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers.")
+                        jmvcore::reject(paste0("Error creating Table One: ", e$message, ". Check that variables have valid data and appropriate types. Categorical variables should be factors. Numeric variables should contain valid numbers."))
                     }
                 })
 
@@ -149,7 +149,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     tbl <- gtsummary::tbl_summary(data = data)
                     gtsummary::as_kable_extra(tbl)
                 }, error = function(e) {
-                    stop("Error creating gtsummary table: ", e$message, ". Check that variables have valid data and appropriate types. gtsummary requires properly formatted variables for summarization.")
+                    jmvcore::reject(paste0("Error creating gtsummary table: ", e$message, ". Check that variables have valid data and appropriate types. gtsummary requires properly formatted variables for summarization."))
                 })
 
                 # Checkpoint after expensive operation to allow UI update
@@ -173,7 +173,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     tab_summary <- summary(tab, text = "html")
                     kableExtra::kable(tab_summary, format = "html", digits = 1, escape = FALSE)
                 }, error = function(e) {
-                    stop("Error creating arsenal table: ", e$message, ". Arsenal requires properly formatted variables. Check that categorical variables are factors and numeric variables contain valid numbers.")
+                    jmvcore::reject(paste0("Error creating arsenal table: ", e$message, ". Arsenal requires properly formatted variables. Check that categorical variables are factors and numeric variables contain valid numbers."))
                 })
 
                 # Checkpoint after expensive operation to allow UI update
@@ -277,7 +277,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                     # Join all the tables together
                     paste(table_list, collapse = "")
                 }, error = function(e) {
-                    stop("Error creating frequency tables with janitor: ", e$message, ". Check that variables have valid data. Janitor works best with categorical or discrete variables.")
+                    jmvcore::reject(paste0("Error creating frequency tables with janitor: ", e$message, ". Check that variables have valid data. Janitor works best with categorical or discrete variables."))
                 })
 
                 # Checkpoint after expensive operation to allow UI update

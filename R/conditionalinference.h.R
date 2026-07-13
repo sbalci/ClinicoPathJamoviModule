@@ -246,7 +246,7 @@ conditionalinferenceResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 refs=list(
                     "Hothorn2006",
                     "Strobl2007",
-                    "Survival",
+                    "survival",
                     "ClinicoPathJamoviModule",
                     "survival",
                     "party"))

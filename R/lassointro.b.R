@@ -48,7 +48,7 @@ truly matter for patient outcomes.</p>
 If you have fewer than ~15 candidate predictors and an events-per-variable ratio above 10
 (e.g., 150 events with 12 variables), standard multivariable Cox regression is usually better.
 It gives you p-values, confidence intervals, and unbiased hazard ratios without penalization.
-Use the Survival &rarr; Multivariable Survival menu instead.<br><br>
+Use the Survival \u{2192} Multivariable Survival menu instead.<br><br>
 <strong>Exception:</strong> If you have very few events (&lt;20), rare outcomes, or encounter
 complete/quasi-complete separation (infinite coefficients), use <strong>Firth Regression</strong>
 even with few predictors. Firth is not for variable selection - it is for bias correction.
@@ -70,61 +70,61 @@ even with few predictors. Firth is not for variable selection - it is for bias c
     <td><strong>LASSO Cox</strong></td>
     <td>First-line variable selection. Automatically drops irrelevant predictors. Start here if unsure.</td>
     <td>Basic</td>
-    <td>Penalized Cox &rarr; LASSO Cox</td>
+    <td>Penalized Cox \u{2192} LASSO Cox</td>
   </tr>
   <tr>
     <td><strong>Adaptive LASSO Cox</strong></td>
     <td>More accurate selection when you need statistical consistency.
       Uses data-driven weights to penalize less important variables more heavily.</td>
     <td>Moderate</td>
-    <td>Penalized Cox &rarr; Adaptive LASSO Cox</td>
+    <td>Penalized Cox \u{2192} Adaptive LASSO Cox</td>
   </tr>
   <tr>
     <td><strong>Elastic Net Cox</strong></td>
     <td>When predictors are moderately correlated.
       Keeps groups of correlated variables together instead of picking just one arbitrarily.</td>
     <td>Moderate</td>
-    <td>Penalized Cox &rarr; Elastic Net Cox</td>
+    <td>Penalized Cox \u{2192} Elastic Net Cox</td>
   </tr>
   <tr>
     <td><strong>Group LASSO Cox</strong></td>
     <td>When variables naturally form groups (e.g., grouped by genes, pathways, or categories). Drops or keeps whole groups at a time.</td>
     <td>Advanced</td>
-    <td>Penalized Cox (Drafts) &rarr; Group LASSO Cox</td>
+    <td>Penalized Cox (Drafts) \u{2192} Group LASSO Cox</td>
   </tr>
   <tr>
     <td><strong>Sparse Group LASSO</strong></td>
     <td>Similar to Group LASSO, but can drop individual variables within a selected group. Highly flexible for clustered features.</td>
     <td>Advanced</td>
-    <td>Penalized Cox (Drafts) &rarr; Sparse Group LASSO</td>
+    <td>Penalized Cox (Drafts) \u{2192} Sparse Group LASSO</td>
   </tr>
   <tr>
     <td><strong>SCAD/MCP Cox</strong></td>
     <td>When you need unbiased coefficient estimates. Standard LASSO shrinks large effects
       toward zero; SCAD and MCP do not.</td>
     <td>Advanced</td>
-    <td>Penalized Cox &rarr; SCAD/MCP Cox</td>
+    <td>Penalized Cox \u{2192} SCAD/MCP Cox</td>
   </tr>
   <tr>
     <td><strong>Firth Regression</strong></td>
     <td>When you have small samples, rare events, or complete/quasi-complete separation.
-      Firth&rsquo;s penalized likelihood removes first-order bias without variable selection.
+      Firth\u{2019}s penalized likelihood removes first-order bias without variable selection.
       Supports both logistic (binary outcome) and Cox (survival) models.</td>
     <td>Basic</td>
-    <td>Penalized Cox &rarr; Firth Regression</td>
+    <td>Penalized Cox \u{2192} Firth Regression</td>
   </tr>
   <tr>
     <td><strong>PCA Cox</strong></td>
     <td>Reduces variables into linearly uncorrelated primary components. Excellent for severe multicollinearity.</td>
     <td>Moderate</td>
-    <td>Dimension Reduction Cox &rarr; PCA Cox</td>
+    <td>Dimension Reduction Cox \u{2192} PCA Cox</td>
   </tr>
   <tr>
     <td><strong>PLS Cox</strong></td>
     <td>When you have far more variables than patients (e.g., genomic data, radiomic features).
       Creates outcome-aware composite scores rather than just variance-based components.</td>
     <td>Advanced</td>
-    <td>Dimension Reduction Cox &rarr; PLS Cox</td>
+    <td>Dimension Reduction Cox \u{2192} PLS Cox</td>
   </tr>
 </tbody>
 </table>
@@ -146,40 +146,40 @@ Check the Decision Guide section for a step-by-step flowchart.</p>
 
 <p><strong>Step 1: How many predictors vs. patients?</strong></p>
 <ul>
-  <li>Predictors &lt; Patients (p &lt; n) &rarr; Go to Step 2</li>
-  <li>Predictors &ge; Patients (p &ge; n) &rarr; Use dimension reduction (<strong>PCA Cox</strong> or <strong>PLS Cox</strong>) or <strong>Elastic Net Cox</strong></li>
+  <li>Predictors &lt; Patients (p &lt; n) \u{2192} Go to Step 2</li>
+  <li>Predictors \u{2265} Patients (p \u{2265} n) \u{2192} Use dimension reduction (<strong>PCA Cox</strong> or <strong>PLS Cox</strong>) or <strong>Elastic Net Cox</strong></li>
 </ul>
 
 <p><strong>Step 2: Are your predictors naturally grouped?</strong></p>
 <ul>
-  <li>Yes (e.g., biological pathways or categorical group clusters) &rarr; Use <strong>Group LASSO</strong> or <strong>Sparse Group LASSO</strong></li>
-  <li>No &rarr; Go to Step 3</li>
+  <li>Yes (e.g., biological pathways or categorical group clusters) \u{2192} Use <strong>Group LASSO</strong> or <strong>Sparse Group LASSO</strong></li>
+  <li>No \u{2192} Go to Step 3</li>
 </ul>
 
 <p><strong>Step 3: Are your predictors strongly correlated?</strong></p>
 <ul>
-  <li>No or mild correlation (r &lt; 0.7) &rarr; Go to Step 4</li>
-  <li>Moderate/Strong correlation (r &ge; 0.7) &rarr; Use <strong>Elastic Net Cox</strong> to select correlated groups, or <strong>PCA Cox</strong> to shrink to orthogonal components.</li>
+  <li>No or mild correlation (r &lt; 0.7) \u{2192} Go to Step 4</li>
+  <li>Moderate/Strong correlation (r \u{2265} 0.7) \u{2192} Use <strong>Elastic Net Cox</strong> to select correlated groups, or <strong>PCA Cox</strong> to shrink to orthogonal components.</li>
 </ul>
 
 <p><strong>Step 4: What is your primary variable selection goal?</strong></p>
 <ul>
-  <li>Identify which variables matter roughly (screening) &rarr; Use <strong>LASSO Cox</strong></li>
-  <li>Accurate variable selection with mathematical consistency (Oracle) &rarr; Use <strong>Adaptive LASSO Cox</strong></li>
-  <li>Unbiased hazard ratio estimates without shrinkage bias &rarr; Use <strong>SCAD/MCP Cox</strong></li>
+  <li>Identify which variables matter roughly (screening) \u{2192} Use <strong>LASSO Cox</strong></li>
+  <li>Accurate variable selection with mathematical consistency (Oracle) \u{2192} Use <strong>Adaptive LASSO Cox</strong></li>
+  <li>Unbiased hazard ratio estimates without shrinkage bias \u{2192} Use <strong>SCAD/MCP Cox</strong></li>
 </ul>
 
 <p><strong>Step 5: Event checks (The EPV Rule)</strong></p>
 <ul>
-  <li>&lt; 10 events &rarr; Standard penalized regression is unreliable. Use <strong>Firth Regression</strong> for bias-corrected estimates, or Kaplan-Meier / univariate Cox.</li>
-  <li>10 - 50 events &rarr; Use LASSO or Elastic Net with caution. If complete separation is detected, switch to <strong>Firth Regression</strong>. Let the module\'s Suitability Assessment guide you.</li>
-  <li>&gt; 50 events &rarr; Any method above is statistically appropriate.</li>
+  <li>&lt; 10 events \u{2192} Standard penalized regression is unreliable. Use <strong>Firth Regression</strong> for bias-corrected estimates, or Kaplan-Meier / univariate Cox.</li>
+  <li>10 - 50 events \u{2192} Use LASSO or Elastic Net with caution. If complete separation is detected, switch to <strong>Firth Regression</strong>. Let the module\'s Suitability Assessment guide you.</li>
+  <li>&gt; 50 events \u{2192} Any method above is statistically appropriate.</li>
 </ul>
 
 <p><strong>Step 6: Is complete or quasi-complete separation an issue?</strong></p>
 <ul>
-  <li>Yes (a predictor perfectly predicts the outcome, or a category has zero events) &rarr; Use <strong>Firth Regression</strong>. Standard logistic/Cox regression will produce infinite coefficients.</li>
-  <li>No &rarr; Use the method selected above.</li>
+  <li>Yes (a predictor perfectly predicts the outcome, or a category has zero events) \u{2192} Use <strong>Firth Regression</strong>. Standard logistic/Cox regression will produce infinite coefficients.</li>
+  <li>No \u{2192} Use the method selected above.</li>
 </ul>
 
 <h3>Quick Comparison Table</h3>
@@ -374,7 +374,7 @@ the LASSO-selected variables, or use SCAD/MCP Cox which does not shrink large ef
 If you have 200 patients, 40 events, and 5 well-established clinical variables,
 standard multivariable Cox regression is better. It gives you p-values, confidence
 intervals, and straightforward hazard ratios. LASSO adds complexity without benefit
-when the events-per-variable ratio is already adequate (&ge; 10).</p>
+when the events-per-variable ratio is already adequate (\u{2265} 10).</p>
 
 <p><strong>3. Not validating the model.</strong>
 LASSO uses internal cross-validation to choose lambda, but this does not
@@ -395,13 +395,13 @@ apparent and cross-validated performance in the model output.</p>
 
 <p><strong>6. Not using Firth regression when separation occurs.</strong>
 If a category of a predictor has zero events (e.g., all Grade 1 patients survived),
-standard regression produces infinite odds/hazard ratios. LASSO may technically &ldquo;work&rdquo;
+standard regression produces infinite odds/hazard ratios. LASSO may technically \u{201C}work\u{201D}
 by shrinking the coefficient, but the underlying problem remains. Firth regression is the
 correct solution: it adds a principled bias correction that produces finite, interpretable
 estimates. The Firth Regression module includes automatic separation detection.</p>
 
 <p><strong>7. Confusing Firth with LASSO penalties.</strong>
-Firth&rsquo;s penalty (Jeffreys prior) serves a different purpose than LASSO. Firth corrects
+Firth\u{2019}s penalty (Jeffreys prior) serves a different purpose than LASSO. Firth corrects
 bias - it keeps all variables in the model. LASSO performs variable selection - it removes
 variables. They are complementary: use Firth for small-sample bias correction with a known
 set of variables; use LASSO for discovering which variables matter from a large candidate set.</p>
@@ -428,11 +428,11 @@ set of variables; use LASSO for discovering which variables matter from a large 
   </tr>
   <tr>
     <td><strong>Penalization / Regularization</strong></td>
-    <td>Adding a &ldquo;cost&rdquo; for including variables in the model. Prevents
+    <td>Adding a \u{201C}cost\u{201D} for including variables in the model. Prevents
       overfitting when you have many candidate predictors.</td>
   </tr>
   <tr>
-    <td><strong>Lambda (&lambda;)</strong></td>
+    <td><strong>Lambda (\u{03BB})</strong></td>
     <td>Controls how aggressively variables are removed. Higher lambda = fewer variables
       kept. Chosen automatically by cross-validation.</td>
   </tr>

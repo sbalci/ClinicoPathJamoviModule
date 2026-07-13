@@ -323,16 +323,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$age) || is.null(self$options$gender))
                 return()
 
-            # TODO (cleanup): this nrow == 0 check duplicates validation already done by
-            # .run() at L50 (which now uses jmvcore::reject). When .run() rejects, .plot()
-            # never gets meaningful plotData (image$state is NULL - caught by the L309
-            # `is.null(plotData)` guard below). The stop() here is therefore unreachable
-            # in normal use; if it does fire it bypasses jamovi's structured error UI.
-            # Either drop these two lines entirely (rely on the plotData NULL check at L309)
-            # or, if defensive-by-design is preferred, replace stop() with `return(FALSE)`
-            # to match the rest of .plot's failure handling.
+            # Defensive check (unreachable in normal use: .run() already validates empty
+            # data via jmvcore::reject at L50, and the is.null(plotData) guard below covers
+            # the NULL-state case). Return FALSE to match .plot()'s failure handling rather
+            # than a raw stop() that would bypass jamovi's structured error UI.
             if (nrow(self$data) == 0)
-                stop("Data contains no (complete) rows")
+                return(FALSE)
 
             # Retrieve the prepared plot data
             plotData <- image$state

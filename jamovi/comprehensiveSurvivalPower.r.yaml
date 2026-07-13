@@ -277,14 +277,10 @@ refs:
     - gsDesign
     - powerSurvEpi
     - survival
-    - CompRisk
     - survRM2
     - ClinicoPathJamoviModule
-    - survivalPowerAnalysis
-    - clinicalTrialDesign
     - NPHMC
     - survSNP
-    - survivalpwr
     - rpact
 
     - tools

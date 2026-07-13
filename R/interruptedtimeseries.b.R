@@ -16,8 +16,8 @@ interruptedtimeseriesClass <- R6::R6Class(
                 measured repeatedly over time. Four quantities are reported:</p>
                 <ul>
                   <li><b>Baseline level</b> (intercept) and <b>baseline trend</b> (pre-intervention slope);</li>
-                  <li><b>Level change</b> &mdash; the immediate jump at the intervention;</li>
-                  <li><b>Trend change</b> &mdash; the change in slope afterwards.</li>
+                  <li><b>Level change</b> \u{2014} the immediate jump at the intervention;</li>
+                  <li><b>Trend change</b> \u{2014} the change in slope afterwards.</li>
                 </ul>
                 <p><b>To run:</b> select a sequential <b>time variable</b>, a continuous
                 <b>outcome</b>, and the <b>intervention time point</b>. Enable Newey-West
@@ -185,16 +185,16 @@ interruptedtimeseriesClass <- R6::R6Class(
             self$results$explanation$setContent(
                 "<h4>Segmented regression for interrupted time series</h4>
                 <p>The model fitted is
-                <i>Y<sub>t</sub> = &beta;<sub>0</sub> + &beta;<sub>1</sub>&middot;time +
-                &beta;<sub>2</sub>&middot;post + &beta;<sub>3</sub>&middot;time&nbsp;after&nbsp;intervention</i>,
+                <i>Y<sub>t</sub> = \u{03B2}<sub>0</sub> + \u{03B2}<sub>1</sub>\u{00B7}time +
+                \u{03B2}<sub>2</sub>\u{00B7}post + \u{03B2}<sub>3</sub>\u{00B7}time&nbsp;after&nbsp;intervention</i>,
                 where <i>post</i> indicates the post-intervention period and
                 <i>time after intervention</i> counts time points since the intervention
                 (Wagner et al., 2002; Bernal et al., 2017).</p>
                 <ul>
-                  <li>&beta;<sub>0</sub> &mdash; baseline level;</li>
-                  <li>&beta;<sub>1</sub> &mdash; baseline trend;</li>
-                  <li>&beta;<sub>2</sub> &mdash; immediate change in level at the intervention;</li>
-                  <li>&beta;<sub>3</sub> &mdash; change in trend after the intervention.</li>
+                  <li>\u{03B2}<sub>0</sub> \u{2014} baseline level;</li>
+                  <li>\u{03B2}<sub>1</sub> \u{2014} baseline trend;</li>
+                  <li>\u{03B2}<sub>2</sub> \u{2014} immediate change in level at the intervention;</li>
+                  <li>\u{03B2}<sub>3</sub> \u{2014} change in trend after the intervention.</li>
                 </ul>
                 <p>Because sequential observations are usually correlated, Newey-West
                 heteroscedasticity-and-autocorrelation-consistent (HAC) standard errors are

@@ -2491,9 +2491,9 @@ stagemigrationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "harrell2015",
-                    "pencina2008",
-                    "vickers2006",
-                    "steyerberg2010",
+                    "Pencina2008",
+                    "Vickers2006",
+                    "Steyerberg2010",
                     "survival",
                     "survminer",
                     "ggplot2",

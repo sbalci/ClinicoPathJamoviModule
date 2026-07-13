@@ -149,7 +149,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     )
                 }
                     # Return the summary text with distribution diagnostics.
-                    paste0(.("Mean of"), " <strong>", htmltools::htmlEscape(myvar), "</strong> ", .("is"), ": ", mean_x, " &plusmn; ", sd_x,
+                    paste0(.("Mean of"), " <strong>", htmltools::htmlEscape(myvar), "</strong> ", .("is"), ": ", mean_x, " \u{00B1} ", sd_x,
                            ". (", .("Median"), ": ", median_x, " [", .("Min"), ": ", min_x, " - ", .("Max"), ": ",
                            max_x, "]) <br>", dist_text, "<br><br>", collapse = " ")
             }

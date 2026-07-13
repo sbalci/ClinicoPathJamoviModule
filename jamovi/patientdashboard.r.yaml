@@ -7,7 +7,6 @@ items:
     - name: todo
       title: Dashboard Overview
       type: Html
-      refs: [patientID, vitals]
 
     - name: patientSummary
       title: Patient Summary

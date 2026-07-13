@@ -458,8 +458,8 @@ ordinalmixedmodelClass <- R6::R6Class(
                 "<p>The cumulative model assumes that the ordinal response Y has categories ",
                 "1 &lt; 2 &lt; ... &lt; J, and models:</p>",
                 "<p style='font-family: monospace; background: #f5f5f5; padding: 8px;'>",
-                "logit[P(Y &le; j)] = &alpha;<sub>j</sub> - X&beta; - Zu</p>",
-                "<p>where &alpha;<sub>j</sub> are threshold parameters, X&beta; are fixed effects, ",
+                "logit[P(Y \u{2264} j)] = \u{03B1}<sub>j</sub> - X\u{03B2} - Zu</p>",
+                "<p>where \u{03B1}<sub>j</sub> are threshold parameters, X\u{03B2} are fixed effects, ",
                 "and Zu are random effects.</p>",
 
                 "<h4>Interpretation</h4>",

@@ -95,6 +95,13 @@ You are an expert jamovi module developer performing systematic quality assessme
 - Clinical readiness assessment
 - Mathematical/statistical correctness
 - Production readiness scoring
+- **Release gates (jamovi library acceptance):**
+  - `Version` >= 1.0.0 in DESCRIPTION + `jamovi/0000.yaml` (pre-1.0 = HIGH gate, cheapest fix)
+  - Citation integrity: no used-but-undefined / case-mismatch / empty-author-year refs in `00refs.yaml` (run `/update-refs --all --validate`)
+  - Dependency declarations complete, incl. `requireNamespace`-guarded/recommended packages the guard test can't see
+  - No declared-but-unused Imports
+  - UI label conventions (action-verb→noun, sentence-case controls); named-HTML-symbol-entities → Unicode
+  - No orphaned non-analysis source files shipped in the build
 - **Time:** ~10 minutes per function
 
 ## Auto-Discovery Algorithm

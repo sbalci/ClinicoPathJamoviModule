@@ -121,7 +121,7 @@ standardizedratioClass <- R6::R6Class(
             html <- glue::glue(
                 "<p>{O} events were observed against {sprintf('%.1f', E)} expected, giving
                 a <b>{type} of {sprintf('%.2f', r$ratio)}</b>
-                ({sprintf('%.0f', 100*d$conf)}% CI {sprintf('%.2f', r$low)}&ndash;{sprintf('%.2f', r$high)}).
+                ({sprintf('%.0f', 100*d$conf)}% CI {sprintf('%.2f', r$low)}\u{2013}{sprintf('%.2f', r$high)}).
                 The observed event count is <b>{dir}</b> (p = {sprintf('%.4f', r$p)}).</p>")
             self$results$summary$setContent(html)
         },

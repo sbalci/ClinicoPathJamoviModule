@@ -561,7 +561,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
                 # Linear: observations per variable (OPV), not EPV
                 opv <- prepared$n / p
                 if (opv >= 15) {
-                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>OPV = %.1f (&ge;15: adequate)</td></tr>",
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>OPV = %.1f (\u{2265}15: adequate)</td></tr>",
                         icons["green"], .("Observations per variable"), opv))
                 } else if (opv >= 10) {
                     checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>OPV = %.1f (10-15: marginal)</td></tr>",
@@ -573,7 +573,7 @@ clinicalscoreClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
             } else {
                 epv <- min(prepared$n_events, prepared$n_nonevents) / p
                 if (epv >= 10) {
-                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (&ge;10: adequate)</td></tr>",
+                    checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (\u{2265}10: adequate)</td></tr>",
                         icons["green"], .("Events per variable"), epv))
                 } else if (epv >= 5) {
                     checks <- c(checks, sprintf("<tr><td>%s</td><td>%s</td><td>EPV = %.1f (5-10: marginal, consider fewer predictors)</td></tr>",

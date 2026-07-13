@@ -304,8 +304,7 @@ gradientboostingResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="",
                 title="Gradient Boosting for Survival Analysis",
                 refs=list(
-                    "GradientBoosting",
-                    "Survival",
+                    "survival",
                     "mboost",
                     "gbm",
                     "xgboost",

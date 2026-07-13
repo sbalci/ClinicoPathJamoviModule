@@ -35,8 +35,8 @@
 # ==============================================
 
 
-new_version: "0.0.51"
-new_date: "2026-07-11"
+new_version: "1.0.0"
+new_date: "2026-07-13"
 quick: false
 TEST: false
 jjstatsplot: true
@@ -118,11 +118,11 @@ modules:
     r_files:
       - "utils.R"
       - "ihc_utilities.R"
-      - "stagemigration_helpers.R"
-      - "stagemigration-utils.R"
-      - "stagemigration-validation.R"
-      - "stagemigration-discrimination.R"
-      - "stagemigration-competing-risks.R"
+      # stagemigration-*.R helpers are intentionally NOT shipped to production OncoPath:
+      # the stagemigration analysis is dev-routed to menuGroup OncoPathT (JamoviTest), so
+      # these files would be orphaned dead weight in the OncoPath release build. They stay
+      # in main + JamoviTest (see JamoviTest r_files below); re-add here when the analysis
+      # is promoted to a production OncoPath menuGroup.
   JamoviTest:
     directory: "/Users/serdarbalci/Documents/GitHub/JamoviTest"
     enabled: false  # Automatically enabled when TEST mode is active

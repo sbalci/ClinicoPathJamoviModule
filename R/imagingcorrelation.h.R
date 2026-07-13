@@ -320,9 +320,7 @@ imagingcorrelationResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Analysis Summary",
-                refs=list(
-                    "imagingFindings")))
+                title="Analysis Summary"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="correlationTable",
