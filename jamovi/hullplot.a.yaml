@@ -117,7 +117,7 @@ options:
           Transparency level for hull polygons. 0 = completely transparent, 1 = opaque.
 
     - name: show_labels
-      title: Show Group Labels
+      title: Group labels
       type: Bool
       default: true
       description:
@@ -219,7 +219,7 @@ options:
           Amount to expand hull boundaries beyond data points. Higher values create larger hulls.
 
     - name: show_statistics
-      title: Show Group Statistics
+      title: Group statistics
       type: Bool
       default: false
       description:
@@ -227,7 +227,7 @@ options:
           If TRUE, displays summary statistics for each group in the output.
 
     - name: outlier_detection
-      title: Outlier Detection
+      title: Outlier detection
       type: Bool
       default: false
       description:
@@ -235,7 +235,7 @@ options:
           If TRUE, identifies and highlights potential outliers within groups.
 
     - name: confidence_ellipses
-      title: Add Confidence Ellipses
+      title: Add confidence ellipses
       type: Bool
       default: false
       description:
@@ -243,7 +243,7 @@ options:
           If TRUE, adds confidence ellipses in addition to hull polygons.
 
     - name: show_summary
-      title: Natural Language Summary
+      title: Natural language summary
       type: Bool
       default: false
       description:
@@ -251,7 +251,7 @@ options:
           If TRUE, displays a plain-language summary of the results with copy-ready text.
 
     - name: show_assumptions
-      title: Assumptions & Guidelines
+      title: Assumptions & guidelines
       type: Bool
       default: false
       description:

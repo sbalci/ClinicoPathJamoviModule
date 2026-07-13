@@ -85,7 +85,7 @@ options:
         jamovi: Optional variable to create separate panels.
 
     - name: show_plot
-      title: "Show Plot"
+      title: "Plot"
       type: Bool
       default: false
       description:
@@ -158,7 +158,7 @@ options:
         jamovi: Choose color scheme for bar segments.
 
     - name: show_percentages
-      title: "Show Percentages"
+      title: "Percentages"
       type: Bool
       default: false
       description:
@@ -181,7 +181,7 @@ options:
         jamovi: How to format percentage values.
 
     - name: show_counts
-      title: "Show Raw Counts"
+      title: "Raw counts"
       type: Bool
       default: false
       description:
@@ -310,7 +310,7 @@ options:
         jamovi: Set plot height for optimal display.
 
     - name: add_outline
-      title: "Add Segment Outlines"
+      title: "Add segment outlines"
       type: Bool
       default: false
       description:
@@ -335,7 +335,7 @@ options:
         jamovi: Choose color for segment borders.
 
     - name: export_ready
-      title: "Export Ready"
+      title: "Export ready"
       type: Bool
       default: false
       description:
@@ -343,7 +343,7 @@ options:
         jamovi: Optimize plot for publication/presentation export.
 
     - name: flerlage_show_labels
-      title: "Show Value Labels (Flerlage)"
+      title: "Value labels (flerlage)"
       type: Bool
       default: false
       description:
@@ -403,7 +403,7 @@ options:
         jamovi: Choose background box color for Flerlage plot type.
 
     - name: show_statistical_tests
-      title: "Show Statistical Tests"
+      title: "Statistical tests"
       type: Bool
       default: false
       description:
@@ -421,7 +421,7 @@ options:
         jamovi: Confidence level for proportion comparisons.
 
     - name: exclude_missing
-      title: "Exclude Missing Values"
+      title: "Exclude missing values"
       type: Bool
       default: true
       description:
@@ -429,7 +429,7 @@ options:
         jamovi: Automatically remove rows with missing data from the analysis.
 
     - name: showExplanations
-      title: Show Explanations
+      title: Explanations
       type: Bool
       default: false
       description:

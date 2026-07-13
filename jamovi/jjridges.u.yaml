@@ -45,14 +45,14 @@ children:
         children:
           - type: ComboBox
             name: plot_type
-            label: Plot Type
+            label: Plot type
           - type: TextBox
             name: scale
             label: Ridge Height Scale
             format: number
           - type: ComboBox
             name: bandwidth
-            label: Bandwidth Method
+            label: Bandwidth method
           - type: TextBox
             name: bandwidth_value
             label: Custom Bandwidth
@@ -72,10 +72,10 @@ children:
         children:
           - type: CheckBox
             name: add_boxplot
-            label: Add Boxplot Inside
+            label: Add boxplot inside
           - type: CheckBox
             name: add_points
-            label: Show Data Points
+            label: Data points
           - type: TextBox
             name: point_alpha
             label: Point Transparency
@@ -83,7 +83,7 @@ children:
             enable: (add_points)
           - type: CheckBox
             name: add_quantiles
-            label: Show Quantile Lines
+            label: Quantile lines
           - type: TextBox
             name: quantiles
             label: Quantile Values
@@ -91,10 +91,10 @@ children:
             enable: (add_quantiles)
           - type: CheckBox
             name: add_mean
-            label: Show Mean Line
+            label: Mean line
           - type: CheckBox
             name: add_median
-            label: Show Median Line
+            label: Median line
   - type: CollapseBox
     label: Statistical Analysis
     collapsed: true
@@ -104,18 +104,18 @@ children:
         children:
           - type: CheckBox
             name: show_stats
-            label: Show Statistics
+            label: Statistics
           - type: ComboBox
             name: test_type
-            label: Statistical Test
+            label: Statistical test
             enable: (show_stats)
           - type: ComboBox
             name: p_adjust_method
-            label: P-value Adjustment
+            label: P-value adjustment
             enable: (show_stats)
           - type: ComboBox
             name: effsize_type
-            label: Effect Size Type
+            label: Effect size type
             enable: (show_stats)
   - type: CollapseBox
     label: Visual Appearance
@@ -130,10 +130,10 @@ children:
             format: number
           - type: CheckBox
             name: fill_ridges
-            label: Fill Ridges
+            label: Fill ridges
           - type: ComboBox
             name: color_palette
-            label: Color Palette
+            label: Color palette
           - type: TextBox
             name: custom_colors
             label: Custom Colors
@@ -151,14 +151,14 @@ children:
             enable: (plot_type == 'density_ridges_gradient')
           - type: CheckBox
             name: reverse_order
-            label: Reverse Y Order
+            label: Reverse Y order
           - type: CheckBox
             name: show_fill_legend
-            label: Show Fill Legend
+            label: Fill legend
             enable: (fill_var)
           - type: CheckBox
             name: show_facet_legend
-            label: Show Facet Legend
+            label: Facet legend
             enable: (facet_var)
   - type: CollapseBox
     label: Theme & Labels
@@ -169,16 +169,16 @@ children:
         children:
           - type: ComboBox
             name: theme_style
-            label: Theme Style
+            label: Theme style
           - type: CheckBox
             name: grid_lines
-            label: Show Grid Lines
+            label: Grid lines
           - type: CheckBox
             name: expand_panels
-            label: Expand Panels
+            label: Expand panels
           - type: ComboBox
             name: legend_position
-            label: Legend Position
+            label: Legend position
       - type: LayoutBox
         margin: large
         children:
@@ -217,10 +217,10 @@ children:
         children:
           - type: CheckBox
             name: add_sample_size
-            label: Show Sample Sizes
+            label: Sample sizes
           - type: CheckBox
             name: add_density_values
-            label: Show Density Values
+            label: Density values
           - type: TextBox
             name: custom_annotations
             label: Custom Annotations
@@ -254,10 +254,10 @@ children:
         children:
           - type: CheckBox
             name: showAboutPanel
-            label: Show About Panel
+            label: About panel
           - type: CheckBox
             name: showAssumptions
-            label: Show Statistical Assumptions
+            label: Statistical assumptions
   - type: LayoutBox
     margin: large
     children:

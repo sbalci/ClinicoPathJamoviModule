@@ -154,7 +154,7 @@ options:
 
     # Advanced Features
     - name: add_boxplot
-      title: Add Boxplot Inside
+      title: Add boxplot inside
       type: Bool
       default: false
       description:
@@ -163,7 +163,7 @@ options:
             of quartiles and outliers.
 
     - name: add_points
-      title: Add Data Points
+      title: Add data points
       type: Bool
       default: false
       description:
@@ -181,7 +181,7 @@ options:
             Transparency of data points when shown.
 
     - name: add_quantiles
-      title: Show Quantile Lines
+      title: Quantile lines
       type: Bool
       default: false
       description:
@@ -197,7 +197,7 @@ options:
             Comma-separated quantile values to display as vertical lines.
 
     - name: add_mean
-      title: Show Mean Line
+      title: Mean line
       type: Bool
       default: false
       description:
@@ -205,7 +205,7 @@ options:
             Add vertical line at the mean of each distribution.
 
     - name: add_median
-      title: Show Median Line
+      title: Median line
       type: Bool
       default: false
       description:
@@ -214,7 +214,7 @@ options:
 
     # Statistical Overlays
     - name: show_stats
-      title: Show Statistics
+      title: Statistics
       type: Bool
       default: false
       description:
@@ -350,7 +350,7 @@ options:
             High value color for gradient plots.
 
     - name: fill_ridges
-      title: Fill Ridges
+      title: Fill ridges
       type: Bool
       default: true
       description:
@@ -358,7 +358,7 @@ options:
             Whether to fill ridges with color or show only outlines.
 
     - name: reverse_order
-      title: Reverse Y Order
+      title: Reverse Y order
       type: Bool
       default: false
       description:
@@ -366,7 +366,7 @@ options:
             Reverse the vertical order of groups.
 
     - name: show_fill_legend
-      title: Show Fill Legend
+      title: Fill legend
       type: Bool
       default: true
       description:
@@ -374,7 +374,7 @@ options:
             Show legend for fill variable when a fill variable is specified.
 
     - name: show_facet_legend
-      title: Show Facet Legend
+      title: Facet legend
       type: Bool
       default: true
       description:
@@ -402,7 +402,7 @@ options:
             Overall plot theme style.
 
     - name: grid_lines
-      title: Show Grid Lines
+      title: Grid lines
       type: Bool
       default: false
       description:
@@ -410,7 +410,7 @@ options:
             Whether to show grid lines in the plot.
 
     - name: expand_panels
-      title: Expand Panels
+      title: Expand panels
       type: Bool
       default: true
       description:
@@ -476,7 +476,7 @@ options:
 
     # Annotations
     - name: add_sample_size
-      title: Show Sample Sizes
+      title: Sample sizes
       type: Bool
       default: false
       description:
@@ -484,7 +484,7 @@ options:
             Display sample size (n) for each group.
 
     - name: add_density_values
-      title: Show Density Values
+      title: Density values
       type: Bool
       default: false
       description:
@@ -563,7 +563,7 @@ options:
 
     # Help & Guidance
     - name: showAboutPanel
-      title: Show About Panel
+      title: About panel
       type: Bool
       default: false
       description:
@@ -572,7 +572,7 @@ options:
             and clinical examples.
 
     - name: showAssumptions
-      title: Show Statistical Assumptions
+      title: Statistical assumptions
       type: Bool
       default: false
       description:

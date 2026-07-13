@@ -112,7 +112,7 @@ options:
 
 
     - name: centralityline
-      title: Centrality Line
+      title: Centrality line
       type: Bool
       default: false
       description:
@@ -124,7 +124,7 @@ options:
             Helpful for comparing typical values across groups or identifying distribution shifts.
 
     - name: changebinwidth
-      title: Change Bin Width
+      title: Change bin width
       type: Bool
       default: false
       description:
@@ -148,7 +148,7 @@ options:
 
 
     - name: resultssubtitle
-      title: Statistical Results
+      title: Statistical results
       type: Bool
       default: false
       description:
@@ -160,7 +160,7 @@ options:
             Helpful for quick interpretation without switching between tabs.
     
     - name: showInterpretation
-      title: Show Clinical Interpretation
+      title: Clinical interpretation
       type: Bool
       default: false
       description:
@@ -199,7 +199,7 @@ options:
             statistical methods and display options appropriate for that clinical context.
 
     - name: enableOneSampleTest
-      title: Enable One-Sample Test
+      title: One-sample test
       type: Bool
       default: false
       description:
@@ -236,7 +236,7 @@ options:
             Confidence level for confidence intervals (between 0 and 1).
 
     - name: bf.message
-      title: Bayes Factor Message
+      title: Bayes factor message
       type: Bool
       default: false
       description:
@@ -397,7 +397,7 @@ options:
             Height of each plot in pixels. Default is 450.
 
     - name: addGGPubrPlot
-      title: Add ggpubr Histogram
+      title: Add ggpubr histogram
       type: Bool
       default: false
       description:
@@ -413,7 +413,7 @@ options:
             Fill color for ggpubr histogram (hex code).
 
     - name: ggpubrAddDensity
-      title: Add Density Curve (ggpubr)
+      title: Add density curve (ggpubr)
       type: Bool
       default: false
       description:
@@ -421,7 +421,7 @@ options:
             Add density curve overlay to ggpubr histogram.
 
     - name: ggpubrAddMean
-      title: Add Mean Line (ggpubr)
+      title: Add mean line (ggpubr)
       type: Bool
       default: false
       description:
@@ -429,7 +429,7 @@ options:
             Add vertical line at mean for ggpubr histogram.
 
     - name: addDistributionDiagnostics
-      title: Add Distribution Diagnostic Plots
+      title: Add distribution diagnostic plots
       type: Bool
       default: false
       description:
@@ -445,7 +445,7 @@ options:
             Fill color for density plot (hex code).
 
     - name: ggpubrShowQQ
-      title: Show QQ Plot
+      title: QQ plot
       type: Bool
       default: false
       description:
@@ -453,7 +453,7 @@ options:
             Show QQ plot for normality assessment.
 
     - name: ggpubrShowECDF
-      title: Show ECDF Plot
+      title: ECDF plot
       type: Bool
       default: false
       description:

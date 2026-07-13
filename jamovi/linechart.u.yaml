@@ -39,19 +39,19 @@ children:
         children:
           - type: CheckBox
             name: points
-            label: "Show Individual Data Points"
+            label: "Individual data points"
           - type: CheckBox
             name: smooth
-            label: "Smooth Trend Lines"
+            label: "Smooth trend lines"
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: confidence
-            label: "Show Confidence Intervals"
+            label: "Confidence intervals"
           - type: CheckBox
             name: trendline
-            label: "Add Linear Trend Analysis"
+            label: "Add linear trend analysis"
 
   - type: CollapseBox
     label: "Clinical Reference"
@@ -78,7 +78,7 @@ children:
         children:
           - type: ComboBox
             name: theme
-            label: "Plot Theme"
+            label: "Plot theme"
             options:
               - name: default
                 title: "Clinical (Recommended)"
@@ -93,7 +93,7 @@ children:
         children:
           - type: ComboBox
             name: colorPalette
-            label: "Color Scheme"
+            label: "Color scheme"
             options:
               - name: clinical
                 title: "Clinical (Colorblind Safe)"

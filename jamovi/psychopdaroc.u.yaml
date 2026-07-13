@@ -52,13 +52,13 @@ children:
         label: Analysis Configuration
       - type: ComboBox
         name: clinicalMode
-        label: Analysis Level
+        label: Analysis level
       - type: ComboBox
         name: clinicalPreset
-        label: Clinical Use Case
+        label: Clinical use case
       - type: ComboBox
         name: direction
-        label: Classification Direction
+        label: Classification direction
 
   # ==============================================
   # 3. CLINICAL PARAMETERS
@@ -102,10 +102,10 @@ children:
         children:
           - type: ComboBox
             name: method
-            label: Cutpoint Method
+            label: Cutpoint method
           - type: ComboBox
             name: metric
-            label: Optimization Metric
+            label: Optimization metric
             enable: >-
               (!method:oc_manual && !method:oc_cost_ratio &&
               !method:oc_equal_sens_spec && !method:oc_closest_01)
@@ -128,7 +128,7 @@ children:
               method:maximize_loess_metric || method:minimize_loess_metric)
           - type: ComboBox
             name: break_ties
-            label: Tie Breaking Method
+            label: Tie breaking method
           - type: TextBox
             name: boot_runs
             format: number
@@ -143,7 +143,7 @@ children:
               bootstrapCI || calculateIDI || calculateNRI || bayesianAnalysis)
           - type: CheckBox
             name: allObserved
-            label: Show all observed cutpoints
+            label: All observed cutpoints
 
   # ==============================================
   # 5. FIXED SENSITIVITY / SPECIFICITY ANALYSIS
@@ -158,10 +158,10 @@ children:
         children:
           - type: CheckBox
             name: fixedSensSpecAnalysis
-            label: Enable Fixed Sensitivity/Specificity Analysis
+            label: Fixed sensitivity/Specificity analysis
           - type: ComboBox
             name: fixedAnalysisType
-            label: Analysis Type
+            label: Analysis type
             enable: (fixedSensSpecAnalysis)
           - type: TextBox
             name: fixedSensitivityValue
@@ -175,15 +175,15 @@ children:
             enable: (fixedSensSpecAnalysis && fixedAnalysisType:specificity)
           - type: ComboBox
             name: fixedInterpolation
-            label: Interpolation Method
+            label: Interpolation method
             enable: (fixedSensSpecAnalysis)
           - type: CheckBox
             name: showFixedROC
-            label: Show Fixed Point ROC Curve
+            label: Fixed point ROC curve
             enable: (fixedSensSpecAnalysis)
           - type: CheckBox
             name: showFixedExplanation
-            label: Show Analysis Guide
+            label: Analysis guide
             enable: (fixedSensSpecAnalysis)
 
   # ==============================================
@@ -199,10 +199,10 @@ children:
         children:
           - type: CheckBox
             name: sensSpecTable
-            label: Show confusion matrices
+            label: Confusion matrices
           - type: CheckBox
             name: showThresholdTable
-            label: Show threshold table
+            label: Threshold table
           - type: TextBox
             name: maxThresholds
             format: number
@@ -234,14 +234,14 @@ children:
                     label: ROC Curve Settings
                   - type: CheckBox
                     name: plotROC
-                    label: Show ROC curves
+                    label: ROC curves
                   - type: CheckBox
                     name: combinePlots
                     label: Combine all curves in one plot
                     enable: (plotROC)
                   - type: CheckBox
                     name: showOptimalPoint
-                    label: Show optimal cutpoint
+                    label: Optimal cutpoint
                     enable: (plotROC)
                   - type: CheckBox
                     name: directLabel
@@ -266,7 +266,7 @@ children:
                     enable: (plotROC)
                   - type: CheckBox
                     name: displaySE
-                    label: Show standard error bands
+                    label: Standard error bands
                     enable: (plotROC && smoothing && !cleanPlot)
                   - type: CheckBox
                     name: interactiveROC
@@ -283,11 +283,11 @@ children:
                     label: Confidence Intervals on Plot
                   - type: CheckBox
                     name: showConfidenceBands
-                    label: Show confidence bands
+                    label: Confidence bands
                     enable: (plotROC && !cleanPlot)
                   - type: CheckBox
                     name: quantileCIs
-                    label: Show CIs at quantiles
+                    label: CIs at quantiles
                     enable: (plotROC && !cleanPlot)
                   - type: TextBox
                     name: quantiles
@@ -301,16 +301,16 @@ children:
                     label: Diagnostic Plots
                   - type: CheckBox
                     name: showCriterionPlot
-                    label: Sensitivity/Specificity vs. Threshold
+                    label: Sensitivity/Specificity vs. threshold
                   - type: CheckBox
                     name: showPrevalencePlot
-                    label: Predictive Values vs. Prevalence
+                    label: Predictive values vs. prevalence
                   - type: CheckBox
                     name: showDotPlot
-                    label: Test Values Distribution
+                    label: Test values distribution
                   - type: CheckBox
                     name: precisionRecallCurve
-                    label: Precision-Recall Curve
+                    label: Precision-recall curve
 
   # ==============================================
   # 8. ADVANCED ROC ANALYSIS
@@ -371,7 +371,7 @@ children:
             label: Compare classifier performance
           - type: CheckBox
             name: effectSizeAnalysis
-            label: Effect Size Analysis
+            label: Effect size analysis
       - type: LayoutBox
         margin: large
         children:
@@ -379,10 +379,10 @@ children:
             label: Discrimination and Reclassification
           - type: CheckBox
             name: calculateIDI
-            label: Calculate IDI (Integrated Discrimination Improvement)
+            label: Calculate IDI (integrated discrimination improvement)
           - type: CheckBox
             name: calculateNRI
-            label: Calculate NRI (Net Reclassification Index)
+            label: Calculate NRI (net reclassification index)
           - type: LevelSelector
             name: refVar
             label: Reference Variable
@@ -411,10 +411,10 @@ children:
         children:
           - type: CheckBox
             name: powerAnalysis
-            label: Statistical Power Analysis
+            label: Statistical power analysis
           - type: ComboBox
             name: powerAnalysisType
-            label: Power Analysis Type
+            label: Power analysis type
             enable: (powerAnalysis)
           - type: TextBox
             name: expectedAUCDifference
@@ -450,7 +450,7 @@ children:
         children:
           - type: CheckBox
             name: bayesianAnalysis
-            label: Bootstrap ROC Analysis (with optional prior)
+            label: Bootstrap ROC analysis (with optional prior)
           - type: TextBox
             name: priorAUC
             format: number
@@ -466,7 +466,7 @@ children:
   # 12. CLINICAL UTILITY ANALYSIS
   # ==============================================
   - type: CollapseBox
-    label: Clinical Utility Analysis
+    label: Clinical utility analysis
     margin: normal
     collapsed: true
     children:
@@ -475,7 +475,7 @@ children:
         children:
           - type: CheckBox
             name: clinicalUtilityAnalysis
-            label: Clinical Utility Analysis
+            label: Clinical utility analysis
           - type: TextBox
             name: treatmentThreshold
             format: string
@@ -488,7 +488,7 @@ children:
             enable: (clinicalUtilityAnalysis)
           - type: CheckBox
             name: interventionCost
-            label: Intervention Cost Analysis
+            label: Intervention cost analysis
             enable: (clinicalUtilityAnalysis)
 
   # ==============================================
@@ -516,7 +516,7 @@ children:
             enable: (metaAnalysis)
           - type: CheckBox
             name: forestPlot
-            label: Show forest plot
+            label: Forest plot
             enable: (metaAnalysis)
           - type: CheckBox
             name: overrideMetaAnalysisWarning

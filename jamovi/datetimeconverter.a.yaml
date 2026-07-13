@@ -122,7 +122,7 @@ options:
 
     # === EXTRACTION OPTIONS (for preview) ===
     - name: extract_year
-      title: Extract Year
+      title: Extract year
       type: Bool
       default: false
       description:
@@ -130,7 +130,7 @@ options:
             Extract and display year component in preview table.
 
     - name: extract_month
-      title: Extract Month
+      title: Extract month
       type: Bool
       default: false
       description:
@@ -138,7 +138,7 @@ options:
             Extract and display month component in preview table.
 
     - name: extract_monthname
-      title: Extract Month Name
+      title: Extract month name
       type: Bool
       default: false
       description:
@@ -146,7 +146,7 @@ options:
             Extract and display month name in preview table.
 
     - name: extract_day
-      title: Extract Day
+      title: Extract day
       type: Bool
       default: false
       description:
@@ -154,7 +154,7 @@ options:
             Extract and display day component in preview table.
 
     - name: extract_hour
-      title: Extract Hour
+      title: Extract hour
       type: Bool
       default: false
       description:
@@ -162,7 +162,7 @@ options:
             Extract and display hour component in preview table.
 
     - name: extract_minute
-      title: Extract Minute
+      title: Extract minute
       type: Bool
       default: false
       description:
@@ -170,7 +170,7 @@ options:
             Extract and display minute component in preview table.
 
     - name: extract_second
-      title: Extract Second
+      title: Extract second
       type: Bool
       default: false
       description:
@@ -178,7 +178,7 @@ options:
             Extract and display second component in preview table.
 
     - name: extract_dayname
-      title: Extract Day Name
+      title: Extract day name
       type: Bool
       default: false
       description:
@@ -186,7 +186,7 @@ options:
             Extract and display day name in preview table.
 
     - name: extract_weeknum
-      title: Extract Week Number
+      title: Extract week number
       type: Bool
       default: false
       description:
@@ -194,7 +194,7 @@ options:
             Extract and display week number in preview table.
 
     - name: extract_quarter
-      title: Extract Quarter
+      title: Extract quarter
       type: Bool
       default: false
       description:
@@ -202,7 +202,7 @@ options:
             Extract and display quarter in preview table.
 
     - name: extract_dayofyear
-      title: Extract Day of Year
+      title: Extract day of year
       type: Bool
       default: false
       description:
@@ -211,7 +211,7 @@ options:
 
     # === DISPLAY OPTIONS ===
     - name: show_quality_metrics
-      title: Show Data Quality Assessment
+      title: Data quality assessment
       type: Bool
       default: false
       description:
@@ -220,7 +220,7 @@ options:
             invalid dates, and data quality warnings.
 
     - name: show_summary
-      title: Show Natural-Language Summary
+      title: Natural-language summary
       type: Bool
       default: false
       description:
@@ -229,7 +229,7 @@ options:
             or clinical documentation.
 
     - name: show_explanations
-      title: Show Explanatory Notes
+      title: Explanatory notes
       type: Bool
       default: false
       description:
@@ -238,7 +238,7 @@ options:
             when to use it, and how to interpret results.
 
     - name: show_glossary
-      title: Show Glossary of Terms
+      title: Glossary of terms
       type: Bool
       default: false
       description:
@@ -280,7 +280,7 @@ options:
             Extract month as numeric value (1-12).
 
     - name: monthname_out
-      title: Extract Month Name
+      title: Extract month name
       type: Output
       description:
           R: >
@@ -294,49 +294,49 @@ options:
             Extract day of month (1-31).
 
     - name: hour_out
-      title: Extract Hour
+      title: Extract hour
       type: Output
       description:
           R: >
             Extract hour component (0-23, 24-hour format).
 
     - name: minute_out
-      title: Extract Minute
+      title: Extract minute
       type: Output
       description:
           R: >
             Extract minute component (0-59).
 
     - name: second_out
-      title: Extract Second
+      title: Extract second
       type: Output
       description:
           R: >
             Extract second component (0-59).
 
     - name: dayname_out
-      title: Extract Day Name
+      title: Extract day name
       type: Output
       description:
           R: >
             Extract day of week as text name (Monday, Tuesday, etc.).
 
     - name: weeknum_out
-      title: Extract Week Number
+      title: Extract week number
       type: Output
       description:
           R: >
             Extract week number of the year (1-53).
 
     - name: quarter_out
-      title: Extract Quarter
+      title: Extract quarter
       type: Output
       description:
           R: >
             Extract quarter of the year (1-4).
 
     - name: dayofyear_out
-      title: Extract Day of Year
+      title: Extract day of year
       type: Output
       description:
           R: >

@@ -137,7 +137,7 @@ options:
 
     # === LANDMARK ANALYSIS ===
     - name: use_landmark
-      title: Enable Landmark Analysis
+      title: Landmark analysis
       type: Bool
       default: false
       description:
@@ -157,7 +157,7 @@ options:
 
     # === DATA QUALITY OPTIONS ===
     - name: remove_negative
-      title: Remove Negative Intervals
+      title: Remove negative intervals
       type: Bool
       default: false
       description:
@@ -166,7 +166,7 @@ options:
             Recommended for data quality assurance.
 
     - name: remove_extreme
-      title: Flag Extreme Values
+      title: Flag extreme values
       type: Bool
       default: false
       description:
@@ -188,7 +188,7 @@ options:
 
     # === OUTPUT OPTIONS ===
     - name: add_times
-      title: Add Calculated Times to Dataset
+      title: Add calculated times to dataset
       type: Bool
       default: false
       description:
@@ -197,7 +197,7 @@ options:
             Useful for subsequent survival analysis or person-time calculations.
 
     - name: include_quality_metrics
-      title: Include Data Quality Assessment
+      title: Include data quality assessment
       type: Bool
       default: false
       description:
@@ -217,7 +217,7 @@ options:
             Standard epidemiological practice uses 95 percent confidence intervals.
 
     - name: show_summary
-      title: Show Natural-Language Summary
+      title: Natural-language summary
       type: Bool
       default: false
       description:
@@ -226,7 +226,7 @@ options:
             copying into reports or clinical notes.
 
     - name: show_glossary
-      title: Show Glossary of Terms
+      title: Glossary of terms
       type: Bool
       default: false
       description:

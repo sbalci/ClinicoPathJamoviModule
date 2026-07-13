@@ -190,10 +190,10 @@ children:
                 name: ci95
               - type: CheckBox
                 name: risktable
-                label: "Show Risk Table"
+                label: "Risk table"
               - type: CheckBox
                 name: censored
-                label: "Show Censored Observations"
+                label: "Censored observations"
               - type: ComboBox
                 name: medianline
   - type: CollapseBox
@@ -247,9 +247,9 @@ children:
             children:
               - type: CheckBox
                 name: showSummaries
-                label: Show Natural Language Summaries
+                label: Natural language summaries
               - type: CheckBox
                 name: showExplanations
-                label: Show Analysis Explanations
+                label: Analysis explanations
               - type: CheckBox
                 name: advancedDiagnostics

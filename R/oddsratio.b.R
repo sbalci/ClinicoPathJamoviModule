@@ -421,27 +421,8 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html$setContent(todo)
 
 
-                # TODO (correctness): `private$.formatErrorMessage` is NOT defined in this
-                # file - it lives in R/multisurvival.b.R:561 and is not shared via inheritance.
-                # The two call sites here (this line and L452 below) will crash with
-                # "attempt to apply non-function" before reaching jmvcore::reject, so the
-                # empty-data and validation-failure error paths never display the intended
-                # structured message. Either (a) port the helper into this file (or a shared
-                # R/utils.R), (b) inline a plain string and pass it directly to jmvcore::reject,
-                # or (c) factor the helper into a private S3/R6 mixin both functions use.
                 if (nrow(self$data) == 0) {
-                    error_msg <- private$.formatErrorMessage(
-                        "data_error",
-                        "No data available for analysis",
-                        "Dataset has no rows or all observations have been filtered out.",
-                        c(
-                            "Check your data import process",
-                            "Verify variable selections",
-                            "Review data quality and missing value patterns",
-                            "Ensure your dataset contains complete observations"
-                        )
-                    )
-                    jmvcore::reject(error_msg)
+                    jmvcore::reject("No data available for analysis. The dataset has no rows or all observations have been filtered out. Check your data import, verify variable selections, and review missing-value patterns.")
                 }
 
                 # CHECKPOINT: Before data preprocessing - which can be time-consuming
@@ -459,18 +440,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Handle validation errors - stop execution if critical errors found
                 if (validation_results$should_stop) {
-                    error_msg <- private$.formatErrorMessage(
-                        "validation_error",
-                        "Critical validation errors detected",
+                    jmvcore::reject(paste0(
+                        "Critical validation errors detected: ",
                         paste(validation_results$errors, collapse = "; "),
-                        c(
-                            "Check your data format and variable types",
-                            "Ensure outcome variable has exactly 2 levels", 
-                            "Verify that explanatory variables have sufficient variation",
-                            "Consider removing rows with missing data"
-                        )
-                    )
-                    jmvcore::reject(error_msg)
+                        ". Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data."))
                 }
 
                 mydata <- jmvcore::naOmit(mydata)

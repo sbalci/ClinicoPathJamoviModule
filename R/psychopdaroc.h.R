@@ -1119,8 +1119,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "positiveClass",
                     "subGroup",
                     "direction",
-                    "ciMethod",
-                    "confidenceLevel"),
+                    "bootstrapCI",
+                    "bootstrapReps",
+                    "quantileCIs"),
                 columns=list(
                     list(
                         `name`="variable", 

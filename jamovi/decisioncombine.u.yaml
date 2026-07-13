@@ -58,31 +58,31 @@ children:
     children:
       - type: CheckBox
         name: showIndividual
-        label: Show Individual Test Statistics
+        label: Individual test statistics
       - type: CheckBox
         name: showFrequency
-        label: Show Frequency Tables
+        label: Frequency tables
       - type: CheckBox
         name: showRecommendation
-        label: Show Optimal Pattern Recommendation
+        label: Optimal pattern recommendation
       - type: CheckBox
         name: addPatternToData
-        label: Add Test Pattern to Data
+        label: Add test pattern to data
       - type: Label
         label: Visualizations
         children:
           - type: CheckBox
             name: showBarPlot
-            label: Bar Chart
+            label: Bar chart
           - type: CheckBox
             name: showHeatmap
             label: Heatmap
           - type: CheckBox
             name: showForest
-            label: Forest Plot
+            label: Forest plot
           - type: CheckBox
             name: showDecisionTree
-            label: Decision Tree
+            label: Decision tree
 
   - type: CollapseBox
     label: Filters
@@ -90,7 +90,7 @@ children:
     children:
       - type: ComboBox
         name: filterStatistic
-        label: Show Statistic
+        label: Statistic
       - type: ComboBox
         name: filterPattern
-        label: Show Pattern Type
+        label: Pattern type

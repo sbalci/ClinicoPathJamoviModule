@@ -110,7 +110,7 @@ options:
 
 
     - name: originaltheme
-      title: Add GGStatsPlot Layer
+      title: Add GGStatsPlot layer
       type: Bool
       default: false
       description:
@@ -143,7 +143,7 @@ options:
             theoretical proportions.
 
     - name: paired
-      title: Paired/Repeated Measures
+      title: Paired/Repeated measures
       type: Bool
       default: false
       description:
@@ -189,7 +189,7 @@ options:
             Confidence/credible interval level.
 
     - name: proportiontest
-      title: Proportion Test
+      title: Proportion test
       type: Bool
       default: false
       description:
@@ -198,7 +198,7 @@ options:
             carried out for each level of y.
 
     - name: bfmessage
-      title: Bayes Factor Message
+      title: Bayes factor message
       type: Bool
       default: false
       description:
@@ -207,7 +207,7 @@ options:
             Only relevant for parametric test.
 
     - name: messages
-      title: Show Console Messages
+      title: Console messages
       type: Bool
       default: false
       description:
@@ -234,7 +234,7 @@ options:
             Automatically sets appropriate statistical methods and parameters.
 
     - name: showexplanations
-      title: Show Clinical Explanations
+      title: Clinical explanations
       type: Bool
       default: false
       description:
@@ -243,7 +243,7 @@ options:
             and clinical interpretations to guide analysis and result interpretation.
 
     - name: resultssubtitle
-      title: Statistical Results
+      title: Statistical results
       type: Bool
       default: false
       description:
@@ -253,7 +253,7 @@ options:
             for categorical association tests. Provides detailed statistical summary.
 
     - name: showSummary
-      title: Show Analysis Summary
+      title: Analysis summary
       type: Bool
       default: false
       description:
@@ -262,7 +262,7 @@ options:
             suitable for copying into reports and publications.
 
     - name: showAssumptions
-      title: Show Assumptions & Warnings
+      title: Assumptions & warnings
       type: Bool
       default: false
       description:
@@ -272,7 +272,7 @@ options:
             recommendations.
 
     - name: showInterpretation
-      title: Show Interpretation Guide
+      title: Interpretation guide
       type: Bool
       default: false
       description:
@@ -281,7 +281,7 @@ options:
             clinical context based on analysis preset, and methodological notes.
 
     - name: addGGPubrDonut
-      title: Add Donut Chart (ggpubr)
+      title: Add donut chart (ggpubr)
       type: Bool
       default: false
       description:

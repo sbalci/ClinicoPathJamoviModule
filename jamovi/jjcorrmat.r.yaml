@@ -6,8 +6,6 @@ jrs:   '1.1'
 clearWith:
     - dep
     - grvar
-    - excl
-    - originaltheme
     - typestatistics
     - matrixtype
     - matrixmethod

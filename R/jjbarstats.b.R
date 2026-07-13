@@ -14,6 +14,16 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
         "jjbarstatsClass",
         inherit = jjbarstatsBase,
         private = list(
+        # Option overrides for clinical presets (jamovi options are read-only at runtime;
+        # presets record overrides here and reads go through private$.option()).
+        overrides = list(),
+        .option = function(option) {
+            if (option %in% names(private$overrides)) return(private$overrides[[option]])
+            opt_obj <- self$options$option(option)
+            if (!is.null(opt_obj)) return(opt_obj$value)
+            return(NULL)
+        },
+
             # Cache variables for performance
             .cached_data = NULL,
             .data_hash = NULL,
@@ -277,7 +287,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         grvar = self$options$grvar,
                         counts = self$options$counts,
                         excl = self$options$excl,
-                        paired = self$options$paired,
+                        paired = private$.option("paired"),
                         label = self$options$label
                     )
                 ), algo = "md5")
@@ -318,39 +328,39 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 switch(preset,
                     "diagnostic" = {
                         # 2x2 diagnostic table: use Fisher's exact when appropriate
-                        if (is.null(self$options$typestatistics) || self$options$typestatistics == "parametric") {
+                        if (is.null(private$.option("typestatistics")) || private$.option("typestatistics") == "parametric") {
                             # Will be handled in statistical validation
                         }
                         # Default to showing statistical results
-                        if (is.null(self$options$resultssubtitle)) {
-                            self$options$resultssubtitle <- TRUE
+                        if (is.null(private$.option("resultssubtitle"))) {
+                            private$overrides[["resultssubtitle"]] <- TRUE
                         }
                     },
                     "treatment" = {
                         # Treatment response: enable pairwise comparisons
-                        if (is.null(self$options$pairwisecomparisons)) {
-                            self$options$pairwisecomparisons <- TRUE
+                        if (is.null(private$.option("pairwisecomparisons"))) {
+                            private$overrides[["pairwisecomparisons"]] <- TRUE
                         }
-                        if (is.null(self$options$padjustmethod)) {
-                            self$options$padjustmethod <- "holm"
+                        if (is.null(private$.option("padjustmethod"))) {
+                            private$overrides[["padjustmethod"]] <- "holm"
                         }
                     },
                     "biomarker" = {
                         # Biomarker expression: robust statistics for potential outliers
-                        if (is.null(self$options$typestatistics)) {
-                            self$options$typestatistics <- "robust"
+                        if (is.null(private$.option("typestatistics"))) {
+                            private$overrides[["typestatistics"]] <- "robust"
                         }
-                        if (is.null(self$options$pairwisecomparisons)) {
-                            self$options$pairwisecomparisons <- TRUE
+                        if (is.null(private$.option("pairwisecomparisons"))) {
+                            private$overrides[["pairwisecomparisons"]] <- TRUE
                         }
                     },
                     "riskfactor" = {
                         # Risk factor analysis: parametric with proportion tests
-                        if (is.null(self$options$typestatistics)) {
-                            self$options$typestatistics <- "parametric"
+                        if (is.null(private$.option("typestatistics"))) {
+                            private$overrides[["typestatistics"]] <- "parametric"
                         }
-                        if (is.null(self$options$proportiontest)) {
-                            self$options$proportiontest <- TRUE
+                        if (is.null(private$.option("proportiontest"))) {
+                            private$overrides[["proportiontest"]] <- TRUE
                         }
                     }
                 )
@@ -395,8 +405,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 dep_vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
 
-                test_method <- switch(self$options$typestatistics,
-                    "parametric" = if (self$options$paired) "McNemar's test" else "Chi-square test of independence",
+                test_method <- switch(private$.option("typestatistics"),
+                    "parametric" = if (private$.option("paired")) "McNemar's test" else "Chi-square test of independence",
                     "nonparametric" = "Non-parametric association test",
                     "robust" = "Robust statistical test",
                     "bayes" = "Bayesian contingency table analysis",
@@ -409,9 +419,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<p><strong>Variables Analyzed:</strong> ", dep_vars, " by ", htmltools::htmlEscape(self$options$group), "</p>",
                     "<p><strong>Sample Size:</strong> ", n_total, " observations across ", n_groups, " groups</p>",
                     "<p><strong>Statistical Method:</strong> ", test_method, "</p>",
-                    if (self$options$pairwisecomparisons && n_groups > 2) paste0(
+                    if (private$.option("pairwisecomparisons") && n_groups > 2) paste0(
                         "<p><strong>Post-hoc Analysis:</strong> Pairwise comparisons with ",
-                        self$options$padjustmethod, " correction</p>"
+                        private$.option("padjustmethod"), " correction</p>"
                     ) else "",
                     if (!is.null(self$options$grvar)) paste0(
                         "<p><strong>Subgroup Analysis:</strong> Results stratified by ", htmltools::htmlEscape(self$options$grvar), "</p>"
@@ -486,7 +496,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Check for paired data appropriateness
-                if (self$options$paired) {
+                if (private$.option("paired")) {
                     warnings <- c(warnings,
                         " <strong>Paired Analysis:</strong> McNemar's test assumes matched pairs (e.g., before/after, case/control matching)."
                     )
@@ -502,7 +512,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<li>Variables are categorical or ordinal</li>",
                     "<li>Observations are independent</li>",
                     "<li>Expected cell counts \u2265 5 for chi-square validity</li>",
-                    if (self$options$paired) "<li>Paired observations (matched subjects)</li>" else "",
+                    if (private$.option("paired")) "<li>Paired observations (matched subjects)</li>" else "",
                     "</ul>",
 
                     if (length(warnings) > 0) paste0(
@@ -604,16 +614,16 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     "<h5>Methods:</h5>",
                     "<p>Bar chart analysis was performed to examine the association between ", dep_vars,
                     " and ", htmltools::htmlEscape(self$options$group), " using ",
-                    switch(self$options$typestatistics,
-                        "parametric" = if (self$options$paired) "McNemar's test" else "chi-square test of independence",
+                    switch(private$.option("typestatistics"),
+                        "parametric" = if (private$.option("paired")) "McNemar's test" else "chi-square test of independence",
                         "nonparametric" = "non-parametric association testing",
                         "robust" = "robust statistical methods",
                         "bayes" = "Bayesian contingency table analysis"
                     ), ". ",
                     
-                    if (self$options$pairwisecomparisons && n_groups > 2) {
+                    if (private$.option("pairwisecomparisons") && n_groups > 2) {
                         paste0("Post-hoc pairwise comparisons were conducted with ", 
-                              self$options$padjustmethod, " correction for multiple testing. ")
+                              private$.option("padjustmethod"), " correction for multiple testing. ")
                     } else "",
                     
                     "Statistical significance was assessed at \u03b1 = ", (1 - self$options$conflevel), " level. ",
@@ -822,14 +832,14 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # CRITICAL: Validate paired data before allowing McNemar's test
-                if (self$options$paired) {
+                if (private$.option("paired")) {
                     paired_valid <- private$.validatePairedData(data, dep_var)
                     if (!paired_valid$valid) {
                         # Create ERROR notice and force paired=FALSE
                         private$.addNotice('ERROR', 'Invalid Paired Data', paired_valid$message)
 
                         # SAFETY: Override paired option to prevent invalid McNemar
-                        self$options$paired <- FALSE
+                        private$overrides[["paired"]] <- FALSE
                         warning(paste("Paired analysis disabled:", paired_valid$message))
                     } else {
                         # Data structure is compatible, but warn about pairing assumption
@@ -839,9 +849,9 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
 
                 # CRITICAL FIX 3: Check if Fisher's exact test should be used automatically
                 fisher_check <- private$.checkStatisticalAssumptions(data, dep_var = dep_var)
-                override_type <- self$options$typestatistics  # Start with user's choice
+                override_type <- private$.option("typestatistics")  # Start with user's choice
 
-                if (fisher_check$use_fisher && !self$options$paired) {
+                if (fisher_check$use_fisher && !private$.option("paired")) {
                     # Auto-switch to Fisher for 2\u00d72 tables with low expected counts
                     # Note: "nonparametric" type in ggbarstats uses Fisher's exact test for 2\u00d72 tables
                     override_type <- "nonparametric"
@@ -875,7 +885,7 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Auto-disable pairwise for large group counts (performance)
-                use_pairwise <- self$options$pairwisecomparisons
+                use_pairwise <- private$.option("pairwisecomparisons")
                 if (use_pairwise && n_groups > 10) {
                     warning("Pairwise comparisons disabled for performance (>10 groups). Set manually to override.")
                     use_pairwise <- FALSE
@@ -923,15 +933,15 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                     y = rlang::sym(self$options$group),
                     counts = if (!is.null(self$options$counts)) rlang::sym(self$options$counts) else NULL,
                     type = override_type,  #  CRITICAL FIX: Use override_type (may auto-switch to Fisher)
-                    paired = if (!is.null(self$options$paired)) self$options$paired else FALSE,
+                    paired = if (!is.null(private$.option("paired"))) private$.option("paired") else FALSE,
                     pairwise.comparisons = use_pairwise,
                     pairwise.display = self$options$pairwisedisplay,
-                    p.adjust.method = self$options$padjustmethod,
-                    results.subtitle = if (!is.null(self$options$resultssubtitle)) self$options$resultssubtitle else TRUE,
+                    p.adjust.method = private$.option("padjustmethod"),
+                    results.subtitle = if (!is.null(private$.option("resultssubtitle"))) private$.option("resultssubtitle") else TRUE,
                     label = if (!is.null(self$options$label)) self$options$label else "percentage",
                     digits = if (!is.null(self$options$digits)) self$options$digits else 2L,
                     digits.perc = if (!is.null(self$options$digitsperc)) self$options$digitsperc else 0L,
-                    proportion.test = if (!is.null(self$options$proportiontest)) self$options$proportiontest else TRUE,
+                    proportion.test = if (!is.null(private$.option("proportiontest"))) private$.option("proportiontest") else TRUE,
                     bf.message = if (!is.null(self$options$bfmessage)) self$options$bfmessage else FALSE,
                     conf.level = if (!is.null(self$options$conflevel)) self$options$conflevel else 0.95,
                     ratio = ratio_vec,
@@ -1071,18 +1081,18 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         # Performance warnings
                         perf_warning <- ""
                         n_groups <- length(unique(prepared_data[[self$options$group]]))
-                        if (self$options$pairwisecomparisons && n_groups > 5) {
+                        if (private$.option("pairwisecomparisons") && n_groups > 5) {
                             perf_warning <- paste0("<br> <b>Performance Note:</b> Pairwise comparisons with ", n_groups, 
                                                  " groups may be slow. Consider disabling for faster results.<br>")
                         }
-                        if (self$options$typestatistics == "bayes") {
+                        if (private$.option("typestatistics") == "bayes") {
                             perf_warning <- paste0(perf_warning, 
                                                  "<br> <b>Performance Note:</b> Bayesian analysis is computationally intensive.<br>")
                         }
                         
                         # Additional info about analysis settings
                         analysis_info <- ""
-                        if (self$options$paired) {
+                        if (private$.option("paired")) {
                             analysis_info <- paste0(analysis_info, "<br>\u2022 Using paired/repeated measures design (McNemar's test)")
                         }
                         if (!is.null(self$options$counts)) {

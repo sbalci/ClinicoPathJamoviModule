@@ -98,7 +98,7 @@ options:
 
 
     - name: pp
-      title: Use Known Population Prevalence
+      title: Use known population prevalence
       type: Bool
       default: false
       description:
@@ -124,7 +124,7 @@ options:
 
 
     - name: od
-      title: Show Raw Data Tables
+      title: Raw data tables
       type: Bool
       default: false
       description:
@@ -135,7 +135,7 @@ options:
             Boolean selection whether to show original data frequency tables.
 
     - name: fnote
-      title: Show Explanatory Footnotes
+      title: Explanatory footnotes
       type: Bool
       default: false
       description:
@@ -146,7 +146,7 @@ options:
             Boolean selection whether to show detailed explanatory footnotes.
 
     - name: ci
-      title: '95 percent Confidence Intervals'
+      title: "95 percent confidence intervals"
       type: Bool
       default: false
       description:
@@ -158,7 +158,7 @@ options:
 
 
     - name: fagan
-      title: 'Fagan Nomogram Plot'
+      title: "Fagan nomogram plot"
       type: Bool
       default: false
       description:
@@ -169,7 +169,7 @@ options:
             Boolean selection whether to generate a Fagan nomogram plot.
 
     - name: showNaturalLanguage
-      title: 'Show Clinical Summary'
+      title: "Clinical summary"
       type: Bool
       default: false
       description:
@@ -180,7 +180,7 @@ options:
             Boolean selection whether to show the natural language clinical summary.
 
     - name: showClinicalInterpretation
-      title: 'Show Clinical Interpretation Guide'
+      title: "Clinical interpretation guide"
       type: Bool
       default: false
       description:
@@ -191,7 +191,7 @@ options:
             Boolean selection whether to show the clinical interpretation guide.
 
     - name: showReportTemplate
-      title: 'Show Copy-Ready Report'
+      title: "Copy-ready report"
       type: Bool
       default: false
       description:
@@ -202,7 +202,7 @@ options:
             Boolean selection whether to show the copy-ready report template.
 
     - name: showAboutAnalysis
-      title: 'Show About This Analysis'
+      title: "About this analysis"
       type: Bool
       default: false
       description:
@@ -213,7 +213,7 @@ options:
             Boolean selection whether to show the about analysis section.
 
     - name: showMisclassified
-      title: 'Show Misclassified Cases Analysis'
+      title: "Misclassified cases analysis"
       type: Bool
       default: false
       description:

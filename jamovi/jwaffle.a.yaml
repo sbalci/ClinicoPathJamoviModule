@@ -56,7 +56,7 @@ options:
             Number of rows in the waffle chart
 
     - name: flip
-      title: Flip Chart
+      title: Flip chart
       type: Bool
       default: false
       description:
@@ -87,7 +87,7 @@ options:
             Color scheme for the waffle squares
 
     - name: show_legend
-      title: Show Legend
+      title: Legend
       type: Bool
       default: false
       description:
@@ -111,7 +111,7 @@ options:
             Custom title for the legend
 
     - name: showSummaries
-      title: Analysis Summary
+      title: Analysis summary
       type: Bool
       default: false
       description:
@@ -119,7 +119,7 @@ options:
             Generate natural language summary of waffle chart results including proportions, dominant categories, and clinical interpretation.
 
     - name: showExplanations
-      title: Show Explanations
+      title: Explanations
       type: Bool
       default: false
       description:

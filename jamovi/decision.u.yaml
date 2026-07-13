@@ -43,14 +43,14 @@ children:
         children:
           - type: CheckBox
             name: ci
-            label: 95% Confidence Intervals
+            label: 95% confidence intervals
             enable: (!pp)
           - type: CheckBox
             name: fnote
-            label: Show Explanatory Footnotes
+            label: Explanatory footnotes
           - type: CheckBox
             name: od
-            label: Show Raw Data Tables
+            label: Raw data tables
   - type: CollapseBox
     label: Population Prevalence Settings
     collapsed: true
@@ -59,7 +59,7 @@ children:
         label: Use when sample doesn't represent target population disease prevalence
       - type: CheckBox
         name: pp
-        label: Use Known Population Prevalence
+        label: Use known population prevalence
         enable: (!ci)
       - type: TextBox
         name: pprob
@@ -72,23 +72,23 @@ children:
     children:
       - type: CheckBox
         name: fagan
-        label: Fagan Nomogram
+        label: Fagan nomogram
   - type: CollapseBox
     label: Output Options
     collapsed: true
     children:
       - type: CheckBox
         name: showNaturalLanguage
-        label: Clinical Summary
+        label: Clinical summary
       - type: CheckBox
         name: showClinicalInterpretation
-        label: Clinical Interpretation Guide
+        label: Clinical interpretation guide
       - type: CheckBox
         name: showReportTemplate
-        label: Copy-Ready Report
+        label: Copy-ready report
       - type: CheckBox
         name: showAboutAnalysis
-        label: About This Analysis
+        label: About this analysis
   - type: CollapseBox
     label: Misclassified Cases Analysis
     collapsed: true
@@ -97,7 +97,7 @@ children:
         label: Identify and analyze false positive and false negative cases
       - type: CheckBox
         name: showMisclassified
-        label: Show Misclassified Cases Tables
+        label: Misclassified cases tables
       - type: LayoutBox
         margin: small
         children:

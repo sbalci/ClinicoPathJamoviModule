@@ -90,10 +90,10 @@ children:
                       - type: ComboBox
                         name: timetypedata
                         enable: (tint)
-                        label: Input Time Type
+                        label: Input time type
                       - type: ComboBox
                         name: timetypeoutput
-                        label: Output Time Type
+                        label: Output time type
                         enable: (tint)
       - type: Label
         label: Landmark Analysis
@@ -104,7 +104,7 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
-                label: Use Landmark Time
+                label: Use landmark time
                 children:
                   - type: TextBox
                     name: landmark
@@ -125,7 +125,7 @@ children:
               - type: CheckBox
                 name: multievent
                 enable: (outcome)
-                label: Enable Multiple Event Analysis
+                label: Multiple event analysis
               - type: Label
                 label: Event Level Assignment
                 children:
@@ -151,7 +151,7 @@ children:
               - type: ComboBox
                 name: analysistype
                 enable: (outcome && multievent)
-                label: Analysis Type
+                label: Analysis type
   - type: CollapseBox
     label: Statistical Analysis
     collapsed: true
@@ -164,16 +164,16 @@ children:
             children:
               - type: CheckBox
                 name: ph_cox
-                label: Proportional Hazards Test
+                label: Proportional hazards test
               - type: CheckBox
                 name: stratified_cox
-                label: Stratified Cox Model
+                label: Stratified Cox model
               - type: CheckBox
                 name: residual_diagnostics
-                label: Residual Diagnostics
+                label: Residual diagnostics
               - type: CheckBox
                 name: loglog
-                label: Log-Log Plot
+                label: Log-log plot
               - type: VariableSupplier
                 persistentItems: false
                 stretchFactor: 1
@@ -193,7 +193,7 @@ children:
             children:
               - type: CheckBox
                 name: age_adjustment
-                label: Age-Adjusted Cox Regression
+                label: Age-adjusted Cox regression
               - type: VariableSupplier
                 persistentItems: false
                 stretchFactor: 1
@@ -208,11 +208,11 @@ children:
                         enable: (age_adjustment)
               - type: CheckBox
                 name: age_interaction
-                label: Test Age x Group Interaction
+                label: Test age x group interaction
                 enable: (age_adjustment)
               - type: CheckBox
                 name: age_stratified_cox
-                label: Stratify Cox by Age Groups
+                label: Stratify Cox by age groups
                 enable: (age_adjustment)
               - type: TextBox
                 name: age_group_cutpoints
@@ -224,23 +224,23 @@ children:
                   age_standardization))
               - type: CheckBox
                 name: age_time_scale
-                label: Age as Time Scale (epidemiologic)
+                label: Age as time scale (epidemiologic)
                 enable: (age_adjustment)
               - type: CheckBox
                 name: age_standardization
-                label: Age Standardization (SMR)
+                label: Age standardization (SMR)
                 enable: (age_adjustment)
               - type: ComboBox
                 name: age_standardization_method
-                label: Standardization Method
+                label: Standardization method
                 enable: (age_adjustment && age_standardization)
               - type: CheckBox
                 name: age_stratified_km
-                label: Age-Stratified KM Plots
+                label: Age-stratified KM plots
                 enable: (age_adjustment)
               - type: CheckBox
                 name: adjusted_curves
-                label: Adjusted Survival Curves
+                label: Adjusted survival curves
                 enable: (age_adjustment)
       - type: Label
         label: Model Validation
@@ -250,7 +250,7 @@ children:
             children:
               - type: CheckBox
                 name: calibration_curves
-                label: Calibration Curves
+                label: Calibration curves
               - type: TextBox
                 name: calibration_timepoint
                 format: number
@@ -263,7 +263,7 @@ children:
                 enable: (calibration_curves)
               - type: CheckBox
                 name: bootstrapValidation
-                label: Bootstrap Internal Validation (C-index)
+                label: Bootstrap internal validation (C-index)
               - type: TextBox
                 name: bootstrapValN
                 format: number
@@ -281,7 +281,7 @@ children:
             children:
               - type: CheckBox
                 name: rcs_analysis
-                label: Restricted Cubic Splines (RCS)
+                label: Restricted cubic splines (RCS)
               - type: VariableSupplier
                 persistentItems: false
                 stretchFactor: 1
@@ -307,11 +307,11 @@ children:
             children:
               - type: CheckBox
                 name: pw
-                label: Perform Pairwise Comparisons
+                label: Perform pairwise comparisons
               - type: ComboBox
                 name: padjustmethod
                 enable: (pw)
-                label: P-value Adjustment Method
+                label: P-value adjustment method
       - type: Label
         label: Weighted Log-Rank Tests
         children:
@@ -320,11 +320,11 @@ children:
             children:
               - type: CheckBox
                 name: weightedLogRank
-                label: Perform Weighted Log-Rank Tests
+                label: Perform weighted log-rank tests
               - type: ComboBox
                 name: survivalTestType
                 enable: (weightedLogRank)
-                label: Test Type for Pairwise Comparisons
+                label: Test type for pairwise comparisons
       - type: Label
         label: Restricted Mean Survival Time
         children:
@@ -333,7 +333,7 @@ children:
             children:
               - type: CheckBox
                 name: rmst_analysis
-                label: RMST Analysis
+                label: RMST analysis
               - type: TextBox
                 name: rmst_tau
                 format: number
@@ -351,16 +351,16 @@ children:
             children:
               - type: CheckBox
                 name: sc
-                label: Survival Curves
+                label: Survival curves
               - type: CheckBox
                 name: kmunicate
-                label: KMunicate Plot
+                label: KMunicate plot
               - type: CheckBox
                 name: ce
-                label: Cumulative Events
+                label: Cumulative events
               - type: CheckBox
                 name: ch
-                label: Cumulative Hazard
+                label: Cumulative hazard
       - type: Label
         label: Plot Appearance
         children:
@@ -369,19 +369,19 @@ children:
             children:
               - type: CheckBox
                 name: ci95
-                label: 95% Confidence Intervals
+                label: 95% confidence intervals
               - type: CheckBox
                 name: risktable
-                label: Risk Table
+                label: Risk table
               - type: CheckBox
                 name: censored
-                label: Show Censored Points
+                label: Censored points
               - type: CheckBox
                 name: pplot
-                label: Show P-values
+                label: P-values
               - type: ComboBox
                 name: medianline
-                label: Median Survival Line
+                label: Median survival line
       - type: Label
         label: Plot Scale & Timing
         children:
@@ -431,7 +431,7 @@ children:
             children:
               - type: CheckBox
                 name: person_time
-                label: Calculate Person-Time Rates
+                label: Calculate person-time rates
               - type: TextBox
                 name: time_intervals
                 format: string
@@ -475,13 +475,13 @@ children:
             children:
               - type: CheckBox
                 name: showExplanations
-                label: Show Analysis Explanations
+                label: Analysis explanations
               - type: CheckBox
                 name: showSummaries
-                label: Show Natural Language Summaries
+                label: Natural language summaries
               - type: CheckBox
                 name: remark_checklist
-                label: REMARK Reporting Checklist
+                label: REMARK reporting checklist
               - type: CheckBox
                 name: use_parametric
   - type: LayoutBox

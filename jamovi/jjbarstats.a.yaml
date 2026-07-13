@@ -71,7 +71,7 @@ options:
 
 
     - name: excl
-      title: Exclude Missing (NA)
+      title: Exclude missing (NA)
       type: Bool
       default: false
 
@@ -91,7 +91,7 @@ options:
       default: parametric
 
     - name: pairwisecomparisons
-      title: Pairwise Comparisons
+      title: Pairwise comparisons
       type: Bool
       default: false
 
@@ -132,12 +132,12 @@ options:
 
 
     - name: originaltheme
-      title: Add GGStatsPlot Layer
+      title: Add GGStatsPlot layer
       type: Bool
       default: false
 
     - name: resultssubtitle
-      title: Show Statistical Results in Subtitle
+      title: Statistical results in subtitle
       type: Bool
       default: false
       description:
@@ -146,7 +146,7 @@ options:
             Disabling improves performance significantly.
 
     - name: messages
-      title: Show Console Messages
+      title: Console messages
       type: Bool
       default: false
       description:
@@ -155,7 +155,7 @@ options:
             Disabling improves performance.
 
     - name: paired
-      title: Paired/Repeated Measures
+      title: Paired/Repeated measures
       type: Bool
       default: false
       description:
@@ -201,7 +201,7 @@ options:
             Number of decimal places for percentage labels.
 
     - name: proportiontest
-      title: Proportion Test
+      title: Proportion test
       type: Bool
       default: false
       description:
@@ -210,7 +210,7 @@ options:
             carried out for each level of y.
 
     - name: bfmessage
-      title: Bayes Factor Message
+      title: Bayes factor message
       type: Bool
       default: false
       description:
@@ -260,7 +260,7 @@ options:
             Automatically sets appropriate statistical methods and parameters.
 
     - name: showexplanations
-      title: Show Clinical Explanations
+      title: Clinical explanations
       type: Bool
       default: false
       description:
@@ -269,7 +269,7 @@ options:
             and clinical interpretations to guide analysis and result interpretation.
 
     - name: showSummary
-      title: Show Analysis Summary
+      title: Analysis summary
       type: Bool
       default: true
       description:
@@ -278,7 +278,7 @@ options:
             suitable for copying into reports and publications.
 
     - name: showAssumptions
-      title: Show Assumptions & Warnings
+      title: Assumptions & warnings
       type: Bool
       default: true
       description:
@@ -288,7 +288,7 @@ options:
             recommendations.
 
     - name: showInterpretation
-      title: Show Interpretation Guide
+      title: Interpretation guide
       type: Bool
       default: false
       description:
@@ -297,7 +297,7 @@ options:
             clinical context based on analysis preset, and methodological notes.
 
     - name: addGGPubrBalloon
-      title: Add Balloon Plot (ggpubr)
+      title: Add balloon plot (ggpubr)
       type: Bool
       default: false
       description:

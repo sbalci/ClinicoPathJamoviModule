@@ -115,14 +115,14 @@ options:
         R: Random seed for reproducible cross-validation fold assignment.
 
     - name: standardize
-      title: Standardize Variables
+      title: Standardize variables
       type: Bool
       default: true
       description:
         R: Whether to standardize predictor variables before fitting.
 
     - name: suitabilityCheck
-      title: Data Suitability Assessment
+      title: Data suitability assessment
       type: Bool
       default: true
       description:
@@ -131,7 +131,7 @@ options:
           and whether regularization is needed.
 
     - name: bootstrapValidation
-      title: Bootstrap Internal Validation
+      title: Bootstrap internal validation
       type: Bool
       default: false
       description:
@@ -149,28 +149,28 @@ options:
         R: Number of bootstrap iterations for internal validation.
 
     - name: cv_plot
-      title: Cross-validation Plot
+      title: Cross-validation plot
       type: Bool
       default: true
       description:
         R: Show cross-validation deviance vs lambda plot.
 
     - name: coef_plot
-      title: Coefficient Plot
+      title: Coefficient plot
       type: Bool
       default: true
       description:
         R: Show bar plot of selected variable coefficients.
 
     - name: roc_plot
-      title: ROC Curve
+      title: ROC curve
       type: Bool
       default: true
       description:
         R: Show ROC curve with AUC and confidence interval.
 
     - name: scoringSystem
-      title: Generate Scoring System
+      title: Scoring system
       type: Bool
       default: false
       description:
@@ -213,7 +213,7 @@ options:
           smallest coefficient and also ignores it.
 
     - name: scoreLookupTable
-      title: Score-to-Probability Lookup Table
+      title: Score-to-probability lookup table
       type: Bool
       default: true
       description:
@@ -228,42 +228,42 @@ options:
         R: Adds predicted probabilities to the dataset.
 
     - name: showSummary
-      title: Show Results Summary
+      title: Results summary
       type: Bool
       default: false
       description:
         R: Display a natural-language summary of the main results.
 
     - name: showExplanations
-      title: Show Method Explanations
+      title: Method explanations
       type: Bool
       default: false
       description:
         R: Display explanations of LASSO logistic regression methodology.
 
     - name: showMethodologyNotes
-      title: Detailed Methodology Notes
+      title: Detailed methodology notes
       type: Bool
       default: false
       description:
         R: Show technical notes about regularization and validation.
 
     - name: includeClinicalGuidance
-      title: Clinical Interpretation Guidance
+      title: Clinical interpretation guidance
       type: Bool
       default: false
       description:
         R: Include guidance for clinical interpretation of results.
 
     - name: showVariableImportance
-      title: Variable Importance Analysis
+      title: Variable importance analysis
       type: Bool
       default: false
       description:
         R: Display variable importance rankings across lambda values.
 
     - name: showModelComparison
-      title: Model Comparison Analysis
+      title: Model comparison analysis
       type: Bool
       default: false
       description:

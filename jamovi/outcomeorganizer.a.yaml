@@ -133,7 +133,7 @@ options:
             The type of survival analysis to prepare the outcome for.
 
     - name: multievent
-      title: Multiple Event Levels
+      title: Multiple event levels
       type: Bool
       default: false
       description:
@@ -177,7 +177,7 @@ options:
             The level representing patients who are alive and disease-free.
 
     - name: useHierarchy
-      title: "Use Event Hierarchy"
+      title: "Use event hierarchy"
       type: Bool
       default: false
       description:
@@ -193,7 +193,7 @@ options:
             The event code (e.g., 1, 2) that takes precedence when multiple events occur.
 
     - name: intervalCensoring
-      title: "Use Interval Censoring"
+      title: "Use interval censoring"
       type: Bool
       default: false
       description:
@@ -215,7 +215,7 @@ options:
             Variable containing the end of the interval when the event might have occurred.
 
     - name: adminCensoring
-      title: "Use Administrative Censoring"
+      title: "Use administrative censoring"
       type: Bool
       default: false
       description:
@@ -230,7 +230,7 @@ options:
             Variable containing the administrative censoring date.
 
     - name: outputTable
-      title: "Show Output Table"
+      title: "Output table"
       type: Bool
       default: false
       description:
@@ -238,7 +238,7 @@ options:
             If true, displays a table showing the frequency of each recoded outcome value.
 
     - name: diagnostics
-      title: "Show Diagnostic Information"
+      title: "Diagnostic information"
       type: Bool
       default: false
       description:
@@ -246,7 +246,7 @@ options:
             If true, displays diagnostic information about the recoding process.
 
     - name: visualization
-      title: "Show Outcome Distribution"
+      title: "Outcome distribution"
       type: Bool
       default: false
       description:
@@ -254,7 +254,7 @@ options:
             If true, displays a visualization of the distribution of recoded outcomes.
 
     - name: showNaturalSummary
-      title: "Show Natural Language Summary"
+      title: "Natural language summary"
       type: Bool
       default: false
       description:
@@ -262,7 +262,7 @@ options:
             Display a plain-language summary of the recoding suitable for copying to reports.
 
     - name: showGlossary
-      title: "Show Survival Analysis Glossary"
+      title: "Survival analysis glossary"
       type: Bool
       default: false
       description:

@@ -183,7 +183,7 @@ options:
             Number of decimal places for displaying correlation coefficients.
 
     - name: partial
-      title: Partial Correlations
+      title: Partial correlations
       type: Bool
       default: false
       description:
@@ -274,7 +274,7 @@ options:
             Caption for the correlation matrix plot.
 
     - name: showexplanations
-      title: Show Explanations
+      title: Explanations
       type: Bool
       default: false
       description:

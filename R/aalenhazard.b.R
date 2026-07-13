@@ -258,7 +258,8 @@ aalenhazardClass <- if (requireNamespace('jmvcore', quietly=TRUE))
         complete_data <- data.frame(
           time = time_data,
           event = event_numeric,
-          covariate_matrix
+          covariate_matrix,
+          check.names = FALSE
         )
         
         if (!is.null(constant_data)) {

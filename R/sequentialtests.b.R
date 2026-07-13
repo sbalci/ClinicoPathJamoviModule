@@ -129,11 +129,10 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     private$.addNotice('STRONG_WARNING', 'Prevalence Very Low', sprintf('Prevalence is very low (%.3f%%). Even with excellent tests, PPV may be extremely low. Consider pre-test probability carefully.', prevalence*100))
                 }
 
-                # Detect potential test correlation
-                # TODO (correctness): agrepl() treats test1_name as a REGEX (fixed=FALSE default); a
-                #   malformed-regex test name (e.g. "[") throws an uncaught error that aborts .run().
-                #   Pass fixed = TRUE so the names are compared literally, not as patterns.
-                test_similarity <- agrepl(test1_name, test2_name, max.distance = 0.3)
+                # Detect potential test correlation. fixed = TRUE compares the names literally
+                # (fuzzy string similarity), so a test name containing regex metacharacters
+                # (e.g. "CA-125 [serum]") can't throw a malformed-pattern error that aborts .run().
+                test_similarity <- agrepl(test1_name, test2_name, max.distance = 0.3, fixed = TRUE)
                 if (test_similarity && test1_name != "Screening Test" && test2_name != "Confirmatory Test") {
                     private$.addNotice('STRONG_WARNING', 'Test Correlation Risk', sprintf('Test names are similar ("%s" vs "%s"). If tests measure similar biomarkers or use similar technology, they may be correlated. This violates the independence assumption and combined metrics will be overestimated.', test1_name, test2_name))
                 }

@@ -10,6 +10,16 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjscatterstatsBase,
     private = list(
 
+        # Option overrides for clinical presets (jamovi options are read-only at runtime;
+        # presets record overrides here and reads go through private$.option()).
+        overrides = list(),
+        .option = function(option) {
+            if (option %in% names(private$overrides)) return(private$overrides[[option]])
+            opt_obj <- self$options$option(option)
+            if (!is.null(opt_obj)) return(opt_obj$value)
+            return(NULL)
+        },
+
         # init ----
 
         # TODO (data hygiene): the `num_levels * plotwidth` sizing below is unbounded - 
@@ -82,13 +92,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateExplanations()
         },
 
-        # TODO (correctness): `.applyClinicalPreset` writes back to jamovi options via
-        # `self$options$typestatistics <- ...` at L102-104, L118-119, L133-134. jamovi
-        # options are read-only at runtime; this mutation pattern may silently no-op or
-        # raise a runtime error in newer jamovi versions. Same concern as
-        # jjbarstats/jjcoefstats/jjhistostats/jjpubr/jjridges. Recommended fix: build
-        # an overrides list + `.option(name)` indirection (jjoncoplot's
-        # `.optionsWithPreset` L34-93 is the correct pattern).
+        # Clinical presets record their settings in private$overrides (below) instead of
+        # writing back into the read-only jamovi option objects; downstream code reads the
+        # effective value via private$.option(name). (2026-07-13 audit fix.)
         #
         # TODO (cleanup): L90-101 / L107-117 / L122-131 contain near-identical
         # `preset_message` HTML blocks. Consider templating to a single helper that
@@ -115,9 +121,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
                     "</div>"
                 )
-                self$options$typestatistics <- "nonparametric"
-                self$options$addGGPubrPlot <- TRUE
-                self$options$ggpubrPalette <- "jco"
+                private$overrides[["typestatistics"]] <- "nonparametric"
+                private$overrides[["addGGPubrPlot"]] <- TRUE
+                private$overrides[["ggpubrPalette"]] <- "jco"
 
             } else if (preset == "treatment_response_analysis") {
                 preset_message <- paste0(
@@ -131,8 +137,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
                     "</div>"
                 )
-                self$options$typestatistics <- "robust"
-                self$options$marginal <- TRUE
+                private$overrides[["typestatistics"]] <- "robust"
+                private$overrides[["marginal"]] <- TRUE
 
             } else if (preset == "publication_ready") {
                 preset_message <- paste0(
@@ -146,8 +152,8 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
                     "</div>"
                 )
-                self$options$originaltheme <- TRUE
-                self$options$resultssubtitle <- TRUE
+                private$overrides[["originaltheme"]] <- TRUE
+                private$overrides[["resultssubtitle"]] <- TRUE
             }
 
             # Display preset notification
@@ -208,15 +214,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data = plotData,
                 x = self$options$dep,
                 y = self$options$group,
-                type = self$options$typestatistics,
+                type = private$.option("typestatistics"),
                 title = title,
                 xlab = xtitle,
                 ylab = ytitle,
-                results.subtitle = self$options$resultssubtitle,
+                results.subtitle = private$.option("resultssubtitle"),
                 conf.level = self$options$conflevel,
                 bf.message = self$options$bfmessage,
                 k = self$options$k,
-                marginal = self$options$marginal,
+                marginal = private$.option("marginal"),
                 marginal.type = self$options$marginalType,
                 point.size = self$options$pointsize,
                 point.alpha = self$options$pointalpha,
@@ -227,7 +233,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             )
 
-            if (self$options$marginal) {
+            if (private$.option("marginal")) {
                 .args$xfill <- self$options$xsidefill
                 .args$yfill <- self$options$ysidefill
             }
@@ -238,7 +244,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot <- plot + ggplot2::geom_rug(alpha = 0.5)
             }
 
-            if (!self$options$originaltheme) {
+            if (!private$.option("originaltheme")) {
                 plot <- plot + ggplot2::theme_bw()
             } else {
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
@@ -287,15 +293,15 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     x = !!rlang::sym(self$options$dep),
                     y = !!rlang::sym(self$options$group),
                     grouping.var = !!rlang::sym(self$options$grvar),
-                    type = !!self$options$typestatistics,
+                    type = !!private$.option("typestatistics"),
                     title.prefix = !!title,
                     xlab = !!xtitle,
                     ylab = !!ytitle,
-                    results.subtitle = !!self$options$resultssubtitle,
+                    results.subtitle = !!private$.option("resultssubtitle"),
                     conf.level = !!self$options$conflevel,
                     bf.message = !!self$options$bfmessage,
                     k = !!self$options$k,
-                    marginal = !!self$options$marginal,
+                    marginal = !!private$.option("marginal"),
                     marginal.type = !!self$options$marginalType,  # CRITICAL FIX: Use actual option value
                     point.size = !!self$options$pointsize,
                     point.alpha = !!self$options$pointalpha,
@@ -308,22 +314,22 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Add marginal options if needed
-            if (self$options$marginal) {
+            if (private$.option("marginal")) {
                 plot_call <- rlang::expr(
                     ggstatsplot::grouped_ggscatterstats(
                         data = plotData,
                         x = !!rlang::sym(self$options$dep),
                         y = !!rlang::sym(self$options$group),
                         grouping.var = !!rlang::sym(self$options$grvar),
-                        type = !!self$options$typestatistics,
+                        type = !!private$.option("typestatistics"),
                         title.prefix = !!title,
                         xlab = !!xtitle,
                         ylab = !!ytitle,
-                        results.subtitle = !!self$options$resultssubtitle,
+                        results.subtitle = !!private$.option("resultssubtitle"),
                         conf.level = !!self$options$conflevel,
                         bf.message = !!self$options$bfmessage,
                         k = !!self$options$k,
-                        marginal = !!self$options$marginal,
+                        marginal = !!private$.option("marginal"),
                         marginal.type = !!self$options$marginalType, # Correctly use option
                         xfill = !!self$options$xsidefill,
                         yfill = !!self$options$ysidefill,
@@ -353,7 +359,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 plot <- plot + ggplot2::geom_rug(alpha = 0.5)
             }
 
-            if (!self$options$originaltheme) {
+            if (!private$.option("originaltheme")) {
                 plot <- plot + ggplot2::theme_bw()
             } else {
                 plot <- plot + ggstatsplot::theme_ggstatsplot()
@@ -480,7 +486,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX: Add correlation annotation with proper method handling
             tryCatch({
-                test_type <- self$options$typestatistics
+                test_type <- private$.option("typestatistics")
                 cor_method <- "pearson"  # Default
                 method_label <- "Pearson"
                 warning_msg <- NULL
@@ -575,7 +581,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Apply theme
-            if (!self$options$originaltheme) {
+            if (!private$.option("originaltheme")) {
                 p <- p + ggplot2::theme_bw()
             } else {
                 p <- p + ggstatsplot::theme_ggstatsplot()
@@ -603,7 +609,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             # Skip if ggpubr plot not requested
-            if (!self$options$addGGPubrPlot)
+            if (!private$.option("addGGPubrPlot"))
                 return()
 
             # Prepare data
@@ -616,7 +622,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data = mydata,
                 x = dep,
                 y = group,
-                palette = self$options$ggpubrPalette
+                palette = private$.option("ggpubrPalette")
             )
 
             # CRITICAL FIX: Implement ggpubrAddSmooth option
@@ -663,7 +669,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             # Skip if ggpubr plot not requested
-            if (!self$options$addGGPubrPlot)
+            if (!private$.option("addGGPubrPlot"))
                 return()
 
             # Prepare data
@@ -677,7 +683,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 data = mydata,
                 x = dep,
                 y = group,
-                palette = self$options$ggpubrPalette,
+                palette = private$.option("ggpubrPalette"),
                 facet.by = grvar
             )
 

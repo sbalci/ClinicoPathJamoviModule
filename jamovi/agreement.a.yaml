@@ -54,7 +54,7 @@ options:
             and other agreement statistics. Default is 0.95 (95 percent CI).
 
     - name: proportionalBias
-      title: 'Test for Proportional Bias'
+      title: "Test for proportional bias"
       type: Bool
       default: false
       description:
@@ -64,7 +64,7 @@ options:
             Uses linear regression of difference vs. mean.
 
     - name: showBlandAltmanGuide
-      title: "When to use Bland-Altman Analysis"
+      title: "When to use Bland-Altman analysis"
       type: Bool
       default: false
       description:
@@ -72,7 +72,7 @@ options:
             Show educational guide explaining Bland-Altman limits of agreement for method comparison studies.
 
     - name: blandAltmanPlot
-      title: 'Bland-Altman Plot'
+      title: "Bland-Altman plot"
       type: Bool
       default: false
       description:
@@ -82,7 +82,7 @@ options:
             Only applicable when raters provide continuous measurements (e.g., tumor size in mm).
 
     - name: agreementHeatmap
-      title: 'Agreement Heatmap (Confusion Matrix)'
+      title: "Agreement heatmap (confusion matrix)"
       type: Bool
       default: false
       description:
@@ -115,7 +115,7 @@ options:
             perceptually uniform and colorblind-safe. Grayscale for black-and-white printing.
 
     - name: heatmapShowPercentages
-      title: "Show Percentages in Cells"
+      title: "Percentages in cells"
       type: Bool
       default: true
       description:
@@ -125,7 +125,7 @@ options:
             when comparing heatmaps with different sample sizes.
 
     - name: heatmapShowCounts
-      title: "Show Counts in Cells"
+      title: "Counts in cells"
       type: Bool
       default: true
       description:
@@ -147,7 +147,7 @@ options:
             Larger for few categories, smaller for many categories.
 
     - name: showAgreementHeatmapGuide
-      title: "When to use Agreement Heatmap"
+      title: "When to use agreement heatmap"
       type: Bool
       default: false
       description:
@@ -157,7 +157,7 @@ options:
 
 
     - name: sft
-      title: Show Frequency Tables
+      title: Frequency tables
       type: Bool
       default: false
       description:
@@ -185,7 +185,7 @@ options:
             Use 'Unweighted' for nominal categories with no inherent order.
 
     - name: exct
-      title: Exact Kappa (3+ Raters)
+      title: Exact kappa (3+ raters)
       type: Bool
       default: false
       description:
@@ -195,7 +195,7 @@ options:
             Note: Not applicable for 2-rater analysis (use Cohen's kappa).
 
     - name: showLevelInfo
-      title: "Show Level Ordering Information"
+      title: "Level ordering information"
       type: Bool
       default: false
       description:
@@ -205,7 +205,7 @@ options:
             (e.g., G1 → G2 → G3 for tumor grades).
 
     - name: kripp
-      title: "Calculate Krippendorff's Alpha"
+      title: "Calculate krippendorff's alpha"
       type: Bool
       default: false
       description:
@@ -231,7 +231,7 @@ options:
             Specifies the measurement level for Krippendorff's alpha calculation.
 
     - name: bootstrap
-      title: "Bootstrap Confidence Intervals"
+      title: "Bootstrap confidence intervals"
       type: Bool
       default: false
       description:
@@ -239,7 +239,7 @@ options:
             Calculate bootstrap confidence intervals for Krippendorff's alpha.
 
     - name: showKrippGuide
-      title: "When to use Krippendorff's Alpha"
+      title: "When to use krippendorff's alpha"
       type: Bool
       default: false
       description:
@@ -247,7 +247,7 @@ options:
             Show educational guide explaining when to use Krippendorff's Alpha including handling missing data and data type selection.
 
     - name: gwet
-      title: "Calculate Gwet's AC1/AC2"
+      title: "Calculate gwet's AC1/AC2"
       type: Bool
       default: false
       description:
@@ -272,7 +272,7 @@ options:
             Unweighted (AC1) for nominal categories. Linear or Quadratic weights (AC2) for ordinal data.
 
     - name: showGwetGuide
-      title: "When to use Gwet's AC"
+      title: "When to use gwet's AC"
       type: Bool
       default: false
       description:
@@ -280,7 +280,7 @@ options:
             Show educational guide explaining when Gwet's AC is preferred over Cohen's kappa, especially for high agreement rates.
 
     - name: pabak
-      title: "Calculate PABAK & Prevalence/Bias Indices"
+      title: "Calculate PABAK & prevalence/Bias indices"
       type: Bool
       default: false
       description:
@@ -299,7 +299,7 @@ options:
             Show educational guide explaining PABAK, the kappa paradox, and when prevalence/bias adjustment is needed.
 
     - name: icc
-      title: "Calculate ICC (Continuous Data)"
+      title: "Calculate ICC (continuous data)"
       type: Bool
       default: false
       description:
@@ -341,7 +341,7 @@ options:
             Mixed: raters are fixed. Single: reliability of individual rater. Average (k): reliability of mean rating.
 
     - name: meanPearson
-      title: "Calculate Mean Pearson Correlation (Linear Association)"
+      title: "Calculate mean Pearson correlation (linear association)"
       type: Bool
       default: false
       description:
@@ -356,7 +356,7 @@ options:
             for assessing whether raters rank and scale measurements similarly.
 
     - name: showMeanPearsonGuide
-      title: "When to use Mean Pearson Correlation"
+      title: "When to use mean Pearson correlation"
       type: Bool
       default: false
       description:
@@ -364,7 +364,7 @@ options:
             Show educational guide and clinical use cases for Mean Pearson Correlation before running analysis.
 
     - name: linCCC
-      title: "Lin's Concordance Correlation Coefficient (CCC)"
+      title: "Lin's concordance correlation coefficient (CCC)"
       type: Bool
       default: false
       description:
@@ -378,7 +378,7 @@ options:
             for 3+ raters.
 
     - name: showLinCCCGuide
-      title: "When to use Lin's CCC"
+      title: "When to use lin's CCC"
       type: Bool
       default: false
       description:
@@ -386,7 +386,7 @@ options:
             Show educational guide and clinical use cases for Lin's Concordance Correlation Coefficient before running analysis.
 
     - name: tdi
-      title: "Total Deviation Index (TDI)"
+      title: "Total deviation index (TDI)"
       type: Bool
       default: false
       description:
@@ -433,7 +433,7 @@ options:
             Show educational guide and clinical use cases for Total Deviation Index before running analysis.
 
     - name: iota
-      title: "Calculate Iota Coefficient (Multivariate Agreement)"
+      title: "Calculate iota coefficient (multivariate agreement)"
       type: Bool
       default: false
       description:
@@ -445,7 +445,7 @@ options:
             to Fleiss' kappa for single categorical variable.
 
     - name: iotaStandardize
-      title: "Standardize Variables (Iota)"
+      title: "Standardize variables (iota)"
       type: Bool
       default: true
       description:
@@ -455,7 +455,7 @@ options:
             equally to the overall agreement measure.
 
     - name: showIotaGuide
-      title: "When to use Iota Coefficient"
+      title: "When to use iota coefficient"
       type: Bool
       default: false
       description:
@@ -463,7 +463,7 @@ options:
             Show educational guide explaining the Iota coefficient for multivariate agreement assessment.
 
     - name: finn
-      title: "Calculate Finn Coefficient (Variance-Based Agreement)"
+      title: "Calculate finn coefficient (variance-based agreement)"
       type: Bool
       default: false
       description:
@@ -499,7 +499,7 @@ options:
             randomly chosen from larger populations).
 
     - name: showFinnGuide
-      title: "When to use Finn Coefficient"
+      title: "When to use finn coefficient"
       type: Bool
       default: false
       description:
@@ -507,7 +507,7 @@ options:
             Show educational guide explaining the Finn coefficient and variance-based agreement measurement.
 
     - name: lightKappa
-      title: "Calculate Light's Kappa (3+ Raters)"
+      title: "Calculate light's kappa (3+ raters)"
       type: Bool
       default: false
       description:
@@ -517,7 +517,7 @@ options:
             distributions or when assumptions of Fleiss' kappa are questionable.
 
     - name: showLightKappaGuide
-      title: "When to use Light's Kappa"
+      title: "When to use light's kappa"
       type: Bool
       default: false
       description:
@@ -525,7 +525,7 @@ options:
             Show educational guide explaining when Light's Kappa is preferred for 3+ rater studies.
 
     - name: kendallW
-      title: "Calculate Kendall's W (Concordance for Rankings)"
+      title: "Calculate kendall's W (concordance for rankings)"
       type: Bool
       default: false
       description:
@@ -536,7 +536,7 @@ options:
             if raters rank cases in similar order.
 
     - name: showKendallWGuide
-      title: "When to use Kendall's W"
+      title: "When to use kendall's W"
       type: Bool
       default: false
       description:
@@ -544,7 +544,7 @@ options:
             Show educational guide explaining Kendall's W for ordinal concordance and ranking agreement.
 
     - name: robinsonA
-      title: "Calculate Robinson's A (Ordinal Agreement Index)"
+      title: "Calculate robinson's A (ordinal agreement index)"
       type: Bool
       default: false
       description:
@@ -557,7 +557,7 @@ options:
             grades). Less affected by marginal distribution imbalances than kappa-based measures.
 
     - name: showRobinsonAGuide
-      title: "When to use Robinson's A"
+      title: "When to use robinson's A"
       type: Bool
       default: false
       description:
@@ -565,7 +565,7 @@ options:
             Show educational guide and clinical use cases for Robinson's A before running analysis.
 
     - name: meanSpearman
-      title: "Calculate Mean Spearman Rho (Average Rank Correlation)"
+      title: "Calculate mean Spearman rho (average rank correlation)"
       type: Bool
       default: false
       description:
@@ -580,7 +580,7 @@ options:
             focusing on rank-order correlation rather than exact concordance.
 
     - name: showMeanSpearmanGuide
-      title: "When to use Mean Spearman Rho"
+      title: "When to use mean Spearman rho"
       type: Bool
       default: false
       description:
@@ -588,7 +588,7 @@ options:
             Show educational guide and clinical use cases for Mean Spearman Rho before running analysis.
 
     - name: raterBias
-      title: "Test for Rater Bias (Systematic Differences)"
+      title: "Test for rater bias (systematic differences)"
       type: Bool
       default: false
       description:
@@ -599,7 +599,7 @@ options:
             over-diagnose or under-diagnose compared to their peers.
 
     - name: showRaterBiasGuide
-      title: "When to use Rater Bias Test"
+      title: "When to use rater bias test"
       type: Bool
       default: false
       description:
@@ -607,7 +607,7 @@ options:
             Show educational guide for detecting systematic rater bias in quality control.
 
     - name: bhapkar
-      title: "Bhapkar Test (Marginal Homogeneity for 2 Raters)"
+      title: "Bhapkar test (marginal homogeneity for 2 raters)"
       type: Bool
       default: false
       description:
@@ -618,7 +618,7 @@ options:
             novice vs. expert, pathologist vs. AI algorithm) to detect systematic differences in category usage.
 
     - name: showBhapkarGuide
-      title: "When to use Bhapkar Test"
+      title: "When to use bhapkar test"
       type: Bool
       default: false
       description:
@@ -626,7 +626,7 @@ options:
             Show educational guide for the Bhapkar test of marginal homogeneity.
 
     - name: stuartMaxwell
-      title: "Stuart-Maxwell Test (Marginal Homogeneity for 2 Raters)"
+      title: "Stuart-Maxwell test (marginal homogeneity for 2 raters)"
       type: Bool
       default: false
       description:
@@ -637,7 +637,7 @@ options:
             is the traditional choice. Use for paired/matched comparisons to detect systematic category usage differences.
 
     - name: showStuartMaxwellGuide
-      title: "When to use Stuart-Maxwell Test"
+      title: "When to use Stuart-Maxwell test"
       type: Bool
       default: false
       description:
@@ -645,7 +645,7 @@ options:
             Show educational guide for the Stuart-Maxwell test of marginal homogeneity.
 
     - name: maxwellRE
-      title: "Maxwell's RE (Random Error Index)"
+      title: "Maxwell's RE (random error index)"
       type: Bool
       default: false
       description:
@@ -659,7 +659,7 @@ options:
             2+ raters/methods.
 
     - name: showMaxwellREGuide
-      title: "When to use Maxwell's RE"
+      title: "When to use maxwell's RE"
       type: Bool
       default: false
       description:
@@ -667,7 +667,7 @@ options:
             Show educational guide and clinical use cases for Maxwell's RE before running analysis.
 
     - name: interIntraRater
-      title: "Inter/Intra-Rater Reliability (Test-Retest)"
+      title: "Inter/Intra-rater reliability (test-retest)"
       type: Bool
       default: false
       description:
@@ -690,7 +690,7 @@ options:
             as the same rater at two time points. Common patterns: underscore (_), dot (.), dash (-).
 
     - name: showInterIntraRaterGuide
-      title: "When to use Inter/Intra-Rater Reliability"
+      title: "When to use inter/Intra-rater reliability"
       type: Bool
       default: false
       description:
@@ -698,7 +698,7 @@ options:
             Show educational guide and clinical use cases for Inter/Intra-Rater Reliability before running analysis.
 
     - name: pairwiseKappa
-      title: "Calculate Pairwise Kappa (vs Reference)"
+      title: "Calculate pairwise kappa (vs reference)"
       type: Bool
       default: false
       description:
@@ -720,7 +720,7 @@ options:
             this reference using Cohen's kappa.
 
     - name: rankRaters
-      title: "Rank Raters by Performance"
+      title: "Rank raters by performance"
       type: Bool
       default: false
       description:
@@ -730,7 +730,7 @@ options:
             who need additional training or those ready for certification.
 
     - name: showPairwiseKappaGuide
-      title: "When to use Pairwise Kappa"
+      title: "When to use pairwise kappa"
       type: Bool
       default: false
       description:
@@ -742,7 +742,7 @@ options:
     # ============================================================
 
     - name: allPairsKappa
-      title: "All-Pairs Cohen's Kappa (Every Rater Pair)"
+      title: "All-pairs cohen's kappa (every rater pair)"
       type: Bool
       default: false
       description:
@@ -754,7 +754,7 @@ options:
             (weights) and 'multipleTestCorrection' options.
 
     - name: allPairsCI
-      title: "Include 95% CI for Each Pair"
+      title: "Include 95% CI for each pair"
       type: Bool
       default: true
       description:
@@ -763,7 +763,7 @@ options:
             analytical standard error returned by irr::kappa2.
 
     - name: showAllPairsKappaGuide
-      title: "When to use All-Pairs Kappa"
+      title: "When to use all-pairs kappa"
       type: Bool
       default: false
       description:
@@ -776,7 +776,7 @@ options:
     # ============================================================
 
     - name: itemModalCategoryAgreement
-      title: "Per-Category Item-Modal Agreement"
+      title: "Per-category item-modal agreement"
       type: Bool
       default: false
       description:
@@ -788,7 +788,7 @@ options:
             Cases with no unique mode (ties) are excluded.
 
     - name: showItemModalGuide
-      title: "When to use Per-Category Item-Modal Agreement"
+      title: "When to use per-category item-modal agreement"
       type: Bool
       default: false
       description:
@@ -797,7 +797,7 @@ options:
 
     # Hierarchical/Multilevel Agreement Analysis
     - name: hierarchicalKappa
-      title: "Hierarchical/Multilevel Kappa"
+      title: "Hierarchical/Multilevel kappa"
       type: Bool
       default: false
       description:
@@ -819,7 +819,7 @@ options:
             institution name, or scanner ID. Raters are nested within these clusters.
 
     - name: iccHierarchical
-      title: "Hierarchical ICC Decomposition"
+      title: "Hierarchical ICC decomposition"
       type: Bool
       default: false
       description:
@@ -830,7 +830,7 @@ options:
             and rater-level components.
 
     - name: clusterSpecificKappa
-      title: "Cluster-Specific Kappa Estimates"
+      title: "Cluster-specific kappa estimates"
       type: Bool
       default: true
       description:
@@ -839,7 +839,7 @@ options:
             sites with poor agreement. Useful for quality control in multi-center studies.
 
     - name: varianceDecomposition
-      title: "Variance Component Decomposition"
+      title: "Variance component decomposition"
       type: Bool
       default: true
       description:
@@ -849,7 +849,7 @@ options:
             Comparison informs whether issues are local or systematic.
 
     - name: shrinkageEstimates
-      title: "Shrinkage (Empirical Bayes) Estimates"
+      title: "Shrinkage (empirical bayes) estimates"
       type: Bool
       default: false
       description:
@@ -859,7 +859,7 @@ options:
             Recommended when cluster sizes vary substantially.
 
     - name: testClusterHomogeneity
-      title: "Test Cluster Homogeneity"
+      title: "Test cluster homogeneity"
       type: Bool
       default: true
       description:
@@ -869,7 +869,7 @@ options:
             requiring investigation.
 
     - name: clusterRankings
-      title: "Cluster Performance Rankings"
+      title: "Cluster performance rankings"
       type: Bool
       default: false
       description:
@@ -879,7 +879,7 @@ options:
             unfair comparisons when cluster sizes differ substantially.
 
     - name: showHierarchicalGuide
-      title: "When to use Hierarchical Kappa"
+      title: "When to use hierarchical kappa"
       type: Bool
       default: false
       description:
@@ -901,7 +901,7 @@ options:
             per condition level.
 
     - name: mixedEffectsComparison
-      title: "Mixed-Effects Condition Comparison"
+      title: "Mixed-effects condition comparison"
       type: Bool
       default: false
       description:
@@ -933,7 +933,7 @@ options:
             comparisons when multiple conditions are present.
 
     - name: showMixedEffectsGuide
-      title: "When to use Mixed-Effects Comparison"
+      title: "When to use mixed-effects comparison"
       type: Bool
       default: false
       description:
@@ -942,7 +942,7 @@ options:
 
     # Multi-Class Confusion Matrix
     - name: confusionMatrix
-      title: "Confusion Matrix Table"
+      title: "Confusion matrix table"
       type: Bool
       default: false
       description:
@@ -972,7 +972,7 @@ options:
             precision/PPV per class).
 
     - name: showConfusionMatrixGuide
-      title: "When to use Confusion Matrix"
+      title: "When to use confusion matrix"
       type: Bool
       default: false
       description:
@@ -981,7 +981,7 @@ options:
 
     # Bootstrap Confidence Intervals
     - name: bootstrapCI
-      title: "Bootstrap Confidence Intervals"
+      title: "Bootstrap confidence intervals"
       type: Bool
       default: false
       description:
@@ -1005,7 +1005,7 @@ options:
             99 percent CIs or when metrics are near boundary values (0 or 1).
 
     - name: showBootstrapCIGuide
-      title: "When to use Bootstrap CIs"
+      title: "When to use bootstrap CIs"
       type: Bool
       default: false
       description:
@@ -1014,7 +1014,7 @@ options:
 
     # Multi-Annotator Concordance F1
     - name: multiAnnotatorConcordance
-      title: "Multi-Annotator Concordance"
+      title: "Multi-annotator concordance"
       type: Bool
       default: false
       description:
@@ -1040,7 +1040,7 @@ options:
             predictions.
 
     - name: showConcordanceF1Guide
-      title: "When to use Multi-Annotator Concordance"
+      title: "When to use multi-annotator concordance"
       type: Bool
       default: false
       description:
@@ -1048,7 +1048,7 @@ options:
             Show educational guide for concordance metrics in AI validation with multiple reference annotators.
 
     - name: specificAgreement
-      title: "Specific Agreement Indices (Category-Focused)"
+      title: "Specific agreement indices (category-focused)"
       type: Bool
       default: false
       description:
@@ -1073,7 +1073,7 @@ options:
             Example: If categories are "Benign" and "Malignant", enter "Malignant".
 
     - name: specificAllCategories
-      title: "Calculate for All Categories"
+      title: "Calculate for all categories"
       type: Bool
       default: true
       description:
@@ -1084,7 +1084,7 @@ options:
             and which may need improved training or criteria clarification.
 
     - name: specificConfidenceIntervals
-      title: "Include Confidence Intervals"
+      title: "Include confidence intervals"
       type: Bool
       default: true
       description:
@@ -1095,7 +1095,7 @@ options:
             agreement from random variation.
 
     - name: showSpecificAgreementGuide
-      title: "When to use Specific Agreement Indices"
+      title: "When to use specific agreement indices"
       type: Bool
       default: false
       description:
@@ -1103,7 +1103,7 @@ options:
             Show educational guide and clinical use cases for Specific Agreement Indices before running analysis.
 
     - name: showSummary
-      title: "Show Plain-Language Summary"
+      title: "Plain-language summary"
       type: Bool
       default: false
       description:
@@ -1112,7 +1112,7 @@ options:
             and clinical guidance. Recommended for reports and presentations.
 
     - name: showAbout
-      title: "Show About This Analysis"
+      title: "About this analysis"
       type: Bool
       default: false
       description:
@@ -1177,7 +1177,7 @@ options:
 
     # Case Agreement Categorization (Consolidated Feature)
     - name: loaVariable
-      title: "Create Case Agreement Categorization"
+      title: "Create case agreement categorization"
       type: Bool
       default: false
       description:
@@ -1262,7 +1262,7 @@ options:
             Default: 'agreement_level'. Will contain categories like 'Absolute', 'High', 'Moderate', 'Low', 'Poor'.
 
     - name: showLoaTable
-      title: "Show LoA Distribution Table"
+      title: "LoA distribution table"
       type: Bool
       default: true
       description:
@@ -1273,7 +1273,7 @@ options:
     # ---- Rater Profile Plots ----
 
     - name: raterProfiles
-      title: "Rater Profile Plots (Distribution Comparison)"
+      title: "Rater profile plots (distribution comparison)"
       type: Bool
       default: false
       description:
@@ -1305,7 +1305,7 @@ options:
             For categorical data: Automatically uses bar plots showing category frequencies.
 
     - name: raterProfileShowPoints
-      title: "Show Individual Data Points"
+      title: "Individual data points"
       type: Bool
       default: false
       description:
@@ -1315,14 +1315,14 @@ options:
             Not recommended for large datasets due to overplotting.
 
     - name: showRaterProfileGuide
-      title: "When to use Rater Profile Plots"
+      title: "When to use rater profile plots"
       type: Bool
       default: false
 
     # ---- Agreement by Subgroup ----
 
     - name: agreementBySubgroup
-      title: "Agreement by Subgroup (Stratified Analysis)"
+      title: "Agreement by subgroup (stratified analysis)"
       type: Bool
       default: false
       description:
@@ -1352,7 +1352,7 @@ options:
             Agreement will be calculated separately for each level of this variable.
 
     - name: subgroupForestPlot
-      title: "Generate Forest Plot"
+      title: "Forest plot"
       type: Bool
       default: true
       description:
@@ -1373,14 +1373,14 @@ options:
             Default: 10 cases (reasonable for kappa estimation).
 
     - name: showSubgroupGuide
-      title: "When to use Agreement by Subgroup"
+      title: "When to use agreement by subgroup"
       type: Bool
       default: false
 
     # ---- Rater Clustering ----
 
     - name: raterClustering
-      title: "Rater Clustering (Identify Rating Pattern Groups)"
+      title: "Rater clustering (identify rating pattern groups)"
       type: Bool
       default: false
       description:
@@ -1468,7 +1468,7 @@ options:
             For hierarchical clustering, this is ignored but dendrogram can be cut at any height.
 
     - name: showDendrogram
-      title: "Show Dendrogram"
+      title: "Dendrogram"
       type: Bool
       default: true
       description:
@@ -1478,7 +1478,7 @@ options:
             Useful for identifying natural number of clusters and understanding rater relationships.
 
     - name: showClusterHeatmap
-      title: "Show Cluster Heatmap"
+      title: "Cluster heatmap"
       type: Bool
       default: true
       description:
@@ -1488,14 +1488,14 @@ options:
             For continuous data: correlation matrix. For categorical data: agreement matrix.
 
     - name: showRaterClusterGuide
-      title: "When to use Rater Clustering"
+      title: "When to use rater clustering"
       type: Bool
       default: false
 
     # ---- Case Clustering ----
 
     - name: caseClustering
-      title: "Case Clustering (Identify Rating Pattern Groups)"
+      title: "Case clustering (identify rating pattern groups)"
       type: Bool
       default: false
       description:
@@ -1567,21 +1567,21 @@ options:
           R: Number of clusters to create for k-means clustering.
 
     - name: showCaseDendrogram
-      title: "Show Dendrogram"
+      title: "Dendrogram"
       type: Bool
       default: true
       description:
           R: Display hierarchical clustering dendrogram for cases.
 
     - name: showCaseClusterHeatmap
-      title: "Show Cluster Heatmap"
+      title: "Cluster heatmap"
       type: Bool
       default: true
       description:
           R: Display similarity matrix heatmap with cluster boundaries.
 
     - name: showCaseClusterGuide
-      title: "When to use Case Clustering"
+      title: "When to use case clustering"
       type: Bool
       default: false
       description:
@@ -1592,7 +1592,7 @@ options:
     # ============================================================
 
     - name: pairedAgreementTest
-      title: Compare Agreement Between Two Conditions
+      title: Compare agreement between two conditions
       type: Bool
       default: false
       description:
@@ -1625,7 +1625,7 @@ options:
           R: Number of bootstrap replications for paired comparison test.
 
     - name: showPairedAgreementGuide
-      title: "When to use Paired Agreement Comparison"
+      title: "When to use paired agreement comparison"
       type: Bool
       default: false
       description:
@@ -1637,7 +1637,7 @@ options:
     # ============================================================
 
     - name: agreementSampleSize
-      title: Calculate Sample Size for Agreement Study
+      title: Calculate sample size for agreement study
       type: Bool
       default: false
       description:
@@ -1718,7 +1718,7 @@ options:
           R: Target power (1 - Type II error rate).
 
     - name: showSampleSizeGuide
-      title: "When to use Sample Size Calculator"
+      title: "When to use sample size calculator"
       type: Bool
       default: false
       description:

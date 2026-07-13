@@ -72,7 +72,7 @@ children:
                 format: number
           - type: CheckBox
             name: show_labels
-            label: Show group labels inside hulls
+            label: Group labels inside hulls
 
   - type: CollapseBox
     label: Points & Color Scheme
@@ -145,10 +145,10 @@ children:
         children:
           - type: CheckBox
             name: confidence_ellipses
-            label: Show 95% confidence ellipses around groups
+            label: 95% confidence ellipses around groups
           - type: CheckBox
             name: show_statistics
-            label: Generate group statistics table (means, sample sizes)
+            label: Group statistics table (means, sample sizes)
           - type: CheckBox
             name: outlier_detection
             label: Detect outliers within groups (IQR method)
@@ -157,4 +157,4 @@ children:
             label: Natural language summary (copy-ready text)
           - type: CheckBox
             name: show_assumptions
-            label: Show data requirements and assumptions
+            label: Data requirements and assumptions

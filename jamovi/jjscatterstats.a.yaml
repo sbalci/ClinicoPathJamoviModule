@@ -148,7 +148,7 @@ options:
             Optional variable to label points. Uses ggrepel to avoid overlapping labels.
 
     - name: showRugPlot
-      title: 'Show Rug Plot'
+      title: "Rug plot"
       type: Bool
       default: false
       description:
@@ -226,12 +226,12 @@ options:
 
 
     - name: originaltheme
-      title: Add GGStatsPlot Layer
+      title: Add GGStatsPlot layer
       type: Bool
       default: false
 
     - name: resultssubtitle
-      title: Statistical Results
+      title: Statistical results
       type: Bool
       default: false
 
@@ -246,7 +246,7 @@ options:
             Confidence level for confidence intervals (between 0 and 1).
 
     - name: bfmessage
-      title: Bayes Factor Message
+      title: Bayes factor message
       type: Bool
       default: false
       description:
@@ -264,7 +264,7 @@ options:
             Number of decimal places for displaying statistics in the subtitle.
 
     - name: marginal
-      title: Show Marginal Histograms
+      title: Marginal histograms
       type: Bool
       default: false
       description:
@@ -346,7 +346,7 @@ options:
             Height of the plot in pixels. Default is 450.
 
     - name: addGGPubrPlot
-      title: Add ggpubr Scatter Plot
+      title: Add ggpubr scatter plot
       type: Bool
       default: false
       description:
@@ -375,7 +375,7 @@ options:
             Color palette for ggpubr scatter plot.
 
     - name: ggpubrAddCorr
-      title: Add Correlation (ggpubr)
+      title: Add correlation (ggpubr)
       type: Bool
       default: false
       description:
@@ -396,7 +396,7 @@ options:
             Method for correlation in ggpubr plot.
 
     - name: ggpubrAddSmooth
-      title: Add Smooth Line (ggpubr)
+      title: Add smooth line (ggpubr)
       type: Bool
       default: false
       description:
@@ -404,7 +404,7 @@ options:
             Add smoothed trend line to ggpubr scatter plot.
 
     - name: showExplanations
-      title: Show Explanations
+      title: Explanations
       type: Bool
       default: false
       description:

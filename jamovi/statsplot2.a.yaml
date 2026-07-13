@@ -123,7 +123,7 @@ options:
 
 
     - name: excl
-      title: Exclude Missing Values
+      title: Exclude missing values
       type: Bool
       default: false
       description:
@@ -132,7 +132,7 @@ options:
             If TRUE, excludes rows with missing values before analysis.
 
     - name: sampleLarge
-      title: Sample Large Datasets
+      title: Sample large datasets
       type: Bool
       default: false
       description:

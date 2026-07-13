@@ -56,7 +56,7 @@ children:
                 name: partial
               - type: ComboBox
                 name: naHandling
-                label: Missing Data Handling
+                label: Missing data handling
   - type: CollapseBox
     label: Matrix Display
     collapsed: true

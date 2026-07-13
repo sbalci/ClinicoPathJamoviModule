@@ -40,7 +40,7 @@ children:
     children:
       - type: CheckBox
         name: showNomogram
-        label: Show diagnostic nomogram
+        label: Diagnostic nomogram
       - type: VariableSupplier
         name: diagnosticPredictorSupplier
         persistentItems: true

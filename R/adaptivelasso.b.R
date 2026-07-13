@@ -1059,7 +1059,9 @@ adaptivelassoClass <- R6::R6Class(
             }
 
             # --- Notices (HTML-based to avoid protobuf serialization errors) ---
-            private$.noticeList <- list()
+            # NOTE: .noticeList is reset once at the top of .run(); do NOT reset it
+            # here or notices added during .prepareData() (e.g. the row-exclusion
+            # INFO notice) would be discarded before .renderNotices() is called.
 
             # No variables selected
             if (adaptive_results$diagnostics$n_selected == 0) {

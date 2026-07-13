@@ -26,7 +26,7 @@ children:
             fitToGrid: true
           - type: CheckBox
             name: useHighlight
-            label: Use Highlighting
+            label: Use highlighting
           - type: LevelSelector
             name: highlight
             enable: (group && useHighlight)
@@ -40,22 +40,22 @@ children:
         children:
           - type: ComboBox
             name: aggregation
-            label: Data Aggregation
+            label: Data aggregation
           - type: ComboBox
             name: sortBy
-            label: Sort Order
+            label: Sort order
           - type: ComboBox
             name: orientation
-            label: Chart Orientation
+            label: Chart orientation
       - type: LayoutBox
         margin: large
         children:
           - type: CheckBox
             name: showValues
-            label: Show Value Labels on Points
+            label: Value labels on points
           - type: CheckBox
             name: showMean
-            label: Show Mean Reference Line
+            label: Mean reference line
   - type: CollapseBox
     label: Visual Appearance
     collapsed: true
@@ -65,10 +65,10 @@ children:
         children:
           - type: ComboBox
             name: colorScheme
-            label: Color Scheme
+            label: Color scheme
           - type: ComboBox
             name: theme
-            label: Plot Theme
+            label: Plot theme
       - type: LayoutBox
         margin: large
         children:
@@ -85,7 +85,7 @@ children:
         children:
           - type: ComboBox
             name: lineType
-            label: Line Type
+            label: Line type
           - type: TextBox
             name: baseline
             format: number
@@ -99,7 +99,7 @@ children:
         children:
           - type: CheckBox
             name: conditionalColor
-            label: Use Conditional Coloring
+            label: Use conditional coloring
           - type: TextBox
             name: colorThreshold
             format: number

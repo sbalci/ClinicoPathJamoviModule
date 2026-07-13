@@ -82,7 +82,7 @@ options:
             False Negative count: cases with disease that tested negative.
 
     - name: pp
-      title: Use Known Population Prevalence
+      title: Use known population prevalence
       type: Bool
       default: false
       description:
@@ -111,7 +111,7 @@ options:
 
 
     - name: fnote
-      title: Show Explanatory Footnotes
+      title: Explanatory footnotes
       type: Bool
       default: false
       description:
@@ -122,7 +122,7 @@ options:
             Boolean selection whether to show detailed explanatory footnotes.
 
     - name: ci
-      title: '95 percent Confidence Intervals'
+      title: "95 percent confidence intervals"
       type: Bool
       default: false
       description:
@@ -134,7 +134,7 @@ options:
 
 
     - name: fagan
-      title: 'Fagan Nomogram Plot'
+      title: "Fagan nomogram plot"
       type: Bool
       default: false
       description:
@@ -145,7 +145,7 @@ options:
             Boolean selection whether to generate a Fagan nomogram plot.
 
     - name: showWelcome
-      title: Show Welcome Message
+      title: Welcome message
       type: Bool
       default: true
       description:
@@ -156,7 +156,7 @@ options:
             Boolean selection whether to show welcome message.
 
     - name: showSummary
-      title: Show Plain-Language Summary
+      title: Plain-language summary
       type: Bool
       default: false
       description:
@@ -167,7 +167,7 @@ options:
             Boolean selection whether to show plain-language summary of results.
 
     - name: showAbout
-      title: Show About This Analysis
+      title: About this analysis
       type: Bool
       default: false
       description:
@@ -178,7 +178,7 @@ options:
             Boolean selection whether to show about and assumptions panels.
 
     - name: showGlossary
-      title: Show Clinical Terms Glossary
+      title: Clinical terms glossary
       type: Bool
       default: false
       description:
@@ -190,7 +190,7 @@ options:
 
     # Multiple cut-off evaluation (DiagROC inspired)
     - name: multiplecuts
-      title: 'Multiple Cut-off Evaluation'
+      title: "Multiple cut-off evaluation"
       type: Bool
       default: false
       description:

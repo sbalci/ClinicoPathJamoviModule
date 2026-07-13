@@ -636,7 +636,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$overrides[[name]] <- value
                         attr(private$overrides[[name]], "label") <- if (!is.null(label)) label else paste0(name, " set to ", value)
                     }
-                    opt$value <- value
+                    # NOTE: do NOT write `opt$value <- value` here. jamovi option objects are
+                    # read-only at runtime; the override is already recorded in private$overrides
+                    # and read back via private$.option(name), so the mutation is both redundant
+                    # and a crash risk on strict jamovi builds.
                 }
             }
 

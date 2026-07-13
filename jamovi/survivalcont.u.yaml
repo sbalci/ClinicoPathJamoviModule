@@ -46,7 +46,7 @@ children:
               - type: CheckBox
                 name: findcut
                 enable: (contexpl && !multiple_cutoffs)
-                label: Find Optimal Cut-off
+                label: Find optimal cut-off
               - type: Output
                 name: calculatedcutoff
                 enable: (findcut)
@@ -62,11 +62,11 @@ children:
               - type: ComboBox
                 name: num_cutoffs
                 enable: (multiple_cutoffs)
-                label: Number of Cut-offs
+                label: Number of cut-offs
               - type: ComboBox
                 name: cutoff_method
                 enable: (multiple_cutoffs)
-                label: Multiple Cut-off Method
+                label: Multiple cut-off method
               - type: TextBox
                 name: min_group_size
                 format: number
@@ -119,10 +119,10 @@ children:
                     children:
                       - type: ComboBox
                         name: timetypedata
-                        label: Input Time Type
+                        label: Input time type
                       - type: ComboBox
                         name: timetypeoutput
-                        label: Output Time Type
+                        label: Output time type
               - type: Output
                 name: calculatedtime
                 enable: (tint)
@@ -135,7 +135,7 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
-                label: Use Landmark Time
+                label: Use landmark time
                 children:
                   - type: TextBox
                     name: landmark
@@ -155,7 +155,7 @@ children:
               - type: CheckBox
                 name: multievent
                 enable: (outcome)
-                label: Enable Multiple Event Analysis
+                label: Multiple event analysis
               - type: Label
                 label: Event Level Assignment
                 enable: (outcome && multievent)
@@ -178,7 +178,7 @@ children:
               - type: ComboBox
                 name: analysistype
                 enable: (outcome && multievent)
-                label: Analysis Type
+                label: Analysis type
               - type: Output
                 name: outcomeredefined
                 enable: (outcome && multievent)
@@ -196,23 +196,23 @@ children:
               - type: CheckBox
                 name: sc
                 enable: (findcut || multiple_cutoffs)
-                label: Survival Curves (Kaplan-Meier)
+                label: Survival curves (Kaplan-Meier)
               - type: CheckBox
                 name: kmunicate
                 enable: (findcut || multiple_cutoffs)
-                label: KMunicate-Style Plot (Publication Ready)
+                label: KMunicate-style plot (publication ready)
               - type: CheckBox
                 name: ce
                 enable: (findcut || multiple_cutoffs)
-                label: Cumulative Events Plot
+                label: Cumulative events plot
               - type: CheckBox
                 name: ch
                 enable: (findcut || multiple_cutoffs)
-                label: Cumulative Hazard Plot
+                label: Cumulative hazard plot
               - type: CheckBox
                 name: loglog
                 enable: (findcut || multiple_cutoffs)
-                label: Log-Log Plot (Proportional Hazards Check)
+                label: Log-log plot (proportional hazards check)
       - type: Label
         label: Plot Customization
         children:
@@ -242,19 +242,19 @@ children:
               - type: CheckBox
                 name: ci95
                 enable: (findcut || multiple_cutoffs)
-                label: 95% Confidence Intervals
+                label: 95% confidence intervals
               - type: CheckBox
                 name: risktable
                 enable: (findcut || multiple_cutoffs)
-                label: Number at Risk Table
+                label: Number at risk table
               - type: CheckBox
                 name: censored
                 enable: (findcut || multiple_cutoffs)
-                label: Show Censored Observations
+                label: Censored observations
               - type: ComboBox
                 name: medianline
                 enable: (findcut || multiple_cutoffs)
-                label: Median Survival Line
+                label: Median survival line
   - type: CollapseBox
     label: Survival Tables
     collapsed: true
@@ -283,10 +283,10 @@ children:
             children:
               - type: CheckBox
                 name: stratified_cox
-                label: Stratified Cox Model (Different Baseline Hazards)
+                label: Stratified Cox model (different baseline hazards)
               - type: CheckBox
                 name: residual_diagnostics
-                label: Model Residual Diagnostics (Outlier Detection)
+                label: Model residual diagnostics (outlier detection)
               - type: VariableSupplier
                 persistentItems: false
                 stretchFactor: 1
@@ -306,7 +306,7 @@ children:
             children:
               - type: CheckBox
                 name: rmst_analysis
-                label: RMST Analysis
+                label: RMST analysis
               - type: TextBox
                 name: rmst_tau
                 format: number
@@ -323,7 +323,7 @@ children:
             children:
               - type: CheckBox
                 name: person_time
-                label: Calculate Person-Time Rates (Events per Time Unit)
+                label: Calculate person-time rates (events per time unit)
               - type: TextBox
                 name: time_intervals
                 format: string
@@ -346,10 +346,10 @@ children:
             children:
               - type: CheckBox
                 name: showSummaries
-                label: Show Natural Language Summaries
+                label: Natural language summaries
               - type: CheckBox
                 name: showExplanations
-                label: Show Analysis Explanations
+                label: Analysis explanations
               - type: TextBox
                 name: seed
                 format: number

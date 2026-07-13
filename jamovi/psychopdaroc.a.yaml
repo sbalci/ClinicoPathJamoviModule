@@ -268,7 +268,7 @@ options:
     # ==========================================
     
     - name: allObserved
-      title: Show All Observed Cutpoints
+      title: All observed cutpoints
       type: Bool
       default: false
       description:
@@ -296,7 +296,7 @@ options:
             Random seed for reproducibility of bootstrap and permutation tests.
 
     - name: usePriorPrev
-      title: Use Prior Prevalence
+      title: Use prior prevalence
       type: Bool
       default: false
       description:
@@ -331,7 +331,7 @@ options:
     # ==========================================
     
     - name: sensSpecTable
-      title: Show Confusion Matrices
+      title: Confusion matrices
       type: Bool
       default: false
       description:
@@ -339,7 +339,7 @@ options:
             Display detailed confusion matrices at optimal cutpoints.
 
     - name: showThresholdTable
-      title: Show Threshold Table
+      title: Threshold table
       type: Bool
       default: false
       description:
@@ -357,7 +357,7 @@ options:
             Maximum number of threshold values to show in the threshold table.
 
     - name: delongTest
-      title: Compare Test Performance Statistically
+      title: Compare test performance statistically
       type: Bool
       default: false
       description:
@@ -371,7 +371,7 @@ options:
     # ==========================================
     
     - name: plotROC
-      title: Show ROC Curves
+      title: ROC curves
       type: Bool
       default: true
       description:
@@ -379,7 +379,7 @@ options:
             Display ROC curves for visual assessment of classifier performance.
 
     - name: combinePlots
-      title: Combine Multiple ROC Curves
+      title: Combine multiple ROC curves
       type: Bool
       default: true
       description:
@@ -387,7 +387,7 @@ options:
             When multiple test variables are selected, combine all ROC curves in a single plot.
 
     - name: cleanPlot
-      title: Publication-Ready Plot
+      title: Publication-ready plot
       type: Bool
       default: false
       description:
@@ -395,7 +395,7 @@ options:
             Create clean ROC curves without annotations, suitable for publications.
 
     - name: showOptimalPoint
-      title: Mark Optimal Cutpoint
+      title: Mark optimal cutpoint
       type: Bool
       default: true
       description:
@@ -403,7 +403,7 @@ options:
             Display the optimal cutpoint on the ROC curve.
 
     - name: displaySE
-      title: Show Standard Error Bands
+      title: Standard error bands
       type: Bool
       default: false
       description:
@@ -411,7 +411,7 @@ options:
             Display standard error bands on ROC curves (when LOESS smoothing is applied).
 
     - name: smoothing
-      title: Apply LOESS Smoothing
+      title: Apply LOESS smoothing
       type: Bool
       default: false
       description:
@@ -419,7 +419,7 @@ options:
             Apply LOESS smoothing to ROC curves for visualization.
 
     - name: showConfidenceBands
-      title: Show Confidence Bands
+      title: Confidence bands
       type: Bool
       default: false
       description:
@@ -446,7 +446,7 @@ options:
             Position of the legend in plots with multiple ROC curves.
 
     - name: directLabel
-      title: Direct Curve Labels
+      title: Direct curve labels
       type: Bool
       default: false
       description:
@@ -454,7 +454,7 @@ options:
             Label curves directly on the plot instead of using a legend.
 
     - name: interactiveROC
-      title: Create Interactive Plot
+      title: Create interactive plot
       type: Bool
       default: false
       description:
@@ -466,7 +466,7 @@ options:
     # ==========================================
     
     - name: showCriterionPlot
-      title: Sensitivity/Specificity vs Threshold
+      title: Sensitivity/Specificity vs threshold
       type: Bool
       default: false
       description:
@@ -474,7 +474,7 @@ options:
             Plot showing how sensitivity and specificity change across different thresholds.
 
     - name: showPrevalencePlot
-      title: Predictive Values vs Prevalence
+      title: Predictive values vs prevalence
       type: Bool
       default: false
       description:
@@ -482,7 +482,7 @@ options:
             Plot showing how PPV and NPV change with disease prevalence.
 
     - name: showDotPlot
-      title: Test Value Distribution
+      title: Test value distribution
       type: Bool
       default: false
       description:
@@ -490,7 +490,7 @@ options:
             Dot plot showing the distribution of test values by class.
 
     - name: precisionRecallCurve
-      title: Precision-Recall Curve
+      title: Precision-recall curve
       type: Bool
       default: false
       description:
@@ -502,7 +502,7 @@ options:
     # ==========================================
     
     - name: partialAUC
-      title: Calculate Partial AUC
+      title: Calculate partial AUC
       type: Bool
       default: false
       description:
@@ -547,7 +547,7 @@ options:
             Method for smoothing the ROC curve (requires pROC package).
 
     - name: bootstrapCI
-      title: Bootstrap Confidence Intervals
+      title: Bootstrap confidence intervals
       type: Bool
       default: false
       description:
@@ -565,7 +565,7 @@ options:
             Number of bootstrap replications for confidence interval calculation.
 
     - name: quantileCIs 
-      title: Show CIs at Quantiles
+      title: CIs at quantiles
       type: Bool
       default: false
       description:
@@ -585,7 +585,7 @@ options:
     # ==========================================
     
     - name: compareClassifiers
-      title: Compare Classifier Performance
+      title: Compare classifier performance
       type: Bool
       default: false
       description:
@@ -593,7 +593,7 @@ options:
             Perform comprehensive comparison of classifier performance metrics.
 
     - name: calculateIDI
-      title: Calculate Discrimination Improvement
+      title: Calculate discrimination improvement
       type: Bool
       default: false
       description:
@@ -602,7 +602,7 @@ options:
             IDI (Integrated Discrimination Improvement) measures the average improvement in predicted probabilities.
 
     - name: calculateNRI
-      title: Calculate Reclassification Improvement
+      title: Calculate reclassification improvement
       type: Bool
       default: false
       description:
@@ -644,7 +644,7 @@ options:
     # ==========================================
 
     - name: effectSizeAnalysis
-      title: Effect Size Analysis
+      title: Effect size analysis
       type: Bool
       default: false
       description:
@@ -653,7 +653,7 @@ options:
             and standardized mean differences between AUC values.
 
     - name: powerAnalysis
-      title: Statistical Power Analysis
+      title: Statistical power analysis
       type: Bool
       default: false
       description:
@@ -718,7 +718,7 @@ options:
             Use 0.5 for moderate correlation, 0.0 for independent samples.
 
     - name: bayesianAnalysis
-      title: Bootstrap ROC Analysis with Prior Weighting
+      title: Bootstrap ROC analysis with prior weighting
       type: Bool
       default: false
       description:
@@ -754,7 +754,7 @@ options:
     # ==========================================
 
     - name: clinicalUtilityAnalysis
-      title: Clinical Utility Analysis
+      title: Clinical utility analysis
       type: Bool
       default: false
       description:
@@ -783,7 +783,7 @@ options:
             Lower values favor more aggressive treatment policies.
 
     - name: interventionCost
-      title: Intervention Cost Analysis
+      title: Intervention cost analysis
       type: Bool
       default: false
       description:
@@ -795,7 +795,7 @@ options:
     # ==========================================
 
     - name: fixedSensSpecAnalysis
-      title: Fixed Sensitivity/Specificity Analysis
+      title: Fixed sensitivity/Specificity analysis
       type: Bool
       default: false
       description:
@@ -837,7 +837,7 @@ options:
             Target specificity value (0-1) for determining the corresponding cutoff and sensitivity.
 
     - name: showFixedROC
-      title: Show Fixed Point ROC Curve
+      title: Fixed point ROC curve
       type: Bool
       default: true
       description:
@@ -860,7 +860,7 @@ options:
             Method for interpolating between observed points to achieve target sensitivity/specificity.
 
     - name: showFixedExplanation
-      title: Show Analysis Guide
+      title: Analysis guide
       type: Bool
       default: true
       description:
@@ -873,7 +873,7 @@ options:
     # ==========================================
 
     - name: metaAnalysis
-      title: Meta-Analysis of ROC Curves
+      title: Meta-analysis of ROC curves
       type: Bool
       default: false
       description:
@@ -897,7 +897,7 @@ options:
             Statistical method for combining AUC estimates across studies/variables.
 
     - name: heterogeneityTest
-      title: Test for Heterogeneity
+      title: Test for heterogeneity
       type: Bool
       default: true
       description:
@@ -906,7 +906,7 @@ options:
             heterogeneity between AUC estimates.
 
     - name: forestPlot
-      title: Forest Plot
+      title: Forest plot
       type: Bool
       default: false
       description:
@@ -915,7 +915,7 @@ options:
             with confidence intervals.
 
     - name: overrideMetaAnalysisWarning
-      title: Override Independence Warning (Advanced Users Only)
+      title: Override independence warning (advanced users only)
       type: Bool
       default: false
       description:

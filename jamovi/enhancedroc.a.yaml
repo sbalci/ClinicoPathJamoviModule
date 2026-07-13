@@ -76,7 +76,7 @@ options:
 
     # Youden Index Options
     - name: youdenOptimization
-      title: 'Youden Index Optimization'
+      title: "Youden index optimization"
       type: Bool
       default: true
       description: 'Find optimal cutoff using Youden Index (Sensitivity + Specificity - 1)'
@@ -121,7 +121,7 @@ options:
       description: 'Number of bootstrap samples for confidence intervals'
 
     - name: useBootstrap
-      title: 'Use Bootstrap'
+      title: "Use bootstrap"
       type: Bool
       default: false
       description: 'Use bootstrap methods for confidence intervals'
@@ -140,26 +140,26 @@ options:
       description: 'Method for calculating bootstrap confidence intervals. BCa provides better coverage but requires more computation.'
 
     - name: bootstrapCutoffCI
-      title: 'Bootstrap CI for Optimal Cutoff'
+      title: "Bootstrap CI for optimal cutoff"
       type: Bool
       default: false
       description: 'Calculate bootstrap confidence intervals for sensitivity and specificity at optimal cutoff'
 
     - name: bootstrapPartialAUC
-      title: 'Bootstrap CI for Partial AUC'
+      title: "Bootstrap CI for partial AUC"
       type: Bool
       default: false
       description: 'Calculate bootstrap confidence intervals for partial AUC estimates'
 
     - name: stratifiedBootstrap
-      title: 'Stratified Bootstrap'
+      title: "Stratified bootstrap"
       type: Bool
       default: false
       description: 'Maintain outcome class proportions in bootstrap samples (recommended for imbalanced data)'
 
     # Comparison Options
     - name: pairwiseComparisons
-      title: 'Pairwise Comparisons'
+      title: "Pairwise comparisons"
       type: Bool
       default: false
       description: 'Perform pairwise comparisons between ROC curves'
@@ -179,37 +179,37 @@ options:
 
     # Output Options
     - name: rocCurve
-      title: 'ROC Curve Plot'
+      title: "ROC curve plot"
       type: Bool
       default: true
       description: 'Display ROC curve plot'
 
     - name: aucTable
-      title: 'AUC Summary Table'
+      title: "AUC summary table"
       type: Bool
       default: true
       description: 'Display AUC summary table'
 
     - name: cutoffTable
-      title: 'Cutoff Analysis Table'
+      title: "Cutoff analysis table"
       type: Bool
       default: false
       description: 'Display detailed cutoff analysis'
 
     - name: optimalCutoffs
-      title: 'Optimal Cutoffs Summary'
+      title: "Optimal cutoffs summary"
       type: Bool
       default: true
       description: 'Display optimal cutoff summary'
 
     - name: diagnosticMetrics
-      title: 'Diagnostic Metrics'
+      title: "Diagnostic metrics"
       type: Bool
       default: true
       description: 'Display comprehensive diagnostic metrics'
 
     - name: clinicalMetrics
-      title: 'Clinical Metrics'
+      title: "Clinical metrics"
       type: Bool
       default: false
       description: 'Display clinical application metrics (PPV, NPV, LR+, LR-)'
@@ -229,7 +229,7 @@ options:
       description: 'Method for smoothing ROC curves'
 
     - name: partialAuc
-      title: 'Partial AUC Analysis'
+      title: "Partial AUC analysis"
       type: Bool
       default: false
       description: 'Calculate partial AUC for specific sensitivity/specificity ranges'
@@ -253,7 +253,7 @@ options:
 
     # CROC Options
     - name: crocAnalysis
-      title: 'CROC Analysis'
+      title: "CROC analysis"
       type: Bool
       default: false
       description: 'Calculate Concentrated ROC curves for early retrieval analysis'
@@ -267,7 +267,7 @@ options:
       description: 'Concentration parameter for CROC exponential magnifier function'
 
     - name: convexHull
-      title: 'ROC Convex Hull'
+      title: "ROC convex hull"
       type: Bool
       default: false
       description: 'Calculate ROC convex hull (optimal achievable performance)'
@@ -287,7 +287,7 @@ options:
 
     # Imbalance Detection Options
     - name: detectImbalance
-      title: 'Detect Class Imbalance'
+      title: "Detect class imbalance"
       type: Bool
       default: false
       description: 'Automatically detect class imbalance and recommend PRC when appropriate'
@@ -301,13 +301,13 @@ options:
       description: 'Ratio threshold for imbalance detection (e.g., 3.0 means 3:1 or 1:3 ratio)'
 
     - name: showImbalanceWarning
-      title: 'Show Imbalance Warning'
+      title: "Imbalance warning"
       type: Bool
       default: false
       description: 'Display warning message when class imbalance is detected'
 
     - name: recommendPRC
-      title: 'Recommend PRC for Imbalanced Data'
+      title: "Recommend PRC for imbalanced data"
       type: Bool
       default: false
       description: 'Recommend using Precision-Recall curves when imbalance is detected'
@@ -322,7 +322,7 @@ options:
       description: 'Disease prevalence for calculating predictive values'
 
     - name: useObservedPrevalence
-      title: 'Use Observed Prevalence'
+      title: "Use observed prevalence"
       type: Bool
       default: false
       description: 'Use the prevalence observed in the data for PPV/NPV and clinical impact calculations (recommended)'
@@ -363,13 +363,13 @@ options:
 
     # Advanced Output Options
     - name: comprehensive_output
-      title: 'Comprehensive Statistical Output'
+      title: "Comprehensive statistical output"
       type: Bool
       default: false
       description: 'Include comprehensive statistical details'
 
     - name: clinical_interpretation
-      title: 'Clinical Interpretation'
+      title: "Clinical interpretation"
       type: Bool
       default: false
       description: 'Provide clinical context for ROC analysis results'
@@ -405,45 +405,45 @@ options:
       description: 'Height of ROC plots'
 
     - name: showCutoffPoints
-      title: 'Show Cutoff Points'
+      title: "Cutoff points"
       type: Bool
       default: false
       description: 'Highlight optimal cutoff points on ROC curve'
 
     - name: showConfidenceBands
-      title: 'Show Confidence Bands'
+      title: "Confidence bands"
       type: Bool
       default: false
       description: 'Display confidence bands around ROC curve'
 
     # Model Comparison Enhancements
     - name: showMetricsDiff
-      title: 'Show Metrics Differences'
+      title: "Metrics differences"
       type: Bool
       default: false
       description: 'Display detailed differences between model metrics'
 
     - name: statisticalComparison
-      title: 'Statistical Model Comparison'
+      title: "Statistical model comparison"
       type: Bool
       default: false
       description: 'Perform comprehensive statistical comparison between models'
 
     # Calibration Analysis Options
     - name: calibrationAnalysis
-      title: 'Calibration Analysis'
+      title: "Calibration analysis"
       type: Bool
       default: false
       description: 'Assess calibration (agreement between observed and predicted probabilities)'
 
     - name: calibrationPlot
-      title: 'Calibration Plot'
+      title: "Calibration plot"
       type: Bool
       default: false
       description: 'Display calibration plot with loess smoothing'
 
     - name: hosmerLemeshow
-      title: 'Hosmer-Lemeshow Test'
+      title: "Hosmer-Lemeshow test"
       type: Bool
       default: false
       description: 'Perform Hosmer-Lemeshow goodness-of-fit test'
@@ -457,20 +457,20 @@ options:
       description: 'Number of groups for Hosmer-Lemeshow test'
 
     - name: brierScore
-      title: 'Brier Score'
+      title: "Brier score"
       type: Bool
       default: false
       description: 'Calculate Brier score and scaled Brier score'
 
     - name: calibrationMetrics
-      title: 'Calibration Metrics'
+      title: "Calibration metrics"
       type: Bool
       default: false
       description: 'Calculate calibration slope, intercept, and calibration-in-the-large'
 
     # Advanced Calibration Methods
     - name: splineCalibration
-      title: 'Spline Calibration Curves'
+      title: "Spline calibration curves"
       type: Bool
       default: false
       description: 'Use restricted cubic splines for flexible calibration curves'
@@ -484,38 +484,38 @@ options:
       description: 'Number of knots for restricted cubic splines (3-7 recommended)'
 
     - name: eoRatio
-      title: 'E/O Ratio'
+      title: "E/O ratio"
       type: Bool
       default: false
       description: 'Calculate Expected/Observed ratio for overall calibration assessment'
 
     - name: namDagostino
-      title: "Nam-D'Agostino Test"
+      title: "Nam-D'Agostino test"
       type: Bool
       default: false
       description: "Perform Nam-D'Agostino calibration test (more powerful than H-L)"
 
     - name: greenwoodNam
-      title: "Greenwood-Nam-D'Agostino Test"
+      title: "Greenwood-Nam-D'Agostino test"
       type: Bool
       default: false
       description: "Greenwood-Nam-D'Agostino test for survival model calibration"
 
     - name: calibrationBelt
-      title: 'Calibration Belt'
+      title: "Calibration belt"
       type: Bool
       default: false
       description: 'Display calibration belt showing uncertainty around calibration curve'
 
     - name: calibrationDensity
-      title: 'Calibration Density Plot'
+      title: "Calibration density plot"
       type: Bool
       default: false
       description: 'Show distribution of predicted probabilities as density overlay'
 
     # Multi-Class ROC Options
     - name: multiClassROC
-      title: 'Multi-Class ROC Analysis'
+      title: "Multi-class ROC analysis"
       type: Bool
       default: false
       description: 'Enable multi-class ROC analysis for outcomes with >2 levels'
@@ -570,25 +570,25 @@ options:
 
     # Clinical Impact Options
     - name: clinicalImpact
-      title: 'Clinical Impact Analysis'
+      title: "Clinical impact analysis"
       type: Bool
       default: false
       description: 'Calculate clinical impact metrics (NNT, NND, clinical utility)'
 
     - name: nntCalculation
-      title: 'Number Needed to Test/Treat'
+      title: "Number needed to test/Treat"
       type: Bool
       default: false
       description: 'Calculate number needed to test and number needed to diagnose'
 
     - name: clinicalUtilityCurve
-      title: 'Clinical Utility Curve'
+      title: "Clinical utility curve"
       type: Bool
       default: false
       description: 'Display clinical utility curve showing test consequences'
 
     - name: decisionImpactTable
-      title: 'Decision Impact Table'
+      title: "Decision impact table"
       type: Bool
       default: false
       description: 'Show decision impact at various thresholds'
@@ -601,13 +601,13 @@ options:
     #   description: 'Enable survival-specific ROC methods (requires time-to-event data)'
 
     - name: harrellCIndex
-      title: "Harrell's C-Index"
+      title: "Harrell's C-index"
       type: Bool
       default: false
       description: "Calculate Harrell's concordance index for time-to-event outcomes"
 
     - name: unoCStatistic
-      title: "Uno's C-Statistic"
+      title: "Uno's C-statistic"
       type: Bool
       default: false
       description: "Calculate Uno's C-statistic (more robust to censoring)"
@@ -625,14 +625,14 @@ options:
       description: 'Calculate cumulative/dynamic AUC (sensitivity for events by specific time)'
 
     - name: competingRisksConcordance
-      title: 'Competing Risks Concordance'
+      title: "Competing risks concordance"
       type: Bool
       default: false
       description: 'Calculate cause-specific concordance for competing risks'
 
     # Clinical Prediction Model Validation
     - name: internalValidation
-      title: 'Internal Validation'
+      title: "Internal validation"
       type: Bool
       default: false
       description: 'Perform internal validation using cross-validation or bootstrap'
@@ -651,37 +651,37 @@ options:
       description: 'Method for internal validation'
 
     - name: optimismCorrection
-      title: 'Optimism Correction'
+      title: "Optimism correction"
       type: Bool
       default: false
       description: 'Apply optimism correction to performance metrics'
 
     - name: externalValidation
-      title: 'External Validation Framework'
+      title: "External validation framework"
       type: Bool
       default: false
       description: 'Enable external validation reporting framework'
 
     - name: decisionImpactCurves
-      title: 'Decision Impact Curves'
+      title: "Decision impact curves"
       type: Bool
       default: false
       description: 'Plot decision impact curves showing clinical consequences'
 
     - name: netBenefitRegression
-      title: 'Net Benefit Regression'
+      title: "Net benefit regression"
       type: Bool
       default: false
       description: 'Model net benefit as function of threshold probabilities'
 
     - name: modelUpdating
-      title: 'Model Updating Analysis'
+      title: "Model updating analysis"
       type: Bool
       default: false
       description: 'Analyze need for model recalibration or updating'
 
     - name: transportability
-      title: 'Transportability Analysis'
+      title: "Transportability analysis"
       type: Bool
       default: false
       description: 'Assess model transportability across populations'

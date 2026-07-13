@@ -64,7 +64,7 @@ options:
             Optional grouping variable to create multiple lines (e.g., treatment groups, patient categories).
 
     - name: confidence
-      title: 'Confidence Interval'
+      title: "Confidence interval"
       type: Bool
       default: false
       description:
@@ -72,7 +72,7 @@ options:
             Whether to display confidence intervals around the line(s).
 
     - name: trendline
-      title: 'Trend Line'
+      title: "Trend line"
       type: Bool
       default: false
       description:
@@ -80,7 +80,7 @@ options:
             Whether to add a trend line (linear regression) to the plot.
 
     - name: points
-      title: 'Show Points'
+      title: "Points"
       type: Bool
       default: true
       description:
@@ -88,7 +88,7 @@ options:
             Whether to show individual data points on the line(s).
 
     - name: smooth
-      title: 'Smooth Line'
+      title: "Smooth line"
       type: Bool
       default: false
       description:

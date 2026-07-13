@@ -287,8 +287,9 @@ items:
           - positiveClass
           - subGroup
           - direction
-          - ciMethod
-          - confidenceLevel
+          - bootstrapCI
+          - bootstrapReps
+          - quantileCIs
       columns:
         - name: variable
           title: Variable

@@ -90,7 +90,7 @@ options:
 
 
     - name: centralityplotting
-      title: Show Centrality
+      title: Centrality
       type: Bool
       default: false
 
@@ -124,7 +124,7 @@ options:
       default: parametric
 
     - name: pairwisecomparisons
-      title: Pairwise Comparisons
+      title: Pairwise comparisons
       type: Bool
       default: false
 
@@ -193,18 +193,18 @@ options:
       default: ''
 
     - name: originaltheme
-      title: Add GGStatsPlot Layer
+      title: Add GGStatsPlot layer
       type: Bool
       default: false
 
     - name: resultssubtitle
-      title: Statistical Results
+      title: Statistical results
       type: Bool
       default: false
 
 
     - name: bfmessage
-      title: Bayes Factor Message
+      title: Bayes factor message
       type: Bool
       default: false
       description:
@@ -232,7 +232,7 @@ options:
             Confidence level for confidence intervals.
 
     - name: varequal
-      title: Equal Variances
+      title: Equal variances
       type: Bool
       default: false
       description:
@@ -289,7 +289,7 @@ options:
             Height of the plot in pixels. Default is 450.
 
     - name: colorblindSafe
-      title: Use Colorblind-Safe Palette
+      title: Use colorblind-safe palette
       type: Bool
       default: false
       description:
@@ -297,7 +297,7 @@ options:
             Whether to use colorblind-safe color palette for plot elements.
 
     - name: showexplanations
-      title: Show Explanations and Guides
+      title: Explanations and guides
       type: Bool
       default: false
       description:
@@ -309,7 +309,7 @@ options:
             and a copy-ready report template. Helpful for learning and preparing manuscripts.
 
     - name: addGGPubrPlot
-      title: Add ggpubr Plot Variant
+      title: Add ggpubr plot variant
       type: Bool
       default: false
       description:
@@ -357,7 +357,7 @@ options:
             Color palette for ggpubr plot.
 
     - name: ggpubrAddStats
-      title: Add Statistical Comparisons (ggpubr)
+      title: Add statistical comparisons (ggpubr)
       type: Bool
       default: true
       description:
@@ -365,7 +365,7 @@ options:
             Add statistical comparison p-values to ggpubr plot.
 
     - name: ggpubrAddPoints
-      title: Add Individual Points (ggpubr)
+      title: Add individual points (ggpubr)
       type: Bool
       default: false
       description:

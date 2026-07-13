@@ -125,18 +125,18 @@ options:
       default: NULL
 
     - name: pointpath
-      title: Show Point Path
+      title: Point path
       type: Bool
       default: false
 
     - name: centralitypath
-      title: Centrality Path
+      title: Centrality path
       type: Bool
       default: false
 
 
     - name: centralityplotting
-      title: 'Show Average Values'
+      title: "Average values"
       type: Bool
       default: false
       description:
@@ -197,7 +197,7 @@ options:
             Bayesian: Provides evidence strength rather than p-values.
 
     - name: pairwisecomparisons
-      title: 'Compare Each Time Point Pair'
+      title: "Compare each time point pair"
       type: Bool
       default: false
       description:
@@ -254,12 +254,12 @@ options:
       default: biased
 
     - name: violin
-      title: Violin Plot
+      title: Violin plot
       type: Bool
       default: true
 
     - name: boxplot
-      title: Box Plot
+      title: Box plot
       type: Bool
       default: true
 
@@ -284,17 +284,17 @@ options:
       default: ''
 
     - name: originaltheme
-      title: Add GGStatsPlot Layer
+      title: Add GGStatsPlot layer
       type: Bool
       default: false
 
     - name: resultssubtitle
-      title: Statistical Results
+      title: Statistical results
       type: Bool
       default: false
 
     - name: bfmessage
-      title: Bayes Factor Message
+      title: Bayes factor message
       type: Bool
       default: false
       description:
@@ -342,7 +342,7 @@ options:
             Height of the plot in pixels. Default is 450.
 
     - name: addGGPubrPlot
-      title: Add ggpubr Plot Variant
+      title: Add ggpubr plot variant
       type: Bool
       default: false
       description:
@@ -388,7 +388,7 @@ options:
             Color palette for ggpubr plot.
 
     - name: ggpubrAddStats
-      title: Add Statistical Comparisons (ggpubr)
+      title: Add statistical comparisons (ggpubr)
       type: Bool
       default: false
       description:
@@ -396,7 +396,7 @@ options:
             Add statistical comparison p-values to ggpubr plot.
 
     - name: ggpubrShowLines
-      title: Show Connecting Lines (paired plot)
+      title: Connecting lines (paired plot)
       type: Bool
       default: false
       description:
@@ -404,7 +404,7 @@ options:
             Show individual subject trajectories for paired plot.
 
     - name: ggpubrAddPoints
-      title: Add Individual Points
+      title: Add individual points
       type: Bool
       default: false
       description:
@@ -412,7 +412,7 @@ options:
             Overlay individual data points on ggpubr plot.
 
     - name: showExplanations
-      title: Show Explanations
+      title: Explanations
       type: Bool
       default: true
       description:

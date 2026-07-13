@@ -167,22 +167,22 @@ options:
     
     # Display Options
     - name: show_explanation
-      title: Show Explanations
+      title: Explanations
       type: Bool
       default: false
       
     - name: show_formulas
-      title: Show Calculation Formulas
+      title: Calculation formulas
       type: Bool
       default: false
       
     - name: show_cost_analysis
-      title: Show Cost Analysis
+      title: Cost analysis
       type: Bool
       default: false
       
     - name: show_nomogram
-      title: Show Fagan Nomogram
+      title: Fagan nomogram
       type: Bool
       default: false
 

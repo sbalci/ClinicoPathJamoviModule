@@ -111,7 +111,7 @@ children:
         children:
           - type: CheckBox
             name: fnote
-            label: 'Show detailed footnotes'
+            label: "Detailed footnotes"
           - type: CheckBox
             name: fagan
-            label: 'Show Fagan nomogram (visualization)'
+            label: "Fagan nomogram (visualization)"

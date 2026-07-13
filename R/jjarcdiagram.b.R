@@ -12,6 +12,16 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = jjarcdiagramBase,
     private = list(
 
+        # Option overrides for clinical presets (jamovi options are read-only at runtime;
+        # presets record overrides here and reads go through private$.option()).
+        overrides = list(),
+        .option = function(option) {
+            if (option %in% names(private$overrides)) return(private$overrides[[option]])
+            opt_obj <- self$options$option(option)
+            if (!is.null(opt_obj)) return(opt_obj$value)
+            return(NULL)
+        },
+
         # Notice collection (single Preformatted plain-text output item; avoids the
         # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
         .noticeList = list(),
@@ -43,8 +53,8 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             # Set plot size based on layout
-            plot_width <- if (self$options$horizontal) 800 else 600
-            plot_height <- if (self$options$horizontal) 600 else 800
+            plot_width <- if (private$.option("horizontal")) 800 else 600
+            plot_height <- if (private$.option("horizontal")) 600 else 800
             self$results$plot$setSize(plot_width, plot_height)
             
             # Set up user instructions
@@ -291,18 +301,18 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Apply preset-specific optimizations
             switch(preset,
                 "gene_interaction" = {
-                    if (is.null(self$options$plotTitle) || self$options$plotTitle == "") {
-                        self$options$plotTitle <- "Gene Interaction Network"
+                    if (is.null(private$.option("plotTitle")) || private$.option("plotTitle") == "") {
+                        private$overrides[["plotTitle"]] <- "Gene Interaction Network"
                     }
                 },
                 "patient_network" = {
-                    self$options$horizontal <- TRUE
+                    private$overrides[["horizontal"]] <- TRUE
                 },
                 "pathway_network" = {
-                    self$options$sortNodes <- "degree"
+                    private$overrides[["sortNodes"]] <- "degree"
                 },
                 "comorbidity_network" = {
-                    self$options$sortNodes <- "degree"
+                    private$overrides[["sortNodes"]] <- "degree"
                 }
             )
         },
@@ -596,7 +606,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             arcplot(
                 network_data$edgelist,
                 ordering = ord,
-                horizontal = self$options$horizontal,
+                horizontal = private$.option("horizontal"),
                 labels = network_data$vlabels_display,
                 show.nodes = self$options$showNodes,
                 col.nodes = colors$node_border,
@@ -610,8 +620,8 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             # Add title if specified
-            if (self$options$plotTitle != "") {
-                title(main = self$options$plotTitle, cex.main = 1.2)
+            if (private$.option("plotTitle") != "") {
+                title(main = private$.option("plotTitle"), cex.main = 1.2)
             }
             
             # Add legend if groups are specified and color by group is enabled
@@ -627,7 +637,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             degrees <- network_data$degrees
             node_groups <- network_data$node_groups
 
-            ord <- switch(self$options$sortNodes,
+            ord <- switch(private$.option("sortNodes"),
                 "none" = seq_along(vlabels),
                 "name" = order(vlabels_display, decreasing = self$options$sortDecreasing),
                 "degree" = order(degrees, decreasing = self$options$sortDecreasing),

@@ -226,7 +226,7 @@ options:
             Alpha level for confidence intervals.
 
     - name: verbose
-      title: Verbose Bootstrap Output
+      title: Verbose bootstrap output
       type: Bool
       default: false
       description:

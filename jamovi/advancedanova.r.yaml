@@ -307,6 +307,7 @@ items:
       description: Residual plots and assumption checking
       visible: (show_plots && (plot_type:diagnostic || plot_type:both))
       requiresData: true
+      renderFun: .diagnosticplot
       clearWith:
           - dependent
           - fixed

@@ -556,6 +556,7 @@ advancedanovaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 height=600,
                 visible="(show_plots && (plot_type:diagnostic || plot_type:both))",
                 requiresData=TRUE,
+                renderFun=".diagnosticplot",
                 clearWith=list(
                     "dependent",
                     "fixed",

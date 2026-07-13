@@ -54,7 +54,7 @@ options:
 
 
     - name: tint
-      title: Using Dates to Calculate Survival Time
+      title: Using dates to calculate survival time
       type: Bool
       default: false
       description:
@@ -228,7 +228,7 @@ options:
 
 
     - name: uselandmark
-      title: Use Landmark Time
+      title: Use landmark time
       type: Bool
       default: false
 
@@ -267,7 +267,7 @@ options:
       default: holm
 
     - name: weightedLogRank
-      title: Weighted Log-Rank Tests
+      title: Weighted log-rank tests
       type: Bool
       default: false
 
@@ -289,29 +289,29 @@ options:
 
 
     - name: ph_cox
-      title: Proportional Hazards Assumption
+      title: Proportional hazards assumption
       type: Bool
       default: false
 
     - name: sc
-      title: Survival Plot
+      title: Survival plot
       type: Bool
       default: false
 
     - name: kmunicate
-      title: KMunicate-Style Plot
+      title: KMunicate-style plot
       type: Bool
       default: false
 
 
     - name: ce
-      title: Cumulative Events
+      title: Cumulative events
       type: Bool
       default: false
 
 
     - name: ch
-      title: Cumulative Hazard
+      title: Cumulative hazard
       type: Bool
       default: false
 
@@ -339,7 +339,7 @@ options:
 
 
     - name: multievent
-      title: Multiple Event Levels
+      title: Multiple event levels
       type: Bool
       default: false
 
@@ -349,12 +349,12 @@ options:
       default: false
 
     - name: risktable
-      title: risktable
+      title: Risktable
       type: Bool
       default: false
 
     - name: censored
-      title: censored
+      title: Censored
       type: Bool
       default: false
 
@@ -383,7 +383,7 @@ options:
 
 
     - name: person_time
-      title: "Calculate Person-Time Metrics"
+      title: "Calculate person-time metrics"
       type: Bool
       default: false
       description: >-
@@ -409,7 +409,7 @@ options:
         1000 for rates per 1000 person-years).
 
     - name: rmst_analysis
-      title: "Restricted Mean Survival Time (RMST)"
+      title: "Restricted mean survival time (RMST)"
       type: Bool
       default: false
       description: >-
@@ -426,7 +426,7 @@ options:
         of follow-up time. Should be specified in the same units as the survival time.
 
     - name: stratified_cox
-      title: "Stratified Cox Regression"
+      title: "Stratified Cox regression"
       type: Bool
       default: false
       description: >-
@@ -444,7 +444,7 @@ options:
       default: null
 
     - name: age_adjustment
-      title: "Age-Adjusted Analysis"
+      title: "Age-adjusted analysis"
       type: Bool
       default: false
       description: >-
@@ -463,7 +463,7 @@ options:
         Used as a covariate in Cox regression for age adjustment. Must be numeric.
 
     - name: age_interaction
-      title: "Test Age Interaction"
+      title: "Test age interaction"
       type: Bool
       default: false
       description: >-
@@ -471,7 +471,7 @@ options:
         survival (age-group interaction). Reports the interaction term p-value.
 
     - name: age_stratified_cox
-      title: "Age-Stratified Cox Model"
+      title: "Age-stratified Cox model"
       type: Bool
       default: false
       description: >-
@@ -488,7 +488,7 @@ options:
         50, 65, 75 creates groups less than 50, 50-64, 65-74, 75 and above.
 
     - name: age_time_scale
-      title: "Age as Time Scale"
+      title: "Age as time scale"
       type: Bool
       default: false
       description: >-
@@ -497,7 +497,7 @@ options:
         Most rigorous for cancer epidemiology where age drives risk.
 
     - name: age_standardization
-      title: "Age Standardization (SMR)"
+      title: "Age standardization (SMR)"
       type: Bool
       default: false
       description: >-
@@ -519,7 +519,7 @@ options:
         Direct standardization applies age-specific rates to a standard population.
 
     - name: age_stratified_km
-      title: "Age-Stratified KM Plots"
+      title: "Age-stratified KM plots"
       type: Bool
       default: false
       description: >-
@@ -527,7 +527,7 @@ options:
         Displays separate curves for each age group within the explanatory variable.
 
     - name: adjusted_curves
-      title: "Adjusted Survival Curves"
+      title: "Adjusted survival curves"
       type: Bool
       default: false
       description: >-
@@ -536,7 +536,7 @@ options:
         removing the effect of age differences between groups.
 
     - name: remark_checklist
-      title: "REMARK Reporting Checklist"
+      title: "REMARK reporting checklist"
       type: Bool
       default: false
       description: >-
@@ -545,7 +545,7 @@ options:
         addressed by the current analysis configuration.
 
     - name: residual_diagnostics
-      title: "Model Residual Diagnostics"
+      title: "Model residual diagnostics"
       type: Bool
       default: false
       description: >-
@@ -560,7 +560,7 @@ options:
         probabilities, confidence intervals, and risk tables at multiple time points.
 
     - name: loglog
-      title: "Log-Log Plot"
+      title: "Log-log plot"
       type: Bool
       default: false
       description: >-
@@ -568,7 +568,7 @@ options:
         assumption. Parallel lines suggest proportional hazards.
 
     - name: showExplanations
-      title: "Show Analysis Explanations"
+      title: "Analysis explanations"
       type: Bool
       default: false
       description: >-
@@ -576,7 +576,7 @@ options:
         interpret the statistical methods and results.
 
     - name: showSummaries
-      title: "Show Natural Language Summaries"
+      title: "Natural language summaries"
       type: Bool
       default: false
       description: >-
@@ -587,7 +587,7 @@ options:
     # Parametric Survival Models Section
     # Parametric Survival Models Section
     - name: use_parametric
-      title: "Enable Parametric Survival Models"
+      title: "Parametric survival models"
       type: Bool
       default: false
       description: >-
@@ -622,7 +622,7 @@ options:
         different assumptions about hazard function shape.
 
     - name: parametric_covariates
-      title: "Include Covariates in Parametric Model"
+      title: "Include covariates in parametric model"
       type: Bool
       default: true
       description: >-
@@ -655,7 +655,7 @@ options:
         odds scale models log cumulative odds, normal scale models normal scores.
 
     - name: parametric_extrapolation
-      title: "Extrapolation Analysis"
+      title: "Extrapolation analysis"
       type: Bool
       default: false
       description: >-
@@ -673,7 +673,7 @@ options:
         relies on distributional assumptions.
 
     - name: parametric_diagnostics
-      title: "Model Diagnostics"
+      title: "Model diagnostics"
       type: Bool
       default: true
       description: >-
@@ -681,7 +681,7 @@ options:
         residual plots, and goodness-of-fit statistics for parametric models.
 
     - name: compare_distributions
-      title: "Compare Multiple Distributions"
+      title: "Compare multiple distributions"
       type: Bool
       default: false
       description: >-
@@ -689,7 +689,7 @@ options:
         Helps select the best-fitting distribution for your data.
 
     - name: parametric_survival_plots
-      title: "Parametric Survival Plots"
+      title: "Parametric survival plots"
       type: Bool
       default: false
       description: >-
@@ -697,7 +697,7 @@ options:
         intervals. Compare with Kaplan-Meier estimates for model validation.
 
     - name: hazard_plots
-      title: "Hazard Function Plots"
+      title: "Hazard function plots"
       type: Bool
       default: false
       description: >-
@@ -706,7 +706,7 @@ options:
 
     # Calibration Curves for Survival Models
     - name: calibration_curves
-      title: "Calibration Curves"
+      title: "Calibration curves"
       type: Bool
       default: false
       description: >-
@@ -737,7 +737,7 @@ options:
 
     # Restricted Cubic Splines for Non-Linear Effects
     - name: rcs_analysis
-      title: "Non-Linearity Assessment (RCS)"
+      title: "Non-linearity assessment (RCS)"
       type: Bool
       default: false
       description: >-
@@ -772,7 +772,7 @@ options:
         detection of complex non-linear patterns but may overfit with small samples.
 
     - name: bootstrapValidation
-      title: Bootstrap Internal Validation
+      title: Bootstrap internal validation
       type: Bool
       default: false
 

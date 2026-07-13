@@ -246,8 +246,6 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "dep",
                     "grvar",
-                    "excl",
-                    "originaltheme",
                     "typestatistics",
                     "matrixtype",
                     "matrixmethod",

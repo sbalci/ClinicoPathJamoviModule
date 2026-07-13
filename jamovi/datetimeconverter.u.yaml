@@ -71,16 +71,16 @@ children:
                 children:
                   - type: CheckBox
                     name: extract_year
-                    label: Extract Year from Variable (4-digit)
+                    label: Extract year from variable (4-digit)
                   - type: CheckBox
                     name: extract_month
-                    label: Extract Month (Number)
+                    label: Extract month (number)
                   - type: CheckBox
                     name: extract_monthname
-                    label: Extract Month (Name)
+                    label: Extract month (name)
                   - type: CheckBox
                     name: extract_day
-                    label: Extract Day of Month
+                    label: Extract day of month
           - type: LayoutBox
             cell:
               column: 1
@@ -125,13 +125,13 @@ children:
                 children:
                   - type: CheckBox
                     name: extract_hour
-                    label: Extract Hour (0-23)
+                    label: Extract hour (0-23)
                   - type: CheckBox
                     name: extract_minute
-                    label: Extract Minute (0-59)
+                    label: Extract minute (0-59)
                   - type: CheckBox
                     name: extract_second
-                    label: Extract Second (0-59)
+                    label: Extract second (0-59)
           - type: LayoutBox
             cell:
               column: 1
@@ -173,16 +173,16 @@ children:
                 children:
                   - type: CheckBox
                     name: extract_dayname
-                    label: Extract Day Name (e.g., Monday)
+                    label: Extract day name (e.g., monday)
                   - type: CheckBox
                     name: extract_weeknum
-                    label: Extract Week Number (1-53)
+                    label: Extract week number (1-53)
                   - type: CheckBox
                     name: extract_quarter
-                    label: Extract Quarter (1-4)
+                    label: Extract quarter (1-4)
                   - type: CheckBox
                     name: extract_dayofyear
-                    label: Extract Day of Year (1-366)
+                    label: Extract day of year (1-366)
           - type: LayoutBox
             cell:
               column: 1

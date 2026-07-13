@@ -9,7 +9,7 @@ children:
     children:
       - type: ComboBox
         name: clinicalPreset
-        label: "Clinical Scenario"
+        label: "Clinical scenario"
   
   - type: VariableSupplier
     persistentItems: false
@@ -74,7 +74,7 @@ children:
         children:
           - type: ComboBox
             name: method
-            label: "Analysis Method"
+            label: "Analysis method"
             options:
               - name: latent_class
                 title: "Latent Class Analysis (Recommended)"
@@ -107,7 +107,7 @@ children:
             enable: (bootstrap)
           - type: CheckBox
             name: verbose
-            label: Verbose Output
+            label: Verbose output
             enable: (bootstrap)
           - type: TextBox
             name: seed

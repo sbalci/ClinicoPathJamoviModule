@@ -48,7 +48,7 @@ children:
                 label: Number of Rows
               - type: CheckBox
                 name: flip
-                label: Flip Chart
+                label: Flip chart
 
       - type: Label
         label: Appearance
@@ -97,7 +97,7 @@ children:
             children:
               - type: CheckBox
                 name: showSummaries
-                label: Analysis Summary
+                label: Analysis summary
               - type: CheckBox
                 name: showExplanations
-                label: Show Explanations
+                label: Explanations

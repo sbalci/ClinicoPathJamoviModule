@@ -96,7 +96,7 @@ options:
 
     # Test independence assumption
     - name: indep
-      title: Independent Tests
+      title: Independent tests
       type: Bool
       default: false
       description:
@@ -141,12 +141,12 @@ options:
 
     # Display options
     - name: fnote
-      title: Show Footnotes
+      title: Footnotes
       type: Bool
       default: false
 
     - name: fagan
-      title: 'Fagan Nomogram'
+      title: "Fagan nomogram"
       type: Bool
       default: false
 

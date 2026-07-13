@@ -76,6 +76,7 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             if (length(levels) != 2) {
                 jmvcore::reject(
                     "Treatment variable must have exactly two levels for this analysis (found {}). Recode or filter to a binary comparison.",
+                    code = NULL,
                     length(levels)
                 )
             }
@@ -106,6 +107,7 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 if (!(successLevel %in% outcomeLevels)) {
                     jmvcore::reject(
                         "Selected Success/Response Level ('{}') is not present in the outcome variable. Available levels: {}.",
+                        code = NULL,
                         successLevel, paste(outcomeLevels, collapse = ", ")
                     )
                 }
@@ -115,7 +117,7 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     res <- tryCatch(
                         prop.test(tab),
                         error = function(e) {
-                            jmvcore::reject("prop.test failed: {}", conditionMessage(e))
+                            jmvcore::reject("prop.test failed: {}", code = NULL, conditionMessage(e))
                         }
                     )
                     effect <- res$estimate[1] - res$estimate[2]
@@ -125,7 +127,7 @@ adaptivetrialdesignClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 res <- tryCatch(
                     t.test(mydata[[outcomeVar]] ~ mydata[[treatmentVar]]),
                     error = function(e) {
-                        jmvcore::reject("t.test failed: {}", conditionMessage(e))
+                        jmvcore::reject("t.test failed: {}", code = NULL, conditionMessage(e))
                     }
                 )
                 effect <- res$estimate[1] - res$estimate[2]

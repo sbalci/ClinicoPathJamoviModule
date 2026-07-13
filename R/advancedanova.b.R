@@ -751,7 +751,7 @@ advancedanovaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             ))
             
             # Diagnostic plots
-            if (self$options$diagnostic_plots) {
+            if (self$options$plot_type %in% c("diagnostic", "both")) {
                 diag_plot <- self$results$diagnosticplot
                 diag_plot$setState(list(
                     data = data.frame(y = y_data, group = group_data),

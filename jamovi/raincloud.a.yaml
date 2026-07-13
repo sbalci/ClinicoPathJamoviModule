@@ -126,7 +126,7 @@ options:
           Optional variable for coloring different elements. If not specified, uses grouping variable.
 
     - name: show_violin
-      title: Show Half-Violin (Density)
+      title: Half-violin (density)
       type: Bool
       default: true
       description:
@@ -134,7 +134,7 @@ options:
           If TRUE, displays half-violin plot showing probability density distribution.
 
     - name: show_boxplot
-      title: Show Box Plot
+      title: Box plot
       type: Bool
       default: true
       description:
@@ -142,7 +142,7 @@ options:
           If TRUE, displays box plot with median, quartiles, and outliers.
 
     - name: show_dots
-      title: Show Data Points
+      title: Data points
       type: Bool
       default: true
       description:
@@ -318,7 +318,7 @@ options:
           Custom label for Y-axis. If empty, uses variable name.
 
     - name: show_statistics
-      title: Show Summary Statistics
+      title: Summary statistics
       type: Bool
       default: false
       description:
@@ -326,7 +326,7 @@ options:
           If TRUE, displays summary statistics table for each group.
 
     - name: show_outliers
-      title: Highlight Outliers
+      title: Highlight outliers
       type: Bool
       default: false
       description:
@@ -349,7 +349,7 @@ options:
           Method for detecting outliers when highlight outliers is enabled.
 
     - name: normality_test
-      title: Test for Normality
+      title: Test for normality
       type: Bool
       default: false
       description:
@@ -357,7 +357,7 @@ options:
           If TRUE, performs normality tests (Shapiro-Wilk) for each group.
 
     - name: comparison_test
-      title: Group Comparison Test
+      title: Group comparison test
       type: Bool
       default: false
       description:
@@ -401,7 +401,7 @@ options:
           Adjustment method applied to the reported p-value (useful for multiple comparisons).
 
     - name: effect_size
-      title: Show Effect Size (2 groups)
+      title: Effect size (2 groups)
       type: Bool
       default: false
       description:

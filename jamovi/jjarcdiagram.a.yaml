@@ -150,7 +150,7 @@ options:
             pathway networks on biological processes, and comorbidity networks on disease associations.
 
     - name: showNodes
-      title: Show Nodes
+      title: Nodes
       type: Bool
       default: false
       description:
@@ -198,7 +198,7 @@ options:
             Order in which nodes are arranged along the baseline. 'None' preserves original order, 'By Name' sorts alphabetically, 'By Group' clusters by categories, 'By Degree' orders by connectivity.
 
     - name: sortDecreasing
-      title: Sort Decreasing
+      title: Sort decreasing
       type: Bool
       default: false
       description:
@@ -206,7 +206,7 @@ options:
             When sorting nodes, whether to use descending order. Only applies when Sort Nodes is not 'None'.
 
     - name: horizontal
-      title: Horizontal Layout
+      title: Horizontal layout
       type: Bool
       default: false
       description:
@@ -247,7 +247,7 @@ options:
             Transparency level of arc lines. 0 = fully transparent (invisible), 1 = fully opaque. Lower values reduce visual clutter in dense networks.
 
     - name: directed
-      title: Directed Network
+      title: Directed network
       type: Bool
       default: false
       description:
@@ -255,7 +255,7 @@ options:
             Whether to treat the network as directed (edges have direction from source to target) or undirected (edges represent bidirectional relationships).
 
     - name: aggregateEdges
-      title: Aggregate Duplicate Edges
+      title: Aggregate duplicate edges
       type: Bool
       default: true
       description:
@@ -307,7 +307,7 @@ options:
             Only applies when Color Nodes by Group is enabled.
 
     - name: colorByGroup
-      title: Color Nodes by Group
+      title: Color nodes by group
       type: Bool
       default: false
       description:
@@ -315,7 +315,7 @@ options:
             When a grouping variable is specified, whether to color-code nodes by their group membership. Requires a group variable.
 
     - name: showStats
-      title: Show Network Statistics
+      title: Network statistics
       type: Bool
       default: false
       description:
@@ -323,7 +323,7 @@ options:
             Whether to display network statistics including number of nodes, edges, density, and centrality measures.
 
     - name: showLegend
-      title: Show Legend
+      title: Legend
       type: Bool
       default: false
       description:
@@ -349,7 +349,7 @@ options:
             Optional title to display above the arc diagram. Leave empty for no title.
 
     - name: showSummary
-      title: Show Copy-Ready Summary
+      title: Copy-ready summary
       type: Bool
       default: true
       description:
@@ -357,7 +357,7 @@ options:
             Whether to display a natural-language summary paragraph suitable for copying into reports or publications. Includes network overview, key findings, and grouping information.
 
     - name: showAssumptions
-      title: Show Assumptions & Guidelines
+      title: Assumptions & guidelines
       type: Bool
       default: true
       description:
@@ -365,7 +365,7 @@ options:
             Whether to display detailed assumptions, interpretation guidelines, and common pitfalls panel. Includes network requirements, centrality measure explanations, and important notes for proper interpretation.
 
     - name: showGlossary
-      title: Show Glossary
+      title: Glossary
       type: Bool
       default: false
       description:

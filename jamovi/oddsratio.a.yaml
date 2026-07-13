@@ -99,7 +99,7 @@ options:
               Specify which level of the diagnostic predictor represents the positive case.
 
     - name: usePenalized
-      title: Use Firth Penalized Logistic Regression
+      title: Use Firth penalized logistic regression
       type: Bool
       default: false
       description:
@@ -111,7 +111,7 @@ options:
 # Nomogram ----
 
     - name: showNomogram
-      title: Show Diagnostic Nomogram
+      title: Diagnostic nomogram
       type: Bool
       default: false
       description:
@@ -120,7 +120,7 @@ options:
             probabilities using likelihood ratios calculated from the data.
 
     - name: showExplanations
-      title: "Show Educational Explanations"
+      title: "Educational explanations"
       type: Bool
       default: false
       description:

@@ -164,7 +164,7 @@ options:
 
     # Options
     - name: pp
-      title: Prior Probability (prevalence)
+      title: Prior probability (prevalence)
       type: Bool
       default: false
       description:
@@ -176,7 +176,7 @@ options:
             Enable custom prior probability (prevalence) for predictive value calculations.
 
     - name: pprob
-      title: Prior Probability (prevalence)
+      title: Prior probability (prevalence)
       type: Number
       default: 0.300
       min: 0.001
@@ -190,7 +190,7 @@ options:
             Requires a value between 0.001 and 0.999, default 0.300.
 
     - name: od
-      title: Original Data
+      title: Original data
       type: Bool
       default: false
       description:
@@ -208,7 +208,7 @@ options:
       default: false
 
     - name: plot
-      title: 'Comparison Plot'
+      title: "Comparison plot"
       type: Bool
       default: false
       description:
@@ -219,7 +219,7 @@ options:
             Generate comparison plot showing test performance metrics.
 
     - name: excludeIndeterminate
-      title: Exclude Indeterminate/Equivocal Levels
+      title: Exclude indeterminate/Equivocal levels
       type: Bool
       default: false
       description:
@@ -229,7 +229,7 @@ options:
             If TRUE, drop rows where test/gold values are neither the specified positive level nor a clear negative level to avoid inflating specificity/NPV from equivocal results.
 
     - name: radarplot
-      title: 'Radar Plot'
+      title: "Radar plot"
       type: Bool
       default: false
       description:
@@ -240,7 +240,7 @@ options:
             Generate radar plot for comprehensive test comparison visualization.
 
     - name: heatmap
-      title: 'Concordance Heatmap'
+      title: "Concordance heatmap"
       type: Bool
       default: false
       description:
@@ -252,7 +252,7 @@ options:
             Generate concordance heatmap comparing per-case test results against gold standard.
 
     - name: opa
-      title: 'Overall Percent Agreement with CI'
+      title: "Overall percent agreement with CI"
       type: Bool
       default: false
       description:
@@ -314,7 +314,7 @@ options:
             Optional stratification variable for subgroup-specific diagnostic accuracy analysis.
 
     - name: statComp
-      title: 'Statistical Comparison'
+      title: "Statistical comparison"
       type: Bool
       default: false
       description:
@@ -327,7 +327,7 @@ options:
             Perform statistical comparison between tests (McNemar's test and confidence intervals for differences).
 
     - name: showSummary
-      title: 'Show Summary'
+      title: "Summary"
       type: Bool
       default: false
       description:
@@ -339,7 +339,7 @@ options:
             Boolean to show natural language summary of statistical comparisons.
 
     - name: showExplanations
-      title: 'Show Explanations'
+      title: "Explanations"
       type: Bool
       default: false
       description:
@@ -351,7 +351,7 @@ options:
             Boolean to show explanations, glossary, and educational content.
 
     - name: showReportSentence
-      title: 'Show Report Sentence'
+      title: "Report sentence"
       type: Bool
       default: false
       description:

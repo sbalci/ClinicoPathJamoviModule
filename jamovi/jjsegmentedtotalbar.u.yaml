@@ -67,7 +67,7 @@ children:
         name: show_plot
       - type: ComboBox
         name: plot_type
-        label: Plot Type
+        label: Plot type
         enable: (show_plot)
   - type: CollapseBox
     label: Clinical Analysis Templates
@@ -79,7 +79,7 @@ children:
         children:
           - type: ComboBox
             name: analysis_preset
-            label: Clinical Analysis Template
+            label: Clinical analysis template
           - type: Label
             label: Choose a template for common clinical analyses.
             margin: small
@@ -94,16 +94,16 @@ children:
         children:
           - type: ComboBox
             name: chart_style
-            label: Chart Style
+            label: Chart style
           - type: ComboBox
             name: color_palette
-            label: Color Palette
+            label: Color palette
           - type: ComboBox
             name: orientation
-            label: Bar Orientation
+            label: Bar orientation
           - type: ComboBox
             name: sort_categories
-            label: Sort Categories
+            label: Sort categories
   - type: CollapseBox
     label: Chart Labels and Titles
     collapsed: true
@@ -142,14 +142,14 @@ children:
         children:
           - type: CheckBox
             name: show_percentages
-            label: Show Percentages
+            label: Percentages
           - type: ComboBox
             name: percentage_format
             enable: (show_percentages)
-            label: Percentage Format
+            label: Percentage format
           - type: CheckBox
             name: show_counts
-            label: Show Raw Counts
+            label: Raw counts
           - type: TextBox
             name: label_threshold
             format: number
@@ -169,7 +169,7 @@ children:
             style: list-inline
           - type: CheckBox
             name: show_statistical_tests
-            label: Perform Chi-square Test
+            label: Perform chi-square test
           - type: TextBox
             name: confidence_level
             enable: (show_statistical_tests)
@@ -185,7 +185,7 @@ children:
         children:
           - type: ComboBox
             name: legend_position
-            label: Legend Position
+            label: Legend position
           - type: TextBox
             name: bar_width
             format: number
@@ -193,11 +193,11 @@ children:
             label: Bar Width
           - type: CheckBox
             name: add_outline
-            label: Add Segment Outlines
+            label: Add segment outlines
           - type: ComboBox
             name: outline_color
             enable: (add_outline)
-            label: Outline Color
+            label: Outline color
   - type: CollapseBox
     label: Plot Dimensions
     collapsed: true
@@ -218,7 +218,7 @@ children:
             label: Plot Height (inches)
           - type: CheckBox
             name: export_ready
-            label: Export Ready
+            label: Export ready
   - type: CollapseBox
     label: Flerlage Plot Options
     collapsed: true
@@ -233,7 +233,7 @@ children:
             style: list-inline
           - type: CheckBox
             name: flerlage_show_labels
-            label: Show Value Labels
+            label: Value labels
             enable: (plot_type == 'flerlage')
           - type: TextBox
             name: flerlage_label_size
@@ -242,7 +242,7 @@ children:
             enable: (plot_type == 'flerlage' && flerlage_show_labels)
           - type: ComboBox
             name: flerlage_label_color
-            label: Label Color
+            label: Label color
             enable: (plot_type == 'flerlage' && flerlage_show_labels)
           - type: TextBox
             name: flerlage_alpha
@@ -251,7 +251,7 @@ children:
             enable: (plot_type == 'flerlage')
           - type: ComboBox
             name: flerlage_box_color
-            label: Background Box Color
+            label: Background box color
             enable: (plot_type == 'flerlage')
   - type: CollapseBox
     label: Advanced Options
@@ -263,6 +263,6 @@ children:
         children:
           - type: CheckBox
             name: exclude_missing
-            label: Exclude Missing Values
+            label: Exclude missing values
           - type: CheckBox
             name: showExplanations

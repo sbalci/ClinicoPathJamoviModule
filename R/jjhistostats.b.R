@@ -16,20 +16,25 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
         inherit = jjhistostatsBase,
         private = list(
 
+        # Option overrides for clinical presets (jamovi options are read-only at runtime;
+        # presets record overrides here and reads go through private$.option()).
+        overrides = list(),
+        .option = function(option) {
+            if (option %in% names(private$overrides)) return(private$overrides[[option]])
+            opt_obj <- self$options$option(option)
+            if (!is.null(opt_obj)) return(opt_obj$value)
+            return(NULL)
+        },
+
             # Cache for processed data and options to avoid redundant computation
             .processedData = NULL,
             .processedOptions = NULL,
             .processedAesthetics = NULL,
             .optionsHash = NULL,
 
-            # TODO (correctness): This helper mutates `self$options$<name>` directly
-            #   (L34/L39/L44/L49). jamovi options are read-only - these assignments
-            #   silently no-op or raise a runtime error in newer jamovi. The JS-side
-            #   `onChange_clinicalPreset` handler at jamovi/js/jjhistostats.events.js
-            #   (L3-76) is the correct mechanism and already wires the same presets,
-            #   making this R-side helper redundant dead code. Either remove the
-            #   function and its `.init()` caller (L57), or convert it to read-only
-            #   logic that returns derived option values without mutation.
+            # Clinical presets record their settings in private$overrides instead of writing
+            # back into the read-only jamovi option objects; reads go through private$.option().
+            # (2026-07-13 audit fix.)
 
             # Apply clinical preset configurations
             .applyClinicalPreset = function() {
@@ -41,24 +46,24 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # Apply preset-specific configurations
                 if (preset == 'lab_values') {
                     # Lab Values: parametric with centrality line
-                    self$options$typestatistics <- 'parametric'
-                    self$options$centralityline <- TRUE
-                    self$options$resultssubtitle <- TRUE
+                    private$overrides[["typestatistics"]] <- 'parametric'
+                    private$overrides[["centralityline"]] <- TRUE
+                    private$overrides[["resultssubtitle"]] <- TRUE
                 } else if (preset == 'biomarkers') {
                     # Biomarker Distribution: nonparametric, robust
-                    self$options$typestatistics <- 'nonparametric'
-                    self$options$centralityline <- TRUE
-                    self$options$resultssubtitle <- TRUE
+                    private$overrides[["typestatistics"]] <- 'nonparametric'
+                    private$overrides[["centralityline"]] <- TRUE
+                    private$overrides[["resultssubtitle"]] <- TRUE
                 } else if (preset == 'patient_chars') {
                     # Patient Characteristics: parametric for age, BMI
-                    self$options$typestatistics <- 'parametric'
-                    self$options$centralityline <- TRUE
-                    self$options$resultssubtitle <- TRUE
+                    private$overrides[["typestatistics"]] <- 'parametric'
+                    private$overrides[["centralityline"]] <- TRUE
+                    private$overrides[["resultssubtitle"]] <- TRUE
                 } else if (preset == 'pathology_scores') {
                     # Pathology Scores: nonparametric for ordinal data
-                    self$options$typestatistics <- 'nonparametric'
-                    self$options$centralityline <- TRUE
-                    self$options$resultssubtitle <- TRUE
+                    private$overrides[["typestatistics"]] <- 'nonparametric'
+                    private$overrides[["centralityline"]] <- TRUE
+                    private$overrides[["resultssubtitle"]] <- TRUE
                 }
             },
 
@@ -120,12 +125,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 options_to_hash <- list(
                     dep = self$options$dep,
                     grvar = self$options$grvar,
-                    typestatistics = self$options$typestatistics,
+                    typestatistics = private$.option("typestatistics"),
                     changebinwidth = self$options$changebinwidth,
                     binwidth = self$options$binwidth,
-                    centralityline = self$options$centralityline,
+                    centralityline = private$.option("centralityline"),
                     centralitytype = self$options$centralitytype,
-                    resultssubtitle = self$options$resultssubtitle,
+                    resultssubtitle = private$.option("resultssubtitle"),
                     enableOneSampleTest = self$options$enableOneSampleTest,
                     test.value = self$options$test.value,
                     conf.level = self$options$conf.level,
@@ -570,7 +575,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 )
 
                 # Process core analysis options
-                typestatistics <- self$options$typestatistics
+                typestatistics <- private$.option("typestatistics")
                 dep <- self$options$dep
                 
                 # Process binwidth
@@ -587,8 +592,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     typestatistics = typestatistics,
                     dep = dep,
                     binwidth = binwidth,
-                    resultssubtitle = self$options$resultssubtitle,
-                    centralityline = self$options$centralityline,
+                    resultssubtitle = private$.option("resultssubtitle"),
+                    centralityline = private$.option("centralityline"),
                     enableOneSampleTest = self$options$enableOneSampleTest,
                     test.value = self$options$test.value,
                     conf.level = self$options$conf.level,

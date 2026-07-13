@@ -10,10 +10,10 @@ children:
     children:
       - type: ComboBox
         name: clinicalpreset
-        label: Analysis Type
+        label: Analysis type
       - type: CheckBox
         name: showexplanations
-        label: Show Clinical Guidance
+        label: Clinical guidance
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
@@ -59,7 +59,7 @@ children:
             children:
               - type: CheckBox
                 name: paired
-                label: Paired/Matched Data (McNemar's Test)
+                label: Paired/Matched data (McNemar's test)
       - type: Label
         label: Test Method
         fitToGrid: true
@@ -71,10 +71,10 @@ children:
                 name: typestatistics
               - type: CheckBox
                 name: proportiontest
-                label: Include Proportion Tests
+                label: Include proportion tests
               - type: CheckBox
                 name: bfmessage
-                label: Show Bayes Factor (for Bayesian)
+                label: Bayes factor (for Bayesian)
       - type: Label
         label: Advanced Parameters
         fitToGrid: true
@@ -103,13 +103,13 @@ children:
             children:
               - type: CheckBox
                 name: originaltheme
-                label: Use ggstatsplot Theme
+                label: Use ggstatsplot theme
               - type: CheckBox
                 name: resultssubtitle
-                label: Show Statistics in Plot Subtitle
+                label: Statistics in plot subtitle
               - type: CheckBox
                 name: messages
-                label: Show Console Messages
+                label: Console messages
               - type: CheckBox
                 name: addGGPubrDonut
       - type: Label
@@ -121,7 +121,7 @@ children:
             children:
               - type: ComboBox
                 name: label
-                label: Slice Label Type
+                label: Slice label type
               - type: TextBox
                 name: digits
                 label: Decimal Places (Statistics)
@@ -135,7 +135,7 @@ children:
             children:
               - type: ComboBox
                 name: ggpubrDonutPalette
-                label: Donut Color Palette
+                label: Donut color palette
                 enable: (addGGPubrDonut)
   - type: CollapseBox
     label: Report & Explanations
@@ -150,10 +150,10 @@ children:
             children:
               - type: CheckBox
                 name: showSummary
-                label: Show Analysis Summary
+                label: Analysis summary
               - type: CheckBox
                 name: showAssumptions
-                label: Show Assumptions & Warnings
+                label: Assumptions & warnings
               - type: CheckBox
                 name: showInterpretation
-                label: Show Interpretation Guide
+                label: Interpretation guide

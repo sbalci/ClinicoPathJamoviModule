@@ -122,7 +122,7 @@ options:
             The level representing a positive result for Test 3.
 
     - name: showIndividual
-      title: Show Individual Test Statistics
+      title: Individual test statistics
       type: Bool
       default: false
       description:
@@ -132,7 +132,7 @@ options:
             Boolean to show individual test performance tables.
 
     - name: showFrequency
-      title: Show Frequency Tables
+      title: Frequency tables
       type: Bool
       default: false
       description:
@@ -142,7 +142,7 @@ options:
             Boolean to show frequency tables.
 
     - name: showBarPlot
-      title: Show Bar Chart
+      title: Bar chart
       type: Bool
       default: false
       description:
@@ -152,7 +152,7 @@ options:
             Boolean to display bar chart visualization.
 
     - name: showHeatmap
-      title: Show Heatmap
+      title: Heatmap
       type: Bool
       default: false
       description:
@@ -162,7 +162,7 @@ options:
             Boolean to display heatmap visualization.
 
     - name: showForest
-      title: Show Forest Plot
+      title: Forest plot
       type: Bool
       default: false
       description:
@@ -172,7 +172,7 @@ options:
             Boolean to display forest plot.
 
     - name: showDecisionTree
-      title: Show Decision Tree
+      title: Decision tree
       type: Bool
       default: false
       description:
@@ -182,7 +182,7 @@ options:
             Boolean to display decision tree visualization.
 
     - name: showRecommendation
-      title: Show Optimal Pattern Recommendation
+      title: Optimal pattern recommendation
       type: Bool
       default: false
       description:
@@ -192,7 +192,7 @@ options:
             Boolean to show optimal pattern recommendation table.
 
     - name: addPatternToData
-      title: Add Test Pattern to Data
+      title: Add test pattern to data
       type: Bool
       default: false
       description:

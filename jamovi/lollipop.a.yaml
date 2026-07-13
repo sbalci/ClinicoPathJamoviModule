@@ -102,7 +102,7 @@ options:
             The categorical variable for grouping (lollipop categories).
 
     - name: useHighlight
-      title: 'Use Highlight'
+      title: "Use highlight"
       type: Bool
       default: false
       description:
@@ -165,7 +165,7 @@ options:
             Chart orientation (vertical or horizontal lollipops).
 
     - name: showValues
-      title: 'Show Values'
+      title: "Values"
       type: Bool
       default: false
       description:
@@ -173,7 +173,7 @@ options:
             Whether to display value labels on the lollipops.
 
     - name: showMean
-      title: 'Show Mean Line'
+      title: "Mean line"
       type: Bool
       default: false
       description:
@@ -260,7 +260,7 @@ options:
             Starting point for lollipop stems (default is 0).
 
     - name: conditionalColor
-      title: 'Conditional Coloring'
+      title: "Conditional coloring"
       type: Bool
       default: false
       description:

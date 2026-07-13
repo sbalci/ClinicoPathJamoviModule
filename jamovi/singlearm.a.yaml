@@ -48,7 +48,7 @@ options:
 
 
     - name: tint
-      title: Using Dates to Calculate Survival Time
+      title: Using dates to calculate survival time
       type: Bool
       default: false
       description: >-
@@ -221,7 +221,7 @@ options:
 
 
     - name: uselandmark
-      title: Use Landmark Time
+      title: Use landmark time
       type: Bool
       default: false
       description: >-
@@ -241,7 +241,7 @@ options:
         can only be given to patients who survive long enough to receive them.
 
     - name: sc
-      title: "Kaplan-Meier Survival Plot"
+      title: "Kaplan-Meier survival plot"
       type: Bool
       default: false
       description: >-
@@ -250,7 +250,7 @@ options:
         visualizing survival trends in your data.
 
     - name: kmunicate
-      title: "KMunicate-Style Plot"
+      title: "KMunicate-style plot"
       type: Bool
       default: false
       description: >-
@@ -260,7 +260,7 @@ options:
 
 
     - name: ce
-      title: Cumulative Events
+      title: Cumulative events
       type: Bool
       default: false
       description: >-
@@ -270,7 +270,7 @@ options:
 
 
     - name: ch
-      title: Cumulative Hazard
+      title: Cumulative hazard
       type: Bool
       default: false
       description: >-
@@ -314,7 +314,7 @@ options:
 
 
     - name: multievent
-      title: "Multiple Event Levels"
+      title: "Multiple event levels"
       type: Bool
       default: false
       description: >-
@@ -332,7 +332,7 @@ options:
         probabilities and are useful for assessing the precision of the estimates.
 
     - name: risktable
-      title: risktable
+      title: Risktable
       type: Bool
       default: false
       description: >-
@@ -342,7 +342,7 @@ options:
         survival characteristics of your data.
 
     - name: censored
-      title: censored
+      title: Censored
       type: Bool
       default: false
       description: >-
@@ -370,7 +370,7 @@ options:
 
 
     - name: person_time
-      title: "Calculate Person-Time Metrics"
+      title: "Calculate person-time metrics"
       type: Bool
       default: false
       description: >-
@@ -396,7 +396,7 @@ options:
         1000 for rates per 1000 person-years).
 
     - name: baseline_hazard
-      title: "Baseline Hazard Analysis"
+      title: "Baseline hazard analysis"
       type: Bool
       default: false
       description: >-
@@ -404,7 +404,7 @@ options:
         instantaneous risk of events changes over time in your study population.
 
     - name: hazard_smoothing
-      title: "Smoothed Hazard Function"
+      title: "Smoothed hazard function"
       type: Bool
       default: false
       description: >-
@@ -416,7 +416,7 @@ options:
 
 
     - name: showExplanations
-      title: "Show Analysis Explanations"
+      title: "Analysis explanations"
       type: Bool
       default: false
       description: >-
@@ -424,7 +424,7 @@ options:
         interpret the statistical methods and results.
 
     - name: showSummaries
-      title: "Show Natural Language Summaries"
+      title: "Natural language summaries"
       type: Bool
       default: false
       description: >-
@@ -433,7 +433,7 @@ options:
         results. Turn off to reduce visual clutter when summaries are not needed.
 
     - name: advancedDiagnostics
-      title: "Advanced Diagnostics & Quality Assessment"
+      title: "Advanced diagnostics & quality assessment"
       type: Bool
       default: false
       description: >-
