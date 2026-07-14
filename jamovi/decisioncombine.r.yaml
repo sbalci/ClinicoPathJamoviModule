@@ -249,9 +249,13 @@ items:
       renderFun: .plotBarChart
       clearWith:
         - gold
+        - goldPositive
         - test1
+        - test1Positive
         - test2
+        - test2Positive
         - test3
+        - test3Positive
         - filterStatistic
         - filterPattern
       description: 'Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations'
@@ -265,9 +269,13 @@ items:
       renderFun: .plotHeatmap
       clearWith:
         - gold
+        - goldPositive
         - test1
+        - test1Positive
         - test2
+        - test2Positive
         - test3
+        - test3Positive
         - filterStatistic
         - filterPattern
       description: 'Color-coded heatmap showing all diagnostic metrics for each test pattern'
@@ -281,15 +289,19 @@ items:
       renderFun: .plotForest
       clearWith:
         - gold
+        - goldPositive
         - test1
+        - test1Positive
         - test2
+        - test2Positive
         - test3
+        - test3Positive
         - filterStatistic
         - filterPattern
       description: 'Forest plot displaying 95 percent confidence intervals for key diagnostic metrics'
 
     - name: decisionTreePlot
-      title: 'Decision Tree - Test Combination Strategy'
+      title: 'Decision Space: Sensitivity vs Specificity'
       type: Image
       width: 900
       height: 700
@@ -297,12 +309,16 @@ items:
       renderFun: .plotDecisionTree
       clearWith:
         - gold
+        - goldPositive
         - test1
+        - test1Positive
         - test2
+        - test2Positive
         - test3
+        - test3Positive
         - filterStatistic
         - filterPattern
-      description: 'Hierarchical decision tree showing test patterns with performance-based recommendations'
+      description: 'Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden''s J'
 
     - name: recommendationTable
       title: 'Optimal Pattern Recommendation'

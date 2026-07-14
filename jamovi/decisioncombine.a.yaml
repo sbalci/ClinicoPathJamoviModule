@@ -84,6 +84,7 @@ options:
     - name: test2
       title: Test 2 (Required for Combinations)
       type: Variable
+      default: NULL
       suggested: [ nominal ]
       permitted: [ factor ]
       description:
@@ -96,6 +97,7 @@ options:
       title: Test 2 Positive Level
       type: Level
       variable: (test2)
+      allowNone: true
       description:
           R: >
             The level representing a positive result for Test 2.
@@ -172,14 +174,14 @@ options:
             Boolean to display forest plot.
 
     - name: showDecisionTree
-      title: Decision tree
+      title: Decision space (sensitivity vs specificity)
       type: Bool
       default: false
       description:
           ui: >
-            Display hierarchical decision tree visualization showing test combination patterns with performance-based recommendations.
+            Display a decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J.
           R: >
-            Boolean to display decision tree visualization.
+            Boolean to display the decision-space (sensitivity vs specificity) scatter plot.
 
     - name: showRecommendation
       title: Optimal pattern recommendation
@@ -232,9 +234,10 @@ options:
       default: all
       description:
           ui: >
-            Filter tables and plots to show only the selected diagnostic statistic.
+            Filter the plots (bar chart, forest plot, and heatmap) to show only the selected
+            diagnostic statistic. The performance tables always show every statistic.
           R: >
-            Character indicating which statistic to display (default: all).
+            Character indicating which statistic to display in the plots (default: all).
 
     - name: filterPattern
       title: Filter by Pattern Type
@@ -246,23 +249,15 @@ options:
           title: All Tests Positive
         - name: allNegative
           title: All Tests Negative
-        - name: majorityPositive
-          title: Majority Positive
-        - name: majorityNegative
-          title: Majority Negative
         - name: mixed
           title: Mixed/Discordant
-        - name: parallel
-          title: Parallel Strategy
-        - name: serial
-          title: Serial Strategy
-        - name: majority
-          title: Majority Rule Strategy
       default: all
       description:
           ui: >
-            Filter tables and plots by pattern type. Options include all positive (+/+, +/+/+), all negative (-/-, -/-/-), majority positive/negative, mixed results, and clinical strategies (Parallel, Serial, Majority rule).
+            Filter the bar chart and heatmap by pattern type: all patterns, all tests positive
+            (+/+, +/+/+), all tests negative (-/-, -/-/-), or mixed/discordant patterns. The
+            performance tables always show every pattern.
           R: >
-            Character indicating which pattern type to display (default: all).
+            Character indicating which pattern type to display in the plots (default: all).
 
 ...
