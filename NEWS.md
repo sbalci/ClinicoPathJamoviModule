@@ -1,5 +1,36 @@
 # ClinicoPath News
 
+# ClinicoPath 1.0.0 — shipping-function bug-fix pass (2026-07-14)
+
+Post-release correctness pass over the OncoPath shipping (submodule-distributed) analyses. These
+fixes change reported statistics for the affected analyses and should be verified against reference
+datasets.
+
+## Fixed
+
+- **Diagnostic Test Meta-Analysis (`diagnosticmeta`):** corrected the delta-method confidence-interval
+  covariance sign for the positive/negative likelihood ratios and the diagnostic odds ratio (the
+  sensitivity–specificity covariance was added instead of subtracted); fixed the forest-plot pooled
+  diamond interval (removed a double logit→probability transform) and serialized the pooled estimate
+  into plot state so the diamond persists after reopening a saved `.omv`; meta-regression now reports
+  every covariate contrast rather than only the first; removed a dead, never-displayed "welcome"
+  output; completed `clearWith` so palette, confidence-level and zero-cell-correction changes refresh
+  results.
+- **IHC Heterogeneity (`ihcheterogeneity`):** corrected the intraclass-correlation index so the value
+  matches its ICC(3,1) label (it was returning ICC(3,k)); fixed row-alignment between the
+  whole-section/spatial-region vectors and the NA-filtered biopsy data; corrected the Hedges' g
+  small-sample degrees-of-freedom factor; surfaced data-quality and sampling-strategy warnings that
+  were being silently overwritten before display; guarded the coefficient of variation and relative
+  bias against near-zero/negative means; relabelled the effect-size column to "Hedges' g".
+- **Swimmer Plot (`swimmerplot`):** fixed the >1000-row data.table fast path, which created a phantom
+  censor column and could flip censoring status; corrected duplicated variable emission in generated
+  syntax (`asSource`); added a fallback for the reverse-Kaplan–Meier median; completed `clearWith`;
+  reset transient notices each run.
+- **Treatment Response Waterfall (`waterfall`):** fixed all-missing patients being mis-classified as
+  progressive disease (`min()` over an empty set returned `Inf`); reset notices each run so they no
+  longer accumulate; use original (unescaped) variable names as data-frame keys so variables with
+  spaces/special characters work; removed dead helper code; completed `clearWith`.
+
 # ClinicoPath 1.0.0 (2026-07-13)
 
 ## First stable release
