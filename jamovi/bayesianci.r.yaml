@@ -9,6 +9,14 @@ items:
       type: Html
       visible: true
 
+    - name: notices
+      title: 'Notices'
+      type: Html
+      clearWith:
+        - outcome
+        - outcome_type
+        - additional_levels
+
     - name: dataInfo
       title: 'Data Summary'
       type: Table
@@ -16,6 +24,7 @@ items:
       rows: 1
       clearWith:
         - outcome
+        - outcome_type
         - group_var
       columns:
         - name: characteristic
@@ -31,6 +40,7 @@ items:
       visible: true
       rows: 1
       clearWith:
+        - outcome_type
         - prior_type
         - beta_alpha
         - beta_beta
@@ -65,8 +75,16 @@ items:
       clearWith:
         - posterior_summary
         - outcome
+        - outcome_type
         - group_var
         - mcmc_method
+        - prior_type
+        - beta_alpha
+        - beta_beta
+        - normal_mean
+        - normal_sd
+        - gamma_shape
+        - gamma_rate
       columns:
         - name: parameter
           title: 'Parameter'
@@ -99,9 +117,17 @@ items:
       rows: 1
       clearWith:
         - outcome
+        - outcome_type
         - credible_level
         - additional_levels
         - mcmc_method
+        - prior_type
+        - beta_alpha
+        - beta_beta
+        - normal_mean
+        - normal_sd
+        - gamma_shape
+        - gamma_rate
       columns:
         - name: parameter
           title: 'Parameter'
@@ -133,7 +159,15 @@ items:
       clearWith:
         - hpd_intervals
         - outcome
+        - outcome_type
         - credible_level
+        - prior_type
+        - beta_alpha
+        - beta_beta
+        - normal_mean
+        - normal_sd
+        - gamma_shape
+        - gamma_rate
       columns:
         - name: parameter
           title: 'Parameter'
@@ -166,7 +200,15 @@ items:
       clearWith:
         - credible_vs_confidence
         - outcome
+        - outcome_type
         - credible_level
+        - prior_type
+        - beta_alpha
+        - beta_beta
+        - normal_mean
+        - normal_sd
+        - gamma_shape
+        - gamma_rate
       columns:
         - name: parameter
           title: 'Parameter'
@@ -237,6 +279,7 @@ items:
         - sensitivity_analysis
         - prior_type
         - outcome
+        - credible_level
       columns:
         - name: prior_specification
           title: 'Prior Specification'
@@ -297,6 +340,7 @@ items:
       clearWith:
         - clinical_interpretation
         - outcome
+        - outcome_type
         - credible_level
       columns:
         - name: clinical_aspect

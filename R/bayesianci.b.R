@@ -2,6 +2,108 @@ bayesianciClass <- R6::R6Class(
     "bayesianciClass",
     inherit = bayesianciBase,
     private = list(
+
+        # ---- User-facing notices (rendered as HTML to avoid Notice serialization issues) ----
+        .noticeList = list(),
+
+        .safeHtmlOutput = function(text) {
+            if (is.null(text) || length(text) == 0) return("")
+            text <- as.character(text)
+            text <- gsub("&", "&amp;", text, fixed = TRUE)
+            text <- gsub("<", "&lt;", text, fixed = TRUE)
+            text <- gsub(">", "&gt;", text, fixed = TRUE)
+            text <- gsub("\"", "&quot;", text, fixed = TRUE)
+            text <- gsub("'", "&#x27;", text, fixed = TRUE)
+            text
+        },
+
+        .addNotice = function(type, title, content) {
+            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                type = type, title = title, content = content
+            )
+        },
+
+        .renderNotices = function() {
+            if (length(private$.noticeList) == 0) {
+                self$results$notices$setContent("")
+                return()
+            }
+
+            typeStyles <- list(
+                ERROR   = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5"),
+                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047"),
+                INFO    = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd")
+            )
+
+            html <- "<div style='margin: 10px 0;'>"
+            for (notice in private$.noticeList) {
+                style <- typeStyles[[notice$type]]
+                if (is.null(style)) style <- typeStyles$INFO
+                html <- paste0(html,
+                    "<div style='background-color: ", style$bgcolor, "; ",
+                    "border-left: 4px solid ", style$border, "; ",
+                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
+                    "<strong style='color: ", style$color, ";'>",
+                    private$.safeHtmlOutput(notice$title), "</strong><br>",
+                    "<span style='color: #374151;'>",
+                    private$.safeHtmlOutput(notice$content), "</span>",
+                    "</div>"
+                )
+            }
+            html <- paste0(html, "</div>")
+            self$results$notices$setContent(html)
+        },
+
+        # Coerce a binary outcome (NAs already removed) to a numeric 0/1 vector.
+        # Returns NULL if it cannot be interpreted as binary (needs exactly two distinct values).
+        .coerceBinaryOutcome = function(x) {
+            if (is.factor(x)) {
+                # Numeric-coded factor (e.g. levels "0"/"1"): honor the underlying codes
+                num <- suppressWarnings(as.numeric(as.character(x)))
+                if (!any(is.na(num)) && all(num %in% c(0, 1))) {
+                    return(num)
+                }
+                # Non-numeric factor: require exactly two observed levels; map 2nd level -> 1
+                f <- droplevels(factor(x))
+                if (nlevels(f) != 2L) {
+                    return(NULL)
+                }
+                return(as.integer(f) - 1L)
+            }
+            num <- suppressWarnings(as.numeric(x))
+            if (all(!is.na(num)) && all(num %in% c(0, 1))) {
+                return(num)
+            }
+            present <- unique(num[!is.na(num)])
+            if (length(present) != 2L) {
+                return(NULL)
+            }
+            as.numeric(num == max(num, na.rm = TRUE))
+        },
+
+        # Parse the free-text 'additional_levels' option, warning on invalid tokens.
+        .parseAdditionalLevels = function(credible_level) {
+            additional_levels <- self$options$additional_levels
+            levels <- c(credible_level)
+            if (!is.null(additional_levels) && nzchar(trimws(additional_levels))) {
+                tokens <- trimws(unlist(strsplit(additional_levels, ",")))
+                tokens <- tokens[nzchar(tokens)]
+                parsed <- suppressWarnings(as.numeric(tokens))
+                valid <- !is.na(parsed) & parsed > 0 & parsed < 1
+                if (any(!valid)) {
+                    bad <- tokens[!valid]
+                    private$.addNotice(
+                        "WARNING",
+                        "Invalid additional credible levels ignored",
+                        paste0("These entries were not numbers strictly between 0 and 1 and were skipped: ",
+                               paste(bad, collapse = ", "), ".")
+                    )
+                }
+                levels <- c(levels, parsed[valid])
+            }
+            sort(unique(levels))
+        },
+
         .init = function() {
             if (is.null(self$data) || nrow(self$data) == 0) {
                 self$results$instructions$setContent(
@@ -64,8 +166,15 @@ bayesianciClass <- R6::R6Class(
         },
         
         .run = function() {
-            # TODO (UX): File-wide - silent `return()` validation paths at lines 68 (outcome unset), 76 (outcome not in data), 81 (all-NA outcome), and 141 (n < 2 after NA removal) leave the user with no feedback about why nothing rendered. Surface via `jmvcore::reject(...)` or an HTML notice per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md so users understand which precondition failed.
+            # Reset notices so messages don't accumulate across runs
+            private$.noticeList <- list()
+
             if (is.null(self$options$outcome)) {
+                private$.addNotice(
+                    "INFO", "No outcome selected",
+                    "Select an outcome variable to compute Bayesian credible intervals."
+                )
+                private$.renderNotices()
                 return()
             }
 
@@ -74,14 +183,24 @@ bayesianciClass <- R6::R6Class(
             outcome_var <- self$options$outcome
 
             if (!(outcome_var %in% names(data))) {
+                private$.addNotice(
+                    "WARNING", "Outcome variable not found",
+                    "The selected outcome variable is not present in the data."
+                )
+                private$.renderNotices()
                 return()
             }
 
             outcome_data <- data[[outcome_var]]
             if (all(is.na(outcome_data))) {
+                private$.addNotice(
+                    "WARNING", "No valid outcome data",
+                    "The selected outcome variable contains only missing values."
+                )
+                private$.renderNotices()
                 return()
             }
-            
+
             # Populate data information
             private$.populateDataInfo(data, outcome_data)
             
@@ -92,6 +211,9 @@ bayesianciClass <- R6::R6Class(
             if (self$options$posterior_plots) {
                 # Plots will be handled by render functions
             }
+
+            # Surface any accumulated user-facing notices
+            private$.renderNotices()
         },
         
         .populateDataInfo = function(data, outcome_data) {
@@ -101,26 +223,39 @@ bayesianciClass <- R6::R6Class(
             n_total <- length(outcome_data)
             n_valid <- sum(!is.na(outcome_data))
             n_missing <- n_total - n_valid
-            
+
+            outcome_nona <- outcome_data[!is.na(outcome_data)]
+
+            # Data range display (computed per type to avoid coercing factors)
+            range_value <- if (outcome_type == "continuous") {
+                sprintf("%.3f - %.3f", min(outcome_nona, na.rm = TRUE), max(outcome_nona, na.rm = TRUE))
+            } else if (outcome_type == "binary") {
+                sprintf("%d unique values", length(unique(outcome_nona)))
+            } else {
+                "Count data"
+            }
+
+            # Mean/Proportion display. For binary outcomes use a safe 0/1 coercion so
+            # factor level indices (1, 2, ...) are not mistaken for the proportion.
+            mean_prop_value <- if (outcome_type == "continuous") {
+                sprintf("%.4f", mean(outcome_nona, na.rm = TRUE))
+            } else if (outcome_type == "binary") {
+                binary_vals <- private$.coerceBinaryOutcome(outcome_nona)
+                if (is.null(binary_vals)) "NA (non-binary values)" else sprintf("%.4f", mean(binary_vals))
+            } else {
+                sprintf("%.2f", mean(outcome_nona, na.rm = TRUE))
+            }
+
             info_data <- data.frame(
-                characteristic = c("Sample Size", "Valid Observations", "Missing Values", 
+                characteristic = c("Sample Size", "Valid Observations", "Missing Values",
                                  "Outcome Type", "Data Range", "Mean/Proportion"),
                 value = c(
                     as.character(n_total),
                     as.character(n_valid),
                     as.character(n_missing),
                     tools::toTitleCase(outcome_type),
-                    ifelse(outcome_type == "continuous", 
-                           sprintf("%.3f - %.3f", min(outcome_data, na.rm = TRUE), max(outcome_data, na.rm = TRUE)),
-                           ifelse(outcome_type == "binary",
-                                  sprintf("%d unique values", length(unique(outcome_data[!is.na(outcome_data)]))),
-                                  "Count data")),
-                    # TODO (correctness): `mean(as.numeric(outcome_data))` in the binary branch returns mean of factor LEVEL INDICES (1, 2, ...), not the binary 0/1 proportion. For a 2-level factor it always shows ~1.5 instead of the actual proportion. Use `jmvcore::toNumeric(outcome_data)` which honors the values attribute and returns the original 0/1 codes. ⚠ Behavior risk: changes the displayed Mean/Proportion value; verify with both jamovi-coded and base-R factor inputs before applying.
-                    ifelse(outcome_type == "continuous",
-                           sprintf("%.4f", mean(outcome_data, na.rm = TRUE)),
-                           ifelse(outcome_type == "binary",
-                                  sprintf("%.4f", mean(as.numeric(outcome_data), na.rm = TRUE)),
-                                  sprintf("%.2f", mean(outcome_data, na.rm = TRUE))))
+                    range_value,
+                    mean_prop_value
                 ),
                 stringsAsFactors = FALSE
             )
@@ -139,15 +274,29 @@ bayesianciClass <- R6::R6Class(
             # Remove missing values
             outcome_clean <- outcome_data[!is.na(outcome_data)]
             n <- length(outcome_clean)
-            
-            if (n < 2) return()
-            
+
+            if (n < 2) {
+                private$.addNotice(
+                    "WARNING", "Insufficient data",
+                    "At least 2 non-missing observations are required for credible interval estimation."
+                )
+                return()
+            }
+
             # Set up prior specification table
             private$.populatePriorSpecification()
-            
+
             # Perform analysis based on outcome type
             if (outcome_type == "binary" || (outcome_type == "continuous" && all(outcome_clean %in% c(0, 1)))) {
-                private$.analyzeBinaryOutcome(outcome_clean, n)
+                # Guard: a binary outcome must have at most two distinct values
+                if (length(unique(outcome_clean)) > 2) {
+                    private$.addNotice(
+                        "WARNING", "Non-binary outcome",
+                        "The outcome was set to binary but has more than 2 distinct values; binary analysis was skipped."
+                    )
+                } else {
+                    private$.analyzeBinaryOutcome(outcome_clean, n)
+                }
             } else if (outcome_type == "continuous") {
                 private$.analyzeContinuousOutcome(outcome_clean, n)
             } else if (outcome_type == "count") {
@@ -224,11 +373,17 @@ bayesianciClass <- R6::R6Class(
         },
         
         .analyzeBinaryOutcome = function(outcome_clean, n) {
-            # Convert to binary if needed
-            if (!all(outcome_clean %in% c(0, 1))) {
-                outcome_clean <- as.numeric(outcome_clean == max(outcome_clean))
+            # Coerce to a numeric 0/1 vector (handles factors and non-0/1 numeric safely)
+            binary_clean <- private$.coerceBinaryOutcome(outcome_clean)
+            if (is.null(binary_clean)) {
+                private$.addNotice(
+                    "WARNING", "Non-binary outcome",
+                    "The outcome could not be interpreted as binary (it needs exactly two distinct values)."
+                )
+                return()
             }
-            
+            outcome_clean <- binary_clean
+
             successes <- sum(outcome_clean)
             failures <- n - successes
             
@@ -375,12 +530,8 @@ bayesianciClass <- R6::R6Class(
             post_sd <- sqrt(post_var)
             post_mode <- max(0, (alpha_post - 1) / beta_post)
             
-            # Posterior median (approximate)
-            if (beta_post > 0) {
-                post_median <- qgamma(0.5, alpha_post, beta_post)
-            } else {
-                post_median <- post_mean
-            }
+            # Posterior median (approximate). beta_post = beta_prior + n is always > 0.
+            post_median <- qgamma(0.5, alpha_post, beta_post)
             
             # Populate posterior summary
             summary_data <- data.frame(
@@ -403,23 +554,15 @@ bayesianciClass <- R6::R6Class(
         
         .calculateCredibleIntervals = function(param_name, shape_param, scale_param, distribution) {
             credible_level <- self$options$credible_level
-            additional_levels <- self$options$additional_levels
 
-            # TODO (UX): File-wide - `additional_levels` is a free-text String option ("0.50,0.80,0.90"). `as.numeric(unlist(strsplit(...)))` produces NA for non-numeric tokens, then the next line silently filters them out. A user typing "0.5; 0.8" or "fifty percent" gets no feedback that their input was discarded. Same parsing logic at the start of `.calculateCredibleIntervalsNormal` below. Detect parse failures and surface a Notice (or use `jmvcore::canBeNumeric()` to validate before parse).
-            # Parse additional levels
-            levels <- c(credible_level)
-            if (!is.null(additional_levels) && additional_levels != "") {
-                add_levels <- as.numeric(unlist(strsplit(additional_levels, ",")))
-                add_levels <- add_levels[!is.na(add_levels) & add_levels > 0 & add_levels < 1]
-                levels <- c(levels, add_levels)
-            }
-            levels <- sort(unique(levels))
-            
+            # Parse additional levels (warns on invalid tokens)
+            levels <- private$.parseAdditionalLevels(credible_level)
+
             ci_data <- data.frame()
-            
+
             for (level in levels) {
                 alpha <- 1 - level
-                
+
                 if (distribution == "beta") {
                     lower <- qbeta(alpha/2, shape_param, scale_param)
                     upper <- qbeta(1 - alpha/2, shape_param, scale_param)
@@ -453,17 +596,10 @@ bayesianciClass <- R6::R6Class(
         
         .calculateCredibleIntervalsNormal = function(param_name, mean, sd) {
             credible_level <- self$options$credible_level
-            additional_levels <- self$options$additional_levels
-            
-            # Parse additional levels
-            levels <- c(credible_level)
-            if (!is.null(additional_levels) && additional_levels != "") {
-                add_levels <- as.numeric(unlist(strsplit(additional_levels, ",")))
-                add_levels <- add_levels[!is.na(add_levels) & add_levels > 0 & add_levels < 1]
-                levels <- c(levels, add_levels)
-            }
-            levels <- sort(unique(levels))
-            
+
+            # Parse additional levels (warns on invalid tokens)
+            levels <- private$.parseAdditionalLevels(credible_level)
+
             ci_data <- data.frame()
             
             for (level in levels) {
@@ -592,8 +728,11 @@ bayesianciClass <- R6::R6Class(
             bayes_width <- bayes_upper - bayes_lower
             freq_width <- freq_upper - freq_lower
             width_diff <- bayes_width - freq_width
-            
-            interpretation <- if (abs(width_diff) < 0.01) {
+
+            # Continuous outcomes can be on any scale, so use a RELATIVE width difference
+            # (an absolute 0.01 cutoff is only meaningful for proportions on [0, 1]).
+            rel_diff <- if (freq_width > 0) abs(width_diff) / freq_width else abs(width_diff)
+            interpretation <- if (rel_diff < 0.01) {
                 "Similar interval widths - comparable precision"
             } else if (width_diff < 0) {
                 "Bayesian interval narrower - incorporating prior information"
@@ -623,8 +762,10 @@ bayesianciClass <- R6::R6Class(
             n <- length(outcome_clean)
             
             if (outcome_type == "binary") {
-                successes <- sum(as.numeric(outcome_clean))
-                
+                binary_clean <- private$.coerceBinaryOutcome(outcome_clean)
+                if (is.null(binary_clean)) return()
+                successes <- sum(binary_clean)
+
                 # Test different beta priors
                 prior_specs <- list(
                     "Uniform" = c(1, 1),
@@ -688,8 +829,9 @@ bayesianciClass <- R6::R6Class(
             interpretation_data <- data.frame()
             
             if (outcome_type == "binary") {
-                prop <- mean(as.numeric(outcome_clean))
-                
+                binary_clean <- private$.coerceBinaryOutcome(outcome_clean)
+                prop <- if (is.null(binary_clean)) NA_real_ else mean(binary_clean)
+
                 clinical_aspects <- c(
                     "Treatment Response",
                     "Diagnostic Accuracy",
