@@ -144,6 +144,43 @@ be verified against reference datasets before release.
   restored a fallback plot for the repeated-measures continuous paths. (Automatic plot/test selection
   by variable type was deliberately left unchanged.)
 
+### jsurvival
+
+- **Single Arm Survival (`survival`):** **BREAKING** — the log-rank weighting option's value keys were
+  corrected: `survival::survdiff()` only computes the Fleming-Harrington G-rho family, and the previous
+  keys `gehan_breslow`, `tarone_ware`, `peto_peto`, and `fleming_harrington` were misleading (three of
+  them were the *same* rho = 1 test). Keys are now `logrank` (rho 0), `fh_rho0_5` (rho 0.5), and
+  `fh_rho1` (rho 1). **Saved `.omv` files and scripts referencing the old keys must be updated.** Also:
+  calibration now uses a mean-centred baseline hazard to match the linear predictor; the completion
+  summary counts only the event of interest (`status == 1`) under competing risks; copy-ready clinical
+  sentences are HTML-escaped; completed `clearWith`.
+- **Multivariable Survival (`multisurvival`):** the risk-group plot now renders (state was never set);
+  the competing-risks nomogram passes the `datadist` object (not a string) and the survival nomogram
+  labels its own time unit; `datadist` is restored with `on.exit`; the event count no longer mis-reads a
+  factor via level index; the C-index is labelled apparent/in-sample; HTML-escaped table output.
+- **2×2 with Odds Ratio (`oddsratio`):** events-per-variable uses the rarer class; the Firth-penalised
+  odds-ratio table drops the intercept row; degenerate sensitivity/specificity render "undefined"
+  instead of a misleading number; the nomogram survives a saved-file reload; fatal validation errors now
+  surface as a notice.
+- **Outcome Organizer (`outcomeorganizer`):** guarded a crash when the recurrence event level is unset;
+  the "Applied" summary reflects operations that actually ran; the natural-language denominator counts
+  coded records; a stale/zero-observation factor level is rejected rather than silently zeroed.
+- **Single Arm Survival helper (`singlearm`):** added the data-changing options (competing-risk type,
+  outcome levels, landmark, time units) to `clearWith` so tables/plots recompute; corrected the median
+  confidence-interval note; relabelled an interval "event rate" honestly; hid empty section headings
+  before analysis.
+- **Continuous-Predictor Survival (`survivalcont`):** restructured `.run()` so explanations, exported
+  columns and completion notices are no longer stranded when "find cut-off" is off; guarded table
+  double-population; reset messages each run; a hard error on < 10 events; halts on invalid time/outcome;
+  survival-summary time units are honoured; completed `clearWith`.
+- **Time Interval Calculator (`timeinterval`):** month arithmetic uses calendar rollback so Jan-31-type
+  starts don't drop; the user's extreme-value multiplier drives the quality flag; the landmark summary
+  distinguishes missing follow-up from follow-up shorter than the landmark; the auto-detected date format
+  is shown.
+- **Date/Time Converter (`datetimeconverter`):** the timezone option is in `clearWith` on the output
+  columns so they recompute on change; friendly labels for all format codes; removed a constant
+  placeholder metric and dead output-request infrastructure; guarded an NA in the quality panel.
+
 # ClinicoPath 1.0.0 (2026-07-13)
 
 ## First stable release
