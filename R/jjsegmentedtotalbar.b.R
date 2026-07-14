@@ -29,7 +29,7 @@
 #' @importFrom scales percent
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom stringr str_to_title
-#' @importFrom rlang sym
+#' @importFrom rlang sym %||%
 #' @return An \code{R6} class generator object for the \code{jjsegmentedtotalbarClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
@@ -41,20 +41,6 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         .processed_data = NULL,
         .composition_data = NULL,
         .preset_config = NULL,
-        .preset_style_override = NULL,
-        .preset_palette_override = NULL,
-
-        # TODO (cleanup): `.escapeVar` is dead code - defined here but never called
-        # anywhere in this file (grep confirms 1 occurrence: the definition).
-        # Safe to delete. Removed for now via "no callers" rationale, but if a
-        # future need arises, use `jmvcore::composeTerm()` for formula contexts
-        # or `rlang::sym()` directly (handles non-syntactic names natively) for
-        # symbol contexts - do NOT resurrect this helper.
-        .escapeVar = function(x) {
-            # Convert variable names with special characters to safe R names
-            # This mirrors the modelbuilder behavior for handling spaces and punctuation
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
 
         # Initialize notice collection list
         .noticeList = list(),
@@ -167,6 +153,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             # (jamovi may reuse the same R6 instance when options change)
             private$.noticeList <- list()
 
+            # Reset processed data so an error early-return does not leave a prior
+            # run's data rendering in tables/plot
+            private$.processed_data <- NULL
+            private$.composition_data <- NULL
+
             # Clear existing tables to prevent accumulation
             self$results$composition_table$deleteRows()
             self$results$detailed_stats$deleteRows()
@@ -194,6 +185,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Prepare data
             private$.processData(data, x_var, y_var, fill_var, facet_var)
+
+            # Serialize processed data into the plot state so the plot re-renders
+            # on option changes and survives reopening a saved .omv (which renders
+            # without re-running .run(), leaving private$.processed_data NULL).
+            if (!is.null(private$.processed_data)) {
+                self$results$plot$setState(as.data.frame(private$.processed_data))
+            }
 
             # Create the plot (will be handled by .plot method called by jamovi)
             # The actual plot creation is handled by the .plot method
@@ -247,6 +245,11 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                     sprintf(.("Analysis completed successfully using %d observations across %d categories and %d segments."),
                         n_total, n_categories, n_segments))
             }
+
+            # Render all collected notices as HTML (errors, warnings, info).
+            # Must run unconditionally here so notices are shown regardless of
+            # whether statistical tests were requested (default: off).
+            private$.renderNotices()
         },
 
         .generateExplanations = function() {
@@ -360,6 +363,16 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         count = sum(!!rlang::sym(y_var), na.rm = TRUE),
                         .groups = 'drop'
                     )
+            }
+
+            # Guard against negative summed values. Segmented total bar charts
+            # represent each bar as a 100% composition, so negative values make
+            # value/sum(value)*100 meaningless. Positive continuous totals are
+            # valid; negatives are not.
+            if (any(processed_data$value < 0, na.rm = TRUE)) {
+                private$.addNotice("ERROR", "Negative Values",
+                    .("Value Variable produced negative category totals. Segmented total bar charts require non-negative values because each bar represents a 100% composition. Please check your data."))
+                return()
             }
 
             # Calculate percentages within each category
@@ -589,80 +602,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
         },
 
         .applyTheme = function(p) {
-
-            style <- self$options$chart_style
-
-            if (style == "clean") {
-                p <- p + ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        panel.grid.major.x = ggplot2::element_blank(),
-                        panel.grid.minor = ggplot2::element_blank(),
-                        text = ggplot2::element_text(size = 11),
-                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
-                        plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5)
-                    )
-            } else if (style == "publication") {
-                p <- p + ggplot2::theme_classic() +
-                    ggplot2::theme(
-                        text = ggplot2::element_text(size = 10),
-                        axis.title = ggplot2::element_text(size = 11, face = "bold"),
-                        plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
-                        legend.text = ggplot2::element_text(size = 9),
-                        axis.line = ggplot2::element_line(color = "black", size = 0.5)
-                    )
-            } else if (style == "presentation") {
-                p <- p + ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        text = ggplot2::element_text(size = 14),
-                        axis.title = ggplot2::element_text(size = 16, face = "bold"),
-                        plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0.5),
-                        legend.text = ggplot2::element_text(size = 12),
-                        panel.grid.major.x = ggplot2::element_blank(),
-                        panel.grid.minor = ggplot2::element_blank()
-                    )
-            } else if (style == "clinical") {
-                p <- p + ggplot2::theme_bw() +
-                    ggplot2::theme(
-                        text = ggplot2::element_text(size = 11),
-                        axis.title = ggplot2::element_text(size = 12, face = "bold"),
-                        plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = 0.5),
-                        panel.grid.major.x = ggplot2::element_blank(),
-                        panel.grid.minor = ggplot2::element_blank(),
-                        legend.position = "right",
-                        legend.background = ggplot2::element_rect(fill = "white", color = "gray80"),
-                        panel.border = ggplot2::element_rect(color = "black", fill = NA, linewidth = 1)
-                    )
-            } else if (style == "bbc_style") {
-                p <- p + ggplot2::theme_minimal() +
-                    ggplot2::theme(
-                        text = ggplot2::element_text(size = 11),
-                        plot.title = ggplot2::element_text(size = 18, face = "bold", hjust = 0),
-                        plot.subtitle = ggplot2::element_text(size = 14, hjust = 0),
-                        axis.title = ggplot2::element_blank(),
-                        axis.text = ggplot2::element_text(size = 10),
-                        panel.grid.major.x = ggplot2::element_blank(),
-                        panel.grid.minor = ggplot2::element_blank(),
-                        panel.background = ggplot2::element_blank(),
-                        legend.position = "top",
-                        legend.justification = "left",
-                        legend.text = ggplot2::element_text(size = 10),
-                        legend.title = ggplot2::element_blank()
-                    )
-            } else if (style == "prism_style") {
-                p <- p + ggplot2::theme_classic() +
-                    ggplot2::theme(
-                        text = ggplot2::element_text(size = 10),
-                        axis.title = ggplot2::element_text(size = 11),
-                        plot.title = ggplot2::element_text(size = 12, face = "bold", hjust = 0.5),
-                        axis.line = ggplot2::element_line(color = "black", linewidth = 0.5),
-                        axis.ticks = ggplot2::element_line(color = "black", linewidth = 0.5),
-                        legend.text = ggplot2::element_text(size = 9),
-                        legend.key.size = ggplot2::unit(0.8, "cm"),
-                        panel.background = ggplot2::element_rect(fill = "white")
-                    )
-            }
-
-            return(p)
+            # Delegate to the single theme factory (.getChartTheme) to avoid
+            # duplicated theme definitions.
+            return(p + private$.getChartTheme(self$options$chart_style))
         },
 
         .getChartTheme = function(style) {
@@ -741,37 +683,6 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
 
             # Default to minimal theme if unknown style
             return(ggplot2::theme_minimal())
-        },
-
-        .addTitles = function(p) {
-
-            # Set titles
-            plot_title <- if (self$options$plot_title != "") self$options$plot_title else .("Segmented Total Bar Chart")
-            x_title <- if (self$options$x_title != "") self$options$x_title else self$options$x_var
-            y_title <- if (self$options$y_title != "") self$options$y_title else .("Percentage")
-            legend_title <- if (self$options$legend_title != "") self$options$legend_title else self$options$fill_var
-
-            p <- p + ggplot2::labs(
-                title = plot_title,
-                x = x_title,
-                y = y_title,
-                fill = legend_title
-            )
-
-            return(p)
-        },
-
-        .applyLegend = function(p) {
-
-            position <- self$options$legend_position
-
-            if (position == "none") {
-                p <- p + ggplot2::theme(legend.position = "none")
-            } else {
-                p <- p + ggplot2::theme(legend.position = position)
-            }
-
-            return(p)
         },
 
         .updateSummary = function() {
@@ -933,6 +844,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             }
 
             df <- private$.processed_data
+            # Fall back to serialized state (e.g. reopened .omv renders without .run())
+            if (is.null(df)) df <- image$state
             if (is.null(df) || nrow(df) == 0) return()
 
             # Route to appropriate plot type
@@ -953,26 +866,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             x_var <- self$options$x_var
             fill_var <- self$options$fill_var
 
-            # Apply sorting if requested (inline)
-            if (self$options$sort_categories != "none") {
-                if (self$options$sort_categories == "total") {
-                    category_order <- df %>%
-                        dplyr::group_by(!!rlang::sym(x_var)) %>%
-                        dplyr::summarise(total = sum(.data$value), .groups = 'drop') %>%
-                        dplyr::arrange(desc(.data$total)) %>%
-                        dplyr::pull(!!rlang::sym(x_var))
-                    df[[x_var]] <- factor(df[[x_var]], levels = unique(category_order))
-                } else if (self$options$sort_categories == "largest_segment") {
-                    category_order <- df %>%
-                        dplyr::group_by(!!rlang::sym(x_var)) %>%
-                        dplyr::summarise(max_segment = max(.data$value), .groups = 'drop') %>%
-                        dplyr::arrange(desc(.data$max_segment)) %>%
-                        dplyr::pull(!!rlang::sym(x_var))
-                    df[[x_var]] <- factor(df[[x_var]], levels = unique(category_order))
-                } else if (self$options$sort_categories == "alpha") {
-                    df[[x_var]] <- factor(df[[x_var]], levels = sort(unique(as.character(df[[x_var]]))))
-                }
-            }
+            # Note: category sorting is already applied in .processData()
+            # (.applySorting sets the x_var factor levels), so no inline re-sort
+            # is needed here.
 
             # Basic stacked-to-100% bar chart
             p <- ggplot2::ggplot(
@@ -1135,6 +1031,13 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                         dplyr::arrange(desc(.data$total)) %>%
                         dplyr::pull(.data$group)
                     plot_data$group <- factor(plot_data$group, levels = unique(category_order))
+                } else if (self$options$sort_categories == "largest_segment") {
+                    category_order <- plot_data %>%
+                        dplyr::group_by(.data$group) %>%
+                        dplyr::summarise(max_segment = max(.data$value), .groups = 'drop') %>%
+                        dplyr::arrange(desc(.data$max_segment)) %>%
+                        dplyr::pull(.data$group)
+                    plot_data$group <- factor(plot_data$group, levels = unique(category_order))
                 } else if (self$options$sort_categories == "alpha") {
                     plot_data$group <- factor(plot_data$group, levels = sort(unique(as.character(plot_data$group))))
                 }
@@ -1169,14 +1072,9 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 p <- p + chart_theme
             }
 
-            # Apply color palette
-            palette_colors <- private$.getColorPalette(
-                self$options$color_palette,
-                length(unique(plot_data$segment))
-            )
-            if (!is.null(palette_colors)) {
-                p <- p + ggplot2::scale_fill_manual(values = palette_colors)
-            }
+            # Apply color palette consistently with the traditional path so
+            # viridis/brewer palettes are not silently ignored in Flerlage mode.
+            p <- private$.applyColorPalette(p, plot_data, "segment")
 
             # Legend position
             if (!identical(self$options$legend_position, "none")) {
@@ -1284,19 +1182,15 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
             self$results$clinical_summary$setContent(clinical_summary_html)
         },
         
-        # TODO (correctness): `.preset_config` is a stale-R6-cache hazard. The
-        # function only assigns to `private$.preset_config` when `preset !=
-        # "custom"` (early return below for custom). If a user switches from a
-        # preset to "custom" between runs against the same R6 instance, the
-        # prior preset's config persists and leaks into the next analysis.
-        # Fix: clear it on the early-return path - 
-        #   if (preset == "custom") { private$.preset_config <- NULL; return() }
         .applyPresetConfiguration = function() {
 
             preset <- self$options$analysis_preset
 
             if (preset == "custom") {
-                return()  # No preset configuration
+                # Clear any stale cached config so a prior preset does not leak
+                # into a subsequent custom run on a reused R6 instance.
+                private$.preset_config <- NULL
+                return()
             }
             
             # Store preset configuration for reference
@@ -1478,9 +1372,8 @@ jjsegmentedtotalbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 
                 self$results$statistical_tests$addRow(rowKey = 1, values = error_row)
             })
-
-            # Render all collected notices as HTML
-            private$.renderNotices()
+            # Notices are rendered once at the end of .run() (not here), so they
+            # appear whether or not statistical tests are requested.
         }
     )
 )
