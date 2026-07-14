@@ -15,6 +15,24 @@ items:
       width: 800
       height: 600
       renderFun: .plot
+      clearWith:
+          - x_var
+          - y_var
+          - group_var
+          - color_var
+          - size_var
+          - hull_concavity
+          - hull_alpha
+          - hull_expand
+          - show_labels
+          - point_size
+          - point_alpha
+          - color_palette
+          - plot_theme
+          - plot_title
+          - x_label
+          - y_label
+          - confidence_ellipses
 
     - name: statistics
       title: Group Statistics

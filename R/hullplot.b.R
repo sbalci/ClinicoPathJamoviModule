@@ -47,12 +47,21 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                     if (requireNamespace("digest", quietly = TRUE)) {
                         data_hash <- digest::digest(relevant_data, algo = "xxhash64")
                     } else {
-                        # Fallback: use a simple hash based on first/last rows
-                        # Not perfect but better than nothing
-                        data_hash <- paste(
-                            digest::digest(head(relevant_data, 10)),
-                            digest::digest(tail(relevant_data, 10)),
-                            sep = ":"
+                        # Base-R fallback fingerprint (no digest dependency):
+                        # dimensions plus a per-column checksum. Not cryptographic,
+                        # but deterministic and sufficient as a cache-invalidation key.
+                        col_sig <- vapply(relevant_data, function(col) {
+                            if (is.numeric(col)) {
+                                paste0(sum(as.numeric(col), na.rm = TRUE),
+                                       "_", sum(!is.na(col)))
+                            } else {
+                                paste0(length(unique(col)),
+                                       "_", sum(nchar(as.character(col)), na.rm = TRUE))
+                            }
+                        }, character(1))
+                        data_hash <- paste0(
+                            nrow(relevant_data), "x", ncol(relevant_data), ":",
+                            paste(col_sig, collapse = "|")
                         )
                     }
                 }
@@ -104,6 +113,13 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 jmvcore::reject("Variables not found in dataset: {missing}", missing = paste(missing_vars, collapse = ", "))
             }
 
+            # Guard against the same variable chosen for both axes, which would
+            # create duplicate column names in plot_data (downstream [[x_var]]
+            # would silently return only the first match).
+            if (x_var == y_var) {
+                jmvcore::reject("X-Axis and Y-Axis variables must be different (both are set to '{var}').", var = x_var)
+            }
+
             # Prepare data - create subset with required variables
             plot_data <- data.frame(
                 x = dataset[[x_var]],
@@ -124,8 +140,17 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 plot_data[[paste0("size_", size_var)]] <- dataset[[size_var]]
             }
 
-            # Remove rows with missing values in required variables
+            # Remove rows with missing values in required variables. Also filter
+            # NA in any active optional color/size column so points do not render
+            # as grey (NA colour) or get silently dropped with a warning (NA size).
             required_cols <- c(x_var, y_var, group_var)
+            if (color_mapping != group_var && color_mapping %in% names(plot_data)) {
+                required_cols <- c(required_cols, color_mapping)
+            }
+            size_col <- if (!is.null(size_var) && size_var != "") paste0("size_", size_var) else NULL
+            if (!is.null(size_col) && size_col %in% names(plot_data)) {
+                required_cols <- c(required_cols, size_col)
+            }
             plot_data <- plot_data[complete.cases(plot_data[required_cols]), ]
 
             if (nrow(plot_data) == 0) {
@@ -319,21 +344,20 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             color_mapping <- prepared$color_mapping
             size_var <- prepared$size_var
 
-            # Check for concaveman package availability and adjust concavity
-            concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
-            hull_concavity <- if (!concaveman_available && self$options$hull_concavity < 2) {
-                2  # Force convex hulls when concaveman is not available
-            } else {
-                self$options$hull_concavity
-            }
-
-            # Create base plot
-            p <- ggplot2::ggplot(plot_data, ggplot2::aes(.data[[x_var]], .data[[y_var]]))
-
-            # If V8/concaveman are unavailable, avoid geom_mark_hull and draw convex hulls directly
+            # Check V8/concaveman availability once; concave hulls need both.
+            # When either is missing we fall back to convex hulls (geom_polygon)
+            # instead of ggforce::geom_mark_hull.
             v8_available <- requireNamespace("V8", quietly = TRUE)
             concaveman_available <- requireNamespace("concaveman", quietly = TRUE)
             use_fallback_hull <- !(v8_available && concaveman_available)
+
+            # Concavity applies only to the ggforce geom_mark_hull path, which is
+            # only taken when concaveman is available, so no fallback adjustment
+            # is needed here (it is unused on the convex-fallback path).
+            hull_concavity <- self$options$hull_concavity
+
+            # Create base plot
+            p <- ggplot2::ggplot(plot_data, ggplot2::aes(.data[[x_var]], .data[[y_var]]))
 
             if (use_fallback_hull) {
                 # Build convex hull polygons per group using chull
@@ -390,12 +414,29 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             
             # Add confidence ellipses if requested
             if (self$options$confidence_ellipses) {
-                p <- p + ggplot2::stat_ellipse(
-                    ggplot2::aes(color = .data[[group_var]]),
-                    level = 0.95,
-                    linetype = "dashed",
-                    size = 0.8
-                )
+                if (color_mapping == group_var) {
+                    # Points and ellipses share the same colour scale (both driven
+                    # by group_var), so mapping colour is safe.
+                    p <- p + ggplot2::stat_ellipse(
+                        ggplot2::aes(color = .data[[group_var]]),
+                        level = 0.95,
+                        linetype = "dashed",
+                        linewidth = 0.8
+                    )
+                } else {
+                    # A separate color_var drives the point colour scale. Mapping
+                    # ellipse colour to group_var as well would force the single
+                    # discrete colour scale to cover the UNION of both variables'
+                    # levels, triggering "Insufficient values in manual scale".
+                    # Instead group ellipses by group_var but draw a neutral colour.
+                    p <- p + ggplot2::stat_ellipse(
+                        ggplot2::aes(group = .data[[group_var]]),
+                        level = 0.95,
+                        linetype = "dashed",
+                        linewidth = 0.8,
+                        color = "grey30"
+                    )
+                }
             }
             
             # Add points - fix aes construction
@@ -461,8 +502,9 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
                 )
             }
             
-            # Handle size legend
-            if (!is.null(size_var)) {
+            # Handle size legend (only when a size aesthetic was actually mapped,
+            # matching the geom_point branch above)
+            if (!is.null(size_var) && size_var != "" && paste0("size_", size_var) %in% names(plot_data)) {
                 p <- p + ggplot2::labs(size = size_var)
             }
             
@@ -567,10 +609,19 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
         .generate_outlier_analysis = function(data, x_var, y_var, group_var) {
             # Simple outlier detection using IQR method within groups
             outliers_list <- list()
-            
+            # Quartiles are essentially the data extremes below this n, so an IQR
+            # outlier count would be statistically meaningless; report "n too small"
+            # instead of a definite number for such groups.
+            min_group_n <- 5
+
             for (group in levels(data[[group_var]])) {
                 group_data <- data[data[[group_var]] == group, ]
-                
+
+                if (nrow(group_data) < min_group_n) {
+                    outliers_list[[group]] <- NA_integer_
+                    next
+                }
+
                 # X variable outliers
                 x_q1 <- quantile(group_data[[x_var]], 0.25, na.rm = TRUE)
                 x_q3 <- quantile(group_data[[x_var]], 0.75, na.rm = TRUE)
@@ -597,10 +648,16 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             total_outliers <- 0
             for (group in names(outliers_list)) {
                 count <- outliers_list[[group]]
-                total_outliers <- total_outliers + count
-                outlier_html <- paste0(outlier_html,
-                    "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, " potential outliers detected</li>"
-                )
+                if (is.na(count)) {
+                    outlier_html <- paste0(outlier_html,
+                        "<li><strong>", htmltools::htmlEscape(group), ":</strong> n too small for reliable outlier detection (n &lt; ", min_group_n, ")</li>"
+                    )
+                } else {
+                    total_outliers <- total_outliers + count
+                    outlier_html <- paste0(outlier_html,
+                        "<li><strong>", htmltools::htmlEscape(group), ":</strong> ", count, " potential outliers detected</li>"
+                    )
+                }
             }
             
             outlier_html <- paste0(outlier_html,
