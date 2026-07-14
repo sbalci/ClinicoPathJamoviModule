@@ -102,6 +102,9 @@ items:
       clearWith:
         - dep
         - group
+        - mytitle
+        - xtitle
+        - ytitle
         - ggpubrPlotType
         - ggpubrPalette
         - ggpubrAddStats
@@ -119,6 +122,9 @@ items:
         - dep
         - group
         - grvar
+        - mytitle
+        - xtitle
+        - ytitle
         - ggpubrPlotType
         - ggpubrPalette
         - ggpubrAddStats

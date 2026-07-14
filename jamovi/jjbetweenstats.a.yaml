@@ -225,8 +225,8 @@ options:
       title: Confidence Level
       type: Number
       default: 0.95
-      min: 0
-      max: 1
+      min: 0.5
+      max: 0.999
       description:
           R: >
             Confidence level for confidence intervals.
