@@ -12,6 +12,7 @@ clearWith:
     - centralityline
     - centralitytype
     - resultssubtitle
+    - enableOneSampleTest
     - test.value
     - conf.level
     - bf.message
@@ -129,6 +130,7 @@ items:
       visible: (addDistributionDiagnostics && ggpubrShowQQ)
       clearWith:
         - dep
+        - ggpubrDensityColor
 
     - name: ecdfPlot
       title: 'Empirical CDF ggpubr'
@@ -140,6 +142,7 @@ items:
       visible: (addDistributionDiagnostics && ggpubrShowECDF)
       clearWith:
         - dep
+        - ggpubrDensityColor
 
     # - name:  e_stats
     #   title: e_stats
