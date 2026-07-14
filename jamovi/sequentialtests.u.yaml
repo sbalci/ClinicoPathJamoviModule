@@ -111,7 +111,7 @@ children:
           - type: CheckBox
             name: show_formulas
           - type: CheckBox
-            name: show_nomogram
+            name: show_plots
           - type: CheckBox
             name: show_cost_analysis
   - type: LayoutBox

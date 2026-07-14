@@ -11,7 +11,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
         inherit = sequentialtestsBase,
         private = list(
             NUMERICAL_TOLERANCE = 1e-10,
-            POPULATION_SIZE = NULL,
 
             # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
             #   Audit verdict: best-engineered function in meddecide; 24 jmvcore::Notice paths covering
@@ -39,8 +38,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                                  values = list(stage = "After First Test"))
                 flowTable$addRow(rowKey = "after_test2",
                                  values = list(stage = "After Second Test"))
-                if (is.null(private$POPULATION_SIZE))
-                    private$POPULATION_SIZE <- self$options$population_size
             },
 
             .run = function() {
@@ -167,6 +164,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Calculate individual test metrics with error handling
+                calc_failed <- FALSE
                 tryCatch({
                     # Calculate PPVs and NPVs with protection against edge cases
                     test1_ppv_denom <- (prevalence * test1_sens) + ((1 - prevalence) * (1 - test1_spec))
@@ -230,17 +228,23 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     test2_npv <- pmax(0, pmin(1, test2_npv))
                     
                 }, error = function(e) {
-                    # If any calculation fails, show error notice
+                    # If any calculation fails, show error notice and flag the failure.
+                    # A bare return() here would only exit this handler closure, not .run();
+                    # setting a flag lets us early-return from .run() below so downstream
+                    # code never runs with unassigned metrics.
                     private$.addNotice(
                         type = "ERROR",
                         title = "Calculation Error",
                         content = sprintf('Calculation error with provided values: %s. Please verify all parameters and try again.', e$message)
                     )
-                    return()
+                    calc_failed <<- TRUE
                 })
 
+                if (calc_failed) {
+                    return()
+                }
+
                 # Calculate combined metrics based on strategy
-                strategy_note <- "Assumes conditional independence between tests. Correlated tests will overstate combined performance."
                 if (strategy == "serial_positive") {
                     # Serial testing of positives (confirmation strategy)
                     combined_sens <- test1_sens * test2_sens
@@ -347,15 +351,15 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     summary <- sprintf(
-                        "<div style='background:#e8f4f8;padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%, a positive result indicates a %.1f%% chance the person truly has the disease (PPV), while a negative result indicates a %.1f%% chance the person is truly disease-free (NPV).%s %s</div>",
+                        "<div style='background:#e8f4f8;padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%, a positive result indicates a %s chance the person truly has the disease (PPV), while a negative result indicates a %s chance the person is truly disease-free (NPV).%s %s</div>",
                         strategy_desc,
                         private$.safeHtmlOutput(test1_name),
                         private$.safeHtmlOutput(test2_name),
                         combined_sens*100, combined_sens*100,
                         combined_spec*100, combined_spec*100,
                         prevalence*100,
-                        combined_ppv*100,
-                        combined_npv*100,
+                        format_percent(combined_ppv),
+                        format_percent(combined_npv),
                         nnt_text,
                         clinical_meaning
                     )
@@ -404,8 +408,8 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     )
                 )
 
-                # Calculate population flow numbers (assuming default population size)
-                pop_size <- private$POPULATION_SIZE
+                # Calculate population flow numbers using the user-specified population size
+                pop_size <- self$options$population_size
                 diseased <- pop_size * prevalence
                 healthy <- pop_size - diseased
 
@@ -454,7 +458,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 # After second test (depends on strategy)
                 if (strategy == "serial_positive") {
                     # Only test1 positives get test2
-                    test2_population <- test1_pos
                     diseased_in_test2 <- test1_tp
                     healthy_in_test2 <- test1_fp
 
@@ -471,7 +474,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
 
                 } else if (strategy == "serial_negative") {
                     # Only test1 negatives get test2
-                    test2_population <- test1_neg
                     diseased_in_test2 <- test1_fn
                     healthy_in_test2 <- test1_tn
 
@@ -489,7 +491,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 } else if (strategy == "parallel") {
                     # Everyone gets both tests
                     # A person is positive if either test is positive
-                    test2_population <- pop_size
 
                     # Positives are those who test positive on either test
                     # This is a simplification as it assumes test independence
@@ -545,7 +546,11 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     total_combined <- total_cost1 + total_cost2
                     
                     costTable <- self$results$cost_analysis_table
-                    
+                    costTable$setTitle(sprintf('Cost Analysis (Per %s Patients)', format(pop_size, big.mark = ',')))
+
+                    # Clear rows from any previous run before repopulating to avoid duplicates
+                    costTable$deleteRows()
+
                     costTable$addRow(rowKey = "test1", values = list(
                         item = paste0("Test 1: ", test1_name),
                         unit_cost = test1_cost,
@@ -598,9 +603,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             "<li>All subjects are first tested with ",
                             private$.safeHtmlOutput(test1_name),
                             " (sensitivity = ",
-                            format(test1_sens * 100, digits = 1),
+                            sprintf("%.1f", test1_sens * 100),
                             "%, specificity = ",
-                            format(test1_spec * 100, digits = 1),
+                            sprintf("%.1f", test1_spec * 100),
                             "%)</li>"
                         )
                         explanation <- paste0(
@@ -608,9 +613,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             "<li>Only those who test positive on the first test receive ",
                             private$.safeHtmlOutput(test2_name),
                             " (sensitivity = ",
-                            format(test2_sens * 100, digits = 1),
+                            sprintf("%.1f", test2_sens * 100),
                             "%, specificity = ",
-                            format(test2_spec * 100, digits = 1),
+                            sprintf("%.1f", test2_spec * 100),
                             "%)</li>"
                         )
                         explanation <- paste0(
@@ -647,9 +652,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             "<li>All subjects are first tested with ",
                             private$.safeHtmlOutput(test1_name),
                             " (sensitivity = ",
-                            format(test1_sens * 100, digits = 1),
+                            sprintf("%.1f", test1_sens * 100),
                             "%, specificity = ",
-                            format(test1_spec * 100, digits = 1),
+                            sprintf("%.1f", test1_spec * 100),
                             "%)</li>"
                         )
                         explanation <- paste0(
@@ -657,9 +662,9 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             "<li>Only those who test negative on the first test receive ",
                             private$.safeHtmlOutput(test2_name),
                             " (sensitivity = ",
-                            format(test2_sens * 100, digits = 1),
+                            sprintf("%.1f", test2_sens * 100),
                             "%, specificity = ",
-                            format(test2_spec * 100, digits = 1),
+                            sprintf("%.1f", test2_spec * 100),
                             "%)</li>"
                         )
                         explanation <- paste0(
@@ -696,15 +701,15 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                             "<li>All subjects receive both ",
                             private$.safeHtmlOutput(test1_name),
                             " (sensitivity = ",
-                            format(test1_sens * 100, digits = 1),
+                            sprintf("%.1f", test1_sens * 100),
                             "%, specificity = ",
-                            format(test1_spec * 100, digits = 1),
+                            sprintf("%.1f", test1_spec * 100),
                             "%) and ",
                             private$.safeHtmlOutput(test2_name),
                             " (sensitivity = ",
-                            format(test2_sens * 100, digits = 1),
+                            sprintf("%.1f", test2_sens * 100),
                             "%, specificity = ",
-                            format(test2_spec * 100, digits = 1),
+                            sprintf("%.1f", test2_spec * 100),
                             "%)</li>"
                         )
                         explanation <- paste0(
@@ -1032,7 +1037,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 }
 
                 # Store data for plots
-                if (self$options$show_nomogram) {
+                if (self$options$show_plots) {
                     plotData <- list(
                         "Prevalence" = prevalence,
                         "Test1_Name" = test1_name,
@@ -1342,10 +1347,6 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                 test1_plr <- plotData$Test1_Sens / (1 - plotData$Test1_Spec)
                 post_test1_pos_odds <- (prevalence / (1 - prevalence)) * test1_plr
                 post_test1_pos_prob <- post_test1_pos_odds / (1 + post_test1_pos_odds)
-
-                test2_plr <- plotData$Test2_Sens / (1 - plotData$Test2_Spec)
-                post_test2_pos_odds <- post_test1_pos_odds * test2_plr
-                post_test2_pos_prob <- post_test2_pos_odds / (1 + post_test2_pos_odds)
 
                 # For negative test pathway
                 test1_nlr <- (1 - plotData$Test1_Sens) / plotData$Test1_Spec

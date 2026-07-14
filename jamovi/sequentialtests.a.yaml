@@ -181,8 +181,8 @@ options:
       type: Bool
       default: false
       
-    - name: show_nomogram
-      title: Fagan nomogram
+    - name: show_plots
+      title: Show diagnostic plots
       type: Bool
       default: false
 
