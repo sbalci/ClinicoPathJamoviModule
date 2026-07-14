@@ -4,17 +4,57 @@ title: Confidence Interval Approach for the Number of Subjects Required
 jrs:   '1.1'
 
 items:
+    - name:  notices
+      title: Notes
+      type:  Html
+      clearWith:
+          - outcome
+          - citype
+          - kappa0
+          - kappaL
+          - kappaU
+          - props
+          - raters
+          - alpha
+
     - name:  text1
       title: Analysis result
       type:  Preformatted
+      clearWith:
+          - outcome
+          - citype
+          - kappa0
+          - kappaL
+          - kappaU
+          - props
+          - raters
+          - alpha
 
     - name:  text_summary
       title: Summary
       type:  Preformatted
+      clearWith:
+          - outcome
+          - citype
+          - kappa0
+          - kappaL
+          - kappaU
+          - props
+          - raters
+          - alpha
 
     - name:  text2
       title: Study Explanation
       type:  Preformatted
+      clearWith:
+          - outcome
+          - citype
+          - kappa0
+          - kappaL
+          - kappaU
+          - props
+          - raters
+          - alpha
 
 refs:
     - ClinicoPathJamoviModule
