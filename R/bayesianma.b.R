@@ -170,12 +170,24 @@ bayesianmaClass <- R6::R6Class(
                 return(NULL)
             }
 
-            # TODO (numeric, ⚠ behavior risk): Two factor-coercion sites that should likely use `jmvcore::toNumeric()`:
-            #   (1) line 168 - `as.numeric(as.logical(...))` returns NA for factors whose labels aren't "TRUE"/"FALSE", silently corrupting binary outcomes.
-            #   (2) line 173 - `as.numeric(as.factor(x))` returns level indices (1, 2, 3, ...), losing meaningful coding before BMA's `scale(X)` and downstream sampling.
-            # `jmvcore::toNumeric()` honors the jamovi `values` attribute (returns original 0/1 codes). Behavior risk: for columns WITHOUT the values attribute (raw R factors), toNumeric returns level indices while line 168's current path returns NA - different shape of silent corruption. Verify with both jamovi-coded and base-R factor inputs before applying.
-            # Convert event variable to numeric if needed
-            data[[eventVar]] <- as.numeric(as.logical(data[[eventVar]]))
+            # Convert event variable to numeric if needed.
+            # NB: a factor with levels "0"/"1" must be routed through
+            # as.character() first - as.numeric(as.logical(factor)) yields all NA
+            # (logical() on a non-"TRUE"/"FALSE" factor is NA), silently wiping the
+            # outcome. as.character() -> as.numeric() preserves the 0/1 codes;
+            # logical TRUE/FALSE and already-numeric inputs pass through as.numeric().
+            ev <- data[[eventVar]]
+            if (is.factor(ev)) {
+                data[[eventVar]] <- as.numeric(as.character(ev))
+            } else {
+                data[[eventVar]] <- as.numeric(ev)
+            }
+
+            # TODO (numeric, behavior risk): predictor factor coercion below uses
+            # `as.numeric(as.factor(x))` which returns level indices (1, 2, 3, ...),
+            # losing meaningful coding before BMA's `scale(X)` and downstream
+            # sampling. Consider `jmvcore::toNumeric()` (honors the jamovi `values`
+            # attribute). Verify with both jamovi-coded and base-R factor inputs.
 
             # Ensure predictor variables are numeric
             for (var in predVars) {
@@ -507,11 +519,16 @@ bayesianmaClass <- R6::R6Class(
             sorted_indices <- order(model_probs, decreasing = TRUE)
             top_models <- list()
 
-            for (i in head(sorted_indices, 20)) { # Top 20 models
-                model_binary <- as.logical(as.numeric(strsplit(names(model_probs)[i], "")[[1]]))
-                top_models[[i]] <- list(
+            # Build sequentially in RANK order so top_models[[1]] is the
+            # highest-posterior model (indexing by the original model position
+            # would misplace entries and leave NULL holes for >20 unique models).
+            top_indices <- head(sorted_indices, 20) # Top 20 models
+            for (rank in seq_along(top_indices)) {
+                idx <- top_indices[rank]
+                model_binary <- as.logical(as.numeric(strsplit(names(model_probs)[idx], "")[[1]]))
+                top_models[[rank]] <- list(
                     variables = model_binary,
-                    probability = as.numeric(model_probs[i]),
+                    probability = as.numeric(model_probs[idx]),
                     size = sum(model_binary),
                     var_names = var_names[model_binary]
                 )
@@ -565,32 +582,62 @@ bayesianmaClass <- R6::R6Class(
             return(selected_model)
         },
         .calculateDiagnostics = function(mcmc_results) {
-            # Simplified convergence diagnostics
+            # Convergence diagnostics via coda, treating each chain's per-iteration
+            # variable-inclusion indicators as the monitored parameters.
             chains <- mcmc_results$chains
 
             if (chains < 2) {
+                # R-hat needs >= 2 chains; ESS is still meaningful for one chain.
+                ess_single <- tryCatch(
+                    round(sum(coda::effectiveSize(
+                        coda::mcmc(mcmc_results$model_samples[[1]] * 1)
+                    ))),
+                    error = function(e) mcmc_results$iterations_kept
+                )
                 return(list(
                     convergence_status = "Cannot assess - need multiple chains",
                     gelman_rubin = NA,
-                    effective_sample_size = mcmc_results$iterations_kept
+                    effective_sample_size = ess_single
                 ))
             }
 
-            # Simplified Gelman-Rubin diagnostic for inclusion probabilities
-            inclusion_chains <- lapply(mcmc_results$model_samples, colMeans)
-            inclusion_matrix <- do.call(rbind, inclusion_chains)
+            # Gelman-Rubin PSRF across ITERATIONS (previous code collapsed each
+            # chain to inclusion means and computed R-hat across VARIABLES, which
+            # is not a convergence diagnostic). ESS is now data-driven, not a
+            # constant multiple of iterations.
+            r_hat <- NA
+            ess <- mcmc_results$iterations_kept
+            tryCatch({
+                mcmc_list <- coda::mcmc.list(lapply(
+                    mcmc_results$model_samples,
+                    function(m) coda::mcmc(m * 1) # coerce logical 0/1 to numeric
+                ))
+                gd <- tryCatch(
+                    coda::gelman.diag(mcmc_list, autoburnin = FALSE, multivariate = TRUE),
+                    error = function(e) NULL
+                )
+                if (!is.null(gd)) {
+                    r_hat <- if (!is.null(gd$mpsrf) && is.finite(gd$mpsrf)) {
+                        gd$mpsrf
+                    } else {
+                        mean(gd$psrf[, 1], na.rm = TRUE)
+                    }
+                }
+                ess <- round(sum(coda::effectiveSize(mcmc_list)))
+            }, error = function(e) NULL)
 
-            # Calculate R-hat (simplified)
-            within_var <- mean(apply(inclusion_matrix, 1, var))
-            between_var <- var(rowMeans(inclusion_matrix))
-            r_hat <- (within_var + between_var) / within_var
-
-            convergence_status <- ifelse(r_hat < 1.1, "Converged", "Not Converged")
+            convergence_status <- if (is.na(r_hat)) {
+                "Unable to compute"
+            } else if (r_hat < 1.1) {
+                "Converged"
+            } else {
+                "Not Converged"
+            }
 
             return(list(
                 convergence_status = convergence_status,
                 gelman_rubin = r_hat,
-                effective_sample_size = mcmc_results$iterations_kept * chains / 2 # Simplified
+                effective_sample_size = ess
             ))
         },
         .quantifyUncertainty = function(processed_results) {
@@ -825,10 +872,12 @@ bayesianmaClass <- R6::R6Class(
                 coeff_mean <- processed$averaged_coeffs[i]
                 coeff_sd <- processed$coeff_sds[i]
 
-                # Calculate credible intervals (approximate)
-                z_score <- qnorm(1 - alpha / 2)
-                credible_lower <- coeff_mean - z_score * coeff_sd
-                credible_upper <- coeff_mean + z_score * coeff_sd
+                # Credible intervals from empirical posterior quantiles of the
+                # coefficient draws (do NOT assume Normality via mean +/- z*sd:
+                # BMA posteriors are typically spike-and-slab / multimodal).
+                draws_i <- processed$all_coefficients[, i]
+                credible_lower <- as.numeric(stats::quantile(draws_i, alpha / 2, na.rm = TRUE))
+                credible_upper <- as.numeric(stats::quantile(draws_i, 1 - alpha / 2, na.rm = TRUE))
 
                 row_values <- list(
                     variable = var_name,
@@ -855,9 +904,13 @@ bayesianmaClass <- R6::R6Class(
                 var_name <- var_names[i]
                 inclusion_prob <- processed$inclusion_probs[i]
 
-                # Calculate Bayes Factor
+                # Calculate Bayes Factor = posterior odds / prior odds.
+                # Prior odds derive from the user's prior inclusion probability
+                # (was hardcoded to 0.5/0.5, which is only correct when
+                # prior_inclusion_prob == 0.5).
+                prior_incl <- self$options$prior_inclusion_prob
                 odds_ratio <- inclusion_prob / (1 - inclusion_prob)
-                prior_odds <- 0.5 / 0.5 # Assuming equal prior odds
+                prior_odds <- prior_incl / (1 - prior_incl)
                 bayes_factor <- odds_ratio / prior_odds
                 log_bf <- log(bayes_factor)
 
