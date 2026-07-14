@@ -143,6 +143,13 @@ items:
         - name: Total
           title: 'Total'
           type: number
+      clearWith:
+          - gold
+          - newtest
+          - goldPositive
+          - testPositive
+          - goldNegative
+          - testNegative
 
 
     # - name:  cTable2
@@ -207,6 +214,12 @@ items:
       clearWith:
           - pp
           - pprob
+          - gold
+          - newtest
+          - goldPositive
+          - testPositive
+          - goldNegative
+          - testNegative
 
 
     - name:  ratioTable
@@ -261,7 +274,13 @@ items:
       clearWith:
           - pp
           - pprob
-          
+          - gold
+          - newtest
+          - goldPositive
+          - testPositive
+          - goldNegative
+          - testNegative
+
     - name: missingDataSummary
       title: 'Data Quality Summary'
       type: Html

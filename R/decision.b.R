@@ -383,16 +383,7 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             # Prepare analysis data with efficient processing
             .prepareAnalysisData = function() {
-                # Helper function to escape variable names
-                .escapeVar <- function(x) {
-                    # Handle special characters in variable names
-                    if (is.character(x)) {
-                        x <- gsub("[^A-Za-z0-9_]", "_", make.names(x))
-                    }
-                    return(x)
-                }
-
-                # Get variable names efficiently with escaping
+                # Get variable names efficiently
                 testVar <- jmvcore::constructFormula(terms = self$options$newtest) %>%
                           jmvcore::decomposeFormula() %>% unlist()
                 goldVar <- jmvcore::constructFormula(terms = self$options$gold) %>%
@@ -907,7 +898,11 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     Sens = .("Sensitivity: Proportion of diseased patients correctly identified (TP rate). Higher is better for ruling OUT disease when negative."),
                     Spec = .("Specificity: Proportion of healthy patients correctly identified (TN rate). Higher is better for ruling IN disease when positive."),
                     AccurT = .("Accuracy: Overall proportion of correct test results. Consider prevalence dependency."),
-                    PrevalenceD = .("Disease Prevalence: Proportion with disease in this population. Affects predictive values."),
+                    PrevalenceD = if (isTRUE(self$options$pp)) {
+                        .("Prevalence: Shows the user-supplied population prior probability (Prior Probability option), NOT the observed sample prevalence. Predictive values and post-test probabilities are computed from this prior.")
+                    } else {
+                        .("Disease Prevalence: Observed proportion with disease in this sample. Affects predictive values.")
+                    },
                     PPV = .("Positive Predictive Value: Probability of disease given positive test. Depends on prevalence and specificity."),
                     NPV = .("Negative Predictive Value: Probability of being healthy given negative test. Depends on prevalence and sensitivity."),
                     PostTestProbDisease = .("Post-test Probability (Disease+): Probability of disease after positive test using population prevalence."),
@@ -1032,6 +1027,13 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
             ,
             .run = function() {
+                # Reset accumulated notices at the start of every run cycle.
+                # The R6 instance is reused across runs, so the `.noticeList = list()`
+                # field default (evaluated once at instantiation) is not enough: without
+                # this reset each .addNotice() message re-appends and renders N times over
+                # N runs (same pattern fixed in survival.b.R).
+                private$.noticeList <- list()
+
                 # Early return if variables not selected
                 if (length(self$options$testPositive) + length(self$options$newtest) +
                     length(self$options$goldPositive) + length(self$options$gold) < 4)
@@ -1445,27 +1447,6 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     NA  # No negative tests
                 }
 
-                # Validate all metrics are in [0,1] range with debug logging
-                for (metric_name in c("Sens", "Spec", "AccurT", "PrevalenceD", "PPV", "NPV")) {
-                    metric_value <- get(metric_name)
-                    if (!is.na(metric_value) && (metric_value < 0 || metric_value > 1)) {
-                        # Metric validation - should not occur with proper data validation
-                        # warning(sprintf("%s out of valid range [0,1]: %.3f - check data", metric_name, metric_value))
-                    }
-                }
-
-                # Debug logging for edge cases and unusual conditions
-                if (getOption("jamovi.debug", FALSE)) {
-                    # Debug message - commented out for production
-                    # message(sprintf("Decision analysis debug: n=%d, prev=%.3f, sens=%.3f, spec=%.3f, ppv=%.3f, npv=%.3f",
-                    #                TotalPop, PrevalenceD, Sens, Spec, PPV, NPV))
-
-                    # Log potential issues
-                    # Data quality checks - these are now handled by .validateSampleSize() via Notices
-                    # Small sample size, extreme prevalence, small cell counts notifications are emitted earlier
-                }
-
-
                 pp <- self$options$pp
                 pprob <- self$options$pprob
 
@@ -1592,15 +1573,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
                     )
                 )
 
-                # Consolidated content generation with enhanced error handling
+                # Consolidated content generation with enhanced error handling.
+                # Pass RAW variable names here: the content generators
+                # (.generateNaturalLanguageSummary / .generateReportTemplate) escape them
+                # internally via .safeHtmlOutput. Escaping here too would double-encode names
+                # containing &, <, >, or quotes (e.g. `A&B` -> `A&amp;B`).
                 test_label <- if (length(self$options$newtest) > 0) {
-                    private$.safeHtmlOutput(paste(self$options$newtest, collapse = ", "))
+                    paste(self$options$newtest, collapse = ", ")
                 } else {
                     "Test"
                 }
 
                 gold_label <- if (length(self$options$gold) > 0) {
-                    private$.safeHtmlOutput(paste(self$options$gold, collapse = ", "))
+                    paste(self$options$gold, collapse = ", ")
                 } else {
                     "Reference"
                 }
@@ -1646,9 +1631,17 @@ decisionClass <- if (requireNamespace("jmvcore"))
                             warning_text
                         )
                         
-                        # Prepend warnings to clinical interpretation
+                        # Prepend warnings to clinical interpretation.
+                        # Read the generated clinical summary from content_results (guarded);
+                        # the previous `clinical_summary` reference was undefined and threw,
+                        # so the enclosing tryCatch swallowed it and misuse warnings were never shown.
                         if ("clinicalInterpretation" %in% names(self$results)) {
-                            current_content <- clinical_summary
+                            current_content <- if (!is.null(content_results) &&
+                                                   !is.null(content_results$clinical_summary)) {
+                                content_results$clinical_summary
+                            } else {
+                                ""
+                            }
                             self$results$clinicalInterpretation$setContent(paste0(warning_panel, current_content))
                         }
                     }
@@ -1960,9 +1953,17 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 # Initialize with NA for all rows in original dataset
                 classification_vector <- rep(NA_character_, nrow(self$data))
 
-                # Map complete case indices back to original data indices
-                # Get row names from mydata2 to match with original data
-                complete_indices <- as.numeric(rownames(mydata2))
+                # Map complete case indices back to original data positions.
+                # Use the purpose-built `original_row_index` column (captured before naOmit
+                # in .prepareAnalysisData), NOT rownames(): dplyr/factor operations upstream
+                # can reset data-frame row names to 1:n, which would write the saved TP/FP/FN/TN
+                # column to the wrong original rows when missing values are interspersed.
+                # The FP/FN display tables already use original_row_index for the same reason.
+                complete_indices <- if (!is.null(mydata2$original_row_index)) {
+                    mydata2$original_row_index
+                } else {
+                    as.numeric(rownames(mydata2))
+                }
 
                 # Create classification groups for complete cases
                 mydata2$classification_group <- NA_character_
@@ -2002,6 +2003,16 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 if (!self$options$showMisclassified) {
                     return()
                 }
+
+                # Populate the misclassified-cases section heading/intro block.
+                # (Declared in decision.r.yaml as `misclassifiedHeading`, visible when
+                # showMisclassified; previously never set anywhere in the backend.)
+                self$results$misclassifiedHeading$setContent(paste0(
+                    "<div style='margin: 15px; padding: 12px; border-left: 4px solid #607D8B; background: #eceff1;'>",
+                    "<h3 style='color: #37474F; margin-top: 0;'>", .("Misclassified Cases Analysis"), "</h3>",
+                    "<p>", .("Cases where the diagnostic test disagreed with the gold standard are examined below. False positives (test positive, disease absent) and false negatives (test negative, disease present) are listed with their original row numbers so individual records can be reviewed."), "</p>",
+                    "</div>"
+                ))
 
                 # Summary counts
                 n_total <- nrow(mydata2)
