@@ -274,17 +274,18 @@ options:
     - name: survivalTestType
       title: 'Survival Test Type'
       type: List
+      # NOTE: survival::survdiff() only implements the Fleming-Harrington G-rho
+      # family (weights S(t)^rho). True Gehan-Breslow (weights = n at risk) and
+      # Tarone-Ware (weights = sqrt of n at risk) cannot be produced by survdiff,
+      # so only the Fleming-Harrington tests survdiff actually computes are offered.
+      # Keys encode the rho used: rho=0 (log-rank), rho=0.5, rho=1 (= Peto-Peto).
       options:
-        - title: 'Log-Rank (standard)'
+        - title: 'Log-Rank (standard, rho=0)'
           name: logrank
-        - title: 'Gehan-Breslow-Wilcoxon'
-          name: gehan_breslow
-        - title: 'Tarone-Ware'
-          name: tarone_ware
-        - title: 'Peto-Peto'
-          name: peto_peto
-        - title: 'Fleming-Harrington'
-          name: fleming_harrington
+        - title: 'Fleming-Harrington (rho=0.5)'
+          name: fh_rho0_5
+        - title: 'Peto-Peto (Fleming-Harrington rho=1)'
+          name: fh_rho1
       default: logrank
 
 
