@@ -6,16 +6,15 @@
 #' @return A formatted table according to the chosen style.
 #'
 #' @importFrom R6 R6Class
-#' @importFrom jmvcore toNumeric select naOmit constructFormula
+#' @importFrom jmvcore select naOmit constructFormula
 #' @importFrom tableone CreateTableOne
 #' @importFrom gtsummary tbl_summary as_kable_extra
 #' @importFrom arsenal tableby
 #' @importFrom janitor tabyl adorn_totals adorn_pct_formatting
-#' @importFrom dplyr rename
 #' @importFrom kableExtra kable kable_styling
 #' @importFrom rlang sym
-#' @importFrom stats as.formula
-#' @importFrom grDevices rgb
+#' @importFrom magrittr %>%
+#' @importFrom htmltools htmlEscape
 
 #'
 tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
@@ -132,7 +131,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # Only populate if visible (saves computation)
             # CRITICAL FIX: Pass both actual_vars (for data access) and selected_vars (for display)
             if (isTRUE(self$options$showSummary)) {
-                private$.generateSummary(data, actual_vars, original_data, excluded_n, selected_vars)
+                private$.generateSummary(data, actual_vars, original_data, excluded_n, selected_vars, original_complete)
             }
 
             if (isTRUE(self$options$showAbout)) {
@@ -140,11 +139,11 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             }
 
             if (isTRUE(self$options$showReportSentence)) {
-                private$.setReportSentence(data, selected_vars, original_data, excluded_n)
+                private$.setReportSentence(data, selected_vars, original_data, excluded_n, original_complete)
             }
 
             # CRITICAL FIX: Pass both actual and display variable names to quality check
-            private$.checkDataQuality(data, actual_vars, original_data, selected_vars)
+            private$.checkDataQuality(data, actual_vars, original_data, selected_vars, original_complete)
 
             # Generate the table based on the chosen style.
             if (table_style == "t1") {
@@ -172,7 +171,11 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 private$.checkpoint()
 
                 mytable <- tryCatch({
-                    tbl <- gtsummary::tbl_summary(data = data)
+                    # Escape factor levels / variable labels before rendering to the
+                    # Html-typed output, mirroring the t3 (arsenal) and t4 (janitor)
+                    # paths so a factor-level name cannot inject markup.
+                    safe_data <- private$.htmlSafeTableData(data)
+                    tbl <- gtsummary::tbl_summary(data = safe_data)
                     gtsummary::as_kable_extra(tbl)
                 }, error = function(e) {
                     jmvcore::reject(paste0("Error creating gtsummary table: ", e$message, ". Check that variables have valid data and appropriate types. gtsummary requires properly formatted variables for summarization."))
@@ -187,7 +190,10 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # Checkpoint before expensive arsenal computation
                 private$.checkpoint()
 
-                formula_str <- jmvcore::constructFormula(terms = selected_vars)
+                # Use actual (post-jmvcore::select) column names so the formula
+                # terms match the data columns passed to arsenal::tableby,
+                # mirroring the actual_vars/selected_vars separation used in t4.
+                formula_str <- jmvcore::constructFormula(terms = actual_vars)
                 formula_obj <- jmvcore::asFormula(paste('~', formula_str))
                 mytable <- tryCatch({
                     arsenal_data <- private$.htmlSafeTableData(data)
@@ -219,9 +225,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 # Wrap entire janitor operation in tryCatch for error handling
                 result <- tryCatch({
                     # CRITICAL FIX: Use actual column names (after jmvcore::select renaming)
-                    # Create mapping for display (original -> actual column names)
-                    var_mapping <- setNames(selected_vars, actual_vars)
-
+                    # for data access; selected_vars[i] drives the user-facing labels.
                     table_list <- lapply(seq_along(actual_vars), function(i) {
                     var <- actual_vars[i]  # Actual column name in data
                     display_var <- selected_vars[i]  # Original name for display
@@ -416,7 +420,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             self$results$about$setContent(about_text)
         },
         
-        .generateSummary = function(data, actual_vars, original_data, excluded_n, display_vars = NULL) {
+        .generateSummary = function(data, actual_vars, original_data, excluded_n, display_vars = NULL, n_complete = NULL) {
             # CRITICAL FIX: Report statistics from ORIGINAL data to show true missingness
             # CRITICAL FIX: Use actual_vars for data access, display_vars for messages
             if (is.null(display_vars)) {
@@ -427,9 +431,16 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             n_final <- nrow(data)
             n_vars <- length(actual_vars)
 
-            # Calculate missing data from ORIGINAL dataset
-            n_complete_original <- sum(complete.cases(original_data))
+            # Calculate missing data from ORIGINAL dataset. The complete-case count is
+            # computed once in .run() and passed in to avoid recomputing complete.cases().
+            if (is.null(n_complete)) n_complete <- sum(complete.cases(original_data))
+            n_complete_original <- n_complete
+            # Base the missing-data branch on the raw count, not the rounded percent,
+            # so tiny-but-nonzero missingness is not reported as complete data.
+            has_missing <- n_complete_original < n_original
             missing_pct_original <- round(100 * (1 - n_complete_original / n_original), 1)
+            missing_pct_label <- if (has_missing && missing_pct_original < 0.1)
+                "&lt;0.1" else format(missing_pct_original)
 
             # Variable type analysis (on final data for consistency)
             var_types <- sapply(data, function(x) {
@@ -460,8 +471,8 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 round(100 * n_complete_original / n_original, 1), "%)</p>",
 
                 # Missing data transparency
-                if (missing_pct_original > 0) {
-                    paste0("<p><strong>Missing data (original):</strong> ", missing_pct_original,
+                if (has_missing) {
+                    paste0("<p><strong>Missing data (original):</strong> ", missing_pct_label,
                            "% of cases have at least one missing value",
                            if (length(high_missing_vars_safe) > 0) {
                                paste0(" <br><em>Variables with >20% missing: ",
@@ -481,7 +492,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                            n_final, " complete cases only. Per-variable denominators may differ if variables have different missing patterns.</em></p>")
                 } else {
                     paste0("<p><strong>Analysis sample:</strong> ", n_final, " cases (no exclusions applied)</p>",
-                           if (missing_pct_original > 0) {
+                           if (has_missing) {
                                "<p style='color: #856404; background-color: #fff3cd; padding: 8px; border-radius: 4px;'><em> Note: Missing values are present but NOT excluded. Different variables may have different sample sizes (denominators) in the table below. Consider enabling 'Exclude Missing Values' for consistent denominators.</em></p>"
                            } else "")
                 },
@@ -493,7 +504,7 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             self$results$summary$setContent(summary_text)
         },
         
-        .checkDataQuality = function(data, actual_vars, original_data, display_vars = NULL) {
+        .checkDataQuality = function(data, actual_vars, original_data, display_vars = NULL, n_complete = NULL) {
             # NOTE: Data quality thresholds align with clinical research standards:
             # - STRONG_WARNING thresholds: N<10, missing>50%, exclusion>30%
             # - WARNING thresholds: N<30, missing>20%, exclusion>10%
@@ -521,8 +532,10 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 recommendations <- c(recommendations, paste0("<em>Small final sample size (N = ", n_final, ").</em> Consider reporting exact values rather than summary statistics. Confidence intervals may be wide."))
             }
 
-            # Check missing data from ORIGINAL dataset
-            missing_pct_original <- round(100 * (1 - sum(complete.cases(original_data)) / n_original), 1)
+            # Check missing data from ORIGINAL dataset. The complete-case count is
+            # computed once in .run() and passed in to avoid recomputing complete.cases().
+            if (is.null(n_complete)) n_complete <- sum(complete.cases(original_data))
+            missing_pct_original <- round(100 * (1 - n_complete / n_original), 1)
             if (missing_pct_original > 50) {
                 # STRONG_WARNING: High missing data
                 warnings <- c(warnings, paste0("<strong> High missing data rate in original dataset (", missing_pct_original, "%).</strong> More than half of cases have at least one missing value. Results may not be representative of the full population. Consider data cleaning, imputation, or reporting missing data patterns."))
@@ -581,12 +594,19 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             }
         },
 
-        .setReportSentence = function(data, vars, original_data, excluded_n) {
+        .setReportSentence = function(data, vars, original_data, excluded_n, n_complete = NULL) {
             n_final <- nrow(data)
             n_original <- nrow(original_data)
             n_vars <- length(vars)
 
-            missing_pct <- round(100 * (1 - sum(complete.cases(original_data)) / n_original), 1)
+            # Complete-case count computed once in .run(); recompute only as a fallback.
+            if (is.null(n_complete)) n_complete <- sum(complete.cases(original_data))
+            # Base the completeness branch on the raw count, not the rounded percent,
+            # so tiny-but-nonzero missingness is not reported as complete data.
+            has_missing <- n_complete < n_original
+            missing_pct <- round(100 * (1 - n_complete / n_original), 1)
+            # Report values that round to 0.0% but are non-zero as "<0.1%".
+            missing_pct_str <- if (missing_pct < 0.1) "<0.1%" else sprintf("%.1f%%", missing_pct)
 
             # Build variable list description
             var_list <- if (n_vars <= 3) {
@@ -596,14 +616,14 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             }
 
             # Build missing data clause
-            missing_clause <- if (missing_pct == 0) {
+            missing_clause <- if (!has_missing) {
                 "Complete data were available for all cases."
             } else if (missing_pct < 5) {
-                sprintf("Minimal missing data were detected (%.1f%% of cases with at least one missing value).", missing_pct)
+                sprintf("Minimal missing data were detected (%s of cases with at least one missing value).", missing_pct_str)
             } else if (missing_pct < 20) {
-                sprintf("Moderate missing data were observed (%.1f%% of cases incomplete).", missing_pct)
+                sprintf("Moderate missing data were observed (%s of cases incomplete).", missing_pct_str)
             } else {
-                sprintf("Substantial missing data were present (%.1f%% of cases with at least one missing value).", missing_pct)
+                sprintf("Substantial missing data were present (%s of cases with at least one missing value).", missing_pct_str)
             }
 
             # Build exclusion clause
