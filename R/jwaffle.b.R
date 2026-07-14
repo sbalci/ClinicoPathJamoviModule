@@ -193,7 +193,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 facet_var <- self$options$facet
                 if (facet_var %in% names(self$data)) {
                     num_levels <- length(unique(self$data[[facet_var]]))
-                    width <- max(base_width, num_levels * base_width)
+                    # Cap the total width so a high-cardinality facet variable does not
+                    # produce an enormous (and effectively unrenderable) image.
+                    max_total_width <- 3000
+                    width <- min(max(base_width, num_levels * base_width), max_total_width)
                     self$results$plot$setSize(width, base_height)
                 } else {
                     self$results$plot$setSize(base_width, base_height)
@@ -244,22 +247,25 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.noticeList <- list()
             if (!is.null(self$results$warnings)) {
                 self$results$warnings$setContent("")
+                # Hide the Messages box when empty so a stale/empty box is not shown;
+                # .accumulateMessage() re-enables it whenever a message is produced.
+                self$results$warnings$setVisible(FALSE)
+            }
+            # Clear stale data-quality notices so they do not persist into a run that
+            # produces none but whose clearWith (groups/counts/facet/rows/color_palette)
+            # has not fired (e.g. underlying data values changed without a variable
+            # selection change).
+            if (!is.null(self$results$notices)) {
+                self$results$notices$setContent("")
             }
         },
 
-        # Variable name safety utility
-        # TODO (cleanup): .escapeVar() is defined but never called anywhere in this file.
-        # Either remove it, or wire it into the asSource() / facet_wrap paths where
-        # column-name escaping happens (currently those paths use jmvcore::composeTerm
-        # / deparse() inline).
-        .escapeVar = function(var) {
-            if (is.null(var)) return(NULL)
-            # Use jmvcore::composeTerm for variables with spaces/special chars
-            if (grepl("[^A-Za-z0-9_]", var)) {
-                jmvcore::composeTerm(var)
-            } else {
-                var
-            }
+        # Consolidated empty-data guard shared by .run (early + post-prep) and .plot,
+        # so every entry point rejects with a single consistent message.
+        .requireData = function(data) {
+            if (is.null(data) || nrow(data) == 0)
+                jmvcore::reject('Data contains no (complete) rows')
+            invisible(data)
         },
 
         # Performance optimization methods
@@ -310,7 +316,13 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 showSummaries = self$options$showSummaries,
                 showExplanations = self$options$showExplanations
             )
-            
+
+            # Use digest (matching .calculateDataHash) so NULL vs empty-string options
+            # produce distinct hashes. paste(list, collapse) coerces NULL away and can
+            # collide two option sets onto one cache key (worst case: a stale plot).
+            if (requireNamespace("digest", quietly = TRUE)) {
+                return(digest::digest(options_list, algo = "md5"))
+            }
             return(paste(options_list, collapse = "_"))
         },
         
@@ -463,19 +475,23 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (!is.null(facet_var) && !is.null(facet_level)) {
                 # Facet-specific caption
                 caption_text <- sprintf(
-                    "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %d)",
+                    "%s = %s: Each square ~ %.1f %s (%.1f%%) (total = %.0f)",
                     facet_var, facet_level, units_per_square, unit_label, squares_per_unit, total_cases
                 )
             } else if (!is.null(facet_var)) {
-                # General faceted caption (when not specific to a level)
+                # General faceted caption (when not specific to a level).
+                # make_proportional = TRUE normalizes EACH panel to ~100 squares, so a
+                # grand-total cases-per-square figure (total_cases / 100) is wrong per
+                # panel. Report the honest per-panel proportion instead of an absolute
+                # count that does not apply to any individual facet.
                 caption_text <- sprintf(
-                    "Each square ~ %.1f %s per facet group (values vary by %s)",
-                    units_per_square, unit_label, facet_var
+                    "Each panel is scaled independently; each square ~ 1%% within that %s group",
+                    facet_var
                 )
             } else {
                 # Simple caption
                 caption_text <- sprintf(
-                    "Each square represents %.1f %s (approximately %.1f%%) (total n=%d)",
+                    "Each square represents %.1f %s (approximately %.1f%%) (total n=%.0f)",
                     units_per_square, unit_label, squares_per_unit, total_cases
                 )
             }
@@ -626,7 +642,16 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     dplyr::group_by(!!!rlang::syms(group_vars)) %>%
                     dplyr::summarise(count = !!count_expr, .groups = 'drop') %>%
                     dplyr::ungroup()
-                
+
+                # Drop unused factor levels so the palette length (keyed to the observed
+                # groups via length(unique(...))) matches the number of levels ggplot
+                # maps in scale_fill_manual. Levels left empty by complete.cases /
+                # filtering would otherwise trigger 'Insufficient values in manual scale'.
+                for (gv in group_vars) {
+                    if (gv %in% names(result) && is.factor(result[[gv]]))
+                        result[[gv]] <- droplevels(result[[gv]])
+                }
+
                 return(result)
             }, error = function(e) {
                 jmvcore::reject(
@@ -669,9 +694,12 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     facet_data <- facet_data[order(facet_data[[groups_var]]), ]
                     proportions <- (facet_data$count / facet_total) * 100
 
-                    # Create breakdown showing all categories within this facet
+                    # Create breakdown showing all categories within this facet.
+                    # counts (facet_data$count) are doubles when a numeric weight
+                    # variable is used, so format with %.0f rather than %d (sprintf
+                    # "%d" errors on non-integer doubles).
                     category_breakdown <- paste(
-                        sprintf("%s %s: %.1f%% (n=%d)",
+                        sprintf("%s %s: %.1f%% (n=%.0f)",
                                groups_var_safe,
                                facet_data[[groups_var]],
                                proportions,
@@ -685,7 +713,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     max_proportion <- proportions[max_prop_idx]
 
                     summary_parts[[facet_level]] <- sprintf(
-                        "<b>Among %s %s</b> (n=%d): %s \u2192 <i>%s %s predominates (%.1f%%)</i>",
+                        "<b>Among %s %s</b> (n=%.0f): %s \u2192 <i>%s %s predominates (%.1f%%)</i>",
                         facet_var_safe, facet_level, facet_total, category_breakdown,
                         groups_var_safe, dominant_category, max_proportion
                     )
@@ -707,9 +735,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 dominant_category <- plotdata[[groups_var]][max_prop_idx]
                 max_proportion <- proportions[max_prop_idx]
 
-                # Create simple breakdown
+                # Create simple breakdown (counts are doubles for weighted data, so
+                # format with %.0f rather than %d to avoid a sprintf crash).
                 breakdown_list <- paste(
-                    sprintf("%s: %.1f%% (n=%d)",
+                    sprintf("%s: %.1f%% (n=%.0f)",
                            plotdata[[groups_var]],
                            proportions,
                            plotdata$count),
@@ -718,10 +747,10 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 summary_text <- sprintf(
                     "<b> Waffle Chart Summary:</b><br><br>
-                    The sample contains %d %s distributed as: %s.<br><br>
+                    The sample contains %.0f %s distributed as: %s.<br><br>
                     <b>Key Finding:</b> %s represents the largest proportion (%.1f%% of %s).<br><br>
                     <b> Report Template:</b><br>
-                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%d) in our sample of %d %s.\"</i>",
+                    <i>\"Distribution analysis revealed %s as the most frequent category (%.1f%%, n=%.0f) in our sample of %.0f %s.\"</i>",
                     total_cases, unit_label, breakdown_list, dominant_category, max_proportion, unit_label,
                     dominant_category, max_proportion, plotdata$count[max_prop_idx], total_cases, unit_label
                 )
@@ -817,13 +846,7 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # TODO (cleanup): the same `jmvcore::reject('Data contains no (complete) rows')`
-            # guard is repeated at lines ~816 (.run early), ~843 (.run post-prep), and
-            # ~890 (.plot post-prep). Consolidate into a small private$.requireData()
-            # helper that takes the data frame and rejects with a consistent message,
-            # so future entry points pick up the same guard for free.
-            if (nrow(self$data) == 0)
-                jmvcore::reject('Data contains no (complete) rows')
+            private$.requireData(self$data)
 
             private$.resetMessages()
 
@@ -841,21 +864,18 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     <br>Please check your variable selections and try again.<br><hr>"
                 )
                 self$results$todo$setContent(error_msg)
-                # TODO (UX): stop(e$message) rethrows as a plain stop and loses the
-                # rejection class set inside .validateInputs(). Consider
-                # `jmvcore::reject(e$message)` so jamovi surfaces a structured error
-                # alongside the HTML todo card.
-                stop(e$message)
+                # Re-raise as a jmvcore rejection so jamovi surfaces a structured error
+                # alongside the HTML todo card. A plain stop() would lose the reject
+                # class set inside .validateInputs().
+                jmvcore::reject(conditionMessage(e))
             })
             
             # Performance optimization: prepare data and options with caching
             mydata <- private$.prepareData()
             options <- private$.prepareOptions()
-            
-            if (is.null(mydata) || nrow(mydata) == 0) {
-                jmvcore::reject('Data contains no (complete) rows')
-            }
-            
+
+            private$.requireData(mydata)
+
             # Generate analysis summary and explanations if requested
             if (self$options$showSummaries || self$options$showExplanations) {
                 groups_var <- self$options$groups
@@ -895,12 +915,16 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
+            # Reset messages first: .plot runs as a separate render pass from .run, so
+            # re-validating without a reset would append the same data-quality notices a
+            # second time (duplicated Messages / notices). Resetting keeps it idempotent.
+            private$.resetMessages()
+
             # Validate inputs and prepare data using cached method
             private$.validateInputs()
             mydata <- private$.prepareData()
-            
-            if (is.null(mydata) || nrow(mydata) == 0)
-                jmvcore::reject('Data contains no (complete) rows')
+
+            private$.requireData(mydata)
 
             groups_var <- self$options$groups
             facet_var <- self$options$facet

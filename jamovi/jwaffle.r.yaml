@@ -33,7 +33,7 @@ items:
     - name: warnings
       title: Messages
       type: Html
-      visible: true
+      visible: false
       clearWith:
         - counts
         - groups
