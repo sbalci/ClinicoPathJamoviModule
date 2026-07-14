@@ -15,7 +15,9 @@ items:
       title: 'Clinical Interpretation'
       type:  Html
       visible: (vars)
-      
+      clearWith:
+          - vars
+
     - name:  aboutAnalysis
       title: 'About This Analysis'
       type:  Html
@@ -25,20 +27,29 @@ items:
       title: 'Data Quality & Assumptions'
       type:  Html
       visible: (vars)
+      clearWith:
+          - vars
 
     - name:  text
       title: 'Variable Summaries'
       type:  Html
+      visible: (vars)
+      clearWith:
+          - vars
 
     - name:  text1
       title: 'Summary Table'
       type:  Html
       visible: (vars)
+      clearWith:
+          - vars
 
     - name:  reportSentences
       title: 'Copy-Ready Clinical Summary'
       type:  Html
       visible: (vars)
+      clearWith:
+          - vars
 
     - name:  error
       title: 'Error Message'
