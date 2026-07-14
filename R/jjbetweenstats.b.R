@@ -19,6 +19,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .options_hash = NULL,
         .accumulated_messages = NULL,  # For accumulating diagnostic messages
         .diagnosticsHtml = NULL,       # Persisted diagnostics HTML (survives .prepareData cache hits)
+        .assumptionWarnings = NULL,    # Cached Levene/Shapiro warnings (computed once in .prepareData)
 
         # Helper to accumulate messages instead of overwriting
         .appendMessage = function(message) {
@@ -139,43 +140,37 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
         },
         
-        # Optimized outlier detection helper for large datasets
+        # Outlier detection helper (IQR rule)
         .detectOutliers = function(data, vars, method = "IQR") {
             outliers <- list()
-            
-            # For very large datasets, use sampling for outlier detection
+
+            # For very large datasets, report only the outlier COUNT (not the full
+            # index vector) to keep diagnostic messages compact. Thresholds are
+            # ALWAYS derived from exact quantiles (cheap even at 1e5+ rows) so the
+            # reported count is reproducible run-to-run; the previous sample()-based
+            # estimate was unseeded and made counts change between identical runs.
             data_size <- nrow(data)
-            use_sampling <- data_size > 5000
-            
+            large_dataset <- data_size > 5000
+
             for (var in vars) {
                 vals <- jmvcore::toNumeric(data[[var]])
                 vals <- vals[!is.na(vals)]
-                
+
                 if (length(vals) > 0) {
-                    # For large datasets, sample for performance
-                    if (use_sampling && length(vals) > 5000) {
-                        # Use a representative sample for outlier threshold calculation
-                        sample_size <- min(5000, length(vals))
-                        sample_vals <- sample(vals, sample_size)
-                        Q1 <- quantile(sample_vals, 0.25, na.rm = TRUE)
-                        Q3 <- quantile(sample_vals, 0.75, na.rm = TRUE)
-                    } else {
-                        Q1 <- quantile(vals, 0.25, na.rm = TRUE)
-                        Q3 <- quantile(vals, 0.75, na.rm = TRUE)
-                    }
-                    
+                    Q1 <- quantile(vals, 0.25, na.rm = TRUE)
+                    Q3 <- quantile(vals, 0.75, na.rm = TRUE)
                     IQR <- Q3 - Q1
-                    
+
                     # Only calculate outlier indices if IQR is meaningful
                     if (IQR > 0) {
                         outlier_indices <- which(
-                            data[[var]] < (Q1 - 1.5 * IQR) | 
+                            data[[var]] < (Q1 - 1.5 * IQR) |
                             data[[var]] > (Q3 + 1.5 * IQR)
                         )
-                        
+
                         if (length(outlier_indices) > 0) {
                             # For large datasets, only report count not indices
-                            if (use_sampling) {
+                            if (large_dataset) {
                                 outliers[[var]] <- length(outlier_indices)
                             } else {
                                 outliers[[var]] <- outlier_indices
@@ -205,36 +200,68 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(plot)
         },
         
-        # Clinical interpretation helper
-        .generateClinicalInterpretation = function(plot_obj, test_type, variables) {
-            interpretation <- tryCatch({
-                # Extract statistics from ggstatsplot object
-                if (!is.null(plot_obj$data)) {
-                    subtitle_text <- plot_obj$labels$subtitle
-                    if (!is.null(subtitle_text) && nchar(subtitle_text) > 0) {
-                        # Extract key statistical information
-                        test_name <- switch(test_type,
-                            "parametric" = .("t-test"),
-                            "nonparametric" = .("Mann-Whitney U test"),
-                            "robust" = .("robust test"),
-                            "bayes" = .("Bayesian analysis")
-                        )
-                        
-                        clinical_text <- sprintf(
-                            .("<div class='clinical-summary'><h4>Results Summary</h4><p>{test} comparing {vars} between groups.</p><p class='subtitle-stats'>{subtitle}</p></div>"),
-                            test = test_name,
-                            vars = htmltools::htmlEscape(paste(variables, collapse = ", ")),
-                            subtitle = htmltools::htmlEscape(subtitle_text)
-                        )
-                        return(clinical_text)
-                    }
+        # Clinical results summary. Rendered from .run() (NOT from a plot render
+        # function): jamovi discards results content mutated during a render, which
+        # is why the previous render-path version appeared then vanished on
+        # option-only re-renders (the same anti-pattern already fixed for
+        # diagnostics/mecGuidance). The test is named from the number of OBSERVED
+        # group levels so a >2-group comparison is not mislabelled as a two-sample
+        # test, and we no longer call nchar()/htmlEscape() on ggstatsplot's
+        # plotmath language subtitle (which threw and forced generic fallback text).
+        .generateClinicalSummary = function() {
+            if (is.null(self$options$dep) || is.null(self$options$group))
+                return()
+
+            mydata <- private$.prepareData()
+            n_total <- nrow(mydata)
+            grp <- mydata[[self$options$group]]
+            grp_levels <- unique(grp[!is.na(grp)])
+            n_groups <- length(grp_levels)
+
+            type <- self$options$typestatistics
+            if (n_groups <= 2) {
+                test_name <- switch(type,
+                    "parametric"    = if (self$options$varequal) .("Student's t-test") else .("Welch's t-test"),
+                    "nonparametric" = .("Mann-Whitney U test"),
+                    "robust"        = .("robust test (Yuen's trimmed means)"),
+                    "bayes"         = .("Bayesian t-test"),
+                    .("two-group comparison")
+                )
+            } else {
+                test_name <- switch(type,
+                    "parametric"    = if (self$options$varequal) .("one-way ANOVA") else .("Welch's ANOVA"),
+                    "nonparametric" = .("Kruskal-Wallis test"),
+                    "robust"        = .("robust ANOVA"),
+                    "bayes"         = .("Bayesian ANOVA"),
+                    .("ANOVA")
+                )
+            }
+
+            vars <- htmltools::htmlEscape(paste(self$options$dep, collapse = ", "))
+            clinical_text <- sprintf(
+                .("<div style='padding: 12px 15px; background-color: #eef7ee; border-left: 4px solid #28a745; margin: 10px 0;'><h4 style='margin-top:0;'>Results Summary</h4><p>%s comparing %s across %d group(s) (n = %d). See the plot subtitle for the test statistic, p-value, and effect size.</p></div>"),
+                test_name,
+                vars,
+                n_groups,
+                n_total
+            )
+            self$results$clinicalSummary$setContent(clinical_text)
+        },
+
+        # Wrap a plot-building/printing expression so degenerate inputs (a group
+        # with <2 observations, an all-NA cell, an internal ggstatsplot/ggpubr
+        # failure) surface as an actionable message instead of a raw jamovi engine
+        # error. `expr` is a promise, evaluated lazily inside the tryCatch.
+        .tryPlot = function(expr) {
+            tryCatch(
+                expr,
+                error = function(e) {
+                    jmvcore::reject(
+                        .("Unable to generate the plot: {err}. This often happens when a group has fewer than two observations or contains only missing values; verify that each group has sufficient non-missing data."),
+                        err = conditionMessage(e)
+                    )
                 }
-                return(.("<p>Analysis completed. See plot for detailed results.</p>"))
-            }, error = function(e) {
-                return(.("<p>Analysis completed successfully.</p>"))
-            })
-            
-            return(interpretation)
+            )
         },
         
         # Build the multiple-endpoint correction guidance HTML.
@@ -428,11 +455,24 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.appendMessage(na_message)
             }
 
+            # Guard: the grouping variable must retain >= 2 non-empty levels after
+            # NA removal. A constant column or excessive missingness collapses it to
+            # a single level, which otherwise reaches ggstatsplot and produces a
+            # cryptic downstream error instead of an actionable message.
+            n_group_levels <- nlevels(droplevels(as.factor(mydata[[self$options$group]])))
+            if (n_group_levels < 2) {
+                jmvcore::reject(
+                    .("The grouping variable '{group}' must have at least 2 groups with data after removing missing values (found {n}). Check for a constant column or excessive missing data."),
+                    group = self$options$group, n = n_group_levels
+                )
+            }
+
             # Validate data quality
             private$.validateDataQuality(mydata, vars)
 
-            # Check statistical assumptions
+            # Check statistical assumptions (cached for reuse by the explanations panel)
             assumption_warnings <- private$.checkAssumptions(mydata, vars, self$options$group, self$options$typestatistics)
+            private$.assumptionWarnings <- assumption_warnings
             if (length(assumption_warnings) > 0) {
                 warning_text <- paste(assumption_warnings, collapse = "<br>")
                 # ACCUMULATE instead of overwrite
@@ -558,16 +598,17 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
 .run = function() {
-    # Preserve and restore the RNG state to avoid leaking global RNG entropy via
-    # internal sample() calls (.detectOutliers uses sample() for >5000-row datasets).
-    # withr::local_preserve_seed() does the save/restore without touching .GlobalEnv.
+    # Preserve and restore the RNG state so any internal randomness used by the
+    # statistical backends (e.g. ggstatsplot's Bayesian/robust tests) does not leak
+    # global RNG entropy. withr::local_preserve_seed() saves/restores without
+    # touching .GlobalEnv. (Outlier detection now uses exact quantiles, not sampling.)
     withr::local_preserve_seed()
 
-    # Always generate About content
-    private$.generateAboutContent()
-
-    # Generate summary if requested
+    # Generate explanatory content only when requested. Every one of these panels
+    # (about/summary/assumptions/interpretation/report) is hidden in the results
+    # unless showexplanations is TRUE, so computing them otherwise is wasted work.
     if (self$options$showexplanations) {
+        private$.generateAboutContent()
         private$.generateSummary()
         private$.generateAssumptionsContent()
         private$.generateInterpretationGuide()
@@ -591,6 +632,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # No analysis yet -> clear the separate guidance / diagnostics panels.
         self$results$mecGuidance$setContent("")
         self$results$diagnostics$setContent("")
+        self$results$clinicalSummary$setContent("")
         return()
 
     } else {
@@ -624,6 +666,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         self$results$mecGuidance$setContent(private$.endpointGuidanceHtml())
         self$results$diagnostics$setContent(
             if (is.null(private$.diagnosticsHtml)) "" else private$.diagnosticsHtml)
+
+        # Clinical results summary, computed in the run context so it survives
+        # option-only re-renders (setting it during .plot render is discarded).
+        private$.generateClinicalSummary()
     }
 },
 .generateAboutContent = function() {
@@ -704,7 +750,12 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     }
 
     mydata <- private$.prepareData()
-    warnings <- private$.checkAssumptions(mydata, self$options$dep, self$options$group, self$options$typestatistics)
+    # Reuse the assumption warnings computed during .prepareData() instead of
+    # re-running Levene's/Shapiro-Wilk per variable/group. Fall back to a fresh
+    # computation only if the cache is somehow empty.
+    warnings <- private$.assumptionWarnings
+    if (is.null(warnings))
+        warnings <- private$.checkAssumptions(mydata, self$options$dep, self$options$group, self$options$typestatistics)
 
     # Add note about multiple endpoints if applicable
     multi_endpoint_note <- ""
@@ -888,14 +939,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     args_list$boxplot.args <- opts$boxplotargs
                 }
                 
-                plot <- do.call(ggstatsplot::ggbetweenstats, args_list)
+                plot <- private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, args_list))
 
                 # Apply theme using helper
                 plot <- private$.applyTheme(plot, opts, ggtheme)
-                
-                # Generate clinical interpretation
-                interpretation <- private$.generateClinicalInterpretation(plot, opts$typestatistics, dep)
-                self$results$clinicalSummary$setContent(interpretation)
             }
 
             # Multiple dependent variables analysis ----
@@ -944,7 +991,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             plot_args$boxplot.args <- opts$boxplotargs
                         }
                         
-                        do.call(ggstatsplot::ggbetweenstats, plot_args)
+                        private$.tryPlot(do.call(ggstatsplot::ggbetweenstats, plot_args))
                     }
                 )
 
@@ -964,14 +1011,10 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         tag_levels = "A"
                     )
                 )
-                
-                # Generate clinical interpretation for multiple variables
-                interpretation <- private$.generateClinicalInterpretation(plotlist[[1]], opts$typestatistics, dep)
-                self$results$clinicalSummary$setContent(interpretation)
             }
 
             # Print Plot ----
-                
+
                 print(plot)
                 TRUE
         },
@@ -1041,7 +1084,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     grouped_args$boxplot.args <- opts$boxplotargs
                 }
                 
-                plot2 <- do.call(ggstatsplot::grouped_ggbetweenstats, grouped_args)
+                plot2 <- private$.tryPlot(do.call(ggstatsplot::grouped_ggbetweenstats, grouped_args))
             }
 
             # Multiple dependent variables grouped analysis ----
@@ -1106,7 +1149,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             grouped_multi_args$boxplot.args <- opts$boxplotargs
                         }
                         
-                        do.call(ggstatsplot::grouped_ggbetweenstats, grouped_multi_args)
+                        private$.tryPlot(do.call(ggstatsplot::grouped_ggbetweenstats, grouped_multi_args))
                     }
                 )
 
@@ -1154,6 +1197,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = group,
                     y = dep,
+                    color = group,
                     title = if (nchar(self$options$mytitle) > 0) self$options$mytitle else NULL,
                     xlab = if (nchar(self$options$xtitle) > 0) self$options$xtitle else group,
                     ylab = if (nchar(self$options$ytitle) > 0) self$options$ytitle else dep,
@@ -1180,7 +1224,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Apply theme
                 plot <- plot + ggpubr::theme_pubr()
 
-                print(plot)
+                private$.tryPlot(print(plot))
             }
 
             # Multiple dependent variables
@@ -1192,6 +1236,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         data = mydata,
                         x = group,
                         y = depvar,
+                        color = group,
                         title = depvar,
                         xlab = group,
                         ylab = depvar,
@@ -1217,7 +1262,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })
 
                 plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
-                print(plot)
+                private$.tryPlot(print(plot))
             }
 
             TRUE
@@ -1248,6 +1293,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = mydata,
                     x = group,
                     y = dep,
+                    color = group,
                     title = if (nchar(self$options$mytitle) > 0) self$options$mytitle else NULL,
                     xlab = if (nchar(self$options$xtitle) > 0) self$options$xtitle else group,
                     ylab = if (nchar(self$options$ytitle) > 0) self$options$ytitle else dep,
@@ -1270,7 +1316,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 plot <- plot + ggpubr::theme_pubr()
-                print(plot)
+                private$.tryPlot(print(plot))
             }
 
             # Multiple dependent variables with faceting
@@ -1282,6 +1328,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         data = mydata,
                         x = group,
                         y = depvar,
+                        color = group,
                         title = depvar,
                         xlab = group,
                         ylab = depvar,
@@ -1308,7 +1355,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 })
 
                 plot <- ggpubr::ggarrange(plotlist = plotlist, ncol = 1, nrow = length(dep))
-                print(plot)
+                private$.tryPlot(print(plot))
             }
 
             TRUE
