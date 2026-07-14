@@ -2,11 +2,13 @@
 
 # ClinicoPath 1.0.0 — shipping-function bug-fix pass (2026-07-14)
 
-Post-release correctness pass over the OncoPath shipping (submodule-distributed) analyses. These
-fixes change reported statistics for the affected analyses and should be verified against reference
-datasets.
+Post-release correctness/robustness pass over the shipping (submodule-distributed) analyses. Many
+fixes change reported statistics or add input-validation guards for the affected analyses and should
+be verified against reference datasets before release.
 
 ## Fixed
+
+### OncoPath
 
 - **Diagnostic Test Meta-Analysis (`diagnosticmeta`):** corrected the delta-method confidence-interval
   covariance sign for the positive/negative likelihood ratios and the diagnostic odds ratio (the
@@ -30,6 +32,59 @@ datasets.
   progressive disease (`min()` over an empty set returned `Inf`); reset notices each run so they no
   longer accumulate; use original (unescaped) variable names as data-frame keys so variables with
   spaces/special characters work; removed dead helper code; completed `clearWith`.
+
+### ClinicoPathDescriptives
+
+- **Cross Table (`crosstable`):** HTML-escaped factor levels and cell values in the Tangram styles,
+  which were previously injected raw into the results view (XSS hardening); wrapped the arsenal/
+  finalfit/gtsummary/tangram table builders in error handling that routes failures to a styled notice
+  instead of a raw R error; corrected inverted enable rules so the continuous-summary and categorical-
+  test options are usable for the styles that consume them; gave variable-name warnings their own
+  output so they no longer clobber the finalfit note; removed dead auto-test-selection scaffolding.
+- **Table One (`tableone`):** HTML-escaped factor levels/labels in the gtsummary style (XSS hardening);
+  keyed the completeness/missing-data message on the raw missing count so a tiny non-zero missingness
+  no longer reports "complete data were available for all cases"; aligned the arsenal formula terms
+  with the actually-selected columns.
+- **Outlier Detection (`outlierdetection`):** routed validation and error messages to an always-visible
+  panel; corrected per-method outlier columns that were double-counting the aggregate flag; unified all
+  displayed outlier counts through one proportion-vs-threshold rule; HTML-escaped variable names; fixed
+  a crash on all-missing variables; preserved row identifiers across subsampling.
+- **Data Quality (`dataquality`):** fixed two crashes where an integer format was applied to a
+  fractional value (the missing-value median and a decimal missing-data threshold); surfaced value-level
+  duplicate counts; stopped flagging continuous numeric variables as high-cardinality; kept critical
+  warnings visible even when the summary panels are off.
+- **Data Check (`checkdata`):** fixed a crash on entirely-missing variables and on factors carrying
+  unused levels; switched to a single population-moment (g1) skewness estimator; corrected the quality-
+  grade boundaries; surfaced quality warnings in a visible panel; removed ~250 lines of dead code.
+- **Chi-Square Post-Hoc (`chisqposttest`):** detailed contingency tables now render all R×C categories
+  (were hard-coded to 2×2); dropped unused factor levels before tabulation; removed a double-population
+  of the export table and a duplicated pairwise computation; relabelled the effect-size column.
+- **Benford Analysis (`benford`):** fixed a crash when Digits = 4 (now capped at 3) and when the MAD
+  statistic is NA; routed fatal errors to the Data Validation panel; completed `clearWith`.
+- **Categorize (`categorize`):** corrected the frequency-table Range column (wrong for lettered/custom/
+  auto styles, and emitting a coercion warning); made generated syntax reproducible on tied data;
+  guarded against duplicate custom labels; cached plot break state.
+- **Summary of Continuous Variables (`summarydata`):** stopped the "infinite/extreme values" clinical
+  alert firing on ordinary NA/NaN; honoured the decimal-places option in the summary table; suppressed
+  misleading `p = NA; skewness = NaN` text on constant data; used raw variable names as data keys;
+  de-duplicated the Shapiro–Wilk computation.
+- **Summary of Categorical Variables (`reportcat`):** stopped truncating factors with more than 100
+  levels; corrected displayed "levels" counts to observed (non-empty) levels; hardened the gt→HTML
+  fallback; completed `clearWith` and hid stale output when no variable is selected.
+- **Age Pyramid (`agepyramid`):** reconciled the "Final observations" count with rows dropped by
+  out-of-range custom breaks (and now errors when none remain in range); validated custom colours with
+  a safe fallback; a ggcharts render failure now shows an explanatory panel instead of a blank plot.
+- **Alluvial Diagram (`alluvial`):** fixed a blank plot when marginal histograms were combined with
+  palette/theme options; moved bin-label and title-compatibility checks so their notices surface before
+  rendering; showed the "no data" message that was previously set but hidden; routed weight-validation
+  errors through the notice channel; removed dead code.
+- **Variable Tree (`vartree`):** preserved quotes in the max-width SVG regex; built the tree summary
+  spec as a vector so percentage and mean/SD annotations can co-exist; added an error notice when NA
+  exclusion removes all rows; completed `clearWith`; removed dead code and unused imports.
+- **Venn Diagram (`venn`):** HTML-escaped variable-access error messages via `jmvcore::reject`;
+  decoupled the membership table from the set-calculations toggle so it is reachable; documented that
+  the sort and minimum-size options apply only to the ComplexUpset engine; corrected the About text;
+  completed `clearWith` for styling options; removed dead code.
 
 # ClinicoPath 1.0.0 (2026-07-13)
 
