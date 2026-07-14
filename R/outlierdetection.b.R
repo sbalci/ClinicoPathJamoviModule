@@ -149,14 +149,41 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
     private = list(
         
         .messages = NULL,
-        
+        .warningsBlocks = NULL,
+
         .accumulateMessage = function(msg) {
             private$.messages <- c(private$.messages, msg)
         },
-        
+
+        # Accumulate a full HTML block (validation summary, sampling notice, error)
+        # to be shown in the always-visible `warnings` output.
+        .addWarningsBlock = function(html) {
+            private$.warningsBlocks <- c(private$.warningsBlocks, html)
+        },
+
         .resetMessages = function() {
             private$.messages <- NULL
+            private$.warningsBlocks <- NULL
             self$results$warnings$setContent("")
+        },
+
+        # Compose all accumulated warning blocks + list messages into the
+        # always-visible `warnings` panel. Safe to call from early-return paths.
+        .renderWarnings = function() {
+            parts <- character(0)
+            if (length(private$.warningsBlocks) > 0)
+                parts <- c(parts, private$.warningsBlocks)
+            if (length(private$.messages) > 0) {
+                parts <- c(parts, paste0(
+                    "<div class='alert alert-warning'>",
+                    "<h6>Analysis Messages</h6>",
+                    "<ul>",
+                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
+                    "</ul></div>"
+                ))
+            }
+            if (length(parts) > 0)
+                self$results$warnings$setContent(paste(parts, collapse = ""))
         },
 
         .createHTMLSection = function(title, content, style = "info", icon = NULL) {
@@ -301,14 +328,17 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # Perform comprehensive input validation
             validation_results <- private$.validateInputs(dataset, selected_vars)
             
-            # Show validation summary if there are issues
-            if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0) {
+            # Show validation summary if there are issues (routed to the always-visible
+            # `warnings` output; `interpretation` is reserved for the interpretation guide).
+            if (length(validation_results$warnings) > 0 || length(validation_results$info) > 0
+                || length(validation_results$errors) > 0) {
                 validation_html <- private$.generateValidationSummary(validation_results)
-                self$results$interpretation$setContent(validation_html)
+                private$.addWarningsBlock(validation_html)
             }
-            
+
             # Stop if critical errors found
             if (validation_results$should_stop) {
+                private$.renderWarnings()
                 return()
             }
             
@@ -367,6 +397,18 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     # falls back to 123 (previous fixed value) when unset.
                     seed_val <- self$options$seed
                     if (is.null(seed_val)) seed_val <- 123
+                    # Save/restore the global RNG state so seeding the subsample
+                    # does not perturb downstream reproducibility outside this run.
+                    if (exists(".Random.seed", envir = .GlobalEnv)) {
+                        .old_seed <- get(".Random.seed", envir = .GlobalEnv)
+                        on.exit(assign(".Random.seed", .old_seed, envir = .GlobalEnv), add = TRUE)
+                    } else {
+                        on.exit(
+                            if (exists(".Random.seed", envir = .GlobalEnv))
+                                rm(".Random.seed", envir = .GlobalEnv),
+                            add = TRUE
+                        )
+                    }
                     set.seed(seed_val)
                     sample_idx <- sample(nrow(analysis_data), sample_size)
                     # Keep original_n preserved from above
@@ -400,9 +442,9 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     )
                 }
 
-                # Store performance message to display later
+                # Route sampling / large-dataset notice to the always-visible warnings panel
                 if (!is.null(performance_msg)) {
-                    self$results$interpretation$setContent(performance_msg)
+                    private$.addWarningsBlock(performance_msg)
                 }
             }
 
@@ -452,7 +494,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 <li>For multivariate methods, try with fewer variables</li>
                 </ul>
                 </div>")
-                self$results$interpretation$setContent(error_msg)
+                # Route failure to the always-visible warnings panel and render now,
+                # since .run() returns early when outlier_results is NULL.
+                private$.addWarningsBlock(error_msg)
+                private$.renderWarnings()
                 NULL  # Return NULL on error
             })
 
@@ -497,21 +542,13 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 self$results$plot$setState(plotData)
             }
             
-            # Populate warnings panel
-            if (!is.null(private$.messages) && length(private$.messages) > 0) {
-                self$results$warnings$setContent(paste(
-                    "<div class='alert alert-warning'>",
-                    "<h6>Analysis Messages</h6>",
-                    "<ul>",
-                    paste(paste0("<li>", private$.messages, "</li>"), collapse = ""),
-                    "</ul></div>",
-                    sep = ""
-                ))
-            }
-
+            # Analysis-complete summary message: count outliers with the SAME composite
+            # rule used by the tables/plot (proportion of per-method flags >= threshold),
+            # so the message agrees with the displayed counts when threshold != 0.5.
             if (!is.null(outlier_results)) {
                 n_analyzed <- nrow(analysis_data)
-                n_outliers <- sum(outlier_results$outlier_logical >= self$options$composite_threshold, na.rm = TRUE)
+                proportion_outlier <- private$.compute_outlier_proportion(outlier_results)
+                n_outliers <- sum(proportion_outlier >= self$options$composite_threshold, na.rm = TRUE)
                 outlier_pct <- round(n_outliers / n_analyzed * 100, 1)
 
                 private$.accumulateMessage(sprintf(
@@ -519,6 +556,9 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     n_analyzed, n_outliers, outlier_pct, private$.get_method_description()
                 ))
             }
+
+            # Render accumulated warning blocks + list messages to the always-visible panel.
+            private$.renderWarnings()
 
         },
 
@@ -536,20 +576,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
             # CRITICAL FIX: Extract detailed data from result list
             if (is.list(outlier_results) && "outlier_data" %in% names(outlier_results)) {
-                outlier_logical <- outlier_results$outlier_logical
-                outlier_data <- outlier_results$outlier_data
-
-                # Calculate proportion outlier from detailed data
-                if (!is.null(outlier_data) && is.data.frame(outlier_data)) {
-                    outlier_cols <- grep("^Outlier", names(outlier_data), value = TRUE)
-                    if (length(outlier_cols) > 0) {
-                        outlier_score <- rowMeans(outlier_data[, outlier_cols, drop = FALSE], na.rm = TRUE)
-                    } else {
-                        outlier_score <- as.numeric(outlier_logical)
-                    }
-                } else {
-                    outlier_score <- as.numeric(outlier_logical)
-                }
+                # Composite outlier score via shared helper (per-method proportion)
+                outlier_score <- private$.compute_outlier_proportion(outlier_results)
 
                 # Create plot data with composite scores
                 plot_data <- data.frame(
@@ -744,7 +772,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     "zscore" = "Standard Z-Score",
                     "iqr" = "Interquartile Range (IQR)",
                     "eti" = "Equal-Tailed Interval",
-                    "hdi" = "Highest Density Interval"
+                    "hdi" = "Highest Density Interval",
+                    "Univariate Method"
                 )
             } else if (method_category == "multivariate") {
                 method_name <- switch(self$options$multivariate_methods,
@@ -752,7 +781,8 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     "mahalanobis_robust" = "Robust Mahalanobis Distance",
                     "mcd" = "Minimum Covariance Determinant",
                     "optics" = "OPTICS Clustering",
-                    "lof" = "Local Outlier Factor"
+                    "lof" = "Local Outlier Factor",
+                    "Multivariate Method"
                 )
             } else if (method_category == "composite") {
                 method_name = "Composite (Multiple Methods)"
@@ -763,36 +793,37 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             return(method_name)
         },
 
+        # Shared composite score: proportion of per-method flags per observation.
+        # Uses ONLY the per-method '^Outlier_' flag columns so the aggregate
+        # 'Outlier' column that performance::check_outliers also returns is not
+        # double-counted. Falls back to the logical vector when detailed data
+        # is unavailable. Reused by the summary, tables, exclusion and plot so
+        # every producer applies the same proportion >= composite_threshold rule.
+        .compute_outlier_proportion = function(outlier_results) {
+            if (is.list(outlier_results) && "outlier_logical" %in% names(outlier_results)) {
+                outlier_logical <- outlier_results$outlier_logical
+                outlier_data <- outlier_results$outlier_data
+                if (!is.null(outlier_data) && is.data.frame(outlier_data)) {
+                    outlier_cols <- grep("^Outlier_", names(outlier_data), value = TRUE)
+                    if (length(outlier_cols) > 0) {
+                        return(rowMeans(outlier_data[, outlier_cols, drop = FALSE], na.rm = TRUE))
+                    }
+                }
+                return(as.numeric(outlier_logical))
+            }
+            return(as.numeric(as.logical(outlier_results)))
+        },
+
         .generate_plain_summary = function(outlier_results, data) {
             # Generate plain-language summary for clinical users
 
             n_total <- nrow(data)
             n_vars <- ncol(data)
 
-            # CRITICAL FIX: Extract detailed data from result list
-            if (is.list(outlier_results) && "outlier_logical" %in% names(outlier_results)) {
-                outlier_logical <- outlier_results$outlier_logical
-                outlier_data <- outlier_results$outlier_data
-
-                # Calculate proportion outlier from detailed data
-                if (!is.null(outlier_data) && is.data.frame(outlier_data)) {
-                    outlier_cols <- grep("^Outlier", names(outlier_data), value = TRUE)
-                    if (length(outlier_cols) > 0) {
-                        proportion_outlier <- rowMeans(outlier_data[, outlier_cols, drop = FALSE], na.rm = TRUE)
-                    } else {
-                        proportion_outlier <- as.numeric(outlier_logical)
-                    }
-                } else {
-                    proportion_outlier <- as.numeric(outlier_logical)
-                }
-
-                # Apply composite threshold
-                threshold <- self$options$composite_threshold
-                n_outliers <- sum(proportion_outlier >= threshold, na.rm = TRUE)
-            } else {
-                # Legacy fallback
-                n_outliers <- sum(as.logical(outlier_results), na.rm = TRUE)
-            }
+            # Composite outlier score via shared helper (per-method proportion)
+            proportion_outlier <- private$.compute_outlier_proportion(outlier_results)
+            threshold <- self$options$composite_threshold
+            n_outliers <- sum(proportion_outlier >= threshold, na.rm = TRUE)
 
             outlier_pct <- round(n_outliers / n_total * 100, 1)
 
@@ -843,7 +874,6 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                         "mahalanobis" = "Mahalanobis distance",
                         "mahalanobis_robust" = "Robust Mahalanobis distance",
                         "mcd" = "Minimum Covariance Determinant (MCD)",
-                        "ics" = "Invariant Coordinate Selection (ICS)",
                         "optics" = "OPTICS clustering method",
                         "lof" = "Local Outlier Factor (LOF)",
                         "multivariate analysis"
@@ -911,9 +941,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                     # CRITICAL FIX: Calculate composite score as percentage of methods
                     # that flagged each observation (not just a binary yes/no)
                     if (ncol(outlier_df) > 0) {
-                        # Count how many methods flagged each observation
-                        # Columns like "Outlier_zscore_robust", "Outlier_iqr", etc.
-                        outlier_cols <- grep("^Outlier", names(outlier_df), value = TRUE)
+                        # Count how many methods flagged each observation using only
+                        # the per-method "Outlier_zscore_robust", "Outlier_iqr", ...
+                        # flags (excludes the aggregate "Outlier" column to avoid double-counting)
+                        outlier_cols <- grep("^Outlier_", names(outlier_df), value = TRUE)
 
                         if (length(outlier_cols) > 0) {
                             # Calculate proportion of methods flagging each case
@@ -940,8 +971,15 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 )
             }
 
-            # Add row indices
-            outlier_df$Row <- seq_len(nrow(outlier_df))
+            # Add row indices. Prefer the original observation identifiers (rownames of
+            # the analyzed data) so that, when a large dataset was subsampled, flagged
+            # rows still map back to the original observations rather than 1..n.
+            data_rownames <- rownames(data)
+            if (!is.null(data_rownames) && length(data_rownames) == nrow(outlier_df)) {
+                outlier_df$Row <- data_rownames
+            } else {
+                outlier_df$Row <- seq_len(nrow(outlier_df))
+            }
 
             # CRITICAL FIX: Apply composite threshold to proportion, not binary flag
             threshold <- self$options$composite_threshold
@@ -1024,7 +1062,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 for (col in names(display_df)[names(display_df) != "Row"]) {
                     value <- display_df[[col]][i]
                     if (is.logical(value)) {
-                        value <- if (value) "" else ""
+                        value <- if (isTRUE(value)) "Yes" else "No"
                     } else if (is.numeric(value)) {
                         value <- round(value, 4)
                     }
@@ -1059,16 +1097,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 # Note: They are often probabilities or standardized scores. 
                 # Let's try to summarize how many outliers each method found.
                 
-                method_cols <- setdiff(names(detailed_data), c("Row", "Outlier", "n_Outliers"))
-                
-                # Clean up column names filter
-                # We want columns that are numeric or logical
-                valid_cols <- c()
-                for (col in method_cols) {
-                    if (is.numeric(detailed_data[[col]]) || is.logical(detailed_data[[col]])) {
-                        valid_cols <- c(valid_cols, col)
-                    }
-                }
+                # Select ONLY per-method flag columns (0/1). Using the raw Distance_*/
+                # z-score columns and thresholding them at composite_threshold inflates
+                # the per-method outlier counts, so restrict to the "Outlier_*" flags.
+                valid_cols <- grep("^Outlier_", names(detailed_data), value = TRUE)
                 
                 if (length(valid_cols) > 0) {
                      # Create a summary table of agreement
@@ -1112,7 +1144,7 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                          
                          comparison_html <- paste0(comparison_html,
                              "<tr>",
-                             "<td style='padding: 8px; border: 1px solid #ddd;'><strong>", col, "</strong></td>",
+                             "<td style='padding: 8px; border: 1px solid #ddd;'><strong>", htmltools::htmlEscape(col), "</strong></td>",
                              "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", n_flagged, "</td>",
                              "<td style='padding: 8px; border: 1px solid #ddd; text-align: center;'>", pct, "%</td>",
                              "</tr>"
@@ -1133,30 +1165,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
 
         .generate_exclusion_summary = function(outlier_results, data, original_n = NULL) {
 
-            # CRITICAL FIX: Extract detailed data from result list
-            if (is.list(outlier_results) && "outlier_logical" %in% names(outlier_results)) {
-                outlier_logical <- outlier_results$outlier_logical
-                outlier_data <- outlier_results$outlier_data
-
-                # Calculate proportion outlier from detailed data
-                if (!is.null(outlier_data) && is.data.frame(outlier_data)) {
-                    outlier_cols <- grep("^Outlier", names(outlier_data), value = TRUE)
-                    if (length(outlier_cols) > 0) {
-                        proportion_outlier <- rowMeans(outlier_data[, outlier_cols, drop = FALSE], na.rm = TRUE)
-                    } else {
-                        proportion_outlier <- as.numeric(outlier_logical)
-                    }
-                } else {
-                    proportion_outlier <- as.numeric(outlier_logical)
-                }
-
-                # Apply composite threshold
-                threshold <- self$options$composite_threshold
-                n_outliers <- sum(proportion_outlier >= threshold, na.rm = TRUE)
-            } else {
-                # Legacy fallback
-                n_outliers <- sum(as.logical(outlier_results), na.rm = TRUE)
-            }
+            # Composite outlier score via shared helper (per-method proportion)
+            proportion_outlier <- private$.compute_outlier_proportion(outlier_results)
+            threshold <- self$options$composite_threshold
+            n_outliers <- sum(proportion_outlier >= threshold, na.rm = TRUE)
 
             # CRITICAL FIX: Use original dataset size if provided
             n_total <- if (!is.null(original_n)) original_n else nrow(data)
@@ -1374,6 +1386,10 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
                 }
                 
                 # Check for constant values
+                # Initialize per-variable so unique_values is always defined even
+                # when the variable is entirely NA (avoids an uncaught error at the
+                # extreme-value check below for all-NA numeric variables).
+                unique_values <- numeric(0)
                 numeric_var <- suppressWarnings(as.numeric(as.character(var_data)))
                 if (!all(is.na(numeric_var))) {
                     unique_values <- unique(numeric_var[!is.na(numeric_var)])
