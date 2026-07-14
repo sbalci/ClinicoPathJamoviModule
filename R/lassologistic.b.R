@@ -41,7 +41,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 html <- "<div style='margin: 10px 0;'>"
                 for (notice in private$.noticeList) {
-                    style <- typeStyles[[notice$type]] %||% typeStyles$INFO
+                    style <- typeStyles[[notice$type]]
+                    if (is.null(style)) style <- typeStyles$INFO
                     html <- paste0(
                         html,
                         "<div style='background-color: ", style$bgcolor, "; ",
@@ -95,6 +96,13 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
             },
             .run = function() {
+                # Reset accumulated notices at the top of every run: jamovi reuses
+                # the R6 instance across re-runs and .renderNotices uses setContent,
+                # so without this the same notice re-renders N times. Matches the
+                # documented reset pattern used to fix the accumulation bug in
+                # survival.b.R.
+                private$.noticeList <- list()
+
                 if (is.null(self$options$outcome) ||
                     is.null(self$options$explanatory) ||
                     length(self$options$explanatory) < 2) {
@@ -370,8 +378,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     complete_idx = which(complete),
                     event_level = event_level,
                     ref_level = ref_level,
-                    explanatory_vars = explanatory_vars,
-                    col_names = colnames(X)
+                    explanatory_vars = explanatory_vars
                 )
             },
 
@@ -609,6 +616,26 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     s = lambda_optimal, type = "response"
                 ))
 
+                # Apparent AUC computed once here as the single source of truth,
+                # then reused by performance/bootstrap/model-comparison/method-
+                # comparison/summary to avoid redundant pROC calls and possible
+                # divergence. direction/levels are fixed (y is 0/1 with 1 = event,
+                # probabilities increase with the event) so a genuinely reversed
+                # score reports AUC < 0.5 instead of being auto-flipped to >= 0.5.
+                apparent_auc <- tryCatch(
+                    {
+                        if (requireNamespace("pROC", quietly = TRUE)) {
+                            as.numeric(pROC::auc(pROC::roc(
+                                data$y, probabilities,
+                                quiet = TRUE, direction = "<", levels = c(0, 1)
+                            )))
+                        } else {
+                            NA_real_
+                        }
+                    },
+                    error = function(e) NA_real_
+                )
+
                 list(
                     cv_fit = cv_fit,
                     final_model = final_model,
@@ -619,6 +646,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     selected = selected,
                     selected_coefs = selected_coefs,
                     probabilities = probabilities,
+                    apparent_auc = apparent_auc,
                     nfolds = nfolds
                 )
             },
@@ -702,7 +730,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         if (requireNamespace("pROC", quietly = TRUE)) {
-                            roc_obj <- pROC::roc(data$y, fit$probabilities, quiet = TRUE)
+                            roc_obj <- pROC::roc(data$y, fit$probabilities, quiet = TRUE, direction = "<", levels = c(0, 1))
                             auc_val <- as.numeric(pROC::auc(roc_obj))
                             ci_obj <- pROC::ci.auc(roc_obj, method = "delong")
                             auc_ci_lower <- ci_obj[1]
@@ -897,7 +925,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         if (requireNamespace("pROC", quietly = TRUE)) {
-                            roc_obj <- pROC::roc(y, total_scores, quiet = TRUE)
+                            roc_obj <- pROC::roc(y, total_scores, quiet = TRUE, direction = "<", levels = c(0, 1))
                             auc_val <- as.numeric(pROC::auc(roc_obj))
                         }
                     },
@@ -923,7 +951,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return()
                 }
 
-                method <- self$options$scoringMethod %||% "schneeweiss"
+                method <- self$options$scoringMethod
+                if (is.null(method)) method <- "schneeweiss"
                 max_points <- self$options$scoringMaxPoints
 
                 coefs <- fit$selected_coefs
@@ -1018,16 +1047,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (method == "compare") {
                     comp_table <- self$results$methodComparison
 
-                    # Full model AUC for reference
-                    full_auc <- NA
-                    tryCatch(
-                        {
-                            if (requireNamespace("pROC", quietly = TRUE)) {
-                                full_auc <- as.numeric(pROC::auc(pROC::roc(data$y, fit$probabilities, quiet = TRUE)))
-                            }
-                        },
-                        error = function(e) {}
-                    )
+                    # Full model AUC for reference (single-source apparent AUC)
+                    full_auc <- fit$apparent_auc
 
                     methods_list <- list(
                         list("Beta10", pts_beta10, "Zhang et al. 2017"),
@@ -1123,17 +1144,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 alpha_val <- fit$alpha
 
-                # Apparent performance
-                apparent_auc <- NA
-                tryCatch(
-                    {
-                        if (requireNamespace("pROC", quietly = TRUE)) {
-                            roc_app <- pROC::roc(data$y, fit$probabilities, quiet = TRUE)
-                            apparent_auc <- as.numeric(pROC::auc(roc_app))
-                        }
-                    },
-                    error = function(e) {}
-                )
+                # Apparent performance (reuse single-source apparent AUC)
+                apparent_auc <- fit$apparent_auc
 
                 apparent_brier <- mean((fit$probabilities - data$y)^2)
                 apparent_slope <- private$.calibrationSlope(data$y, fit$probabilities)
@@ -1182,8 +1194,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ))
 
                             if (requireNamespace("pROC", quietly = TRUE)) {
-                                auc_boot_boot <- as.numeric(pROC::auc(pROC::roc(y_boot, prob_boot_boot, quiet = TRUE)))
-                                auc_boot_orig <- as.numeric(pROC::auc(pROC::roc(data$y, prob_boot_orig, quiet = TRUE)))
+                                auc_boot_boot <- as.numeric(pROC::auc(pROC::roc(y_boot, prob_boot_boot, quiet = TRUE, direction = "<", levels = c(0, 1))))
+                                auc_boot_orig <- as.numeric(pROC::auc(pROC::roc(data$y, prob_boot_orig, quiet = TRUE, direction = "<", levels = c(0, 1))))
                                 optimism_auc[b] <- auc_boot_boot - auc_boot_orig
                             }
 
@@ -1275,6 +1287,11 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         stability_rank = imp_df$stability_rank[i]
                     ))
                 }
+
+                table$setNote(
+                    "apparent_note",
+                    .("Path Inclusion Proportion is the fraction of the single cross-validated lambda path on which each predictor has a non-zero coefficient (apparent), NOT a bootstrap/resampling stability-selection frequency. Importance Rank orders predictors by their maximum absolute coefficient along that path. Because Ridge (L1 weight = 0) never shrinks coefficients to zero, every predictor is retained at all lambdas and the proportion is trivially 1.0.")
+                )
             },
 
             # ══════════════════════════════════════════════════════════════════
@@ -1283,14 +1300,16 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .populateModelComparison = function(data, fit) {
                 table <- self$results$modelComparison
 
+                # Track complete/quasi-complete separation in the unpenalized
+                # refits (rows 2-3) so we can flag their unreliable AUC/AIC.
+                separation_detected <- FALSE
+
                 # Row 1: the actual PENALIZED LASSO model (apparent performance).
                 # Penalized models have no standard AIC, so it is left blank.
+                # AUC reuses the single-source apparent AUC from .fitLasso.
                 tryCatch(
                     {
-                        auc_lasso <- NA
-                        if (requireNamespace("pROC", quietly = TRUE)) {
-                            auc_lasso <- as.numeric(pROC::auc(pROC::roc(data$y, fit$probabilities, quiet = TRUE)))
-                        }
+                        auc_lasso <- fit$apparent_auc
                         brier_lasso <- mean((fit$probabilities - data$y)^2)
                         table$addRow(rowKey = 1, values = list(
                             model_type = .("LASSO (penalized)"),
@@ -1311,11 +1330,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     df_sel <- data.frame(y = data$y, X_sel)
                     tryCatch(
                         {
-                            glm_sel <- glm(y ~ ., data = df_sel, family = binomial)
+                            glm_sel <- suppressWarnings(glm(y ~ ., data = df_sel, family = binomial))
                             prob_sel <- predict(glm_sel, type = "response")
+                            if (!isTRUE(glm_sel$converged) ||
+                                any(prob_sel > 1 - 1e-8 | prob_sel < 1e-8)) {
+                                separation_detected <- TRUE
+                            }
                             auc_sel <- NA
                             if (requireNamespace("pROC", quietly = TRUE)) {
-                                auc_sel <- as.numeric(pROC::auc(pROC::roc(data$y, prob_sel, quiet = TRUE)))
+                                auc_sel <- as.numeric(pROC::auc(pROC::roc(data$y, prob_sel, quiet = TRUE, direction = "<", levels = c(0, 1))))
                             }
                             brier_sel <- mean((prob_sel - data$y)^2)
                             table$addRow(rowKey = 2, values = list(
@@ -1334,11 +1357,15 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         df_all <- data.frame(y = data$y, data$X)
-                        glm_all <- glm(y ~ ., data = df_all, family = binomial)
+                        glm_all <- suppressWarnings(glm(y ~ ., data = df_all, family = binomial))
                         prob_all <- predict(glm_all, type = "response")
+                        if (!isTRUE(glm_all$converged) ||
+                            any(prob_all > 1 - 1e-8 | prob_all < 1e-8)) {
+                            separation_detected <- TRUE
+                        }
                         auc_all <- NA
                         if (requireNamespace("pROC", quietly = TRUE)) {
-                            auc_all <- as.numeric(pROC::auc(pROC::roc(data$y, prob_all, quiet = TRUE)))
+                            auc_all <- as.numeric(pROC::auc(pROC::roc(data$y, prob_all, quiet = TRUE, direction = "<", levels = c(0, 1))))
                         }
                         brier_all <- mean((prob_all - data$y)^2)
                         table$addRow(rowKey = 3, values = list(
@@ -1356,6 +1383,17 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "refit_note",
                     .("Rows 2-3 are unpenalized logistic refits (shown for AIC comparability); their apparent AUC is typically higher than the penalized LASSO model in row 1 because refitting removes LASSO shrinkage. All metrics are apparent (in-sample) - use Bootstrap Internal Validation for optimism-corrected discrimination.")
                 )
+
+                if (separation_detected) {
+                    table$setNote(
+                        "separation_note",
+                        .("Warning: an unpenalized logistic refit (row 2 or 3) did not converge or produced fitted probabilities at 0 or 1, indicating complete or quasi-complete separation. Its apparent AUC (often ~1.0), AIC, and Brier score are unreliable and should not be interpreted - this is exactly the instability that LASSO penalization is designed to avoid.")
+                    )
+                    private$.addNotice(
+                        "WARNING", .("Separation in Unpenalized Refit"),
+                        .("An unpenalized logistic refit (Model Comparison rows 2-3) showed complete/quasi-complete separation (non-convergence or fitted probabilities at 0/1). Its AUC/AIC are unreliable; prefer the penalized LASSO row.")
+                    )
+                }
             },
 
             # ══════════════════════════════════════════════════════════════════
@@ -1473,7 +1511,7 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return(FALSE)
                 }
 
-                roc_obj <- pROC::roc(state$y, state$probabilities, quiet = TRUE)
+                roc_obj <- pROC::roc(state$y, state$probabilities, quiet = TRUE, direction = "<", levels = c(0, 1))
                 auc_val <- sprintf("%.3f", as.numeric(pROC::auc(roc_obj)))
                 ci_obj <- tryCatch(pROC::ci.auc(roc_obj, method = "delong"), error = function(e) NULL)
 
@@ -1503,15 +1541,8 @@ lassologisticClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 )
 
                 # Apparent discrimination for a copy-ready report sentence
-                auc_val <- NA_real_
-                tryCatch(
-                    {
-                        if (requireNamespace("pROC", quietly = TRUE)) {
-                            auc_val <- as.numeric(pROC::auc(pROC::roc(data$y, fit$probabilities, quiet = TRUE)))
-                        }
-                    },
-                    error = function(e) {}
-                )
+                # (reuse single-source apparent AUC from .fitLasso).
+                auc_val <- fit$apparent_auc
 
                 top_vars <- if (n_sel > 0) {
                     paste(fit$selected[seq_len(min(5, n_sel))], collapse = ", ")
