@@ -273,6 +273,7 @@ items:
           - krippMethod
           - bootstrap
           - nBoot
+          - confLevel
 
     - name: krippExplanation
       title: "About Krippendorff's Alpha"
@@ -1087,6 +1088,7 @@ items:
       clearWith:
           - vars
           - nBoot
+          - confLevel
 
     - name: bootstrapCIExplanation
       title: "About Bootstrap Confidence Intervals"
@@ -1291,6 +1293,7 @@ items:
       clearWith:
           - vars
           - iccType
+          - confLevel
 
     - name: iccExplanation
       title: "About Intraclass Correlation Coefficient (ICC)"
@@ -1368,6 +1371,7 @@ items:
           type: text
       clearWith:
           - vars
+          - confLevel
 
     - name: linCCCExplanation
       title: "About Lin's Concordance Correlation Coefficient"
@@ -1592,6 +1596,7 @@ items:
       clearWith:
           - vars
           - iotaStandardize
+          - confLevel
 
     - name: iotaExplanation
       title: "About Iota Coefficient"
