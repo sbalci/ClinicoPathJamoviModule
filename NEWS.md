@@ -181,6 +181,53 @@ be verified against reference datasets before release.
   columns so they recompute on change; friendly labels for all format codes; removed a constant
   placeholder metric and dead output-request infrastructure; guarded an NA in the quality panel.
 
+### meddecide
+
+- **Interrater Reliability (`agreement`):** fixed the multi-category PABAK formula (was the binary
+  `2·po−1`); replaced too-narrow kappa confidence intervals (built from a null-hypothesis SE) with the
+  `vcd::Kappa` asymptotic SE; the confidence-level option now drives the analytic CIs (was hard-coded
+  95%); numeric-coded categorical data (e.g. HER2 0/1/2/3) is no longer mis-rejected as continuous.
+- **Diagnostic Test Comparison (`decisioncompare`):** the results text no longer reports "significant
+  differences" unconditionally (now reflects the actual McNemar/Cochran p-values); likelihood ratios are
+  finite (continuity-corrected) at perfect sensitivity/specificity; de-duplicated the McNemar
+  computation; error notices now render on the failure path.
+- **Combine Diagnostic Tests (`decisioncombine`):** **BREAKING** — five non-functional `filterPattern`
+  values (`majorityPositive`, `majorityNegative`, `parallel`, `serial`, `majority`) were removed (they
+  were no-ops that fell back to "all", so results are unchanged). Individual-test statistics are computed
+  on the raw contingency table; the bar chart uses a free y-scale for unbounded metrics (LR, DOR,
+  Youden); single-test wrapper calls no longer error.
+- **Sequential Testing (`sequentialtests`):** **BREAKING** — the misleadingly-named `show_nomogram`
+  option was renamed to `show_plots` (it gates diagnostic plots, not a Fagan nomogram; saved analyses
+  with it enabled revert to the default). Fixed a frozen population-size cache, duplicate cost-table
+  rows on re-run, and raw "NA%" output.
+- **LASSO Logistic (`lassologistic`):** ROC AUC now uses an explicit `direction`/`levels` so it is
+  oriented correctly; the apparent AUC is computed once and reused; a quasi-complete-separation caveat is
+  surfaced; notices reset each run.
+- **ROC (psychopdaROC):** HTML-escaped variable names in report notes; applied the explicit
+  `direction`/`levels` to all auxiliary ROC computations (power, Bayesian, bootstrap, clinical-utility,
+  meta) so they match the main analysis; the DeLong comparison Z is now sign-preserving.
+- **Enhanced ROC (`enhancedROC`):** the `direction` option (and the cutoff/confidence-band/theme
+  toggles) now invalidate the cached ROC plots; guarded a latent crash from an uninitialised validation
+  result; the calibration plot no longer refits a model for already-probability-scale predictors,
+  matching the calibration table.
+- **Decision (`decision`):** fixed an undefined-variable bug that silently disabled misuse detection;
+  the saved classification column now stays aligned with the original rows when data have missings;
+  notices reset each run.
+- **Decision Calculator (`decisioncalculator`):** the notices panel clears stale content each run;
+  Matthews correlation is no longer shown as a percentage; removed ~90 lines of dead
+  confidence-interval code whose comments falsely claimed to augment the output; more robust parsing of
+  the epiR results.
+- **Co-testing (`cotest`):** notices render per severity level; sensitivity/specificity/prevalence
+  inputs are relabelled "(0-1)" to match how they are stored; removed dead client-side guidance code.
+- **No Gold Standard (`nogoldstandard`):** corrected the latent-class disease-class identification (it
+  reshaped only one class's probabilities and could invert sensitivity/specificity); added `deleteRows`
+  so three tables don't duplicate on re-run. *(The downstream sensitivity/specificity extraction should
+  be confirmed against the installed poLCA output layout before release.)*
+- **Kappa sample size (`kappasizeci`, `kappasizefixedn`, `kappasizepower`):** input validation tightened
+  to match the `kappaSize` engine (proportion counts/sum, ordered kappa bounds), engine errors surface
+  as clean jamovi errors instead of being swallowed into output text, and a binary-outcome branch that
+  dropped the second proportion was fixed.
+
 # ClinicoPath 1.0.0 (2026-07-13)
 
 ## First stable release
