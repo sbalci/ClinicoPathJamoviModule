@@ -78,12 +78,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
         },
 
-        # Utility to escape variable names for safe use in outputs
-        .escapeVar = function(x) {
-            if (is.null(x) || length(x) == 0) return(x)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
-
         # Validate weight variable for weighted alluvial plots
         .validateWeightVariable = function(data, weight_var) {
             if (is.null(weight_var) || weight_var == "")
@@ -100,19 +94,21 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             weight_col <- data[[weight_var]]
 
-            # Notices are rendered as HTML in `dataWarning` to avoid the
-            # jamovi protobuf serialization failure triggered by dynamic
-            # jmvcore::Notice objects (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
-            .errBox <- function(msg)
-                paste0("<div style='padding: 15px; margin: 6px 0; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> ", msg, "</div>")
+            # All weight-validation errors are routed through the single
+            # `notices` (Preformatted) channel via .addNotice for a consistent
+            # UX. Preformatted is plain text, so there is no HTML injection
+            # surface even for user-supplied variable names.
 
             # Validate weight type
             if (!is.numeric(weight_col)) {
-                self$results$dataWarning$setContent(.errBox(sprintf(
-                    "Invalid Weight Variable: '%s' must be numeric (current type: %s). Please select a numeric variable containing counts, frequencies, or sampling weights.",
-                    htmltools::htmlEscape(weight_var), htmltools::htmlEscape(class(weight_col)[1])
-                )))
-                self$results$dataWarning$setVisible(TRUE)
+                private$.addNotice(
+                    "ERROR",
+                    "Invalid Weight Variable",
+                    sprintf(
+                        "'%s' must be numeric (current type: %s). Please select a numeric variable containing counts, frequencies, or sampling weights.",
+                        weight_var, class(weight_col)[1]
+                    )
+                )
                 return(FALSE)
             }
 
@@ -138,11 +134,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Check for negative weights
             n_negative <- sum(weight_col < 0, na.rm = TRUE)
             if (n_negative > 0) {
-                self$results$dataWarning$setContent(.errBox(sprintf(
-                    "Negative Weights Detected: Weight variable '%s' contains %d negative value%s. Weights must be non-negative (>= 0).",
-                    htmltools::htmlEscape(weight_var), n_negative, if(n_negative > 1) "s" else ""
-                )))
-                self$results$dataWarning$setVisible(TRUE)
+                private$.addNotice(
+                    "ERROR",
+                    "Negative Weights Detected",
+                    sprintf(
+                        "Weight variable '%s' contains %d negative value%s. Weights must be non-negative (>= 0).",
+                        weight_var, n_negative, if (n_negative > 1) "s" else ""
+                    )
+                )
                 return(FALSE)
             }
 
@@ -288,6 +287,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "</div>"
                 )
                 self$results$dataWarning$setContent(html)
+                self$results$dataWarning$setVisible(TRUE)
                 return(FALSE)
             }
 
@@ -303,8 +303,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Data type validation and discretization helper
         .validateVariableTypes = function(vars) {
-            warning_messages <- c()
-
             for (var in vars) {
                 if (!(var %in% names(self$data))) {
                     var_safe <- htmltools::htmlEscape(var)
@@ -340,12 +338,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # STRONG WARNING for 11-20 unique values
                     if (unique_values > 10) {
-                        # Collect warning messages for the notice banner
-                        warning_messages <- c(warning_messages, sprintf(
-                            'Variable "%s" has %d categories.',
-                            var, unique_values
-                        ))
-
                         private$.addNotice('STRONG_WARNING', 'Too Many Categories', paste0(
                             "Variable '", var, "' has ",
                             unique_values, " categories. This may create an unreadable plot with too many thin flows.\n",
@@ -528,6 +520,36 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plot_vars <- utils::head(vars_name, max_vars)
             engine <- self$options$engine
             weight_var <- self$options$weight
+
+            # Pre-render validations that depend only on options are performed
+            # here (during .run) rather than inside the .plot render callback.
+            # Notices mutated from a render callback are not reliably transmitted
+            # to the client, so option-only failures must surface before the
+            # plot is drawn.
+            custombinlabels <- self$options$custombinlabels
+            if (!is.null(custombinlabels) && nzchar(custombinlabels)) {
+                bin_labels <- trimws(strsplit(custombinlabels, ",")[[1]])
+                bin_labels <- bin_labels[nzchar(bin_labels)]
+                if (length(bin_labels) < 2) {
+                    private$.addNotice(
+                        "ERROR",
+                        "Invalid Bin Labels",
+                        "Provide at least two non-empty, comma-separated bin labels."
+                    )
+                    return(NULL)
+                }
+            }
+
+            if (isTRUE(self$options$marg) && isTRUE(self$options$usetitle)) {
+                private$.addNotice('ERROR', 'Incompatible Options', paste0(
+                    "Custom titles cannot be used with marginal plots. ",
+                    "This combination would produce ambiguous plot labeling.\n",
+                    "Required Action: Choose one:\n",
+                    " - Disable 'Use custom title' to keep marginal plots\n",
+                    " - Disable 'Marginal plots' to use custom title"
+                ))
+                return(NULL)
+            }
 
             has_weight <- !is.null(weight_var) && length(weight_var) > 0 &&
                 nzchar(weight_var)
@@ -901,55 +923,53 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 }
 
-                # Apply color palette ----
-                colorPalette <- self$options$colorPalette
-                plot <- private$.applyColorPalette(plot, colorPalette)
+                # Post-processing below adds ggplot layers (scales, themes,
+                # coord_flip, labs). easyalluvial::add_marginal_histograms()
+                # returns a gtable rather than a ggplot, so adding layers to it
+                # errors. Skip ALL such post-processing when marginal histograms
+                # were drawn (easyalluvial engine only). The marg + custom-title
+                # incompatibility is pre-checked in .prepareMainPlotState.
+                is_marg_easy <- isTRUE(marg) && engine == "easyalluvial"
 
-                # Apply enhanced gradients if requested ----
-                if (self$options$enhancedGradients && colorPalette == "default") {
-                    plot <- plot +
-                        ggplot2::scale_fill_viridis_d(option = "plasma", alpha = 0.8)
-                }
+                if (!is_marg_easy) {
+                    # Apply color palette ----
+                    colorPalette <- self$options$colorPalette
+                    plot <- private$.applyColorPalette(plot, colorPalette)
 
-                # Apply theme style ----
-                themeStyle <- self$options$themeStyle
-                plot <- private$.applyThemeStyle(plot, themeStyle)
-
-                # Configure plot orientation / flow direction ----
-                orient <- self$options$orient
-                flowDirection <- self$options$flowDirection
-
-                plot <- private$.applyFlowDirection(
-                    plot,
-                    orient = orient,
-                    flow_direction = flowDirection
-                )
-
-                # Apply custom title and subtitle ----
-                usetitle <- self$options$usetitle
-                plotSubtitle <- self$options$plotSubtitle
-
-                # HARD STOP: Cannot use both marginals and custom titles
-                if (marg && usetitle) {
-                    private$.addNotice('ERROR', 'Incompatible Options', paste0(
-                        "Custom titles cannot be used with marginal plots. ",
-                        "This combination would produce ambiguous plot labeling.\n",
-                        "Required Action: Choose one:\n",
-                        " - Disable 'Use custom title' to keep marginal plots\n",
-                        " - Disable 'Marginal plots' to use custom title"
-                    ))
-                    return()  # Stop execution to prevent ambiguous output
-                }
-
-                if (!marg && usetitle) {
-                    mytitle <- self$options$mytitle
-                    if (!is.null(plotSubtitle) && plotSubtitle != "") {
-                        plot <- plot + ggplot2::labs(title = mytitle, subtitle = plotSubtitle)
-                    } else {
-                        plot <- plot + ggplot2::ggtitle(mytitle)
+                    # Apply enhanced gradients if requested ----
+                    if (self$options$enhancedGradients && colorPalette == "default") {
+                        plot <- plot +
+                            ggplot2::scale_fill_viridis_d(option = "plasma", alpha = 0.8)
                     }
-                } else if (!is.null(plotSubtitle) && plotSubtitle != "") {
-                    plot <- plot + ggplot2::labs(subtitle = plotSubtitle)
+
+                    # Apply theme style ----
+                    themeStyle <- self$options$themeStyle
+                    plot <- private$.applyThemeStyle(plot, themeStyle)
+
+                    # Configure plot orientation / flow direction ----
+                    orient <- self$options$orient
+                    flowDirection <- self$options$flowDirection
+
+                    plot <- private$.applyFlowDirection(
+                        plot,
+                        orient = orient,
+                        flow_direction = flowDirection
+                    )
+
+                    # Apply custom title and subtitle ----
+                    usetitle <- self$options$usetitle
+                    plotSubtitle <- self$options$plotSubtitle
+
+                    if (!marg && usetitle) {
+                        mytitle <- self$options$mytitle
+                        if (!is.null(plotSubtitle) && plotSubtitle != "") {
+                            plot <- plot + ggplot2::labs(title = mytitle, subtitle = plotSubtitle)
+                        } else {
+                            plot <- plot + ggplot2::ggtitle(mytitle)
+                        }
+                    } else if (!is.null(plotSubtitle) && plotSubtitle != "") {
+                        plot <- plot + ggplot2::labs(subtitle = plotSubtitle)
+                    }
                 }
 
                 # Render the final plot
