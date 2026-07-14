@@ -1145,6 +1145,8 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Get primary metric scores
             primary_metric <- self$options$primary_metric
+            # Option value "f1" corresponds to the "f1_score" performance column
+            if (primary_metric == "f1") primary_metric <- "f1_score"
             if (!primary_metric %in% names(private$.performance_data)) {
                 primary_metric <- "accuracy"  # fallback
             }
@@ -1488,6 +1490,8 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Check for valid performance data
             primary_metric <- self$options$primary_metric
+            # Option value "f1" corresponds to the "f1_score" performance column
+            if (primary_metric == "f1") primary_metric <- "f1_score"
             if (!primary_metric %in% names(private$.performance_data)) {
                 primary_metric <- "accuracy"
             }
@@ -1509,7 +1513,7 @@ treecompareClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "accuracy" = "Accuracy",
                     "sensitivity" = "Sensitivity",
                     "specificity" = "Specificity",
-                    "f1" = "F1 Score",
+                    "f1_score" = "F1 Score",
                     primary_metric
                 )
                 

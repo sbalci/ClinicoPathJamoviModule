@@ -1298,15 +1298,39 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
-        .populateGrowthParameters = function() {
-            
-            if (is.null(private$growth_model)) return()
-            
+        # Delta-method CI for a scalar function g(theta) of model parameters.
+        # param_names index the fitted (co)variance matrix; grad is dg/dtheta in
+        # the same order (length 1 => direct parameter, CI = point +/- z*SE).
+        # Uses vcov() (defined for nls/lm/nlme); returns c(NA, NA) on any failure
+        # (e.g. brms fits whose parameter names differ), so no row ever crashes.
+        .growthParamCI = function(model, param_names, grad, point, z) {
             tryCatch({
-                
+                V <- stats::vcov(model)
+                if (is.null(V) || is.null(rownames(V)) ||
+                    !all(param_names %in% rownames(V))) {
+                    return(c(NA_real_, NA_real_))
+                }
+                grad <- as.numeric(grad)
+                Vsub <- V[param_names, param_names, drop = FALSE]
+                var_est <- as.numeric(t(grad) %*% Vsub %*% grad)
+                if (!is.finite(var_est) || var_est < 0) return(c(NA_real_, NA_real_))
+                se <- sqrt(var_est)
+                c(point - z * se, point + z * se)
+            }, error = function(e) c(NA_real_, NA_real_))
+        },
+
+        .populateGrowthParameters = function() {
+
+            if (is.null(private$growth_model)) return()
+
+            tryCatch({
+
                 growth_table <- self$results$growthParametersTable
                 model <- private$growth_model
                 growth_model <- self$options$growthModel %||% "gompertz"
+
+                conf_level <- (self$options$confidenceLevel %||% 95) / 100
+                z <- stats::qnorm(1 - (1 - conf_level) / 2)
                 
                 # Extract parameters and calculate derived characteristics
                 if (growth_model == "exponential") {
@@ -1316,14 +1340,15 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         k <- coef(model)["k"]
                     }
                     
+                    gr_ci <- private$.growthParamCI(model, "k", 1, as.numeric(k), z)
                     growth_table$addRow(rowKey = "growth_rate", values = list(
                         characteristic = "Growth Rate Constant",
                         value = round(k, 4),
                         unit = "1/time",
-                        ci_lower = round(k * 0.9, 4),
-                        ci_upper = round(k * 1.1, 4)
+                        ci_lower = ifelse(is.na(gr_ci[1]), NA, round(gr_ci[1], 4)),
+                        ci_upper = ifelse(is.na(gr_ci[2]), NA, round(gr_ci[2], 4))
                     ))
-                    
+
                 } else if (growth_model == "gompertz") {
                     if (inherits(model, "nlme")) {
                         alpha <- fixef(model)["alpha"]
@@ -1333,20 +1358,26 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         beta <- coef(model)["beta"]
                     }
                     
+                    # Initial Growth Rate = alpha*beta: delta method, grad = (beta, alpha)
+                    ig_val <- as.numeric(alpha * beta)
+                    ig_ci <- private$.growthParamCI(model, c("alpha", "beta"),
+                                                    c(as.numeric(beta), as.numeric(alpha)),
+                                                    ig_val, z)
                     growth_table$addRow(rowKey = "initial_growth", values = list(
                         characteristic = "Initial Growth Rate",
                         value = round(alpha * beta, 4),
                         unit = "1/time",
-                        ci_lower = round(alpha * beta * 0.9, 4),
-                        ci_upper = round(alpha * beta * 1.1, 4)
+                        ci_lower = ifelse(is.na(ig_ci[1]), NA, round(ig_ci[1], 4)),
+                        ci_upper = ifelse(is.na(ig_ci[2]), NA, round(ig_ci[2], 4))
                     ))
-                    
+
+                    dec_ci <- private$.growthParamCI(model, "beta", 1, as.numeric(beta), z)
                     growth_table$addRow(rowKey = "deceleration", values = list(
                         characteristic = "Deceleration Parameter",
                         value = round(beta, 4),
                         unit = "1/time",
-                        ci_lower = round(beta * 0.9, 4),
-                        ci_upper = round(beta * 1.1, 4)
+                        ci_lower = ifelse(is.na(dec_ci[1]), NA, round(dec_ci[1], 4)),
+                        ci_upper = ifelse(is.na(dec_ci[2]), NA, round(dec_ci[2], 4))
                     ))
                 } else if (growth_model == "logistic") {
                     if (inherits(model, "nlme")) {
@@ -1359,20 +1390,26 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         t0 <- coef(model)["t0"]
                     }
                     
+                    # Maximum Growth Rate = r*K/4: delta method, grad = (K/4, r/4)
+                    mg_val <- as.numeric(r * K / 4)
+                    mg_ci <- private$.growthParamCI(model, c("r", "K"),
+                                                    c(as.numeric(K) / 4, as.numeric(r) / 4),
+                                                    mg_val, z)
                     growth_table$addRow(rowKey = "max_growth_rate", values = list(
                         characteristic = "Maximum Growth Rate",
                         value = round(r * K / 4, 4),
                         unit = "size/time",
-                        ci_lower = NA,
-                        ci_upper = NA
+                        ci_lower = ifelse(is.na(mg_ci[1]), NA, round(mg_ci[1], 4)),
+                        ci_upper = ifelse(is.na(mg_ci[2]), NA, round(mg_ci[2], 4))
                     ))
-                    
+
+                    t0_ci <- private$.growthParamCI(model, "t0", 1, as.numeric(t0), z)
                     growth_table$addRow(rowKey = "time_to_half_K", values = list(
                         characteristic = "Time to 50% of K",
                         value = round(t0, 4),
                         unit = "time",
-                        ci_lower = NA,
-                        ci_upper = NA
+                        ci_lower = ifelse(is.na(t0_ci[1]), NA, round(t0_ci[1], 4)),
+                        ci_upper = ifelse(is.na(t0_ci[2]), NA, round(t0_ci[2], 4))
                     ))
                 } else if (growth_model == "bertalanffy") {
                     if (inherits(model, "nlme")) {
@@ -1383,26 +1420,30 @@ tumorgrowthClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         V0 <- coef(model)["V0"]
                     }
                     
+                    # Initial Growth Rate = k*V0: delta method, grad = (V0, k)
+                    igr_val <- as.numeric(k * V0)
+                    igr_ci <- private$.growthParamCI(model, c("k", "V0"),
+                                                     c(as.numeric(V0), as.numeric(k)),
+                                                     igr_val, z)
                     growth_table$addRow(rowKey = "initial_growth_rate", values = list(
                         characteristic = "Initial Growth Rate",
                         value = round(k * V0, 4),
                         unit = "size/time",
-                        ci_lower = NA,
-                        ci_upper = NA
+                        ci_lower = ifelse(is.na(igr_ci[1]), NA, round(igr_ci[1], 4)),
+                        ci_upper = ifelse(is.na(igr_ci[2]), NA, round(igr_ci[2], 4))
                     ))
                 } else if (growth_model == "linear") {
-                    if (inherits(model, "lm")) {
-                        k <- coef(model)["time"]
-                    } else {
-                        k <- coef(model)["k"]
-                    }
-                    
+                    # lm names the slope "time"; nls fallback names it "k"
+                    kname <- if (inherits(model, "lm")) "time" else "k"
+                    k <- coef(model)[kname]
+
+                    lin_ci <- private$.growthParamCI(model, kname, 1, as.numeric(k), z)
                     growth_table$addRow(rowKey = "growth_rate", values = list(
                         characteristic = "Growth Rate",
                         value = round(k, 4),
                         unit = "size/time",
-                        ci_lower = NA,
-                        ci_upper = NA
+                        ci_lower = ifelse(is.na(lin_ci[1]), NA, round(lin_ci[1], 4)),
+                        ci_upper = ifelse(is.na(lin_ci[2]), NA, round(lin_ci[2], 4))
                     ))
                 }
                 

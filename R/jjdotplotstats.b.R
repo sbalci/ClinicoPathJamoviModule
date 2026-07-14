@@ -559,7 +559,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br><br>
                 This tool will help you generate Dot Charts.
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>ggbetweenstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>grouped_ggbetweenstats</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations for <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>ggbetweenstats</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>grouped_ggbetweenstats</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"
@@ -613,7 +613,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             # ggbetweenstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html
+            # https://www.indrapatil.com/ggstatsplot/reference/ggbetweenstats.html
 
             # Checkpoint before expensive ggstatsplot computation
             private$.checkpoint()
@@ -678,7 +678,7 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             # grouped_ggbetweenstats ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html
+            # https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbetweenstats.html
 
 
 

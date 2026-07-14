@@ -2,7 +2,6 @@
 #' @return Categorized variable with frequency tables and distribution plots
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @importFrom stats quantile sd median
 #'
 #' @description
@@ -197,7 +196,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Generate R code for reproducibility.
         # Variable names are backtick-quoted via jmvcore::composeTerm() inside
-        # .generateRCode() (below), and custom labels have single quotes escaped,
+        # .generateRCode() (below), and custom labels are serialized with dput(),
         # so the generated copy-paste snippet stays valid R for names with spaces
         # or special characters.
         .generateRCode = function(varname, method, nbins, breaks, sdmult,
@@ -243,11 +242,17 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Add label generation
             if (labels == "custom" && customlabels != "") {
-                # Escape single quotes in labels so a label containing an apostrophe does not
-                # break the generated c('...') literal.
-                custom_parts <- gsub("'", "\\\\'", trimws(strsplit(customlabels, ",")[[1]]))
-                code <- paste0(code, "labels <- c('",
-                              paste(custom_parts, collapse = "', '"), "')\n")
+                custom_parts <- trimws(strsplit(customlabels, ",")[[1]])
+                custom_literals <- paste(
+                    utils::capture.output(dput(custom_parts)),
+                    collapse = "\n"
+                )
+                code <- paste0(
+                    code,
+                    "labels <- ",
+                    custom_literals,
+                    "\n"
+                )
             } else if (labels == "semantic") {
                 # Generate semantic labels based on number of categories
                 code <- paste0(code,
@@ -302,14 +307,12 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .run = function() {
 
-            # TODO (forward-looking): no `.()` wrapping anywhere in this file 
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file:
             # the welcome HTML, error notice bodies (already migrated to HTML
             # boxes), assumption text, and the .noticeBox helper messages are
             # all English-only. Address in a /prepare-translation pass.
-            # TODO (forward-looking, perf): no `private$.checkpoint()` between
-            # `.calculateBreaks` (Jenks/quantile/meansd are O(n log n)) and
-            # `cut()` on the full vector. Add checkpoints for datasets where
-            # `n > ~100k` to keep the UI responsive.
+            # TODO (forward-looking, perf): cache these breaks in plot state so
+            # the render callback does not calculate them a second time.
 
             # Input Validation ----
             if (is.null(self$options$var) || length(self$options$var) == 0) {
@@ -412,7 +415,14 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             manual_breaks <- self$options$breaks
             sdmult <- self$options$sdmult
 
-            breaks <- private$.calculateBreaks(x_clean, method, nbins, manual_breaks, sdmult)
+            private$.checkpoint()
+            breaks <- private$.calculateBreaks(
+                x_clean,
+                method,
+                nbins,
+                manual_breaks,
+                sdmult
+            )
 
             # Enforce sorted unique breaks to avoid cut() failures
             if (!is.null(breaks)) {
@@ -491,6 +501,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             # Create categorized variable ----
+            private$.checkpoint()
             x_cat <- cut(
                 x,
                 breaks = breaks,

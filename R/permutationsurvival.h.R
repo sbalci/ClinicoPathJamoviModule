@@ -280,19 +280,22 @@ permutationsurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 name="survivalPlot",
                 title="Survival Curves Comparison",
                 visible="(show_survival_curves)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".plotSurvival"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="permutationDistributionPlot",
                 title="Permutation Test Statistics Distribution",
                 visible="(show_permutation_distribution)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".plotPermutationDistribution"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="testProgressionPlot",
                 title="P-value Progression",
                 visible="(show_test_progression)",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".plotTestProgression"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="analysisSummary",

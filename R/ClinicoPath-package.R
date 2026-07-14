@@ -141,7 +141,7 @@
 #' 
 #' @section Links:
 #' \itemize{
-#'   \item Package website: \url{https://sbalci.github.io/ClinicoPathJamoviModule/}
+#'   \item Package website: \url{https://www.serdarbalci.com/ClinicoPathJamoviModule/}
 #'   \item GitHub repository: \url{https://github.com/sbalci/ClinicoPathJamoviModule/}
 #'   \item Bug reports: \url{https://github.com/sbalci/ClinicoPathJamoviModule/issues/}
 #'   \item jamovi library: \url{https://www.jamovi.org/}

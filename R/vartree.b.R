@@ -2,14 +2,12 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import DiagrammeR
-#' @import DiagrammeRsvg
-#' @import vtree
-#' @rawNamespace import(janitor, except = c(chisq.test, fisher.test))
-#' @import labelled
+#' @importFrom DiagrammeRsvg export_svg
+#' @importFrom labelled set_variable_labels var_label
 #' @importFrom magrittr %>%
 #' @importFrom stats as.formula
 #' @importFrom grDevices rgb
+#' @importFrom vtree vtree
 #'
 #' @return An \code{R6} class generator object for the \code{vartreeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 # Enhanced implementation supporting current CRAN vtree version 5.6.5
@@ -115,20 +113,8 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # serialization-safe plain-text notices pattern via
             # private$.addNotice(type, title, content), rendered into the
             # `notices` Preformatted output item (see .addNotice/.renderNotices).
-            # TODO (security): zero `htmltools::htmlEscape` calls across
-            # ~800 LOC. The clinical-summary HTML at ~L688-708, the about
-            # section at ~L711-723, and the interpretation rendering all
-            # interpolate variable names (which come from user CSV headers).
-            # Sweep all paste0 HTML construction with `htmltools::htmlEscape()`
-            # on dynamic interpolations.
-            # TODO (forward-looking, perf): no `private$.checkpoint()` despite
-            # `vtree::vtree` being the heaviest operation and producing
-            # exponential complexity in #vars x avg #levels. Add a
-            # checkpoint immediately before the `vtree::vtree(...)` call
-            # (~L444) so wide trees don't freeze the UI.
-
             # Initial check for variables
-            if (is.null(self$options$vars)) {
+            if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 todo <- paste0(
                     "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px;'>",
                     "<h3 style='color: #007bff; margin-top: 0;'>", .("Welcome to Variable Tree Analysis"), "</h3>",
@@ -425,6 +411,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Wrapped in tryCatch so an incompatible variable/option combination (too many
             # factor levels, invalid prune/follow settings) surfaces a clean jamovi-level
             # message via jmvcore::reject() instead of an opaque raw R crash.
+            private$.checkpoint()
             results <- tryCatch(vtree::vtree(
                 z = mydata,
                 vars = myvars1,

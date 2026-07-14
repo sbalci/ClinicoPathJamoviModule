@@ -15,7 +15,7 @@ options:
             The data as a data frame.
 
     - name: var
-      title: Variable to Categorize
+      title: Variable to categorize
       type: Variable
       suggested:
         - continuous
@@ -28,7 +28,7 @@ options:
             Select the continuous variable you want to convert into categories.
 
     - name: method
-      title: Binning Method
+      title: Binning method
       type: List
       options:
         - title: Equal Intervals
@@ -54,7 +54,7 @@ options:
             Choose how to divide the variable into categories.
 
     - name: nbins
-      title: Number of Categories
+      title: Number of categories
       type: Integer
       min: 2
       max: 20
@@ -66,7 +66,7 @@ options:
             Number of categories to create (2-20).
 
     - name: breaks
-      title: Custom Break Points
+      title: Custom break points
       type: String
       default: ''
       description:
@@ -77,7 +77,7 @@ options:
             For manual binning, enter comma-separated break points (e.g., "0, 25, 50, 75, 100").
 
     - name: sdmult
-      title: SD Multiplier
+      title: SD multiplier
       type: Number
       min: 0.5
       max: 3
@@ -89,7 +89,7 @@ options:
             How many standard deviations from mean to use for category boundaries.
 
     - name: labels
-      title: Category Labels
+      title: Category labels
       type: List
       options:
         - title: Auto (numeric ranges)
@@ -110,7 +110,7 @@ options:
             Choose label style for the new categories.
 
     - name: customlabels
-      title: Custom Label Names
+      title: Custom label names
       type: String
       default: ''
       description:
@@ -121,7 +121,7 @@ options:
             Enter custom labels separated by commas (must match number of categories).
 
     - name: newvarname
-      title: New Variable Name
+      title: New variable name
       type: String
       default: ''
       description:
@@ -131,7 +131,7 @@ options:
             Name for the new categorized variable. Leave empty for automatic naming.
 
     - name: addtodata
-      title: Add Categorized Variable to Data
+      title: Categorized variable
       type: Output
       description:
           R: >
@@ -140,7 +140,7 @@ options:
             Add the new categorized variable directly to the dataset.
 
     - name: includelowest
-      title: Include lowest value in first bin
+      title: Lowest value in first bin
       type: Bool
       default: true
       description:
@@ -160,7 +160,7 @@ options:
             Whether intervals include the right endpoint (e.g., (0,10] vs [0,10)).
 
     - name: ordered
-      title: Create ordered factor
+      title: Ordered factor
       type: Bool
       default: true
       description:
@@ -170,7 +170,7 @@ options:
             Create an ordered factor to preserve the natural ordering of categories.
 
     - name: excl
-      title: Exclude missing values
+      title: Missing-value exclusion
       type: Bool
       default: true
       description:

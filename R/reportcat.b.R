@@ -141,7 +141,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dplyr::mutate(
                             percent = n / validtotal,
                             level_description = glue::glue(
-                                .("{level}: n = {n}, {percent} of valid cases. "),
+                                .("{level}: n = {n}, {percent} of valid cases."),
                                 level = htmltools::htmlEscape(level),
                                 n = n,
                                 percent = scales::percent(percent)
@@ -150,17 +150,14 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dplyr::pull(level_description)
 
                     # Create overall summary sentences with HTML tags for styling.
-                    sentence1 <- glue::glue("<strong>{var}</strong> {has_obs} {obs} {observations} {and} {levels} {levels_text}.",
+                    sentence1 <- glue::glue(.("<strong>{var}</strong> has {observations} observations and {levels} levels."),
                         var = htmltools::htmlEscape(myvar),
-                        has_obs = .("has"),
-                        obs = total_obs,
-                        observations = .("observations"),
-                        and = .("and"),
-                        levels = num_levels,
-                        levels_text = .("levels"))
-                    sentence2 <- glue::glue("{missing_label}: {count}.",
-                        missing_label = .("Missing values"),
-                        count = missing_obs)
+                        observations = total_obs,
+                        levels = num_levels)
+                    sentence2 <- glue::glue(
+                        .("Missing values: {count}."),
+                        count = missing_obs
+                    )
                     full_description <- paste(c(sentence1, description, sentence2), collapse = "<br>")
                     return(full_description)
                 }
@@ -581,6 +578,5 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         }
     )
 )
-
 
 

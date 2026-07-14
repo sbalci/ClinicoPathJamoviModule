@@ -293,7 +293,8 @@ jviolinResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
-        plot = function() private$.items[["plot"]]),
+        plot = function() private$.items[["plot"]],
+        explanations = function() private$.items[["explanations"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -332,7 +333,15 @@ jviolinResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "usexlabel",
                     "xlabel",
                     "useylabel",
-                    "ylabel")))}))
+                    "ylabel")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="explanations",
+                title="Explanations",
+                visible="(showExplanations)",
+                clearWith=list(
+                    "dep",
+                    "group")))}))
 
 jviolinBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jviolinBase",
@@ -399,6 +408,7 @@ jviolinBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

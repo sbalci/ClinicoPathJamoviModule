@@ -56,7 +56,7 @@ options:
       default: NULL
 
     - name: posthoc
-      title: Post-Hoc Method
+      title: Post-hoc method
       type: List
       options:
         - title: Bonferroni
@@ -65,7 +65,7 @@ options:
           name: holm
         - title: FDR
           name: fdr
-        - title: None (Disable Post-Hoc)
+        - title: None (disable post-hoc)
           name: none
       default: bonferroni
       description: >
@@ -76,7 +76,7 @@ options:
                   conservative), or FDR (controls false discovery rate) for pairwise testing.
 
     - name: sig
-      title: Significance Level
+      title: Significance level
       type: Number
       min: 0.001
       max: 0.1
@@ -85,7 +85,7 @@ options:
                   alpha level for significance testing
 
     - name: excl
-      title: Exclude missing (NA)
+      title: Missing-value exclusion (NA)
       type: Bool
       default: false
       description: >
@@ -127,7 +127,7 @@ options:
                   display individual 2x2 tables for each pairwise comparison
 
     - name: residualsCutoff
-      title: Residuals Significance Cutoff
+      title: Residual significance cutoff
       type: Number
       min: 1.5
       max: 4.0
@@ -145,21 +145,21 @@ options:
                   computationally intensive and may take longer for large tables.
 
     - name: testSelection
-      title: Statistical Test Selection
+      title: Statistical test selection
       type: List
       options:
-        - title: Automatic (Recommended)
+        - title: Automatic (recommended)
           name: auto
-        - title: Always Chi-Square
+        - title: Always chi-square
           name: chisquare
-        - title: Always Fisher's Exact
+        - title: Always Fisher's exact
           name: fisher
       default: auto
       description: >
                   method for selecting statistical test for pairwise comparisons
 
     - name: exportResults
-      title: Export detailed results
+      title: Detailed results export
       type: Bool
       default: false
       description: >

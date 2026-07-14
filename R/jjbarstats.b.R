@@ -1046,8 +1046,8 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         "</ul>",
                         "<p><strong>Step 4:</strong> Review results and clinical interpretations</p>",
                         "<hr>",
-                        "<p><small> <strong>Documentation:</strong> <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggbarstats.html' target='_blank'>ggbarstats</a> | ",
-                        "<a href='https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>grouped_ggbarstats</a></small></p>",
+                        "<p><small> <strong>Documentation:</strong> <a href='https://www.indrapatil.com/ggstatsplot/reference/ggbarstats.html' target='_blank'>ggbarstats</a> | ",
+                        "<a href='https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbarstats.html' target='_blank'>grouped_ggbarstats</a></small></p>",
                         "</div>"
                     )
 

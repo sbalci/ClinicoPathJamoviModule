@@ -135,10 +135,10 @@ timeupdatedsurvivalClass <- R6::R6Class(
             if (plotType %in% c("survival", "hazards", "cumulative", "all")) {
                 
                 tryCatch({
-                    p <- private$.createSurvivalPlot(private$.results$model, 
+                    p <- private$.createSurvivalPlot(private$.results$model,
                                                    private$.results$modelType, plotType)
                     print(p)
-                    True
+                    TRUE
                 }, error = function(e) {
                     plot.new()
                     text(0.5, 0.5, paste("Error creating survival plot:", e$message), 

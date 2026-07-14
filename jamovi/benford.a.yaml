@@ -29,7 +29,7 @@ options:
             continuous values used for the report
 
     - name: digits
-      title: Number of Digits
+      title: Number of digits
       type: Integer
       default: 2
       min: 1

@@ -39,8 +39,8 @@ timedependentClass <- if (requireNamespace('jmvcore'))
       .run = function() {
         
         # Validation and setup
-        if (!self$options$id || !self$options$stop_time || !self$options$event) {
-          self$results$todo$setContent(self$.create_welcome_message())
+        if (is.null(self$options$id) || is.null(self$options$stop_time) || is.null(self$options$event)) {
+          self$results$todo$setContent(private$.create_welcome_message())
           return()
         }
         
@@ -63,13 +63,13 @@ timedependentClass <- if (requireNamespace('jmvcore'))
         
         tryCatch({
           # Prepare data
-          data_prepared <- self$.prepare_data()
+          data_prepared <- private$.prepare_data()
           if (is.null(data_prepared)) {
             return()
           }
           
           # Fit models
-          model_results <- self$.fit_models(data_prepared)
+          model_results <- private$.fit_models(data_prepared)
           if (is.null(model_results)) {
             return()
           }
@@ -77,32 +77,32 @@ timedependentClass <- if (requireNamespace('jmvcore'))
           private$.fitted_model <- model_results
           
           # Generate results
-          self$.populate_cox_results(model_results)
+          private$.populate_cox_results(model_results)
           
           if (self$options$test_proportional_hazards) {
-            self$.test_time_varying_effects(model_results)
+            private$.test_time_varying_effects(model_results)
           }
           
           if (self$options$perform_landmark) {
-            self$.perform_landmark_analysis(data_prepared)
+            private$.perform_landmark_analysis(data_prepared)
           }
           
           if (self$options$time_dependent_roc) {
-            self$.perform_roc_analysis(data_prepared, model_results)
+            private$.perform_roc_analysis(data_prepared, model_results)
           }
           
           if (self$options$compare_models) {
-            self$.compare_models(data_prepared)
+            private$.compare_models(data_prepared)
           }
           
           if (self$options$internal_validation) {
-            self$.perform_validation(data_prepared)
+            private$.perform_validation(data_prepared)
           }
           
           # Generate summary and interpretation
-          self$.generate_model_summary(model_results)
-          self$.generate_interpretation(model_results)
-          self$.generate_recommendations()
+          private$.generate_model_summary(model_results)
+          private$.generate_interpretation(model_results)
+          private$.generate_recommendations()
           
         }, error = function(e) {
           error_msg <- paste0(
@@ -224,7 +224,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
               
             }, error = function(e) {
               # Fallback to standard Cox with tt functions
-              tt_functions <- self$.create_time_transform_functions(all_vars)
+              tt_functions <- private$.create_time_transform_functions(all_vars)
               if (length(tt_functions) > 0) {
                 model <- survival::coxph(model_formula, data = data, tt = tt_functions)
               } else {
@@ -503,7 +503,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
             specificity <- NA
             
             if (self$options$optimal_cutpoint) {
-              cutpoint_result <- self$.find_optimal_cutpoint(roc_data, time_point)
+              cutpoint_result <- private$.find_optimal_cutpoint(roc_data, time_point)
               if (!is.null(cutpoint_result)) {
                 optimal_cutpoint <- cutpoint_result$cutpoint
                 sensitivity <- cutpoint_result$sensitivity
@@ -704,7 +704,7 @@ timedependentClass <- if (requireNamespace('jmvcore'))
               cv_se <- sd(cv_aucs) / sqrt(length(cv_aucs))
               
               # Apparent performance
-              apparent_auc <- self$.calculate_apparent_auc(data, time_point)
+              apparent_auc <- private$.calculate_apparent_auc(data, time_point)
               optimism <- apparent_auc - cv_auc
               corrected_auc <- apparent_auc - optimism
               
@@ -1110,14 +1110,14 @@ timedependentClass <- if (requireNamespace('jmvcore'))
             ggtheme
           
           print(p)
-          
-          True
-          
+
+          TRUE
+
         }, error = function(e) {
           FALSE
         })
       },
-      
+
       .plot_cutpoint_stability = function(image, ggtheme, theme, ...) {
         
         # Plot optimal cutpoints over time

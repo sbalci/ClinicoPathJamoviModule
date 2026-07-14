@@ -50,7 +50,7 @@ options:
           will be computed and explained.
 
     - name: decimal_places
-      title: "Decimal Places"
+      title: "Decimal places"
       type: Integer
       min: 0
       max: 5

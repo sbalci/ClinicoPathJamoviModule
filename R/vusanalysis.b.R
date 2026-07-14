@@ -18,6 +18,7 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 data <- self$data
                 predictor <- as.numeric(data[[self$options$predictor]])
                 outcome <- data[[self$options$multiclass_outcome]]
+                outcome <- private$.applyOutcomeOrder(outcome)
 
                 # Remove missing values
                 complete_cases <- complete.cases(predictor, outcome)
@@ -152,43 +153,12 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 outcome_levels <- levels(outcome)
                 n_classes <- length(outcome_levels)
 
-                # For 3+ classes, calculate probability of correct ordering
-                # Use pairwise Mann-Whitney U statistics
-
-                # Simple approach: Average of all pairwise AUCs
-                # More sophisticated: Calculate true VUS via combinatorics
-
-                pairwise_aucs <- numeric()
-                for (i in 1:(n_classes - 1)) {
-                    for (j in (i + 1):n_classes) {
-                        class1_idx <- outcome == outcome_levels[i]
-                        class2_idx <- outcome == outcome_levels[j]
-
-                        pred1 <- predictor[class1_idx]
-                        pred2 <- predictor[class2_idx]
-
-                        # Calculate AUC via Mann-Whitney U
-                        auc <- private$.mannWhitneyAUC(pred1, pred2)
-                        pairwise_aucs <- c(pairwise_aucs, auc)
-                    }
-                }
-
-                # Simplified VUS: use Mossman's formula for 3 classes
-                # For k=3: VUS ≈ average of 3 pairwise AUCs minus correction
-                # More general: use combinatorial approach
-
-                # Calculate VUS (simplified approach for practical use)
-                if (n_classes == 3) {
-                    # For 3 classes: VUS = (AUC12 + AUC13 + AUC23)/3 - correction
-                    # Mossman 1999: VUS ≈ product of pairwise AUCs (conservative)
-                    vus <- prod(pairwise_aucs)
-
-                    # Alternative: linear combination
-                    # vus <- mean(pairwise_aucs)
-                } else {
-                    # For k>3: use average pairwise AUC as approximation
-                    vus <- mean(pairwise_aucs)
-                }
+                # True empirical VUS = P(X1 < X2 < ... < Xk), the fraction of
+                # tuples (one observation per class) that are correctly ordered
+                # by the predictor, with Mann-Whitney half-weight handling of
+                # ties. This is the k-class generalization of the AUC and is
+                # consistent with the null VUS = 1/k! reported below.
+                vus <- private$.computeVUS(predictor, outcome, outcome_levels)
 
                 # Calculate SE via bootstrap if requested
                 vus_se <- NA
@@ -367,30 +337,13 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Check if all classes present
                     strat_classes <- length(unique(strat_outcome))
 
-                    # Calculate VUS for this stratum (simplified)
+                    # Calculate VUS for this stratum using the same estimator,
+                    # restricted to the classes present in this subgroup while
+                    # preserving the overall (low-to-high) class ordering.
                     outcome_levels <- levels(outcome)
-                    pairwise_aucs <- numeric()
+                    strat_vus <- private$.computeVUS(strat_pred, strat_outcome, outcome_levels)
 
-                    for (i in 1:(strat_classes - 1)) {
-                        for (j in (i + 1):strat_classes) {
-                            if (i <= length(outcome_levels) && j <= length(outcome_levels)) {
-                                class1_idx <- strat_outcome == outcome_levels[i]
-                                class2_idx <- strat_outcome == outcome_levels[j]
-
-                                if (sum(class1_idx) > 0 && sum(class2_idx) > 0) {
-                                    pred1 <- strat_pred[class1_idx]
-                                    pred2 <- strat_pred[class2_idx]
-
-                                    auc <- private$.mannWhitneyAUC(pred1, pred2)
-                                    pairwise_aucs <- c(pairwise_aucs, auc)
-                                }
-                            }
-                        }
-                    }
-
-                    if (length(pairwise_aucs) > 0) {
-                        strat_vus <- mean(pairwise_aucs)
-
+                    if (!is.na(strat_vus)) {
                         # Simplified CI via bootstrap
                         ci_lower <- NA
                         ci_upper <- NA
@@ -410,6 +363,62 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 }
             },
+            .applyOutcomeOrder = function(outcome) {
+                # Apply the user-specified class ordering (low to high) when it is
+                # provided and exactly matches the existing levels. VUS is
+                # direction-dependent, so class order determines the estimate.
+                order_str <- self$options$outcome_order
+                if (is.null(order_str) || !nzchar(trimws(order_str))) {
+                    return(outcome)
+                }
+
+                requested <- trimws(strsplit(order_str, ",")[[1]])
+                requested <- requested[nzchar(requested)]
+                lvls <- levels(outcome)
+
+                if (length(requested) == length(lvls) && setequal(requested, lvls)) {
+                    outcome <- factor(as.character(outcome), levels = requested)
+                }
+
+                outcome
+            },
+            .computeVUS = function(predictor, outcome, ordered_levels = NULL) {
+                # Empirical Volume Under the ROC Surface for k ordered classes:
+                # the fraction of tuples (one observation drawn from each class)
+                # whose predictor values are correctly ordered low-to-high,
+                # i.e. an estimate of P(X1 < X2 < ... < Xk). Ties receive a
+                # half weight, matching the Mann-Whitney convention used for AUC.
+                if (is.null(ordered_levels)) {
+                    ordered_levels <- levels(outcome)
+                }
+
+                outcome_chr <- as.character(outcome)
+                present <- ordered_levels[ordered_levels %in% unique(outcome_chr)]
+                k <- length(present)
+                if (k < 2) {
+                    return(NA_real_)
+                }
+
+                groups <- lapply(present, function(lv) predictor[outcome_chr == lv])
+                sizes <- vapply(groups, length, integer(1))
+                if (any(sizes == 0)) {
+                    return(NA_real_)
+                }
+
+                # Dynamic program over ordered classes: f holds, for each
+                # observation, the (tie-weighted) count of correctly ordered
+                # continuations through the higher classes.
+                f <- rep(1, sizes[k])
+                for (m in (k - 1):1) {
+                    up <- groups[[m + 1]]
+                    fu <- f
+                    f <- vapply(groups[[m]], function(v) {
+                        sum((as.numeric(up > v) + 0.5 * as.numeric(up == v)) * fu)
+                    }, numeric(1))
+                }
+
+                sum(f) / prod(sizes)
+            },
             .mannWhitneyAUC = function(x1, x2) {
                 # Calculate AUC using Mann-Whitney U statistic
                 # AUC = U / (n1 * n2)
@@ -421,9 +430,18 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return(NA)
                 }
 
+                # Map option values to valid rank() tie methods; "conservative"
+                # is not a valid ties.method for rank() and would error.
+                ties_method <- switch(self$options$handle_ties,
+                    average = "average",
+                    random = "random",
+                    conservative = "min",
+                    "average"
+                )
+
                 # Combine and rank
                 combined <- c(x1, x2)
-                ranks <- rank(combined, ties.method = self$options$handle_ties)
+                ranks <- rank(combined, ties.method = ties_method)
 
                 # Sum of ranks for x1
                 rank_sum_x1 <- sum(ranks[1:n1])
@@ -452,34 +470,9 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     boot_pred <- predictor[boot_idx]
                     boot_outcome <- outcome[boot_idx]
 
-                    # Calculate pairwise AUCs
-                    pairwise_aucs <- numeric()
-
-                    for (i in 1:(n_classes - 1)) {
-                        for (j in (i + 1):n_classes) {
-                            class1_idx <- boot_outcome == outcome_levels[i]
-                            class2_idx <- boot_outcome == outcome_levels[j]
-
-                            if (sum(class1_idx) > 0 && sum(class2_idx) > 0) {
-                                pred1 <- boot_pred[class1_idx]
-                                pred2 <- boot_pred[class2_idx]
-
-                                auc <- private$.mannWhitneyAUC(pred1, pred2)
-                                pairwise_aucs <- c(pairwise_aucs, auc)
-                            }
-                        }
-                    }
-
-                    # VUS estimate
-                    if (length(pairwise_aucs) > 0) {
-                        if (n_classes == 3) {
-                            boot_vus[b] <- prod(pairwise_aucs) # Conservative for 3 classes
-                        } else {
-                            boot_vus[b] <- mean(pairwise_aucs)
-                        }
-                    } else {
-                        boot_vus[b] <- NA
-                    }
+                    # Same VUS estimator as the point estimate, restricted to the
+                    # original class ordering.
+                    boot_vus[b] <- private$.computeVUS(boot_pred, boot_outcome, outcome_levels)
                 }
 
                 return(boot_vus)
@@ -546,6 +539,7 @@ vusanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 data <- self$data
                 predictor <- as.numeric(data[[self$options$predictor]])
                 outcome <- data[[self$options$multiclass_outcome]]
+                outcome <- private$.applyOutcomeOrder(outcome)
 
                 # Remove missing
                 complete_cases <- complete.cases(predictor, outcome)

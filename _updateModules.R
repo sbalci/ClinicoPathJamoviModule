@@ -2078,8 +2078,8 @@ if (!WIP & webpage) {
 # Distribute tests to submodules (P1.4 / P1.5) ----
 # Ship a self-contained dependency-guard test (the runtime twin of the dependency
 # check below) plus a tests/testthat.R runner. By DEFAULT this is done only for
-# submodules that have no pre-existing functional tests, so activating a runner
-# surfaces only the always-green guard test -- never a pre-existing failure. The
+# submodules that have no pre-existing functional tests. The shipped guard is a
+# strict dependency-policy test and will fail on undeclared package usage. The
 # umbrella's per-analysis functional tests are also distributable (name-keyed and
 # namespace-translated by copy_module_tests), but the umbrella suite currently has
 # failing tests, so full distribution is gated behind `copy_test_files` -- enable it

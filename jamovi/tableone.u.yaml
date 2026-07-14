@@ -10,7 +10,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: "Select Variables"
+        label: "Variables"
         children:
           - type: VariablesListBox
             name: vars
@@ -26,7 +26,7 @@ children:
     children:
       - type: CheckBox
         name: excl
-        label: "Exclude missing values (NA)"
+        label: "Missing-value exclusion (NA)"
   - type: CollapseBox
     label: "Output Options"
     collapsed: true

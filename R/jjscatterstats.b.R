@@ -67,7 +67,7 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br><br>
                 This tool will help you generate Scatter Plot with correlation analysis.
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggscatterstats.html' target='_blank'>ggscatterstats</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggscatterstats.html' target='_blank'>grouped_ggscatterstats</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggscatterstats.html' target='_blank'>ggscatterstats</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggscatterstats.html' target='_blank'>grouped_ggscatterstats</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>"

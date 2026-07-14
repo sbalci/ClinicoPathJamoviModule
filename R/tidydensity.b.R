@@ -72,9 +72,11 @@ tidydensityClass <- if (requireNamespace("jmvcore")) {
                 </p>
                 </div>"
 
+                    self$results$todo$setVisible(TRUE)
                     self$results$todo$setContent(intro_msg)
                     return()
                 } else {
+                    self$results$todo$setVisible(FALSE)
                     self$results$todo$setContent("")
                 }
 

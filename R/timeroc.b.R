@@ -262,23 +262,34 @@ timerocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         fpr <- private$.fit$FP[, time_idx]
                         spec <- 1 - fpr
 
-                        valid_idx <- !is.na(sens) & !is.na(spec) & !is.na(private$.fit$marker)
-                        if (sum(valid_idx) > 0) {
-                            sens_clean <- sens[valid_idx]
-                            spec_clean <- spec[valid_idx]
-                            marker_clean <- private$.fit$marker[valid_idx]
+                        # timeROC does not store the marker vector on the fit
+                        # object. Internally it sorts markers in decreasing order
+                        # (order(-marker)) and prepends a trivial TP=FP=0 row, so
+                        # the TP/FP rows map to c(NA, sort(unique(marker),
+                        # decreasing = TRUE)). Reconstruct that mapping to recover
+                        # the cutoff value at each ROC point.
+                        marker_levels <- c(NA, sort(unique(private$.data$marker),
+                                                    decreasing = TRUE))
 
-                            youden <- sens_clean + spec_clean - 1
-                            optimal_idx <- which.max(youden)
+                        if (length(marker_levels) == length(sens)) {
+                            valid_idx <- !is.na(sens) & !is.na(spec) & !is.na(marker_levels)
+                            if (sum(valid_idx) > 0) {
+                                sens_clean <- sens[valid_idx]
+                                spec_clean <- spec[valid_idx]
+                                marker_clean <- marker_levels[valid_idx]
 
-                            if (length(optimal_idx) > 0 && optimal_idx <= length(marker_clean)) {
-                                table$addRow(rowKey = i, values = list(
-                                    timepoint = tp,
-                                    cutoff = round(marker_clean[optimal_idx], 3),
-                                    sensitivity = round(sens_clean[optimal_idx], 3),
-                                    specificity = round(spec_clean[optimal_idx], 3),
-                                    youden = round(youden[optimal_idx], 3)
-                                ))
+                                youden <- sens_clean + spec_clean - 1
+                                optimal_idx <- which.max(youden)
+
+                                if (length(optimal_idx) > 0 && optimal_idx <= length(marker_clean)) {
+                                    table$addRow(rowKey = i, values = list(
+                                        timepoint = tp,
+                                        cutoff = round(marker_clean[optimal_idx], 3),
+                                        sensitivity = round(sens_clean[optimal_idx], 3),
+                                        specificity = round(spec_clean[optimal_idx], 3),
+                                        youden = round(youden[optimal_idx], 3)
+                                    ))
+                                }
                             }
                         }
                     }

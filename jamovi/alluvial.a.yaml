@@ -26,7 +26,7 @@ options:
             values used for the Alluvial Diagram.
 
     - name: condensationvar
-      title: Condensation Variable
+      title: Condensation variable
       type: Variable
       default: NULL
       description:
@@ -36,7 +36,7 @@ options:
             The primary variable to be used for condensation.
 
     - name: excl
-      title: Exclude missing (NA)
+      title: Missing-value exclusion (NA)
       type: Bool
       default: false
       description:
@@ -80,13 +80,15 @@ options:
       title: Fill by (ggalluvial)
       type: Variable
       default: NULL
+      suggested: [ ordinal, nominal ]
+      permitted: [ factor ]
       description:
           R: >
-            A string naming the variable from `data` that will be used to
-            color the flows in the ggalluvial plot.
+            A string naming the categorical variable from `data` that will be
+            used to color the flows in the ggalluvial plot.
           jamovi: >
-            A string naming the variable from `data` that will be used to
-            color the flows in the ggalluvial plot.
+            A string naming the categorical variable from `data` that will be
+            used to color the flows in the ggalluvial plot.
 
     - name: bin
       title: Bin labels
@@ -168,15 +170,17 @@ options:
       description:
           R: >
             Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
-            Leave empty to use bin option defaults.
+            The number of labels determines the number of bins. Leave empty to
+            use the selected bin-label method.
           jamovi: >
             Custom labels for bins, separated by commas (e.g., "Low,Medium,High").
-            Leave empty to use bin option defaults.
+            The number of labels determines the number of bins. Leave empty to
+            use the selected bin-label method.
 
     # === Phase 1: Easy Additions ===
 
     - name: colorPalette
-      title: Color Palette
+      title: Color palette
       type: List
       options:
         - title: Default
@@ -209,7 +213,7 @@ options:
             Display count values on nodes.
 
     - name: themeStyle
-      title: Theme Style
+      title: Theme style
       type: List
       options:
         - title: Default (easyalluvial)
@@ -240,7 +244,7 @@ options:
             Apply sophisticated color gradients to flow edges for better visual appeal.
 
     - name: plotSubtitle
-      title: Plot Subtitle
+      title: Plot subtitle
       type: String
       default: ''
       description:
@@ -252,7 +256,7 @@ options:
     # === Phase 2: Medium Additions ===
 
     - name: weight
-      title: Weight Variable
+      title: Weight variable
       type: Variable
       default: NULL
       suggested: [ continuous ]
@@ -274,7 +278,7 @@ options:
             Apply Sankey diagram styling (narrow nodes, sigmoid curves).
 
     - name: curveType
-      title: Curve Type
+      title: Curve type
       type: List
       options:
         - title: Cubic (smooth)
@@ -297,7 +301,7 @@ options:
             Curve style for flows. Requires ggalluvial engine.
 
     - name: flowDirection
-      title: Flow Direction
+      title: Flow direction
       type: List
       options:
         - title: Left to Right
@@ -316,7 +320,7 @@ options:
             Direction of flow in the diagram.
 
     - name: engine
-      title: Plot Engine
+      title: Plot engine
       type: List
       options:
         - title: Easy Alluvial (automatic)
@@ -333,7 +337,7 @@ options:
             ggalluvial for manual control with curve types and Sankey styling.
 
     - name: labelNodes
-      title: Label nodes
+      title: Node labels
       type: Bool
       default: false
       description:

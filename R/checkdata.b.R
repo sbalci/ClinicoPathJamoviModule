@@ -1118,25 +1118,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .run = function() {
             private$.noticeList <- list()
 
-            # TODO (security): file-wide htmlEscape gap. Only 2 `htmlEscape`
-            # calls across ~2.2k LOC of HTML construction. Variable names
-            # (from user CSV headers - uncontrolled `<`, `>`, `&`) flow into
-            # `<p><strong>Variable:</strong> ", var_name, "</p>` at ~L2013
-            # and into many other HTML blocks in `.formatQualityHTML`,
-            # `.buildSummaryHtml`, `.buildAboutHtml`, `.buildCaveatsHtml`,
-            # and the heuristic recommendations sections. Sweep all paste0
-            # HTML construction with `htmltools::htmlEscape()` on every
-            # dynamic interpolation. Lower priority than Cat A1 because
-            # variable headers are owned by the user, not an external
-            # attacker - but reports may be exported and re-rendered.
             # TODO (forward-looking): no `.()` wrapping anywhere in this file
             # (~2.2k LOC of clinical interpretation copy). Address in a
             # /prepare-translation pass before i18n release.
-            # TODO (forward-looking, perf): zero `private$.checkpoint()`
-            # calls. The `sapply` loops in `.detectOutliers`, `.runMissingTest`,
-            # and the heuristic scoring block are O(n) but on >100k-row
-            # variables can hold the UI for seconds. Add checkpoints around
-            # each major analysis branch.
+            # TODO (forward-looking, perf): add checkpoints around
+            # `.populateOutlierAnalysis`, `.analyzeMissingPatterns`,
+            # `.analyzeCategoricalQuality`, and `.clinicalContextValidation`.
             # TODO (cleanup): file is 2.2k LOC - split into helper files
             # (`.checkOutliers`, `.checkDistribution`, `.checkPlausibility`,
             # `.renderHtml`) to keep each unit under ~500 LOC.

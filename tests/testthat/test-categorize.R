@@ -144,3 +144,39 @@ test_that("categorize generates correct labels", {
      expect_true(!is.null(res_custom$rcode))
    }
 })
+
+test_that("generated categorize code safely quotes names and custom labels", {
+  generate_code <- categorizeClass$private_methods$.generateRCode
+
+  custom_labels <- paste0(
+    "O'Brien, path", "\\", "root, line one\nline two"
+  )
+  code <- generate_code(
+    varname = "tumor grade",
+    method = "equal",
+    nbins = 3,
+    breaks = "",
+    sdmult = 1,
+    labels = "custom",
+    customlabels = custom_labels,
+    newvarname = "risk group",
+    includelowest = TRUE,
+    rightclosed = TRUE,
+    ordered = TRUE
+  )
+
+  expect_error(parsed <- parse(text = code), NA)
+
+  env <- new.env(parent = baseenv())
+  env$data <- data.frame(
+    "tumor grade" = 1:9,
+    check.names = FALSE
+  )
+  eval(parsed, envir = env)
+
+  expect_equal(
+    env$labels,
+    c("O'Brien", "path\\root", "line one\nline two")
+  )
+  expect_true("risk group" %in% names(env$data))
+})

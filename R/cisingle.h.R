@@ -190,7 +190,8 @@ ciSingleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Confidence Interval Plot",
                 width=500,
                 height=400,
-                visible="(showPlot)"))}))
+                visible="(showPlot)",
+                renderFun=".plot"))}))
 
 ciSingleBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "ciSingleBase",

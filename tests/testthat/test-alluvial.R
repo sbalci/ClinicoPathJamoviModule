@@ -1,6 +1,4 @@
 test_that("alluvial class exists and can be instantiated", {
-  skip_if_not_installed('jmvReadWrite')
-    
     # Test that alluvial class exists
     expect_true(exists("alluvialClass"))
     
@@ -30,9 +28,8 @@ test_that("alluvial function basic structure", {
             vars = c("Sex", "Grade", "Status")
         )
         
-        # Check that result is an alluvial analysis object
-        expect_s3_class(result, "alluvialClass")
-        expect_true(inherits(result, "alluvialBase"))
+        # Exported jamovi functions return the result tree, not the analysis R6.
+        expect_s3_class(result, "alluvialResults")
     }
 })
 
@@ -57,7 +54,7 @@ test_that("alluvial parameter validation", {
                 vars = c("Var1", "Var2", "Var3"),
                 fill = fill_opt
             )
-            expect_s3_class(result, "alluvialClass")
+            expect_s3_class(result, "alluvialResults")
         }
         
         # Test with different bin options
@@ -69,7 +66,7 @@ test_that("alluvial parameter validation", {
                 vars = c("Var1", "Var2", "Var3"),
                 bin = bin_opt
             )
-            expect_s3_class(result, "alluvialClass")
+            expect_s3_class(result, "alluvialResults")
         }
         
         # Test with different orientation options
@@ -81,7 +78,7 @@ test_that("alluvial parameter validation", {
                 vars = c("Var1", "Var2", "Var3"),
                 orient = orient_opt
             )
-            expect_s3_class(result, "alluvialClass")
+            expect_s3_class(result, "alluvialResults")
         }
     }
 })
@@ -105,7 +102,7 @@ test_that("alluvial marginal plots parameter", {
             orient = "vert"
         )
         
-        expect_s3_class(result, "alluvialClass")
+        expect_s3_class(result, "alluvialResults")
         expect_true(result$options$marg)
         expect_equal(result$options$orient, "vert")
     }
@@ -131,7 +128,7 @@ test_that("alluvial custom title parameter", {
             marg = FALSE
         )
         
-        expect_s3_class(result, "alluvialClass")
+        expect_s3_class(result, "alluvialResults")
         expect_true(result$options$usetitle)
         expect_equal(result$options$mytitle, custom_title)
     }
@@ -156,11 +153,11 @@ test_that("alluvial condensation variable parameter", {
             condensationvar = "Gender"
         )
         
-        expect_s3_class(result, "alluvialClass")
+        expect_s3_class(result, "alluvialResults")
         expect_equal(result$options$condensationvar, "Gender")
         
         # Check that second plot method exists
-        expect_true(exists(".plot2", envir = result$.__enclos_env__$private))
+        expect_true(is.function(alluvialClass$private_methods$.plot2))
     }
 })
 
@@ -181,7 +178,7 @@ test_that("alluvial missing value exclusion parameter", {
             excl = TRUE
         )
         
-        expect_s3_class(result, "alluvialClass")
+        expect_s3_class(result, "alluvialResults")
         expect_true(result$options$excl)
     }
 })
@@ -213,7 +210,7 @@ test_that("alluvial comprehensive parameter combination", {
             mytitle = "Comprehensive Test Analysis"
         )
         
-        expect_s3_class(result, "alluvialClass")
+        expect_s3_class(result, "alluvialResults")
         expect_equal(result$options$condensationvar, "Condition")
         expect_true(result$options$excl)
         expect_false(result$options$marg)
@@ -241,8 +238,8 @@ test_that("alluvial required methods exist", {
         )
         
         # Check that required methods exist
-        expect_true(exists(".plot", envir = result$.__enclos_env__$private))
-        expect_true(exists(".run", envir = result$.__enclos_env__$private))
+        expect_true(is.function(alluvialClass$private_methods$.plot))
+        expect_true(is.function(alluvialClass$private_methods$.run))
         
         # Check for plot2 method when condensation variable is used
         result_with_condensation <- alluvial(
@@ -250,6 +247,125 @@ test_that("alluvial required methods exist", {
             vars = c("A"),
             condensationvar = "B"
         )
-        expect_true(exists(".plot2", envir = result_with_condensation$.__enclos_env__$private))
+        expect_true(is.function(alluvialClass$private_methods$.plot2))
     }
+})
+
+test_that("alluvial caches prepared data and honors missing-value exclusion", {
+    data <- data.frame(
+        axis_a = factor(c("x", "y", NA, "x")),
+        axis_b = factor(c("m", NA, "n", "m")),
+        flow_group = factor(c("u", "v", "u", "v"))
+    )
+
+    keep_missing <- alluvial(
+        data = data,
+        vars = c("axis_a", "axis_b"),
+        engine = "ggalluvial",
+        fillGgalluvial = "flow_group",
+        excl = FALSE
+    )
+    exclude_missing <- alluvial(
+        data = data,
+        vars = c("axis_a", "axis_b"),
+        engine = "ggalluvial",
+        fillGgalluvial = "flow_group",
+        excl = TRUE
+    )
+
+    keep_state <- keep_missing$plot$state
+    exclude_state <- exclude_missing$plot$state
+
+    expect_equal(nrow(keep_state$data), 4)
+    expect_equal(nrow(exclude_state$data), 2)
+    expect_equal(keep_state$fill_var, "flow_group")
+    expect_true("flow_group" %in% names(keep_state$data))
+    expect_true("(Missing)" %in% levels(keep_state$data$axis_a))
+    expect_true("(Missing)" %in% levels(keep_state$data$axis_b))
+
+    render_body <- paste(
+        deparse(body(alluvialClass$private_methods$.plot)),
+        collapse = "\n"
+    )
+    expect_false(grepl("self\\$data", render_body))
+})
+
+test_that("weighted alluvial aggregation preserves a separate fill variable", {
+    data <- data.frame(
+        axis_a = factor(c("x", "x", "y", "y")),
+        axis_b = factor(c("m", "m", "n", "n")),
+        flow_group = factor(c("u", "v", "u", "v")),
+        count = c(1, 2, 3, 4)
+    )
+
+    result <- alluvial(
+        data = data,
+        vars = c("axis_a", "axis_b"),
+        engine = "ggalluvial",
+        fillGgalluvial = "flow_group",
+        weight = "count"
+    )
+
+    state <- result$plot$state
+    expect_equal(nrow(state$data), 4)
+    expect_equal(sum(state$data$count), sum(data$count))
+    expect_equal(state$fill_var, "flow_group")
+})
+
+test_that("weighted alluvial rejects unusable or reused weights", {
+    all_missing <- data.frame(
+        axis_a = factor(c("x", "y", "x")),
+        axis_b = factor(c("m", "n", "m")),
+        count = c(NA_real_, NA_real_, NA_real_)
+    )
+    missing_result <- alluvial(
+        data = all_missing,
+        vars = c("axis_a", "axis_b"),
+        engine = "ggalluvial",
+        weight = "count"
+    )
+
+    expect_null(missing_result$plot$state)
+    expect_match(missing_result$notices$content, "No Valid Weights")
+
+    reused <- data.frame(
+        axis_a = c(1, 2, 1),
+        axis_b = factor(c("m", "n", "m"))
+    )
+    reused_result <- alluvial(
+        data = reused,
+        vars = c("axis_a", "axis_b"),
+        engine = "ggalluvial",
+        weight = "axis_a"
+    )
+
+    expect_null(reused_result$plot$state)
+    expect_match(reused_result$notices$content, "Weight Variable Reused")
+})
+
+test_that("easyalluvial bin labels and flow directions render", {
+    data <- data.frame(
+        value = 1:10,
+        group = factor(rep(c("x", "y"), 5))
+    )
+
+    min_max <- alluvial(
+        data = data,
+        vars = c("value", "group"),
+        bin = "min_max"
+    )
+    custom <- alluvial(
+        data = data,
+        vars = c("value", "group"),
+        custombinlabels = "Low, Middle, High"
+    )
+    reversed <- alluvial(
+        data = data,
+        vars = c("value", "group"),
+        flowDirection = "right_left"
+    )
+
+    expect_error(suppressWarnings(min_max$plot$.render()), NA)
+    expect_error(suppressWarnings(custom$plot$.render()), NA)
+    expect_error(suppressWarnings(reversed$plot$.render()), NA)
 })

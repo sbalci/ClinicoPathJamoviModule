@@ -2,7 +2,7 @@ title: Chi-Square Post-Hoc Tests
 name: chisqposttest
 jus: '3.0'
 stage: 0
-compilerMode: aggressive
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -29,58 +29,58 @@ children:
             name: counts
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     children:
-      - type: ComboBox
-        name: posthoc
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: ComboBox
+            name: posthoc
+          - type: TextBox
+            name: sig
+            format: number
+          - type: CheckBox
+            name: excl
+          - type: CheckBox
+            name: exp
+          - type: CheckBox
+            name: plot
+          - type: CheckBox
+            name: showResiduals
+  - type: CollapseBox
+    label: Advanced Settings
+    collapsed: true
     children:
-      - type: TextBox
-        name: sig
-        format: number
-  - type: LayoutBox
-    margin: large
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: TextBox
+            name: residualsCutoff
+            format: number
+          - type: CheckBox
+            name: phiCI
+          - type: ComboBox
+            name: testSelection
+          - type: CheckBox
+            name: showDetailedTables
+  - type: CollapseBox
+    label: Output Panels
+    collapsed: true
     children:
-      - type: CheckBox
-        name: excl
-      - type: CheckBox
-        name: exp
-      - type: CheckBox
-        name: plot
-      - type: CheckBox
-        name: showResiduals
-      - type: CheckBox
-        name: showEducational
-      - type: CheckBox
-        name: showDetailedTables
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: TextBox
-        name: residualsCutoff
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: phiCI
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: ComboBox
-        name: testSelection
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: CheckBox
-        name: exportResults
-      - type: CheckBox
-        name: showClinicalSummary
-      - type: CheckBox
-        name: copyReadySentences
-      - type: CheckBox
-        name: showAssumptionsCheck
-      - type: CheckBox
-        name: showGlossary
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: showEducational
+          - type: CheckBox
+            name: exportResults
+          - type: CheckBox
+            name: showClinicalSummary
+          - type: CheckBox
+            name: copyReadySentences
+          - type: CheckBox
+            name: showAssumptionsCheck
+          - type: CheckBox
+            name: showGlossary

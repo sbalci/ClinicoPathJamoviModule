@@ -285,12 +285,12 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="text1",
                 title="Original Data",
-                visible=FALSE))
+                visible="(od)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
                 title="Original Data",
-                visible="false (od)"))
+                visible="(od)"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cTable1",

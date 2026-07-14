@@ -41,8 +41,9 @@
 #' @import jmvcore
 #' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q bold_levels bold_p all_continuous all_categorical all_stat_cols style_pvalue as_kable_extra
 #' @importFrom gt md
+#' @importFrom labelled set_variable_labels var_label
 #' @importFrom purrr partial
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
+#' @importFrom magrittr %>%
 #' @noRd
 NULL
 
@@ -341,6 +342,40 @@ crosstableClass <- if (requireNamespace('jmvcore'))
         "crosstableClass",
         inherit = crosstableBase,
         private = list(
+            .htmlSafeTableData = function(data) {
+                escape <- function(value) {
+                    as.character(htmltools::htmlEscape(as.character(value)))
+                }
+
+                for (i in seq_along(data)) {
+                    value <- data[[i]]
+                    if (is.factor(value)) {
+                        levels(value) <- escape(levels(value))
+                    } else if (is.character(value)) {
+                        value[] <- escape(value)
+                    }
+
+                    label <- attr(value, "label", exact = TRUE)
+                    if (is.null(label))
+                        label <- names(data)[i]
+                    attr(value, "label") <- escape(label)
+
+                    units <- attr(value, "units", exact = TRUE)
+                    if (is.character(units))
+                        attr(value, "units") <- escape(units)
+
+                    value_labels <- attr(value, "labels", exact = TRUE)
+                    if (!is.null(value_labels) && !is.null(names(value_labels))) {
+                        names(value_labels) <- escape(names(value_labels))
+                        attr(value, "labels") <- value_labels
+                    }
+
+                    data[[i]] <- value
+                }
+
+                data
+            },
+
             # .labelData ----
             # Prepare data by cleaning names and setting original labels with robust handling.
             .labelData = function() {
@@ -505,15 +540,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
             # .run ----
             .run = function() {
-                # TODO (forward-looking, perf): currently only 1
-                # `private$.checkpoint()` call despite 4 large style branches
-                # (`tablestyle1` tableone, `tablestyle2` finalfit, `tablestyle3`
-                # gtsummary, `tablestyle4` arsenal, `tablestyle5` tangram).
-                # Each branch invokes a different third-party table builder
-                # whose computation cost scales with #covariates * #groups.
-                # Add a checkpoint before each style branch (~L677 / L726 /
-                # L848 / L976 / and tablestyle5 site) to keep the UI thread
-                # responsive on wide datasets.
                 sty <- self$options$sty
                 # If required options are missing, show a welcome message with instructions.
                 if (is.null(self$options$vars) || is.null(self$options$group)) {
@@ -627,14 +653,23 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     mydata <- jmvcore::naOmit(mydata)
                 
                 # Validate analysis assumptions and data quality
-                validation_results <- .validateAnalysisAssumptions(mydata, myvars, mygroup,
-                                                                   name_mapping = original_names_mapping)
-                if (length(validation_results$warnings) > 0) {
+                validation_results <- .validateAnalysisAssumptions(
+                    mydata,
+                    myvars,
+                    mygroup,
+                    name_mapping = original_names_mapping
+                )
+                validation_messages <- c(
+                    validation_results$critical_issues,
+                    validation_results$warnings
+                )
+                data_quality_html <- ""
+                if (length(validation_messages) > 0) {
                     # Accumulate all warnings into HTML (avoid serialization errors from dynamic Notice inserts)
-                    warning_html_parts <- character(length(validation_results$warnings))
+                    warning_html_parts <- character(length(validation_messages))
 
-                    for (i in seq_along(validation_results$warnings)) {
-                        warn <- validation_results$warnings[[i]]
+                    for (i in seq_along(validation_messages)) {
+                        warn <- validation_messages[[i]]
 
                         # Determine severity based on content
                         notice_type <- if (grepl("Very small|n = [0-9]+\\)", warn)) {
@@ -659,15 +694,17 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     }
 
                     # Combine all warnings into single HTML output
-                    combined_warnings <- paste(warning_html_parts, collapse = "\n")
-                    self$results$dataQualityNotice$setContent(combined_warnings)
+                    data_quality_html <- paste(warning_html_parts, collapse = "\n")
+                    self$results$dataQualityNotice$setContent(data_quality_html)
                     self$results$dataQualityNotice$setVisible(TRUE)
                 } else {
+                    self$results$dataQualityNotice$setContent("")
                     self$results$dataQualityNotice$setVisible(FALSE)
                 }
 
                 # Generate table based on selected style.
                 if (sty == "arsenal") {
+                    private$.checkpoint()
                     arsenal_control <- arsenal::tableby.control(
                         test = TRUE,
                         total = TRUE,
@@ -677,21 +714,25 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         stats.labels = list(meansd = "Mean (SD)", median = "Median", q1q3 = "Q1, Q3")
                     )
 
-                    # TODO (security, forward-looking): the four `tablestyleN$setContent(...)` paths at L677 (arsenal), L726 (finalfit), L848 (gtsummary), L976 (tangram) push raw HTML produced by third-party packages directly into the result pane. Those packages embed the user's column names and factor labels inside <th>/<td> cells, and header escaping is package-version-dependent - modern versions typically escape cell contents but not always headers. Wrapping the table HTML wholesale would break the table markup. The proper fix is one of: (a) verify each package version escapes headers (audit each release used in production), (b) rename columns to alphanumeric placeholders before passing to the package and substitute display labels via the package's labeling API (arsenal::labels<- / finalfit `dependent_label` / gtsummary `modify_header`), or (c) post-process the HTML with rvest/xml2 to selectively escape <th>/<td> text content. Approach (b) is least fragile but most invasive. Defense-in-depth, not a confirmed exploit chain - flagged forward-looking.
+                    arsenal_data <- private$.htmlSafeTableData(mydata)
                     tablearsenal <- arsenal::tableby(
                         formula = formula,
-                        data = mydata,
+                        data = arsenal_data,
                         control = arsenal_control,
                         digits = 1,
                         digits.count = 1
                     )
-                    tablearsenal <- summary(tablearsenal, text = 'html', pfootnote = 'html')
-                    # capture.output() returns a character vector with one element per
-                    # printed line; Html$setContent requires a SCALAR string, so collapse
-                    # to a single string. Passing the multi-element vector triggers the
-                    # jamovi 2.7 serialization error "cannot set non-repeated field to
-                    # vector of length > 1" (forum.jamovi.org/viewtopic.php?t=4163).
-                    tablearsenal <- paste(capture.output(tablearsenal), collapse = "\n")
+                    # Render Arsenal's own markup after escaping every data-derived
+                    # label and value on a render-only copy.
+                    tablearsenal <- summary(
+                        tablearsenal,
+                        text = "html",
+                        pfootnote = "html"
+                    )
+                    tablearsenal <- paste(
+                        capture.output(tablearsenal),
+                        collapse = "\n"
+                    )
                     self$results$tablestyle1$setContent(tablearsenal)
                 } else if (sty == "finalfit") {
                     myvars_term <- jmvcore::composeTerm(components = myvars)
@@ -739,10 +780,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         tablefinalfit,
                         format = "html",
                         digits = 1,
-                        escape = FALSE
+                        escape = TRUE
                     )
                     self$results$tablestyle2$setContent(tablefinalfit)
                 } else if (sty == "gtsummary") {
+                    private$.checkpoint()
                     # tablegtsummary <- gtsummary::tbl_summary(data = mydata, by = mygroup)
                     # tablegtsummary <- gtsummary::as_kable_extra(tablegtsummary)
                     # self$results$tablestyle3$setContent(tablegtsummary)
@@ -803,7 +845,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 tablegtsummary <-
                   mydata_subset %>%
                   tbl_summary(
-                    by = mygroup,
+                    by = dplyr::all_of(mygroup),
                     statistic = list(
                       all_continuous()  ~ stats_cont,
                       all_categorical() ~ "{n}/{N} ({p}%)"
@@ -811,8 +853,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     digits       = all_continuous() ~ 2,
                     missing_text = "(Missing)",
                     type = list(
-                        all_of(cat_vars) ~ "categorical",
-                        all_of(cont_vars) ~ "continuous"
+                        dplyr::all_of(cat_vars) ~ "categorical",
+                        dplyr::all_of(cont_vars) ~ "continuous"
                     )
                   ) %>%
                   add_n() %>%
@@ -829,9 +871,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                                    "Multiple testing correction is only meaningful when testing multiple variables simultaneously."),
                             type = "INFO"
                         )
-                        self$results$dataQualityNotice$setContent(
-                            paste(self$results$dataQualityNotice$state, single_var_warning, sep = "\n")
+                        data_quality_html <- paste(
+                            c(data_quality_html, single_var_warning),
+                            collapse = "\n"
                         )
+                        self$results$dataQualityNotice$setContent(data_quality_html)
                         self$results$dataQualityNotice$setVisible(TRUE)
                     }
 
@@ -977,10 +1021,11 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 }
 
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {
+                    private$.checkpoint()
                     sty_term <- jmvcore::composeTerm(components = self$options$sty)
                     tabletangram <- tangram::html5(
                         tangram::tangram(
-                            formula,
+                            paste(deparse(formula), collapse = " "),
                             mydata,
                             transform = tangram::hmisc,
                             id = "tbl3",
@@ -990,7 +1035,12 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         ),
                         fragment = TRUE,
                         style = sty_term,
-                        caption = paste0("Cross Table for Dependent ", .getDisplayName(mygroup, original_names_mapping)),
+                        caption = paste0(
+                            "Cross Table for Dependent ",
+                            htmltools::htmlEscape(
+                                .getDisplayName(mygroup, original_names_mapping)
+                            )
+                        ),
                         id = "tbl3"
                     )
                     self$results$tablestyle4$setContent(tabletangram)
@@ -1019,87 +1069,25 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 self$results$analysisInfo$setContent(info_html)
                 self$results$analysisInfo$setVisible(TRUE)
 
-                # ========================================================================
-                # STUBBED FEATURES - NOT IMPLEMENTED
-                # The following features are commented out and NOT available to users.
-                # Do not uncomment without adding corresponding UI controls in .a.yaml
-                # and output definitions in .r.yaml.
-                # ========================================================================
-
-                # PAIRWISE COMPARISONS - NOT IMPLEMENTED
-                # No pairwise option exists in .a.yaml
-                # No pairwiseTable output exists in .r.yaml
-                # if (self$options$pairwise && !is.null(self$options$group) && !is.null(self$options$vars)) {
-                #     private$.performPairwiseComparisons()
-                # }
-
-                # ADVANCED POST-HOC ANALYSIS - NOT IMPLEMENTED
-                # No posthoc_method, effect_size_measures, residual_analysis, or
-                # correspondence_analysis options exist in .a.yaml
-                # if (self$options$posthoc_method != "none" || self$options$effect_size_measures ||
-                #     self$options$residual_analysis || self$options$correspondence_analysis) {
-                #     private$.performAdvancedPosthoc()
-                # }
-
-                # CLINICAL SUMMARY & COPY-READY SENTENCES - NOT IMPLEMENTED
-                # No clinicalSummary or reportSentences outputs exist in .r.yaml
-                # tryCatch({
-                #     clinical_summary <- private$.generateClinicalSummary(
-                #         results = list(data = mydata, vars = myvars, group = mygroup),
-                #         myvars = myvars,
-                #         mygroup = mygroup,
-                #         test_type = "crosstable"
-                #     )
-                #     
-                #     # Add clinical summary to results
-                #     if (!is.null(clinical_summary)) {
-                #         summary_html <- paste0(
-                #             "<div style='background-color: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #28a745;'>",
-                #             "<h4 style='margin-top: 0; color: #28a745;'>Clinical Summary</h4>",
-                #             clinical_summary,
-                #             "</div>"
-                #         )
-                #         self$results$clinicalSummary$setContent(summary_html)
-                #         
-                #         # Also populate the copy-ready sentences
-                #         copy_ready <- paste0(
-                #             "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                #             "<h4 style='margin-top: 0; color: #856404;'>Copy-Ready Clinical Interpretation</h4>",
-                #             "<p>", gsub("<[^>]*>", "", clinical_summary), "</p>",
-                #             "</div>"
-                #         )
-                #         self$results$reportSentences$setContent(copy_ready)
-                #     }
-                # }, error = function(e) {
-                #     # Handle clinical summary generation errors gracefully
-                #     detailed_error <- paste(.("Clinical summary generation failed:"), e$message)
-                #     warning(detailed_error)
-                #     
-                #     # Provide fallback guidance
-                #     fallback_msg <- paste0(
-                #         "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                #         "<h4 style='margin-top: 0; color: #856404;'>", .("Manual Interpretation Required"), "</h4>",
-                #         "<p>", .("Automatic clinical summary could not be generated. Please review results manually."), "</p>",
-                #         "</div>"
-                #     )
-                #     self$results$reportSentences$setContent(fallback_msg)
-                # })
-
                 # Standardized mean differences (balance diagnostic)
                 if (isTRUE(self$options$showSMD))
-                    private$.populateSMD()
+                    private$.populateSMD(
+                        data = mydata,
+                        vars = myvars,
+                        group = mygroup,
+                        name_mapping = original_names_mapping
+                    )
 
             },
 
             # ----------------------------------------------------------------
             # Standardized mean differences (balance diagnostic for two groups)
             # ----------------------------------------------------------------
-            .populateSMD = function() {
+            .populateSMD = function(data, vars, group, name_mapping = NULL) {
                 tab <- self$results$smdTable
-                if (is.null(self$options$vars) || is.null(self$options$group)) return()
+                if (length(vars) == 0 || length(group) == 0) return()
 
-                data <- self$data
-                g <- data[[self$options$group]]
+                g <- data[[group]]
                 if (!is.factor(g)) g <- as.factor(g)
                 g <- droplevels(g)
                 if (nlevels(g) != 2) {
@@ -1110,7 +1098,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 levs <- levels(g)
                 i1 <- g == levs[1]; i2 <- g == levs[2]
 
-                for (v in self$options$vars) {
+                for (v in vars) {
                     x <- data[[v]]
                     isNum <- is.numeric(x) || (is.integer(x) && !is.factor(x))
                     smd <- NA_real_; vtype <- "categorical"
@@ -1126,8 +1114,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                            else if (a < 0.1) "negligible (< 0.1)"
                            else if (a < 0.2) "small (0.1-0.2)"
                            else "notable (>= 0.2)"
+                    display_name <- .getDisplayName(v, name_mapping)
                     tab$addRow(rowKey = v, values = list(
-                        variable = v, vtype = vtype, smd = smd, absSMD = a, balance = bal))
+                        variable = display_name, vtype = vtype, smd = smd,
+                        absSMD = a, balance = bal))
                 }
                 tab$setNote("smd", sprintf(
                     "SMD between '%s' and '%s'. Continuous: (m1 - m2) / sqrt((s1^2 + s2^2)/2). Categorical: multinomial SMD (Yang & Dalton, 2012). |SMD| < 0.1 conventionally indicates negligible imbalance.",
@@ -1167,755 +1157,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 val <- as.numeric(t(Tm) %*% Sinv %*% Tm)
                 if (!is.finite(val) || val < 0) return(NA_real_)
                 sqrt(val)
-            },
-
-            # ========================================================================
-            # STUBBED HELPER METHODS - NOT IMPLEMENTED
-            # The following private methods are placeholders for future features.
-            # They are NOT wired to any UI controls or output items.
-            # ========================================================================
-
-            # PAIRWISE COMPARISONS HELPER - NOT IMPLEMENTED
-            # .performPairwiseComparisons ----
-            # .performPairwiseComparisons = function() {
-                # # Get the labeled data
-                # # labelData <- private$.labelData()
-                # mydata <- labelData$mydata
-                # myvars <- labelData$myvars
-                # mygroup <- labelData$mygroup
-                # 
-                # # Check if we have a valid group variable
-                # if (length(mygroup) == 0 || !(mygroup %in% names(mydata))) {
-                #     return()
-                # }
-                # 
-                # # Get the group variable data
-                # group_var <- mydata[[mygroup]]
-                # 
-                # # Check if group has more than 2 levels
-                # if (!is.factor(group_var)) {
-                #     group_var <- as.factor(group_var)
-                # }
-                # 
-                # group_levels <- levels(group_var)
-                # n_groups <- length(group_levels)
-                # 
-                # if (n_groups <= 2) {
-                #     note <- paste0(
-                #         "<div style='background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                #         "<strong>Note:</strong> Pairwise comparisons are only performed when the grouping variable has more than 2 levels. ",
-                #         "Your grouping variable has ", n_groups, " level(s).",
-                #         "</div>"
-                #     )
-                #     self$results$pairwiseNote$setContent(note)
-                #     return()
-                # }
-                # 
-                # # Perform pairwise comparisons for each variable
-                # results_list <- list()
-                # test_type <- self$options$pcat
-                # 
-                # for (var in myvars) {
-                #     if (!(var %in% names(mydata))) next
-                #     
-                #     var_data <- mydata[[var]]
-                #     
-                #     # Skip if not categorical
-                #     if (!is.factor(var_data) && !is.character(var_data)) next
-                #     
-                #     # Generate all pairwise combinations
-                #     pairs <- utils::combn(group_levels, 2)
-                #     
-                #     for (i in 1:ncol(pairs)) {
-                #         group1 <- pairs[1, i]
-                #         group2 <- pairs[2, i]
-                #         
-                #         # Subset data for this pair
-                #         subset_idx <- group_var %in% c(group1, group2)
-                #         subset_var <- var_data[subset_idx]
-                #         subset_group <- group_var[subset_idx]
-                #         
-                #         # Create contingency table
-                #         cont_table <- table(subset_var, subset_group)
-                #         
-                #         # Perform test
-                #         test_result <- NULL
-                #         # Use intelligent test selection with clinical rationale
-                #         test_selection <- private$.selectAppropriateTest(
-                #             cont_table,
-                #             test_preference = if (test_type == "fisher") "fisher" else "auto",
-                #             min_expected = 5
-                #         )
-                #         
-                #         test_name <- test_selection$test
-                #         test_rationale <- test_selection$reason
-                #         
-                #         # Perform the selected test
-                #         if (test_selection$test == "fisher") {
-                #             tryCatch({
-                #                 test_result <- fisher.test(cont_table)
-                #                 test_name <- .("Fisher's Exact")
-                #             }, error = function(e) {
-                #                 test_result <- NULL
-                #             })
-                #         } else {
-                #             tryCatch({
-                #                 test_result <- chisq.test(cont_table)
-                #                 test_name <- .("Chi-square")
-                #             }, error = function(e) {
-                #                 test_result <- NULL
-                #             })
-                #         }
-                #         
-                #         # Add warning if test selection was based on assumption violations
-                #         if (test_selection$warning) {
-                #             warning_msg <- paste(.("Test selection warning:"), test_rationale)
-                #             # Store warning for later display
-                #             if (is.null(self$results$assumptions$content)) {
-                #                 assumption_warnings <- warning_msg
-                #             } else {
-                #                 assumption_warnings <- paste(self$results$assumptions$content, "<br>", warning_msg)
-                #             }
-                #         }
-                #         
-                #         if (!is.null(test_result)) {
-                #             results_list <- append(results_list, list(list(
-                #                 variable = var,
-                #                 comparison = paste0(var, ": ", group1, " vs ", group2),
-                #                 group1 = group1,
-                #                 group2 = group2,
-                #                 test = test_name,
-                #                 statistic = if (test_name == "Chi-square") test_result$statistic else NA,
-                #                 df = if (test_name == "Chi-square") test_result$parameter else NA,
-                #                 p_value = test_result$p.value
-                #             )))
-                #         }
-                #     }
-                # }
-                # 
-                # # Apply p-value adjustment if requested
-                # if (length(results_list) > 0) {
-                #     p_values <- sapply(results_list, function(x) x$p_value)
-                #     
-                #     if (self$options$p_adjust != "none") {
-                #         adjusted_p <- stats::p.adjust(p_values, method = self$options$p_adjust)
-                #         for (i in seq_along(results_list)) {
-                #             results_list[[i]]$p_adjusted <- adjusted_p[i]
-                #         }
-                #     } else {
-                #         for (i in seq_along(results_list)) {
-                #             results_list[[i]]$p_adjusted <- NA
-                #         }
-                #     }
-                #     
-                #     # Populate the table
-                #     for (result in results_list) {
-                #         self$results$pairwiseTable$addRow(
-                #             rowKey = paste0(result$comparison, "_", result$test),
-                #             values = list(
-                #                 comparison = result$comparison,
-                #                 group1 = result$group1,
-                #                 group2 = result$group2,
-                #                 test = result$test,
-                #                 statistic = result$statistic,
-                #                 df = result$df,
-                #                 p_value = result$p_value,
-                #                 p_adjusted = result$p_adjusted
-                #             )
-                #         )
-                #     }
-                #     
-                #     # Add explanatory note
-                #     note <- paste0(
-                #         "<div style='background-color: #e8f4fd; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
-                #         "<strong>Pairwise Comparisons:</strong> All possible pairs of groups have been compared. ",
-                #         "Total comparisons: ", length(results_list), ". ",
-                #         if (self$options$p_adjust != "none") {
-                #             paste0("P-values have been adjusted using the ", self$options$p_adjust, " method to control for multiple testing.")
-                #         } else {
-                #             "P-values are not adjusted for multiple comparisons."
-                #         },
-                #         "</div>"
-                #     )
-                # #     self$results$pairwiseNote$setContent(note)
-                # # }
-            # },
-
-            # ADVANCED POST-HOC TESTING HELPER - NOT IMPLEMENTED
-            # No corresponding UI options in .a.yaml
-            # .performAdvancedPosthoc = function() {
-                # # Get the labeled data
-                # labelData <- private$.labelData()
-                # mydata <- labelData$mydata
-                # myvars <- labelData$myvars
-                # mygroup <- labelData$mygroup
-                # 
-                # # Perform analyses for each variable
-                # for (var in myvars) {
-                #     # Create contingency table
-                #     contingency_table <- table(mydata[[var]], mydata[[mygroup]])
-                #     
-                #     # Skip if table is empty or has single dimension
-                #     if (length(contingency_table) == 0 || length(dim(contingency_table)) < 2) {
-                #         next
-                #     }
-                #     
-                #     # Effect size measures
-                #     if (self$options$effect_size_measures) {
-                #         private$.calculateEffectSizes(var, contingency_table)
-                #     }
-                #     
-                #     # Residual analysis
-                #     if (self$options$residual_analysis) {
-                #         private$.performResidualAnalysis(var, contingency_table)
-                #     }
-                #     
-                #     # Advanced post-hoc statistical tests
-                #     if (self$options$posthoc_method != "none") {
-                #         private$.performPosthocTests(var, contingency_table)
-                #     }
-                #     
-                #     # Correspondence analysis
-                #     if (self$options$correspondence_analysis) {
-                #         private$.performCorrespondenceAnalysis(var, contingency_table)
-                #     }
-                # }
-                # 
-                # # TEMPORARILY DISABLED - plot options not available in .a.yaml
-                # # Generate visualizations
-                # # if (self$options$mosaic_plot) {
-                # #     private$.prepareMosaicPlot()
-                # # }
-
-                # # if (self$options$correspondence_analysis) {
-                # #     private$.prepareCorrespondencePlot()
-                # # }
-            # },
-
-            # EFFECT SIZES CALCULATION - NOT IMPLEMENTED
-            # No effectsizes output table in .r.yaml
-            # .calculateEffectSizes = function(var, contingency_table) {
-                # # Calculate various effect size measures
-                # n <- sum(contingency_table)
-                #
-                # # Cramer's V
-                # chi_square <- chisq.test(contingency_table)$statistic
-                # k <- min(nrow(contingency_table), ncol(contingency_table))
-                # cramers_v <- sqrt(chi_square / (n * (k - 1)))
-                # 
-                # # Phi coefficient (for 2x2 tables)
-                # phi <- sqrt(chi_square / n)
-                # 
-                # # Calculate confidence intervals (using bootstrap approximation)
-                # conf_level <- self$options$confidence_level
-                # 
-                # # Add Cramer's V
-                # self$results$effectsizes$addRow(
-                #     rowKey = paste0(var, "_cramers_v"),
-                #     values = list(
-                #         variable = var,
-                #         measure = .("Cramer's V"),
-                #         value = cramers_v,
-                #         ci_lower = max(0, cramers_v - 1.96 * sqrt(cramers_v / n)),
-                #         ci_upper = min(1, cramers_v + 1.96 * sqrt(cramers_v / n)),
-                #         interpretation = private$.interpretEffectSize(cramers_v, "cramers_v")
-                #     )
-                # )
-                # 
-                # # Add Phi coefficient for 2x2 tables
-                # if (nrow(contingency_table) == 2 && ncol(contingency_table) == 2) {
-                #     self$results$effectsizes$addRow(
-                #         rowKey = paste0(var, "_phi"),
-                #         values = list(
-                #             variable = var,
-                #             measure = .("Phi Coefficient"),
-                #             value = phi,
-                #             ci_lower = max(-1, phi - 1.96 * sqrt(phi / n)),
-                #             ci_upper = min(1, phi + 1.96 * sqrt(phi / n)),
-                #             interpretation = private$.interpretEffectSize(phi, "phi")
-                #         )
-                #     )
-                # # }
-            # },
-
-            # RESIDUAL ANALYSIS - NOT IMPLEMENTED
-            # No residuals output table in .r.yaml
-            # .performResidualAnalysis = function(var, contingency_table) {
-                # # Calculate standardized and adjusted residuals
-                # chi_test <- chisq.test(contingency_table)
-                # expected <- chi_test$expected
-                # observed <- contingency_table
-                # 
-                # # Standardized residuals
-                # std_residuals <- (observed - expected) / sqrt(expected)
-                # 
-                # # Adjusted residuals
-                # row_totals <- rowSums(observed)
-                # col_totals <- colSums(observed)
-                # n <- sum(observed)
-                # 
-                # adj_residuals <- matrix(0, nrow = nrow(observed), ncol = ncol(observed))
-                # 
-                # for (i in 1:nrow(observed)) {
-                #     for (j in 1:ncol(observed)) {
-                #         variance <- expected[i,j] * (1 - row_totals[i]/n) * (1 - col_totals[j]/n)
-                #         adj_residuals[i,j] <- (observed[i,j] - expected[i,j]) / sqrt(variance)
-                #         
-                #         # Calculate contribution to chi-square
-                #         contribution <- ((observed[i,j] - expected[i,j])^2 / expected[i,j]) / chi_test$statistic * 100
-                #         
-                #         self$results$residuals$addRow(
-                #             rowKey = paste0(var, "_", i, "_", j),
-                #             values = list(
-                #                 variable = var,
-                #                 group_level = colnames(contingency_table)[j],
-                #                 var_level = rownames(contingency_table)[i],
-                #                 observed = observed[i,j],
-                #                 expected = expected[i,j],
-                #                 std_residual = std_residuals[i,j],
-                #                 adj_residual = adj_residuals[i,j],
-                #                 contribution = contribution
-                #             )
-                #         )
-                #     }
-                # # }
-            # },
-
-            # POST-HOC STATISTICAL TESTS - NOT IMPLEMENTED
-            # No posthocstats output table in .r.yaml
-            # .performPosthocTests = function(var, contingency_table) {
-                # method <- self$options$posthoc_method
-                # 
-                # if (method == "standardized_residuals") {
-                #     # Test for significant standardized residuals
-                #     chi_test <- chisq.test(contingency_table)
-                #     
-                #     self$results$posthocstats$addRow(
-                #         rowKey = paste0(var, "_std_residuals"),
-                #         values = list(
-                #             variable = var,
-                #             method = .("Standardized Residuals"),
-                #             statistic = chi_test$statistic,
-                #             df = chi_test$parameter,
-                #             p_value = chi_test$p.value,
-                #             interpretation = ifelse(chi_test$p.value < 0.05,
-                #                 "Significant departure from independence",
-                #                 "No significant departure from independence")
-                #         )
-                #     )
-                #     
-                # } else if (method == "cramers_v") {
-                #     # Test significance of Cramer's V
-                #     chi_test <- chisq.test(contingency_table)
-                #     n <- sum(contingency_table)
-                #     k <- min(nrow(contingency_table), ncol(contingency_table))
-                #     cramers_v <- sqrt(chi_test$statistic / (n * (k - 1)))
-                #     
-                #     self$results$posthocstats$addRow(
-                #         rowKey = paste0(var, "_cramers_v_test"),
-                #         values = list(
-                #             variable = var,
-                #             method = .("Cramer's V Test"),
-                #             statistic = cramers_v,
-                #             df = chi_test$parameter,
-                #             p_value = chi_test$p.value,
-                #             interpretation = private$.interpretEffectSize(cramers_v, "cramers_v")
-                #         )
-                #     )
-                #     
-                # } else if (method == "freeman_halton") {
-                #     # Freeman-Halton extension of Fisher's exact test
-                #     if (self$options$exact_tests) {
-                #         tryCatch({
-                #             if (requireNamespace("RVAideMemoire", quietly = TRUE)) {
-                #                 fh_test <- RVAideMemoire::fisher.multcomp(contingency_table)
-                #                 
-                #                 self$results$posthocstats$addRow(
-                #                     rowKey = paste0(var, "_freeman_halton"),
-                #                     values = list(
-                #                         variable = var,
-                #                         method = .("Freeman-Halton Extension"),
-                #                         statistic = NA,
-                #                         df = NA,
-                #                         p_value = fh_test$p.value,
-                #                         interpretation = ifelse(fh_test$p.value < 0.05,
-                #                             "Significant association (exact test)",
-                #                             "No significant association (exact test)")
-                #                     )
-                #                 )
-                #             }
-                #         }, error = function(e) {
-                #             # Fallback to regular Fisher's test
-                #             fisher_test <- fisher.test(contingency_table, simulate.p.value = TRUE)
-                #             self$results$posthocstats$addRow(
-                #                 rowKey = paste0(var, "_fisher_simulated"),
-                #                 values = list(
-                #                     variable = var,
-                #                     method = .("Fisher's Exact (Simulated)"),
-                #                     statistic = NA,
-                #                     df = NA,
-                #                     p_value = fisher_test$p.value,
-                #                     interpretation = ifelse(fisher_test$p.value < 0.05,
-                #                         "Significant association (simulated)",
-                #                         "No significant association (simulated)")
-                #                 )
-                #             )
-                #         })
-                #     }
-                # # }
-            # },
-
-            # CORRESPONDENCE ANALYSIS - NOT IMPLEMENTED
-            # No correspondenceanalysis output table in .r.yaml
-            # .performCorrespondenceAnalysis = function(var, contingency_table) {
-                # tryCatch({
-                #     if (requireNamespace("ca", quietly = TRUE)) {
-                #         ca_result <- ca::ca(contingency_table)
-                #         
-                #         # Extract eigenvalues and variance explained
-                #         eigenvalues <- ca_result$sv^2
-                #         total_inertia <- sum(eigenvalues)
-                #         variance_explained <- eigenvalues / total_inertia * 100
-                #         cumulative_variance <- cumsum(variance_explained)
-                #         
-                #         # Add results to table
-                #         for (i in 1:min(length(eigenvalues), 3)) {  # Show first 3 dimensions
-                #             self$results$correspondenceanalysis$addRow(
-                #                 rowKey = paste0(var, "_dim", i),
-                #                 values = list(
-                #                     dimension = paste(.("Dimension"), i),
-                #                     eigenvalue = eigenvalues[i],
-                #                     variance_explained = variance_explained[i],
-                #                     cumulative_variance = cumulative_variance[i],
-                #                     inertia = eigenvalues[i] / total_inertia
-                #                 )
-                #             )
-                #         }
-                #     }
-                # }, error = function(e) {
-                #     # Handle CA errors gracefully
-                # # })
-            # },
-
-            # MOSAIC PLOT - NOT IMPLEMENTED
-            # No mosaicplot output in .r.yaml
-            # .prepareMosaicPlot = function() {
-                # # Prepare data for mosaic plot
-                # labelData <- private$.labelData()
-                # plot_data <- list(
-                #     data = labelData$mydata,
-                #     vars = labelData$myvars,
-                #     group = labelData$mygroup
-                # )
-                # 
-                # # self$results$mosaicplot$setState(plot_data)
-            # },
-
-            # CORRESPONDENCE PLOT - NOT IMPLEMENTED
-            # No correspondenceplot output in .r.yaml
-            # .prepareCorrespondencePlot = function() {
-                # # Prepare data for correspondence analysis plot
-                # labelData <- private$.labelData()
-                # plot_data <- list(
-                #     data = labelData$mydata,
-                #     vars = labelData$myvars,
-                #     group = labelData$mygroup
-                # )
-                # 
-                # # self$results$correspondenceplot$setState(plot_data)
-            # },
-
-            # EFFECT SIZE INTERPRETATION - NOT IMPLEMENTED
-            # Helper for effect size calculations (also not implemented)
-            # .interpretEffectSize = function(value, type) {
-                # if (type == "cramers_v") {
-                #     if (value < 0.1) return("Negligible")
-                #     else if (value < 0.3) return("Small")
-                #     else if (value < 0.5) return("Medium")
-                #     else return("Large")
-                # } else if (type == "phi") {
-                #     if (abs(value) < 0.1) return("Negligible")
-                #     else if (abs(value) < 0.3) return("Small")
-                #     else if (abs(value) < 0.5) return("Medium")
-                #     else return("Large")
-                # }
-                # # return("Unknown")
-            # },
-
-            # MOSAIC PLOT RENDERER - NOT IMPLEMENTED
-            # No mosaicplot output in .r.yaml, no mosaic_plot option in .a.yaml
-            # .mosaicplot = function(image, ggtheme, theme, ...) {
-                # if (is.null(image$state)) return(FALSE)
-                # 
-                # plot_data <- image$state$data
-                # vars <- image$state$vars
-                # group <- image$state$group
-                # 
-                # tryCatch({
-                #     if (requireNamespace("vcd", quietly = TRUE) && length(vars) >= 1) {
-                #         # Create mosaic plot using vcd package
-                #         var <- vars[1]  # Use first variable
-                #         
-                #         # Create contingency table
-                #         tbl <- table(plot_data[[var]], plot_data[[group]])
-                #         
-                #         # Generate mosaic plot
-                #         vcd::mosaic(tbl, 
-                #                main = paste(.("Mosaic Plot:"), var, .("by"), group),
-                #                shade = TRUE,
-                #                legend = TRUE)
-                #         return(TRUE)
-                #     }
-                # }, error = function(e) {
-                #     # Fallback: create a simple bar plot
-                #     if (length(vars) >= 1) {
-                #         var <- vars[1]
-                #         tbl <- table(plot_data[[var]], plot_data[[group]])
-                #         barplot(tbl, 
-                #                main = paste(.("Association:"), var, .("by"), group),
-                #                beside = TRUE,
-                #                legend = TRUE,
-                #                col = rainbow(nrow(tbl)))
-                #         return(TRUE)
-                #     }
-                # })
-                # 
-                # # return(FALSE)
-            # },
-
-            # CORRESPONDENCE PLOT RENDERER - NOT IMPLEMENTED
-            # No correspondenceplot output in .r.yaml, no correspondence_analysis option in .a.yaml
-            # .correspondenceplot = function(image, ggtheme, theme, ...) {
-                # if (is.null(image$state)) return(FALSE)
-                #
-                # plot_data <- image$state$data
-                # vars <- image$state$vars
-                # group <- image$state$group
-                #
-                # tryCatch({
-                #     if (requireNamespace("ca", quietly = TRUE) && length(vars) >= 1) {
-                #         var <- vars[1]  # Use first variable
-                #
-                #         # Create contingency table
-                #         tbl <- table(plot_data[[var]], plot_data[[group]])
-                #
-                #         # Perform correspondence analysis
-                #         ca_result <- ca::ca(tbl)
-                #
-                #         # Create biplot
-                #         plot(ca_result,
-                #              main = paste(.("Correspondence Analysis:"), var, .("by"), group))
-                #         return(TRUE)
-                #     }
-                # }, error = function(e) {
-                #     # Handle errors gracefully
-                # })
-                #
-                # # return(FALSE)
-            # },
-
-            # ===== Mantel-Haenszel Test (Private Helper Functions) =====
-            # Added for Kemp 2015 study requirements - non-breaking enhancement
-
-            # Private helper: Perform Mantel-Haenszel chi-square test
-            .performMantelHaenszel = function(row_var, col_var, strata_var, data) {
-                tryCatch({
-                    # Create 3-way contingency table
-                    tbl_3way <- table(data[[row_var]], data[[col_var]], data[[strata_var]])
-
-                    # Check if we have at least 2 strata with data
-                    n_strata <- dim(tbl_3way)[3]
-                    if (n_strata < 2) {
-                        return(list(
-                            success = FALSE,
-                            error = sprintf("Mantel-Haenszel requires at least 2 strata. Found: %d", n_strata)
-                        ))
-                    }
-
-                    # Check for 2x2 tables in each stratum
-                    if (dim(tbl_3way)[1] != 2 || dim(tbl_3way)[2] != 2) {
-                        return(list(
-                            success = FALSE,
-                            error = "Mantel-Haenszel requires 2x2 tables. Use binary variables or recode."
-                        ))
-                    }
-
-                    # Apply Haldane-Anscombe correction if any zero cell to stabilize OR/CI
-                    if (any(tbl_3way == 0)) {
-                        tbl_3way <- tbl_3way + 0.5
-                    }
-
-                    # Perform Mantel-Haenszel test (base R function)
-                    mh_result <- stats::mantelhaen.test(
-                        x = tbl_3way,
-                        correct = TRUE  # Continuity correction
-                    )
-
-                    return(list(
-                        success = TRUE,
-                        statistic = mh_result$statistic,
-                        df = mh_result$parameter,
-                        p_value = mh_result$p.value,
-                        common_or = mh_result$estimate,
-                        conf_int = mh_result$conf.int,
-                        n_strata = n_strata,
-                        method = mh_result$method
-                    ))
-                }, error = function(e) {
-                    return(list(
-                        success = FALSE,
-                        error = paste("Mantel-Haenszel test failed:", e$message)
-                    ))
-                })
-            },
-
-            # Private helper: Breslow-Day test for homogeneity of odds ratios
-            .performBreslowDay = function(row_var, col_var, strata_var, data) {
-                tryCatch({
-                    # Create 3-way contingency table
-                    tbl_3way <- table(data[[row_var]], data[[col_var]], data[[strata_var]])
-
-                    # Calculate OR for each stratum
-                    n_strata <- dim(tbl_3way)[3]
-                    strata_names <- dimnames(tbl_3way)[[3]]
-                    or_vec <- numeric(n_strata)
-
-                    for (k in 1:n_strata) {
-                        tbl_2x2 <- tbl_3way[,,k]
-                        # Calculate odds ratio: (a*d) / (b*c)
-                        a <- tbl_2x2[1,1]
-                        b <- tbl_2x2[1,2]
-                        c <- tbl_2x2[2,1]
-                        d <- tbl_2x2[2,2]
-
-                        # Avoid division by zero
-                        if (b == 0 || c == 0) {
-                            or_vec[k] <- NA
-                        } else {
-                            or_vec[k] <- (a * d) / (b * c)
-                        }
-                    }
-
-                    # Prefer robust implementation if available
-                    if (requireNamespace("DescTools", quietly = TRUE)) {
-                        bd <- DescTools::BreslowDayTest(tbl_3way, correct = TRUE)
-                        bd_chisq <- as.numeric(bd$statistic)
-                        bd_df <- as.numeric(bd$parameter)
-                        bd_p <- as.numeric(bd$p.value)
-                    } else {
-                        # Fallback: signal limitation
-                        return(list(
-                            success = FALSE,
-                            error = "Breslow-Day test requires DescTools::BreslowDayTest; install DescTools for this feature."
-                        ))
-                    }
-
-                    return(list(
-                        success = TRUE,
-                        statistic = bd_chisq,
-                        df = bd_df,
-                        p_value = bd_p,
-                        strata_or = or_vec,
-                        strata_names = strata_names,
-                        common_or = NA
-                    ))
-                }, error = function(e) {
-                    return(list(
-                        success = FALSE,
-                        error = paste("Breslow-Day test failed:", e$message)
-                    ))
-                })
-            },
-
-            # Private helper: Format M-H results for display
-            .formatMantelHaenszelResults = function(mh_result, bd_result = NULL) {
-                if (!mh_result$success) {
-                    return(paste0(
-                        "<div style='background-color: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ffc107;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>Mantel-Haenszel Test Error</h4>",
-                        "<p>", mh_result$error, "</p>",
-                        "</div>"
-                    ))
-                }
-
-                html <- paste0(
-                    "<div style='background-color: #e8f4fd; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #2196F3;'>",
-                    "<h4 style='margin-top: 0; color: #1976D2;'>Mantel-Haenszel Chi-Square Test</h4>",
-                    "<p><strong>Purpose:</strong> Tests association between row and column variables while controlling for stratification variable.</p>",
-
-                    "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
-                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Chi-square statistic:</strong></td>",
-                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.3f", mh_result$statistic), "</td></tr>",
-                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Degrees of freedom:</strong></td>",
-                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", mh_result$df, "</td></tr>",
-                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>P-value:</strong></td>",
-                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.4f", mh_result$p_value), "</td></tr>",
-                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Common odds ratio:</strong></td>",
-                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.3f", mh_result$common_or), "</td></tr>",
-                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>95% CI for OR:</strong></td>",
-                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>",
-                    sprintf("(%.3f, %.3f)", mh_result$conf_int[1], mh_result$conf_int[2]), "</td></tr>",
-                    "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Number of strata:</strong></td>",
-                    "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", mh_result$n_strata, "</td></tr>",
-                    "</table>",
-
-                    "<p><strong>Interpretation:</strong></p>",
-                    "<ul>",
-                    "<li><strong>Common OR = 1:</strong> No association between variables (after controlling for strata)</li>",
-                    "<li><strong>Common OR > 1:</strong> Positive association (exposure increases odds of outcome)</li>",
-                    "<li><strong>Common OR < 1:</strong> Negative association (exposure decreases odds of outcome)</li>",
-                    "</ul>"
-                )
-
-                # Add Breslow-Day results if available
-                if (!is.null(bd_result) && bd_result$success) {
-                    html <- paste0(html,
-                        "<h4 style='margin-top: 15px; color: #1976D2;'>Breslow-Day Test for Homogeneity</h4>",
-                        "<p><strong>Purpose:</strong> Tests whether odds ratios are homogeneous (constant) across strata.</p>",
-
-                        "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
-                        "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Chi-square statistic:</strong></td>",
-                        "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.3f", bd_result$statistic), "</td></tr>",
-                        "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>Degrees of freedom:</strong></td>",
-                        "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", bd_result$df, "</td></tr>",
-                        "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'><strong>P-value:</strong></td>",
-                        "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", sprintf("%.4f", bd_result$p_value), "</td></tr>",
-                        "</table>",
-
-                        "<p><strong>Interpretation:</strong></p>",
-                        "<ul>",
-                        "<li><strong>p > 0.05:</strong> Odds ratios are homogeneous across strata (common OR valid)</li>",
-                        "<li><strong>p \u{2264} 0.05:</strong> Odds ratios vary across strata (use stratified analysis instead)</li>",
-                        "</ul>",
-
-                        "<p><strong>Stratum-specific odds ratios:</strong></p>",
-                        "<table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>",
-                        "<tr style='background-color: #f0f0f0;'>",
-                        "<th style='padding: 5px; border-bottom: 1px solid #ccc; text-align: left;'>Stratum</th>",
-                        "<th style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>Odds Ratio</th>",
-                        "</tr>"
-                    )
-
-                    for (i in seq_along(bd_result$strata_or)) {
-                        or_val <- if (is.na(bd_result$strata_or[i])) "NA (zero cells)" else sprintf("%.3f", bd_result$strata_or[i])
-                        html <- paste0(html,
-                            "<tr><td style='padding: 5px; border-bottom: 1px solid #ccc;'>", bd_result$strata_names[i], "</td>",
-                            "<td style='padding: 5px; border-bottom: 1px solid #ccc; text-align: right;'>", or_val, "</td></tr>"
-                        )
-                    }
-
-                    html <- paste0(html, "</table>")
-                }
-
-                html <- paste0(html, "</div>")
-
-                return(html)
-            },
-
-            # Dummy placeholder for last item in private list
-            .dummy = function() {
-                # This is a placeholder to maintain proper R6 syntax
-                return(invisible(NULL))
             }
         ), # End of private list
         public = list(

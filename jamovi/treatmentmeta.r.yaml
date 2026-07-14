@@ -430,6 +430,7 @@ items:
     - name: forest_plot
       title: Forest Plot
       type: Image
+      renderFun: .forest_plot
       width: 900
       height: 600
       description: Forest plot showing individual and pooled effect sizes
@@ -443,6 +444,7 @@ items:
     - name: funnel_plot
       title: Funnel Plot
       type: Image
+      renderFun: .funnel_plot
       width: 600
       height: 600
       description: Funnel plot for assessing publication bias
@@ -455,6 +457,7 @@ items:
     - name: baujat_plot
       title: Baujat Plot
       type: Image
+      renderFun: .baujat_plot
       width: 600
       height: 600
       description: Contribution to heterogeneity vs influence on pooled estimate
@@ -467,6 +470,7 @@ items:
     - name: radial_plot
       title: Radial Plot
       type: Image
+      renderFun: .radial_plot
       width: 600
       height: 600
       description: Galbraith radial plot for heterogeneity assessment
@@ -508,6 +512,7 @@ items:
     - name: cumulative_plot
       title: Cumulative Meta-Analysis
       type: Image
+      renderFun: .cumulative_plot
       width: 800
       height: 600
       description: Cumulative meta-analysis plot over time
@@ -520,6 +525,7 @@ items:
     - name: pcurve_plot
       title: P-Curve Plot
       type: Image
+      renderFun: .pcurve_plot
       width: 600
       height: 450
       description: Distribution of significant p-values

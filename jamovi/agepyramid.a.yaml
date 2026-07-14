@@ -42,7 +42,7 @@ options:
             categorical values used for the report
             
     - name: female
-      title: Select Female
+      title: Female level
       type: Level
       variable: (gender)
       description:
@@ -54,7 +54,7 @@ options:
             level female
 
     - name: male
-      title: Select Male
+      title: Male level
       type: Level
       variable: (gender)
       description:
@@ -66,7 +66,7 @@ options:
             level male
 
     - name: age_groups
-      title: Age Group Presets
+      title: Age group preset
       type: List
       options:
         - name: custom
@@ -78,7 +78,7 @@ options:
         - name: geriatric
           title: Geriatric (65+)
         - name: lifecourse
-          title: Life Course
+          title: Life course
       default: custom
       description:
           R: >
@@ -87,7 +87,7 @@ options:
             Predefined age group categories.
 
     - name: bin_width
-      title: Bin Width (Years)
+      title: Bin width (years)
       type: Number
       default: 5
       description:
@@ -97,7 +97,7 @@ options:
             The width of the age bins in years.
 
     - name: custom_breaks
-      title: Custom Age Breaks
+      title: Custom age breaks
       type: String
       default: ""
       description:
@@ -108,7 +108,7 @@ options:
             Comma-separated age break points (e.g., 0,18,25,50,65,100).
 
     - name: plot_title
-      title: Plot Title
+      title: Plot title
       type: String
       default: "Age Pyramid"
       description:
@@ -118,17 +118,17 @@ options:
             The title displayed on the age pyramid plot.
 
     - name: color_palette
-      title: Color Palette
+      title: Color palette
       type: List
       options:
         - name: standard
-          title: Standard (Pink/Blue)
+          title: Standard (pink/blue)
         - name: colorblind
-          title: Colorblind-Friendly
+          title: Colorblind-friendly
         - name: grayscale
           title: Grayscale
         - name: custom
-          title: Custom Colors
+          title: Custom colors
       default: standard
       description:
           R: >
@@ -137,7 +137,7 @@ options:
             Color palette for gender visualization.
 
     - name: female_color
-      title: Female Color
+      title: Female color
       type: String
       default: "#E91E63"
       description:
@@ -147,7 +147,7 @@ options:
             Custom color for female bars (hex code).
 
     - name: male_color
-      title: Male Color
+      title: Male color
       type: String
       default: "#2196F3"
       description:
@@ -157,7 +157,7 @@ options:
             Custom color for male bars (hex code).
 
     - name: originaltheme
-      title: Use original custom theme
+      title: Original custom theme
       type: Bool
       default: false
       description:
@@ -170,7 +170,7 @@ options:
     # ---- GGCharts Pyramid Options ----
 
     - name: enableGGCharts
-      title: GGCharts pyramid
+      title: ggcharts pyramid
       type: Bool
       default: false
       description:
@@ -181,11 +181,11 @@ options:
             Show ggcharts pyramid as a second plot option.
 
     - name: ggcharts_sort
-      title: Sort Bars
+      title: Bar order
       type: List
       options:
         - name: no
-          title: No Sorting
+          title: No sorting
         - name: ascending
           title: Ascending
         - name: descending
@@ -199,19 +199,19 @@ options:
             Sort bars by population count.
 
     - name: ggcharts_colors
-      title: Bar Colors
+      title: Bar colors
       type: List
       options:
         - name: default
-          title: Default (Blue/Orange)
+          title: Default (blue/orange)
         - name: standard
-          title: Standard (Pink/Blue)
+          title: Standard (pink/blue)
         - name: colorblind
-          title: Colorblind-Friendly
+          title: Colorblind-friendly
         - name: grayscale
           title: Grayscale
         - name: custom
-          title: Custom Colors
+          title: Custom colors
       default: default
       description:
           R: >
@@ -221,7 +221,7 @@ options:
             Color scheme for the ggcharts pyramid.
 
     - name: ggcharts_color1
-      title: First Group Color
+      title: First group color
       type: String
       default: "#1F77B4"
       description:
@@ -231,7 +231,7 @@ options:
             Custom color for first group (hex code).
 
     - name: ggcharts_color2
-      title: Second Group Color
+      title: Second group color
       type: String
       default: "#FF7F0E"
       description:
@@ -241,7 +241,7 @@ options:
             Custom color for second group (hex code).
 
     - name: ggcharts_title
-      title: GGCharts Plot Title
+      title: ggcharts plot title
       type: String
       default: "Age Pyramid (ggcharts)"
       description:
@@ -251,7 +251,7 @@ options:
             Title for the ggcharts pyramid plot.
 
     - name: ggcharts_xlab
-      title: X-Axis Label
+      title: X-axis label
       type: String
       default: "Population"
       description:

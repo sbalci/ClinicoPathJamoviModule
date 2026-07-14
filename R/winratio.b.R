@@ -206,7 +206,10 @@ winratioClass <- R6::R6Class(
             } else {
                 p_w <- W / Ttot; p_l <- L / Ttot
                 mw1 <- win_i[i1] / n0; ml1 <- loss_i[i1] / n0
-                mw0 <- win_i[i0] / n1; ml0 <- loss_i[i0] / n1
+                # Reference-side projections of the two-sample U-statistic: a reference
+                # subject's contribution to p_w is how often it is BEATEN by the index
+                # group (loss_i), and to p_l how often it WINS against it (win_i).
+                mw0 <- loss_i[i0] / n1; ml0 <- win_i[i0] / n1
                 var_pw   <- stats::var(mw1) / n1 + stats::var(mw0) / n0
                 var_pl   <- stats::var(ml1) / n1 + stats::var(ml0) / n0
                 cov_pwpl <- stats::cov(mw1, ml1) / n1 + stats::cov(mw0, ml0) / n0

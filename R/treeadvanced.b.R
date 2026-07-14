@@ -1036,11 +1036,10 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
 
                 n_nodes <- nrow(private$.model$frame)
                 n_leaves <- sum(private$.model$frame$var == "<leaf>")
-                # TODO (cleanup): rpart:::tree.depth is an UNEXPORTED internal - `:::` is fragile
-                #   across rpart versions and trips R CMD check. Compute depth from the public node
-                #   structure instead: max(floor(log2(as.numeric(rownames(private$.model$frame)))))
-                #   (rpart node ids encode depth as floor(log2(id))).
-                tree_depth <- max(rpart:::tree.depth(as.numeric(rownames(private$.model$frame))))
+                # Tree depth from the public node structure: rpart node ids encode depth as
+                # floor(log2(id)) (root = node 1 -> depth 0). Avoids the unexported
+                # rpart:::tree.depth (`:::` is version-fragile and trips R CMD check).
+                tree_depth <- max(floor(log2(as.numeric(rownames(private$.model$frame)))))
 
                 # Advanced features information
                 advanced_info <- ""
@@ -1214,8 +1213,8 @@ treeadvancedClass <- if (requireNamespace("jmvcore")) {
                         values = list(
                             metric = metrics$metric[i],
                             value = metrics$value[i],
-                            cilower = metrics$ci_lower[i],
-                            ciupper = metrics$ci_upper[i]
+                            ci_lower = metrics$ci_lower[i],
+                            ci_upper = metrics$ci_upper[i]
                         )
                     )
                 }

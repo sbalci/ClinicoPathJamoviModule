@@ -51,7 +51,7 @@ options:
             Categorical variables for tree construction.
 
     - name: percvar
-      title: Variable for Percentage
+      title: Variable for percentage
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
@@ -68,7 +68,7 @@ options:
             Specific level for percentage calculations.
 
     - name: summaryvar
-      title: Continuous Variable for Summaries
+      title: Continuous variable for summaries
       type: Variable
       suggested: [ continuous ]
       permitted: [ numeric ]
@@ -77,12 +77,12 @@ options:
             Continuous variable for statistical summaries (mean, SD) in tree nodes.
 
     - name: summarylocation
-      title: 'Summary Location'  
+      title: 'Summary location'
       type: List
       options:
-        - title: 'All Nodes'
+        - title: 'All nodes'
           name: allnodes
-        - title: 'Leaf Nodes Only'
+        - title: 'Leaf nodes only'
           name: leafonly
       default: leafonly
       description:
@@ -90,7 +90,7 @@ options:
             Where to display statistical summaries in the tree.
 
     - name: style
-      title: Visual Style
+      title: Visual style
       type: List
       options:
         - name: default
@@ -106,7 +106,7 @@ options:
             minimal (simplified layout).
 
     - name: prunebelow
-      title: Prune Below
+      title: Prune below
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
@@ -133,7 +133,7 @@ options:
             Second level for pruning condition.
 
     - name: follow
-      title: Follow Below
+      title: Follow below
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
@@ -160,7 +160,7 @@ options:
             Second level for follow condition.
 
     - name: excl
-      title: Exclude missing (NA)
+      title: Missing-value exclusion (NA)
       type: Bool
       default: false
       description:
@@ -184,7 +184,7 @@ options:
             Display tree in horizontal orientation.
 
     - name: sline
-      title: Sameline
+      title: Same-line labels
       type: Bool
       default: true
       description:
@@ -224,7 +224,7 @@ options:
             Display counts in tree nodes.
 
     - name: legend
-      title: Legends
+      title: Legend
       type: Bool
       default: false
       description:
@@ -256,7 +256,7 @@ options:
             Display pattern table alongside tree.
 
     - name: mytitle
-      title: Root Title
+      title: Root title
       type: String
       default: ''
       description:
@@ -264,7 +264,7 @@ options:
             Custom title for the tree root.
 
     - name: useprunesmaller
-      title: Prune small nodes
+      title: Small-node pruning
       type: Bool
       default: false
       description:
@@ -288,7 +288,7 @@ options:
             Generate and display automatic interpretation of tree results.
 
     - name: maxwidth
-      title: Maximum Width
+      title: Maximum width
       type: Integer
       default: 600
       description:

@@ -36,7 +36,7 @@ options:
             entire dataset will be analyzed.
 
     - name: check_duplicates
-      title: "Check for duplicates"
+      title: "Duplicate values"
       type: Bool
       default: false
       description:
@@ -53,7 +53,7 @@ options:
           If TRUE, provides detailed missing value statistics and patterns.
 
     - name: complete_cases_only
-      title: "Check for duplicate rows"
+      title: "Duplicate rows"
       type: Bool
       default: false
       description:
@@ -95,7 +95,7 @@ options:
     #       Show value expectations analysis visualization.
 
     - name: missing_threshold_visual
-      title: "Missing Data Highlight Threshold ( percent)"
+      title: "Missing-data highlight threshold (percent)"
       type: Number
       min: 0
       max: 100

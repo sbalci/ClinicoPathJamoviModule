@@ -247,11 +247,13 @@ mediansurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="survivalPlot",
                 title="Survival Curves with Median Indicators",
+                renderFun=".plotSurvival",
                 visible="(show_survival_plot)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="medianComparisonPlot",
                 title="Median Survival Comparison",
+                renderFun=".plotMedianComparison",
                 visible=TRUE))
             self$add(jmvcore::Html$new(
                 options=options,

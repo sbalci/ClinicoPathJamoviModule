@@ -18,7 +18,7 @@ options:
             The data as a data frame.
 
     - name: var1
-      title: 'Variable 1 (Required)'
+      title: 'Variable 1 (required)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
@@ -29,7 +29,7 @@ options:
             A string naming the primary variable from `data`.
 
     - name: var1true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var1)
       description:
@@ -39,7 +39,7 @@ options:
             The level in `var1` that represents the true condition.
 
     - name: var2
-      title: 'Variable 2 (Required)'
+      title: 'Variable 2 (required)'
       type: Variable
       suggested: [ ordinal, nominal ]
       permitted: [ factor ]
@@ -50,7 +50,7 @@ options:
             A string naming the secondary variable from `data`.
 
     - name: var2true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var2)
       description:
@@ -60,7 +60,7 @@ options:
             The level in `var2` that represents the true condition.
 
     - name: var3
-      title: 'Variable 3 (Optional)'
+      title: 'Variable 3 (optional)'
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -72,7 +72,7 @@ options:
             An optional variable from `data`.
 
     - name: var3true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var3)
       description:
@@ -82,7 +82,7 @@ options:
             The level in `var3` that represents the true condition.
 
     - name: var4
-      title: 'Variable 4 (Optional)'
+      title: 'Variable 4 (optional)'
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -94,7 +94,7 @@ options:
             An optional variable from `data`.
 
     - name: var4true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var4)
       description:
@@ -105,7 +105,7 @@ options:
 
 
     - name: var5
-      title: 'Variable 5 (Optional)'
+      title: 'Variable 5 (optional)'
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -117,7 +117,7 @@ options:
             Fifth variable for 5+ set analysis.
 
     - name: var5true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var5)
       description:
@@ -127,7 +127,7 @@ options:
             The level in `var5` that represents the true condition.
 
     - name: var6
-      title: 'Variable 6 (Optional)'
+      title: 'Variable 6 (optional)'
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -139,7 +139,7 @@ options:
             Sixth variable for 6+ set analysis.
 
     - name: var6true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var6)
       description:
@@ -149,7 +149,7 @@ options:
             The level in `var6` that represents the true condition.
 
     - name: var7
-      title: 'Variable 7 (Optional)'
+      title: 'Variable 7 (optional)'
       type: Variable
       default: NULL
       suggested: [ ordinal, nominal ]
@@ -161,7 +161,7 @@ options:
             Seventh variable for 7+ set analysis.
 
     - name: var7true
-      title: 'Select True Level'
+      title: 'True level'
       type: Level
       variable: (var7)
       description:
@@ -171,12 +171,12 @@ options:
             The level in `var7` that represents the true condition.
 
     - name: show_upsetR
-      title: "upsetR plot"
+      title: "UpSetR plot"
       type: Bool
       default: false
 
     - name: show_complexUpset
-      title: "complexUpset plot"
+      title: "ComplexUpset plot"
       type: Bool
       default: false
 
@@ -193,7 +193,7 @@ options:
 
 
     - name: sortBy
-      title: 'Sort Intersections By'
+      title: 'Sort intersections by'
       type: List
       options:
         - name: freq
@@ -210,7 +210,7 @@ options:
             Choose how to sort the intersections.
 
     - name: minSize
-      title: 'Minimum Intersection Size'
+      title: 'Minimum intersection size'
       type: Integer
       min: 0
       default: 0
@@ -241,7 +241,7 @@ options:
             Add detailed explanatory footnotes with interpretation guidance.
 
     - name: aboutAnalysis
-      title: "About analysis"
+      title: "About this analysis"
       type: Bool
       default: false
       description:
@@ -283,7 +283,7 @@ options:
 
 
     - name: shapeType
-      title: 'Venn Diagram Shape'
+      title: 'Venn diagram shape'
       type: List
       options:
         - name: auto
@@ -304,7 +304,7 @@ options:
             Choose the shape type for the Venn diagram.
 
     - name: regionLabels
-      title: 'Region Labels'
+      title: 'Region labels'
       type: List
       options:
         - name: count
@@ -312,7 +312,7 @@ options:
         - name: percent
           title: 'Percent'
         - name: both
-          title: 'Both Count and Percent'
+          title: 'Both count and percent'
         - name: none
           title: 'None'
       default: count
@@ -321,7 +321,7 @@ options:
             What to display in Venn diagram regions (available for advanced diagrams).
 
     - name: labelGeometry
-      title: 'Label Style'
+      title: 'Label style'
       type: List
       options:
         - name: label
@@ -336,7 +336,7 @@ options:
             Choose label style for region text.
 
     - name: labelPrecisionDigits
-      title: 'Percentage Decimal Places'
+      title: 'Percentage decimal places'
       type: Integer
       min: 0
       max: 3
@@ -348,7 +348,7 @@ options:
             Decimal precision for percentages.
 
     - name: setNameSize
-      title: 'Set Name Size'
+      title: 'Set name size'
       type: Number
       min: 1
       max: 20
@@ -360,7 +360,7 @@ options:
             Size of set name labels.
 
     - name: labelSize
-      title: 'Region Label Size'
+      title: 'Region label size'
       type: Number
       min: 1
       max: 20
@@ -372,7 +372,7 @@ options:
             Size of region labels.
 
     - name: edgeSize
-      title: 'Edge Line Width'
+      title: 'Edge line width'
       type: Number
       min: 0.1
       max: 5
@@ -384,7 +384,7 @@ options:
             Width of boundary lines.
 
     - name: edgeColor
-      title: 'Edge Color'
+      title: 'Edge color'
       type: String
       default: 'black'
       description:
@@ -394,7 +394,7 @@ options:
             Color of boundary lines.
 
     - name: edgeLineType
-      title: 'Edge Line Type'
+      title: 'Edge line type'
       type: List
       options:
         - name: solid
@@ -404,11 +404,11 @@ options:
         - name: dotted
           title: 'Dotted'
         - name: dotdash
-          title: 'Dot-Dash'
+          title: 'Dot-dash'
         - name: longdash
-          title: 'Long Dash'
+          title: 'Long dash'
         - name: twodash
-          title: 'Two Dash'
+          title: 'Two dash'
       default: solid
       description:
           R: >
@@ -417,7 +417,7 @@ options:
             Choose the line style for set boundaries.
 
     - name: edgeAlpha
-      title: 'Edge Transparency'
+      title: 'Edge transparency'
       type: Number
       min: 0
       max: 1
@@ -429,7 +429,7 @@ options:
             Set transparency of boundary lines.
 
     - name: fillAlpha
-      title: 'Fill Transparency'
+      title: 'Fill transparency'
       type: Number
       min: 0
       max: 1
@@ -451,7 +451,7 @@ options:
             Show or hide set name labels.
 
     - name: setLabelColor
-      title: 'Set Label Color'
+      title: 'Set label color'
       type: String
       default: 'black'
       description:
@@ -471,7 +471,7 @@ options:
             Use color gradient based on intersection sizes.
 
     - name: colorPalette
-      title: 'Color Palette'
+      title: 'Color palette'
       type: List
       options:
         - name: default
@@ -516,7 +516,7 @@ options:
             Show detailed set calculations and membership tables.
 
     - name: calculateOverlap
-      title: "Calculate overlaps"
+      title: "Overlap calculations"
       type: Bool
       default: false
       description:
@@ -526,7 +526,7 @@ options:
             Calculate overlap intersections.
 
     - name: calculateDiscern
-      title: "Calculate unique members"
+      title: "Unique member calculations"
       type: Bool
       default: false
       description:
@@ -536,7 +536,7 @@ options:
             Calculate unique members per set.
 
     - name: calculateUnite
-      title: "Calculate unions"
+      title: "Union calculations"
       type: Bool
       default: false
       description:
@@ -556,7 +556,7 @@ options:
             Show detailed membership information.
 
     - name: membershipGroups
-      title: 'Add Membership Groups to Data'
+      title: 'Add membership groups to data'
       type: Output
       description:
           R: >

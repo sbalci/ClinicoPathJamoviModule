@@ -365,3 +365,27 @@ test_that("chisqposttest adjustment methods work correctly", {
     # All methods should complete without error
     testthat::expect_equal(length(results_list), length(adjustment_methods))
 })
+
+test_that("pairwise chunking threshold counts both table dimensions", {
+    count_comparisons <-
+        chisqposttestClass$private_methods$.pairwiseComparisonCount
+
+    expect_equal(count_comparisons(matrix(1, nrow = 2, ncol = 8)), 29)
+    expect_equal(count_comparisons(matrix(1, nrow = 6, ncol = 6)), 30)
+    expect_equal(count_comparisons(matrix(1, nrow = 2, ncol = 2)), 2)
+})
+
+test_that("chisqposttest source code quotes special variable names once", {
+    options <- chisqposttestOptions$new(
+        rows = "tumor grade",
+        cols = "response-group"
+    )
+    analysis <- chisqposttestClass$new(options = options)
+    source <- analysis$asSource()
+
+    expect_error(parse(text = source), NA)
+    expect_equal(lengths(regmatches(source, gregexpr("rows =", source, fixed = TRUE))), 1)
+    expect_equal(lengths(regmatches(source, gregexpr("cols =", source, fixed = TRUE))), 1)
+    expect_match(source, 'rows = "tumor grade"', fixed = TRUE)
+    expect_match(source, 'cols = "response-group"', fixed = TRUE)
+})

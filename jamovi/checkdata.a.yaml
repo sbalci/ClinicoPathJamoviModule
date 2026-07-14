@@ -11,7 +11,7 @@ options:
       type: Data
       
     - name: var
-      title: Variable to Check
+      title: Variable to check
       type: Variable
 
     - name: showOutliers
@@ -47,7 +47,7 @@ options:
             Analyze patterns in missing data and value distributions.
 
     - name: rareCategoryThreshold
-      title: Rare Category Threshold ( percent)
+      title: Rare category threshold (%)
       type: Number
       min: 0.1
       max: 20
@@ -65,7 +65,7 @@ options:
             Perform context-specific validation for clinical variables (age, lab values, etc.). Heuristic ranges may need adjustment.
 
     - name: unitSystem
-      title: Unit System for Clinical Checks
+      title: Unit system for clinical checks
       type: List
       options:
         - name: auto
@@ -80,7 +80,7 @@ options:
             Unit system for clinical plausibility checks. Auto-detect attempts to infer from data ranges.
 
     - name: outlierTransform
-      title: Outlier Detection Transformation
+      title: Outlier-detection transformation
       type: List
       options:
         - name: none
@@ -95,7 +95,7 @@ options:
             Apply transformation before outlier detection to handle skewed distributions (especially right-skewed lab values).
 
     - name: mcarTest
-      title: Perform MCAR statistical test
+      title: MCAR statistical test
       type: Bool
       default: false
       description:
@@ -103,7 +103,7 @@ options:
             Perform Little's MCAR test if available (requires naniar package). Provides formal test vs. heuristic assessment.
 
     - name: cvMinMean
-      title: Minimum Mean for CV Calculation
+      title: Minimum mean for CV calculation
       type: Number
       min: 0
       max: 10

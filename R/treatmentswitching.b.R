@@ -9,6 +9,17 @@ treatmentSwitchingClass <- if (requireNamespace("jmvcore")) {
         "treatmentSwitchingClass",
         inherit = treatmentswitchingBase,
         private = list(
+            # Private field declarations. R6 locks the private environment
+            # (lock_objects = TRUE, inherited from jmvcore::Analysis), so any
+            # field assigned at run time must be declared here first; otherwise
+            # `private$<field> <- value` errors with
+            # "cannot add bindings to a locked environment".
+            switching_data = NULL,
+            analysis_results = NULL,
+            bootstrap_results = NULL,
+            comprehensive_sensitivity = NULL,
+            sensitivity_results = NULL,
+            conf_level = NULL,
             .init = function() {
                 # Check for required packages
                 required_packages <- c("survival", "ggplot2", "dplyr", "survminer")

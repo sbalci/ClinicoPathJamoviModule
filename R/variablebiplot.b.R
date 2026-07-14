@@ -126,10 +126,6 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Check feature types
                 for (feat in self$options$features) {
                     feat_data <- private$.getVarData(feat)
-                    message(
-                        "DEBUG: Checking feature '", feat, "' - is.factor=", is.factor(feat_data),
-                        " is.ordered=", is.ordered(feat_data)
-                    )
                     if (is.factor(feat_data) && !is.ordered(feat_data)) {
                         self$results$todo$setContent(paste0(
                             "<div style='padding: 1em; background: #f8d7da; border-left: 4px solid #dc3545;'>",
@@ -896,6 +892,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Natural-language Summary (controlled by checkbox)
                 if (self$options$showSummary) {
                     summary_text <- sprintf(
+                        paste0(
                         "<div style='padding: 1em; background: #f8f9fa; border-left: 4px solid #3498db;'>",
                         "<h4> Summary</h4>",
                         "<p><b>Analysis:</b> %s biplot comparing <b>%d groups</b> using <b>%d features</b> ",
@@ -903,7 +900,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         "<p><b>Key Finding:</b> The first two components (PC%d and PC%d) explain ",
                         "<b>%.1f%% + %.1f%% = %.1f%%</b> of the %s in the data.</p>",
                         "<p><b>Clinical Interpretation:</b> %s</p>",
-                        "</div>",
+                        "</div>"),
                         method_name, n_groups, n_features, n_obs,
                         pc1, pc2, var1, var2, total_var,
                         if (method_name == "PCA") "total variance" else "group separation",
@@ -983,6 +980,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 report_html <- sprintf(
+                    paste0(
                     "<div style='padding: 1em; background: #e7f3ff; border: 1px solid #0066cc;'>",
                     "<h4> Copy-Ready Report Paragraph</h4>",
                     "<div style='background: white; padding: 1em; margin: 1em 0; font-family: Georgia, serif;'>",
@@ -993,7 +991,7 @@ variablebiplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "most important for distinguishing between groups.",
                     "</div>",
                     "<p><i>Tip: Click and drag to select text, then copy (Ctrl+C / Cmd+C)</i></p>",
-                    "</div>",
+                    "</div>"),
                     if (method_name == "PCA") {
                         "principal component analysis (PCA)"
                     } else if (method_name == "PLS-DA") {

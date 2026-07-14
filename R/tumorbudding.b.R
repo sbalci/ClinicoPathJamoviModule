@@ -160,7 +160,7 @@ tumorbuddingClass <- R6::R6Class(
         },
 
         .writeGrade = function(p) {
-            if (!self$options$addGradeToData$isNotFilled && !p$hasCase) {
+            if (self$results$addGradeToData$isNotFilled() && !p$hasCase) {
                 grade <- rep(NA_character_, length(p$keep))
                 grade[p$keep] <- private$.gradeOf(round(p$norm[p$keep]))
                 self$results$addGradeToData$setRowNums(rownames(self$data))

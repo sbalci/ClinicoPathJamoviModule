@@ -9,17 +9,18 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variable to Check
+        label: Variable to check
         children:
           - type: VariablesListBox
             name: var
             maxItemCount: 1
             isTarget: true
-  - type: LayoutBox
-    margin: large
+  - type: CollapseBox
+    label: Analysis Options
+    collapsed: false
     children:
-      - type: Label
-        label: Analysis Options
+      - type: LayoutBox
+        margin: large
         children:
           - type: CheckBox
             name: showOutliers
@@ -29,33 +30,33 @@ children:
             name: showDuplicates
           - type: CheckBox
             name: showPatterns
-      - type: Label
-        label: Advanced Settings
+  - type: CollapseBox
+    label: Advanced Settings
+    collapsed: true
+    children:
+      - type: LayoutBox
         margin: large
         children:
-          - type: LayoutBox
-            margin: small
-            children:
-              - type: ComboBox
-                name: outlierTransform
-              - type: TextBox
-                name: cvMinMean
-                format: number
-              - type: TextBox
-                name: rareCategoryThreshold
-                format: number
-          - type: LayoutBox
-            margin: small
-            children:
-              - type: CheckBox
-                name: clinicalValidation
-              - type: ComboBox
-                name: unitSystem
-                enable: (clinicalValidation)
-              - type: CheckBox
-                name: mcarTest
-      - type: Label
-        label: Educational Panels
+          - type: ComboBox
+            name: outlierTransform
+          - type: TextBox
+            name: cvMinMean
+            format: number
+          - type: TextBox
+            name: rareCategoryThreshold
+            format: number
+          - type: CheckBox
+            name: clinicalValidation
+          - type: ComboBox
+            name: unitSystem
+            enable: (clinicalValidation)
+          - type: CheckBox
+            name: mcarTest
+  - type: CollapseBox
+    label: Educational Panels
+    collapsed: true
+    children:
+      - type: LayoutBox
         margin: large
         children:
           - type: CheckBox

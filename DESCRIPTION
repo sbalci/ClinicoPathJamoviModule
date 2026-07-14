@@ -28,7 +28,7 @@ URL: https://www.serdarbalci.com/ClinicoPathJamoviModule,
     https://github.com/sbalci/jsurvival,
     https://github.com/sbalci/meddecide,
     https://github.com/sbalci/jjstatsplot,
-    https://sbalci.github.io/ClinicoPathJamoviModule/
+    https://www.serdarbalci.com/ClinicoPathJamoviModule/
 BugReports: https://github.com/sbalci/ClinicoPathJamoviModule/issues/
 Depends:
     R (>= 4.1.0)

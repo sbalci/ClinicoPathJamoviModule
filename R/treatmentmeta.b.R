@@ -346,7 +346,12 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
 
         .populateIndividualStudies = function(res) {
             table <- self$results$individual_studies
-            
+
+            # Honor the "Show Study Weights" toggle (weight columns)
+            show_w <- isTRUE(self$options$show_weights)
+            table$getColumn("weight_fixed")$setVisible(show_w)
+            table$getColumn("weight_random")$setVisible(show_w)
+
             for (i in seq_along(res$studlab)) {
                 # Get year if available
                 year_val <- if (!is.null(self$options$year)) self$data[[self$options$year]][i] else NA
@@ -414,6 +419,7 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             }
             
             # Test for subgroup differences
+            if (!isTRUE(self$options$subgroup_test)) return()
             test_table <- self$results$subgroup_test
             test_table$addRow(rowKey = "between", values = list(
                 test = "Between-subgroups Q-test",
@@ -491,8 +497,8 @@ treatmentmetaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             table <- self$results$publication_bias_tests
             
-            # Egger's test
-            tryCatch({
+            # Egger's test (gated by the "Egger's Test" toggle)
+            if (isTRUE(self$options$eggers_test)) tryCatch({
                 # Use direct TE and seTE to avoid subgroup issues in meta package
                 egg <- meta::metabias(res$TE, res$seTE, method = "Egger", k.min = 3)
                 p_val <- if (!is.null(egg$p.value)) egg$p.value else egg$pval

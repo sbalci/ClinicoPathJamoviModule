@@ -98,10 +98,10 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             type_name <- switch(
                 as.character(type),
-                "1" = "ERROR",
-                "2" = "STRONG_WARNING",
-                "3" = "WARNING",
-                "4" = "INFO",
+                "0" = "ERROR",
+                "1" = "STRONG_WARNING",
+                "2" = "WARNING",
+                "3" = "INFO",
                 "INFO"
             )
 
@@ -313,6 +313,7 @@ timedependentdcaClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             })
 
             if (is.null(private$.data_prepared)) {
+                private$.renderNotices()
                 return()
             }
 

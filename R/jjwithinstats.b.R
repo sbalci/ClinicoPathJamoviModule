@@ -237,7 +237,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         \u2022 Select at least 2 measurements (First and Second Measurement fields)<br>
                         \u2022 No missing values allowed<br>
                         \u2022 Use for comparing 2-4 measurements from the same subjects<br><br>
-                        See documentation: <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
+                        See documentation: <a href='https://www.indrapatil.com/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
                         Please cite jamovi and packages as instructed.<br><hr>"
                 
                 self$results$todo$setVisible(visible = TRUE)
@@ -951,7 +951,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         \u2022 Select at least 2 measurements (First and Second Measurement fields)<br>
                         \u2022 No missing values allowed<br>
                         \u2022 Use for comparing 2-4 measurements from the same subjects<br><br>
-                        See documentation: <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
+                        See documentation: <a href='https://www.indrapatil.com/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
                         Please cite jamovi and packages as instructed.<br><hr>"
 
                 # Ensure todo is visible and set content

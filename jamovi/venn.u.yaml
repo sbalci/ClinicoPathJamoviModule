@@ -13,7 +13,7 @@ children:
         stretchFactor: 1
         children:
           - type: TargetLayoutBox
-            label: "Variable 1 (Required)"
+            label: "Variable 1 (required)"
             children:
               - type: VariablesListBox
                 name: var1
@@ -23,7 +23,7 @@ children:
                 name: var1true
                 enable: (var1)
           - type: TargetLayoutBox
-            label: "Variable 2 (Required)"
+            label: "Variable 2 (required)"
             children:
               - type: VariablesListBox
                 name: var2
@@ -34,7 +34,7 @@ children:
                 name: var2true
                 enable: (var2)
           - type: TargetLayoutBox
-            label: Variable 3 (Optional)
+            label: Variable 3 (optional)
             children:
               - type: VariablesListBox
                 name: var3
@@ -45,7 +45,7 @@ children:
                 name: var3true
                 enable: (var3)
           - type: TargetLayoutBox
-            label: Variable 4 (Optional)
+            label: Variable 4 (optional)
             children:
               - type: VariablesListBox
                 name: var4
@@ -56,7 +56,7 @@ children:
                 name: var4true
                 enable: (var4)
           - type: TargetLayoutBox
-            label: Variable 5 (Optional)
+            label: Variable 5 (optional)
             children:
               - type: VariablesListBox
                 name: var5
@@ -67,7 +67,7 @@ children:
                 name: var5true
                 enable: (var5)
           - type: TargetLayoutBox
-            label: Variable 6 (Optional)
+            label: Variable 6 (optional)
             children:
               - type: VariablesListBox
                 name: var6
@@ -78,7 +78,7 @@ children:
                 name: var6true
                 enable: (var6)
           - type: TargetLayoutBox
-            label: Variable 7 (Optional)
+            label: Variable 7 (optional)
             children:
               - type: VariablesListBox
                 name: var7

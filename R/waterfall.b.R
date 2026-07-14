@@ -826,6 +826,28 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           return(list(waterfall = waterfall_data, spider = spider_data))
         },
 
+        # Categorize responses into RECIST-style categories (CR/PR/SD/PD).
+        # Shared by the large-dataset processing paths; mirrors the case_when
+        # in .processData so both paths yield identical factors. Missing this
+        # method previously caused "attempt to apply non-function" for any
+        # dataset large enough to enter the optimized path (>100 rows or
+        # >50 unique patients), e.g. the bundled histopathology example.
+        .categorizeRECIST = function(response) {
+          factor(
+            dplyr::case_when(
+              is.na(response) ~ "Unknown",
+              response <= private$RECIST_CR_THRESHOLD ~ "CR",
+              response > private$RECIST_CR_THRESHOLD &
+                response <= private$RECIST_PR_THRESHOLD ~ "PR",
+              response > private$RECIST_PR_THRESHOLD &
+                response <= private$RECIST_PD_THRESHOLD ~ "SD",
+              response > private$RECIST_PD_THRESHOLD ~ "PD",
+              TRUE ~ "Unknown"
+            ),
+            levels = c("CR", "PR", "SD", "PD", "Unknown")
+          )
+        },
+
         # Basic data existence check
       .validateBasicData = function(df) {
         msgs <- private$.getValidationMessages()

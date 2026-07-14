@@ -236,8 +236,9 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                                     z_val <- if (se_val > 0) coeff_val / se_val else 0
                                     p_val <- if (se_val > 0) 2 * (1 - pnorm(abs(z_val))) else 1
                                     
-                                    ci_lower <- coeff_val - 1.96 * se_val
-                                    ci_upper <- coeff_val + 1.96 * se_val
+                                    z_crit <- qnorm(1 - (1 - self$options$confidence_level) / 2)
+                                    ci_lower <- coeff_val - z_crit * se_val
+                                    ci_upper <- coeff_val + z_crit * se_val
                                     ci_text <- sprintf("[%.4f, %.4f]", ci_lower, ci_upper)
                                     
                                     row_key <- paste(var_name, t, sep = "_")
@@ -314,8 +315,9 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                                 z_val <- coeff_val / se_val
                                 p_val <- 2 * (1 - pnorm(abs(z_val)))
                                 
-                                ci_lower <- coeff_val - 1.96 * se_val
-                                ci_upper <- coeff_val + 1.96 * se_val
+                                z_crit <- qnorm(1 - (1 - self$options$confidence_level) / 2)
+                                ci_lower <- coeff_val - z_crit * se_val
+                                ci_upper <- coeff_val + z_crit * se_val
                                 ci_text <- sprintf("[%.4f, %.4f]", ci_lower, ci_upper)
                                 
                                 row_key <- paste(var_name, t, sep = "_")
@@ -403,8 +405,9 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                             z_val <- coeff_val / se_val
                             p_val <- 2 * (1 - pnorm(abs(z_val)))
                             
-                            ci_lower <- coeff_val - 1.96 * se_val
-                            ci_upper <- coeff_val + 1.96 * se_val
+                            z_crit <- qnorm(1 - (1 - self$options$confidence_level) / 2)
+                            ci_lower <- coeff_val - z_crit * se_val
+                            ci_upper <- coeff_val + z_crit * se_val
                             ci_text <- sprintf("[%.4f, %.4f]", ci_lower, ci_upper)
                             
                             row_key <- paste(var_name, t, sep = "_")
@@ -447,8 +450,9 @@ timeupdatesurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
                     z_val <- coeff_val / se_val
                     p_val <- 2 * (1 - pnorm(abs(z_val)))
                     
-                    ci_lower <- coeff_val - 1.96 * se_val
-                    ci_upper <- coeff_val + 1.96 * se_val
+                    z_crit <- qnorm(1 - (1 - self$options$confidence_level) / 2)
+                    ci_lower <- coeff_val - z_crit * se_val
+                    ci_upper <- coeff_val + z_crit * se_val
                     ci_text <- sprintf("[%.4f, %.4f]", ci_lower, ci_upper)
                     
                     row_key <- paste(var_name, t, sep = "_")

@@ -122,6 +122,7 @@ The function expects data in "tidy" (long) format with three essential variables
 # )
 }
 }
+\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{clinicalheatmapBase} -> \code{clinicalheatmapClass}
 }

@@ -61,16 +61,26 @@ trichotomousrocClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             n_neg <- sum(y_mapped == 1)
             n_ind <- sum(y_mapped == 2)
             n_pos <- sum(y_mapped == 3)
+
+            # Each category must be populated; an empty class yields NaN sensitivities
+            # (0 / 0) that crash the Youden search's `if (avg_se > best_j)` comparison.
+            if (n_neg == 0 || n_ind == 0 || n_pos == 0) {
+                jmvcore::reject("Each of the three outcome categories (positive, indeterminate, negative) must contain at least one observation with a non-missing predictor value.")
+            }
             
             # --- 1. Threshold Optimization ---
             # Grid search over unique values
             sorted_uv <- sort(unique(predictor))
             
             # Candidate thresholds (midpoints)
-             if (length(sorted_uv) < 2) {
-                 # Not enough values
-                 return()
-             }
+            # Trichotomous classification needs two DISTINCT thresholds, which requires
+            # at least 3 distinct predictor values. With fewer, the Youden grid search
+            # below reverse-iterates (1:0) and compares NA, crashing with
+            # "missing value where TRUE/FALSE needed". Reject with actionable feedback
+            # instead of the previous silent return().
+            if (length(sorted_uv) < 3) {
+                jmvcore::reject("The predictor must have at least 3 distinct values to define two thresholds for trichotomous (three-category) classification.")
+            }
             
             # Potential cutoffs
             cutoffs <- c(-Inf, (sorted_uv[-1] + sorted_uv[-length(sorted_uv)]) / 2, Inf)

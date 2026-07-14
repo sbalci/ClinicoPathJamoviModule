@@ -63,7 +63,12 @@ alluvialOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             private$..fillGgalluvial <- jmvcore::OptionVariable$new(
                 "fillGgalluvial",
                 fillGgalluvial,
-                default=NULL)
+                default=NULL,
+                suggested=list(
+                    "ordinal",
+                    "nominal"),
+                permitted=list(
+                    "factor"))
             private$..bin <- jmvcore::OptionList$new(
                 "bin",
                 bin,
@@ -280,7 +285,11 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "weight",
                     "maxvars",
                     "engine",
-                    "condensationvar")))
+                    "condensationvar",
+                    "excl",
+                    "fillGgalluvial",
+                    "marg",
+                    "usetitle")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -294,7 +303,10 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=FALSE,
                 clearWith=list(
                     "vars",
-                    "maxvars")))
+                    "maxvars",
+                    "excl",
+                    "weight",
+                    "engine")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Alluvial Diagrams",
@@ -333,7 +345,8 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(condensationvar)",
                 clearWith=list(
                     "vars",
-                    "condensationvar")))
+                    "condensationvar",
+                    "excl")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="`Condensation Plot ${condensationvar}`",
@@ -382,8 +395,8 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param marg Include marginal plots.
 #' @param fill A list for the argument fill for selecting the variable to be
 #'   represented by color. Default is 'first_variable'.
-#' @param fillGgalluvial A string naming the variable from \code{data} that
-#'   will be used to color the flows in the ggalluvial plot.
+#' @param fillGgalluvial A string naming the categorical variable from
+#'   \code{data} that will be used to color the flows in the ggalluvial plot.
 #' @param bin Display labels for bin categories. Note: This controls label
 #'   text only, not the binning method. easyalluvial uses its own internal
 #'   binning algorithm. For custom binning, create categorized variables before
@@ -393,7 +406,8 @@ alluvialBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param mytitle Title for the plot.
 #' @param maxvars Maximum number of variables to include in the alluvial plot.
 #' @param custombinlabels Custom labels for bins, separated by commas (e.g.,
-#'   "Low,Medium,High"). Leave empty to use bin option defaults.
+#'   "Low,Medium,High"). The number of labels determines the number of bins.
+#'   Leave empty to use the selected bin-label method.
 #' @param colorPalette Color palette for the diagram flows.
 #' @param showCounts Display count values on nodes.
 #' @param themeStyle Theme style for the plot background and elements.
@@ -461,6 +475,7 @@ alluvial <- function(
             `if`( ! missing(fillGgalluvial), fillGgalluvial, NULL),
             `if`( ! missing(weight), weight, NULL))
 
+    for (v in fillGgalluvial) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
 
     options <- alluvialOptions$new(
         vars = vars,

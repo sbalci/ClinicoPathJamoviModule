@@ -581,7 +581,7 @@ jjbetweenstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         <br><br>
         This tool creates optimized Box-Violin Plots for comparing continuous variables between groups.
         <br><br>
-        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>here</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>here</a>.
+        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggbetweenstats.html' target='_blank'>here</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggbetweenstats.html' target='_blank'>here</a>.
         <br>
         Please cite jamovi and the packages as given below.
         <br><hr>"

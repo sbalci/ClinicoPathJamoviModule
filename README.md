@@ -758,7 +758,7 @@ Made possible via the codes, help, and guidence of
   Love](https://github.com/jonathon-love),
 - [finalfit](https://finalfit.org/) developer [Ewen
   Harrison](https://github.com/ewenharrison),
-- [ggstatsplot](https://indrajeetpatil.github.io/ggstatsplot/) developer
+- [ggstatsplot](https://www.indrapatil.com/ggstatsplot/) developer
   [Indrajeet Patil](https://github.com/IndrajeetPatil),
 - [tangram](https://github.com/spgarbet/tangram) developer [Shawn
   Garbett](https://github.com/spgarbet),
@@ -842,7 +842,7 @@ commit](https://img.shields.io/github/last-commit/sbalci/clinicopathjamovimodule
 Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 ![GitHub commit
 activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
-[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
+[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
 [![GitHub code size in
 bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
 [![minimal R
@@ -924,7 +924,7 @@ Date](https://img.shields.io/github/release-date/sbalci/clinicopathjamovimodule)
 activity](https://img.shields.io/github/commit-activity/m/sbalci/clinicopathjamovimodule)
 
 **Webpage, Links, Size, Download**  
-[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://sbalci.github.io/ClinicoPathJamoviModule/)
+[![Website](https://img.shields.io/badge/website-ClinicoPathJamoviModule-orange.svg?colorB=E91E63)](https://www.serdarbalci.com/ClinicoPathJamoviModule/)
 [![GitHub code size in
 bytes](https://img.shields.io/github/languages/code-size/sbalci/clinicopathjamovimodule.svg)](https://github.com/sbalci/ClinicoPathJamoviModule)
 
@@ -948,7 +948,7 @@ stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg)](
 Stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule.svg?style=social&label=Github)](https://github.com/sbalci/clinicopathjamovimodule)
 ![GitHub
 stars](https://img.shields.io/github/stars/sbalci/clinicopathjamovimodule?style=social)
-[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20📦.%20@serdarbalci&url=https%3A%2F%2Fsbalci.github.io%2ClinicoPathJamoviModule%2)
+[![Twitter](https://img.shields.io/twitter/url/https/github.com/sbalci/clinicopathjamovimodule.svg?style=social)](https://twitter.com/intent/tweet?text=A%20@jamovistats%20module%20for%20%23histopathology%20%23clinicopathology%20%23pathology%20%23research%20using%20various%20%23rstats%20packages%20📦.%20@serdarbalci&url=https%3A%2F%2Fwww.serdarbalci.com%2ClinicoPathJamoviModule%2)
 [![contributions
 welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/sbalci/clinicopathjamovimodule/issues)
 ![GitHub

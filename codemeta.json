@@ -9,22 +9,22 @@
   "name": "ClinicoPath: Analysis for Clinicopathological Research",
   "codeRepository": "https://github.com/sbalci/ClinicoPathJamoviModule/",
   "relatedLink": [
-    "https://sbalci.github.io/ClinicoPathJamoviModule/",
+    "https://www.serdarbalci.com/ClinicoPathJamoviModule",
     "https://github.com/sbalci/ClinicoPath/",
     "https://github.com/sbalci/ClinicoPathDescriptives/",
     "https://github.com/sbalci/jsurvival",
     "https://github.com/sbalci/meddecide",
     "https://github.com/sbalci/jjstatsplot"
   ],
-  "issueTracker": "\n    https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
-  "license": "https://spdx.org/licenses/GPL-3.0",
-  "version": "0.0.2.48",
+  "issueTracker": "https://github.com/sbalci/ClinicoPathJamoviModule/issues/",
+  "license": "https://spdx.org/licenses/GPL-2.0-only.html",
+  "version": "1.0.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.0.2 (2020-06-22)",
+  "runtimePlatform": "R (>= 4.1.0)",
   "author": [
     {
       "@type": "Person",

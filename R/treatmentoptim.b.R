@@ -366,12 +366,20 @@ treatmentoptimClass <- R6::R6Class(
         .predictTreatmentResponse = function(treatment, patient_data) {
             # Simulate treatment response prediction
             # In real implementation, this would use trained ML models
-            # TODO (correctness): set.seed(42) mutates the GLOBAL RNG state on every run, silently
-            #   breaking reproducibility of any other analysis in the same jamovi session. If a
-            #   local seed is genuinely needed, save/restore via withr::with_seed() or
-            #   on.exit(assign(".Random.seed", old, envir=.GlobalEnv)). (Moot once .predictTreatmentResponse
-            #   is replaced with a real model - see the stub TODO at the top of .run.)
-            set.seed(42)  # For reproducible results
+            # Save/restore the global RNG so the local set.seed() below stays local and does not
+            # break reproducibility of any other analysis in the same jamovi session. (Moot once
+            # .predictTreatmentResponse is replaced with a real model - see the stub TODO in .run.)
+            old_seed <- if (exists(".Random.seed", envir = .GlobalEnv))
+                get(".Random.seed", envir = .GlobalEnv) else NULL
+            on.exit({
+                if (is.null(old_seed)) {
+                    if (exists(".Random.seed", envir = .GlobalEnv))
+                        rm(".Random.seed", envir = .GlobalEnv)
+                } else {
+                    assign(".Random.seed", old_seed, envir = .GlobalEnv)
+                }
+            }, add = TRUE)
+            set.seed(42)  # For reproducible results within this call only
             
             base_response <- switch(treatment,
                 "Standard Therapy A" = 0.65,

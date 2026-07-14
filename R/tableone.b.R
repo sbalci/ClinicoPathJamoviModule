@@ -22,6 +22,40 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "tableoneClass",
     inherit = tableoneBase,
     private = list(
+        .htmlSafeTableData = function(data) {
+            escape <- function(value) {
+                as.character(htmltools::htmlEscape(as.character(value)))
+            }
+
+            for (i in seq_along(data)) {
+                value <- data[[i]]
+                if (is.factor(value)) {
+                    levels(value) <- escape(levels(value))
+                } else if (is.character(value)) {
+                    value[] <- escape(value)
+                }
+
+                label <- attr(value, "label", exact = TRUE)
+                if (is.null(label))
+                    label <- names(data)[i]
+                attr(value, "label") <- escape(label)
+
+                units <- attr(value, "units", exact = TRUE)
+                if (is.character(units))
+                    attr(value, "units") <- escape(units)
+
+                value_labels <- attr(value, "labels", exact = TRUE)
+                if (!is.null(value_labels) && !is.null(names(value_labels))) {
+                    names(value_labels) <- escape(names(value_labels))
+                    attr(value, "labels") <- value_labels
+                }
+
+                data[[i]] <- value
+            }
+
+            data
+        },
+
         .run = function() {
             # NOTE: This function uses HTML outputs for messages instead of jmvcore::Notice
             # due to serialization constraints in jamovi's protobuf system.
@@ -36,14 +70,6 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
             # function is otherwise architecturally clean (good checkpoint
             # coverage, htmlEscape usage, asSource method). Address in a
             # /prepare-translation pass.
-            # TODO (forward-looking): `kableExtra::kable(..., escape=FALSE)`
-            # at L163 (arsenal branch) is intentional - `arsenal::summary`
-            # already returns escaped HTML. If a future maintainer
-            # substitutes arsenal output for a renderer that does NOT escape,
-            # XSS becomes possible. Add a comment near L163 explaining the
-            # trust assumption, or post-process with `xml2::read_html` +
-            # selective escape of <td> contents.
-
             # Check that the input data has at least one complete row.
             if (is.null(self$data) || nrow(self$data) == 0) {
                 self$results$todo$setContent("
@@ -164,14 +190,19 @@ tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
                 formula_str <- jmvcore::constructFormula(terms = selected_vars)
                 formula_obj <- jmvcore::asFormula(paste('~', formula_str))
                 mytable <- tryCatch({
+                    arsenal_data <- private$.htmlSafeTableData(data)
                     tab <- arsenal::tableby(formula = formula_obj,
-                                            data = data,
+                                            data = arsenal_data,
                                             total = TRUE,
                                             digits = 1,
                                             digits.count = 0,
                                             digits.pct = 1)
-                    tab_summary <- summary(tab, text = "html")
-                    kableExtra::kable(tab_summary, format = "html", digits = 1, escape = FALSE)
+                    tab_summary <- summary(
+                        tab,
+                        text = "html",
+                        pfootnote = "html"
+                    )
+                    paste(capture.output(tab_summary), collapse = "\n")
                 }, error = function(e) {
                     jmvcore::reject(paste0("Error creating arsenal table: ", e$message, ". Arsenal requires properly formatted variables. Check that categorical variables are factors and numeric variables contain valid numbers."))
                 })

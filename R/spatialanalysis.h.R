@@ -374,6 +374,7 @@ spatialanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="spatialplot",
                 title="Spatial Distribution Plot",
+                renderFun=".spatialplot",
                 width=600,
                 height=600,
                 visible="(show_plots)",

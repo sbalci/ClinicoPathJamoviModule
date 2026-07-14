@@ -641,8 +641,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     
                     <p style='font-size: 14px; color: #868e96; margin: 20px 0 0 0;'>
                      <strong>Documentation:</strong> 
-                    <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/gghistostats.html' target='_blank' style='color: #007bff;'>gghistostats</a> | 
-                    <a href='https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_gghistostats.html' target='_blank' style='color: #007bff;'>grouped_gghistostats</a>
+                    <a href='https://www.indrapatil.com/ggstatsplot/reference/gghistostats.html' target='_blank' style='color: #007bff;'>gghistostats</a> | 
+                    <a href='https://www.indrapatil.com/ggstatsplot/reference/grouped_gghistostats.html' target='_blank' style='color: #007bff;'>grouped_gghistostats</a>
                     </p>
                     </div>"
                     )

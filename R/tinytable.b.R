@@ -62,9 +62,11 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 </p>
                 </div>"
                 
+                self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(intro_msg)
                 return()
             } else {
+                self$results$todo$setVisible(FALSE)
                 self$results$todo$setContent("")
             }
 
@@ -213,10 +215,13 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 
                 if (is.numeric(var_data)) {
                     n_valid <- sum(!is.na(var_data))
-                    mean_val <- round(mean(var_data, na.rm = TRUE), self$options$precision_digits)
-                    sd_val <- round(sd(var_data, na.rm = TRUE), self$options$precision_digits)
-                    
-                    summary_text <- paste0("n=", n_valid, ", Mean=", mean_val, " (SD=", sd_val, ")")
+                    if (self$options$show_statistics) {
+                        mean_val <- round(mean(var_data, na.rm = TRUE), self$options$precision_digits)
+                        sd_val <- round(sd(var_data, na.rm = TRUE), self$options$precision_digits)
+                        summary_text <- paste0("n=", n_valid, ", Mean=", mean_val, " (SD=", sd_val, ")")
+                    } else {
+                        summary_text <- paste0("n=", n_valid)
+                    }
                     if (self$options$show_missing && any(is.na(var_data))) {
                         missing_count <- sum(is.na(var_data))
                         summary_text <- paste0(summary_text, ", Missing=", missing_count)
@@ -472,7 +477,7 @@ tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
                 "<li><strong>Observations:</strong> ", n_rows, " rows of data</li>",
                 "<li><strong>Theme:</strong> ", stringr::str_to_title(table_theme), " styling</li>",
                 "<li><strong>Output Format:</strong> ", toupper(output_format), " optimized</li>",
-                if (!is.null(group_var) && group_var != "") paste0("<li><strong>Grouping:</strong> By ", group_var, "</li>") else "",
+                if (!is.null(group_var) && group_var != "") paste0("<li><strong>Grouping:</strong> By ", htmltools::htmlEscape(group_var), "</li>") else "",
                 "</ul>",
                 
                 "<h4 style='color: #2e7d32;'>TinyTable Features:</h4>",

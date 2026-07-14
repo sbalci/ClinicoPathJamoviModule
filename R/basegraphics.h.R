@@ -397,6 +397,8 @@ basegraphicsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "point_type",
                     "point_size",
                     "color_scheme",
+                    "line_type",
+                    "line_width",
                     "add_grid",
                     "add_legend",
                     "bins",

@@ -4,10 +4,7 @@
 #' It creates a visually appealing plot showing the distribution of age by gender.
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
-#' @import tidyr
-#' @import tibble
+#' @importFrom tidyr complete pivot_wider
 #'
 #' @param age The name of the column containing age data.
 #'
@@ -23,11 +20,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # and the data-summary section in `.build_data_summary_html` are all
             # English-only. Address in a /prepare-translation pass for this
             # function before the next release with i18n support.
-            # TODO (forward-looking, perf): `.run()` and `.plot()` do non-trivial
-            # ggplot/ggcharts work without a single `private$.checkpoint()` call.
-            # Large datasets (n > ~50k) freeze the UI thread until the plot is
-            # ready. Add checkpoints around the `dplyr` aggregation (~L218) and
-            # before the `ggplot2::ggplot` / `ggcharts::pyramid_chart` calls.
+            # Plot callbacks do not expose a safe cancellation point, but the
+            # data aggregation below can be interrupted between phases.
             # Check if required options (age and gender) are provided
             if (is.null(self$options$age) || is.null(self$options$gender)) {
                 self$results$welcome$setContent(
@@ -242,6 +236,7 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    ordered_result = FALSE)
 
             # Prepare data for plotting and table output ----
+            private$.checkpoint()
             plotData <- mydata %>%
                 dplyr::select(Gender = Gender2, Pop) %>%
                 dplyr::group_by(Gender, Pop) %>%

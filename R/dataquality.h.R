@@ -130,7 +130,7 @@ dataqualityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "visdat",
-                    "BaylorEdPsych",
+                    "naniar",
                     "dplyr",
                     "ggplot2"))
             self$add(jmvcore::Html$new(

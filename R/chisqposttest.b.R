@@ -151,12 +151,18 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             return(interpretation_matrix)
         },
+
+        .pairwiseComparisonCount = function(contingency_table) {
+            dimensions <- dim(contingency_table)
+            sum(vapply(dimensions, function(n) {
+                if (n < 2) 0 else choose(n, 2)
+            }, numeric(1)))
+        },
         
         # Robust pairwise chi-square testing with optimized resource management
         .robustPairwiseTests = function(contingency_table, method = "bonferroni", test_selection = "auto") {
             # Check if we need memory optimization for large tables
-            row_names <- rownames(contingency_table)
-            total_comparisons <- choose(length(row_names), 2)
+            total_comparisons <- private$.pairwiseComparisonCount(contingency_table)
             
             # Use chunked processing for moderate-sized tables to prevent resource limits
             if (total_comparisons > 25) {
@@ -330,7 +336,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .robustPairwiseTestsChunked = function(contingency_table, method = "bonferroni", test_selection = "auto", chunk_size = 50) {
             row_names <- rownames(contingency_table)
             col_names <- colnames(contingency_table)
-            total_comparisons <- choose(length(row_names), 2) + choose(length(col_names), 2)
+            total_comparisons <- private$.pairwiseComparisonCount(contingency_table)
             
             # Initialize variables
             all_pairwise_results <- list()
@@ -962,7 +968,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add post-hoc information if applicable
             if (chiSqTest$p.value < 0.05 && !is.null(pairwise_results) && length(pairwise_results) > 0) {
                 posthoc_text <- sprintf(
-                    .(" Post-hoc analysis revealed %d significant pairwise difference(s) out of %d comparisons after %s correction."),
+                    .("Post-hoc analysis revealed %d significant pairwise difference(s) out of %d comparisons after %s correction."),
                     n_significant_pairs,
                     length(pairwise_results),
                     self$options$posthoc
@@ -1512,19 +1518,26 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 style = "margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 3px;",
                                 htmltools::div(
                                     style = "display: inline-block; margin-right: 20px;",
-                                    htmltools::strong(.("Test used: ")), test_used
+                                    htmltools::strong(jmvcore::format(
+                                        .("Test used: {test}"), test = test_used))
                                 ),
                                 htmltools::div(
                                     style = "display: inline-block; margin-right: 20px;",
-                                    htmltools::strong(.("p-value: ")), format.pval(p_value, digits = 3)
+                                    htmltools::strong(jmvcore::format(
+                                        .("p-value: {p}"),
+                                        p = format.pval(p_value, digits = 3)))
                                 ),
                                 htmltools::div(
                                     style = "display: inline-block; margin-right: 20px;",
-                                    htmltools::strong(.("Adjusted p: ")), format.pval(p_adj, digits = 3)
+                                    htmltools::strong(jmvcore::format(
+                                        .("Adjusted p: {p}"),
+                                        p = format.pval(p_adj, digits = 3)))
                                 ),
                                 htmltools::div(
                                     style = "display: inline-block;",
-                                    htmltools::strong(.("Significant: ")), if (p_adj < self$options$sig) .("Yes") else .("No")
+                                    htmltools::strong(jmvcore::format(
+                                        .("Significant: {status}"),
+                                        status = if (p_adj < self$options$sig) .("Yes") else .("No")))
                                 )
                             )
                         )
@@ -1601,8 +1614,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (fisher_used) {
                     fisher_notice <- htmltools::div(
                         style = "padding: 10px; background-color: #e3f2fd; border-left: 4px solid #1976d2; margin: 8px 0;",
-                        htmltools::strong(.("Method notice: ")),
-                        .("Pairwise comparisons with expected cell counts < 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method.")
+                        htmltools::strong(.("Method notice: Pairwise comparisons with expected cell counts below 5 are automatically analysed with Fisher's exact test; the reported p-values use that exact method."))
                     )
                 }
 
@@ -1810,18 +1822,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Main analysis method - Core implementation
         .run = function() {
-            # TODO (security): only 1 `htmlEscape` call across ~2.1k LOC of
-            # HTML construction. Variable names and factor labels flow into
-            # multiple paste0 HTML blocks: error/warning notices (~L1217,
-            # L1233, L1276, L1535, L1559), the educational notes, and the
-            # weighted-data info HTML. Sweep all paste0 HTML construction with
-            # `htmltools::htmlEscape()` on every dynamic interpolation.
-            # TODO (forward-looking, perf): no `private$.checkpoint()` despite
-            # 7+ post-hoc method branches (bonferroni, holm, hochberg, hommel,
-            # BH, BY, fdr) which run pairwise chi-square / Fisher tests over
-            # all level combinations. For tables with many categories
-            # (>10x10), each method can take seconds. Add checkpoints between
-            # the overall test and each post-hoc method branch.
+            # TODO (forward-looking, perf): add periodic checkpoints inside the
+            # row/column pair loops and before the optional Phi CI bootstrap.
 
             # Initial setup and validation
             if (!private$.handleInitialSetup()) return()
@@ -1941,9 +1943,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 htmltools::p(clinical_summary$summary_text),
                 htmltools::div(
                     style = "margin-top: 10px; font-size: 12px; color: #666;",
-                    htmltools::strong(.("Effect Size Interpretation: ")),
-                    sprintf(.("The effect size is %s (Cram\u{E9}r's V = %.3f)"), 
-                           clinical_summary$effect_interpretation, clinical_summary$effect_size)
+                    htmltools::strong(sprintf(
+                        .("Effect size interpretation: The effect size is %s (Cram\u{E9}r's V = %.3f)."),
+                        clinical_summary$effect_interpretation,
+                        clinical_summary$effect_size
+                    ))
                 )
             )
             
@@ -1973,9 +1977,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
             
             title_text <- if (assumptions$warning_level == "none") {
-                .(" Assumptions Check: All conditions met")
+                .("Assumptions check: All conditions met")
             } else {
-                .(" Assumptions Check: Review required")
+                .("Assumptions check: Review required")
             }
             
             assumptions_content <- htmltools::div(
@@ -2128,41 +2132,22 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(rows) || is.null(cols))
                 return('')
 
-            # TODO (correctness): asSource() emits broken R for column names
-            # with special characters. The hand-rolled escaping at lines ~2099
-            # and ~2106 wraps `name with spaces` in backticks, then ~2114-2115
-            # embeds the result inside DOUBLE QUOTES (e.g. `rows = "`name`"`),
-            # producing invalid R syntax (backticks have no meaning inside
-            # double-quoted strings). For string-arg contexts you don't need
-            # backticks at all - only proper string quoting. Replacement:
-            #   rows_arg <- jmvcore::format('rows = {}', rows, context = "R")
-            #   cols_arg <- jmvcore::format('cols = {}', cols, context = "R")
-            # That removes the manual escaping helpers and produces correctly
-            # quoted R for any name. NOT auto-applied because output for
-            # special-char names changes (broken->correct). Same pattern flagged
-            # at R/biomarkerresponse.b.R:1535.
-            # Escape rows variable
-            rows_escaped <- if (!is.null(rows) && !identical(make.names(rows), rows)) {
-                paste0('`', rows, '`')
-            } else {
-                rows
-            }
-
-            # Escape cols variable
-            cols_escaped <- if (!is.null(cols) && !identical(make.names(cols), cols)) {
-                paste0('`', cols, '`')
-            } else {
-                cols
-            }
-
-            # Build arguments
-            rows_arg <- paste0('rows = "', rows_escaped, '"')
-            cols_arg <- paste0('cols = "', cols_escaped, '"')
+            rows_arg <- paste0('rows = ', paste(deparse(rows), collapse = ' '))
+            cols_arg <- paste0('cols = ', paste(deparse(cols), collapse = ' '))
 
             # Get other arguments using base helper (if available)
             args <- ''
             if (!is.null(private$.asArgs)) {
                 args <- private$.asArgs(incData = FALSE)
+            }
+            if (args != '') {
+                args_lines <- strsplit(args, ",\\s*\\n\\s*")[[1]]
+                args_lines <- args_lines[!grepl("^\\s*(rows|cols)\\s*=", args_lines)]
+                args <- if (length(args_lines) > 0) {
+                    paste(args_lines, collapse = ',\n    ')
+                } else {
+                    ''
+                }
             }
             if (args != '')
                 args <- paste0(',\n    ', args)

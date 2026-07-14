@@ -989,7 +989,7 @@ qtwistResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=600,
                 renderFun=".plotForest",
-                visible="(!is.null(stratify_by) && length(stratify_by) > 0)",
+                visible="(length(stratify_by) > 0)",
                 clearWith=list(
                     "time_os",
                     "time_pfs",

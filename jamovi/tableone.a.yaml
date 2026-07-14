@@ -41,7 +41,7 @@ options:
         Select the variables to include in the table.
         
   - name: sty
-    title: "Table Style"
+    title: "Table style"
     type: List
     options:
       - title: "tableone (Standard medical format)"
@@ -60,7 +60,7 @@ options:
         Choose the descriptive table format. 'tableone' style shows standard medical descriptives (mean ± SD, median [IQR], N ( percent)), 'gtsummary' provides polished formatting, 'arsenal' gives detailed summaries, and 'janitor' focuses on frequency counts.
         
   - name: excl
-    title: "Exclude missing (NA)"
+    title: "Missing-value exclusion (NA)"
     type: Bool
     default: false
     description:

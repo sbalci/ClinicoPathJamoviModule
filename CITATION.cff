@@ -12,8 +12,8 @@ authors:
     family-names: Balci
     email: serdarbalci@serdarbalci.com
     orcid: 'https://orcid.org/0000-0002-7852-3851'
-date-released: '2025-09-18'
-version: "0.0.31.69"
+date-released: '2026-07-13'
+version: "1.0.0"
 identifiers:
   - type: doi
     value: 10.5281/zenodo.3997188
@@ -25,7 +25,7 @@ identifiers:
     value: 'https://github.com/sbalci/ClinicoPathJamoviModule/'
     description: GitHub
   - type: url
-    value: 'https://sbalci.github.io/ClinicoPathJamoviModule/'
+    value: 'https://www.serdarbalci.com/ClinicoPathJamoviModule'
     description: webpage
   - type: url
     value: >-
@@ -67,4 +67,4 @@ keywords:
   - agreement
   - descriptives
   - plots
-license: GPL-2.0
+license: GPL-2.0-only

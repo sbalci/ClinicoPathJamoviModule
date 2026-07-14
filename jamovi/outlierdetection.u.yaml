@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: "Variables for Analysis (Lab Values, Biomarkers, etc.)"
+        label: "Variables for analysis (lab values, biomarkers, etc.)"
         children:
           - type: VariablesListBox
             name: vars

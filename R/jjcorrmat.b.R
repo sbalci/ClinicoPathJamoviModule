@@ -88,7 +88,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
                 <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
                 <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
+                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
                 <br>
                 Please cite jamovi and the packages as given below.
                 <br><hr>")
@@ -656,7 +656,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
         <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
         <br><br>
-        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
+        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
         <br>
         Please cite jamovi and the packages as given below.
         <br><hr>")
@@ -861,7 +861,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         
             # ggcorrmat ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/ggcorrmat.html
+            # https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html
 
             # Checkpoint before expensive correlation computation
             private$.checkpoint()
@@ -953,7 +953,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             # grouped_ggcorrmat ----
-            # https://indrajeetpatil.github.io/ggstatsplot/reference/grouped_ggcorrmat.html
+            # https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html
 
             if ( !is.null(self$options$grvar) ) {
 

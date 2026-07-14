@@ -15,26 +15,28 @@ children:
             name: vars
             isTarget: true
       - type: TargetLayoutBox
-        label: Condensation Variable
+        label: Condensation variable
         children:
           - type: VariablesListBox
             name: condensationvar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Weight Variable (optional)
+        label: Weight variable (optional)
         children:
           - type: VariablesListBox
             name: weight
             maxItemCount: 1
             isTarget: true
+            enable: (engine:ggalluvial)
       - type: TargetLayoutBox
-        label: Fill Variable (ggalluvial)
+        label: Fill variable (ggalluvial)
         children:
           - type: VariablesListBox
             name: fillGgalluvial
             maxItemCount: 1
             isTarget: true
+            enable: (engine:ggalluvial)
   - type: CollapseBox
     label: Options
     stretchFactor: 1
@@ -58,7 +60,7 @@ children:
                     name: excl
                   - type: CheckBox
                     name: marg
-                    enable: (orient:vert && !usetitle)
+                    enable: (engine:easyalluvial && orient:vert && !usetitle)
                   - type: ComboBox
                     name: orient
                     enable: (!marg)
@@ -77,12 +79,15 @@ children:
                 children:
                   - type: ComboBox
                     name: fill
+                    enable: (engine:easyalluvial)
                   - type: ComboBox
                     name: bin
+                    enable: (engine:easyalluvial)
                   - type: TextBox
                     name: custombinlabels
                     format: string
                     width: large
+                    enable: (engine:easyalluvial)
                   - type: TextBox
                     name: maxvars
                     format: number
@@ -137,8 +142,10 @@ children:
                 children:
                   - type: CheckBox
                     name: labelNodes
+                    enable: (engine:ggalluvial)
                   - type: CheckBox
                     name: showCounts
+                    enable: (engine:ggalluvial)
 
   - type: CollapseBox
     label: Advanced
@@ -179,4 +186,3 @@ children:
                 children:
                   - type: ComboBox
                     name: flowDirection
-

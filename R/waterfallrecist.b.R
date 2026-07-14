@@ -194,7 +194,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 data_df <- self$data
 
                 # Verify visitTime variable exists
-                visitTimeVar <- jmvcore::toB64(self$options$visitTime)
+                visitTimeVar <- private$.resolveVar(self$options$visitTime)
                 if (!visitTimeVar %in% colnames(data_df)) {
                     private$.addNotice("ERROR", "Visit Time Variable Not Found", paste0('Visit Time variable "', self$options$visitTime, '" not found in dataset. Verify variable name and re-run.'))
                     return(list(valid = FALSE, message = ""))
@@ -208,7 +208,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Check diameter variable exists
-                diameterVar <- jmvcore::toB64(self$options$diameter)
+                diameterVar <- private$.resolveVar(self$options$diameter)
                 if (!diameterVar %in% colnames(data_df)) {
                     private$.addNotice("ERROR", "Diameter Variable Not Found", paste0('Diameter variable "', self$options$diameter, '" not found in dataset. Verify variable name and re-run.'))
                     return(list(valid = FALSE, message = ""))
@@ -223,7 +223,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Check if lesionType is provided and has valid values
                 if (!is.null(self$options$lesionType) && length(self$options$lesionType) > 0) {
-                    lesionTypeVar <- jmvcore::toB64(self$options$lesionType)
+                    lesionTypeVar <- private$.resolveVar(self$options$lesionType)
                     if (lesionTypeVar %in% colnames(data_df)) {
                         lesion_types <- unique(as.character(data_df[[lesionTypeVar]]))
                         lesion_types <- lesion_types[!is.na(lesion_types)]
@@ -247,10 +247,10 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 data_df <- self$data
 
                 # Get variable names (encoded)
-                patientIDVar <- jmvcore::toB64(self$options$patientID)
-                lesionIDVar <- jmvcore::toB64(self$options$lesionID)
-                visitTimeVar <- jmvcore::toB64(self$options$visitTime)
-                diameterVar <- jmvcore::toB64(self$options$diameter)
+                patientIDVar <- private$.resolveVar(self$options$patientID)
+                lesionIDVar <- private$.resolveVar(self$options$lesionID)
+                visitTimeVar <- private$.resolveVar(self$options$visitTime)
+                diameterVar <- private$.resolveVar(self$options$diameter)
 
                 # Build lesion data frame
                 lesion_data <- data.frame(
@@ -263,7 +263,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add optional variables if provided
                 if (!is.null(self$options$lesionType) && length(self$options$lesionType) > 0) {
-                    lesionTypeVar <- jmvcore::toB64(self$options$lesionType)
+                    lesionTypeVar <- private$.resolveVar(self$options$lesionType)
                     if (lesionTypeVar %in% colnames(data_df)) {
                         lesion_data$lesionType <- as.character(data_df[[lesionTypeVar]])
                         # Standardize case
@@ -279,7 +279,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 if (!is.null(self$options$location) && length(self$options$location) > 0) {
-                    locationVar <- jmvcore::toB64(self$options$location)
+                    locationVar <- private$.resolveVar(self$options$location)
                     if (locationVar %in% colnames(data_df)) {
                         lesion_data$location <- as.character(data_df[[locationVar]])
                     } else {
@@ -290,7 +290,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 if (!is.null(self$options$isNewLesion) && length(self$options$isNewLesion) > 0) {
-                    isNewLesionVar <- jmvcore::toB64(self$options$isNewLesion)
+                    isNewLesionVar <- private$.resolveVar(self$options$isNewLesion)
                     if (isNewLesionVar %in% colnames(data_df)) {
                         lesion_data$isNewLesion <- jmvcore::toNumeric(data_df[[isNewLesionVar]])
                         # Mark new lesions
@@ -1086,7 +1086,7 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 nadir_data <- aggregate(
                     percent_change ~ patientID,
                     data = target_sums,
-                    FUN = function(x) x[which.min(abs(x))[1]] # Closest to 0 or most negative
+                    FUN = function(x) x[which.min(x)[1]] # Nadir: most negative (best) % change
                 )
                 names(nadir_data)[2] <- "best_change"
 
@@ -1243,6 +1243,26 @@ waterfallrecistClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # TODO: Add BOR as new variable to original dataset
                 # NOTE: Merge best_responses back to patient-level
                 # New column: "RECIST_BestOverallResponse"
+            },
+            .resolveVar = function(name) {
+                # self$data uses ORIGINAL (raw) variable names in both the R wrapper
+                # and the jamovi GUI, so the raw option value is the correct data[[]]
+                # key. Fall back to a base64-encoded name only for legacy runtimes
+                # that may hand back encoded columns. (jmvcore::toB64() applied
+                # unconditionally never matches raw column names, so every lookup
+                # returned NULL and validation always reported "Variable Not Found".)
+                if (is.null(name) || length(name) == 0 || identical(name, "")) {
+                    return(name)
+                }
+                nm <- names(self$data)
+                if (name %in% nm) {
+                    return(name)
+                }
+                b64 <- jmvcore::toB64(name)
+                if (b64 %in% nm) {
+                    return(b64)
+                }
+                return(name)
             },
             .escapeVar = function(x) {
                 # Escape variable names with spaces/special characters for safe R usage

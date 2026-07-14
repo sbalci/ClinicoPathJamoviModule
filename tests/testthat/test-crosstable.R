@@ -211,9 +211,9 @@ test_that("crosstable SMD balance column computes correctly", {
       data = df, vars = c("xcon", "xbin", "xcat"), group = "grp",
       sty = "gtsummary", showSMD = TRUE)
   })
-  expect_true(inherits(model, "jmvcoreClass"))
+  expect_s3_class(model, "crosstableResults")
 
-  smd <- model$results$smdTable$asDF
+  smd <- model$smdTable$asDF
   expect_equal(nrow(smd), 3)
   # continuous SMD ~ -0.49 (magnitude ~0.49)
   expect_equal(round(abs(smd$absSMD[smd$variable == "xcon"]), 1), 0.5)
@@ -232,6 +232,41 @@ test_that("crosstable SMD requires exactly two groups", {
     x   = rnorm(150))
   model <- crosstable(data = df, vars = "x", group = "grp",
                       sty = "gtsummary", showSMD = TRUE)
-  smd <- model$results$smdTable$asDF
+  smd <- model$smdTable$asDF
   expect_equal(nrow(smd), 0)   # no rows for 3-group data; note explains why
+})
+
+test_that("crosstable SMD uses the same exclusion set as the main table", {
+  skip_if_not_installed("jmvcore")
+
+  df <- data.frame(
+    grp = factor(rep(c("A", "B"), each = 3)),
+    x = c(0, 0, 10, 1, 1, 1),
+    auxiliary = c(NA, 1, 1, 1, 1, 1)
+  )
+
+  pairwise <- crosstable(
+    data = df,
+    vars = c("x", "auxiliary"),
+    group = "grp",
+    sty = "gtsummary",
+    showSMD = TRUE,
+    excl = FALSE
+  )
+  complete_case <- crosstable(
+    data = df,
+    vars = c("x", "auxiliary"),
+    group = "grp",
+    sty = "gtsummary",
+    showSMD = TRUE,
+    excl = TRUE
+  )
+
+  pairwise_x <- pairwise$smdTable$asDF
+  pairwise_x <- pairwise_x$absSMD[pairwise_x$variable == "x"]
+  complete_x <- complete_case$smdTable$asDF
+  complete_x <- complete_x$absSMD[complete_x$variable == "x"]
+
+  expect_equal(pairwise_x, abs((10 / 3 - 1) / sqrt((100 / 3) / 2)))
+  expect_equal(complete_x, abs((5 - 1) / sqrt(50 / 2)))
 })

@@ -9,13 +9,13 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variables for Tree Analysis
+        label: Variables for tree analysis
         children:
           - type: VariablesListBox
             name: vars
             isTarget: true
       - type: TargetLayoutBox
-        label: Reference Variable for Percentages
+        label: Reference variable for percentages
         children:
           - type: VariablesListBox
             name: percvar
@@ -23,16 +23,16 @@ children:
             isTarget: true
           - type: LevelSelector
             name: percvarLevel
-            label: "Reference Level"
+            label: "Reference level"
       - type: TargetLayoutBox
-        label: Continuous Variable (for summary statistics)
+        label: Continuous variable (for summary statistics)
         children:
           - type: VariablesListBox
             name: summaryvar
             maxItemCount: 1
             isTarget: true
       - type: TargetLayoutBox
-        label: Prune Below
+        label: Prune below
         children:
           - type: VariablesListBox
             name: prunebelow
@@ -43,7 +43,7 @@ children:
           - type: LevelSelector
             name: pruneLevel2
       - type: TargetLayoutBox
-        label: Follow Below
+        label: Follow below
         children:
           - type: VariablesListBox
             name: follow

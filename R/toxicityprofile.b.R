@@ -196,6 +196,13 @@ toxicityprofileClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                 if (events_group2 > 0 && total_group2 > 0) {
                     rr <- (events_group1/total_group1) / (events_group2/total_group2)
 
+                    # Initialize before tryCatch: assignments inside the error handler
+                    # write to the handler's local env and are discarded, so pval/rr_ci
+                    # must be defined here to avoid a first-iteration "object not found"
+                    # crash or a prior AE iteration's values leaking onto this one.
+                    pval <- NA
+                    rr_ci <- c(NA, NA)
+
                     # Fisher's exact test
                     tryCatch({
                         fisher_test <- fisher.test(matrix(c(
@@ -205,16 +212,7 @@ toxicityprofileClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                         pval <- fisher_test$p.value
                         rr_ci <- fisher_test$conf.int
                     }, error = function(e) {
-                        # TODO (correctness): `<-` inside this error handler writes to the
-                        # handler's local env and is discarded. On a fisher.test() throw
-                        # (degenerate 2x2 for a rare AE term) the loop falls through to the
-                        # results[[ae]] assignment below with STALE pval/rr_ci from the prior
-                        # iteration (mislabels one AE's p-value/CI onto another), or
-                        # `object 'pval' not found` on the first iteration. Use `<<-` or set
-                        # pval/rr_ci before the tryCatch. Same bug in dead-code
-                        # .performStatisticalTests (~L113), no runtime effect there.
-                        pval <- NA
-                        rr_ci <- c(NA, NA)
+                        NULL
                     })
                 } else {
                     rr <- NA

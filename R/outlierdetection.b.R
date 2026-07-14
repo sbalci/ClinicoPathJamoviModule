@@ -189,20 +189,6 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             # TODO (forward-looking): no `.()` wrapping in this file (~1.5k
             # LOC of educational and method-description text). Address in
             # a /prepare-translation pass.
-            # TODO (forward-looking, perf): no `private$.checkpoint()` calls.
-            # `performance::check_outliers` with composite scoring across
-            # >=4 algorithms (Z-scores, IQR, Mahalanobis, MCD, LOF, OPTICS)
-            # can take many seconds on n > 10k. Add checkpoints between
-            # each method branch in `.runUnivariateOutliers` and
-            # `.runMultivariateOutliers`.
-            # TODO (correctness, forward-looking): composite-score thresholds
-            # and method-mixing logic deserve a clinical-readiness review.
-            # When multiple methods disagree (Z-score flags an obs that MCD
-            # does not), the composite score interpretation is opaque and
-            # there is no safeguard against contradictory flags. Document
-            # the composition rule in the .a.yaml description and add a
-            # method-agreement column to the per-row results table.
-
             # Reset messages
             private$.resetMessages()
 
@@ -693,11 +679,13 @@ outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierde
             }
             
             # Perform outlier detection
+            private$.checkpoint()
             outlier_result <- performance::check_outliers(
                 data,
                 method = method,
                 threshold = threshold
             )
+            private$.checkpoint()
 
             # Check if result is valid
             if (is.null(outlier_result)) {

@@ -105,6 +105,7 @@ A results object containing:
 \tabular{llllll}{
 \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 \code{results$plot} \tab \tab \tab \tab \tab an image \cr
+\code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 }
 }
 \description{

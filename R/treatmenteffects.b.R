@@ -15,7 +15,8 @@ treatmenteffectsClass <- R6::R6Class(
         .sensitivity_results = NULL,
         .model_diagnostics = NULL,
         .heterogeneity_results = NULL,
-        
+        .ps_model = NULL,
+
         .init = function() {
             # Check required variables
             if (is.null(self$options$treatment_var) || is.null(self$options$outcome_var) ||
@@ -432,7 +433,18 @@ treatmenteffectsClass <- R6::R6Class(
                 individual_effects = individual_effects
             )
         },
-        
+
+        .instrumentalVariableAnalysis = function() {
+            # Instrumental variable estimation is not yet implemented. This method
+            # was referenced in .run() (causal_method == "instrumental_variable")
+            # but never defined, which crashed with "attempt to apply non-function".
+            # Emit an informative note instead of crashing.
+            self$results$overview$setNote(
+                "iv_note",
+                "Instrumental variable analysis is not yet implemented; no treatment effect was estimated for this method."
+            )
+        },
+
         .assessCovariateBalance = function() {
             if (is.null(private$.data)) return()
             

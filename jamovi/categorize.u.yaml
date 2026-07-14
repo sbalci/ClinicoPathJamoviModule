@@ -9,7 +9,7 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
-        label: Variable to Categorize
+        label: Variable to categorize
         children:
           - type: VariablesListBox
             name: var

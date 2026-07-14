@@ -232,7 +232,8 @@ biomarkerresponseResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 title="Biomarker-Response Plot",
                 width=600,
                 height=400,
-                requiresData=TRUE))
+                requiresData=TRUE,
+                renderFun=".plot"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="correlation",

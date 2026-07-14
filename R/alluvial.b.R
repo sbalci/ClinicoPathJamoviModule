@@ -2,7 +2,10 @@
 #' @return Alluvial Plot
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom ggplot2 aes after_stat coord_flip element_text geom_text ggplot
+#' @importFrom ggplot2 ggtitle labs scale_fill_brewer scale_fill_viridis_d
+#' @importFrom ggplot2 scale_x_reverse scale_y_reverse theme theme_bw theme_classic
+#' @importFrom ggplot2 theme_grey theme_minimal
 #' @importFrom magrittr %>%
 #' @importFrom easyalluvial alluvial_wide add_marginal_histograms plot_condensation
 #' @importFrom ggalluvial geom_alluvium geom_stratum stat_alluvium stat_stratum StatStratum
@@ -38,6 +41,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
+            duplicate <- vapply(private$.noticeList, function(notice) {
+                identical(notice$type, type) &&
+                    identical(notice$title, title) &&
+                    identical(notice$content, content)
+            }, logical(1))
+            if (any(duplicate))
+                return()
+
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type,
                 title = title,
@@ -75,8 +86,16 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Validate weight variable for weighted alluvial plots
         .validateWeightVariable = function(data, weight_var) {
-            if (is.null(weight_var) || weight_var == "" || !weight_var %in% names(data)) {
-                return(TRUE)  # No weight specified - valid
+            if (is.null(weight_var) || weight_var == "")
+                return(TRUE)
+            if (!weight_var %in% names(data)) {
+                private$.addNotice(
+                    "ERROR",
+                    "Weight Variable Not Found",
+                    paste0("Weight variable '", weight_var,
+                        "' does not exist in the data.")
+                )
+                return(FALSE)
             }
 
             weight_col <- data[[weight_var]]
@@ -97,6 +116,25 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
+            non_missing <- !is.na(weight_col)
+            if (!any(non_missing)) {
+                private$.addNotice(
+                    "ERROR",
+                    "No Valid Weights",
+                    "The weight variable contains only missing values."
+                )
+                return(FALSE)
+            }
+
+            if (any(!is.finite(weight_col[non_missing]))) {
+                private$.addNotice(
+                    "ERROR",
+                    "Non-finite Weights",
+                    "Weights must be finite numeric values or missing."
+                )
+                return(FALSE)
+            }
+
             # Check for negative weights
             n_negative <- sum(weight_col < 0, na.rm = TRUE)
             if (n_negative > 0) {
@@ -108,7 +146,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
-            # TODO (UX): File-wide convert all `# REMOVED Notice:` blocks to HTML output items per docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md (waterfall.b.R is the reference). Affected sites in this file: 85, 260, 474, 492, 549, 643, 695, 754, 787. Currently these conditions fail silently, leaving the user with no feedback (e.g. NA weights skipped, plot generation errors swallowed in tryCatch).
+            if (!any(weight_col > 0, na.rm = TRUE)) {
+                private$.addNotice(
+                    "ERROR",
+                    "No Positive Weights",
+                    "The weight variable must contain at least one positive value."
+                )
+                return(FALSE)
+            }
+
             # Check for NA weights
             n_na <- sum(is.na(weight_col))
             if (n_na > 0) {
@@ -130,7 +176,9 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Remove rows with NA weights
-            data <- data[!is.na(data[[weight_var]]), ]
+            data <- data[!is.na(data[[weight_var]]), , drop = FALSE]
+            if (nrow(data) == 0)
+                return(data)
 
             # Aggregate weights by unique combinations of categorical variables.
             # constructFormula backtick-quotes names with spaces; asFormula allowlist-validates.
@@ -149,20 +197,43 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(data_agg)
         },
 
-        # Handle missing values with transparency reporting
-        .handleMissingValues = function(data, vars) {
-            # Count missing before removal
+        # Handle missing values according to the user-facing exclusion option.
+        .handleMissingValues = function(data, vars, exclude, report = TRUE) {
             n_total <- nrow(data)
             missing_counts <- sapply(vars, function(v) sum(is.na(data[[v]])))
-            any_missing <- any(missing_counts > 0)
 
-            # ALWAYS remove NAs for consistent behavior
-            data_clean <- data[complete.cases(data[, vars, drop=FALSE]), ]
+            if (!any(missing_counts > 0))
+                return(data)
+
+            if (!exclude) {
+                for (var in vars) {
+                    values <- data[[var]]
+                    if (!anyNA(values))
+                        next
+
+                    if (is.factor(values)) {
+                        ordered_values <- is.ordered(values)
+                        old_levels <- levels(values)
+                        values <- as.character(values)
+                        values[is.na(values)] <- "(Missing)"
+                        data[[var]] <- factor(
+                            values,
+                            levels = unique(c(old_levels, "(Missing)")),
+                            ordered = ordered_values
+                        )
+                    } else {
+                        values <- as.character(values)
+                        values[is.na(values)] <- "(Missing)"
+                        data[[var]] <- values
+                    }
+                }
+                return(data)
+            }
+
+            data_clean <- data[stats::complete.cases(data[, vars, drop = FALSE]), ]
             n_removed <- n_total - nrow(data_clean)
 
-            # Report missingness transparently as HTML (Notice objects are
-            # not serialization-safe when dynamically inserted in jamovi).
-            if (n_removed > 0) {
+            if (report && n_removed > 0) {
                 pct_removed <- round(100 * n_removed / n_total, 1)
 
                 vars_with_missing <- names(missing_counts[missing_counts > 0])
@@ -285,9 +356,6 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Note: Warning notices for too many categories are now handled by jmvcore::Notice at lines 262-273
-            # No need for redundant HTML warning
-
             return(TRUE)
         },
 
@@ -302,6 +370,7 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (var in vars) {
                 data[[var]] <- as.factor(data[[var]])
             }
+            data[[fill_var]] <- as.factor(data[[fill_var]])
 
             # Get options
             sankey_style <- self$options$sankeyStyle
@@ -420,19 +489,238 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             return(plot)
         },
+
+        .applyFlowDirection = function(plot, orient, flow_direction) {
+            # Preserve the legacy orientation shortcut only when the newer,
+            # explicit flow-direction option remains at its default.
+            if (identical(flow_direction, "left_right") &&
+                    identical(orient, "horr")) {
+                flow_direction <- "top_bottom"
+            }
+
+            reverse_x <- if ("x" %in% names(plot$data) &&
+                    (is.factor(plot$data$x) || is.character(plot$data$x))) {
+                ggplot2::scale_x_discrete(limits = function(values) rev(values))
+            } else {
+                ggplot2::scale_x_reverse()
+            }
+
+            switch(flow_direction,
+                left_right = plot,
+                right_left = plot + reverse_x,
+                top_bottom = plot + reverse_x + ggplot2::coord_flip(),
+                bottom_top = plot + ggplot2::coord_flip(),
+                plot
+            )
+        },
+
+        .appendDataWarning = function(html) {
+            existing <- self$results$dataWarning$content
+            if (is.null(existing))
+                existing <- ""
+            self$results$dataWarning$setContent(paste0(existing, html))
+            self$results$dataWarning$setVisible(TRUE)
+        },
+
+        .prepareMainPlotState = function() {
+            vars_name <- self$options$vars
+            max_vars <- self$options$maxvars
+            plot_vars <- utils::head(vars_name, max_vars)
+            engine <- self$options$engine
+            weight_var <- self$options$weight
+
+            has_weight <- !is.null(weight_var) && length(weight_var) > 0 &&
+                nzchar(weight_var)
+            if (engine == "ggalluvial" && has_weight &&
+                    !private$.validateWeightVariable(self$data, weight_var)) {
+                return(NULL)
+            }
+
+            fill_var <- plot_vars[1]
+            requested_fill <- self$options$fillGgalluvial
+            if (engine == "ggalluvial" && !is.null(requested_fill) &&
+                    length(requested_fill) > 0 && nzchar(requested_fill)) {
+                if (!requested_fill %in% names(self$data)) {
+                    private$.addNotice(
+                        "ERROR",
+                        "Fill Variable Not Found",
+                        paste0("Fill variable '", requested_fill,
+                            "' does not exist in the data.")
+                    )
+                    return(NULL)
+                }
+                fill_var <- requested_fill
+            }
+
+            if (engine == "ggalluvial" && has_weight &&
+                    weight_var %in% unique(c(plot_vars, fill_var))) {
+                private$.addNotice(
+                    "ERROR",
+                    "Weight Variable Reused",
+                    paste0(
+                        "Weight variable '", weight_var,
+                        "' must be different from the axis and fill variables."
+                    )
+                )
+                return(NULL)
+            }
+
+            vars_to_select <- plot_vars
+            if (engine == "ggalluvial") {
+                vars_to_select <- unique(c(vars_to_select, fill_var))
+                if (has_weight)
+                    vars_to_select <- unique(c(vars_to_select, weight_var))
+            } else if (has_weight) {
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "Weight Variable Ignored",
+                    paste0(
+                        "The weight variable is only supported by the GG Alluvial engine.\n",
+                        "Switch to the GG Alluvial engine to use weighted flows."
+                    )
+                )
+            }
+
+            mydata <- jmvcore::select(self$data, vars_to_select)
+            missing_vars <- plot_vars
+            if (engine == "ggalluvial")
+                missing_vars <- unique(c(missing_vars, fill_var))
+            mydata <- private$.handleMissingValues(
+                mydata,
+                missing_vars,
+                exclude = self$options$excl
+            )
+
+            if (nrow(mydata) == 0) {
+                private$.addNotice(
+                    "ERROR",
+                    "No Complete Data",
+                    paste0(
+                        "All observations have missing values in one or more selected ",
+                        "variables. Cannot generate plot."
+                    )
+                )
+                return(NULL)
+            }
+
+            if (length(vars_name) > max_vars) {
+                warning_html <- paste0(
+                    "<div style='background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #0c5460;'>Variables Truncated</h4>",
+                    "<p style='color: #0c5460;'>You selected <strong>",
+                    length(vars_name), "</strong> variables, but the maximum is <strong>",
+                    max_vars, "</strong>.</p>",
+                    "<p>Only the first <strong>", max_vars,
+                    "</strong> variables are displayed.</p>",
+                    "</div>"
+                )
+                private$.appendDataWarning(warning_html)
+            }
+
+            n_levels <- vapply(plot_vars, function(var) {
+                length(unique(mydata[[var]]))
+            }, integer(1))
+            total_combinations <- prod(n_levels)
+            if (total_combinations > 100) {
+                private$.addNotice(
+                    "STRONG_WARNING",
+                    "Complex Visualization",
+                    paste0(
+                        "The selected variables create ", total_combinations,
+                        " possible flow combinations. This may produce an overcrowded plot.\n",
+                        "Reduce the number of variables or group infrequent categories."
+                    )
+                )
+            }
+
+            if (engine == "ggalluvial" && has_weight) {
+                private$.checkpoint()
+                grouping_vars <- unique(c(plot_vars, fill_var))
+                mydata <- private$.aggregateDataForGgalluvial(
+                    data = mydata,
+                    vars = grouping_vars,
+                    weight_var = weight_var
+                )
+                if (nrow(mydata) == 0) {
+                    private$.addNotice(
+                        "ERROR",
+                        "No Valid Weights",
+                        "No observations with non-missing weights remain."
+                    )
+                    return(NULL)
+                }
+            }
+
+            list(
+                data = mydata,
+                vars = plot_vars,
+                engine = engine,
+                fill_var = fill_var,
+                weight_var = if (engine == "ggalluvial" && has_weight) {
+                    weight_var
+                } else {
+                    NULL
+                }
+            )
+        },
+
+        .prepareCondensationState = function() {
+            cond_var <- self$options$condensationvar
+            if (is.null(cond_var) || length(cond_var) == 0 || !nzchar(cond_var))
+                return(NULL)
+
+            vars_name <- unique(c(cond_var, self$options$vars))
+            mydata <- jmvcore::select(self$data, vars_name)
+            cond_data <- mydata[[cond_var]]
+
+            if (is.numeric(cond_data)) {
+                unique_values <- length(unique(cond_data[!is.na(cond_data)]))
+                if (unique_values > 10) {
+                    cond_var_safe <- htmltools::htmlEscape(cond_var)
+                    html <- paste0(
+                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
+                        "<h4 style='margin-top: 0; color: #856404;'>Continuous Condensation Variable</h4>",
+                        "<p>Condensation variable '<strong>", cond_var_safe,
+                        "</strong>' has <strong>", unique_values,
+                        "</strong> unique values. Select a categorical variable.</p>",
+                        "</div>"
+                    )
+                    self$results$condensationWarning$setContent(html)
+                    return(NULL)
+                }
+            }
+
+            mydata <- private$.handleMissingValues(
+                mydata,
+                vars_name,
+                exclude = self$options$excl,
+                report = FALSE
+            )
+            if (nrow(mydata) == 0) {
+                self$results$condensationWarning$setContent(
+                    "No complete observations remain for the condensation plot."
+                )
+                return(NULL)
+            }
+
+            self$results$condensationWarning$setContent("")
+            list(data = mydata, condensation_var = cond_var)
+        },
+
         .run = function() {
 
             private$.noticeList <- list()
+            private$.renderNotices()
+            self$results$plot$setState(NULL)
+            self$results$plot2$setState(NULL)
+            self$results$condensationWarning$setContent("")
 
-            # TODO (forward-looking): no `.()` wrapping anywhere in this file 
+            # TODO (forward-looking): no `.()` wrapping anywhere in this file:
             # welcome HTML, error/warning HTML, plot captions, and the data
             # summary are English-only. Internationalise in a
             # /prepare-translation pass before the next i18n release.
-            # TODO (forward-looking, perf): no `private$.checkpoint()` anywhere
-            # in `.run()` despite ggalluvial / easyalluvial aggregation being
-            # heavy on wide categorical datasets. Add checkpoints before
-            # `.aggregateDataForGgalluvial` (~L102), before the easyalluvial
-            # call, and before plot rendering to keep the UI responsive.
+            # Plot callbacks do not expose a render-safe cancellation point;
+            # data preparation is interrupted between its expensive phases.
 
             # Input Validation ----
 
@@ -514,9 +802,14 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$dataWarning$setContent("")
                 self$results$dataWarning$setVisible(FALSE)
 
-                # NOTE: Removed INFO notice to avoid serialization errors
-                # INFO notices without return() can cause "attempt to apply non-function" errors
-                # The plot will be generated successfully without the notice
+                main_state <- private$.prepareMainPlotState()
+                if (is.null(main_state))
+                    return()
+                self$results$plot$setState(main_state)
+
+                condensation_state <- private$.prepareCondensationState()
+                if (!is.null(condensation_state))
+                    self$results$plot2$setState(condensation_state)
             }
 
         }
@@ -524,39 +817,15 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot = function(image, ggtheme, theme, ...) {
-            # Main alluvial plot generation function
+            state <- image$state
+            if (is.null(state) || is.null(state$data))
+                return(FALSE)
 
-            # Input validation using shared helper
-            if (!private$.validateAlluvialInputs())
-                return()
-
-            # Wrap plot generation in error handler
             tryCatch({
-                # Data Preparation ----
-                # Extract selected variables and create working dataset
-                varsName <- self$options$vars
-                weight_var <- self$options$weight
-
-                # Validate weight variable BEFORE data preparation
-                if (!private$.validateWeightVariable(self$data, weight_var)) {
-                    return()  # Stop if weight validation fails
-                }
-
-                # Select variables (include weight if specified)
-                vars_to_select <- c(varsName)
-                if (!is.null(weight_var) && weight_var != "" && weight_var %in% names(self$data)) {
-                    vars_to_select <- c(varsName, weight_var)
-                }
-                mydata <- jmvcore::select(self$data, vars_to_select)
-
-                # ALWAYS handle missing values with transparency
-                mydata <- private$.handleMissingValues(mydata, varsName)
-
-                # Check if enough data remains after NA removal
-                if (nrow(mydata) == 0) {
-                    private$.addNotice('ERROR', 'No Complete Data', 'All observations have missing values in one or more selected variables. Cannot generate plot.')
-                    return()
-                }
+                varsName <- state$vars
+                weight_var <- state$weight_var
+                mydata <- state$data
+                engine <- state$engine
 
                 # Configure plot aesthetics 
                 # Set color fill strategy for the alluvial flows.
@@ -572,100 +841,40 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Determine bin labels based on user selection
                 # Note: easyalluvial's bin_labels parameter only controls label display,
                 # not the binning method itself. Actual binning is done by easyalluvial internally.
+                bins <- 5L
                 if (!is.null(custombinlabels) && custombinlabels != "") {
                     # Custom labels provided by user
                     bin <- trimws(strsplit(custombinlabels, ",")[[1]])
+                    bin <- bin[nzchar(bin)]
+                    if (length(bin) < 2) {
+                        private$.addNotice(
+                            "ERROR",
+                            "Invalid Bin Labels",
+                            "Provide at least two non-empty, comma-separated bin labels."
+                        )
+                        return(FALSE)
+                    }
+                    bins <- length(bin)
                 } else {
                     # Use predefined labels based on bin option
                     bin <- switch(bin_option,
                         "default" = c("LL", "ML", "M", "MH", "HH"),
                         "mean" = "mean",
                         "median" = "median",
-                        "min_max" = c("min", "max"),
+                        "min_max" = "min_max",
                         "cuts" = c("Q1", "Q2", "Q3", "Q4", "Q5"),
                         c("LL", "ML", "M", "MH", "HH")  # fallback
                     )
                 }
 
-                # Generate core alluvial plot ----
-                # Using easyalluvial package for robust alluvial diagram generation
-                # Reference: https://erblast.github.io/easyalluvial/
                 maxvars <- self$options$maxvars
-
-                # Warn user if more variables selected than maxvars allows
-                num_selected <- length(varsName)
-                if (num_selected > maxvars) {
-                    # Notice rendered as HTML in dataWarning to avoid the
-                    # jamovi protobuf serialization failure caused by
-                    # dynamically inserted jmvcore::Notice objects.
-
-                    # Keep detailed warning in dataWarning
-                    warning_html <- paste0(
-                        "<div style='background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #0c5460;'>Variables Truncated</h4>",
-                        "<p style='color: #0c5460;'>You selected <strong>", num_selected, "</strong> variables, but maximum is set to <strong>", maxvars, "</strong>.</p>",
-                        "<p>Only the first <strong>", maxvars, "</strong> variables will be displayed in the plot.</p>",
-                        "<p><strong>To show more variables:</strong> Increase the 'Maximum variables' setting (up to 20).</p>",
-                        "</div>"
-                    )
-                    # Append to existing warning if any
-                    existing_warning <- self$results$dataWarning$content
-                    if (!is.null(existing_warning) && nchar(existing_warning) > 0) {
-                        self$results$dataWarning$setContent(paste0(existing_warning, warning_html))
-                    } else {
-                        self$results$dataWarning$setContent(warning_html)
-                    }
-                    self$results$dataWarning$setVisible(TRUE)
-                }
-
-                # Get engine selection
-                engine <- self$options$engine
-
-                # Add interpretability checks
-                # Calculate total possible flow combinations
-                n_levels_per_var <- sapply(varsName, function(v) {
-                    if (is.factor(mydata[[v]])) {
-                        length(levels(mydata[[v]]))
-                    } else {
-                        length(unique(mydata[[v]]))
-                    }
-                })
-                total_combinations <- prod(n_levels_per_var)
-
-                # Warn if too many combinations (spaghetti plot risk)
-                if (total_combinations > 100) {
-                    private$.addNotice('STRONG_WARNING', 'Complex Visualization', paste0(
-                        "The selected variables create ",
-                        total_combinations, " possible flow combinations. ",
-                        "This may result in an overcrowded, difficult-to-interpret plot.\n",
-                        "Recommendations:\n",
-                        " - Reduce the number of variables (currently ", length(varsName), ")\n",
-                        " - Group less frequent categories to reduce category counts\n",
-                        " - Focus on 3-5 variables with 3-7 categories each for optimal readability"
-                    ))
-                }
 
                 # Generate plot based on selected engine ----
                 if (engine == "ggalluvial") {
-                    # Use ggalluvial engine for manual control
-                    # TODO (correctness): `fillGgalluvial` is only checked for is.null if the user picks a column that is NOT in `vars`, it won't be selected into `mydata`, and `rlang::sym(fill_var)` will resolve to a missing column at aes-evaluation time, producing an opaque ggplot error. Either include fillGgalluvial in `vars_to_select` (line ~540) or fall back to `varsName[1]` when fill_var is not present in mydata.
-                    fill_var <- if (!is.null(self$options$fillGgalluvial)) {
-                        self$options$fillGgalluvial
-                    } else {
-                        varsName[1]
-                    }
-
-                    # Aggregate data if weight variable provided
-                    mydata_for_plot <- private$.aggregateDataForGgalluvial(
+                    plot <- private$.createGgalluvialPlot(
                         data = mydata,
                         vars = varsName,
-                        weight_var = weight_var
-                    )
-
-                    plot <- private$.createGgalluvialPlot(
-                        data = mydata_for_plot,
-                        vars = varsName,
-                        fill_var = fill_var,
+                        fill_var = state$fill_var,
                         weight_var = weight_var
                     )
                 } else {
@@ -673,18 +882,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     plot <- easyalluvial::alluvial_wide(
                         data = mydata,
                         max_variables = maxvars,
+                        bins = bins,
                         fill_by = fill,
                         verbose = FALSE,  # Disabled to prevent console clutter in jamovi
                         bin_labels = bin
                     )
-                }
-
-                # Warn if weight is provided but ignored by easyalluvial
-                if (engine == "easyalluvial" && !is.null(weight_var) && weight_var != "") {
-                    private$.addNotice('STRONG_WARNING', 'Weight Variable Ignored', paste0(
-                        "The 'Weight Variable' option is only supported by the GG Alluvial engine.\n",
-                        "Suggestion: Switch 'Plot Engine' to 'GG Alluvial (manual control)' to use weighted flows."
-                    ))
                 }
 
                 # Add marginal histograms if requested (easyalluvial only) ----
@@ -717,16 +919,11 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 orient <- self$options$orient
                 flowDirection <- self$options$flowDirection
 
-                # Handle orientation (legacy) and flow direction (new)
-                if (orient != "vert") {
-                    plot <- plot + ggplot2::coord_flip()
-                } else if (flowDirection == "top_bottom") {
-                    plot <- plot + ggplot2::coord_flip()
-                } else if (flowDirection == "right_left") {
-                    plot <- plot + ggplot2::scale_x_reverse()
-                } else if (flowDirection == "bottom_top") {
-                    plot <- plot + ggplot2::coord_flip() + ggplot2::scale_y_reverse()
-                }
+                plot <- private$.applyFlowDirection(
+                    plot,
+                    orient = orient,
+                    flow_direction = flowDirection
+                )
 
                 # Apply custom title and subtitle ----
                 usetitle <- self$options$usetitle
@@ -775,94 +972,30 @@ alluvialClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            # Condensation plot generation function
-            # Creates a detailed view of how one specific variable relates to others
+            state <- image$state
+            if (is.null(state) || is.null(state$data))
+                return(FALSE)
 
-            # Input validation - requires both variables and condensation variable
-            if (is.null(self$options$condensationvar) || is.null(self$options$vars))
-                return()
-
-            if (nrow(self$data) == 0) {
-                html <- paste0(
-                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
-                    "<h4 style='margin-top: 0; color: #721c24;'>No Data Available</h4>",
-                    "<p style='color: #721c24;'>Data contains no (complete) rows.</p>",
-                    "<p>Please check your data for missing values or filtering issues.</p>",
-                    "</div>"
-                )
-                self$results$condensationWarning$setContent(html)
-                return()
-            }
-
-            # Data preparation for condensation analysis ----
-            # CRITICAL: Only use selected variables to prevent PHI leakage
-            # Use the RAW column name for data-frame lookups and NSE injection
-            # below. Do NOT run this through jmvcore::composeTerm(): that helper
-            # backtick-quotes names with special characters for *formula* use,
-            # which would corrupt `mydata[[condvarName]]` and the `%in%` check
-            # for names containing spaces (e.g. "tumor grade").
-            condvarName <- self$options$condensationvar
-
-            # Ensure condensation variable is included in selected variables
-            varsName <- self$options$vars
-            if (!(condvarName %in% varsName)) {
-                varsName <- c(condvarName, varsName)
-            }
-
-            # Extract ONLY selected variables (prevent PHI leakage)
-            mydata <- jmvcore::select(self$data, varsName)
-
-            # Validate condensation variable is appropriate (not continuous)
-            condvar_data <- mydata[[condvarName]]
-            if (is.numeric(condvar_data)) {
-                unique_vals <- length(unique(condvar_data[!is.na(condvar_data)]))
-                if (unique_vals > 10) {
-                    condvarName_safe <- htmltools::htmlEscape(condvarName)
-                    html <- paste0(
-                        "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 10px 0;'>",
-                        "<h4 style='margin-top: 0; color: #856404;'>Continuous Condensation Variable</h4>",
-                        "<p style='color: #856404;'>Condensation variable '<strong>", condvarName_safe, "</strong>' has <strong>", unique_vals, "</strong> unique values.</p>",
-                        "<p><strong>Security Warning:</strong> Continuous variables can expose patient-level data in condensation plots.</p>",
-                        "<hr style='border-color: #ffc107;'>",
-                        "<p><strong>Required Action:</strong> Condensation plots require categorical variables.</p>",
-                        "<p style='margin: 10px 0;'><strong>Solutions:</strong></p>",
-                        "<ol style='margin-left: 20px;'>",
-                        "<li>Select a different <strong>categorical</strong> variable for condensation</li>",
-                        "<li>Or bin '<strong>", condvarName_safe, "</strong>' first using Data -> Compute</li>",
-                        "<li>Example: Create categories like 'Low', 'Medium', 'High'</li>",
-                        "</ol>",
-                        "</div>"
+            tryCatch({
+                plot <- rlang::inject(
+                    easyalluvial::plot_condensation(
+                        df = state$data,
+                        first = !!rlang::sym(state$condensation_var)
                     )
-                    self$results$condensationWarning$setContent(html)
-                    return()
-                }
-            }
-
-            # Clear warnings if validation passes
-            self$results$condensationWarning$setContent("")
-
-            # Handle missing values based on user preference
-            excl <- self$options$excl
-            if (excl) {mydata <- jmvcore::naOmit(mydata)}
-
-            # Generate condensation plot ----
-            # Condensation plots show detailed relationships between the primary variable
-            # and selected variables only (not the entire dataset)
-            # easyalluvial::plot_condensation() evaluates `first` with NSE
-            # (enquo() + quo_name()), so passing `first = condvarName` captures
-            # the literal symbol "condvarName" instead of the variable's value,
-            # producing "condvarName is not a column in df". Inject the actual
-            # column name as a symbol so quo_name() resolves to the real name.
-            plot2 <- rlang::inject(
-                easyalluvial::plot_condensation(
-                    df = mydata,
-                    first = !!rlang::sym(condvarName)
                 )
-            )
-
-            # Render the condensation plot
-            print(plot2)
-            TRUE
+                plot <- private$.applyColorPalette(plot, self$options$colorPalette)
+                plot <- private$.applyThemeStyle(plot, self$options$themeStyle)
+                print(plot)
+                TRUE
+            }, error = function(e) {
+                private$.addNotice(
+                    "ERROR",
+                    "Condensation Plot Failed",
+                    paste0(e$message, "\nSelect a categorical condensation variable ",
+                        "and check the selected variables for sparse categories.")
+                )
+                FALSE
+            })
         }
     )
 )

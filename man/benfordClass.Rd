@@ -17,6 +17,7 @@ The Benford's Law analysis is a statistical test to determine if the distributio
 This is commonly used in clinical research to detect data entry errors, fraud, or other quality issues.
 The analysis returns structured results with clinical interpretation and actionable guidance.
 }
+\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{benfordBase} -> \code{benfordClass}
 }

@@ -205,7 +205,14 @@ transformationmodelsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             if (nrow(modelData) == 0) {
                 return(list(error = "No complete cases available for analysis."))
             }
-            
+
+            # Guard against zero-event fits: if the specified event level matches no
+            # observed value (or all events are dropped as incomplete cases), status is
+            # all-0, which passes the binary check above but makes survreg fit nonsense.
+            if (sum(modelData$status) == 0) {
+                return(list(error = "No events observed for the specified event level. Check the 'Event Level' value against the outcome variable."))
+            }
+
             # Add observation identifiers
             modelData$obs_id <- seq_len(nrow(modelData))
             

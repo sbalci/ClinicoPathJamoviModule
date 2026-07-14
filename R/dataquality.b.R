@@ -11,19 +11,55 @@
 dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityClass",
     inherit = dataqualityBase, private = list(
 
+    .mcarTestMessage = function(data) {
+        numeric_data <- data[vapply(data, is.numeric, logical(1))]
+        if (ncol(numeric_data) < 2) {
+            return("Little's MCAR test was not run because it requires at least two numeric variables.")
+        }
+        if (!anyNA(numeric_data)) {
+            return("Little's MCAR test was not run because the selected numeric variables have no missing values.")
+        }
+
+        if (!requireNamespace("naniar", quietly = TRUE)) {
+            return("Little's MCAR test is unavailable because the optional naniar package is not installed.")
+        }
+
+        tryCatch({
+            result <- as.data.frame(naniar::mcar_test(numeric_data))[1, , drop = FALSE]
+            interpretation <- if (result$p.value < 0.05) {
+                "The data provide evidence against the MCAR assumption."
+            } else {
+                paste0(
+                    "The test does not reject the MCAR assumption, but this does not ",
+                    "prove that the data are MCAR."
+                )
+            }
+            sprintf(
+                paste0(
+                    "Little's MCAR test (naniar): chi-square = %.2f, df = %s, ",
+                    "p = %.4f, missing patterns = %s. %s"
+                ),
+                result$statistic,
+                result$df,
+                result$p.value,
+                result$missing.patterns,
+                interpretation
+            )
+        }, error = function(e) {
+            paste0(
+                "Little's MCAR test could not be computed for the selected variables. ",
+                "Review variable types and missing-data patterns."
+            )
+        })
+    },
 
     .run = function() {
 
-        # TODO (data hygiene): optional dependency `BaylorEdPsych::LittleMCAR`
-        # is invoked via `requireNamespace(quietly=TRUE)` (~L201-208) but
-        # the package is not listed in `DESCRIPTION` Imports or Suggests.
-        # Add to Suggests so R CMD check and reverse-dep tools can audit it.
         # TODO (forward-looking): no `.()` wrapping in this file (~1.1k LOC
         # of welcome HTML, recommendations, and explanations). Address in
         # a /prepare-translation pass.
-        # TODO (forward-looking, perf): no `private$.checkpoint()` despite
-        # visdat plot generation (vis_dat, vis_miss, vis_guess) which can be
-        # slow on wide tables. Add checkpoints before each plot path.
+        # TODO (forward-looking, perf): the visdat plot callbacks can be slow
+        # on wide tables; add render-safe cancellation points when supported.
 
         # Check if variables have been selected. If not, display a welcoming message.
         if (length(self$options$vars) == 0) {
@@ -201,20 +237,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                                     max(case_missing),
                                     ncol(analysis_data))
 
-            # # Little's MCAR test if available and >1 var
-            # mcar_msg <- ""
-            # if (ncol(analysis_data) > 1 && requireNamespace("BaylorEdPsych", quietly = TRUE)) {
-            #     try({
-            #         mcar <- BaylorEdPsych::LittleMCAR(analysis_data)
-            #         mcar_msg <- sprintf("Little's MCAR test: chi-square=%.2f, df=%s, p=%.4f",
-            #                             mcar$chi.square, mcar$df, mcar$p.value)
-            #     }, silent = TRUE)
-            # } else if (ncol(analysis_data) > 1) {
-            #     mcar_msg <- "Little's MCAR test skipped (BaylorEdPsych not installed)."
-            # }
-            # MCAR block is disabled above; keep mcar_msg defined so building
-            # the HTML below does not error with "object 'mcar_msg' not found".
-            mcar_msg <- ""
+            mcar_msg <- private$.mcarTestMessage(analysis_data)
 
             # Threshold flagging
             threshold <- self$options$missing_threshold_visual
@@ -231,7 +254,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 "<h4>Missing Value Analysis</h4>",
                 paste(htmltools::htmlEscape(names(missing_summary)), missing_summary, sep = ": ", collapse = "<br>"),
                 "<br>", case_summary,
-                if (mcar_msg != "") paste0("<br>", mcar_msg) else "",
+                "<br>", htmltools::htmlEscape(mcar_msg),
                 flag_html
             )
         }
@@ -767,7 +790,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 "<li><strong>If retaining, use imputation:</strong>",
                 "<ul>",
                 "<li>Multiple imputation (mice package): <code>mice::mice(data, m=5, method='pmm')</code></li>",
-                "<li>Only if missing data is MAR (Missing At Random) - check Little's MCAR test above</li>",
+                "<li>Review Little's MCAR test when available, but do not infer MAR solely from this test</li>",
                 "<li>Report imputation method and sensitivity analysis in your manuscript</li>",
                 "</ul></li>",
                 "<li><strong>Alternative:</strong> Restrict to complete cases but report potential selection bias</li>",
@@ -795,7 +818,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 "<p><strong>Recommended approach:</strong></p>",
                 "<ul style='line-height: 1.8;'>",
                 "<li><strong>Preferred:</strong> Multiple imputation with sensitivity analysis</li>",
-                "<li><strong>Acceptable:</strong> Complete-case analysis if MCAR confirmed (Little's test p>0.05)</li>",
+                "<li><strong>Complete-case analysis:</strong> Consider only when MCAR is substantively plausible; a non-significant Little's test does not prove MCAR</li>",
                 "<li><strong>Report:</strong> Compare baseline characteristics between complete vs. incomplete cases</li>",
                 "<li><strong>Document:</strong> State missingness mechanism and handling method in Methods section</li>",
                 "</ul>",
@@ -953,10 +976,10 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             "<li><strong>What it tests:</strong> Whether missing data is completely random (MCAR) vs. systematic (MAR/MNAR)</li>",
             "<li><strong>Interpretation:</strong>",
             "<ul>",
-            "<li>p > 0.05: Missing data is MCAR (safe to use complete-case analysis or imputation)</li>",
-            "<li>p \u{2264} 0.05: Missing data is NOT random (use caution with complete-case analysis; prefer imputation)</li>",
+            "<li>p > 0.05: The test does not reject MCAR; it does not prove MCAR</li>",
+            "<li>p \u{2264} 0.05: The data provide evidence against MCAR; use caution with complete-case analysis</li>",
             "</ul></li>",
-            "<li><strong>Clinical relevance:</strong> If data is MCAR, deleting cases doesn't bias results (but reduces power)</li>",
+            "<li><strong>Clinical relevance:</strong> Even when MCAR is plausible, deleting cases reduces power and should be reported</li>",
             "</ul>",
             "</div>",
 

@@ -149,74 +149,6 @@ validate_module_integrity <- function(module_dir, module_name, required_dirs = N
   return(TRUE)
 }
 
-# Dependency management: Check module dependencies
-check_module_dependencies <- function(module_dir) {
-  desc_file <- file.path(module_dir, "DESCRIPTION")
-
-  if (!file.exists(desc_file)) {
-    warning("DESCRIPTION file not found: ", desc_file)
-    return(FALSE)
-  }
-
-  tryCatch({
-    desc_content <- read.dcf(desc_file)
-
-    # Check Imports
-    if ("Imports" %in% colnames(desc_content)) {
-      imports <- desc_content[1, "Imports"]
-      if (!is.na(imports)) {
-        import_packages <- trimws(strsplit(imports, ",")[[1]])
-        import_packages <- gsub("\\(.*\\)", "", import_packages)  # Remove version specs
-        import_packages <- trimws(import_packages)  # Trim whitespace again
-
-        missing_imports <- c()
-        for (pkg in import_packages) {
-          if (nchar(pkg) > 0 && !requireNamespace(pkg, quietly = TRUE)) {
-            missing_imports <- c(missing_imports, pkg)
-          }
-        }
-
-        if (length(missing_imports) > 0) {
-          warning("Missing imported packages for ", basename(module_dir), ": ",
-                  paste(missing_imports, collapse = ", "))
-          return(FALSE)
-        }
-      }
-    }
-
-    # Check Depends
-    if ("Depends" %in% colnames(desc_content)) {
-      depends <- desc_content[1, "Depends"]
-      if (!is.na(depends)) {
-        depend_packages <- trimws(strsplit(depends, ",")[[1]])
-        depend_packages <- gsub("\\(.*\\)", "", depend_packages)  # Remove version specs
-        depend_packages <- trimws(depend_packages)  # Trim whitespace again
-        depend_packages <- depend_packages[depend_packages != "R" & nchar(depend_packages) > 0]  # Exclude R itself and empty strings
-
-        missing_depends <- c()
-        for (pkg in depend_packages) {
-          if (nchar(pkg) > 0 && !requireNamespace(pkg, quietly = TRUE)) {
-            missing_depends <- c(missing_depends, pkg)
-          }
-        }
-
-        if (length(missing_depends) > 0) {
-          warning("Missing dependency packages for ", basename(module_dir), ": ",
-                  paste(missing_depends, collapse = ", "))
-          return(FALSE)
-        }
-      }
-    }
-
-    message("✅ Dependencies validated: ", basename(module_dir))
-    return(TRUE)
-
-  }, error = function(e) {
-    warning("Failed to check dependencies for ", basename(module_dir), ": ", e$message)
-    return(FALSE)
-  })
-}
-
 # Prune DESCRIPTION.backup.<timestamp> files older than `days` days.
 # Uses the filename timestamp (not file mtime) so git checkouts / OS-level
 # touches don't accidentally extend the lifespan. Silent on no-op; reports
@@ -1018,131 +950,350 @@ setup_parallel_processing <- function(enabled = FALSE, max_workers = 4) {
 # those packages were absent from the submodule Imports. jamovi installs only a
 # submodule's Imports, so end users crashed even though the umbrella was fine.
 #
-# check_module_dependencies() closes that gap: it parses each distributed R file
-# and extracts the ACTUAL package usages (SYMBOL_PACKAGE tokens from the R parser,
-# which ignores mentions inside comments/strings), then asserts every used package
-# is declared in that submodule's DESCRIPTION. Packages that are referenced only
-# behind a requireNamespace() guard are reported as WARNINGS (they degrade
-# gracefully and may legitimately live in Suggests); unguarded-and-undeclared
-# packages are ERRORS (they crash on a clean install).
+# check_module_dependencies() closes that gap by walking each parsed R expression,
+# so package-like text in comments and strings is ignored. Unguarded namespace or
+# package-attachment use must be declared in Imports/Depends. Use that is proven
+# optional by lexical requireNamespace() control flow may instead be in Suggests.
+# Only Priority: base packages are implicit; Recommended and transitive packages
+# still require a direct declaration.
 # =============================================================================
 
-# Base + recommended packages ship with every R install and never need declaring.
-get_base_recommended_packages <- function() {
-  fallback <- c("base", "boot", "class", "cluster", "codetools", "compiler",
-                "datasets", "foreign", "graphics", "grDevices", "grid",
-                "KernSmooth", "lattice", "MASS", "Matrix", "methods", "mgcv",
-                "nlme", "nnet", "parallel", "rpart", "spatial", "splines",
-                "stats", "stats4", "survival", "tcltk", "tools", "utils")
+# Only Priority: base packages are implicit. Priority: recommended packages (for
+# example MASS and boot) still need direct DESCRIPTION declarations when used.
+get_base_packages <- function() {
+  fallback <- c("base", "compiler", "datasets", "graphics", "grDevices", "grid",
+                "methods", "parallel", "splines", "stats", "stats4", "tcltk",
+                "tools", "utils")
   out <- tryCatch({
     ip <- utils::installed.packages()
     prio <- ip[, "Priority"]
-    base_rec <- rownames(ip)[!is.na(prio) & prio %in% c("base", "recommended")]
-    unique(c(fallback, base_rec))
+    base <- rownames(ip)[!is.na(prio) & prio == "base"]
+    unique(c(fallback, base))
   }, error = function(e) fallback)
   out
 }
 
-# Extract packages actually referenced in R source via `pkg::` / `pkg:::` (robust:
-# uses the R parser, so `pkg::x` inside a comment or string is NOT counted) plus
-# the set of packages named inside a requireNamespace("pkg") guard.
+# Extract packages referenced through `pkg::` / `pkg:::` and classify each use by
+# lexical control flow. A use is optional only inside the true branch of a positive
+# requireNamespace("pkg") check, or after a terminal negative guard such as
+# `if (!requireNamespace("pkg")) return()` in the same block.
 scan_r_package_usage <- function(r_dir) {
-  used <- character(0)
+  required <- character(0)
   guarded <- character(0)
-  if (!dir.exists(r_dir)) return(list(used = used, guarded = guarded))
+  parse_errors <- character(0)
+  empty <- list(
+    required = required,
+    guarded = guarded,
+    used = character(0),
+    parse_errors = parse_errors
+  )
+  if (!dir.exists(r_dir)) return(empty)
+
+  call_name <- function(expr) {
+    if (!is.call(expr)) return(NA_character_)
+    head <- expr[[1]]
+    if (is.symbol(head)) return(as.character(head))
+    if (is.call(head) && identical(head[[1]], as.name("::")) &&
+        as.character(head[[2]]) == "base") {
+      return(as.character(head[[3]]))
+    }
+    NA_character_
+  }
+
+  literal_package_arg <- function(expr) {
+    if (!is.call(expr) || length(expr) < 2) return(character(0))
+    args <- as.list(expr[-1])
+    arg_names <- names(args)
+    package_index <- match("package", arg_names)
+    if (is.na(package_index)) package_index <- 1L
+    arg <- args[[package_index]]
+    if (is.character(arg) && length(arg) == 1) return(arg)
+    character_only_index <- match("character.only", arg_names)
+    character_only <- !is.na(character_only_index) &&
+      isTRUE(args[[character_only_index]])
+    if (is.symbol(arg) && !character_only) return(as.character(arg))
+    character(0)
+  }
+
+  require_namespace_pkg <- function(expr) {
+    if (!is.call(expr) || !identical(call_name(expr), "requireNamespace")) {
+      return(character(0))
+    }
+    args <- as.list(expr[-1])
+    if (length(args) == 0) return(character(0))
+    package_index <- match("package", names(args))
+    if (is.na(package_index)) package_index <- 1L
+    arg <- args[[package_index]]
+    if (is.character(arg) && length(arg) == 1) arg else character(0)
+  }
+
+  common <- function(x, y) intersect(unique(x), unique(y))
+
+  available_when_true <- NULL
+  available_when_false <- NULL
+
+  available_when_true <- function(expr) {
+    if (!is.call(expr)) return(character(0))
+    pkg <- require_namespace_pkg(expr)
+    if (length(pkg) > 0) return(pkg)
+
+    head <- expr[[1]]
+    name <- call_name(expr)
+    if (identical(head, as.name("(")) || identical(name, "isTRUE")) {
+      return(available_when_true(expr[[2]]))
+    }
+    if (identical(name, "isFALSE")) {
+      return(available_when_false(expr[[2]]))
+    }
+    if (identical(head, as.name("!"))) {
+      return(available_when_false(expr[[2]]))
+    }
+    if (identical(head, as.name("&&")) || identical(head, as.name("&"))) {
+      return(unique(c(
+        available_when_true(expr[[2]]),
+        available_when_true(expr[[3]])
+      )))
+    }
+    if (identical(head, as.name("||")) || identical(head, as.name("|"))) {
+      return(common(
+        available_when_true(expr[[2]]),
+        available_when_true(expr[[3]])
+      ))
+    }
+    character(0)
+  }
+
+  available_when_false <- function(expr) {
+    if (!is.call(expr)) return(character(0))
+
+    head <- expr[[1]]
+    name <- call_name(expr)
+    if (identical(head, as.name("(")) || identical(name, "isTRUE")) {
+      return(available_when_false(expr[[2]]))
+    }
+    if (identical(name, "isFALSE")) {
+      return(available_when_true(expr[[2]]))
+    }
+    if (identical(head, as.name("!"))) {
+      return(available_when_true(expr[[2]]))
+    }
+    if (identical(head, as.name("&&")) || identical(head, as.name("&"))) {
+      return(common(
+        available_when_false(expr[[2]]),
+        available_when_false(expr[[3]])
+      ))
+    }
+    if (identical(head, as.name("||")) || identical(head, as.name("|"))) {
+      return(unique(c(
+        available_when_false(expr[[2]]),
+        available_when_false(expr[[3]])
+      )))
+    }
+    character(0)
+  }
+
+  is_terminal <- function(expr) {
+    if (!is.call(expr)) return(FALSE)
+    head <- expr[[1]]
+    if (identical(head, as.name("{"))) {
+      return(length(expr) >= 2 && is_terminal(expr[[length(expr)]]))
+    }
+    if (identical(head, as.name("if"))) {
+      return(length(expr) >= 4 &&
+             is_terminal(expr[[3]]) && is_terminal(expr[[4]]))
+    }
+    name <- call_name(expr)
+    identical(name, "return") || identical(name, "stop") ||
+      (is.call(head) && identical(head[[1]], as.name("::")) &&
+       as.character(head[[2]]) == "jmvcore" &&
+       as.character(head[[3]]) == "reject")
+  }
+
+  continuation_guards <- function(expr) {
+    if (!is.call(expr) || !identical(expr[[1]], as.name("if"))) {
+      return(character(0))
+    }
+    true_terminal <- is_terminal(expr[[3]])
+    false_terminal <- length(expr) >= 4 && is_terminal(expr[[4]])
+    if (true_terminal && !false_terminal) {
+      return(available_when_false(expr[[2]]))
+    }
+    if (false_terminal && !true_terminal) {
+      return(available_when_true(expr[[2]]))
+    }
+    character(0)
+  }
+
+  record_package <- function(pkg, active_guards) {
+    if (length(pkg) != 1 || is.na(pkg) || !nzchar(pkg)) return(invisible(NULL))
+    if (pkg %in% active_guards) guarded <<- c(guarded, pkg)
+    else required <<- c(required, pkg)
+    invisible(NULL)
+  }
+
+  walk <- NULL
+  walk_condition <- function(expr, active_guards) {
+    if (!is.call(expr)) return(invisible(NULL))
+    head <- expr[[1]]
+    if (identical(head, as.name("&&"))) {
+      walk(expr[[2]], active_guards)
+      walk(expr[[3]], unique(c(
+        active_guards,
+        available_when_true(expr[[2]])
+      )))
+      return(invisible(NULL))
+    }
+    if (identical(head, as.name("||"))) {
+      walk(expr[[2]], active_guards)
+      walk(expr[[3]], unique(c(
+        active_guards,
+        available_when_false(expr[[2]])
+      )))
+      return(invisible(NULL))
+    }
+    walk(expr, active_guards)
+  }
+
+  walk <- function(expr, active_guards = character(0)) {
+    if (!is.call(expr)) return(invisible(NULL))
+
+    head <- expr[[1]]
+    if (identical(head, as.name("::")) || identical(head, as.name(":::"))) {
+      record_package(as.character(expr[[2]]), active_guards)
+      return(invisible(NULL))
+    }
+
+    name <- call_name(expr)
+    if (name %in% c("library", "require")) {
+      record_package(literal_package_arg(expr), active_guards)
+    }
+
+    if (identical(head, as.name("if"))) {
+      condition <- expr[[2]]
+      walk_condition(condition, active_guards)
+      walk(expr[[3]], unique(c(
+        active_guards,
+        available_when_true(condition)
+      )))
+      if (length(expr) >= 4) {
+        walk(expr[[4]], unique(c(
+          active_guards,
+          available_when_false(condition)
+        )))
+      }
+      return(invisible(NULL))
+    }
+
+    if (identical(head, as.name("{"))) {
+      block_guards <- active_guards
+      if (length(expr) >= 2) {
+        for (i in 2:length(expr)) {
+          walk(expr[[i]], block_guards)
+          block_guards <- unique(c(
+            block_guards,
+            continuation_guards(expr[[i]])
+          ))
+        }
+      }
+      return(invisible(NULL))
+    }
+
+    if (identical(head, as.name("&&")) || identical(head, as.name("||"))) {
+      walk_condition(expr, active_guards)
+      return(invisible(NULL))
+    }
+
+    for (i in seq_along(expr)) walk(expr[[i]], active_guards)
+    invisible(NULL)
+  }
 
   r_files <- list.files(r_dir, pattern = "\\.[Rr]$", full.names = TRUE)
   for (f in r_files) {
-    parsed <- tryCatch(parse(f, keep.source = TRUE), error = function(e) NULL)
-    if (!is.null(parsed)) {
-      pd <- tryCatch(utils::getParseData(parsed), error = function(e) NULL)
-      if (!is.null(pd) && nrow(pd) > 0) {
-        pkgs <- pd$text[pd$token == "SYMBOL_PACKAGE"]
-        used <- c(used, pkgs)
+    parsed <- tryCatch(
+      parse(f, keep.source = FALSE),
+      error = function(e) {
+        parse_errors <<- c(
+          parse_errors,
+          paste0(basename(f), ": ", conditionMessage(e))
+        )
+        NULL
       }
-    }
-    # requireNamespace("pkg") / requireNamespace('pkg') guards (raw-text scan is
-    # adequate here: this only downgrades ERROR -> WARNING, never the reverse).
-    lines <- tryCatch(readLines(f, warn = FALSE), error = function(e) character(0))
-    g <- regmatches(lines, gregexpr("requireNamespace\\(\\s*[\"']([A-Za-z0-9.]+)[\"']", lines))
-    g <- unlist(g)
-    if (length(g) > 0) {
-      g <- sub("requireNamespace\\(\\s*[\"']([A-Za-z0-9.]+)[\"'].*", "\\1", g)
-      guarded <- c(guarded, g)
-    }
+    )
+    if (!is.null(parsed)) for (expr in parsed) walk(expr)
   }
-  list(used = unique(used), guarded = unique(guarded))
+
+  required <- unique(required)
+  guarded <- setdiff(unique(guarded), required)
+  list(
+    required = required,
+    guarded = guarded,
+    used = unique(c(required, guarded)),
+    parse_errors = unique(parse_errors)
+  )
 }
 
-# Packages declared in a DESCRIPTION (Imports + Depends + Suggests), version-stripped.
-get_declared_packages <- function(desc_file) {
-  if (!file.exists(desc_file)) return(character(0))
+# Packages declared in a DESCRIPTION, keeping runtime requirements separate
+# from optional Suggests.
+get_description_dependencies <- function(desc_file) {
+  empty <- list(required = character(0), optional = character(0))
+  if (!file.exists(desc_file)) return(empty)
   dcf <- tryCatch(read.dcf(desc_file), error = function(e) NULL)
-  if (is.null(dcf)) return(character(0))
-  fields <- intersect(c("Imports", "Depends", "Suggests"), colnames(dcf))
-  vals <- unlist(lapply(fields, function(fld) dcf[1, fld]))
-  vals <- vals[!is.na(vals)]
-  if (length(vals) == 0) return(character(0))
-  toks <- unlist(strsplit(paste(vals, collapse = ","), ","))
-  toks <- trimws(gsub("\\s*\\([^)]*\\)", "", toks))   # drop version specs
-  toks <- toks[nchar(toks) > 0 & toks != "R"]
-  unique(toks)
+  if (is.null(dcf)) return(empty)
+
+  parse_fields <- function(fields) {
+    fields <- intersect(fields, colnames(dcf))
+    if (length(fields) == 0) return(character(0))
+    vals <- unlist(lapply(fields, function(field) dcf[1, field]))
+    vals <- vals[!is.na(vals)]
+    if (length(vals) == 0) return(character(0))
+    packages <- unlist(strsplit(paste(vals, collapse = ","), ","))
+    packages <- trimws(gsub("\\s*\\([^)]*\\)", "", packages))
+    unique(packages[nchar(packages) > 0 & packages != "R"])
+  }
+
+  list(
+    required = parse_fields(c("Imports", "Depends")),
+    optional = parse_fields("Suggests")
+  )
 }
 
-# Recursive Depends/Imports/LinkingTo closure of a set of packages, using the
-# LOCAL installed-package DB (no internet). A package pulled in transitively is
-# installed on the user's machine even if the submodule doesn't declare it, so
-# `pkg::` against it won't crash -- but it should still be declared directly
-# (R CMD check flags it), hence "hygiene" rather than "crash".
-get_transitive_dependencies <- function(declared) {
-  if (length(declared) == 0) return(character(0))
-  tryCatch({
-    db <- utils::installed.packages()
-    deps <- tools::package_dependencies(declared, db = db, recursive = TRUE,
-                                        which = c("Depends", "Imports", "LinkingTo"))
-    unique(unlist(deps, use.names = FALSE))
-  }, error = function(e) character(0))
-}
-
-# Check a single module directory. Returns list with three severities:
-#   errors  = used via pkg::, undeclared, unguarded, AND not transitively available -> CRASH
-#   hygiene = used via pkg::, undeclared, but transitively available -> should declare directly
-#   warnings= used only behind requireNamespace(), undeclared -> should be in Suggests
+# Check a single module directory. Unguarded usage requires Imports/Depends;
+# lexically guarded usage may be declared in Imports/Depends or Suggests.
 check_module_dependencies <- function(module_dir, module_name = basename(module_dir),
-                                       base_recommended = get_base_recommended_packages()) {
+                                       base_packages = get_base_packages()) {
   r_dir <- file.path(module_dir, "R")
   desc_file <- file.path(module_dir, "DESCRIPTION")
 
   usage <- scan_r_package_usage(r_dir)
-  declared <- get_declared_packages(desc_file)
+  dependencies <- get_description_dependencies(desc_file)
+  package_name <- tryCatch(
+    read.dcf(desc_file)[1, "Package"],
+    error = function(e) module_name
+  )
+  if (is.na(package_name) || !nzchar(package_name)) package_name <- module_name
 
-  # A module never needs to declare itself or base/recommended packages.
-  ignore <- unique(c(base_recommended, module_name))
-  transitive <- get_transitive_dependencies(declared)
-
-  undeclared <- setdiff(usage$used, c(declared, ignore))
-
-  # Split undeclared into guarded (optional -> Suggests) vs unguarded (required).
-  undeclared_guarded   <- intersect(undeclared, usage$guarded)
-  undeclared_unguarded <- setdiff(undeclared, usage$guarded)
-
-  # Among required-but-undeclared: transitively available is a hygiene issue;
-  # genuinely absent is a hard crash.
-  hygiene <- intersect(undeclared_unguarded, transitive)
-  errors  <- setdiff(undeclared_unguarded, transitive)
+  ignore <- unique(c(base_packages, package_name))
+  required_missing <- setdiff(
+    usage$required,
+    c(dependencies$required, ignore)
+  )
+  optional_missing <- setdiff(
+    usage$guarded,
+    c(dependencies$required, dependencies$optional, ignore)
+  )
 
   list(module = module_name,
-       errors = sort(errors),
-       hygiene = sort(hygiene),
-       warnings = sort(undeclared_guarded),
+       errors = sort(required_missing),
+       warnings = sort(optional_missing),
+       parse_errors = usage$parse_errors,
        used = usage$used)
 }
 
 # Aggregate check across modules. `module_specs` is a named list: name -> dir.
-# Prints a report and stop()s if any module has unguarded-undeclared packages.
+# Prints a report and stops for any declaration or source-parse violation.
 check_all_modules_dependencies <- function(module_specs, fail_on_error = TRUE) {
   cat("\n🔎 Reconciling submodule dependencies (pkg:: usage vs DESCRIPTION)...\n")
-  base_rec <- get_base_recommended_packages()
+  base <- get_base_packages()
   any_errors <- FALSE
 
   for (nm in names(module_specs)) {
@@ -1151,29 +1302,32 @@ check_all_modules_dependencies <- function(module_specs, fail_on_error = TRUE) {
       cat("  ⏭️  ", nm, ": directory not found, skipping\n", sep = "")
       next
     }
-    res <- check_module_dependencies(dir, nm, base_rec)
-    if (length(res$errors) == 0 && length(res$hygiene) == 0 && length(res$warnings) == 0) {
+    res <- check_module_dependencies(dir, nm, base)
+    if (length(res$errors) == 0 && length(res$warnings) == 0 &&
+        length(res$parse_errors) == 0) {
       cat("  ✅ ", nm, ": all used packages declared\n", sep = "")
     }
+    if (length(res$parse_errors) > 0) {
+      any_errors <- TRUE
+      cat("  ❌ ", nm, ": could not parse R source: ",
+          paste(res$parse_errors, collapse = "; "), "\n", sep = "")
+    }
     if (length(res$warnings) > 0) {
+      any_errors <- TRUE
       cat("  ⚠️  ", nm, ": used behind requireNamespace() but NOT declared (add to Suggests): ",
           paste(res$warnings, collapse = ", "), "\n", sep = "")
     }
-    if (length(res$hygiene) > 0) {
-      cat("  ⚠️  ", nm, ": used via pkg:: and only transitively available -- declare directly (R CMD check): ",
-          paste(res$hygiene, collapse = ", "), "\n", sep = "")
-    }
     if (length(res$errors) > 0) {
       any_errors <- TRUE
-      cat("  ❌ ", nm, ": used via pkg:: but NOT declared and NOT available (WILL CRASH on install): ",
+      cat("  ❌ ", nm, ": unguarded package use is not in Imports/Depends: ",
           paste(res$errors, collapse = ", "), "\n", sep = "")
     }
   }
 
   if (any_errors && fail_on_error) {
     stop("❌ Dependency reconciliation failed: one or more submodules use packages ",
-         "via `pkg::` that are not declared in their DESCRIPTION Imports. Add the ",
-         "packages listed above to the relevant submodule DESCRIPTION and re-run.")
+         "without a direct DESCRIPTION declaration. Add required ",
+         "packages to Imports/Depends and guarded optional packages to Suggests.")
   }
   invisible(!any_errors)
 }

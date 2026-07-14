@@ -31,7 +31,7 @@ options:
             The data as a data frame.
 
     - name: vars
-      title: Variables for Analysis
+      title: Variables for analysis
       type: Variables
       suggested:
         - continuous
@@ -43,16 +43,16 @@ options:
             based on the selected variables using the chosen detection methods.
 
     - name: method_category
-      title: Detection Method Category
+      title: Detection method category
       type: List
       options:
-        - title: "Univariate Methods"
+        - title: "Univariate methods"
           name: univariate
-        - title: "Multivariate Methods"  
+        - title: "Multivariate methods"
           name: multivariate
-        - title: "Composite (Multiple Methods)"
+        - title: "Composite (multiple methods)"
           name: composite
-        - title: "All Methods"
+        - title: "All methods"
           name: all
       default: composite
       description:
@@ -65,18 +65,18 @@ options:
             complete blood count panels.
 
     - name: univariate_methods
-      title: Univariate Methods
+      title: Univariate method
       type: List
       options:
-        - title: "Robust Z-Score (MAD-based)"
+        - title: "Robust Z-score (MAD-based)"
           name: zscore_robust
-        - title: "Standard Z-Score"
+        - title: "Standard Z-score"
           name: zscore
-        - title: "Interquartile Range (IQR)"
+        - title: "Interquartile range (IQR)"
           name: iqr
-        - title: "Equal-Tailed Interval"
+        - title: "Equal-tailed interval"
           name: eti
-        - title: "Highest Density Interval"
+        - title: "Highest density interval"
           name: hdi
       default: zscore_robust
       description:
@@ -84,18 +84,18 @@ options:
             Specific univariate method for outlier detection when univariate category is selected.
 
     - name: multivariate_methods
-      title: Multivariate Methods
+      title: Multivariate method
       type: List
       options:
-        - title: "Mahalanobis Distance"
+        - title: "Mahalanobis distance"
           name: mahalanobis
-        - title: "Robust Mahalanobis Distance"
+        - title: "Robust Mahalanobis distance"
           name: mahalanobis_robust
-        - title: "Minimum Covariance Determinant (MCD)"
+        - title: "Minimum covariance determinant (MCD)"
           name: mcd
-        - title: "OPTICS Clustering"
+        - title: "OPTICS clustering"
           name: optics
-        - title: "Local Outlier Factor (LOF)"
+        - title: "Local outlier factor (LOF)"
           name: lof
       default: mahalanobis
       description:
@@ -103,7 +103,7 @@ options:
             Specific multivariate method for outlier detection when multivariate category is selected.
 
     - name: composite_threshold
-      title: Composite Score Threshold
+      title: Composite score threshold
       type: Number
       min: 0.1
       max: 1.0
@@ -114,7 +114,7 @@ options:
             classified as outliers by at least half of the methods are considered outliers.
 
     - name: zscore_threshold
-      title: Z-Score Threshold
+      title: Z-score threshold
       type: Number
       min: 1.0
       max: 5.0
@@ -127,7 +127,7 @@ options:
             detection for research). Recommended: 3.29 for clinical quality control.
 
     - name: iqr_multiplier
-      title: IQR Multiplier
+      title: IQR multiplier
       type: Number
       min: 1.0
       max: 3.0
@@ -140,7 +140,7 @@ options:
             biomarkers). Useful for non-normal distributions common in clinical data.
 
     - name: confidence_level
-      title: Confidence Level for Intervals
+      title: Confidence level for intervals
       type: Number
       min: 0.90
       max: 0.999
@@ -192,7 +192,7 @@ options:
             Display detailed interpretation of outlier detection results and methodological notes.
 
     - name: seed
-      title: Random Seed
+      title: Random seed
       type: Integer
       default: 123
       description:

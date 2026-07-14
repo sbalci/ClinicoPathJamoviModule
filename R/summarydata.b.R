@@ -7,7 +7,7 @@
 #' @importFrom gt gt tab_header fmt_number cols_label md cell_fill cells_column_labels cell_text tab_style opt_stylize tab_options
 #' @importFrom gtExtras gt_plt_summary
 #' @importFrom htmltools HTML
-#' @import moments
+#' @importFrom moments kurtosis skewness
 #' @importFrom utils packageVersion
 #' @noRd
 NULL
@@ -40,11 +40,6 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             
             vars <- self$options$vars
 
-            # TODO (forward-looking, perf): no `private$.checkpoint()` between
-            # the heavy `gtExtras::gt_plt_summary()` call (~L177) and its
-            # multi-layered fallback chain. On wide tables, gtExtras can hold
-            # the UI for seconds. Add a checkpoint immediately before the
-            # gtExtras call.
             # Remove non-numeric variables and variables with all NAs
             vars_to_remove <- c()
             warning_msgs <- c()
@@ -105,14 +100,14 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
                     # Initialize variables
                     p_val <- NA
-                    norm_status <- NULL
+                    distribution_assessment <- NULL
 
                     # Check if data has variance (not all values identical)
                     n_unique <- length(unique(valid_data))
 
                     if (n_unique == 1) {
                         # All values are identical - no variance
-                        norm_status <- .("constant value (no variance)")
+                        distribution_assessment <- .("The data are constant and have no variance.")
                     } else if (length(valid_data) >= 3 && length(valid_data) <= 5000) {
                         # Perform Shapiro-Wilk test with error handling
                         sw_result <- tryCatch({
@@ -125,33 +120,41 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
                         # Interpret normality result
                         if (!is.na(p_val)) {
-                            norm_status <- if (p_val > 0.05) {
-                                .("appears to be normally distributed")
+                            distribution_assessment <- if (p_val > 0.05) {
+                                .("The data are consistent with a normal distribution.")
                             } else {
-                                .("does not appear to be normally distributed. Please use relevant visualisation and tests to verify the characteristics of distribution.")
+                                .("The data are not consistent with a normal distribution; inspect the distribution visually and use appropriate tests.")
                             }
                         }
                     }
 
-                    # Default norm_status if not set
-                    if (is.null(norm_status)) {
-                        norm_status <- .("Normality test not applicable due to sample size")
+                    if (is.null(distribution_assessment)) {
+                        distribution_assessment <- .("Normality was not assessed because the sample size is outside the Shapiro-Wilk test range.")
                     }
 
                     # Calculate skewness and kurtosis using the moments package.
                     skew_val <- round(moments::skewness(numeric_data, na.rm = TRUE), 2)
                     kurt_val <- round(moments::kurtosis(numeric_data, na.rm = TRUE), 2)
 
-                    dist_text <- paste0(
-                        "<br><em>", .("Distribution Diagnostics for"), " ", htmltools::htmlEscape(myvar) ,":</em> ", .("Shapiro-Wilk p-value"), " = ", p_val,
-                        "; ", .("Skewness"), " = ", skew_val, "; ", .("Kurtosis"), " = ", kurt_val,
-                        " (", .("Data"), " ", norm_status, ")."
+                    dist_text <- jmvcore::format(
+                        .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = {p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
+                        variable = htmltools::htmlEscape(myvar),
+                        p = p_val,
+                        skewness = skew_val,
+                        kurtosis = kurt_val,
+                        assessment = distribution_assessment
                     )
                 }
-                    # Return the summary text with distribution diagnostics.
-                    paste0(.("Mean of"), " <strong>", htmltools::htmlEscape(myvar), "</strong> ", .("is"), ": ", mean_x, " \u{00B1} ", sd_x,
-                           ". (", .("Median"), ": ", median_x, " [", .("Min"), ": ", min_x, " - ", .("Max"), ": ",
-                           max_x, "]) <br>", dist_text, "<br><br>", collapse = " ")
+                summary_text <- jmvcore::format(
+                    .("Mean of <strong>{variable}</strong>: {mean} \u{00B1} {sd}. Median: {median} (minimum: {minimum}; maximum: {maximum})."),
+                    variable = htmltools::htmlEscape(myvar),
+                    mean = mean_x,
+                    sd = sd_x,
+                    median = median_x,
+                    minimum = min_x,
+                    maximum = max_x
+                )
+                paste0(summary_text, dist_text, "<br><br>")
             }
             results <- purrr::map(.x = var_list, .f = mysummary)
             # Collapse the per-variable summary strings into a single HTML string.
@@ -183,6 +186,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     names(clean_data) <- numeric_vars
 
                     # Use gtExtras with default styling as intended
+                    private$.checkpoint()
                     summary_table <- clean_data %>%
                         gtExtras::gt_plt_summary()
 
@@ -427,8 +431,8 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<p><strong>", .("Data Quality Assessment"), ":</strong></p>",
                 "<ul style='margin: 5px 0 10px 20px;'>",
                 "<li>", paste0("Average missing data: ", avg_missing, "%"), "</li>",
-                if (avg_missing > 20) paste0("<li style='color: #d32f2f;'>", .(" High missing data rate may affect interpretation"), "</li>") else "",
-                if (avg_missing <= 5) paste0("<li style='color: #388e3c;'>", .(" Excellent data completeness"), "</li>") else "",
+                if (avg_missing > 20) paste0("<li style='color: #d32f2f;'>", .("A high missing-data rate may affect interpretation."), "</li>") else "",
+                if (avg_missing <= 5) paste0("<li style='color: #388e3c;'>", .("Data completeness is excellent."), "</li>") else "",
                 "</ul>",
                 
                 "<p><strong>", .("Clinical Applications"), ":</strong></p>",
@@ -440,8 +444,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "</ul>",
                 
                 if (any(sapply(dataset[variables], function(x) any(!is.finite(x), na.rm = TRUE)))) 
-                    paste0("<p style='color: #d32f2f;'><strong>", .(" Data Quality Alert"), ":</strong> ", 
-                           .("Some variables contain infinite or extreme values that may require investigation"), "</p>") else "",
+                    paste0("<p style='color: #d32f2f;'><strong>",
+                           .("Data quality alert: Some variables contain infinite or extreme values that may require investigation."),
+                           "</strong></p>") else "",
                 
                 "</div>"
             )

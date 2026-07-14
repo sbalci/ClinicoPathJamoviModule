@@ -17,6 +17,7 @@ data <- data.frame(
 )
 jjoncoplot(data, "SampleID", c("TP53", "KRAS"))
 }
+\keyword{internal}
 \section{Super classes}{
 \code{\link[jmvcore:Analysis]{jmvcore::Analysis}} -> \code{jjoncoplotBase} -> \code{jjoncoplotClass}
 }
