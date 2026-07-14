@@ -32,6 +32,7 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - excl
 
     - name:  assumptionsCheck
@@ -76,6 +77,7 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - excl
           - exp
 
@@ -86,7 +88,9 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - excl
+          - sig
           - showResiduals
           - residualsCutoff
 
@@ -97,7 +101,9 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - excl
+          - sig
           - showResiduals
           - residualsCutoff
 
@@ -131,7 +137,7 @@ items:
           type: number
           format: zto,pvalue
         - name: effect_size
-          title: "Effect Size (Phi)"
+          title: "Effect Size (Phi/V)"
           type: number
         - name: phi_ci
           title: "95% CI (Phi)"
@@ -142,9 +148,12 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - posthoc
           - sig
           - excl
+          - testSelection
+          - phiCI
 
     - name:  detailedComparisons
       title: 'Detailed Pairwise Comparison Tables'
@@ -153,6 +162,7 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - posthoc
           - sig
           - excl
@@ -179,6 +189,13 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
+          - excl
+          - posthoc
+          - sig
+          - testSelection
+          - showResiduals
+          - residualsCutoff
           - exportResults
 
     - name:  reportSentences
@@ -208,6 +225,7 @@ items:
       clearWith:
           - rows
           - cols
+          - counts
           - excl
 
 refs:

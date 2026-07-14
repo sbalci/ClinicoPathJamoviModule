@@ -566,7 +566,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "Chi-square = ", round(result$chi_statistic, 3), ", ",
                     "p = ", format.pval(p_value, digits = 3), ", ",
                     "Adjusted p = ", format.pval(p_adj, digits = 3), htmltools::br(),
-                    "Effect size (Phi) = ", round(result$effect_size, 3), htmltools::br(),
+                    "Effect size (Phi/V) = ", round(result$effect_size, 3), htmltools::br(),
                     sig_indicator
                 )
                 
@@ -686,12 +686,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             row_totals <- rowSums(subtable)
             col_totals <- colSums(subtable)
             grand_total <- sum(subtable)
-            
-            # Create table header
-            header_row <- htmltools::tags$tr(
-                style = "background-color: #e3f2fd;",
+
+            # Create table header (iterate over every column, not just the first two,
+            # so 2xC / Rx2 subtables render all categories)
+            header_cells <- list(
                 htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;", 
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; background-color: #f8f9fa;",
                     if (!is.null(col_var_name) || !is.null(row_var_name)) {
                         htmltools::div(
                             style = "font-weight: bold; color: #495057; font-size: 11px;",
@@ -702,85 +702,71 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     } else {
                         ""
                     }
-                ),
-                htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", 
-                    if (!is.null(col_var_name)) {
-                        htmltools::div(
-                            htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
-                            htmltools::div(style = "font-size: 13px; color: #212529;", col_names[1])
-                        )
-                    } else {
-                        col_names[1]
-                    }
-                ),
-                htmltools::tags$th(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", 
-                    if (!is.null(col_var_name)) {
-                        htmltools::div(
-                            htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
-                            htmltools::div(style = "font-size: 13px; color: #212529;", col_names[2])
-                        )
-                    } else {
-                        col_names[2]
-                    }
-                ),
-                htmltools::tags$th(style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", htmltools::strong("Total"))
+                )
             )
-            
-            # Create data rows
-            data_rows <- lapply(1:2, function(j) {
-                row_pct1 <- round(subtable[j, 1] / row_totals[j] * 100, 1)
-                row_pct2 <- round(subtable[j, 2] / row_totals[j] * 100, 1)
-                
-                htmltools::tags$tr(
+            for (col in col_names) {
+                header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
+                    if (!is.null(col_var_name)) {
+                        htmltools::div(
+                            htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", col_var_name),
+                            htmltools::div(style = "font-size: 13px; color: #212529;", col)
+                        )
+                    } else {
+                        col
+                    }
+                )
+            }
+            header_cells[[length(header_cells) + 1]] <- htmltools::tags$th(
+                style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;", htmltools::strong("Total"))
+            header_row <- htmltools::tags$tr(style = "background-color: #e3f2fd;", header_cells)
+
+            # Create data rows (iterate over every row and every column)
+            data_rows <- lapply(seq_along(row_names), function(i) {
+                cells <- list(
                     htmltools::tags$td(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #e3f2fd; font-weight: bold;", 
+                        style = "border: 1px solid #e1e5e9; padding: 8px; background-color: #e3f2fd; font-weight: bold;",
                         if (!is.null(row_var_name)) {
                             htmltools::div(
                                 htmltools::div(style = "font-size: 11px; color: #6c757d; margin-bottom: 2px;", row_var_name),
-                                htmltools::div(style = "font-size: 13px; color: #212529;", row_names[j])
+                                htmltools::div(style = "font-size: 13px; color: #212529;", row_names[i])
                             )
                         } else {
-                            row_names[j]
+                            row_names[i]
                         }
-                    ),
-                    htmltools::tags$td(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
-                        subtable[j, 1], htmltools::br(), htmltools::tags$small(paste0("(", row_pct1, "%)"))
-                    ),
-                    htmltools::tags$td(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
-                        subtable[j, 2], htmltools::br(), htmltools::tags$small(paste0("(", row_pct2, "%)"))
-                    ),
-                    htmltools::tags$td(
-                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; font-weight: bold;",
-                        row_totals[j]
                     )
                 )
-            })
-            
-            # Create total row
-            col_pct1 <- round(col_totals[1] / grand_total * 100, 1)
-            col_pct2 <- round(col_totals[2] / grand_total * 100, 1)
-            
-            total_row <- htmltools::tags$tr(
-                style = "background-color: #f5f5f5; font-weight: bold;",
-                htmltools::tags$td(style = "border: 1px solid #e1e5e9; padding: 8px;", "Total"),
-                htmltools::tags$td(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
-                    col_totals[1], htmltools::br(), htmltools::tags$small(paste0("(", col_pct1, "%)"))
-                ),
-                htmltools::tags$td(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
-                    col_totals[2], htmltools::br(), htmltools::tags$small(paste0("(", col_pct2, "%)"))
-                ),
-                htmltools::tags$td(
-                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
-                    grand_total
+                for (j in seq_along(col_names)) {
+                    row_pct <- if (row_totals[i] > 0) round(subtable[i, j] / row_totals[i] * 100, 1) else 0
+                    cells[[length(cells) + 1]] <- htmltools::tags$td(
+                        style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
+                        subtable[i, j], htmltools::br(), htmltools::tags$small(paste0("(", row_pct, "%)"))
+                    )
+                }
+                cells[[length(cells) + 1]] <- htmltools::tags$td(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center; font-weight: bold;",
+                    row_totals[i]
                 )
+                htmltools::tags$tr(cells)
+            })
+
+            # Create total row (iterate over every column)
+            total_cells <- list(
+                htmltools::tags$td(style = "border: 1px solid #e1e5e9; padding: 8px;", "Total")
             )
-            
+            for (j in seq_along(col_names)) {
+                col_pct <- if (grand_total > 0) round(col_totals[j] / grand_total * 100, 1) else 0
+                total_cells[[length(total_cells) + 1]] <- htmltools::tags$td(
+                    style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
+                    col_totals[j], htmltools::br(), htmltools::tags$small(paste0("(", col_pct, "%)"))
+                )
+            }
+            total_cells[[length(total_cells) + 1]] <- htmltools::tags$td(
+                style = "border: 1px solid #e1e5e9; padding: 8px; text-align: center;",
+                grand_total
+            )
+            total_row <- htmltools::tags$tr(style = "background-color: #f5f5f5; font-weight: bold;", total_cells)
+
             # Build complete table
             htmltools::tags$table(
                 style = "border-collapse: collapse; width: 100%; margin: 10px 0;",
@@ -1258,7 +1244,12 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (excl) {
                 data <- jmvcore::naOmit(data)
             }
-            
+
+            # Drop unused factor levels so empty observed categories do not create
+            # zero-margin rows/columns that would make the chi-square test undefined.
+            if (is.factor(data[[rows]])) data[[rows]] <- droplevels(data[[rows]])
+            if (is.factor(data[[cols]])) data[[cols]] <- droplevels(data[[cols]])
+
             # Create contingency table
             contTable <- try({
                 if (!is.null(counts)) {
@@ -1299,8 +1290,10 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
             
-            # Add warning message about weighted data (only in main analysis)
-            if (!is.null(counts) && show_warnings && self$options$showEducational) {
+            # Add warning message about weighted data (only in main analysis).
+            # Written whenever counts is set so the visible:(counts) panel is never
+            # rendered empty (does not require the Educational panels toggle).
+            if (!is.null(counts) && show_warnings) {
                 weight_warning <- htmltools::div(
                     style = "padding: 10px; background-color: #e1f5fe; border-left: 4px solid #0277bd; margin: 10px 0;",
                     htmltools::h5(" Weighted Data Analysis", style = "color: #01579b; margin-top: 0;"),
@@ -1486,75 +1479,8 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
         },
         
-        # Handle detailed comparison tables display
-        .handleDetailedComparisons = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
-            overall_significant <- chiSqTest$p.value < self$options$sig
-            
-            if (overall_significant) {
-                adjustMethod <- self$options$posthoc
-                pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
-                
-                if (length(pairwise_results) > 0) {
-                    detailed_content <- htmltools::div(
-                        style = "margin: 15px 0;",
-                        htmltools::h4(.("Detailed 2\u{D7}2 Comparison Tables"), style = "color: #1976d2; margin-bottom: 15px;")
-                    )
-                    
-                    tables_html <- lapply(pairwise_results, function(result) {
-                        # Determine which test method was used (stored in result)
-                        test_used <- result$test_used
-                        p_value <- result$actual_pvalue
-                        p_adj <- result$actual_pvalue_adjusted
-                        
-                        # Create the 2x2 table HTML
-                        table_html <- private$.createContingencyTableHTML(result$subtable)
-                        
-                        # Create the complete comparison section
-                        htmltools::div(
-                            style = "margin: 20px 0; padding: 15px; border: 1px solid #e1e5e9; border-radius: 4px;",
-                            htmltools::h5(result$comparison, style = "color: #495057; margin-top: 0;"),
-                            table_html,
-                            htmltools::div(
-                                style = "margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 3px;",
-                                htmltools::div(
-                                    style = "display: inline-block; margin-right: 20px;",
-                                    htmltools::strong(jmvcore::format(
-                                        .("Test used: {test}"), test = test_used))
-                                ),
-                                htmltools::div(
-                                    style = "display: inline-block; margin-right: 20px;",
-                                    htmltools::strong(jmvcore::format(
-                                        .("p-value: {p}"),
-                                        p = format.pval(p_value, digits = 3)))
-                                ),
-                                htmltools::div(
-                                    style = "display: inline-block; margin-right: 20px;",
-                                    htmltools::strong(jmvcore::format(
-                                        .("Adjusted p: {p}"),
-                                        p = format.pval(p_adj, digits = 3)))
-                                ),
-                                htmltools::div(
-                                    style = "display: inline-block;",
-                                    htmltools::strong(jmvcore::format(
-                                        .("Significant: {status}"),
-                                        status = if (p_adj < self$options$sig) .("Yes") else .("No")))
-                                )
-                            )
-                        )
-                    })
-                    
-                    full_content <- htmltools::div(
-                        detailed_content,
-                        tables_html
-                    )
-                    
-                    self$results$detailedComparisons$setContent(as.character(full_content))
-                }
-            }
-        },
-        
         # Helper method to handle post-hoc testing
-        .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL) {
+        .handlePostHocTesting = function(chiSqTest, contTable, rows = NULL, cols = NULL, pairwise_results = NULL) {
             # CRITICAL FIX: Check if user wants to disable post-hoc tests entirely
             # When posthoc = "none", skip all pairwise testing
             if (self$options$posthoc == "none") {
@@ -1599,9 +1525,11 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             adjustMethod <- self$options$posthoc
-            
-            # Use robust pairwise testing approach with user-selected test method
-            pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
+
+            # Use robust pairwise testing approach with user-selected test method.
+            # Computed once in .run() and passed in; recompute only if absent.
+            if (is.null(pairwise_results))
+                pairwise_results <- private$.robustPairwiseTests(contTable, adjustMethod, self$options$testSelection)
             
             if (length(pairwise_results) > 0) {
                 # Show the posthoc table since we have results to display
@@ -1668,16 +1596,14 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$multipleTestingInfo$setContent(
                     paste0("<div style='padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7;'>", .("No valid pairwise comparisons could be performed. This may be due to insufficient data in subtables or table structure."), "</div>"))
             }
-            
-            # Generate export table if requested
-            if (self$options$exportResults) {
-                private$.generateExportTable(chiSqTest, contTable)
-            }
+
+            # NOTE: The export table is generated once from .run() (not here) to
+            # avoid populating exportTable twice per run (duplicate rowKeys).
         },
-        
-        
+
+
         # Generate comprehensive export table
-        .generateExportTable = function(chiSqTest, contTable) {
+        .generateExportTable = function(chiSqTest, contTable, pairwise_results = NULL) {
             export_data <- list()
             row_index <- 1
             
@@ -1758,7 +1684,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Post-hoc Results (if significant)
             if (chiSqTest$p.value < self$options$sig) {
-                pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
+                # Reuse the pairwise results computed in .run(); recompute only if absent.
+                if (is.null(pairwise_results))
+                    pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
                 
                 if (length(pairwise_results) > 0) {
                     for (i in seq_along(pairwise_results)) {
@@ -1804,7 +1732,7 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             category = "Pairwise Comparisons",
                             measure = paste(result$comparison, "- Effect Size"),
                             value = round(result$effect_size, 3),
-                            interpretation = paste("Phi coefficient =", round(result$effect_size, 3))
+                            interpretation = paste("Effect size (Phi/V) =", round(result$effect_size, 3))
                         )
                         row_index <- row_index + 1
                     }
@@ -1843,7 +1771,17 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Perform main chi-square test
             chiSqTest <- private$.performChiSquareTest(contTable, rows, cols)
-            
+
+            # Compute pairwise post-hoc comparisons once and reuse across the
+            # post-hoc table, clinical summary, and export table. This avoids
+            # re-running the (optionally bootstrapped) pairwise tests 3-4x per run.
+            pairwise_results <- NULL
+            need_pairwise <- self$options$posthoc != "none" ||
+                             self$options$showClinicalSummary ||
+                             self$options$exportResults
+            if (need_pairwise && chiSqTest$p.value < self$options$sig)
+                pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
+
             # Validate assumptions and show warnings
             assumptions <- private$.validateAssumptions(contTable, chiSqTest)
             if (self$options$showAssumptionsCheck) {
@@ -1882,26 +1820,19 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$educationalOverview$setContent(as.character(overview_panel))
             }
             
-            # Handle residuals analysis
-            residuals_analysis <- NULL
+            # Handle residuals analysis (residuals are computed inside the handler)
             if (self$options$showResiduals) {
-                cutoff_value <- if (self$options$residualsCutoff != 2.0) self$options$residualsCutoff else NULL
-                residuals_analysis <- private$.analyzeResiduals(chiSqTest, contTable, self$options$sig, cutoff_value)
                 private$.handleResidualsAnalysis(chiSqTest, contTable, rows, cols)
             }
             
-            # Generate and display clinical summary
+            # Generate and display clinical summary (reuses shared pairwise_results)
             if (self$options$showClinicalSummary) {
-                pairwise_results <- NULL
-                if (chiSqTest$p.value < self$options$sig) {
-                    pairwise_results <- private$.robustPairwiseTests(contTable, self$options$posthoc, self$options$testSelection)
-                }
                 clinical_summary <- private$.generateClinicalSummary(chiSqTest, contTable, pairwise_results, rows, cols)
                 private$.displayClinicalSummary(clinical_summary)
             }
             
-            # Handle post-hoc testing
-            private$.handlePostHocTesting(chiSqTest, contTable, rows, cols)
+            # Handle post-hoc testing (reuses shared pairwise_results)
+            private$.handlePostHocTesting(chiSqTest, contTable, rows, cols, pairwise_results)
             
             # Detailed comparison tables are handled within post-hoc testing
             # No separate call needed as it's integrated into .handlePostHocTesting()
@@ -1920,9 +1851,9 @@ chisqposttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$glossaryPanel$setContent(glossary)
             }
             
-            # Export results if requested
+            # Export results if requested (reuses shared pairwise_results)
             if (self$options$exportResults) {
-                private$.generateExportTable(chiSqTest, contTable)
+                private$.generateExportTable(chiSqTest, contTable, pairwise_results)
             }
 
             # Note: INFO notice at completion removed to avoid serialization errors
