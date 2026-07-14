@@ -59,6 +59,8 @@ items:
           - landmark_time
           - remove_negative
           - remove_extreme
+          - extreme_multiplier
+          - timezone
 
 refs:
     - ClinicoPathJamoviModule
