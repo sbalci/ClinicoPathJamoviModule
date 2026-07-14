@@ -160,8 +160,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             warnings <- list()
             errors <- list()
             
-            # Check for realistic time ranges
-            durations <- patient_data$end_time - patient_data$start_time
+            # Check for realistic time ranges.
+            # Compute durations in the SELECTED time unit. For Date/POSIXct input a raw
+            # subtraction yields an auto-unit difftime (secs/hours/days), which would make
+            # the day/month thresholds below meaningless; convert via lubridate so the
+            # >10-year / zero-duration checks are correct in datetime/absolute mode too.
+            if (inherits(patient_data$start_time, c("Date", "POSIXct", "POSIXlt")) ||
+                inherits(patient_data$end_time, c("Date", "POSIXct", "POSIXlt"))) {
+                intervals <- suppressWarnings(lubridate::interval(patient_data$start_time, patient_data$end_time))
+                durations <- suppressWarnings(lubridate::time_length(intervals, unit = self$options$timeUnit))
+            } else {
+                durations <- as.numeric(patient_data$end_time) - as.numeric(patient_data$start_time)
+            }
             negative_durations <- which(durations < 0)
             if (length(negative_durations) > 0) {
                 errors <- append(errors, sprintf(
@@ -801,7 +811,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             patient_data$segment_duration <- private$.getDurations(patient_data)
 
-            # Performance optimization: Use data.table for large datasets (>1000 patients)
+            # Performance optimization: Use data.table for large datasets (>1000 rows)
             use_fast_path <- nrow(patient_data) > 1000 && requireNamespace("data.table", quietly = TRUE)
 
             if (use_fast_path) {
@@ -844,6 +854,18 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         patient_group = group_value
                     )
                 }, by = patient_id]
+
+                # Mirror the base (slow) path: only retain censor_status / patient_group
+                # when they actually carry information. The j-expression above always
+                # emits both columns, so an unselected censor/group variable would leave
+                # an all-NA phantom column. A phantom censor_status makes
+                # .calculateMedianFollowUp() take the reverse-KM branch with all patients
+                # as non-events, so the curve never reaches 0.5 and median follow-up
+                # flips to NA (diverging from the base path's simple median).
+                if (all(is.na(summary_list$censor_status)))
+                    summary_list[, censor_status := NULL]
+                if (all(is.na(summary_list$patient_group)))
+                    summary_list[, patient_group := NULL]
 
                 summary_list <- split(summary_list, summary_list$patient_id)
             } else {
@@ -970,19 +992,27 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             total_time
         },
 
+        # Single shared synonym table mapping lower-case response variants to the
+        # standard RECIST abbreviation. Used by BOTH .getBestResponse (via the rank of
+        # the abbreviation) and .normalizeResponse, so the mapping is defined once.
+        .responseSynonymMap = function() {
+            c(
+                "cr" = "CR", "complete response" = "CR", "complete" = "CR",
+                "pr" = "PR", "partial response" = "PR", "partial" = "PR",
+                "sd" = "SD", "stable disease" = "SD", "stable" = "SD",
+                "pd" = "PD", "progressive disease" = "PD", "progression" = "PD", "progressive" = "PD",
+                "ne" = "NE", "not evaluable" = "NE", "na" = "NE"
+            )
+        },
+
         # Get best response based on oncology hierarchy
         # CR (Complete Response) > PR (Partial Response) > SD (Stable Disease) > PD (Progressive Disease) > Other
         .getBestResponse = function(responses) {
             if (length(responses) == 0) return(NA_character_)
 
-            # Define response hierarchy (lower rank = better response)
-            response_hierarchy <- c(
-                "cr" = 1, "complete response" = 1, "complete" = 1,
-                "pr" = 2, "partial response" = 2, "partial" = 2,
-                "sd" = 3, "stable disease" = 3, "stable" = 3,
-                "pd" = 4, "progressive disease" = 4, "progression" = 4,
-                "ne" = 5, "not evaluable" = 5, "na" = 5
-            )
+            syn <- private$.responseSynonymMap()
+            # Rank of each standard abbreviation (lower rank = better response)
+            response_rank <- c("CR" = 1, "PR" = 2, "SD" = 3, "PD" = 4, "NE" = 5)
 
             responses_lower <- tolower(trimws(responses))
 
@@ -991,7 +1021,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             best_response <- responses[1]  # Default to first if no match
 
             for (i in seq_along(responses_lower)) {
-                rank <- response_hierarchy[responses_lower[i]]
+                std <- unname(syn[responses_lower[i]])  # NA if unrecognized
+                rank <- if (!is.na(std)) response_rank[[std]] else NA
                 if (!is.na(rank) && rank < best_rank) {
                     best_rank <- rank
                     best_response <- responses[i]  # Keep original case
@@ -1008,18 +1039,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
         # Normalize response category to standard abbreviation
         # Handles case-insensitive matching for clinical response categories
-        # Returns: "CR", "PR", "SD", "PD", or the original value if unrecognized
+        # Returns: "CR", "PR", "SD", "PD", "NE", or the original value if unrecognized
         .normalizeResponse = function(response_str) {
             if (is.na(response_str) || length(response_str) == 0) return(response_str)
 
             response_lower <- tolower(trimws(response_str))
-
-            # Map variations to standard abbreviations
-            if (response_lower %in% c("cr", "complete response", "complete")) return("CR")
-            if (response_lower %in% c("pr", "partial response", "partial")) return("PR")
-            if (response_lower %in% c("sd", "stable disease", "stable")) return("SD")
-            if (response_lower %in% c("pd", "progressive disease", "progression", "progressive")) return("PD")
-            if (response_lower %in% c("ne", "not evaluable", "na")) return("NE")
+            std <- unname(private$.responseSynonymMap()[response_lower])  # NA if unrecognized
+            if (!is.na(std)) return(std)
 
             # Return original if not recognized
             return(response_str)
@@ -1161,6 +1187,11 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                             # Fallback: use simple median if KM fails
                             stats::median(follow_up_times[valid_idx])
                         })
+                        # quantile() returns NA (not an error) when the reverse curve
+                        # never reaches 0.5 (too few censoring 'events'); fall back to the
+                        # simple median so a numeric follow-up is always reported.
+                        if (length(median_fu) == 0 || is.na(median_fu))
+                            median_fu <- stats::median(follow_up_times[valid_idx])
                         return(median_fu)
                     }
                 }
@@ -1248,7 +1279,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 best_pct <- stats$response_percentages[[best_response]]
 
                 interpretation$response <- sprintf(
-                    .("Most common response was %s (%.1f%% of observations). Response distribution shows clinical patterns suitable for efficacy analysis."),
+                    .("Most common response was %s (%.1f%% of patients). Response distribution shows clinical patterns suitable for efficacy analysis."),
                     htmltools::htmlEscape(best_response),
                     best_pct
                 )
@@ -1378,7 +1409,15 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Reset notice collection
             private$.noticeList <- list()
 
-            
+            # Reset stale HTML notice outputs so content from a previous run does not
+            # linger after the triggering condition (low Fisher cell counts, absolute-date
+            # reference lines) has cleared. Neither item has a clearWith rule.
+            self$results$warningNotice$setContent('')
+            self$results$warningNotice$setVisible(FALSE)
+            self$results$validationReport$setContent('')
+            self$results$validationReport$setVisible(FALSE)
+
+
             # Enhanced instructions with comprehensive guidance
             if (is.null(self$options$patientID) ||
                 is.null(self$options$startTime) ||
@@ -1455,6 +1494,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</div>"
                     )
                     self$results$instructions$setContent(mismatch_guidance)
+                    # Also surface via the ERROR-notice channel for consistent,
+                    # machine-readable error reporting.
+                    private$.addNotice('ERROR', 'Data Type Mismatch',
+                                       'Date/Time input type was selected but the time variables contain numeric values. Switch Time Input Type to Raw Values (or correct the data) and re-run.')
                     return()  # Stop here, don't process further
                 }
 
@@ -1530,9 +1573,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         "</div>"
                     )
                     self$results$instructions$setContent(error_msg)
-                    stop(validation_result$message)
+                    # Surface via the ERROR-notice channel too, then return early so the
+                    # tailored guidance above is preserved. Previously this stop()-ed into
+                    # the generic outer error handler, which overwrote the specific message.
+                    private$.addNotice('ERROR', 'Data Validation Error',
+                                       as.character(validation_result$message))
+                    return()
                 }
-                
+
                 # Extract patient data and show warnings if present
                 patient_data <- if ("data" %in% names(validation_result)) validation_result$data else validation_result
                 
@@ -1596,11 +1644,13 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 event_data <- private$.processEventMarkers(patient_data)
                 arrow_data <- private$.processOngoingStatus(patient_data, stats)
                 interpretation <- private$.generateClinicalInterpretation(stats, patient_data)
-                
-                # Generate clinical summary
-                clinical_summary <- private$.generateClinicalSummary(stats, patient_data)
-                private$.displayClinicalSummary(clinical_summary)
-                
+
+                # NOTE: .generateClinicalSummary()/.displayClinicalSummary() were dead:
+                # they wrote into `interpretation`, which is then either overwritten by
+                # .generateInterpretationOutput() (showInterpretation = TRUE) or hidden
+                # (visible:(showInterpretation)). The summary was never shown, so the
+                # calls were removed to avoid wasted computation and confusion.
+
                 # Update summary table
                 private$.updateSummaryTable(stats)
                 
@@ -1675,6 +1725,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     "</div>"
                 )
                 self$results$instructions$setContent(error_msg)
+                # Also surface the failure via the ERROR-notice channel before re-raising.
+                private$.addNotice('ERROR', 'Error in Swimmer Plot Analysis',
+                                   as.character(e$message))
                 stop(e)
             })
         },
@@ -2859,48 +2912,38 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         #' Generate R source code for Swimmer Plot analysis
         #' @return Character string with R syntax for reproducible analysis
         asSource = function() {
-            startTime <- self$options$startTime
-            endTime <- self$options$endTime
-            groupVar <- self$options$groupVar
-
-            if (is.null(startTime) || is.null(endTime))
+            if (is.null(self$options$startTime) || is.null(self$options$endTime))
                 return('')
 
-            # Escape variable names that contain spaces or special characters
-            startTime_escaped <- if (!is.null(startTime) && !identical(make.names(startTime), startTime)) {
-                paste0('`', startTime, '`')
-            } else {
-                startTime
-            }
-
-            endTime_escaped <- if (!is.null(endTime) && !identical(make.names(endTime), endTime)) {
-                paste0('`', endTime, '`')
-            } else {
-                endTime
-            }
-
-            # Build arguments
-            startTime_arg <- paste0('startTime = "', startTime_escaped, '"')
-            endTime_arg <- paste0('endTime = "', endTime_escaped, '"')
-
-            # Escape groupVar if present
-            groupVar_arg <- ''
-            if (!is.null(groupVar)) {
-                groupVar_escaped <- if (!identical(make.names(groupVar), groupVar)) {
-                    paste0('`', groupVar, '`')
+            # Build the argument list in option-declaration order.
+            #
+            # Every variable-name option (single OptionVariable or multi-variable
+            # OptionVariables) is emitted as a deparse()'d string literal. deparse()
+            # produces valid, fully-escaped R for names containing spaces, quotes or
+            # backslashes (e.g. `My Var`); the previous manual `paste0('\`', name, '\`')`
+            # embedded a literal backtick INSIDE the quoted string, which is invalid.
+            # Detecting the option by CLASS (not by name) means any variable option added
+            # later is escaped automatically.
+            #
+            # Variables are NOT re-emitted through private$.asArgs() - doing so previously
+            # duplicated startTime/endTime/groupVar in the generated syntax (the known
+            # "double variables" codegen bug). All non-variable options keep jmvcore's
+            # per-option sourcify so formatting stays consistent with jamovi.
+            args <- character(0)
+            for (option in private$.options$options) {
+                if (option$name == 'data')
+                    next
+                if (inherits(option, 'OptionVariable') || inherits(option, 'OptionVariables')) {
+                    val <- option$value
+                    if (!is.null(val) && length(val) > 0)
+                        args <- c(args, paste0(option$name, ' = ',
+                                               paste0(deparse(val), collapse = '')))
                 } else {
-                    groupVar
+                    as <- private$.sourcifyOption(option)
+                    if (!identical(as, ''))
+                        args <- c(args, as)
                 }
-                groupVar_arg <- paste0(',\n    groupVar = "', groupVar_escaped, '"')
             }
-
-            # Get other arguments using base helper (if available)
-            args <- ''
-            if (!is.null(private$.asArgs)) {
-                args <- private$.asArgs(incData = FALSE)
-            }
-            if (args != '')
-                args <- paste0(',\n    ', args)
 
             # Get package name dynamically
             pkg_name <- utils::packageName()
@@ -2908,7 +2951,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Build complete function call
             paste0(pkg_name, '::swimmerplot(\n    data = data,\n    ',
-                   startTime_arg, ',\n    ', endTime_arg, groupVar_arg, args, ')')
+                   paste(args, collapse = ',\n    '), ')')
         }
     ) # End of public list
 )

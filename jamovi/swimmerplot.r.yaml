@@ -51,6 +51,7 @@ items:
           - eventTimeVar
           - laneWidth
           - markerSize
+          - colorPalette
           - plotTheme
           - showLegend
           - referenceLines
@@ -75,6 +76,7 @@ items:
           - startTime
           - endTime
           - responseVar
+          - censorVar
           - timeType
           - dateFormat
           - timeUnit
@@ -249,6 +251,7 @@ items:
           - startTime
           - endTime
           - responseVar
+          - censorVar
           - timeUnit
           - personTimeAnalysis
 

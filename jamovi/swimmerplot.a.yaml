@@ -183,11 +183,11 @@ options:
       title: "Maximum Milestones"
       type: Number
       min: 1
-      max: 10
+      max: 5
       default: 5
       description:
           R: >
-            Maximum number of milestone events to support.
+            Maximum number of milestone events to support (milestone slots 1-5 are defined).
 
     - name: milestone1Name
       title: "Milestone 1 Name"
