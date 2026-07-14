@@ -132,7 +132,8 @@ options:
       default: 2
       description:
         R: >
-          Size of scatter plot points.
+          Size of scatter plot points. Ignored when a Size Variable is selected,
+          because point size is then mapped to that variable's values.
 
     - name: point_alpha
       title: Point Transparency
