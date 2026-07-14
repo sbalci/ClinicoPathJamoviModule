@@ -9,7 +9,7 @@
 #' @return A comprehensive analysis with clinical interpretation and actionable recommendations.
 #' @importFrom benford.analysis benford getSuspects
 #' @importFrom glue glue
-#' @importFrom jmvcore composeTerm constructFormula toNumeric
+#' @importFrom jmvcore toNumeric
 #'
 #'
 #' @returns A comprehensive Benford's Law analysis with clinical interpretation.
@@ -139,7 +139,10 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .interpretResults = function(benford_obj, suspects_obj, var_data) {
-            n_total <- length(var_data[!is.na(var_data)])
+            # Count only finite, positive observations so the reported N matches
+            # the analyzed set (var_cleaned uses the same is.finite & > 0 filter);
+            # this prevents Inf slipping past validation from inflating N.
+            n_total <- length(var_data[!is.na(var_data) & is.finite(var_data) & var_data > 0])
             n_suspects <- if (!is.null(suspects_obj) && nrow(suspects_obj) > 0) nrow(suspects_obj) else 0
             suspicion_rate <- round((n_suspects / n_total) * 100, 1)
 
@@ -164,14 +167,30 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clinical_interpretation <- .("CAUTION: Sample size too small for reliable Benford's Law analysis. With fewer than 100 observations, statistical tests lack power and results should NOT be used for clinical decision-making or data quality assessment.")
                 recommendation <- .("Increase sample size to at least 100-1000 observations before drawing conclusions. Consider alternative data quality checks for small datasets.")
                 concern_level <- .("Unreliable (N<100)")
+            } else if (is.na(mad_conformity)) {
+                # benford.analysis returns MAD.conformity = NA when
+                # number.of.digits > 3. digits is capped at 3 in benford.a.yaml,
+                # but guard defensively so an NA conformity reports MAD
+                # numerically instead of crashing on if(NA || NA).
+                clinical_interpretation <- sprintf(
+                    .("MAD = %.4f. A conformity classification is not available for this digit setting; interpret the MAD and chi-square test (p=%.4f) directly. Larger MAD values indicate greater deviation from Benford's Law."),
+                    mad_value, chisq_pvalue
+                )
+                recommendation <- .("No conformity label is available for this digit configuration. Review the numeric MAD and chi-square results directly, and consider using 1-3 digit analysis for a classified assessment.")
+                concern_level <- .("Not classified")
+
             } else {
-                # Use EVIDENCE-BASED interpretation from MAD conformity levels
-                # These thresholds are from published Benford's Law literature:
+                # Use EVIDENCE-BASED interpretation from the package's MAD
+                # conformity classification. NOTE: the illustrative cutoffs below
+                # are Nigrini's FIRST-DIGIT thresholds; benford.analysis applies
+                # digit-count-specific cutoffs internally (e.g. the 2-digit
+                # nonconformity threshold is far tighter). Always trust the
+                # package's MAD.conformity label rather than these numbers.
                 # Nigrini, M. (2012). Benford's Law: Applications for Forensic Accounting
-                #   MAD < 0.006: Close conformity
-                #   MAD 0.006-0.012: Acceptable conformity
-                #   MAD 0.012-0.015: Marginally acceptable conformity
-                #   MAD > 0.015: Nonconformity
+                #   (1-digit) MAD < 0.006: Close conformity
+                #   (1-digit) MAD 0.006-0.012: Acceptable conformity
+                #   (1-digit) MAD 0.012-0.015: Marginally acceptable conformity
+                #   (1-digit) MAD > 0.015: Nonconformity
 
                 if (mad_conformity == "Close conformity" || mad_conformity == "Acceptable conformity") {
                     clinical_interpretation <- sprintf(
@@ -204,7 +223,6 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             return(list(
                 total_observations = n_total,
-                valid_observations = n_total,
                 suspicious_count = n_suspects,
                 suspicion_rate = suspicion_rate,
                 # Statistical evidence
@@ -242,7 +260,7 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tests_title = .("Statistical tests performed:"),
             tests_text = .("(1) MAD (Mean Absolute Deviation): Primary measure of conformity with validated thresholds. (2) Chi-square goodness-of-fit test: Tests overall distribution fit. (3) Mantissa Arc Test: Tests for subtle distributional anomalies. All tests are from published Benford's Law literature (Nigrini, 2012)."),
             interpret_title = .("How to interpret:"),
-            interpret_text = .("Results are based on MAD conformity levels: Close/Acceptable (<0.012) = Low concern; Marginally acceptable (0.012-0.015) = Moderate concern; Nonconformity (>0.015) = High concern. These are evidence-based thresholds, not arbitrary cutoffs."),
+            interpret_text = .("Results use the MAD (Mean Absolute Deviation) conformity classification computed by the benford.analysis package, which applies digit-count-specific thresholds (the cutoffs for 2- and 3-digit analysis are much tighter than for a single digit). The package label is mapped to a concern level: Close or Acceptable conformity = Low concern; Marginally acceptable = Moderate concern; Nonconformity = High concern. Rely on the reported conformity label rather than any fixed numeric MAD cutoff, because the appropriate cutoff changes with the number of digits analyzed."),
             action_title = .("What to do with results:"),
             action_text = .("Low concern: Continue routine monitoring. Moderate concern: Review data collection procedures. High concern: Immediate investigation of data sources, systematic bias, and individual flagged observations required.")
             )
@@ -372,19 +390,9 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     warning_title, "</strong> ", warning_msg, "</div>")
             }
 
-            # DATA RANGE VALIDATION (from benford2)
-            # Check if data spans at least one order of magnitude
-            if (valid_count > 0) {
-                data_range <- max(var_cleaned) / min(var_cleaned)
-                if (data_range < 10) {
-                    range_warning_title <- .("Data Range Warning:")
-                    range_warning_msg <- sprintf(.("Data spans less than one order of magnitude (range ratio = %.2f). Benford's Law may not apply naturally to constrained datasets."),
-                                                data_range)
-                    warnings_html <- paste0(warnings_html,
-                        "<div style='color: #856404; margin-top: 10px;'><strong>",
-                        range_warning_title, "</strong> ", range_warning_msg, "</div>")
-                }
-            }
+            # NOTE: the order-of-magnitude range check is performed once in
+            # .validate() (which reports it via the dataWarning item); it is not
+            # duplicated here to avoid emitting two warnings for one condition.
 
             if (nchar(warnings_html) > 0) {
                 guidelines <- paste(guidelines, warnings_html)
@@ -397,6 +405,11 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Perform Benford analysis with error handling
             private$.checkpoint()
             tryCatch({
+                # Clear any prior summary rows up front so a run that errors part
+                # way through cannot leave stale rows, and so re-adding rowKey 1-6
+                # never collides with rows from a previous run.
+                self$results$summary$deleteRows()
+
                 # Run Benford analysis
                 bfd.cp <- benford.analysis::benford(data = var,
                                                    number.of.digits = digits)
@@ -507,12 +520,26 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     error_template <- .("Analysis error: {msg}. Please check your data and try again.")
                     error_msg <- glue::glue(error_template, msg = e$message)
                 }
-                
-                self$results$summary$addRow(rowKey=1, values=list(
-                    statistic=.("Error"),
-                    value="",
-                    interpretation=error_msg
-                ))
+
+                # Surface fatal errors via the dataWarning Html item (which has
+                # clearWith) rather than as a summary-table row. This keeps error
+                # text from co-mingling with stale statistical rows and avoids a
+                # duplicate rowKey=1 collision if the error was thrown after some
+                # rows had already been added.
+                self$results$summary$deleteRows()
+                # Escape the (potentially data-derived) error message before it
+                # enters the Html item, so it cannot inject markup.
+                error_msg_html <- as.character(error_msg)
+                error_msg_html <- gsub("&", "&amp;", error_msg_html, fixed = TRUE)
+                error_msg_html <- gsub("<", "&lt;", error_msg_html, fixed = TRUE)
+                error_msg_html <- gsub(">", "&gt;", error_msg_html, fixed = TRUE)
+                error_html <- paste0(
+                    "<div style='background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 10px 0;'>",
+                    "<h4 style='margin-top: 0; color: #721c24;'>", .("Analysis Error"), "</h4>",
+                    "<p style='color: #721c24;'>", error_msg_html, "</p>",
+                    "</div>"
+                )
+                self$results$dataWarning$setContent(error_html)
             })
         },
 
@@ -632,13 +659,14 @@ benfordClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .plot = function(image, ggtheme, theme, ...) {
 
-            # Use shared validation method
-            if (!private$.validate())
-                return()
-
-            # Get plot data from state
+            # Get plot data from state. State is only set when the analysis in
+            # .run() succeeded, and clearWith invalidates it when var/digits
+            # change, so a non-NULL state is a sufficient guard. We intentionally
+            # do NOT re-run .validate() here: it re-reads self$data and rewrites
+            # the dataWarning item as a side effect, which a render function
+            # should not do.
             plotData <- image$state
-            
+
             if (is.null(plotData))
                 return()
             

@@ -14,6 +14,9 @@ items:
     - name:  explanation
       title: "About Benford's Law in Clinical Data"
       type:  Html
+      clearWith:
+          - var
+          - digits
 
     - name: dataWarning
       title: Data Validation
@@ -27,6 +30,9 @@ items:
       title: Analysis Summary
       type:  Table
       rows: 0
+      clearWith:
+          - var
+          - digits
       columns:
           - name: statistic
             title: Statistic
@@ -41,18 +47,30 @@ items:
     - name:  todo
       title: Guidelines
       type:  Html
+      clearWith:
+          - var
+          - digits
 
     - name:  text
       title: Detailed Analysis Results
       type:  Preformatted
+      clearWith:
+          - var
+          - digits
 
     - name:  text2
       title: Suspicious Data Points
       type:  Preformatted
+      clearWith:
+          - var
+          - digits
 
     - name:  reportSentence
       title: Clinical Report
       type:  Html
+      clearWith:
+          - var
+          - digits
 
     - name: plot
       title: 'Digit Distribution Analysis'
@@ -61,6 +79,9 @@ items:
       height: 500
       renderFun: .plot
       requiresData: true
+      clearWith:
+          - var
+          - digits
 
 refs:
     - benford.analysis
