@@ -209,10 +209,8 @@ children:
             enable: (showSetCalculations)
           - type: CheckBox
             name: showMembershipTable
-            enable: (showSetCalculations)
           - type: Output
             name: membershipGroups
-            enable: (showSetCalculations)
 
   - type: CollapseBox
     label: Output Sections

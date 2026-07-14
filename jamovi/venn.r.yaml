@@ -18,6 +18,26 @@ clearWith:
     - var5true
     - var6true
     - var7true
+    # UpSet plot options (so plots re-render on style-only changes)
+    - sortBy
+    - minSize
+    - showAnnotations
+    # ggVennDiagram styling options
+    - shapeType
+    - regionLabels
+    - labelGeometry
+    - labelPrecisionDigits
+    - setNameSize
+    - labelSize
+    - edgeSize
+    - edgeColor
+    - edgeLineType
+    - edgeAlpha
+    - fillAlpha
+    - showSetLabels
+    - setLabelColor
+    - fillColorMapping
+    - colorPalette
 
 items:
 
