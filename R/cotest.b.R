@@ -22,7 +22,6 @@ cotestClass <- if (requireNamespace("jmvcore"))
             #   [hygiene/notices] independence assumption only mentioned in HTML body - also surface as STRONG_WARNING banner
             #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation cotest
             #   [statistical-validation] /review-function cotest - Bayes update + sequential rules vs textbook reference
-            #   [testing] no tests/testthat/test-cotest.R
             .init = function() {
                 # Add welcome instructions
                 instructions <- '
@@ -84,7 +83,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
 
             .run = function() {
                 # Initialize notices collection for user-visible validation feedback
-                private$.notices <- character(0)
+                private$.notices <- list()
 
                 # Get parameters from user inputs
                 test1_sens <- self$options$test1_sens
@@ -188,7 +187,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     "<p><strong>Clinical Interpretation:</strong></p>
                 <p>Disease prevalence (pre-test probability): <strong>%.1f%%</strong></p>
                 <p><strong>Both tests positive:</strong> %.1f%% probability (%.1fx increase) - %s</p>
-                <p><strong>Both tests negative:</strong> %.1f%% probability (%.2fx change) %s</p>
+                <p><strong>Both tests negative:</strong> %.1f%% probability (%.2fx of prevalence) %s</p>
                 <p><strong>Single positive test:</strong></p>
                 <ul>
                 <li>Test 1 positive only: <strong>%.1f%%</strong> %s</li>
@@ -264,11 +263,11 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 if (prevalence <= 0 || prevalence >= 1) {
                     jmvcore::reject("Disease prevalence must be between 0 and 1. Consider realistic clinical prevalences: rare diseases (0.001-0.01), common conditions (0.05-0.20).")
                 }
-                if (!indep && (cond_dep_pos < -1 || cond_dep_pos > 1)) {
-                    jmvcore::reject("Conditional dependence for positive cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
+                if (!indep && (cond_dep_pos < 0 || cond_dep_pos > 1)) {
+                    jmvcore::reject("Conditional dependence for positive cases must be between 0 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence).")
                 }
-                if (!indep && (cond_dep_neg < -1 || cond_dep_neg > 1)) {
-                    jmvcore::reject("Conditional dependence for negative cases must be between -1 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence). Negative values reflect inverse correlation.")
+                if (!indep && (cond_dep_neg < 0 || cond_dep_neg > 1)) {
+                    jmvcore::reject("Conditional dependence for negative cases must be between 0 and 1. Typical values: 0.05 (weak), 0.15 (moderate), 0.30 (strong dependence).")
                 }
                 
                 # Additional clinical validity checks
@@ -693,7 +692,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
                                                prevalence, postest_prob_both, rel_prob_both,
                                                postest_prob_both_neg, rel_prob_both_neg) {
                 sprintf(
-                    "Co-testing with Test 1 (sensitivity %.0f%%, specificity %.0f%%) and Test 2 (sensitivity %.0f%%, specificity %.0f%%) in a population with %.1f%% disease prevalence showed: when both tests are positive, disease probability is %.1f%% (%.1fx increase); when both are negative, disease probability is %.1f%% (%.2fx decrease).",
+                    "Co-testing with Test 1 (sensitivity %.0f%%, specificity %.0f%%) and Test 2 (sensitivity %.0f%%, specificity %.0f%%) in a population with %.1f%% disease prevalence showed: when both tests are positive, disease probability is %.1f%% (%.1fx increase); when both are negative, disease probability is %.1f%% (reduced to %.2fx of prevalence).",
                     test1_sens * 100, test1_spec * 100,
                     test2_sens * 100, test2_spec * 100,
                     prevalence * 100,
@@ -750,19 +749,15 @@ cotestClass <- if (requireNamespace("jmvcore"))
                 return(presets[[preset]])
             },
 
-            # Add a notice to the collection
+            # Add a notice to the collection (stores level so it can be rendered distinctly)
             .addNotice = function(message, level = "warning") {
-                icon <- switch(level,
-                    "warning" = "",
-                    "info" = "",
-                    "error" = "",
-                    ""
-                )
-                notice_text <- paste0(icon, " ", message)
-                private$.notices <- c(private$.notices, notice_text)
+                if (!level %in% c("error", "warning", "info"))
+                    level <- "warning"
+                private$.notices <- c(private$.notices,
+                                      list(list(level = level, message = message)))
             },
 
-            # Display collected notices to the user
+            # Display collected notices to the user, styled per severity level
             .displayNotices = function() {
                 if (length(private$.notices) == 0) {
                     # No notices, hide the notices section
@@ -770,16 +765,34 @@ cotestClass <- if (requireNamespace("jmvcore"))
                     return()
                 }
 
-                # Build HTML for notices
-                notices_html <- '<div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 15px; margin: 10px 0;">'
-                notices_html <- paste0(notices_html, '<h4 style="margin-top: 0; color: #856404;">Validation Notices</h4>')
-                notices_html <- paste0(notices_html, '<ul style="margin-bottom: 0; padding-left: 20px;">')
-
-                for (notice in private$.notices) {
-                    notices_html <- paste0(notices_html, '<li style="margin: 5px 0;">', notice, '</li>')
+                # Per-level presentation: prefix label + text colour so that
+                # info/error messages are not visually mislabeled as warnings.
+                styleFor <- function(level) {
+                    switch(level,
+                        "error"   = list(label = "Error",   color = "#842029"),
+                        "warning" = list(label = "Warning", color = "#664d03"),
+                        "info"    = list(label = "Note",    color = "#055160"),
+                        list(label = "Note", color = "#664d03")
+                    )
                 }
 
-                notices_html <- paste0(notices_html, '</ul></div>')
+                items_html <- ""
+                for (notice in private$.notices) {
+                    sty <- styleFor(notice$level)
+                    items_html <- paste0(
+                        items_html,
+                        '<li style="margin: 5px 0; color: ', sty$color, ';"><strong>',
+                        sty$label, ':</strong> ', notice$message, '</li>'
+                    )
+                }
+
+                notices_html <- paste0(
+                    '<div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 10px 0;">',
+                    '<h4 style="margin-top: 0;">Validation Notices</h4>',
+                    '<ul style="margin-bottom: 0; padding-left: 20px;">',
+                    items_html,
+                    '</ul></div>'
+                )
 
                 self$results$notices$setContent(notices_html)
                 self$results$notices$setVisible(TRUE)
@@ -806,7 +819,7 @@ cotestClass <- if (requireNamespace("jmvcore"))
   <li>P(Test1\u{2212} and Test2\u{2212} | Disease\u{2212}) = P(Test1\u{2212} | Disease\u{2212}) \u{00D7} P(Test2\u{2212} | Disease\u{2212}) = Spec\u{2081} \u{00D7} Spec\u{2082}</li>
 </ul>
 
-<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u{03C1} or \u{03C8}) that ranges from -1 (inverse correlation) to 1 (maximum possible dependence):</p>
+<p><strong>Dependent Tests:</strong> When tests are dependent, we adjust these probabilities using a correlation parameter (denoted as \u{03C1} or \u{03C8}) that ranges from 0 (independence) to 1 (maximum possible dependence):</p>
 <ul>
   <li>P(Test1+ and Test2+ | Disease+) = (Sens\u{2081} \u{00D7} Sens\u{2082}) + \u{03C1}\u{1D68}\u{2092}\u{209B} \u{00D7} \u{221A}(Sens\u{2081} \u{00D7} (1\u{2212}Sens\u{2081}) \u{00D7} Sens\u{2082} \u{00D7} (1\u{2212}Sens\u{2082}))</li>
   <li>P(Test1+ and Test2+ | Disease\u{2212}) = ((1\u{2212}Spec\u{2081}) \u{00D7} (1\u{2212}Spec\u{2082})) + \u{03C1}\u{2099}\u{2091}\U{0001D454} \u{00D7} \u{221A}((1\u{2212}Spec\u{2081}) \u{00D7} Spec\u{2081} \u{00D7} (1\u{2212}Spec\u{2082}) \u{00D7} Spec\u{2082})</li>
