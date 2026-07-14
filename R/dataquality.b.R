@@ -149,7 +149,10 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             if (is.numeric(data_vec)) {
                 sdv <- stats::sd(data_vec, na.rm = TRUE)
                 near_zero_var <- !is.na(sdv) && sdv < .Machine$double.eps
-                high_card <- n_unique > 50 && n_unique > 0.5 * n_nonmiss
+                # High cardinality is expected/normal for continuous numeric
+                # variables (e.g. tumor size, lab values), so it is only flagged
+                # for non-numeric (ID-like / categorical) variables below to
+                # reduce false alarms.
                 if (n_nonmiss > 10) {
                     q <- stats::quantile(data_vec, probs = c(0.25, 0.75), na.rm = TRUE, names = FALSE)
                     iqr <- q[2] - q[1]
@@ -187,36 +190,50 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             summary_rows[[length(summary_rows) + 1]] <- add_summary_row(nm, analysis_data[[nm]])
         }
 
-        # Check for high missingness (>50%) and issue STRONG_WARNING
+        # Check for high missingness (>50%)
         high_missing_vars <- vapply(summary_rows, function(r) {
             if (!is.na(r$missing_pct) && r$missing_pct > 50) r$variable else NA_character_
         }, character(1))
         high_missing_vars <- high_missing_vars[!is.na(high_missing_vars)]
 
-        # NOTE: Removed Notice insertion to avoid serialization errors
-        # High missingness warning is now included in HTML summary output
-        if (length(high_missing_vars) > 0) {
-            # Warning will be included in .generateSummary() and .generateRecommendations()
-        }
-
-        # Check for small sample size
-        # NOTE: Removed Notice insertion to avoid serialization errors
-        # Small sample warning is now included in HTML summary output
+        # Total sample size (used for small-sample checks and downstream reporting)
         n_total <- nrow(analysis_data)
-        if (n_total < 20) {
-            # Warning will be included in .generateSummary() and .generateRecommendations()
-        }
 
-        # Check for near-zero variance and issue WARNING
+        # Check for near-zero variance
         near_zero_vars <- vapply(summary_rows, function(r) {
             if (isTRUE(r$near_zero_var)) r$variable else NA_character_
         }, character(1))
         near_zero_vars <- near_zero_vars[!is.na(near_zero_vars)]
 
-        # NOTE: Removed Notice insertion to avoid serialization errors
-        # Near-zero variance warning is now included in HTML summary output
+        # Surface critical warnings in the always-visible `text` output so they
+        # persist even when the plain-language summary and recommendations
+        # panels are both toggled off. (jmvcore::Notice objects are avoided
+        # here because dynamically inserted notices break jamovi's protobuf
+        # serialization.)
+        critical_warnings <- character(0)
+        if (length(high_missing_vars) > 0) {
+            critical_warnings <- c(critical_warnings, sprintf(
+                "<strong>High missingness (&gt;50%%):</strong> %s",
+                paste(htmltools::htmlEscape(high_missing_vars), collapse = ", ")))
+        }
         if (length(near_zero_vars) > 0) {
-            # Warning will be included in .generateSummary() and .generateRecommendations()
+            critical_warnings <- c(critical_warnings, sprintf(
+                "<strong>Near-zero variance:</strong> %s",
+                paste(htmltools::htmlEscape(near_zero_vars), collapse = ", ")))
+        }
+        if (n_total < 20) {
+            critical_warnings <- c(critical_warnings, sprintf(
+                "<strong>Very small sample size (n=%d):</strong> estimates may be unstable",
+                n_total))
+        }
+        if (length(critical_warnings) > 0) {
+            quality_results$critical_warnings <- paste0(
+                "<div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; border-radius: 5px;'>",
+                "<h4 style='margin-top: 0; color: #856404;'>Critical Data Quality Warnings</h4>",
+                "<ul style='margin-bottom: 0;'><li>",
+                paste(critical_warnings, collapse = "</li><li>"),
+                "</li></ul></div>"
+            )
         }
 
         # Missing value analysis
@@ -231,7 +248,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
             # Case-level missingness distribution
             case_missing <- rowSums(is.na(analysis_data))
-            case_summary <- sprintf("Case-level missing: median %d, mean %.1f, max %d (of %d vars)",
+            case_summary <- sprintf("Case-level missing: median %.1f, mean %.1f, max %d (of %d vars)",
                                     stats::median(case_missing),
                                     mean(case_missing),
                                     max(case_missing),
@@ -291,6 +308,17 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
                 )
             } else {
                 # Check for duplicates within each variable
+                # Accumulate the total number of duplicate values across all
+                # selected variables so the plain-language summary and
+                # recommendations report a non-zero count in value-level mode.
+                # (Previously duplicate_rows stayed NA in this branch, so both
+                # always reported 0 duplicates for value-level analysis.)
+                duplicate_rows <- sum(vapply(analysis_data, function(x) {
+                    non_missing <- sum(!is.na(x))
+                    unique_vals <- length(unique(jmvcore::naOmit(x)))
+                    non_missing - unique_vals
+                }, numeric(1)))
+
                 dup_summary <- sapply(analysis_data, function(x) {
                     total <- length(x)
                     non_missing <- sum(!is.na(x))
@@ -655,8 +683,12 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             0
         }
 
+        # Shared "good quality" criterion, used for both the prose assessment
+        # and the colored status box below so the two never disagree.
+        is_good_quality <- length(high_missing_vars) == 0 && n_total >= 30 && length(near_zero_vars) == 0
+
         # Determine overall assessment
-        overall_assessment <- if (length(high_missing_vars) == 0 && n_total >= 30 && length(near_zero_vars) == 0) {
+        overall_assessment <- if (is_good_quality) {
             "Good - data quality is acceptable for analysis"
         } else if (n_total < 20 || length(high_missing_vars) > 0) {
             "Needs attention - significant quality issues detected"
@@ -666,7 +698,9 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
         # Get duplicate info
         dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
-        dup_type <- if (self$options$complete_cases_only) "rows" else "values"
+        # Mirror the branch that actually ran in .run(): the row-level branch
+        # requires more than one variable, otherwise the value-level branch runs.
+        dup_type <- if (self$options$complete_cases_only && length(summary_rows) > 1) "rows" else "values"
 
         # Count variables exceeding threshold
         vars_above_threshold <- sum(vapply(summary_rows, function(r) {
@@ -689,7 +723,7 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
 
             # Missing data summary
             if (self$options$check_missing) {
-                sprintf("<li><strong>Missing Data:</strong> %d variable%s exceed%s %d%% missing threshold",
+                sprintf("<li><strong>Missing Data:</strong> %d variable%s exceed%s %g%% missing threshold",
                         vars_above_threshold,
                         if (vars_above_threshold == 1) "" else "s",
                         if (vars_above_threshold == 1) "s" else "",
@@ -745,8 +779,8 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
             # Overall assessment box
             sprintf(
                 "<div style='background-color: %s; padding: 15px; border-radius: 5px; border-left: 4px solid %s;'>",
-                if (length(high_missing_vars) == 0 && n_total >= 30) "#d1f2eb" else "#fff3cd",
-                if (length(high_missing_vars) == 0 && n_total >= 30) "#00695c" else "#ff8f00"
+                if (is_good_quality) "#d1f2eb" else "#fff3cd",
+                if (is_good_quality) "#00695c" else "#ff8f00"
             ),
             "<p style='margin: 0; font-weight: bold;'>Overall Assessment: ", overall_assessment, "</p>",
             "</div>",
@@ -830,13 +864,16 @@ dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityCla
         dup_count <- if (!is.null(duplicate_rows) && !is.na(duplicate_rows)) duplicate_rows else 0
         if (dup_count > 0) {
             has_recommendations <- TRUE
-            dup_type <- if (self$options$complete_cases_only) "duplicate rows" else "duplicate values"
+            # Mirror the branch that actually ran in .run(): the row-level branch
+            # requires more than one variable, otherwise value-level mode runs.
+            row_level_dupes <- self$options$complete_cases_only && length(summary_rows) > 1
+            dup_type <- if (row_level_dupes) "duplicate rows" else "duplicate values"
             recs_html <- paste0(recs_html,
                 "<div style='background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
                 "<h4 style='color: #e65100; margin-top: 0;'> ", dup_count, " ", dup_type, " Detected</h4>",
                 "<p><strong>Actions:</strong></p>",
                 "<ol style='line-height: 1.8;'>",
-                if (self$options$complete_cases_only) {
+                if (row_level_dupes) {
                     paste0(
                         "<li><strong>Review patient identifiers:</strong> Check if duplicates represent same patient (data entry error) or different patients</li>",
                         "<li><strong>If same patient:</strong> Merge records, keeping most complete/recent data</li>",
