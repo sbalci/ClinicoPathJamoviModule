@@ -4,6 +4,7 @@
 #' @rawNamespace import(igraph, except = c(compose, crossing, is_named, simplify))
 #' @import grDevices
 #' @import RColorBrewer
+#' @importFrom graphics par title legend
 #' @return An \code{R6} class generator object for the \code{jjarcdiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 
@@ -52,6 +53,12 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$source) || is.null(self$options$target))
                 return()
 
+            # Apply preset overrides BEFORE sizing: some presets (e.g. patient_network)
+            # force a horizontal layout, and the canvas dimensions must reflect that
+            # override. Reading .option("horizontal") before .configurePresets() sized a
+            # forced-horizontal plot inside a portrait (600x800) canvas.
+            private$.configurePresets()
+
             # Set plot size based on layout
             plot_width <- if (private$.option("horizontal")) 800 else 600
             plot_height <- if (private$.option("horizontal")) 600 else 800
@@ -95,13 +102,8 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
             if (is.null(self$data) || nrow(self$data) == 0)
-                            return() 
+                return()
 
-            # Validate data
-            if (nrow(self$data) == 0) {
-                jmvcore::reject(.('Data contains no (complete) rows'))
-            }
-            
             private$.checkpoint()
             # Update assumptions panel when variables change
             private$.updateAssumptionsPanel()
@@ -186,9 +188,23 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Helper method to escape variable names for safe igraph handling
         .escapeVar = function(x) {
             x_char <- as.character(x)
-            safe <- make.names(x_char, unique = TRUE)
+            safe <- make.names(x_char)
             safe <- gsub("\\.", "_", safe)
+            # Enforce uniqueness AFTER the dot substitution. Running make.names(unique=TRUE)
+            # first and gsub second let distinct originals ('HLA.A' and 'HLA_A') both collapse
+            # to 'HLA_A', silently merging two entities into one node. Uniqueness must be the
+            # final operation so any post-substitution collisions get re-suffixed.
+            safe <- make.names(safe, unique = TRUE)
             return(safe)
+        },
+
+        # Map make.names-escaped node key(s) back to the original display label(s).
+        # Falls back to the key itself when unmapped so nothing is dropped.
+        .toDisplayLabel = function(escaped, network_data) {
+            if (is.null(escaped) || length(escaped) == 0) return(escaped)
+            lbl <- network_data$escaped_to_label[escaped]
+            lbl[is.na(lbl)] <- escaped[is.na(lbl)]
+            unname(lbl)
         },
 
         # Helper method to create user instructions
@@ -279,9 +295,8 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to update assumptions panel conditionally
         .updateAssumptionsPanel = function() {
-            if (!is.null(self$options$source) && !is.null(self$options$target) || 
-                length(self$options$source) == 0 || length(self$options$target) == 0
-            ) {
+            if (!is.null(self$options$source) && !is.null(self$options$target) &&
+                length(self$options$source) > 0 && length(self$options$target) > 0) {
                 # Configure preset-specific settings
                 private$.configurePresets()
                 
@@ -319,6 +334,12 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         # Helper method to prepare network data
         .prepareNetworkData = function() {
+            # Reset notices at the start of every preparation pass. Both .run() and .plot()
+            # call this method on the SAME R6 instance; without a reset here the render pass
+            # (.plot) re-appends every warning, duplicating the notices panel each cycle.
+            private$.noticeList <- list()
+            private$.renderNotices()
+
             mydata <- self$data
 
             if (nrow(mydata) == 0) {
@@ -389,10 +410,13 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
 
-            # Calculate initial metrics before aggregation
-            vlabels_initial <- unique(c(edge_df$source, edge_df$target))
-            vlabels_display <- unique(c(edge_df$source_label, edge_df$target_label))
-            n_edges_raw <- nrow(edge_df)
+            # Robust escaped -> original-label map built from the full node set
+            # (node_map maps original -> escaped; invert it). Order-independent, so it stays
+            # valid through self-loop removal and edge aggregation below. Display labels are
+            # (re)derived from the FINAL edgelist after aggregation, never from this stale
+            # pre-aggregation edge_df (which caused length/order mismatches with arcplot).
+            escaped_to_label <- setNames(names(node_map), unname(node_map))
+            has_weight_var <- !is.null(weight_var) && weight_var %in% names(mydata_clean)
 
             # Remove self-loops before aggregation
             self_loops <- sum(edge_df$source == edge_df$target)
@@ -451,8 +475,16 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             edgelist <- as.matrix(edge_df[, c("source", "target")])
             weights <- edge_df$weight
 
-            # Calculate network metrics after aggregation
-            vlabels <- unique(c(edgelist[,1], edgelist[,2]))
+            # Calculate network metrics after aggregation.
+            # Canonical node order MUST match arcplot AND igraph, both of which derive nodes
+            # as unique(as.vector(t(edgelist))) (row-major, first appearance). The previous
+            # column-major unique(c(col1, col2)) produced a DIFFERENT order, so per-node
+            # aesthetics (labels, fills, sizes) and orderings were silently paired with the
+            # wrong nodes. Recomputing display labels here (post self-loop removal AND
+            # aggregation) also guarantees length(vlabels_display) == num_nodes, avoiding
+            # arcplot's hard "Length of labels differs from number of nodes" stop.
+            vlabels <- unique(as.vector(t(edgelist)))
+            vlabels_display <- unname(escaped_to_label[vlabels])
             n_nodes <- length(vlabels)
             n_edges <- nrow(edgelist)
 
@@ -490,9 +522,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # NODE-LEVEL GROUP HANDLING: Build proper node-to-group mapping with conflict detection
             # Groups should be node attributes, not edge-level
-            # Create reverse mapping: escaped names -> original labels
-            label_to_escaped <- setNames(vlabels, vlabels_display)
-            escaped_to_label <- setNames(vlabels_display, vlabels)
+            # escaped_to_label was already built (robustly, order-independently) above.
 
             node_groups <- NULL
             group_conflicts <- c()
@@ -585,6 +615,8 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 g = g,
                 vlabels = vlabels,              # Escaped names for igraph
                 vlabels_display = vlabels_display,  # Original for plotting
+                escaped_to_label = escaped_to_label,  # Escaped -> original for stats/report
+                has_weight_var = has_weight_var,      # TRUE only if a real weight var supplied
                 degrees = degrees,
                 n_nodes = n_nodes,
                 n_edges = n_edges,
@@ -845,8 +877,12 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (network_data$n_nodes > 1) {
                 private$.checkpoint(flush = FALSE)  # Before expensive centrality calculations
 
-                # WEIGHTED CENTRALITY: Handle weight semantics correctly
-                has_weights <- !is.null(igraph::E(g)$weight) && any(igraph::E(g)$weight != 1)
+                # WEIGHTED CENTRALITY: Handle weight semantics correctly.
+                # Base this on whether a REAL weight variable was supplied, not on
+                # E(g)$weight != 1: with aggregateEdges=TRUE and no weight variable, edge
+                # multiplicity counts are summed into E(g)$weight (>1), which would falsely
+                # flag the network as weighted and mislabel unweighted degree as "strength".
+                has_weights <- isTRUE(network_data$has_weight_var)
 
                 if (has_weights) {
                     # Determine weight interpretation
@@ -895,8 +931,9 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 valid_betweenness <- betweenness[is.finite(betweenness) & !is.na(betweenness)]
 
                 if (length(valid_degrees) > 0 && length(valid_betweenness) > 0) {
-                    highest_degree_node <- names(which.max(network_data$degrees))
-                    highest_betweenness_node <- names(which.max(betweenness))
+                    # Display ORIGINAL labels, not make.names-escaped keys ('Gene A' not 'Gene_A')
+                    highest_degree_node <- private$.toDisplayLabel(names(which.max(network_data$degrees)), network_data)
+                    highest_betweenness_node <- private$.toDisplayLabel(names(which.max(betweenness)), network_data)
                     max_degree <- max(network_data$degrees)
                     max_betweenness <- max(betweenness)
                 } else {
@@ -1028,11 +1065,12 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         analysis_type, network_data$n_nodes, network_data$n_edges, network_data$density, density_desc),
                 
                 if (network_data$n_nodes > 1 && self$options$showStats) {
-                    # Get centrality information if available
-                    highest_degree_node <- names(which.max(network_data$degrees))
+                    # Get centrality information if available (map escaped key -> original label)
+                    highest_degree_node <- private$.toDisplayLabel(names(which.max(network_data$degrees)), network_data)
                     max_degree <- max(network_data$degrees)
-                    # Use appropriate label for weighted vs unweighted
-                    if (!is.null(igraph::E(network_data$g)$weight) && any(igraph::E(network_data$g)$weight != 1)) {
+                    # Use appropriate label for weighted vs unweighted (real weight var only,
+                    # not incidental aggregation multiplicity counts)
+                    if (isTRUE(network_data$has_weight_var)) {
                         sprintf(.("<p><strong>Key Findings:</strong> The entity '%s' emerged as the most highly connected hub with %.2f weighted connections, suggesting its central role in the network.</p>"),
                                 htmltools::htmlEscape(highest_degree_node), max_degree)
                     } else {
