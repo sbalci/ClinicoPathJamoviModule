@@ -21,6 +21,7 @@ items:
       clearWith:
           - vars
           - group
+          - p_adjust
           - excl
 
     - name: analysisInfo
@@ -56,6 +57,15 @@ items:
           - sty
           - excl
 
+    - name: varNameWarnings
+      title: Variable Name Warnings
+      type: Html
+      visible: false
+      clearWith:
+          - vars
+          - group
+          - excl
+
     - name: tablestyle1
       title: '`Cross Table - ${group}`'
       type: Html
@@ -87,6 +97,8 @@ items:
           - vars
           - group
           - sty
+          - cont
+          - p_adjust
           - excl
       visible: (sty:gtsummary)
       refs: gtsummary
