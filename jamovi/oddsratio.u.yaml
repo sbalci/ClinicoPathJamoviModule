@@ -31,6 +31,7 @@ children:
     children:
       - type: CheckBox
         name: usePenalized
+        label: Firth penalized logistic regression
       - type: CheckBox
         name: showExplanations
   - type: CollapseBox

@@ -352,7 +352,6 @@ items:
           - sc
           - endplot
           - byplot
-          - sas
           - ci95
           - risktable
           - censored
@@ -378,7 +377,6 @@ items:
           - kmunicate
           - endplot
           - byplot
-          - sas
           - outcome
           - outcomeLevel
           - elapsedtime
@@ -403,7 +401,6 @@ items:
           - ce
           - endplot
           - byplot
-          - sas
           - ci95
           - risktable
           - censored
@@ -429,7 +426,6 @@ items:
           - ch
           - endplot
           - byplot
-          - sas
           - ci95
           - risktable
           - censored

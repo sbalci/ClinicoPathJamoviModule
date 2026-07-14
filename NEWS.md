@@ -5,7 +5,7 @@
 ## First stable release
 
 Crosses the 1.0 line for jamovi library acceptance. This release folds in the fixes from the
-2026-07-13 jamovi library audits (ClinicoPathDescriptives + OncoPath):
+2026-07-13 jamovi library audits (ClinicoPathDescriptives + OncoPath + jsurvival):
 
 ### Fixed
 
@@ -27,6 +27,14 @@ Crosses the 1.0 line for jamovi library acceptance. This release folds in the fi
   collapsible panels and removed disabled cross-table schema scaffolding.
 - **Rendering:** replaced named HTML symbol entities (`&plusmn;`, `&ge;`, …) with Unicode escapes
   so they render correctly and survive non-HTML export.
+- **jsurvival validation and localization:** retained clear analysis-level rejection on both
+  odds-ratio validation paths, converted fragmented translated output to complete placeholder-based
+  sentences, and normalized checkbox labels to noun phrases.
+- **jsurvival schema:** removed stale `sas` invalidation keys and hid the unfinished survival-tree
+  controls until their backend and results are wired end to end.
+- **jsurvival distribution:** trimmed the standalone citation catalog to the 22 referenced keys,
+  replaced broad package imports with selective imports, synchronized release metadata, and removed
+  the orphaned survival-power event handler from the standalone package.
 - **Cleanup:** removed dead and commented-out cross-table feature scaffolding, removed
   half-wired `clinicalPreset` code, and stopped shipping orphaned stage-migration helpers to
   the OncoPath build.

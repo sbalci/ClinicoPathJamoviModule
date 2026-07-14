@@ -1,6 +1,5 @@
 #' @title Enhanced Outcome Organizer for Survival Analysis
 #' @importFrom R6 R6Class
-#' @import jmvcore
 #'
 #' @return An \code{R6} class generator object for the \code{outcomeorganizerClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

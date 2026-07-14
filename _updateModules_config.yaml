@@ -131,6 +131,7 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/jsurvival"
     r_files:
       - "utils.R"
+      - "survival_utils.R"
       - "diagnostichelpers.R"
       # survivalPower_distributions.R is intentionally NOT shipped to production jsurvival:
       # the survivalPower analysis is dev-routed to menuGroup SurvivalT (JamoviTest) and is
@@ -213,6 +214,7 @@ modules:
       - "histopathology.rda"
     r_files:
       - "utils.R"
+      - "survival_utils.R"
       - "error_handling.R"
       - "diagnostichelpers.R"
       - "survivalPower_distributions.R"

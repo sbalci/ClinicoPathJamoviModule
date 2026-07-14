@@ -672,8 +672,7 @@ copy_jamovi_assets <- function(module_names, source_base_dir, dest_base_dir, mod
         paste0("^", module_name, "\\.js$"),                    # moduleName.js
         paste0("^", module_name, "\\.events\\.js$"),          # moduleName.events.js
         paste0("^", module_name, "\\.handlers\\.js$"),        # moduleName.handlers.js
-        paste0("^", module_name, "\\.helpers\\.js$"),         # moduleName.helpers.js
-        paste0("^", module_name, ".*\\.js$")                  # moduleName*.js (catch-all)
+        paste0("^", module_name, "\\.helpers\\.js$")          # moduleName.helpers.js
       )
 
       for (pattern in js_patterns) {

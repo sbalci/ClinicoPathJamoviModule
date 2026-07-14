@@ -46,7 +46,7 @@ children:
               - type: CheckBox
                 name: findcut
                 enable: (contexpl && !multiple_cutoffs)
-                label: Find optimal cut-off
+                label: Optimal cut-off
               - type: Output
                 name: calculatedcutoff
                 enable: (findcut)
@@ -58,6 +58,7 @@ children:
             children:
               - type: CheckBox
                 name: multiple_cutoffs
+                label: Multiple cut-offs
                 enable: (contexpl && !findcut)
               - type: ComboBox
                 name: num_cutoffs
@@ -87,7 +88,7 @@ children:
             children:
               - type: CheckBox
                 name: tint
-                label: Calculate time from dates
+                label: Time from dates
               - type: Label
                 label: Date Variables
                 enable: (tint)
@@ -135,7 +136,7 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
-                label: Use landmark time
+                label: Landmark time
                 children:
                   - type: TextBox
                     name: landmark
@@ -323,7 +324,7 @@ children:
             children:
               - type: CheckBox
                 name: person_time
-                label: Calculate person-time rates (events per time unit)
+                label: Person-time rates (events per time unit)
               - type: TextBox
                 name: time_intervals
                 format: string

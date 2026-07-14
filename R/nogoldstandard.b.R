@@ -1246,7 +1246,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # In case of error, create a simpler plot
-                        message(.("Error in plot: "), e$message)
+                        message(jmvcore::format(.("Error in plot: {msg}"), msg = e$message))
 
                         # Simple fallback plot
                         try(
@@ -1346,7 +1346,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     },
                     error = function(e) {
                         # In case of error, create a simpler plot
-                        message(.("Error in ggplot: "), e$message)
+                        message(jmvcore::format(.("Error in ggplot: {msg}"), msg = e$message))
 
                         # Try base R fallback
                         try(

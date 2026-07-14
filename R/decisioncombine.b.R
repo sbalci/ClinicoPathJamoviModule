@@ -86,6 +86,22 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 # Test 3 visibility
                 hasTest3 <- !is.null(self$options$test3) && self$options$test3 != ""
                 self$results$individualTest3$setVisible(showIndividual && hasTest3)
+
+                # Initialize fixed-structure tables for Test 1, 2, 3
+                for (i in 1:3) {
+                    group <- self$results[[paste0("individualTest", i)]]
+                    contTable <- group[[paste0("test", i, "Contingency")]]
+                    statsTable <- group[[paste0("test", i, "Stats")]]
+                    
+                    contTable$addRow(rowKey = "Positive", values = list(testResult = .("Test Positive")))
+                    contTable$addRow(rowKey = "Negative", values = list(testResult = .("Test Negative")))
+                    contTable$addRow(rowKey = "Total", values = list(testResult = .("Total")))
+                    
+                    statsTable$addRow(rowKey = "sens", values = list(statistic = .("Sensitivity")))
+                    statsTable$addRow(rowKey = "spec", values = list(statistic = .("Specificity")))
+                    statsTable$addRow(rowKey = "ppv", values = list(statistic = .("PPV")))
+                    statsTable$addRow(rowKey = "npv", values = list(statistic = .("NPV")))
+                }
             },
             .run = function() {
                 # Main analysis flow - fail fast approach
@@ -428,20 +444,17 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Populate contingency table
-                contTable$addRow(rowKey = "Positive", values = list(
-                    testResult = "Test Positive",
+                contTable$setRow(rowKey = "Positive", values = list(
                     goldPos = tp,
                     goldNeg = fp,
                     total = tp + fp
                 ))
-                contTable$addRow(rowKey = "Negative", values = list(
-                    testResult = "Test Negative",
+                contTable$setRow(rowKey = "Negative", values = list(
                     goldPos = fn,
                     goldNeg = tn,
                     total = fn + tn
                 ))
-                contTable$addRow(rowKey = "Total", values = list(
-                    testResult = "Total",
+                contTable$setRow(rowKey = "Total", values = list(
                     goldPos = tp + fn,
                     goldNeg = fp + tn,
                     total = tp + fp + fn + tn
@@ -459,20 +472,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 npv <- detail_df[detail_df$statistic == "pv.neg", "est"]
 
                 # Populate statistics table
-                statsTable$addRow(rowKey = "sens", values = list(
-                    statistic = "Sensitivity",
+                statsTable$setRow(rowKey = "sens", values = list(
                     estimate = sens
                 ))
-                statsTable$addRow(rowKey = "spec", values = list(
-                    statistic = "Specificity",
+                statsTable$setRow(rowKey = "spec", values = list(
                     estimate = spec
                 ))
-                statsTable$addRow(rowKey = "ppv", values = list(
-                    statistic = "PPV",
+                statsTable$setRow(rowKey = "ppv", values = list(
                     estimate = ppv
                 ))
-                statsTable$addRow(rowKey = "npv", values = list(
-                    statistic = "NPV",
+                statsTable$setRow(rowKey = "npv", values = list(
                     estimate = npv
                 ))
             },

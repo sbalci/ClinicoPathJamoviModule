@@ -110,6 +110,7 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
+                label: Landmark time
                 children:
                   - type: TextBox
                     name: landmark
@@ -254,6 +255,7 @@ children:
             children:
               - type: CheckBox
                 name: calculateRiskScore
+                label: Risk score
               - type: ComboBox
                 name: numRiskGroups
                 enable: (calculateRiskScore)
@@ -335,6 +337,7 @@ children:
         children:
           - type: CheckBox
             name: use_stratify
+            label: Variable stratification
             fitToGrid: true
           - type: Label
             label: Select Stratification Variables
@@ -371,6 +374,7 @@ children:
         children:
           - type: CheckBox
             name: person_time
+            label: Person-time metrics
           - type: TextBox
             name: time_intervals
             format: string
@@ -393,33 +397,6 @@ children:
                 name: showExplanations
               - type: CheckBox
                 name: showSummaries
-  - type: CollapseBox
-    label: Survival Decision Tree
-    collapsed: true
-    children:
-      - type: Label
-        label: Survival Decision Tree
-        children:
-          - type: LayoutBox
-            margin: large
-            children:
-              - type: CheckBox
-                name: use_tree
-              - type: TextBox
-                name: min_node
-                format: number
-                enable: (use_tree)
-              - type: TextBox
-                name: complexity
-                format: number
-                enable: (use_tree)
-              - type: TextBox
-                name: max_depth
-                format: number
-                enable: (use_tree)
-              - type: CheckBox
-                name: show_terminal_nodes
-                enable: (use_tree)
   - type: CollapseBox
     label: Interaction Terms
     collapsed: true

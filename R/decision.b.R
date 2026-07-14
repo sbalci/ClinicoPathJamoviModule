@@ -51,6 +51,12 @@ decisionClass <- if (requireNamespace("jmvcore"))
                 cTable$addRow(rowKey = "Test Negative", values = list(newtest = .("Test Negative")))
                 cTable$addRow(rowKey = "Total", values = list(newtest = .("Total")))
 
+                summary_table <- self$results$confusionMatrixSummary
+                summary_table$addRow(rowKey = 1, values = list(classification = .("True Positive")))
+                summary_table$addRow(rowKey = 2, values = list(classification = .("False Positive")))
+                summary_table$addRow(rowKey = 3, values = list(classification = .("False Negative")))
+                summary_table$addRow(rowKey = 4, values = list(classification = .("True Negative")))
+
                 # Populate welcome message
                 self$results$welcome$setContent("
                     <div style='padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 8px; border-left: 4px solid #4A90E2;'>
@@ -2008,24 +2014,19 @@ decisionClass <- if (requireNamespace("jmvcore"))
 
                 # Populate confusion matrix summary
                 summary_table <- self$results$confusionMatrixSummary
-                try(summary_table$deleteRows(), silent = TRUE)
-                summary_table$addRow(rowKey = 1, values = list(
-                    classification = "True Positive",
+                summary_table$setRow(rowKey = 1, values = list(
                     count = n_tp,
                     percentage = n_tp / n_total
                 ))
-                summary_table$addRow(rowKey = 2, values = list(
-                    classification = "False Positive",
+                summary_table$setRow(rowKey = 2, values = list(
                     count = n_fp,
                     percentage = n_fp / n_total
                 ))
-                summary_table$addRow(rowKey = 3, values = list(
-                    classification = "False Negative",
+                summary_table$setRow(rowKey = 3, values = list(
                     count = n_fn,
                     percentage = n_fn / n_total
                 ))
-                summary_table$addRow(rowKey = 4, values = list(
-                    classification = "True Negative",
+                summary_table$setRow(rowKey = 4, values = list(
                     count = n_tn,
                     percentage = n_tn / n_total
                 ))

@@ -92,6 +92,7 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
+                label: Landmark time
                 children:
                   - type: TextBox
                     name: landmark
@@ -216,6 +217,7 @@ children:
         children:
           - type: CheckBox
             name: person_time
+            label: Person-time metrics
           - type: TextBox
             name: time_intervals
             format: string

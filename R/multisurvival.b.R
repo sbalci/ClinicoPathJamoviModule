@@ -343,7 +343,6 @@
 #'
 #' @seealso \code{\link{multisurvival}} for the main user interface function
 #' @importFrom R6 R6Class
-#' @import jmvcore
 #' @keywords internal
 #' @return An \code{R6} class generator object for the \code{multisurvivalClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

@@ -54,6 +54,7 @@ children:
     children:
       - type: CheckBox
         name: remove_negative
+        label: Negative-interval exclusion
       - type: CheckBox
         name: remove_extreme
       - type: TextBox
@@ -63,6 +64,7 @@ children:
         enable: (remove_extreme)
       - type: CheckBox
         name: include_quality_metrics
+        label: Data quality assessment
       - type: TextBox
         name: confidence_level
         format: number
@@ -74,6 +76,7 @@ children:
     children:
       - type: CheckBox
         name: add_times
+        label: Calculated-time variables
       - type: CheckBox
         name: show_summary
   - type: LayoutBox

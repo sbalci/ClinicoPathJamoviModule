@@ -981,56 +981,6 @@ options:
     #     ui: >
     #       Display plots showing how model performance varies over follow-up time.
 
-# Decision Tree Options ---- (EXPERIMENTAL - will be implemented later)
-    - name: use_tree
-      title: Use survival decision tree
-      type: Bool
-      default: false
-      description:
-        R: >
-          If true, fits a survival decision tree to identify subgroups with different survival outcomes.
-          Decision trees provide an intuitive alternative to Cox regression for identifying risk factors.
-
-    - name: min_node
-      title: Minimum Node Size
-      type: Integer
-      min: 5
-      max: 100
-      default: 20
-      description:
-        R: >
-          The minimum number of observations required in a terminal node. Larger values create
-          simpler trees that may be more generalizable but potentially miss important subgroups.
-
-    - name: complexity
-      title: Complexity Parameter
-      type: Number
-      min: 0.001
-      max: 0.1
-      default: 0.01
-      description:
-        R: >
-          The complexity parameter for tree pruning. Higher values result in smaller trees.
-          This parameter controls the trade-off between tree size and goodness of fit.
-
-    - name: max_depth
-      title: Maximum Tree Depth
-      type: Integer
-      min: 1
-      max: 10
-      default: 5
-      description:
-        R: >
-          The maximum depth of the decision tree. Limits the complexity of the tree to avoid overfitting.
-
-    - name: show_terminal_nodes
-      title: Survival curves for terminal nodes
-      type: Bool
-      default: false
-      description:
-        R: >
-          If true, displays Kaplan-Meier survival curves for each terminal node of the decision tree.
-
 # Time-Dependent Covariates ---- (EXPERIMENTAL - will be implemented later)
     # - name: use_time_dependent
     #   title: Use Time-Dependent Covariates

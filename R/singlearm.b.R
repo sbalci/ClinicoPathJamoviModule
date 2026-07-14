@@ -1,7 +1,5 @@
 #' @title Single Arm Survival
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom ggplot2 ggplot aes geom_text geom_line geom_point labs theme_void theme element_blank scale_x_continuous scale_y_continuous annotate
 #' @importFrom gridExtra grid.arrange
 #' @importFrom survminer ggsurvplot ggcompetingrisks
@@ -2729,7 +2727,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                  color = "#DE8F05", alpha = 0.4, size = 1) +
               ggplot2::labs(
                 title = .("Smoothed Hazard Function"),
-                subtitle = paste0(.("LOESS smoothing with span = "), round(adaptive_span, 2)),
+                subtitle = jmvcore::format(
+                  .("LOESS smoothing with span = {span}"),
+                  span = round(adaptive_span, 2)
+                ),
                 x = paste0("Time (", self$options$timetypeoutput, ")"),
                 y = "Smoothed Hazard Rate"
               ) +

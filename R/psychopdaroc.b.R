@@ -228,7 +228,6 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @rawNamespace import(cutpointr, except = c(auc, roc))
 #' @importFrom MASS ginv
 # ============================================================================
 # MAIN ANALYSIS CLASS

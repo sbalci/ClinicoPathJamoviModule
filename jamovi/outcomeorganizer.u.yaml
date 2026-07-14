@@ -88,6 +88,7 @@ children:
         children:
           - type: CheckBox
             name: useHierarchy
+            label: Event hierarchy
             children:
               - type: TextBox
                 name: eventPriority
@@ -103,6 +104,7 @@ children:
         children:
           - type: CheckBox
             name: intervalCensoring
+            label: Interval censoring
             children:
               - type: VariableSupplier
                 persistentItems: false
@@ -127,6 +129,7 @@ children:
         children:
           - type: CheckBox
             name: adminCensoring
+            label: Administrative censoring
             children:
               - type: VariableSupplier
                 persistentItems: false

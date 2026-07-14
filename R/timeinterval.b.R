@@ -60,9 +60,6 @@
 #' }
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import lubridate
-#' @import glue
 #'
 
 timeintervalClass <- if (requireNamespace('jmvcore')) R6::R6Class(

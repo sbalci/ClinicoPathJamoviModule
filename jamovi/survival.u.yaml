@@ -50,7 +50,7 @@ children:
               - type: CheckBox
                 name: tint
                 fitToGrid: true
-                label: Calculate time from dates
+                label: Time from dates
               - type: Label
                 label: Date Variables
                 fitToGrid: true
@@ -104,7 +104,7 @@ children:
             children:
               - type: CheckBox
                 name: uselandmark
-                label: Use landmark time
+                label: Landmark time
                 children:
                   - type: TextBox
                     name: landmark
@@ -208,11 +208,11 @@ children:
                         enable: (age_adjustment)
               - type: CheckBox
                 name: age_interaction
-                label: Test age x group interaction
+                label: Age × group interaction
                 enable: (age_adjustment)
               - type: CheckBox
                 name: age_stratified_cox
-                label: Stratify Cox by age groups
+                label: Age-stratified Cox model
                 enable: (age_adjustment)
               - type: TextBox
                 name: age_group_cutpoints
@@ -307,7 +307,7 @@ children:
             children:
               - type: CheckBox
                 name: pw
-                label: Perform pairwise comparisons
+                label: Pairwise comparisons
               - type: ComboBox
                 name: padjustmethod
                 enable: (pw)
@@ -320,7 +320,7 @@ children:
             children:
               - type: CheckBox
                 name: weightedLogRank
-                label: Perform weighted log-rank tests
+                label: Weighted log-rank tests
               - type: ComboBox
                 name: survivalTestType
                 enable: (weightedLogRank)
@@ -431,7 +431,7 @@ children:
             children:
               - type: CheckBox
                 name: person_time
-                label: Calculate person-time rates
+                label: Person-time rates
               - type: TextBox
                 name: time_intervals
                 format: string
@@ -494,6 +494,7 @@ children:
     children:
       - type: CheckBox
         name: parametric_covariates
+        label: Parametric-model covariates
   - type: LayoutBox
     margin: large
     children:

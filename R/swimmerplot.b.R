@@ -4,8 +4,6 @@
 #' Creates swimmer plots for visualizing patient timelines, treatments, milestones, and clinical events.
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
-#' @import ggswim
 #' @importFrom ggplot2 ggplot aes labs theme element_text element_blank
 #' @importFrom dplyr mutate filter group_by summarize left_join arrange n bind_rows
 #' @importFrom tidyr pivot_wider
@@ -256,7 +254,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             if (length(missing_vars) > 0) {
                 return(list(
                     error = TRUE,
-                    message = paste(.("Missing required variables:"), paste(missing_vars, collapse = ", "))
+                    message = jmvcore::format(.("Missing required variables: {vars}"), vars = paste(missing_vars, collapse = ", "))
                 ))
             }
             
@@ -273,7 +271,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, error = function(e) {
                 return(list(
                     error = TRUE,
-                    message = paste(.(.("Error processing core variables:")), e$message)
+                    message = jmvcore::format(.("Error processing core variables: {message}"), message = e$message)
                 ))
             })
             
@@ -308,10 +306,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
                 # Check for other parsing errors
                 if (isTRUE(start_parsed$error)) {
-                    return(list(error = TRUE, message = paste(.("Start time parsing:"), start_parsed$message)))
+                    return(list(error = TRUE, message = jmvcore::format(.("Start time parsing: {message}"), message = start_parsed$message)))
                 }
                 if (isTRUE(end_parsed$error)) {
-                    return(list(error = TRUE, message = paste(.("End time parsing:"), end_parsed$message)))
+                    return(list(error = TRUE, message = jmvcore::format(.("End time parsing: {message}"), message = end_parsed$message)))
                 }
                 
                 patient_data$start_time <- start_parsed$value
@@ -1290,14 +1288,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     dcr_pct <- dcr_count / sum(stats$response_counts) * 100
 
                     response_text <- sprintf(
-                        .(.(" Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients) and disease control rate (DCR) of %.1f%% (%d/%d patients). The most frequent response category was %s (%.1f%%).")),
+                        .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients) and disease control rate (DCR) of %.1f%% (%d/%d patients). The most frequent response category was %s (%.1f%%)."),
                         orr_pct, orr_count, sum(stats$response_counts),
                         dcr_pct, dcr_count, sum(stats$response_counts),
                         safe_best_response, best_pct
                     )
                 } else {
                     response_text <- sprintf(
-                        .(.(" Response data was available for all patients, with %s being the most common category (%.1f%% of observations).")),
+                        .("Response data was available for all patients, with %s being the most common category (%.1f%% of observations)."),
                         safe_best_response, best_pct
                     )
                 }
@@ -1307,7 +1305,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }
             
             # Add methodology note
-            methodology_note <- .(.("This timeline visualization uses the ggswim package to display patient treatment courses, clinical milestones, and outcome assessments in a comprehensive swimmer plot format suitable for clinical research reporting."))
+            methodology_note <- .("This timeline visualization uses the ggswim package to display patient treatment courses, clinical milestones, and outcome assessments in a comprehensive swimmer plot format suitable for clinical research reporting.")
             summary_text <- paste(summary_text, methodology_note)
             
             return(summary_text)
@@ -1516,14 +1514,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (isTRUE(validation_result$error)) {
                     error_msg <- paste0(
                         "<div style='color: red; padding: 15px; border: 1px solid red; border-radius: 5px; margin: 10px;'>",
-                        .("<h4>Data Validation Error</h4>"),
-                        .("<p><strong>Error:</strong> "), htmltools::htmlEscape(validation_result$message), .("</p>"),
-                        .("<p><strong>Please check:</strong></p>"),
+                        "<h4>", .("Data Validation Error"), "</h4>",
+                        "<p><strong>", .("Error:"), "</strong> ", htmltools::htmlEscape(validation_result$message), "</p>",
+                        "<p><strong>", .("Please check:"), "</strong></p>",
                         "<ul>",
-                        .("<li>All required variables are selected</li>"),
-                        .("<li>Data contains valid values</li>"),
-                        .("<li>End times are greater than or equal to start times</li>"),
-                        .("<li>Check for negative follow-up times or unrealistic durations</li>"),
+                        "<li>", .("All required variables are selected"), "</li>",
+                        "<li>", .("Data contains valid values"), "</li>",
+                        "<li>", .("End times are greater than or equal to start times"), "</li>",
+                        "<li>", .("Check for negative follow-up times or unrealistic durations"), "</li>",
                         "</ul>",
                         "</div>"
                     )
@@ -1658,14 +1656,14 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, error = function(e) {
                 error_msg <- paste(
                     "<div style='color: red; padding: 10px; border: 1px solid red; border-radius: 5px;'>",
-                    .("<h4>Error in Swimmer Plot Analysis</h4>"),
-                    .("<p><strong>Error:</strong>"), htmltools::htmlEscape(e$message), .("</p>"),
-                    .("<p><strong>Suggestions:</strong></p>"),
+                    "<h4>", .("Error in Swimmer Plot Analysis"), "</h4>",
+                    "<p><strong>", .("Error:"), "</strong> ", htmltools::htmlEscape(e$message), "</p>",
+                    "<p><strong>", .("Suggestions:"), "</strong></p>",
                     "<ul>",
-                    .("<li>Ensure all required variables are selected</li>"),
-                    .("<li>Check that time variables contain valid numeric or date values</li>"),
-                    .("<li>Verify that end times are greater than or equal to start times</li>"),
-                    .("<li>For date/time data, ensure correct format is selected</li>"),
+                    "<li>", .("Ensure all required variables are selected"), "</li>",
+                    "<li>", .("Check that time variables contain valid numeric or date values"), "</li>",
+                    "<li>", .("Verify that end times are greater than or equal to start times"), "</li>",
+                    "<li>", .("For date/time data, ensure correct format is selected"), "</li>",
                     "</ul>",
                     "</div>"
                 )
@@ -1777,7 +1775,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 row_idx <- 7
                 for (response in names(stats$response_counts)) {
                     self$results$summary$addRow(rowKey = row_idx, values = list(
-                        metric = paste0(response, .(" Rate (%)")),
+                        metric = jmvcore::format(.("{response} Rate (%)"), response = response),
                         value = round(stats$response_percentages[[response]], 1)
                     ))
                     row_idx <- row_idx + 1
@@ -2437,7 +2435,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
 
             # Add labels with clinical context
             is_date_scale <- inherits(patient_data$start_time, c("Date", "POSIXct"))
-            x_label <- if (is_date_scale) .("Date") else paste0(.("Time ("), self$options$timeUnit, .(")"))
+            x_label <- if (is_date_scale) .("Date") else jmvcore::format(.("Time ({unit})"), unit = self$options$timeUnit)
             p <- p + ggplot2::labs(
                 title = .("Patient Timeline Analysis"),
                 subtitle = sprintf(.("N=%d patients | Median follow-up: %.1f %s | Total person-time: %.1f %s"),

@@ -2,7 +2,6 @@
 #' @return Table
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom irr kappa2 kappam.fleiss agree
 #' @importFrom dplyr group_by count
 #' @importFrom htmlTable htmlTable

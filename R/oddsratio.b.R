@@ -61,7 +61,6 @@
 #' @seealso \code{\link[finalfit]{finalfit}}, \code{\link[rms]{rms}}
 #'
 #' @importFrom R6 R6Class
-#' @import jmvcore
 #'
 #' @return An \code{R6} class generator object for the \code{oddsratioClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -346,8 +345,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is.null(self$options$explanatory) || is.null(self$options$outcome))
             {
 
-                # TODO ----
-
                 todo <- glue::glue("
                     <br>Welcome to ClinicoPath
                     <br><br>
@@ -440,9 +437,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Handle validation errors - stop execution if critical errors found
                 if (validation_results$should_stop) {
+                    validation_error <- sub(
+                        "[.]+$",
+                        "",
+                        paste(validation_results$errors, collapse = "; ")
+                    )
                     jmvcore::reject(paste0(
                         "Critical validation errors detected: ",
-                        paste(validation_results$errors, collapse = "; "),
+                        validation_error,
                         ". Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data."))
                 }
 
@@ -1192,26 +1194,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
                     if (nrow(self$data) == 0)
                 jmvcore::reject('Data contains no (complete) rows')
-            # TODO (cleanup): the dead commented block immediately below (early
-            # outcome-validation drafts and pre-jmvcore formula builders) was superseded
-            # by the .validateInputs path at L176 and the constructFormula/composeTerms
-            # upstream - safe to delete on a future cleanup pass.
-            # Check if outcome variable is suitable or stop
-            # myoutcome2 <- self$options$outcome
-            # myoutcome2 <- self$data[[myoutcome2]]
-            # myoutcome2 <- na.omit(myoutcome2)
-                    # if (class(myoutcome2) == "factor")
-            #     jmvcore::reject("Please use a continuous variable for outcome.")
-            #
-            #
-            # if (any(myoutcome2 != 0 & myoutcome2 != 1))
-            #     jmvcore::reject('Outcome variable must only contains 1s and 0s. If patient is dead or event (recurrence) occured it is 1. If censored (patient is alive or free of disease) at the last visit it is 0.')
-                    # mydata <- self$data
-                    # formula2 <- jmvcore::constructFormula(terms = self$options$explanatory)
-                    # formulaR <- jmvcore::constructFormula(terms = self$options$outcome)
-                    # formulaR <- jmvcore::toNumeric(formulaR)
-                    # https://finalfit.org/reference/or_plot.html
-
                     plotList <- image$state
 
                     mydata <- plotList$plotData
