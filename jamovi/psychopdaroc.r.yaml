@@ -105,6 +105,8 @@ items:
         - boot_runs
         - break_ties
         - tol_metric
+        - usePriorPrev
+        - priorPrev
       template:
         type: Table
         rows: 0
@@ -171,6 +173,8 @@ items:
         - positiveClass
         - subGroup
         - direction
+        - usePriorPrev
+        - priorPrev
       columns:
         - name: threshold
           title: Cut-off
@@ -376,6 +380,7 @@ items:
           - cleanPlot
           - showConfidenceBands
           - quantileCIs
+          - combinePlots
 
     - name: interactivePlot
       title: Interactive ROC Plot

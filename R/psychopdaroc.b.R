@@ -305,24 +305,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
         as.character(x)
       },
 
-      # Backtick escaping for formula contexts (e.g., `My Var` ~ x)
-      .escapeVarFormula = function(x) {
-        if (is.null(x) || length(x) == 0) {
-          return(x)
-        }
-        vapply(x, function(v) {
-          if (is.character(v) && nzchar(v)) {
-            if (grepl("[^A-Za-z0-9_.]", v)) {
-              paste0("`", v, "`")
-            } else {
-              v
-            }
-          } else {
-            as.character(v)
-          }
-        }, character(1), USE.NAMES = FALSE)
-      },
-
       # ============================================================================
       # CLINICAL UTILITY METHODS
       # ============================================================================
@@ -1990,10 +1972,10 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             "<p> The ROC analysis has been completed using the following specifications: ",
             "<p>\u{00A0}</p>",
             "<p> Measure Variable(s): ",
-            paste(unlist(self$options$dependentVars), collapse = ", "),
+            htmltools::htmlEscape(paste(unlist(self$options$dependentVars), collapse = ", ")),
             "</p>",
             "<p> Class Variable: ",
-            self$options$classVar,
+            htmltools::htmlEscape(self$options$classVar),
             "</p>"
           )
 
@@ -2113,6 +2095,21 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           summary_status$warnings <- c(
             summary_status$warnings,
             sprintf("Class imbalance detected (Prevalence: %.1f%%). Consider using Precision-Recall curves.", prevalence * 100)
+          )
+        }
+
+        # Warn when the gold-standard class variable has more than two levels.
+        # ROC analysis requires exactly two levels; when more are present a
+        # one-vs-rest dichotomization (positive class vs. all other levels combined)
+        # is applied. Surface this explicitly rather than collapsing silently.
+        n_class_levels <- nlevels(droplevels(as.factor(classVar)))
+        if (!is.na(n_class_levels) && n_class_levels > 2) {
+          summary_status$warnings <- c(
+            summary_status$warnings,
+            sprintf(
+              "Class variable has %d levels, but ROC analysis requires exactly two. A one-vs-rest dichotomization is applied: '%s' (positive) vs. all other levels combined.",
+              n_class_levels, htmltools::htmlEscape(positiveClass)
+            )
           )
         }
 
@@ -2463,24 +2460,28 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           # -----------------------------------------------------------------------
 
           if (self$options$plotROC) {
+            # Build this variable's ROC plot data once and always accumulate it into
+            # plotDataList so the interactive plot renders in both individual and
+            # combined modes (previously plotDataList was only filled when combining).
+            varPlotData <- data.frame(
+              var = rep(var, length(confusionMatrix$x.sorted)),
+              cutpoint = confusionMatrix$x.sorted,
+              sensitivity = sensList,
+              specificity = specList,
+              ppv = ppvList,
+              npv = npvList,
+              AUC = rep(results$AUC, length(confusionMatrix$x.sorted)),
+              youden = youdenList,
+              j_max_idx = j_max_idx,
+              stringsAsFactors = FALSE
+            )
+            plotDataList <- rbind(plotDataList, varPlotData)
+
             if (self$options$combinePlots == FALSE) {
               # Individual plot for this variable
               image <- self$results$plotROC$get(key = var)
               image$setTitle(paste("ROC Curve:", var))
-              image$setState(
-                data.frame(
-                  var = rep(var, length(confusionMatrix$x.sorted)),
-                  cutpoint = confusionMatrix$x.sorted,
-                  sensitivity = sensList,
-                  specificity = specList,
-                  ppv = ppvList,
-                  npv = npvList,
-                  AUC = rep(results$AUC, length(confusionMatrix$x.sorted)),
-                  youden = youdenList,
-                  j_max_idx = j_max_idx,
-                  stringsAsFactors = FALSE
-                )
-              )
+              image$setState(varPlotData)
 
               # Set states for additional plots if enabled
               if (self$options$showCriterionPlot) {
@@ -2512,23 +2513,6 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 dotImage$setTitle(paste("Dot Plot:", var))
                 dotImage$setState(rawData)
               }
-            } else {
-              # Collect data for combined plot
-              plotDataList <- rbind(
-                plotDataList,
-                data.frame(
-                  var = rep(var, length(confusionMatrix$x.sorted)),
-                  cutpoint = confusionMatrix$x.sorted,
-                  sensitivity = sensList,
-                  specificity = specList,
-                  ppv = ppvList,
-                  npv = npvList,
-                  AUC = rep(results$AUC, length(confusionMatrix$x.sorted)),
-                  youden = youdenList,
-                  j_max_idx = j_max_idx,
-                  stringsAsFactors = FALSE
-                )
-              )
             }
           }
         } # End of loop through variables
@@ -2710,7 +2694,9 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 auc_diff = diff_data[i, "AUC Difference"],
                 ci_lower = diff_data[i, "CI(lower)"],
                 ci_upper = diff_data[i, "CI(upper)"],
-                z = sqrt(qchisq(1 - diff_data[i, "P.Value"], df = 1)),
+                # Preserve the sign of the AUC difference: |z| = sqrt(chisq_1),
+                # sign(z) = sign(AUC difference) since the standard error is positive.
+                z = sign(diff_data[i, "AUC Difference"]) * sqrt(qchisq(1 - diff_data[i, "P.Value"], df = 1)),
                 p = diff_data[i, "P.Value"]
               ))
             }
@@ -2913,6 +2899,25 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
               )
             }
           )
+        }
+
+        # Surface worse-than-chance discrimination (AUC < 0.5) to the user.
+        # A native Notice/HTML banner is not available at this point in the flow,
+        # so a prominent table note is used (jamovi renders these under the table).
+        poor_disc_vars <- names(aucList)[vapply(
+          aucList, function(a) isTRUE(is.finite(a) && a < 0.5), logical(1)
+        )]
+        if (length(poor_disc_vars) > 0) {
+          poor_disc_note <- paste0(
+            "WARNING: AUC below 0.5 (worse than chance) for: ",
+            htmltools::htmlEscape(paste(poor_disc_vars, collapse = ", ")),
+            ". This usually indicates that the Classification Direction is set incorrectly ",
+            "(whether higher or lower test values indicate the positive class). ",
+            "Verify the 'Classification Direction' option; an AUC below 0.5 means the test ",
+            "discriminates in the opposite direction."
+          )
+          simpleTable$setNote("auc_below_chance", poor_disc_note)
+          aucSummaryTable$setNote("auc_below_chance", poor_disc_note)
         }
 
         # Add table footnotes explaining the CI method used
@@ -4785,11 +4790,8 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
             {
               # Calculate observed AUC for effect size
               if (requireNamespace("pROC", quietly = TRUE)) {
-                roc_obj <- pROC::roc(y_complete, x_complete, quiet = TRUE)
+                roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
                 observed_auc <- as.numeric(pROC::auc(roc_obj))
-
-                # Convert AUC to Cohen's d equivalent (approximate)
-                observed_d <- 2 * qnorm(observed_auc)
 
                 # Standard error of AUC (Hanley-McNeil)
                 se_auc <- sqrt((observed_auc * (1 - observed_auc) +
@@ -4961,7 +4963,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
                 # Basic Bayesian approach using bootstrap simulation
                 # This is a simplified implementation - real Bayesian ROC would use MCMC
 
-                roc_obj <- pROC::roc(y_complete, x_complete, quiet = TRUE)
+                roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
                 observed_auc <- as.numeric(pROC::auc(roc_obj))
 
                 # Simulate posterior distribution using bootstrap
@@ -4978,7 +4980,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
 
                   # Calculate AUC for bootstrap sample
                   if (length(unique(boot_y)) > 1) {
-                    boot_roc <- pROC::roc(boot_y, boot_x, quiet = TRUE)
+                    boot_roc <- pROC::roc(boot_y, boot_x, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
                     bootstrap_aucs[i] <- as.numeric(pROC::auc(boot_roc))
                   } else {
                     bootstrap_aucs[i] <- 0.5 # Default if no variation
@@ -5072,7 +5074,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           tryCatch(
             {
               if (requireNamespace("pROC", quietly = TRUE)) {
-                roc_obj <- pROC::roc(y_complete, x_complete, quiet = TRUE)
+                roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
 
                 # Find optimal cutoff using Youden's index
                 coords <- pROC::coords(roc_obj, "best", ret = c("threshold", "sensitivity", "specificity"))
@@ -5244,7 +5246,7 @@ psychopdaROCClass <- if (requireNamespace("jmvcore")) {
           tryCatch(
             {
               if (requireNamespace("pROC", quietly = TRUE)) {
-                roc_obj <- pROC::roc(y_complete, x_complete, quiet = TRUE)
+                roc_obj <- pROC::roc(y_complete, x_complete, levels = c(0, 1), direction = ifelse(self$options$direction == ">=", "<", ">"), quiet = TRUE)
                 aucs[i] <- as.numeric(pROC::auc(roc_obj))
 
                 # Calculate standard error of AUC
