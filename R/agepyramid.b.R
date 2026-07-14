@@ -235,6 +235,22 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                    labels = labels,
                                    ordered_result = FALSE)
 
+            # Reconcile counts: ages that fall outside the break span (e.g. custom
+            # breaks that do not start at 0) become NA here and were previously
+            # dropped from the table/plot while still counted in "Final
+            # observations". Count them, remove them so downstream outputs are
+            # consistent, and recompute n_final so the Data Summary matches the
+            # plotted/tabled Total (data-integrity).
+            n_unbinned <- sum(is.na(mydata[["Pop"]]))
+            if (n_unbinned > 0) {
+                mydata <- mydata[!is.na(mydata[["Pop"]]), , drop = FALSE]
+            }
+            n_final <- nrow(mydata)  # Recompute after dropping out-of-range ages
+
+            if (n_final == 0) {
+                jmvcore::reject("No observations fall within the specified age break range. Adjust the custom age breaks or bin width so they cover the data.")
+            }
+
             # Prepare data for plotting and table output ----
             private$.checkpoint()
             plotData <- mydata %>%
@@ -249,10 +265,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             image <- self$results$plot
             image$setState(plotData)
 
-            # Also save state for ggcharts plot (if enabled)
+            # Also save state for ggcharts plot (if enabled).
+            # Store the raw grid; .plotGGCharts prepares it once at render time
+            # (avoids preparing the data twice).
             if (self$options$enableGGCharts) {
                 imageGGCharts <- self$results$plotGGCharts
-                imageGGCharts$setState(private$.prepare_ggcharts_data(plotData))
+                imageGGCharts$setState(plotData)
             }
 
             # Pivot data for table output ----
@@ -298,6 +316,9 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for(i in seq_len(nrow(plotData2))) {
                 pyramidTable$addRow(rowKey = i, values = plotData2[i,])
             }
+            pyramidTable$setNote(
+                "pct",
+                "Percentages are column percentages within each gender (Female and Male each sum to 100%). Rounded per-bin percentages may not total exactly 100.")
 
             # Build data summary HTML ----
             info_html <- private$.build_data_summary_html(
@@ -308,7 +329,8 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 male_level = male_level,
                 single_gender_label = single_gender_label,
                 n_invalid_age = n_invalid_age,
-                n_missing_gender = n_missing_gender
+                n_missing_gender = n_missing_gender,
+                n_unbinned = n_unbinned
             )
             self$results$dataInfo$setContent(info_html)
         },
@@ -358,11 +380,12 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Custom colors from user
                 color_female <- self$options$female_color
                 color_male <- self$options$male_color
-                # Fallback to defaults if colors are empty
-                if (is.null(color_female) || nchar(trimws(color_female)) == 0) {
+                # Fallback to defaults if colors are empty or not valid colors
+                # (prevents an unstructured crash in scale_fill_manual on bad hex)
+                if (!private$.is_valid_color(color_female)) {
                     color_female <- "#E91E63"
                 }
-                if (is.null(color_male) || nchar(trimws(color_male)) == 0) {
+                if (!private$.is_valid_color(color_male)) {
                     color_male <- "#2196F3"
                 }
             } else {
@@ -467,11 +490,11 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Custom colors from user
                 color1 <- self$options$ggcharts_color1
                 color2 <- self$options$ggcharts_color2
-                # Fallback to defaults if colors are empty
-                if (is.null(color1) || nchar(trimws(color1)) == 0) {
+                # Fallback to defaults if colors are empty or not valid colors
+                if (!private$.is_valid_color(color1)) {
                     color1 <- "#1F77B4"
                 }
-                if (is.null(color2) || nchar(trimws(color2)) == 0) {
+                if (!private$.is_valid_color(color2)) {
                     color2 <- "#FF7F0E"
                 }
                 bar_colors <- c(color1, color2)
@@ -515,9 +538,23 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 print(plot)
                 return(TRUE)
             }, error = function(e) {
-                # If ggcharts fails, show informative message
+                # Surface the failure to the user instead of a silent blank plot:
+                # draw a placeholder panel explaining why the ggcharts pyramid could
+                # not be rendered (also logged as an R warning for the console).
                 warning("ggcharts pyramid failed: ", e$message)
-                return(FALSE)
+                fallback <- ggplot2::ggplot() +
+                    ggplot2::annotate(
+                        "text", x = 0, y = 0, hjust = 0.5, vjust = 0.5, size = 4,
+                        label = paste0(
+                            "The ggcharts pyramid could not be drawn.\n\n",
+                            "Reason: ", e$message, "\n\n",
+                            "Try turning off 'ggcharts pyramid', or adjust the\n",
+                            "age groups / custom colors and re-run."
+                        )
+                    ) +
+                    ggplot2::theme_void()
+                print(fallback)
+                return(TRUE)
             })
         },
 
@@ -552,6 +589,21 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 as.data.frame()
         },
 
+        .is_valid_color = function(x) {
+            # TRUE if x is a single non-empty string that R recognizes as a color
+            # (hex like #RRGGBB or a named color). Guards scale_fill_manual /
+            # ggcharts bar_colors against unstructured crashes on invalid input.
+            if (is.null(x) || length(x) != 1 || is.na(x))
+                return(FALSE)
+            x <- trimws(x)
+            if (nchar(x) == 0)
+                return(FALSE)
+            tryCatch({
+                grDevices::col2rgb(x)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
         .create_age_labels = function(breaks) {
             # Create readable labels from age breaks
             # With right=TRUE in cut(), intervals are (lower, upper]
@@ -575,9 +627,14 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .build_data_summary_html = function(n_initial, n_final, is_single_gender,
                                            female_level, male_level, single_gender_label,
-                                           n_invalid_age = 0, n_missing_gender = 0) {
+                                           n_invalid_age = 0, n_missing_gender = 0,
+                                           n_unbinned = 0) {
             # Build informative HTML showing data quality and gender level info
             n_excluded <- n_initial - n_final
+            # Rows removed by jmvcore::naOmit (source NA in age or gender) are not
+            # captured by the age/gender/range counters; derive them so the
+            # breakdown sub-items sum exactly to the total Excluded.
+            n_source_na <- max(0, n_excluded - n_invalid_age - n_missing_gender - n_unbinned)
 
             html <- "<div style='background-color: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196F3;'>"
             html <- paste0(html, "<h4 style='margin: 0 0 8px 0; color: #1976d2;'> Data Summary</h4>")
@@ -590,12 +647,18 @@ agepyramidClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 html <- paste0(html, "<tr><td><strong>Excluded:</strong></td><td style='color: #d32f2f;'>",
                     n_excluded, " (", pct_excluded, "%)</td></tr>")
                 
-                # Add breakdown
+                # Add breakdown (sub-items sum to the total Excluded above)
+                if (n_source_na > 0) {
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing age/gender (source NA):</td><td style='color: #d32f2f; font-size: 13px;'>", n_source_na, "</td></tr>")
+                }
                 if (n_invalid_age > 0) {
                     html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Non-numeric ages:</td><td style='color: #d32f2f; font-size: 13px;'>", n_invalid_age, "</td></tr>")
                 }
                 if (n_missing_gender > 0) {
                     html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Missing/unrecognized gender:</td><td style='color: #d32f2f; font-size: 13px;'>", n_missing_gender, "</td></tr>")
+                }
+                if (n_unbinned > 0) {
+                    html <- paste0(html, "<tr><td style='padding-left: 20px; font-size: 13px;'>- Outside age-break range:</td><td style='color: #d32f2f; font-size: 13px;'>", n_unbinned, "</td></tr>")
                 }
             }
 
