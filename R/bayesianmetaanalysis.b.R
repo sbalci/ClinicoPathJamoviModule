@@ -4,6 +4,41 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
     "bayesianmetaanalysisClass",
     inherit = bayesianmetaanalysisBase,
     private = list(
+
+        # Notice management ----
+        # Notices are rendered to a dedicated Html output to avoid the protobuf
+        # serialization error caused by jmvcore::Notice objects passed to
+        # self$results$insert(). type = error | strongWarning | warning | info.
+        .resetNotices = function() {
+            if (!is.null(self$results$notices)) {
+                self$results$notices$setContent("")
+                self$results$notices$setVisible(FALSE)
+            }
+        },
+
+        .addNotice = function(type, title, message) {
+            if (is.null(self$results$notices))
+                return(invisible(NULL))
+            border_color <- switch(type,
+                "error"         = "#d9534f",
+                "strongWarning" = "#e67e22",
+                "warning"       = "#f0ad4e",
+                "info"          = "#5bc0de",
+                "#f0ad4e"
+            )
+            current <- self$results$notices$content
+            if (is.null(current))
+                current <- ""
+            new_message <- sprintf(
+                '<div style="margin: 10px 0; padding: 10px; border-left: 4px solid %s; background-color: #f8f9fa;"><strong>%s:</strong> %s</div>',
+                border_color,
+                htmltools::htmlEscape(title),
+                htmltools::htmlEscape(message)
+            )
+            self$results$notices$setContent(paste0(current, new_message))
+            self$results$notices$setVisible(TRUE)
+        },
+
         .init = function() {
             if (is.null(self$options$effectSize) || 
                 is.null(self$options$standardError)) {
@@ -56,12 +91,27 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             effectSize <- jmvcore::toNumeric(data[[self$options$effectSize]])
             standardError <- jmvcore::toNumeric(data[[self$options$standardError]])
             
+            # Reset notices for this run (avoid accumulation across runs)
+            private$.resetNotices()
+
             # Check for missing values
             if (any(is.na(effectSize)) || any(is.na(standardError))) {
                 jmvcore::reject("Missing values detected in effect size or standard error")
                 return()
             }
-            
+
+            # Standard errors must be strictly positive
+            if (any(standardError <= 0)) {
+                jmvcore::reject("Standard errors must be positive; found one or more values <= 0.")
+                return()
+            }
+
+            # Warn when there are too few studies for reliable random-effects estimation
+            if (length(effectSize) < 5) {
+                private$.addNotice("warning", "Few studies",
+                    sprintf("Only %d studies were provided. Between-study variance (tau-squared) and random-effects estimates are unreliable with fewer than about 5 studies; interpret results with caution.", length(effectSize)))
+            }
+
             # Get study IDs if specified
             studyId <- NULL
             if (!is.null(self$options$studyId)) {
@@ -70,22 +120,16 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 studyId <- paste0("Study_", seq_len(length(effectSize)))
             }
             
-            # Get covariates if specified
+            # Get covariates if specified. Use jmvcore::select() to preserve
+            # jamovi column attributes (measureType, values, labels) so factor
+            # covariates are handled correctly in the meta-regression model.
             covariates <- NULL
             if (length(self$options$covariates) > 0) {
-                # TODO (cleanup): `data[self$options$covariates]` is base subset and may strip jamovi column attributes (`measureType`, `values`, labels). Use `jmvcore::select(data, self$options$covariates)` to preserve them, especially for downstream factor handling in the meta-regression model formula.
-                covariates <- data[self$options$covariates]
+                covariates <- jmvcore::select(data, self$options$covariates)
             }
 
-            # TODO (cleanup): File-wide - leftover debug `print()` calls spam the R console during normal use. Affected sites: 81, 82, 84 (this block), 250-251 (`print("Posterior names:") / print(names(posterior))`), 323 (`print(paste("Metafor input lengths..."))`). Remove or guard with a debug flag.
             # Perform the Bayesian meta-analysis based on model type
             tryCatch({
-                print(paste("EffectSize len:", length(effectSize)))
-                print(paste("StudyId len:", length(studyId)))
-                if (length(effectSize) != length(studyId)) {
-                   print("LENGTH MISMATCH DETECTED")
-                }
-                
                 if (self$options$modelType == "fixed_effects") {
                     results <- private$.runFixedEffectsModel(
                         effectSize, standardError, studyId, covariates
@@ -132,13 +176,7 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         },
         
         .runFixedEffectsModel = function(effectSize, standardError, studyId, covariates) {
-            # Check for required package
-            if (!requireNamespace("metaBMA", quietly = TRUE)) {
-                jmvcore::reject("Package 'metaBMA' is required for Bayesian meta-analysis. Please install it.")
-                return(NULL)
-            }
-            
-            # Prepare data for analysis
+            # Fixed-effect inverse-variance weighting (no external package required)
             weights <- 1 / (standardError^2)
             
             # Simple weighted average for fixed effects
@@ -185,13 +223,16 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         },
         
         .runRandomEffectsModel = function(effectSize, standardError, studyId, covariates) {
-            # Try to use brms if available, otherwise fall back to metafor
+            # Try to use brms if available, otherwise fall back to a frequentist estimator
             if (requireNamespace("brms", quietly = TRUE)) {
                 return(private$.runBRMSModel(effectSize, standardError, studyId, covariates, "random"))
             } else if (requireNamespace("metafor", quietly = TRUE)) {
+                private$.addNotice("warning", "Bayesian engine unavailable",
+                    "The 'brms' package is not available, so a frequentist random-effects model (metafor, REML) was fitted instead. Reported intervals are frequentist confidence intervals, not Bayesian credible intervals.")
                 return(private$.runMetaforModel(effectSize, standardError, studyId, covariates))
             } else {
-                # Fallback to simple DerSimonian-Laird estimator
+                private$.addNotice("warning", "Bayesian engine unavailable",
+                    "Neither 'brms' nor 'metafor' is available, so a frequentist DerSimonian-Laird random-effects estimator was used. Reported intervals are frequentist confidence intervals, not Bayesian credible intervals.")
                 return(private$.runSimpleRandomEffects(effectSize, standardError, studyId))
             }
         },
@@ -240,16 +281,14 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 chains = self$options$mcmcChains,
                 iter = self$options$mcmcIterations,
                 warmup = self$options$warmupIterations,
-                cores = parallel::detectCores() - 1,
+                cores = max(1, parallel::detectCores() - 1),
                 silent = 2,
                 refresh = 0
             )
             
             # Extract results
             summary_model <- summary(model)
-            posterior <- brms::posterior_samples(model)
-            print("Posterior names:")
-            print(names(posterior))
+            posterior <- brms::as_draws_df(model)
             
             # Calculate pooled effect and credible interval
             ci_level <- self$options$credibleInterval / 100
@@ -296,6 +335,16 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
                 )
             )
             
+            # Warn if MCMC convergence diagnostics look poor
+            if (isFALSE(results$convergence$converged) ||
+                (is.finite(results$convergence$Rhat) && results$convergence$Rhat >= 1.01)) {
+                private$.addNotice("strongWarning", "MCMC may not have converged",
+                    sprintf("Convergence diagnostics indicate the sampler may not have converged (max R-hat = %s). Increase warmup/iterations or reconsider the model; posterior estimates may be unreliable.",
+                            ifelse(is.finite(results$convergence$Rhat),
+                                   formatC(results$convergence$Rhat, digits = 3, format = "f"),
+                                   "NA")))
+            }
+
             # Add covariate effects if present
             if (!is.null(covariates)) {
                 coef_names <- names(covariates)
@@ -321,12 +370,15 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         
         .runMetaforModel = function(effectSize, standardError, studyId, covariates) {
             # Use metafor for frequentist random effects as fallback
-            print(paste("Metafor input lengths - Effect:", length(effectSize), "SE:", length(standardError), "StudyId:", length(studyId)))
             if (!is.null(covariates)) {
+                # Build a proper model matrix so factor covariates are dummy-coded
+                # rather than coerced to character via as.matrix().
+                mm <- stats::model.matrix(~ ., data = as.data.frame(covariates))
+                mm <- mm[, setdiff(colnames(mm), "(Intercept)"), drop = FALSE]
                 model <- metafor::rma(
                     yi = effectSize,
                     sei = standardError,
-                    mods = ~ as.matrix(covariates),
+                    mods = mm,
                     method = "REML"
                 )
             } else {
@@ -389,9 +441,9 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             pooled_random <- sum(effectSize * weights_re) / sum(weights_re)
             pooled_se <- sqrt(1 / sum(weights_re))
             
-            # Calculate I2
-            I2 <- max(0, (Q - df) / Q * 100)
-            
+            # Calculate I2 (guard against division by zero when Q -> 0)
+            I2 <- ifelse(Q > df & Q > 0, max(0, (Q - df) / Q * 100), 0)
+
             # Credible intervals
             ci_level <- self$options$credibleInterval / 100
             z_crit <- qnorm((1 + ci_level) / 2)
@@ -447,7 +499,8 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
             pooled <- sum(effectSize * weights) / sum(weights)
             Q <- sum(weights * (effectSize - pooled)^2)
             df <- length(effectSize) - 1
-            I2 <- max(0, (Q - df) / Q * 100)
+            # Guard against division by zero when Q -> 0
+            I2 <- ifelse(Q > df & Q > 0, max(0, (Q - df) / Q * 100), 0)
             return(I2)
         },
         
@@ -520,15 +573,41 @@ bayesianmetaanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::
         
         .assessPublicationBias = function(effectSize, standardError) {
             table <- self$results$publicationBiasResults
-            
-            # Simple Egger's test
-            precision <- 1 / standardError
-            model <- lm(effectSize ~ precision, weights = 1/standardError^2)
-            
+
+            # Egger's regression test is unreliable with few studies
+            k <- length(effectSize)
+            if (k < 10) {
+                private$.addNotice("warning", "Publication bias not assessed",
+                    sprintf("Egger's test is unreliable with fewer than 10 studies (k = %d); the test was not performed.", k))
+                return()
+            }
+
+            # Standard Egger's test: regress the standard normal deviate on precision.
+            # The test statistic is the t-value of the intercept.
+            snd  <- effectSize / standardError
+            prec <- 1 / standardError
+            model <- stats::lm(snd ~ prec)
+            coefs <- summary(model)$coefficients
+
+            intercept <- coefs["(Intercept)", "Estimate"]
+            statistic <- coefs["(Intercept)", "t value"]
+            p_value   <- coefs["(Intercept)", "Pr(>|t|)"]
+
+            interpretation <- if (is.na(p_value)) {
+                "Insufficient information to assess funnel plot asymmetry."
+            } else if (p_value < 0.05) {
+                sprintf("Significant funnel plot asymmetry (intercept = %.3f, p = %.3f): possible publication bias or small-study effects.",
+                        intercept, p_value)
+            } else {
+                sprintf("No significant funnel plot asymmetry (intercept = %.3f, p = %.3f): little evidence of publication bias.",
+                        intercept, p_value)
+            }
+
             table$addRow(rowKey = 1, values = list(
                 test = "Egger's Test",
-                statistic = coef(model)[1] / summary(model)$coefficients[1, 2],
-                p_value = summary(model)$coefficients[1, 4]
+                statistic = statistic,
+                p_value = p_value,
+                interpretation = interpretation
             ))
         },
         
