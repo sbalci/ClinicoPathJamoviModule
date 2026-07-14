@@ -17,7 +17,34 @@ items:
       requiresData: true
       renderFun: .plot
       clearWith:
+        - x_var
+        - y_var
+        - fill_var
+        - facet_var
+        - exclude_missing
         - plot_type
+        - chart_style
+        - color_palette
+        - orientation
+        - sort_categories
+        - bar_width
+        - plot_title
+        - x_title
+        - y_title
+        - legend_title
+        - legend_position
+        - show_percentages
+        - percentage_format
+        - show_counts
+        - label_threshold
+        - add_outline
+        - outline_color
+        - export_ready
+        - flerlage_show_labels
+        - flerlage_label_size
+        - flerlage_label_color
+        - flerlage_alpha
+        - flerlage_box_color
 
     - name: summary
       title: 'Chart Summary'
@@ -37,7 +64,7 @@ items:
           type: integer
         - name: total_observations
           title: 'Total Observations'
-          type: integer
+          type: number
         - name: chart_type
           title: 'Chart Type'
           type: text
@@ -59,7 +86,7 @@ items:
           type: text
         - name: count
           title: 'Count'
-          type: integer
+          type: number
         - name: percentage
           title: 'Group Percentage'
           type: number
@@ -70,7 +97,7 @@ items:
           format: pc
         - name: total_in_category
           title: 'Category Total'
-          type: integer
+          type: number
 
     - name: detailed_stats
       title: 'Detailed Statistics'
@@ -121,7 +148,7 @@ items:
           title: 'Test'
           type: text
         - name: statistic
-          title: 'Chi-square'
+          title: 'Statistic'
           type: number
         - name: df
           title: 'df'
@@ -136,13 +163,6 @@ items:
 
     - name: preset_guidance
       title: 'Template Guidance'
-      type: Html
-      visible: false
-      clearWith:
-        - analysis_preset
-
-    - name: presetInfo
-      title: 'Preset Information'
       type: Html
       visible: false
       clearWith:
