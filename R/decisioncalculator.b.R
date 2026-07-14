@@ -17,7 +17,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
             .ACCURACY_GOOD = 0.8, # Accuracy > 0.8: Good overall performance
 
             # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-            #   [hygiene/notices] exemplary - 17 jmvcore::Notice paths; use as the reference impl module-wide
+            #   [hygiene/notices] uses a plain-text Preformatted "notices" output via private$.addNotice()/.renderNotices(); NOT jmvcore::Notice objects (avoids the insert(999, Notice) serialization error)
             #   [i18n] 0 .() wraps despite excellent notice content; high priority - /prepare-translation decisioncalculator
             #   [statistical-validation] /review-function decisioncalculator - confirm Bayes prior-override math
             #   [hygiene/notices] add INFO methodology summary at end of .run() (currently absent)
@@ -50,6 +50,7 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         ERROR          = "ERROR: ",
                         STRONG_WARNING = "WARNING: ",
                         WARNING        = "WARNING: ",
+                        INFO           = "INFO: ",
                         ""
                     )
                     paste0(prefix, notice$title, "\n", notice$content)
@@ -355,96 +356,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                     0
                 }
 
-                # Advanced confidence interval calculations ----
-                # Multiple CI methods for different metrics (following diagnostic test literature):
-                # - Clopper-Pearson exact: Gold standard for sensitivity/specificity (binomial proportions)
-                # - Logit transformation: Better coverage for PPV/NPV at extreme values
-                # - Log transformation: Standard approach for likelihood ratios (multiplicative scale)
-                # These supplement epiR::epi.tests() for verification and methodological transparency
-
-                # Clopper-Pearson exact binomial CIs for sensitivity and specificity (using raw counts)
-                # However, we supplement this with logic that respects the continuity correction if zero cells are present
-                if (zero_cell) {
-                    # Use logit transformation with continuity correction (consistent with PPV/NPV)
-                    # Sensitivity CI
-                    sens_eps <- 1e-9
-                    Sens_for_ci <- min(max(Sens, sens_eps), 1 - sens_eps)
-                    sens_logit <- log(Sens_for_ci / (1 - Sens_for_ci))
-                    sens_se <- sqrt((1 / TP_cc) + (1 / FN_cc))
-                    sens_ci_logit <- sens_logit + c(-1.96, 1.96) * sens_se
-                    sens_ci <- exp(sens_ci_logit) / (1 + exp(sens_ci_logit))
-
-                    # Specificity CI
-                    spec_eps <- 1e-9
-                    Spec_for_ci <- min(max(Spec, spec_eps), 1 - spec_eps)
-                    spec_logit <- log(Spec_for_ci / (1 - Spec_for_ci))
-                    spec_se <- sqrt((1 / TN_cc) + (1 / FP_cc))
-                    spec_ci_logit <- spec_logit + c(-1.96, 1.96) * spec_se
-                    spec_ci <- exp(spec_ci_logit) / (1 + exp(spec_ci_logit))
-                } else {
-                    # Default to exact binomial CIs when no correction is needed
-                    sens_ci <- stats::binom.test(round(TP), round(TP + FN), conf.level = 0.95)$conf.int
-                    spec_ci <- stats::binom.test(round(TN), round(TN + FP), conf.level = 0.95)$conf.int
-                }
-
-                # Logit transformation CIs for PPV and NPV (more accurate)
-                # PPV CI using logit transformation
-                eps <- 1e-9
-                PPV_for_ci <- min(max(PPV, eps), 1 - eps)
-                NPV_for_ci <- min(max(NPV, eps), 1 - eps)
-
-                if (TP_cc > 0 && TestP > 0) {
-                    ppv_logit <- log(PPV_for_ci / (1 - PPV_for_ci))
-                    ppv_se <- sqrt((1 / TP_cc) + (1 / FP_cc))
-                    ppv_ci_logit <- ppv_logit + c(-1.96, 1.96) * ppv_se
-                    ppv_ci <- exp(ppv_ci_logit) / (1 + exp(ppv_ci_logit))
-                } else {
-                    ppv_ci <- c(0, 1)
-                }
-
-                # NPV CI using logit transformation
-                if (TN_cc > 0 && TestN > 0) {
-                    npv_logit <- log(NPV_for_ci / (1 - NPV_for_ci))
-                    npv_se <- sqrt((1 / TN_cc) + (1 / FN_cc))
-                    npv_ci_logit <- npv_logit + c(-1.96, 1.96) * npv_se
-                    npv_ci <- exp(npv_ci_logit) / (1 + exp(npv_ci_logit))
-                } else {
-                    npv_ci <- c(0, 1)
-                }
-
-                # Log-transformed CIs for likelihood ratios
-                # PLR CI
-                if (TP_cc > 0 && FP_cc > 0) {
-                    plr_log <- log(LRP)
-                    plr_se <- sqrt((1 / TP_cc) - (1 / (TP_cc + FN_cc)) + (1 / FP_cc) - (1 / (TN_cc + FP_cc)))
-                    plr_ci_log <- plr_log + c(-1.96, 1.96) * plr_se
-                    plr_ci <- exp(plr_ci_log)
-                } else {
-                    plr_ci <- c(0, Inf)
-                }
-
-                # NLR CI
-                if (FN_cc > 0 && TN_cc > 0) {
-                    nlr_log <- log(LRN)
-                    nlr_se <- sqrt((1 / FN_cc) - (1 / (TP_cc + FN_cc)) + (1 / TN_cc) - (1 / (TN_cc + FP_cc)))
-                    nlr_ci_log <- nlr_log + c(-1.96, 1.96) * nlr_se
-                    nlr_ci <- exp(nlr_ci_log)
-                } else {
-                    nlr_ci <- c(0, 1)
-                }
-
-                # Additional diagnostic metrics from DiagROC
-                # Diagnostic Odds Ratio
+                # Diagnostic Odds Ratio (Haldane-Anscombe corrected counts).
+                # Displayed in advancedMetricsTable; confidence intervals for all
+                # metrics are supplied by epiR::epi.tests() (see the ci block below).
                 if (FN_cc > 0 && FP_cc > 0) {
                     DOR <- (TP_cc * TN_cc) / (FN_cc * FP_cc)
-                    # CI for DOR using log transformation
-                    dor_log <- log(DOR)
-                    dor_se <- sqrt((1 / TP_cc) + (1 / TN_cc) + (1 / FN_cc) + (1 / FP_cc))
-                    dor_ci_log <- dor_log + c(-1.96, 1.96) * dor_se
-                    dor_ci <- exp(dor_ci_log)
                 } else {
                     DOR <- NA
-                    dor_ci <- c(NA, NA)
                 }
 
                 # Youden's Index (optimal cut-off criterion)
@@ -540,7 +458,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     ratioTable$addFootnote(rowNo = 1, col = "AccurT", "Accuracy (True Test Result Ratio)")
 
-                    ratioTable$addFootnote(rowNo = 1, col = "PrevalenceD", "Disease Prevalence in this population")
+                    prev_note <- if (pp) {
+                        "Prevalence used: the user-supplied population prevalence (prior probability), not the prevalence observed in this study sample."
+                    } else {
+                        "Disease prevalence observed in this study sample."
+                    }
+                    ratioTable$addFootnote(rowNo = 1, col = "PrevalenceD", prev_note)
 
                     ppv_note <- if (pp) {
                         "Positive Predictive Value (Probability of disease after a positive test using supplied population prevalence)"
@@ -557,13 +480,17 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
 
                     ratioTable$addFootnote(rowNo = 1, col = "NPV", npv_note)
 
-                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", "Post-test Probability of Having Disease  (Probability of having disease after a positive test using known Population Prevalence)")
+                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbDisease", "Post-test Probability of Having Disease (Probability of having disease after a positive test using the prevalence above). Mathematically identical to the PPV shown here.")
 
-                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using known Population Prevalence)")
+                    ratioTable$addFootnote(rowNo = 1, col = "PostTestProbHealthy", "Post-test Probability of Being Healthy (Probability of being healthy after a negative test using the prevalence above). Mathematically identical to the NPV shown here.")
 
                     ratioTable$addFootnote(rowNo = 1, col = "LRP", "Positive Likelihood Ratio: How much more likely a positive result is in diseased vs healthy patients. >10 = strong evidence, >5 = moderate, >2 = weak but potentially useful.")
 
                     ratioTable$addFootnote(rowNo = 1, col = "LRN", "Negative Likelihood Ratio: How much more likely a negative result is in diseased vs healthy patients. <0.1 = strong evidence against disease, <0.2 = moderate, <0.5 = weak.")
+
+                    if (zero_cell) {
+                        ratioTable$addFootnote(rowNo = 1, col = "LRP", "A Haldane-Anscombe 0.5 continuity correction was applied to the likelihood ratios in this table because a zero cell was present. The epiR confidence-interval table below uses raw (uncorrected) counts, so its LR point estimates may differ.")
+                    }
                 }
 
 
@@ -632,27 +559,31 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         tibble::rownames_to_column(.data = ., var = "statsabv")
 
 
-                    epirresult2$statsnames <-
-                        c(
-                            "Apparent prevalence",
-                            "True prevalence",
-                            "Test sensitivity",
-                            "Test specificity",
-                            "Diagnostic accuracy",
-                            "Diagnostic odds ratio",
-                            "Number needed to diagnose",
-                            "Youden's index",
-                            "Positive predictive value",
-                            "Negative predictive value",
-                            "Likelihood ratio of a positive test",
-                            "Likelihood ratio of a negative test",
-                            "Proportion of subjects with the outcome ruled out",
-                            "Proportion of subjects with the outcome ruled in",
-                            "Proportion of false positives",
-                            "Proportion of false negative",
-                            "False Discovery Rate",
-                            "False Omission Rate"
-                        )
+                    # Map epiR statistic codes to display names via a named lookup keyed on
+                    # the `statistic` column. Robust to epiR version changes in row count or
+                    # order; the previous positional c(<18 names>) assignment errored
+                    # ("replacement has 18 rows") or mislabelled if the summary changed shape.
+                    # Codes not listed here are dropped downstream by the ratiorows/numberrows
+                    # filters, so they need no label.
+                    stat_labels <- c(
+                        "ap"      = "Apparent prevalence",
+                        "tp"      = "True prevalence",
+                        "se"      = "Test sensitivity",
+                        "sp"      = "Test specificity",
+                        "diag.ac" = "Diagnostic accuracy",
+                        "diag.or" = "Diagnostic odds ratio",
+                        "nndx"    = "Number needed to diagnose",
+                        "youden"  = "Youden's index",
+                        "pv.pos"  = "Positive predictive value",
+                        "pv.neg"  = "Negative predictive value",
+                        "lr.pos"  = "Likelihood ratio of a positive test",
+                        "lr.neg"  = "Likelihood ratio of a negative test",
+                        "p.tpdn"  = "Proportion of subjects with the outcome ruled out",
+                        "p.tndp"  = "Proportion of subjects with the outcome ruled in",
+                        "p.dntp"  = "Proportion of false positives",
+                        "p.dptn"  = "Proportion of false negative"
+                    )
+                    epirresult2$statsnames <- unname(stat_labels[epirresult2$statistic])
 
                     ratiorows <- c(
                         "ap",
@@ -704,25 +635,13 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                         stringsAsFactors = FALSE
                     )
 
-                    # Add Matthews Correlation Coefficient
-                    mcc_row <- data.frame(
-                        statistic = "mcc",
-                        est = MCC,
-                        lower = NA_real_, # CI not computed
-                        upper = NA_real_,
-                        statsabv = "mcc",
-                        statsnames = "Matthews correlation coefficient (CI not computed)",
-                        stringsAsFactors = FALSE
-                    )
-
-                    # Combine enhanced metrics with existing epiR results
-                    epirresult_ratio <- rbind(epirresult_ratio, balanced_acc_row, f1_row, mcc_row)
-
-                    # Enhanced functionality: Multiple CI methods applied
-                    # - Clopper-Pearson exact for sensitivity/specificity
-                    # - Logit transformation for PPV/NPV
-                    # - Log transformation for likelihood ratios
-                    # - Additional metrics: Balanced Accuracy, F1 Score, MCC
+                    # Combine enhanced metrics with existing epiR results.
+                    # Balanced accuracy and F1 are proportions in [0, 1], so they render
+                    # correctly in this percent-formatted (format: pc) table.
+                    # MCC is intentionally excluded: it ranges [-1, +1], so pc formatting would
+                    # display it misleadingly (e.g. 0.4 as "40%", or a negative value as "-30%").
+                    # MCC is shown as a plain number in advancedMetricsTable instead.
+                    epirresult_ratio <- rbind(epirresult_ratio, balanced_acc_row, f1_row)
 
 
                     # epirTable_ratio -----
@@ -917,6 +836,12 @@ decisioncalculatorClass <- if (requireNamespace("jmvcore")) {
                 #
                 # image2 <- self$results$plot2
                 # image2$setState(plotData2)
+
+                # Render collected notices once at the end of a successful run. This also
+                # clears the panel when no notice was raised this cycle (.noticeList was
+                # reset at the top of .run()), preventing a stale notice from persisting
+                # after the user corrects an input not covered by the notices clearWith.
+                private$.renderNotices()
             },
             .plot1 = function(image1, ggtheme, ...) {
                 plotData1 <- image1$state
