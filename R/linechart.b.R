@@ -67,9 +67,15 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         # Initialize results and validate dependencies
         .init = function() {
-            # Check for required packages and validate parameters at initialization
-            private$.checkDependencies()
+            # Validate parameters at initialization. Dependency checking is
+            # performed once at runtime in .run() (and again in the separate
+            # render phase in .plot()); no separate .init() check is needed.
             private$.validateParameters()
+
+            # Apply user-specified plot dimensions so the Width/Height options
+            # actually resize the rendered Image (bounds are enforced by
+            # .validateParameters() and by min/max in linechart.a.yaml).
+            self$results$plot$setSize(self$options$width, self$options$height)
 
             # Initialize with enhanced welcome message if no variables selected
             if (is.null(self$options$xvar) || is.null(self$options$yvar)) {
@@ -98,6 +104,11 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             self$results$summary$setVisible(TRUE)
             self$results$plot$setVisible(TRUE)
 
+            # Reset the notice/instructions Html once per run. .checkDataQuality()
+            # appends to this output, so without a reset the same data-quality
+            # warnings accumulate (duplicate) across successive run cycles.
+            self$results$todo$setContent("")
+
             # Main analysis pipeline with comprehensive error handling
             tryCatch({
                 # Check dependencies at runtime
@@ -116,13 +127,19 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 summary_stats <- private$.calculateSummary(data)
                 private$.populateSummary(summary_stats)
 
-                # Generate natural language summary
-                private$.generateNaturalSummary(summary_stats, data)
-
-                # Calculate correlation if trend line requested
+                # Calculate correlation once if trend line requested, then thread
+                # the result into the natural-language summary, the correlation
+                # table, and the assumptions panel (avoids recomputing cor.test/lm).
+                correlation_stats <- NULL
                 if (self$options$trendline) {
                     private$.checkpoint()  # Checkpoint before correlation analysis
                     correlation_stats <- private$.calculateCorrelation(data)
+                }
+
+                # Generate natural language summary (reuses correlation_stats)
+                private$.generateNaturalSummary(summary_stats, data, correlation_stats)
+
+                if (self$options$trendline) {
                     private$.populateCorrelation(correlation_stats)
                     private$.populateAssumptions(data, correlation_stats)
                     self$results$correlation$setVisible(TRUE)
@@ -244,13 +261,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                            .("Please select a different variable with varying values.")))
             }
 
-            # Validate reference line if provided
-            if (!is.null(self$options$refline) && !is.na(self$options$refline)) {
-                refline_value <- as.numeric(self$options$refline)
-                if (is.na(refline_value)) {
-                    warning(.("Reference line value is not numeric and will be ignored."))
-                }
-            }
+            # (refline is a numeric Number option: no non-numeric validation needed here)
 
             # CRITICAL FIX: Sort data by x-variable to prevent zig-zag lines
             # For longitudinal data, observations must be ordered by time/sequence
@@ -322,23 +333,17 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             #   true within-subject replication, or document the heuristic in the panel.
             has_repeated_measures <- avg_obs_per_x > 1.5  # More than 1.5 obs per x on average
 
-            # Issue warnings for statistical validity
+            # Issue warnings for statistical validity (translatable via .())
             if (!is.null(groupby)) {
-                warning(paste0(
-                    "Correlation statistics treat all observations as independent, ",
-                    "which may not be appropriate for grouped data. ",
-                    "For more rigorous analysis of grouped longitudinal data, ",
-                    "consider mixed-effects models using additional software."
-                ))
+                warning(.("Correlation statistics treat all observations as independent, which may not be appropriate for grouped data. For more rigorous analysis of grouped longitudinal data, consider mixed-effects models using additional software."))
                 correlation_stats$has_grouping <- TRUE
             }
 
             if (has_repeated_measures) {
-                warning(paste0(
-                    "Data appears to have repeated measures (multiple observations per time point). ",
-                    "Both naive (assumes independence) and patient-level aggregate statistics are provided. ",
-                    "Use patient-level results for longitudinal inference."
-                ))
+                # Only naive (independence-assuming) statistics are computed and
+                # shown; no patient-level aggregate statistics are produced. The
+                # message describes exactly what is reported to avoid over-claiming.
+                warning(.("Data appears to have repeated measures (multiple observations per time point). The correlation and regression statistics shown treat all observations as independent and may overstate statistical significance for longitudinal data. Interpret them as exploratory descriptives, and consider mixed-effects models in specialized software for formal inference."))
                 correlation_stats$has_repeated_measures <- TRUE
             }
 
@@ -582,7 +587,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Build copy-ready sentence
             direction <- if (r > 0) .("positive") else .("negative")
-            strength <- if (abs(r) < 0.3) .("weak") else if (abs(r) < 0.5) .("moderate") else .("strong")
+            strength <- private$.correlationStrength(r)
 
             copy_ready <- paste0(
                 .("Analysis revealed a "), strength, " ", direction, " ", .("correlation between the variables "),
@@ -607,7 +612,35 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(copy_ready)
         },
 
-        # Interpret effect size
+        # Single source of truth for correlation-strength wording.
+        # Convention: absolute Pearson r (NOT R-squared) on a five-level scale
+        #   |r| < 0.10  negligible
+        #   |r| < 0.30  weak
+        #   |r| < 0.50  moderate
+        #   |r| < 0.70  strong
+        #   |r| >= 0.70 very strong
+        # Used by .generateCopyReadyCorrelation(), .interpretCorrelation(), and
+        # .generateNaturalSummary() so all three report consistent strength labels.
+        .correlationStrength = function(r) {
+            if (is.na(r)) return(.("undetermined"))
+            abs_r <- abs(r)
+            if (abs_r < 0.1) {
+                .("negligible")
+            } else if (abs_r < 0.3) {
+                .("weak")
+            } else if (abs_r < 0.5) {
+                .("moderate")
+            } else if (abs_r < 0.7) {
+                .("strong")
+            } else {
+                .("very strong")
+            }
+        },
+
+        # Interpret effect size.
+        # NOTE: this is a variance-explained (R-squared) scale and is deliberately
+        # distinct from .correlationStrength() (which labels |r|). The R-squared
+        # thresholds below are intentionally conservative for clinical reporting.
         .interpretEffectSize = function(r_squared) {
             if (r_squared >= 0.5) {
                 return(.("Large effect size - clinically meaningful association."))
@@ -630,10 +663,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
             # Strength interpretation with clinical relevance
             abs_r <- abs(r)
-            strength <- if (abs_r < 0.1) .("negligible") else
-                       if (abs_r < 0.3) .("weak") else
-                       if (abs_r < 0.5) .("moderate") else
-                       if (abs_r < 0.7) .("strong") else .("very strong")
+            strength <- private$.correlationStrength(r)
 
             direction <- if (r > 0) .("positive") else .("negative")
 
@@ -674,10 +704,12 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 c("#2E86AB", "#A23B72", "#F18F01", "#C73E1D", "#7FB069", "#8E6C8A")
             )
 
-            # Ensure we don't exceed available colors, cycle if needed
+            # Interpolate additional distinct colors when more groups are
+            # requested than the base palette provides (up to 10 groups are
+            # permitted). Interpolating keeps groups 7-10 visually
+            # distinguishable instead of cycling/repeating identical colors.
             if (n_colors > length(palette_colors)) {
-                # Repeat palette if more colors needed
-                palette_colors <- rep(palette_colors, ceiling(n_colors / length(palette_colors)))
+                palette_colors <- grDevices::colorRampPalette(palette_colors)(n_colors)
             }
 
             return(palette_colors[1:n_colors])
@@ -921,14 +953,8 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     jmvcore::reject(.("Plot height must be between 300 and 1000 pixels. Current value will be ignored."), code="")
                 }
             }
-
-            # Validate reference line if provided
-            if (!is.null(self$options$refline) && !is.na(self$options$refline)) {
-                refline_value <- suppressWarnings(as.numeric(self$options$refline))
-                if (is.na(refline_value)) {
-                    jmvcore::reject(.("Reference line value must be numeric. Please enter a valid number."), code="")
-                }
-            }
+            # refline is a numeric Number option (bounded in linechart.a.yaml),
+            # so it can never be non-numeric here; no extra validation needed.
         },
 
         # Enhanced welcome message
@@ -1041,8 +1067,10 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
         },
 
-        # Generate natural language summary
-        .generateNaturalSummary = function(summary_stats, data) {
+        # Generate natural language summary.
+        # correlation_stats is threaded in from .run() (computed once) to avoid a
+        # second cor.test/lm pass; falls back to computing it only if not supplied.
+        .generateNaturalSummary = function(summary_stats, data, correlation_stats = NULL) {
             xvar <- self$options$xvar
             yvar <- self$options$yvar
             groupby <- self$options$groupby
@@ -1055,31 +1083,32 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 " ", .("across"), " ", summary_stats$n_x_points, " ", .("time points"), "</p>"
             )
 
-            # Add group information
+            # Add group information (group_names is user data -> escape for HTML)
             if (!is.null(groupby) && summary_stats$n_groups > 1) {
                 summary_text <- paste0(summary_text,
-                    "<p><strong>", .("Groups:"), "</strong> ", summary_stats$n_groups, " ", .("groups"), " (", summary_stats$group_names, ")</p>"
+                    "<p><strong>", .("Groups:"), "</strong> ", summary_stats$n_groups, " ", .("groups"), " (", jmvcore::htmlEscape(summary_stats$group_names), ")</p>"
                 )
             }
 
-            # Add Y variable summary
+            # Add Y variable summary (yvar is a user column name -> escape for HTML)
             summary_text <- paste0(summary_text,
-                "<p><strong>", yvar, "</strong> ", .("ranges from"), " ",
+                "<p><strong>", jmvcore::htmlEscape(yvar), "</strong> ", .("ranges from"), " ",
                 format(summary_stats$y_min, digits = 3), " ", .("to"), " ", format(summary_stats$y_max, digits = 3),
                 " (mean: ", format(summary_stats$y_mean, digits = 3), ", SD: ", format(summary_stats$y_sd, digits = 3), ")</p>"
             )
 
             # Add trend information if available
             if (self$options$trendline && is.numeric(data[[xvar]])) {
-                # TODO (cleanup): .calculateCorrelation(data) is also invoked in .run() at L124
-                #   when trendline=TRUE. Reuse the result by threading correlation_stats
-                #   into .generateNaturalSummary() instead of recomputing here (avoids a
-                #   second cor.test/lm pass on the same data).
-                correlation_stats <- private$.calculateCorrelation(data)
+                # Reuse the correlation computed once in .run(); compute here only
+                # if it was not supplied (defensive fallback).
+                if (is.null(correlation_stats)) {
+                    correlation_stats <- private$.calculateCorrelation(data)
+                }
                 if (!is.null(correlation_stats$slope)) {
                     trend_direction <- if (correlation_stats$slope > 0) .("increasing") else .("decreasing")
-                    trend_strength <- if (abs(correlation_stats$r_squared) > 0.5) .("strong") else
-                                     if (abs(correlation_stats$r_squared) > 0.25) .("moderate") else .("weak")
+                    # Use the shared |r|-based strength convention for consistency
+                    # with the correlation table and copy-ready summary.
+                    trend_strength <- private$.correlationStrength(correlation_stats$pearson_r)
 
                     summary_text <- paste0(summary_text,
                         "<p><strong>", .("Trend:"), "</strong> ", trend_strength, " ", trend_direction, " ", .("trend detected"),
@@ -1122,7 +1151,7 @@ linechartClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             error_msg <- paste0(
                 "<div class='alert alert-danger'>",
                 "<h4>", .("Analysis Error"), "</h4>",
-                "<p><strong>", .("Error:"), "</strong> ", e$message, "</p>",
+                "<p><strong>", .("Error:"), "</strong> ", jmvcore::htmlEscape(e$message), "</p>",
                 "<p><strong>", .("Suggestion:"), "</strong> ", suggestion, "</p>",
                 "<details>",
                 "<summary>", .("Common Solutions"), "</summary>",
