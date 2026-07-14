@@ -156,88 +156,6 @@ NULL
     return(list(issues = issues, warnings = warnings))
 }
 
-# Helper function for intelligent test selection with clinical rationale
-.selectAppropriateTest <- function(contingency_table, test_preference = "auto", min_expected = 5) {
-    # Calculate expected frequencies
-    tryCatch({
-        chi_test <- chisq.test(contingency_table)
-        expected_min <- min(chi_test$expected)
-        
-        if (test_preference == "auto") {
-            if (expected_min < min_expected) {
-                return(list(
-                    test = "fisher", 
-                    reason = paste0("Expected counts < ", min_expected, ". Fisher's exact test recommended."),
-                    warning = TRUE,
-                    expected_min = expected_min
-                ))
-            } else {
-                return(list(
-                    test = "chisq", 
-                    reason = paste0("All expected counts \u{2265} ", min_expected, ". Chi-square test appropriate."),
-                    warning = FALSE,
-                    expected_min = expected_min
-                ))
-            }
-        }
-        
-        # User specified test - check if appropriate
-        if (test_preference == "chisq" && expected_min < min_expected) {
-            return(list(
-                test = test_preference,
-                reason = paste0("Chi-square test as requested (Note: Expected counts < ", min_expected, ")"),
-                warning = TRUE,
-                expected_min = expected_min
-            ))
-        }
-        
-        return(list(
-            test = test_preference, 
-            reason = "Test selected as requested",
-            warning = FALSE,
-            expected_min = expected_min
-        ))
-    }, error = function(e) {
-        return(list(
-            test = "fisher", 
-            reason = "Cannot calculate expected frequencies. Using Fisher's exact test.",
-            warning = TRUE,
-            expected_min = NA
-        ))
-    })
-}
-
-# Wrapper for gtsummary to automatically choose Fisher vs chi-square based on expected counts
-.cat_test_auto <- function(data, variable, by, test_preference = "auto", min_expected = 5, ...) {
-    tbl <- table(data[[variable]], data[[by]])
-    sel <- .selectAppropriateTest(tbl, test_preference = test_preference, min_expected = min_expected)
-    if (sel$test == "fisher") {
-        res <- fisher.test(tbl)
-    } else {
-        res <- suppressWarnings(chisq.test(tbl, correct = FALSE))
-    }
-    res
-}
-
-# Wrapper for gtsummary to use Welch/oneway vs Wilcoxon/Kruskal depending on chosen central tendency
-.cont_test_auto <- function(data, variable, by, method = c("mean", "median"), ...) {
-    method <- match.arg(method)
-    groups <- factor(data[[by]])
-    if (length(levels(groups)) > 2) {
-        if (method == "mean") {
-            stats::oneway.test(data[[variable]] ~ groups, var.equal = FALSE)
-        } else {
-            stats::kruskal.test(data[[variable]] ~ groups)
-        }
-    } else {
-        if (method == "mean") {
-            stats::t.test(data[[variable]] ~ groups, var.equal = FALSE)
-        } else {
-            stats::wilcox.test(data[[variable]] ~ groups, exact = FALSE)
-        }
-    }
-}
-
 # Helper function to validate sample size and data quality
 # name_mapping: optional named character vector mapping cleaned -> original variable
 # names so user-facing warnings use the labels users actually selected.
@@ -302,35 +220,6 @@ NULL
     ))
 }
 
-# Helper function to generate clinical interpretation
-.generateClinicalSummary <- function(results, myvars, mygroup, test_type = "crosstable") {
-    if (is.null(results) || length(results) == 0) {
-        return("No results available for interpretation.")
-    }
-    
-    # Count significant associations (assuming p-value column exists)
-    significant_count <- 0
-    total_tests <- length(myvars)
-    
-    if (test_type == "crosstable") {
-        summary <- sprintf("Cross-table analysis comparing %d variable(s) across %s groups.",
-                          total_tests, mygroup)
-
-        if (significant_count > 0) {
-            summary <- paste0(summary, " ",
-                sprintf("Found %d significant association(s) (p < 0.05).", significant_count))
-        } else {
-            summary <- paste0(summary, " ",
-                "No significant associations detected (all p \u{2265} 0.05).")
-        }
-
-        summary <- paste0(summary, " ",
-            "Review individual test results below for detailed findings.")
-    }
-    
-    return(summary)
-}
-
 #' @title Cross Tables Analysis Class
 #'
 #' @description R6 class for generating cross tables for clinicopathological comparisons.
@@ -374,6 +263,19 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 }
 
                 data
+            },
+
+            # .reportTableError ----
+            # Route a table-builder failure to the styled HTML error notice
+            # instead of surfacing a raw R error. conditionMessage(e) is
+            # HTML-escaped inside .createNoticeHTML().
+            .reportTableError = function(e) {
+                error_html <- .createNoticeHTML(
+                    paste0("Table generation failed: ", conditionMessage(e)),
+                    type = "ERROR"
+                )
+                self$results$errorNotice$setContent(error_html)
+                self$results$errorNotice$setVisible(TRUE)
             },
 
             # .labelData ----
@@ -453,8 +355,10 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                         paste(htmltools::htmlEscape(unlist(validation_results$warnings)), collapse = "<br>"),
                         "</div>"
                     )
-                    # Display in todo2 section
-                    self$results$todo2$setContent(warning_msg)
+                    # Display variable-name warnings in their own item so they do
+                    # not clobber the finalfit methodology note (which uses todo2).
+                    self$results$varNameWarnings$setContent(warning_msg)
+                    self$results$varNameWarnings$setVisible(TRUE)
                 }
 
                 # If any user-specified variable could not be matched, block analysis
@@ -715,13 +619,14 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     )
 
                     arsenal_data <- private$.htmlSafeTableData(mydata)
-                    tablearsenal <- arsenal::tableby(
+                    tablearsenal <- tryCatch(arsenal::tableby(
                         formula = formula,
                         data = arsenal_data,
                         control = arsenal_control,
                         digits = 1,
                         digits.count = 1
-                    )
+                    ), error = function(e) { private$.reportTableError(e); NULL })
+                    if (is.null(tablearsenal)) return()
                     # Render Arsenal's own markup after escaping every data-derived
                     # label and value on a render-only copy.
                     tablearsenal <- summary(
@@ -739,7 +644,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                     myvars_term <- jmvcore::decomposeTerm(term = myvars_term)
                     private$.checkpoint()
                     # Create the finalfit summary table.
-                    tablefinalfit <- mydata %>%
+                    tablefinalfit <- tryCatch(mydata %>%
                         finalfit::summary_factorlist(
                             .data = .,
                             dependent = mygroup,
@@ -775,7 +680,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             include_row_missing_col = TRUE,
                             catTest = NULL,
                             weights = NULL
-                        )
+                        ), error = function(e) { private$.reportTableError(e); NULL })
+                    if (is.null(tablefinalfit)) return()
                     tablefinalfit <- kableExtra::kable(
                         tablefinalfit,
                         format = "html",
@@ -830,9 +736,6 @@ crosstableClass <- if (requireNamespace('jmvcore'))
 
                 gtsummary_method <- method_mapping[p_adjust_method]
 
-                # Determine number of groups for correct test selection
-                n_groups <- length(unique(stats::na.omit(mydata[[mygroup]])))
-
                 # Map user options to gtsummary syntax
                 stats_cont <- if (self$options$cont == "mean") "{mean} ({sd})" else "{median} ({p25}, {p75})"
 
@@ -842,7 +745,7 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 # - Continuous 3+ groups: ANOVA (oneway.test)
                 # User preferences for cont/pcat are still respected in arsenal and finalfit styles
 
-                tablegtsummary <-
+                tablegtsummary <- tryCatch(
                   mydata_subset %>%
                   tbl_summary(
                     by = dplyr::all_of(mygroup),
@@ -859,7 +762,9 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                   ) %>%
                   add_n() %>%
                   add_overall() %>%
-                  add_p(pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3))
+                  add_p(pvalue_fun = ~ gtsummary::style_pvalue(.x, digits = 3)),
+                  error = function(e) { private$.reportTableError(e); NULL })
+                if (is.null(tablegtsummary)) return()
 
                 # Add adjusted p-values/q-values only if adjustment method is not "none"
                 if (p_adjust_method != "none") {
@@ -1023,10 +928,15 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                 } else if (sty %in% c("nejm", "lancet", "hmisc")) {
                     private$.checkpoint()
                     sty_term <- jmvcore::composeTerm(components = self$options$sty)
-                    tabletangram <- tangram::html5(
+                    # Escape data-derived factor levels and character cell values on a
+                    # render-only copy before tangram injects them into the type:Html
+                    # output, mirroring the arsenal branch. Raw values would otherwise
+                    # reach the jamovi webview unescaped (HTML/JS injection risk).
+                    tangram_data <- private$.htmlSafeTableData(mydata)
+                    tabletangram <- tryCatch(tangram::html5(
                         tangram::tangram(
                             paste(deparse(formula), collapse = " "),
-                            mydata,
+                            tangram_data,
                             transform = tangram::hmisc,
                             id = "tbl3",
                             test = TRUE,
@@ -1042,7 +952,8 @@ crosstableClass <- if (requireNamespace('jmvcore'))
                             )
                         ),
                         id = "tbl3"
-                    )
+                    ), error = function(e) { private$.reportTableError(e); NULL })
+                    if (is.null(tabletangram)) return()
                     self$results$tablestyle4$setContent(tabletangram)
                 }
 
