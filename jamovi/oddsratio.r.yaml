@@ -39,10 +39,17 @@ items:
       clearWith:
           - explanatory
           - outcome
+          - outcomeLevel
+          - usePenalized
 
     - name:  text2
       title: Model Performance Metrics
       type:  Html
+      clearWith:
+          - explanatory
+          - outcome
+          - outcomeLevel
+          - usePenalized
 
 
     # Plot Section
@@ -56,6 +63,8 @@ items:
       clearWith:
           - explanatory
           - outcome
+          - outcomeLevel
+          - usePenalized
 
     # Odds Ratio Explanations (right after odds ratio analysis)
     - name: oddsRatioExplanation
@@ -99,7 +108,9 @@ items:
       clearWith:
           - explanatory
           - outcome
+          - outcomeLevel
           - diagnosticPredictor
+          - predictorLevel
 
     - name: nomogram
       title: "Nomogram Details"

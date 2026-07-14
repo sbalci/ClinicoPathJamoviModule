@@ -442,17 +442,18 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "",
                         paste(validation_results$errors, collapse = "; ")
                     )
-                    jmvcore::reject(paste0(
+                    critical_message <- paste0(
                         "Critical validation errors detected: ",
                         validation_error,
-                        ". Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data."))
+                        ". Ensure the outcome variable has exactly 2 levels, explanatory variables have sufficient variation, and consider removing rows with missing data.")
+                    # Surface the critical error in the dedicated 'errors' Html output
+                    # before aborting, so the previously-empty item is populated.
+                    private$.addNotice(jmvcore::NoticeType$ERROR, critical_message)
+                    jmvcore::reject(critical_message)
                 }
 
                 mydata <- jmvcore::naOmit(mydata)
                 
-                # Monitor memory usage for large datasets
-                memory_status <- private$.checkMemoryUsage(operation = "odds ratio analysis")
-
                 original_names <- names(mydata)
 
                 # Save original names as a named vector where the names are the original names,
@@ -512,17 +513,23 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             levels = new_levels
                         )
 
-                        # Add info message to inform user
-                        outcome_releveling_message <- paste0(
-                            "Outcome variable releveled: '", positive_level,
-                            "' is now modeled as the positive outcome (event)."
+                        # Inform user which level is modeled as the positive outcome
+                        private$.addNotice(
+                            jmvcore::NoticeType$INFO,
+                            paste0(
+                                "Outcome variable releveled: '", positive_level,
+                                "' is now modeled as the positive outcome (event)."
+                            )
                         )
                     } else {
                         # Warn if selected level doesn't exist
-                        warning_msg <- paste0(
-                            "Warning: Selected positive outcome level '", positive_level,
-                            "' not found in data. Available levels: ",
-                            paste(levels(outcome_var), collapse = ", ")
+                        private$.addNotice(
+                            jmvcore::NoticeType$WARNING,
+                            paste0(
+                                "Selected positive outcome level '", positive_level,
+                                "' not found in data. Available levels: ",
+                                paste(levels(outcome_var), collapse = ", ")
+                            )
                         )
                     }
                 }
@@ -568,7 +575,12 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Additional diagnostics: EPV and separation checks
                 extra_warnings <- c()
                 if (!is.null(dependent_variable_name_from_label) && !is.null(self$options$outcomeLevel)) {
-                    evt_count <- sum(mydata[[dependent_variable_name_from_label]] == self$options$outcomeLevel, na.rm = TRUE)
+                    # Events-per-variable uses the rarer of the two outcome classes:
+                    # logistic-regression EPV is driven by the minority count, which is
+                    # not necessarily the user-selected positive level.
+                    n_event <- sum(mydata[[dependent_variable_name_from_label]] == self$options$outcomeLevel, na.rm = TRUE)
+                    n_nonevent <- sum(!is.na(mydata[[dependent_variable_name_from_label]])) - n_event
+                    evt_count <- min(n_event, n_nonevent)
                     df_predictors <- 0
                     for (v in explanatory_variable_names) {
                         if (!is.null(v) && v %in% names(mydata)) {
@@ -828,6 +840,14 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     predictor_levels <- rownames(cont_table)
                     outcome_levels <- colnames(cont_table)
 
+                    # Format diagnostic metrics, rendering undefined (NA) values
+                    # explicitly rather than as a misleading 0% or numeric. LRs
+                    # derived from an undefined metric are also shown as undefined.
+                    sens_txt <- if (is.na(lr_results$sensitivity)) "undefined (no positive cases)" else paste0(round(lr_results$sensitivity * 100, 1), "%")
+                    spec_txt <- if (is.na(lr_results$specificity)) "undefined (no negative cases)" else paste0(round(lr_results$specificity * 100, 1), "%")
+                    plr_txt  <- if (is.na(lr_results$positive_lr)) "undefined" else as.character(round(lr_results$positive_lr, 2))
+                    nlr_txt  <- if (is.na(lr_results$negative_lr)) "undefined" else as.character(round(lr_results$negative_lr, 2))
+
                     # Build full metrics text with all features
                     metrics_text <- paste0(
                         "<br>",
@@ -835,10 +855,10 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                         "<div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;'>",
                         "<b>Diagnostic Metrics:</b><br>",
-                        "Sensitivity: ", round(lr_results$sensitivity * 100, 1), "%<br>",
-                        "Specificity: ", round(lr_results$specificity * 100, 1), "%<br>",
-                        "Positive LR: ", round(lr_results$positive_lr, 2), "<br>",
-                        "Negative LR: ", round(lr_results$negative_lr, 2), "<br>",
+                        "Sensitivity: ", sens_txt, "<br>",
+                        "Specificity: ", spec_txt, "<br>",
+                        "Positive LR: ", plr_txt, "<br>",
+                        "Negative LR: ", nlr_txt, "<br>",
                         "</div>",
 
                         statistical_warnings,
@@ -894,6 +914,18 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         private$.addNotice(jmvcore::NoticeType$WARNING,
                             "Nomogram could not be generated due to model fitting issues. The odds ratio analysis completed successfully, but the nomogram visualization is not available. This may occur with: (1) perfect separation in the data, (2) convergence issues, or (3) insufficient sample size. The main analysis results are still valid.")
                     }
+
+                    # Persist the serializable ingredients (data + raw variable names)
+                    # needed to rebuild the nomogram. private$.nom_object is not
+                    # serialized, so on reload the render function refits from this
+                    # state instead of showing a blank plot. The nomogram object
+                    # itself is not stored (it carries function references that would
+                    # break protobuf serialization).
+                    self$results$plot_nomogram$setState(list(
+                        data = mydata,
+                        dependent = dependent_variable_name_from_label,
+                        explanatory = explanatory_variable_names
+                    ))
 
                     # Update results with diagnostic metrics
                     # Set the separate diagnosticMetrics output
@@ -1031,29 +1063,22 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            # Calculate sensitivity and specificity
-            sensitivity <- tp / (tp + fn)  # True Positive Rate
-            specificity <- tn / (tn + fp)  # True Negative Rate
-            
-            # Handle edge cases
-            if (is.na(sensitivity) || !is.finite(sensitivity)) {
-                sensitivity <- 0
-            }
-            if (is.na(specificity) || !is.finite(specificity)) {
-                specificity <- 0
-            }
-            
-            # Calculate likelihood ratios with proper handling of edge cases
-            if (specificity == 1) {
-                positive_lr <- Inf
+            # Calculate sensitivity and specificity.
+            # These are undefined when the 2x2 table has no actual positives
+            # (tp + fn == 0) or no actual negatives (tn + fp == 0). Keep them NA
+            # rather than silently coercing to 0, which would masquerade as real
+            # (perfect-miss) diagnostic performance.
+            sensitivity <- if ((tp + fn) == 0) NA_real_ else tp / (tp + fn)  # True Positive Rate
+            specificity <- if ((tn + fp) == 0) NA_real_ else tn / (tn + fp)  # True Negative Rate
+
+            # Likelihood ratios are undefined if either component metric is undefined.
+            if (is.na(sensitivity) || is.na(specificity)) {
+                positive_lr <- NA_real_
+                negative_lr <- NA_real_
             } else {
-                positive_lr <- sensitivity / (1 - specificity)
-            }
-            
-            if (specificity == 0) {
-                negative_lr <- Inf
-            } else {
-                negative_lr <- (1 - sensitivity) / specificity
+                # Handle edge cases where a ratio diverges (perfect separation).
+                positive_lr <- if (specificity == 1) Inf else sensitivity / (1 - specificity)
+                negative_lr <- if (specificity == 0) Inf else (1 - sensitivity) / specificity
             }
             
             # Create diagnostic information
@@ -1166,15 +1191,32 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plot_nomogram = function(image, ggtheme, theme, ...) {
             oldpar <- graphics::par(no.readonly = TRUE)
             on.exit(graphics::par(oldpar), add = TRUE)
-            if(is.null(private$.nom_object)) {
+
+            # Fast path: reuse the nomogram built during .run() when available.
+            nom <- private$.nom_object
+
+            # Fallback for serialization/reload: the private field is not persisted,
+            # so refit the model + nomogram from the state stored on this image.
+            if (is.null(nom) && !is.null(image$state)) {
+                st <- image$state
+                prep <- private$.prepareRmsNomogram(st$data, st$dependent, st$explanatory)
+                if (!is.null(prep$fit)) {
+                    nom <- try(
+                        rms::nomogram(prep$fit, fun = stats::plogis,
+                                      funlabel = "Predicted Probability"),
+                        silent = TRUE)
+                    if (inherits(nom, "try-error")) nom <- NULL
+                }
+            }
+
+            if (is.null(nom)) {
                 return(FALSE)
             }
 
             private$.checkpoint()
 
-
             par(mar = c(4, 4, 2, 2))
-            plot(private$.nom_object)
+            plot(nom)
             return(TRUE)
         }
 
@@ -1557,35 +1599,6 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ))
         }
 
-        # Helper function to monitor memory usage for large datasets
-        ,
-        .checkMemoryUsage = function(data_size_mb, operation = "analysis") {
-            # Get current memory usage
-            current_memory <- as.numeric(object.size(self$data)) / 1024^2  # Convert to MB
-            
-            # Define memory thresholds
-            warning_threshold <- 100  # MB
-            critical_threshold <- 500  # MB
-            
-            if (current_memory > critical_threshold) {
-                warning(paste0(
-                    " Large Dataset Warning: Dataset size is ", round(current_memory, 1), " MB. ",
-                    "This may cause performance issues or memory problems during ", operation, ". ",
-                    "Consider:\n",
-                    "\u2022 Working with a representative sample\n",
-                    "\u2022 Reducing the number of variables\n", 
-                    "\u2022 Checking available system memory"
-                ))
-                return("critical")
-            } else if (current_memory > warning_threshold) {
-                message(paste0(
-                    " Dataset size: ", round(current_memory, 1), " MB. ",
-                    "Analysis may take longer than usual."
-                ))
-                return("warning")
-            }
-            return("normal")
-        }
 
         # Helper function for configurable positive level detection
         ,
@@ -1697,7 +1710,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             fit <- tryCatch({
                 logistf::logistf(f, data = .data)
             }, error = function(e) {
-                jmvcore::reject("Error fitting Firth model: {}", e$message)
+                jmvcore::reject(paste0("Error fitting Firth model: ", e$message))
             })
             
             # Extract coefficients and CIs
@@ -1726,7 +1739,16 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Get variable names from the model
             var_names <- names(coefs)
-            
+
+            # Drop the intercept: finalfit omits it from the OR table, and an
+            # exponentiated intercept is not an odds ratio for any predictor.
+            keep <- var_names != "(Intercept)"
+            var_names <- var_names[keep]
+            or        <- or[keep]
+            or_lower  <- or_lower[keep]
+            or_upper  <- or_upper[keep]
+            p_vals    <- p_vals[keep]
+
             # Create the result table
             summary_table <- data.frame(
                 Dependent = character(length(var_names)),
