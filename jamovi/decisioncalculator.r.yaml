@@ -16,6 +16,18 @@ items:
         - pp
         - pprob
         - ci
+        - fnote
+        - multiplecuts
+        - cutoff1
+        - cutoff2
+        - tp1
+        - fp1
+        - tn1
+        - fn1
+        - tp2
+        - fp2
+        - tn2
+        - fn2
 
     - name: welcome
       title: ""
@@ -94,6 +106,10 @@ items:
           title: 'Wrong Test'
           type: number
       clearWith:
+          - TP
+          - FP
+          - TN
+          - FN
           - pp
           - pprob
 
@@ -149,6 +165,10 @@ items:
           type: number
           # format: pc
       clearWith:
+          - TP
+          - FP
+          - TN
+          - FN
           - pp
           - pprob
 
@@ -178,6 +198,10 @@ items:
           title: 'Diagnostic Odds Ratio'
           type: number
       clearWith:
+          - TP
+          - FP
+          - TN
+          - FN
           - pp
           - pprob
 
@@ -225,6 +249,10 @@ items:
           type: number
           format: pc
       clearWith:
+          - TP
+          - FP
+          - TN
+          - FN
           - pp
           - pprob
       refs:
@@ -253,6 +281,10 @@ items:
           superTitle: '95% Confidence Interval'
           type: number
       clearWith:
+          - TP
+          - FP
+          - TN
+          - FN
           - pp
           - pprob
       refs:
@@ -273,6 +305,10 @@ items:
       requiresData: true
       visible: (fagan)
       clearWith:
+          - TP
+          - FP
+          - TN
+          - FN
           - pp
           - pprob
           - fagan
