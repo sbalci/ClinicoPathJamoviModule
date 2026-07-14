@@ -49,8 +49,8 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
             #   [SECURITY/C1-HIGH] FIXED 2026-05-14 - formula now built with jmvcore::composeTerms +
             #     jmvcore::asFormula (allow-list parse-time guard) at .runLCA (~L642), replacing
-            #     stats::as.formula(paste(.escapeVariableNames(...))). Local helper .escapeVariableNames
-            #     remains defined at L8 for backward compat but is unused; consider removing in a follow-up
+            #     the former stats::as.formula(paste(...)) string-built formula. The old
+            #     .escapeVariableNames helper has been removed; only the asFormula path remains.
             #   [CLINICAL-SAFETY] add STRONG_WARNING when LCA convergence < ~25% of n_starts in .runLCA
             #   [CLINICAL-SAFETY] add STRONG_WARNING when total cases < 100 (Hui-Walter assumption)
             #   [hygiene/notices] custom private$.addNotice parallels jmvcore::Notice - consolidate
@@ -134,6 +134,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
 
                 # Populate the results table
                 crosstab_table <- self$results$crosstab
+                crosstab_table$deleteRows() # Clear existing rows to prevent duplicates on re-run
                 for (i in seq_len(nrow(table_data))) {
                     crosstab_table$addRow(rowKey = paste0("pattern_", i), values = list(
                         test_combination = table_data$test_combination[i],
@@ -596,6 +597,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 table <- self$results$model_fit
+                table$deleteRows() # Clear existing rows to prevent duplicates on re-run
 
                 # Add basic fit statistics
                 fit_stats <- list(
@@ -635,8 +637,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Create formula with allow-list parse-time guard.
-                # jmvcore::composeTerms backtick-quotes names (handling internal backticks correctly,
-                # unlike the local .escapeVariableNames helper which fails on names containing backticks);
+                # jmvcore::composeTerms backtick-quotes names (handling internal backticks correctly);
                 # jmvcore::asFormula enforces the parse-time allow-list and rejects code injection in RHS.
                 # cbind is on the global allow-list (jamovi 2.7.27+).
                 var_names <- names(lca_data)
@@ -715,10 +716,19 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Extract results
-                # Ensure we identify which class represents disease presence
-                # Usually the class with higher test positivity rates
-                class_means <- sapply(best_model$probs, function(x) x[2, 2]) # P(yes|class)
-                disease_class <- which.max(colMeans(matrix(class_means, ncol = 2)))
+                # Ensure we identify which class represents disease presence.
+                # For each latent class, average P(test positive | class) across all tests;
+                # the disease class is the one whose tests are, on average, most often
+                # positive. poLCA stores probs[[i]] with rows = latent classes and columns =
+                # outcomes (column 2 = "yes"/positive), so probs[[i]][c, 2] = P(test i
+                # positive | class c). The previous code reshaped a single class's per-test
+                # vector via matrix(..., ncol = 2), which produced an arbitrary disease class
+                # and could invert sensitivity/specificity.
+                # NEEDS-RUNTIME-CHECK: confirm against poLCA output that the sensitivity/
+                # specificity extraction below indexes the same rows=class/cols=outcome layout.
+                mean_pos_class1 <- mean(sapply(best_model$probs, function(x) x[1, 2]))
+                mean_pos_class2 <- mean(sapply(best_model$probs, function(x) x[2, 2]))
+                disease_class <- which.max(c(mean_pos_class1, mean_pos_class2))
                 healthy_class <- 3 - disease_class # The other class
 
                 # Disease prevalence is the probability of the disease class
@@ -1040,8 +1050,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                             success_count <- success_count + 1
                         },
                         error = function(e) {
-                            # Count errors but continue bootstrap
-                            error_count <- error_count + 1
+                            # Count errors but continue bootstrap. Use <<- so the outer counter
+                            # (defined in .calculateBootstrapCI) is updated; a plain <- would
+                            # only create a local binding, leaving error_count at 0 and the
+                            # convergence warning below permanently dead.
+                            error_count <<- error_count + 1
                         }
                     )
 
@@ -1591,6 +1604,7 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
             .populateAgreementStats = function(test_data, tests, test_levels) {
                 # Calculate pairwise Cohen's Kappa
                 table <- self$results$agreement_stats
+                table$deleteRows() # Clear existing rows to prevent duplicates on re-run
                 n_tests <- length(tests)
 
                 if (n_tests < 2) {
@@ -1641,6 +1655,11 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                         ))
                     }
                 }
+
+                table$setNote(
+                    "kappa_se",
+                    .("Kappa standard errors and p-values use a large-sample normal approximation rather than the exact asymptotic SE (e.g. vcd::Kappa); interpret p-values cautiously, especially in small samples.")
+                )
             }
         )
     )

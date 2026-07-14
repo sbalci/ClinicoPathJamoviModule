@@ -8,12 +8,22 @@ items:
       title: Important Information
       type: Preformatted
       clearWith:
+        - clinicalPreset
         - test1
+        - test1Positive
         - test2
+        - test2Positive
         - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
         - method
         - bootstrap
-        - clinicalPreset
+        - nboot
+        - alpha
+        - seed
 
     - name: instructions
       title: Instructions
@@ -24,6 +34,23 @@ items:
       title: Agreement Statistics (Cohen's Kappa)
       type: Table
       visible: true
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
       columns:
         - name: test_pair
           title: Test Pair
@@ -54,6 +81,23 @@ items:
       title: Disease Prevalence
       type: Table
       rows: 1
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
       columns:
         - name: estimate
           title: Estimate
@@ -71,6 +115,23 @@ items:
     - name: test_metrics
       title: Test Performance Metrics
       type: Table
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
       columns:
         - name: test
           title: Test
@@ -116,6 +177,23 @@ items:
       title: Model Fit Statistics
       type: Table
       visible: (method=="latent_class")
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
       columns:
         - name: statistic
           title: Statistic
@@ -128,6 +206,23 @@ items:
       title: Test Cross-Tabulation
       type: Table
       visible: true
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
       columns:
         - name: test_combination
           title: Test Combination
@@ -146,6 +241,23 @@ items:
       renderFun: .plot
       width: 500
       height: 400
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
 
     - name: agreement_plot2
       title: Test Agreement Plot (ggplot2)
@@ -153,6 +265,23 @@ items:
       renderFun: .plot_ggplot
       width: 500
       height: 400
+      clearWith:
+        - clinicalPreset
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+        - test4
+        - test4Positive
+        - test5
+        - test5Positive
+        - method
+        - bootstrap
+        - nboot
+        - alpha
+        - seed
 
 
 
