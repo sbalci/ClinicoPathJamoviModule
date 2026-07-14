@@ -71,7 +71,7 @@ children:
               - type: TextBox
                 name: min_group_size
                 format: number
-                enable: (multiple_cutoffs)
+                enable: (findcut || multiple_cutoffs)
                 label: Minimum Group Size (%)
               - type: Output
                 name: calculatedmulticut
