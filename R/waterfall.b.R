@@ -87,14 +87,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           return(text)
         },
 
-        # Safely format patient IDs and other user inputs for HTML display
-        .safeFormatPatientID = function(id_vector) {
-          sapply(id_vector, function(id) {
-            if (is.null(id) || is.na(id)) return("N/A")
-            private$.safeHtmlOutput(as.character(id))
-          }, USE.NAMES = FALSE)
-        },
-
         # Initialize notice collection list
         .noticeList = list(),
 
@@ -292,46 +284,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           nrow(df) > 100 || length(unique(df[[1]])) > 50  # Assuming first column might be patient ID
         },
 
-        # Progressive rendering for large datasets
-        .prepareProgressiveData = function(df, chunk_size = 50) {
-          n_rows <- nrow(df)
-          if (n_rows <= chunk_size) {
-            return(list(data = df, is_chunked = FALSE, total_chunks = 1))
-          }
-
-          # Create chunks for progressive processing
-          chunk_indices <- split(seq_len(n_rows), ceiling(seq_len(n_rows) / chunk_size))
-
-          list(
-            data = df,
-            chunk_indices = chunk_indices,
-            is_chunked = TRUE,
-            total_chunks = length(chunk_indices),
-            chunk_size = chunk_size
-          )
-        },
-
-        # Plot helper functions for better code organization ----
-
-        # Prepare waterfall plot data and sort
-        .prepareWaterfallPlotData = function(plotData) {
-          df <- plotData$data$waterfall
-
-          # Optimize for large datasets
-          df <- private$.optimizeForLargeDatasets(df)
-
-          # Sort data
-          if (plotData$options$sortBy == "response") {
-            # conventional oncology waterfall: worst (highest) on left, best (lowest) on right
-            decreasing <- !identical(plotData$options$sortDirection, "reverse")
-            df <- df[order(df$response, decreasing = decreasing, na.last = TRUE),]
-          } else if (plotData$options$sortBy == "id") {
-            df <- df[order(df[[plotData$options$patientID]], na.last = TRUE),]
-          }
-
-          return(df)
-        },
-
         # --- Issue #1 enhancements: baseline line + annotation markers ---
 
         # Vectorized isTRUE (NA -> FALSE)
@@ -403,6 +355,17 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 stringsAsFactors = FALSE
               )
               nlev <- length(unique(marker_df$confirm_status))
+              # Guard against confirmation variables with many levels: a manual
+              # scale must supply at least one shape per level or ggplot errors
+              # ("Insufficient values in manual scale"). Recycle a pool of distinct
+              # shapes to exactly nlev values; warn when levels exceed the pool.
+              shape_pool <- c(16, 1, 17, 2, 15, 0)
+              if (nlev > length(shape_pool)) {
+                message(sprintf(
+                  .("Confirmation variable has %d levels; markers reuse shapes beyond %d distinct symbols."),
+                  nlev, length(shape_pool)))
+              }
+              shape_values <- rep(shape_pool, length.out = max(1, nlev))
               plot <- plot +
                 ggplot2::geom_point(
                   data = marker_df,
@@ -415,7 +378,7 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ) +
                 ggplot2::scale_shape_manual(
                   name = .("Confirmation"),
-                  values = c(16, 1, 17, 2, 15)[seq_len(min(5, nlev))]
+                  values = shape_values
                 )
             }
           }
@@ -443,176 +406,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
           }
           plot
-        },
-
-        # Define color schemes for plots
-        .getColorSchemes = function() {
-          list(
-            recist = c(
-              "CR" = "#1b9e77",  # teal - colorblind safe
-              "PR" = "#7570b3",  # purple - colorblind safe
-              "SD" = "#e7298a",  # magenta - colorblind safe
-              "PD" = "#e66101",  # orange - colorblind safe
-              "NA" = "#666666"   # gray
-            ),
-            simple = c(
-              "CR" = "#1b9e77",  # teal for positive response
-              "PR" = "#1b9e77",  # same teal for positive response
-              "SD" = "#666666",  # gray for stable
-              "PD" = "#e66101",  # orange for progression
-              "NA" = "#999999"   # lighter gray
-            ),
-            colorblind = c(
-              "CR" = "#009E73",  # bluish green
-              "PR" = "#56B4E9",  # sky blue
-              "SD" = "#E69F00",  # orange
-              "PD" = "#CC79A7",  # reddish purple
-              "NA" = "#999999"   # gray
-            )
-          )
-        },
-
-        # Select appropriate colors for waterfall plot
-        .selectWaterfallColors = function(plotData, df) {
-          color_schemes <- private$.getColorSchemes()
-
-          # Check if group-based coloring is requested and group variable exists
-          useGroupColoring <- !is.null(plotData$options$colorBy) &&
-                              plotData$options$colorBy == "group" &&
-                              "patient_group" %in% names(df)
-
-          if (useGroupColoring) {
-            # Generate distinct colors for groups using reusable method
-            group_levels <- unique(df$patient_group)
-            colors <- private$.generateGroupColors(group_levels, plotData$options$colorScheme)
-            fill_var <- "patient_group"
-            legend_name <- .("Patient Group")
-          } else {
-            # Use RECIST coloring based on selected scheme
-            colors <- switch(plotData$options$colorScheme,
-              "simple" = color_schemes$simple,
-              "colorblind" = color_schemes$colorblind,
-              "jamovi" = color_schemes$recist,
-              "recist" = color_schemes$recist,
-              color_schemes$recist  # default fallback
-            )
-            fill_var <- "recist_category"
-            legend_name <- .("RECIST Response")
-          }
-
-          list(colors = colors, fill_var = fill_var, legend_name = legend_name, useGroupColoring = useGroupColoring)
-        },
-
-        # Create base waterfall plot
-        .createWaterfallBasePlot = function(df, color_info, plotData) {
-          ggplot2::ggplot(df, ggplot2::aes(
-            x = factor(seq_len(nrow(df))),
-            y = response
-          )) +
-          ggplot2::geom_bar(
-            stat = "identity",
-            ggplot2::aes(fill = !!rlang::sym(color_info$fill_var)),
-            width = plotData$options$barWidth,
-            alpha = plotData$options$barAlpha
-          ) +
-          ggplot2::scale_fill_manual(
-            name = color_info$legend_name,
-            values = color_info$colors,
-            na.value = "#808080",
-            drop = FALSE
-          ) +
-          ggplot2::labs(
-            x = .("Patients"),
-            y = .("Change in Tumor Size (%)")
-          )
-        },
-
-        # Add RECIST threshold lines to plot
-        .addRecistThresholds = function(plot, show_thresholds) {
-          if (show_thresholds) {
-            plot +
-              ggplot2::geom_hline(
-                yintercept = c(private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD),
-                linetype = "dashed",
-                color = c("#4169E1", "#FF0000"),
-                alpha = 0.5
-              )
-          } else {
-            plot
-          }
-        },
-
-        # Add response labels to plot
-        .addResponseLabels = function(plot, df, plotData) {
-          if (plotData$options$labelOutliers) {
-            threshold <- plotData$options$minResponseForLabel
-            labels <- ifelse(
-              !is.na(df$response) & abs(df$response) > threshold,
-              sprintf("%.1f%%", df$response),
-              ""
-            )
-
-            if (any(labels != "")) {
-              plot +
-                ggplot2::geom_text(
-                  data = df[labels != "",],
-                  mapping = ggplot2::aes(
-                    x = factor(which(labels != "")),
-                    y = response,
-                    label = labels[labels != ""]
-                  ),
-                  vjust = ifelse(df$response[labels != ""] > 0, -0.5, 1.2),
-                  hjust = 0.5,
-                  size = 3,
-                  color = "black"
-                )
-            } else {
-              plot
-            }
-          } else {
-            plot
-          }
-        },
-
-        # Add median and confidence interval lines
-        .addMedianAndCI = function(plot, df, plotData) {
-          if (plotData$options$showMedian) {
-            median_response <- median(df$response, na.rm = TRUE)
-            plot <- plot +
-              ggplot2::geom_hline(
-                yintercept = median_response,
-                linetype = "solid",
-                color = "blue",
-                alpha = 0.7
-              )
-          }
-
-          if (plotData$options$showCI) {
-            # Calculate 95% confidence interval for median
-            if (nrow(df) > 10) {
-              ci_data <- tryCatch({
-                t_test <- t.test(df$response, na.rm = TRUE)
-                c(lower = t_test$conf.int[1], upper = t_test$conf.int[2])
-              }, error = function(e) c(lower = NA, upper = NA))
-
-              if (!is.na(ci_data[1])) {
-                plot <- plot +
-                  ggplot2::geom_ribbon(
-                    data = data.frame(
-                      x = c(0, nrow(df) + 1),
-                      ymin = ci_data[1],
-                      ymax = ci_data[2]
-                    ),
-                    mapping = ggplot2::aes(x = x, ymin = ymin, ymax = ymax),
-                    alpha = 0.2,
-                    fill = "blue",
-                    inherit.aes = FALSE
-                  )
-              }
-            }
-          }
-
-          return(plot)
         },
 
         # Memory-efficient processing for large datasets
@@ -700,8 +493,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ) %>%
             dplyr::ungroup()
 
-          # Create waterfall data (best response per patient)
+          # Create waterfall data (best response per patient).
+          # Drop all-NA patients first so an empty group does not become
+          # min(numeric(0)) = Inf (which .categorizeRECIST mis-labels as PD).
           waterfall_data <- processed_df %>%
+            dplyr::filter(!is.na(response)) %>%
             dplyr::group_by(!!rlang::sym(patientID)) %>%
             dplyr::summarise(
               response = min(response, na.rm = TRUE),
@@ -732,8 +528,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           # Create waterfall data efficiently
           if (!is.null(timeVar) && timeVar %in% names(df)) {
-            # For time-series percentage data, get best response per patient
+            # For time-series percentage data, get best response per patient.
+            # Drop all-NA patients first so an empty group does not become
+            # min(numeric(0)) = Inf (which .categorizeRECIST mis-labels as PD).
             waterfall_data <- processed_df %>%
+              dplyr::filter(!is.na(response)) %>%
               dplyr::group_by(!!rlang::sym(patientID)) %>%
               dplyr::summarise(
                 response = min(response, na.rm = TRUE),
@@ -799,7 +598,10 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
           # Create waterfall and spider data
           if (!is.null(timeVar) && timeVar %in% names(processed_df)) {
+            # Drop all-NA patients first so an empty group does not become
+            # min(numeric(0)) = Inf (which .categorizeRECIST mis-labels as PD).
             waterfall_data <- processed_df %>%
+              dplyr::filter(!is.na(response)) %>%
               dplyr::group_by(!!rlang::sym(patientID)) %>%
               dplyr::summarise(response = min(response, na.rm = TRUE), .groups = "drop")
             spider_data <- processed_df
@@ -1267,13 +1069,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         df_waterfall <- df_waterfall %>%
           dplyr::mutate(
-            category = factor(
-              cut(response,
-                  breaks = c(-Inf, private$RECIST_PR_THRESHOLD, private$RECIST_PD_THRESHOLD, Inf),
-                  labels = c(.("Response"), .("Stable"), .("Progression")),
-                  right = FALSE),
-              levels = c(.("Response"), .("Stable"), .("Progression"))
-            ),
             # Create simplified response categories (threshold-based, NOT RECIST v1.1 compliant)
             # NOTE: Variable name "recist_category" retained for backward compatibility
             # but represents SIMPLIFIED categories (no confirmation, no new lesions, no non-target)
@@ -1378,41 +1173,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       }
 
-
-      ,
-      # Add duration of response calculation
-      .calculateDurationOfResponse = function(df) {
-        df %>%
-          dplyr::group_by(patientID) %>%
-          dplyr::summarise(
-            duration = max(time[response <= private$RECIST_PR_THRESHOLD], na.rm=TRUE) -
-              min(time[response <= private$RECIST_PR_THRESHOLD], na.rm=TRUE),
-            best_response = min(response, na.rm=TRUE)
-          )
-      }
-
-      ,
-      # Add time to response metric
-      .calculateTimeToResponse = function(df) {
-        df %>%
-          dplyr::group_by(patientID) %>%
-          dplyr::filter(response <= private$RECIST_PR_THRESHOLD) %>%
-          dplyr::summarise(
-            time_to_response = min(time, na.rm=TRUE)
-          )
-      }
-
-      ,
-      # Add subgroup analysis capability
-      .createSubgroupAnalysis = function(df, subgroupVar) {
-        df %>%
-          dplyr::group_by(!!rlang::sym(subgroupVar)) %>%
-          dplyr::summarise(
-            ORR = mean(response <= private$RECIST_PR_THRESHOLD, na.rm=TRUE),
-            DCR = mean(response <= private$RECIST_PD_THRESHOLD, na.rm=TRUE),
-            median_response = median(response, na.rm=TRUE)
-          )
-      }
 
       ,
       # Calculate person-time metrics for enhanced analysis
@@ -1679,11 +1439,14 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ## Validate data ----
         private$.checkpoint()  # Checkpoint        # Validate data structure and content
 
-        # SAFETY: Escape variable names for special characters (spaces, punctuation, etc.)
-        safe_patientID <- private$.escapeVar(self$options$patientID)
-        safe_responseVar <- private$.escapeVar(self$options$responseVar)
-        safe_timeVar <- private$.escapeVar(self$options$timeVar)
-        safe_groupVar <- private$.escapeVar(self$options$groupVar)
+        # Use RAW variable names as data-frame keys. jamovi delivers self$data with
+        # the ORIGINAL variable names, so make.names()-escaping (e.g. "Patient ID"
+        # -> "Patient.ID") breaks column lookups and grouping. No R formula is
+        # constructed anywhere here, so escaping provides no benefit.
+        safe_patientID <- self$options$patientID
+        safe_responseVar <- self$options$responseVar
+        safe_timeVar <- self$options$timeVar
+        safe_groupVar <- self$options$groupVar
 
         validated_data <- private$.validateData(
           self$data,
@@ -1881,11 +1644,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Generate tables and results ----
       .generateTablesAndResults = function(processed_data) {
-        # Define safe variable names for jamovi column access
-        safe_patientID <- private$.escapeVar(self$options$patientID)
-        safe_responseVar <- private$.escapeVar(self$options$responseVar)
-        safe_timeVar <- private$.escapeVar(self$options$timeVar)
-        safe_groupVar <- private$.escapeVar(self$options$groupVar)
+        # Use RAW variable names as data-frame keys (jamovi delivers self$data with
+        # original names; make.names()-escaping breaks lookups for names with spaces).
+        safe_patientID <- self$options$patientID
+        safe_responseVar <- self$options$responseVar
+        safe_timeVar <- self$options$timeVar
+        safe_groupVar <- self$options$groupVar
 
         # Extract data
         df_waterfall <- processed_data$waterfall
@@ -1962,9 +1726,11 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           idx_env$metric_row_index <- idx_env$metric_row_index + 1
         }
 
-        # Add Total Patients
+        # Add Evaluable Patients (metrics$n excludes Unknown/NA-response patients,
+        # so label it as evaluable-n to avoid confusion with the full cohort size
+        # used elsewhere in CIs/summaries).
         add_metric_row(list(
-          metric = .("Total Patients"),
+          metric = .("Evaluable Patients"),
           value = as.character(metrics$n)
         ))
 
@@ -2183,11 +1949,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Generate visualizations ----
       .generateVisualizations = function(processed_data, metrics) {
-        # SAFETY: Escape variable names for special characters
-        safe_patientID <- private$.escapeVar(self$options$patientID)
-        safe_responseVar <- private$.escapeVar(self$options$responseVar)
-        safe_timeVar <- private$.escapeVar(self$options$timeVar)
-        safe_groupVar <- private$.escapeVar(self$options$groupVar)
+        # Use RAW variable names as data-frame keys (jamovi delivers self$data with
+        # original names; make.names()-escaping breaks lookups for names with spaces).
+        safe_patientID <- self$options$patientID
+        safe_responseVar <- self$options$responseVar
+        safe_timeVar <- self$options$timeVar
+        safe_groupVar <- self$options$groupVar
 
         # Attach optional confirmation / ongoing annotations (issue #1 markers).
         # Baked into the waterfall data so the plot state carries them to render.
@@ -2250,11 +2017,12 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Generate reports and supplementary content ----
       .generateReportsAndContent = function(processed_data, metrics, person_time_metrics) {
-        # SAFETY: Escape variable names for special characters
-        safe_patientID <- private$.escapeVar(self$options$patientID)
-        safe_responseVar <- private$.escapeVar(self$options$responseVar)
-        safe_timeVar <- private$.escapeVar(self$options$timeVar)
-        safe_groupVar <- private$.escapeVar(self$options$groupVar)
+        # Use RAW variable names as data-frame keys (jamovi delivers self$data with
+        # original names; make.names()-escaping breaks lookups for names with spaces).
+        safe_patientID <- self$options$patientID
+        safe_responseVar <- self$options$responseVar
+        safe_timeVar <- self$options$timeVar
+        safe_groupVar <- self$options$groupVar
 
         # Generate enhanced clinical metrics with confidence intervals ----
         if (isTRUE(self$options$showConfidenceIntervals)) {
@@ -2424,7 +2192,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
       # Refactored run method ----
       .run = function() {
-        
+
+        # Reset accumulated notices at the start of every run. jamovi reuses the
+        # analysis R6 instance across re-runs within a session, so without this
+        # reset .addNotice() would append to the prior run's list and .renderNotices()
+        # would emit each notice 2x, 3x, ... on successive runs.
+        private$.noticeList <- list()
+
         # Step 1: Initialize analysis and show guidance
         private$.initializeAnalysis()
 
@@ -2689,11 +2463,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 
 
-
-        # Add waterfall plot faceting by subgroup
-        # if (!is.null(plotData$options$subgroupVar)) {
-        #   p <- p + ggplot2::facet_wrap(~subgroup)
-        # }
 
         # Issue #1: baseline reference line + confirmation/ongoing markers
         p <- private$.addBaseline(p, isTRUE(plotData$options$showBaseline))
@@ -3624,21 +3393,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
       }
 
       ,
-      # Variable safety utility ----
-      .escapeVar = function(x) {
-        # Escape variable names with spaces/special characters for safe R usage
-        # Mimics modelbuilder behavior for consistent variable handling
-        # Prevents errors with variables like "Patient ID", "Response (%)", etc.
-        if (is.null(x) || length(x) == 0 || x == "") {
-          return(x)
-        }
-        # Use make.names to ensure valid R identifiers
-        safe_name <- make.names(x)
-        # Replace remaining problematic characters with underscores
-        safe_name <- gsub("[^A-Za-z0-9_]+", "_", safe_name)
-        return(safe_name)
-      },
-
       # Helper functions for interpretation ----
       # NOTE: These benchmarks are GENERAL guidelines for phase II oncology trials
       # Actual thresholds vary by tumor type, line of therapy, and standard of care

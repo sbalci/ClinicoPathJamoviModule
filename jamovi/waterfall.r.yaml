@@ -50,6 +50,7 @@ items:
          - inputType
          - colorScheme
          - groupVar
+         - responseCategoryVar
 
     - name: aboutAnalysis
       title: About This Analysis
@@ -82,6 +83,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - responseCategoryVar
 
 
     # - name: summaryTable_explanation
@@ -121,6 +123,11 @@ items:
         - name: median_duration
           title: "Median Duration"
           type: text
+      clearWith:
+         - patientID
+         - responseVar
+         - timeVar
+         - inputType
 
 
     - name: clinicalMetrics
@@ -139,6 +146,7 @@ items:
          - responseVar
          - timeVar
          - inputType
+         - responseCategoryVar
 
     - name: waterfallplot
       title: 'Waterfall Plot'
@@ -176,6 +184,7 @@ items:
          - timeVar
          - inputType
          - generateCopyReadyReport
+         - responseCategoryVar
 
     - name: clinicalSignificance
       title: Clinical Significance Assessment
@@ -185,6 +194,7 @@ items:
          - patientID
          - responseVar
          - showClinicalSignificance
+         - responseCategoryVar
 
     - name: clinicalGlossary
       title: Clinical Terms & Definitions
@@ -224,6 +234,7 @@ items:
          - timeVar
          - inputType
          - showConfidenceIntervals
+         - responseCategoryVar
 
     - name: groupComparisonTable
       title: Group Comparison Analysis
@@ -254,6 +265,7 @@ items:
          - responseVar
          - groupVar
          - inputType
+         - responseCategoryVar
 
     - name: groupComparisonTest
       title: Group Comparison Statistical Test
@@ -278,6 +290,7 @@ items:
          - responseVar
          - groupVar
          - inputType
+         - responseCategoryVar
 
 
     - name: spiderplot
@@ -319,6 +332,7 @@ items:
          - inputType
          - groupVar
          - showExplanations
+         - responseCategoryVar
 
     - name: explanations
       title: Analysis Guide
