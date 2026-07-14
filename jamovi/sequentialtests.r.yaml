@@ -14,6 +14,9 @@ items:
          - test1_spec
          - test2_sens
          - test2_spec
+         - test1_name
+         - test2_name
+         - population_size
 
     - name: plain_summary
       title: 'Summary (Plain Language)'
@@ -93,6 +96,14 @@ items:
       title: 'Population Flow Analysis'
       type: Table
       rows: 0
+      clearWith:
+         - strategy
+         - prevalence
+         - test1_sens
+         - test1_spec
+         - test2_sens
+         - test2_spec
+         - population_size
       columns:
         - name: stage
           title: 'Testing Stage'
@@ -126,10 +137,20 @@ items:
           type: number
 
     - name: cost_analysis_table
-      title: 'Cost Analysis (Per 1000 Patients)'
+      title: 'Cost Analysis'
       type: Table
       visible: (show_cost_analysis)
       rows: 0
+      clearWith:
+         - strategy
+         - prevalence
+         - test1_sens
+         - test1_spec
+         - test2_sens
+         - test2_spec
+         - test1_cost
+         - test2_cost
+         - population_size
       columns:
         - name: item
           title: 'Item'
@@ -160,7 +181,7 @@ items:
       width: 600
       height: 400
       renderFun: .plot_flow_diagram
-      visible: (show_nomogram)
+      visible: (show_plots)
 
     - name: plot_performance
       title: 'Test Performance Comparison'
@@ -168,7 +189,7 @@ items:
       width: 600
       height: 400
       renderFun: .plot_performance
-      visible: (show_nomogram)
+      visible: (show_plots)
 
     - name: plot_probability
       title: 'Probability Transformation'
@@ -176,7 +197,7 @@ items:
       width: 600
       height: 400
       renderFun: .plot_probability
-      visible: (show_nomogram)
+      visible: (show_plots)
 
     - name: plot_population_flow
       title: 'Population Flow Visualization'
@@ -184,7 +205,7 @@ items:
       width: 600
       height: 400
       renderFun: .plot_population_flow
-      visible: (show_nomogram)
+      visible: (show_plots)
 
     - name: plot_sensitivity_analysis
       title: 'Sensitivity Analysis: PPV/NPV vs Prevalence'
@@ -192,7 +213,7 @@ items:
       width: 600
       height: 400
       renderFun: .plot_sensitivity_analysis
-      visible: (show_nomogram)
+      visible: (show_plots)
 
     - name: clinical_guidance
       title: 'Clinical Guidance'
