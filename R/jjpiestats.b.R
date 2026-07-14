@@ -20,6 +20,12 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .plotTheme = NULL,
         .effectiveOptions = NULL,
 
+        # Memoized Fisher's-exact decision, keyed on the same data+option hash
+        # as .processedData so the chi-square assumption check (an independent
+        # chisq.test) runs once per data/option state instead of once per plot.
+        .fisherDecision = NULL,
+        .fisherDecisionHash = NULL,
+
         # Notice collection helpers. A single Preformatted (plain-text) output item:
         # avoids BOTH the jmvcore::Notice serialization error from
         # self$results$insert(999, Notice) AND any HTML in notices (project convention:
@@ -27,11 +33,20 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .noticeList = list(),
 
         .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
+            # De-duplicate: render functions may re-run without .run() (e.g. on a
+            # plot resize), which would otherwise append the same notice again.
+            already <- vapply(private$.noticeList, function(n) {
+                identical(n$type, type) &&
+                    identical(n$title, title) &&
+                    identical(n$content, content)
+            }, logical(1))
+            if (!any(already)) {
+                private$.noticeList[[length(private$.noticeList) + 1]] <- list(
+                    type = type,
+                    title = title,
+                    content = content
+                )
+            }
             # Render immediately so early-return validation aborts still display the notice
             private$.renderNotices()
         },
@@ -63,23 +78,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$plot1$setSize(650, 450)
 
             self$results$plot2$setSize(650, 450)
-
-
-            if (!is.null(self$options$grvar) && !is.null(self$options$group)) {
-
-                mydata <- self$data
-
-                group <-  self$options$group
-
-                num_levels_group <- nlevels(
-                    as.factor(mydata[[group]])
-                )
-
-                self$results$plot4$setSize(num_levels_group * 600, 450)
-
-            }
-
-
 
 
             if (!is.null(self$options$group) && !is.null(self$options$grvar)) {
@@ -121,8 +119,8 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 label = self$options$label %||% "percentage",
                 digits = self$options$digits %||% 2L,
                 conflevel = self$options$conflevel %||% 0.95,
-                proportiontest = self$options$proportiontest %||% TRUE,
-                bfmessage = self$options$bfmessage %||% TRUE,
+                proportiontest = self$options$proportiontest %||% FALSE,
+                bfmessage = self$options$bfmessage %||% FALSE,
                 messages = self$options$messages %||% FALSE,
                 resultssubtitle = self$options$resultssubtitle,
                 originaltheme = self$options$originaltheme,
@@ -208,28 +206,46 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # panels whenever 'showexplanations' was off. 'showexplanations' now
             # acts as a master switch that also reveals the granular panels.
             show_expl <- isTRUE(self$options$showexplanations)
-            
+
             # Generate About content
             about_content <- private$.generateAboutContent()
             self$results$about$setContent(about_content)
-            
-            # Generate other clinical panels if we have data
-            if (!is.null(self$options$dep)) {
-                if (show_expl || isTRUE(self$options$showSummary)) {
-                    self$results$summary$setContent(private$.generateSummaryContent())
-                }
-                
-                if (show_expl || isTRUE(self$options$showInterpretation)) {
-                    self$results$interpretation$setContent(private$.generateInterpretationContent())
-                }
-                
-                report_content <- private$.generateReportContent()
-                self$results$report$setContent(report_content)
-                
-                if (!is.null(self$options$group) &&
-                    (show_expl || isTRUE(self$options$showAssumptions))) {
-                    self$results$assumptions$setContent(private$.generateAssumptionsContent())
-                }
+
+            has_dep <- !is.null(self$options$dep)
+
+            # Placeholder shown when a toggle is on but the outcome variable is
+            # not yet selected, so an enabled panel never renders blank-but-titled.
+            placeholder <- glue::glue(
+                "<p><em>{msg}</em></p><hr>",
+                msg = .('Select a dependent (outcome) variable to populate this panel.')
+            )
+
+            # Summary (needs the outcome variable)
+            if (show_expl || isTRUE(self$options$showSummary)) {
+                self$results$summary$setContent(
+                    if (has_dep) private$.generateSummaryContent() else placeholder
+                )
+            }
+
+            # Interpretation guidance
+            if (show_expl || isTRUE(self$options$showInterpretation)) {
+                self$results$interpretation$setContent(
+                    if (has_dep) private$.generateInterpretationContent() else placeholder
+                )
+            }
+
+            # Assumptions & warnings (works with or without a grouping variable;
+            # the contingency-table checks are simply skipped when no group is set)
+            if (show_expl || isTRUE(self$options$showAssumptions)) {
+                self$results$assumptions$setContent(
+                    if (has_dep) private$.generateAssumptionsContent() else placeholder
+                )
+            }
+
+            # Copy-ready report (r.yaml gates visibility on dep, so only populate
+            # when the outcome variable is present)
+            if (has_dep) {
+                self$results$report$setContent(private$.generateReportContent())
             }
         },
         
@@ -453,7 +469,7 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (!any(c("factor", "character", "logical") %in% var_class)) {
                         # Try to convert numeric to factor if it has few unique values
                         if (is.numeric(self$data[[var]])) {
-                            unique_vals <- length(unique(self$data[[var]], na.rm = TRUE))
+                            unique_vals <- length(unique(self$data[[var]][!is.na(self$data[[var]])]))
                             if (unique_vals > 10) {
                                 jmvcore::reject(
                                     .('Variable "{var}" appears to be continuous ({count} unique values). Pie charts are for categorical data. Consider converting to groups first.'),
@@ -593,6 +609,28 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .checkFisherNeeded = function(data, dep_var, group_var, counts_var = NULL) {
+            # Memoize on the current data+option hash (set by .getCachedData, which
+            # every plot calls before this). The decision is a pure function of
+            # data/dep/group/counts, all captured by .data_hash, so recomputing the
+            # chi-square assumption check once per plot render is wasteful.
+            cache_key <- private$.data_hash
+            if (!is.null(cache_key) &&
+                identical(private$.fisherDecisionHash, cache_key) &&
+                !is.null(private$.fisherDecision)) {
+                return(private$.fisherDecision)
+            }
+
+            result <- private$.computeFisherNeeded(data, dep_var, group_var, counts_var)
+
+            if (!is.null(cache_key)) {
+                private$.fisherDecision <- result
+                private$.fisherDecisionHash <- cache_key
+            }
+
+            result
+        },
+
+        .computeFisherNeeded = function(data, dep_var, group_var, counts_var = NULL) {
             # CRITICAL FIX #5: Check if Fisher's exact test should be used
             # Returns list with use_fisher, low_count_cells, total_cells, pct_low
 
@@ -712,65 +750,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     total_n
                 )
             ))
-        },
-
-        .checkExtremePrevalence = function(data, dep_var, group_var) {
-            # ENHANCEMENT #2: Warn about extreme prevalence affecting PPV/NPV generalizability
-            # Only relevant for diagnostic preset with 2x2 contingency tables
-
-            opts <- private$.effectiveOptionsList()
-
-            # Only check for diagnostic preset
-            if (is.null(opts$clinicalpreset) || opts$clinicalpreset != "diagnostic") {
-                return()
-            }
-
-            # Must have group variable for prevalence calculation
-            if (is.null(group_var) || group_var == "" || !group_var %in% names(data)) {
-                return()
-            }
-
-            # Create contingency table (use weighted if counts present)
-            counts_var <- self$options$counts
-            if (!is.null(counts_var) && counts_var != "" && counts_var %in% names(data)) {
-                formula_str <- paste0(jmvcore::composeTerm(counts_var),
-                                      " ~ ", jmvcore::composeTerm(dep_var),
-                                      " + ", jmvcore::composeTerm(group_var))
-                cont_table <- xtabs(jmvcore::asFormula(formula_str), data = data)
-            } else {
-                cont_table <- table(data[[dep_var]], data[[group_var]])
-            }
-
-            # Only check for 2x2 tables (diagnostic test scenario)
-            if (!all(dim(cont_table) == c(2, 2))) {
-                return()
-            }
-
-            # Calculate prevalence and report which level is used
-            group_totals <- colSums(cont_table)
-            total_n <- sum(group_totals)
-
-            # Assuming first column/level represents "diseased/positive"
-            diseased_level <- colnames(cont_table)[1]
-            prevalence <- group_totals[1] / total_n
-
-            # Warn if prevalence is extreme (<10% or >90%)
-            if (prevalence < 0.10 || prevalence > 0.90) {
-                # notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'extremePrevalence',
-                #     type = jmvcore::NoticeType$INFO
-                # )
-
-                # direction <- if (prevalence < 0.10) "low" else "high"
-                # notice$setContent(sprintf(
-                #     'Disease prevalence (level "%s") in this dataset is %.1f%% (%s prevalence setting). Positive Predictive Value (PPV) and Negative Predictive Value (NPV) are highly dependent on prevalence and may not generalize to populations with substantially different disease rates. Consider reporting sensitivity, specificity, and likelihood ratios which are less affected by prevalence.',
-                #     diseased_level,
-                #     prevalence * 100,
-                #     direction
-                # ))
-                # self$results$insert(999, notice)
-            }
         },
 
         .getCachedData = function() {
@@ -965,6 +944,29 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             })
         },
 
+        # Guard: expected proportions (ratio) must have one value per outcome
+        # level. .parseRatio only validates numeric / sums-to-1 / positivity, not
+        # length, so a mismatched vector (e.g. "0.5,0.5" for a 3-level outcome)
+        # would otherwise be passed straight to ggpiestats(ratio=...) and error
+        # inside the statsExpressions goodness-of-fit test. On mismatch, fall back
+        # to NULL (equal theoretical proportions) and tell the user why.
+        .applyRatioLengthGuard = function(ratio, data, dep) {
+            if (is.null(ratio) || is.null(dep) || is.null(data[[dep]])) return(ratio)
+            n_lev <- nlevels(droplevels(as.factor(data[[dep]])))
+            if (length(ratio) != n_lev) {
+                private$.addNotice(
+                    "WARNING",
+                    .('Expected proportions ignored'),
+                    sprintf(
+                        .('You supplied %d expected proportion(s), but the outcome variable has %d level(s). The number of expected proportions must match the number of outcome categories. Falling back to equal theoretical proportions.'),
+                        length(ratio), n_lev
+                    )
+                )
+                return(NULL)
+            }
+            ratio
+        },
+
         # Optimized options preparation with caching
         .prepareOptions = function(force_refresh = FALSE) {
             if (!is.null(private$.processedOptions) && !force_refresh) {
@@ -994,7 +996,11 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
         .run = function() {
 
+            # Reset notices at the top of every run so stale messages from a
+            # previous state (e.g. a paired-validation failure the user has since
+            # fixed) are cleared; render functions re-populate as needed.
             private$.noticeList <- list()
+            private$.renderNotices()
 
             # Generate clinical interpretation panels
             private$.generateClinicalPanels()
@@ -1177,18 +1183,18 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # CRITICAL FIX #3: Validate paired data before McNemar test
             if (options_data$paired) {
-                # plot1 has no grouping variable (y=NULL), so paired doesn't apply
-                # notice <- jmvcore::Notice$new(
-                #     options = self$options,
-                #     name = 'pairedWithoutGroup',
-                #     type = jmvcore::NoticeType$ERROR
-                # )
-                # notice$setContent(
-                #     .('Paired/repeated measures analysis requires a grouping variable (e.g., Pre vs Post). Single variable pie charts cannot use paired option. Please add a grouping variable or disable the paired option.')
-                # )
-                # self$results$insert(999, notice)
+                # plot1 has no grouping variable (y=NULL), so paired doesn't apply.
+                # Explain the empty plot instead of silently returning nothing.
+                private$.addNotice(
+                    "WARNING",
+                    .('Single-variable pie chart not shown'),
+                    .('The paired/repeated-measures option requires a two-way (grouped) comparison, so the single-variable pie chart cannot be drawn. Disable the "Paired" option to display this chart, or use the grouped charts for the paired analysis.')
+                )
                 return()
             }
+
+            # Guard: expected proportions must match the number of outcome levels
+            options_data$ratio <- private$.applyRatioLengthGuard(options_data$ratio, mydata, dep)
 
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
@@ -1271,20 +1277,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 NULL
             }
 
-            # ENHANCEMENT #6: Enhanced ratio parsing with notice-based feedback
-                ratio_vec <- options_data$ratio
+            # Guard: expected proportions must match the number of outcome levels
+            ratio_vec <- private$.applyRatioLengthGuard(options_data$ratio, mydata, dep)
 
             # CRITICAL FIX #3: Validate paired data before McNemar test
             if (options_data$paired) {
                 validation <- private$.validatePairedData(mydata, dep, group)
                 if (!validation$valid) {
-                    # notice <- jmvcore::Notice$new(
-                    #     options = self$options,
-                    #     name = 'pairedValidationError',
-                    #     type = jmvcore::NoticeType$ERROR
-                    # )
-                    # notice$setContent(validation$message)
-                    # self$results$insert(999, notice)
+                    # Explain the empty plot instead of silently returning nothing.
+                    private$.addNotice(
+                        "WARNING",
+                        .('Paired analysis not shown'),
+                        validation$message
+                    )
                     return()
                 }
             }
@@ -1309,9 +1314,6 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # self$results$insert(999, notice)
                 }
             }
-
-            # ENHANCEMENT #2: Check for extreme prevalence in diagnostic preset
-            private$.checkExtremePrevalence(mydata, dep, group)
 
             # Checkpoint before expensive statistical computation
             private$.checkpoint()
@@ -1421,21 +1423,19 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     NULL
                 }
 
-                # ENHANCEMENT #6: Enhanced ratio parsing with notice-based feedback
-                ratio_vec <- NULL
-            ratio_vec <- options_data$ratio
+                # Guard: expected proportions must match the number of outcome levels
+                ratio_vec <- private$.applyRatioLengthGuard(options_data$ratio, mydata, dep)
 
                 # CRITICAL FIX #3: Validate paired data before McNemar test
                 if (options_data$paired) {
                     validation <- private$.validatePairedData(mydata, dep, group)
                     if (!validation$valid) {
-                        # notice <- jmvcore::Notice$new(
-                        #     options = self$options,
-                        #     name = 'pairedValidationError',
-                        #     type = jmvcore::NoticeType$ERROR
-                        # )
-                        # notice$setContent(validation$message)
-                        # self$results$insert(999, notice)
+                        # Explain the empty plot instead of silently returning nothing.
+                        private$.addNotice(
+                            "WARNING",
+                            .('Paired analysis not shown'),
+                            validation$message
+                        )
                         return()
                     }
                 }
