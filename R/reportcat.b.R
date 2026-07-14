@@ -32,6 +32,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         variable_types_note = .("Only Nominal, Ordinal, or Categorical variables (factors) are allowed.")
         )
                 self$results$todo$setContent(todo)
+                # Reset any stale error/warning when no variables are selected.
+                self$results$error$setVisible(FALSE)
                 return()
             } else {
                 # Clear the to-do message if variables are selected.
@@ -123,10 +125,14 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     total_obs <- length(mydata[[myvar]])
                     missing_obs <- sum(is.na(mydata[[myvar]]))
                     valid_obs <- total_obs - missing_obs
-                    num_levels <- nlevels(as.factor(mydata[[myvar]]))
+                    # Count observed (non-missing) levels, consistent with
+                    # misuse detection and the fallback summary table.
+                    num_levels <- length(unique(mydata[[myvar]][!is.na(mydata[[myvar]])]))
 
-                    # Create a summary table for the variable.
-                    tbl <- summary(as.factor(mydata[[myvar]]))
+                    # Create a summary table for the variable. maxsum = Inf
+                    # prevents summary.factor() from lumping >100 levels into
+                    # a single "(Other)" row for high-cardinality variables.
+                    tbl <- summary(as.factor(mydata[[myvar]]), maxsum = Inf)
                     summar <- data.frame(
                         level = names(tbl),
                         n = as.numeric(tbl),
@@ -150,9 +156,9 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         dplyr::pull(level_description)
 
                     # Create overall summary sentences with HTML tags for styling.
-                    sentence1 <- glue::glue(.("<strong>{var}</strong> has {observations} observations and {levels} levels."),
+                    sentence1 <- glue::glue(.("<strong>{var}</strong> has {rows} rows and {levels} levels."),
                         var = htmltools::htmlEscape(myvar),
-                        observations = total_obs,
+                        rows = total_obs,
                         levels = num_levels)
                     sentence2 <- glue::glue(
                         .("Missing values: {count}."),
@@ -226,7 +232,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$aboutAnalysis$setContent(about_content)
 
                 # Add assumptions and data quality guidance
-                assumptions_content <- private$.generateAssumptionsContent(myvars, mydata)
+                assumptions_content <- private$.generateAssumptionsContent()
                 
                 # Add misuse detection
                 misuse_warnings <- private$.detectMisusePatterns(mydata, myvars)
@@ -434,7 +440,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         # Generate assumptions and data quality content
-        .generateAssumptionsContent = function(variables, data) {
+        # (static guidance; dynamic checks live in .detectMisusePatterns)
+        .generateAssumptionsContent = function() {
             assumptions_content <- glue::glue(
                 "<div style='padding: 20px; background-color: #fff3e0; border-left: 4px solid #ff9800; margin: 10px 0;'>
                 <h4 style='color: #e65100; margin-top: 0;'>{title}</h4>
@@ -527,9 +534,7 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 Type = rep(.("categorical"), length(cat_vars)),
                 N = sapply(dataset[cat_vars], function(x) sum(!is.na(x))),
                 Missing = sapply(dataset[cat_vars], function(x) sum(is.na(x))),
-                Levels = sapply(dataset[cat_vars], function(x) {
-                    if (is.factor(x)) nlevels(x) else length(unique(x[!is.na(x)]))
-                }),
+                Levels = sapply(dataset[cat_vars], function(x) length(unique(x[!is.na(x)]))),
                 Most_Common = sapply(dataset[cat_vars], function(x) {
                     tbl <- table(x, useNA = "no")
                     if (length(tbl) > 0) names(tbl)[which.max(tbl)] else "NA"
@@ -572,9 +577,8 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     heading.subtitle.font.size = 12
                 )
             
-            # Convert to HTML
-            print_table <- print(gt_table)
-            return(htmltools::HTML(print_table[["children"]][[2]]))
+            # Convert to HTML using the documented gt API (same as primary path)
+            return(htmltools::HTML(gt::as_raw_html(gt_table)))
         }
     )
 )
