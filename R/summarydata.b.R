@@ -12,15 +12,15 @@
 #' @noRd
 NULL
 
-# Variable name escaping utility for handling special characters
-.escapeVar <- function(x) {
-    gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-}
-
 summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataClass",
     inherit = summarydataBase, private = list(
-        
+
+        # Per-run cache of Shapiro-Wilk results keyed by variable name
+        .shapiroCache = NULL,
+
         .run = function() {
+        # Reset per-run Shapiro-Wilk cache (R6 instance persists across runs)
+        private$.shapiroCache <- list()
         # Check if variables have been selected. If not, display a welcoming message with instructions.
         if (length(self$options$vars) == 0) {
             intro_msg <- "
@@ -68,8 +68,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
 
             # Retrieve the data and construct the list of variables.
             dataset <- self$data
-            var_formula <- jmvcore::constructFormula(terms = vars)
-            var_list <- unlist(jmvcore::decomposeFormula(formula = var_formula))
+            # Use the filtered variable names directly as data[[]] keys. Round-tripping
+            # through constructFormula/decomposeFormula can mangle names containing
+            # spaces or special characters, breaking downstream dataset[[var]] lookups.
+            var_list <- vars
             # mysummary function with optimized calculations
             mysummary <- function(myvar) {
                 # Cache numeric conversion to avoid repeated calls
@@ -108,18 +110,14 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     if (n_unique == 1) {
                         # All values are identical - no variance
                         distribution_assessment <- .("The data are constant and have no variance.")
-                    } else if (length(valid_data) >= 3 && length(valid_data) <= 5000) {
-                        # Perform Shapiro-Wilk test with error handling
-                        sw_result <- tryCatch({
-                            sw_test <- shapiro.test(valid_data)
-                            list(p_val = round(sw_test$p.value, 3), success = TRUE)
-                        }, error = function(e) {
-                            list(p_val = NA, success = FALSE)
-                        })
-                        p_val <- sw_result$p_val
+                    } else {
+                        # Shapiro-Wilk test (cached per run, shared with report sentences).
+                        # Returns NULL when n is outside the valid 3-5000 range.
+                        sw_test <- private$.shapiroResult(valid_data, key = myvar)
+                        if (!is.null(sw_test)) {
+                            p_val <- round(sw_test$p.value, 3)
 
-                        # Interpret normality result
-                        if (!is.na(p_val)) {
+                            # Interpret normality result
                             distribution_assessment <- if (p_val > 0.05) {
                                 .("The data are consistent with a normal distribution.")
                             } else {
@@ -136,18 +134,33 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                     skew_val <- round(moments::skewness(numeric_data, na.rm = TRUE), 2)
                     kurt_val <- round(moments::kurtosis(numeric_data, na.rm = TRUE), 2)
 
-                    dist_text <- jmvcore::format(
-                        .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = {p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
-                        variable = htmltools::htmlEscape(myvar),
-                        p = p_val,
-                        skewness = skew_val,
-                        kurtosis = kurt_val,
-                        assessment = distribution_assessment
-                    )
+                    if (is.na(p_val)) {
+                        # Normality was not assessed (constant data or n outside 3-5000);
+                        # show only the assessment, not NA/NaN diagnostics.
+                        dist_text <- jmvcore::format(
+                            .("<br><em>Distribution diagnostics for {variable}:</em> {assessment}"),
+                            variable = htmltools::htmlEscape(myvar),
+                            assessment = distribution_assessment
+                        )
+                    } else {
+                        dist_text <- jmvcore::format(
+                            .("<br><em>Distribution diagnostics for {variable}:</em> Shapiro-Wilk p-value = {p}; skewness = {skewness}; kurtosis = {kurtosis}. {assessment}"),
+                            variable = htmltools::htmlEscape(myvar),
+                            p = p_val,
+                            skewness = skew_val,
+                            kurtosis = kurt_val,
+                            assessment = distribution_assessment
+                        )
+                    }
                 }
+                # Per-variable sample size and missingness for a self-describing headline.
+                n_x <- sum(!is.na(numeric_data))
+                missing_x <- sum(is.na(numeric_data))
                 summary_text <- jmvcore::format(
-                    .("Mean of <strong>{variable}</strong>: {mean} \u{00B1} {sd}. Median: {median} (minimum: {minimum}; maximum: {maximum})."),
+                    .("<strong>{variable}</strong> (N = {n}, missing = {missing}): Mean {mean} \u{00B1} {sd}. Median: {median} (minimum: {minimum}; maximum: {maximum})."),
                     variable = htmltools::htmlEscape(myvar),
+                    n = n_x,
+                    missing = missing_x,
                     mean = mean_x,
                     sd = sd_x,
                     median = median_x,
@@ -243,72 +256,22 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             self$results$glossary$setContent(glossary_content)
         }
         },
-        # Simple summary table without resource-intensive gtExtras
-        .create_simple_summary_table = function(dataset, var_list) {
-            # Filter to numeric variables only
-            numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
-            
-            if (length(numeric_vars) == 0) {
-                return(htmltools::HTML(paste0("<p>", .("No numeric variables selected for summary table."), "</p>")))
-            }
-            
-            # Create simple HTML table
-            html <- "<table style='border-collapse: collapse; margin: 10px 0; width: 100%;'>"
-            html <- paste0(html, "<tr style='background-color: #f8f9fa;'>")
-            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Variable"), "</th>")
-            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("N"), "</th>")
-            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Mean"), "</th>")
-            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("SD"), "</th>")
-            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Min"), "</th>")
-            html <- paste0(html, "<th style='border: 1px solid #ccc; padding: 8px;'>", .("Max"), "</th>")
-            html <- paste0(html, "</tr>")
-            
-            for (var in numeric_vars) {
-                data_col <- dataset[[var]]
-                data_col <- as.numeric(data_col[!is.na(data_col)])
-
-                html <- paste0(html, "<tr>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; font-weight: bold;'>", htmltools::htmlEscape(var), "</td>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", length(data_col), "</td>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(mean(data_col, na.rm = TRUE), 2), "</td>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(sd(data_col, na.rm = TRUE), 2), "</td>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(min(data_col, na.rm = TRUE), 2), "</td>")
-                html <- paste0(html, "<td style='border: 1px solid #ccc; padding: 8px; text-align: center;'>", round(max(data_col, na.rm = TRUE), 2), "</td>")
-                html <- paste0(html, "</tr>")
-            }
-            
-            html <- paste0(html, "</table>")
-            return(htmltools::HTML(html))
-        },
-        # Simplified gtExtras wrapper (compatibility verified)
-        .create_summary_table = function(dataset, var_list) {
-            # Filter to numeric variables only
-            numeric_vars <- var_list[sapply(dataset[var_list], is.numeric)]
-            
-            if (length(numeric_vars) == 0) {
-                return(htmltools::HTML(paste0("<p>", .("No numeric variables selected for summary table."), "</p>")))
-            }
-            
-            # Prepare clean dataset with only numeric variables
-            clean_data <- dataset[numeric_vars]
-            
-            # Ensure proper data types
-            clean_data <- as.data.frame(lapply(clean_data, function(x) {
-                if (is.factor(x)) as.numeric(as.character(x)) else as.numeric(x)
-            }))
-            
-            # Use vectorized calculations for better performance
-            tryCatch({
-                summary_table <- clean_data %>% 
-                    gtExtras::gt_plt_summary()
-                
-                # Convert to HTML
-                print_table <- print(summary_table)
-                return(htmltools::HTML(print_table[["children"]][[2]]))
-            }, error = function(e) {
-                # Fallback to basic table
-                return(private$.gtExtras_style_fallback(dataset, var_list))
-            })
+        # Compute (and cache per run) the Shapiro-Wilk test for a numeric vector.
+        # Returns the htest object, or NULL when the test is not applicable
+        # (n outside 3-5000, constant data, or an error). Shared by the diagnostics
+        # text and the report sentences so the test runs at most once per variable.
+        .shapiroResult = function(x, key = NULL) {
+            if (is.null(private$.shapiroCache))
+                private$.shapiroCache <- list()
+            if (!is.null(key) && !is.null(private$.shapiroCache[[key]]))
+                return(private$.shapiroCache[[key]]$value)
+            valid <- x[!is.na(x)]
+            result <- NULL
+            if (length(valid) >= 3 && length(valid) <= 5000 && length(unique(valid)) > 1)
+                result <- tryCatch(shapiro.test(valid), error = function(e) NULL)
+            if (!is.null(key))
+                private$.shapiroCache[[key]] <- list(value = result)
+            result
         },
         # Fallback with gtExtras-style appearance
         .gtExtras_style_fallback = function(dataset, var_list) {
@@ -318,7 +281,10 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
             if (length(numeric_vars) == 0) {
                 return(htmltools::HTML("<p>No numeric variables available for summary table.</p>"))
             }
-            
+
+            # Match the text summary's precision (see decimal_places option)
+            dp <- self$options$decimal_places
+
             # Calculate comprehensive summary statistics using vectorized operations
             calc_stats <- function(x) {
                 x <- as.numeric(x)
@@ -351,13 +317,13 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 Type = rep("numeric", length(numeric_vars)),
                 N = round(stats_matrix["n", ]),
                 Missing = round(stats_matrix["missing", ]),
-                Mean = round(stats_matrix["mean", ], 2),
-                SD = round(stats_matrix["sd", ], 2),
-                Min = round(stats_matrix["min", ], 2),
-                Q25 = round(stats_matrix["q25", ], 2),
-                Median = round(stats_matrix["median", ], 2),
-                Q75 = round(stats_matrix["q75", ], 2),
-                Max = round(stats_matrix["max", ], 2),
+                Mean = round(stats_matrix["mean", ], dp),
+                SD = round(stats_matrix["sd", ], dp),
+                Min = round(stats_matrix["min", ], dp),
+                Q25 = round(stats_matrix["q25", ], dp),
+                Median = round(stats_matrix["median", ], dp),
+                Q75 = round(stats_matrix["q75", ], dp),
+                Max = round(stats_matrix["max", ], dp),
                 stringsAsFactors = FALSE
             )
             
@@ -370,7 +336,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 ) %>%
                 gt::fmt_number(
                     columns = c("Mean", "SD", "Min", "Q25", "Median", "Q75", "Max"),
-                    decimals = 2
+                    decimals = dp
                 ) %>%
                 gt::cols_label(
                     Variable = .("Variable"),
@@ -401,10 +367,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 )
             
             # Convert to HTML
-            print_table <- print(gt_table)
-            return(htmltools::HTML(print_table[["children"]][[2]]))
+            return(htmltools::HTML(as.character(gt::as_raw_html(gt_table))))
         },
-        
+
         # Generate clinical interpretation for continuous variables
         .generateClinicalInterpretation = function(variables, dataset) {
             if (length(variables) == 0) return("")
@@ -443,7 +408,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 "<li>", .("Statistical assumption verification"), "</li>",
                 "</ul>",
                 
-                if (any(sapply(dataset[variables], function(x) any(!is.finite(x), na.rm = TRUE)))) 
+                if (any(sapply(dataset[variables], function(x) any(is.infinite(x)))))
                     paste0("<p style='color: #d32f2f;'><strong>",
                            .("Data quality alert: Some variables contain infinite or extreme values that may require investigation."),
                            "</strong></p>") else "",
@@ -595,10 +560,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 
                 # Add distribution information if enabled
                 if (self$options$distr && n >= 3 && n <= 5000) {
-                    sw_test <- tryCatch({
-                        shapiro.test(var_clean)
-                    }, error = function(e) NULL)
-                    
+                    # Reuse the cached Shapiro-Wilk result from the diagnostics text
+                    sw_test <- private$.shapiroResult(var_clean, key = var)
+
                     if (!is.null(sw_test)) {
                         if (sw_test$p.value > 0.05) {
                             sentence <- paste0(sentence, ". ", 
