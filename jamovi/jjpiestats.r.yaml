@@ -24,6 +24,8 @@ clearWith:
     - showSummary
     - showAssumptions
     - showInterpretation
+    - addGGPubrDonut
+    - ggpubrDonutPalette
 
 items:
 
