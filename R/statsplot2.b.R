@@ -28,6 +28,17 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             .noticeList = list(),
 
             .addNotice = function(type, title, content) {
+                # De-duplicate: the same validation runs in both .run and the render path,
+                # so skip appending an identical (type+title+content) notice to avoid showing
+                # it twice within a single run cycle.
+                content_chr <- as.character(content)
+                for (existing in private$.noticeList) {
+                    if (identical(existing$type, type) &&
+                        identical(as.character(existing$title), as.character(title)) &&
+                        identical(as.character(existing$content), content_chr)) {
+                        return(invisible(NULL))
+                    }
+                }
                 private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                     type = type,
                     title = title,
@@ -74,6 +85,28 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
             # Method to invalidate cache when options change
             .invalidateCache = function() {
                 private$.cached_analysis <- NULL
+            },
+
+            # Human-readable label for a detected plot type. Kept in sync with the labels
+            # passed to .validatePlotData inside each .plot*Stats function so the ERROR
+            # notice generated from .run matches the render path and de-duplicates cleanly.
+            .plotTypeLabel = function(plot_type) {
+                switch(plot_type,
+                    "independent_factor_continuous"     = "violin plot",
+                    "independent_continuous_continuous" = "scatter plot",
+                    "independent_factor_factor"         = "bar chart",
+                    "independent_continuous_factor"     = "dot plot",
+                    "repeated_factor_continuous"        = "within-subjects violin plot",
+                    "repeated_factor_factor"            = "alluvial diagram",
+                    plot_type
+                )
+            },
+
+            # Optional packages that enable the full range of plot types. Returns the subset
+            # that is not installed.
+            .getMissingPackages = function() {
+                required_packages <- c("ggstatsplot", "ggalluvial", "dplyr", "easyalluvial", "patchwork", "cowplot")
+                required_packages[!vapply(required_packages, function(pkg) requireNamespace(pkg, quietly = TRUE), logical(1))]
             },
 
             # Validate that design (independent/repeated) matches data structure
@@ -244,9 +277,10 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                         # Increased threshold to 15 for clinical scales (11-15 point scales)
                         if (unique_vals > 0 && unique_vals <= 15 &&
                             all(abs(v[!is.na(v)] - round(v[!is.na(v)])) < .Machine$double.eps^0.5)) {
-                            # Warning for borderline cases
+                            # Warning for borderline cases - surfaced via the notices output
+                            # (base warning() is not reliably shown in the jamovi UI).
                             if (unique_vals > 10) {
-                                warning(jmvcore::format(
+                                private$.addNotice('WARNING', 'Borderline Variable Type', jmvcore::format(
                                     "Variable has {} unique integer values (borderline categorical/continuous). Treating as categorical. To force continuous, convert to numeric with decimals.",
                                     unique_vals
                                 ))
@@ -283,9 +317,15 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     grvar = self$options$grvar
                 )
                 
-                # Add warnings for unexpected variable types
+                # Add warnings for unexpected variable types - surfaced via the notices output
+                # (base warning() is not reliably shown in the jamovi UI).
                 if (dep_type == "unknown" || group_type == "unknown") {
-                    warning(glue::glue("Unexpected variable types detected. {analysis_info$dep_var}: {class(mydep)[1]}, {analysis_info$group_var}: {class(mygroup)[1]}. Analysis may not work as expected."))
+                    private$.addNotice('WARNING', 'Unexpected Variable Types', glue::glue(
+                        "Unexpected variable types detected.\n",
+                        " - {analysis_info$dep_var}: {class(mydep)[1]}\n",
+                        " - {analysis_info$group_var}: {class(mygroup)[1]}\n",
+                        " - Analysis may not work as expected."
+                    ))
                 }
                 
                 # Cache the result
@@ -617,8 +657,6 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
 
                 private$.noticeList <- list()
 
-                StatStratum <- ggalluvial::StatStratum
-
                 analysis_info <- NULL
 
                 # Invalidate cache to ensure fresh analysis with current options
@@ -653,6 +691,20 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 # Clear todo message
                 self$results$todo$setVisible(FALSE)
+
+                # Surface any missing optional packages through the notices output. .init writes
+                # install guidance to ExplanationMessage for the no-variable case, but .run
+                # overwrites ExplanationMessage once variables are selected, so route the guidance
+                # to the (reset-at-top-of-run) notices output where it survives.
+                missing_packages <- private$.getMissingPackages()
+                if (length(missing_packages) > 0) {
+                    install_cmd <- paste0("install.packages(c('", paste(missing_packages, collapse = "', '"), "'))")
+                    private$.addNotice('WARNING', 'Optional Packages Missing', glue::glue(
+                        "Optional packages are not installed: {paste(missing_packages, collapse = ', ')}.\n",
+                        " - Install with: {install_cmd}\n",
+                        " - Basic functionality still works; some plot types may fall back to simpler visualizations."
+                    ))
+                }
 
                 # Enhanced data validation with context
                 if (nrow(self$data) == 0) {
@@ -749,24 +801,35 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 # Set the explanation message in results
                 self$results$ExplanationMessage$setContent(combined_html)
 
-                # Add success summary at the end
-                n_total <- nrow(self$data)
-                n_used <- nrow(prepared_data$data)
+                # Validate the prepared data before reporting success. .validatePlotData adds
+                # the appropriate ERROR notice (Insufficient Data / No Valid Levels) when the
+                # data cannot support the selected plot; only report success when it passes.
+                # The same validation runs again in the render path, but .addNotice
+                # de-duplicates identical notices so any ERROR is shown once.
+                validation_ok <- private$.validatePlotData(
+                    prepared_data,
+                    private$.plotTypeLabel(analysis_info$plot_type)
+                )
 
-                private$.addNotice('INFO', 'Analysis Complete', glue::glue(
-                    "Analysis completed successfully.\n",
-                    " - Plot type: {analysis_info$plot_type}\n",
-                    " - Observations used: {format(n_used, big.mark = ',')} of {format(n_total, big.mark = ',')}\n",
-                    " - Statistical approach: {analysis_info$distribution}\n",
-                    " - Study design: {analysis_info$direction}"
-                ))
+                if (validation_ok) {
+                    # Add success summary at the end
+                    n_total <- nrow(self$data)
+                    n_used <- nrow(prepared_data$data)
+
+                    private$.addNotice('INFO', 'Analysis Complete', glue::glue(
+                        "Analysis completed successfully.\n",
+                        " - Plot type: {analysis_info$plot_type}\n",
+                        " - Observations used: {format(n_used, big.mark = ',')} of {format(n_total, big.mark = ',')}\n",
+                        " - Statistical approach: {analysis_info$distribution}\n",
+                        " - Study design: {analysis_info$direction}"
+                    ))
+                }
 
             },
             
             .init = function() {
                 # Centralized package dependency checking
-                required_packages <- c("ggstatsplot", "ggalluvial", "dplyr", "easyalluvial", "patchwork", "cowplot")
-                missing_packages <- required_packages[!sapply(required_packages, function(pkg) requireNamespace(pkg, quietly = TRUE))]
+                missing_packages <- private$.getMissingPackages()
                 if (length(missing_packages) > 0) {
                     install_cmd <- paste0("install.packages(c('", paste(missing_packages, collapse = "', '"), "'))")
                     warning_html <- glue::glue(
@@ -787,58 +850,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 analysis_info <- private$.detectAnalysisType()
                 
                 if (is.null(analysis_info)) {
-                    # No variables selected - hide conditional options
-                    # Keep all options visible initially
+                    # No variables selected - keep all options visible initially
                     return()
                 }
-                
-                # Determine which options should be enabled
-                
-                # 1. Study Design (direction) - Always relevant when variables are selected
-                # Could be disabled for specific unsupported combinations
-                
-                # 2. Statistical Approach (distribution) - Only relevant for quantitative analyses
-                # Enable for: continuous outcomes, disable for pure categorical comparisons
-                enable_distribution <- (
-                    analysis_info$dep_type == "continuous" || 
-                    analysis_info$group_type == "continuous"
-                )
-                
-                # 3. Alluvial Style - Only relevant for repeated factor vs factor
-                enable_alluvial <- (
-                    analysis_info$direction == "repeated" && 
-                    analysis_info$dep_type == "factor" && 
-                    analysis_info$group_type == "factor"
-                )
-                
-                # Apply visibility rules (if UI supports it)
-                # Note: Jamovi may not support dynamic enable/disable in all versions
-                # This is primarily for documentation of when options are relevant
-                
-                if (!enable_distribution) {
-                    # Statistical approach not relevant for pure categorical comparisons
-                    # User should be aware this option doesn't affect factor vs factor plots
-                }
-                
-                if (!enable_alluvial) {
-                    # Alluvial style only matters for repeated factor vs factor
-                    # Hide or disable this option for other combinations
-                }
-                
-                # You could also add informative messages
-                if (analysis_info$plot_type == "independent_factor_factor" && 
-                    !is.null(self$options$distribution) && 
-                    self$options$distribution != "p") {
-                    # Note: Statistical approach doesn't affect bar charts for factor comparisons
-                }
-                
-                if (analysis_info$plot_type != "repeated_factor_factor" &&
-                    !is.null(self$options$alluvsty)) {
-                    # Alluvial style not applicable
-                    # NOTE: Notice intentionally not posted from .init to avoid duplicating
-                    # with the .run notices pass; the alluvial-style note is surfaced via the
-                    # HTML explanation message instead.
-                }
+
+                # Option gating (alluvsty enabled only for repeated designs) is handled
+                # declaratively in statsplot2.u.yaml via `enable: (direction:repeated)`.
+                # The applicability of the statistical-approach option to the current
+                # combination is communicated through the HTML explanation message in .run.
             },
             
             # Fallback plot using basic ggplot2 when all else fails
@@ -1089,7 +1108,8 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 plot <- ggstatsplot::ggdotplotstats(
                     data = prepared_data$data,
                     x = !!rlang::sym(x_var),  # continuous variable
-                    y = !!rlang::sym(y_var)   # factor variable
+                    y = !!rlang::sym(y_var),  # factor variable
+                    type = prepared_data$distribution
                 )
                 return(plot)
             },
@@ -1169,7 +1189,6 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     ggplot2::xlab(prepared_data$group) +
                     ggalluvial::geom_alluvium(ggplot2::aes(fill = gr, colour = gr)) +
                     ggalluvial::geom_stratum() +
-                    ggalluvial::stat_stratum(geom = "stratum") +
                     ggplot2::geom_label(stat = stratum, infer.label = TRUE) +
                     ggplot2::theme_minimal()
                 
@@ -1183,9 +1202,14 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     jmvcore::reject("Package 'easyalluvial' is required for simplified alluvial plots but is not installed. Install with: install.packages('easyalluvial')")
                 }
                 
+                # Subset to the user-selected group/dep columns (group first, matching the
+                # ggalluvial axis1=group, axis2=dep layout) so the diagram reflects the chosen
+                # variables instead of every column in the data frame.
+                alluvial_data <- prepared_data$data[, c(prepared_data$group, prepared_data$dep), drop = FALSE]
+
                 plot <- easyalluvial::alluvial_wide(
-                    data = prepared_data$data,
-                    max_variables = 5,
+                    data = alluvial_data,
+                    max_variables = 2,
                     fill_by = 'first_variable'
                 )
                 return(plot)
@@ -1198,38 +1222,39 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                 
                 # Handle specific grouped plot types with native support
                 if (analysis_info$plot_type == "independent_factor_continuous") {
-                    # Use grouped_ggbetweenstats for factor vs continuous
-                    plot <- ggstatsplot::grouped_ggbetweenstats(
-                        data = prepared_data$data,
-                        x = !!rlang::sym(prepared_data$group),
-                        y = !!rlang::sym(prepared_data$dep),
-                        grouping.var = !!rlang::sym(prepared_data$grvar),
-                        pairwise.comparisons = TRUE,
-                        p.adjust.method = "bonferroni"
-                    )
-                    grouped_func_available <- TRUE
+                    # Use grouped_ggbetweenstats for factor vs continuous. Capture success via
+                    # the tryCatch return value so a failure falls through to the manual
+                    # multi-panel fallback instead of propagating uncaught through .generatePlot.
+                    grouped_func_available <- tryCatch({
+                        plot <- ggstatsplot::grouped_ggbetweenstats(
+                            data = prepared_data$data,
+                            x = !!rlang::sym(prepared_data$group),
+                            y = !!rlang::sym(prepared_data$dep),
+                            grouping.var = !!rlang::sym(prepared_data$grvar),
+                            pairwise.comparisons = TRUE,
+                            p.adjust.method = "bonferroni"
+                        )
+                        TRUE
+                    }, error = function(e) {
+                        message("grouped_ggbetweenstats failed: ", conditionMessage(e))
+                        FALSE
+                    })
                 } else if (analysis_info$plot_type == "independent_continuous_continuous") {
-                    # Try grouped_ggscatterstats if available
-                    # TODO (correctness): the `error = function(e)` handler below assigns
-                    # `grouped_func_available <- FALSE` in its OWN local scope (no `<<-`), so the
-                    # assignment is discarded. It is harmless only because FALSE is already the
-                    # default (see :1245) and the success path sets TRUE last; if that default ever
-                    # becomes TRUE, a grouped_ggscatterstats failure would NOT reset the flag and the
-                    # manual fallback path would be skipped. Fix: use `<<-` or capture the result of
-                    # tryCatch (e.g. `ok <- tryCatch({...; TRUE}, error = function(e) FALSE)`).
-                    # Note also the asymmetry: the `independent_factor_continuous` branch above
-                    # (:1250) has no tryCatch at all, so a grouped_ggbetweenstats failure propagates
-                    # uncaught through .generatePlot (:1029 is not wrapped).
-                    tryCatch({
+                    # Try grouped_ggscatterstats if available. Capture the tryCatch return value
+                    # so a failure correctly resets the flag and falls through to the manual
+                    # multi-panel fallback (the previous handler assigned the flag in its own
+                    # local scope with no <<-, discarding the reset).
+                    grouped_func_available <- tryCatch({
                         plot <- ggstatsplot::grouped_ggscatterstats(
                             data = prepared_data$data,
                             x = !!rlang::sym(prepared_data$group),
                             y = !!rlang::sym(prepared_data$dep),
                             grouping.var = !!rlang::sym(prepared_data$grvar)
                         )
-                        grouped_func_available <- TRUE
+                        TRUE
                     }, error = function(e) {
-                        grouped_func_available <- FALSE
+                        message("grouped_ggscatterstats failed: ", conditionMessage(e))
+                        FALSE
                     })
                 }
                 
@@ -1326,12 +1351,12 @@ statsplot2Class <- if (requireNamespace('jmvcore'))
                     return()
                 }
                 
-                # Check if plot type is supported
-                if (analysis_info$plot_type %in% c("repeated_continuous_continuous", "repeated_continuous_factor")) {
-                    # These combinations are not supported
-                    return()
-                }
-                
+                # For repeated_continuous_continuous / repeated_continuous_factor there is no
+                # specialized ggstatsplot function; .generatePlot returns NULL for these and
+                # falls through to .plotFallback (basic ggplot2), matching the explanation
+                # message which promises a basic visualization. Do NOT early-return here or the
+                # promised plot would never render.
+
                 # Checkpoint before data preparation
                 private$.checkpoint()
                 

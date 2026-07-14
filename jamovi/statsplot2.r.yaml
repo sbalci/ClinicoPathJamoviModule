@@ -16,6 +16,7 @@ items:
           - excl
           - grvar
           - sampleLarge
+          - seed
 
     - name:  todo
       title: To Do
@@ -41,6 +42,7 @@ items:
           - excl
           - grvar
           - sampleLarge
+          - seed
 
 
 
@@ -60,6 +62,7 @@ items:
           - excl
           - grvar
           - sampleLarge
+          - seed
 
 
 refs:
