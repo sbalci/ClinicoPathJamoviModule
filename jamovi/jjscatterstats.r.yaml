@@ -5,6 +5,7 @@ jrs:   '1.1'
 
 
 clearWith:
+    - clinicalPreset
     - dep
     - group
     - grvar
@@ -51,6 +52,11 @@ items:
       title: Explanations
       type:  Html
       visible: (showExplanations)
+
+    - name:  warnings
+      title: Warnings
+      type:  Html
+      visible: false
 
     - name: plot2
       title: '`${dep} vs {group} by {grvar}`'
