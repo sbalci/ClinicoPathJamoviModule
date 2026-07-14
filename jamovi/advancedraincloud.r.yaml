@@ -55,6 +55,13 @@ items:
       type: Html
       visible: (y_var:null || x_var:null)
 
+    # Always-visible notes/warnings item. Operationally important, data-driven
+    # conditions and the ggrain hard-dependency error are surfaced here so they
+    # can never be hidden by option-gated visibility. Populated in .run().
+    - name: analysisNotes
+      title: Analysis Notes
+      type: Html
+
     - name: plot
       title: Advanced Raincloud Plot
       type: Image
