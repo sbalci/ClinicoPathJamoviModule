@@ -7,14 +7,38 @@ items:
     - name:  text1
       title: Analysis result
       type:  Preformatted
+      clearWith:
+          - outcome
+          - kappa0
+          - kappa1
+          - props
+          - raters
+          - alpha
+          - power
 
     - name:  text_summary
       title: Summary
       type:  Preformatted
+      clearWith:
+          - outcome
+          - kappa0
+          - kappa1
+          - props
+          - raters
+          - alpha
+          - power
 
     - name:  text2
       title: Study Explanation
       type:  Preformatted
+      clearWith:
+          - outcome
+          - kappa0
+          - kappa1
+          - props
+          - raters
+          - alpha
+          - power
 
 refs:
     - ClinicoPathJamoviModule
