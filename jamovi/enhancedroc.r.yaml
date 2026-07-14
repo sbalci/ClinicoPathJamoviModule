@@ -132,6 +132,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
                 - confidenceLevel
                 - useBootstrap
 
@@ -284,6 +285,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
 
             columns:
                 - name: predictor
@@ -323,6 +325,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
                 - customCutoffs
 
             columns:
@@ -375,6 +378,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
 
             columns:
                 - name: predictor
@@ -417,6 +421,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
                 - useObservedPrevalence
                 - prevalence
 
@@ -462,6 +467,7 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
                 - partialRange
                 - partialAucType
 
@@ -618,7 +624,12 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
                 - smoothMethod
+                - showCutoffPoints
+                - showConfidenceBands
+                - confidenceLevel
+                - plotTheme
                 - plotWidth
                 - plotHeight
             width: 600
@@ -651,6 +662,11 @@ items:
                 - outcome
                 - predictors
                 - positiveClass
+                - direction
+                - showCutoffPoints
+                - showConfidenceBands
+                - confidenceLevel
+                - plotTheme
                 - plotWidth
                 - plotHeight
             width: 600

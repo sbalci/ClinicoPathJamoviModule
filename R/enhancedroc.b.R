@@ -338,7 +338,10 @@ enhancedROCClass <- R6::R6Class(
             private$.renderNotices()
         },
         .prepareData = function() {
-            # Validate data using enhanced error handling if available
+            # Validate data using enhanced error handling if available.
+            # Initialize to NULL first so the warnings block below is safe even
+            # when validate_clinical_data() is not on the search path.
+            validation_result <- NULL
             if (exists("validate_clinical_data", mode = "function")) {
                 validation_result <- validate_clinical_data(
                     data = self$data,
@@ -384,15 +387,16 @@ enhancedROCClass <- R6::R6Class(
                 }
             }
 
-            # Show warnings if any
-            if (length(validation_result$warnings) > 0) {
+            # Show warnings if any (guarded: validation_result stays NULL when
+            # validate_clinical_data() is unavailable)
+            if (!is.null(validation_result) && length(validation_result$warnings) > 0) {
                 warning_msg <- paste(
                     "<p><strong>Warnings:</strong><br>",
                     private$.safeHtmlOutput(paste(validation_result$warnings, collapse = "; ")), "</p>"
                 )
-                self$results$results$instructions$setContent(
-                    paste(private$.getInstructions(), warning_msg)
-                )
+                # Append to the accumulator so later setContent calls do not drop it
+                private$.instructionsHtml <- paste0(private$.instructionsHtml, warning_msg)
+                self$results$results$instructions$setContent(private$.instructionsHtml)
             }
 
             # Prepare analysis dataset - jmvcore::naOmit preserves jamovi
@@ -467,9 +471,8 @@ enhancedROCClass <- R6::R6Class(
                         "<p>Standard ROC tables will show performance for Positive Class: '<code>", private$.safeHtmlOutput(private$.positiveClass), "</code>' vs Others.</p>",
                         "</div>"
                     )
-                    self$results$results$instructions$setContent(
-                        paste(private$.getInstructions(), info_msg)
-                    )
+                    private$.instructionsHtml <- paste0(private$.instructionsHtml, info_msg)
+                    self$results$results$instructions$setContent(private$.instructionsHtml)
 
                     # Keep original outcome for multi-class calculations
                     private$.multiClassOutcome <- outcome_var
@@ -522,9 +525,8 @@ enhancedROCClass <- R6::R6Class(
                         "<p><em>ROC analysis will evaluate how well the predictor(s) distinguish between these two groups.</em></p>",
                         "</div>"
                     )
-                    self$results$results$instructions$setContent(
-                        paste(private$.getInstructions(), info_msg)
-                    )
+                    private$.instructionsHtml <- paste0(private$.instructionsHtml, info_msg)
+                    self$results$results$instructions$setContent(private$.instructionsHtml)
                 }
             }
 
@@ -563,8 +565,8 @@ enhancedROCClass <- R6::R6Class(
                         "' as positive class and '", private$.safeHtmlOutput(negative_class),
                         "' as negative class. You can change this in the Positive Class dropdown.</p>"
                     )
-                    current_instructions <- private$.getInstructions()
-                    self$results$results$instructions$setContent(paste0(current_instructions, info_msg))
+                    private$.instructionsHtml <- paste0(private$.instructionsHtml, info_msg)
+                    self$results$results$instructions$setContent(private$.instructionsHtml)
                 }
             }
 
@@ -3824,9 +3826,18 @@ enhancedROCClass <- R6::R6Class(
                         pred_vals <- data[[predictor]]
                         y_binary <- as.numeric(outcome == levels(outcome)[2])
 
-                        # Fit model
-                        model <- glm(y_binary ~ pred_vals, family = binomial)
-                        probs <- predict(model, type = "response")
+                        # Derive probabilities consistently with
+                        # .populateCalibrationAnalysis: if the predictor is already
+                        # in [0,1] treat it as pre-calibrated probabilities, otherwise
+                        # fit a logistic model to map values onto [0,1]. This keeps the
+                        # plotted curve consistent with the tabulated Brier/slope.
+                        pred_range <- range(pred_vals, na.rm = TRUE)
+                        if (pred_range[1] >= 0 && pred_range[2] <= 1) {
+                            probs <- pred_vals
+                        } else {
+                            model <- glm(y_binary ~ pred_vals, family = binomial)
+                            probs <- predict(model, type = "response")
+                        }
 
                         # Create bins for plotting (deciles)
                         data_df <- data.frame(prob = probs, outcome = y_binary)
