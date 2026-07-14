@@ -220,6 +220,7 @@ items:
           - standardize
           - random_seed
           - scoringMaxPoints
+          - scoringMethod
 
     - name: lookupTable
       title: Score-to-Probability Lookup
@@ -429,6 +430,8 @@ items:
           - outcomeLevel
           - explanatory
           - lambda
+          - penalty
+          - alpha
           - nfolds
           - standardize
           - random_seed
@@ -463,6 +466,8 @@ items:
           - outcomeLevel
           - explanatory
           - lambda
+          - penalty
+          - alpha
           - nfolds
           - standardize
           - random_seed
