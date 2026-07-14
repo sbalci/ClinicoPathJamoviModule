@@ -13,11 +13,6 @@ items:
 
 
 
-    - name: welcome
-      title: Welcome
-      type: Html
-      visible: false
-
     - name: instructions
       title: Getting Started
       type: Html
@@ -33,6 +28,8 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
+          - zero_cell_correction
+          - confidence_level
 
     - name: about
       title: About This Analysis
@@ -51,6 +48,7 @@ items:
           - true_negatives
           - confidence_level
           - method
+          - zero_cell_correction
       columns:
         - name: parameter
           title: Parameter
@@ -87,6 +85,8 @@ items:
           - false_negatives
           - true_negatives
           - method
+          - zero_cell_correction
+          - confidence_level
       columns:
         - name: parameter
           title: Parameter
@@ -119,6 +119,8 @@ items:
           - false_negatives
           - true_negatives
           - method
+          - zero_cell_correction
+          - confidence_level
       columns:
         - name: measure
           title: Measure
@@ -155,6 +157,8 @@ items:
           - true_negatives
           - covariate
           - method
+          - zero_cell_correction
+          - confidence_level
       columns:
         - name: measure
           title: Measure
@@ -189,6 +193,7 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
+          - zero_cell_correction
       columns:
         - name: test
           title: Test
@@ -257,6 +262,9 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
+          - zero_cell_correction
+          - confidence_level
+          - color_palette
 
     - name: srocplot
       title: Summary ROC Plot
@@ -272,13 +280,15 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
+          - zero_cell_correction
+          - color_palette
 
     - name: funnelplot
       title: Funnel Plot for Publication Bias
       type: Image
       width: 600
       height: 500
-      visible: (funnel_plot)
+      visible: (funnel_plot && publication_bias)
       requiresData: true
       renderFun: .funnelplot
       clearWith:
@@ -287,6 +297,8 @@ items:
           - false_positives
           - false_negatives
           - true_negatives
+          - zero_cell_correction
+          - color_palette
 
     - name: interpretation
       title: Clinical Interpretation and Guidelines

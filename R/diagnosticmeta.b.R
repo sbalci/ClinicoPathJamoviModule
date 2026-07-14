@@ -108,20 +108,15 @@ diagnosticmetaClass <- R6::R6Class(
         .init = function() {
 
             # Initialize content for all Html outputs
-            private$.populateWelcome()
             private$.populateInstructions()
             private$.populateAboutPanel()
             private$.populateInterpretation()
 
             # Set initial visibility based on data state
-            self$results$welcome$setVisible(FALSE)
             self$results$instructions$setVisible(TRUE)
             self$results$summary$setVisible(FALSE)
             self$results$about$setVisible(self$options$show_methodology)
             self$results$interpretation$setVisible(FALSE)
-
-            # Initialize results tables with proper columns
-            private$.initializeResultsTables()
 
         },
         
@@ -159,7 +154,6 @@ diagnosticmetaClass <- R6::R6Class(
             # Check if data is ready
             if (is.null(self$data) || nrow(self$data) == 0) {
                 # Show instructions when no data
-                self$results$welcome$setVisible(FALSE)
                 self$results$instructions$setVisible(TRUE)
                 return()
             }
@@ -183,13 +177,11 @@ diagnosticmetaClass <- R6::R6Class(
 
             if (!all_provided) {
                 # Show instructions if any variables are missing
-                self$results$welcome$setVisible(FALSE)
                 self$results$instructions$setVisible(TRUE)
                 return()
             }
 
             # All variables provided - hide instructions and proceed with analysis
-            self$results$welcome$setVisible(FALSE)
             self$results$instructions$setVisible(FALSE)
             
             # Extract data
@@ -598,7 +590,14 @@ diagnosticmetaClass <- R6::R6Class(
 
                 var_logit_sens <- vcov_matrix[1, 1]
                 var_logit_spec <- vcov_matrix[2, 2]
-                cov_sens_spec <- vcov_matrix[1, 2]
+                # mada's Reitsma model is parameterized in (tsens, tfpr) =
+                # (logit sensitivity, logit FALSE-positive rate). Because
+                # logit(spec) = logit(1 - FPR) = -tfpr, the covariance between
+                # logit(sens) and logit(spec) is the NEGATIVE of vcov[1, 2].
+                # The three delta-method variance formulas below add
+                # 2 * grad_s * grad_p * cov_sens_spec, so using the correctly
+                # signed covariance yields v1 + v2 - 2c for DOR, etc.
+                cov_sens_spec <- -vcov_matrix[1, 2]
 
                 if (var_logit_sens >= 0 && var_logit_spec >= 0) {
                     if (is.finite(pooled_plr) && pooled_plr > 0) {
@@ -821,8 +820,8 @@ diagnosticmetaClass <- R6::R6Class(
                         "taus_sq" = "Between-study variance (tau^2)"
                     )
 
-                    hsroc_table <- self$results$hsrocresults
-                    hsroc_table$deleteRows()
+                    # Note: hsroc_table$deleteRows() was already called at the
+                    # top of .performPHMSROCAnalysis(); no need to clear again.
 
                     # Process each coefficient
                     for (param_name in names(coefficients)) {
@@ -1142,49 +1141,58 @@ diagnosticmetaClass <- R6::R6Class(
                 # the cell stays safe if a future renderer ever interprets HTML.
                 safe_covariate_label <- htmltools::htmlEscape(covariate_var)
 
-                if (!is.null(sens_metareg)) {
-                    metareg_table$addRow(rowKey = "sens_intercept", values = list(
-                        measure = "Sensitivity",
-                        parameter = "Intercept",
-                        estimate = sens_metareg$beta[1],
-                        std_error = sens_metareg$se[1],
-                        z_value = sens_metareg$zval[1],
-                        p_value = sens_metareg$pval[1]
-                    ))
+                # Emit one row per non-intercept coefficient. A categorical
+                # covariate with k > 2 levels produces k - 1 contrasts, so
+                # iterate over 2:length(beta) instead of reporting only beta[2].
+                # Label each row with the metafor coefficient name
+                # (rownames(model$beta)); fall back to the covariate name.
+                add_metareg_rows <- function(model, measure, key_prefix) {
+                    if (is.null(model)) {
+                        return()
+                    }
+                    metareg_table$addRow(
+                        rowKey = paste0(key_prefix, "_intercept"),
+                        values = list(
+                            measure = measure,
+                            parameter = "Intercept",
+                            estimate = model$beta[1],
+                            std_error = model$se[1],
+                            z_value = model$zval[1],
+                            p_value = model$pval[1]
+                        )
+                    )
 
-                    if (length(sens_metareg$beta) >= 2) {
-                        metareg_table$addRow(rowKey = "sens_covariate", values = list(
-                            measure = "Sensitivity",
-                            parameter = safe_covariate_label,
-                            estimate = sens_metareg$beta[2],
-                            std_error = sens_metareg$se[2],
-                            z_value = sens_metareg$zval[2],
-                            p_value = sens_metareg$pval[2]
-                        ))
+                    n_coef <- length(model$beta)
+                    if (n_coef < 2) {
+                        return()
+                    }
+
+                    beta_names <- rownames(model$beta)
+                    for (j in 2:n_coef) {
+                        coef_label <- if (!is.null(beta_names) &&
+                            length(beta_names) >= j &&
+                            !is.na(beta_names[j]) &&
+                            nzchar(beta_names[j])) {
+                            htmltools::htmlEscape(beta_names[j])
+                        } else {
+                            safe_covariate_label
+                        }
+                        metareg_table$addRow(
+                            rowKey = paste0(key_prefix, "_covariate_", j),
+                            values = list(
+                                measure = measure,
+                                parameter = coef_label,
+                                estimate = model$beta[j],
+                                std_error = model$se[j],
+                                z_value = model$zval[j],
+                                p_value = model$pval[j]
+                            )
+                        )
                     }
                 }
 
-                if (!is.null(spec_metareg)) {
-                    metareg_table$addRow(rowKey = "spec_intercept", values = list(
-                        measure = "Specificity",
-                        parameter = "Intercept",
-                        estimate = spec_metareg$beta[1],
-                        std_error = spec_metareg$se[1],
-                        z_value = spec_metareg$zval[1],
-                        p_value = spec_metareg$pval[1]
-                    ))
-
-                    if (length(spec_metareg$beta) >= 2) {
-                        metareg_table$addRow(rowKey = "spec_covariate", values = list(
-                            measure = "Specificity",
-                            parameter = safe_covariate_label,
-                            estimate = spec_metareg$beta[2],
-                            std_error = spec_metareg$se[2],
-                            z_value = spec_metareg$zval[2],
-                            p_value = spec_metareg$pval[2]
-                        ))
-                    }
-                }
+                add_metareg_rows(sens_metareg, "Sensitivity", "sens")
+                add_metareg_rows(spec_metareg, "Specificity", "spec")
             }
         },
         
@@ -1240,12 +1248,98 @@ diagnosticmetaClass <- R6::R6Class(
                 # Remove any attributes that might contain functions
                 attributes(meta_data) <- attributes(meta_data)[c("names", "row.names", "class")]
             }
-            image$setState(meta_data)
+
+            # RELOAD FIX: serialize the pooled sensitivity/specificity point and
+            # their confidence intervals into the image state (mirroring
+            # .populateSROCPlot) so the pooled diamond survives an .omv reload.
+            # Reading private$.pooled_* / private$.biv_model at render time
+            # returned NULL after a saved file was reopened without re-running.
+            pooled_sens <- private$.pooled_sensitivity
+            pooled_spec <- private$.pooled_specificity
+            pooled_sens_ci <- c(NA_real_, NA_real_)
+            pooled_spec_ci <- c(NA_real_, NA_real_)
+
+            conf_level <- self$options$confidence_level
+            if (is.null(conf_level) || length(conf_level) == 0 || !is.finite(conf_level)) {
+                conf_level <- 95
+            }
+            conf_level <- min(max(conf_level, 50), 99) / 100
+
+            if (!is.null(private$.biv_model)) {
+                tryCatch({
+                    summary_results <- summary(private$.biv_model, level = conf_level)
+                    coefficients <- summary_results$coefficients
+
+                    # CI FIX: build the Wald interval on the LOGIT scale using the
+                    # tsens/tfpr intercept rows (estimate + SE both on link scale)
+                    # and transform with plogis() exactly ONCE. The probability-
+                    # scale rows ('sensitivity'/'false pos. rate') are already in
+                    # [0, 1] and often carry NA SE, so applying plogis() to them
+                    # double-squashed the interval.
+                    get_logit_ci <- function(param_name) {
+                        if (is.null(rownames(coefficients))) return(c(NA_real_, NA_real_))
+                        idx <- which(rownames(coefficients) == param_name)
+                        if (length(idx) == 0) return(c(NA_real_, NA_real_))
+                        estimate <- coefficients[idx[1], 1]
+                        se <- coefficients[idx[1], 2]
+                        if (!is.finite(estimate) || !is.finite(se)) return(c(NA_real_, NA_real_))
+                        z <- stats::qnorm(1 - (1 - conf_level) / 2)
+                        c(estimate - z * se, estimate + z * se)
+                    }
+
+                    sens_ci_logit <- get_logit_ci("tsens.(Intercept)")
+                    if (!any(is.na(sens_ci_logit))) {
+                        pooled_sens_ci <- stats::plogis(sens_ci_logit)
+                    }
+
+                    # logit(spec) = -tfpr, so specificity CI is the reversed
+                    # complement of the FPR interval to keep lower < upper.
+                    fpr_ci_logit <- get_logit_ci("tfpr.(Intercept)")
+                    if (!any(is.na(fpr_ci_logit))) {
+                        pooled_spec_ci <- rev(1 - stats::plogis(fpr_ci_logit))
+                    }
+                }, error = function(e) {
+                    # Silently fall back to NA CIs if extraction fails
+                })
+            }
+
+            plot_state <- list(
+                data = meta_data,
+                pooled_sens = if (!is.null(pooled_sens)) as.numeric(pooled_sens) else NA_real_,
+                pooled_spec = if (!is.null(pooled_spec)) as.numeric(pooled_spec) else NA_real_,
+                pooled_sens_ci = pooled_sens_ci,
+                pooled_spec_ci = pooled_spec_ci
+            )
+
+            image$setState(plot_state)
         },
         
         .forestplot = function(image, ggtheme, theme, ...) {
 
-            meta_data <- image$state
+            state <- image$state
+
+            # Unpack state. New state is a list carrying the study data plus the
+            # serialized pooled point and CIs. Legacy states (older saved .omv
+            # files) stored only the data frame - fall back to private fields,
+            # which are populated whenever .run() has just executed.
+            pooled_sens <- NULL
+            pooled_spec <- NULL
+            pooled_sens_ci <- c(NA_real_, NA_real_)
+            pooled_spec_ci <- c(NA_real_, NA_real_)
+
+            if (is.data.frame(state)) {
+                meta_data <- state
+                pooled_sens <- private$.pooled_sensitivity
+                pooled_spec <- private$.pooled_specificity
+            } else if (is.list(state)) {
+                meta_data <- state$data
+                pooled_sens <- state$pooled_sens
+                pooled_spec <- state$pooled_spec
+                if (!is.null(state$pooled_sens_ci)) pooled_sens_ci <- state$pooled_sens_ci
+                if (!is.null(state$pooled_spec_ci)) pooled_spec_ci <- state$pooled_spec_ci
+            } else {
+                return(FALSE)
+            }
 
             # Validate meta_data
             if (is.null(meta_data) || !is.data.frame(meta_data) || nrow(meta_data) == 0) {
@@ -1317,48 +1411,17 @@ diagnosticmetaClass <- R6::R6Class(
                 # Get color palette for accessibility
                 colors <- private$.getColorPalette()
 
-                # Add pooled estimates as diamond (standard meta-analysis convention)
+                # Add pooled estimates as diamond (standard meta-analysis
+                # convention). Pooled point + CIs come from the serialized state
+                # (see .populateForestPlot), so they persist across .omv reloads.
                 pooled_data <- NULL
-                if (!is.null(private$.pooled_sensitivity) && !is.null(private$.pooled_specificity)) {
-                    # Get bivariate model summary for pooled CIs
-                    pooled_sens_ci <- c(NA_real_, NA_real_)
-                    pooled_spec_ci <- c(NA_real_, NA_real_)
-
-                    if (!is.null(private$.biv_model)) {
-                        tryCatch({
-                            summary_results <- summary(private$.biv_model)
-                            coefficients <- summary_results$coefficients
-
-                            # Helper to get CI from coefficients
-                            get_ci <- function(param_name) {
-                                if (is.null(rownames(coefficients))) return(c(NA_real_, NA_real_))
-                                idx <- which(rownames(coefficients) == param_name)
-                                if (length(idx) == 0) return(c(NA_real_, NA_real_))
-                                estimate <- coefficients[idx[1], 1]
-                                se <- coefficients[idx[1], 2]
-                                z <- stats::qnorm(1 - (1 - conf_level) / 2)
-                                c(estimate - z * se, estimate + z * se)
-                            }
-
-                            # Get CIs for sensitivity and specificity
-                            sens_ci_logit <- get_ci("sensitivity")
-                            if (!any(is.na(sens_ci_logit))) {
-                                pooled_sens_ci <- stats::plogis(sens_ci_logit)
-                            }
-
-                            fpr_ci_logit <- get_ci("false pos. rate")
-                            if (!any(is.na(fpr_ci_logit))) {
-                                pooled_spec_ci <- 1 - stats::plogis(fpr_ci_logit)
-                            }
-                        }, error = function(e) {
-                            # Silently use NA CIs if extraction fails
-                        })
-                    }
+                if (!is.null(pooled_sens) && !is.null(pooled_spec) &&
+                    is.finite(pooled_sens) && is.finite(pooled_spec)) {
 
                     # Create pooled estimate rows
                     pooled_sens_row <- data.frame(
                         study = "POOLED ESTIMATE",
-                        estimate = private$.pooled_sensitivity,
+                        estimate = pooled_sens,
                         ci_lower = pooled_sens_ci[1],
                         ci_upper = pooled_sens_ci[2],
                         metric = "Sensitivity",
@@ -1367,7 +1430,7 @@ diagnosticmetaClass <- R6::R6Class(
 
                     pooled_spec_row <- data.frame(
                         study = "POOLED ESTIMATE",
-                        estimate = private$.pooled_specificity,
+                        estimate = pooled_spec,
                         ci_lower = pooled_spec_ci[1],
                         ci_upper = pooled_spec_ci[2],
                         metric = "Specificity",
@@ -1444,10 +1507,19 @@ diagnosticmetaClass <- R6::R6Class(
 
             image <- self$results$srocplot
 
-            # Check if bivariate model is available
+            # Check if bivariate model is available. The SROC pooled summary
+            # point is derived from the bivariate (Reitsma) model, so without it
+            # the plot would render blank with no explanation. Carry a message in
+            # the state so .srocplot can draw an informative panel instead.
             if (is.null(private$.biv_model)) {
-                # Set empty state to avoid errors
-                image$setState(NULL)
+                image$setState(list(
+                    message = paste(
+                        "The Summary ROC plot requires the bivariate",
+                        "random-effects (Reitsma) model. Enable",
+                        "'Bivariate Analysis' to display the pooled summary",
+                        "point and study estimates."
+                    )
+                ))
                 return()
             }
 
@@ -1510,6 +1582,25 @@ diagnosticmetaClass <- R6::R6Class(
 
             state <- image$state
             if (is.null(state)) {
+                return(FALSE)
+            }
+
+            # Bivariate model unavailable: draw a centered explanatory panel
+            # instead of a blank canvas.
+            if (!is.null(state$message)) {
+                if (requireNamespace("ggplot2", quietly = TRUE)) {
+                    p <- ggplot2::ggplot() +
+                        ggplot2::annotate(
+                            "text", x = 0.5, y = 0.5,
+                            label = state$message,
+                            hjust = 0.5, vjust = 0.5, size = 5
+                        ) +
+                        ggplot2::xlim(0, 1) +
+                        ggplot2::ylim(0, 1) +
+                        ggplot2::theme_void()
+                    print(p)
+                    return(TRUE)
+                }
                 return(FALSE)
             }
 
@@ -1618,15 +1709,6 @@ diagnosticmetaClass <- R6::R6Class(
             }
         },
         
-        # TODO (cleanup): the `welcome` output is defined in .r.yaml and
-        # populated by .populateWelcome below, but every reachable code path
-        # in .run() calls `self$results$welcome$setVisible(FALSE)` (lines 85,
-        # 130, 154, 160 - there is no path where it is set visible). The
-        # output is dead. Either (a) remove the `welcome` entry from .r.yaml
-        # and delete .populateWelcome, or (b) reach a code path that sets it
-        # visible (e.g. when no required variables are selected, show the
-        # welcome panel instead of `instructions`).
-        #
         # TODO (UX): `self$results$instructions` is overloaded as: (a) onboarding
         # message when no data, (b) data-validation error sink (lines 151, 186),
         # (c) meta-regression-missing-covariate notice (.appendInstructionMessage),
@@ -1636,28 +1718,6 @@ diagnosticmetaClass <- R6::R6Class(
         # dedicated `notices` Html output (notice-pattern from waterfall.b.R)
         # would clarify the UX and align with the notices-migration TODO at
         # the top of `.run()`.
-        .populateWelcome = function() {
-            welcome_html <- paste0(
-                "<div class='jmv-welcome' style='padding: 20px; background: #f8f9fa; border-radius: 8px; margin: 10px 0;'>",
-                "<h3 style='color: #2c3e50; margin-top: 0;'>Diagnostic Test Meta-Analysis</h3>",
-                "<p style='margin-bottom: 15px;'>Welcome to the comprehensive meta-analysis tool for diagnostic test accuracy studies.</p>",
-                "<div style='background: white; padding: 15px; border-radius: 5px; border-left: 4px solid #3498db;'>",
-                "<h4 style='margin-top: 0; color: #3498db;'>Getting Started</h4>",
-                "<ol style='margin-bottom: 0;'>",
-                "<li><strong>Select Study Identifier:</strong> Choose the variable containing unique study names</li>",
-                "<li><strong>Define 2x2 Table:</strong> Select variables for TP, FP, FN, TN counts</li>",
-                "<li><strong>Choose Analysis Options:</strong> Enable bivariate analysis, proportional-hazards SROC, or publication bias assessment</li>",
-                "<li><strong>Configure Plots:</strong> Select forest plots, SROC curves, or funnel plots as needed</li>",
-                "</ol>",
-                "</div>",
-                "<div style='background: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 10px;'>",
-                "<strong>Quick Tip:</strong> Start with bivariate analysis for pooled sensitivity and specificity estimates",
-                "</div>",
-                "</div>"
-            )
-            self$results$welcome$setContent(welcome_html)
-        },
-
         .populateInstructions = function() {
             
             html <- "
@@ -1757,11 +1817,6 @@ diagnosticmetaClass <- R6::R6Class(
             "
             
             self$results$instructions$setContent(html)
-        },
-        
-        .initializeResultsTables = function() {
-            # Tables are now predefined in .r.yaml file
-            # No need to add columns dynamically
         },
         
         .populateIndividualStudies = function(meta_data) {
