@@ -22,6 +22,7 @@ items:
         - zscore_threshold
         - iqr_multiplier
         - confidence_level
+        - seed
 
     - name: plot
       title: Outlier Detection Plot
@@ -40,6 +41,7 @@ items:
         - zscore_threshold
         - iqr_multiplier
         - confidence_level
+        - seed
 
     - name: outlier_table
       title: Outlier Detection Results
@@ -54,6 +56,7 @@ items:
         - zscore_threshold
         - iqr_multiplier
         - confidence_level
+        - seed
 
     - name: method_comparison
       title: Method Comparison
@@ -66,6 +69,7 @@ items:
         - zscore_threshold
         - iqr_multiplier
         - confidence_level
+        - seed
 
     - name: exclusion_summary
       title: Exclusion Recommendations
@@ -80,6 +84,7 @@ items:
         - zscore_threshold
         - iqr_multiplier
         - confidence_level
+        - seed
 
     - name: interpretation
       title: Analysis Interpretation
@@ -90,6 +95,11 @@ items:
         - method_category
         - univariate_methods
         - multivariate_methods
+        - composite_threshold
+        - zscore_threshold
+        - iqr_multiplier
+        - confidence_level
+        - seed
 
 refs:
     - ClinicoPathJamoviModule
