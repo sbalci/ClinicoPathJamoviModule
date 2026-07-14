@@ -6,14 +6,14 @@ jrs: '1.1'
 items:
     - name: notices
       title: Important Information
-      type: Preformatted
+      type: Html
       clearWith:
         - var
         - showOutliers
-        - showDistribution
-        - showDuplicates
-        - showPatterns
+        - outlierTransform
         - clinicalValidation
+        - unitSystem
+        - cvMinMean
 
     - name: todo
       title: Getting Started
@@ -22,10 +22,20 @@ items:
     - name: qualityText
       title: Quality Assessment Summary
       type: Preformatted
+      clearWith:
+        - var
+        - showOutliers
+        - outlierTransform
+        - showPatterns
+        - clinicalValidation
+        - unitSystem
+        - cvMinMean
 
     - name: missingVals
       title: Missing Data Analysis
       type: Table
+      clearWith:
+        - var
       rows: 0
       columns:
         - name: metric
@@ -42,12 +52,20 @@ items:
       title: "Outlier Detection (Consensus: >=2 methods)"
       type: Html
       visible: (showOutliers)
+      clearWith:
+        - var
+        - showOutliers
+        - outlierTransform
 
     - name: outliers
       title: "Outlier Detection (Consensus: >=2 methods)"
       type: Table
       description: "Shows outliers detected by at least 2 of 3 methods: Z-score (|z|>3), IQR (1.5×IQR rule), Modified Z-score (MAD-based |z|>3.5). Points flagged by only 1 method are NOT shown."
       visible: (showOutliers)
+      clearWith:
+        - var
+        - showOutliers
+        - outlierTransform
       rows: 0
       columns:
         - name: rowNumber
@@ -77,6 +95,10 @@ items:
       type: Table
       description: "Summary of each outlier detection method. These are heuristic approaches; consider skewness and sample size when interpreting."
       visible: (showOutliers)
+      clearWith:
+        - var
+        - showOutliers
+        - outlierTransform
       rows: 0
       columns:
         - name: method
@@ -96,6 +118,11 @@ items:
       title: Distribution Analysis
       type: Table
       visible: (showDistribution)
+      clearWith:
+        - var
+        - showDistribution
+        - cvMinMean
+        - rareCategoryThreshold
       rows: 0
       columns:
         - name: metric
@@ -112,6 +139,9 @@ items:
       title: Duplicate Values
       type: Table
       visible: (showDuplicates)
+      clearWith:
+        - var
+        - showDuplicates
       rows: 0
       columns:
         - name: value
@@ -128,6 +158,11 @@ items:
       title: Data Patterns
       type: Table
       visible: (showPatterns)
+      clearWith:
+        - var
+        - showPatterns
+        - clinicalValidation
+        - unitSystem
       rows: 0
       columns:
         - name: pattern
@@ -144,16 +179,26 @@ items:
       title: Natural-Language Summary
       type: Html
       visible: (showSummary)
+      clearWith:
+        - var
+        - showOutliers
+        - outlierTransform
+        - clinicalValidation
+        - unitSystem
 
     - name: aboutAnalysis
       title: About This Analysis
       type: Html
       visible: (showAbout)
+      clearWith:
+        - var
 
     - name: caveatsAssumptions
       title: Caveats & Assumptions
       type: Html
       visible: (showCaveats)
+      clearWith:
+        - var
 
 refs:
     - ClinicoPathJamoviModule

@@ -6,62 +6,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     inherit = checkdataBase,
     private = list(
 
-        # Cache for performance optimization
-        .data_cache = NULL,
-
-        # Notice collection (single Preformatted plain-text output item; avoids the
-        # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
-        .noticeList = list(),
-
-        .addNotice = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type, title = title, content = content
-            )
-            private$.renderNotices()
-        },
-
-        .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                self$results$notices$setContent("")
-                return()
-            }
-            blocks <- vapply(private$.noticeList, function(notice) {
-                prefix <- switch(notice$type,
-                    ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
-                    WARNING = "WARNING: ", "")
-                paste0(prefix, notice$title, "\n", notice$content)
-            }, character(1))
-            self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-        },
-
-        # Initialize and manage data cache
-        .initializeCache = function(variable, var_name) {
-            cache_key <- paste0(var_name, "_", length(variable))
-
-            if (is.null(private$.data_cache) || private$.data_cache$key != cache_key) {
-                private$.data_cache <- list(
-                    key = cache_key,
-                    clean_var = variable[!is.na(variable)],
-                    freq_table = table(variable, useNA = "no"),
-                    n_total = length(variable),
-                    n_complete = sum(!is.na(variable)),
-                    n_missing = sum(is.na(variable)),
-                    n_unique = length(unique(variable[!is.na(variable)])),
-                    is_numeric = is.numeric(variable),
-                    is_categorical = is.factor(variable) || is.character(variable),
-                    variable_name = var_name
-                )
-                # Calculate derived metrics
-                private$.data_cache$missing_pct <- (private$.data_cache$n_missing / private$.data_cache$n_total) * 100
-                private$.data_cache$unique_pct <- ifelse(private$.data_cache$n_complete > 0,
-                                                        (private$.data_cache$n_unique / private$.data_cache$n_complete) * 100, 0)
-            }
-            return(private$.data_cache)
-        },
-
-        .clearCache = function() {
-            private$.data_cache <- NULL
-        },
+        # Track the outlier-detection transform applied in the most recent
+        # .populateOutlierAnalysis call, so .run's limitations text can annotate
+        # the scale (the helper-local `outlier_analysis` is not visible in .run).
+        .outlier_transform = "none",
 
         # Generate interpretation for missing data
         .interpretMissing = function(missing_pct) {
@@ -88,6 +36,18 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 return("Highly skewed")
             }
+        },
+
+        # Moment coefficient of skewness (g1) using consistent population
+        # moments; avoids mixing a population 3rd moment with the sample SD.
+        .computeSkewness = function(x) {
+            n <- length(x)
+            if (n < 3) return(0)
+            mu <- mean(x)
+            m2 <- mean((x - mu)^2)
+            m3 <- mean((x - mu)^3)
+            if (m2 <= 0) return(0)
+            m3 / m2^1.5
         },
         
         # Determine outlier severity
@@ -481,8 +441,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             category_analysis <- list()
             
-            # Category frequency analysis
+            # Category frequency analysis. Drop zero-count entries so unused
+            # factor levels do not force a false "severe imbalance" (min_freq=0)
+            # or get listed as rare categories.
             freq_table <- table(clean_var)
+            freq_table <- freq_table[freq_table > 0]
             n_categories <- length(freq_table)
             n_total <- length(clean_var)
             
@@ -726,18 +689,13 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 sd_val <- sd(clean_var)
                 mad_val <- mad(clean_var, constant = 1.4826)  # Robust spread
 
-                # Enhanced skewness calculation with interpretation
-                skewness <- ifelse(sd_val > 0 && length(clean_var) > 2,
-                    mean((clean_var - mean_val)^3) / sd_val^3, 0)
+                # Skewness via consistent population moments (g1)
+                skewness <- private$.computeSkewness(clean_var)
 
                 # FIXED: CV calculation with stability check
                 cv_min_mean <- self$options$cvMinMean
                 cv_valid <- abs(mean_val) >= cv_min_mean
                 cv <- ifelse(cv_valid && mean_val != 0, abs(sd_val / mean_val) * 100, NA)
-
-                # Kurtosis calculation (measure of tail heaviness)
-                kurtosis <- ifelse(sd_val > 0 && length(clean_var) > 3,
-                    mean((clean_var - mean_val)^4) / sd_val^4 - 3, 0)
 
                 self$results$distribution$addRow(rowKey="mean", values=list(
                     metric="Mean",
@@ -814,9 +772,12 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
 
             } else if (is_categorical && n_complete >= 1) {
-                # Distribution analysis for categorical variables
+                # Distribution analysis for categorical variables. Drop zero-count
+                # entries so unused factor levels do not inflate the category
+                # count or produce NaN entropy (0 * log2(0)).
                 clean_var <- variable[!is.na(variable)]
                 freq_table <- table(clean_var)
+                freq_table <- freq_table[freq_table > 0]
                 n_categories <- length(freq_table)
 
                 # Modal category and frequency
@@ -890,6 +851,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (is_numeric && n_complete >= 3) {
                 outlier_analysis <- private$.advancedOutlierDetection(variable)
                 outliers_found <- length(outlier_analysis$outlier_indices)
+                private$.outlier_transform <- outlier_analysis$transform_applied
 
                 # Show informative-only warning if small sample
                 if (!is.null(outlier_analysis$is_informative_only) && outlier_analysis$is_informative_only) {
@@ -1020,103 +982,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(outliers_found)
         },
 
-        # Populate missing data analysis
-        .populateMissingDataAnalysis = function(variable, n_total) {
-            n_missing <- sum(is.na(variable))
-            n_complete <- n_total - n_missing
-            missing_pct <- (n_missing / n_total) * 100
-            n_unique <- length(unique(variable[!is.na(variable)]))
-            unique_pct <- ifelse(n_complete > 0, (n_unique / n_complete) * 100, 0)
-
-            self$results$missingVals$addRow(rowKey="total_obs", values=list(
-                metric="Total Observations",
-                value=as.character(n_total),
-                interpretation=ifelse(n_total >= 100, "Adequate sample size",
-                                    ifelse(n_total >= 30, "Moderate sample size", "Small sample size"))
-            ))
-
-            self$results$missingVals$addRow(rowKey="missing_vals", values=list(
-                metric="Missing Values",
-                value=sprintf("%d (%.1f%%)", n_missing, missing_pct),
-                interpretation=private$.interpretMissing(missing_pct)
-            ))
-
-            self$results$missingVals$addRow(rowKey="complete_cases", values=list(
-                metric="Complete Cases",
-                value=sprintf("%d (%.1f%%)", n_complete, 100-missing_pct),
-                interpretation=ifelse(n_complete >= 0.9 * n_total, "Excellent completeness",
-                                    ifelse(n_complete >= 0.8 * n_total, "Good completeness",
-                                          ifelse(n_complete >= 0.7 * n_total, "Acceptable completeness", "Poor completeness")))
-            ))
-
-            self$results$missingVals$addRow(rowKey="unique_vals", values=list(
-                metric="Unique Values",
-                value=sprintf("%d (%.1f%%)", n_unique, unique_pct),
-                interpretation=ifelse(unique_pct > 95, "Very high variability",
-                                    ifelse(unique_pct > 50, "High variability",
-                                          ifelse(unique_pct > 10, "Moderate variability", "Low variability")))
-            ))
-
-            return(list(
-                n_missing = n_missing,
-                n_complete = n_complete,
-                missing_pct = missing_pct,
-                n_unique = n_unique,
-                unique_pct = unique_pct
-            ))
-        },
-
-        # Populate duplicate analysis
-        .populateDuplicateAnalysis = function(variable, n_complete) {
-            if (!self$options$showDuplicates || n_complete == 0) {
-                return()
-            }
-
-            clean_var <- variable[!is.na(variable)]
-            freq_table <- table(clean_var)
-            is_categorical <- is.factor(variable) || is.character(variable)
-
-            # Enhanced duplicate detection
-            if (is_categorical) {
-                # For categorical data, show all frequencies
-                freq_table_sorted <- sort(freq_table, decreasing = TRUE)
-                max_display <- min(20, length(freq_table_sorted))  # Limit display
-
-                for (i in 1:max_display) {
-                    value_name <- names(freq_table_sorted)[i]
-                    count <- freq_table_sorted[i]
-                    percentage <- round((count / n_complete) * 100, 1)
-
-                    self$results$duplicates$addRow(rowKey=paste0("cat_", i), values=list(
-                        value=value_name,
-                        count=as.integer(count),
-                        percentage=percentage
-                    ))
-                }
-            } else {
-                # For numeric data, only show values that appear more than once
-                duplicates <- freq_table[freq_table > 1]
-                if (length(duplicates) > 0) {
-                    duplicates_sorted <- sort(duplicates, decreasing = TRUE)
-                    max_display <- min(15, length(duplicates_sorted))
-
-                    for (i in 1:max_display) {
-                        value_name <- names(duplicates_sorted)[i]
-                        count <- duplicates_sorted[i]
-                        percentage <- round((count / n_complete) * 100, 1)
-
-                        self$results$duplicates$addRow(rowKey=paste0("dup_", i), values=list(
-                            value=value_name,
-                            count=as.integer(count),
-                            percentage=percentage
-                        ))
-                    }
-                }
-            }
-        },
-
         .run = function() {
-            private$.noticeList <- list()
+            private$.outlier_transform <- "none"
 
             # TODO (forward-looking): no `.()` wrapping anywhere in this file
             # (~2.2k LOC of clinical interpretation copy). Address in a
@@ -1133,6 +1000,9 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Set visibility for all items
             self$results$todo$setVisible(!variable_selected)
+            # `notices` (Important Information) is shown only once quality-threshold
+            # alerts are actually rendered near the end of a successful .run.
+            self$results$notices$setVisible(FALSE)
             self$results$qualityText$setVisible(variable_selected)
             self$results$missingVals$setVisible(variable_selected)
             # Outlier visibility will be controlled dynamically based on results
@@ -1197,6 +1067,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Render notices as HTML to avoid the jamovi protobuf serialization
             # failure triggered by dynamically inserted jmvcore::Notice objects.
             if (nrow(self$data) == 0) {
+                self$results$todo$setVisible(TRUE)
                 self$results$todo$setContent(
                     "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Error:</strong> Dataset contains no rows. Please provide data for quality assessment.</div>"
                 )
@@ -1212,6 +1083,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Handle validation errors
             if (!validation_results$is_valid) {
+                self$results$todo$setVisible(TRUE)
                 err_msg <- htmltools::htmlEscape(paste(validation_results$error_messages, collapse = "; "))
                 self$results$todo$setContent(sprintf(
                     "<div style='padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; color: #721c24; border-radius: 5px;'><strong>Data Validation Error:</strong> %s</div>",
@@ -1271,71 +1143,6 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use the refactored .populateDistributionAnalysis method
             if (self$options$showDistribution) {
                 private$.populateDistributionAnalysis(variable, is_numeric, is_categorical, n_complete)
-            }
-
-            # Keep categorical distribution for .run method (legacy support)
-            if (FALSE && self$options$showDistribution && is_categorical && n_complete >= 1) {
-                # Distribution analysis for categorical variables
-                clean_var <- variable[!is.na(variable)]
-                freq_table <- table(clean_var)
-                n_categories <- length(freq_table)
-
-                # Modal category and frequency
-                modal_category <- names(which.max(freq_table))
-                modal_freq <- max(freq_table)
-                modal_pct <- round(100 * modal_freq / n_complete, 1)
-
-                # IMPROVED: Category balance (entropy-based) with scale context
-                props <- as.numeric(freq_table) / n_complete
-                entropy <- -sum(props * log(props, base = 2))
-                max_entropy <- log(n_categories, base = 2)
-                balance_index <- ifelse(max_entropy > 0, entropy / max_entropy, 1)
-
-                # IMPROVED: Rare categories using configurable threshold
-                rare_threshold_pct <- self$options$rareCategoryThreshold
-                rare_threshold_n <- (rare_threshold_pct / 100) * n_complete
-                rare_categories <- sum(freq_table < rare_threshold_n)
-
-                self$results$distribution$addRow(rowKey="num_categories", values=list(
-                    metric="Number of Categories",
-                    value=n_categories,
-                    interpretation=ifelse(n_categories <= 5, "Manageable number of categories",
-                                        ifelse(n_categories <= 10, "Moderate number of categories",
-                                              "Many categories - consider grouping"))
-                ))
-
-                self$results$distribution$addRow(rowKey="modal_category", values=list(
-                    metric="Modal Category",
-                    value=paste0(modal_category, " (", modal_freq, ")"),
-                    interpretation=sprintf("Most frequent: %s (%.1f%%)", modal_category, modal_pct)
-                ))
-
-                self$results$distribution$addRow(rowKey="balance_index", values=list(
-                    metric="Category Balance Index (Entropy)",
-                    value=round(balance_index, 3),
-                    interpretation=sprintf("%.2f of %.2f max entropy; %s",
-                                          entropy, max_entropy,
-                                          ifelse(balance_index > 0.8, "well balanced",
-                                                ifelse(balance_index > 0.6, "moderately balanced", "imbalanced")))
-                ))
-
-                if (rare_categories > 0) {
-                    self$results$distribution$addRow(rowKey="rare_categories", values=list(
-                        metric="Rare Categories",
-                        value=rare_categories,
-                        interpretation=sprintf("%d categories with <%.1f%% frequency - may violate chi-squared assumptions (expected cell count \u{2265}5)",
-                                              rare_categories, rare_threshold_pct)
-                    ))
-                }
-
-                # Dominant category concern
-                if (modal_pct > 80) {
-                    self$results$distribution$addRow(rowKey="dominance_warning", values=list(
-                        metric="Dominance Warning",
-                        value=paste0(modal_pct, "%"),
-                        interpretation="One category dominates - consider data quality"
-                    ))
-                }
             }
 
             # Enhanced duplicate analysis with categorical support
@@ -1472,8 +1279,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Distribution shape pattern
                     if (length(clean_var) > 3) {
-                        skewness <- ifelse(sd(clean_var) > 0,
-                            mean((clean_var - mean(clean_var))^3) / sd(clean_var)^3, 0)
+                        skewness <- private$.computeSkewness(clean_var)
 
                         if (abs(skewness) > 1) {
                             skew_direction <- ifelse(skewness > 0, "right-skewed", "left-skewed")
@@ -1564,6 +1370,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Component 3: Variability assessment (max penalty: 25 points)
             variability_penalty <- 0
+            uniqueness_ratio <- 0  # defined up-front so an all-NA column (n_complete==0) does not crash the component description below
             if (n_complete > 0) {
                 uniqueness_ratio <- n_unique / n_complete
                 if (uniqueness_ratio < 0.01) {
@@ -1625,9 +1432,11 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Collect quality threshold notices as HTML for user-facing alerts.
-            # Rendered into the `todo` Html output rather than via
-            # jmvcore::Notice$new + insert(), which is a documented protobuf
-            # serialization risk (see docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md).
+            # Rendered into the always-available `notices` (Important Information)
+            # Html output rather than via jmvcore::Notice$new + insert(), which is
+            # a documented protobuf serialization risk (see
+            # docs/NOTICE_TO_HTML_CONVERSION_GUIDE.md). Note: `todo` is hidden once
+            # a variable is selected, so alerts must NOT be routed there.
             quality_notices_html <- list()
             .noticeBox <- function(level, msg) {
                 cfg <- switch(level,
@@ -1710,7 +1519,8 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
             if (length(rendered) > 0) {
-                self$results$todo$setContent(paste(rendered, collapse = ""))
+                self$results$notices$setContent(paste(rendered, collapse = ""))
+                self$results$notices$setVisible(TRUE)
             }
 
             # IMPROVED: Transparent heuristic quality summary with softened presentation
@@ -1800,7 +1610,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     NA
                 }
 
-                skewness <- ifelse(sd_val > 0, mean((clean_var - mean_val)^3) / sd_val^3, 0)
+                skewness <- private$.computeSkewness(clean_var)
 
                 quality_text <- paste0(quality_text, " DISTRIBUTION ASSESSMENT:\n")
                 quality_text <- paste0(quality_text, sprintf("\u{2022} Central Tendency: Mean = %.3f, Median = %.3f\n",
@@ -1940,19 +1750,15 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     quality_text <- paste0(quality_text, "  Single-method flags shown for early QC; manually verify before taking action.\n")
                     limitations_added <- TRUE
                 } else if (outliers_found > 0) {
-                    outlier_transform_note <- if (exists("outlier_analysis") && !is.null(outlier_analysis$transform_applied)) {
-                        if (outlier_analysis$transform_applied != "none") {
-                            paste0(" on ", outlier_analysis$transform_applied, "-transformed scale")
-                        } else {
-                            ""
-                        }
+                    transform_applied <- private$.outlier_transform %in% c("log", "sqrt")
+                    outlier_transform_note <- if (transform_applied) {
+                        paste0(" on ", private$.outlier_transform, "-transformed scale")
                     } else {
                         ""
                     }
                     quality_text <- paste0(quality_text, "\u{2022} OUTLIERS: Consensus detection", outlier_transform_note, "; assumes approximate normality.\n")
 
-                    if (exists("skewness") && abs(skewness) > 1 &&
-                        (!exists("outlier_analysis") || is.null(outlier_analysis$transform_applied) || outlier_analysis$transform_applied == "none")) {
+                    if (exists("skewness") && abs(skewness) > 1 && !transform_applied) {
                         quality_text <- paste0(quality_text, "  WARNING: Severe skewness (", round(skewness, 2), ") without transform may cause Z-score false positives.\n")
                     }
                     limitations_added <- TRUE
@@ -2020,7 +1826,7 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 summary_html <- "<div style='font-family: Georgia, serif; line-height: 1.8; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #2c5aa0;'>"
                 summary_html <- paste0(summary_html, "<h3 style='color: #2c5aa0; margin-top: 0;'>Data Quality Summary</h3>")
                 summary_html <- paste0(summary_html, "<p><strong>Variable:</strong> ", htmltools::htmlEscape(var_name), "</p>")
-                summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", quality_score, "/100 by heuristic scoring)</p>")
+                summary_html <- paste0(summary_html, "<p><strong>Overall Quality Grade:</strong> ", quality_grade, " (", max(0, min(100, quality_score)), "/100 by heuristic scoring)</p>")
 
                 # Sample characteristics
                 if (is_numeric) {
@@ -2093,10 +1899,10 @@ checkdataClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 about_html <- paste0(about_html, "<h4>Quality Grade Interpretation</h4>")
                 about_html <- paste0(about_html, "<ul>")
-                about_html <- paste0(about_html, "<li><strong>Grade A (85-100):</strong> Excellent quality - minimal issues, suitable for standard analysis</li>")
-                about_html <- paste0(about_html, "<li><strong>Grade B (70-84):</strong> Good quality - minor issues requiring documentation but analysis can proceed</li>")
-                about_html <- paste0(about_html, "<li><strong>Grade C (50-69):</strong> Quality concerns - significant issues requiring review and sensitivity analyses</li>")
-                about_html <- paste0(about_html, "<li><strong>Grade D (<50):</strong> Poor quality - major validity threats, consider data cleaning or re-collection</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade A (90-100):</strong> Excellent quality - minimal issues, suitable for standard analysis</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade B (80-89):</strong> Good quality - minor issues requiring documentation but analysis can proceed</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade C (70-79):</strong> Quality concerns - significant issues requiring review and sensitivity analyses</li>")
+                about_html <- paste0(about_html, "<li><strong>Grade D (<70):</strong> Poor quality - major validity threats, consider data cleaning or re-collection</li>")
                 about_html <- paste0(about_html, "</ul>")
 
                 about_html <- paste0(about_html, "<h4>Advanced Options</h4>")
