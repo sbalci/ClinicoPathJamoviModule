@@ -3,15 +3,16 @@ name: bayesianma
 jrs: '1.1'
 title: Analysis Results
 items:
+    # Always visible so welcome text, setup guidance, and validation/error
+    # messages (missing variables, insufficient data, run-time errors) actually
+    # surface. Empty Html renders nothing, so these stay blank when unused.
     - name: instructions
       title: Instructions
       type: Html
-      visible: false
 
     - name: todo
       title: Analysis Todo
       type: Html
-      visible: false
 
     - name: summary
       title: Bayesian Model Averaging Summary
@@ -23,6 +24,15 @@ items:
         - pred_vars
         - prior_type
         - mcmc_method
+        - mcmc_chains
+        - mcmc_iterations
+        - burn_in
+        - proposal_variance
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: metric
           title: Metric
@@ -42,6 +52,13 @@ items:
         - mcmc_iterations
         - mcmc_chains
         - prior_type
+        - burn_in
+        - proposal_variance
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: metric
           title: Metric
@@ -61,7 +78,16 @@ items:
       clearWith:
         - pred_vars
         - mcmc_iterations
+        - mcmc_chains
         - credible_level
+        - prior_type
+        - burn_in
+        - proposal_variance
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: variable
           title: Variable
@@ -102,7 +128,16 @@ items:
       clearWith:
         - pred_vars
         - mcmc_iterations
+        - mcmc_chains
         - variable_selection_threshold
+        - prior_type
+        - burn_in
+        - proposal_variance
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: variable
           title: Variable
@@ -132,7 +167,16 @@ items:
       visible: (show_top_models)
       clearWith:
         - mcmc_iterations
+        - mcmc_chains
         - model_selection_method
+        - prior_type
+        - burn_in
+        - proposal_variance
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: model_rank
           title: Rank
@@ -164,6 +208,10 @@ items:
         - mcmc_chains
         - mcmc_iterations
         - convergence_diagnostic
+        - burn_in
+        - proposal_variance
+        - prior_type
+        - seed_value
       columns:
         - name: parameter
           title: Parameter
@@ -191,6 +239,17 @@ items:
       clearWith:
         - model_selection_method
         - variable_selection_threshold
+        - occam_ratio
+        - mcmc_iterations
+        - mcmc_chains
+        - burn_in
+        - proposal_variance
+        - prior_type
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: selection_method
           title: Selection Method
@@ -221,7 +280,16 @@ items:
       visible: (uncertainty_quantification)
       clearWith:
         - mcmc_iterations
+        - mcmc_chains
         - credible_level
+        - burn_in
+        - proposal_variance
+        - prior_type
+        - prior_inclusion_prob
+        - beta_alpha
+        - beta_beta
+        - complexity_penalty
+        - seed_value
       columns:
         - name: quantity
           title: Quantity
@@ -250,6 +318,10 @@ items:
       clearWith:
         - prior_type
         - sensitivity_analysis
+        - prior_inclusion_prob
+        - mcmc_iterations
+        - mcmc_chains
+        - seed_value
       columns:
         - name: prior_specification
           title: Prior Specification
@@ -277,6 +349,10 @@ items:
       clearWith:
         - cross_validation
         - cv_folds
+        - mcmc_iterations
+        - mcmc_chains
+        - prior_type
+        - seed_value
       columns:
         - name: fold
           title: Fold
@@ -307,7 +383,12 @@ items:
       requiresData: true
       clearWith:
         - mcmc_iterations
+        - mcmc_chains
         - model_selection_method
+        - burn_in
+        - proposal_variance
+        - prior_type
+        - seed_value
 
     - name: inclusionProbsPlot
       title: Variable Inclusion Probabilities
@@ -319,6 +400,13 @@ items:
       clearWith:
         - pred_vars
         - variable_selection_threshold
+        - mcmc_iterations
+        - mcmc_chains
+        - burn_in
+        - proposal_variance
+        - prior_type
+        - prior_inclusion_prob
+        - seed_value
 
     - name: coefficientsPlot
       title: Posterior Coefficient Distributions
@@ -330,6 +418,12 @@ items:
       clearWith:
         - pred_vars
         - credible_level
+        - mcmc_iterations
+        - mcmc_chains
+        - burn_in
+        - proposal_variance
+        - prior_type
+        - seed_value
 
     - name: convergencePlot
       title: MCMC Convergence Diagnostics
@@ -341,6 +435,9 @@ items:
       clearWith:
         - mcmc_chains
         - mcmc_iterations
+        - burn_in
+        - proposal_variance
+        - seed_value
 
     - name: modelSpacePlot
       title: Model Space Exploration
@@ -351,7 +448,12 @@ items:
       requiresData: true
       clearWith:
         - mcmc_iterations
+        - mcmc_chains
         - prior_type
+        - burn_in
+        - proposal_variance
+        - prior_inclusion_prob
+        - seed_value
 
     - name: predictionsPlot
       title: Model-Averaged Predictions
@@ -363,6 +465,10 @@ items:
       clearWith:
         - prediction_intervals
         - credible_level
+        - mcmc_iterations
+        - mcmc_chains
+        - prior_type
+        - seed_value
 
     - name: explanations
       title: Bayesian Model Averaging Explanations
