@@ -44,6 +44,7 @@ items:
       type:  Html
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -78,6 +79,7 @@ items:
           type: number
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -104,6 +106,7 @@ items:
           type: text
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -116,7 +119,10 @@ items:
           - useHierarchy
           - eventPriority
           - intervalCensoring
+          - intervalStart
+          - intervalEnd
           - adminCensoring
+          - adminDate
 
     - name: outcomeViz
       title: 'Outcome Distribution'
@@ -127,6 +133,7 @@ items:
       visible: (visualization)
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -141,6 +148,7 @@ items:
       visible: (showNaturalSummary)
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - multievent
           - analysistype
@@ -164,6 +172,7 @@ items:
       measureType: nominal
       clearWith:
           - outcome
+          - patientID
           - outcomeLevel
           - multievent
           - analysistype

@@ -318,9 +318,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Main function to organize outcomes with enhanced functionality
-        .organizeOutcomes = function() {
-            # Get data and variables
-            labelled_data <- private$.getData()
+        .organizeOutcomes = function(labelled_data = NULL) {
+            # Get data and variables. Reuse the labelled data already computed in
+            # .run() when supplied, so janitor::clean_names + labelled::set_variable_labels
+            # (the full name-clean/label pass) runs once per execution instead of twice.
+            if (is.null(labelled_data)) {
+                labelled_data <- private$.getData()
+            }
             mydata <- labelled_data$mydata_labelled
             outcome_var <- labelled_data$outcome_var
             recurrence_var <- labelled_data$recurrence_var
@@ -338,6 +342,12 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Validation diagnostics - will be used if diagnostics are enabled
             diagnostics <- list()
+
+            # Track whether the optional operations actually ran, so the Summary text
+            # in .run() reports only what was truly applied (these silently skip when
+            # a patient ID / interval / admin-date variable is missing or no duplicate
+            # IDs exist). Prevents the report from overstating what was done.
+            applied <- list(hierarchy = FALSE, interval = FALSE, admin = FALSE)
 
             # Create a new outcome variable based on the analysis type
             if (!multievent) {
@@ -407,7 +417,19 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     if (is.null(outcomeLevel)) {
                         jmvcore::reject('Please select which value represents the event using the "Outcome Level" option.')
                     }
-                    
+
+                    # Verify the selected event level actually occurs in the data.
+                    # Without this, a stale level (e.g. left over after switching
+                    # variables, or a factor level with zero observations) silently
+                    # produces all-zero (no events) with no warning.
+                    factor_vals <- unique(as.character(outcome1[!is.na(outcome1)]))
+                    if (!as.character(outcomeLevel) %in% factor_vals) {
+                        jmvcore::reject(paste0(
+                            'Selected outcome level "', outcomeLevel,
+                            '" not found in data. Available values: ',
+                            paste(factor_vals, collapse = ", ")))
+                    }
+
                     # Convert to 1s and 0s based on the event level
                     mydata[["myoutcome"]] <- ifelse(
                         test = outcome1 == outcomeLevel,
@@ -428,6 +450,20 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # For these analyses, also consider recurrence/progression as events
                     recurrence_outcome <- mydata[[recurrence_var]]
                     recurrence_level <- self$options$recurrenceLevel
+
+                    # Guard: a recurrence/progression variable is selected but no event
+                    # level was chosen. Without this, `recurrence_outcome == NULL` yields
+                    # logical(0); ifelse -> length 0; pmax -> numeric(0); and the
+                    # assignment mydata[["myoutcome"]] <- numeric(0) errors with
+                    # "replacement has 0 rows, data has n".
+                    if (is.null(recurrence_level)) {
+                        jmvcore::reject(paste0(
+                            'A recurrence/progression variable is selected for ',
+                            toupper(analysistype),
+                            ' analysis, but no recurrence event level was chosen. Please ',
+                            'select the level that indicates recurrence/progression in the ',
+                            '"Event Level" option under the Recurrence/Progression Variable.'))
+                    }
 
                     # Mark recurrences as events (1)
                     recurrence_events <- ifelse(
@@ -454,6 +490,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Time to progression: only progression counts as event, deaths are censored
                     recurrence_outcome <- mydata[[recurrence_var]]
                     recurrence_level <- self$options$recurrenceLevel
+
+                    # Guard: recurrence variable selected but no progression event level
+                    # chosen -> logical(0) recode that crashes the assignment (see above).
+                    if (is.null(recurrence_level)) {
+                        jmvcore::reject(paste0(
+                            'A recurrence/progression variable is selected for TTP analysis, ',
+                            'but no progression event level was chosen. Please select the level ',
+                            'that indicates progression in the "Event Level" option under the ',
+                            'Recurrence/Progression Variable.'))
+                    }
 
                     # Only progression counts as an event
                     mydata[["myoutcome"]] <- ifelse(
@@ -587,6 +633,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "Event hierarchy applied (priority: %s) to %d patients with multiple records.",
                                 highest_priority, n_affected
                             )
+                            applied$hierarchy <- TRUE
                         }
                     }
                 }
@@ -606,6 +653,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     mydata[["interval_L"]] <- mydata[[start_var[1]]]
                     mydata[["interval_R"]] <- mydata[[end_var[1]]]
                     diagnostics$interval_censoring <- "Interval censoring enabled. Use Surv(interval_L, interval_R, myoutcome, type='interval2') in survival analysis."
+                    applied$interval <- TRUE
                 } else {
                     diagnostics$interval_censoring <- "Interval censoring: variables not found in dataset"
                 }
@@ -626,6 +674,7 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     # Store administrative censoring date for use in survival analysis
                     mydata[["admin_censor_date"]] <- mydata[[admin_date_var[1]]]
                     diagnostics$admin_censoring <- "Administrative censoring date stored. Apply in survival analysis: time_censored = pmin(time, admin_censor_date)"
+                    applied$admin <- TRUE
                 } else {
                     diagnostics$admin_censoring <- "Administrative censoring: date variable not found in dataset"
                 }
@@ -637,7 +686,8 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(list(
                 "df_outcome" = df_outcome,
                 "mydata" = mydata,
-                "diagnostics" = diagnostics
+                "diagnostics" = diagnostics,
+                "applied" = applied
             ))
         },
 
@@ -826,11 +876,13 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Insert notices before main processing
             private$.insertNotices()
 
-            # Organize outcomes
-            results <- private$.organizeOutcomes()
+            # Organize outcomes (reuse labelled_data computed above to avoid a second
+            # janitor::clean_names + labelled pass)
+            results <- private$.organizeOutcomes(labelled_data)
             df_outcome <- results$df_outcome
             mydata <- results$mydata
             diagnostics <- results$diagnostics
+            applied <- results$applied
 
             # Create summary text describing the recoding
             analysistype <- self$options$analysistype
@@ -841,12 +893,19 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Pre-escape OptionLevel factor labels (user-supplied via dropdown bound to a
             # column's factor levels) before HTML interpolation in the glue::glue blocks
             # below. glue does NOT HTML-escape interpolations.
-            esc_dod <- htmltools::htmlEscape(self$options$dod)
-            esc_dooc <- htmltools::htmlEscape(self$options$dooc)
-            esc_awd <- htmltools::htmlEscape(self$options$awd)
-            esc_awod <- htmltools::htmlEscape(self$options$awod)
-            esc_outcomeLevel <- htmltools::htmlEscape(self$options$outcomeLevel)
-            esc_recurrenceLevel <- htmltools::htmlEscape(self$options$recurrenceLevel)
+            #
+            # Coerce NULL/empty Level options to "" first: htmlEscape(NULL) returns
+            # character(0), and a length-0 interpolation collapses the whole glue::glue
+            # block to character(0), so self$results$summary$setContent() would receive
+            # an empty vector (blank summary) for valid already-0/1 numeric outcomes
+            # where no event level need be chosen.
+            .lvl <- function(x) if (is.null(x) || length(x) == 0) "" else as.character(x)
+            esc_dod <- htmltools::htmlEscape(.lvl(self$options$dod))
+            esc_dooc <- htmltools::htmlEscape(.lvl(self$options$dooc))
+            esc_awd <- htmltools::htmlEscape(.lvl(self$options$awd))
+            esc_awod <- htmltools::htmlEscape(.lvl(self$options$awod))
+            esc_outcomeLevel <- htmltools::htmlEscape(.lvl(self$options$outcomeLevel))
+            esc_recurrenceLevel <- htmltools::htmlEscape(.lvl(self$options$recurrenceLevel))
 
             if (self$options$multievent) {
                 if (analysistype == 'os') {
@@ -951,18 +1010,22 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            # Add information about special handling if applicable
-            if (self$options$useHierarchy) {
+            # Add information about special handling ONLY when it was actually applied.
+            # These operations silently skip when their prerequisites are missing (no
+            # patient ID / no duplicate IDs for hierarchy; interval/admin variables not
+            # found), so gate the report text on the applied flags returned by
+            # .organizeOutcomes() rather than on the checkbox alone.
+            if (isTRUE(applied$hierarchy)) {
                 summary_text <- paste(summary_text, glue::glue(
                     "<br><b>Event Hierarchy Applied:</b> If multiple events occur, priority is given to type {self$options$eventPriority}.<br>"
                 ))
             }
 
-            if (self$options$intervalCensoring) {
+            if (isTRUE(applied$interval)) {
                 summary_text <- paste(summary_text, "<br><b>Interval Censoring:</b> Events are known to occur within time intervals rather than at exact times.<br>")
             }
 
-            if (self$options$adminCensoring) {
+            if (isTRUE(applied$admin)) {
                 summary_text <- paste(summary_text, "<br><b>Administrative Censoring:</b> Observations are censored at a specified administrative date.<br>")
             }
 
@@ -1070,12 +1133,36 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 censor_desc <- if (analysistype == "ttp") "patients who died without progression or remain event-free"
                     else "patients who remain alive or event-free"
 
-                # Calculate frequencies
+                # Calculate frequencies. The denominator must be ALL non-missing coded
+                # records: for competing risks (codes 0/1/2) and multistate (0/1/2/3)
+                # the events (==1) plus censored (==0) counts do NOT sum to the total,
+                # so using n_events + n_censored silently drops the competing/other-cause
+                # states and reports percentages against a wrong total. For binary OS
+                # coding this is identical to the previous denominator.
                 n_events <- sum(mydata$myoutcome == 1, na.rm = TRUE)
                 n_censored <- sum(mydata$myoutcome == 0, na.rm = TRUE)
-                total_n <- n_events + n_censored
+                total_n <- sum(!is.na(mydata$myoutcome))
                 event_pct <- if (total_n > 0) round(n_events / total_n * 100, 1) else 0
                 censor_pct <- if (total_n > 0) round(n_censored / total_n * 100, 1) else 0
+
+                # For competing-risks / multistate coding, append an explicit per-state
+                # breakdown so the copy-ready text does not imply the non-event group
+                # accounts for every remaining patient.
+                state_breakdown <- ""
+                if (analysistype %in% c("compete", "multistate")) {
+                    state_tab <- table(mydata$myoutcome)
+                    state_lines <- vapply(names(state_tab), function(v) {
+                        cnt <- as.integer(state_tab[[v]])
+                        pct <- if (total_n > 0) round(cnt / total_n * 100, 1) else 0
+                        sprintf("%s: %d (%.1f%%)",
+                                htmltools::htmlEscape(private$.getOutcomeLabel(v, analysistype, self$options$multievent)),
+                                cnt, pct)
+                    }, character(1))
+                    state_breakdown <- paste0(
+                        " Full state breakdown (of ", total_n, " coded records): ",
+                        paste(state_lines, collapse = "; "), "."
+                    )
+                }
 
                 natural_summary <- sprintf(
                     "<div style='background-color: #e7f3ff; padding: 15px; border-radius: 8px; margin: 10px 0;'>
@@ -1083,14 +1170,16 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     The outcome variable '<b>%s</b>' was recoded for <b>%s</b> analysis.
                     Events (coded as 1) represent %s.
                     Non-events (coded as 0) represent %s.
-                    The recoded variable '<b>myoutcome</b>' contains <b>%d events (%.1f%%)</b> and <b>%d non-events (%.1f%%)</b>.
+                    The recoded variable '<b>myoutcome</b>' contains <b>%d events (%.1f%%)</b> and <b>%d non-events (%.1f%%)</b> out of %d coded records.%s
                     </div>",
                     htmltools::htmlEscape(self$options$outcome),
                     analysis_type_labels[[analysistype]],
                     event_desc,
                     censor_desc,
                     n_events, event_pct,
-                    n_censored, censor_pct
+                    n_censored, censor_pct,
+                    total_n,
+                    state_breakdown
                 )
 
                 self$results$naturalSummary$setContent(natural_summary)
