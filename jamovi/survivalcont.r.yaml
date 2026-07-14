@@ -67,6 +67,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name:  coxTable
       title: '`Cox Table- ${contexpl}`'
@@ -103,6 +112,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name:  tCoxtext2
       title: ''
@@ -123,6 +141,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     # - name:  mydataview_personTimeAnalysis
     #   title: mydataview_personTimeAnalysis
@@ -204,6 +231,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - cutp
+        - min_group_size
 
     - name: personTimeSummary
       title: 'Person-Time Summary'
@@ -223,6 +259,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - cutp
+        - min_group_size
 
 
 
@@ -288,6 +333,13 @@ items:
         - outcomeLevel
         - findcut
         - multiple_cutoffs
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
 
     - name: rmstSummary
       title: 'RMST Interpretation'
@@ -301,6 +353,13 @@ items:
         - outcomeLevel
         - findcut
         - multiple_cutoffs
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
 
 
 
@@ -353,6 +412,13 @@ items:
         - outcome
         - outcomeLevel
         - findcut
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
 
 
     # Residual Diagnostics Explanation
@@ -403,6 +469,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
 
@@ -457,6 +532,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: plot5
       title: '`Survival Plot - ${contexpl} Grouped with New Cut-Off`'
@@ -481,6 +565,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name:  medianSummary
       # title: Median Survival Summary and Table
@@ -502,6 +595,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
     - name:  medianTable
@@ -559,6 +661,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
 
@@ -581,6 +692,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
     - name:  survTable
@@ -631,6 +751,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: plot2
       title: '`Cumulative Events  - ${contexpl} Grouped with New Cut-Off`'
@@ -655,6 +784,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: plot3
       title: '`Cumulative Hazard  - ${contexpl} Grouped with New Cut-Off`'
@@ -679,6 +817,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: plot6
       title: '`KMunicate-Style Plot  - ${contexpl} Grouped with New Cut-Off`'
@@ -703,6 +850,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
       refs:
           - KMunicate
           - KMunicate2
@@ -758,6 +914,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - cutp
+        - min_group_size
 
 
 
@@ -790,6 +955,13 @@ items:
         - outcome
         - outcomeLevel
         - findcut
+        - uselandmark
+        - landmark
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
 
 
     - name: calculatedtime
@@ -815,6 +987,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: outcomeredefined
       title: Add Redefined Outcome to Data
@@ -839,6 +1020,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: calculatedcutoff
       title: Add Calculated Cut-off Group to Data
@@ -865,6 +1055,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
 
@@ -911,6 +1110,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: multipleMedianTable
       title: '`Median Survival by Multiple Cut-offs: ${contexpl}`'
@@ -957,6 +1165,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
     # Multiple Cutoffs Explanation
@@ -1021,6 +1238,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: plotMultipleCutoffs
       title: '`Multiple Cut-offs Visualization - ${contexpl}`'
@@ -1049,6 +1275,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: plotMultipleSurvival
       title: '`Survival Plot with Multiple Cut-offs - ${contexpl}`'
@@ -1077,6 +1312,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
     - name: calculatedmulticut
       title: Add Multiple Cut-off Groups to Data
@@ -1105,6 +1349,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - uselandmark
+          - landmark
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - cutp
+          - min_group_size
 
 
 
