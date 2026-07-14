@@ -13,6 +13,7 @@ items:
         - test_type
         - show_stats
         - effsize_type
+        - clinicalPreset
 
     - name: warnings
       title: Preset Overrides
@@ -39,6 +40,7 @@ items:
         - x_var
         - y_var
         - show_stats
+        - clinicalPreset
 
     - name: reportSummary
       title: Report Summary (Copy-Ready)
@@ -50,6 +52,7 @@ items:
         - show_stats
         - test_type
         - effsize_type
+        - clinicalPreset
 
     - name: aboutPanel
       title: About Ridge Plots
@@ -105,6 +108,13 @@ items:
         - plot_caption
         - x_label
         - y_label
+        - clinicalPreset
+        - show_fill_legend
+        - show_facet_legend
+        - add_sample_size
+        - add_density_values
+        - custom_annotations
+        - dpi
 
     - name: statistics
       title: Statistical Summary
@@ -149,6 +159,9 @@ items:
       clearWith:
         - x_var
         - y_var
+        - fill_var
+        - facet_var
+        - clinicalPreset
 
     - name: tests
       title: Statistical Tests
@@ -158,6 +171,9 @@ items:
       columns:
         - name: comparison
           title: Comparison
+          type: text
+        - name: method
+          title: Method
           type: text
         - name: statistic
           title: Statistic
@@ -176,11 +192,11 @@ items:
           type: number
           format: zto,dp:3
         - name: ci_lower
-          title: CI Lower
+          title: Effect CI Lower
           type: number
           format: zto,dp:3
         - name: ci_upper
-          title: CI Upper
+          title: Effect CI Upper
           type: number
           format: zto,dp:3
       clearWith:
@@ -189,6 +205,9 @@ items:
         - test_type
         - p_adjust_method
         - effsize_type
+        - fill_var
+        - facet_var
+        - clinicalPreset
 
     - name: interpretation
       title: Interpretation
@@ -198,6 +217,7 @@ items:
         - x_var
         - y_var
         - plot_type
+        - clinicalPreset
 
 refs:
     - ClinicoPathJamoviModule

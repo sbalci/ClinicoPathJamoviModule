@@ -33,6 +33,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # notice content must be plain text). ====
         .noticeList = list(),
 
+        # Collects per-comparison assumption-violation auto-switch messages so a
+        # single summarized notice is shown instead of one per pairwise comparison
+        # (which floods the panel with many groups). Reset in .generateTests.
+        .assumptionSwitches = character(0),
+
         .addNotice = function(type, title, content) {
             private$.noticeList[[length(private$.noticeList) + 1]] <- list(
                 type = type,
@@ -79,17 +84,24 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(NULL)
         },
 
+        # Auto-enable the fill legend when a fill variable is present but the user
+        # left legend_position on "none". Recorded as an override so the fill colours
+        # are explained in the plot. Because .applyClinicalPreset() resets
+        # private$overrides <- list(), this MUST be re-applied after every
+        # .applyClinicalPreset() call (both .init and .run) or the legend is hidden.
+        .applyAutoLegendOverride = function() {
+            if (!is.null(self$options$fill_var) &&
+                private$.option("legend_position") == "none") {
+                private$overrides$legend_position <- "right"
+            }
+        },
+
         .init = function() {
             # Apply presets first to ensure UI reflects overrides
             private$.applyClinicalPreset()
 
             # Auto-enable legend when fill variable is specified
-            # This ensures the fill colors are explained in the plot
-            if (!is.null(self$options$fill_var) &&
-                self$options$legend_position == "none") {
-                # Override legend_position to show the fill legend
-                private$overrides$legend_position <- "right"
-            }
+            private$.applyAutoLegendOverride()
 
             # Check if required variables are provided
             if (is.null(self$options$x_var) || is.null(self$options$y_var)) {
@@ -211,9 +223,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Check minimum sample size
             if (nrow(self$data) < private$.MIN_SAMPLE_SIZE) {
-                warnings <- c(warnings, paste0(.("Sample size (n="), nrow(self$data), 
-                                               .(") is below recommended minimum of "), private$.MIN_SAMPLE_SIZE, 
-                                               .(" for reliable ridge plot analysis")))
+                warnings <- c(warnings, jmvcore::format(
+                    .("Sample size (n={n}) is below recommended minimum of {min} for reliable ridge plot analysis"),
+                    n = nrow(self$data), min = private$.MIN_SAMPLE_SIZE))
             }
 
             # Check basic variability of X
@@ -238,9 +250,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             group_counts <- table(plot_data$y)
             small_groups <- group_counts[group_counts < private$.MIN_GROUP_SIZE]
             if (length(small_groups) > 0) {
-                warnings <- c(warnings, paste0(.("Groups with fewer than "), private$.MIN_GROUP_SIZE, 
-                                               .(" observations may show unreliable density estimates: "), 
-                                               paste(names(small_groups), collapse=", ")))
+                warnings <- c(warnings, jmvcore::format(
+                    .("Groups with fewer than {min} observations may show unreliable density estimates: {groups}"),
+                    min = private$.MIN_GROUP_SIZE, groups = paste(names(small_groups), collapse = ", ")))
             }
             
             # Check for extreme outliers that could affect interpretation
@@ -248,9 +260,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 z_scores <- abs(scale(plot_data$x))
                 outlier_prop <- sum(z_scores > 3, na.rm = TRUE) / length(z_scores)
                 if (outlier_prop > private$.MAX_OUTLIER_PROP) {
-                    warnings <- c(warnings, paste0(.("High proportion of extreme outliers detected ("), 
-                                                   round(outlier_prop * 100, 1), 
-                                                   .("%). Consider reviewing data quality or using robust statistical options.")))
+                    warnings <- c(warnings, jmvcore::format(
+                        .("High proportion of extreme outliers detected ({pct}%). Consider reviewing data quality or using robust statistical options."),
+                        pct = round(outlier_prop * 100, 1)))
                 }
             }
             
@@ -396,7 +408,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Add statistical test results if available
             if (has_stats && !is.null(self$results$tests) && self$results$tests$rowCount > 0) {
                 text_summary <- paste0(text_summary, "<p></p><p><strong>STATISTICAL COMPARISONS:</strong></p>")
-                test_type <- self$options$test_type
+                test_type <- private$.option("test_type")
                 test_name <- switch(test_type,
                     parametric = "parametric test",
                     nonparametric = "non-parametric test",
@@ -506,8 +518,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateAssumptionsPanel = function() {
             # Statistical assumptions and caveats for selected test type
-            test_type <- self$options$test_type
-            has_stats <- self$options$show_stats
+            test_type <- private$.option("test_type")
+            has_stats <- private$.option("show_stats")
 
             if (!has_stats) {
                 html <- paste0(
@@ -730,16 +742,14 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     paste(labels, collapse = "; "),
                     ")."
                 )
-                warning(msg)
 
-                # Surface in UI warnings without clobbering other content
-                current <- self$results$warnings$content
+                # Overwrite (do NOT prepend): this block is the only writer of the
+                # warnings panel and runs in both .init and .run, so prepending would
+                # duplicate the banner on every run. The former warning(msg) call was
+                # removed - R warnings are invisible to jamovi users and redundant
+                # with this panel.
                 html_msg <- paste0("<p style='color:#856404;'>", msg, "</p>")
-                if (is.null(current) || current == "") {
-                    self$results$warnings$setContent(html_msg)
-                } else {
-                    self$results$warnings$setContent(paste0(html_msg, current))
-                }
+                self$results$warnings$setContent(html_msg)
                 self$results$warnings$setVisible(TRUE)
             }
         },
@@ -753,10 +763,19 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # (jamovi may reuse the same R6 instance when options change)
             private$.noticeList <- list()
 
+            # Reset the preset-override banner so it cannot accumulate across runs
+            self$results$warnings$setContent("")
+
             # Apply clinical preset if selected (must be done before other processing)
             private$.applyClinicalPreset()
+            # Re-apply the fill-legend override wiped by .applyClinicalPreset()
+            private$.applyAutoLegendOverride()
 
-            # Validate inputs
+            # Validate inputs. jmvcore::reject() throws; the handler converts it to an
+            # ERROR notice and flags validation_failed so .run() actually halts. A bare
+            # return() in the handler would only exit the handler, letting .run continue
+            # with invalid data (coerced NA X, or a plotted non-categorical Y).
+            validation_failed <- FALSE
             input_warnings <- tryCatch({
                 private$.validateInputs()
             }, error = function(e) {
@@ -765,13 +784,16 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     title = "Input Validation Error",
                     content = e$message
                 )
-                return()
+                validation_failed <<- TRUE
+                NULL
             })
-            
+            if (validation_failed)
+                return()
+
             # Prepare data
             private$.checkpoint()
             plot_data <- private$.prepareData()
-            
+
             if (nrow(plot_data) == 0) {
                 private$.addNotice(
                     type = "ERROR",
@@ -780,7 +802,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 return()
             }
-            
+
             # Validate data and collect additional warnings
             data_warnings <- tryCatch({
                 private$.validateData(plot_data)
@@ -790,8 +812,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     title = "Data Validation Error",
                     content = e$message
                 )
-                return()
+                validation_failed <<- TRUE
+                NULL
             })
+            if (validation_failed)
+                return()
             
             # Display individual warnings as separate Notices
             all_warnings <- c(input_warnings, data_warnings)
@@ -872,8 +897,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             notice_msg <- paste0(
                 "Ridge plot analysis completed successfully \u2022 ",
                 n_obs, " observations across ", n_groups, " groups \u2022 ",
-                "Plot type: ", self$options$plot_type,
-                if(self$options$show_stats) paste0(" \u2022 Statistical tests: ", self$options$test_type) else ""
+                "Plot type: ", private$.option("plot_type"),
+                if(private$.option("show_stats")) paste0(" \u2022 Statistical tests: ", private$.option("test_type")) else ""
             )
             private$.addNotice(
                 type = "INFO",
@@ -966,7 +991,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            if (self$options$add_mean) {
+            if (private$.option("add_mean")) {
                 mean_data <- data %>%
                     group_by(y) %>%
                     summarise(mean_x = mean(x, na.rm = TRUE))
@@ -980,7 +1005,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
             
-            if (self$options$add_median) {
+            if (private$.option("add_median")) {
                 median_data <- data %>%
                     group_by(y) %>%
                     summarise(median_x = median(x, na.rm = TRUE))
@@ -1131,7 +1156,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         aes(fill = fill),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
-                        bandwidth = private$.calculateBandwidth(),
+                        bandwidth = private$.calculateBandwidth(data$x),
                         color = "black",
                         linewidth = 0.5,
                         show.legend = show_fill_legend
@@ -1142,7 +1167,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         aes(fill = y),
                         scale = self$options$scale,
                         alpha = self$options$alpha,
-                        bandwidth = private$.calculateBandwidth(),
+                        bandwidth = private$.calculateBandwidth(data$x),
                         color = "black",
                         linewidth = 0.5,
                         show.legend = FALSE
@@ -1157,7 +1182,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     fill = NA,
                     color = "black",
                     linewidth = 0.75,
-                    bandwidth = private$.calculateBandwidth()
+                    bandwidth = private$.calculateBandwidth(data$x)
                 )
             }
             
@@ -1171,7 +1196,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 aes(fill = after_stat(x)),
                 scale = self$options$scale,
                 gradient_lwd = 1.0,
-                bandwidth = private$.calculateBandwidth()
+                bandwidth = private$.calculateBandwidth(data$x)
             )
             
             # Apply gradient colors
@@ -1241,7 +1266,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     scale = self$options$scale,
                     alpha = self$options$alpha,
                     show.legend = show_fill_legend,
-                    bandwidth = private$.calculateBandwidth()
+                    bandwidth = private$.calculateBandwidth(data$x)
                 )
             } else {
                 p <- p + ggridges::geom_density_ridges(
@@ -1249,7 +1274,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     scale = self$options$scale,
                     alpha = self$options$alpha,
                     show.legend = FALSE,
-                    bandwidth = private$.calculateBandwidth()
+                    bandwidth = private$.calculateBandwidth(data$x)
                 )
             }
             
@@ -1259,17 +1284,32 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             return(p)
         },
         
-        .calculateBandwidth = function() {
-            if (self$options$bandwidth == "custom") {
+        .calculateBandwidth = function(x = NULL) {
+            method <- self$options$bandwidth
+            if (method == "custom") {
                 return(self$options$bandwidth_value)
-            } else if (self$options$bandwidth != "nrd0") {
-                return(self$options$bandwidth)
             }
-            return(NULL)  # Use default
+
+            # ggridges evaluates `3 * bandwidth` internally, so bandwidth must be
+            # NUMERIC. Returning the literal string "nrd"/"SJ" crashes the plot with
+            # "non-numeric argument to binary operator". Convert the named method to a
+            # pooled numeric bandwidth here (bw.SJ can fail on ties/few unique values,
+            # so fall back to bw.nrd). "nrd0" -> NULL lets geom_density_ridges use its
+            # own per-group default.
+            xv <- if (!is.null(x)) x[is.finite(x)] else numeric(0)
+            if (method == "nrd") {
+                if (length(xv) > 1) return(stats::bw.nrd(xv))
+                return(NULL)
+            } else if (method == "SJ") {
+                if (length(xv) > 1)
+                    return(tryCatch(stats::bw.SJ(xv), error = function(e) stats::bw.nrd(xv)))
+                return(NULL)
+            }
+            return(NULL)  # nrd0 -> use ggridges default
         },
         
         .applyColorPalette = function(p) {
-            palette <- self$options$color_palette
+            palette <- private$.option("color_palette")
             
             # Determine legend title
             legend_title <- if (!is.null(self$options$fill_var)) {
@@ -1488,11 +1528,17 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 if (length(assumption_violations) > 0) {
-                    # Auto-suggest and switch to nonparametric for robustness
-                    private$.addNotice('WARNING', 'Assumption Check Failed', paste0(
-                        "Assumption check failed: ", paste(assumption_violations, collapse = "; "),
-                        " - Using Wilcoxon test instead of t-test (auto-suggested)."
-                    ))
+                    # Auto-suggest and switch to nonparametric for robustness.
+                    # Accumulate one line per comparison; a single summarized notice is
+                    # emitted in .generateTests (avoids flooding with many groups).
+                    private$.assumptionSwitches <- c(
+                        private$.assumptionSwitches,
+                        paste0(
+                            group1, " vs ", group2,
+                            if (stratum_label != "") paste0(" (", stratum_label, ")") else "",
+                            ": ", paste(assumption_violations, collapse = "; ")
+                        )
+                    )
 
                     test_result <- wilcox.test(data1, data2, conf.int = TRUE)
                     statistic <- test_result$statistic
@@ -1699,8 +1745,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             d2 <- data[indices[indices > n1]]
                             private$.calculateCliffsDelta(d1, d2)
                         }
+                        # strata= resamples WITHIN each group so per-replicate group
+                        # sizes stay fixed at (n1, n2). Without it boot draws a random
+                        # group split (possibly empty -> NA), giving an invalid CI.
                         boot_result <- tryCatch({
-                            boot::boot(c(data1, data2), boot_fn, R = 1000)
+                            boot::boot(c(data1, data2), boot_fn, R = 1000,
+                                       strata = factor(rep(1:2, c(n1, n2))))
                         }, error = function(e) NULL)
 
                         if (!is.null(boot_result)) {
@@ -1777,14 +1827,12 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check 3: Look for variables with "patient", "subject", "id" in the data
             # (checked in parent data, not just plot_data)
-            # TODO (correctness): the grepl pattern below is a naive substring match - 
-            # "id" matches inside "candidate", "android", "video"; "case" matches inside
-            # "lowercase", "phasecase". Use word-boundary anchors:
-            #   grepl("\\b(patient|subject|id|case)\\b", col_names)
-            # to reduce false positives in the heuristic.
+            # Word-boundary anchors avoid substring false positives: a bare
+            # "patient|subject|id|case" matched inside "candidate", "android",
+            # "lowercase". \\b(...)\\b requires the token to stand alone.
             if (!is.null(self$data)) {
                 col_names <- tolower(names(self$data))
-                has_id_vars <- any(grepl("patient|subject|id|case", col_names))
+                has_id_vars <- any(grepl("\\b(patient|subject|id|case)\\b", col_names))
 
                 if (has_id_vars && total_obs > 50) {
                     return(paste0(
@@ -1801,7 +1849,8 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Helper method: Adjust p-values handling NA correctly
         .adjustPValues = function(p_values) {
-            if (self$options$p_adjust_method == "none") {
+            p_adjust_method <- private$.option("p_adjust_method")
+            if (p_adjust_method == "none") {
                 return(p_values)
             }
 
@@ -1817,7 +1866,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Adjust only non-NA p-values
             adjusted <- p_values
             adjusted[non_na_indices] <- p.adjust(p_values[non_na_indices],
-                                                 method = self$options$p_adjust_method)
+                                                 method = p_adjust_method)
 
             return(adjusted)
         },
@@ -1831,6 +1880,10 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rowKey = row_key,
                 values = list(
                     comparison = test_result$comparison,
+                    # Method label disambiguates the shared Statistic column: a Bayesian
+                    # BF10, a Yuen statistic, an auto-switched Wilcoxon and a t all land
+                    # in the same numeric column, so name the test that produced it.
+                    method = test_result$test_method,
                     statistic = test_result$statistic,
                     p_value = test_result$p_value,
                     p_adjusted = adjusted_p,
@@ -1843,6 +1896,9 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateTests = function(data) {
             tests_table <- self$results$tests
+
+            # Reset the assumption-switch accumulator for this run
+            private$.assumptionSwitches <- character(0)
 
             # Build stratification variables (facet and fill if present)
             strata_vars <- c()
@@ -1939,8 +1995,25 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     }
                 }
             }
+
+            # Emit a SINGLE summarized notice for all assumption-based auto-switches
+            # (rather than one notice per pairwise comparison).
+            if (length(private$.assumptionSwitches) > 0) {
+                n_switch <- length(private$.assumptionSwitches)
+                private$.addNotice(
+                    'WARNING',
+                    'Assumption Check Failed',
+                    paste0(
+                        n_switch,
+                        if (n_switch == 1) " comparison was" else " comparisons were",
+                        " auto-switched from t-test to Wilcoxon due to assumption",
+                        " violations (normality/variance): ",
+                        paste(private$.assumptionSwitches, collapse = " | ")
+                    )
+                )
+            }
         },
-        
+
         .generateInterpretation = function(data) {
             # Generate clinical summary first
             clinical_summary <- private$.generateClinicalSummary(data, private$.option("show_stats"))
@@ -2023,18 +2096,11 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .calculateCliffsDelta = function(x, y) {
-            # Prefer effectsize::cliff_delta when available for efficiency and validation
-            if (requireNamespace("effectsize", quietly = TRUE)) {
-                res <- effectsize::cliff_delta(x, y, ci = NULL, alternative = "two.sided", distribution = "continuous")
-                if (!is.null(res$CLES)) {
-                    return(as.numeric(res$CLES * 2 - 1))  # convert common language effect size to delta scale
-                }
-                if (!is.null(res$delta)) {
-                    return(as.numeric(res$delta))
-                }
-            }
-
-            # Fallback manual computation: proportion of pairs where x > y minus proportion where x < y
+            # Manual computation of Cliff's Delta: proportion of pairs where x > y
+            # minus proportion where x < y. (effectsize has no `cliff_delta` export -
+            # the actual name is `cliffs_delta` with a different result API - so the
+            # former effectsize call always threw and fell through to NA. This
+            # dependency-free definition is exact and used directly.)
             x <- x[!is.na(x)]
             y <- y[!is.na(y)]
             n1 <- length(x)
