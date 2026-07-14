@@ -12,6 +12,8 @@ items:
           - target
           - weight
           - group
+          - aggregateEdges
+          - directed
 
     - name: instructions
       title: Instructions
@@ -26,6 +28,8 @@ items:
           - target
           - weight
           - group
+          - aggregateEdges
+          - directed
 
     - name: plot
       title: Arc Diagram
@@ -34,6 +38,29 @@ items:
       height: 400
       renderFun: .plot
       requiresData: true
+      clearWith:
+          - source
+          - target
+          - weight
+          - group
+          - showNodes
+          - nodeSize
+          - nodeSizeValue
+          - sortNodes
+          - sortDecreasing
+          - horizontal
+          - arcWidth
+          - arcWidthValue
+          - arcTransparency
+          - directed
+          - aggregateEdges
+          - weightMode
+          - colorByGroup
+          - arcColorMode
+          - showLegend
+          - labelSize
+          - plotTitle
+          - analysisPreset
 
     - name: networkStats
       title: Network Statistics
