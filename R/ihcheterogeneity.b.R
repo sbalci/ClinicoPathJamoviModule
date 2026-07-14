@@ -18,6 +18,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
         .repro_stats = NULL,
 
+        # Accumulators for data-quality warnings and sampling-strategy notes so
+        # they are merged into the final interpretation instead of being
+        # clobbered (Html $state is always NULL and cannot be read back).
+        .warnings_html = NULL,
+        .strategy_notes = NULL,
+
         .calculateRobustCV = function(values) {
             # Robust CV calculation with safeguards against division by near-zero means
             values <- values[!is.na(values)]
@@ -56,6 +62,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     <p style='margin-bottom: 0;'><em>Configure thresholds and options in the left panel.</em></p>
                 </div>
             ")
+
+            # Hide the welcome screen whenever any regional measurement is
+            # supplied. The plural 'biopsies' list cannot be referenced from the
+            # r.yaml 'visible' expression, so drive visibility here instead.
+            self$results$welcome$setVisible(
+                is.null(self$options$biopsy1) &&
+                (is.null(self$options$biopsies) || length(self$options$biopsies) == 0)
+            )
 
             if (is.null(self$data)) {
                 self$results$interpretation$setContent(
@@ -110,9 +124,6 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 return()
             }
             
-            # Initialize results tables
-            private$.initializeTables()
-            
             # Set conditional visibility based on options and analysis type
             analysis_type <- self$options$analysis_type
             show_plots <- self$options$show_variability_plots ||
@@ -133,7 +144,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                            analysis_type == "variability" ||
                            analysis_type == "comprehensive"
 
-            self$results$poweranalysistable$setVisible(show_power)
+            # Gate the power table on a reference being supplied: power analysis
+            # returns nothing for inter-regional (no-reference) studies, so it
+            # would otherwise show an empty-but-visible table by default.
+            self$results$poweranalysistable$setVisible(show_power && !is.null(self$options$wholesection))
             self$results$variancetable$setVisible(show_variance)
             self$results$spatialanalysistable$setVisible(!is.null(self$options$spatial_id))
 
@@ -176,8 +190,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
 
             # Handle multiple regional measurement columns
-            biopsy_data <- private$.extractRegionalData(data)
-            
+            regional <- private$.extractRegionalData(data)
+            biopsy_data <- regional$data
+            keep_rows <- regional$keep
+
+            # Align the reference vector with the rows retained after dropping
+            # all-NA regional cases, so positional indexing, cbind() and
+            # complete.cases() stay row-aligned with biopsy_data.
+            if (!is.null(whole_section)) {
+                whole_section <- whole_section[keep_rows]
+            }
+
             # Enhanced data quality checks with specific warnings
             min_cases_needed <- 5
             has_reference <- !is.null(whole_section)
@@ -200,12 +223,12 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     "</ul>",
                     "</div>"
                 )
-                current_content <- self$results$interpretation$state
-                if (!is.null(current_content)) {
-                    self$results$interpretation$setContent(paste0(warning_html, current_content))
-                } else {
-                    self$results$interpretation$setContent(warning_html)
-                }
+                # Store for merging into the final interpretation. Html $state is
+                # always NULL, and .generateHeterogeneityInterpretation() would
+                # otherwise overwrite any setContent() issued here.
+                private$.warnings_html <- warning_html
+            } else {
+                private$.warnings_html <- NULL
             }
             
             # Get optional spatial data
@@ -213,7 +236,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             if (!is.null(self$options$spatial_id)) {
                 spatial_id_var <- self$options$spatial_id
                 if (spatial_id_var %in% names(data)) {
-                    spatial_regions <- data[[spatial_id_var]]
+                    # Align with the retained biopsy rows (see keep_rows above)
+                    spatial_regions <- data[[spatial_id_var]][keep_rows]
                 } else {
                     # Handle case where spatial_id is selected but not in data.
                     # reject() content renders as plain text (jamovi escapes it), so no htmlEscape needed.
@@ -237,72 +261,6 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.generateHeterogeneityInterpretation(whole_section, biopsy_data, study_design)
         },
         
-        .initializeTables = function() {
-            # Reproducibility metrics table
-            repro_table <- self$results$reproducibilitytable
-            repro_table$addColumn(name = 'metric', title = 'Reproducibility Metric', type = 'text')
-            repro_table$addColumn(name = 'value', title = 'Value', type = 'number', format = 'zto')
-            repro_table$addColumn(name = 'ci_lower', title = '95% CI Lower', type = 'number', format = 'zto')
-            repro_table$addColumn(name = 'ci_upper', title = '95% CI Upper', type = 'number', format = 'zto')
-            repro_table$addColumn(name = 'interpretation', title = 'Clinical Interpretation', type = 'text')
-            
-            # Sampling bias table
-            bias_table <- self$results$samplingbiastable
-            bias_table$addColumn(name = 'comparison', title = 'Comparison', type = 'text')
-            bias_table$addColumn(name = 'mean_diff', title = 'Mean Difference', type = 'number', format = 'zto')
-            bias_table$addColumn(name = 'p_value', title = 'P-value', type = 'number', format = 'zto,pvalue')
-            bias_table$addColumn(name = 'effect_size', title = 'Effect Size (Cohen\'s d)', type = 'number', format = 'zto')
-            bias_table$addColumn(name = 'clinical_impact', title = 'Clinical Impact', type = 'text')
-            
-            # Variance components table
-            variance_table <- self$results$variancetable
-            variance_table$addColumn(name = 'component', title = 'Variance Component', type = 'text')
-            variance_table$addColumn(name = 'variance', title = 'Variance', type = 'number', format = 'zto')
-            variance_table$addColumn(name = 'percentage', title = 'Percentage (%)', type = 'number', format = 'zto')
-            variance_table$addColumn(name = 'contribution', title = 'Contribution to Total Variance', type = 'text')
-            
-            # Power analysis table (if enabled)
-            if (self$options$power_analysis) {
-                power_table <- self$results$poweranalysistable
-                power_table$addColumn(name = 'scenario', title = 'Analysis Scenario', type = 'text')
-                power_table$addColumn(name = 'effect_size', title = 'Expected Effect Size', type = 'number', format = 'zto')
-                power_table$addColumn(name = 'power', title = 'Statistical Power', type = 'number', format = 'pc')
-                power_table$addColumn(name = 'required_n', title = 'Required Sample Size', type = 'integer')
-                power_table$addColumn(name = 'recommendation', title = 'Recommendation', type = 'text')
-            }
-            
-            # Spatial analysis table (if spatial data provided)
-            if (!is.null(self$options$spatial_id)) {
-                spatial_table <- self$results$spatialanalysistable
-                spatial_table$addColumn(name = 'region', title = 'Spatial Region', type = 'text')
-                spatial_table$addColumn(name = 'n_cases', title = 'Cases', type = 'integer')
-                spatial_table$addColumn(name = 'mean_value', title = 'Mean Value', type = 'number', format = 'zto')
-                spatial_table$addColumn(name = 'cv_percent', title = 'CV (%)', type = 'number', format = 'zto')
-                spatial_table$addColumn(name = 'heterogeneity_level', title = 'Heterogeneity Level', type = 'text')
-            }
-
-            # Compartment comparison table (if enabled)
-            if (self$options$compareCompartments && !is.null(self$options$spatial_id)) {
-                comp_table <- self$results$compartmentComparison
-                comp_table$addColumn(name = 'metric', title = 'Heterogeneity Metric', type = 'text')
-                comp_table$addColumn(name = 'compartment', title = 'Compartment', type = 'text')
-                comp_table$addColumn(name = 'value', title = 'Value', type = 'number', format = 'zto')
-                comp_table$addColumn(name = 'ci_lower', title = '95% CI Lower', type = 'number', format = 'zto')
-                comp_table$addColumn(name = 'ci_upper', title = '95% CI Upper', type = 'number', format = 'zto')
-                comp_table$addColumn(name = 'comparison', title = 'Comparison to Other Compartments', type = 'text')
-            }
-
-            # Compartment tests table (if enabled)
-            if (self$options$compartmentTests && !is.null(self$options$spatial_id)) {
-                test_table <- self$results$compartmentTests
-                test_table$addColumn(name = 'test_type', title = 'Test', type = 'text')
-                test_table$addColumn(name = 'statistic', title = 'Statistic', type = 'number', format = 'zto')
-                test_table$addColumn(name = 'df', title = 'DF', type = 'integer')
-                test_table$addColumn(name = 'p_value', title = 'p-value', type = 'number', format = 'zto,pvalue')
-                test_table$addColumn(name = 'interpretation', title = 'Interpretation', type = 'text')
-            }
-        },
-        
         .extractRegionalData = function(data) {
             # Extract biopsy measurements from multiple columns efficiently
             # Collect individual biopsy columns
@@ -320,8 +278,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Remove rows with all missing biopsy values
             complete_rows <- rowSums(!is.na(biopsy_data)) > 0
             biopsy_data <- biopsy_data[complete_rows, , drop = FALSE]
-            
-            return(biopsy_data)
+
+            # Return the retained-row mask so callers can align the reference and
+            # spatial vectors with the filtered biopsy rows.
+            return(list(data = biopsy_data, keep = complete_rows))
         },
         
         .performHeterogeneityAnalysis = function(whole_section, biopsy_data, spatial_regions = NULL, study_design = "reference_based") {
@@ -417,15 +377,10 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     "Consider documenting sampling methodology for future analyses.", sep="")
             }
 
-            # Apply sampling strategy interpretation if needed
-            if (nchar(interpretation_text) > 0) {
-                current_interp <- self$results$interpretation$state
-                if (is.null(current_interp)) {
-                    self$results$interpretation$setContent(interpretation_text)
-                } else {
-                    self$results$interpretation$setContent(paste(current_interp, interpretation_text, sep=""))
-                }
-            }
+            # Store sampling-strategy / analysis-type notes for inclusion in the
+            # final interpretation. Html $state is always NULL and a setContent()
+            # here would be clobbered by .generateHeterogeneityInterpretation().
+            private$.strategy_notes <- if (nchar(interpretation_text) > 0) interpretation_text else NULL
         },
         
         .analyzeReproducibility = function(whole_section, biopsy_data, correlation_threshold = 0.80, cv_threshold = 20.0, study_design = "reference_based") {
@@ -435,6 +390,17 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
             # Initialize correlation variables
             correlations <- c()
+
+            # Compute the inter-region correlation matrix once and reuse it for
+            # both the inter-regional correlations and the mean inter-biopsy
+            # reproducibility metric below.
+            inter_biopsy_corr <- numeric(0)
+            if (n_biopsies >= 2) {
+                biopsy_cor_matrix <- cor(biopsy_data, use = "pairwise.complete.obs", method = "spearman")
+                upper_tri_indices <- which(upper.tri(biopsy_cor_matrix), arr.ind = TRUE)
+                inter_biopsy_corr <- biopsy_cor_matrix[upper_tri_indices]
+                inter_biopsy_corr <- inter_biopsy_corr[!is.na(inter_biopsy_corr)]
+            }
 
             if (has_reference) {
                 # Reference-based study: correlations between reference and each regional measurement
@@ -451,15 +417,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     correlations <- rep(NA, n_biopsies)
                 }
             } else {
-                # Inter-regional study: use mean of all pairwise correlations between regions
-                if (n_biopsies >= 2) {
-                    cor_matrix <- cor(biopsy_data, use = "pairwise.complete.obs", method = "spearman")
-                    upper_tri_indices <- which(upper.tri(cor_matrix), arr.ind = TRUE)
-                    correlations <- cor_matrix[upper_tri_indices]
-                    correlations <- correlations[!is.na(correlations)]
-                } else {
-                    correlations <- NA
-                }
+                # Inter-regional study: reuse the precomputed pairwise correlations
+                correlations <- if (n_biopsies >= 2) inter_biopsy_corr else NA
             }
             
             # Calculate ICC with proper validation and fallback
@@ -475,34 +434,27 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             icc_lower <- icc_result$lower
             icc_upper <- icc_result$upper
             
-            # Inter-regional reproducibility (vectorized approach)
-            if (n_biopsies >= 2) {
-                # Use vectorized correlation matrix calculation
-                cor_matrix <- cor(biopsy_data, use = "pairwise.complete.obs", method = "spearman")
-
-                # Extract upper triangle correlations efficiently
-                upper_tri_indices <- which(upper.tri(cor_matrix), arr.ind = TRUE)
-                inter_biopsy_corr <- cor_matrix[upper_tri_indices]
-
-                # Remove NAs and calculate mean
-                inter_biopsy_corr <- inter_biopsy_corr[!is.na(inter_biopsy_corr)]
-                mean_inter_biopsy <- if (length(inter_biopsy_corr) > 0) mean(inter_biopsy_corr) else NA
-            } else {
-                mean_inter_biopsy <- NA
-            }
+            # Inter-regional reproducibility (reuse the precomputed matrix)
+            mean_inter_biopsy <- if (length(inter_biopsy_corr) > 0) mean(inter_biopsy_corr) else NA
             
             # Populate reproducibility table
             repro_table <- self$results$reproducibilitytable
             
-            repro_table$addRow(rowKey = 1, values = list(
-                metric = "Mean Regional-Reference Correlation",
-                value = mean(correlations, na.rm = TRUE),
-                ci_lower = NA,
-                ci_upper = NA,
-                interpretation = ifelse(mean(correlations, na.rm = TRUE) >= correlation_threshold, 
-                                       "Good representativeness", "Limited representativeness")
-            ))
-            
+            # Row 1 is meaningful only when a reference is supplied. In the
+            # inter-regional design mean(correlations) is the same mean pairwise
+            # inter-region correlation already reported as row 3, so skip it here
+            # to avoid a mislabelled ("Regional-Reference") duplicate.
+            if (has_reference) {
+                repro_table$addRow(rowKey = 1, values = list(
+                    metric = "Mean Regional-Reference Correlation",
+                    value = mean(correlations, na.rm = TRUE),
+                    ci_lower = NA,
+                    ci_upper = NA,
+                    interpretation = ifelse(mean(correlations, na.rm = TRUE) >= correlation_threshold,
+                                           "Good representativeness", "Limited representativeness")
+                ))
+            }
+
             if (!is.na(icc_value)) {
                 repro_table$addRow(rowKey = 2, values = list(
                     metric = "ICC(3,1) - All Methods",
@@ -570,16 +522,22 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                         # Apply Hedges' correction for small samples (n < 50)
                         if (n_pairs < 50) {
-                            correction_factor <- 1 - (3 / (4 * n_pairs - 9))
+                            correction_factor <- 1 - (3 / (4 * n_pairs - 5))
                             cohens_d <- cohens_d_raw * correction_factor
                         } else {
                             cohens_d <- cohens_d_raw
                         }
                         
-                        # Clinical impact assessment
-                        relative_bias <- abs(mean_diff) / mean(ws_complete) * 100
-                        clinical_impact <- ifelse(relative_bias <= 5, "Minimal (<5%)", 
-                                                ifelse(relative_bias <= 15, "Moderate (5-15%)", "Large (>15%)"))
+                        # Clinical impact assessment (guard near-zero/negative reference mean)
+                        ref_mean <- mean(ws_complete)
+                        if (is.na(ref_mean) || abs(ref_mean) < 1e-6) {
+                            relative_bias <- NA_real_
+                            clinical_impact <- "Not assessable (reference mean near zero)"
+                        } else {
+                            relative_bias <- abs(mean_diff) / abs(ref_mean) * 100
+                            clinical_impact <- ifelse(relative_bias <= 5, "Minimal (<5%)",
+                                                    ifelse(relative_bias <= 15, "Moderate (5-15%)", "Large (>15%)"))
+                        }
                         
                         bias_table$addRow(rowKey = row_key, values = list(
                             comparison = paste("Region", i, "vs Reference"),
@@ -611,15 +569,22 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
                         # Apply Hedges' correction for small samples
                         if (n_pairs < 50) {
-                            correction_factor <- 1 - (3 / (4 * n_pairs - 9))
+                            correction_factor <- 1 - (3 / (4 * n_pairs - 5))
                             overall_d <- overall_d_raw * correction_factor
                         } else {
                             overall_d <- overall_d_raw
                         }
                         
-                        relative_bias <- abs(overall_diff) / mean(whole_section[complete_pairs]) * 100
-                        clinical_impact <- ifelse(relative_bias <= 5, "Minimal (<5%)", 
-                                                ifelse(relative_bias <= 15, "Moderate (5-15%)", "Large (>15%)"))
+                        # Guard near-zero/negative reference mean before relative bias
+                        ref_mean <- mean(whole_section[complete_pairs])
+                        if (is.na(ref_mean) || abs(ref_mean) < 1e-6) {
+                            relative_bias <- NA_real_
+                            clinical_impact <- "Not assessable (reference mean near zero)"
+                        } else {
+                            relative_bias <- abs(overall_diff) / abs(ref_mean) * 100
+                            clinical_impact <- ifelse(relative_bias <= 5, "Minimal (<5%)",
+                                                    ifelse(relative_bias <= 15, "Moderate (5-15%)", "Large (>15%)"))
+                        }
                         
                         bias_table$addRow(rowKey = row_key, values = list(
                             comparison = "Mean of Regions vs Reference",
@@ -742,7 +707,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             
             if (sum(complete_pairs) >= 3) {
                 # Observed correlation effect size
-                obs_correlation <- cor(whole_section[complete_pairs], biopsy_means[complete_pairs])
+                obs_correlation <- cor(whole_section[complete_pairs], biopsy_means[complete_pairs], method = "spearman")
                 
                 # Convert correlation to effect size (Cohen's convention)
                 # Small: r = 0.1, Medium: r = 0.3, Large: r = 0.5
@@ -751,7 +716,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 power_table <- self$results$poweranalysistable
                 row_key <- 1
                 
-                for (effect_size in correlation_categories) {
+                for (idx in seq_along(correlation_categories)) {
+                    effect_size <- correlation_categories[idx]
                     # Skip if effect size is zero or near-zero
                     if (abs(effect_size) < 0.01) {
                         next
@@ -786,11 +752,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     # Ensure minimum of 5 cases
                     required_n <- pmax(required_n, 5, na.rm = TRUE)
 
-                    scenario <- if (effect_size == obs_correlation) {
+                    # Identify the row by index (correlation_categories =
+                    # c(0.1, 0.3, 0.5, obs_correlation)) so a coincidental match
+                    # of the observed r to a fixed effect size cannot mis-tag it.
+                    scenario <- if (idx == 4) {
                         "Observed Effect Size"
-                    } else if (effect_size == 0.1) {
+                    } else if (idx == 1) {
                         "Small Effect (r=0.1)"
-                    } else if (effect_size == 0.3) {
+                    } else if (idx == 2) {
                         "Medium Effect (r=0.3)"
                     } else {
                         "Large Effect (r=0.5)"
@@ -837,8 +806,8 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         # Calculate regional statistics
                         region_values <- c(region_whole_section, as.matrix(region_biopsy_data))
                         region_mean <- mean(region_values, na.rm = TRUE)
-                        region_cv <- sd(region_values, na.rm = TRUE) / region_mean * 100
-                        
+                        region_cv <- private$.calculateRobustCV(region_values)
+
                         # Categorize heterogeneity level
                         heterogeneity_level <- ifelse(region_cv <= 15, "Low",
                                                      ifelse(region_cv <= 30, "Moderate", "High"))
@@ -946,7 +915,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                 case_values <- case_values[!is.na(case_values)]
 
                 if (length(case_values) >= 2) {
-                    list(case_id = i, cv = sd(case_values) / mean(case_values) * 100)
+                    list(case_id = i, cv = private$.calculateRobustCV(case_values))
                 } else {
                     NULL
                 }
@@ -1016,7 +985,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         
                         all_regional_values <- c(region_ws, as.matrix(region_biopsy))
                         region_mean <- mean(all_regional_values, na.rm = TRUE)
-                        region_cv <- sd(all_regional_values, na.rm = TRUE) / region_mean * 100
+                        region_cv <- private$.calculateRobustCV(all_regional_values)
                         
                         region_stats <- rbind(region_stats, data.frame(
                             Region = as.character(region),
@@ -1382,8 +1351,23 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Generate assumptions and methodology content
             assumptions_content <- private$.generateAssumptionsContent(metrics)
 
+            # Merge the accumulated data-quality warnings (prepended) and the
+            # sampling-strategy / analysis-type notes (appended) so neither is
+            # clobbered by this setContent(). See .warnings_html / .strategy_notes.
+            final_interpretation <- interpretation
+            if (!is.null(private$.warnings_html)) {
+                final_interpretation <- paste0(private$.warnings_html, final_interpretation)
+            }
+            if (!is.null(private$.strategy_notes)) {
+                strategy_html <- paste0(
+                    "<div style='background-color: #f8f9fa; padding: 10px; border-left: 4px solid #6c757d; margin: 10px 0;'>",
+                    gsub("\n\n", "<br><br>", trimws(private$.strategy_notes), fixed = TRUE),
+                    "</div>"
+                )
+                final_interpretation <- paste0(final_interpretation, strategy_html)
+            }
 
-            self$results$interpretation$setContent(interpretation)
+            self$results$interpretation$setContent(final_interpretation)
             self$results$report_sentences$setContent(report_sentences)
             self$results$assumptions$setContent(assumptions_content)
 
@@ -1752,10 +1736,14 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Attempt ICC calculation
             icc_err <- tryCatch({
                 icc_result <- psych::ICC(icc_data)
-                # Use ICC(3,1) - consistency, single measurements
-                icc_value <- icc_result$results$ICC[6]
-                icc_lower <- icc_result$results$`lower bound`[6]
-                icc_upper <- icc_result$results$`upper bound`[6]
+                # Use ICC(3,1) - single fixed raters. psych::ICC()$results rows
+                # are ordered ICC1, ICC2, ICC3, ICC1k, ICC2k, ICC3k; index [3] is
+                # ICC3 = ICC(3,1) single measures. Index [6] (ICC3k = ICC(3,k),
+                # average measures) was previously extracted, inflating every
+                # single-measurement reliability verdict.
+                icc_value <- icc_result$results$ICC[3]
+                icc_lower <- icc_result$results$`lower bound`[3]
+                icc_upper <- icc_result$results$`upper bound`[3]
 
                 # Validate ICC result
                 if (is.na(icc_value) || icc_value < -1 || icc_value > 1) {
@@ -1916,7 +1904,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     }
                     case_values <- case_values[!is.na(case_values)]
                     if (length(case_values) >= 2) {
-                        cv <- sd(case_values) / mean(case_values) * 100
+                        cv <- private$.calculateRobustCV(case_values)
                         if (!is.na(cv) && is.finite(cv)) {
                             region_cv_values <- c(region_cv_values, cv)
                         }
@@ -2093,7 +2081,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     case_values <- case_values[!is.na(case_values)]
 
                     if (length(case_values) >= 2) {
-                        cv <- sd(case_values) / mean(case_values) * 100
+                        cv <- private$.calculateRobustCV(case_values)
                         if (!is.na(cv) && is.finite(cv)) {
                             region_cvs <- c(region_cvs, cv)
                         }

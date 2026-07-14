@@ -43,6 +43,18 @@ items:
       title: Reproducibility Assessment
       type: Table
       description: Correlation and reliability metrics
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: metric
           title: 'Reproducibility Metric'
@@ -67,6 +79,18 @@ items:
       title: Sampling Bias Analysis
       type: Table
       description: Systematic bias assessment between methods
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: comparison
           title: 'Comparison'
@@ -80,7 +104,7 @@ items:
           type: number
           format: zto,pvalue
         - name: effect_size
-          title: 'Effect Size (Cohen''s d)'
+          title: 'Effect Size (Hedges'' g)'
           type: number
           format: zto
         - name: clinical_impact
@@ -91,6 +115,18 @@ items:
       title: Variance Component Analysis
       type: Table
       description: Sources of measurement variability
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: component
           title: 'Variance Component'
@@ -112,6 +148,18 @@ items:
       type: Table
       visible: (power_analysis)
       description: Sample size recommendations and power calculations
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: scenario
           title: 'Analysis Scenario'
@@ -136,6 +184,18 @@ items:
       type: Table
       visible: (spatial_id)
       description: Variability across spatial regions
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: region
           title: 'Spatial Region'
@@ -160,6 +220,18 @@ items:
       type: Table
       visible: (compareCompartments && length(spatial_id) > 0)
       description: Statistical comparison of heterogeneity metrics between compartments
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: metric
           title: 'Heterogeneity Metric'
@@ -188,6 +260,18 @@ items:
       type: Table
       visible: (compartmentTests && length(spatial_id) > 0)
       description: Formal statistical tests comparing heterogeneity across compartments
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       columns:
         - name: test_type
           title: 'Test'
@@ -214,6 +298,18 @@ items:
       width: 700
       height: 500
       visible: (show_variability_plots)
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       renderFun: .biopsyplot
 
     - name: variabilityplot
@@ -223,6 +319,18 @@ items:
       width: 600
       height: 400
       visible: (show_variability_plots)
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       renderFun: .variabilityplot
 
     - name: spatialplot
@@ -232,6 +340,18 @@ items:
       width: 600
       height: 400
       visible: (show_variability_plots)
+      clearWith:
+        - wholesection
+        - biopsy1
+        - biopsy2
+        - biopsy3
+        - biopsy4
+        - biopsies
+        - spatial_id
+        - cv_threshold
+        - correlation_threshold
+        - analysis_type
+        - sampling_strategy
       renderFun: .spatialplot
 
 
