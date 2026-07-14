@@ -83,6 +83,10 @@ items:
           - test2_spec
           - prevalence
           - fagan
+          - indep
+          - cond_dep_pos
+          - cond_dep_neg
+          - preset
 
 refs:
     - ClinicoPathJamoviModule

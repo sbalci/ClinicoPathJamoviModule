@@ -22,16 +22,14 @@ children:
         children:
           - type: TextBox
             name: test1_sens
-            label: 'Sensitivity (%)'
-            suffix: '%'
+            label: 'Sensitivity (0-1)'
             format: number
             enable: (preset == 'custom')
             events:
               change: ./cotest.events::onChange_test1_sens
           - type: TextBox
             name: test1_spec
-            label: 'Specificity (%)'
-            suffix: '%'
+            label: 'Specificity (0-1)'
             format: number
             enable: (preset == 'custom')
             events:
@@ -45,16 +43,14 @@ children:
         children:
           - type: TextBox
             name: test2_sens
-            label: 'Sensitivity (%)'
-            suffix: '%'
+            label: 'Sensitivity (0-1)'
             format: number
             enable: (preset == 'custom')
             events:
               change: ./cotest.events::onChange_test2_sens
           - type: TextBox
             name: test2_spec
-            label: 'Specificity (%)'
-            suffix: '%'
+            label: 'Specificity (0-1)'
             format: number
             enable: (preset == 'custom')
             events:
@@ -97,8 +93,7 @@ children:
         children:
           - type: TextBox
             name: prevalence
-            label: 'Disease Prevalence (%)'
-            suffix: '%'
+            label: 'Disease Prevalence (0-1)'
             format: number
             events:
               change: ./cotest.events::onChange_prevalence
