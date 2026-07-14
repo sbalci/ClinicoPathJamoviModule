@@ -18,6 +18,10 @@ items:
           - fillGgalluvial
           - marg
           - usetitle
+          - bin
+          - custombinlabels
+          - fill
+          - curveType
 
     - name: todo
       title: To Do
