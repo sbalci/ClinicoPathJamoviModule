@@ -7,13 +7,9 @@ items:
     - name: notices
       title: Important Information
       type: Preformatted
-      clearWith:
-        - dep
-        - group
-        - sortBy
-        - orientation
-        - aggregation
-        - colorScheme
+      # No clearWith needed: .run() calls private$.renderNotices() unconditionally at
+      # the end of every run (and in the error handler), which sets the content to ""
+      # whenever the current run emits no notices, so stale notices cannot persist.
 
     - name: todo
       title: Instructions

@@ -94,7 +94,7 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
                     ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
+                    STRONG_WARNING = "IMPORTANT WARNING: ",
                     WARNING        = "WARNING: ",
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
@@ -234,6 +234,15 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         sprintf("Conditional coloring applied. Values > %.2f colored orange (above threshold), others blue (below).",
                                 self$options$colorThreshold)
                     )
+
+                    # Conditional coloring takes precedence over category highlighting
+                    if (self$options$useHighlight) {
+                        private$.addNotice(
+                            'INFO',
+                            'Highlighting Ignored',
+                            "Conditional coloring is active, so category highlighting is ignored. Turn off conditional coloring to use highlighting."
+                        )
+                    }
                 }
 
                 # Generate and display clinical summary
@@ -246,7 +255,12 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Save plot data for rendering
                 private$.savePlotData(data)
-                
+
+                # Render notices at the end of the run. .renderNotices() sets the
+                # content to "" for an empty queue, so a run that emits zero notices
+                # clears any stale text left over from a previous run.
+                private$.renderNotices()
+
             }, error = function(e) {
                 msg_html <- htmltools::htmlEscape(e$message)
                 error_msg <- paste0(
@@ -258,6 +272,10 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 )
                 self$results$todo$setContent(error_msg)
                 self$results$todo$setVisible(TRUE)
+
+                # Also flush the notice queue on the error path so prior notices
+                # do not linger under an error message.
+                private$.renderNotices()
             })
         },
         
@@ -559,7 +577,21 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .populateSummary = function(summary_stats) {
             table <- self$results$summary
             table$deleteRows()
-            
+
+            # When aggregation is active, the statistics below describe the plotted
+            # per-group aggregated values (e.g. mean of sums when aggregation = sum),
+            # not the raw observations. Make that explicit so labels like
+            # "Mean Value" are not misread.
+            agg_method <- self$options$aggregation
+            if (!is.null(agg_method) && agg_method != "none") {
+                table$setNote(
+                    "aggregation",
+                    sprintf("Statistics describe the plotted per-group %s values, not the raw observations.", agg_method)
+                )
+            } else {
+                table$setNote("aggregation", NULL)
+            }
+
             row_num <- 1
             
             # Data characteristics
@@ -731,13 +763,13 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             p <- p + ggplot2::geom_segment(segment_aes, linewidth = line_width, linetype = line_type)
             
             if (use_color_mapping) {
-                # Apply custom colors
+                # Apply custom colors. use_color_mapping is TRUE only when
+                # conditional_color or has_highlight is TRUE, so these two branches
+                # are exhaustive (no dead trailing else).
                 if (conditional_color) {
                     colors <- c("above_threshold" = "#E69F00", "below_threshold" = "#56B4E9")  # Orange/Blue
-                } else if (has_highlight) {
-                    colors <- c("highlighted" = color_scheme$highlight_color, "normal" = color_scheme$normal_color)
                 } else {
-                    colors <- c("normal" = color_scheme$colors[1])
+                    colors <- c("highlighted" = color_scheme$highlight_color, "normal" = color_scheme$normal_color)
                 }
                 
                 p <- p + 
