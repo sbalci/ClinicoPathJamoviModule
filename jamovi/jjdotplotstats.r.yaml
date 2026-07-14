@@ -26,8 +26,6 @@ clearWith:
     - centralityk
     - plotwidth
     - plotheight
-    # - guidedMode
-    # - clinicalPreset
 
 
 
@@ -57,36 +55,6 @@ items:
       height: 300
       renderFun: .plot
       requiresData: true
-
-    - name: interpretation
-      title: Clinical Interpretation
-      type: Html
-      visible: false
-      # visible: (guidedMode)
-
-    - name: assumptions
-      title: Data Assessment & Recommendations
-      type: Html
-      visible: false
-      # visible: (guidedMode)
-
-    - name: reportSentence
-      title: Report Template
-      type: Html
-      visible: false
-      # visible: (guidedMode)
-
-    - name: guidedSteps
-      title: Analysis Steps
-      type: Html
-      visible: false
-      # visible: (guidedMode)
-
-    - name: recommendations
-      title: Next Steps
-      type: Html
-      visible: false
-      # visible: (guidedMode)
 
 
 refs:

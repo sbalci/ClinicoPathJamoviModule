@@ -20,7 +20,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .options_hash = NULL,
         .messages = NULL,
         .noticesList = NULL,
-        # .currentPreset = "basic",
+        # Cached result of .validateInputs(); computed once per .run() so the
+        # render paths (.plot / .plot2) gate silently instead of re-validating.
+        .inputsValid = FALSE,
 
         # Notice accumulation system (HTML-based, avoids serialization issues)
         .addNotice = function(message, type = "INFO") {
@@ -92,9 +94,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # init ----
 
         .init = function() {
-            # Apply clinical presets if not custom
-            # private$.applyClinicalPreset()
-
             # Since dep is single variable, use fixed size
             # Use configurable plot dimensions
             plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 650
@@ -155,6 +154,15 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(FALSE)
             }
 
+            # Confidence level must lie strictly inside (0, 1). The boundary
+            # values 0 and 1 make ggstatsplot's interval computation fail with an
+            # opaque error, so guard against them explicitly here.
+            conf_level <- self$options$conflevel
+            if (!is.null(conf_level) && (conf_level <= 0 || conf_level >= 1)) {
+                private$.addNotice(sprintf('Confidence level must be greater than 0 and less than 1 (received %s). A typical value is 0.95.', format(conf_level)), "ERROR")
+                return(FALSE)
+            }
+
             # Check total sample size
             n_total <- sum(complete_rows)
             if (n_total < 30) {
@@ -202,74 +210,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         
         
-        
-        # Guided steps generator
-        # .generateGuidedSteps = function() {
-        #     if (!self$options$guidedMode) return()
-        #
-        #     steps <- glue::glue(
-        #         "<div style='background-color: #e8f5e8; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;'>",
-        #         "<h4 style='color: #155724; margin-top: 0;'> Analysis Steps</h4>",
-        #         "<ol style='margin: 10px 0; padding-left: 20px;'>",
-        #         "<li><strong>Data Selection:</strong> Choose continuous variable and grouping variable</li>",
-        #         "<li><strong>Test Selection:</strong> Review data assessment recommendations above</li>",
-        #         "<li><strong>Options:</strong> Configure display and statistical options</li>",
-        #         "<li><strong>Interpretation:</strong> Review clinical interpretation and assumptions</li>",
-        #         "<li><strong>Report:</strong> Copy report template for documentation</li>",
-        #         "</ol>",
-        #         "<p><em> Tip: Follow these steps in order for best results. Check the Data Assessment panel for recommendations.</em></p>",
-        #         "</div>"
-        #     )
-        #
-        #     self$results$guidedSteps$setContent(steps)
-        # },
-        
-        # Next steps recommendations
-        # .generateRecommendations = function() {
-        #     if (!self$options$guidedMode) return()
-        #
-        #     preset <- private$.currentPreset
-        #
-        #     recommendations <- switch(preset,
-        #         "publication" = glue::glue(
-        #             "<div style='background-color: #fff8e1; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>",
-        #             "<h4 style='color: #856404; margin-top: 0;'> Publication Checklist</h4>",
-        #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
-        #             "<li> Report effect size with confidence intervals</li>",
-        #             "<li> Include assumption checking results</li>",
-        #             "<li> State statistical test used and why</li>",
-        #             "<li> Report exact p-values (not just p < 0.05)</li>",
-        #             "<li> Consider multiple testing corrections if applicable</li>",
-        #             "</ul>",
-        #             "</div>"
-        #         ),
-        #         "clinical" = glue::glue(
-        #             "<div style='background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 10px 0;'>",
-        #             "<h4 style='color: #1976d2; margin-top: 0;'> Clinical Decision Points</h4>",
-        #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
-        #             "<li>Consider clinical significance vs. statistical significance</li>",
-        #             "<li>Evaluate practical impact of observed differences</li>",
-        #             "<li>Review sample representativeness for your population</li>",
-        #             "<li>Consider confounding variables not in this analysis</li>",
-        #             "<li>Discuss findings with clinical colleagues</li>",
-        #             "</ul>",
-        #             "</div>"
-        #         ),
-        #         glue::glue(
-        #             "<div style='background-color: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 10px 0;'>",
-        #             "<h4 style='color: #7b1fa2; margin-top: 0;'> Next Steps</h4>",
-        #             "<ul style='margin: 10px 0; padding-left: 20px;'>",
-        #             "<li>Review the statistical assumptions above</li>",
-        #             "<li>Consider additional analyses if needed</li>",
-        #             "<li>Document your methods and findings</li>",
-        #             "<li>Consider replication with independent data</li>",
-        #             "</ul>",
-        #             "</div>"
-        #         )
-        #     )
-        #
-        #     self$results$recommendations$setContent(recommendations)
-        # },
         
         # Data quality validation helper
         .validateDataQuality = function(mydata, dep_var) {
@@ -332,7 +272,13 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Optimized data preparation with robust caching
         .prepareData = function(force_refresh = FALSE) {
-            # Create robust hash of current data to detect changes
+            # Create a hash of the current data to detect changes. This keys on
+            # the analysis variables plus the data's dimensions and column names
+            # rather than the individual cell values. jamovi re-instantiates the
+            # analysis object whenever the underlying data is edited, so within a
+            # single object lifecycle identical dims + names imply identical
+            # values; add a value digest here if this helper is ever reused
+            # outside jamovi's lifecycle.
             current_hash <- digest::digest(list(
                 dep = self$options$dep,
                 group = self$options$group,
@@ -510,19 +456,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 originaltheme = self$options$originaltheme
             )
 
-            # Apply preset overrides without mutating options object
-            # if (private$.currentPreset == "basic") {
-            #     options_list$resultssubtitle <- TRUE
-            # } else if (private$.currentPreset == "publication") {
-            #     options_list$resultssubtitle <- TRUE
-            #     options_list$originaltheme <- TRUE
-            # } else if (private$.currentPreset == "clinical") {
-            #     centrality_plotting <- TRUE
-            #     centrality_type <- "nonparametric"
-            #     options_list$centralityplotting <- TRUE
-            #     options_list$centralityparameter <- "median"
-            # }
-            
             # Process centrality parameters if enabled
             options_list$centrality.plotting <- centrality_plotting
             options_list$centrality.type <- centrality_type
@@ -545,9 +478,10 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # run ----
         .run = function() {
-            # Clear messages and notices at start of new run
+            # Clear messages, notices, and cached validity at start of new run
             private$.messages <- NULL
             private$.clearNotices()
+            private$.inputsValid <- FALSE
 
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
@@ -583,15 +517,30 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Pre-process data and options for performance with enhanced validation
+                private$.inputsValid <- FALSE
                 tryCatch({
                     mydata <- private$.prepareData()
-                    private$.prepareOptions()
+                    options_data <- private$.prepareOptions()
 
-                    # Generate clinical interpretation and assumptions
+                    # Validate inputs once per run. All validation notices are
+                    # emitted here (not in the render paths) so they neither
+                    # duplicate when a Split-By variable makes both plots render,
+                    # nor accumulate on plot-only re-renders such as resizing.
+                    private$.inputsValid <- private$.validateInputs()
 
-                    # Generate guided mode content if enabled
-                    # private$.generateGuidedSteps()
-                    # private$.generateRecommendations()
+                    # Emit a single success notice when inputs are valid
+                    if (isTRUE(private$.inputsValid)) {
+                        n_obs <- nrow(mydata)
+                        n_groups <- length(unique(mydata[[options_data$group]]))
+                        test_name <- switch(options_data$typestatistics,
+                            "parametric" = "parametric (t-test/ANOVA)",
+                            "nonparametric" = "nonparametric (Mann-Whitney/Kruskal-Wallis)",
+                            "robust" = "robust (trimmed means)",
+                            "bayes" = "Bayesian",
+                            "selected"
+                        )
+                        private$.addNotice(sprintf('Analysis completed successfully using %s test. Compared %d groups with N = %d total observations.', test_name, n_groups, n_obs), "INFO")
+                    }
                 }, error = function(e) {
                     private$.addNotice(sprintf('Data processing failed: %s. Please check your variable selections and try again.', htmltools::htmlEscape(e$message)), "ERROR")
                     return()
@@ -603,8 +552,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         ,
         .plot = function(image, ggtheme, theme, ...) {
-            # Use shared validation helper ----
-            if (!private$.validateInputs())
+            # Inputs are validated once in .run(); the render path only reads the
+            # cached result so validation notices are not re-emitted per render. ----
+            if (!isTRUE(private$.inputsValid))
                 return()
 
             # Use cached data and options for performance ----
@@ -644,19 +594,6 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             if (is.null(plot)) return()
 
-            # Add success notice
-            n_obs <- nrow(mydata)
-            n_groups <- length(unique(mydata[[options_data$group]]))
-            test_name <- switch(options_data$typestatistics,
-                "parametric" = "parametric (t-test/ANOVA)",
-                "nonparametric" = "nonparametric (Mann-Whitney/Kruskal-Wallis)",
-                "robust" = "robust (trimmed means)",
-                "bayes" = "Bayesian",
-                "selected"
-            )
-
-            private$.addNotice(sprintf('Analysis completed successfully using %s test. Compared %d groups with N = %d total observations.', test_name, n_groups, n_obs), "INFO")
-
             # Print Plot ----
 
             print(plot)
@@ -668,8 +605,9 @@ jjdotplotstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         ,
 
         .plot2 = function(image, ggtheme, theme, ...) {
-            # Use shared validation helper with additional grouping check ----
-            if (!private$.validateInputs() || is.null(self$options$grvar))
+            # Inputs are validated once in .run(); the render path only reads the
+            # cached result. The Split-By variable must also be present. ----
+            if (!isTRUE(private$.inputsValid) || is.null(self$options$grvar))
                 return()
 
             # Use cached data and options for performance ----
