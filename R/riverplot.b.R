@@ -24,7 +24,7 @@
 #' @importFrom ggplot2 scale_x_discrete geom_text scale_fill_manual scale_fill_viridis_d
 #' @importFrom ggplot2 scale_fill_brewer coord_flip theme_void guides guide_legend
 #' @importFrom ggalluvial geom_alluvium geom_stratum StatStratum geom_flow stat_stratum
-#' @importFrom dplyr group_by summarise n mutate arrange filter select distinct
+#' @importFrom dplyr group_by summarise n mutate arrange filter distinct
 #' @importFrom dplyr case_when if_else left_join bind_rows across all_of
 #' @importFrom tidyr pivot_longer pivot_wider gather spread
 #' @importFrom rlang sym syms !! !!! .data
@@ -57,6 +57,9 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .cache_key = NULL,
         .last_cache_key = NULL,
         .cache_timestamp = NULL,
+
+        # Accumulated informational warnings from optional processing paths
+        .accumulated_warnings = NULL,
 
         # Progress tracking
         .total_steps = 8,
@@ -448,6 +451,11 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     private$.generate_enhanced_caveats()
                 }
 
+                # Surface any warnings accumulated during optional processing paths
+                if (length(private$.accumulated_warnings) > 0) {
+                    private$.show_warnings(private$.accumulated_warnings)
+                }
+
                 # Set plot state
                 self$results$plot$setState(list(
                     data = private$.processedData,
@@ -495,12 +503,12 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
                     # Create stacked data
                     from_data <- data %>%
-                        select(all_of(from_col), everything(), -all_of(to_col)) %>%
+                        dplyr::select(all_of(from_col), everything(), -all_of(to_col)) %>%
                         rename(category = all_of(from_col)) %>%
                         mutate(time_point = "from")
 
                     to_data <- data %>%
-                        select(all_of(to_col), everything(), -all_of(from_col)) %>%
+                        dplyr::select(all_of(to_col), everything(), -all_of(from_col)) %>%
                         rename(category = all_of(to_col)) %>%
                         mutate(time_point = "to")
 
@@ -719,6 +727,14 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(list(errors = errors, warnings = warnings))
         },
         
+        .add_warning = function(message) {
+            # Accumulate an informational/processing warning to be surfaced later.
+            # Called by optional paths (multi-format detection, large-dataset sampling).
+            if (length(message) == 0) return(invisible(NULL))
+            private$.accumulated_warnings <- c(private$.accumulated_warnings, as.character(message))
+            invisible(NULL)
+        },
+
         .show_warnings = function(warnings) {
             if (length(warnings) == 0) return()
             
@@ -948,9 +964,9 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             if (!is.null(weight_var)) keep_cols <- c(keep_cols, weight_var)
             
             processed <- data %>%
-                select(all_of(keep_cols)) %>%
+                dplyr::select(all_of(keep_cols)) %>%
                 filter(if (all(sapply(strata_vars, function(x) x %in% names(.)))) {
-                    rowSums(is.na(select(., all_of(strata_vars)))) < length(strata_vars)
+                    rowSums(is.na(dplyr::select(., all_of(strata_vars)))) < length(strata_vars)
                 } else {
                     TRUE
                 })
@@ -1055,7 +1071,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         to_category = as.character(next_stratum),
                         percentage = count / sum(count) * 100
                     ) %>%
-                    select(from_stage, from_category, to_stage, to_category, count, percentage, weight)
+                    dplyr::select(from_stage, from_category, to_stage, to_category, count, percentage, weight)
             } else {
                 # Aggregate flows (less meaningful for long format without ID)
                 flows <- data %>%
@@ -1075,7 +1091,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                            0),
                         weight = count
                     ) %>%
-                    select(from_stage, from_category, to_stage, to_category, count, percentage, weight) %>%
+                    dplyr::select(from_stage, from_category, to_stage, to_category, count, percentage, weight) %>%
                     arrange(from_stage, from_category)
             }
             
@@ -1188,7 +1204,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     to_category = as.character(stage2),
                     percentage = count / sum(count) * 100
                 ) %>%
-                select(from_stage, from_category, to_stage, to_category, count, percentage, weight)
+                dplyr::select(from_stage, from_category, to_stage, to_category, count, percentage, weight)
 
             # Populate flow table with enhanced error handling
             tryCatch({
@@ -1224,7 +1240,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         stage = as.character(x),
                         category = as.character(stratum)
                     ) %>%
-                    select(stage, category, count, percentage, cumulative)
+                    dplyr::select(stage, category, count, percentage, cumulative)
             } else if (data_format == "single") {
                 # Single format stage summary - treat as simple frequency
                 strata_var <- self$options$strata[1]
@@ -1240,7 +1256,7 @@ riverplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         percentage = count / sum(count) * 100,
                         cumulative = cumsum(percentage)
                     ) %>%
-                    select(stage, category, count, percentage, cumulative)
+                    dplyr::select(stage, category, count, percentage, cumulative)
             } else {
                 # Wide format stage summary - optimized vectorized approach
                 stage_summaries <- lapply(self$options$strata, function(stage_var) {

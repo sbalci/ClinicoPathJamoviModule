@@ -4,7 +4,7 @@
 #' @import survival
 #' @import flexsurv
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom stats AIC BIC nobs vcov qnorm pnorm
 #'
 #' @return An \code{R6} class generator object for the \code{flexparametricClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -94,8 +94,11 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Handle outcome coding
                 outcome_level <- self$options$outcomeLevel
-                if (is.character(analysis_data$event)) {
-                    analysis_data$event <- ifelse(analysis_data$event == outcome_level, 1, 0)
+                if (is.factor(analysis_data$event) || is.character(analysis_data$event)) {
+                    # Compare on the character label so text-coded factors
+                    # (e.g. "Dead"/"Alive") are matched to outcomeLevel directly
+                    # instead of being coerced to NA via as.numeric().
+                    analysis_data$event <- ifelse(as.character(analysis_data$event) == outcome_level, 1, 0)
                 } else {
                     analysis_data$event <- ifelse(analysis_data$event == as.numeric(outcome_level), 1, 0)
                 }
@@ -238,7 +241,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Create formula
                         if (!is.null(covariate_names) && length(covariate_names) > 0) {
-                            formula_str <- paste("surv_obj ~", jmvcore::composeTerms(as.list(covariate_names)))
+                            formula_str <- paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(covariate_names)), collapse = " + "))
                             formula_obj <- jmvcore::asFormula(formula_str)
                         } else {
                             formula_obj <- surv_obj ~ 1
@@ -909,7 +912,7 @@ flexparametricClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 surv_obj <- Surv(data$time, data$event)
 
                 if (!is.null(covariate_names) && length(covariate_names) > 0) {
-                    formula_str <- paste("surv_obj ~", jmvcore::composeTerms(as.list(covariate_names)))
+                    formula_str <- paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(covariate_names)), collapse = " + "))
                     return(jmvcore::asFormula(formula_str))
                 } else {
                     return(surv_obj ~ 1)

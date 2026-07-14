@@ -161,7 +161,8 @@ retractedClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Get data
             data <- self$data
-            dois <- data[[self$options$doi]]
+            # Coerce to character so factor/labelled DOI columns are handled as strings
+            dois <- as.character(data[[self$options$doi]])
             
             # Check for empty data
             if (length(dois) == 0)

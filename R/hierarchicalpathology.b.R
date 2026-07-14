@@ -459,6 +459,11 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
 
             table <- self$results$modelresults
 
+            # Critical value from the user-specified confidence level
+            # (previously hardcoded to 1.96, i.e. always 95%, ignoring confidence_level)
+            conf <- self$options$confidence_level
+            crit <- stats::qnorm(1 - (1 - conf) / 2)
+
             # Model summary statistics
             if (inherits(model, "lmerMod")) {
                 # Linear mixed model
@@ -479,8 +484,8 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                         std_error = round(se, 4),
                         statistic = round(t_value, 4),
                         p_value = NA,  # t-tests in lmer don't have p-values by default
-                        ci_lower = round(estimate - 1.96 * se, 4),
-                        ci_upper = round(estimate + 1.96 * se, 4)
+                        ci_lower = round(estimate - crit * se, 4),
+                        ci_upper = round(estimate + crit * se, 4)
                     )
 
                     table$addRow(rowKey = paste0("fixed_", i), values = row)
@@ -504,8 +509,8 @@ hierarchicalpathologyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6:
                         std_error = round(se, 4),
                         statistic = round(z_value, 4),
                         p_value = round(p_value, 4),
-                        ci_lower = round(estimate - 1.96 * se, 4),
-                        ci_upper = round(estimate + 1.96 * se, 4)
+                        ci_lower = round(estimate - crit * se, 4),
+                        ci_upper = round(estimate + crit * se, 4)
                     )
 
                     table$addRow(rowKey = paste0("fixed_", i), values = row)

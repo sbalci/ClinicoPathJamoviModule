@@ -11,9 +11,9 @@
 #' @import jmvcore
 #' @importFrom dplyr inner_join
 #' @import ggvenn
-#' @import ggVennDiagram
+#' @rawNamespace import(ggVennDiagram, except = c(unite))
 #' @import UpSetR
-#' @import ComplexUpset
+#' @rawNamespace import(ComplexUpset, except = c(upset))
 #' @importFrom grid grid.text
 #' @importFrom ggplot2 ggtitle theme element_text
 #' @importFrom magrittr %>%

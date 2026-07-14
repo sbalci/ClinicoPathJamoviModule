@@ -6,6 +6,9 @@ groomecompareClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             # Initialize notice list
             .noticeList = list(),
 
+            # Track whether radar-scale adjustment notice was already emitted
+            .radarScaleNotified = NULL,
+
             # Add a notice
             .addNotice = function(type, title, content) {
                 notice <- list(type = type, title = title, content = content)

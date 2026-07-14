@@ -336,15 +336,18 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .calculateIntegratedBrier = function(model_info, data) {
              # Calculate integrated Brier score using pec
-             if (requireNamespace('pec', quietly = TRUE) && !is.null(private$pec_result)) {
-                 ibs_val <- pec::crps(private$pec_result)[1] # Retrieve IBS
-                 
-                 table <- self$results$brierTable
-                 table$addRow(rowKey = 1, values = list(
-                     model = "Model",
-                     ibs = round(ibs_val, 4)
-                 ))
-             }
+             tryCatch({
+                 if (requireNamespace('pec', quietly = TRUE) && !is.null(private$pec_result)) {
+                     ibs_val <- as.numeric(pec::crps(private$pec_result))[1] # Retrieve IBS
+
+                     table <- self$results$brierTable
+                     table$addRow(rowKey = 1, values = list(
+                         integrated_brier = round(ibs_val, 4)
+                     ))
+                 }
+             }, error = function(e) {
+                 message("Integrated Brier score calculation failed: ", e$message)
+             })
         },
 
         .performDecisionCurveAnalysis = function(model_info, data) {
@@ -660,6 +663,114 @@ survivalvalidationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 image <- self$results$predErrorPlot
                 image$setState(list(pec = private$pec_result))
             }
+        },
+
+        # --- Plot render functions (referenced by renderFun in .r.yaml) ---
+        # These MUST exist: jmvcore renders images via
+        # do.call(private[[renderFun]], ...), so a missing method crashes with
+        # "attempt to apply non-function" whenever the image is visible. Each
+        # renders only from its stored state and returns FALSE otherwise.
+
+        .plotROC = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$td_auc))
+                return(FALSE)
+            tryCatch({
+                td <- state$td_auc
+                times <- td$times
+                TP <- td$TP
+                FP <- td$FP
+                if (is.null(TP) || is.null(FP) || !is.matrix(TP) || !is.matrix(FP))
+                    return(FALSE)
+                df_list <- list()
+                for (j in seq_along(times)) {
+                    auc_j <- td$AUC[j]
+                    if (is.na(auc_j)) next
+                    df_list[[length(df_list) + 1L]] <- data.frame(
+                        FP = as.numeric(FP[, j]),
+                        TP = as.numeric(TP[, j]),
+                        label = paste0("t = ", times[j], " (AUC = ", round(auc_j, 3), ")"),
+                        stringsAsFactors = FALSE
+                    )
+                }
+                if (length(df_list) == 0)
+                    return(FALSE)
+                df <- do.call(rbind, df_list)
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = FP, y = TP, colour = label)) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0,
+                                         linetype = "dashed", colour = "grey50") +
+                    ggplot2::geom_line(linewidth = 1) +
+                    ggplot2::coord_equal() +
+                    ggplot2::labs(x = "1 - Specificity", y = "Sensitivity",
+                                  colour = "Time point",
+                                  title = "Time-dependent ROC Curves") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
+        .plotCalibration = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$calibration))
+                return(FALSE)
+            tryCatch({
+                cal <- state$calibration
+                df_list <- list()
+                for (t_point in names(cal)) {
+                    res <- cal[[t_point]]
+                    if (is.null(res) || nrow(res) == 0) next
+                    df_list[[length(df_list) + 1L]] <- data.frame(
+                        time = t_point,
+                        observed = as.numeric(res$observed),
+                        expected = as.numeric(res$expected),
+                        stringsAsFactors = FALSE
+                    )
+                }
+                if (length(df_list) == 0)
+                    return(FALSE)
+                df <- do.call(rbind, df_list)
+                df <- df[stats::complete.cases(df[, c("observed", "expected")]), , drop = FALSE]
+                if (nrow(df) == 0)
+                    return(FALSE)
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = expected, y = observed, colour = time)) +
+                    ggplot2::geom_abline(slope = 1, intercept = 0,
+                                         linetype = "dashed", colour = "grey50") +
+                    ggplot2::geom_point(size = 2) +
+                    ggplot2::labs(x = "Predicted", y = "Observed", colour = "Time point",
+                                  title = "Calibration") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
+        .plotDecision = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$dca))
+                return(FALSE)
+            tryCatch({
+                dca <- state$dca
+                if (is.null(dca) || nrow(dca) == 0)
+                    return(FALSE)
+                p <- ggplot2::ggplot(dca, ggplot2::aes(x = threshold, y = net_benefit)) +
+                    ggplot2::geom_line(linewidth = 1) +
+                    ggplot2::labs(x = "Threshold probability", y = "Net benefit",
+                                  title = "Decision Curve Analysis") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
+        .plotPredError = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$pec))
+                return(FALSE)
+            tryCatch({
+                plot(state$pec)
+                TRUE
+            }, error = function(e) FALSE)
         }
     )
 )

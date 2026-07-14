@@ -16,7 +16,7 @@
 #' @importFrom rlang sym
 #' @importFrom stats as.formula
 #' @importFrom grDevices rgb
-#' @importFrom htmltools htmlEscape
+
 #'
 tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "tableoneClass",

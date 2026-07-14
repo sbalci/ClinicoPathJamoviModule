@@ -347,7 +347,7 @@ misclassificationbiasClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R
 
             # Bias percentage
             if (measure == "rd") {
-                bias_pct <- if (obs_val != 0) ((obs_val - adj_val) / abs(adj_val)) * 100 else NA
+                bias_pct <- if (adj_val != 0) ((obs_val - adj_val) / abs(adj_val)) * 100 else NA
             } else {
                 bias_pct <- if (adj_val != 0) ((log(obs_val) - log(adj_val)) / abs(log(adj_val))) * 100 else NA
             }

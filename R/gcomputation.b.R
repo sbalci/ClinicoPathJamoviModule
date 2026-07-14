@@ -94,11 +94,15 @@ gcomputationClass <- R6::R6Class(
 
         .formula = function() {
             opt <- self$options
-            cv <- opt$covariates
+            # Backtick-escape user-controlled covariate names so variables with
+            # spaces or special characters do not break formula parsing. The df
+            # keeps raw column names (df[[cv]] <- col), which these match.
+            cv <- paste(jmvcore::composeTerms(as.list(opt$covariates)),
+                        collapse = " + ")
             if (opt$interactions)
-                rhs <- paste0(".a * (", paste(cv, collapse = " + "), ")")
+                rhs <- paste0(".a * (", cv, ")")
             else
-                rhs <- paste0(".a + ", paste(cv, collapse = " + "))
+                rhs <- paste0(".a + ", cv)
             stats::as.formula(paste0(".y ~ ", rhs))
         },
 

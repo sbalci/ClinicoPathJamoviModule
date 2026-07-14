@@ -4,7 +4,7 @@
 #' @import jmvcore
 #' @import survival
 #' @import ggplot2
-#' @importFrom dplyr mutate filter select group_by summarise n
+#' @importFrom dplyr mutate filter group_by summarise n
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats quantile sd median
 #' @export
@@ -643,7 +643,7 @@ qtwistClass <- R6::R6Class(
                 }
 
                 tox_duration_var <- jmvcore::toNumeric(self$data[[self$options$toxicity_duration_var]])
-                data$tox_duration <- tox_duration_var[complete.cases(data)]
+                data$tox_duration <- tox_duration_var[as.integer(rownames(data))]
 
                 # Cap toxicity duration at tau
                 data$tox_duration <- pmin(data$tox_duration, tau)
@@ -662,7 +662,7 @@ qtwistClass <- R6::R6Class(
                         tox_binary <- as.numeric(tox_indicator)
                     }
 
-                    tox_binary <- tox_binary[complete.cases(data)]
+                    tox_binary <- tox_binary[as.integer(rownames(data))]
                     data$tox_duration <- data$tox_duration * tox_binary
                 }
 
@@ -676,8 +676,8 @@ qtwistClass <- R6::R6Class(
                 tox_start <- jmvcore::toNumeric(self$data[[self$options$toxicity_start_var]])
                 tox_end <- jmvcore::toNumeric(self$data[[self$options$toxicity_end_var]])
 
-                tox_start <- tox_start[complete.cases(data)]
-                tox_end <- tox_end[complete.cases(data)]
+                tox_start <- tox_start[as.integer(rownames(data))]
+                tox_end <- tox_end[as.integer(rownames(data))]
 
                 # Calculate duration, ensuring positive and within tau
                 tox_duration <- pmax(0, tox_end - tox_start)

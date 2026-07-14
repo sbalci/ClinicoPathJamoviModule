@@ -36,7 +36,11 @@ ihcthresholdClass <- R6::R6Class(
                 negative = as.numeric(raw_data[[self$options$negativeCells]])
             )
             private$.data <- as.data.frame(data_list)
-            private$.data$total <- private$.data$positive + private$.data$negative
+            if (!is.null(self$options$totalCells)) {
+                private$.data$total <- as.numeric(raw_data[[self$options$totalCells]])
+            } else {
+                private$.data$total <- private$.data$positive + private$.data$negative
+            }
             private$.data$positive_ratio <- private$.data$positive / private$.data$total
             private$.data <- private$.data[complete.cases(private$.data), ]
         },

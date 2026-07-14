@@ -149,6 +149,9 @@ mageeequationClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Cla
         .prepareData = function() {
             data <- self$data
 
+            if (is.null(self$options$her2Positive))
+                jmvcore::reject(.("Select the HER2 Positive level to identify HER2-positive cases."))
+
             nuc_grade <- jmvcore::toNumeric(data[[self$options$nuclearGrade]])
             mitosis <- jmvcore::toNumeric(data[[self$options$mitosis]])
             er_val <- jmvcore::toNumeric(data[[self$options$erHscore]])

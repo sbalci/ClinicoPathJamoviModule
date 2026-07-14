@@ -172,7 +172,7 @@ predmodelClass <- if (requireNamespace('jmvcore'))
                 if (requireNamespace("pROC", quietly = TRUE)) {
                     roc_obj <- pROC::roc(y_actual, y_pred, quiet = TRUE)
                     auc_value <- as.numeric(pROC::auc(roc_obj))
-                    auc_ci <- as.numeric(pROC::ci.auc(roc_obj))
+                    auc_ci <- as.numeric(pROC::ci.auc(roc_obj, conf.level = self$options$ciLevel))
 
                     # Calculate Brier score
                     brier <- mean((y_pred - y_actual)^2)

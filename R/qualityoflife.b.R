@@ -19,7 +19,9 @@ qualityoflifeClass <- R6::R6Class(
         .clinical_interpretation = NULL,
         .group_results = NULL,
         .longitudinal_results = NULL,
-        
+        .ceiling_floor_results = NULL,
+        .correlation_results = NULL,
+
         .init = function() {
             # Check if at least one domain has items
             domain_items <- c(
@@ -59,6 +61,8 @@ qualityoflifeClass <- R6::R6Class(
             private$.clinical_interpretation <- NULL
             private$.group_results           <- NULL
             private$.longitudinal_results    <- NULL
+            private$.ceiling_floor_results   <- NULL
+            private$.correlation_results     <- NULL
 
             # Check if we have domain items
             domain_items <- c(
@@ -878,9 +882,218 @@ qualityoflifeClass <- R6::R6Class(
                     axis.text.x = element_text(size = 10),
                     axis.text.y = element_text(size = 8)
                 )
-            
+
             print(p)
             TRUE
+        },
+
+        .plot_summary_scores = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.summary_scores) || length(private$.summary_scores) == 0)
+                return(FALSE)
+
+            summary_scores <- private$.summary_scores
+            plot_data <- data.frame(Summary = character(0), Mean = numeric(0),
+                                    stringsAsFactors = FALSE)
+            for (score_name in names(summary_scores)) {
+                vals <- summary_scores[[score_name]]
+                vals <- vals[!is.na(vals)]
+                if (length(vals) > 0)
+                    plot_data <- rbind(plot_data,
+                        data.frame(Summary = score_name, Mean = mean(vals),
+                                   stringsAsFactors = FALSE))
+            }
+            if (nrow(plot_data) == 0) return(FALSE)
+
+            p <- ggplot(plot_data, aes(x = Summary, y = Mean)) +
+                geom_col(fill = "steelblue", alpha = 0.8) +
+                labs(title = "Summary QoL Scores", x = NULL, y = "Mean Score") +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5))
+            print(p)
+            TRUE
+        },
+
+        .plot_missing_patterns = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.domain_data) || length(private$.domain_data) == 0)
+                return(FALSE)
+
+            domain_data <- private$.domain_data
+            plot_data <- data.frame(Domain = character(0), Missing = numeric(0),
+                                    stringsAsFactors = FALSE)
+            for (domain_name in names(domain_data)) {
+                items <- domain_data[[domain_name]]
+                miss <- mean(is.na(as.matrix(items)))
+                plot_data <- rbind(plot_data,
+                    data.frame(Domain = domain_name, Missing = miss,
+                               stringsAsFactors = FALSE))
+            }
+            if (nrow(plot_data) == 0) return(FALSE)
+
+            p <- ggplot(plot_data, aes(x = Domain, y = Missing)) +
+                geom_col(fill = "tomato", alpha = 0.8) +
+                ylim(0, 1) +
+                labs(title = "Missing Data by Domain", x = "QoL Domains",
+                     y = "Proportion Missing") +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5),
+                      axis.text.x = element_text(angle = 45, hjust = 1))
+            print(p)
+            TRUE
+        },
+
+        .plot_ceiling_floor_effects = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.ceiling_floor_results) ||
+                length(private$.ceiling_floor_results) == 0)
+                return(FALSE)
+
+            res <- private$.ceiling_floor_results
+            plot_data <- data.frame(Domain = character(0), Effect = character(0),
+                                    Percent = numeric(0), stringsAsFactors = FALSE)
+            for (domain_name in names(res)) {
+                r <- res[[domain_name]]
+                plot_data <- rbind(plot_data,
+                    data.frame(Domain = r$domain, Effect = "Floor",
+                               Percent = r$floor_effect_percent, stringsAsFactors = FALSE),
+                    data.frame(Domain = r$domain, Effect = "Ceiling",
+                               Percent = r$ceiling_effect_percent, stringsAsFactors = FALSE))
+            }
+            if (nrow(plot_data) == 0) return(FALSE)
+
+            p <- ggplot(plot_data, aes(x = Domain, y = Percent, fill = Effect)) +
+                geom_col(position = "dodge", alpha = 0.8) +
+                labs(title = "Ceiling and Floor Effects", x = "QoL Domains",
+                     y = "Proportion") +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5),
+                      axis.text.x = element_text(angle = 45, hjust = 1))
+            print(p)
+            TRUE
+        },
+
+        .plot_domain_correlations = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.domain_scores) || length(private$.domain_scores) < 2)
+                return(FALSE)
+
+            score_matrix <- do.call(cbind, private$.domain_scores)
+            cor_matrix <- stats::cor(score_matrix, use = "pairwise.complete.obs")
+            cor_df <- as.data.frame(as.table(cor_matrix), stringsAsFactors = FALSE)
+            names(cor_df) <- c("Domain1", "Domain2", "Correlation")
+
+            p <- ggplot(cor_df, aes(x = Domain1, y = Domain2, fill = Correlation)) +
+                geom_tile() +
+                scale_fill_gradient2(low = "blue", mid = "white", high = "red",
+                                     midpoint = 0, limits = c(-1, 1)) +
+                labs(title = "Domain Correlation Heatmap", x = NULL, y = NULL) +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5),
+                      axis.text.x = element_text(angle = 45, hjust = 1))
+            print(p)
+            TRUE
+        },
+
+        .plot_utilities_distribution = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.health_utilities) ||
+                length(private$.health_utilities) == 0)
+                return(FALSE)
+
+            util_list <- private$.health_utilities
+            plot_data <- data.frame(Measure = character(0), Utility = numeric(0),
+                                    stringsAsFactors = FALSE)
+            for (nm in names(util_list)) {
+                vals <- util_list[[nm]]
+                vals <- vals[!is.na(vals)]
+                if (length(vals) > 0)
+                    plot_data <- rbind(plot_data,
+                        data.frame(Measure = nm, Utility = vals,
+                                   stringsAsFactors = FALSE))
+            }
+            if (nrow(plot_data) == 0) return(FALSE)
+
+            p <- ggplot(plot_data, aes(x = Utility, fill = Measure)) +
+                geom_histogram(alpha = 0.7, bins = 20, position = "identity") +
+                labs(title = "Health Utilities Distribution", x = "Utility Value",
+                     y = "Count") +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5))
+            print(p)
+            TRUE
+        },
+
+        .plot_group_comparison = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.group_results) || length(private$.group_results) == 0)
+                return(FALSE)
+
+            res <- private$.group_results
+            plot_data <- data.frame(Domain = character(0), Group = character(0),
+                                    Mean = numeric(0), stringsAsFactors = FALSE)
+            for (domain_name in names(res)) {
+                r <- res[[domain_name]]
+                if (!is.null(r$group1_mean) && !is.null(r$group2_mean))
+                    plot_data <- rbind(plot_data,
+                        data.frame(Domain = r$domain, Group = "Group 1",
+                                   Mean = r$group1_mean, stringsAsFactors = FALSE),
+                        data.frame(Domain = r$domain, Group = "Group 2",
+                                   Mean = r$group2_mean, stringsAsFactors = FALSE))
+            }
+            if (nrow(plot_data) == 0) return(FALSE)
+
+            p <- ggplot(plot_data, aes(x = Domain, y = Mean, fill = Group)) +
+                geom_col(position = "dodge", alpha = 0.8) +
+                labs(title = "Group Comparison of QoL Domains", x = "QoL Domains",
+                     y = "Mean Score") +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5),
+                      axis.text.x = element_text(angle = 45, hjust = 1))
+            print(p)
+            TRUE
+        },
+
+        .plot_longitudinal_trajectories = function(image, ggtheme, theme, ...) {
+            if (is.null(private$.longitudinal_results) ||
+                length(private$.longitudinal_results) == 0)
+                return(FALSE)
+
+            res <- private$.longitudinal_results
+            plot_data <- data.frame(Domain = character(0), Time = character(0),
+                                    Score = numeric(0), stringsAsFactors = FALSE)
+            for (domain_name in names(res)) {
+                d <- res[[domain_name]]$data
+                if (!is.null(d) && nrow(d) > 0) {
+                    agg <- stats::aggregate(score ~ time, data = d,
+                                            FUN = function(x) mean(x, na.rm = TRUE))
+                    plot_data <- rbind(plot_data,
+                        data.frame(Domain = domain_name,
+                                   Time = as.character(agg$time),
+                                   Score = agg$score, stringsAsFactors = FALSE))
+                }
+            }
+            if (nrow(plot_data) == 0) return(FALSE)
+
+            p <- ggplot(plot_data, aes(x = Time, y = Score, color = Domain,
+                                       group = Domain)) +
+                geom_line() +
+                geom_point() +
+                labs(title = "Longitudinal QoL Trajectories", x = "Time",
+                     y = "Mean Score") +
+                theme_minimal() +
+                theme(plot.title = element_text(hjust = 0.5))
+            print(p)
+            TRUE
+        },
+
+        .plot_population_comparison = function(image, ggtheme, theme, ...) {
+            # Population normative comparison data is not computed by this
+            # analysis (no validated reference dataset is bundled). This method
+            # is defined so the declared renderFun resolves and jamovi does not
+            # raise "attempt to apply non-function"; it draws nothing.
+            return(FALSE)
+        },
+
+        .plot_change_waterfall = function(image, ggtheme, theme, ...) {
+            # QoL change / waterfall data is not computed by this analysis. This
+            # method is defined so the declared renderFun resolves without
+            # crashing; it draws nothing.
+            return(FALSE)
         }
     )
 )

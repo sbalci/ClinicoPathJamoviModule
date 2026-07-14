@@ -299,7 +299,7 @@ marginalrecurrentClass <- R6::R6Class(
                 # and parse via jmvcore::asFormula() for allow-list validation. Closes
                 # the C1 RCE vector where a poisoned column name would otherwise reach
                 # reReg::reReg's model.frame as a callable expression.
-                rhs <- jmvcore::composeTerms(as.list(covariates))
+                rhs <- paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + ")
                 model_formula <- jmvcore::asFormula(paste("..recur_response ~", rhs))
             } else {
                 model_formula <- jmvcore::asFormula("..recur_response ~ 1")

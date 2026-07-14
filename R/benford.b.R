@@ -13,7 +13,7 @@
 #'
 #'
 #' @returns A comprehensive Benford's Law analysis with clinical interpretation.
-#' @export benfordClass
+#' @keywords internal
 #'
 
 

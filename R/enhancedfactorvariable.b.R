@@ -82,6 +82,9 @@ enhancedfactorvariableClass <- R6::R6Class(
             if (self$options$comprehensive_output) {
                 private$.updateMethodsExplanation()
             }
+
+            # Prepare visualization state (render functions read image$state)
+            private$.prepareVisualizations(data, vars)
         },
         
         .checkFactorVariables = function(data, vars) {
@@ -697,6 +700,199 @@ enhancedfactorvariableClass <- R6::R6Class(
             html$setContent(content)
         },
         
+        # ---- Visualization helpers -------------------------------------------------
+        # Wraps plot data plus appearance options into image state so that changing
+        # plotOrientation/plotTheme also triggers a re-render (state-based change
+        # detection; see jamovi_module_patterns_guide.md "State Management for Plots").
+        .imageState = function(df) {
+            list(
+                data        = as.data.frame(df, stringsAsFactors = FALSE),
+                orientation = self$options$plotOrientation,
+                theme       = self$options$plotTheme
+            )
+        },
+
+        .buildLevelCounts = function(data, vars, top_only) {
+            parts <- list()
+            for (var in vars) {
+                var_data <- data[[var]]
+                if (!is.factor(var_data)) var_data <- as.factor(var_data)
+
+                if (self$options$includeMissing) {
+                    ft <- table(var_data, useNA = "ifany")
+                } else {
+                    ft <- table(var_data[!is.na(var_data)])
+                }
+                if (length(ft) == 0) next
+
+                lvl <- names(ft)
+                lvl[is.na(lvl)] <- self$options$missingLabel
+
+                df <- data.frame(
+                    variable = var,
+                    level    = lvl,
+                    count    = as.integer(ft),
+                    stringsAsFactors = FALSE
+                )
+                df <- df[order(df$count, decreasing = TRUE), , drop = FALSE]
+
+                if (top_only) {
+                    n <- min(nrow(df), self$options$maxTopFactors)
+                    df <- df[seq_len(n), , drop = FALSE]
+                }
+                parts[[length(parts) + 1]] <- df
+            }
+            if (length(parts) == 0) return(NULL)
+            do.call(rbind, parts)
+        },
+
+        .prepareVisualizations = function(data, vars) {
+            # Factor distribution overview + top-factors bar plot
+            if (isTRUE(self$options$createVisualizations)) {
+                dist_df <- private$.buildLevelCounts(
+                    data, vars, top_only = isTRUE(self$options$plotTopFactorsOnly))
+                if (!is.null(dist_df))
+                    self$results$factorDistributionPlot$setState(private$.imageState(dist_df))
+
+                if (isTRUE(self$options$showOnlyTopFactors)) {
+                    top_df <- private$.buildLevelCounts(data, vars, top_only = TRUE)
+                    if (!is.null(top_df))
+                        self$results$topFactorsPlot$setState(private$.imageState(top_df))
+                }
+            }
+
+            # Complexity metrics plot
+            if (isTRUE(self$options$factorComplexityAnalysis)) {
+                parts <- list()
+                for (var in vars) {
+                    vd <- data[[var]]
+                    if (!is.factor(vd)) vd <- as.factor(vd)
+                    vd <- vd[!is.na(vd)]
+                    if (length(vd) == 0) next
+                    p <- as.numeric(table(vd)) / length(vd)
+                    parts[[length(parts) + 1]] <- data.frame(
+                        variable = var,
+                        metric   = c("Shannon Entropy", "Simpson Diversity", "Berger-Parker Dominance"),
+                        value    = c(-sum(p * log2(p + 1e-10)), 1 - sum(p^2), max(p)),
+                        stringsAsFactors = FALSE
+                    )
+                }
+                if (length(parts) > 0)
+                    self$results$complexityPlot$setState(private$.imageState(do.call(rbind, parts)))
+            }
+
+            # Level balance (Gini) plot
+            if (isTRUE(self$options$levelBalanceAnalysis)) {
+                parts <- list()
+                for (var in vars) {
+                    vd <- data[[var]]
+                    if (!is.factor(vd)) vd <- as.factor(vd)
+                    vd <- vd[!is.na(vd)]
+                    if (length(vd) == 0) next
+                    parts[[length(parts) + 1]] <- data.frame(
+                        variable = var,
+                        gini     = private$.calculateGini(as.numeric(table(vd))),
+                        stringsAsFactors = FALSE
+                    )
+                }
+                if (length(parts) > 0)
+                    self$results$balanceAnalysisPlot$setState(private$.imageState(do.call(rbind, parts)))
+            }
+        },
+
+        .applyPlotTheme = function(plot, ggtheme) {
+            theme_name <- self$options$plotTheme
+            plot + switch(as.character(theme_name),
+                clinical = ggplot2::theme_minimal(),
+                modern   = ggplot2::theme_light(),
+                classic  = ggplot2::theme_classic(),
+                ggtheme
+            )
+        },
+
+        .plotFactorDistribution = function(image, ggtheme, theme, ...) {
+            st <- image$state
+            if (is.null(st) || is.null(st$data) || nrow(st$data) == 0) return(FALSE)
+            df <- st$data
+
+            plot <- ggplot2::ggplot(
+                    df,
+                    ggplot2::aes(x = stats::reorder(level, count), y = count, fill = variable)) +
+                ggplot2::geom_col(show.legend = length(unique(df$variable)) > 1) +
+                ggplot2::facet_wrap(~ variable, scales = "free") +
+                ggplot2::labs(x = "Factor Level", y = "Count",
+                              title = "Factor Distribution Overview", fill = "Variable")
+
+            if (identical(self$options$plotOrientation, "horizontal"))
+                plot <- plot + ggplot2::coord_flip()
+
+            plot <- private$.applyPlotTheme(plot, ggtheme)
+            print(plot)
+            TRUE
+        },
+
+        .plotTopFactors = function(image, ggtheme, theme, ...) {
+            st <- image$state
+            if (is.null(st) || is.null(st$data) || nrow(st$data) == 0) return(FALSE)
+            df <- st$data
+
+            multi <- length(unique(df$variable)) > 1
+            df$label <- if (multi) paste(df$variable, df$level, sep = ": ") else df$level
+            df <- df[order(df$count, decreasing = TRUE), , drop = FALSE]
+            df$label <- factor(df$label, levels = rev(unique(df$label)))
+
+            plot <- ggplot2::ggplot(df, ggplot2::aes(x = label, y = count, fill = variable)) +
+                ggplot2::geom_col(show.legend = multi) +
+                ggplot2::labs(x = "Factor Level", y = "Count",
+                              title = "Top Factor Levels", fill = "Variable")
+
+            if (identical(self$options$plotOrientation, "horizontal"))
+                plot <- plot + ggplot2::coord_flip()
+
+            plot <- private$.applyPlotTheme(plot, ggtheme)
+            print(plot)
+            TRUE
+        },
+
+        .plotComplexity = function(image, ggtheme, theme, ...) {
+            st <- image$state
+            if (is.null(st) || is.null(st$data) || nrow(st$data) == 0) return(FALSE)
+            df <- st$data
+
+            plot <- ggplot2::ggplot(df, ggplot2::aes(x = variable, y = value, fill = metric)) +
+                ggplot2::geom_col(position = ggplot2::position_dodge()) +
+                ggplot2::labs(x = "Variable", y = "Value",
+                              title = "Factor Complexity Metrics", fill = "Metric")
+
+            if (identical(self$options$plotOrientation, "horizontal"))
+                plot <- plot + ggplot2::coord_flip()
+
+            plot <- private$.applyPlotTheme(plot, ggtheme)
+            print(plot)
+            TRUE
+        },
+
+        .plotBalanceAnalysis = function(image, ggtheme, theme, ...) {
+            st <- image$state
+            if (is.null(st) || is.null(st$data) || nrow(st$data) == 0) return(FALSE)
+            df <- st$data
+
+            plot <- ggplot2::ggplot(
+                    df,
+                    ggplot2::aes(x = stats::reorder(variable, gini), y = gini, fill = gini)) +
+                ggplot2::geom_col(show.legend = FALSE) +
+                ggplot2::scale_y_continuous(limits = c(0, 1)) +
+                ggplot2::labs(x = "Variable", y = "Gini Coefficient",
+                              title = "Level Balance (Gini Coefficient)")
+
+            if (identical(self$options$plotOrientation, "horizontal"))
+                plot <- plot + ggplot2::coord_flip()
+
+            plot <- private$.applyPlotTheme(plot, ggtheme)
+            print(plot)
+            TRUE
+        },
+
         .setError = function(message) {
             # Set error state - htmlEscape inside the helper so all callers
             # are safe by default (defense-in-depth against future callers

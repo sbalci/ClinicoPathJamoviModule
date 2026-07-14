@@ -506,7 +506,11 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 n_clean <- length(clean_measurements)
 
                 # Calculate reference intervals
-                if (method == "nonparametric") {
+                # horn_method falls through to the percentile branch: Horn's approach
+                # yields percentile-based limits (its distinguishing outlier step is
+                # handled separately via the outlier_detection option). Without this,
+                # selecting horn_method left lower_limit/upper_limit undefined -> crash.
+                if (method == "nonparametric" || method == "horn_method") {
                     # Non-parametric method (CLSI C28-A3)
                     lower_p <- (100 - percentile) / 2
                     upper_p <- 100 - lower_p
@@ -544,8 +548,11 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     median_val <- median(clean_measurements)
                     mad_val <- mad(clean_measurements)
 
-                    # Robust reference intervals
-                    factor <- qnorm(1 - (100 - percentile) / 200) * 1.4826 # MAD scaling factor
+                    # Robust reference intervals.
+                    # mad() already applies the 1.4826 normal-consistency constant, so
+                    # only the z-quantile is needed here (multiplying by 1.4826 again
+                    # double-scaled and over-widened the interval by ~48%).
+                    factor <- qnorm(1 - (100 - percentile) / 200)
                     lower_limit <- median_val - factor * mad_val
                     upper_limit <- median_val + factor * mad_val
 
@@ -955,6 +962,239 @@ qualitycontrolClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             </html>"
 
                 self$results$methodExplanation$setContent(html)
+            },
+
+            # ---- Plot render functions (declared via renderFun in .r.yaml) ----
+            # All plot images set requiresData: true, so self$data is available here
+            # (jmvcore populates it in .createPlotObject before the render call).
+            .plotControlChart = function(image, ggtheme, theme, ...) {
+                measurement_var <- self$options$measurement_var
+                if (is.null(measurement_var))
+                    return()
+
+                raw <- jmvcore::toNumeric(self$data[[measurement_var]])
+                valid <- !is.na(raw)
+                measurements <- raw[valid]
+                if (length(measurements) < 3)
+                    return(FALSE)
+
+                time_var <- self$options$time_var
+                if (!is.null(time_var)) {
+                    tt <- jmvcore::toNumeric(self$data[[time_var]])[valid]
+                    if (all(is.na(tt)))
+                        tt <- seq_along(measurements)
+                } else {
+                    tt <- seq_along(measurements)
+                }
+
+                center <- self$options$target_value %||% mean(measurements)
+                sdv <- self$options$target_sd %||% sd(measurements)
+                if (is.na(sdv) || sdv <= 0)
+                    sdv <- sd(measurements)
+
+                if (identical(self$options$control_limits_method, "custom")) {
+                    ucl <- self$options$custom_upper_limit %||% (center + 3 * sdv)
+                    lcl <- self$options$custom_lower_limit %||% (center - 3 * sdv)
+                } else {
+                    ucl <- center + 3 * sdv
+                    lcl <- center - 3 * sdv
+                }
+
+                df <- data.frame(time = tt, value = measurements)
+                df <- df[order(df$time), ]
+                df$ooc <- df$value > ucl | df$value < lcl
+
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = value)) +
+                    ggplot2::geom_hline(yintercept = center, color = "#2E7D32", linewidth = 0.8) +
+                    ggplot2::geom_hline(yintercept = c(center + sdv, center - sdv),
+                                        color = "#9E9E9E", linetype = "dotted") +
+                    ggplot2::geom_hline(yintercept = c(center + 2 * sdv, center - 2 * sdv),
+                                        color = "#FB8C00", linetype = "dashed") +
+                    ggplot2::geom_hline(yintercept = c(ucl, lcl),
+                                        color = "#C62828", linetype = "solid") +
+                    ggplot2::geom_line(color = "#1565C0") +
+                    ggplot2::geom_point(ggplot2::aes(color = ooc), size = 2) +
+                    ggplot2::scale_color_manual(values = c(`FALSE` = "#1565C0", `TRUE` = "#C62828"),
+                                                guide = "none") +
+                    ggplot2::labs(
+                        x = "Sequence / Time",
+                        y = measurement_var,
+                        title = "Levey-Jennings Control Chart",
+                        subtitle = sprintf("Center = %.3f  |  UCL = %.3f  |  LCL = %.3f", center, ucl, lcl)
+                    ) +
+                    ggtheme
+
+                print(plot)
+                return(TRUE)
+            },
+            .plotSigmaMetrics = function(image, ggtheme, theme, ...) {
+                measurement_var <- self$options$measurement_var
+                if (is.null(measurement_var))
+                    return()
+
+                raw <- jmvcore::toNumeric(self$data[[measurement_var]])
+                measurements <- raw[!is.na(raw)]
+                if (length(measurements) < 3)
+                    return(FALSE)
+
+                method <- self$options$sigma_calculation
+                TEa <- self$options$allowable_error
+                target_val <- self$options$target_value %||% mean(measurements)
+                bias_percent <- (abs(mean(measurements) - target_val) / target_val) * 100
+                cv <- (sd(measurements) / mean(measurements)) * 100
+
+                sigma_level <- if (identical(method, "total_error")) {
+                    (TEa - bias_percent) / cv
+                } else if (identical(method, "bias_imprecision")) {
+                    TEa / (bias_percent + 1.65 * cv)
+                } else {
+                    TEa / cv
+                }
+                sigma_level <- max(0, sigma_level)
+
+                df <- data.frame(metric = "Sigma", value = sigma_level)
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = metric, y = value)) +
+                    ggplot2::annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0, ymax = 3,
+                                      fill = "#EF9A9A", alpha = 0.4) +
+                    ggplot2::annotate("rect", xmin = -Inf, xmax = Inf, ymin = 3, ymax = 4,
+                                      fill = "#FFE082", alpha = 0.4) +
+                    ggplot2::annotate("rect", xmin = -Inf, xmax = Inf, ymin = 4, ymax = 6,
+                                      fill = "#A5D6A7", alpha = 0.4) +
+                    ggplot2::annotate("rect", xmin = -Inf, xmax = Inf, ymin = 6, ymax = Inf,
+                                      fill = "#66BB6A", alpha = 0.4) +
+                    ggplot2::geom_col(width = 0.4, fill = "#1565C0") +
+                    ggplot2::geom_hline(yintercept = c(3, 4, 5, 6), linetype = "dashed", color = "grey40") +
+                    ggplot2::coord_flip() +
+                    ggplot2::labs(
+                        x = NULL,
+                        y = "Sigma Level",
+                        title = "Laboratory Sigma Metric",
+                        subtitle = sprintf("Sigma = %.2f  (Bias = %.2f%%, CV = %.2f%%)",
+                                           sigma_level, bias_percent, cv)
+                    ) +
+                    ggtheme
+
+                print(plot)
+                return(TRUE)
+            },
+            .plotMethodValidation = function(image, ggtheme, theme, ...) {
+                measurement_var <- self$options$measurement_var
+                if (is.null(measurement_var))
+                    return()
+
+                raw <- jmvcore::toNumeric(self$data[[measurement_var]])
+                measurements <- raw[!is.na(raw)]
+                if (length(measurements) < 3)
+                    return(FALSE)
+
+                mean_val <- mean(measurements)
+                sd_val <- sd(measurements)
+                target_val <- self$options$target_value
+                bins <- max(10, min(30, ceiling(sqrt(length(measurements)))))
+
+                df <- data.frame(value = measurements)
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = value)) +
+                    ggplot2::geom_histogram(bins = bins, fill = "#90CAF9", color = "white") +
+                    ggplot2::geom_vline(xintercept = mean_val, color = "#1565C0", linewidth = 0.9) +
+                    ggplot2::labs(
+                        x = measurement_var,
+                        y = "Frequency",
+                        title = "Method Validation: Distribution of Measurements",
+                        subtitle = sprintf("Mean = %.3f  |  SD = %.3f  |  CV = %.2f%%",
+                                           mean_val, sd_val, (sd_val / mean_val) * 100)
+                    ) +
+                    ggtheme
+
+                if (!is.null(target_val))
+                    plot <- plot + ggplot2::geom_vline(xintercept = target_val,
+                                                       color = "#C62828", linetype = "dashed", linewidth = 0.9)
+
+                print(plot)
+                return(TRUE)
+            },
+            .plotReferenceIntervals = function(image, ggtheme, theme, ...) {
+                measurement_var <- self$options$measurement_var
+                if (is.null(measurement_var))
+                    return()
+
+                raw <- jmvcore::toNumeric(self$data[[measurement_var]])
+                measurements <- raw[!is.na(raw)]
+                if (length(measurements) < 3)
+                    return(FALSE)
+
+                method <- self$options$reference_method
+                percentile <- as.numeric(self$options$reference_percentile)
+
+                if (identical(method, "parametric")) {
+                    z <- qnorm(1 - (100 - percentile) / 200)
+                    lower <- mean(measurements) - z * sd(measurements)
+                    upper <- mean(measurements) + z * sd(measurements)
+                } else if (identical(method, "robust")) {
+                    # mad() already applies the 1.4826 normal-consistency constant
+                    z <- qnorm(1 - (100 - percentile) / 200)
+                    lower <- median(measurements) - z * mad(measurements)
+                    upper <- median(measurements) + z * mad(measurements)
+                } else {
+                    # nonparametric and horn_method: percentile-based limits
+                    lower_p <- (100 - percentile) / 2
+                    lower <- as.numeric(quantile(measurements, lower_p / 100))
+                    upper <- as.numeric(quantile(measurements, (100 - lower_p) / 100))
+                }
+
+                bins <- max(10, min(30, ceiling(sqrt(length(measurements)))))
+                df <- data.frame(value = measurements)
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = value)) +
+                    ggplot2::geom_histogram(bins = bins, fill = "#B0BEC5", color = "white") +
+                    ggplot2::geom_vline(xintercept = c(lower, upper),
+                                        color = "#C62828", linetype = "dashed", linewidth = 0.9) +
+                    ggplot2::labs(
+                        x = measurement_var,
+                        y = "Frequency",
+                        title = sprintf("Reference Interval (%g%%)", percentile),
+                        subtitle = sprintf("Lower = %.3f  |  Upper = %.3f  |  Method: %s",
+                                           lower, upper, method)
+                    ) +
+                    ggtheme
+
+                print(plot)
+                return(TRUE)
+            },
+            .plotTrendAnalysis = function(image, ggtheme, theme, ...) {
+                measurement_var <- self$options$measurement_var
+                if (is.null(measurement_var))
+                    return()
+
+                raw <- jmvcore::toNumeric(self$data[[measurement_var]])
+                valid <- !is.na(raw)
+                measurements <- raw[valid]
+                if (length(measurements) < 3)
+                    return(FALSE)
+
+                time_var <- self$options$time_var
+                if (!is.null(time_var)) {
+                    tt <- jmvcore::toNumeric(self$data[[time_var]])[valid]
+                    if (all(is.na(tt)))
+                        tt <- seq_along(measurements)
+                } else {
+                    tt <- seq_along(measurements)
+                }
+
+                df <- data.frame(time = tt, value = measurements)
+                df <- df[order(df$time), ]
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = value)) +
+                    ggplot2::geom_line(color = "#90CAF9") +
+                    ggplot2::geom_point(color = "#1565C0", size = 2) +
+                    ggplot2::geom_smooth(method = "lm", formula = y ~ x, se = TRUE, color = "#C62828") +
+                    ggplot2::labs(
+                        x = "Sequence / Time",
+                        y = measurement_var,
+                        title = "Trend Analysis",
+                        subtitle = "Measurements over time with linear regression trend"
+                    ) +
+                    ggtheme
+
+                print(plot)
+                return(TRUE)
             },
 
             # Helper functions for Westgard rules

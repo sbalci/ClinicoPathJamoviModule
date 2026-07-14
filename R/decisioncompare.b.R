@@ -1,7 +1,7 @@
 #' @title Compare Medical Decision Tests
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #'
 #' @return An \code{R6} class generator object for the \code{decisioncompareClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

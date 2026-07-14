@@ -33,7 +33,11 @@ jforesterClass <- R6::R6Class(
             # Prepare data for forest plot
             data <- private$.prepareForestData()
             if (is.null(data)) return()
-            
+
+            # Provide data to the plot renderer via state so the plot
+            # persists across re-renders (e.g. resize) without a full re-run
+            self$results$forest_plot$setState(data)
+
             # Populate results tables
             private$.populateDataTable(data)
             private$.populateSummaryStats(data)
@@ -371,7 +375,10 @@ jforesterClass <- R6::R6Class(
         },
         
         .plot_forest = function(image, ggtheme, theme, ...) {
-            if (is.null(private$.forest_data)) return()
+            forest_data <- image$state
+            if (is.null(forest_data))
+                forest_data <- private$.forest_data
+            if (is.null(forest_data)) return()
             
             # Check if we can create a forest plot with available packages
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
@@ -385,8 +392,8 @@ jforesterClass <- R6::R6Class(
             }
             
             tryCatch({
-                data <- private$.forest_data
-                
+                data <- forest_data
+
                 # Prepare data for plotting
                 data$study_num <- nrow(data):1  # Reverse order for plotting
                 

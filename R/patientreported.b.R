@@ -18,7 +18,9 @@ patientreportedClass <- R6::R6Class(
         .group_results = NULL,
         .longitudinal_results = NULL,
         .missing_patterns = NULL,
-        
+        .quality_results = NULL,
+        .clinical_interpretation = NULL,
+
         .init = function() {
             if (length(self$options$scale_items) == 0) {
                 self$results$scale_overview$setNote("note", "At least one scale item is required")
@@ -215,8 +217,9 @@ patientreportedClass <- R6::R6Class(
                 # Cronbach's alpha
                 alpha_result <- psych::alpha(scale_data, na.rm = TRUE)
                 
-                # Item-total correlations
-                item_stats <- psych::item.stats(scale_data)
+                # Item-total correlations (from the alpha result; psych has no
+                # standalone item.stats() function)
+                item_stats <- alpha_result$item.stats
                 
                 # Store reliability results
                 private$.reliability_results <- list(
@@ -634,6 +637,39 @@ patientreportedClass <- R6::R6Class(
             
             print(p)
             TRUE
+        },
+
+        # --- Render stubs for declared-but-unimplemented plots ---------------
+        # These images are declared in patientreported.r.yaml with a renderFun.
+        # jamovi calls do.call(private[[renderFun]], ...) for every visible image;
+        # a missing method throws "attempt to apply non-function". Until the real
+        # plots are implemented, return FALSE (no plot) so the analysis is safe.
+        .plot_reliability = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_factor_analysis = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_group_comparison = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_longitudinal = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_change_analysis = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_responder_analysis = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_correlation_heatmap = function(image, ggtheme, theme, ...) {
+            return(FALSE)
         }
     )
 )

@@ -108,6 +108,11 @@ lollipopClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Reset notices for new analysis
             private$.noticeList <- list()
 
+            # Wire user-controlled plot dimensions to the Image output
+            if (!is.null(self$options$width) && !is.null(self$options$height)) {
+                self$results$plot$setSize(self$options$width, self$options$height)
+            }
+
             # Check for required packages
             missing_packages <- c()
             if (!requireNamespace("ggplot2", quietly = TRUE)) {

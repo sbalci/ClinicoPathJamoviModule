@@ -5,7 +5,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
 #' @import tibble
 #'

@@ -5,7 +5,6 @@
 #' @importFrom stats median sd quantile
 #' @importFrom utils head tail
 #' @importFrom summarytools dfSummary freq descr ctable
-
 toolssummaryClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "toolssummaryClass",
     inherit = toolssummaryBase,

@@ -62,18 +62,21 @@ items:
       type: Image
       visible: (show_survival_curves)
       requiresData: true
+      renderFun: .plotSurvival
 
     - name: permutationDistributionPlot
       title: "Permutation Test Statistics Distribution"
       type: Image
       visible: (show_permutation_distribution)
       requiresData: true
+      renderFun: .plotPermutationDistribution
 
     - name: testProgressionPlot
       title: "P-value Progression"
       type: Image
       visible: (show_test_progression)
       requiresData: true
+      renderFun: .plotTestProgression
 
     - name: analysisSummary
       title: Analysis Summary

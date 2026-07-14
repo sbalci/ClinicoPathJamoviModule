@@ -85,10 +85,11 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 jmvcore::reject(.("The 'ggpubr' package is required. Install with: install.packages('ggpubr')"))
             }
 
+            plotInfoHtml <- private$.generatePlotInfo()
             if (self$options$showExplanations) {
-                private$.generateExplanations()
+                plotInfoHtml <- paste0(private$.generateExplanations(), plotInfoHtml)
             }
-            private$.generatePlotInfo()
+            self$results$plotInfo$setContent(plotInfoHtml)
             private$.populateDescriptives()
             private$.populateCorrelation()
 
@@ -1308,7 +1309,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             html <- paste0(html, "<p><strong>Palette:</strong> ", self$options$palette,
                           " | <strong>Theme:</strong> ", self$options$theme, "</p></div>")
 
-            self$results$plotInfo$setContent(html)
+            return(html)
         },
 
         .generateWelcomeMessage = function() {
@@ -1426,7 +1427,7 @@ jjpubrClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ), "</p>")
             }
 
-            self$results$plotInfo$setContent(explanation)
+            return(explanation)
         }
     )
 )

@@ -44,12 +44,20 @@ spatialbayesiansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             # 3. Model Summary
             tableSummary <- self$results$modelSummary
             tableSummary$addRow(rowKey=1, values=list(parameter="Observations", value=as.character(nrow(mydata)), interpretation="Total sample size"))
-            # TODO (correctness): as.numeric(mydata[[statusVar]]) == 1 counts the FIRST factor level
-            #   (level index 1), not necessarily the event - and a naive jmvcore::toNumeric() swap is
-            #   unsafe (honors the factor's values/labels → 0/1 or NA for char-level factors). Derive
-            #   the event count from an explicit event level (require an eventLevel option, or compare
-            #   mydata[[statusVar]] == <event_level>) instead of positional level indices.
-            tableSummary$addRow(rowKey=2, values=list(parameter="Events", value=as.character(sum(as.numeric(mydata[[statusVar]]) == 1)), interpretation="Number of events"))
+            # Count events using the explicit event level (statusLevel) when supplied,
+            # avoiding the off-by-one of positional factor indices (as.numeric(factor)==1
+            # counts the FIRST level, not the event). Falls back to the positive/last code
+            # (highest numeric value / last factor level) when no event level is chosen.
+            statusCol <- mydata[[statusVar]]
+            statusLevel <- self$options$statusLevel
+            if (!is.null(statusLevel)) {
+                nEvents <- sum(as.character(statusCol) == as.character(statusLevel), na.rm = TRUE)
+            } else if (is.factor(statusCol)) {
+                nEvents <- sum(as.integer(statusCol) == length(levels(statusCol)), na.rm = TRUE)
+            } else {
+                nEvents <- sum(statusCol == max(statusCol, na.rm = TRUE), na.rm = TRUE)
+            }
+            tableSummary$addRow(rowKey=2, values=list(parameter="Events", value=as.character(nEvents), interpretation="Number of events"))
             tableSummary$addRow(rowKey=3, values=list(parameter="Spatial Model", value=self$options$spatial_model, interpretation="Selected spatial structure"))
 
             # TODO (stub): RELEASE BLOCKER - this is a placeholder, NOT a real spatial Bayesian model.
@@ -120,5 +128,20 @@ spatialbayesiansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
                 improving estimates in regions with sparse data ('disease mapping').</p>
             ")
             self$results$methodsExplanation$setContent(explanation)
-        })
+        },
+
+        # Render-function stubs for the Image outputs declared in the .r.yaml
+        # (renderFun: .plotSpatialMaps, etc.). This baseline implementation sets no
+        # plot state, so each returns FALSE (no image drawn). Defining them prevents an
+        # "attempt to apply non-function" crash if jamovi requests a render for these
+        # always-visible images via the interactive (.render/.createPlotObject) path,
+        # which does not guard against a missing method.
+        .plotSpatialMaps = function(image, ...) return(FALSE),
+        .plotSurvivalMaps = function(image, ...) return(FALSE),
+        .plotHazardMaps = function(image, ...) return(FALSE),
+        .plotResidualMaps = function(image, ...) return(FALSE),
+        .plotConvergenceDiagnostics = function(image, ...) return(FALSE),
+        .plotPosteriorDistributions = function(image, ...) return(FALSE),
+        .plotSpatialCorrelation = function(image, ...) return(FALSE)
+    )
 )

@@ -313,7 +313,7 @@ ihcpredictResults <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         "ihcpredictResults",
         inherit = jmvcore::Group,
         active = list(
-            instructions = function() private$.items[[" instructions"]],
+            instructions = function() private$.items[["instructions"]],
             modelSummary = function() private$.items[["modelSummary"]],
             validationResults = function() private$.items[["validationResults"]],
             predictions = function() private$.items[["predictions"]],

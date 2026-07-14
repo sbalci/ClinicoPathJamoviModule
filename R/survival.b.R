@@ -192,7 +192,7 @@
 #' 
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @import survival
 #' @import survminer
 #' @import finalfit
@@ -1750,7 +1750,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 medianSummary <- c(km_fit_median_definition,
                                    "The median survival time is when 50% of subjects have experienced the event.",
                                    "This means that 50% of subjects in this group survived longer than this time period.",
-                                   "Note: Confidence intervals are calculated using the log-log transformation method for improved accuracy with censored data (not plain Greenwood formula)."
+                                   "Note: Confidence intervals are calculated on the log scale (survfit default, conf.type = 'log') using Greenwood's variance estimate, which improves accuracy with censored data."
                                    )
 
                 self$results$medianSummary$setContent(medianSummary)
@@ -2438,7 +2438,7 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 survTableSummary <- htmltools::htmlEscape(survTableSummary)
 
                 survTableSummaryWithNote <- c(survTableSummary,
-                                              "Note: Confidence intervals for survival probabilities are calculated using the log-log transformation method rather than the plain Greenwood formula for better performance with censored survival data.")
+                                              "Note: Confidence intervals for survival probabilities are calculated on the log scale (survfit default, conf.type = 'log') using Greenwood's variance estimate, for better performance with censored survival data.")
                 
                 self$results$survTableSummary$setContent(survTableSummaryWithNote)
 

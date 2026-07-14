@@ -4,7 +4,7 @@
 #' @import survival
 #' @import survminer
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import lubridate
 #' @return An \code{R6} class generator object for the \code{jiwillsurviveClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -481,23 +481,27 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                 summary_fit <- summary(fit)
             }
             
-            # Create table data
-            table_data <- data.frame(
-                Time = summary_fit$time,
-                N_Risk = summary_fit$n.risk,
-                N_Event = summary_fit$n.event,
-                Survival = round(summary_fit$surv, 3),
-                SE = round(summary_fit$std.err, 3),
-                Lower_CI = round(summary_fit$lower, 3),
-                Upper_CI = round(summary_fit$upper, 3)
-            )
-            
+            # Determine group labels (strata) when present
             if (!is.null(summary_fit$strata)) {
-                table_data$Group <- rep(names(summary_fit$strata), summary_fit$strata)
+                groups <- rep(names(summary_fit$strata), summary_fit$strata)
+            } else {
+                groups <- rep("Overall", length(summary_fit$time))
             }
-            
-            # Set the table
-            self$results$survivalTable$setContent(table_data)
+
+            # Populate the Table item row by row (Table has no setContent method)
+            table <- self$results$survivalTable
+            for (i in seq_along(summary_fit$time)) {
+                table$addRow(rowKey = i, values = list(
+                    Time     = summary_fit$time[i],
+                    N_Risk   = as.integer(summary_fit$n.risk[i]),
+                    N_Event  = as.integer(summary_fit$n.event[i]),
+                    Survival = round(summary_fit$surv[i], 3),
+                    SE       = round(summary_fit$std.err[i], 3),
+                    Lower_CI = round(summary_fit$lower[i], 3),
+                    Upper_CI = round(summary_fit$upper[i], 3),
+                    Group    = groups[i]
+                ))
+            }
         },
         
         .createKMStats = function(fit) {
@@ -537,21 +541,27 @@ jiwillsurviveClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
             
             # Create summary table similar to survival table
             summary_fit <- summary(fit)
-            
-            table_data <- data.frame(
-                Time = summary_fit$time,
-                N_Risk = summary_fit$n.risk,
-                N_Event = summary_fit$n.event,
-                Survival = round(summary_fit$surv, 3),
-                Lower_CI = round(summary_fit$lower, 3),
-                Upper_CI = round(summary_fit$upper, 3)
-            )
-            
+
+            # Determine group labels (strata) when present
             if (!is.null(summary_fit$strata)) {
-                table_data$Group <- rep(names(summary_fit$strata), summary_fit$strata)
+                groups <- rep(names(summary_fit$strata), summary_fit$strata)
+            } else {
+                groups <- rep("Overall", length(summary_fit$time))
             }
-            
-            self$results$kmTable$setContent(table_data)
+
+            # Populate the Table item row by row (Table has no setContent method)
+            table <- self$results$kmTable
+            for (i in seq_along(summary_fit$time)) {
+                table$addRow(rowKey = i, values = list(
+                    Time     = summary_fit$time[i],
+                    N_Risk   = as.integer(summary_fit$n.risk[i]),
+                    N_Event  = as.integer(summary_fit$n.event[i]),
+                    Survival = round(summary_fit$surv[i], 3),
+                    Lower_CI = round(summary_fit$lower[i], 3),
+                    Upper_CI = round(summary_fit$upper[i], 3),
+                    Group    = groups[i]
+                ))
+            }
         },
         
         .createInterpretation = function(fit, data) {

@@ -1103,7 +1103,7 @@ labinterpretClass <- R6::R6Class(
             # Create trend visualization for first few lab values
             plot_data <- data.frame()
             
-            for (i in seq_along(min(length(labValues), 4))) {  # Limit to 4 tests for readability
+            for (i in seq_len(min(length(labValues), 4))) {  # Limit to 4 tests for readability
                 labVar <- labValues[i]
                 labData <- data[[labVar]]
                 

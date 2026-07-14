@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import glue
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #'
 #' @return An \code{R6} class generator object for the \code{pcacomponenttestClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -408,7 +408,7 @@ pcacomponenttestClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.ciHigh[i] * 100, private$.ciHigh[i])
                 row[['pvalue']] <- private$.pvalues[i]
                 row[['adjpvalue']] <- private$.adjPvalues[i]
-                row[['significant']] <- ifelse(private$.adjPvalues[i] < 0.05, '', '')
+                row[['significant']] <- if (!is.na(private$.adjPvalues[i]) && private$.adjPvalues[i] < 0.05) '*' else ''
 
                 table$addRow(rowKey = i, values = row)
             }

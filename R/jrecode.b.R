@@ -42,7 +42,7 @@ jrecodeClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # then single quotes - produces valid R single-quoted string literals
             # for user values that may contain `\` (e.g., Windows paths like C:\Users)
             x <- gsub("\\", "\\\\", x, fixed = TRUE)
-            gsub("'", "\\\\'", x, fixed = TRUE)
+            gsub("'", "\\'", x, fixed = TRUE)
         },
 
         .init = function() {

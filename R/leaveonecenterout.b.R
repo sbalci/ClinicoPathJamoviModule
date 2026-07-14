@@ -784,7 +784,7 @@ leaveonecenteroutClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
                     ggplot2::scale_size_continuous(name = "N (test)", range = c(2, 6)) +
                     ggplot2::labs(
                         title = paste0("Leave-One-Center-Out: ", metric_label, " per Center"),
-                        x = metric_label, y = "Held-Out Center") +
+                        x = metric_label, y = "Held-Out Center")
                 x_lo <- min(c(df$ci_lower, df$auc), na.rm = TRUE) - 0.05
                 if (self$options$modelType != "linear") x_lo <- max(0, x_lo)
                 x_hi <- min(1, max(c(df$ci_upper, df$auc), na.rm = TRUE) + 0.05)

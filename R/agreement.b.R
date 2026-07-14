@@ -2,9 +2,9 @@
 #' @return Table
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom irr kappa2 kappam.fleiss agree
-#' @importFrom dplyr select group_by count
+#' @importFrom dplyr group_by count
 #' @importFrom htmlTable htmlTable
 #' @importFrom glue glue
 #'

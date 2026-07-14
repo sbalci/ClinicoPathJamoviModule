@@ -2,7 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag select left_join group_modify transmute bind_rows
+#' @importFrom dplyr mutate filter group_by arrange summarise n ungroup lead lag left_join group_modify transmute bind_rows
 #' @importFrom tidyr pivot_longer
 #' @importFrom stats binom.test
 #' @export
@@ -201,7 +201,8 @@ irecistClass <- R6::R6Class(
                         private$.populateSummaryStats()
                     }
 
-                    if (self$options$calculateORR || self$options$calculateDCR) {
+                    if (self$options$calculateORR || self$options$calculateDCR ||
+                        self$options$showPseudoprogressionRate) {
                         private$.populateEfficacyMetrics()
                     }
 
@@ -1108,8 +1109,8 @@ irecistClass <- R6::R6Class(
             p <- ggplot(waterfallData, aes(x = patientOrder, y = bestChange, fill = bestResponse)) +
                 geom_bar(stat = "identity", width = 0.8) +
                 geom_hline(yintercept = 0, linetype = "solid", color = "black") +
-                geom_hline(yintercept = -30, linetype = "dashed", color = "blue", alpha = 0.5) +
-                geom_hline(yintercept = 20, linetype = "dashed", color = "red", alpha = 0.5) +
+                geom_hline(yintercept = -self$options$prThreshold, linetype = "dashed", color = "blue", alpha = 0.5) +
+                geom_hline(yintercept = self$options$pdThreshold, linetype = "dashed", color = "red", alpha = 0.5) +
                 scale_fill_manual(values = colors, name = "Best Response") +
                 labs(
                     title = "Waterfall Plot - Best Response by iRECIST",
@@ -1192,8 +1193,8 @@ irecistClass <- R6::R6Class(
                 geom_line(alpha = 0.6, color = "steelblue") +
                 geom_point(alpha = 0.4, size = 1.5) +
                 geom_hline(yintercept = 0, linetype = "solid", color = "black") +
-                geom_hline(yintercept = -30, linetype = "dashed", color = "blue", alpha = 0.5) +
-                geom_hline(yintercept = 20, linetype = "dashed", color = "red", alpha = 0.5) +
+                geom_hline(yintercept = -self$options$prThreshold, linetype = "dashed", color = "blue", alpha = 0.5) +
+                geom_hline(yintercept = self$options$pdThreshold, linetype = "dashed", color = "red", alpha = 0.5) +
                 labs(
                     title = "Spider Plot - Individual Tumor Trajectories",
                     x = "Time from Baseline",

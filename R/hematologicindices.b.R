@@ -271,7 +271,7 @@ hematologicindicesClass <- R6::R6Class(
                 if (is.factor(sraw) || is.character(sraw)) {
                     if (is.null(ev)) ev <- levels(as.factor(sraw))[nlevels(as.factor(sraw))]
                     status <- as.integer(as.character(sraw) == ev)
-                } else { sn <- jmvcore::toNumeric(sraw); status <- as.integer(sn == max(sn, na.rm = TRUE)) }
+                } else { sn <- jmvcore::toNumeric(sraw); status <- as.integer(sn == if (!is.null(ev)) suppressWarnings(as.numeric(ev)) else max(sn, na.rm = TRUE)) }
                 df <- data.frame(idx, time, status)
                 df <- df[stats::complete.cases(df), , drop = FALSE]
                 cut <- if (opt$splitMethod == "optimal") private$.optimalCut(df$idx, df$time, df$status) else stats::median(df$idx)

@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import glue
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
 #' @import pracma
 #' @import scales
@@ -557,7 +557,7 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
                         cihigh = row$ci_high,
                         pvalue = row$pvalue,
                         adjpvalue = row$adj_pvalue,
-                        significant = ifelse(row$adj_pvalue < 0.05, "", "")
+                        significant = ifelse(!is.na(row$adj_pvalue) & row$adj_pvalue < 0.05, "*", "")
                     ))
                 }
             },
@@ -616,7 +616,7 @@ An Alternative Permutation Strategy. <i>Psychometrika</i>, 76(3):440-460. doi:10
                         aes(
                             x = .data$variable_display,
                             y = .data$original * 1.1,
-                            label = ""
+                            label = "*"
                         ),
                         size = 6, color = "gold3"
                     )

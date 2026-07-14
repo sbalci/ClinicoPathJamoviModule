@@ -867,7 +867,7 @@ classificationClass <- if (requireNamespace("jmvcore")) {
                     positive_class <- colnames(prob_mat)[1]
                 }
 
-                roc_obj <- roc(truth_factor, prob_col, levels = levels(truth_factor), direction = "<", positive = positive_class)
+                roc_obj <- pROC::roc(truth_factor, prob_col, levels = levels(truth_factor), direction = "<", positive = positive_class)
 
                 # Create data frame for ggplot
                 roc_data <- data.frame(

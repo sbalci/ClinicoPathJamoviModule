@@ -817,10 +817,14 @@ plscoxClass <- R6::R6Class(
                                     ))
                                     boot_cox <- survival::coxph(boot_formula, data = boot_cox_data, method = tie_method)
 
-                                    # Apparent C-index on bootstrap sample
-                                    boot_apparent_c <- survival::concordance(
-                                        boot_formula, data = boot_cox_data, reverse = TRUE
-                                    )$concordance
+                                    # Apparent C-index on bootstrap sample.
+                                    # Use the fitted Cox object's concordance for the
+                                    # JOINT model C-index: passing a multi-term formula
+                                    # to concordance() returns a per-covariate VECTOR
+                                    # (only Comp1 would survive the scalar assignment),
+                                    # which would not match the LP-based boot_test_c
+                                    # below and would corrupt the optimism estimate.
+                                    boot_apparent_c <- survival::concordance(boot_cox)$concordance
 
                                     # Step 2b: Apply bootstrap model to ORIGINAL data
                                     # Project original data through bootstrap PLS weights
@@ -929,7 +933,14 @@ plscoxClass <- R6::R6Class(
                                     paste(colnames(perm_cox_data)[3:ncol(perm_cox_data)], collapse = " + ")
                                 ))
 
-                                perm_c <- survival::concordance(perm_formula, data = perm_cox_data, reverse = TRUE)$concordance
+                                # Joint model C-index from the fitted Cox object.
+                                # A multi-term formula passed to concordance() returns
+                                # a per-covariate VECTOR (only Comp1 would be kept on
+                                # scalar assignment), which would not match the observed
+                                # model C-index (summary(cox_model)$concordance) and
+                                # would invalidate the permutation null distribution.
+                                perm_cox <- survival::coxph(perm_formula, data = perm_cox_data, method = tie_method)
+                                perm_c <- survival::concordance(perm_cox)$concordance
                                 valid_perms <- valid_perms + 1
                                 perm_c_indices[valid_perms] <- perm_c
                             }

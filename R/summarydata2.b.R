@@ -338,7 +338,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
 
                         # Generate date summary
                         date_summary <- paste0(
-                            "<strong>", myvar, "</strong> (Date Variable)<br>",
+                            "<strong>", htmltools::htmlEscape(myvar), "</strong> (Date Variable)<br>",
                             "Format detected: ", format_used, "<br>",
                             "n = ", n_valid, ", missing = ", n_missing, " (", round(n_missing/total_n*100, 1), "%)<br>",
                             "Date range: ", as.character(min_date), " to ", as.character(max_date), "<br>",
@@ -426,7 +426,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                     }
 
                     dist_text <- paste0(
-                        "<br><em>Distribution Diagnostics for ", myvar ,":</em> Shapiro-Wilk p-value = ", p_val,
+                        "<br><em>Distribution Diagnostics for ", htmltools::htmlEscape(myvar) ,":</em> Shapiro-Wilk p-value = ", p_val,
                         "; Skewness = ", skew_val, "; Kurtosis = ", kurt_val,
                         " (Data ", norm_status, ")."
                     )
@@ -436,7 +436,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 if (summary_format == "sumvar") {
                     # sumvar-style comprehensive output
                     summary_text <- paste0(
-                        "<strong>", myvar, "</strong><br>",
+                        "<strong>", htmltools::htmlEscape(myvar), "</strong><br>",
                         "n = ", n_valid, ", missing = ", n_missing, " (", round(n_missing/total_n*100, 1), "%)<br>",
                         "Mean: ", round(mean(valid_data), 2), " (95% CI: ", ci_lower, " - ", ci_upper, ")<br>",
                         "Median: ", round(median(valid_data), 2), " (Q1: ", q1, ", Q3: ", q3, ")<br>",
@@ -759,6 +759,7 @@ summarydata2Class <- if (requireNamespace("jmvcore")) R6::R6Class("summarydata2C
                 for (col_name in names(df_data)) {
                     value <- df_data[i, col_name]
                     if (is.na(value)) value <- "-"
+                    value <- htmltools::htmlEscape(value)
                     html <- paste0(html, "<td style='padding: 10px; border: 1px solid ", style_config$border_color, "; text-align: center;'>", value, "</td>")
                 }
                 html <- paste0(html, "</tr>")

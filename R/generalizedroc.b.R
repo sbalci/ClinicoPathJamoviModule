@@ -113,17 +113,17 @@ generalizedrocClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     private$.populateDiagnostics()
                 }
 
-                # If tram package is enabled, use covariate-adjusted ROC
+                # Covariate-adjusted ROC via the tram package is not yet
+                # available: its result outputs (rocTable, covariateRocPlot,
+                # aucVsCovariatePlot) are not defined in generalizedroc.r.yaml,
+                # so the path crashes on undefined outputs, and the AUC values it
+                # would produce are hard-coded placeholders (0.75). Guard it so it
+                # neither crashes nor reports fabricated statistics. Enabling it
+                # requires new .r.yaml outputs plus a real AUC computation.
                 if (self$options$use_tram %||% FALSE) {
-                    tryCatch(
-                        {
-                            private$.fitTramModel()
-                        },
-                        error = function(e) {
-                            stop(paste("tram model error:", e$message))
-                        }
+                    jmvcore::reject(
+                        "Covariate-adjusted ROC (tram) is not yet available. Please uncheck 'Use Covariate-Adjusted ROC (tram)' to run the standard generalized ROC analysis."
                     )
-                    return()
                 }
 
                 # Calculate generalized ROC

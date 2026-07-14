@@ -6,7 +6,6 @@
 #' @importFrom stats rbeta quantile
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom scales percent
-
 bayesdcaClass <- if (requireNamespace("jmvcore"))
     R6::R6Class(
         "bayesdcaClass",

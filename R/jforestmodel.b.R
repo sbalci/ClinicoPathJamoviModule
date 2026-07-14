@@ -515,7 +515,10 @@ jforestmodelClass <- R6::R6Class(
                 
                 # Apply color scheme and styling
                 plot <- private$.applyColorScheme(plot)
-                
+
+                # Apply point/line sizing (honors point_size and line_size options)
+                plot <- private$.applyPointLineSize(plot)
+
                 # Apply panel width ratio if specified
                 if (self$options$panel_width_ratio != "1:1:1") {
                     plot <- private$.applyPanelRatio(plot)
@@ -584,10 +587,6 @@ jforestmodelClass <- R6::R6Class(
                             if (is.null(layer$aes_params$colour)) {
                                 layer$aes_params$colour <- color_value
                             }
-                            # Apply point size if specified
-                            if (is.null(layer$aes_params$size) && self$options$point_size != 2) {
-                                layer$aes_params$size <- self$options$point_size
-                            }
                         }
                         return(layer)
                     })
@@ -599,7 +598,38 @@ jforestmodelClass <- R6::R6Class(
             
             return(plot)
         },
-        
+
+        .applyPointLineSize = function(plot) {
+            # Honor point_size and line_size options via layer post-processing.
+            # Only override when the user changed the value from its default so
+            # forestmodel's native sizing is preserved for default settings.
+            tryCatch({
+                change_point <- !is.null(self$options$point_size) && self$options$point_size != 2
+                change_line  <- !is.null(self$options$line_size) && self$options$line_size != 0.5
+
+                if (!change_point && !change_line) return(plot)
+
+                plot$layers <- lapply(plot$layers, function(layer) {
+                    geom <- layer$geom
+                    if (change_point && inherits(geom, "GeomPoint")) {
+                        layer$aes_params$size <- self$options$point_size
+                    }
+                    if (change_line && (inherits(geom, "GeomErrorbarh") ||
+                                        inherits(geom, "GeomErrorbar") ||
+                                        inherits(geom, "GeomSegment") ||
+                                        inherits(geom, "GeomLinerange"))) {
+                        layer$aes_params$linewidth <- self$options$line_size
+                    }
+                    return(layer)
+                })
+
+                return(plot)
+
+            }, error = function(e) {
+                return(plot)  # Return original plot if sizing fails
+            })
+        },
+
         .applyPanelRatio = function(plot) {
             # Panel width ratio implementation
             # Note: This is complex with forestmodel and may require plot reconstruction

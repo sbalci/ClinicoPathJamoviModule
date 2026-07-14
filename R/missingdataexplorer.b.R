@@ -40,7 +40,7 @@ missingdataexplorerClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R
                 private$.data_subset <- data_subset
                 
             }, error = function(e) {
-                jmvcore::reject("Analysis error: {}", e$message)
+                jmvcore::reject("Analysis error: {}", code = NULL, e$message)
             })
         },
 

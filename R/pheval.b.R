@@ -12,6 +12,10 @@ phevalClass <- R6::R6Class(
     "phevalClass",
     inherit = phevalBase,
     private = list(
+        # Declared field: assigned in .preparePlotTheme(); must be declared
+        # here or R6 lock_objects=TRUE throws "cannot add bindings to a
+        # locked environment" when .init() calls .preparePlotTheme().
+        .plotTheme = NULL,
         .init = function() {
             if (is.null(self$data) || is.null(self$options$elapsedtime) || is.null(self$options$outcome)) {
                 self$results$todo$setContent(

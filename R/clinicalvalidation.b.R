@@ -10,7 +10,6 @@
 #' @importFrom stats residuals predict hatvalues coef lowess qqnorm qqline aggregate
 #' @importFrom graphics par plot abline lines text plot.new
 #' @importFrom survival cox.zph
-
 clinicalvalidationClass <- R6::R6Class(
   "clinicalvalidationClass",
   inherit = clinicalvalidationBase,

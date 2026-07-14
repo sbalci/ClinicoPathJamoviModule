@@ -35,11 +35,11 @@
 #' @import jmvcore
 #' @importFrom survival coxph Surv cox.zph
 #' @importFrom survminer ggcoxdiagnostics ggcoxzph
-#' @importFrom dplyr select all_of
+#' @importFrom dplyr all_of
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom car vif
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #'
 
 coxdiagnosticsClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {

@@ -103,6 +103,37 @@ mendelianrandomizationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6
             </ul>"
 
             self$results$interpretation$setContent(interp_html)
+
+            # MR assumptions check guide
+            assumptions_html <- "<h3>MR Assumptions Check</h3>
+
+            <p>Valid Mendelian Randomization rests on three core instrumental
+            variable (IV) assumptions. Evaluate each before trusting causal
+            estimates:</p>
+
+            <h4>1. Relevance (IV1)</h4>
+            <ul>
+            <li>Instruments must be strongly associated with the exposure.</li>
+            <li>Check: genome-wide significance (p &lt; 5e-8) and per-SNP F-statistic &gt; 10.</li>
+            <li>Weak instruments bias estimates toward the confounded observational association.</li>
+            </ul>
+
+            <h4>2. Independence / Exchangeability (IV2)</h4>
+            <ul>
+            <li>Instruments must be independent of confounders of the exposure-outcome relationship.</li>
+            <li>Check: population stratification control, ancestry matching, no association with known confounders.</li>
+            </ul>
+
+            <h4>3. Exclusion Restriction (IV3)</h4>
+            <ul>
+            <li>Instruments affect the outcome only through the exposure (no horizontal pleiotropy).</li>
+            <li>Check: MR-Egger intercept test, heterogeneity (Cochran Q), and consistency across methods.</li>
+            </ul>
+
+            <p><b>Reminder:</b> These assumptions cannot all be verified from data
+            alone; triangulate statistical checks with biological plausibility.</p>"
+
+            self$results$assumptions$setContent(assumptions_html)
         },
 
         #---------------------------------------------

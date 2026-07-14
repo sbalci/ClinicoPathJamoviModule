@@ -10,7 +10,7 @@
 #' @importFrom splines ns
 #' @importFrom rms rcs
 #' @importFrom stats lm glm AIC BIC logLik quantile median
-#' @importFrom dplyr mutate select filter
+#' @importFrom dplyr mutate filter
 #'
 #' @return An \code{R6} class generator object for the \code{continuousrelationshipClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

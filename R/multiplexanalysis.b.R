@@ -12,6 +12,12 @@ multiplexanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
         "multiplexanalysisClass",
         inherit = multiplexanalysisBase,
         private = list(
+            # Declared private fields (object is lock_objects=TRUE; writing to an
+            # undeclared field throws "cannot add bindings to a locked environment").
+            .cluster_data = NULL,
+            .pca_data = NULL,
+            .loadings_data = NULL,
+            .spatial_data = NULL,
             .init = function() {
                 if (is.null(self$data) || length(self$options$marker_vars) == 0) {
                     self$results$interpretation$setContent(

@@ -568,7 +568,19 @@ mixedcoxClass <- if (requireNamespace('jmvcore'))
           self$results$clusterSurvivalPlot$setState(NULL)
         }
       },
-      
+
+      # Render residual analysis plot
+      # renderFun referenced by `residualPlot` in mixedcox.r.yaml. The residual
+      # plot is not yet implemented (no state is ever set for this image), so this
+      # renderer is intentionally a no-op returning FALSE. It exists so the
+      # declared renderFun resolves to a real method - otherwise, when a user
+      # enables `residual_analysis` and the image becomes visible, jamovi would
+      # invoke a missing method and raise "attempt to apply non-function".
+      # TODO (stub): implement alongside the other plot stubs (see .plotFixedEffects).
+      .plotResiduals = function(image, ggtheme, theme, ...) {
+        return(FALSE)
+      },
+
       # Generate natural language summaries
       .generateSummaries = function(model_results) {
         summary_text <- paste0(

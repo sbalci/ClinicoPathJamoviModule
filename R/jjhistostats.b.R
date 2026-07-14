@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import rlang
-#' @import purrr
+#' @rawNamespace import(purrr, except = c(discard, flatten, flatten_chr, flatten_dbl, flatten_int, flatten_lgl, flatten_raw, invoke, splice))
 #' @import glue
 #' @import ggstatsplot
 #' @importFrom digest digest
@@ -673,7 +673,9 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     
                     # Generate clinical warnings and performance warnings
                     warnings <- private$.generateClinicalWarnings(mydata, self$options$dep)
-                    performance_warnings <- private$.generatePerformanceWarnings(mydata, self$options)
+                    # Use processed options so clinical-preset overrides to typestatistics
+                    # are honored here (consistent with all other reads via private$.option()).
+                    performance_warnings <- private$.generatePerformanceWarnings(mydata, private$.prepareOptions())
                     
                     all_warnings <- c(warnings, performance_warnings)
                     

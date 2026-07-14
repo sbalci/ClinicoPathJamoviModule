@@ -21,7 +21,7 @@
 #' @importFrom grafify posthoc_Levelwise
 #' @importFrom grafify posthoc_vsRef
 #' @importFrom grafify posthoc_Trends_Levelwise
-#' @importFrom dplyr select
+
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @importFrom dplyr mutate
@@ -82,7 +82,8 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     "<br>Please install it using: install.packages('grafify')",
                     "</div>"
                 )
-                self$results$main_plot$setContent(error_msg)
+                self$results$todo$setContent(error_msg)
+                self$results$todo$setVisible(TRUE)
                 return()
             }
             
@@ -151,12 +152,14 @@ grafifyClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .process_data = function(raw_data) {
             # Clean and prepare data
             processed_data <- raw_data
-            
-            # Clean variable names
-            if (requireNamespace("janitor", quietly = TRUE)) {
-                processed_data <- janitor::clean_names(processed_data)
-            }
-            
+
+            # NOTE: Do NOT run janitor::clean_names() here. Option values
+            # (self$options$x_var, $y_var, $groups, ...) hold the ORIGINAL
+            # variable names, and all downstream lookups (column subsetting,
+            # aes(), grafify xcol/ycol, formulas) rely on those names. Renaming
+            # columns to snake_case would break the option->column mapping for
+            # any variable whose name is not already clean.
+
             # Validate and select variables based on plot requirements
             plot_vars <- c()
             

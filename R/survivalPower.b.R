@@ -2,7 +2,6 @@
 #' @importFrom survival survdiff
 #' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_point geom_rect labs scale_y_continuous scale_color_manual theme element_text element_blank
 #' @importFrom scales percent_format
-
 # Survival Power Analysis Module for Jamovi
 #
 # Constants used in calculations:

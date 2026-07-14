@@ -15,7 +15,6 @@
 #' @importFrom viridis viridis
 #' @importFrom rlang .data
 #' @importFrom grid unit
-
 hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
     inherit = hullplotBase,
     private = list(
@@ -282,7 +281,26 @@ hullplotClass <- if (requireNamespace("jmvcore")) R6::R6Class("hullplotClass",
             self$results$interpretation$setContent(interpretation_html)
 
             # Set state for plot function
-            self$results$plot$setState(prepared)
+            # Include appearance options in the state so the plot re-renders
+            # when they change. The cached `prepared` object only keys on
+            # data/variable selections, so without this the plot would not
+            # refresh when e.g. hull_alpha, color_palette or plot_theme change.
+            plot_state <- prepared
+            plot_state$options <- list(
+                hull_concavity      = self$options$hull_concavity,
+                hull_alpha          = self$options$hull_alpha,
+                hull_expand         = self$options$hull_expand,
+                show_labels         = self$options$show_labels,
+                point_size          = self$options$point_size,
+                point_alpha         = self$options$point_alpha,
+                color_palette       = self$options$color_palette,
+                plot_theme          = self$options$plot_theme,
+                plot_title          = self$options$plot_title,
+                x_label             = self$options$x_label,
+                y_label             = self$options$y_label,
+                confidence_ellipses = self$options$confidence_ellipses
+            )
+            self$results$plot$setState(plot_state)
 
         },
 

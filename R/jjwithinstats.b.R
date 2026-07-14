@@ -152,8 +152,6 @@
 #' @importFrom digest digest
 #' @importFrom ggstatsplot ggwithinstats theme_ggstatsplot
 #' @importFrom ggpubr ggpaired ggboxplot ggviolin ggline stat_compare_means theme_pubr
-
-
 jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jjwithinstatsClass",
     inherit = jjwithinstatsBase,
@@ -606,11 +604,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 safe_var <- safe_vars_check[i]
                 col <- mydata[[safe_var]]
 
-                # Handle labelled data (preserve labels for reporting)
-                if (inherits(col, "haven_labelled")) {
-                    col <- haven::as_factor(col, levels = "both")
-                }
-
+                # jmvcore::toNumeric() extracts the underlying numeric values,
+                # including for haven_labelled columns (SPSS/Stata imports).
+                # Do NOT route haven_labelled through haven::as_factor(levels =
+                # "both") first: that replaces the real measurement values with
+                # factor position codes (e.g. 10, 20, 30 -> 1, 2, 3), silently
+                # corrupting the within-subjects analysis. This matches the
+                # direct toNumeric() pattern used by jjbetweenstats/jjdotplotstats.
                 mydata[[safe_var]] <- jmvcore::toNumeric(col)
             }
             

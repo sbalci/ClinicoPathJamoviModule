@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import survival
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @export
 #' @return An \code{R6} class generator object for the \code{mixedeffectscoxClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -634,6 +634,33 @@ mixedeffectscoxClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             )
             
             html$setContent(content)
+        },
+
+        # Image render handlers. These five images are declared `visible` by default in
+        # .r.yaml/.h.R with the renderFun names below, but their plot content is not yet
+        # implemented and no state is ever set on them. Without these methods jamovi
+        # crashes ("attempt to apply non-function") when it tries to render the visible
+        # images. Returning FALSE draws nothing safely.
+        # FLAG: implement the actual plots, or default the show_*_plots options to false
+        # (the latter requires recompiling .h.R via jmvtools::prepare()).
+        .plotResiduals = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plotRandomEffects = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plotSurvival = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plotForest = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plotClusterAnalysis = function(image, ggtheme, theme, ...) {
+            return(FALSE)
         }
     )
 )

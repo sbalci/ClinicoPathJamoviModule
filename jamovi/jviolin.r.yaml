@@ -32,6 +32,14 @@ items:
           - useylabel
           - ylabel
 
+    - name: explanations
+      title: Explanations
+      type: Html
+      visible: (showExplanations)
+      clearWith:
+          - dep
+          - group
+
 refs:
     - ggplot2
     - RGraphGallery

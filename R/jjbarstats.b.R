@@ -1116,13 +1116,19 @@ jjbarstatsClass <- if (requireNamespace('jmvcore'))
                         
                         self$results$todo$setContent(todo)
                         
-                        # Generate clinical interpretation panels if explanations are enabled
-                        if (isTRUE(self$options$showexplanations)) {
+                        # Generate clinical interpretation panels.
+                        # Each panel's visibility is governed by its own toggle in .r.yaml
+                        # (showSummary / showAssumptions / showInterpretation); generate the
+                        # content whenever that toggle is on so a visible panel is never left
+                        # blank. showexplanations acts as a master switch enabling all panels.
+                        if (isTRUE(self$options$showexplanations) || isTRUE(self$options$showSummary))
                             private$.generateSummary(prepared_data)
+                        if (isTRUE(self$options$showexplanations) || isTRUE(self$options$showAssumptions))
                             private$.checkStatisticalAssumptions(prepared_data)
+                        if (isTRUE(self$options$showexplanations) || isTRUE(self$options$showInterpretation))
                             private$.generateInterpretationGuide()
+                        if (isTRUE(self$options$showexplanations))
                             private$.generateCopyReadyReport(prepared_data)
-                        }
 
                         # ENHANCEMENT 3: Clinical prevalence warning for diagnostic preset
                         if (self$options$clinicalpreset == "diagnostic" &&

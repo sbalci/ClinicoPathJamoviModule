@@ -826,6 +826,37 @@ pseudosurvivalClass <- R6::R6Class(
             # Get the survival probability at the largest time <= target time
             idx <- which(fit$time == max(valid_times))[1]
             return(fit$surv[idx])
+        },
+
+        # ---- Plot render methods -------------------------------------------
+        # These Image outputs declare renderFun in pseudosurvival.r.yaml. For
+        # every visible image jamovi calls do.call(private[[renderFun]], ...);
+        # if the method is absent, private[[renderFun]] is NULL and rendering
+        # crashes with "attempt to apply non-function". The plotting logic is
+        # not yet implemented (no setState is ever called), so each renderer
+        # returns FALSE, telling jamovi there is nothing to draw (no crash).
+        .plot_pseudo_observations = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_regression = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_survival_curves = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_rmst_comparison = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_diagnostics = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_sensitivity = function(image, ggtheme, theme, ...) {
+            return(FALSE)
         }
     )
 )

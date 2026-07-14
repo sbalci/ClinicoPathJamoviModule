@@ -76,29 +76,29 @@ markovmultistateClass <- R6::R6Class(
             
             # Set up educational content
             if (self$options$showEducational) {
-                self$.generateEducationalContent()
+                private$.generateEducationalContent()
             }
             
             # Fit the multi-state model
             tryCatch({
-                model_results <- self$.fitMultiStateModel(data)
+                model_results <- private$.fitMultiStateModel(data)
                 
                 if (!is.null(model_results)) {
                     # Fill results tables
-                    self$.fillModelSummary(model_results)
-                    self$.fillTransitionIntensities(model_results)
-                    self$.fillTransitionProbabilities(model_results)
-                    self$.fillStateProbabilities(model_results)
-                    self$.fillMeanSojournTimes(model_results)
+                    private$.fillModelSummary(model_results)
+                    private$.fillTransitionIntensities(model_results)
+                    private$.fillTransitionProbabilities(model_results)
+                    private$.fillStateProbabilities(model_results)
+                    private$.fillMeanSojournTimes(model_results)
                     
                     if (length(covs) > 0) {
-                        self$.fillCovariateEffects(model_results)
+                        private$.fillCovariateEffects(model_results)
                     }
                     
-                    self$.fillModelFit(model_results)
-                    self$.fillPredictions(model_results)
-                    self$.generateMethodsInfo()
-                    self$.generateInterpretationGuide()
+                    private$.fillModelFit(model_results)
+                    private$.fillPredictions(model_results)
+                    private$.generateMethodsInfo()
+                    private$.generateInterpretationGuide()
                     
                     # Store results for plotting
                     private$.model_results <- model_results
@@ -123,7 +123,7 @@ markovmultistateClass <- R6::R6Class(
             covs <- self$options$covs
             
             # Prepare data for multi-state modeling
-            ms_data <- self$.prepareMultiStateData(data)
+            ms_data <- private$.prepareMultiStateData(data)
             
             if (is.null(ms_data)) {
                 return(NULL)
@@ -132,22 +132,22 @@ markovmultistateClass <- R6::R6Class(
             # Fit model based on type
             if (model_type == "homogeneous") {
                 # Use msm package for homogeneous Markov models
-                model <- self$.fitHomogeneousMarkov(ms_data)
+                model <- private$.fitHomogeneousMarkov(ms_data)
             } else if (model_type == "nonhomogeneous") {
                 # Use mstate package for non-homogeneous models
-                model <- self$.fitNonHomogeneousMarkov(ms_data)
+                model <- private$.fitNonHomogeneousMarkov(ms_data)
             } else if (model_type == "semimarkov") {
                 # Semi-Markov model
-                model <- self$.fitSemiMarkovModel(ms_data)
+                model <- private$.fitSemiMarkovModel(ms_data)
             } else if (model_type == "cox") {
                 # Multi-state Cox model
-                model <- self$.fitMultiStateCox(ms_data)
+                model <- private$.fitMultiStateCox(ms_data)
             } else if (model_type == "illnessdeath") {
                 # Illness-death model
-                model <- self$.fitIllnessDeathModel(ms_data)
+                model <- private$.fitIllnessDeathModel(ms_data)
             } else {
                 # Progressive model
-                model <- self$.fitProgressiveModel(ms_data)
+                model <- private$.fitProgressiveModel(ms_data)
             }
             
             return(model)
@@ -187,12 +187,12 @@ markovmultistateClass <- R6::R6Class(
             tryCatch({
                 # Check if msm package is available
                 if (!requireNamespace("msm", quietly = TRUE)) {
-                    return(self$.generateMockResults("homogeneous"))
+                    return(private$.generateMockResults("homogeneous"))
                 }
                 
                 # Determine Q matrix structure based on transition type
                 n_states <- length(unique(ms_data$state))
-                qmatrix <- self$.buildQMatrix(n_states)
+                qmatrix <- private$.buildQMatrix(n_states)
                 
                 # Build formula
                 covs <- self$options$covs
@@ -203,14 +203,14 @@ markovmultistateClass <- R6::R6Class(
                 }
                 
                 # Fit model (using mock for demonstration)
-                model_result <- self$.generateMockResults("homogeneous")
+                model_result <- private$.generateMockResults("homogeneous")
                 model_result$data <- ms_data
                 model_result$n_states <- n_states
                 
                 return(model_result)
                 
             }, error = function(e) {
-                return(self$.generateMockResults("homogeneous"))
+                return(private$.generateMockResults("homogeneous"))
             })
         },
         
@@ -219,25 +219,25 @@ markovmultistateClass <- R6::R6Class(
             tryCatch({
                 # Check if mstate package is available
                 if (!requireNamespace("mstate", quietly = TRUE)) {
-                    return(self$.generateMockResults("nonhomogeneous"))
+                    return(private$.generateMockResults("nonhomogeneous"))
                 }
                 
                 # Convert data to mstate format
                 # This would typically involve creating transition matrices
-                model_result <- self$.generateMockResults("nonhomogeneous")
+                model_result <- private$.generateMockResults("nonhomogeneous")
                 model_result$data <- ms_data
                 model_result$n_states <- length(unique(ms_data$state))
                 
                 return(model_result)
                 
             }, error = function(e) {
-                return(self$.generateMockResults("nonhomogeneous"))
+                return(private$.generateMockResults("nonhomogeneous"))
             })
         },
         
         .fitSemiMarkovModel = function(ms_data) {
             # Fit semi-Markov model
-            model_result <- self$.generateMockResults("semimarkov")
+            model_result <- private$.generateMockResults("semimarkov")
             model_result$data <- ms_data
             model_result$n_states <- length(unique(ms_data$state))
             return(model_result)
@@ -245,7 +245,7 @@ markovmultistateClass <- R6::R6Class(
         
         .fitMultiStateCox = function(ms_data) {
             # Fit multi-state Cox model
-            model_result <- self$.generateMockResults("cox")
+            model_result <- private$.generateMockResults("cox")
             model_result$data <- ms_data
             model_result$n_states <- length(unique(ms_data$state))
             return(model_result)
@@ -253,7 +253,7 @@ markovmultistateClass <- R6::R6Class(
         
         .fitIllnessDeathModel = function(ms_data) {
             # Fit illness-death model (3-state model)
-            model_result <- self$.generateMockResults("illnessdeath")
+            model_result <- private$.generateMockResults("illnessdeath")
             model_result$data <- ms_data
             model_result$n_states <- 3
             return(model_result)
@@ -261,7 +261,7 @@ markovmultistateClass <- R6::R6Class(
         
         .fitProgressiveModel = function(ms_data) {
             # Fit progressive multi-state model
-            model_result <- self$.generateMockResults("progressive")
+            model_result <- private$.generateMockResults("progressive")
             model_result$data <- ms_data
             model_result$n_states <- length(unique(ms_data$state))
             return(model_result)

@@ -22,14 +22,14 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Prepare data
             data <- self$data
             if (nrow(data) == 0) return()
-            
-            # Clean variable names
-            if (requireNamespace('janitor', quietly = TRUE)) {
-                data <- janitor::clean_names(data)
-            }
-            
+
+            # NOTE: do NOT clean_names() here. All downstream lookups use the
+            # raw jamovi option names (matrix_vars/row_var/col_var/value_var/
+            # annotation_var); renaming columns would break those lookups for
+            # any variable containing spaces or capitals.
+
             # Generate heatmap
-            plot <- self$.create_heatmap(data)
+            plot <- private$.create_heatmap(data)
             
             # Set plot with custom dimensions
             self$results$plot$setState(plot)
@@ -37,16 +37,16 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Generate data matrix if requested
             if (self$options$output_format %in% c("data_matrix", "both")) {
-                self$.populate_matrix_table(data)
+                private$.populate_matrix_table(data)
             }
             
             # Generate clustering results if clustering is enabled
             if (self$options$cluster_rows || self$options$cluster_cols) {
-                self$.populate_cluster_table(data)
+                private$.populate_cluster_table(data)
             }
             
             # Generate interpretation
-            self$.generate_interpretation(data)
+            private$.generate_interpretation(data)
         },
         
         .plot = function(image, ggtheme, theme, ...) {
@@ -69,11 +69,11 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Prepare matrix data
-            matrix_data <- self$.prepare_matrix_data(data)
+            matrix_data <- private$.prepare_matrix_data(data)
             
             # Create ggplot2 heatmap
-            plot <- self$.build_ggplot_heatmap(matrix_data)
-            
+            plot <- private$.build_ggplot_heatmap(matrix_data, data)
+
             return(plot)
         },
         
@@ -110,7 +110,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Apply scaling
-            matrix_data <- self$.apply_scaling(matrix_data)
+            matrix_data <- private$.apply_scaling(matrix_data)
             
             return(matrix_data)
         },
@@ -135,7 +135,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             return(matrix_data)
         },
         
-        .build_ggplot_heatmap = function(matrix_data) {
+        .build_ggplot_heatmap = function(matrix_data, data) {
             # Convert matrix to data frame for ggplot2
             heatmap_data <- expand.grid(
                 Row = factor(rownames(matrix_data), levels = rownames(matrix_data)),
@@ -164,21 +164,21 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             plot <- ggplot2::ggplot(heatmap_data, base_aes) + geom_func
             
             # Apply color scheme
-            plot <- self$.apply_color_scheme(plot)
+            plot <- private$.apply_color_scheme(plot)
             
             # Apply clustering if requested
             if (self$options$cluster_rows || self$options$cluster_cols) {
-                plot <- self$.apply_clustering(plot, matrix_data)
+                plot <- private$.apply_clustering(plot, matrix_data)
                 
                 # Add dendrograms if requested
                 if (self$options$show_dendrograms) {
-                    plot <- self$.add_dendrograms(plot, matrix_data)
+                    plot <- private$.add_dendrograms(plot, matrix_data)
                 }
             }
             
             # Add cell values if requested
             if (self$options$show_values) {
-                formatted_values <- self$.format_values(heatmap_data$Value)
+                formatted_values <- private$.format_values(heatmap_data$Value)
                 plot <- plot + ggplot2::geom_text(
                     ggplot2::aes(label = formatted_values),
                     size = self$options$text_size / 3,
@@ -189,11 +189,11 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add annotations if specified
             if (!is.null(self$options$annotation_var) && 
                 length(self$options$annotation_var) > 0) {
-                plot <- self$.add_annotations(plot, data)
+                plot <- private$.add_annotations(plot, data)
             }
             
             # Apply styling
-            plot <- self$.apply_styling(plot)
+            plot <- private$.apply_styling(plot)
             
             return(plot)
         },
@@ -239,7 +239,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .apply_clustering = function(plot, matrix_data) {
             # Perform hierarchical clustering
             if (self$options$cluster_rows) {
-                row_dist <- self$.calculate_distance(matrix_data, "row")
+                row_dist <- private$.calculate_distance(matrix_data, "row")
                 if (inherits(row_dist, "dist")) {
                     row_clust <- stats::hclust(row_dist, method = self$options$clustering_method)
                     plot <- plot + ggplot2::scale_y_discrete(limits = rownames(matrix_data)[row_clust$order])
@@ -247,7 +247,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (self$options$cluster_cols) {
-                col_dist <- self$.calculate_distance(matrix_data, "column")
+                col_dist <- private$.calculate_distance(matrix_data, "column")
                 if (inherits(col_dist, "dist")) {
                     col_clust <- stats::hclust(col_dist, method = self$options$clustering_method)
                     plot <- plot + ggplot2::scale_x_discrete(limits = colnames(matrix_data)[col_clust$order])
@@ -338,7 +338,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .populate_matrix_table = function(data) {
-            matrix_data <- self$.prepare_matrix_data(data)
+            matrix_data <- private$.prepare_matrix_data(data)
             
             # Convert matrix to long format for table
             matrix_long <- expand.grid(
@@ -361,11 +361,11 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .populate_cluster_table = function(data) {
-            matrix_data <- self$.prepare_matrix_data(data)
+            matrix_data <- private$.prepare_matrix_data(data)
             cluster_results <- list()
             
             if (self$options$cluster_rows) {
-                row_dist <- self$.calculate_distance(matrix_data, "row")
+                row_dist <- private$.calculate_distance(matrix_data, "row")
                 row_clust <- stats::hclust(row_dist, method = self$options$clustering_method)
                 
                 for (i in seq_along(row_clust$labels)) {
@@ -380,7 +380,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (self$options$cluster_cols) {
-                col_dist <- self$.calculate_distance(matrix_data, "column")
+                col_dist <- private$.calculate_distance(matrix_data, "column")
                 col_clust <- stats::hclust(col_dist, method = self$options$clustering_method)
                 
                 for (i in seq_along(col_clust$labels)) {
@@ -407,7 +407,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Add dendrogram information as plot annotations
             # This is a simplified implementation; full dendrograms would require additional packages
             if (self$options$cluster_rows) {
-                row_dist <- self$.calculate_distance(matrix_data, "row")
+                row_dist <- private$.calculate_distance(matrix_data, "row")
                 if (inherits(row_dist, "dist")) {
                     row_clust <- stats::hclust(row_dist, method = self$options$clustering_method)
                     plot <- plot + ggplot2::labs(caption = paste("Row clustering:", self$options$clustering_method, "method"))
@@ -415,7 +415,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (self$options$cluster_cols) {
-                col_dist <- self$.calculate_distance(matrix_data, "column")
+                col_dist <- private$.calculate_distance(matrix_data, "column")
                 if (inherits(col_dist, "dist")) {
                     col_clust <- stats::hclust(col_dist, method = self$options$clustering_method)
                     current_caption <- if (is.null(plot$labels$caption)) "" else paste0(plot$labels$caption, "\n")
@@ -447,7 +447,7 @@ jggheatmapClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         },
         
         .generate_interpretation = function(data) {
-            matrix_data <- self$.prepare_matrix_data(data)
+            matrix_data <- private$.prepare_matrix_data(data)
             
             n_rows <- nrow(matrix_data)
             n_cols <- ncol(matrix_data)

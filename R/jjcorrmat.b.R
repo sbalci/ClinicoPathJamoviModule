@@ -881,7 +881,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 type = options_data$typestatistics,
                 partial = options_data$partial,
                 beta = 0.1,
+                # Decimal places: newer ggstatsplot renamed `k` -> `digits`.
+                # Pass both so the option is honored regardless of version
+                # (the unused name is harmlessly absorbed by `...`).
                 k = options_data$k,
+                digits = options_data$k,
                 sig.level = options_data$siglevel,
                 conf.level = options_data$conflevel,
                 bf.prior = 0.707,
@@ -987,7 +991,11 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     matrix.type = options_data$matrixtype,
                     partial = options_data$partial,
                     beta = 0.1,
+                    # Decimal places: newer ggstatsplot renamed `k` -> `digits`.
+                    # Pass both so the option is honored regardless of version
+                    # (the unused name is harmlessly absorbed by `...`).
                     k = options_data$k,
+                    digits = options_data$k,
                     sig.level = options_data$siglevel,
                     conf.level = options_data$conflevel,
                     bf.prior = 0.707,

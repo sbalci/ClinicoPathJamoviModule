@@ -345,7 +345,10 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 
                 # Populate PCA summary table
                 private$.populatePCASummary()
-                
+
+                # Populate component loadings table (top features per component)
+                private$.populateComponentLoadings()
+
                 # Fit Cox model on principal components
                 private$.fitPCCoxModel()
                 
@@ -772,7 +775,49 @@ pcacoxClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ))
             }
         },
-        
+
+        .populateComponentLoadings = function() {
+
+            tryCatch({
+
+                if (is.null(private$loadings)) return()
+
+                table <- self$results$componentLoadings
+
+                loadings_mat <- private$loadings
+                feat_names <- rownames(loadings_mat)
+                if (is.null(feat_names)) feat_names <- colnames(private$X_matrix)
+                if (is.null(feat_names)) feat_names <- private$predictors
+
+                n_comp <- min(private$selected_components, ncol(loadings_mat))
+                n_top <- 10  # top features (by absolute loading) shown per component
+
+                row_key <- 0
+                for (i in seq_len(n_comp)) {
+                    comp_loadings <- loadings_mat[, i]
+                    ord <- order(abs(comp_loadings), decreasing = TRUE)
+                    top_idx <- ord[seq_len(min(n_top, length(ord)))]
+
+                    for (r in seq_along(top_idx)) {
+                        idx <- top_idx[r]
+                        row_key <- row_key + 1
+                        table$addRow(rowKey = row_key, values = list(
+                            component = paste0("PC", i),
+                            feature = feat_names[idx],
+                            loading = round(comp_loadings[idx], 4),
+                            abs_loading = round(abs(comp_loadings[idx]), 4),
+                            rank = as.integer(r)
+                        ))
+                    }
+                }
+
+            }, error = function(e) {
+                private$.addNotice('WARNING', 'Component Loadings Failed',
+                    sprintf("Component loadings table could not be populated: %s", conditionMessage(e))
+                )
+            })
+        },
+
         .fitPCCoxModel = function() {
             
             tryCatch({

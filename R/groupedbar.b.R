@@ -21,7 +21,7 @@
 #' @importFrom ggplot2 scale_fill_viridis_d scale_fill_manual geom_text
 #' @importFrom ggplot2 facet_wrap facet_grid theme element_text geom_hline
 #' @importFrom ggplot2 geom_errorbar element_rect geom_ribbon guides guide_legend
-#' @importFrom dplyr group_by summarise mutate arrange filter select distinct
+#' @importFrom dplyr group_by summarise mutate arrange filter distinct
 #' @importFrom dplyr case_when if_else n left_join across all_of
 #' @importFrom tidyr pivot_longer pivot_wider gather spread
 #' @importFrom scales percent comma label_number
@@ -212,11 +212,12 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Convert to long format for processing
             if (is.null(values)) {
                 # Calculate statistics from the data
+                group_vars <- c("Item", groups)
+                if (!is.null(facetby)) group_vars <- c(group_vars, facetby)
                 plot_data <- data %>%
-                    select(all_of(c(items, groups, if (!is.null(facetby)) facetby))) %>%
+                    dplyr::select(all_of(c(items, groups, if (!is.null(facetby)) facetby))) %>%
                     pivot_longer(cols = all_of(items), names_to = "Item", values_to = "Value") %>%
-                    group_by(Item, !!sym(groups), 
-                            if (!is.null(facetby)) !!sym(facetby)) %>%
+                    group_by(across(all_of(group_vars))) %>%
                     summarise(
                         n = n(),
                         statistic_value = switch(self$options$statistic,
@@ -241,11 +242,12 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     )
             } else {
                 # Use provided values
+                group_vars <- c("Item", "Category", groups)
+                if (!is.null(facetby)) group_vars <- c(group_vars, facetby)
                 plot_data <- data %>%
-                    select(all_of(c(items, groups, values, if (!is.null(facetby)) facetby))) %>%
+                    dplyr::select(all_of(c(items, groups, values, if (!is.null(facetby)) facetby))) %>%
                     pivot_longer(cols = all_of(items), names_to = "Item", values_to = "Category") %>%
-                    group_by(Item, Category, !!sym(groups),
-                            if (!is.null(facetby)) !!sym(facetby)) %>%
+                    group_by(across(all_of(group_vars))) %>%
                     summarise(
                         n = n(),
                         statistic_value = switch(self$options$statistic,
@@ -362,7 +364,7 @@ groupedbarClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     item = as.character(Item),
                     group = as.character(!!sym(self$options$groups))
                 ) %>%
-                select(item, group, n, statistic_value, se, sd)
+                dplyr::select(item, group, n, statistic_value, se, sd)
             
             # Add confidence intervals if needed
             if (self$options$showerrorbars && self$options$errortype %in% c("ci95", "ci99")) {

@@ -180,7 +180,7 @@ multifocalconcordanceClass <- R6::R6Class(
             rates <- rates[!is.na(rates)]
             if (length(rates) == 0) { self$results$summary$setContent(
                 "<p>No cases with \u22652 foci were available for concordance.</p>"); return() }
-            worst <- p$markers[which.min(rates)]
+            worst <- names(rates)[which.min(rates)]
             html <- glue::glue(
                 "<p>Across the assessed markers, concordance between foci ranged from
                 <b>{sprintf('%.0f%%', 100*min(rates))}</b> ({worst}) to

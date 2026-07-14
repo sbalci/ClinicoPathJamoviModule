@@ -904,6 +904,63 @@ recurrentsurvivalClass <- R6::R6Class(
             }
         },
 
+        # Image render methods -------------------------------------------------
+        # These are declared via `renderFun:` in recurrentsurvival.r.yaml (and
+        # compiled into the base class). jamovi resolves each render function with
+        # do.call(private[[renderFun]], ...); if the method is missing the call
+        # becomes do.call(NULL, ...) -> "attempt to apply non-function", crashing
+        # every visible image (recurrence/cumulative-hazard/event-timeline/residual/
+        # model-comparison are visible by default). No state is currently populated
+        # for these images (plotting is not yet implemented), so each guard returns
+        # FALSE and jamovi draws an empty plot area instead of crashing.
+        .plot_recurrence_functions = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_gap_time_distributions = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_cumulative_hazard = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_event_timeline = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_residuals = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_frailty_distribution = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_multistate_diagram = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
+        .plot_model_comparison = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(TRUE)
+        },
+
         # Private variables
         ..current_model = NULL,
         ..rereg_model = NULL,

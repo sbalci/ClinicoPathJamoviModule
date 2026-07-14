@@ -164,7 +164,7 @@ optimalcutpointClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             class = !!rlang::sym(outcome),
                             method = cutpointr::maximize_metric,
                             metric = get(metric, envir = asNamespace("cutpointr")),
-                            boot_runs = if (self$options$bootstrap_validation) 1000 else 0
+                            boot_runs = if (self$options$bootstrap_validation) self$options$bootstrap_runs else 0
                         )
 
                         # Store results

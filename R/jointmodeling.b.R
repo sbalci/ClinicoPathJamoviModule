@@ -11,7 +11,13 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         
         .progress_steps = 0,
         .current_step = 0,
-        
+        # R6 locks the object (lock_objects = TRUE by default); these cache fields
+        # MUST be declared here, otherwise `private$variable_names <- ...` etc. throws
+        # "cannot add bindings to a locked environment" at runtime.
+        variable_names = NULL,
+        long_model = NULL,
+        surv_model = NULL,
+
         .init = function() {
             # Check for required packages with detailed messages
             packages_needed <- c('JMbayes2', 'joineR', 'nlme', 'splines', 'survival')
@@ -125,13 +131,12 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
             
-            # TODO (correctness): R6 cache state (`private$variable_names`,
-            # `private$long_model`, `private$surv_model`) is not explicitly reset at
-            # `.run()` entry. If a run fails partway through `.fitJointModel`, the
-            # next run could read stale model objects. Add reset block here:
-            #   private$variable_names <- NULL
-            #   private$long_model <- NULL
-            #   private$surv_model <- NULL
+            # Reset cached state so a run that fails partway through cannot leave the
+            # next run reading stale model objects.
+            private$variable_names <- NULL
+            private$long_model <- NULL
+            private$surv_model <- NULL
+
             # Initialize progress tracking
             private$.progress_steps = private$.calculateProgressSteps()
             private$.current_step = 0
@@ -849,29 +854,35 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             tryCatch({
                 
                 # Set up plots based on options
+                # NOTE: the fitted joint model object is intentionally NOT stored in the
+                # image state. JMbayes2/lme model objects carry environments/function
+                # references that jamovi's protobuf serializer cannot handle (the
+                # "attempt to apply non-function" serialization failure). The render
+                # methods only need the prepared data plus the selected variable names
+                # (read from self$options at render time).
                 if (self$options$plot_trajectories) {
                     image <- self$results$trajectoryPlot
-                    image$setState(list(joint_model = joint_model, data = data, plot_type = "trajectories"))
+                    image$setState(list(data = data, plot_type = "trajectories"))
                 }
-                
+
                 if (self$options$plot_mean_trajectory) {
                     image <- self$results$meanTrajectoryPlot
-                    image$setState(list(joint_model = joint_model, data = data, plot_type = "mean_trajectory"))
+                    image$setState(list(data = data, plot_type = "mean_trajectory"))
                 }
-                
+
                 if (self$options$plot_survival_curves) {
                     image <- self$results$survivalPlot
-                    image$setState(list(joint_model = joint_model, data = data, plot_type = "survival"))
+                    image$setState(list(data = data, plot_type = "survival"))
                 }
-                
+
                 if (self$options$plot_dynamic_auc) {
                     image <- self$results$dynamicAUCPlot
-                    image$setState(list(joint_model = joint_model, data = data, plot_type = "dynamic_auc"))
+                    image$setState(list(data = data, plot_type = "dynamic_auc"))
                 }
-                
+
                 if (self$options$plot_residuals) {
                     image <- self$results$residualPlot
-                    image$setState(list(joint_model = joint_model, data = data, plot_type = "residuals"))
+                    image$setState(list(data = data, plot_type = "residuals"))
                 }
                 
             }, error = function(e) {
@@ -951,7 +962,120 @@ jointmodelingClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             vars <- strsplit(formula_str, "[+*:~\\(\\)\\s]+")[[1]]
             vars <- vars[vars != "" & !grepl("^[0-9]+$", vars) & vars != "I"]
             return(unique(vars))
+        },
+
+        # ---- Image render functions (declared as renderFun in jointmodeling.r.yaml) ----
+        # Variable names are read from self$options at render time and used through the
+        # ggplot2 `.data[[...]]` pronoun, which handles arbitrary/space/punctuation
+        # column names safely without manual backtick escaping.
+
+        .trajectoryPlot = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$data)) return(FALSE)
+            data <- state$data
+            id_var   <- self$options$id
+            time_var <- self$options$time_longitudinal
+            bio_var  <- self$options$biomarker
+            if (is.null(id_var) || is.null(time_var) || is.null(bio_var)) return(FALSE)
+
+            plot <- ggplot2::ggplot(
+                    data,
+                    ggplot2::aes(x = .data[[time_var]], y = .data[[bio_var]], group = .data[[id_var]])
+                ) +
+                ggplot2::geom_line(alpha = 0.4, colour = "#1E88E5") +
+                ggplot2::geom_point(alpha = 0.4, size = 0.8, colour = "#1565C0") +
+                ggplot2::labs(title = "Individual Biomarker Trajectories",
+                              x = time_var, y = bio_var) +
+                ggtheme
+            print(plot)
+            TRUE
+        },
+
+        .meanTrajectoryPlot = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$data)) return(FALSE)
+            data <- state$data
+            time_var <- self$options$time_longitudinal
+            bio_var  <- self$options$biomarker
+            if (is.null(time_var) || is.null(bio_var)) return(FALSE)
+
+            plot <- ggplot2::ggplot(
+                    data,
+                    ggplot2::aes(x = .data[[time_var]], y = .data[[bio_var]])
+                ) +
+                ggplot2::geom_point(alpha = 0.2, size = 0.7, colour = "#90A4AE") +
+                ggplot2::geom_smooth(method = "loess", formula = y ~ x,
+                                     colour = "#2E7D32", fill = "#A5D6A7") +
+                ggplot2::labs(title = "Population Biomarker Trajectory",
+                              x = time_var, y = bio_var) +
+                ggtheme
+            print(plot)
+            TRUE
+        },
+
+        .survivalPlot = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state) || is.null(state$data)) return(FALSE)
+            if (!requireNamespace("survival", quietly = TRUE)) return(FALSE)
+            data <- state$data
+            id_var    <- self$options$id
+            stime_var <- self$options$survival_time
+            sstat_var <- self$options$survival_status
+            bio_var   <- self$options$biomarker
+            if (is.null(id_var) || is.null(stime_var) ||
+                is.null(sstat_var) || is.null(bio_var)) return(FALSE)
+
+            # Collapse to one row per patient for the survival process.
+            surv_df <- data[!duplicated(data[[id_var]]), , drop = FALSE]
+            stime <- as.numeric(surv_df[[stime_var]])
+            sstat <- as.numeric(surv_df[[sstat_var]])  # already 0/1 from .prepareData
+            bio   <- as.numeric(surv_df[[bio_var]])
+            grp <- factor(ifelse(bio > stats::median(bio, na.rm = TRUE),
+                                 "High biomarker", "Low biomarker"))
+
+            fit <- survival::survfit(survival::Surv(stime, sstat) ~ grp)
+            st  <- summary(fit)
+            strata <- if (is.null(st$strata)) rep("All", length(st$time)) else as.character(st$strata)
+            km_df <- data.frame(time = st$time, surv = st$surv, strata = strata)
+
+            plot <- ggplot2::ggplot(km_df,
+                    ggplot2::aes(x = time, y = surv, colour = strata)) +
+                ggplot2::geom_step(size = 1) +
+                ggplot2::ylim(0, 1) +
+                ggplot2::labs(title = "Survival by Biomarker Level (median split)",
+                              x = stime_var, y = "Survival probability", colour = NULL) +
+                ggtheme
+            print(plot)
+            TRUE
+        },
+
+        .dynamicAUCPlot = function(image, ggtheme, theme, ...) {
+            # An honest time-dependent AUC curve requires a fitted-model prediction
+            # routine that is not yet implemented. Render nothing (empty plot) rather
+            # than fabricate a discrimination curve.
+            return(FALSE)
+        },
+
+        .residualPlot = function(image, ggtheme, theme, ...) {
+            state <- image$state
+            if (is.null(state)) return(FALSE)
+            model <- private$long_model
+            if (is.null(model) || !inherits(model, "lme")) return(FALSE)
+
+            resid_df <- data.frame(
+                fitted    = as.numeric(stats::fitted(model)),
+                residuals = as.numeric(stats::residuals(model, type = "normalized"))
+            )
+            plot <- ggplot2::ggplot(resid_df,
+                    ggplot2::aes(x = fitted, y = residuals)) +
+                ggplot2::geom_point(alpha = 0.5, colour = "#7B1FA2") +
+                ggplot2::geom_hline(yintercept = 0, linetype = "dashed", colour = "red") +
+                ggplot2::labs(title = "Longitudinal Model Residuals",
+                              x = "Fitted values", y = "Normalized residuals") +
+                ggtheme
+            print(plot)
+            TRUE
         }
-        
+
     )
 )

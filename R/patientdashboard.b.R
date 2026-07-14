@@ -193,8 +193,8 @@ patientdashboardClass <- R6::R6Class(
             patientData <- data[[patientID[1]]]
             currentPatient <- if (!is.null(patientData)) as.character(patientData[1]) else "Unknown"
             
-            summary_html <- paste0(summary_html, 
-                "<div class='patient-header'> Patient Monitor: ", currentPatient, "</div>"
+            summary_html <- paste0(summary_html,
+                "<div class='patient-header'> Patient Monitor: ", htmltools::htmlEscape(currentPatient), "</div>"
             )
             
             # Dashboard configuration summary

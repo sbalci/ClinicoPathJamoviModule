@@ -73,7 +73,7 @@ stratifiedparametricClass <- R6::R6Class(
             
             # Run the analysis
             tryCatch({
-                self$.runStratifiedParametric(time_var, event_var, strata_var, covariates)
+                private$.runStratifiedParametric(time_var, event_var, strata_var, covariates)
             }, error = function(e) {
                 error_msg <- paste("<p><strong>Error in analysis:</strong>", htmltools::htmlEscape(e$message), "</p>")
                 self$results$todo$setContent(error_msg)
@@ -121,13 +121,13 @@ stratifiedparametricClass <- R6::R6Class(
             }
             
             # Fit stratified parametric models
-            stratified_models <- self$.fitStratifiedModels(model_data, strata_levels, covariates)
+            stratified_models <- private$.fitStratifiedModels(model_data, strata_levels, covariates)
             
             # Fit non-stratified model for comparison
-            non_stratified_model <- self$.fitNonStratifiedModel(model_data, covariates)
+            non_stratified_model <- private$.fitNonStratifiedModel(model_data, covariates)
             
             # Update results
-            self$.populateResults(stratified_models, non_stratified_model, strata_levels, model_data)
+            private$.populateResults(stratified_models, non_stratified_model, strata_levels, model_data)
         },
         
         .fitStratifiedModels = function(model_data, strata_levels, covariates) {
@@ -254,42 +254,42 @@ stratifiedparametricClass <- R6::R6Class(
         .populateResults = function(stratified_models, non_stratified_model, strata_levels, model_data) {
             # Model Summary
             if (self$options$show_model_summary) {
-                summary_content <- self$.createModelSummary(stratified_models, non_stratified_model, strata_levels)
+                summary_content <- private$.createModelSummary(stratified_models, non_stratified_model, strata_levels)
                 self$results$modelSummary$setContent(summary_content)
             }
             
             # Coefficients Table
             if (self$options$show_coefficients) {
-                self$.populateCoefficientsTable(stratified_models, strata_levels)
+                private$.populateCoefficientsTable(stratified_models, strata_levels)
             }
             
             # Stratification Test
             if (self$options$show_stratification_test && self$options$test_stratification) {
-                self$.populateStratificationTestTable(stratified_models, non_stratified_model)
+                private$.populateStratificationTestTable(stratified_models, non_stratified_model)
             }
             
             # Model Comparison Table
-            self$.populateModelComparisonTable(stratified_models, non_stratified_model)
+            private$.populateModelComparisonTable(stratified_models, non_stratified_model)
             
             # Strata Characteristics Table
-            self$.populateStrataCharacteristicsTable(model_data, strata_levels)
+            private$.populateStrataCharacteristicsTable(model_data, strata_levels)
             
             # Prediction Table
-            self$.populatePredictionTable(stratified_models, strata_levels)
+            private$.populatePredictionTable(stratified_models, strata_levels)
             
             # Residual Analysis
             if (self$options$show_diagnostics) {
-                self$.populateResidualAnalysisTable(stratified_models, strata_levels)
+                private$.populateResidualAnalysisTable(stratified_models, strata_levels)
             }
             
             # Summaries and Explanations
             if (self$options$showSummaries) {
-                summary_content <- self$.createAnalysisSummary(stratified_models, strata_levels)
+                summary_content <- private$.createAnalysisSummary(stratified_models, strata_levels)
                 self$results$analysisSummary$setContent(summary_content)
             }
             
             if (self$options$showExplanations) {
-                explanation_content <- self$.createMethodologyExplanation()
+                explanation_content <- private$.createMethodologyExplanation()
                 self$results$methodExplanation$setContent(explanation_content)
             }
         },

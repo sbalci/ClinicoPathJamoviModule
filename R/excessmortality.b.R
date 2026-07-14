@@ -45,7 +45,7 @@ excessmortalityClass <- R6::R6Class(
                 return()
             
             # Check required variables
-            ready <- self$.checkData()
+            ready <- private$.checkData()
             if (!ready$ready) {
                 if (!is.null(ready$error))
                     jmvcore::reject(ready$error, code = "")
@@ -55,22 +55,22 @@ excessmortalityClass <- R6::R6Class(
             data <- self$data
             
             # Fit excess mortality model
-            model_result <- self$.fitExcessMortalityModel(data)
+            model_result <- private$.fitExcessMortalityModel(data)
             
             if (!is.null(model_result)) {
                 # Generate model summary
-                self$.generateModelSummary(model_result)
+                private$.generateModelSummary(model_result)
                 
                 # Generate coefficients table
                 if (length(self$options$covariates) > 0) {
-                    self$.generateCoefficients(model_result)
+                    private$.generateCoefficients(model_result)
                 }
                 
                 # Generate predictions
-                self$.generatePredictions(model_result)
+                private$.generatePredictions(model_result)
                 
                 # Generate goodness of fit
-                self$.generateGoodnessOfFit(model_result)
+                private$.generateGoodnessOfFit(model_result)
                 
                 # Store model for plotting
                 private$.model <- model_result
@@ -151,7 +151,7 @@ excessmortalityClass <- R6::R6Class(
             
             # Simplified excess mortality modeling (since mexhaz may not be available)
             result <- tryCatch({
-                self$.fitSimplifiedExcessModel(analysis_data)
+                private$.fitSimplifiedExcessModel(analysis_data)
             }, error = function(e) {
                 jmvcore::reject(paste("Error fitting excess mortality model:", e$message), code = "")
                 return(NULL)
@@ -165,7 +165,7 @@ excessmortalityClass <- R6::R6Class(
             
             # Calculate age-sex specific expected rates (simplified approximation)
             # In practice, this would use life tables
-            data$expected_rate <- self$.calculateExpectedRates(data$age, data$sex)
+            data$expected_rate <- private$.calculateExpectedRates(data$age, data$sex)
             
             # Add person-years for Poisson modeling
             data$pyears <- data$time

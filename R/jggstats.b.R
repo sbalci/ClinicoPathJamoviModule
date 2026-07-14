@@ -59,24 +59,24 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             # Generate plot based on analysis type
-            plot <- self$.create_ggstats_plot(data)
+            plot <- private$.create_ggstats_plot(data)
             
             # Set plot
             self$results$plot$setState(plot)
             
             # Generate model table if requested
             if (self$options$output_format %in% c("model_table", "both")) {
-                self$.populate_model_table(data)
+                private$.populate_model_table(data)
             }
             
             # Generate model summary if requested
             if (self$options$show_model_summary) {
-                self$.populate_model_summary(data)
+                private$.populate_model_summary(data)
             }
             
             # Generate interpretation if requested
             if (self$options$show_interpretation) {
-                self$.generate_interpretation(data)
+                private$.generate_interpretation(data)
             }
         },
         
@@ -101,29 +101,29 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Create plot based on analysis type
             plot <- switch(self$options$analysis_type,
-                "ggcoef_model" = self$.create_ggcoef_model(data),
-                "ggcoef_compare" = self$.create_ggcoef_compare(data),
-                "gglikert" = self$.create_gglikert(data),
-                "ggsurvey" = self$.create_ggsurvey(data),
-                "stat_prop" = self$.create_stat_prop(data),
-                "stat_cross" = self$.create_stat_cross(data),
-                "stat_weighted_mean" = self$.create_weighted_mean(data),
-                "ggcascade" = self$.create_ggcascade(data),
-                self$.create_ggcoef_model(data)
+                "ggcoef_model" = private$.create_ggcoef_model(data),
+                "ggcoef_compare" = private$.create_ggcoef_compare(data),
+                "gglikert" = private$.create_gglikert(data),
+                "ggsurvey" = private$.create_ggsurvey(data),
+                "stat_prop" = private$.create_stat_prop(data),
+                "stat_cross" = private$.create_stat_cross(data),
+                "stat_weighted_mean" = private$.create_weighted_mean(data),
+                "ggcascade" = private$.create_ggcascade(data),
+                private$.create_ggcoef_model(data)
             )
             
             # Apply customizations
-            plot <- self$.apply_plot_customizations(plot)
+            plot <- private$.apply_plot_customizations(plot)
             
             return(plot)
         },
         
         .create_ggcoef_model = function(data) {
             # Build formula
-            formula <- self$.build_formula(data)
+            formula <- private$.build_formula(data)
             
             # Fit model
-            model <- self$.fit_model(data, formula)
+            model <- private$.fit_model(data, formula)
             
             # Prepare additional arguments
             coef_args <- list(
@@ -167,7 +167,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_ggcoef_compare = function(data) {
             # Build multiple models for comparison
-            models <- self$.build_comparison_models(data)
+            models <- private$.build_comparison_models(data)
             
             # Apply standardization if requested
             if (self$options$standardized && self$options$model_type %in% c("lm", "glm")) {
@@ -211,7 +211,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_gglikert = function(data) {
             # Prepare Likert data
-            likert_data <- self$.prepare_likert_data(data)
+            likert_data <- private$.prepare_likert_data(data)
             
             # Create Likert plot
             plot <- ggstats::gglikert(
@@ -224,7 +224,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_ggsurvey = function(data) {
             # Prepare survey data with weights
-            survey_data <- self$.prepare_survey_data(data)
+            survey_data <- private$.prepare_survey_data(data)
             
             # Create survey visualization using ggstats approach
             if (!is.null(self$options$weight_var)) {
@@ -304,7 +304,7 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .create_ggcascade = function(data) {
             # Create cascade plot for data filtering visualization
-            cascade_data <- self$.prepare_cascade_data(data)
+            cascade_data <- private$.prepare_cascade_data(data)
             
             # Create cascade plot manually using ggplot2 since ggcascade expects specific format
             plot <- ggplot2::ggplot(cascade_data, ggplot2::aes(x = step, y = n)) +
@@ -382,17 +382,17 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .build_comparison_models = function(data) {
             # Build multiple models for comparison
             # This would need to be customized based on specific comparison needs
-            formula <- self$.build_formula(data)
+            formula <- private$.build_formula(data)
             
             # For demonstration, create two models
-            model1 <- self$.fit_model(data, formula)
+            model1 <- private$.fit_model(data, formula)
             
             # Second model with interaction if grouping variable exists
             if (!is.null(self$options$grouping_var)) {
                 formula_str <- paste(as.character(formula)[2], "~",
                                    as.character(formula)[3], "*", jmvcore::composeTerm(self$options$grouping_var))
                 formula2 <- jmvcore::asFormula(formula_str)
-                model2 <- self$.fit_model(data, formula2)
+                model2 <- private$.fit_model(data, formula2)
                 return(list("Model 1" = model1, "Model 2" = model2))
             }
             
@@ -533,8 +533,8 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .populate_model_table = function(data) {
             # Create and fit model
-            formula <- self$.build_formula(data)
-            model <- self$.fit_model(data, formula)
+            formula <- private$.build_formula(data)
+            model <- private$.fit_model(data, formula)
             
             # Extract model results
             if (requireNamespace('broom', quietly = TRUE)) {
@@ -560,8 +560,8 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .populate_model_summary = function(data) {
             # Create and fit model
-            formula <- self$.build_formula(data)
-            model <- self$.fit_model(data, formula)
+            formula <- private$.build_formula(data)
+            model <- private$.fit_model(data, formula)
             
             # Extract model summary statistics
             if (requireNamespace('broom', quietly = TRUE)) {
@@ -610,8 +610,8 @@ jggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         
         .generate_interpretation = function(data) {
             # Create and fit model
-            formula <- self$.build_formula(data)
-            model <- self$.fit_model(data, formula)
+            formula <- private$.build_formula(data)
+            model <- private$.fit_model(data, formula)
             
             analysis_name <- switch(self$options$analysis_type,
                 "ggcoef_model" = "model coefficient visualization",

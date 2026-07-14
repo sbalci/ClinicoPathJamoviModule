@@ -84,11 +84,11 @@ polychoriccorrClass <- R6::R6Class(
             }
             
             # Calculate correlations
-            self$.calculatePolychoricCorrelations(data, vars)
+            private$.calculatePolychoricCorrelations(data, vars)
             
             # Create frequency tables if requested
             if (self$options$showFreq) {
-                self$.createFrequencyTables(data, vars)
+                private$.createFrequencyTables(data, vars)
             }
         },
         
@@ -119,7 +119,7 @@ polychoriccorrClass <- R6::R6Class(
                     }
                     
                     # Calculate correlation based on type
-                    result <- self$.calculateCorrelationPair(x, y, actual_type, ci_level)
+                    result <- private$.calculateCorrelationPair(x, y, actual_type, ci_level)
                     
                     if (!is.null(result)) {
                         # Format confidence interval
@@ -156,13 +156,13 @@ polychoriccorrClass <- R6::R6Class(
             
             if (type == "tetrachoric") {
                 # Tetrachoric correlation for 2x2 tables
-                result <- self$.calculateTetrachoric(x, y, ci_level)
+                result <- private$.calculateTetrachoric(x, y, ci_level)
             } else if (type == "polychoric") {
                 # Approximation using Spearman correlation on ranks
-                result <- self$.calculatePolychoricApprox(x_num, y_num, ci_level)
+                result <- private$.calculatePolychoricApprox(x_num, y_num, ci_level)
             } else {
                 # For other types, use Spearman as approximation
-                result <- self$.calculatePolychoricApprox(x_num, y_num, ci_level)
+                result <- private$.calculatePolychoricApprox(x_num, y_num, ci_level)
             }
             
             return(result)

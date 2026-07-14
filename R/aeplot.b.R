@@ -9,7 +9,6 @@
 #' @importFrom R6 R6Class
 #' @import ggplot2
 #' @importFrom magrittr %>%
-
 aeplotClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "aeplotClass",
     inherit = aeplotBase,

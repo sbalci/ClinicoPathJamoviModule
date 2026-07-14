@@ -131,7 +131,7 @@ rmstregressionClass <- R6::R6Class(
             # Add explanatory variables
             if (length(self$options$explanatory) > 0) {
                 for (var in self$options$explanatory) {
-                    if (self$data[[var]]$measureType == 'continuous') {
+                    if (is.numeric(self$data[[var]])) {
                         data[[var]] <- jmvcore::toNumeric(self$data[[var]])
                     } else {
                         data[[var]] <- factor(self$data[[var]])

@@ -1394,7 +1394,7 @@ haralicktextureClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         paste0(
                             "<li><strong>Feature Ranges:</strong> ",
                             paste(sapply(names(feature_summaries)[1:min(3, length(feature_summaries))], function(x) {
-                                paste0(x, ": ", round(feature_summaries[[x]]$range, 3))
+                                paste0(htmltools::htmlEscape(x), ": ", round(feature_summaries[[x]]$range, 3))
                             }), collapse = ", "),
                             if (length(feature_summaries) > 3) "..." else "", "</li>"
                         )

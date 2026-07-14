@@ -303,7 +303,7 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 return(htmltools::HTML(print_table[["children"]][[2]]))
             }, error = function(e) {
                 # Fallback to basic table
-                return(self$.gtExtras_style_fallback(dataset, var_list))
+                return(private$.gtExtras_style_fallback(dataset, var_list))
             })
         },
         # Fallback with gtExtras-style appearance
@@ -581,9 +581,9 @@ summarydataClass <- if (requireNamespace("jmvcore")) R6::R6Class("summarydataCla
                 min_val <- round(min(var_clean), 2)
                 max_val <- round(max(var_clean), 2)
 
-                # Basic descriptive sentence (use plain text var name for clinical reports)
+                # Basic descriptive sentence (escape var name; output is rendered as HTML)
                 sentence <- paste0(
-                    "For ", var, ", analysis of ", n, " observations showed mean ", 
+                    "For ", htmltools::htmlEscape(var), ", analysis of ", n, " observations showed mean ",
                     mean_val, " \u{B1} ", sd_val, " (median ", median_val, 
                     ", range ", min_val, "-", max_val, ")"
                 )

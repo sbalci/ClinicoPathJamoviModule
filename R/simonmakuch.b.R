@@ -4,7 +4,7 @@
 #' @import survival
 #' @import survminer
 #' @import ggplot2
-#' @importFrom dplyr mutate filter arrange select group_by summarise n
+#' @importFrom dplyr mutate filter arrange group_by summarise n
 #' @importFrom tidyr pivot_longer pivot_wider
 #' @export
 #' @return An \code{R6} class generator object for the \code{simonmakuchClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -14,6 +14,14 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "simonmakuchClass",
     inherit = simonmakuchBase,
     private = list(
+
+        # Stores the fitted time-dependent Cox model so downstream outputs
+        # (immortal-time bias, time-varying effects, diagnostics, bootstrap,
+        # sensitivity) can reuse it. Must be declared here: R6 locks the object
+        # by default, so assigning to an undeclared field throws
+        # "cannot add bindings to a locked environment".
+        .cox_model = NULL,
+
         .init = function() {
             
             # Welcome message
@@ -1218,12 +1226,216 @@ simonmakuchClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }, error = function(e) {
                 # Create error plot
                 plot <- ggplot2::ggplot() +
-                    ggplot2::annotate("text", x = 0.5, y = 0.5, 
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
                                       label = paste("Error creating plot:", e$message),
                                       size = 4) +
                     ggtheme
-                
+
                 print(plot)
+            })
+        },
+
+        .plotLandmarkAnalysis = function(image, ggtheme, theme, ...) {
+            # Landmark survival curves by exposure status, faceted per landmark time
+
+            if (is.null(self$options$survivalTime) ||
+                is.null(self$options$event) ||
+                is.null(self$options$timeDepVariable)) {
+                return()
+            }
+
+            tryCatch({
+                survData <- private$.prepareTimeDepenentData(self$data)
+                if (is.null(survData)) return()
+
+                landmark_times <- as.numeric(unlist(strsplit(self$options$landmarkTimes, ",")))
+                landmark_times <- landmark_times[!is.na(landmark_times)]
+                if (length(landmark_times) == 0) return()
+
+                plot_list <- list()
+                for (lt in landmark_times) {
+                    ld <- survData[survData$tstop > lt, ]
+                    if (nrow(ld) == 0) next
+                    ld$tstart_adj <- pmax(ld$tstart, lt)
+                    fit <- survival::survfit(
+                        survival::Surv(tstart_adj, tstop, event) ~ exposed,
+                        data = ld
+                    )
+                    s <- summary(fit)
+                    if (is.null(s$strata)) next
+                    plot_list[[length(plot_list) + 1]] <- data.frame(
+                        time = s$time,
+                        surv = s$surv,
+                        exposure = sub("exposed=", "", as.character(s$strata)),
+                        landmark = paste0("Landmark ", lt),
+                        stringsAsFactors = FALSE
+                    )
+                }
+                if (length(plot_list) == 0) return()
+
+                pd <- do.call(rbind, plot_list)
+                plot <- ggplot2::ggplot(pd, ggplot2::aes(x = time, y = surv, color = exposure)) +
+                    ggplot2::geom_step() +
+                    ggplot2::facet_wrap(~ landmark) +
+                    ggplot2::ylim(0, 1) +
+                    ggplot2::labs(
+                        title = "Landmark Survival Analysis",
+                        x = "Time", y = "Survival Probability", color = "Exposure Status"
+                    ) +
+                    ggtheme
+                print(plot)
+                TRUE
+
+            }, error = function(e) {
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                      label = paste("Error creating plot:", e$message),
+                                      size = 4) +
+                    ggtheme
+                print(plot)
+                TRUE
+            })
+        },
+
+        .plotCumulativeIncidence = function(image, ggtheme, theme, ...) {
+            # Cumulative incidence of the time-dependent exposure over time
+            # (1 - KM of time-to-exposure, treating exposure onset as the event)
+
+            if (is.null(self$options$timeDepVariable) ||
+                is.null(self$options$timeDepTime) ||
+                is.null(self$options$timeDepStatus)) {
+                return()
+            }
+
+            tryCatch({
+                survData <- private$.prepareTimeDepenentData(self$data)
+                if (is.null(survData)) return()
+
+                agg <- do.call(rbind, lapply(split(survData, survData$id), function(d) {
+                    d <- d[order(d$tstart), ]
+                    er <- which(d$exposed == "Exposed")
+                    if (length(er) > 0)
+                        data.frame(time = d$tstart[er[1]], status = 1)
+                    else
+                        data.frame(time = max(d$tstop), status = 0)
+                }))
+                # Drop degenerate baseline-exposed onsets at time 0 for the survfit
+                agg <- agg[agg$time > 0 | agg$status == 0, ]
+                if (nrow(agg) == 0 || all(agg$status == 0)) return()
+
+                fit <- survival::survfit(survival::Surv(time, status) ~ 1, data = agg)
+                df <- data.frame(time = fit$time, cuminc = 1 - fit$surv)
+
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = cuminc)) +
+                    ggplot2::geom_step() +
+                    ggplot2::ylim(0, 1) +
+                    ggplot2::labs(
+                        title = "Cumulative Incidence of Time-Dependent Exposure",
+                        x = "Time", y = "Cumulative Incidence of Exposure"
+                    ) +
+                    ggtheme
+                print(plot)
+                TRUE
+
+            }, error = function(e) {
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                      label = paste("Error creating plot:", e$message),
+                                      size = 4) +
+                    ggtheme
+                print(plot)
+                TRUE
+            })
+        },
+
+        .plotExposureStatus = function(image, ggtheme, theme, ...) {
+            # Cumulative count of subjects who have transitioned to exposed over time
+
+            if (is.null(self$options$timeDepVariable) ||
+                is.null(self$options$timeDepTime) ||
+                is.null(self$options$timeDepStatus)) {
+                return()
+            }
+
+            tryCatch({
+                survData <- private$.prepareTimeDepenentData(self$data)
+                if (is.null(survData)) return()
+
+                onset <- do.call(rbind, lapply(split(survData, survData$id), function(d) {
+                    d <- d[order(d$tstart), ]
+                    er <- which(d$exposed == "Exposed")
+                    if (length(er) > 0)
+                        data.frame(time = d$tstart[er[1]], exposed = 1)
+                    else
+                        data.frame(time = max(d$tstop), exposed = 0)
+                }))
+                ot <- sort(onset$time[onset$exposed == 1])
+                if (length(ot) == 0) return()
+
+                df <- data.frame(time = c(0, ot), n_exposed = c(0, seq_along(ot)))
+                plot <- ggplot2::ggplot(df, ggplot2::aes(x = time, y = n_exposed)) +
+                    ggplot2::geom_step() +
+                    ggplot2::labs(
+                        title = "Exposure Status Changes Over Time",
+                        x = "Time", y = "Cumulative Number Exposed"
+                    ) +
+                    ggtheme
+                print(plot)
+                TRUE
+
+            }, error = function(e) {
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                      label = paste("Error creating plot:", e$message),
+                                      size = 4) +
+                    ggtheme
+                print(plot)
+                TRUE
+            })
+        },
+
+        .plotModelDiagnostics = function(image, ggtheme, theme, ...) {
+            # Proportional-hazards diagnostic: scaled Schoenfeld residuals vs time
+
+            if (is.null(self$options$survivalTime) ||
+                is.null(self$options$event) ||
+                is.null(self$options$timeDepVariable)) {
+                return()
+            }
+
+            tryCatch({
+                survData <- private$.prepareTimeDepenentData(self$data)
+                if (is.null(survData)) return()
+
+                model <- survival::coxph(
+                    survival::Surv(tstart, tstop, event) ~ exposed,
+                    data = survData
+                )
+                zph <- survival::cox.zph(model)
+                resid_df <- data.frame(
+                    time = as.numeric(zph$time),
+                    residual = as.numeric(zph$y[, 1])
+                )
+
+                plot <- ggplot2::ggplot(resid_df, ggplot2::aes(x = time, y = residual)) +
+                    ggplot2::geom_point(alpha = 0.5) +
+                    ggplot2::geom_smooth(method = "loess", formula = y ~ x, se = TRUE) +
+                    ggplot2::labs(
+                        title = "Proportional Hazards Diagnostic (Scaled Schoenfeld Residuals)",
+                        x = "Time", y = "Scaled Schoenfeld Residual (exposed)"
+                    ) +
+                    ggtheme
+                print(plot)
+                TRUE
+
+            }, error = function(e) {
+                plot <- ggplot2::ggplot() +
+                    ggplot2::annotate("text", x = 0.5, y = 0.5,
+                                      label = paste("Error creating plot:", e$message),
+                                      size = 4) +
+                    ggtheme
+                print(plot)
+                TRUE
             })
         }
     )

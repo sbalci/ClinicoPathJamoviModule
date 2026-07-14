@@ -300,8 +300,11 @@ precisionrecallClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 pValue <- 2 * min(mean(aucDiff >= 0), mean(aucDiff <= 0))
 
             } else if (method == "permutation") {
-                # Permutation test (simplified)
-                pValue <- 0.5  # Placeholder
+                # Permutation test is NOT implemented. Return NA rather than a
+                # fabricated p-value. A correct implementation must permute the
+                # model/label assignment and recompute the AUC-PR difference
+                # null distribution. Until then this branch reports no result.
+                pValue <- NA_real_
             }
 
             return(pValue)

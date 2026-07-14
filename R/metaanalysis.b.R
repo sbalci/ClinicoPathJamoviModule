@@ -271,17 +271,17 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 if (sum(complete_cases) < 2) {
                     self$results$instructions$setContent(
-                        "<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
+                        paste0("<div style='color: #dc3545; padding: 15px; background-color: #f8d7da; border-radius: 5px;'>
                     <h4> Insufficient Data</h4>
                     <p>Meta-analysis requires at least 2 studies with complete effect size and variance data.</p>
-                    <p><b>Current status:</b> Found " + sum(complete_cases) + " complete cases out of " + length(effect_sizes) + " total.</p>
+                    <p><b>Current status:</b> Found ", sum(complete_cases), " complete cases out of ", length(effect_sizes), " total.</p>
                     <p><b>Check your data for:</b></p>
                     <ul>
                     <li>Missing effect sizes</li>
                     <li>Missing variance/standard error values</li>
                     <li>Non-numeric values in these columns</li>
                     </ul>
-                    </div>"
+                    </div>")
                     )
                     return(NULL)
                 }
@@ -348,6 +348,9 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             .run = function() {
                 # Clear any cached data on new run
                 private$.cached_clean_data <- NULL
+
+                # Always populate the static methods & interpretation guide
+                private$.populateMethodExplanation()
 
                 # Modular execution pipeline
                 if (!private$.validateInputs()) {
@@ -426,7 +429,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     "generic" = private$.generateGenericSummary(clean_data),
                     "diagnostic_accuracy" = private$.generateDiagnosticSummary(),
                     "network" = private$.generateNetworkSummary(),
-                    "Analysis completed for " + n_studies + " studies."
+                    paste0("Analysis completed for ", n_studies, " studies.")
                 )
 
                 # Start with summary
@@ -685,7 +688,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (bias_tests %in% c("egger", "all_tests") && length(effects) >= 3) {
                     tryCatch(
                         {
-                            egger_result <- metafor::regtest(private$ma_model, model = "lm")
+                            egger_result <- metafor::regtest(private$.ma_model, model = "lm")
 
                             egger_interpretation <- if (egger_result$pval < 0.05) {
                                 "Significant publication bias detected"
@@ -723,7 +726,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (bias_tests %in% c("begg", "all_tests") && length(effects) >= 3) {
                     tryCatch(
                         {
-                            begg_result <- metafor::ranktest(private$ma_model)
+                            begg_result <- metafor::ranktest(private$.ma_model)
 
                             begg_interpretation <- if (begg_result$pval < 0.05) {
                                 "Significant publication bias detected"
@@ -755,11 +758,11 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (bias_tests %in% c("trim_fill", "all_tests")) {
                     tryCatch(
                         {
-                            tf_result <- metafor::trimfill(private$ma_model, side = "left")
+                            tf_result <- metafor::trimfill(private$.ma_model, side = "left")
 
                             n_imputed <- tf_result$k0
                             tf_pooled <- tf_result$beta
-                            original_pooled <- private$ma_model$beta
+                            original_pooled <- private$.ma_model$beta
 
                             tf_interpretation <- if (n_imputed > 0) {
                                 sprintf("Suggests %d missing studies; adjusted estimate = %.3f", n_imputed, tf_pooled)
@@ -975,15 +978,15 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 }
 
                 # Original I²
-                original_i2 <- if (!is.null(private$ma_model$I2)) private$ma_model$I2 else 0
+                original_i2 <- if (!is.null(private$.ma_model$I2)) private$.ma_model$I2 else 0
 
                 # Leave-one-out analysis
                 tryCatch(
                     {
-                        loo_results <- metafor::leave1out(private$ma_model)
+                        loo_results <- metafor::leave1out(private$.ma_model)
 
                         # Find studies with largest influence on results
-                        effect_changes <- abs(loo_results$estimate - as.numeric(private$ma_model$beta))
+                        effect_changes <- abs(loo_results$estimate - as.numeric(private$.ma_model$beta))
                         most_influential_idx <- which.max(effect_changes)
 
                         # Results when most influential study is removed
@@ -1032,7 +1035,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     {
                         fe_model <- metafor::rma(yi = effects, vi = variances, method = "FE")
                         fe_effect <- as.numeric(fe_model$beta)
-                        re_effect <- as.numeric(private$ma_model$beta)
+                        re_effect <- as.numeric(private$.ma_model$beta)
 
                         sensitivity_table$addRow(rowKey = "fe_vs_re", values = list(
                             analysis = "Fixed vs Random Effects",
@@ -1057,13 +1060,13 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 tryCatch(
                     {
                         # Calculate standardized residuals
-                        residuals <- metafor::rstandard(private$ma_model)
+                        residuals <- metafor::rstandard(private$.ma_model)
 
                         # Calculate leverage (hat values)
-                        leverage <- metafor::hatvalues(private$ma_model)
+                        leverage <- metafor::hatvalues(private$.ma_model)
 
                         # Calculate Cook's distance
-                        cooks_d <- metafor::cooks.distance(private$ma_model)
+                        cooks_d <- metafor::cooks.distance(private$.ma_model)
 
                         # Identify outliers (|standardized residual| > 2)
                         outlier_threshold <- 2
@@ -1449,7 +1452,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 return(interpretation)
             },
             .populateMethodExplanation = function() {
-                html <- "
+                html <- paste0("
             <html>
             <head>
             <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
@@ -1458,7 +1461,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <h3>Meta-Analysis Methods & Interpretation</h3>
 
             <h4>Effect Size Measures</h4>
-            <p><b>Current Effect Measure:</b> " + private$.getEffectMeasureInterpretation() + "</p>
+            <p><b>Current Effect Measure:</b> ", private$.getEffectMeasureInterpretation(), "</p>
             <p><b>Odds Ratio (OR):</b> Measure of association for binary outcomes. OR > 1 indicates increased odds.</p>
             <p><b>Mean Difference (MD):</b> Absolute difference in means between groups for continuous outcomes.</p>
             <p><b>Standardized Mean Difference (SMD):</b> Cohen's d; effect size standardized by pooled SD.</p>
@@ -1512,13 +1515,13 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
             <p>\u{2022} DerSimonian R, Laird N. Meta-analysis in clinical trials. Control Clin Trials. 1986.</p>
             <p>\u{2022} Viechtbauer W. Conducting meta-analyses in R with the metafor package. JSS. 2010.</p>
             </body>
-            </html>"
+            </html>")
 
                 self$results$methodExplanation$setContent(html)
             },
 
             # Plot Functions
-            .forestPlot = function(image, ...) {
+            .plotForest = function(image, ...) {
                 if (!requireNamespace("metafor", quietly = TRUE)) {
                     return(FALSE)
                 }
@@ -1584,7 +1587,7 @@ metaanalysisClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     }
                 )
             },
-            .funnelPlot = function(image, ...) {
+            .plotFunnel = function(image, ...) {
                 if (!requireNamespace("metafor", quietly = TRUE)) {
                     return(FALSE)
                 }

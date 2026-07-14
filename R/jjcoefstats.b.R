@@ -142,6 +142,10 @@ jjcoefstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
 .run = function() {
     private$.noticeList <- list()
+    # Reset per-run model state so a prior successful run does not leak
+    # stale coefficients into summaries/plot/notice when this run returns early.
+    private$.tidyCoefs <- NULL
+    private$.modelFit <- NULL
     on.exit(private$.renderNotices(), add = TRUE)
 
     # Always generate About content

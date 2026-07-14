@@ -347,7 +347,7 @@ sequentialtestsClass <- if (requireNamespace('jmvcore'))
                     }
 
                     summary <- sprintf(
-                        "<div style='background:#e8f4f8;padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%%%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%%%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%%%, a positive result indicates a %.1f%%%% chance the person truly has the disease (PPV), while a negative result indicates a %.1f%%%% chance the person is truly disease-free (NPV).%s %s</div>",
+                        "<div style='background:#e8f4f8;padding:15px;border-left:4px solid #0077be;font-size:1.05em;line-height:1.6;'><strong>Clinical Summary:</strong> Using a %s with %s followed by %s, the combined test achieves %.1f%% sensitivity (detects %.0f of every 100 diseased individuals) and %.1f%% specificity (correctly rules out %.0f of every 100 healthy individuals). At your specified disease prevalence of %.1f%%, a positive result indicates a %.1f%% chance the person truly has the disease (PPV), while a negative result indicates a %.1f%% chance the person is truly disease-free (NPV).%s %s</div>",
                         strategy_desc,
                         private$.safeHtmlOutput(test1_name),
                         private$.safeHtmlOutput(test2_name),

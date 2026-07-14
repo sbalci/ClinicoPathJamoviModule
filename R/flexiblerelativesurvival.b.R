@@ -46,7 +46,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
                 return()
 
             # Check required variables
-            ready <- self$.checkData()
+            ready <- private$.checkData()
             if (!ready$ready) {
                 if (!is.null(ready$error))
                     jmvcore::reject(ready$error, code = "")
@@ -56,25 +56,25 @@ flexiblerelativesurvivalClass <- R6::R6Class(
             data <- self$data
 
             # Fit flexible relative survival model
-            model_result <- self$.fitFlexibleRelativeSurvival(data)
+            model_result <- private$.fitFlexibleRelativeSurvival(data)
 
             if (!is.null(model_result)) {
                 # Generate model summary
-                self$.generateModelSummary(model_result)
+                private$.generateModelSummary(model_result)
 
                 # Generate coefficients table
                 if (length(self$options$covariates) > 0) {
-                    self$.generateCoefficients(model_result)
+                    private$.generateCoefficients(model_result)
                 }
 
                 # Generate relative survival estimates
-                self$.generateRelativeSurvivalEstimates(model_result)
+                private$.generateRelativeSurvivalEstimates(model_result)
 
                 # Generate smoothing information
-                self$.generateSmoothingInfo(model_result)
+                private$.generateSmoothingInfo(model_result)
 
                 # Generate goodness of fit
-                self$.generateGoodnessOfFit(model_result)
+                private$.generateGoodnessOfFit(model_result)
 
                 # Store model for plotting
                 private$.model <- model_result
@@ -164,7 +164,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
 
             # Fit flexible relative survival model
             result <- tryCatch({
-                self$.fitFlexibleModel(analysis_data)
+                private$.fitFlexibleModel(analysis_data)
             }, error = function(e) {
                 jmvcore::reject(paste("Error fitting flexible relative survival model:", e$message), code = "")
                 return(NULL)
@@ -175,7 +175,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
 
         .fitFlexibleModel = function(data) {
             # Calculate expected survival rates
-            data$expected_hazard <- self$.calculateExpectedHazard(data$age, data$sex, data$year)
+            data$expected_hazard <- private$.calculateExpectedHazard(data$age, data$sex, data$year)
             data$expected_survival <- exp(-data$expected_hazard * data$time)
 
             # Person-years for Poisson modeling
@@ -379,7 +379,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
                 avg_year <- mean(model_result$data$year)
 
                 # Expected hazard at reference values
-                expected_haz <- self$.calculateExpectedHazard(avg_age,
+                expected_haz <- private$.calculateExpectedHazard(avg_age,
                                                             factor(avg_sex, levels = levels(model_result$data$sex)),
                                                             avg_year)
 
@@ -495,7 +495,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
                 t <- time_seq[i]
 
                 # Expected hazard
-                expected_haz <- self$.calculateExpectedHazard(avg_age,
+                expected_haz <- private$.calculateExpectedHazard(avg_age,
                                                             factor(avg_sex, levels = levels(model_result$data$sex)),
                                                             avg_year)
 
@@ -561,7 +561,7 @@ flexiblerelativesurvivalClass <- R6::R6Class(
             for (i in seq_along(time_seq)) {
                 t <- time_seq[i]
 
-                expected_haz <- self$.calculateExpectedHazard(avg_age,
+                expected_haz <- private$.calculateExpectedHazard(avg_age,
                                                             factor(avg_sex, levels = levels(model_result$data$sex)),
                                                             avg_year)
 

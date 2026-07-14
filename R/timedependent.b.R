@@ -7,7 +7,7 @@
 #' @import riskRegression
 #' @import pROC
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @return An \code{R6} class generator object for the \code{timedependentClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 timedependentClass <- if (requireNamespace('jmvcore'))

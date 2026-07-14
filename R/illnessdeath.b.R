@@ -175,8 +175,16 @@ illnessdeathClass <- R6::R6Class(
             }
 
             # Validate and prepare state variables
+            # jmvcore::toNumeric returns a plain factor (no jamovi "values"
+            # attribute) unchanged; coerce factor levels (e.g. "0"/"1"/"2") to
+            # their numeric codes so downstream state indexing (state + 1) does
+            # not silently yield NA and drop every transition.
             from_states <- jmvcore::toNumeric(analysis_data[[from_var]])
+            if (is.factor(from_states))
+                from_states <- as.numeric(as.character(from_states))
             to_states <- jmvcore::toNumeric(analysis_data[[to_var]])
+            if (is.factor(to_states))
+                to_states <- as.numeric(as.character(to_states))
             
             # Check state coding
             valid_states <- c(0, 1, 2)

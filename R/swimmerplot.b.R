@@ -3,11 +3,11 @@
 #' Comprehensive swimmer plot function with full ggswim integration.
 #' Creates swimmer plots for visualizing patient timelines, treatments, milestones, and clinical events.
 #'
-#' @importFrom R6 R6Class  
+#' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggswim
 #' @importFrom ggplot2 ggplot aes labs theme element_text element_blank
-#' @importFrom dplyr mutate filter select group_by summarize left_join arrange n bind_rows
+#' @importFrom dplyr mutate filter group_by summarize left_join arrange n bind_rows
 #' @importFrom tidyr pivot_wider
 #' @importFrom lubridate ymd_hms ymd ydm mdy myd dmy dym interval time_length
 #' @importFrom tibble tibble
@@ -265,9 +265,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             # Extract and process core variables
             patient_data <- tryCatch({
                 data.frame(
-                    patient_id = as.character(df[[private$.escapeVar(self$options$patientID)]]),
-                    start_time = df[[private$.escapeVar(self$options$startTime)]],
-                    end_time = df[[private$.escapeVar(self$options$endTime)]],
+                    patient_id = as.character(df[[self$options$patientID]]),
+                    start_time = df[[self$options$startTime]],
+                    end_time = df[[self$options$endTime]],
                     stringsAsFactors = FALSE
                 )
             }, error = function(e) {
@@ -373,17 +373,17 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             
             # Add response/status variable if provided
             if (!is.null(self$options$responseVar)) {
-                patient_data$response <- as.factor(df[[private$.escapeVar(self$options$responseVar)]])
+                patient_data$response <- as.factor(df[[self$options$responseVar]])
             }
 
             # Add censoring/event status variable if provided
             if (!is.null(self$options$censorVar)) {
-                patient_data$censor_status <- df[[private$.escapeVar(self$options$censorVar)]]
+                patient_data$censor_status <- df[[self$options$censorVar]]
             }
 
             # Add grouping variable if provided
             if (!is.null(self$options$groupVar)) {
-                patient_data$patient_group <- as.factor(df[[private$.escapeVar(self$options$groupVar)]])
+                patient_data$patient_group <- as.factor(df[[self$options$groupVar]])
             }
 
             # Data validation
@@ -437,7 +437,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     !is.null(self$options[[name_opt]]) && 
                     self$options[[name_opt]] != "") {
                     
-                    milestone_dates <- self$data[[private$.escapeVar(self$options[[date_opt]])]]
+                    milestone_dates <- self$data[[self$options[[date_opt]]]]
                     
                     # Skip if all NA
                     if (all(is.na(milestone_dates))) next
@@ -607,9 +607,9 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 if (!is.null(event_var)) {
                     event_data <- tryCatch({
                         # Ensure all variables exist and get their lengths
-                        patient_ids <- as.character(self$data[[private$.escapeVar(self$options$patientID)]])
-                        event_times <- self$data[[private$.escapeVar(event_time_var)]]
-                        event_labels <- as.character(self$data[[private$.escapeVar(event_var)]])
+                        patient_ids <- as.character(self$data[[self$options$patientID]])
+                        event_times <- self$data[[event_time_var]]
+                        event_labels <- as.character(self$data[[event_var]])
 
                         # Find the minimum length to avoid row mismatch
                         min_length <- min(length(patient_ids), length(event_times), length(event_labels))
@@ -1628,6 +1628,7 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                         laneWidth = self$options$laneWidth,
                         markerSize = self$options$markerSize,
                         theme = self$options$plotTheme,
+                        colorPalette = self$options$colorPalette,
                         showLegend = self$options$showLegend,
                         referenceLines = self$options$referenceLines,
                         customReferenceTime = self$options$customReferenceTime
@@ -2545,8 +2546,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 sv <- self$options$sortVariable
                 df <- self$data
                 tmp <- data.frame(
-                    patient_id = as.character(df[[private$.escapeVar(self$options$patientID)]]),
-                    sort_val = df[[private$.escapeVar(sv)]],
+                    patient_id = as.character(df[[self$options$patientID]]),
+                    sort_val = df[[sv]],
                     stringsAsFactors = FALSE
                 )
                 tmp <- tmp[!is.na(tmp$patient_id) & !duplicated(tmp$patient_id), ]

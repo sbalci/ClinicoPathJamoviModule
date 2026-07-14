@@ -12,10 +12,15 @@
 #' @importFrom dplyr group_by summarise mutate arrange filter
 #' @importFrom broom tidy
 #' @importFrom htmltools HTML
-
 groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedforestClass",
     inherit = groupedforestBase,
     private = list(
+
+        # Stores the grouped Cox results so .plot_forest() can reuse them.
+        # Must be declared here: R6 locks the object (lock_objects=TRUE by
+        # default), so assigning to an undeclared private field would throw
+        # "cannot add bindings to a locked environment" at runtime.
+        .grouped_results = NULL,
 
         .run = function() {
 
@@ -418,7 +423,13 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
             cox_model <- survival::coxph(cox_formula, data = data)
             
             model_summary <- broom::tidy(cox_model, conf.int = TRUE, conf.level = self$options$confidence_level)
-            treatment_coef <- model_summary[grepl(treatment_var, model_summary$term), ]
+            # Match the treatment term robustly: exact variable-name prefix
+            # (literal, not regex) and exclude interaction terms, mirroring
+            # .perform_grouped_analysis. Avoids regex-metacharacter surprises and
+            # false matches on covariates whose names contain the treatment name.
+            is_trt <- startsWith(model_summary$term, treatment_var) &
+                      !grepl(":", model_summary$term, fixed = TRUE)
+            treatment_coef <- model_summary[is_trt, ]
             
             overall_html <- paste0(
                 "<div style='background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>",
@@ -622,6 +633,3 @@ groupedforestClass <- if (requireNamespace("jmvcore")) R6::R6Class("groupedfores
 
     )
 )
-
-# Store results for plotting
-.grouped_results <- NULL

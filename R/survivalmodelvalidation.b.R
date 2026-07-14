@@ -182,6 +182,11 @@ survivalmodelvalidationClass <- R6::R6Class(
             
             # Methodological notes and recommendations
             tryCatch({
+                private$.generateMethodologicalNotes()
+            }, error = function(e) {
+                # Ignore
+            })
+            tryCatch({
                 private$.generateRecommendations(prepared_data, validation_results)
             }, error = function(e) {
                 # Ignore
@@ -547,6 +552,31 @@ survivalmodelvalidationClass <- R6::R6Class(
                     conclusion = paste0(nrow(data), " patients analyzed")
                 ))
             }, silent = TRUE)
+
+            # Narrative for the Calibration Analysis output item
+            cal_method <- self$options$calibration_method
+            method_label <- switch(cal_method,
+                "decile_based"       = "Decile-Based Calibration",
+                "smooth_calibration" = "Smooth Calibration Curve",
+                "hosmer_lemeshow"    = "Hosmer-Lemeshow Test",
+                "greenwood_nam"      = "Greenwood-Nam-D'Agostino Test",
+                cal_method)
+
+            cal_html <- paste0(
+                "<h4>Calibration Assessment</h4>",
+                "<p>Calibration measures the agreement between the risk predicted by the model ",
+                "and the outcomes actually observed. A well-calibrated model neither systematically ",
+                "over- nor under-estimates risk.</p>",
+                "<p><b>Selected method:</b> ", method_label, "</p>",
+                "<p>The <b>calibration slope</b> (see the Calibration Assessment table) summarizes ",
+                "agreement on the log-hazard scale: a slope of 1.0 is ideal, a slope &lt; 1 indicates ",
+                "the risk score is too extreme (overfitting; shrinkage recommended), and a slope &gt; 1 ",
+                "indicates predictions that are too moderate.</p>",
+                "<p style='font-size: 0.9em; color: #666;'><i>Note: For a pre-computed linear predictor, ",
+                "absolute calibration (calibration-in-the-large) cannot be assessed without the model's ",
+                "baseline hazard; the slope assesses relative calibration only.</i></p>"
+            )
+            self$results$calibrationAnalysis$setContent(cal_html)
         },
         
         .updateValidationTable = function(results) {
@@ -1125,6 +1155,44 @@ survivalmodelvalidationClass <- R6::R6Class(
             html <- paste0(html, "</ol>")
             
             self$results$recommendations$setContent(html)
+        },
+
+        .generateMethodologicalNotes = function() {
+
+            validation_type <- self$options$validation_type
+            method_label <- gsub("_", " ", stringr::str_to_title(validation_type))
+
+            html <- "<h3>Methodological Notes</h3>"
+            html <- paste0(html, "<p><b>Selected validation strategy:</b> ", method_label, "</p>")
+
+            html <- paste0(html, "<h4>Discrimination</h4>")
+            html <- paste0(html, "<p>The Concordance Index (C-index) estimates the probability that, for a random pair of ",
+                           "patients, the one with the higher risk score experiences the event first. It is computed here ",
+                           "with <code>survival::concordance()</code>. Time-dependent AUC (via the <code>timeROC</code> package) ",
+                           "describes how discrimination changes across the specified prediction time points.</p>")
+
+            html <- paste0(html, "<h4>Validation Methodology</h4>")
+            html <- paste0(html, "<ul>")
+            html <- paste0(html, "<li><b>Internal Bootstrap:</b> resamples patients with replacement to estimate the ",
+                           "sampling distribution of the C-index and an optimism term.</li>")
+            html <- paste0(html, "<li><b>Cross-Validation:</b> partitions the data into folds and evaluates the risk ",
+                           "score on each held-out fold.</li>")
+            html <- paste0(html, "<li><b>Temporal Validation:</b> splits the data into an earlier development portion ",
+                           "and a later evaluation portion (based on row order).</li>")
+            html <- paste0(html, "</ul>")
+
+            html <- paste0(html, "<div style='background-color: #fff8e1; border-left: 5px solid #f0ad4e; padding: 12px; margin: 10px 0;'>")
+            html <- paste0(html, "<p style='margin:0;'><b>Important interpretation caveat.</b> This analysis validates a ",
+                           "<i>pre-computed</i> risk score / linear predictor rather than re-estimating model coefficients. ",
+                           "Because the predictor is held fixed across resamples, the reported optimism and ",
+                           "bias-corrected performance reflect only the sampling stability of a frozen score - they do ",
+                           "<b>not</b> capture the optimism that arises from fitting model coefficients on the same data ",
+                           "(Harrell-Efron optimism correction requires refitting the model within each bootstrap sample). ",
+                           "If the score was developed on this dataset, treat the apparent C-index as optimistic and ",
+                           "confirm performance with a properly refit internal validation or an independent external cohort.</p>")
+            html <- paste0(html, "</div>")
+
+            self$results$methodologicalNotes$setContent(html)
         },
 
         .interpretCIndex = function(c_index) {

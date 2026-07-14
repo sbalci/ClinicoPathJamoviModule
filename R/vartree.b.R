@@ -5,7 +5,7 @@
 #' @import DiagrammeR
 #' @import DiagrammeRsvg
 #' @import vtree
-#' @import janitor
+#' @rawNamespace import(janitor, except = c(chisq.test, fisher.test))
 #' @import labelled
 #' @importFrom magrittr %>%
 #' @importFrom stats as.formula

@@ -10,6 +10,23 @@ jextractggstatsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
     private = list(
         .init = function() {
             if (is.null(self$data) || is.null(self$options$dep_var)) {
+                instructions_html <- paste0(
+                    "<div style='padding: 20px; background-color: #f8f9fa; border-radius: 8px;'>",
+                    "<h2>Statistical Data Extraction from ggstatsplot</h2>",
+                    "<p>This analysis extracts the underlying statistical details ",
+                    "(subtitle, caption, pairwise comparisons, and descriptive statistics) ",
+                    "computed by <em>ggstatsplot</em>.</p>",
+                    "<h4>Getting Started</h4>",
+                    "<ol>",
+                    "<li>Select a numeric <strong>Dependent Variable</strong>.</li>",
+                    "<li>Optionally select a <strong>Grouping Variable</strong> for group comparisons.</li>",
+                    "<li>Choose the <strong>Analysis Type</strong> and <strong>Statistical Test</strong>.</li>",
+                    "<li>Pick which <strong>Components</strong> to extract.</li>",
+                    "</ol>",
+                    "<p><em>Results will appear once a dependent variable is selected.</em></p>",
+                    "</div>"
+                )
+                self$results$instructions$setContent(instructions_html)
                 self$results$instructions$setVisible(visible = TRUE)
                 self$results$extracted_data$setVisible(visible = FALSE)
                 self$results$statistical_summary$setVisible(visible = FALSE)

@@ -378,6 +378,11 @@ frailtysurvivalClass <- R6::R6Class(
 
             html <- "<h3>Covariate Effects</h3>"
 
+            # Confidence level for covariate CIs (option-driven; replaces hardcoded 1.96)
+            conf_level <- self$options$confidence_level
+            z_mult <- stats::qnorm(1 - (1 - conf_level) / 2)
+            ci_label <- paste0(round(conf_level * 100), "% CI")
+
             tryCatch(
                 {
                     if (inherits(frailty_model, "coxph")) {
@@ -390,7 +395,7 @@ frailtysurvivalClass <- R6::R6Class(
                             covariate_coefs <- coefficients[covariate_rows, , drop = FALSE]
 
                             html <- paste0(html, "<table class='jamovi-table'>")
-                            html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>95% CI</th></tr>")
+                            html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>", ci_label, "</th></tr>")
 
                             for (i in seq_len(nrow(covariate_coefs))) {
                                 var_name <- rownames(covariate_coefs)[i]
@@ -400,9 +405,9 @@ frailtysurvivalClass <- R6::R6Class(
                                 z <- round(covariate_coefs[i, "z"], 3)
                                 p_val <- format.pval(covariate_coefs[i, "Pr(>|z|)"])
 
-                                # Calculate 95% CI
-                                ci_lower <- round(exp(coef - 1.96 * se), 4)
-                                ci_upper <- round(exp(coef + 1.96 * se), 4)
+                                # Calculate CI at the selected confidence level
+                                ci_lower <- round(exp(coef - z_mult * se), 4)
+                                ci_upper <- round(exp(coef + z_mult * se), 4)
                                 ci_text <- paste0("(", ci_lower, ", ", ci_upper, ")")
 
                                 html <- paste0(html, "<tr>")
@@ -687,6 +692,37 @@ frailtysurvivalClass <- R6::R6Class(
             )
 
             self$results$cluster_summary$setContent(html)
+        },
+
+        # ---- Plot render methods ----------------------------------------
+        # These image outputs declare renderFun in frailtysurvival.r.yaml but
+        # the plotting features are not yet implemented: no analysis code calls
+        # image$setState(). Each renderer therefore returns FALSE (blank plot)
+        # rather than leaving the method undefined, which would make jamovi call
+        # do.call(private[[funName]], ...) on NULL and crash the visible image.
+        .plot_survival_curves = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            FALSE
+        },
+        .plot_frailty_distribution = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            FALSE
+        },
+        .plot_cluster_effects = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            FALSE
+        },
+        .plot_residuals = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            FALSE
+        },
+        .plot_variance_components = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            FALSE
+        },
+        .plot_mcmc_diagnostics = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            FALSE
         }
     )
 )

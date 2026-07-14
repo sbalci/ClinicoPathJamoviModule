@@ -254,7 +254,8 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                             ci <- exp(confint(glm_model, level = conf_level))[2, ]
                             pval <- summary(glm_model)$coefficients[2, "Pr(>|z|)"]
                         }
-                        n_events <- sum(subset_df[[outcome_var]], na.rm = TRUE)
+                        n_events <- if (is.numeric(subset_df[[outcome_var]]))
+                            sum(subset_df[[outcome_var]], na.rm = TRUE) else NA
                         
                         results[[paste(subgroup_var, level, sep = ": ")]] <- list(
                             subgroup = paste(subgroup_var, level, sep = ": "),
@@ -346,7 +347,7 @@ subgroupforestClass <- if(requireNamespace("jmvcore")) R6::R6Class(
                     )
                     
                 }, error = function(e) {
-                    interaction_results[[subgroup_var]] <- list(
+                    interaction_results[[subgroup_var]] <<- list(
                         variable = subgroup_var,
                         pvalue = NA,
                         interpretation = "Unable to calculate"

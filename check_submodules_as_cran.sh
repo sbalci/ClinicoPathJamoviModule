@@ -19,7 +19,7 @@ for m in "${MODS[@]}"; do
   out=$(mktemp -d)
   ( cd "$d" && env -u ELECTRON_RUN_AS_NODE R CMD build . --no-build-vignettes --no-manual ) \
     && tgz=$(ls -t "$d"/${m}_*.tar.gz 2>/dev/null | head -1) \
-    && env -u ELECTRON_RUN_AS_NODE R CMD check --as-cran --no-manual -o "$out" "$tgz"
+    && env -u ELECTRON_RUN_AS_NODE _R_CHECK_FORCE_SUGGESTS_=false R CMD check --as-cran --no-manual -o "$out" "$tgz"
   echo "  --- summary for $m (log: $out/${m}.Rcheck/00check.log) ---"
   grep -E 'NOTE|WARNING|ERROR' "$out/${m}.Rcheck/00check.log" 2>/dev/null || echo "  (no NOTE/WARNING/ERROR — clean)"
 done

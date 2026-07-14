@@ -211,7 +211,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(result)
 
             }, error = function(e) {
-                jmvcore::reject("Error in sample size calculation: {}", e$message)
+                jmvcore::reject("Error in sample size calculation: {}", code=NULL, e$message)
             })
         },
 

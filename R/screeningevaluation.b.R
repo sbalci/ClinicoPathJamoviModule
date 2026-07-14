@@ -18,6 +18,15 @@ screeningevaluationClass <- R6::R6Class(
         .quality_indicators = NULL,
         .age_stratified_results = NULL,
         .cost_effectiveness = NULL,
+        # Advanced (cancer) analysis results, computed by the target_disease == "cancer"
+        # block. These are assigned without a leading dot to match the existing call
+        # sites; without these declarations R6's locked environment rejects the writes.
+        # NOTE: none of these are currently rendered to a .r.yaml output (see FLAGS).
+        interval_cancer_results = NULL,
+        lead_time_results = NULL,
+        length_bias_results = NULL,
+        overdiagnosis_results = NULL,
+        cancer_quality_metrics = NULL,
 
         .init = function() {
             # Check required variables for tabular screening data analysis
@@ -108,7 +117,8 @@ screeningevaluationClass <- R6::R6Class(
                 screening_positive = screening_result == levels(screening_result)[2],
                 disease_present = disease_status == levels(disease_status)[2],
                 data[, !names(data) %in% c(screening_result_var, disease_status_var), drop = FALSE],
-                stringsAsFactors = FALSE
+                stringsAsFactors = FALSE,
+                check.names = FALSE
             )
         },
 

@@ -1,7 +1,7 @@
 #' @title Group and Summarize
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import ggplot2
 #' @import lubridate
 #'
@@ -207,19 +207,20 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Clear existing rows instead of columns
             table$deleteRows()
 
-            # Since we can't dynamically add columns in jamovi, we'll create a
-            # formatted text output for the results
-            # First, let's create column headers as a string
-            headers <- c()
-
-            # Add group variable headers
+            # Add group variable columns (leftmost, in selection order) so each
+            # row shows which group it belongs to. Use 'text' so the TOTAL row
+            # ("TOTAL"/"") and any factor/numeric/date group values all display.
             for (var in groupVars) {
                 col_title <- var
-                if (!is.null(dateVar) && grepl(paste0("^", dateVar, "_"), var)) {
+                if (!is.null(dateVar) && startsWith(var, paste0(dateVar, "_"))) {
                     col_title <- gsub("_", " ", var)
                     col_title <- tools::toTitleCase(col_title)
                 }
-                headers <- c(headers, col_title)
+                table$addColumn(
+                    name = var,
+                    title = col_title,
+                    type = 'text'
+                )
             }
 
             # Add statistic columns for each variable
@@ -273,7 +274,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Format date values for display
                 row_values <- as.list(summary_data[i, ])
                 for (var in groupVars) {
-                    if (!is.null(dateVar) && grepl(paste0("^", dateVar, "_"), var)) {
+                    if (!is.null(dateVar) && startsWith(var, paste0(dateVar, "_"))) {
                         # Format date based on aggregation level
                         if (self$options$timeAggregation == "hour") {
                             row_values[[var]] <- format(row_values[[var]], "%Y-%m-%d %H:00")
@@ -286,6 +287,11 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         } else if (self$options$timeAggregation == "year") {
                             row_values[[var]] <- format(row_values[[var]], "%Y")
                         }
+                    } else {
+                        # Coerce non-date group values to character so factor
+                        # labels (not integer codes) and numerics display in the
+                        # text group columns.
+                        row_values[[var]] <- as.character(row_values[[var]])
                     }
                 }
                 table$addRow(rowKey = i, values = row_values)
@@ -399,7 +405,7 @@ groupsummaryClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if we're plotting time series data
             is_time_series <- !is.null(plotData$dateVar) &&
-                any(grepl(paste0("^", plotData$dateVar, "_"), groupVars))
+                any(startsWith(groupVars, paste0(plotData$dateVar, "_")))
 
             if (is_time_series && length(groupVars) == 1) {
                 # Time series line plot

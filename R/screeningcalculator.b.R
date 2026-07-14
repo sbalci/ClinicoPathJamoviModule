@@ -425,6 +425,18 @@ screeningcalculatorClass <- if (requireNamespace("jmvcore"))
                 if (self$options$repeat3) {
                     repeatTest3Table <- self$results$repeatTest3Table
 
+                    # Recompute the second-test probabilities from PPV/NPV so this
+                    # block is independent of the repeat2 block having executed
+                    # (repeat2 can be disabled while repeat3 remains enabled).
+                    # Values are identical to those computed in the repeat2 block.
+                    ppPPV <- (sens * PPV) / ((sens * PPV) + ((1 - spec) * (1 - PPV)))
+                    pnNPV <- (spec * (1 - PPV)) / ((spec * (1 - PPV)) + ((1 - sens) * PPV))
+                    probDiseasePn <- 1 - pnNPV
+                    negPrev <- 1 - NPV  # Probability of disease after a negative test
+                    npPPV <- (sens * negPrev) / ((sens * negPrev) + ((1 - spec) * (1 - negPrev)))
+                    nnNPV <- (spec * (1 - negPrev)) / ((spec * (1 - negPrev)) + ((1 - sens) * negPrev))
+                    probDiseaseNn <- 1 - nnNPV
+
                     # Scenario 1: Positive-Positive-Positive (+/+/+)
                     # Starting from the result of +/+
                     pppPrev <- ppPPV  # Probability after two positive tests

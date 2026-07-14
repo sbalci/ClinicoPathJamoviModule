@@ -138,9 +138,17 @@ epidemiosurvivalClass <- R6::R6Class(
             }
 
             # Extract core variables
+            # event_var is a permitted factor in jamovi, so data[[event_var]] is
+            # always a factor at runtime. Coerce a 0/1-coded factor to numeric so
+            # downstream sum() and survival::Surv() work (a factor status crashes
+            # both).
+            event_raw <- data[[self$options$event_var]]
+            if (is.factor(event_raw))
+                event_raw <- suppressWarnings(as.numeric(as.character(event_raw)))
+
             epi_data <- data.frame(
                 time = data[[self$options$time_var]],
-                event = data[[self$options$event_var]],
+                event = event_raw,
                 stringsAsFactors = FALSE
             )
 

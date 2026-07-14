@@ -61,15 +61,31 @@ multiclassdiagnosticsClass <- R6::R6Class(
             
             # Generate plots
             if (self$options$showROC) {
-                private$.rocPlot(predicted, actual, classes)
+                self$results$rocPlot$setState(list(
+                    predicted = predicted,
+                    actual = actual,
+                    classes = classes,
+                    theme = self$options$plotTheme
+                ))
             }
             
             if (self$options$showConfusion) {
-                private$.confusionPlot(predicted, actual, classes)
+                self$results$confusionPlot$setState(list(
+                    predicted = predicted,
+                    actual = actual,
+                    classes = classes,
+                    theme = self$options$plotTheme
+                ))
             }
             
             if (self$options$showPerClass) {
-                private$.metricsPlot()
+                perClassTbl <- self$results$perClassMetrics
+                if (perClassTbl$rowCount > 0) {
+                    self$results$metricsPlot$setState(list(
+                        metricsTable = as.data.frame(perClassTbl),
+                        theme = self$options$plotTheme
+                    ))
+                }
             }
 
             # TODO (stub): `saveResults` (`OptionBool`, declared in .a.yaml / .h.R) is never
@@ -90,42 +106,40 @@ multiclassdiagnosticsClass <- R6::R6Class(
             # Clear existing rows
             confTable$deleteRows()
             
-            # Add rows for each actual class
-            for (i in seq_along(classes)) {
-                row <- list(actual_class = as.character(classes[i]))
-                
-                # Add predicted counts for each class
-                for (j in seq_along(classes)) {
-                    col_name <- paste0("predicted_", classes[j])
-                    if (classes[i] %in% rownames(cm) && classes[j] %in% colnames(cm)) {
-                        row[[col_name]] <- cm[classes[i], classes[j]]
-                    } else {
-                        row[[col_name]] <- 0
-                    }
-                }
-                
-                # Add total
-                row[[".total[predicted]"]] <- sum(actual == classes[i])
-                
-                confTable$addRow(rowKey = i, values = row)
-            }
-            
-            # Add columns dynamically for predicted classes
-            # TODO (correctness): col_name <- paste0("predicted_", classes[j]) at L91 / here
-            # builds jamovi table column names directly from user factor labels. jamovi
-            # `addColumn(name=...)` requires identifier-safe names (^[A-Za-z_][A-Za-z0-9_.]*$).
-            # A factor level containing spaces, hyphens, slashes, Unicode, or starting with a
-            # digit would crash on column creation. Sanitize via `make.names(col_name)` or
-            # `jmvcore::toB64()` before use; keep the human-readable label in `title=` only.
+            # Identifier-safe jamovi column keys (index-based). Human-readable class
+            # labels may contain spaces, punctuation, Unicode, or leading digits that are
+            # invalid as jamovi column names; those are kept only in the column title.
+            # Raw class labels are used solely for the confusion-matrix (cm) lookups.
+            col_names <- paste0("predicted_", seq_along(classes))
+
+            # Add columns for each predicted class BEFORE populating rows
             for (j in seq_along(classes)) {
-                col_name <- paste0("predicted_", classes[j])
-                if (!col_name %in% names(confTable$columns)) {
+                if (!col_names[j] %in% names(confTable$columns)) {
                     confTable$addColumn(
-                        name = col_name,
+                        name = col_names[j],
                         title = as.character(classes[j]),
                         type = "integer"
                     )
                 }
+            }
+
+            # Add rows for each actual class
+            for (i in seq_along(classes)) {
+                row <- list(actual_class = as.character(classes[i]))
+
+                # Add predicted counts for each class
+                for (j in seq_along(classes)) {
+                    if (classes[i] %in% rownames(cm) && classes[j] %in% colnames(cm)) {
+                        row[[col_names[j]]] <- cm[classes[i], classes[j]]
+                    } else {
+                        row[[col_names[j]]] <- 0
+                    }
+                }
+
+                # Add total (number of actual instances of this class)
+                row[[".total[predicted]"]] <- sum(actual == classes[i])
+
+                confTable$addRow(rowKey = i, values = row)
             }
         },
         
@@ -419,24 +433,17 @@ multiclassdiagnosticsClass <- R6::R6Class(
                     })
                 }
             }
-        },
-        
-        .rocPlot = function(predicted, actual, classes) {
-            if (!requireNamespace("pROC", quietly = TRUE)) {
-                return()
-            }
-            
-            image <- self$results$rocPlot
-            
-            image$setState(list(
-                predicted = predicted,
-                actual = actual,
-                classes = classes,
+
+            # Populate model-comparison plot state (labels from the modelNames option)
+            model_labels <- trimws(strsplit(self$options$modelNames, ",")[[1]])
+            self$results$modelComparisonPlot$setState(list(
+                compData = as.data.frame(compTable),
+                modelNames = model_labels,
                 theme = self$options$plotTheme
             ))
         },
         
-        .rocPlotSource = function(image, ...) {
+        .rocPlot = function(image, ...) {
             if (!requireNamespace("pROC", quietly = TRUE) || 
                 !requireNamespace("ggplot2", quietly = TRUE)) {
                 return(FALSE)
@@ -505,18 +512,7 @@ multiclassdiagnosticsClass <- R6::R6Class(
             TRUE
         },
         
-        .confusionPlot = function(predicted, actual, classes) {
-            image <- self$results$confusionPlot
-            
-            image$setState(list(
-                predicted = predicted,
-                actual = actual,
-                classes = classes,
-                theme = self$options$plotTheme
-            ))
-        },
-        
-        .confusionPlotSource = function(image, ...) {
+        .confusionPlot = function(image, ...) {
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
                 return(FALSE)
             }
@@ -556,29 +552,16 @@ multiclassdiagnosticsClass <- R6::R6Class(
             TRUE
         },
         
-        .metricsPlot = function() {
-            image <- self$results$metricsPlot
-            
-            # Get data from perClassMetrics table
-            metricsTable <- self$results$perClassMetrics
-            
-            if (metricsTable$rowCount == 0) {
-                return()
-            }
-            
-            image$setState(list(
-                metricsTable = as.data.frame(metricsTable),
-                theme = self$options$plotTheme
-            ))
-        },
-        
-        .metricsPlotSource = function(image, ...) {
-            if (!requireNamespace("ggplot2", quietly = TRUE) || 
+        .metricsPlot = function(image, ...) {
+            if (!requireNamespace("ggplot2", quietly = TRUE) ||
                 !requireNamespace("tidyr", quietly = TRUE)) {
                 return(FALSE)
             }
-            
+
             metrics_df <- image$state$metricsTable
+            if (is.null(metrics_df) || nrow(metrics_df) == 0) {
+                return(FALSE)
+            }
             
             # Reshape data for plotting
             metrics_long <- tidyr::pivot_longer(
@@ -604,6 +587,46 @@ multiclassdiagnosticsClass <- R6::R6Class(
                     legend.position = "bottom"
                 )
             
+            print(p)
+            TRUE
+        },
+
+        .modelComparisonPlot = function(image, ...) {
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+                return(FALSE)
+            }
+
+            comp_df <- image$state$compData
+            if (is.null(comp_df) || nrow(comp_df) == 0) {
+                return(FALSE)
+            }
+
+            model_labels <- image$state$modelNames
+            if (is.null(model_labels) || length(model_labels) < 2 ||
+                any(is.na(model_labels)) || any(!nzchar(model_labels))) {
+                model_labels <- c("Model 1", "Model 2")
+            }
+
+            plot_df <- data.frame(
+                metric = factor(rep(comp_df$metric, 2), levels = comp_df$metric),
+                model = factor(
+                    rep(c(model_labels[1], model_labels[2]), each = nrow(comp_df)),
+                    levels = c(model_labels[1], model_labels[2])
+                ),
+                value = c(comp_df$model1, comp_df$model2)
+            )
+
+            p <- ggplot2::ggplot(plot_df, ggplot2::aes(x = metric, y = value, fill = model)) +
+                ggplot2::geom_bar(stat = "identity", position = "dodge") +
+                ggplot2::labs(
+                    title = "Model Comparison",
+                    x = "Metric",
+                    y = "Value",
+                    fill = "Model"
+                ) +
+                ggplot2::theme_minimal() +
+                ggplot2::theme(legend.position = "bottom")
+
             print(p)
             TRUE
         }

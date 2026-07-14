@@ -165,6 +165,7 @@ items:
     - name: spatialplot
       title: Spatial Distribution Plot
       type: Image
+      renderFun: .spatialplot
       description: Visualization of spatial coordinate data with optional cell type coloring
       width: 600
       height: 600

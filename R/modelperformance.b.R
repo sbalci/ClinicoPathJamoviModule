@@ -259,7 +259,7 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                     rsquared = rsq,
                     cindex = cindices[i],
                     loglik = logLik(model$fit)[1],
-                    recommended = if (i == best_idx) "" else ""
+                    recommended = if (length(best_idx) == 1 && !is.na(best_idx) && i == best_idx) "Yes" else ""
                 ))
             }
         },
@@ -348,6 +348,18 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 best_idx <- which.max(values)
                 metric_name <- "C-index"
                 better <- "higher"
+            } else {
+                # Fallback (e.g. recommendBy == "cv", not handled here): use AIC
+                values <- sapply(fitted_models, function(m) AIC(m$fit))
+                best_idx <- which.min(values)
+                metric_name <- "AIC"
+                better <- "lower"
+            }
+
+            if (length(best_idx) != 1 || is.na(best_idx)) {
+                self$results$recommendation$setContent(
+                    "<p>Unable to determine a recommended model for the selected criterion.</p>")
+                return()
             }
 
             best_model <- fitted_models[[best_idx]]
@@ -399,9 +411,11 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                     p_val <- coefs[i, ncol(coefs)]
 
                     html <- paste0(html, sprintf(
-                        "<tr><td style='padding: 5px; border: 1px solid #ddd;'>%s</td>",
-                        "<td style='padding: 5px; border: 1px solid #ddd;'>%.3f</td>",
-                        "<td style='padding: 5px; border: 1px solid #ddd;'>%.4f</td></tr>",
+                        paste0(
+                            "<tr><td style='padding: 5px; border: 1px solid #ddd;'>%s</td>",
+                            "<td style='padding: 5px; border: 1px solid #ddd;'>%.3f</td>",
+                            "<td style='padding: 5px; border: 1px solid #ddd;'>%.4f</td></tr>"
+                        ),
                         htmltools::htmlEscape(var_name), coef_val, p_val
                     ))
                 }
@@ -491,13 +505,13 @@ modelperformanceClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6
                 pred <- predict(model$fit, type = "response")
                 actual <- model$fit$y
 
-                roc_obj <- roc(actual, pred, quiet = TRUE)
+                roc_obj <- pROC::roc(actual, pred, quiet = TRUE)
 
                 roc_data[[length(roc_data) + 1]] <- data.frame(
                     model = model$name,
                     specificity = roc_obj$specificities,
                     sensitivity = roc_obj$sensitivities,
-                    auc = as.numeric(auc(roc_obj))
+                    auc = as.numeric(pROC::auc(roc_obj))
                 )
             }
 

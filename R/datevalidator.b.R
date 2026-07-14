@@ -5,9 +5,8 @@
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom lubridate dmy mdy ymd dmy_hms mdy_hms ymd_hms parse_date_time
-#' @importFrom dplyr mutate select bind_cols case_when
+#' @importFrom dplyr mutate bind_cols case_when
 #' @importFrom htmltools HTML
-
 datevalidatorClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("datevalidatorClass",
         inherit = datevalidatorBase,

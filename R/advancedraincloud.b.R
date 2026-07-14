@@ -12,7 +12,6 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom viridis viridis
 #' @importFrom htmltools HTML
-
 advancedraincloudClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("advancedraincloudClass",
         inherit = advancedraincloudBase,

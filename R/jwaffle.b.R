@@ -138,14 +138,12 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import waffle
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom magrittr %>%
 #' @importFrom glue glue
 #' @import scales
 #' @importFrom rlang sym
 #' @importFrom digest digest
-
-
 jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jwaffleClass",
     inherit = jwaffleBase,
@@ -370,6 +368,23 @@ jwaffleClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             "Note: %d row(s) removed due to missing values in analysis variables (%s). %d row(s) remaining.",
                             rows_removed, paste(relevant_vars, collapse = ", "), nrow(mydata)
                         ))
+                    }
+                }
+
+                # Labelled-logic parity: .validateInputs() converts haven_labelled
+                # groups to factors (levels = "both") for validation. Apply the same
+                # conversion to the data that actually feeds aggregation/plotting so
+                # labels (not raw numeric codes) reach aes(fill=)/scale_fill_manual and
+                # the natural-language summaries. Guarded by inherits(), so ordinary
+                # factor/character columns are left untouched.
+                cat_vars <- character(0)
+                if (!is.null(self$options$groups) && self$options$groups != "")
+                    cat_vars <- c(cat_vars, self$options$groups)
+                if (!is.null(self$options$facet) && self$options$facet != "")
+                    cat_vars <- c(cat_vars, self$options$facet)
+                for (v in cat_vars) {
+                    if (v %in% names(mydata) && inherits(mydata[[v]], "haven_labelled")) {
+                        mydata[[v]] <- haven::as_factor(mydata[[v]], levels = "both")
                     }
                 }
 

@@ -11,6 +11,23 @@ jcomplexupsetClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         .init = function() {
             if (is.null(self$data) || is.null(self$options$set_vars) || length(self$options$set_vars) < 2) {
                 self$results$instructions$setVisible(visible = TRUE)
+                self$results$instructions$setContent(
+                    paste0(
+                        "<h2>Complex UpSet Plot Visualization</h2>",
+                        "<p>UpSet plots visualize intersections among multiple sets and are a ",
+                        "scalable alternative to Venn diagrams (especially for more than 3 sets).</p>",
+                        "<p><strong>To get started:</strong></p>",
+                        "<ul>",
+                        "<li>Assign at least <strong>2 variables</strong> to <em>Set Variables</em>. ",
+                        "Each variable represents set membership and is treated as binary ",
+                        "(non-missing / non-zero / not \"FALSE\" values indicate membership).</li>",
+                        "<li>Optionally add a <em>Value Variable</em> to weight intersections.</li>",
+                        "<li>Adjust sorting, minimum intersection size, annotations, colours and theme ",
+                        "in the options panel.</li>",
+                        "</ul>",
+                        "<p>A maximum of 10 set variables is supported for readability.</p>"
+                    )
+                )
                 self$results$plot$setVisible(visible = FALSE)
                 self$results$statistics$setVisible(visible = FALSE)
                 self$results$interpretation$setVisible(visible = FALSE)

@@ -126,5 +126,45 @@ nonparametricregressionClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R
             ")
             self$results$methodsExplanation$setContent(explanation)
 
-        })
+        },
+
+        # Image render stubs. The .r.yaml declares these via renderFun
+        # (.plotFittedCurves, .plotResidualDiagnostics, .plotQQDiagnostics,
+        # .plotPartialEffects, .plotInfluenceDiagnostics, .plotBandwidthSelection)
+        # but they were undefined, so jamovi's render dispatch
+        # (analysis$.createPlotObject / .render) would call a non-function
+        # ("attempt to apply non-function"). Guard on image$state, which is
+        # never set yet, and return FALSE so nothing is drawn until the
+        # backend populates state for each plot.
+        .plotFittedCurves = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(FALSE)
+        },
+        .plotResidualDiagnostics = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(FALSE)
+        },
+        .plotQQDiagnostics = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(FALSE)
+        },
+        .plotPartialEffects = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(FALSE)
+        },
+        .plotInfluenceDiagnostics = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(FALSE)
+        },
+        .plotBandwidthSelection = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            return(FALSE)
+        }
+    )
 )

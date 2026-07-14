@@ -65,7 +65,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @importFrom tidyheatmaps tidyheatmap
-#' @importFrom dplyr select mutate group_by summarise across arrange filter pull n inner_join
+#' @importFrom dplyr mutate group_by summarise across arrange filter pull n inner_join
 #' @importFrom tidyr pivot_wider complete
 #' @importFrom tibble column_to_rownames
 #' @importFrom rlang sym
@@ -79,7 +79,7 @@
 #' @importFrom survminer ggsurvplot
 #'
 #' @return A jamovi analysis object containing the clinical heatmap and supporting information
-#' @export clinicalheatmapClass
+#' @keywords internal
 #'
 #' @examples
 #' \dontrun{

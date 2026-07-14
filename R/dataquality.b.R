@@ -8,7 +8,6 @@
 #' @importFrom htmltools HTML
 #' @importFrom visdat vis_dat vis_miss vis_guess
 #' @importFrom ggplot2 ggsave theme_minimal labs
-
 dataqualityClass <- if (requireNamespace("jmvcore")) R6::R6Class("dataqualityClass",
     inherit = dataqualityBase, private = list(
 

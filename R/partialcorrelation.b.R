@@ -10,6 +10,10 @@ partialcorrelationClass <- R6::R6Class(
     "partialcorrelationClass",
     inherit = partialcorrelationBase,
     private = list(
+        # Message trackers (declared so R6 lock_objects=TRUE allows assignment)
+        .error_messages = NULL,
+        .warning_messages = NULL,
+
         .init = function() {
             if (is.null(self$data) || is.null(self$options$vars) || 
                 is.null(self$options$controls) || 
@@ -146,7 +150,26 @@ partialcorrelationClass <- R6::R6Class(
                 private$.generateMethodsExplanation()
             }
         },
-        
+
+        # ---------------------------------------------------------------------
+        # No-op stubs for advertised-but-unimplemented features.
+        # These methods are called from .run() (several under default-on toggles,
+        # e.g. clinicalInterpretation defaults TRUE) but were never defined, so
+        # every default run hit "attempt to apply non-function". Stubbing them as
+        # no-ops un-breaks the analysis so the implemented outputs (partialCorr,
+        # zeroOrder, plot) render; the corresponding outputs simply stay empty
+        # until the features are implemented. Do NOT fabricate statistics here.
+        # ---------------------------------------------------------------------
+        .calculateSemiPartialCorrelations = function(...) invisible(NULL),
+        .generateDiagnostics = function(...) invisible(NULL),
+        .performAssumptionChecks = function(...) invisible(NULL),
+        .generateComprehensiveSummary = function(...) invisible(NULL),
+        .generateRecommendations = function(...) invisible(NULL),
+        .generateClinicalInterpretation = function(...) invisible(NULL),
+        .generateMethodsExplanation = function(...) invisible(NULL),
+        .plotNetwork = function(image, ggtheme, theme, ...) FALSE,
+        .plotEffectSizes = function(image, ggtheme, theme, ...) FALSE,
+
         .calculatePartialCorrelations = function(data, vars, controls, method, ci_level) {
             partial_table <- self$results$partialCorr
             row_idx <- 1

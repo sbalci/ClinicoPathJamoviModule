@@ -4,7 +4,6 @@
 #' @import jmvcore
 #' @importFrom stats prcomp kmeans dist hclust cutree sd
 #' @importFrom cluster silhouette pam clusGap
-
 # IHC utility functions (calculateHScore, calculateIHCDistance, ...) are
 # provided by ihc_utilities.R via the package Collate/namespace and are
 # callable directly; no source() is needed (sourcing at load would define

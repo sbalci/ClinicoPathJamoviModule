@@ -67,7 +67,7 @@ methodvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         s <- sd(subdata[[measVar]])
                         cv <- (s / m) * 100
                         limit <- self$options$custom_cv_limit
-                        status <- if (cv <= limit) "Pass" else "Fail"
+                        status <- if (is.na(cv)) "N/A" else if (cv <= limit) "Pass" else "Fail"
                         
                         tablePrec$addRow(rowKey=i, values=list(
                             level = as.character(lv),
@@ -83,7 +83,7 @@ methodvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     s <- sd(mydata[[measVar]])
                     cv <- (s / m) * 100
                     limit <- self$options$custom_cv_limit
-                    status <- if (cv <= limit) "Pass" else "Fail"
+                    status <- if (is.na(cv)) "N/A" else if (cv <= limit) "Pass" else "Fail"
                     
                     tablePrec$addRow(rowKey=1, values=list(
                         level = "Overall",
@@ -111,7 +111,7 @@ methodvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                         bias_abs <- m_obs - m_ref
                         bias_rel <- (bias_abs / m_ref) * 100
                         limit <- self$options$custom_bias_limit
-                        status <- if (abs(bias_rel) <= limit) "Pass" else "Fail"
+                        status <- if (is.na(bias_rel)) "N/A" else if (abs(bias_rel) <= limit) "Pass" else "Fail"
                         
                         tableAcc$addRow(rowKey=i, values=list(
                             level = as.character(lv),
@@ -128,7 +128,7 @@ methodvalidationClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
                     bias_abs <- m_obs - m_ref
                     bias_rel <- (bias_abs / m_ref) * 100
                     limit <- self$options$custom_bias_limit
-                    status <- if (abs(bias_rel) <= limit) "Pass" else "Fail"
+                    status <- if (is.na(bias_rel)) "N/A" else if (abs(bias_rel) <= limit) "Pass" else "Fail"
                     
                     tableAcc$addRow(rowKey=1, values=list(
                         level = "Overall",

@@ -101,6 +101,13 @@ residualcancerburdenClass <- R6::R6Class(
             idx <- private$.rcbIndex(d1, d2, ca, cis, ln, dmet)
             cls <- private$.rcbClass(idx)
 
+            # Exclude rows missing any required field. The shared .rcbIndex() coerces
+            # NA inputs to 0 (correct for the optional cis/metSize and the single-case
+            # path), which would otherwise score an empty cohort row as RCB = 0 / pCR.
+            valid <- !is.na(d1) & !is.na(d2) & !is.na(ca) & !is.na(ln)
+            idx[!valid] <- NA_real_
+            cls[!valid] <- NA
+
             ok <- !is.na(idx)
             if (sum(ok) == 0) {
                 self$results$todo$setContent(

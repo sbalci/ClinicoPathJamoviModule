@@ -5,7 +5,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import pivottabler
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @export
 #' @return An \code{R6} class generator object for the \code{crosstablepivotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 # TODO (cleanup): replace whole-namespace `@import pivottabler` / `@import dplyr` with `@importFrom`

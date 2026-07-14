@@ -4,7 +4,7 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @import ggridges
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
 #' @importFrom effectsize cohens_d hedges_g eta_squared omega_squared
 #' @importFrom rstatix wilcox_test t_test
@@ -1857,7 +1857,7 @@ jjridgesClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             if (length(strata_vars) > 0) {
                 # Get all unique combinations of strata
                 strata_combinations <- data %>%
-                    select(all_of(strata_vars)) %>%
+                    dplyr::select(all_of(strata_vars)) %>%
                     distinct()
 
                 all_test_results <- list()

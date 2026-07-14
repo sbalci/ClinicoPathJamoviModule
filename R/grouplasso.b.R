@@ -41,6 +41,7 @@ grouplassoClass <- R6::R6Class(
 
         .init = function() {
             if (is.null(self$data) || is.null(self$options$time) || is.null(self$options$event)) {
+                self$results$instructions$setVisible(TRUE)
                 self$results$instructions$setContent(
                     "<html>
                     <head>
@@ -1476,6 +1477,7 @@ grouplassoClass <- R6::R6Class(
         },
 
         .initResults = function() {
+            self$results$instructions$setVisible(FALSE)
             self$results$groupSummary$setVisible(self$options$show_group_summary)
             self$results$coefficients$setVisible(self$options$show_coefficients)
             self$results$pathSummary$setVisible(self$options$show_path_summary)

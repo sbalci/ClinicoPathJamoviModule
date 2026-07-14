@@ -2,6 +2,20 @@ superpcClass <- R6::R6Class(
     "superpcClass",
     inherit = superpcBase,
     private = list(
+        # ---- private state (must be declared; R6 locks the object) ----
+        .analysis_data = NULL,
+        .features = NULL,
+        .screening_results = NULL,
+        .selected_features = NULL,
+        .pca_result = NULL,
+        .pc_scores = NULL,
+        .variance_explained = NULL,
+        .n_components_used = NULL,
+        .cox_model = NULL,
+        .model_data = NULL,
+        .cv_results = NULL,
+        .c_index = NULL,
+
         .init = function() {
             private$.update_instructions()
         },

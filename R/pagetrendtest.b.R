@@ -243,9 +243,12 @@ pagetrendtestClass <- R6::R6Class(
                         ordered_levels <- condition_levels
                         trend_weights <- 1:k
                     } else if (self$options$trend_direction == "decreasing") {
-                        # Reverse order for decreasing trend
+                        # Reverse level order for decreasing trend; weights stay 1:k so
+                        # the last natural level gets weight 1 and the first gets weight k
+                        # (reversing BOTH levels and weights would cancel out and be
+                        # identical to the increasing case).
                         ordered_levels <- rev(condition_levels)
-                        trend_weights <- k:1
+                        trend_weights <- 1:k
                     } else if (self$options$trend_direction == "custom") {
                         # Parse custom ordering
                         if (is.null(self$options$custom_order) || self$options$custom_order == "") {
@@ -316,9 +319,9 @@ pagetrendtestClass <- R6::R6Class(
 
                     # Expected value and variance under null hypothesis
                     # E[L] = n * k * (k+1)^2 / 4
-                    # Var[L] = n * k^2 * (k+1) * (k-1) / 144
+                    # Var[L] = n * k^2 * (k+1)^2 * (k-1) / 144  == n * k^2 * (k+1) * (k^2-1) / 144
                     expected_L <- n * k * (k + 1)^2 / 4
-                    var_L <- n * k^2 * (k + 1) * (k - 1) / 144
+                    var_L <- n * k^2 * (k + 1)^2 * (k - 1) / 144
 
                     # Standardized L statistic
                     if (var_L > 0) {
@@ -412,7 +415,7 @@ pagetrendtestClass <- R6::R6Class(
             n <- data_prepared$n_subjects
             k <- data_prepared$n_conditions
             expected_L <- n * k * (k + 1)^2 / 4
-            var_L <- n * k^2 * (k + 1) * (k - 1) / 144
+            var_L <- n * k^2 * (k + 1)^2 * (k - 1) / 144
 
             if (var_L > 0) {
                 standardized_L <- (observed_L - expected_L) / sqrt(var_L)

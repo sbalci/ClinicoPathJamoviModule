@@ -5,13 +5,12 @@
 #' @import jmvcore
 #' @importFrom magrittr %>%
 #' @importFrom tinytable tt style_tt group_tt format_tt theme_tt
-#' @importFrom dplyr select group_by summarise n across where all_of
+#' @importFrom dplyr group_by summarise n across where all_of
 #' @importFrom dplyr mutate case_when
 #' @importFrom stats sd median quantile
 #' @importFrom htmltools HTML
 #' @importFrom stringr str_to_title
 #' @importFrom rlang .data
-
 tinytableClass <- if (requireNamespace("jmvcore")) R6::R6Class("tinytableClass",
     inherit = tinytableBase,
     private = list(

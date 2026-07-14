@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import survival
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @export
 #' @return An \code{R6} class generator object for the \code{coxphwClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

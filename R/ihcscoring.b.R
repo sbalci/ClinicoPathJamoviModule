@@ -2206,8 +2206,13 @@ def segment_nuclei(image_path):
                         )
                     )
 
-                    # Store recommendations for use in analysis
-                    self$.guidedRecommendations <- recommendations
+                    # NOTE: R6 locks the object (lock_objects = TRUE by default), so
+                    # assigning to an undeclared field on `self` throws
+                    # "cannot add bindings to a locked environment" at runtime.
+                    # These recommendations are advisory only (surfaced via the guided
+                    # ComboBox titles and misuse warnings) and are not written back to
+                    # options, so we simply discard them here.
+                    invisible(recommendations)
                 }
             },
 

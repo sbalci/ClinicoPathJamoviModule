@@ -34,7 +34,7 @@ multistatesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Check if variables are selected
             if (is.null(self$options$id) || is.null(self$options$time_stop)) {
-                self$results$instructions$setContent(
+                self$results$todo$setContent(
                     "<h3>Welcome to Multistate Survival Analysis</h3>
                     <p>Multistate models analyze progression through multiple disease states over time.</p>
 

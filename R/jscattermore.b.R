@@ -204,19 +204,19 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             start_time <- Sys.time()
             
             # Generate high-performance scatter plot
-            plot_obj <- self$.createScatterPlot(data_clean, x_var, y_var)
+            plot_obj <- private$.createScatterPlot(data_clean, x_var, y_var)
             
             # Calculate performance metrics
             end_time <- Sys.time()
             render_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
             
             # Generate summary
-            summary_text <- self$.generateSummary(data_clean, x_var, y_var, render_time)
+            summary_text <- private$.generateSummary(data_clean, x_var, y_var, render_time)
             
             # Generate performance info if needed
             performance_text <- NULL
             if (options$show_performance) {
-                performance_text <- self$.generatePerformanceInfo(data_clean, render_time)
+                performance_text <- private$.generatePerformanceInfo(data_clean, render_time)
             }
             
             # Cache the results for future use
@@ -252,9 +252,9 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             }
             
             if (plot_type == 'base_r') {
-                return(self$.createBaseRPlot(data, x_var, y_var))
+                return(private$.createBaseRPlot(data, x_var, y_var))
             } else {
-                return(self$.createGgplotPlot(data, x_var, y_var))
+                return(private$.createGgplotPlot(data, x_var, y_var))
             }
         },
         
@@ -270,7 +270,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if (!is.null(options$color_var)) {
                     color_data <- data[[options$color_var]]
                     if (is.numeric(color_data)) {
-                        colors <- self$.getColorPalette(color_data)
+                        colors <- private$.getColorPalette(color_data)
                     } else {
                         colors <- rainbow(length(unique(color_data)))[as.factor(color_data)]
                     }
@@ -377,7 +377,7 @@ jscattermoreClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
                 
                 # Apply theme
-                p <- p + self$.applyTheme(options$theme_style)
+                p <- p + private$.applyTheme(options$theme_style)
                 
                 # Add labels
                 p <- p + ggplot2::labs(

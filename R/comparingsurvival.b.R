@@ -1,7 +1,7 @@
 #' @title Comparing Survival Outcomes
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom survival survdiff survfit Surv
 #' @importFrom ggplot2 ggplot aes geom_step geom_ribbon labs theme_minimal
 #' @importFrom survminer ggsurvplot

@@ -36,7 +36,8 @@ hiddenmarkovClass <- R6::R6Class(
                 return()
             
             # Populate results
-            private$.populateModelSummary()
+            if (self$options$showModel)
+                private$.populateModelSummary()
             private$.populateTransitionMatrix()
             
             if (self$options$showTransitions)
@@ -402,14 +403,14 @@ hiddenmarkovClass <- R6::R6Class(
         .populateViterbiStates = function() {
             if (is.null(private$.model))
                 return()
-            
+
+            table <- self$results$viterbiStates
+            table$deleteRows()
+
             tryCatch({
                 # Get Viterbi states (most likely hidden state sequence)
                 viterbi <- msm::viterbi.msm(private$.model)
-                
-                table <- self$results$viterbiStates
-                table$deleteRows()
-                
+
                 data_df <- data.frame(
                     subject = private$.data$subject,
                     time = private$.data$time,

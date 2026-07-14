@@ -137,7 +137,7 @@ generalpseudoClass <- R6::R6Class(
             # Add explanatory variables
             if (length(self$options$explanatory) > 0) {
                 for (var in self$options$explanatory) {
-                    if (self$data[[var]]$measureType == 'continuous') {
+                    if (is.numeric(self$data[[var]])) {
                         data[[var]] <- jmvcore::toNumeric(self$data[[var]])
                     } else {
                         data[[var]] <- factor(self$data[[var]])
@@ -719,14 +719,14 @@ generalpseudoClass <- R6::R6Class(
         },
         
         .addMethodologyExplanation = function() {
-            html <- '<h3>Generalized Pseudo-Observations Methodology</h3>
+            html <- paste0('<h3>Generalized Pseudo-Observations Methodology</h3>
                     <p><b>Overview:</b> Pseudo-observations provide a general approach to analyze survival data and other censored outcomes using standard statistical methods.</p>
-                    
+
                     <h4>Method:</h4>
                     <ul>
-                    <li><b>Functional Type:</b> ' + self$options$functional_type + '</li>
-                    <li><b>Pseudo-observation Method:</b> ' + self$options$pseudo_method + '</li>
-                    <li><b>Regression Type:</b> ' + self$options$regression_type + '</li>
+                    <li><b>Functional Type:</b> ', self$options$functional_type, '</li>
+                    <li><b>Pseudo-observation Method:</b> ', self$options$pseudo_method, '</li>
+                    <li><b>Regression Type:</b> ', self$options$regression_type, '</li>
                     </ul>
                     
                     <h4>Interpretation:</h4>
@@ -743,8 +743,8 @@ generalpseudoClass <- R6::R6Class(
                     <li>Flexible modeling framework</li>
                     <li>Handles complex covariate relationships</li>
                     <li>Suitable for competing risks and multi-state models</li>
-                    </ul>'
-            
+                    </ul>')
+
             self$results$methodologyExplanation$setContent(html)
         },
         

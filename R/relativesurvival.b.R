@@ -647,7 +647,10 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 timepoints <- private$.parseTimepoints(self$options$timepoints)
                 if (length(timepoints) == 0) timepoints <- c(1, 3, 5, 10)
 
-                crud_times <- crud$time / 365.25
+                # cmp.rel returns nested curves: $causeSpec (disease-specific crude
+                # probability of death) and $population (other-cause), each a list with
+                # $time / $est / $var. There is no top-level $time / $est / $var.
+                crud_times <- crud$causeSpec$time / 365.25
                 max_time <- max(crud_times, na.rm = TRUE)
                 timepoints <- timepoints[timepoints <= max_time * 1.1]
                 if (length(timepoints) == 0) timepoints <- c(max_time)
@@ -657,20 +660,24 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 for (i in seq_along(timepoints)) {
                     tp <- timepoints[i]
                     tp_days <- tp * 365.25
-                    idx <- private$.stepIdx(crud$time, tp_days)
+                    idx <- private$.stepIdx(crud$causeSpec$time, tp_days)
 
                     disease_death <- NA
                     other_death <- NA
                     disease_ci_lower <- NA
                     disease_ci_upper <- NA
 
-                    if (!is.na(idx) && !is.null(crud$est) && nrow(crud$est) >= idx) {
-                        disease_death <- crud$est[idx, 1]
-                        other_death <- crud$est[idx, 2]
+                    if (!is.na(idx) && !is.null(crud$causeSpec$est) &&
+                        length(crud$causeSpec$est) >= idx) {
+                        disease_death <- crud$causeSpec$est[idx]
+                        other_death <- if (!is.null(crud$population$est) &&
+                                           length(crud$population$est) >= idx)
+                            crud$population$est[idx] else NA
                     }
 
-                    if (!is.na(idx) && !is.null(crud$var) && nrow(crud$var) >= idx) {
-                        se_disease <- sqrt(crud$var[idx, 1])
+                    if (!is.na(idx) && !is.null(crud$causeSpec$var) &&
+                        length(crud$causeSpec$var) >= idx) {
+                        se_disease <- sqrt(crud$causeSpec$var[idx])
                         z <- qnorm(1 - (1 - self$options$confidence_level) / 2)
                         disease_ci_lower <- max(0, disease_death - z * se_disease)
                         disease_ci_upper <- min(1, disease_death + z * se_disease)
@@ -916,12 +923,16 @@ relativesurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 reg_model <- NULL
 
                 if (model_type == "additive") {
+                    # int = yearly follow-up intervals (in years) for the piecewise-constant
+                    # baseline excess hazard. rsadd has NO `int.length` argument; passing it
+                    # forwards into glm.control(...) and always errors ("unused argument").
+                    n_int <- max(1, floor(max(data$time_years, na.rm = TRUE)))
                     reg_model <- relsurv::rsadd(
                         fml,
                         rmap = list(age = age_days, sex = sex_relsurv, year = diagdate),
                         ratetable = rate_table,
                         data = data,
-                        int.length = 365.25
+                        int = n_int
                     )
                 } else if (model_type == "multiplicative") {
                     # int = number of yearly follow-up intervals

@@ -21,6 +21,7 @@ outbreakanalysisClass <- R6::R6Class(
         .epidemic_curve_data = NULL,
         .attack_rates = NULL,
         .data_quality_results = NULL,
+        .dose_response_results = NULL,
 
         .init = function() {
             # Check required variables for tabular data analysis
@@ -95,6 +96,7 @@ outbreakanalysisClass <- R6::R6Class(
             private$.epidemic_curve_data <- NULL
             private$.attack_rates <- NULL
             private$.data_quality_results <- NULL
+            private$.dose_response_results <- NULL
 
             # Extract and process tabular outbreak data
             data <- self$data

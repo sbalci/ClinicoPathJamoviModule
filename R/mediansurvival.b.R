@@ -410,7 +410,21 @@ mediansurvivalClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Clas
             
             return(p)
         },
-        
+
+        .plotSurvival = function(image, ggtheme, theme, ...) {
+            plotObj <- image$state
+            if (is.null(plotObj)) return(FALSE)
+            print(plotObj)
+            TRUE
+        },
+
+        .plotMedianComparison = function(image, ggtheme, theme, ...) {
+            plotObj <- image$state
+            if (is.null(plotObj)) return(FALSE)
+            print(plotObj)
+            TRUE
+        },
+
         .populateSummary = function(results) {
             if (!self$options$showSummaries) return()
             

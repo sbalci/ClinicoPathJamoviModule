@@ -2,7 +2,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom irr kappa2
 #' @importFrom scales percent
 #' @importFrom reshape2 melt

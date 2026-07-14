@@ -10,25 +10,14 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     private = list(
         
         .init = function() {
-            # Check for required packages
+            # flexsurv is required for model fitting; surface a clear message early.
+            # (Routed to the existing 'todo' Html output; there is no 'errors'/'warnings'
+            #  result item, so referencing self$results$errors/$warnings would crash.)
             if (!requireNamespace('flexsurv', quietly = TRUE)) {
-                self$results$errors$setContent(
-                    "The flexsurv package is required but not installed. 
-                    Please install using: install.packages('flexsurv')"
-                )
-            }
-            
-            if (!requireNamespace('mstate', quietly = TRUE)) {
-                self$results$warnings$setContent(
-                    "The mstate package is recommended for enhanced multi-state modeling. 
-                    Install using: install.packages('mstate')"
-                )
-            }
-            
-            if (!requireNamespace('msm', quietly = TRUE)) {
-                self$results$warnings$setContent(
-                    "The msm package provides additional multi-state methods. 
-                    Install using: install.packages('msm')"
+                self$results$todo$setContent(
+                    "<h3>Package Required</h3>
+                    <p>The <b>flexsurv</b> package is required but not installed.
+                    Please install it using: <code>install.packages('flexsurv')</code></p>"
                 )
             }
         },
@@ -199,12 +188,10 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$ms_data <- ms_data
                 
                 # Populate transition matrix summary
-                self$.populateTransitionMatrix()
+                private$.populateTransitionMatrix()
                 
             }, error = function(e) {
-                self$results$errors$setContent(
-                    paste("Data preparation failed:", htmltools::htmlEscape(e$message))
-                )
+                jmvcore::reject(paste("Data preparation failed:", e$message))
             })
         },
 
@@ -272,9 +259,7 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.populateModelResults()
                 
             }, error = function(e) {
-                self$results$errors$setContent(
-                    paste("Model fitting failed:", htmltools::htmlEscape(e$message))
-                )
+                jmvcore::reject(paste("Model fitting failed:", e$message))
             })
         },
         
@@ -296,7 +281,8 @@ flexmultistateClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         to_state <- private$states[j]
                         trans_name <- paste(from_state, "\u{2192}", to_state)
                         
-                        n_trans <- ifelse(dim(trans_counts) > 0 && i <= nrow(trans_counts) && j <= ncol(trans_counts),
+                        n_trans <- ifelse(nrow(trans_counts) > 0 && ncol(trans_counts) > 0 &&
+                                          i <= nrow(trans_counts) && j <= ncol(trans_counts),
                                         trans_counts[i, j], 0)
                         
                         # Approximate person-years

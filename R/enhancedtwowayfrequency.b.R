@@ -11,6 +11,10 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
     "enhancedtwowayfrequencyClass",
     inherit = enhancedtwowayfrequencyBase,
     private = list(
+        # Declared so runtime assignment does not hit R6's locked-environment guard
+        .error_messages = character(0),
+        .warning_messages = character(0),
+
         .init = function() {
             if (is.null(self$data) || is.null(self$options$rowVar) ||
                 is.null(self$options$colVar))
@@ -81,6 +85,9 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
 
             # Create cross-tabulation table (BlueSky BSkyTwoWayFrequency approach)
             mytable <- table(complete_data[[rowVar]], complete_data[[colVar]])
+
+            # Store state for plot renderers
+            private$.setPlotStates(mytable, rowVar, colVar)
 
             # Calculate various percentage types
             if (self$options$cellPercent || self$options$showCounts) {
@@ -292,7 +299,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                         row_values$std_residual <- std_residuals[i, j]
                     }
 
-                    observed_table$setRow(rowNo = row_idx, values = row_values)
+                    observed_table$addRow(rowKey = row_idx, values = row_values)
                     row_idx <- row_idx + 1
                 }
             }
@@ -329,7 +336,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                         effect_size <- sprintf("Cram\u{00E9}r's V = %.3f", cramers_v)
                     }
 
-                    test_table$setRow(rowNo = row_idx, values = list(
+                    test_table$addRow(rowKey = row_idx, values = list(
                         test_name = "Pearson Chi-Square",
                         statistic = chi_result$statistic,
                         df = chi_result$parameter,
@@ -362,7 +369,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                         "No significant association"
                     }
 
-                    test_table$setRow(rowNo = row_idx, values = list(
+                    test_table$addRow(rowKey = row_idx, values = list(
                         test_name = "Fisher's Exact Test",
                         statistic = NA,  # Fisher's test doesn't have a test statistic
                         df = NA,
@@ -383,7 +390,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
             cramers_v <- private$.calculateCramersV(mytable)
             cramers_interp <- private$.interpretCramersV(cramers_v)
 
-            assoc_table$setRow(rowNo = row_idx, values = list(
+            assoc_table$addRow(rowKey = row_idx, values = list(
                 measure = "Cram\u{00E9}r's V",
                 value = cramers_v,
                 confidence_interval = "",  # Would need bootstrap for CI
@@ -397,7 +404,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
                 phi <- private$.calculatePhi(mytable)
                 phi_interp <- private$.interpretPhi(phi)
 
-                assoc_table$setRow(rowNo = row_idx, values = list(
+                assoc_table$addRow(rowKey = row_idx, values = list(
                     measure = "Phi Coefficient",
                     value = phi,
                     confidence_interval = "",
@@ -410,7 +417,7 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
             # Contingency coefficient
             contingency_c <- private$.calculateContingencyCoefficient(mytable)
 
-            assoc_table$setRow(rowNo = row_idx, values = list(
+            assoc_table$addRow(rowKey = row_idx, values = list(
                 measure = "Contingency Coefficient",
                 value = contingency_c,
                 confidence_interval = "",
@@ -476,6 +483,282 @@ enhancedtwowayfrequencyClass <- R6::R6Class(
             } else {
                 "Strong association"
             }
+        },
+
+        .escapeHtml = function(x) {
+            x <- as.character(x)
+            x <- gsub("&", "&amp;", x, fixed = TRUE)
+            x <- gsub("<", "&lt;", x, fixed = TRUE)
+            x <- gsub(">", "&gt;", x, fixed = TRUE)
+            x <- gsub("\"", "&quot;", x, fixed = TRUE)
+            x <- gsub("'", "&#39;", x, fixed = TRUE)
+            x
+        },
+
+        .performAssumptionChecks = function(mytable) {
+            assumption_table <- self$results$assumptionCheck
+            min_threshold <- self$options$minimumExpected
+
+            chi_result <- tryCatch(suppressWarnings(chisq.test(mytable)),
+                                   error = function(e) NULL)
+
+            if (!is.null(chi_result)) {
+                expected <- chi_result$expected
+                total_cells <- length(expected)
+                min_expected <- min(expected)
+                n_below <- sum(expected < min_threshold)
+                pct_below5 <- 100 * sum(expected < 5) / total_cells
+
+                assumption_table$addRow(rowKey = "min_expected", values = list(
+                    assumption = paste0("Minimum expected frequency >= ", min_threshold),
+                    status = if (min_expected >= min_threshold) "Met" else "Violated",
+                    details = sprintf("Smallest expected count = %.2f; %d of %d cells below threshold",
+                                      min_expected, n_below, total_cells),
+                    recommendation = if (min_expected >= min_threshold)
+                        "Chi-square approximation is appropriate."
+                    else
+                        "Consider Fisher's exact test or collapsing sparse categories."
+                ))
+
+                assumption_table$addRow(rowKey = "cochran", values = list(
+                    assumption = "Cochran's rule (>= 80% of cells with expected >= 5)",
+                    status = if (pct_below5 <= 20) "Met" else "Violated",
+                    details = sprintf("%.1f%% of cells have expected count < 5", pct_below5),
+                    recommendation = if (pct_below5 <= 20)
+                        "Large-sample assumptions satisfied."
+                    else
+                        "Use an exact test; asymptotic p-values may be unreliable."
+                ))
+            }
+
+            assumption_table$addRow(rowKey = "independence", values = list(
+                assumption = "Independence of observations",
+                status = "Assumed",
+                details = sprintf("Total observations analysed: %d", sum(mytable)),
+                recommendation = "Each observation must contribute to exactly one cell."
+            ))
+        },
+
+        .generateDiagnostics = function(complete_data, mytable, rowVar, colVar) {
+            diag_table <- self$results$diagnostics
+            n_total <- nrow(self$data)
+            n_complete <- nrow(complete_data)
+            n_missing <- n_total - n_complete
+
+            diag_table$addRow(rowKey = "sample", values = list(
+                diagnostic_item = "Sample size",
+                value = as.character(n_complete),
+                interpretation = sprintf("%d complete cases of %d total", n_complete, n_total),
+                quality_flag = if (n_complete >= 30) "Adequate" else "Small sample"
+            ))
+
+            diag_table$addRow(rowKey = "missing", values = list(
+                diagnostic_item = "Missing cases",
+                value = as.character(n_missing),
+                interpretation = sprintf("%.1f%% of rows excluded",
+                                         if (n_total > 0) 100 * n_missing / n_total else 0),
+                quality_flag = if (n_total > 0 && n_missing / n_total > 0.1)
+                    "High missingness" else "Acceptable"
+            ))
+
+            diag_table$addRow(rowKey = "dims", values = list(
+                diagnostic_item = "Table dimensions",
+                value = sprintf("%d x %d", nrow(mytable), ncol(mytable)),
+                interpretation = sprintf("%d row levels, %d column levels",
+                                         nrow(mytable), ncol(mytable)),
+                quality_flag = if (any(dim(mytable) < 2)) "Degenerate" else "Valid"
+            ))
+
+            n_empty <- sum(mytable == 0)
+            diag_table$addRow(rowKey = "empty", values = list(
+                diagnostic_item = "Empty cells",
+                value = as.character(n_empty),
+                interpretation = sprintf("%d of %d cells have zero count",
+                                         n_empty, length(mytable)),
+                quality_flag = if (n_empty == 0) "None" else "Sparse cells present"
+            ))
+        },
+
+        .generateComprehensiveSummary = function(mytable, complete_data) {
+            summary_table <- self$results$comprehensiveAnalysisSummary
+            n <- sum(mytable)
+            cramers_v <- tryCatch(private$.calculateCramersV(mytable),
+                                  error = function(e) NA_real_)
+            chi <- tryCatch(suppressWarnings(chisq.test(mytable)),
+                            error = function(e) NULL)
+
+            summary_table$addRow(rowKey = "n", values = list(
+                measure = "Total observations",
+                value = as.character(n),
+                interpretation = "Cases contributing to the cross-tabulation",
+                clinical_significance = if (n >= 30)
+                    "Sufficient for inference" else "Interpret with caution"
+            ))
+
+            if (!is.null(chi)) {
+                summary_table$addRow(rowKey = "chi", values = list(
+                    measure = "Pearson chi-square",
+                    value = sprintf("%.3f (df = %d)", chi$statistic, chi$parameter),
+                    interpretation = sprintf("p = %.4f", chi$p.value),
+                    clinical_significance = if (chi$p.value < 0.05)
+                        "Statistically significant association"
+                    else
+                        "No significant association"
+                ))
+            }
+
+            if (!is.na(cramers_v)) {
+                interp <- private$.interpretCramersV(cramers_v)
+                summary_table$addRow(rowKey = "cramers", values = list(
+                    measure = "Cram\u{00E9}r's V",
+                    value = sprintf("%.3f", cramers_v),
+                    interpretation = interp$interpretation,
+                    clinical_significance = interp$clinical
+                ))
+            }
+        },
+
+        .generateRecommendations = function(mytable) {
+            html <- self$results$recommendations
+            recs <- character(0)
+
+            chi <- tryCatch(suppressWarnings(chisq.test(mytable)),
+                            error = function(e) NULL)
+            if (!is.null(chi)) {
+                min_exp <- min(chi$expected)
+                if (min_exp < self$options$minimumExpected)
+                    recs <- c(recs, sprintf(
+                        "Smallest expected frequency (%.2f) is below %g; prefer Fisher's exact test.",
+                        min_exp, self$options$minimumExpected))
+                if (chi$p.value < 0.05)
+                    recs <- c(recs, "The association is statistically significant; report an effect size (Cram&eacute;r's V / Phi) alongside the p-value.")
+                else
+                    recs <- c(recs, "No statistically significant association was detected; consider statistical power and sample size before concluding independence.")
+            }
+            if (nrow(mytable) == 2 && ncol(mytable) == 2 && !self$options$continuityCorrection)
+                recs <- c(recs, "For a 2x2 table, Yates' continuity correction is commonly recommended.")
+            if (length(recs) == 0)
+                recs <- "No specific recommendations; assumptions appear to be met."
+
+            items <- paste0("<li>", recs, "</li>", collapse = "")
+            html$setContent(paste0(
+                "<div style='padding:8px;'><h3>Statistical Recommendations</h3><ul>",
+                items, "</ul></div>"))
+        },
+
+        .generateClinicalInterpretation = function(mytable) {
+            html <- self$results$clinicalInterpretationGuide
+            rowVar <- private$.escapeHtml(self$options$rowVar)
+            colVar <- private$.escapeHtml(self$options$colVar)
+
+            cramers_v <- tryCatch(private$.calculateCramersV(mytable),
+                                  error = function(e) NA_real_)
+            chi <- tryCatch(suppressWarnings(chisq.test(mytable)),
+                            error = function(e) NULL)
+
+            assoc_text <- if (!is.na(cramers_v)) {
+                interp <- private$.interpretCramersV(cramers_v)
+                sprintf("The strength of association between <b>%s</b> and <b>%s</b> is <b>%s</b> (Cram&eacute;r's V = %.3f).",
+                        rowVar, colVar, tolower(interp$interpretation), cramers_v)
+            } else {
+                sprintf("Association between <b>%s</b> and <b>%s</b> could not be quantified.",
+                        rowVar, colVar)
+            }
+
+            sig_text <- if (!is.null(chi)) {
+                if (chi$p.value < 0.05)
+                    "The chi-square test indicates a statistically significant relationship, suggesting the two variables are not independent."
+                else
+                    "The chi-square test does not provide evidence of a relationship between the variables."
+            } else ""
+
+            html$setContent(paste0(
+                "<div style='padding:8px;'>",
+                "<h3>Clinical Application Guidance</h3>",
+                "<p>", assoc_text, "</p>",
+                "<p>", sig_text, "</p>",
+                "<p><i>Note:</i> Statistical association does not imply causation. Interpret findings in the context of study design, potential confounders, and clinical plausibility.</p>",
+                "</div>"))
+        },
+
+        .generateMethodsExplanation = function() {
+            html <- self$results$methodsExplanation
+            html$setContent(
+                "<div style='padding:8px;'>
+                <h3>Statistical Methods and References</h3>
+                <ul>
+                <li><b>Pearson chi-square test:</b> Tests independence of two categorical variables using observed versus expected frequencies under independence.</li>
+                <li><b>Fisher's exact test:</b> Exact test of association, recommended when expected cell counts are small.</li>
+                <li><b>Yates' continuity correction:</b> Adjustment applied to 2x2 chi-square tests to reduce approximation error.</li>
+                <li><b>Cram&eacute;r's V:</b> Effect size for association, ranging 0 to 1, derived from the chi-square statistic.</li>
+                <li><b>Phi coefficient:</b> Association measure for 2x2 tables.</li>
+                <li><b>Contingency coefficient:</b> General association measure derived from chi-square.</li>
+                <li><b>Standardized residuals:</b> Identify the cells contributing most to a significant chi-square result.</li>
+                </ul>
+                <p><b>Reference:</b> Agresti A (2018) <i>An Introduction to Categorical Data Analysis</i>, 3rd ed., Wiley.</p>
+                </div>")
+        },
+
+        .setPlotStates = function(mytable, rowVar, colVar) {
+            state <- list(
+                counts = matrix(as.integer(mytable),
+                                nrow = nrow(mytable),
+                                dimnames = dimnames(mytable)),
+                rowVar = rowVar,
+                colVar = colVar)
+            if (self$options$heatmapPlot)
+                self$results$heatmapPlot$setState(state)
+            if (self$options$mosaicPlot)
+                self$results$mosaicPlot$setState(state)
+            if (self$options$residualAnalysis && self$options$detailedOutput)
+                self$results$residualPlot$setState(state)
+        },
+
+        .plotHeatmap = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            st <- image$state
+            df <- as.data.frame(as.table(st$counts), stringsAsFactors = FALSE)
+            names(df) <- c("Row", "Col", "Count")
+
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Col, y = Row, fill = Count)) +
+                ggplot2::geom_tile(color = "white") +
+                ggplot2::geom_text(ggplot2::aes(label = Count)) +
+                ggplot2::scale_fill_gradient(low = "#deebf7", high = "#08519c") +
+                ggplot2::labs(x = st$colVar, y = st$rowVar, title = "Frequency Heatmap") +
+                ggtheme
+            print(p)
+            TRUE
+        },
+
+        .plotMosaic = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            st <- image$state
+            tbl <- as.table(st$counts)
+            names(dimnames(tbl)) <- c(st$rowVar, st$colVar)
+            graphics::mosaicplot(tbl, main = "Mosaic Plot", color = TRUE,
+                                 xlab = st$rowVar, ylab = st$colVar, las = 1)
+            TRUE
+        },
+
+        .plotResiduals = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            st <- image$state
+            chi <- tryCatch(suppressWarnings(chisq.test(st$counts)),
+                            error = function(e) NULL)
+            if (is.null(chi)) return(FALSE)
+            df <- as.data.frame(as.table(chi$stdres), stringsAsFactors = FALSE)
+            names(df) <- c("Row", "Col", "Residual")
+
+            p <- ggplot2::ggplot(df, ggplot2::aes(x = Col, y = Row, fill = Residual)) +
+                ggplot2::geom_tile(color = "white") +
+                ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", Residual))) +
+                ggplot2::scale_fill_gradient2(low = "#b2182b", mid = "white",
+                                              high = "#2166ac", midpoint = 0) +
+                ggplot2::labs(x = st$colVar, y = st$rowVar,
+                              title = "Standardized Residuals") +
+                ggtheme
+            print(p)
+            TRUE
         }
     )
 )

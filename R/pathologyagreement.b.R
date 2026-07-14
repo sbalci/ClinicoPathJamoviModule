@@ -350,11 +350,11 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     # Select the appropriate ICC based on user choice
                     # ICC(3,1) for consistency (relative agreement), ICC(2,1) for absolute agreement
                     if (self$options$icc_type == "consistency") {
-                        icc_index <- 6 # ICC(3,1) - Consistency (fixed raters, relative agreement)
+                        icc_index <- 3 # psych row 3 = ICC3 (Single_fixed_raters) = ICC(3,1) consistency, single measure
                         icc_label <- "ICC(3,1) - Consistency"
                         icc_interpretation <- "relative agreement between methods"
                     } else { # absolute
-                        icc_index <- 4 # ICC(2,1) - Absolute Agreement (random raters, absolute values)
+                        icc_index <- 2 # psych row 2 = ICC2 (Single_random_raters) = ICC(2,1) absolute agreement, single measure
                         icc_label <- "ICC(2,1) - Absolute Agreement"
                         icc_interpretation <- "absolute value concordance between methods"
                     }
@@ -775,9 +775,9 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                     # Use same ICC type as selected by user
                     if (self$options$icc_type == "consistency") {
-                        icc_index <- 6 # ICC(3,1) - Consistency
+                        icc_index <- 3 # ICC(3,1) - Consistency (psych row 3, single measure)
                     } else { # absolute
-                        icc_index <- 4 # ICC(2,1) - Absolute Agreement
+                        icc_index <- 2 # ICC(2,1) - Absolute Agreement (psych row 2, single measure)
                     }
 
                     icc_value <- icc_result$results$ICC[icc_index]
@@ -945,9 +945,9 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Add relevant ICC types for multi-method analysis
                 icc_types <- list(
-                    list(index = 1, name = "ICC(1,1) - Single rater, random effects"),
-                    list(index = 4, name = "ICC(2,1) - Single rater, mixed effects"),
-                    list(index = 6, name = "ICC(3,1) - Single rater, fixed effects")
+                    list(index = 1, name = "ICC(1,1) - Single rater, one-way random effects"),
+                    list(index = 2, name = "ICC(2,1) - Single rater, two-way random effects"),
+                    list(index = 3, name = "ICC(3,1) - Single rater, two-way fixed effects")
                 )
 
                 row_key <- 1
@@ -1021,7 +1021,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (requireNamespace("psych", quietly = TRUE)) {
                     data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
                     icc_result <- psych::ICC(data_for_icc)
-                    icc_index <- if (self$options$icc_type == "consistency") 6 else 4
+                    icc_index <- if (self$options$icc_type == "consistency") 3 else 2 # single-measure ICC (psych rows 3/2)
                     icc_value <- icc_result$results$ICC[icc_index]
                 }
 
@@ -1153,7 +1153,7 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 if (requireNamespace("psych", quietly = TRUE)) {
                     data_for_icc <- data.frame(Method1 = method1, Method2 = method2)
                     icc_result <- psych::ICC(data_for_icc)
-                    icc_index <- if (self$options$icc_type == "consistency") 6 else 4 # absolute
+                    icc_index <- if (self$options$icc_type == "consistency") 3 else 2 # single-measure ICC (psych rows 3/2)
                     icc_value <- icc_result$results$ICC[icc_index]
                     icc_lower <- icc_result$results$`lower bound`[icc_index]
                     icc_upper <- icc_result$results$`upper bound`[icc_index]
@@ -1340,12 +1340,12 @@ pathologyagreementClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     return("")
                 }
 
-                # Build arguments - jmvcore::format(..., context = "R") produces valid R string
-                # literals handling embedded quotes/backslashes (G-category codegen hygiene).
-                # Replaces a manual paste0('"', escaped, '"') wrap that corrupted the syntax pane
-                # for column names containing " or \.
-                dep1_arg <- paste0("dep1 = ", jmvcore::format("{}", dep1, context = "R"))
-                dep2_arg <- paste0("dep2 = ", jmvcore::format("{}", dep2, context = "R"))
+                # Build arguments - base R deparse() emits a valid, properly-escaped R string
+                # literal (quotes + backslashes handled). jmvcore::format(context = "R") does NOT
+                # quote strings, which corrupted the syntax pane (unquoted/broken R) for column
+                # names containing spaces, " or \.
+                dep1_arg <- paste0("dep1 = ", deparse(dep1))
+                dep2_arg <- paste0("dep2 = ", deparse(dep2))
 
                 # Get other arguments using base helper (if available)
                 args <- ""

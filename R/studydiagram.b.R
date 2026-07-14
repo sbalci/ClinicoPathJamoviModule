@@ -144,8 +144,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  # Check vars
                  if (is.null(self$options$step_name) || is.null(self$options$participant_count)) return()
 
-                 step_col <- jmvcore::toB64(self$options$step_name)
-                 count_col <- jmvcore::toB64(self$options$participant_count)
+                 step_col <- self$options$step_name
+                 count_col <- self$options$participant_count
 
                  # Ensure proper types
                  if (!is.numeric(data[[count_col]])) {
@@ -214,7 +214,7 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                  # Reasons?
                  if (!is.null(self$options$exclusion_reason_summary)) {
-                      flow_data$reason <- as.character(data[[jmvcore::toB64(self$options$exclusion_reason_summary)]])
+                      flow_data$reason <- as.character(data[[self$options$exclusion_reason_summary]])
                  } else {
                       flow_data$reason <- ""
                  }
@@ -223,8 +223,8 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  # Sequential Exclusion Logic
                  if (is.null(self$options$participant_id_mapping) || is.null(self$options$exclusion_reason_mapping)) return()
 
-                 pid_col <- jmvcore::toB64(self$options$participant_id_mapping)
-                 reason_col <- jmvcore::toB64(self$options$exclusion_reason_mapping)
+                 pid_col <- self$options$participant_id_mapping
+                 reason_col <- self$options$exclusion_reason_mapping
                  
                  # Unique IDs check
                  if (any(duplicated(data[[pid_col]]))) {
@@ -281,7 +281,31 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # --- Results Populating ---
-            private$.processedData <- flow_data
+            # Normalize the computed flow into the list-of-lists structure consumed by the
+            # summary table, plot renderer, and clinical/interpretation helpers, and record
+            # the flow summary they read. step_summary stores the label in flow_data$step;
+            # exclusion_mapping stores it in flow_data$name.
+            step_labels_vec <- if (!is.null(flow_data$step)) as.character(flow_data$step) else as.character(flow_data$name)
+            n_initial <- flow_data$n[1]
+            n_final <- flow_data$n[nrow(flow_data)]
+
+            private$.processedData <- lapply(seq_len(nrow(flow_data)), function(i) {
+                list(
+                    step = step_labels_vec[i],
+                    participants = flow_data$n[i],
+                    excluded = flow_data$excluded[i],
+                    percent_retained = round(flow_data$n[i] / n_initial * 100, 1),
+                    exclusion_reasons = if (!is.null(flow_data$reason)) as.character(flow_data$reason[i]) else ""
+                )
+            })
+
+            private$.flowSummary <- list(
+                format = format,
+                total_initial = n_initial,
+                total_final = n_final,
+                total_excluded = n_initial - n_final,
+                retention_rate = round(n_final / n_initial * 100, 1)
+            )
             
             # Text Description
             if (self$options$show_interpretation) {
@@ -302,20 +326,22 @@ studydiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                  self$results$diagram$setContent("")
             }
             
-            # Table
-            table <- self$results$summary
-            for(i in seq_len(nrow(flow_data))) {
-                 row <- list(
-                      step = flow_data$step[i],
-                      count = flow_data$n[i],
-                      excluded = flow_data$excluded[i],
-                      retention = paste0(round(flow_data$n[i] / flow_data$n[1] * 100, 1), "%")
-                 )
-                 table$addRow(rowKey = i, values = row)
+            # Summary table (populates the correct .r.yaml column names)
+            summary_table <- self$results$summary
+            summary_table$deleteRows()
+            for (i in seq_along(private$.processedData)) {
+                 sd <- private$.processedData[[i]]
+                 summary_table$addRow(rowKey = i, values = list(
+                      step = sd$step,
+                      participants = sd$participants,
+                      excluded = sd$excluded,
+                      percent_retained = sd$percent_retained,
+                      exclusion_reasons = sd$exclusion_reasons
+                 ))
             }
             
-            # Trigger plot
-            self$results$plot$setState(flow_data)
+            # Trigger plot (sets the state structure the .plot renderer expects)
+            private$.generatePlot()
 
             # Generate all clinical outputs
             private$.checkDataQuality()

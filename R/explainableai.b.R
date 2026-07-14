@@ -246,10 +246,19 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
         
         .performFeatureImportanceAnalysis = function(feature_data, target_data = NULL, prediction_data = NULL) {
             # Enhanced feature importance analysis with real ML integration
-            # Try to use actual model if target data is available
+            # Define feature names up front: they are referenced by the fallback
+            # paths below, so they must exist before any use.
+            features <- colnames(feature_data)
+            n_features <- min(length(features), self$options$n_features)
+
+            set.seed(42)
+
+            # Try to use actual model if target data is available. Capture the
+            # tryCatch return value so that fallbacks (including the error
+            # handler) propagate to this scope instead of a nested environment.
             if (!is.null(target_data) && is.factor(target_data)) {
                 # Attempt to build a simple random forest for real importance scores
-                tryCatch({
+                importance_scores <- tryCatch({
                     if (requireNamespace('randomForest', quietly = TRUE)) {
                         # Build quick random forest model
                         rf_model <- randomForest::randomForest(
@@ -258,32 +267,27 @@ explainableaiClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class
                             ntree = 50,
                             importance = TRUE
                         )
-                        
+
                         # Extract real importance scores
                         importance_matrix <- randomForest::importance(rf_model)
                         if (ncol(importance_matrix) >= 2) {
                             real_importance <- importance_matrix[, 1]  # Mean decrease accuracy
-                            importance_scores <- abs(real_importance) / max(abs(real_importance))  # Normalize
+                            abs(real_importance) / max(abs(real_importance))  # Normalize
                         } else {
-                            importance_scores <- runif(length(features), 0.1, 1.0)  # Fallback
+                            runif(length(features), 0.1, 1.0)  # Fallback
                         }
                     } else {
-                        importance_scores <- runif(length(features), 0.1, 1.0)  # Fallback
+                        runif(length(features), 0.1, 1.0)  # Fallback
                     }
-                }, error = function(e) {
-                    importance_scores <- runif(length(features), 0.1, 1.0)  # Fallback on error
-                })
+                }, error = function(e) runif(length(features), 0.1, 1.0))  # Fallback on error
             } else {
                 # Fallback to simulation for demonstration
                 importance_scores <- runif(length(features), 0.1, 1.0)
             }
-            
-            features <- colnames(feature_data)
-            n_features <- min(length(features), self$options$n_features)
-            
-            set.seed(42)
-            # importance_scores already calculated above
-            std_errors <- runif(n_features, 0.01, 0.1)
+
+            # std_errors must span all features: order_idx below can reference
+            # any feature index (not just the top n_features).
+            std_errors <- runif(length(features), 0.01, 0.1)
             
             # Calculate confidence intervals
             ci_lower <- pmax(0, importance_scores - 1.96 * std_errors)

@@ -300,8 +300,8 @@ spatialautocorrelationClass <- R6::R6Class(
             table$addRow(rowKey = "gearys_c", values = list(
                 measure = "Geary's C",
                 observed = geary_result$estimate[1],
-                expected = 1.0,
-                variance = geary_result$estimate[2],
+                expected = geary_result$estimate[2],
+                variance = geary_result$estimate[3],
                 z_score = geary_result$statistic,
                 p_value = geary_result$p.value,
                 interpretation = interpretation
@@ -384,12 +384,7 @@ spatialautocorrelationClass <- R6::R6Class(
             }
         },
         .performHotspotAnalysis = function(coords_data) {
-            # Hotspot analysis using kernel density estimation
-            if (!requireNamespace("KernSmooth", quietly = TRUE)) {
-                return()
-            }
-
-            coords_matrix <- coordinates(coords_data)
+            # Hotspot analysis using quantile thresholds on measurement values
             values <- coords_data$value
 
             # Simple hotspot detection based on local density and values

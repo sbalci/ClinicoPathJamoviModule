@@ -167,7 +167,7 @@ dynamicpredictionClass <- R6::R6Class(
             # Add baseline variables
             if (length(self$options$baseline) > 0) {
                 for (var in self$options$baseline) {
-                    if (self$data[[var]]$measureType == 'continuous') {
+                    if (is.numeric(self$data[[var]])) {
                         data$survival[[var]] <- jmvcore::toNumeric(self$data[[var]])
                     } else {
                         data$survival[[var]] <- factor(self$data[[var]])

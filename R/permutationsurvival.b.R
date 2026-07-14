@@ -538,6 +538,27 @@ permutationsurvivalClass <- R6::R6Class(
             image <- self$results$testProgressionPlot
             image$setState(plot)
         },
+        .plotSurvival = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) {
+                return(FALSE)
+            }
+            print(image$state)
+            TRUE
+        },
+        .plotPermutationDistribution = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) {
+                return(FALSE)
+            }
+            print(image$state)
+            TRUE
+        },
+        .plotTestProgression = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) {
+                return(FALSE)
+            }
+            print(image$state)
+            TRUE
+        },
         .generateSummary = function(results, data) {
             groups <- levels(data$group)
             n_total <- nrow(data)

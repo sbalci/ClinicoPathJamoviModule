@@ -3,7 +3,6 @@
 #' @importFrom survival survdiff
 #' @importFrom ggplot2 ggplot aes geom_line geom_hline geom_point geom_rect labs scale_y_continuous scale_color_manual theme element_text element_blank
 #' @importFrom scales percent_format
-
 # Survival Power Analysis Module for Jamovi
 #
 # Constants used in calculations:
@@ -3285,10 +3284,10 @@ simpleSurvivalPowerClass <- R6::R6Class(
                     # Create sensitivity analysis plot
                     plot <- ggplot2::ggplot(data, ggplot2::aes(x = hazard_ratio, y = sample_size)) +
                         ggplot2::geom_line(color = "steelblue", size = 1) +
-                        ggplot2::geom_point(size = 3, color = "steelblue") +
+                        ggplot2::geom_point(size = 3, color = "steelblue")
 
-                        # Highlight base case if present
-                        if ("is_base_case" %in% names(data)) {
+                    # Highlight base case if present
+                    if ("is_base_case" %in% names(data)) {
                             base_data <- data[data$is_base_case, ]
                             if (nrow(base_data) > 0) {
                                 plot <- plot + ggplot2::geom_point(

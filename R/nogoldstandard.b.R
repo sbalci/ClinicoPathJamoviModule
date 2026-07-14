@@ -530,7 +530,13 @@ nogoldstandardClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                tests <- private$.getTestVariables()
+                # Use the analyzed test names (aligned with results$sensitivities /
+                # results$specificities). results$data columns are the filtered tests
+                # that actually entered the analysis (those with BOTH a variable and a
+                # positive level set). .getTestVariables() returns every selected test
+                # variable even when its positive level is unset, which would misalign
+                # labels with the metric vector and add spurious NA rows.
+                tests <- names(results$data)
 
                 # Clear any existing rows to prevent duplicates
                 table <- self$results$test_metrics

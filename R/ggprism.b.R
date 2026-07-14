@@ -1128,7 +1128,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                         "Statistical differences evaluated using",
                         switch(self$options$stats_method,
                             "ttest" = "t-test (comparing means)",
-                            "wilcox" = "Wilcoxon test (comparing medians)",
+                            "wilcoxon" = "Wilcoxon test (comparing medians)",
                             "anova" = "ANOVA (comparing multiple group means)",
                             "kruskal" = "Kruskal-Wallis test (comparing multiple group medians)",
                             self$options$stats_method
@@ -1260,7 +1260,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                             "</ul>",
                             "<p><strong>Violations:</strong> Consider Wilcoxon test for non-normal data or unequal variances.</p>"
                         ),
-                        "wilcox" = paste(
+                        "wilcoxon" = paste(
                             "<h4>Wilcoxon Test Assumptions:</h4>",
                             "<ul>",
                             "<li><strong>Independence:</strong> Observations should be independent</li>",
@@ -1351,7 +1351,7 @@ ggprismClass <- if (requireNamespace("jmvcore")) {
                 if (self$options$show_statistics) {
                     test_desc <- switch(self$options$stats_method,
                         "ttest" = "independent samples t-test",
-                        "wilcox" = "Wilcoxon rank-sum test",
+                        "wilcoxon" = "Wilcoxon rank-sum test",
                         "anova" = "one-way ANOVA",
                         "kruskal" = "Kruskal-Wallis test",
                         "statistical testing"

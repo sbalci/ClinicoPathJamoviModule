@@ -25,20 +25,21 @@ rocregClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             predictor <- predictor[complete_cases]
             outcome <- outcome[complete_cases]
 
-            # Identify positive class
-            # TODO (correctness): rework this to respect the factor properly. `outcome` is
-            # permitted:[factor]; the else branch's `as.numeric(outcome) - 1` is a fragile
-            # positional idiom - it assumes the factor's 2nd level is the positive class AND that
-            # as.numeric() returns level indices 1,2. A naive jmvcore::toNumeric() swap would BREAK
-            # (toNumeric honours the factor's `values` attribute, so a 0/1-coded factor → -1,0).
-            # Instead derive/require the positive level (e.g. default to the last factor level) and
-            # map via `as.numeric(outcome == <positive_level>)` like the if-branch, so labelled
-            # factor coding is honoured rather than positional indices. (Mirrors roc2d.b.R.)
+            # Identify positive class.
+            # `outcome` is permitted:[factor]. Map to 0/1 via factor-label equality so labelled
+            # coding is honoured rather than positional integer codes. When the positive level is
+            # not specified, default to the LAST factor level as the diseased/positive class (a
+            # documented convention). For the standard 2-level case this yields identical coding to
+            # the previous `as.numeric(outcome) - 1` (level 2 = positive) but is robust to label
+            # ordering and to factors with more than two levels (which the old idiom silently
+            # turned into non-binary 0..k-1 values).
+            outcome <- as.factor(outcome)
             if (!is.null(self$options$positive_level)) {
-                outcome_binary <- as.numeric(outcome == self$options$positive_level)
+                positive_level <- self$options$positive_level
             } else {
-                outcome_binary <- as.numeric(outcome) - 1
+                positive_level <- utils::tail(levels(outcome), 1)
             }
+            outcome_binary <- as.numeric(outcome == positive_level)
 
             # Implement stratified ROC analysis (practical alternative to full ROC regression)
             # For each covariate, stratify and calculate ROC curves

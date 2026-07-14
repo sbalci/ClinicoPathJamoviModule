@@ -73,14 +73,6 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 if (self$options$showModelFit) {
                     private$.populateModelFitTable()
                 }
-
-                if (self$options$causeSpecificComparison) {
-                    private$.compareToCauseSpecific(data)
-                }
-
-                if (self$options$showPredictionTable) {
-                    private$.makePredictions(data)
-                }
             }
 
             # Calculate cumulative incidence
@@ -170,15 +162,8 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                     data$group <- self$data[[groupVar_escaped]]
                 }
 
-                # CRITICAL FIX: Strata option removed - cmprsk::crr() does not support stratification
-                # Warn if user has strata option set (backward compatibility)
-                if (!is.null(self$options$strata)) {
-                    jmvcore::warning(paste(
-                        "Stratification is not supported by Fine-Gray models (cmprsk::crr).",
-                        "Consider using the stratification variable as a covariate instead,",
-                        "or fitting separate models for each stratum."
-                    ))
-                }
+                # Note: Fine-Gray (cmprsk::crr) does not support stratification, so no
+                # strata option is exposed. Use a stratifying variable as a covariate instead.
 
                 # Remove rows with NA
                 data <- data[complete.cases(data), ]
@@ -256,9 +241,8 @@ finegrayClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 p <- 2 * (1 - pnorm(abs(z)))
 
                 # Calculate confidence intervals
-                # CRITICAL FIX: Convert percentage to proportion before qnorm
-                # confLevel is stored as percentage (e.g., 95), must convert to 0.95
-                conf_level <- self$options$confLevel / 100
+                # confLevel is a proportion (0.50-0.99 per .a.yaml); use it directly.
+                conf_level <- self$options$confLevel
                 z_crit <- qnorm((1 + conf_level) / 2)
 
                 ci_lower <- coef - z_crit * se

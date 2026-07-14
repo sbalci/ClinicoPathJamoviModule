@@ -10,8 +10,8 @@ items:
       description: Overview of the parametric frailty model analysis
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -47,8 +47,8 @@ items:
       description: Model fit statistics for the parametric frailty model
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -67,8 +67,8 @@ items:
       description: Parameter estimates for the parametric frailty model
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -115,8 +115,8 @@ items:
       description: Summary statistics for frailty terms
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -149,8 +149,8 @@ items:
       description: Individual frailty predictions for each subject/group
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -183,8 +183,8 @@ items:
       description: Goodness-of-fit tests for the parametric frailty model
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -212,8 +212,8 @@ items:
       description: Plot of the estimated hazard function
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -227,8 +227,8 @@ items:
       description: Plot of the estimated survival function
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -242,8 +242,8 @@ items:
       description: Plot of the frailty distribution
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -257,8 +257,8 @@ items:
       description: Model diagnostic plots
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method
@@ -272,8 +272,8 @@ items:
       description: Comprehensive model summary and interpretation
       clearWith:
         - outcome
-        - explanatory
-        - frailty
+        - covariates
+        - frailty_variable
         - baseline_distribution
         - frailty_distribution
         - estimation_method

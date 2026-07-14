@@ -42,8 +42,7 @@
 #' @importFrom gtsummary tbl_summary modify_header add_n add_overall bold_labels add_p add_q bold_levels bold_p all_continuous all_categorical all_stat_cols style_pvalue as_kable_extra
 #' @importFrom gt md
 #' @importFrom purrr partial
-#' @import magrittr
-
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @noRd
 NULL
 

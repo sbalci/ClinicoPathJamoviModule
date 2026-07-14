@@ -50,7 +50,9 @@ samplingerrorClass <- R6::R6Class(
                 if (freq > 0 && freq < 1) {
                     se_prop <- sqrt((freq * (1 - freq)) / n)
                     # Finite population correction
-                    fpc <- sqrt((ref_vol - sample_vol * n) / (ref_vol - 1))
+                    # Guard denominator: ref_vol < 1 would make (ref_vol - 1)
+                    # negative and yield sqrt(negative) = NaN. Matches .plot.
+                    fpc <- sqrt((ref_vol - sample_vol * n) / max(1, ref_vol - 1))
                     E_Nesv <- se_prop * fpc * 100
                 } else {
                     E_Nesv <- 0
@@ -96,6 +98,8 @@ samplingerrorClass <- R6::R6Class(
                 comp_table <- self$results$errorComponents
 
                 total_sq <- results$E_Ne^2 + results$E_Bn^2 + results$E_Nesv^2
+                # Avoid 0/0 -> NaN in contribution when all components are zero
+                if (total_sq <= 0) total_sq <- 1
 
                 comp_table$setRow(rowNo = 1, values = list(
                     component = "E(Ne)",

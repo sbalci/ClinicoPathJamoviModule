@@ -1,7 +1,7 @@
 #' @title Arc Diagram
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import igraph
+#' @rawNamespace import(igraph, except = c(compose, crossing, is_named, simplify))
 #' @import grDevices
 #' @import RColorBrewer
 #' @return An \code{R6} class generator object for the \code{jjarcdiagramClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -356,10 +356,21 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return(NULL)
             }
 
+            # Build a SINGLE escape mapping across BOTH source and target columns so
+            # that the same node value always maps to the same safe name and distinct
+            # values never collide. make.names(unique = TRUE) must be applied to the
+            # *combined unique* node set: applying it per-row (as before) appended
+            # suffixes to repeated nodes (GeneA, GeneA_1, GeneA_2, ...), turning each
+            # occurrence into a phantom distinct node and silently breaking degree,
+            # edge aggregation, self-loop detection and group assignment.
+            node_labels <- unique(c(as.character(mydata_clean[[source_var]]),
+                                    as.character(mydata_clean[[target_var]])))
+            node_map <- setNames(private$.escapeVar(node_labels), node_labels)
+
             # Create edge data frame with escaped names + original labels
             edge_df <- data.frame(
-                source = private$.escapeVar(mydata_clean[[source_var]]),
-                target = private$.escapeVar(mydata_clean[[target_var]]),
+                source = unname(node_map[as.character(mydata_clean[[source_var]])]),
+                target = unname(node_map[as.character(mydata_clean[[target_var]])]),
                 source_label = as.character(mydata_clean[[source_var]]),
                 target_label = as.character(mydata_clean[[target_var]]),
                 stringsAsFactors = FALSE
@@ -625,7 +636,7 @@ jjarcdiagramClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             
             # Add legend if groups are specified and color by group is enabled
-            if (!is.null(network_data$groups) && self$options$colorByGroup && self$options$showLegend) {
+            if (!is.null(network_data$node_groups) && self$options$colorByGroup && self$options$showLegend) {
                 private$.addLegend(colors)
             }
         },

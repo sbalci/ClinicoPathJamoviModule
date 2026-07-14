@@ -299,7 +299,7 @@ calculateIHCMarkerSummary <- function(marker_data, marker_name) {
         n = length(clean_data),
         mean = mean(clean_data),
         median = stats::median(clean_data),
-        sd = sd(clean_data),
+        sd = stats::sd(clean_data),
         min = min(clean_data),
         max = max(clean_data),
         positive_rate = positive_rate

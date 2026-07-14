@@ -7,7 +7,6 @@
 #' extended to survival, binary, and continuous endpoints.
 #'
 #' @importFrom R6 R6Class
-
 gsdesignClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(
     "gsdesignClass",
     inherit = gsdesignBase,

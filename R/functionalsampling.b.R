@@ -76,9 +76,10 @@ functionalsamplingClass <- R6::R6Class(
             p_value <- 2 * (1 - pnorm(abs(z_score)))
 
             # Interpret spatial pattern
-            if (R < 1 && p_value < 0.05) {
+            alpha <- self$options$significance_level
+            if (R < 1 && p_value < alpha) {
                 pattern <- "Clustered"
-            } else if (R > 1 && p_value < 0.05) {
+            } else if (R > 1 && p_value < alpha) {
                 pattern <- "Regular/Uniform"
             } else {
                 pattern <- "Random"
@@ -125,6 +126,7 @@ functionalsamplingClass <- R6::R6Class(
         },
         .populateTables = function() {
             results <- private$.results_cache
+            if (is.null(results)) return()
 
             # Summary table
             if (self$options$show_summary) {
@@ -187,6 +189,7 @@ functionalsamplingClass <- R6::R6Class(
         },
         .plot = function(image, ggtheme, theme, ...) {
             results <- private$.results_cache
+            if (is.null(results)) return(FALSE)
             data <- results$all_data
             rare_data <- results$rare_data
 

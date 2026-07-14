@@ -5042,10 +5042,20 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           return(NULL)
         }
 
+      # Adjusted-curve summary/comparison sub-analyses are currently disabled:
+      # the options ac_summary / ac_timepoints / ac_compare are commented out in
+      # .a.yaml (intended defaults: FALSE / '12, 36, 60' / FALSE). Reference those
+      # defaults directly here - accessing an undeclared option via self$options$
+      # throws "options$<name> does not exist" and would crash this method (which
+      # runs whenever Adjusted Survival Curves are enabled with a valid variable).
+      ac_summary    <- FALSE
+      ac_compare    <- FALSE
+      ac_timepoints <- "12, 36, 60"
+
       # Get timepoints for summaries
-      timepoints <- if (self$options$ac_summary) {
+      timepoints <- if (ac_summary) {
         tryCatch({
-          pts <- as.numeric(trimws(unlist(strsplit(self$options$ac_timepoints, ","))))
+          pts <- as.numeric(trimws(unlist(strsplit(ac_timepoints, ","))))
           pts <- sort(unique(pts[!is.na(pts)]))
           if (length(pts) == 0) c(12, 36, 60) else pts
         }, error = function(e) c(12, 36, 60))
@@ -5153,14 +5163,14 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         }
       }
 
-      # Run additional analyses
-      if (self$options$ac_summary) {
+      # Run additional analyses (gated by the disabled-feature defaults above)
+      if (ac_summary) {
         private$.adjustedSurvTable(results, cox_model)
         private$.adjustedMedianSurv(results, cox_model)
         private$.adjustedCox(results, cox_model)
       }
 
-      if (self$options$ac_compare) {
+      if (ac_compare) {
         private$.adjustedPairwise(results, cox_model)
       }
 
@@ -5245,8 +5255,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       # Add results to table
       if (length(all_results) > 0) {
-        # Clear existing rows
-        self$results$adjustedSurvTable$setRows(NULL)
+        # Clear existing rows (jmvcore Table has no setRows(); deleteRows() clears all)
+        self$results$adjustedSurvTable$deleteRows()
 
         # Add new rows
         for (i in seq_along(all_results)) {
@@ -5775,8 +5785,8 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
       # Add results to table
       if (length(comparisons) > 0) {
-        # Clear existing rows
-        self$results$adjustedPairwiseTable$setRows(NULL)
+        # Clear existing rows (jmvcore Table has no setRows(); deleteRows() clears all)
+        self$results$adjustedPairwiseTable$deleteRows()
 
         # Add new rows
         for (i in seq_along(comparisons)) {

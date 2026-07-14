@@ -20,7 +20,7 @@
 #' @importFrom R6 R6Class
 #' @import jmvcore
 #' @import lubridate
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #'
 #' @return An \code{R6} class generator object for the \code{datetimeconverterClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

@@ -81,24 +81,12 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                     
                     # Generate results
                     private$.populateResults(forest_model, surv_data)
-                    
-                    # Create plots
-                    if (self$options$plot_importance) {
-                        private$.createImportancePlot(forest_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_oob_error) {
-                        private$.createOobErrorPlot(forest_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_survival) {
-                        private$.createSurvivalPlot(forest_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_partial) {
-                        private$.createPartialPlots(forest_model, surv_data)
-                    }
-                    
+
+                    # Plots are rendered by their declared renderFun methods
+                    # (.plotImportance / .plotOobError / .plotSurvival / .plotPartial)
+                    # and their visibility is controlled by the plot_* options in
+                    # extratrees.r.yaml, so no explicit plot-creation calls are made here.
+
                 }, error = function(e) {
                     self$results$todo$setContent(paste0(
                         "<h4> Analysis Error</h4>",
@@ -148,10 +136,14 @@ extratreesClass <- if (requireNamespace("jmvcore"))
                 }
                 
                 # Combine into analysis dataset
+                # check.names = FALSE preserves original predictor names so they
+                # match the backtick-escaped terms produced by jmvcore::composeTerms()
+                # (predictors containing spaces/punctuation would otherwise be mangled).
                 analysis_data <- data.frame(
                     survival_object = surv_obj,
                     pred_data,
-                    stringsAsFactors = FALSE
+                    stringsAsFactors = FALSE,
+                    check.names = FALSE
                 )
                 
                 # Add weights column if provided

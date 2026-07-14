@@ -12,7 +12,6 @@
 #' @importFrom dplyr summarise group_by
 #' @importFrom htmltools HTML
 #' @importFrom stringr str_to_title
-
 tidydensityClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class("tidydensityClass",
         inherit = tidydensityBase,

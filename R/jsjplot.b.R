@@ -211,19 +211,19 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Execute analysis based on type with caching
             if (analysis_type == 'regression_table') {
-                self$.runRegressionTable(data)
+                private$.runRegressionTable(data)
             } else if (analysis_type == 'coefficient_plot') {
-                self$.runCoefficientPlot(data)
+                private$.runCoefficientPlot(data)
             } else if (analysis_type == 'interaction_plot') {
-                self$.runInteractionPlot(data)
+                private$.runInteractionPlot(data)
             } else if (analysis_type == 'marginal_effects') {
-                self$.runMarginalEffects(data)
+                private$.runMarginalEffects(data)
             } else if (analysis_type == 'frequency_table') {
-                self$.runFrequencyTable(data)
+                private$.runFrequencyTable(data)
             } else if (analysis_type == 'correlation_matrix') {
-                self$.runCorrelationMatrix(data)
+                private$.runCorrelationMatrix(data)
             } else if (analysis_type == 'pca_plot') {
-                self$.runPCAPlot(data)
+                private$.runPCAPlot(data)
             }
             
             # Cache the results for future use
@@ -245,24 +245,24 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Build and fit model
-                model <- self$.buildModel(data)
+                model <- private$.buildModel(data)
                 
                 if (is.null(model)) {
                     return()
                 }
                 
                 # Generate regression table using sjPlot
-                table_output <- self$.jtab_model(model)
+                table_output <- private$.jtab_model(model)
                 
                 # Set table output
                 self$results$model_table$setContent(table_output)
                 
                 # Generate model statistics
-                stats_output <- self$.jmodel_statistics(model)
+                stats_output <- private$.jmodel_statistics(model)
                 self$results$statistics$setContent(stats_output)
                 
                 # Generate summary
-                summary_output <- self$.jmodel_summary(model, data)
+                summary_output <- private$.jmodel_summary(model, data)
                 self$results$summary$setContent(summary_output)
                 
             }, error = function(e) {
@@ -282,24 +282,24 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Build and fit model
-                model <- self$.buildModel(data)
+                model <- private$.buildModel(data)
                 
                 if (is.null(model)) {
                     return()
                 }
                 
                 # Generate coefficient plot using sjPlot
-                plot_obj <- self$.jplot_model(model, type = "est")
+                plot_obj <- private$.jplot_model(model, type = "est")
                 
                 # Set plot
                 self$results$plot$setState(plot_obj)
                 
                 # Generate model statistics
-                stats_output <- self$.jmodel_statistics(model)
+                stats_output <- private$.jmodel_statistics(model)
                 self$results$statistics$setContent(stats_output)
                 
                 # Generate summary
-                summary_output <- self$.jmodel_summary(model, data)
+                summary_output <- private$.jmodel_summary(model, data)
                 self$results$summary$setContent(summary_output)
                 
             }, error = function(e) {
@@ -319,24 +319,24 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Build interaction model
-                model <- self$.buildInteractionModel(data)
+                model <- private$.buildInteractionModel(data)
                 
                 if (is.null(model)) {
                     return()
                 }
                 
                 # Generate interaction plot
-                plot_obj <- self$.jplot_model(model, type = "int")
+                plot_obj <- private$.jplot_model(model, type = "int")
                 
                 # Set plot
                 self$results$plot$setState(plot_obj)
                 
                 # Generate model statistics
-                stats_output <- self$.jmodel_statistics(model)
+                stats_output <- private$.jmodel_statistics(model)
                 self$results$statistics$setContent(stats_output)
                 
                 # Generate summary
-                summary_output <- self$.jmodel_summary(model, data)
+                summary_output <- private$.jmodel_summary(model, data)
                 self$results$summary$setContent(summary_output)
                 
             }, error = function(e) {
@@ -356,24 +356,24 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Build model
-                model <- self$.buildModel(data)
+                model <- private$.buildModel(data)
                 
                 if (is.null(model)) {
                     return()
                 }
                 
                 # Generate marginal effects plot
-                plot_obj <- self$.jplot_model(model, type = "eff")
+                plot_obj <- private$.jplot_model(model, type = "eff")
                 
                 # Set plot
                 self$results$plot$setState(plot_obj)
                 
                 # Generate model statistics
-                stats_output <- self$.jmodel_statistics(model)
+                stats_output <- private$.jmodel_statistics(model)
                 self$results$statistics$setContent(stats_output)
                 
                 # Generate summary
-                summary_output <- self$.jmodel_summary(model, data)
+                summary_output <- private$.jmodel_summary(model, data)
                 self$results$summary$setContent(summary_output)
                 
             }, error = function(e) {
@@ -396,7 +396,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Generate frequency tables
-                freq_output <- self$.jfreq_tables(data, categorical_vars)
+                freq_output <- private$.jfreq_tables(data, categorical_vars)
                 
                 # Set table output
                 self$results$model_table$setContent(freq_output)
@@ -428,13 +428,13 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Generate correlation matrix plot
-                plot_obj <- self$.jcorrelation_matrix(data[numeric_vars])
+                plot_obj <- private$.jcorrelation_matrix(data[numeric_vars])
                 
                 # Set plot
                 self$results$plot$setState(plot_obj)
                 
                 # Generate correlation table
-                cor_table <- self$.jcorrelation_table(data[numeric_vars])
+                cor_table <- private$.jcorrelation_table(data[numeric_vars])
                 self$results$model_table$setContent(cor_table)
                 
                 # Generate summary
@@ -464,20 +464,20 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Perform PCA
-                pca_result <- self$.jperform_pca(data[numeric_vars])
+                pca_result <- private$.jperform_pca(data[numeric_vars])
                 
                 # Generate PCA plot
-                plot_obj <- self$.jpca_plot(pca_result)
+                plot_obj <- private$.jpca_plot(pca_result)
                 
                 # Set plot
                 self$results$plot$setState(plot_obj)
                 
                 # Generate PCA summary table
-                pca_table <- self$.jpca_summary_table(pca_result)
+                pca_table <- private$.jpca_summary_table(pca_result)
                 self$results$model_table$setContent(pca_table)
                 
                 # Generate summary
-                summary_text <- self$.jpca_interpretation(pca_result, length(numeric_vars))
+                summary_text <- private$.jpca_interpretation(pca_result, length(numeric_vars))
                 self$results$summary$setContent(summary_text)
                 
             }, error = function(e) {
@@ -527,7 +527,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 # Build formula (composeTerm backtick-escapes non-syntactic names;
                 # asFormula allowlist-validates against lm/glm/lmer model.frame RCE)
-                formula_str <- paste(jmvcore::composeTerm(dep_var), "~", jmvcore::composeTerms(as.list(indep_vars)))
+                formula_str <- paste(jmvcore::composeTerm(dep_var), "~", paste(jmvcore::composeTerms(as.list(indep_vars)), collapse = " + "))
                 model_formula <- jmvcore::asFormula(formula_str)
                 
                 # Fit model based on type
@@ -581,7 +581,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Build interaction formula (composeTerm backtick-escapes non-syntactic
             # names; asFormula allowlist-validates against lm model.frame RCE)
             int_term <- paste(jmvcore::composeTerm(int_vars[1]), "*", jmvcore::composeTerm(int_vars[2]))
-            other_terms <- if (length(other_vars) > 0) jmvcore::composeTerms(as.list(other_vars)) else ""
+            other_terms <- if (length(other_vars) > 0) paste(jmvcore::composeTerms(as.list(other_vars)), collapse = " + ") else ""
 
             if (other_terms != "") {
                 formula_str <- paste(jmvcore::composeTerm(dep_var), "~", int_term, "+", other_terms)
@@ -687,7 +687,7 @@ jsjplotClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             )
             
             # Apply theme
-            plot_obj <- plot_obj + self$.japply_sjplot_theme(options$theme_style)
+            plot_obj <- plot_obj + private$.japply_sjplot_theme(options$theme_style)
             
             return(plot_obj)
         },

@@ -48,7 +48,16 @@ effectsizeClass <- R6::R6Class(
             dep <- self$options$dep
             group <- self$options$group
             analysis_type <- self$options$analysisType
-            measures <- self$options$measures
+            # Build the measures vector from the individual Bool options.
+            # (There is no single `measures` option; the .a.yaml exposes
+            # measures_cohens_d / measures_hedges_g / measures_glass_delta.)
+            measures <- character(0)
+            if (isTRUE(self$options$measures_cohens_d))
+                measures <- c(measures, "cohens_d")
+            if (isTRUE(self$options$measures_hedges_g))
+                measures <- c(measures, "hedges_g")
+            if (isTRUE(self$options$measures_glass_delta))
+                measures <- c(measures, "glass_delta")
             ci_level <- self$options$ciWidth / 100
             test_value <- self$options$testValue
             group1_value <- self$options$group1Value
@@ -485,6 +494,26 @@ effectsizeClass <- R6::R6Class(
                 )
 
             return(p)
+        },
+
+        # --- Placeholder render methods for advanced visualizations ---
+        # These Image outputs declare renderFun in effectsize.r.yaml but are not
+        # yet implemented. The stubs prevent an "attempt to apply non-function"
+        # crash when the corresponding options are enabled.
+        .plotAdvancedForest = function(image, ...) {
+            return(FALSE)
+        },
+
+        .plotEffectDistribution = function(image, ...) {
+            return(FALSE)
+        },
+
+        .plotEffectComparison = function(image, ...) {
+            return(FALSE)
+        },
+
+        .plotPowerCurves = function(image, ...) {
+            return(FALSE)
         }
     )
 )

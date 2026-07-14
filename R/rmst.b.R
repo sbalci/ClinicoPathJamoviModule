@@ -214,48 +214,39 @@ rmstClass <- R6::R6Class(
         },
         
         .calculateRMSTIntegral = function(km_fit, tau) {
-            
-            # Extract survival function
-            times <- c(0, km_fit$time)
-            survival <- c(1, km_fit$surv)
-            
-            # Truncate at tau
-            tau_index <- which(times <= tau)
-            times_trunc <- times[tau_index]
-            survival_trunc <- survival[tau_index]
-            
-            # Add tau point if needed
-            if (max(times_trunc) < tau) {
-                # Linear interpolation to get survival at tau
-                surv_at_tau <- approx(times, survival, xout = tau, rule = 2)$y
-                times_trunc <- c(times_trunc, tau)
-                survival_trunc <- c(survival_trunc, surv_at_tau)
-            }
-            
-            # Calculate RMST using trapezoidal rule
-            if (length(times_trunc) > 1) {
-                dt <- diff(times_trunc)
-                avg_surv <- (survival_trunc[-length(survival_trunc)] + survival_trunc[-1]) / 2
-                rmst <- sum(dt * avg_surv)
-            } else {
-                rmst <- 0
-            }
-            
-            # Calculate variance using Greenwood's formula
-            # This is an approximation for RMST variance
-            n_risk <- km_fit$n.risk
-            n_events <- km_fit$n.event
-            
-            # Greenwood variance for survival function
-            greenwood_var <- cumsum(n_events / (n_risk * (n_risk - n_events)))
-            
-            # Approximate RMST variance (simplified)
-            # In practice, this would need more sophisticated variance calculation
-            rmst_var <- ifelse(length(greenwood_var) > 0, 
-                              mean(greenwood_var[times <= tau]) * (tau^2 / 4), 
-                              0)
+
+            # Restricted mean survival time from the Kaplan-Meier step function,
+            # integrated up to tau. The point estimate is the exact area under the
+            # (right-continuous) KM curve and the variance follows the Klein &
+            # Moeschberger asymptotic formula. This matches survRM2::rmst2 exactly.
+
+            t <- km_fit$time
+            s <- km_fit$surv
+            d <- km_fit$n.event
+            y <- km_fit$n.risk
+
+            # Keep only event/censoring times at or before tau
+            idx <- t <= tau
+            t <- t[idx]; s <- s[idx]; d <- d[idx]; y <- y[idx]
+
+            # Segment boundaries: 0, event times, tau. S is right-continuous and
+            # equals ss[k] on [tt[k], tt[k+1]) (S = 1 before the first event).
+            tt <- c(0, t, tau)
+            ss <- c(1, s)
+            dt <- diff(tt)
+
+            # RMST = area under the survival step function (rectangle rule)
+            seg_area <- ss * dt
+            rmst <- sum(seg_area)
+
+            # A_i = integral of S from event time t_i to tau (area to the right)
+            A_i <- rev(cumsum(rev(seg_area)))[-1]
+
+            # Var(RMST) = sum over event times of A_i^2 * d_i / (y_i * (y_i - d_i))
+            valid <- d > 0 & y > d
+            rmst_var <- sum((A_i[valid])^2 * d[valid] / (y[valid] * (y[valid] - d[valid])))
             rmst_se <- sqrt(rmst_var)
-            
+
             return(list(rmst = rmst, se = rmst_se, var = rmst_var))
         },
         

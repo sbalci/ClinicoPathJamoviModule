@@ -117,18 +117,16 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
 
             private$.noticeList <- list()
 
+            # Reset projection cache so early-return paths (e.g. missing vars) do not leave
+            # `.projectionPlot`/`.projection3D`/`.survivalPlot` rendering a prior run's stale
+            # projection alongside fresh notice text.
+            private$.projectionData <- NULL
+
             # Check for required inputs
             if (is.null(self$options$vars) || length(self$options$vars) == 0) {
                 private$.addNotice('ERROR', 'Variables Required', 'Please select at least 2 variables for similarity analysis.')
                 return()
             }
-
-            # TODO (data hygiene): `private$.projectionData` set at L108 below is NOT reset
-            # at the top of `.run()`. If `.run()` early-exits before L108 (e.g., the "select
-            # at least 2 variables" notice path at L86-90), `.plot`/`.plot3D`/`.plotSurvival`
-            # at L658/L717/L757 still see the prior run's projection cache. No security path,
-            # but renders stale projections alongside fresh notice text. Defense-in-depth:
-            # `private$.projectionData <- NULL` at the very top of `.run()`.
 
             # Set seed for reproducibility - save and restore global RNG state so subsequent
             # random draws elsewhere in the user's session are not affected by our seed.
@@ -278,7 +276,9 @@ patientsimilarityClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R
         },
 
         .runPCA = function(data, n_dims) {
-            pca_result <- prcomp(data, center = FALSE, scale. = FALSE)
+            # Center is required for valid PCA (components about the mean, not the origin);
+            # harmless no-op when scaleVars already standardized the data.
+            pca_result <- prcomp(data, center = TRUE, scale. = FALSE)
 
             # Extract coordinates
             coords <- pca_result$x[, 1:n_dims, drop = FALSE]

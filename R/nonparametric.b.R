@@ -814,7 +814,19 @@ nonparametricClass <- R6::R6Class(
             
             posthoc_method <- self$options$post_hoc_method %||% "dunn"
             p_adjust <- self$options$p_adjustment %||% "holm"
-            
+
+            # Transparency: only Dunn's test and pairwise Wilcoxon are natively
+            # implemented in .runPostHocTest(); any other selection silently falls
+            # back to pairwise Wilcoxon. Warn the user so the reported comparisons
+            # are not mistaken for the selected method.
+            unimplemented_posthoc <- c("conover", "steel_dwass", "nemenyi",
+                                       "games_howell", "dscf")
+            if (posthoc_method %in% unimplemented_posthoc) {
+                posthoc_table$setNote("method_fallback",
+                    sprintf(.("The selected post-hoc method (%s) is not yet implemented; pairwise Wilcoxon tests with '%s' adjustment were used instead."),
+                            posthoc_method, p_adjust))
+            }
+
             # Perform post-hoc test
             posthoc_results <- private$.runPostHocTest(outcome, groups, posthoc_method, p_adjust)
             

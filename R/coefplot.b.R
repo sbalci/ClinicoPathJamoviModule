@@ -1,7 +1,7 @@
 #' @title Coefficient Plots
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @importFrom coefplot coefplot
 #' @importFrom jtools plot_summs plot_coefs
 #' @import ggplot2

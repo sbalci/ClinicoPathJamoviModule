@@ -92,24 +92,11 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                     
                     # Generate results
                     private$.populateResults(boost_model, surv_data)
-                    
-                    # Create plots
-                    if (self$options$plot_convergence) {
-                        private$.createConvergencePlot(boost_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_importance) {
-                        private$.createImportancePlot(boost_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_partial) {
-                        private$.createPartialPlots(boost_model, surv_data)
-                    }
-                    
-                    if (self$options$plot_survival) {
-                        private$.createSurvivalPlot(boost_model, surv_data)
-                    }
-                    
+
+                    # Plots are produced by their renderFun methods
+                    # (.plotConvergence / .plotImportance / .plotPartial / .plotSurvival)
+                    # declared in gradientboosting.r.yaml; no separate builder calls are needed.
+
                 }, error = function(e) {
                     self$results$todo$setContent(paste0(
                         "<h4> Analysis Error</h4>",
@@ -394,8 +381,8 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                 
                 if (algorithm == "mboost") {
                     model_info <- c(model_info, list(
-                        c("Final mstop", mstop(boost_model$model)),
-                        c("Selected variables", length(selected(boost_model$model)))
+                        c("Final mstop", mboost::mstop(boost_model$model)),
+                        c("Selected variables", length(mboost::selected(boost_model$model)))
                     ))
                 } else if (algorithm == "gbm") {
                     model_info <- c(model_info, list(
@@ -441,20 +428,20 @@ gradientboostingClass <- if (requireNamespace("jmvcore"))
                 
                 if (algorithm == "mboost") {
                     # Get variable selection frequency
-                    selected_vars <- selected(boost_model$model)
-                    total_steps <- mstop(boost_model$model)
+                    selected_vars <- mboost::selected(boost_model$model)
+                    total_steps <- mboost::mstop(boost_model$model)
                     
                     importance_data <- table(selected_vars)
                     importance_normalized <- importance_data / total_steps
                     
                 } else if (algorithm == "gbm") {
                     # Get relative importance from gbm
-                    importance_data <- relative.influence(boost_model$model, n.trees = boost_model$optimal_trees)
+                    importance_data <- gbm::relative.influence(boost_model$model, n.trees = boost_model$optimal_trees)
                     importance_normalized <- importance_data / sum(importance_data)
                     
                 } else if (algorithm == "xgboost") {
                     # Get feature importance from xgboost
-                    importance_data <- xgb.importance(feature_names = boost_model$variable_names, model = boost_model$model)
+                    importance_data <- xgboost::xgb.importance(feature_names = boost_model$variable_names, model = boost_model$model)
                     importance_normalized <- importance_data$Gain
                     names(importance_normalized) <- importance_data$Feature
                 }

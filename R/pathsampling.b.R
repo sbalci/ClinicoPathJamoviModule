@@ -1421,100 +1421,6 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     html <- sprintf("<div style='%s'>
                     <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
                     <p>Formula: n = log(1 - Power) / log(1 - q)</p>
-                </div>", private$.styleConstants$font)
-                    powerText$setContent(html)
-                }
-
-                # === Multi-Focal Analysis ===
-                if (self$options$showMultifocalAnalysis) {
-                    multifocalText <- self$results$multifocalAnalysisText
-                    multifocalTable <- self$results$multifocalProbTable
-
-                    q_val <- if (!is.na(pEstimate) && pEstimate > 0) pEstimate else 0.1 # Default or fallback
-
-                    for (i in 1:maxSamp) {
-                        # P(X >= k) = 1 - pbinom(k-1, n, p)
-                        p_ge_1 <- 1 - pbinom(0, i, q_val)
-                        p_ge_2 <- 1 - pbinom(1, i, q_val)
-                        p_ge_3 <- 1 - pbinom(2, i, q_val)
-
-                        multifocalTable$addRow(rowKey = i, values = list(
-                            nSamples = i,
-                            detectOne = p_ge_1,
-                            detectTwo = p_ge_2,
-                            detectThree = p_ge_3
-                        ))
-                    }
-
-                    html <- sprintf("<div style='%s'>
-                    <p><strong>Multifocal Detection:</strong> Probability of detecting multiple lesions in 'n' samples, assuming per-sample detection probability q = %.3f.</p>
-                    <p>Useful for planning sampling when the goal is to find multiple foci (e.g., multifocal tumor).</p>
-                </div>", private$.styleConstants$font, q_val)
-                    multifocalText$setContent(html)
-                }
-
-                # === Automated Model Selection ===
-                if (self$options$autoSelectModel) {
-                    selectionText <- self$results$modelSelectionText
-                    comparisonTable <- self$results$modelComparisonTable
-
-                    # Use private helper to compare models
-                    if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
-                        model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
-
-                        for (res in model_results) {
-                            comparisonTable$addRow(rowKey = res$model, values = res)
-                        }
-
-                        best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
-
-                        html <- sprintf("<div style='%s'>
-                        <p><strong>Best Fitting Model:</strong> %s (based on AIC)</p>
-                        <p>Lower AIC/BIC indicates better fit. Non-significant Chi-square p-value (>0.05) indicates adequate fit.</p>
-                    </div>", private$.styleConstants$font, best_model)
-                        selectionText$setContent(html)
-                    } else {
-                        selectionText$setContent("Insufficient data for model selection.")
-                    }
-                }
-
-                # === Power Analysis ===
-                if (self$options$showPowerAnalysis) {
-                    powerText <- self$results$powerAnalysisText
-                    powerTable <- self$results$powerTable
-
-                    targetPower <- self$options$targetPower
-                    targetQ <- self$options$targetDetectionProb
-
-                    # Scenario 1: User specified target q
-                    n_req_1 <- ceiling(log(1 - targetPower) / log(1 - targetQ))
-                    achieved_power_1 <- 1 - (1 - targetQ)^n_req_1
-
-                    powerTable$addRow(rowKey = "user_spec", values = list(
-                        scenario = "User Specified Target",
-                        targetPower = targetPower,
-                        probDetect = targetQ,
-                        nSamples = n_req_1,
-                        achievedPower = achieved_power_1
-                    ))
-
-                    # Scenario 2: Observed q (if available)
-                    if (!is.na(pEstimate) && pEstimate > 0 && pEstimate < 1) {
-                        n_req_2 <- ceiling(log(1 - targetPower) / log(1 - pEstimate))
-                        achieved_power_2 <- 1 - (1 - pEstimate)^n_req_2
-
-                        powerTable$addRow(rowKey = "observed", values = list(
-                            scenario = "Observed Data Estimate",
-                            targetPower = targetPower,
-                            probDetect = pEstimate,
-                            nSamples = n_req_2,
-                            achievedPower = achieved_power_2
-                        ))
-                    }
-
-                    html <- sprintf("<div style='%s'>
-                    <p><strong>Power Analysis:</strong> Calculates the number of samples needed to detect at least one lesion with %.0f%% probability (Power), assuming a per-sample detection probability (q).</p>
-                    <p>Formula: n = log(1 - Power) / log(1 - q)</p>
                 </div>", private$.styleConstants$font, targetPower * 100)
                     powerText$setContent(html)
                 }
@@ -1550,26 +1456,18 @@ pathsamplingClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # === Automated Model Selection ===
                 if (self$options$autoSelectModel) {
                     selectionText <- self$results$modelSelectionText
-                    comparisonTable <- self$results$modelComparisonTable
 
-                    # Use private helper to compare models
-                    if (!is.na(pEstimate) && length(firstDetectionData) > 5) {
-                        model_results <- private$.compareModels(firstDetectionData, pEstimate, totalSamplesData)
-
-                        for (res in model_results) {
-                            comparisonTable$addRow(rowKey = res$model, values = res)
-                        }
-
-                        best_model <- model_results[[which.min(sapply(model_results, function(x) x$aic))]]$model
-
-                        html <- sprintf("<div style='%s'>
-                        <p><strong>Best Fitting Model:</strong> %s (based on AIC)</p>
-                        <p>Lower AIC/BIC indicates better fit. Non-significant Chi-square p-value (>0.05) indicates adequate fit.</p>
-                    </div>", private$.styleConstants$font, best_model)
-                        selectionText$setContent(html)
-                    } else {
-                        selectionText$setContent("Insufficient data for model selection.")
-                    }
+                    # NOTE: the multi-model AIC/BIC comparison engine (.compareModels)
+                    # has not been implemented for this analysis. Rather than call an
+                    # undefined helper (which errors with "attempt to apply non-function"),
+                    # provide an honest message and direct the user to the individual
+                    # model outputs, which are computed with validated formulae.
+                    selectionText$setContent(sprintf("<div style='%s'>
+                        <p><strong>Automated model selection is not available in this version.</strong></p>
+                        <p>Compare models manually using the Binomial, Hypergeometric, and
+                        Beta-Binomial outputs above, and the Model Fit Assessment / Observed
+                        vs Predicted tables for goodness-of-fit.</p>
+                    </div>", private$.styleConstants$font))
                 }
 
                 # === Auto-Detect Heterogeneity (Warning Only) ===

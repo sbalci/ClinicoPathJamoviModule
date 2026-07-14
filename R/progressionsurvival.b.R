@@ -156,7 +156,7 @@ progressionsurvivalClass <- R6::R6Class(
             # Create PFS dataset
             pfs_data <- data.frame(
                 time = data[[time_var]],
-                progression = as.numeric(data[[progression_var]]),
+                progression = as.numeric(as.character(data[[progression_var]])),
                 stringsAsFactors = FALSE
             )
 
@@ -165,11 +165,19 @@ progressionsurvivalClass <- R6::R6Class(
                 pfs_data$treatment <- as.factor(data[[self$options$treatment_var]])
             }
 
+            # PFS event indicator. By definition, progression-free survival
+            # counts progression OR death (whichever comes first) as the
+            # event; a death without documented progression is an event, not
+            # censoring. Start from progression alone and upgrade to the
+            # composite endpoint when a death indicator is supplied.
+            pfs_data$pfs_event <- pfs_data$progression
+
             # Add death variable for competing risks
             if (!is.null(self$options$death_var)) {
-                pfs_data$death <- as.numeric(data[[self$options$death_var]])
+                pfs_data$death <- as.numeric(as.character(data[[self$options$death_var]]))
                 # Create composite endpoint (progression or death)
                 pfs_data$composite_event <- pmax(pfs_data$progression, pfs_data$death, na.rm = TRUE)
+                pfs_data$pfs_event <- pfs_data$composite_event
             }
 
             # Add patient ID
@@ -242,9 +250,9 @@ progressionsurvivalClass <- R6::R6Class(
 
             # Calculate summary statistics
             n_patients <- nrow(data)
-            n_events <- sum(data$progression, na.rm = TRUE)
-            censoring_rate <- (1 - mean(data$progression, na.rm = TRUE)) * 100
-            median_followup <- median(data$time[data$progression == 0], na.rm = TRUE)
+            n_events <- sum(data$pfs_event, na.rm = TRUE)
+            censoring_rate <- (1 - mean(data$pfs_event, na.rm = TRUE)) * 100
+            median_followup <- median(data$time[data$pfs_event == 0], na.rm = TRUE)
 
             analysis_type <- switch(self$options$analysis_type,
                 "standard_pfs" = "Standard PFS",
@@ -285,7 +293,7 @@ progressionsurvivalClass <- R6::R6Class(
             tryCatch(
                 {
                     # Create survival object
-                    surv_obj <- Surv(data$time, data$progression)
+                    surv_obj <- Surv(data$time, data$pfs_event)
 
                     # Fit Kaplan-Meier curves
                     if (!is.null(self$options$treatment_var) && "treatment" %in% names(data)) {
@@ -425,7 +433,7 @@ progressionsurvivalClass <- R6::R6Class(
             tryCatch(
                 {
                     # Create survival object
-                    surv_obj <- Surv(data$time, data$progression)
+                    surv_obj <- Surv(data$time, data$pfs_event)
 
                     # Fit Cox model
                     if (self$options$regression_model == "cox_ph") {
@@ -604,7 +612,7 @@ progressionsurvivalClass <- R6::R6Class(
                         landmark_data$time_adj <- landmark_data$time - landmark_time
 
                         # Fit survival from landmark time
-                        surv_obj <- Surv(landmark_data$time_adj, landmark_data$progression)
+                        surv_obj <- Surv(landmark_data$time_adj, landmark_data$pfs_event)
 
                         if ("treatment" %in% names(landmark_data)) {
                             km_fit <- survfit(surv_obj ~ treatment, data = landmark_data)
@@ -687,7 +695,7 @@ progressionsurvivalClass <- R6::R6Class(
                     subgroup_table <- self$results$subgroup_analysis_table
 
                     # Overall treatment effect
-                    surv_obj <- Surv(data$time, data$progression)
+                    surv_obj <- Surv(data$time, data$pfs_event)
                     overall_cox <- coxph(surv_obj ~ treatment, data = data)
                     overall_hr <- exp(coef(overall_cox))
                     overall_ci <- exp(confint(overall_cox))
@@ -697,7 +705,7 @@ progressionsurvivalClass <- R6::R6Class(
                     subgroup_table$addRow(rowKey = "overall", values = list(
                         subgroup = "Overall",
                         n_patients = nrow(data),
-                        n_events = sum(data$progression),
+                        n_events = sum(data$pfs_event),
                         hr = round(overall_hr, 3),
                         hr_ci_lower = round(overall_ci[1], 3),
                         hr_ci_upper = round(overall_ci[2], 3),
@@ -730,7 +738,7 @@ progressionsurvivalClass <- R6::R6Class(
 
                             if (nrow(subgroup_data) < 10) next
 
-                            subgroup_surv <- Surv(subgroup_data$time, subgroup_data$progression)
+                            subgroup_surv <- Surv(subgroup_data$time, subgroup_data$pfs_event)
                             subgroup_cox <- coxph(subgroup_surv ~ treatment, data = subgroup_data)
 
                             sg_hr <- exp(coef(subgroup_cox))
@@ -740,7 +748,7 @@ progressionsurvivalClass <- R6::R6Class(
                             subgroup_table$addRow(rowKey = paste(var, level), values = list(
                                 subgroup = paste(var, ":", level),
                                 n_patients = nrow(subgroup_data),
-                                n_events = sum(subgroup_data$progression),
+                                n_events = sum(subgroup_data$pfs_event),
                                 hr = round(sg_hr, 3),
                                 hr_ci_lower = round(sg_ci[1], 3),
                                 hr_ci_upper = round(sg_ci[2], 3),

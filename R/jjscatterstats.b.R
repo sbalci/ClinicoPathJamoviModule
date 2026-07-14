@@ -536,8 +536,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     )
                 }
 
-                # Show warning if method was changed
-                if (!is.null(warning_msg)) {
+                # Show warning if method was changed.
+                # Guard on itemNames: the `warnings` Html output is optional and
+                # may not exist in .r.yaml; jmvcore throws (not NULL) on access to
+                # an undefined results item, so probe existence before touching it.
+                if (!is.null(warning_msg) && ("warnings" %in% self$results$itemNames)) {
                     current_warnings <- self$results$warnings$state
                     if (is.null(current_warnings)) {
                         current_warnings <- ""
@@ -568,9 +571,11 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }, error = function(e) {
                 # If correlation fails, continue without it
                 # htmlEscape e$message since cor.test errors may include column-name fragments
-                warning_msg <- paste0(" Correlation calculation failed: ", htmltools::htmlEscape(e$message))
-                self$results$warnings$setContent(warning_msg)
-                self$results$warnings$setVisible(TRUE)
+                if ("warnings" %in% self$results$itemNames) {
+                    warning_msg <- paste0(" Correlation calculation failed: ", htmltools::htmlEscape(e$message))
+                    self$results$warnings$setContent(warning_msg)
+                    self$results$warnings$setVisible(TRUE)
+                }
             })
 
             # Add labels

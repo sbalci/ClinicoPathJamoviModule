@@ -185,7 +185,7 @@
 #' @importFrom survival Surv survfit coxph concordance survdiff
 #' @importFrom survminer ggsurvplot
 #' @importFrom ggplot2 ggplot aes geom_point geom_line labs theme_minimal
-#' @importFrom dplyr mutate select group_by summarize
+#' @importFrom dplyr mutate group_by summarize
 #' @importFrom stats chisq.test fisher.test AIC BIC
 #' @importFrom boot boot boot.ci
 #' @importFrom pROC roc ci.auc
@@ -7416,7 +7416,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (self$options$performIntervalCensoringAnalysis) {
                             tryCatch(
                                 {
-                                    interval_results <- self$.performIntervalCensoringAnalysis(data, all_results)
+                                    interval_results <- private$.performIntervalCensoringAnalysis(data, all_results)
                                     if (!is.null(interval_results) && is.character(interval_results)) {
                                         all_results$interval_censoring_analysis <- interval_results
                                     }
@@ -7429,7 +7429,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (self$options$performInformativeCensoringAnalysis) {
                             tryCatch(
                                 {
-                                    informative_results <- self$.performInformativeCensoringAnalysis(data, all_results)
+                                    informative_results <- private$.performInformativeCensoringAnalysis(data, all_results)
                                     if (!is.null(informative_results) && is.character(informative_results)) {
                                         all_results$informative_censoring_analysis <- informative_results
                                     }
@@ -7442,7 +7442,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (self$options$performConcordanceProbabilityAnalysis) {
                             tryCatch(
                                 {
-                                    concordance_results <- self$.performConcordanceProbabilityAnalysis(data, all_results)
+                                    concordance_results <- private$.performConcordanceProbabilityAnalysis(data, all_results)
                                     if (!is.null(concordance_results) && is.character(concordance_results)) {
                                         all_results$concordance_probability_analysis <- concordance_results
                                     }
@@ -7455,7 +7455,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (self$options$performWinRatioAnalysis) {
                             tryCatch(
                                 {
-                                    winratio_results <- self$.performWinRatioAnalysis(data, all_results)
+                                    winratio_results <- private$.performWinRatioAnalysis(data, all_results)
                                     if (!is.null(winratio_results)) {}
                                 },
                                 error = function(e) {}
@@ -7466,7 +7466,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (self$options$performFrailtyModelsAnalysis) {
                             tryCatch(
                                 {
-                                    frailty_results <- self$.performFrailtyModelsAnalysis(data, all_results)
+                                    frailty_results <- private$.performFrailtyModelsAnalysis(data, all_results)
                                     if (!is.null(frailty_results)) {}
                                 },
                                 error = function(e) {}
@@ -7477,7 +7477,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         if (self$options$performClinicalUtilityAnalysis) {
                             tryCatch(
                                 {
-                                    utility_results <- self$.performClinicalUtilityAnalysis(data, all_results)
+                                    utility_results <- private$.performClinicalUtilityAnalysis(data, all_results)
                                     if (!is.null(utility_results)) {}
                                 },
                                 error = function(e) {}
@@ -24412,7 +24412,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         ms_time_points <- as.numeric(trimws(strsplit(self$options$multiStateTimePoints, ",")[[1]]))
 
                         # Prepare multi-state data
-                        ms_data <- self$.prepareMultiStateData(data, state_definitions, absorption_states)
+                        ms_data <- private$.prepareMultiStateData(data, state_definitions, absorption_states)
 
                         if (is.null(ms_data)) {
                             return(NULL)
@@ -24420,37 +24420,37 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Generate transition matrix if requested
                         if (self$options$generateTransitionMatrix) {
-                            transition_results <- self$.calculateTransitionIntensities(ms_data, state_definitions)
+                            transition_results <- private$.calculateTransitionIntensities(ms_data, state_definitions)
                             if (!is.null(transition_results)) {
-                                self$.populateTransitionIntensities(transition_results)
+                                private$.populateTransitionIntensities(transition_results)
                             }
                         }
 
                         # Calculate transition probabilities if requested
                         if (self$options$calculateTransitionProbabilities) {
-                            prob_results <- self$.calculateTransitionProbabilities(ms_data, state_definitions, ms_time_points)
+                            prob_results <- private$.calculateTransitionProbabilities(ms_data, state_definitions, ms_time_points)
                             if (!is.null(prob_results)) {
-                                self$.populateTransitionProbabilities(prob_results)
+                                private$.populateTransitionProbabilities(prob_results)
                             }
                         }
 
                         # Calculate state occupancy probabilities
-                        occupancy_results <- self$.calculateStateOccupancy(ms_data, state_definitions, ms_time_points)
+                        occupancy_results <- private$.calculateStateOccupancy(ms_data, state_definitions, ms_time_points)
                         if (!is.null(occupancy_results)) {
-                            self$.populateStateOccupancy(occupancy_results)
+                            private$.populateStateOccupancy(occupancy_results)
                         }
 
                         # Generate model comparison
-                        comparison_results <- self$.generateMultiStateComparison(ms_data, state_definitions, transition_results, prob_results, occupancy_results)
+                        comparison_results <- private$.generateMultiStateComparison(ms_data, state_definitions, transition_results, prob_results, occupancy_results)
                         if (!is.null(comparison_results)) {
-                            self$.populateMultiStateComparison(comparison_results)
+                            private$.populateMultiStateComparison(comparison_results)
                         }
 
                         # Generate comprehensive summary if requested
                         if (self$options$generateMSMSummary) {
-                            summary_results <- self$.generateMultiStateSummary(ms_data, state_definitions, transition_results, prob_results, occupancy_results, comparison_results)
+                            summary_results <- private$.generateMultiStateSummary(ms_data, state_definitions, transition_results, prob_results, occupancy_results, comparison_results)
                             if (!is.null(summary_results)) {
-                                self$.populateMultiStateSummary(summary_results)
+                                private$.populateMultiStateSummary(summary_results)
                             }
                         }
 
@@ -24597,7 +24597,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                                 HR_Lower = ci_lower,
                                                 HR_Upper = ci_upper,
                                                 P_Value = p_value,
-                                                Transition_Type = self$.classifyTransition(from_state, to_state, state_definitions),
+                                                Transition_Type = private$.classifyTransition(from_state, to_state, state_definitions),
                                                 Clinical_Significance = ifelse(intensity > 0.01, "Clinically Significant", "Low Impact")
                                             )
 
@@ -24689,7 +24689,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                                     New_CI_Lower = new_ci_lower,
                                                     New_CI_Upper = new_ci_upper,
                                                     Probability_Difference = new_prob - orig_prob,
-                                                    Statistical_Test = self$.testProbabilityDifference(orig_prob, new_prob, total_at_risk)
+                                                    Statistical_Test = private$.testProbabilityDifference(orig_prob, new_prob, total_at_risk)
                                                 )
 
                                                 results[[paste(time_point, from_state, to_state, sep = "_")]] <- result_row
@@ -25029,7 +25029,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         cif_time_points <- as.numeric(trimws(strsplit(self$options$cifTimePoints, ",")[[1]]))
 
                         # Prepare competing risks data
-                        competing_data <- self$.prepareCompetingRisksData(data, event_levels, primary_event)
+                        competing_data <- private$.prepareCompetingRisksData(data, event_levels, primary_event)
 
                         if (is.null(competing_data)) {
                             return(NULL)
@@ -25037,39 +25037,39 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Perform Fine-Gray analysis if requested
                         if (self$options$competingRisksMethod %in% c("finegray", "comprehensive")) {
-                            finegray_results <- self$.performFineGrayAnalysis(competing_data, cif_time_points)
+                            finegray_results <- private$.performFineGrayAnalysis(competing_data, cif_time_points)
                             if (!is.null(finegray_results)) {
-                                self$.populateFineGrayResults(finegray_results)
+                                private$.populateFineGrayResults(finegray_results)
                             }
                         }
 
                         # Perform cause-specific analysis if requested
                         if (self$options$competingRisksMethod %in% c("causespecific", "comprehensive")) {
-                            causespecific_results <- self$.performCauseSpecificAnalysis(competing_data)
+                            causespecific_results <- private$.performCauseSpecificAnalysis(competing_data)
                             if (!is.null(causespecific_results)) {
-                                self$.populateCauseSpecificResults(causespecific_results)
+                                private$.populateCauseSpecificResults(causespecific_results)
                             }
                         }
 
                         # Calculate CIF summary
-                        cif_summary <- self$.calculateCIFSummary(competing_data, cif_time_points)
+                        cif_summary <- private$.calculateCIFSummary(competing_data, cif_time_points)
                         if (!is.null(cif_summary)) {
-                            self$.populateCIFSummary(cif_summary)
+                            private$.populateCIFSummary(cif_summary)
                         }
 
                         # Calculate competing risks C-index if requested
                         if (self$options$calculateCRCIndex) {
-                            cr_cindex <- self$.calculateCompetingRisksCIndex(competing_data)
+                            cr_cindex <- private$.calculateCompetingRisksCIndex(competing_data)
                             if (!is.null(cr_cindex)) {
-                                self$.populateCompetingRisksCIndex(cr_cindex)
+                                private$.populateCompetingRisksCIndex(cr_cindex)
                             }
                         }
 
                         # Generate comprehensive summary if requested
                         if (self$options$generateCRSummary) {
-                            summary_results <- self$.generateCompetingRisksSummary(competing_data, finegray_results, causespecific_results, cif_summary, cr_cindex)
+                            summary_results <- private$.generateCompetingRisksSummary(competing_data, finegray_results, causespecific_results, cif_summary, cr_cindex)
                             if (!is.null(summary_results)) {
-                                self$.populateCompetingRisksSummary(summary_results)
+                                private$.populateCompetingRisksSummary(summary_results)
                             }
                         }
 
@@ -25307,15 +25307,15 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 event_name <- ifelse(event_type == 1, "Primary Event", "Competing Event")
 
                                 # Calculate CIF for original system
-                                orig_cif <- self$.calculateCIFAtTime(competing_data, "old_stage", event_type, time_point)
+                                orig_cif <- private$.calculateCIFAtTime(competing_data, "old_stage", event_type, time_point)
 
                                 # Calculate CIF for new system
-                                new_cif <- self$.calculateCIFAtTime(competing_data, "new_stage", event_type, time_point)
+                                new_cif <- private$.calculateCIFAtTime(competing_data, "new_stage", event_type, time_point)
 
                                 # Perform Gray's test if requested
                                 gray_p <- NA
                                 if (self$options$performGrayTest) {
-                                    gray_p <- self$.performGrayTest(competing_data, event_type, time_point)
+                                    gray_p <- private$.performGrayTest(competing_data, event_type, time_point)
                                 }
 
                                 result_row <- list(
@@ -25403,10 +25403,10 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             competing_data$current_event <- ifelse(competing_data$event_cr == event_type, 1, 0)
 
                             # Calculate C-index for original staging system
-                            orig_cindex <- self$.calculateCRCIndex(competing_data, "old_stage", "current_event")
+                            orig_cindex <- private$.calculateCRCIndex(competing_data, "old_stage", "current_event")
 
                             # Calculate C-index for new staging system
-                            new_cindex <- self$.calculateCRCIndex(competing_data, "new_stage", "current_event")
+                            new_cindex <- private$.calculateCRCIndex(competing_data, "new_stage", "current_event")
 
                             improvement <- new_cindex$estimate - orig_cindex$estimate
 
@@ -25419,7 +25419,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 New_CI_Lower = new_cindex$ci_lower,
                                 New_CI_Upper = new_cindex$ci_upper,
                                 Improvement = improvement,
-                                P_Value = self$.testCIndexDifference(orig_cindex, new_cindex),
+                                P_Value = private$.testCIndexDifference(orig_cindex, new_cindex),
                                 Clinical_Significance = ifelse(abs(improvement) >= 0.02, "Clinically Significant", "Not Significant")
                             )
 
@@ -25671,7 +25671,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Perform Random Forest for Old Staging System
                         if (self$options$rfAnalyzeOldStage) {
-                            rf_old <- self$.performRandomForestModel(
+                            rf_old <- private$.performRandomForestModel(
                                 data, old_stage, "Old_Stage", covariates, survival_time, event_indicator
                             )
                             if (!is.null(rf_old)) {
@@ -25681,7 +25681,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Perform Random Forest for New Staging System
                         if (self$options$rfAnalyzeNewStage) {
-                            rf_new <- self$.performRandomForestModel(
+                            rf_new <- private$.performRandomForestModel(
                                 data, new_stage, "New_Stage", covariates, survival_time, event_indicator
                             )
                             if (!is.null(rf_new)) {
@@ -25691,13 +25691,13 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Comparative Analysis if both models available
                         if (length(rf_results) == 2) {
-                            comparison_results <- self$.compareRandomForestModels(rf_results$old_stage, rf_results$new_stage)
+                            comparison_results <- private$.compareRandomForestModels(rf_results$old_stage, rf_results$new_stage)
                             rf_results$comparison <- comparison_results
                         }
 
                         # Populate result tables
                         if (length(rf_results) > 0) {
-                            self$.populateRandomForestTables(rf_results)
+                            private$.populateRandomForestTables(rf_results)
                             return("Random Survival Forests analysis completed successfully")
                         }
 
@@ -25917,7 +25917,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 )))
                             }
 
-                            self$.populateRandomForestPerformance(perf_data)
+                            private$.populateRandomForestPerformance(perf_data)
                         }
 
                         # Populate Variable Importance
@@ -25948,7 +25948,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         if (length(importance_data) > 0) {
-                            self$.populateRandomForestImportance(importance_data)
+                            private$.populateRandomForestImportance(importance_data)
                         }
 
                         # Populate Comparison if available
@@ -26004,7 +26004,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 }
                             )))
 
-                            self$.populateRandomForestComparison(comp_data)
+                            private$.populateRandomForestComparison(comp_data)
                         }
 
                         # Populate Summary
@@ -26037,17 +26037,17 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         if (length(summary_data) > 0) {
-                            self$.populateRandomForestSummary(summary_data)
+                            private$.populateRandomForestSummary(summary_data)
                         }
 
                         # Populate Forest Survival Predictions table
                         if (self$options$generateSurvivalPredictions) {
-                            self$.populateForestSurvivalPredictions(rf_results)
+                            private$.populateForestSurvivalPredictions(rf_results)
                         }
 
                         # Populate Forest Staging Comparison table
                         if (self$options$forestStagingComparison && length(rf_results) >= 2) {
-                            self$.populateForestStagingComparison(rf_results)
+                            private$.populateForestStagingComparison(rf_results)
                         }
                     },
                     error = function(e) {
@@ -26497,7 +26497,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Perform Cure Model for Old Staging System
                         if (self$options$cureAnalyzeOldStage) {
-                            cure_old <- self$.performCureModel(
+                            cure_old <- private$.performCureModel(
                                 data, old_stage, "Old_Stage", covariates, survival_time, event_indicator
                             )
                             if (!is.null(cure_old)) {
@@ -26507,7 +26507,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Perform Cure Model for New Staging System
                         if (self$options$cureAnalyzeNewStage) {
-                            cure_new <- self$.performCureModel(
+                            cure_new <- private$.performCureModel(
                                 data, new_stage, "New_Stage", covariates, survival_time, event_indicator
                             )
                             if (!is.null(cure_new)) {
@@ -26517,25 +26517,25 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Comparative Analysis if both models available
                         if (length(cure_results) == 2) {
-                            comparison_results <- self$.compareCureModels(cure_results$old_stage, cure_results$new_stage)
+                            comparison_results <- private$.compareCureModels(cure_results$old_stage, cure_results$new_stage)
                             cure_results$comparison <- comparison_results
                         }
 
                         # Stage-specific analysis if requested
                         if (self$options$cureStageSpecificAnalysis) {
-                            stage_specific_results <- self$.performStageSpecificCureAnalysis(data, cure_results)
+                            stage_specific_results <- private$.performStageSpecificCureAnalysis(data, cure_results)
                             cure_results$stage_specific <- stage_specific_results
                         }
 
                         # Bootstrap validation if requested
                         if (self$options$cureBootstrapCI) {
-                            bootstrap_results <- self$.performCureBootstrapValidation(data, cure_results)
+                            bootstrap_results <- private$.performCureBootstrapValidation(data, cure_results)
                             cure_results$bootstrap <- bootstrap_results
                         }
 
                         # Populate result tables
                         if (length(cure_results) > 0) {
-                            self$.populateCureModelTables(cure_results)
+                            private$.populateCureModelTables(cure_results)
                             return("Cure model analysis completed successfully")
                         }
 
@@ -26728,7 +26728,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Stage-specific comparison
                         if (!is.null(cure_old$stage_cure_fractions) && !is.null(cure_new$stage_cure_fractions)) {
-                            comparison$stage_discrimination <- self$.compareStageCureFractions(
+                            comparison$stage_discrimination <- private$.compareStageCureFractions(
                                 cure_old$stage_cure_fractions,
                                 cure_new$stage_cure_fractions
                             )
@@ -26830,12 +26830,12 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Bootstrap validation for cure fraction estimates
                         if (!is.null(cure_results$old_stage) && cure_results$old_stage$evidence_of_cure) {
-                            old_bootstrap <- self$.bootstrapCureFraction(data, cure_results$old_stage, bootstrap_reps)
+                            old_bootstrap <- private$.bootstrapCureFraction(data, cure_results$old_stage, bootstrap_reps)
                             bootstrap_results$old_stage <- old_bootstrap
                         }
 
                         if (!is.null(cure_results$new_stage) && cure_results$new_stage$evidence_of_cure) {
-                            new_bootstrap <- self$.bootstrapCureFraction(data, cure_results$new_stage, bootstrap_reps)
+                            new_bootstrap <- private$.bootstrapCureFraction(data, cure_results$new_stage, bootstrap_reps)
                             bootstrap_results$new_stage <- new_bootstrap
                         }
 
@@ -26942,7 +26942,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         if (length(fraction_data) > 0) {
-                            self$.populateCureFractionEstimates(fraction_data)
+                            private$.populateCureFractionEstimates(fraction_data)
                         }
 
                         # Populate Model Parameters
@@ -26979,7 +26979,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         }
 
                         if (length(param_data) > 0) {
-                            self$.populateCureModelParameters(param_data)
+                            private$.populateCureModelParameters(param_data)
                         }
 
                         # Populate Comparison if available
@@ -27036,7 +27036,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 }
                             )))
 
-                            self$.populateCureModelComparison(comp_data)
+                            private$.populateCureModelComparison(comp_data)
                         }
 
                         # Populate Stage-Specific Analysis
@@ -27085,7 +27085,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             }
 
                             if (length(stage_data) > 0) {
-                                self$.populateStageSpecificCureAnalysis(stage_data)
+                                private$.populateStageSpecificCureAnalysis(stage_data)
                             }
                         }
 
@@ -27124,7 +27124,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         )))
 
                         if (length(summary_data) > 0) {
-                            self$.populateCureAnalysisSummary(summary_data)
+                            private$.populateCureAnalysisSummary(summary_data)
                         }
 
                         # Populate Bootstrap Validation Results
@@ -27161,7 +27161,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             }
 
                             if (length(bootstrap_data) > 0) {
-                                self$.populateCureModelBootstrap(bootstrap_data)
+                                private$.populateCureModelBootstrap(bootstrap_data)
                             }
                         }
                     },
@@ -27345,45 +27345,45 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             ),
                             list(
                                 Characteristic = "Censoring Types",
-                                Value = self$.getCensoringTypes(left_time, right_time),
+                                Value = private$.getCensoringTypes(left_time, right_time),
                                 Description = "Distribution of censoring patterns"
                             )
                         )
 
-                        self$.populateIntervalCensoringOverview(overview_data)
+                        private$.populateIntervalCensoringOverview(overview_data)
                         results$overview <- overview_data
 
                         # Non-parametric analysis (NPMLE)
                         if (self$options$intervalCensoringModel %in% c("nonparametric", "both")) {
-                            npmle_results <- self$.performNPMLE(surv_obj, stage, time_points)
-                            self$.populateIntervalCensoringNonparametric(npmle_results)
+                            npmle_results <- private$.performNPMLE(surv_obj, stage, time_points)
+                            private$.populateIntervalCensoringNonparametric(npmle_results)
                             results$npmle <- npmle_results
                         }
 
                         # Parametric analysis
                         if (self$options$intervalCensoringModel %in% c("parametric", "both")) {
-                            parametric_results <- self$.performParametricIC(surv_obj, stage)
-                            self$.populateIntervalCensoringParametric(parametric_results)
+                            parametric_results <- private$.performParametricIC(surv_obj, stage)
+                            private$.populateIntervalCensoringParametric(parametric_results)
                             results$parametric <- parametric_results
                         }
 
                         # Model comparison
                         if (self$options$intervalCensoringCompareStages) {
-                            comparison_results <- self$.performICModelComparison(surv_obj, stage)
-                            self$.populateIntervalCensoringComparison(comparison_results)
+                            comparison_results <- private$.performICModelComparison(surv_obj, stage)
+                            private$.populateIntervalCensoringComparison(comparison_results)
                             results$comparison <- comparison_results
                         }
 
                         # Model diagnostics
                         if (self$options$intervalCensoringDiagnostics) {
-                            diagnostics_results <- self$.performICDiagnostics(surv_obj, stage)
-                            self$.populateIntervalCensoringDiagnostics(diagnostics_results)
+                            diagnostics_results <- private$.performICDiagnostics(surv_obj, stage)
+                            private$.populateIntervalCensoringDiagnostics(diagnostics_results)
                             results$diagnostics <- diagnostics_results
                         }
 
                         # Generate summary
-                        summary_results <- self$.generateIntervalCensoringSummary(results)
-                        self$.populateIntervalCensoringSummary(summary_results)
+                        summary_results <- private$.generateIntervalCensoringSummary(results)
+                        private$.populateIntervalCensoringSummary(summary_results)
                         results$summary <- summary_results
 
                         return("Interval Censoring Analysis completed successfully")
@@ -27425,7 +27425,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                 # Bootstrap confidence intervals if requested
                                 if (self$options$intervalCensoringBootstrap) {
-                                    boot_results <- self$.bootstrapNPMLE(stage_surv, time_point)
+                                    boot_results <- private$.bootstrapNPMLE(stage_surv, time_point)
                                     lower_ci <- boot_results$lower
                                     upper_ci <- boot_results$upper
                                 } else {
@@ -27856,43 +27856,43 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             )
                         )
 
-                        self$.populateInformativeCensoringOverview(overview_data)
+                        private$.populateInformativeCensoringOverview(overview_data)
                         results$overview <- overview_data
 
                         # Informative censoring tests
-                        test_results <- self$.performInformativeCensoringTests(surv_obj, stage, time, event)
-                        self$.populateInformativeCensoringTests(test_results)
+                        test_results <- private$.performInformativeCensoringTests(surv_obj, stage, time, event)
+                        private$.populateInformativeCensoringTests(test_results)
                         results$tests <- test_results
 
                         # Censoring patterns by stage
                         if (self$options$informativeCensoringCompareStages) {
-                            stage_results <- self$.analyzeCensoringByStage(time, event, stage)
-                            self$.populateInformativeCensoringByStage(stage_results)
+                            stage_results <- private$.analyzeCensoringByStage(time, event, stage)
+                            private$.populateInformativeCensoringByStage(stage_results)
                             results$by_stage <- stage_results
                         }
 
                         # Adjustment for informative censoring
                         if (self$options$informativeCensoringAdjustmentMethod != "none") {
-                            adjustment_results <- self$.performInformativeCensoringAdjustment(surv_obj, stage, time, event, landmark_times)
-                            self$.populateInformativeCensoringAdjustment(adjustment_results)
+                            adjustment_results <- private$.performInformativeCensoringAdjustment(surv_obj, stage, time, event, landmark_times)
+                            private$.populateInformativeCensoringAdjustment(adjustment_results)
                             results$adjustment <- adjustment_results
 
                             # Sensitivity analysis
                             if (self$options$informativeCensoringAdjustmentMethod == "sensitivity_analysis") {
-                                sensitivity_results <- self$.performSensitivityAnalysis(surv_obj, stage, time, event, landmark_times)
-                                self$.populateInformativeCensoringSensitivity(sensitivity_results)
+                                sensitivity_results <- private$.performSensitivityAnalysis(surv_obj, stage, time, event, landmark_times)
+                                private$.populateInformativeCensoringSensitivity(sensitivity_results)
                                 results$sensitivity <- sensitivity_results
                             }
                         }
 
                         # Diagnostics
-                        diagnostics_results <- self$.performInformativeCensoringDiagnostics(surv_obj, stage, time, event, test_results)
-                        self$.populateInformativeCensoringDiagnostics(diagnostics_results)
+                        diagnostics_results <- private$.performInformativeCensoringDiagnostics(surv_obj, stage, time, event, test_results)
+                        private$.populateInformativeCensoringDiagnostics(diagnostics_results)
                         results$diagnostics <- diagnostics_results
 
                         # Generate summary
-                        summary_results <- self$.generateInformativeCensoringSummary(results)
-                        self$.populateInformativeCensoringSummary(summary_results)
+                        summary_results <- private$.generateInformativeCensoringSummary(results)
+                        private$.populateInformativeCensoringSummary(summary_results)
                         results$summary <- summary_results
 
                         return("Informative Censoring Analysis completed successfully")
@@ -28129,9 +28129,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                 # Apply adjustment based on method
                                 if (adjustment_method == "ipw") {
-                                    adj_surv <- self$.applyIPWAdjustment(stage_surv, time_point)
+                                    adj_surv <- private$.applyIPWAdjustment(stage_surv, time_point)
                                 } else if (adjustment_method == "multiple_imputation") {
-                                    adj_surv <- self$.applyMIAdjustment(stage_surv, time_point)
+                                    adj_surv <- private$.applyMIAdjustment(stage_surv, time_point)
                                 } else if (adjustment_method == "sensitivity_analysis") {
                                     # Use conservative estimate (assume informative censoring biases downward)
                                     adj_surv <- unadj_surv * 0.95 # 5% downward adjustment
@@ -28144,7 +28144,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                 # Bootstrap confidence intervals if requested
                                 if (self$options$informativeCensoringBootstrap) {
-                                    boot_ci <- self$.bootstrapAdjustedSurvival(stage_surv, time_point, adjustment_method)
+                                    boot_ci <- private$.bootstrapAdjustedSurvival(stage_surv, time_point, adjustment_method)
                                     lower_ci <- boot_ci$lower
                                     upper_ci <- boot_ci$upper
                                 } else {
@@ -28275,9 +28275,9 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             tryCatch(
                                 {
                                     if (adjustment_method == "ipw") {
-                                        boot_estimates[i] <- self$.applyIPWAdjustment(boot_surv, time_point)
+                                        boot_estimates[i] <- private$.applyIPWAdjustment(boot_surv, time_point)
                                     } else if (adjustment_method == "multiple_imputation") {
-                                        boot_estimates[i] <- self$.applyMIAdjustment(boot_surv, time_point)
+                                        boot_estimates[i] <- private$.applyMIAdjustment(boot_surv, time_point)
                                     } else {
                                         # Default: Kaplan-Meier
                                         km_fit <- survival::survfit(boot_surv ~ 1)
@@ -28599,43 +28599,43 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             )
                         )
 
-                        self$.populateConcordanceProbabilityOverview(overview_data)
+                        private$.populateConcordanceProbabilityOverview(overview_data)
                         results$overview <- overview_data
 
                         # Concordance probability estimates
-                        concordance_estimates <- self$.calculateConcordanceProbabilities(surv_obj, stage, time, event)
-                        self$.populateConcordanceProbabilityEstimates(concordance_estimates)
+                        concordance_estimates <- private$.calculateConcordanceProbabilities(surv_obj, stage, time, event)
+                        private$.populateConcordanceProbabilityEstimates(concordance_estimates)
                         results$estimates <- concordance_estimates
 
                         # Time-dependent concordance analysis
-                        time_dependent_results <- self$.calculateTimeDependentConcordance(surv_obj, stage, time, event, time_points)
-                        self$.populateConcordanceProbabilityTimeDependentComplex(time_dependent_results)
+                        time_dependent_results <- private$.calculateTimeDependentConcordance(surv_obj, stage, time, event, time_points)
+                        private$.populateConcordanceProbabilityTimeDependentComplex(time_dependent_results)
                         results$time_dependent <- time_dependent_results
 
                         # Staging system comparison
                         if (self$options$concordanceProbabilityCompareStages) {
-                            comparison_results <- self$.compareConcordanceBetweenStages(concordance_estimates)
-                            self$.populateConcordanceProbabilityComparison(comparison_results)
+                            comparison_results <- private$.compareConcordanceBetweenStages(concordance_estimates)
+                            private$.populateConcordanceProbabilityComparison(comparison_results)
                             results$comparison <- comparison_results
                         }
 
                         # Robustness analysis
                         if (self$options$concordanceProbabilityRobustnessAnalysis) {
-                            robustness_results <- self$.performConcordanceRobustnessAnalysis(surv_obj, stage, time, event)
-                            self$.populateConcordanceProbabilityRobustness(robustness_results)
+                            robustness_results <- private$.performConcordanceRobustnessAnalysis(surv_obj, stage, time, event)
+                            private$.populateConcordanceProbabilityRobustness(robustness_results)
                             results$robustness <- robustness_results
                         }
 
                         # Diagnostics
                         if (self$options$concordanceProbabilityDiagnostics) {
-                            diagnostics_results <- self$.performConcordanceDiagnostics(surv_obj, stage, time, event, concordance_estimates)
-                            self$.populateConcordanceProbabilityDiagnosticsTable(diagnostics_results)
+                            diagnostics_results <- private$.performConcordanceDiagnostics(surv_obj, stage, time, event, concordance_estimates)
+                            private$.populateConcordanceProbabilityDiagnosticsTable(diagnostics_results)
                             results$diagnostics <- diagnostics_results
                         }
 
                         # Generate summary
-                        summary_results <- self$.generateConcordanceProbabilitySummary(results)
-                        self$.populateConcordanceProbabilitySummary(summary_results)
+                        summary_results <- private$.generateConcordanceProbabilitySummary(results)
+                        private$.populateConcordanceProbabilitySummary(summary_results)
                         results$summary <- summary_results
 
                         return("Concordance Probability Analysis completed successfully")
@@ -28669,7 +28669,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             # Harrell's C-index
                             if (methods %in% c("all_methods", "harrell_c")) {
-                                harrell_result <- self$.calculateHarrellCIndex(surv_obj, current_stage)
+                                harrell_result <- private$.calculateHarrellCIndex(surv_obj, current_stage)
 
                                 result <- list(
                                     Method = "Harrell C-index",
@@ -28686,7 +28686,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             # Uno's C-index
                             if (methods %in% c("all_methods", "uno_c")) {
-                                uno_result <- self$.calculateUnoCIndex(surv_obj, current_stage, time, event)
+                                uno_result <- private$.calculateUnoCIndex(surv_obj, current_stage, time, event)
 
                                 result <- list(
                                     Method = "Uno C-index",
@@ -28703,7 +28703,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             # IPCW Concordance
                             if (methods %in% c("all_methods", "ipcw_concordance")) {
-                                ipcw_result <- self$.calculateIPCWConcordance(surv_obj, current_stage, time, event)
+                                ipcw_result <- private$.calculateIPCWConcordance(surv_obj, current_stage, time, event)
 
                                 result <- list(
                                     Method = "IPCW Concordance",
@@ -28720,7 +28720,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                             # Weighted Concordance
                             if (methods %in% c("all_methods", "weighted_concordance")) {
-                                weighted_result <- self$.calculateWeightedConcordance(surv_obj, current_stage, time, event)
+                                weighted_result <- private$.calculateWeightedConcordance(surv_obj, current_stage, time, event)
 
                                 result <- list(
                                     Method = "Weighted Concordance",
@@ -29012,7 +29012,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                     if (methods %in% c("all_methods", "time_dependent")) {
                                         # Calculate time-dependent concordance
-                                        td_concordance <- self$.calculateTimeDependentConcordanceAtTime(
+                                        td_concordance <- private$.calculateTimeDependentConcordanceAtTime(
                                             surv_obj[at_risk], current_stage[at_risk],
                                             time[at_risk], event[at_risk], time_point
                                         )
@@ -29032,7 +29032,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                                     if (methods %in% c("all_methods", "harrell_c")) {
                                         # Harrell's C at this time point
-                                        harrell_td <- self$.calculateHarrellCIndex(surv_obj[at_risk], current_stage[at_risk])
+                                        harrell_td <- private$.calculateHarrellCIndex(surv_obj[at_risk], current_stage[at_risk])
 
                                         result <- list(
                                             Staging_System = system_name,
@@ -29194,13 +29194,13 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             current_stage <- stage_systems[[system_name]]
 
                             # Baseline concordance
-                            baseline <- self$.calculateHarrellCIndex(surv_obj, current_stage)
+                            baseline <- private$.calculateHarrellCIndex(surv_obj, current_stage)
 
                             # Outlier sensitivity analysis
                             outlier_indices <- which(time > quantile(time, 0.95, na.rm = TRUE))
                             if (length(outlier_indices) > 0) {
                                 robust_indices <- setdiff(seq_along(time), outlier_indices)
-                                outlier_robust <- self$.calculateHarrellCIndex(surv_obj[robust_indices], current_stage[robust_indices])
+                                outlier_robust <- private$.calculateHarrellCIndex(surv_obj[robust_indices], current_stage[robust_indices])
 
                                 result <- list(
                                     Analysis_Type = "Outlier Sensitivity",
@@ -29217,7 +29217,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             high_cens_indices <- which(event == 0 & time < quantile(time[event == 0], 0.5, na.rm = TRUE))
                             if (length(high_cens_indices) > 0) {
                                 cens_robust_indices <- setdiff(seq_along(time), high_cens_indices)
-                                cens_robust <- self$.calculateHarrellCIndex(surv_obj[cens_robust_indices], current_stage[cens_robust_indices])
+                                cens_robust <- private$.calculateHarrellCIndex(surv_obj[cens_robust_indices], current_stage[cens_robust_indices])
 
                                 result <- list(
                                     Analysis_Type = "Censoring Sensitivity",
@@ -29235,7 +29235,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 boot_concordances <- numeric(100)
                                 for (b in 1:100) {
                                     boot_indices <- sample(seq_along(time), replace = TRUE)
-                                    boot_concordance <- self$.calculateHarrellCIndex(surv_obj[boot_indices], current_stage[boot_indices])
+                                    boot_concordance <- private$.calculateHarrellCIndex(surv_obj[boot_indices], current_stage[boot_indices])
                                     boot_concordances[b] <- boot_concordance$concordance
                                 }
 
@@ -29577,7 +29577,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                 if (nrow(old_patients) < 3 || nrow(new_patients) < 3) next
 
                                 # Calculate win ratio
-                                wr_result <- self$.calculateWinRatio(old_patients, new_patients, endpoints)
+                                wr_result <- private$.calculateWinRatio(old_patients, new_patients, endpoints)
 
                                 if (!is.null(wr_result)) {
                                     comparison_name <- paste(old_stage_var, old_stage, "vs", new_stage_var, new_stage)
@@ -29630,7 +29630,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                                         new_patients <- truncated_data[truncated_data[[new_stage_var]] == new_stage, ]
 
                                         if (nrow(old_patients) >= 3 && nrow(new_patients) >= 3) {
-                                            wr_result <- self$.calculateWinRatio(old_patients, new_patients, endpoints)
+                                            wr_result <- private$.calculateWinRatio(old_patients, new_patients, endpoints)
 
                                             if (!is.null(wr_result)) {
                                                 sensitivity_results[[length(sensitivity_results) + 1]] <- list(
@@ -29671,24 +29671,24 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Populate results tables
                         if (length(win_ratio_results) > 0) {
-                            self$.populateWinRatioOverview(list(overview = winratio_summary))
-                            self$.populateWinRatioPrimaryResults(win_ratio_results)
-                            self$.populateWinRatioEndpointContributions(endpoint_results)
+                            private$.populateWinRatioOverview(list(overview = winratio_summary))
+                            private$.populateWinRatioPrimaryResults(win_ratio_results)
+                            private$.populateWinRatioEndpointContributions(endpoint_results)
 
                             if (length(comparison_results) > 0) {
-                                self$.populateWinRatioComparisons(comparison_results)
+                                private$.populateWinRatioComparisons(comparison_results)
                             }
 
                             if (length(sensitivity_results) > 0) {
-                                self$.populateWinRatioSensitivity(sensitivity_results)
+                                private$.populateWinRatioSensitivity(sensitivity_results)
                             }
 
                             if (length(pairwise_results) > 0) {
-                                self$.populateWinRatioPairwise(pairwise_results)
+                                private$.populateWinRatioPairwise(pairwise_results)
                             }
 
                             if (length(winratio_summary) > 0) {
-                                self$.populateWinRatioSummary(winratio_summary)
+                                private$.populateWinRatioSummary(winratio_summary)
                             }
                         }
 
@@ -30063,7 +30063,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         if (!coxme_available) {
                             # Use survival::coxph with frailty() function as fallback
-                            simplified_results <- self$.performSimplifiedFrailtyAnalysis(complete_data, time_var, event_var, old_stage_var, new_stage_var, cluster_var)
+                            simplified_results <- private$.performSimplifiedFrailtyAnalysis(complete_data, time_var, event_var, old_stage_var, new_stage_var, cluster_var)
                             return(simplified_results)
                         }
 
@@ -30096,7 +30096,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         )
 
                         if (is.null(model_old) || is.null(model_new)) {
-                            simplified_results <- self$.performSimplifiedFrailtyAnalysis(complete_data, time_var, event_var, old_stage_var, new_stage_var, cluster_var)
+                            simplified_results <- private$.performSimplifiedFrailtyAnalysis(complete_data, time_var, event_var, old_stage_var, new_stage_var, cluster_var)
                             return(simplified_results)
                         }
 
@@ -30312,31 +30312,31 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Populate results tables
                         if (length(overview_results) > 0) {
-                            self$.populateFrailtyModelsOverview(overview_results)
+                            private$.populateFrailtyModelsOverview(overview_results)
                         }
 
                         if (length(comparison_results) > 0) {
-                            self$.populateFrailtyModelsComparison(comparison_results)
+                            private$.populateFrailtyModelsComparison(comparison_results)
                         }
 
                         if (length(variance_results) > 0) {
-                            self$.populateFrailtyModelsVarianceComponents(variance_results)
+                            private$.populateFrailtyModelsVarianceComponents(variance_results)
                         }
 
                         if (length(cluster_results) > 0) {
-                            self$.populateFrailtyModelsClusterSpecific(cluster_results)
+                            private$.populateFrailtyModelsClusterSpecific(cluster_results)
                         }
 
                         if (length(bootstrap_results) > 0) {
-                            self$.populateFrailtyModelsBootstrap(bootstrap_results)
+                            private$.populateFrailtyModelsBootstrap(bootstrap_results)
                         }
 
                         if (length(diagnostics_results) > 0) {
-                            self$.populateFrailtyModelsDiagnostics(diagnostics_results)
+                            private$.populateFrailtyModelsDiagnostics(diagnostics_results)
                         }
 
                         if (length(summary_results) > 0) {
-                            self$.populateFrailtyModelsSummary(summary_results)
+                            private$.populateFrailtyModelsSummary(summary_results)
                         }
 
                         return(list(
@@ -30376,7 +30376,7 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             Interpretation = "Basic frailty analysis completed"
                         ))
 
-                        self$.populateFrailtyModelsOverview(overview_results)
+                        private$.populateFrailtyModelsOverview(overview_results)
 
                         return(list(overview = overview_results))
                     },
@@ -30861,31 +30861,31 @@ stagemigrationClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                         # Populate results tables
                         if (length(overview_results) > 0) {
-                            self$.populateClinicalUtilityOverview(overview_results)
+                            private$.populateClinicalUtilityOverview(overview_results)
                         }
 
                         if (length(comparison_results) > 0) {
-                            self$.populateClinicalUtilityComparison(comparison_results)
+                            private$.populateClinicalUtilityComparison(comparison_results)
                         }
 
                         if (length(nnt_results) > 0) {
-                            self$.populateClinicalUtilityNNT(nnt_results)
+                            private$.populateClinicalUtilityNNT(nnt_results)
                         }
 
                         if (length(netbenefit_results) > 0) {
-                            self$.populateClinicalUtilityNetBenefit(netbenefit_results)
+                            private$.populateClinicalUtilityNetBenefit(netbenefit_results)
                         }
 
                         if (length(timevarying_results) > 0) {
-                            self$.populateClinicalUtilityTimeVarying(timevarying_results)
+                            private$.populateClinicalUtilityTimeVarying(timevarying_results)
                         }
 
                         if (length(bootstrap_results) > 0) {
-                            self$.populateClinicalUtilityBootstrap(bootstrap_results)
+                            private$.populateClinicalUtilityBootstrap(bootstrap_results)
                         }
 
                         if (length(summary_results) > 0) {
-                            self$.populateClinicalUtilitySummary(summary_results)
+                            private$.populateClinicalUtilitySummary(summary_results)
                         }
 
                         return(list(

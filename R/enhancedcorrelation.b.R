@@ -39,7 +39,7 @@ enhancedcorrelationClass <- R6::R6Class(
 
             # Initialize details table
             details <- self$results$text
-            n_vars <- length(vars)
+            n_vars <- length(self$options$vars)
             n_pairs <- n_vars * (n_vars - 1) / 2
 
             if (n_pairs > 0) {
@@ -55,7 +55,9 @@ enhancedcorrelationClass <- R6::R6Class(
             method <- self$options$method
             ci_level <- self$options$ciWidth / 100
             alpha_level <- self$options$sigLevel
+            # pValueAdjustment is not a defined option in this module; default to no adjustment
             pvalue_adjustment <- self$options$pValueAdjustment
+            if (is.null(pvalue_adjustment)) pvalue_adjustment <- "none"
 
             # Get data
             data <- self$data
@@ -103,7 +105,8 @@ enhancedcorrelationClass <- R6::R6Class(
             n_matrix <- cor_result$n
 
             # Populate correlation matrix table
-            if (self$options$showMatrix) {
+            # showMatrix option and correlationMatrix output are not defined in this module; block is dormant
+            if (isTRUE(self$options$showMatrix) && !is.null(self$results$correlationMatrix)) {
                 matrix_table <- self$results$correlationMatrix
                 matrix_table$addRows(length(vars))
 
@@ -150,12 +153,14 @@ enhancedcorrelationClass <- R6::R6Class(
 
                     cor_val <- cor_matrix[i, j]
                     p_val <- p_matrix[i, j]
-                    n_val <- n_matrix[i, j]
+                    # psych::corr.test returns a scalar n when all pairs share the same sample size
+                    n_val <- if (length(n_matrix) == 1) n_matrix else n_matrix[i, j]
 
                     # Format confidence interval
                     ci_text <- ""
                     if (self$options$ci && !is.null(ci_lower) && !is.null(ci_upper)) {
-                        ci_text <- sprintf("[%.3f, %.3f]", ci_lower[i, j], ci_upper[i, j])
+                        # cor_result$ci rows are ordered to match this i<j pairwise loop
+                        ci_text <- sprintf("[%.3f, %.3f]", ci_lower[row_idx], ci_upper[row_idx])
                     }
 
                     # Set row values
@@ -227,8 +232,10 @@ enhancedcorrelationClass <- R6::R6Class(
             }
 
             # Apply multiple comparison correction if requested
-            if (self$options$pValueAdjustment != "none" && length(p_values) > 1) {
-                adjusted_p <- p.adjust(p_values, method = self$options$pValueAdjustment)
+            pval_adj <- self$options$pValueAdjustment
+            if (is.null(pval_adj)) pval_adj <- "none"
+            if (pval_adj != "none" && length(p_values) > 1) {
+                adjusted_p <- p.adjust(p_values, method = pval_adj)
 
                 # Update the table with adjusted p-values
                 for (i in seq_along(adjusted_p)) {
@@ -258,7 +265,14 @@ enhancedcorrelationClass <- R6::R6Class(
                 return()
             }
 
-            plot_type <- self$options$plotType
+            # plotType is not a defined option; derive the plot from the plotMatrix/plotScatter toggles
+            plot_type <- if (isTRUE(self$options$plotMatrix)) {
+                "matrix"
+            } else if (isTRUE(self$options$plotScatter)) {
+                "scatter"
+            } else {
+                "matrix"
+            }
 
             if (plot_type == "matrix") {
                 private$.createMatrixPlot(data, vars)

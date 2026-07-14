@@ -128,7 +128,21 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             private$.generateExecutiveSummary(data)
             private$.generatePopulationDashboard(data)
         },
-        
+
+        # Robust dynamic-row population helper.
+        # jmvcore's Table class has NO setRows() method (valid API is
+        # addRow(rowKey, values) / setRow() / deleteRows()); the previous
+        # setRows() calls crashed at runtime with "attempt to apply
+        # non-function". deleteRows() first clears any rows pre-created by a
+        # `rows:` template in the .r.yaml so dynamically generated subgroup rows
+        # are not duplicated.
+        .fillTable = function(table, rows_list) {
+            if (table$rowCount > 0)
+                table$deleteRows()
+            for (i in seq_along(rows_list))
+                table$addRow(rowKey = i, values = rows_list[[i]])
+        },
+
         .generatePopulationSummary = function(data) {
             patientID <- self$options$patientID
             healthOutcomes <- self$options$healthOutcomes
@@ -254,7 +268,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate demographics table
-            self$results$demographicsTable$setRows(demographics_data)
+            private$.fillTable(self$results$demographicsTable, demographics_data)
         },
         
         .performHealthOutcomesAnalysis = function(data) {
@@ -293,7 +307,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate health outcomes table
-            self$results$healthOutcomesTable$setRows(outcomes_data)
+            private$.fillTable(self$results$healthOutcomesTable, outcomes_data)
         },
         
         .performRiskStratification = function(data) {
@@ -331,7 +345,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate risk stratification table
-            self$results$riskStratificationTable$setRows(risk_data)
+            private$.fillTable(self$results$riskStratificationTable, risk_data)
         },
         
         .performGeographicAnalysis = function(data) {
@@ -365,7 +379,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate geographic analysis table
-            self$results$geographicAnalysisTable$setRows(geographic_data)
+            private$.fillTable(self$results$geographicAnalysisTable, geographic_data)
         },
         
         .performTemporalTrendsAnalysis = function(data) {
@@ -412,7 +426,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate temporal trends table
-            self$results$temporalTrendsTable$setRows(trends_data)
+            private$.fillTable(self$results$temporalTrendsTable, trends_data)
         },
         
         .performHealthDisparitiesAnalysis = function(data) {
@@ -454,7 +468,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate health disparities table
-            self$results$healthDisparitiesTable$setRows(disparities_data)
+            private$.fillTable(self$results$healthDisparitiesTable, disparities_data)
         },
         
         .performPredictiveModeling = function(data) {
@@ -493,7 +507,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate predictive modeling table
-            self$results$predictiveModelingTable$setRows(prediction_data)
+            private$.fillTable(self$results$predictiveModelingTable, prediction_data)
         },
         
         .performSurveillanceAnalysis = function(data) {
@@ -522,7 +536,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate surveillance table
-            self$results$surveillanceTable$setRows(surveillance_data)
+            private$.fillTable(self$results$surveillanceTable, surveillance_data)
         },
         
         .performQualityMetricsAnalysis = function(data) {
@@ -547,7 +561,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             }
             
             # Populate quality metrics table
-            self$results$qualityMetricsTable$setRows(quality_data)
+            private$.fillTable(self$results$qualityMetricsTable, quality_data)
         },
         
         .performInterventionAnalysis = function(data) {
@@ -576,7 +590,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             )
             
             # Populate intervention analysis table
-            self$results$interventionAnalysisTable$setRows(intervention_data)
+            private$.fillTable(self$results$interventionAnalysisTable, intervention_data)
         },
         
         .performResourceAllocationAnalysis = function(data) {
@@ -601,7 +615,7 @@ populationhealthClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             )
             
             # Populate resource allocation table
-            self$results$resourceAllocationTable$setRows(resource_data)
+            private$.fillTable(self$results$resourceAllocationTable, resource_data)
         },
         
         .generatePopulationReport = function(data) {

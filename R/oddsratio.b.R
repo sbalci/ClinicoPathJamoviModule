@@ -267,20 +267,20 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             
                             if (length(factor_levels) > 10) {
                                 validation_results$warnings <- c(validation_results$warnings,
-                                    paste(.("Explanatory variable '{var_name}' has {levels} levels. Consider grouping categories or using as continuous if ordinal.")))
+                                    glue::glue("Explanatory variable '{var_name}' has {length(factor_levels)} levels. Consider grouping categories or using as continuous if ordinal."))
                             }
                             
                             # Check for sparse categories
                             sparse_categories <- sum(factor_counts < 5)
                             if (sparse_categories > 0) {
                                 validation_results$warnings <- c(validation_results$warnings,
-                                    paste(.("Explanatory variable '{var_name}' has {sparse_categories} categories with fewer than 5 observations. Consider combining categories.")))
+                                    glue::glue("Explanatory variable '{var_name}' has {sparse_categories} categories with fewer than 5 observations. Consider combining categories."))
                             }
                         } else if (is.numeric(var_data)) {
                             # Numeric variable validation
                             if (any(is.infinite(var_data_clean))) {
                                 validation_results$warnings <- c(validation_results$warnings,
-                                    paste(.("Explanatory variable '{var_name}' contains infinite values.")))
+                                    glue::glue("Explanatory variable '{var_name}' contains infinite values."))
                             }
                             
                             # Check for extreme values
@@ -291,7 +291,7 @@ oddsratioClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                             
                             if (extreme_high + extreme_low > 0) {
                                 validation_results$info <- c(validation_results$info,
-                                    paste(.("Explanatory variable '{var_name}' may contain extreme outliers ({outliers} potential outliers).")))
+                                    glue::glue("Explanatory variable '{var_name}' may contain extreme outliers ({extreme_high + extreme_low} potential outliers)."))
                             }
                         } else if (is.ordered(var_data)) {
                             validation_results$info <- c(validation_results$info,

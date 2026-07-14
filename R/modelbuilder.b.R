@@ -52,7 +52,7 @@
 #' @importFrom ggplot2 ggplot aes geom_line geom_point geom_smooth geom_abline
 #' @importFrom ggplot2 labs theme_minimal scale_color_brewer facet_wrap
 #' @importFrom ggplot2 geom_ribbon geom_histogram geom_density scale_x_continuous
-#' @importFrom dplyr mutate select filter summarise group_by arrange
+#' @importFrom dplyr mutate filter summarise group_by arrange
 #' @importFrom pROC roc auc ci.auc coords
 #' @importFrom magrittr %>%
 #' @importFrom htmltools HTML
@@ -278,7 +278,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             return(TRUE)
             
             # Add clinical misuse detection
-            self$.detectClinicalMisuse()
+            private$.detectClinicalMisuse()
         },
         
         # Clinical misuse detection and recommendations
@@ -1558,8 +1558,8 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             
             # Generate clinical summary if models exist
             if (length(private$.models) > 0) {
-                self$.generateClinicalSummary()
-                self$.generateReportSentences()
+                private$.generateClinicalSummary()
+                private$.generateReportSentences()
             }
             
             # Clean up memory after analysis
@@ -1579,17 +1579,12 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 modeling_data <- private$.transformVariables(modeling_data, basic_predictors)
                 modeling_data <- private$.createInteractions(modeling_data, basic_predictors)
                 
-                # Build formula
-                # TODO (security): outcome_var (self$options$outcome - column name)
-                # is NOT routed through .escapeVariableNames / jmvcore::composeTerm
-                # here or at sister sites L1606/L1641/L1676. jmvcore::asFormula now
-                # provides allow-list defense against function-call injection in the
-                # outcome name, but layered Defense 1 (backtick-escape) is still missing.
-                # When refactoring, wrap with jmvcore::composeTerm(outcome_var) or build
-                # the whole formula via jmvcore::constructFormula(outcome_var, predictors).
+                # Build formula. Both predictors and the outcome name are backtick-escaped
+                # via .escapeVariableNames() (Defense 1); jmvcore::asFormula() then adds
+                # allow-list defense against function-call injection (Defense 2).
                 escaped_predictors <- .escapeVariableNames(basic_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_basic <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
+                formula_basic <- jmvcore::asFormula(paste(.escapeVariableNames(outcome_var), "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -1624,7 +1619,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Build formula
                 escaped_predictors <- .escapeVariableNames(enhanced_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_enhanced <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
+                formula_enhanced <- jmvcore::asFormula(paste(.escapeVariableNames(outcome_var), "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -1659,7 +1654,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Build formula
                 escaped_predictors <- .escapeVariableNames(biomarker_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_biomarker <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
+                formula_biomarker <- jmvcore::asFormula(paste(.escapeVariableNames(outcome_var), "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -1694,7 +1689,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
                 # Build formula
                 escaped_predictors <- .escapeVariableNames(custom_predictors)
                 predictor_string <- paste(escaped_predictors, collapse = " + ")
-                formula_custom <- jmvcore::asFormula(paste(outcome_var, "~", predictor_string))
+                formula_custom <- jmvcore::asFormula(paste(.escapeVariableNames(outcome_var), "~", predictor_string))
                 
                 # Build model (penalized or regular logistic)
                 if (self$options$penalizedRegression) {
@@ -2691,7 +2686,7 @@ modelbuilderClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             }
             
             # Generate export options
-            self$.generateExportOptions()
+            private$.generateExportOptions()
         },
         
         # Generate export options and capabilities

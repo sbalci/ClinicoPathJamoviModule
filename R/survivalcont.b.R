@@ -138,7 +138,7 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @return An \code{R6} class generator object for the \code{survivalcontClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 survivalcontClass <- if (requireNamespace("jmvcore")) {

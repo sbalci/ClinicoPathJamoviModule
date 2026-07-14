@@ -196,17 +196,14 @@ recistClass <- R6::R6Class(
         .prepareData = function() {
             mydata <- self$data
 
-            # TODO (correctness): composeTerm() backtick-quotes non-syntactic names
-            # (e.g. "Patient ID" -> `Patient ID`), so mydata[[composeTerm(...)]] returns NULL
-            # for any column whose name contains spaces/special chars. composeTerm is for
-            # FORMULA terms, NOT data-frame indexing - index with the raw self$options$X.
-            # Affects every composeTerm()+mydata[[...]] pair below in .prepareData()
-            # (patientId, assessmentTime, lesionId, lesionType, lesionDiameter, organ,
-            # nonTargetStatus) and the groupVar/patientId merge in .populateStratifiedTable().
-            patientId <- jmvcore::composeTerm(self$options$patientId)
-            assessmentTime <- jmvcore::composeTerm(self$options$assessmentTime)
-            lesionId <- jmvcore::composeTerm(self$options$lesionId)
-            lesionType <- jmvcore::composeTerm(self$options$lesionType)
+            # Use RAW option names as data-frame keys. composeTerm() backtick-quotes
+            # non-syntactic names (e.g. "Patient ID" -> `Patient ID`), which makes
+            # mydata[[...]] return NULL for any column whose name has spaces/special
+            # chars. composeTerm is for FORMULA terms only, not data-frame indexing.
+            patientId <- self$options$patientId
+            assessmentTime <- self$options$assessmentTime
+            lesionId <- self$options$lesionId
+            lesionType <- self$options$lesionType
 
             data <- data.frame(
                 patientId = mydata[[patientId]],
@@ -218,7 +215,7 @@ recistClass <- R6::R6Class(
 
             # Add diameter if provided
             if (!is.null(self$options$lesionDiameter)) {
-                lesionDiameter <- jmvcore::composeTerm(self$options$lesionDiameter)
+                lesionDiameter <- self$options$lesionDiameter
                 data$diameter <- jmvcore::toNumeric(mydata[[lesionDiameter]])
             } else {
                 data$diameter <- NA
@@ -226,7 +223,7 @@ recistClass <- R6::R6Class(
 
             # Add organ if provided
             if (!is.null(self$options$organ)) {
-                organ <- jmvcore::composeTerm(self$options$organ)
+                organ <- self$options$organ
                 data$organ <- as.character(mydata[[organ]])
             } else {
                 data$organ <- "unknown"
@@ -234,7 +231,7 @@ recistClass <- R6::R6Class(
 
             # Add non-target status if provided
             if (!is.null(self$options$nonTargetStatus)) {
-                nonTarget <- jmvcore::composeTerm(self$options$nonTargetStatus)
+                nonTarget <- self$options$nonTargetStatus
                 data$nonTargetStatus <- tolower(as.character(mydata[[nonTarget]]))
             } else {
                 data$nonTargetStatus <- NA
@@ -404,7 +401,7 @@ recistClass <- R6::R6Class(
                 group_by(patientId) %>%
                 arrange(assessmentTime) %>%
                 filter(row_number() == 1) %>%
-                select(patientId, baselineSum = targetSum, baselineTime = assessmentTime)
+                dplyr::select(patientId, baselineSum = targetSum, baselineTime = assessmentTime)
 
             targetSums <- targetSums %>%
                 left_join(baseline, by = "patientId") %>%
@@ -422,6 +419,16 @@ recistClass <- R6::R6Class(
                         absoluteChange = targetSum - nadirSum
                     ) %>%
                     ungroup()
+            } else {
+                # Nadir not used: PD is referenced against baseline via the is.na(changeFromNadir)
+                # fallback branch in .classifyResponses(). These columns must still exist (as NA)
+                # so that downstream case_when() and .populateTargetSumTable() do not error.
+                targetSums <- targetSums %>%
+                    mutate(
+                        nadirSum = NA_real_,
+                        changeFromNadir = NA_real_,
+                        absoluteChange = NA_real_
+                    )
             }
 
             private$.targetSumData <- targetSums
@@ -804,8 +811,8 @@ recistClass <- R6::R6Class(
             bestData <- private$.bestResponseData
 
             mydata <- self$data
-            groupVar <- jmvcore::composeTerm(self$options$groupVar)
-            patientIdVar <- jmvcore::composeTerm(self$options$patientId)
+            groupVar <- self$options$groupVar
+            patientIdVar <- self$options$patientId
 
             # Merge group variable with best response
             groups <- data.frame(

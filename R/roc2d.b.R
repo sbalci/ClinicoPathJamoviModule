@@ -42,8 +42,11 @@ roc2dClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 outcome_binary <- as.numeric(outcome) - 1
             }
 
-            # Calculate individual marker AUCs
-            private$.calculateIndividualAUCs(marker1, marker2, outcome_binary)
+            # Calculate individual marker AUCs (respect "Compare to Single Markers" option)
+            self$results$individualAUCs$setVisible(self$options$compare_single_markers)
+            if (self$options$compare_single_markers) {
+                private$.calculateIndividualAUCs(marker1, marker2, outcome_binary)
+            }
 
             # Calculate combination rules
             private$.calculateCombinationRules(marker1, marker2, outcome_binary)

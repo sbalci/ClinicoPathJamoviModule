@@ -144,7 +144,7 @@ friedmantestClass <- R6::R6Class(
             }
 
             # Generate method explanation
-            private$.generateMethodExplanation()
+            private$.generateMethodExplanation(friedman_result)
         },
 
         # Validate inputs
@@ -486,7 +486,7 @@ friedmantestClass <- R6::R6Class(
         },
 
         # Generate method explanation
-        .generateMethodExplanation = function() {
+        .generateMethodExplanation = function(friedman_result) {
             method_desc <- switch(self$options$method,
                 "asymptotic" = "asymptotic chi-square distribution",
                 "exact" = "exact distribution",
@@ -498,7 +498,7 @@ friedmantestClass <- R6::R6Class(
                 "<html><body>",
                 "<h3>Method: Friedman Test for Non-Parametric Repeated Measures</h3>",
                 "<p>This analysis uses the <strong>Friedman test</strong> with <strong>", method_desc, "</strong> ",
-                "to test for differences across <strong>", length(self$options$variables), " conditions</strong> ",
+                "to test for differences across <strong>", friedman_result$n_conditions, " conditions</strong> ",
                 "in a repeated measures design.</p>",
                 "<h4>Statistical Approach:</h4>",
                 "<p>The Friedman test ranks observations within each subject across conditions, then compares ",

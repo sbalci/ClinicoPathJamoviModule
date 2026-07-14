@@ -487,7 +487,7 @@ smoothhazardClass <- R6::R6Class(
                 n_points <- min(length(hazard_results$time), 20)  # Limit to first 20 points
                 
                 for (i in 1:n_points) {
-                    table$setRow(rowNo = i, values = list(
+                    table$addRow(rowKey = i, values = list(
                         time = round(hazard_results$time[i], 3),
                         hazard = round(hazard_results$hazard[i], 6),
                         lower_ci = round(hazard_results$lower_ci[i], 6),
@@ -893,7 +893,7 @@ smoothhazardClass <- R6::R6Class(
                 n_points <- length(hazard_results$time)
                 
                 for (i in 1:n_points) {
-                    table$setRow(rowNo = i, values = list(
+                    table$addRow(rowKey = i, values = list(
                         time_point = round(hazard_results$time[i], 4),
                         hazard_estimate = round(hazard_results$hazard[i], 8),
                         lower_ci = round(hazard_results$lower_ci[i], 8),

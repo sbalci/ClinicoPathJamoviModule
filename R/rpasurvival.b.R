@@ -259,9 +259,12 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                         col
                     }
                 }))
-                # Use escaped names for safe formula construction
+                # Column names MUST be the raw variable names: they are the data-frame keys
+                # used by rpart's model.frame lookup. Backtick-quoted (composeTerm) names would
+                # make rpart search for the un-quoted name and fail (e.g. "tumor grade").
+                names(predictorData) <- self$options$predictors
+                # Escaped names are used ONLY inside the formula string (below)
                 escapedNames <- jmvcore::composeTerms(as.list(self$options$predictors))
-                names(predictorData) <- escapedNames
 
                 # Create complete case dataset
                 completeIdx <- complete.cases(timeVar, eventNumeric, predictorData)
@@ -288,10 +291,13 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                 # Combine data
                 analysisData <- cbind(data.frame(survObj = survObj), predictorData)
 
-                # Fit rpart with survival outcome
-                tryCatch(
+                # Fit rpart with survival outcome.
+                # NOTE: a return() inside the error handler exits ONLY the handler, not
+                # .run(); assign the result to `tree` and guard on NULL so a fitting failure
+                # stops cleanly instead of crashing later on a non-existent `tree` object.
+                tree <- tryCatch(
                     {
-                        tree <- rpart::rpart(
+                        rpart::rpart(
                             formula,
                             data = analysisData,
                             method = "exp", # exponential survival (proportional hazards)
@@ -311,9 +317,14 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                             paste0("Error: ", htmltools::htmlEscape(e$message))
                         )
                         private$.renderNotices()
-                        return()
+                        NULL
                     }
                 )
+
+                # Stop if model fitting failed (error notice already rendered above)
+                if (is.null(tree)) {
+                    return()
+                }
 
                 # Prune tree if requested
                 if (self$options$prunetree && self$options$nfolds > 0) {
@@ -384,14 +395,15 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
 
                 # Order by decreasing median OS (best = highest median)
                 orderIdx <- order(medianOS, decreasing = TRUE)
-                orderedLabels <- labels[orderIdx]
 
-                # Recreate factor with ordered levels
+                # Reorder factor levels so the best-prognosis group is first
                 riskGroup <- factor(as.character(riskGroup), levels = labels[orderIdx])
-                levels(riskGroup) <- orderedLabels
 
-                # Update labels for consistent use
-                labels <- orderedLabels
+                # Relabel in prognosis order so the group NAMES reflect the ranking
+                # (best prognosis = Stage I / Low Risk / Group 1). Previously the names
+                # stayed glued to their original terminal node, which could label the
+                # best-survival group as "High Risk" or a higher Roman-numeral stage.
+                levels(riskGroup) <- labels
 
                 # Populate risk group table
                 if (self$options$riskgrouptable) {
@@ -801,7 +813,7 @@ rpasurvivalClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {
                     palette = "jco",
                     ggtheme = ggplot2::theme_minimal(),
                     title = "Kaplan-Meier Curves by RPA Risk Group",
-                    xlab = "Time (months)",
+                    xlab = paste0("Time (", self$options$time_unit, ")"),
                     ylab = "Overall Survival Probability",
                     legend.title = "Risk Group",
                     legend.labs = state$labels,

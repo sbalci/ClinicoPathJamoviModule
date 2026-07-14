@@ -139,7 +139,8 @@ intervalsurvivalClass <- R6::R6Class(
                         analysis_data <- data.frame(
                             left = left[complete_cases],
                             right = right[complete_cases],
-                            covariate_data[complete_cases, , drop = FALSE]
+                            covariate_data[complete_cases, , drop = FALSE],
+                            check.names = FALSE
                         )
                     } else {
                         complete_cases <- complete.cases(left, right, status, covariate_data)
@@ -147,7 +148,8 @@ intervalsurvivalClass <- R6::R6Class(
                             left = left[complete_cases],
                             right = right[complete_cases],
                             status = status[complete_cases],
-                            covariate_data[complete_cases, , drop = FALSE]
+                            covariate_data[complete_cases, , drop = FALSE],
+                            check.names = FALSE
                         )
                     }
                 }
@@ -156,6 +158,17 @@ intervalsurvivalClass <- R6::R6Class(
                     self$results$data_summary$setContent("Error: Insufficient complete cases for analysis.")
                     return()
                 }
+
+                # Provide serializable state for the always-visible interval
+                # censoring visualization (raw bounds, before any imputation).
+                plot_df <- data.frame(
+                    left  = analysis_data$left,
+                    right = analysis_data$right,
+                    check.names = FALSE
+                )
+                if ("status" %in% names(analysis_data))
+                    plot_df$status <- as.character(analysis_data$status)
+                self$results$interval_plot$setState(list(df = plot_df))
 
                 # Perform interval-censored survival analysis
                 private$.performIntervalAnalysis(analysis_data, left_time, right_time, status_var, covariates)
@@ -384,9 +397,9 @@ intervalsurvivalClass <- R6::R6Class(
                     # Fit AFT model
                     if (length(covariates) > 0) {
                         formula_str <- paste("surv_obj ~", paste(jmvcore::composeTerms(as.list(covariates)), collapse = " + "))
-                        aft_model <- survreg(jmvcore::asFormula(formula_str), data = analysis_data, dist = distribution)
+                        aft_model <- survival::survreg(jmvcore::asFormula(formula_str), data = analysis_data, dist = distribution)
                     } else {
-                        aft_model <- survreg(surv_obj ~ 1, data = analysis_data, dist = distribution)
+                        aft_model <- survival::survreg(surv_obj ~ 1, data = analysis_data, dist = distribution)
                     }
 
                     model_summary <- summary(aft_model)
@@ -517,8 +530,12 @@ intervalsurvivalClass <- R6::R6Class(
                         model_summary <- summary(model)
                         coefficients <- model_summary$coefficients
 
+                        conf_level <- self$options$confidence_level
+                        z_crit <- stats::qnorm(1 - (1 - conf_level) / 2)
+                        ci_label <- paste0(round(conf_level * 100, 0), "% CI")
+
                         html <- paste0(html, "<table class='jamovi-table'>")
-                        html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>95% CI</th></tr>")
+                        html <- paste0(html, "<tr><th>Variable</th><th>Coef</th><th>Exp(Coef)</th><th>SE</th><th>Z</th><th>Pr(&gt;|z|)</th><th>", ci_label, "</th></tr>")
 
                         for (i in seq_len(nrow(coefficients))) {
                             var_name <- rownames(coefficients)[i]
@@ -528,9 +545,9 @@ intervalsurvivalClass <- R6::R6Class(
                             z <- round(coefficients[i, "z"], 3)
                             p_val <- format.pval(coefficients[i, "Pr(>|z|)"])
 
-                            # 95% CI for hazard ratio
-                            ci_lower <- round(exp(coef - 1.96 * se), 4)
-                            ci_upper <- round(exp(coef + 1.96 * se), 4)
+                            # Confidence interval for hazard ratio (uses confidence_level option)
+                            ci_lower <- round(exp(coef - z_crit * se), 4)
+                            ci_upper <- round(exp(coef + z_crit * se), 4)
                             ci_text <- paste0("(", ci_lower, ", ", ci_upper, ")")
 
                             # Coefficient row names trace back to formula
@@ -683,7 +700,82 @@ intervalsurvivalClass <- R6::R6Class(
 
             self$results$goodness_of_fit_results$setContent(html)
         },
-        
+
+        # ---- Plot render functions -------------------------------------
+        # Each Image item in the .r.yaml declares a renderFun; if the named
+        # method does not exist, jamovi errors ("attempt to apply
+        # non-function") whenever the image is visible. The methods below
+        # satisfy every declared renderFun.
+
+        .plot_intervals = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state))
+                return(FALSE)
+            df <- image$state$df
+            if (is.null(df) || nrow(df) == 0)
+                return(FALSE)
+
+            left  <- df$left
+            right <- df$right
+
+            # Replace non-finite bounds with plottable limits so open-ended
+            # (left/right censored) intervals still render as segments.
+            finite_vals <- c(left[is.finite(left)], right[is.finite(right)])
+            if (length(finite_vals) == 0)
+                return(FALSE)
+            lo <- min(finite_vals, na.rm = TRUE)
+            hi <- max(finite_vals, na.rm = TRUE)
+            left[!is.finite(left)]   <- lo
+            right[!is.finite(right)] <- hi
+
+            ord <- order(left, right)
+            plot_df <- data.frame(
+                id    = seq_along(left),
+                left  = left[ord],
+                right = right[ord],
+                check.names = FALSE
+            )
+
+            p <- ggplot2::ggplot(plot_df) +
+                ggplot2::geom_segment(
+                    ggplot2::aes(x = left, xend = right, y = id, yend = id),
+                    colour = "#3182bd", linewidth = 0.6, alpha = 0.8) +
+                ggplot2::geom_point(ggplot2::aes(x = left,  y = id),
+                                    colour = "#08519c", size = 0.9) +
+                ggplot2::geom_point(ggplot2::aes(x = right, y = id),
+                                    colour = "#de2d26", size = 0.9) +
+                ggplot2::labs(
+                    x = "Time",
+                    y = "Observation (ordered by interval)",
+                    title = "Interval Censoring Visualization") +
+                ggtheme
+
+            print(p)
+            TRUE
+        },
+
+        # The following plots are not yet implemented. They return FALSE so
+        # jamovi renders an empty plot instead of crashing on a missing
+        # render method. No statistics are fabricated.
+        .plot_survival_curves = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_hazard_function = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_residuals = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_model_comparison = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
+        .plot_convergence = function(image, ggtheme, theme, ...) {
+            return(FALSE)
+        },
+
         # Private variables
         ..current_model = NULL
     ),

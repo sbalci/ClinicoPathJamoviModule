@@ -74,6 +74,7 @@ items:
       type: Image
       width: 600
       height: 500
+      renderFun: .plotConfusionMatrixPlot
       visible: (analysis_type:classification && confusion_matrix_plot)
       requiresData: true
       clearWith:
@@ -85,6 +86,7 @@ items:
       type: Image
       width: 600
       height: 500
+      renderFun: .plotROCPlot
       visible: (analysis_type:classification && roc_plot && predicted_probabilities)
       requiresData: true
       clearWith:

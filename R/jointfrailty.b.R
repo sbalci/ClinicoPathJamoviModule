@@ -444,12 +444,12 @@ jointfrailtyClass <- R6::R6Class(
                             z = z_val,
                             p = p_val,
                             hr = hr,
-                            hr_lower = hr_upper,
+                            hr_lower = hr_lower,
                             hr_upper = hr_upper
                         ))
                     }
                 }
-                
+
             }, error = function(e) {
                 table$addRow(rowKey = 1, values = list(
                     covariate = "Terminal coefficients",

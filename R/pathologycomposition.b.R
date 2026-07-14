@@ -255,12 +255,16 @@ pathologycompositionClass <- R6::R6Class(
             }
         },
         .convertToSemiQuantitative = function(numeric_data) {
-            # Convert numeric proportions to semi-quantitative categories
-            # Based on gastric cancer study methodology
-            cut_points <- c(0, 0.1, 0.5, 0.9, 1.0)
+            # Convert numeric proportions (0-1 scale) to semi-quantitative categories
+            # Based on gastric cancer study methodology. Six breakpoints yield five
+            # intervals so the number of labels matches the number of bins: cut()
+            # requires length(labels) == length(breaks) - 1. The previous five
+            # breaks paired with five labels raised the runtime error
+            # "lengths of 'breaks' and 'labels' differ" for every numeric component.
+            cut_points <- c(-Inf, 0, 0.1, 0.5, 0.9, Inf)
             labels <- c("absent", "<=10%", ">10%-<=50%", ">50%-<90%", ">=90%")
 
-            cut(numeric_data, breaks = cut_points, labels = labels, include.lowest = TRUE)
+            cut(numeric_data, breaks = cut_points, labels = labels, right = TRUE)
         },
         .createCompositionGroups = function(data, component_vars) {
             # Create composition groups based on dominant components

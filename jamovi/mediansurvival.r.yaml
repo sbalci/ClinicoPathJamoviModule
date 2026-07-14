@@ -57,11 +57,13 @@ items:
     - name: survivalPlot
       title: Survival Curves with Median Indicators
       type: Image
+      renderFun: .plotSurvival
       visible: (show_survival_plot)
 
     - name: medianComparisonPlot
       title: Median Survival Comparison
       type: Image
+      renderFun: .plotMedianComparison
       visible: true
 
     - name: analysisSummary

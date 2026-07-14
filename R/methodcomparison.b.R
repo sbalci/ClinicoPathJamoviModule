@@ -244,9 +244,8 @@ methodcomparisonClass <- R6::R6Class(
                     var1 <- var(method1, na.rm = TRUE)
                     var2 <- var(method2, na.rm = TRUE)
 
-                    bias_correction <- 2 * r * sqrt(var1) * sqrt(var2) / (var1 + var2 + (mean1 - mean2)^2)
                     precision <- r
-                    accuracy <- 2 / (1 + var1 / var2 + var2 / var1 + (mean1 - mean2)^2 / (sqrt(var1) * sqrt(var2)))
+                    accuracy <- 2 / (sqrt(var1 / var2) + sqrt(var2 / var1) + (mean1 - mean2)^2 / (sqrt(var1) * sqrt(var2)))
 
                     # Interpretation
                     ccc_interp <- if (ccc_value >= 0.99) {
@@ -283,7 +282,7 @@ methodcomparisonClass <- R6::R6Class(
                         estimate = accuracy,
                         lower_ci = NA,
                         upper_ci = NA,
-                        interpretation = paste("C_b =", round(bias_correction, 4))
+                        interpretation = paste("C_b =", round(accuracy, 4))
                     ))
                 },
                 error = function(e) {
@@ -359,7 +358,7 @@ methodcomparisonClass <- R6::R6Class(
 
             # Add precision and accuracy decomposition
             precision <- r
-            accuracy <- 2 / (1 + var_x / var_y + var_y / var_x + (mean_x - mean_y)^2 / (sqrt(var_x) * sqrt(var_y)))
+            accuracy <- 2 / (sqrt(var_x / var_y) + sqrt(var_y / var_x) + (mean_x - mean_y)^2 / (sqrt(var_x) * sqrt(var_y)))
 
             table$addRow(rowKey = "precision_manual", values = list(
                 measure = "Precision (Correlation)",
@@ -405,6 +404,24 @@ methodcomparisonClass <- R6::R6Class(
                 se_loa <- sd_diff * sqrt((n - 1) / n * (1 + t_val^2 / (2 * (n - 1))))
                 lower_loa_ci <- c(lower_loa - t_val * se_loa, lower_loa + t_val * se_loa)
                 upper_loa_ci <- c(upper_loa - t_val * se_loa, upper_loa + t_val * se_loa)
+            } else if (self$options$limits_method == "bootstrap") {
+                # Bootstrap percentile CIs for the limits of agreement (Carkeet 2015)
+                lower_loa <- mean_diff - 1.96 * sd_diff
+                upper_loa <- mean_diff + 1.96 * sd_diff
+
+                B <- self$options$bootstrap_samples
+                boot_lower <- numeric(B)
+                boot_upper <- numeric(B)
+                for (b in seq_len(B)) {
+                    d <- diff[sample.int(n, n, replace = TRUE)]
+                    md <- mean(d)
+                    sdd <- sd(d)
+                    boot_lower[b] <- md - 1.96 * sdd
+                    boot_upper[b] <- md + 1.96 * sdd
+                }
+                alpha <- 1 - self$options$confidence_level
+                lower_loa_ci <- unname(stats::quantile(boot_lower, c(alpha / 2, 1 - alpha / 2), na.rm = TRUE))
+                upper_loa_ci <- unname(stats::quantile(boot_upper, c(alpha / 2, 1 - alpha / 2), na.rm = TRUE))
             }
 
             # Populate table

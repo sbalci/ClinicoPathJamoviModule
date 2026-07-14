@@ -2,7 +2,7 @@
 #' @description Creates oncoplots (mutation landscapes) to visualize genomic alterations across genes and samples with optional clinical annotations
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom magrittr %>%
 #' @import ggplot2
 #' @import tidyr
@@ -22,7 +22,7 @@
 #' )
 #' jjoncoplot(data, "SampleID", c("TP53", "KRAS"))
 #     selkamand/ggoncoplot
-#' @export jjoncoplotClass
+#' @keywords internal
 
 jjoncoplotClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
@@ -764,8 +764,11 @@ jjoncoplotClass <- if (requireNamespace("jmvcore")) {
                 genesToInclude <- effectiveOptions$genesToInclude
                 genesToIgnore <- effectiveOptions$genesToIgnore
 
-                # Create safe variable names for use in formulas and rlang (handles spaces, special chars)
-                safe_sampleVar <- jmvcore::composeTerm(sampleVar)
+                # Raw (unquoted) sample name: every consumer feeds this to rlang::sym(),
+                # which quotes arbitrary strings itself. composeTerm() here would embed literal
+                # backticks into the symbol name and break column lookups for names with
+                # spaces/special chars (e.g. "Sample ID").
+                safe_sampleVar <- sampleVar
 
                 # Convert to data frame and handle missing values
                 df <- as.data.frame(data)

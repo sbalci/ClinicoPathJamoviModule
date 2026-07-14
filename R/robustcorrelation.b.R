@@ -548,13 +548,11 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.bootstrapResults <- bootstrap_results
             return(bootstrap_results)
-        }
-    ),
-
-    # Public methods
-    public = list(
+        },
 
         # Main run method
+        # NOTE: jamovi invokes private$.run() and dispatches renderFuns via
+        # private[[funName]]; these methods MUST live in the private list.
         .run = function() {
 
             # Initial instructions
@@ -647,7 +645,9 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
             }
 
-            table$setRows(rows)
+            # jmvcore Table has no setRows(); clear then add each row
+            table$deleteRows()
+            for (.ri in seq_along(rows)) table$addRow(rowKey = .ri, values = rows[[.ri]])
         },
 
         # Populate outlier table
@@ -670,7 +670,9 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows[[i]] <- row
             }
 
-            table$setRows(rows)
+            # jmvcore Table has no setRows(); clear then add each row
+            table$deleteRows()
+            for (.ri in seq_along(rows)) table$addRow(rowKey = .ri, values = rows[[.ri]])
         },
 
         # Populate bootstrap table
@@ -697,7 +699,9 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 row_idx <- row_idx + 1
             }
 
-            table$setRows(rows)
+            # jmvcore Table has no setRows(); clear then add each row
+            table$deleteRows()
+            for (.ri in seq_along(rows)) table$addRow(rowKey = .ri, values = rows[[.ri]])
         },
 
         # Plot correlation heatmap
@@ -722,21 +726,21 @@ robustcorrelationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Set diagonal to NA to avoid showing self-correlations
             diag(cor_matrix) <- NA
 
+            # Determine colors (needed by both ggcorrplot and fallback branches)
+            if (self$options$heatmap_colors == "custom") {
+                colors <- c(self$options$low_color, self$options$mid_color, self$options$high_color)
+            } else if (self$options$heatmap_colors == "viridis") {
+                colors <- c("#440154", "#21908C", "#FDE725")
+            } else if (self$options$heatmap_colors == "plasma") {
+                colors <- c("#0D0887", "#CC4678", "#F0F921")
+            } else if (self$options$heatmap_colors == "red_yellow_blue") {
+                colors <- c("#D73027", "#FFFFBF", "#1A9850")
+            } else {
+                colors <- c("#3B82C5", "white", "#E74C3C")  # blue_white_red
+            }
+
             # Create heatmap
             if (requireNamespace("ggcorrplot", quietly = TRUE)) {
-
-                # Determine colors
-                if (self$options$heatmap_colors == "custom") {
-                    colors <- c(self$options$low_color, self$options$mid_color, self$options$high_color)
-                } else if (self$options$heatmap_colors == "viridis") {
-                    colors <- c("#440154", "#21908C", "#FDE725")
-                } else if (self$options$heatmap_colors == "plasma") {
-                    colors <- c("#0D0887", "#CC4678", "#F0F921")
-                } else if (self$options$heatmap_colors == "red_yellow_blue") {
-                    colors <- c("#D73027", "#FFFFBF", "#1A9850")
-                } else {
-                    colors <- c("#3B82C5", "white", "#E74C3C")  # blue_white_red
-                }
 
                 plot <- ggcorrplot::ggcorrplot(
                     cor_matrix,

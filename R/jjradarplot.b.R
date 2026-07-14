@@ -106,18 +106,24 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
 
                 # Prepare Data ----
                 mydata <- self$data
-                mydata <- jmvcore::naOmit(mydata)
 
-                if (nrow(mydata) == 0)
-                    jmvcore::reject(.('Data contains no (complete) rows after removing missing values'))
-                
                 # Select only needed variables
                 radar_vars <- c(vars, categoryVar)
                 if (!is.null(self$options$splitBy)) {
                     radar_vars <- c(radar_vars, self$options$splitBy)
                 }
-                
+
                 mydata <- mydata[radar_vars]
+
+                # Handle missing values: listwise deletion when the user chooses to
+                # exclude cases analysis by analysis; otherwise NAs are handled
+                # per-variable via na.rm in the aggregation step below.
+                if (self$options$excl) {
+                    mydata <- mydata[complete.cases(mydata), , drop = FALSE]
+                }
+
+                if (nrow(mydata) == 0)
+                    jmvcore::reject(.('Data contains no (complete) rows after removing missing values'))
                 
                 # Check if we have numeric variables for radar axes
                 numeric_vars <- sapply(mydata[vars], is.numeric)
@@ -141,10 +147,15 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
             
             # Helper function to create single radar plot ----
             .createRadarPlot = function(data, vars, categoryVar, ggtheme) {
-                # Aggregate data by category (mean)
+                # Aggregate data by category (mean or median per user selection)
+                aggFun <- if (self$options$aggregationMethod == "median")
+                    function(x) median(x, na.rm = TRUE)
+                else
+                    function(x) mean(x, na.rm = TRUE)
+
                 aggregated_data <- data %>%
                     dplyr::group_by(!!rlang::sym(categoryVar)) %>%
-                    dplyr::summarise(across(all_of(vars), ~ mean(.x, na.rm = TRUE)), .groups = 'drop')
+                    dplyr::summarise(across(all_of(vars), aggFun), .groups = 'drop')
                 
                 # Scale variables to 0-1 range for better visualization
                 if (self$options$scaleData) {
@@ -189,10 +200,15 @@ jjradarplotClass <- if (requireNamespace('jmvcore'))
             
             # Helper function to create faceted radar plot ----
             .createFacetedRadarPlot = function(data, vars, categoryVar, splitBy, ggtheme) {
-                # Aggregate data by category and split variable
+                # Aggregate data by category and split variable (mean or median per user selection)
+                aggFun <- if (self$options$aggregationMethod == "median")
+                    function(x) median(x, na.rm = TRUE)
+                else
+                    function(x) mean(x, na.rm = TRUE)
+
                 aggregated_data <- data %>%
                     dplyr::group_by(!!rlang::sym(categoryVar), !!rlang::sym(splitBy)) %>%
-                    dplyr::summarise(across(all_of(vars), ~ mean(.x, na.rm = TRUE)), .groups = 'drop')
+                    dplyr::summarise(across(all_of(vars), aggFun), .groups = 'drop')
                 
                 # Scale variables to 0-1 range for better visualization
                 if (self$options$scaleData) {

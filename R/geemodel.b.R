@@ -136,7 +136,10 @@ geemodelClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             raw_data <- self$data
             data_list <- lapply(all_vars, function(v) raw_data[[v]])
             names(data_list) <- all_vars
-            data <- as.data.frame(data_list)
+            # check.names = FALSE preserves original variable names so that
+            # data[[<original name>]] lookups and the composeTerm-escaped formula
+            # (e.g. `my var`) match the actual columns for names with spaces/punctuation
+            data <- as.data.frame(data_list, check.names = FALSE)
 
             # Remove missing values
             missing_count <- sum(!complete.cases(data))

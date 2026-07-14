@@ -4,6 +4,7 @@ stereologyClass <- R6::R6Class(
     private = list(
         .data = NULL,
         .results_cache = NULL,
+        .plot_data = NULL,
 
         # ====== INITIALIZATION ======
         .init = function() {

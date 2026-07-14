@@ -235,8 +235,9 @@ survivalcalibrationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Apparent Brier score at calibration time
                 # Calculate prediction error
                 # For censored observations before cal_time, treat as if they survived
+                # Observed survival status at cal_time: 1 = alive past horizon, 0 = event by horizon, NA = censored before horizon
                 survived_to_cal_time <- ifelse(time_vec >= cal_time & event_vec == 0, 1,
-                                               ifelse(time_vec >= cal_time & event_vec == 1, 0,
+                                               ifelse(time_vec >= cal_time & event_vec == 1, 1,  # event AFTER horizon = survived to horizon
                                                      ifelse(time_vec < cal_time & event_vec == 1, 0, NA)))
 
                 valid_idx <- !is.na(survived_to_cal_time)
@@ -316,7 +317,7 @@ survivalcalibrationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Calculate Brier score
                     survived <- ifelse(boot_time >= cal_time & boot_event == 0, 1,
-                                      ifelse(boot_time >= cal_time & boot_event == 1, 0,
+                                      ifelse(boot_time >= cal_time & boot_event == 1, 1,  # event AFTER horizon = survived to horizon
                                             ifelse(boot_time < cal_time & boot_event == 1, 0, NA)))
                     valid_idx <- !is.na(survived)
                     if (sum(valid_idx) > 0) {
@@ -368,7 +369,7 @@ survivalcalibrationClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                     # Calculate Brier score
                     survived <- ifelse(test_time >= cal_time & test_event == 0, 1,
-                                      ifelse(test_time >= cal_time & test_event == 1, 0,
+                                      ifelse(test_time >= cal_time & test_event == 1, 1,  # event AFTER horizon = survived to horizon
                                             ifelse(test_time < cal_time & test_event == 1, 0, NA)))
                     valid_idx <- !is.na(survived)
                     if (sum(valid_idx) > 0) {

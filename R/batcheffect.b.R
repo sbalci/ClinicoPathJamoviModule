@@ -5,7 +5,6 @@
 #' @importFrom sva ComBat
 #' @importFrom stats prcomp var cor dist hclust cutree
 #' @importFrom utils capture.output
-
 #' @export
 
 batcheffectClass <- if (requireNamespace("jmvcore", quietly = TRUE)) {

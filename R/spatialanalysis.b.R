@@ -84,10 +84,11 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             }
             
             # Remove missing data
+            min_points <- self$options$min_points
             complete_cases <- complete.cases(data[c(x_var, y_var)])
-            if (sum(complete_cases) < 10) {
+            if (sum(complete_cases) < min_points) {
                 self$results$text$setContent(
-                    "<p style='color: red;'><b>Error:</b> At least 10 complete coordinate pairs are required for spatial analysis.</p>"
+                    paste0("<p style='color: red;'><b>Error:</b> At least ", min_points, " complete coordinate pairs are required for spatial analysis.</p>")
                 )
                 return()
             }
@@ -246,43 +247,53 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
             
             x_coords <- data[[x_var]]
             y_coords <- data[[y_var]]
-            
+
+            # Edge correction method (border, isotropic, or both)
+            correction_method <- self$options$correction_method
+            corrections <- switch(correction_method,
+                                  "border" = "border",
+                                  "isotropic" = "isotropic",
+                                  "both" = c("border", "isotropic"),
+                                  c("border", "isotropic"))
+            primary_col <- if (correction_method == "isotropic") "iso" else "border"
+            env_correction <- if (correction_method == "isotropic") "isotropic" else "border"
+
             # Create spatial point pattern
             tryCatch({
                 # Define window
                 x_range <- range(x_coords, na.rm = TRUE)
                 y_range <- range(y_coords, na.rm = TRUE)
-                
+
                 # Expand window slightly to include all points
                 x_margin <- diff(x_range) * 0.05
                 y_margin <- diff(y_range) * 0.05
-                
+
                 window <- spatstat.geom::owin(xrange = x_range + c(-x_margin, x_margin),
                                              yrange = y_range + c(-y_margin, y_margin))
-                
+
                 # Create point pattern
                 ppp <- spatstat.geom::ppp(x_coords, y_coords, window = window)
-                
+
                 # Calculate Ripley's K function
-                K_result <- spatstat.explore::Kest(ppp, correction = c("border", "isotropic"))
-                
+                K_result <- spatstat.explore::Kest(ppp, correction = corrections)
+
                 # Calculate L function (normalized K)
-                L_result <- spatstat.explore::Lest(ppp, correction = c("border", "isotropic"))
-                
+                L_result <- spatstat.explore::Lest(ppp, correction = corrections)
+
                 # Test for Complete Spatial Randomness (CSR)
-                envelope_result <- spatstat.explore::envelope(ppp, fun = spatstat.explore::Kest, 
-                                                            nsim = 99, rank = 5, correction = "border")
-                
+                envelope_result <- spatstat.explore::envelope(ppp, fun = spatstat.explore::Kest,
+                                                            nsim = 99, rank = 5, correction = env_correction)
+
                 # Add results to table
                 distances <- K_result$r[seq(1, length(K_result$r), length.out = 10)]
-                
+
                 for (i in seq_along(distances)) {
                     r <- distances[i]
                     idx <- which.min(abs(K_result$r - r))
-                    
-                    K_obs <- K_result$border[idx]
+
+                    K_obs <- K_result[[primary_col]][idx]
                     K_theo <- K_result$theo[idx]
-                    L_obs <- L_result$border[idx]
+                    L_obs <- L_result[[primary_col]][idx]
                     L_theo <- L_result$theo[idx]
                     
                     # Check if within envelope
@@ -415,7 +426,8 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 ))
                 
                 # Interpretation
-                interpretation <- if (ce_test$p.value < 0.05) {
+                sig_level <- self$options$significance_level
+                interpretation <- if (ce_test$p.value < sig_level) {
                     if (ce_test$statistic < 1) "Significantly clustered" else "Significantly dispersed"
                 } else {
                     "Random distribution"
@@ -463,7 +475,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 ppp <- spatstat.geom::ppp(x_coords, y_coords, window = window)
                 
                 # Kernel density estimation
-                density_est <- spatstat.explore::density(ppp)
+                density_est <- spatstat.explore::density.ppp(ppp)
                 
                 # Find local maxima (simple hotspot detection)
                 density_values <- as.vector(density_est$v)
@@ -530,74 +542,94 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 x_coords <- data[[x_var]]
                 y_coords <- data[[y_var]]
                 n <- length(x_coords)
-                
-                if (n < 10) {
+                min_points <- self$options$min_points
+
+                if (n < min_points) {
                     hotspot_table$addRow(rowKey="gi_star_error", values=list(
                         measure="Getis-Ord Gi* Error",
-                        value="Insufficient points (<10) for Gi* calculation",
-                        interpretation="Need at least 10 points for reliable Gi* statistics"
+                        value=paste0("Insufficient points (<", min_points, ") for Gi* calculation"),
+                        interpretation=paste("Need at least", min_points, "points for reliable Gi* statistics")
                     ))
                     return()
                 }
-                
-                # Create spatial point pattern for spatstat
+
+                # Getis-Ord Gi* (Ord & Getis 1995) on a quadrat grid of point counts.
+                # Neighborhoods use queen contiguity including the focal cell (the "star").
                 x_range <- range(x_coords, na.rm = TRUE)
                 y_range <- range(y_coords, na.rm = TRUE)
-                x_margin <- diff(x_range) * 0.05
-                y_margin <- diff(y_range) * 0.05
-                
-                window <- spatstat.geom::owin(xrange = x_range + c(-x_margin, x_margin),
-                                             yrange = y_range + c(-y_margin, y_margin))
-                
-                ppp <- spatstat.geom::ppp(x_coords, y_coords, window = window)
-                
-                # Use spatstat's optimized localG function (Getis-Ord Gi*)
-                local_g_result <- spatstat.explore::localG(ppp, correction = "border")
-                
-                # Extract z-scores and significance
-                z_scores <- local_g_result
-                alpha <- 0.05
+                n_grid <- 10
+                x_breaks <- seq(x_range[1], x_range[2], length.out = n_grid + 1)
+                y_breaks <- seq(y_range[1], y_range[2], length.out = n_grid + 1)
+
+                counts <- matrix(0, n_grid, n_grid)
+                for (p in seq_along(x_coords)) {
+                    xi <- max(1, min(findInterval(x_coords[p], x_breaks, rightmost.closed = TRUE), n_grid))
+                    yi <- max(1, min(findInterval(y_coords[p], y_breaks, rightmost.closed = TRUE), n_grid))
+                    counts[xi, yi] <- counts[xi, yi] + 1
+                }
+
+                x_vec <- as.vector(counts)
+                n_cells <- length(x_vec)
+                xbar <- mean(x_vec)
+                S <- sqrt(sum(x_vec^2) / n_cells - xbar^2)
+
+                if (S <= 0) {
+                    hotspot_table$addRow(rowKey="gi_star_error", values=list(
+                        measure="Getis-Ord Gi* Error",
+                        value="Uniform point counts; Gi* undefined",
+                        interpretation="No variation across grid cells to detect hot/coldspots"
+                    ))
+                    return()
+                }
+
+                # Standardized Gi* z-score per grid cell (binary weights, incl. self)
+                z_mat <- matrix(NA_real_, n_grid, n_grid)
+                for (a in 1:n_grid) for (b in 1:n_grid) {
+                    ai <- max(1, a - 1):min(n_grid, a + 1)
+                    bi <- max(1, b - 1):min(n_grid, b + 1)
+                    nbr <- counts[ai, bi, drop = FALSE]
+                    Wi <- length(nbr)
+                    den <- S * sqrt((n_cells * Wi - Wi^2) / (n_cells - 1))
+                    z_mat[a, b] <- if (den > 0) (sum(nbr) - xbar * Wi) / den else NA_real_
+                }
+                z_scores <- as.vector(z_mat)
+                z_scores <- z_scores[is.finite(z_scores)]
+
+                alpha <- self$options$significance_level
                 z_critical <- qnorm(1 - alpha/2)
-                
+
                 # Identify significant hotspots and coldspots
-                hotspots <- which(z_scores > z_critical)
-                coldspots <- which(z_scores < -z_critical)
-                
-                # Summary statistics
-                n_hotspots_gi <- length(hotspots)
-                n_coldspots_gi <- length(coldspots)
+                n_hotspots_gi <- sum(z_scores > z_critical)
+                n_coldspots_gi <- sum(z_scores < -z_critical)
                 max_z_score <- max(z_scores, na.rm = TRUE)
                 min_z_score <- min(z_scores, na.rm = TRUE)
-                
-                # Calculate local density threshold for context
-                nn_distances <- spatstat.geom::nndist(ppp)
-                threshold_distance <- mean(nn_distances) * 2
-                
+
                 # Add results to table
+                cell_size <- mean(c(diff(x_range) / n_grid, diff(y_range) / n_grid))
                 hotspot_table$addRow(rowKey="gi_threshold", values=list(
-                    measure="Gi* Distance Threshold",
-                    value=round(threshold_distance, 2),
-                    interpretation="Spatial neighborhood distance for Gi* calculation"
+                    measure="Gi* Grid Cell Size",
+                    value=round(cell_size, 2),
+                    interpretation=paste0("Quadrat size for Gi* (", n_grid, "x", n_grid, " grid, queen contiguity)")
                 ))
-                
+
                 hotspot_table$addRow(rowKey="gi_hotspots", values=list(
                     measure="Gi* Hotspots",
                     value=n_hotspots_gi,
-                    interpretation=paste("Points with significantly high local clustering (z >", round(z_critical, 2), ")")
+                    interpretation=paste("Grid cells with significantly high local clustering (z >", round(z_critical, 2), ")")
                 ))
-                
+
                 hotspot_table$addRow(rowKey="gi_coldspots", values=list(
                     measure="Gi* Coldspots",
                     value=n_coldspots_gi,
-                    interpretation=paste("Points with significantly low local clustering (z <", round(-z_critical, 2), ")")
+                    interpretation=paste("Grid cells with significantly low local clustering (z <", round(-z_critical, 2), ")")
                 ))
-                
+
                 hotspot_table$addRow(rowKey="max_z_score", values=list(
                     measure="Maximum Z-score",
                     value=round(max_z_score, 2),
                     interpretation="Most significant hotspot z-score"
                 ))
-                
+
                 if (min_z_score < -z_critical) {
                     hotspot_table$addRow(rowKey="min_z_score", values=list(
                         measure="Minimum Z-score",
@@ -605,25 +637,25 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                         interpretation="Most significant coldspot z-score"
                     ))
                 }
-                
+
                 # Overall interpretation
                 if (n_hotspots_gi > 0 || n_coldspots_gi > 0) {
-                    interpretation <- paste("Detected", n_hotspots_gi, "significant hotspots and", n_coldspots_gi, "coldspots using optimized Getis-Ord Gi* analysis")
+                    interpretation <- paste("Detected", n_hotspots_gi, "significant hotspots and", n_coldspots_gi, "coldspots using Getis-Ord Gi* analysis")
                 } else {
                     interpretation <- "No significant spatial clustering detected (random distribution)"
                 }
-                
+
                 hotspot_table$addRow(rowKey="gi_interpretation", values=list(
                     measure="Gi* Overall Result",
                     value=interpretation,
                     interpretation="Statistical significance of spatial clustering patterns"
                 ))
-                
+
             }, error = function(e) {
                 hotspot_table$addRow(rowKey="gi_star_error", values=list(
                     measure="Getis-Ord Gi* Error",
-                    value=paste("Optimized calculation failed:", e$message),
-                    interpretation="Falling back to density-based hotspot detection"
+                    value=paste("Gi* calculation failed:", e$message),
+                    interpretation="See density-based hotspot metrics above"
                 ))
             })
         },
@@ -760,47 +792,51 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 n_types <- length(unique_types)
                 
                 if (n_types >= 2) {
-                    # Calculate cross-type pair correlation function
-                    pcf_result <- spatstat.explore::pcfcross(ppp, correction = "border")
-                    
-                    # Extract distances for analysis
-                    distances <- pcf_result$r[seq(1, length(pcf_result$r), length.out = 8)]
-                    
                     for (i in 1:(n_types-1)) {
                         for (j in (i+1):n_types) {
                             type1 <- unique_types[i]
                             type2 <- unique_types[j]
-                            
-                            # Get cross-type PCF values
-                            pcf_column <- paste0(type1, "to", type2)
-                            if (pcf_column %in% names(pcf_result)) {
-                                pcf_obs <- pcf_result[[pcf_column]]
-                                pcf_theo <- rep(1, length(pcf_obs))  # Theoretical value for random pattern
-                                
+
+                            # Cross-type pair correlation function g_ij(r) for this pair
+                            pcf_pair <- tryCatch(
+                                spatstat.explore::pcfcross(ppp, i = type1, j = type2, correction = "translate"),
+                                error = function(e) NULL)
+
+                            if (!is.null(pcf_pair) && "trans" %in% names(pcf_pair)) {
+                                pcf_r <- pcf_pair$r
+                                pcf_obs <- pcf_pair$trans
+
+                                # Extract distances for this pair's PCF
+                                distances <- pcf_r[seq(1, length(pcf_r), length.out = 8)]
+
                                 for (k in seq_along(distances)) {
                                     r <- distances[k]
-                                    idx <- which.min(abs(pcf_result$r - r))
-                                    
+                                    idx <- which.min(abs(pcf_r - r))
+
                                     obs_val <- pcf_obs[idx]
-                                    theo_val <- pcf_theo[idx]
-                                    
+                                    theo_val <- 1  # g(r) = 1 under spatial independence
+
                                     # Determine interaction type
-                                    interaction_type <- if (obs_val > 1.2) {
+                                    interaction_type <- if (is.na(obs_val)) {
+                                        "Undefined"
+                                    } else if (obs_val > 1.2) {
                                         "Attraction"
                                     } else if (obs_val < 0.8) {
                                         "Repulsion"
                                     } else {
                                         "Random"
                                     }
-                                    
+
                                     interpretation <- if (interaction_type == "Attraction") {
                                         paste(type1, "and", type2, "cells tend to be closer than random")
                                     } else if (interaction_type == "Repulsion") {
                                         paste(type1, "and", type2, "cells tend to avoid each other")
-                                    } else {
+                                    } else if (interaction_type == "Random") {
                                         paste(type1, "and", type2, "cells show random spatial relationship")
+                                    } else {
+                                        paste(type1, "and", type2, "cells: g(r) undefined at this distance")
                                     }
-                                    
+
                                     interaction_table$addRow(rowKey=paste0(type1, "_", type2, "_", k), values=list(
                                         type_i=type1,
                                         type_j=type2,
@@ -815,15 +851,15 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                                 # Fallback to cross-type nearest neighbor distances
                                 type1_points <- which(marks_factor == type1)
                                 type2_points <- which(marks_factor == type2)
-                                
+
                                 if (length(type1_points) > 0 && length(type2_points) > 0) {
                                     cross_nnd <- spatstat.geom::nncross(
                                         spatstat.geom::ppp(x_coords[type1_points], y_coords[type1_points], window = window),
                                         spatstat.geom::ppp(x_coords[type2_points], y_coords[type2_points], window = window)
                                     )$dist
-                                    
+
                                     mean_cross_nnd <- mean(cross_nnd, na.rm = TRUE)
-                                    
+
                                     interaction_table$addRow(rowKey=paste0(type1, "_", type2, "_nnd"), values=list(
                                         type_i=type1,
                                         type_j=type2,
@@ -1074,13 +1110,15 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                 }
                 
                 # Perform comparative analysis between groups
+                min_points <- self$options$min_points
+                sig_level <- self$options$significance_level
                 group_results <- list()
-                
+
                 for (i in 1:n_groups) {
                     group_name <- groups[i]
                     group_data <- data[data[[group_var]] == group_name, ]
-                    
-                    if (nrow(group_data) >= 10) {  # Minimum points for spatial analysis
+
+                    if (nrow(group_data) >= min_points) {  # Minimum points for spatial analysis
                         x_coords <- group_data[[x_var]]
                         y_coords <- group_data[[y_var]]
                         
@@ -1113,7 +1151,7 @@ spatialanalysisClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                             mean_nnd = mean_nnd,
                             ce_r = ce_r,
                             ce_p = ce_p,
-                            spatial_pattern = if (ce_p < 0.05) {
+                            spatial_pattern = if (ce_p < sig_level) {
                                 if (ce_r < 1) "Clustered" else "Dispersed"
                             } else "Random"
                         )

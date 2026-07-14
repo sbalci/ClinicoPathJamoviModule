@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import glue
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import ggrepel
 #'
 #' @return An \code{R6} class generator object for the \code{jjsyndromicplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.

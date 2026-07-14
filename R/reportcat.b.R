@@ -36,7 +36,11 @@ reportcatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             } else {
                 # Clear the to-do message if variables are selected.
                 self$results$todo$setContent("")
-                
+
+                # Reset any stale error/warning from a previous run; the
+                # validation branches below re-show it when needed.
+                self$results$error$setVisible(FALSE)
+
                 # Enhanced input validation with proper error handling
                 if (nrow(self$data) == 0) {
                     self$results$error$setContent(glue::glue("<div style='padding: 15px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;'><strong>{error_label}:</strong> {error_msg}</div>",

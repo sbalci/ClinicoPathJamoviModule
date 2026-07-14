@@ -153,10 +153,29 @@ enhancedfrequencyClass <- R6::R6Class(
             # This creates individual frequency tables for each variable
             # In a full implementation, this would create separate tables for each variable
             # For now, we'll create a simplified version
-            
+
             for (i in seq_along(vars)) {
                 var <- vars[i]
                 private$.createSingleFrequencyTable(data, var, i)
+            }
+
+            # Populate state for the frequency distribution plot (long format)
+            plot_rows <- list()
+            for (var in vars) {
+                vd <- data[[var]]
+                if (!is.factor(vd)) vd <- as.factor(vd)
+                ft <- table(vd)
+                if (length(ft) == 0) next
+                plot_rows[[length(plot_rows) + 1L]] <- data.frame(
+                    variable = var,
+                    category = names(ft),
+                    count = as.integer(ft),
+                    stringsAsFactors = FALSE
+                )
+            }
+            if (length(plot_rows) > 0) {
+                plot_df <- do.call(rbind, plot_rows)
+                self$results$frequencyDistributionPlot$setState(plot_df)
             }
         },
         
@@ -310,7 +329,8 @@ enhancedfrequencyClass <- R6::R6Class(
         
         .createDataQualityAssessment = function(data, vars) {
             table <- self$results$dataQualityReport
-            
+            quality_rows <- list()
+
             for (var in vars) {
                 var_data <- data[[var]]
                 
@@ -361,11 +381,24 @@ enhancedfrequencyClass <- R6::R6Class(
                     balance = balance,
                     recommendations = recommendations
                 )
-                
+
                 table$addRow(rowKey = var, values = row)
+
+                quality_rows[[length(quality_rows) + 1L]] <- data.frame(
+                    variable = var,
+                    quality_score = round(quality_score, 3),
+                    completeness = round(completeness, 3),
+                    stringsAsFactors = FALSE
+                )
+            }
+
+            # Populate state for the data quality plot
+            if (length(quality_rows) > 0) {
+                quality_df <- do.call(rbind, quality_rows)
+                self$results$dataQualityPlot$setState(quality_df)
             }
         },
-        
+
         .generateQualityRecommendations = function(completeness, uniqueness, balance_ratio) {
             recommendations <- character(0)
             
@@ -392,7 +425,8 @@ enhancedfrequencyClass <- R6::R6Class(
         
         .createCategoricalDiagnostics = function(data, vars) {
             table <- self$results$categoricalDiagnostics
-            
+            balance_rows <- list()
+
             for (var in vars) {
                 var_data <- data[[var]]
                 
@@ -440,8 +474,21 @@ enhancedfrequencyClass <- R6::R6Class(
                     rare_categories_count = rare_categories_count,
                     interpretation = interpretation
                 )
-                
+
                 table$addRow(rowKey = var, values = row)
+
+                balance_rows[[length(balance_rows) + 1L]] <- data.frame(
+                    variable = var,
+                    entropy = round(entropy, 3),
+                    gini_impurity = round(gini_impurity, 3),
+                    stringsAsFactors = FALSE
+                )
+            }
+
+            # Populate state for the category balance plot
+            if (length(balance_rows) > 0) {
+                balance_df <- do.call(rbind, balance_rows)
+                self$results$categoryBalancePlot$setState(balance_df)
             }
         },
         
@@ -619,6 +666,58 @@ enhancedfrequencyClass <- R6::R6Class(
             html$setContent(content)
         },
         
+        .plotFrequencyDistribution = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                df <- image$state
+                if (is.null(df) || nrow(df) == 0) return(FALSE)
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = category, y = count)) +
+                    ggplot2::geom_col(fill = "#4C72B0") +
+                    ggplot2::facet_wrap(~ variable, scales = "free") +
+                    ggplot2::labs(x = NULL, y = "Frequency",
+                                  title = "Frequency Distributions") +
+                    ggtheme +
+                    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
+        .plotDataQuality = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                df <- image$state
+                if (is.null(df) || nrow(df) == 0) return(FALSE)
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = stats::reorder(variable, quality_score),
+                                                      y = quality_score)) +
+                    ggplot2::geom_col(fill = "#55A868") +
+                    ggplot2::coord_flip() +
+                    ggplot2::ylim(0, 1) +
+                    ggplot2::labs(x = NULL, y = "Quality Score",
+                                  title = "Data Quality by Variable") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
+        .plotCategoryBalance = function(image, ggtheme, theme, ...) {
+            if (is.null(image$state)) return(FALSE)
+            tryCatch({
+                df <- image$state
+                if (is.null(df) || nrow(df) == 0) return(FALSE)
+                p <- ggplot2::ggplot(df, ggplot2::aes(x = stats::reorder(variable, entropy),
+                                                      y = entropy)) +
+                    ggplot2::geom_col(fill = "#C44E52") +
+                    ggplot2::coord_flip() +
+                    ggplot2::labs(x = NULL, y = "Shannon Entropy (bits)",
+                                  title = "Category Diversity (Entropy)") +
+                    ggtheme
+                print(p)
+                TRUE
+            }, error = function(e) FALSE)
+        },
+
         .setError = function(message) {
             # Set error state - htmlEscape inside the helper so all callers
             # are safe by default (defense-in-depth against future callers

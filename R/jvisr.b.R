@@ -257,15 +257,15 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             analysis_type <- options$analysis_type
             
             if (analysis_type == 'kaplan_meier') {
-                self$.runKaplanMeier(mydata)
+                private$.runKaplanMeier(mydata)
             } else if (analysis_type == 'cuminc') {
-                self$.runCumInc(mydata)
+                private$.runCumInc(mydata)
             } else if (analysis_type == 'tableone') {
-                self$.runTableOne(mydata)
+                private$.runTableOne(mydata)
             } else if (analysis_type == 'attrition') {
-                self$.runAttrition(mydata)
+                private$.runAttrition(mydata)
             } else if (analysis_type == 'risktable') {
-                self$.runRiskTable(mydata)
+                private$.runRiskTable(mydata)
             }
         },
         
@@ -284,10 +284,10 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Estimate Kaplan-Meier curves using enhanced visR integration
             tryCatch({
                 # Use enhanced KM estimation with better visR integration
-                km_fit <- self$.jestimate_KM_enhanced(data, formula)
+                km_fit <- private$.jestimate_KM_enhanced(data, formula)
                 
                 # Generate enhanced visR plot
-                plot_obj <- self$.jvisr_plot_enhanced(km_fit, data)
+                plot_obj <- private$.jvisr_plot_enhanced(km_fit, data)
                 
                 # Cache and set plot
                 private$.cached_plot <- plot_obj
@@ -295,7 +295,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Generate summary with caching
                 if (options$show_summary) {
-                    summary_table <- self$.jget_summary(km_fit)
+                    summary_table <- private$.jget_summary(km_fit)
                     private$.cached_summary <- summary_table
                     self$results$summary$setContent(summary_table)
                 } else {
@@ -304,7 +304,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 
                 # Generate interpretation with caching
                 if (options$show_interpretation) {
-                    interpretation <- self$.jget_interpretation(km_fit, data, strata_var)
+                    interpretation <- private$.jget_interpretation(km_fit, data, strata_var)
                     private$.cached_interpretation <- interpretation
                     self$results$interpretation$setContent(interpretation)
                 } else {
@@ -325,7 +325,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Create cumulative incidence plot
-                plot_obj <- self$.jcumulative_incidence(data, "time_variable", "event_variable", strata_var)
+                plot_obj <- private$.jcumulative_incidence(data, "time_variable", "event_variable", strata_var)
                 
                 # Cache and set plot
                 private$.cached_plot <- plot_obj
@@ -368,7 +368,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Generate Table One using existing method
-                table_one <- self$.jtable_one(data)
+                table_one <- private$.jtable_one(data)
 
                 # Convert to HTML for display (escape=TRUE - table cells include user column names and factor levels)
                 html_table <- knitr::kable(table_one, format = 'html', escape = TRUE)
@@ -401,7 +401,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             tryCatch({
                 
                 # Create attrition flowchart
-                plot_obj <- self$.jattrition_chart(data)
+                plot_obj <- private$.jattrition_chart(data)
                 
                 # Cache and set plot
                 private$.cached_plot <- plot_obj
@@ -453,7 +453,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 km_fit <- survival::survfit(formula, data = data)
                 
                 # Generate risk table
-                risk_table <- self$.jget_risktable(km_fit)
+                risk_table <- private$.jget_risktable(km_fit)
                 
                 # Convert to HTML
                 html_table <- knitr::kable(risk_table, format = 'html', escape = FALSE)
@@ -519,11 +519,11 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     if (options$theme_style == "visr") {
                         p <- p + visR::define_theme()
                     } else {
-                        p <- p + self$.apply_theme(options$theme_style)
+                        p <- p + private$.apply_theme(options$theme_style)
                     }
                     
                     # Apply color palette
-                    p <- p + self$.apply_color_palette(options$color_palette)
+                    p <- p + private$.apply_color_palette(options$color_palette)
                     
                     # Apply labels
                     p <- p + ggplot2::labs(
@@ -543,14 +543,32 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     
                 }, error = function(e) {
                     # Fallback to survminer if visR fails
-                    return(self$.jvisr_plot_fallback(km_fit, data))
+                    return(private$.jvisr_plot_fallback(km_fit, data))
                 })
             } else {
                 # Fallback to survminer
-                return(self$.jvisr_plot_fallback(km_fit, data))
+                return(private$.jvisr_plot_fallback(km_fit, data))
             }
         },
         
+        .apply_theme = function(theme_style) {
+            # Return a ggplot2 theme object for the requested style
+            switch(theme_style,
+                "classic" = ggplot2::theme_classic(),
+                "minimal" = ggplot2::theme_minimal(),
+                "clean"   = ggplot2::theme_bw(),
+                ggplot2::theme_minimal()
+            )
+        },
+
+        .apply_color_palette = function(color_palette) {
+            # Return a ggplot2 brewer colour scale, or NULL (no-op) for the default palette
+            if (is.null(color_palette) || color_palette == "default") {
+                return(NULL)
+            }
+            ggplot2::scale_color_brewer(palette = color_palette)
+        },
+
         .jvisr_plot_fallback = function(km_fit, data) {
             
             options <- self$options
@@ -580,7 +598,7 @@ jvisrClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 return(p$plot)
             } else {
                 # Final fallback to base plotting
-                return(self$.jvisr_plot_base(km_fit))
+                return(private$.jvisr_plot_base(km_fit))
             }
         },
         

@@ -987,10 +987,15 @@ outcomeorganizerClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Summary now only contains analysis description (validation moved to Notices)
             self$results$summary$setContent(summary_text)
 
+            # Frequency table of recoded outcomes. Computed unconditionally
+            # because both the output table and the visualization state consume
+            # it; previously it was defined only inside the outputTable block,
+            # so enabling the visualization without the table crashed with
+            # "object 'outcome_counts' not found".
+            outcome_counts <- table(mydata$myoutcome)
+
             # Add data table if requested
             if (self$options$outputTable) {
-                # Create frequency table of new outcomes
-                outcome_counts <- table(mydata$myoutcome)
                 outcome_table <- self$results$outputTable
 
                 # Add rows for each unique outcome value

@@ -15,7 +15,6 @@
 #' @importFrom htmltools HTML
 #' @importFrom moments skewness kurtosis
 #' @importFrom viridis viridis
-
 raincloudClass <- if (requireNamespace("jmvcore")) R6::R6Class("raincloudClass",
     inherit = raincloudBase,
     private = list(

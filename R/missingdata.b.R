@@ -61,7 +61,7 @@
 #' @importFrom ggmice plot_pattern plot_corr plot_flux plot_trace
 #' @importFrom ggmice ggmice densityplot stripplot xyplot
 #' @importFrom ggplot2 ggplot aes labs theme_minimal ggtitle
-#' @importFrom dplyr summarise group_by mutate select
+#' @importFrom dplyr summarise group_by mutate
 #' @importFrom htmltools HTML
 #' @return An \code{R6} class generator object for the \code{missingdataClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
@@ -319,9 +319,9 @@ missingdataClass <- if (requireNamespace("jmvcore")) R6::R6Class("missingdataCla
             }
 
             tryCatch({
-                plot <- ggmice::ggmice(private$.mice_results, 
+                plot <- ggmice::ggmice(private$.mice_results,
                                       ggplot2::aes(x = .value, group = .imp)) +
-                    ggmice::geom_density() +
+                    ggplot2::geom_density() +
                     ggplot2::ggtitle("Observed vs Imputed Data Distributions") +
                     ggtheme
                 

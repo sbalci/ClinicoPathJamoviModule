@@ -236,7 +236,15 @@ oneSurvivalClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # the values attribute matches the expected 0/1 semantics before swapping.
             # Standard binary conversions
             if (all(unique_vals %in% c(0, 1))) {
-                # Already 0/1 - convert to numeric if needed
+                # Already 0/1 (numeric or factor-coded). For a FACTOR with levels
+                # "0"/"1", as.numeric() returns LEVEL INDICES (1,2), silently
+                # off-by-one for the event indicator; read the visible labels via
+                # as.character() instead (identical to the "0"/"1" string branch
+                # below). For a numeric 0/1 vector as.numeric() is the identity,
+                # so this cannot regress the numeric path.
+                if (is.factor(status_data)) {
+                    return(as.numeric(as.character(status_data)))
+                }
                 return(as.numeric(status_data))
             } else if (all(unique_vals %in% c(FALSE, TRUE))) {
                 # TRUE/FALSE - convert to 1/0

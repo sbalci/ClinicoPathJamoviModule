@@ -200,7 +200,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
         
         .generateClinicalPanels = function() {
-            if (!isTRUE(self$options$showexplanations)) return()
+            # 'about' is always visible (r.yaml visible: true), so populate it
+            # every run rather than only when 'showexplanations' is on. The old
+            # early return here left the always-visible 'about' and 'report'
+            # (visible: (dep)) panels empty by default, and also made the granular
+            # showSummary/showAssumptions/showInterpretation toggles render empty
+            # panels whenever 'showexplanations' was off. 'showexplanations' now
+            # acts as a master switch that also reveals the granular panels.
+            show_expl <- isTRUE(self$options$showexplanations)
             
             # Generate About content
             about_content <- private$.generateAboutContent()
@@ -208,18 +215,20 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Generate other clinical panels if we have data
             if (!is.null(self$options$dep)) {
-                summary_content <- private$.generateSummaryContent()
-                self$results$summary$setContent(summary_content)
+                if (show_expl || isTRUE(self$options$showSummary)) {
+                    self$results$summary$setContent(private$.generateSummaryContent())
+                }
                 
-                interpretation_content <- private$.generateInterpretationContent()
-                self$results$interpretation$setContent(interpretation_content)
+                if (show_expl || isTRUE(self$options$showInterpretation)) {
+                    self$results$interpretation$setContent(private$.generateInterpretationContent())
+                }
                 
                 report_content <- private$.generateReportContent()
                 self$results$report$setContent(report_content)
                 
-                if (!is.null(self$options$group)) {
-                    assumptions_content <- private$.generateAssumptionsContent()
-                    self$results$assumptions$setContent(assumptions_content)
+                if (!is.null(self$options$group) &&
+                    (show_expl || isTRUE(self$options$showAssumptions))) {
+                    self$results$assumptions$setContent(private$.generateAssumptionsContent())
                 }
             }
         },
@@ -388,19 +397,16 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 .('statistical analysis')
             )
             
-            # TODO (correctness): paste() with named args is broken here - the
-            #   `{outcome}/{groups}/{method}` placeholders are NEVER interpolated.
-            #   paste() only respects `sep`/`collapse`; other named args are treated
-            #   as positional values and concatenated with default sep=" ". Result is
-            #   literal `{outcome}` text followed by appended values. Use glue::glue()
-            #   or sprintf() instead to actually interpolate the placeholders.
+            # Interpolate the {outcome}/{groups}/{method} placeholders with glue.
+            # (paste() only honors sep/collapse, so named args were previously
+            # treated as positional values and the placeholders never filled.)
             sample_description <- if (!is.null(self$options$group) && self$options$group != "") {
-                paste(.('We compared {outcome} distributions across {groups} using {method}.'),
+                glue::glue(.('We compared {outcome} distributions across {groups} using {method}.'),
                      outcome = htmltools::htmlEscape(self$options$dep),
                      groups = htmltools::htmlEscape(self$options$group),
                      method = method_name)
             } else {
-                paste(.('We analyzed the distribution of {outcome} using descriptive statistics.'),
+                glue::glue(.('We analyzed the distribution of {outcome} using descriptive statistics.'),
                      outcome = htmltools::htmlEscape(self$options$dep))
             }
             
@@ -1403,9 +1409,14 @@ jjpiestatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 selected_theme <- private$.getPlotTheme()
 
 
-                # Get counts variable if specified
+                # Get counts variable if specified. Pass the column name as a
+                # plain string (ggstatsplot captures `counts` with ensym, which
+                # accepts a string) - matching plot1/plot2. Do NOT use `!!sym()`
+                # here: rlang injection only works inside a data-masking call, so
+                # `!!sym(x)` in this plain assignment parses as `!(!sym(x))` and
+                # errors with "invalid argument type".
                 counts_var <- if (!is.null(options_data$counts) && options_data$counts != "") {
-                    !!rlang::sym(options_data$counts)
+                    options_data$counts
                 } else {
                     NULL
                 }

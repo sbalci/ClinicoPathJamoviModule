@@ -6,6 +6,12 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
     inherit = spikeslabpriorsBase,
     private = list(
         .run = function() {
+            # Reset cached model so an early-return run (missing outcome/predictors,
+            # missing BoomSpikeSlab, or missing Cox time/status) cannot leave a stale
+            # model that the plot renderers (which gate only on is.null(.model_res))
+            # would keep drawing.
+            private$.model_res <- NULL
+
             # 1. Variable validation
             outcome <- self$options$outcome
             predictors <- self$options$predictors
@@ -47,12 +53,8 @@ spikeslabpriorsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cla
                     # 5. Populate Results Tables
                     private$.populateResults(res)
                     
-                    # 6. Store result for plots
-                    # TODO (correctness): I5 stale cache - private$.model_res is set here on success but
-                    #   never reset at the top of .run(); an early-return run (missing outcome/predictors
-                    #   L13, missing BoomSpikeSlab L18, or missing Cox time/status L29) leaves the prior
-                    #   model, which .plotInclusionProbabilities/.plotCoefficients still render (they gate
-                    #   only on is.null(private$.model_res)). Reset to NULL at the start of .run().
+                    # 6. Store result for plots (reset to NULL at the top of .run()
+                    #    guards against stale renders on early-return runs).
                     private$.model_res <- res
                 }
             }, error = function(e) {

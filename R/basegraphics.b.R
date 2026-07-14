@@ -35,12 +35,11 @@
 #'
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @importFrom dplyr select all_of
+#' @importFrom dplyr all_of
 #' @importFrom janitor clean_names
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom haven as_factor
-#' @import magrittr
-
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 basegraphicsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
     "basegraphicsClass",
     inherit = basegraphicsBase,

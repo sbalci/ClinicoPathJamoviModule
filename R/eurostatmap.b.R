@@ -16,7 +16,7 @@
 #' @import eurostat
 #' @importFrom tmap tmap_mode tm_shape tm_fill tm_borders tm_layout
 #' @import sf
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import giscoR
 eurostatmapClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "eurostatmapClass",

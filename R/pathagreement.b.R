@@ -1,9 +1,9 @@
 #' @title Pathology Interrater Reliability Analysis
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import magrittr
+#' @rawNamespace import(magrittr, except = c(extract, set_names))
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @importFrom irr kappa2 kappam.fleiss agree
 #' @importFrom psych ICC
 #' @importFrom htmlTable htmlTable
@@ -1733,41 +1733,46 @@ pathagreementClass <- if (requireNamespace("jmvcore")) {
                 TRUE
             },
 
-            # # Pairwise plot - commented out for future release
-            # .pairwisePlot = function(image, ggtheme, theme, ...) {
-            #     # Placeholder for pairwise agreement plot
-            #     p <- ggplot() +
-            #         geom_text(aes(x = 0.5, y = 0.5, label = "Pairwise Agreement Plot\n(Implementation pending)"),
-            #                  size = 6) +
-            #         xlim(0, 1) + ylim(0, 1) +
-            #         theme_void()
-            #     print(p)
-            #     TRUE
-            # },
+            # Pairwise plot - placeholder (renderFun .pairwisePlot is declared in
+            # .r.yaml with visible:(pairwiseAnalysis); the method MUST exist or
+            # jamovi's do.call(private[[funName]], ...) crashes with
+            # "attempt to apply non-function" when the image becomes visible.
+            .pairwisePlot = function(image, ggtheme, theme, ...) {
+                # Placeholder for pairwise agreement plot
+                p <- ggplot() +
+                    geom_text(aes(x = 0.5, y = 0.5, label = "Pairwise Agreement Plot\n(Implementation pending)"),
+                             size = 6) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    theme_void()
+                print(p)
+                TRUE
+            },
 
-            # # Category plot - commented out for future release
-            # .categoryPlot = function(image, ggtheme, theme, ...) {
-            #     # Placeholder for category agreement plot
-            #     p <- ggplot() +
-            #         geom_text(aes(x = 0.5, y = 0.5, label = "Category Agreement Plot\n(Implementation pending)"),
-            #                  size = 6) +
-            #         xlim(0, 1) + ylim(0, 1) +
-            #         theme_void()
-            #     print(p)
-            #     TRUE
-            # },
+            # Category plot - placeholder (renderFun .categoryPlot declared in
+            # .r.yaml with visible:(categoryAnalysis); method must exist to avoid crash).
+            .categoryPlot = function(image, ggtheme, theme, ...) {
+                # Placeholder for category agreement plot
+                p <- ggplot() +
+                    geom_text(aes(x = 0.5, y = 0.5, label = "Category Agreement Plot\n(Implementation pending)"),
+                             size = 6) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    theme_void()
+                print(p)
+                TRUE
+            },
 
-            # # Confusion matrix plot - commented out for future release
-            # .confusionMatrixPlot = function(image, ggtheme, theme, ...) {
-            #     # Placeholder for confusion matrix plot
-            #     p <- ggplot() +
-            #         geom_text(aes(x = 0.5, y = 0.5, label = "Confusion Matrix Plot\n(Implementation pending)"),
-            #                  size = 6) +
-            #         xlim(0, 1) + ylim(0, 1) +
-            #         theme_void()
-            #     print(p)
-            #     TRUE
-            # },
+            # Confusion matrix plot - placeholder (renderFun .confusionMatrixPlot
+            # declared in .r.yaml with visible:(pathologyContext); method must exist to avoid crash).
+            .confusionMatrixPlot = function(image, ggtheme, theme, ...) {
+                # Placeholder for confusion matrix plot
+                p <- ggplot() +
+                    geom_text(aes(x = 0.5, y = 0.5, label = "Confusion Matrix Plot\n(Implementation pending)"),
+                             size = 6) +
+                    xlim(0, 1) + ylim(0, 1) +
+                    theme_void()
+                print(p)
+                TRUE
+            },
 
             # Diagnostic style dendrogram - Creates hierarchical clustering visualization matching Usubutun et al.
             .diagnosticStyleDendrogram = function(image, ggtheme, theme, ...) {

@@ -3,7 +3,7 @@
 #' @import jmvcore
 #' @import glue
 #' @import ggplot2
-#' @import dplyr
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
 #' @import stats
 #'
@@ -189,6 +189,15 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
                 # Run PCA ----
                 private$.runPCA()
 
+                # Abort cleanly if PCA could not be computed (e.g. fewer than 3
+                # complete observations remain after removing missing values).
+                # The explanatory ERROR notice was already rendered in .runPCA();
+                # continuing would dereference a NULL pca object and crash at the
+                # "components truncated" check (4 > NULL -> if(logical(0))).
+                if (is.null(private$.pcaResults)) {
+                    return()
+                }
+
                 # Informational summary for users ----
                 pca <- private$.pcaResults
                 row_info <- private$.rowInfo
@@ -274,6 +283,11 @@ pcaloadingheatmapClass <- if (requireNamespace("jmvcore")) {
 
                 self$results$todo$setContent(todo)
                 private$.variance()
+
+                # Final render clears stale notices from a previous run when the
+                # current run produces none (e.g. toggling an option not listed in
+                # the notices output's clearWith). Idempotent for added notices.
+                private$.renderNotices()
             },
 
             # Run PCA ----

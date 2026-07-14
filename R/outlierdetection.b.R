@@ -139,12 +139,11 @@
 #' @importFrom ggplot2 ggplot aes labs theme_minimal theme element_text
 #' @importFrom ggplot2 geom_point geom_hline scale_color_manual
 #' @importFrom performance check_outliers
-#' @importFrom dplyr mutate select row_number
+#' @importFrom dplyr mutate row_number
 #' @importFrom htmltools HTML
 #' @importFrom stringr str_to_title
 #' @importFrom dbscan optics lof
 #' @importFrom robustbase covMcd
-
 outlierdetectionClass <- if (requireNamespace("jmvcore")) R6::R6Class("outlierdetectionClass",
     inherit = outlierdetectionBase,
     private = list(

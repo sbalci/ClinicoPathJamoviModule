@@ -132,14 +132,14 @@ synopticcompletenessClass <- R6::R6Class(
         },
 
         .writeCompleteness = function(p) {
-            if (!self$options$addCompletenessToData$isNotFilled) {
+            if (self$results$addCompletenessToData$isNotFilled()) {
                 self$results$addCompletenessToData$setRowNums(rownames(self$data))
                 self$results$addCompletenessToData$setValues(round(100 * p$report_comp, 1))
             }
         },
 
         .summary = function(p) {
-            worst <- p$items[which.min(colMeans(p$pres))]
+            worst <- jmvcore::htmlEscape(p$items[which.min(colMeans(p$pres))])
             html <- glue::glue(
                 "<p>Across <b>{p$nr}</b> reports audited against <b>{p$ni}</b> required elements,
                 mean completeness was <b>{sprintf('%.1f%%', 100*mean(p$report_comp))}</b>, and

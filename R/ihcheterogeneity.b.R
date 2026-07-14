@@ -18,22 +18,6 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
 
         .repro_stats = NULL,
 
-        # TODO (correctness): .escapeVar mangles non-syntactic column names then
-        # uses the mangled name to look up data[[mangled_name]] - silently breaks
-        # variable lookup for any column with spaces/dashes/special chars (callers
-        # at L183, L232, L338 hit `data[[.escapeVar(name)]]` which returns NULL).
-        # Same broken pattern as finegray's .escapeVar (project-wide cleanup needed).
-        # Fix: either remove .escapeVar entirely and let `data[[name]]` use the
-        # original name (jamovi columns retain their literal names), or only use
-        # the mangled name for variable-name display in formulas via
-        # jmvcore::composeTerm(name) for backtick-safe quoting.
-        # Add variable name safety utility
-        .escapeVar = function(x) {
-            # Handle variables with spaces and special characters
-            if (is.null(x) || length(x) == 0) return(x)
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-        },
-
         .calculateRobustCV = function(values) {
             # Robust CV calculation with safeguards against division by near-zero means
             values <- values[!is.na(values)]
@@ -186,7 +170,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             
             # Extract reference data (optional)
             whole_section <- if (!is.null(self$options$wholesection)) {
-                data[[private$.escapeVar(self$options$wholesection)]]
+                data[[self$options$wholesection]]
             } else {
                 NULL
             }
@@ -227,7 +211,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             # Get optional spatial data
             spatial_regions <- NULL
             if (!is.null(self$options$spatial_id)) {
-                spatial_id_var <- private$.escapeVar(self$options$spatial_id)
+                spatial_id_var <- self$options$spatial_id
                 if (spatial_id_var %in% names(data)) {
                     spatial_regions <- data[[spatial_id_var]]
                 } else {
@@ -330,10 +314,7 @@ ihcheterogeneityClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Cl
             additional_cols <- if (!is.null(self$options$biopsies)) self$options$biopsies else c()
             biopsy_columns <- c(unlist(individual_biopsies), additional_cols)
 
-            # Apply variable name safety for column extraction
-            biopsy_columns <- sapply(biopsy_columns, private$.escapeVar, USE.NAMES = FALSE)
-
-            # Create biopsy data matrix
+            # Create biopsy data matrix (jamovi retains literal column names)
             biopsy_data <- data[, biopsy_columns, drop = FALSE]
             
             # Remove rows with all missing biopsy values

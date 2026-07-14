@@ -99,7 +99,8 @@ mantelhaenszelClass <- R6::R6Class(
                     lower_ci = ci_lower,
                     upper_ci = ci_upper,
                     chisq = chisq_i,
-                    p_value = p_value_i
+                    p_value = p_value_i,
+                    var_log_or = se_log_or^2
                 )
             }
 
@@ -145,10 +146,9 @@ mantelhaenszelClass <- R6::R6Class(
             }
 
             # Woolf test for homogeneity
-            weights <- 1 / sapply(stratum_results, function(x) {
-                1 / a[as.numeric(x$stratum)] + 1 / b[as.numeric(x$stratum)] +
-                    1 / c[as.numeric(x$stratum)] + 1 / d[as.numeric(x$stratum)]
-            })
+            # Weight = 1 / Var(ln OR_i); use the per-stratum variance stored above
+            # (indexing a/b/c/d by the stratum *label* fails for non-integer levels).
+            weights <- 1 / sapply(stratum_results, function(x) x$var_log_or)
             log_ors <- sapply(stratum_results, function(x) log(x$estimate))
             woolf_chisq <- sum(weights * (log_ors - log(mh_or))^2)
             woolf_p <- 1 - pchisq(woolf_chisq, n_strata - 1)

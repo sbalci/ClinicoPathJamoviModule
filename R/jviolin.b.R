@@ -5,7 +5,6 @@
 #' @import jmvcore
 #' @import ggplot2
 #' @importFrom dplyr %>%
-
 jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
     "jviolinClass",
     inherit = jviolinBase,
@@ -246,9 +245,16 @@ jviolinClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
         },
 
         .generateExplanations = function() {
+            # Guard: the `explanations` result item must be declared in
+            # jamovi/jviolin.r.yaml. If the compiled header predates that
+            # declaration, self$results$explanations is NULL - skip rather
+            # than crash with "attempt to apply non-function".
+            exp <- self$results$explanations
+            if (is.null(exp))
+                return()
+
             if (self$options$showExplanations) {
-                self$results$explanations$setVisible(TRUE)
-                self$results$explanations$setContent(
+                exp$setContent(
                     "<h3>Explanations</h3>
                     <p>
                         This violin plot shows the distribution of a continuous variable across different groups.

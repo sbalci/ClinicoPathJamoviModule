@@ -100,7 +100,7 @@ graph_info <- function (edgelist, vertices, sorted = FALSE, decreasing = FALSE,
     if (!is.matrix(edgelist) || ncol(edgelist) != 2) 
         stop("\nSorry, 'edgelist' must be a two column matrix")
     num_edges = nrow(edgelist)
-    if (hasArg(vertices)) {
+    if (methods::hasArg(vertices)) {
         nodes = vertices
     }
     else {
@@ -152,7 +152,7 @@ arcplot <- function (edgelist, vertices, sorted = FALSE, decreasing = FALSE,
     adj = NA, padj = NA, axes = FALSE, xlim = NULL, ylim = NULL, 
     ...) 
 {
-    if (hasArg(vertices)) {
+    if (methods::hasArg(vertices)) {
         nodes_edges = graph_info(edgelist, vertices = vertices, 
             sorted = sorted, decreasing = decreasing, ordering = ordering, 
             labels = labels)
@@ -272,15 +272,15 @@ arcplot <- function (edgelist, vertices, sorted = FALSE, decreasing = FALSE,
                 x_arc = radio * sin(-z)
             }
         }
-        lines(x_arc, y_arc, col = col.arcs[i], lwd = lwd.arcs[i], 
+        graphics::lines(x_arc, y_arc, col = col.arcs[i], lwd = lwd.arcs[i], 
             lty = lty.arcs[i], lend = lend, ljoin = ljoin, lmitre = lmitre)
         if (show.nodes) {
-            points(x = x_nodes, y = y_nodes, pch = pch.nodes, 
+            graphics::points(x = x_nodes, y = y_nodes, pch = pch.nodes, 
                 col = col.nodes, bg = bg.nodes, cex = cex.nodes, 
                 lwd = lwd.nodes)
         }
         if (show.labels) {
-            mtext(labels, side = side, line = line, at = centers, 
+            graphics::mtext(labels, side = side, line = line, at = centers, 
                 cex = cex.labels, outer = outer, col = col.labels, 
                 las = las, font = font, adj = adj, padj = padj, 
                 ...)

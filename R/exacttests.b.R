@@ -42,7 +42,7 @@ exacttestsClass <- R6::R6Class(
             if (is.null(self$data))
                 return()
             
-            ready <- self$.checkData()
+            ready <- private$.checkData()
             if (!ready$ready) {
                 if (!is.null(ready$error))
                     jmvcore::reject(ready$error, code = "")
@@ -59,13 +59,13 @@ exacttestsClass <- R6::R6Class(
             ci_level <- self$options$ciWidth / 100
             
             if (test_type == "fisher" && !is.null(rows_var) && !is.null(cols_var)) {
-                self$.runFisherTest(data, rows_var, cols_var, counts_var, alternative, ci_level)
+                private$.runFisherTest(data, rows_var, cols_var, counts_var, alternative, ci_level)
             } else if (test_type == "binomial" && !is.null(rows_var)) {
-                self$.runBinomialTest(data, rows_var, alternative, ci_level)
+                private$.runBinomialTest(data, rows_var, alternative, ci_level)
             } else if (test_type == "mcnemar" && !is.null(rows_var) && !is.null(cols_var)) {
-                self$.runMcNemarTest(data, rows_var, cols_var, alternative)
+                private$.runMcNemarTest(data, rows_var, cols_var, alternative)
             } else if (test_type == "barnard" && !is.null(rows_var) && !is.null(cols_var)) {
-                self$.runBarnardTest(data, rows_var, cols_var, counts_var, alternative, ci_level)
+                private$.runBarnardTest(data, rows_var, cols_var, counts_var, alternative, ci_level)
             }
         },
         
@@ -109,7 +109,7 @@ exacttestsClass <- R6::R6Class(
             
             if (!is.null(result)) {
                 # Update contingency table
-                self$.updateContingencyTable(ct)
+                private$.updateContingencyTable(ct)
                 
                 # Update test results
                 tests <- self$results$tests
@@ -121,7 +121,7 @@ exacttestsClass <- R6::R6Class(
                                      result$conf.int[1], result$conf.int[2], ci_method)
                 }
                 
-                tests$setRow(rowNo = 1, values = list(
+                tests$addRow(rowKey = 1, values = list(
                     test = "Fisher's exact test",
                     value = result$estimate,
                     p = result$p.value,
@@ -169,7 +169,7 @@ exacttestsClass <- R6::R6Class(
                                      result$conf.int[1], result$conf.int[2], ci_method)
                 }
                 
-                tests$setRow(rowNo = 1, values = list(
+                tests$addRow(rowKey = 1, values = list(
                     test = "Exact binomial test",
                     value = result$estimate,
                     p = result$p.value,
@@ -191,16 +191,16 @@ exacttestsClass <- R6::R6Class(
             
             # Run McNemar's exact test
             result <- tryCatch({
-                mcnemar.test(ct)
+                mcnemar.test(ct, correct = self$options$correction)
             }, error = function(e) NULL)
             
             if (!is.null(result)) {
                 # Update contingency table
-                self$.updateContingencyTable(ct)
+                private$.updateContingencyTable(ct)
                 
                 # Update test results
                 tests <- self$results$tests
-                tests$setRow(rowNo = 1, values = list(
+                tests$addRow(rowKey = 1, values = list(
                     test = "Exact McNemar test",
                     value = result$statistic,
                     p = result$p.value
@@ -215,7 +215,7 @@ exacttestsClass <- R6::R6Class(
         .runBarnardTest = function(data, rows_var, cols_var, counts_var, alternative, ci_level) {
             # Note: Barnard's test is computationally intensive
             # For now, we'll fall back to Fisher's test with a note
-            self$.runFisherTest(data, rows_var, cols_var, counts_var, alternative, ci_level)
+            private$.runFisherTest(data, rows_var, cols_var, counts_var, alternative, ci_level)
             
             # Update note to indicate Barnard's test approximation
             note <- self$results$note

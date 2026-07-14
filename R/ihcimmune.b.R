@@ -142,19 +142,22 @@ ihcimmuneClass <- R6::R6Class(
         },
 
 
-        .runTILAnalysis = function() {
+        .performTILAnalysis = function() {
             method <- self$options$tilMethod
-            results <- list()
 
             if (method == "sterlacci") {
-                results <- private$.performSterlacciAnalysis()
+                private$.performSterlacciAnalysis()
             } else if (method == "cd4cd8_ratio") {
-                results <- private$.performCD4CD8Analysis()
+                private$.performCD4CD8Analysis()
             } else if (method == "granzyme_focus") {
-                results <- private$.performGranzymeAnalysis()
+                private$.performGranzymeAnalysis()
             } else {
-                results <- private$.performComprehensiveTILAnalysis()
+                private$.performComprehensiveTILAnalysis()
             }
+        },
+
+        .runTILAnalysis = function() {
+            results <- private$.performTILAnalysis()
 
             # Populate TIL summary table
             table <- self$results$tilSummary
@@ -631,7 +634,7 @@ ihcimmuneClass <- R6::R6Class(
 
         .applyClinicalPresets = function() {
             # Apply tumor-type specific presets based on available markers
-            if (!self$options$immune_markers || length(self$options$immune_markers) == 0) return()
+            if (length(self$options$immune_markers) == 0) return()
 
             markers <- colnames(private$.immune_matrix)
             markers_lower <- tolower(markers)
@@ -743,7 +746,7 @@ ihcimmuneClass <- R6::R6Class(
 
         .generateClinicalReport = function() {
             # Generate copy-ready clinical report
-            if (!self$options$immune_markers || length(self$options$immune_markers) == 0) {
+            if (length(self$options$immune_markers) == 0) {
                 return("<p>No immune markers selected for analysis.</p>")
             }
 

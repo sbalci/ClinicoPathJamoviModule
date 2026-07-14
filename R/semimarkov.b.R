@@ -64,34 +64,34 @@ semimarkovClass <- R6::R6Class(
 
             # Set up educational content
             if (self$options$showEducational) {
-                self$.generateEducationalContent()
+                private$.generateEducationalContent()
             }
 
             # Fit the Semi-Markov model
             tryCatch(
                 {
-                    model_results <- self$.fitSemiMarkovModel(data)
+                    model_results <- private$.fitSemiMarkovModel(data)
 
                     if (!is.null(model_results)) {
                         # Fill results tables
-                        self$.fillModelSummary(model_results)
-                        self$.fillTransitionRates(model_results)
-                        self$.fillSojournDistribution(model_results)
-                        self$.fillTransitionProbabilities(model_results)
-                        self$.fillStateProbabilities(model_results)
+                        private$.fillModelSummary(model_results)
+                        private$.fillTransitionRates(model_results)
+                        private$.fillSojournDistribution(model_results)
+                        private$.fillTransitionProbabilities(model_results)
+                        private$.fillStateProbabilities(model_results)
 
                         if (self$options$showReliabilityAnalysis) {
-                            self$.fillReliabilityAnalysis(model_results)
+                            private$.fillReliabilityAnalysis(model_results)
                         }
 
                         if (length(covs) > 0) {
-                            self$.fillCovariateEffects(model_results)
+                            private$.fillCovariateEffects(model_results)
                         }
 
-                        self$.fillModelDiagnostics(model_results)
-                        self$.fillPredictions(model_results)
-                        self$.generateMethodsInfo()
-                        self$.generateInterpretationGuide()
+                        private$.fillModelDiagnostics(model_results)
+                        private$.fillPredictions(model_results)
+                        private$.generateMethodsInfo()
+                        private$.generateInterpretationGuide()
 
                         # Store results for plotting
                         # TODO (correctness): I5 stale cache - private$.model_results is set here on
@@ -117,7 +117,7 @@ semimarkovClass <- R6::R6Class(
             estimation_method <- self$options$estimationMethod
 
             # Prepare data
-            sm_data <- self$.prepareSemiMarkovData(data)
+            sm_data <- private$.prepareSemiMarkovData(data)
 
             if (is.null(sm_data)) {
                 return(NULL)
@@ -125,15 +125,15 @@ semimarkovClass <- R6::R6Class(
 
             # Fit model based on type
             if (model_type == "parametric") {
-                model <- self$.fitParametricSemiMarkov(sm_data)
+                model <- private$.fitParametricSemiMarkov(sm_data)
             } else if (model_type == "nonparametric") {
-                model <- self$.fitNonParametricSemiMarkov(sm_data)
+                model <- private$.fitNonParametricSemiMarkov(sm_data)
             } else if (model_type == "regression") {
-                model <- self$.fitRegressionSemiMarkov(sm_data)
+                model <- private$.fitRegressionSemiMarkov(sm_data)
             } else if (model_type == "competing") {
-                model <- self$.fitCompetingSemiMarkov(sm_data)
+                model <- private$.fitCompetingSemiMarkov(sm_data)
             } else {
-                model <- self$.fitMultiphaseSemiMarkov(sm_data)
+                model <- private$.fitMultiphaseSemiMarkov(sm_data)
             }
 
             return(model)
@@ -181,45 +181,45 @@ semimarkovClass <- R6::R6Class(
                 {
                     # Check if SemiMarkov package is available
                     if (!requireNamespace("SemiMarkov", quietly = TRUE)) {
-                        return(self$.generateMockSemiMarkovResults("parametric"))
+                        return(private$.generateMockSemiMarkovResults("parametric"))
                     }
 
                     # Generate mock results for demonstration
-                    model_result <- self$.generateMockSemiMarkovResults("parametric")
+                    model_result <- private$.generateMockSemiMarkovResults("parametric")
                     model_result$data <- sm_data
                     model_result$n_states <- length(unique(sm_data$state))
 
                     return(model_result)
                 },
                 error = function(e) {
-                    return(self$.generateMockSemiMarkovResults("parametric"))
+                    return(private$.generateMockSemiMarkovResults("parametric"))
                 }
             )
         },
         .fitNonParametricSemiMarkov = function(sm_data) {
             # Fit non-parametric Semi-Markov model
-            model_result <- self$.generateMockSemiMarkovResults("nonparametric")
+            model_result <- private$.generateMockSemiMarkovResults("nonparametric")
             model_result$data <- sm_data
             model_result$n_states <- length(unique(sm_data$state))
             return(model_result)
         },
         .fitRegressionSemiMarkov = function(sm_data) {
             # Fit Semi-Markov regression model
-            model_result <- self$.generateMockSemiMarkovResults("regression")
+            model_result <- private$.generateMockSemiMarkovResults("regression")
             model_result$data <- sm_data
             model_result$n_states <- length(unique(sm_data$state))
             return(model_result)
         },
         .fitCompetingSemiMarkov = function(sm_data) {
             # Fit competing risks Semi-Markov model
-            model_result <- self$.generateMockSemiMarkovResults("competing")
+            model_result <- private$.generateMockSemiMarkovResults("competing")
             model_result$data <- sm_data
             model_result$n_states <- length(unique(sm_data$state))
             return(model_result)
         },
         .fitMultiphaseSemiMarkov = function(sm_data) {
             # Fit multi-phase Semi-Markov model
-            model_result <- self$.generateMockSemiMarkovResults("multiphase")
+            model_result <- private$.generateMockSemiMarkovResults("multiphase")
             model_result$data <- sm_data
             model_result$n_states <- length(unique(sm_data$state))
             return(model_result)

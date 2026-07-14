@@ -182,6 +182,9 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             num_knots <- self$options$num_knots
             degree <- as.numeric(self$options$spline_degree)
             scale <- self$options$hazard_scale
+            # flexsurvspline() names the log cumulative-hazard scale "hazard"
+            # (Royston-Parmar proportional hazards); "log" is not a valid value.
+            if (scale == "log") scale <- "hazard"
             explanatory <- self$options$explanatory
             
             # Build formula
@@ -197,14 +200,14 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             knots <- private$.determineKnots(data, knots_method, num_knots)
             
             # Fit main model with flexsurvspline
+            # flexsurvspline expects knots on the log-time axis (timescale = "log")
             best_model <- flexsurv::flexsurvspline(
                 formula = formula_obj,
                 data = data,
                 k = length(knots$internal),
-                knots = knots$internal,
-                bknots = knots$boundary,
-                scale = scale,
-                inits = NULL
+                knots = log(knots$internal),
+                bknots = log(knots$boundary),
+                scale = scale
             )
             
             # Model comparison if requested
@@ -267,6 +270,9 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             # Try different numbers of knots and select best by AIC
             formula_obj <- as.formula("Surv(time, event) ~ 1")
             scale <- self$options$hazard_scale
+            # flexsurvspline() names the log cumulative-hazard scale "hazard"
+            # (Royston-Parmar proportional hazards); "log" is not a valid value.
+            if (scale == "log") scale <- "hazard"
             
             best_aic <- Inf
             best_knots <- NULL
@@ -283,7 +289,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         formula = formula_obj,
                         data = data,
                         k = k,
-                        knots = as.numeric(knots),
+                        knots = log(as.numeric(knots)),
                         scale = scale
                     )
                     
@@ -333,7 +339,7 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                         formula = formula_obj,
                         data = data,
                         k = k,
-                        knots = as.numeric(knots),
+                        knots = log(as.numeric(knots)),
                         scale = scale
                     )
                     
@@ -394,8 +400,10 @@ splinehazardClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             table <- self$results$parametersTable
             
-            # Get parameter estimates and confidence intervals
-            coef_summary <- summary(model)$t
+            # Get parameter estimates on the transformed (estimation) scale.
+            # summary() returns fitted survival curves, not coefficients;
+            # model$res.t holds the parameter matrix (cols "est"/"se").
+            coef_summary <- model$res.t
             conf_level <- self$options$confidence_level
             
             # Extract parameter information

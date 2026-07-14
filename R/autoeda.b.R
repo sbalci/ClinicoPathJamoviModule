@@ -12,10 +12,9 @@
 #' @importFrom ggplot2 theme_minimal theme_classic theme_bw ggtitle ggplot aes geom_histogram geom_boxplot geom_point
 #' @importFrom ggplot2 geom_density geom_bar facet_wrap labs theme_void coord_flip scale_fill_viridis_d
 #' @importFrom stringr str_to_title str_detect str_replace_all
-#' @importFrom dplyr select filter mutate summarise group_by arrange
+#' @importFrom dplyr filter mutate summarise group_by arrange
 #' @importFrom tidyr pivot_longer gather
 #' @importFrom viridis scale_color_viridis scale_fill_viridis
-
 autoedaClass <- if (requireNamespace("jmvcore")) R6::R6Class("autoedaClass",
     inherit = autoedaBase,
     private = list(

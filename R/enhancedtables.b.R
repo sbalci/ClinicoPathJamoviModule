@@ -19,7 +19,7 @@
 #' @importFrom gt opt_row_striping
 #' @importFrom gt cols_align
 #' @importFrom gt tab_options
-#' @importFrom dplyr select
+
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @importFrom dplyr mutate
@@ -147,10 +147,11 @@ enhancedtablesClass <- if (requireNamespace("jmvcore")) R6::R6Class(
             # Clean and prepare data
             processed_data <- raw_data
             
-            # Clean variable names
-            if (requireNamespace("janitor", quietly = TRUE)) {
-                processed_data <- janitor::clean_names(processed_data)
-            }
+            # NOTE: janitor::clean_names() intentionally NOT applied here.
+            # It rewrites column names (e.g. "Age" -> "age"), but all downstream
+            # code selects/accesses columns by the ORIGINAL option names
+            # (self$options$vars / group_var / strata_var). Cleaning the names
+            # first breaks selection with "undefined columns selected".
             
             # Select only requested variables
             selected_vars <- self$options$vars

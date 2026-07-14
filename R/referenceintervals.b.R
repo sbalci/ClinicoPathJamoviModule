@@ -52,14 +52,18 @@ referenceintervalsClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6
 
             # 4. Perform Calculations
             
-            # Parse percentiles
+            # Parse percentiles (robust to malformed input)
             probs_str <- self$options$reference_percentiles
-            probs <- as.numeric(strsplit(probs_str, ",")[[1]]) / 100
-            if (length(probs) < 2) probs <- c(0.025, 0.975)
-            # TODO (correctness): a malformed reference_percentiles entry (e.g. "abc" or "2.5,x")
-            # parses to NA via as.numeric(); the length<2 guard above does NOT catch NA values, so
-            # quantile(x, probs = c(NA, ...)) errors later. Validate here - drop/reject NAs and
-            # values outside [0,1], fall back to c(0.025, 0.975), and surface a user notice.
+            probs <- suppressWarnings(as.numeric(strsplit(probs_str, ",")[[1]])) / 100
+            # Drop NA / out-of-range entries so quantile() cannot receive NA or values outside
+            # [0,1]; fall back to CLSI 2.5/97.5 defaults if fewer than two valid probabilities
+            # remain, otherwise use the lowest/highest as the RI limits.
+            probs <- probs[is.finite(probs) & probs > 0 & probs < 1]
+            if (length(probs) < 2) {
+                probs <- c(0.025, 0.975)
+            } else {
+                probs <- range(probs)
+            }
 
             method <- self$options$ri_method
             

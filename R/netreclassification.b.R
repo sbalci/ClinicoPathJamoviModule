@@ -261,16 +261,22 @@ netreclassificationClass <- R6::R6Class(
         },
 
         .calculateCategoricalNRI = function(outcome, baseline_cats, new_cats) {
+            # Compare ordinal risk-category positions via integer codes.
+            # cut() returns UNORDERED factors; ">"/"<" on factors returns NA
+            # (with a warning), which would make every count collapse to 0.
+            baseline_idx <- as.integer(baseline_cats)
+            new_idx <- as.integer(new_cats)
+
             # Calculate NRI for events
             events_idx <- which(outcome == 1)
-            events_improved <- sum(new_cats[events_idx] > baseline_cats[events_idx], na.rm = TRUE)
-            events_worsened <- sum(new_cats[events_idx] < baseline_cats[events_idx], na.rm = TRUE)
+            events_improved <- sum(new_idx[events_idx] > baseline_idx[events_idx], na.rm = TRUE)
+            events_worsened <- sum(new_idx[events_idx] < baseline_idx[events_idx], na.rm = TRUE)
             events_nri <- (events_improved - events_worsened) / length(events_idx)
 
             # Calculate NRI for non-events
             nonevents_idx <- which(outcome == 0)
-            nonevents_improved <- sum(new_cats[nonevents_idx] < baseline_cats[nonevents_idx], na.rm = TRUE)
-            nonevents_worsened <- sum(new_cats[nonevents_idx] > baseline_cats[nonevents_idx], na.rm = TRUE)
+            nonevents_improved <- sum(new_idx[nonevents_idx] < baseline_idx[nonevents_idx], na.rm = TRUE)
+            nonevents_worsened <- sum(new_idx[nonevents_idx] > baseline_idx[nonevents_idx], na.rm = TRUE)
             nonevents_nri <- (nonevents_improved - nonevents_worsened) / length(nonevents_idx)
 
             # Total NRI
@@ -364,19 +370,23 @@ netreclassificationClass <- R6::R6Class(
         },
 
         .decomposeNRI = function(outcome, baseline_cats, new_cats) {
-            # Detailed decomposition analysis
+            # Detailed decomposition analysis.
+            # Compare via integer codes: cut() returns UNORDERED factors, so
+            # ">"/"<" on the factors themselves returns NA and undercounts.
+            baseline_idx <- as.integer(baseline_cats)
+            new_idx <- as.integer(new_cats)
             events_idx <- which(outcome == 1)
             nonevents_idx <- which(outcome == 0)
 
             # Movement analysis for events
-            events_up <- sum(new_cats[events_idx] > baseline_cats[events_idx], na.rm = TRUE)
-            events_down <- sum(new_cats[events_idx] < baseline_cats[events_idx], na.rm = TRUE)
-            events_same <- sum(new_cats[events_idx] == baseline_cats[events_idx], na.rm = TRUE)
+            events_up <- sum(new_idx[events_idx] > baseline_idx[events_idx], na.rm = TRUE)
+            events_down <- sum(new_idx[events_idx] < baseline_idx[events_idx], na.rm = TRUE)
+            events_same <- sum(new_idx[events_idx] == baseline_idx[events_idx], na.rm = TRUE)
 
             # Movement analysis for non-events
-            nonevents_up <- sum(new_cats[nonevents_idx] > baseline_cats[nonevents_idx], na.rm = TRUE)
-            nonevents_down <- sum(new_cats[nonevents_idx] < baseline_cats[nonevents_idx], na.rm = TRUE)
-            nonevents_same <- sum(new_cats[nonevents_idx] == baseline_cats[nonevents_idx], na.rm = TRUE)
+            nonevents_up <- sum(new_idx[nonevents_idx] > baseline_idx[nonevents_idx], na.rm = TRUE)
+            nonevents_down <- sum(new_idx[nonevents_idx] < baseline_idx[nonevents_idx], na.rm = TRUE)
+            nonevents_same <- sum(new_idx[nonevents_idx] == baseline_idx[nonevents_idx], na.rm = TRUE)
 
             return(list(
                 events = list(up = events_up, down = events_down, same = events_same),

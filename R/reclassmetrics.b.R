@@ -88,23 +88,15 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .prepareData = function() {
-            # Get data
-            # TODO (data hygiene): column matching relies on janitor::clean_names() (whole frame)
-            # and janitor::make_clean_names() (each option name, below) producing identical results.
-            # Two distinct source columns can clean to the same name (collision), or a name can clean
-            # differently in the two calls, silently yielding NULL / wrong columns. Prefer indexing
-            # self$data by the raw self$options$X (jmvcore idiom) instead of janitor name-cleaning.
-            mydata <- self$data %>% janitor::clean_names()
-
-            # Get variable names
-            outcome_var <- janitor::make_clean_names(self$options$outcome)
-            old_prob_var <- janitor::make_clean_names(self$options$oldModelProb)
-            new_prob_var <- janitor::make_clean_names(self$options$newModelProb)
+            # Extract columns by their raw variable names (jmvcore idiom). Indexing self$data
+            # directly avoids janitor name-cleaning collisions/divergence and preserves the
+            # labelled level attributes needed for correct factor handling below.
+            mydata <- self$data
 
             # Extract vectors
-            outcome_vec <- mydata[[outcome_var]]
-            old_prob <- mydata[[old_prob_var]]
-            new_prob <- mydata[[new_prob_var]]
+            outcome_vec <- mydata[[self$options$outcome]]
+            old_prob <- mydata[[self$options$oldModelProb]]
+            new_prob <- mydata[[self$options$newModelProb]]
 
             # Validate probabilities
             if (any(old_prob < 0, na.rm = TRUE) || any(old_prob > 1, na.rm = TRUE)) {
@@ -117,7 +109,10 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # For binary outcome, ensure it's 0/1
             if (self$options$outcomeType == "binary") {
                 if (is.factor(outcome_vec)) {
-                    outcome_vec <- jmvcore::toNumeric(outcome_vec) - 1
+                    # Use integer level codes (1..k), NOT jmvcore::toNumeric(): toNumeric returns the
+                    # labelled *values* (e.g. 0/1 for a 0/1-coded factor), so subtracting 1 would yield
+                    # -1/0 and reject the analysis. as.integer() always gives 1..k -> second level = 1 = event.
+                    outcome_vec <- as.integer(outcome_vec) - 1
                 }
                 if (!all(outcome_vec %in% c(0, 1))) {
                     jmvcore::reject("Binary outcome must be 0/1 or a factor with 2 levels")
@@ -130,8 +125,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     jmvcore::reject("Survival time is required for survival outcome analysis")
                 }
 
-                time_var <- janitor::make_clean_names(self$options$survivalTime)
-                time_vec <- mydata[[time_var]]
+                time_vec <- mydata[[self$options$survivalTime]]
 
                 if (any(time_vec <= 0, na.rm = TRUE)) {
                     jmvcore::reject("Survival times must be positive")
@@ -377,11 +371,9 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .bootstrapNRI = function(outcome, old_prob, new_prob, cutoffs) {
-            # TODO (UX): nBootstrap is hard-capped at 500 here (and identically in
-            # .bootstrapContinuousNRI and .bootstrapIDI), but reclassmetrics.a.yaml lets the user
-            # set up to 2000 - any value above 500 is silently ignored. Either honour the option
-            # (drop the min(), or cap at the .a.yaml max) or lower the .a.yaml max to 500.
-            n_boot <- min(self$options$nBootstrap, 500)
+            # Honour the user-specified number of bootstrap samples (bounded 100-2000 by .a.yaml);
+            # progress is yielded via .checkpoint() inside the loop.
+            n_boot <- self$options$nBootstrap
             n <- length(outcome)
             nri_boot <- numeric(n_boot)
 
@@ -411,7 +403,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .bootstrapContinuousNRI = function(outcome, old_prob, new_prob) {
-            n_boot <- min(self$options$nBootstrap, 500)
+            n_boot <- self$options$nBootstrap
             n <- length(outcome)
             nri_boot <- numeric(n_boot)
 
@@ -440,7 +432,7 @@ reclassmetricsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         .bootstrapIDI = function(outcome, old_prob, new_prob) {
-            n_boot <- min(self$options$nBootstrap, 500)
+            n_boot <- self$options$nBootstrap
             n <- length(outcome)
             idi_boot <- numeric(n_boot)
 

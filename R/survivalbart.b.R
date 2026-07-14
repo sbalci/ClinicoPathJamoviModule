@@ -151,13 +151,11 @@ survivalbartClass <- R6::R6Class(
 
             # Prepare survival object
             time_values <- as.numeric(analysis_data[[time_var]])
-            # TODO (correctness): `event` is permitted [factor, numeric] (.a.yaml). For a
-            # FACTOR event with levels c("0","1"), as.numeric() returns level INDICES c(1,2),
-            # not the 0/1 codes - corrupting n_events (sum at ~L177), the event rate
-            # (mean at ~L450), and BART censoring. Switch to jmvcore::toNumeric() (honors the
-            # jamovi `values` attribute → correct 0/1). Behavior-risk: changes output for
-            # factor-coded event columns, so verify against a 0/1-factor test dataset first.
-            event_values <- as.numeric(analysis_data[[event_var]])
+            # `event` is permitted [factor, numeric] (.a.yaml). as.numeric() on a FACTOR with
+            # levels c("0","1") returns level INDICES c(1,2), not the 0/1 codes. jmvcore::toNumeric()
+            # converts the level LABELS ("0"/"1" -> 0/1) and passes numeric input through unchanged,
+            # so n_events (sum) and the event rate (mean) are correct for both storage types.
+            event_values <- jmvcore::toNumeric(analysis_data[[event_var]])
             
             if (any(time_values <= 0, na.rm = TRUE)) {
                 self$results$instructions$setContent(

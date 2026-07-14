@@ -14,8 +14,7 @@
 #' @importFrom jmvcore .
 #' @import jmvcore
 #' @import ggplot2
-#' @import dplyr
-
+#' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 # Provide a safe fallback for the translation helper used as .("text")
 # In environments where jmvcore's translator isn't available, treat it as identity
 if (!exists(".") || !is.function(get(".", inherits = TRUE))) {
