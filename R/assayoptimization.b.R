@@ -3,12 +3,7 @@
 #' @importFrom stats lm anova aov model.matrix residuals fitted predict
 #' @importFrom stats qt qnorm qf pf pt pnorm
 #' @importFrom stats median mad IQR quantile sd var
-#' @importFrom DoE.base fac.design oa.design
-#' @importFrom rsm ccd bbd rsm
 #' @importFrom pwr pwr.f2.test pwr.t.test pwr.anova.test
-#' @importFrom car Anova leveneTest
-#' @importFrom emmeans emmeans contrast
-# TODO (cleanup): The DoE.base, rsm, car, and emmeans @importFrom directives above import functions that the body never calls (no fac.design / oa.design / ccd / bbd / Anova / leveneTest / emmeans / contrast usage). They force unnecessary hard dependencies and load-time cost. Either drop the unused imports, or wire those packages into the analyses they were intended for (e.g., car::Anova for the ANOVA in .analyzeFactorEffects, emmeans for post-hoc contrasts in .performOptimization).
 #' @export
 #' @return An \code{R6} class generator object for the \code{assayoptimizationClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 assayoptimizationClass <- R6::R6Class(
