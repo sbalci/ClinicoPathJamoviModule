@@ -18,18 +18,30 @@ items:
     - name: formatInfo
       title: 'Format Detection'
       type: Html
+      clearWith:
+         - datetime_var
+         - datetime_format
 
     - name: qualityMetrics
       title: 'Quality Assessment'
       type: Html
+      clearWith:
+         - datetime_var
+         - datetime_format
 
     - name: previewTable
       title: 'Conversion Preview'
       type: Html
+      clearWith:
+         - datetime_var
+         - datetime_format
 
     - name: componentPreview
       title: 'Extracted Components Preview'
       type: Html
+      clearWith:
+         - datetime_var
+         - datetime_format
 
     - name: qualityAssessment
       title: 'Data Quality Assessment'
@@ -64,6 +76,7 @@ items:
       measureType: nominal
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: corrected_datetime_numeric
@@ -74,6 +87,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: year_out
@@ -84,6 +98,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: month_out
@@ -95,6 +110,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
           - month_out
 
@@ -124,6 +140,7 @@ items:
       measureType: nominal
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
           - monthname_out
 
@@ -135,6 +152,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
 
@@ -146,6 +164,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: minute_out
@@ -156,6 +175,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: second_out
@@ -166,6 +186,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: dayname_out
@@ -176,6 +197,7 @@ items:
       measureType: nominal
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: weeknum_out
@@ -186,6 +208,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: quarter_out
@@ -196,6 +219,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
     - name: dayofyear_out
@@ -206,6 +230,7 @@ items:
       measureType: continuous
       clearWith:
           - datetime_var
+          - timezone
           - datetime_format
 
 refs:

@@ -25,15 +25,6 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     "datetimeconverterClass",
     inherit = datetimeconverterBase,
     private = list(
-        .rOutputRequests = NULL,
-
-        # Track R-specific output requests
-        .isOutputRequested = function(name) {
-            if (is.null(private$.rOutputRequests))
-                return(FALSE)
-            isTRUE(private$.rOutputRequests[[name]])
-        },
-
         # Initialize notice collection list
         .noticeList = list(),
 
@@ -207,6 +198,12 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ymd_hm = "YYYY-MM-DD HH:MM",
                 dmy_hm = "DD-MM-YYYY HH:MM",
                 mdy_hm = "MM-DD-YYYY HH:MM",
+                ymdhms = "YYYY-MM-DD HH:MM:SS",
+                dmyhms = "DD-MM-YYYY HH:MM:SS",
+                mdyhms = "MM-DD-YYYY HH:MM:SS",
+                ymdhm = "YYYY-MM-DD HH:MM",
+                dmyhm = "DD-MM-YYYY HH:MM",
+                mdyhm = "MM-DD-YYYY HH:MM",
                 ydm = "YYYY-DD-MM",
                 myd = "MM-YYYY-DD",
                 dym = "DD-YYYY-MM",
@@ -634,9 +631,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 NA_real_
             }
 
-            # Ambiguity: parsed values that differ between dmy/mdy when both succeed
-            ambiguity_flag <- logical(length(parsed))
-            # Placeholder: rely on ambiguousFormatDetected notice; mark any NA parsed as potential failure
+            # Note: DMY/MDY ambiguity is surfaced via the .warnAmbiguousFormat notice,
+            # so no per-observation ambiguity metric is computed here.
 
             quality_metrics <- list(
                 total_observations = total_obs,
@@ -644,7 +640,6 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 successfully_parsed = successful,
                 failed_parsing = failed_parsing,
                 success_rate = success_rate,
-                ambiguous = sum(ambiguity_flag, na.rm = TRUE),
                 min_datetime = if (successful > 0) min(parsed, na.rm = TRUE) else NA,
                 max_datetime = if (successful > 0) max(parsed, na.rm = TRUE) else NA
             )
@@ -951,14 +946,15 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # CLINICIAN-FRIENDLY PANEL METHODS
         # ===================================================================
 
-        .populateQualityAssessment = function(quality, parsed_dates) {
+        .populateQualityAssessment = function(quality, parsed_dates, misuse_warnings = NULL) {
             # Populate quality assessment panel (controlled by checkbox)
             if (!self$options$show_quality_metrics) {
                 return()
             }
 
-            # Detect misuse warnings
-            misuse_warnings <- private$.detectMisuse(parsed_dates)
+            # Detect misuse warnings (reuse the value computed in .run when supplied)
+            if (is.null(misuse_warnings))
+                misuse_warnings <- private$.detectMisuse(parsed_dates)
 
             # Calculate percentages
             missing_pct <- if (quality$total_observations > 0) {
@@ -968,7 +964,9 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Generate quality summary
-            quality_summary <- if (quality$success_rate >= 95) {
+            quality_summary <- if (is.na(quality$success_rate)) {
+                "N/A (no non-missing values)"
+            } else if (quality$success_rate >= 95) {
                 "Excellent (\u226595% success)"
             } else if (quality$success_rate >= 80) {
                 "Good (80-94% success)"
@@ -1309,18 +1307,8 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             private$.updateOutputTitles(datetime_var)
 
-            # Validate datetime variable is selected
-            if (is.null(datetime_var) || length(datetime_var) == 0 || datetime_var == "") {
-                private$.addNotice(
-                    type = "ERROR",
-                    title = "No Variable Selected",
-                    content = 'No datetime variable selected. \u2022 Please select a variable containing datetime information from the left panel. \u2022 Use the "DateTime Variable" dropdown to choose a column.'
-                )
-                private$.renderNotices()
-                return()
-            }
-
             # Validate datetime variable exists in dataset
+            # (null/empty selection is already handled by the welcome-message guard above)
             if (!datetime_var %in% names(data)) {
                 available_vars <- names(data)
                 available_preview <- if (length(available_vars) > 10) {
@@ -1350,10 +1338,6 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
                 private$.renderNotices()
                 return()
-            }
-
-            if (! datetime_var %in% names(data)) {
-                jmvcore::reject("The selected datetime variable '{}' was not found in the dataset.", datetime_var)
             }
 
             # Prepare datetime values for parsing
@@ -1404,7 +1388,16 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 } else {
                     detected_format <- self$options$datetime_format
                 }
-                parsed_dates <- private$.parseDatetime(parsing_vector, detected_format, tz = tz_to_use)
+                if (identical(detected_format, "unsure")) {
+                    # Auto-detection could not resolve a format; the "Format Detection
+                    # Failed" WARNING has already been queued. Skip parsing rather than
+                    # passing "unsure" to .getParser() (which would stop() and emit a
+                    # confusing developer-flavoured error notice).
+                    parsed_dates <- as.POSIXct(rep(NA_real_, length(parsing_vector)),
+                                               origin = "1970-01-01", tz = tz_to_use)
+                } else {
+                    parsed_dates <- private$.parseDatetime(parsing_vector, detected_format, tz = tz_to_use)
+                }
             }
 
             # Assess quality
@@ -1458,6 +1451,18 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "ymd_hms" = "YYYY-MM-DD HH:MM:SS",
                 "dmy_hms" = "DD-MM-YYYY HH:MM:SS",
                 "mdy_hms" = "MM-DD-YYYY HH:MM:SS",
+                "ymd_hm" = "YYYY-MM-DD HH:MM",
+                "dmy_hm" = "DD-MM-YYYY HH:MM",
+                "mdy_hm" = "MM-DD-YYYY HH:MM",
+                "ymdhms" = "YYYY-MM-DD HH:MM:SS",
+                "dmyhms" = "DD-MM-YYYY HH:MM:SS",
+                "mdyhms" = "MM-DD-YYYY HH:MM:SS",
+                "ymdhm" = "YYYY-MM-DD HH:MM",
+                "dmyhm" = "DD-MM-YYYY HH:MM",
+                "mdyhm" = "MM-DD-YYYY HH:MM",
+                "ydm" = "YYYY-DD-MM",
+                "myd" = "MM-YYYY-DD",
+                "dym" = "DD-YYYY-MM",
                 "ymd" = "YYYY-MM-DD",
                 "dmy" = "DD-MM-YYYY",
                 "mdy" = "MM-DD-YYYY",
@@ -1466,6 +1471,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "posixct" = "Already formatted POSIXct/POSIXt",
                 "date" = "R Date class (converted to midnight)",
                 "preparsed" = "Pre-parsed datetime values",
+                "unsure" = "Undetermined (please specify the format manually)",
                 detected_format
             )
 
@@ -1579,7 +1585,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Use isNotFilled() to prevent duplicate writes
 
             # Add corrected datetime as character
-            if ((self$options$corrected_datetime_char || private$.isOutputRequested('corrected_datetime_char')) &&
+            if ((self$options$corrected_datetime_char) &&
                 self$results$corrected_datetime_char$isNotFilled()) {
                 self$results$corrected_datetime_char$setRowNums(rownames(data))
                 self$results$corrected_datetime_char$setValues(
@@ -1588,7 +1594,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add corrected datetime as numeric
-            if ((self$options$corrected_datetime_numeric || private$.isOutputRequested('corrected_datetime_numeric')) &&
+            if ((self$options$corrected_datetime_numeric) &&
                 self$results$corrected_datetime_numeric$isNotFilled()) {
                 self$results$corrected_datetime_numeric$setRowNums(rownames(data))
                 corrected_numeric <- as.numeric(parsed_dates)
@@ -1596,17 +1602,17 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Add component outputs
-            if ((self$options$year_out || private$.isOutputRequested('year_out')) && self$results$year_out$isNotFilled()) {
+            if ((self$options$year_out) && self$results$year_out$isNotFilled()) {
                 self$results$year_out$setRowNums(rownames(data))
                 self$results$year_out$setValues(as.numeric(components$year))
             }
 
-            if ((self$options$month_out || private$.isOutputRequested('month_out')) && self$results$month_out$isNotFilled()) {
+            if ((self$options$month_out) && self$results$month_out$isNotFilled()) {
                 self$results$month_out$setRowNums(rownames(data))
                 self$results$month_out$setValues(as.numeric(components$month))
             }
 
-            if ((self$options$monthname_out || private$.isOutputRequested('monthname_out')) &&
+            if ((self$options$monthname_out) &&
                 self$results$monthname_out$isNotFilled()) {
                 self$results$monthname_out$setRowNums(rownames(data))
                 self$results$monthname_out$setValues(
@@ -1614,27 +1620,27 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            if ((self$options$day_out || private$.isOutputRequested('day_out')) && self$results$day_out$isNotFilled()) {
+            if ((self$options$day_out) && self$results$day_out$isNotFilled()) {
                 self$results$day_out$setRowNums(rownames(data))
                 self$results$day_out$setValues(as.numeric(components$day))
             }
 
-            if ((self$options$hour_out || private$.isOutputRequested('hour_out')) && self$results$hour_out$isNotFilled()) {
+            if ((self$options$hour_out) && self$results$hour_out$isNotFilled()) {
                 self$results$hour_out$setRowNums(rownames(data))
                 self$results$hour_out$setValues(as.numeric(components$hour))
             }
 
-            if ((self$options$minute_out || private$.isOutputRequested('minute_out')) && self$results$minute_out$isNotFilled()) {
+            if ((self$options$minute_out) && self$results$minute_out$isNotFilled()) {
                 self$results$minute_out$setRowNums(rownames(data))
                 self$results$minute_out$setValues(as.numeric(components$minute))
             }
 
-            if ((self$options$second_out || private$.isOutputRequested('second_out')) && self$results$second_out$isNotFilled()) {
+            if ((self$options$second_out) && self$results$second_out$isNotFilled()) {
                 self$results$second_out$setRowNums(rownames(data))
                 self$results$second_out$setValues(as.numeric(components$second))
             }
 
-            if ((self$options$dayname_out || private$.isOutputRequested('dayname_out')) &&
+            if ((self$options$dayname_out) &&
                 self$results$dayname_out$isNotFilled()) {
                 self$results$dayname_out$setRowNums(rownames(data))
                 self$results$dayname_out$setValues(
@@ -1642,19 +1648,19 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 )
             }
 
-            if ((self$options$weeknum_out || private$.isOutputRequested('weeknum_out')) &&
+            if ((self$options$weeknum_out) &&
                 self$results$weeknum_out$isNotFilled()) {
                 self$results$weeknum_out$setRowNums(rownames(data))
                 self$results$weeknum_out$setValues(as.numeric(components$weeknum))
             }
 
-            if ((self$options$quarter_out || private$.isOutputRequested('quarter_out')) &&
+            if ((self$options$quarter_out) &&
                 self$results$quarter_out$isNotFilled()) {
                 self$results$quarter_out$setRowNums(rownames(data))
                 self$results$quarter_out$setValues(as.numeric(components$quarter))
             }
 
-            if ((self$options$dayofyear_out || private$.isOutputRequested('dayofyear_out')) &&
+            if ((self$options$dayofyear_out) &&
                 self$results$dayofyear_out$isNotFilled()) {
                 self$results$dayofyear_out$setRowNums(rownames(data))
                 self$results$dayofyear_out$setValues(as.numeric(components$dayofyear))
@@ -1682,7 +1688,7 @@ datetimeconverterClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
 
             # Populate new clinician-friendly panels
-            private$.populateQualityAssessment(quality, parsed_dates)
+            private$.populateQualityAssessment(quality, parsed_dates, misuse_warnings)
             private$.populateNaturalLanguageSummary(datetime_var, detected_format,
                                                      quality, components, tz_summary)
             private$.populateExplanatoryPanels()
