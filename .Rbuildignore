@@ -226,3 +226,5 @@
 ^tr/R$
 ^tr/jamovi$
 ^jamovi_modules$
+^MERGED_NEEDS_TESTING\.md$
+^backlog\.json$
