@@ -86,6 +86,64 @@ be verified against reference datasets before release.
   the sort and minimum-size options apply only to the ComplexUpset engine; corrected the About text;
   completed `clearWith` for styling options; removed dead code.
 
+### jjstatsplot
+
+- **Scatter Plot (`jjscatterstats`):** surfaced the previously-declared but unrendered warnings panel;
+  corrected the `point.size`/`point.alpha`/`size` arguments to the current ggstatsplot API; used a
+  proper GAM spline formula for `method = "gam"`; added a small-n / zero-variance guard.
+- **Correlation Matrix (`jjcorrmat`):** the correlation table now honours the Confidence Level option;
+  the small-sample warning uses the effective complete-case N; the table is populated deterministically
+  once per run (was rebuilt inside the plot renderers); variable names resolve to their display labels.
+- **Bar Chart (`jjbarstats`):** data-quality warnings (small groups, zero cells, low expected counts,
+  pairwise auto-disable) now surface in the results instead of the R console; de-duplicated and
+  per-run-reset notices; the assumptions panel lists all variables; dropped the deprecated `messages`
+  argument.
+- **Box-Violin (Between Groups) (`jjbetweenstats`):** the clinical summary is computed in the analysis
+  pass (renders with the plot off); all plot builders are wrapped so a degenerate group yields a
+  friendly message instead of a blank plot; added a `< 2` non-empty-levels guard; outlier detection is
+  now deterministic; the journal palette is applied to the ggpubr variant.
+- **Box-Violin (Repeated Measures) (`jjwithinstats`):** the Subject ID now actively drives the paired
+  test (it was silently ignored); removed a dead HTML-notice subsystem; clinical-quality warnings
+  persist across option-only re-runs; single population-moment (g1) skewness; raw variable names used as
+  data keys.
+- **Histogram (`jjhistostats`):** completed `clearWith` reactivity; single (g1) skewness estimator;
+  dropped the deprecated `messages` argument; multi-variable diagnostic panels sized so they aren't
+  compressed.
+- **Dot Chart (`jjdotplotstats`):** validation notices emit once (were doubled when Split-By was set and
+  re-appended on resize); removed five never-populated outputs and ~120 lines of disabled scaffolding.
+- **Pie Chart (`jjpiestats`):** silent no-plot returns now explain why; guarded a ratio-length mismatch
+  against the outcome levels; fixed an NA-as-level count; memoised the Fisher-vs-chi-square decision.
+- **Ridgeline (`jjridges`):** Cliff's Delta now returns a value (was always NA, from a non-existent
+  function call); `"nrd"`/`"SJ"` bandwidth no longer crashes; clinical presets now actually apply the
+  FDR/palette/mean-median settings; stratified bootstrap CI; a `Method` column disambiguates the test.
+- **Segmented Total Bar (`jjsegmentedtotalbar`):** notices render even with statistics off; the plot
+  serialises state and re-renders on option changes; the selected colour palette is actually applied.
+- **Arc Diagram (`jjarcdiagram`):** fixed systematic node mislabeling and group-fill/order misalignment
+  by using a consistent row-major node order; variable names differing only by `.`/`_` no longer merge;
+  hub names display original labels.
+- **Advanced Raincloud (`advancedraincloud`):** the "Clinical Threshold" line is drawn only when a
+  cutoff is set (was at y = 0 by default); fixed the broken Viridis palette; log-transform now rejects
+  non-positive values instead of producing NaN; a hard error (ggrain missing) surfaces in an
+  always-visible panel.
+- **Raincloud (`raincloud`):** the group-comparison auto path no longer crashes in a non-English locale
+  (test dispatch keyed on an untranslated identifier); `shapiro.test` is guarded against constant
+  groups; the computed MAD and kurtosis columns are now shown.
+- **Line Chart (`linechart`):** the Width/Height options now resize the plot; correlation strength is
+  labelled from |r| (was inconsistently from R²); user/label strings HTML-escaped; colours interpolated
+  for > 6 groups.
+- **Waffle Chart (`jwaffle`):** fixed a crash when a fractional (weighted) count met an integer format;
+  dropped unused factor levels so the palette matches; the faceted caption states an honest per-panel
+  proportion.
+- **Hull Plot (`hullplot`):** removed a hard dependency in the cache fallback; guarded duplicate X/Y and
+  NA in colour/size columns; fixed a confidence-ellipse colour-scale collision; added an IQR
+  small-group guard.
+- **Lollipop Chart (`lollipop`):** notices render and clear correctly; distinct STRONG_WARNING label; a
+  table note clarifies aggregated values; removed dead code.
+- **statsplot2 (`statsplot2`):** routed missing-package guidance and warnings to the notices output;
+  subset the alluvial engine to the selected pair; removed a duplicated plot layer and dead no-op logic;
+  restored a fallback plot for the repeated-measures continuous paths. (Automatic plot/test selection
+  by variable type was deliberately left unchanged.)
+
 # ClinicoPath 1.0.0 (2026-07-13)
 
 ## First stable release
