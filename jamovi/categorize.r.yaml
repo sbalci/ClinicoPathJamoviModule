@@ -10,6 +10,14 @@ items:
       type:  Html
       clearWith:
           - var
+          - method
+          - nbins
+          - labels
+          - customlabels
+          - sdmult
+          - includelowest
+          - rightclosed
+          - excl
 
     - name: summaryText
       title: Variable Summary

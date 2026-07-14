@@ -126,7 +126,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Generate labels based on method and number of bins
-        .generateLabels = function(breaks, label_type, custom_labels, nbins, include_lowest, right_closed) {
+        .generateLabels = function(breaks, label_type, custom_labels, include_lowest, right_closed) {
             n_categories <- length(breaks) - 1
 
             if (n_categories <= 0) {
@@ -179,8 +179,10 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         paste0("Category ", 1:n_categories)
                     } else {
                         custom <- trimws(strsplit(custom_labels, ",")[[1]])
-                        if (length(custom) != n_categories) {
-                            # Warn and use numbered
+                        if (length(custom) != n_categories || anyDuplicated(custom) > 0) {
+                            # Fall back to numbered when the count does not match
+                            # or the labels are not unique (duplicate factor
+                            # labels break cut()/merge categories).
                             paste0("Category ", 1:n_categories)
                         } else {
                             custom
@@ -221,8 +223,10 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 code <- paste0(code, "breaks <- seq(min(data$", varname, ", na.rm = TRUE), ",
                               "max(data$", varname, ", na.rm = TRUE), length.out = ", nbins + 1, ")\n")
             } else if (method == "quantile") {
-                code <- paste0(code, "breaks <- quantile(data$", varname,
-                              ", probs = seq(0, 1, length.out = ", nbins + 1, "), na.rm = TRUE)\n")
+                # unique(sort(...)) mirrors the backend so the copy-paste snippet
+                # does not throw "'breaks' are not unique" on tied data.
+                code <- paste0(code, "breaks <- unique(sort(quantile(data$", varname,
+                              ", probs = seq(0, 1, length.out = ", nbins + 1, "), na.rm = TRUE)))\n")
             } else if (method == "meansd") {
                 code <- paste0(code, "m <- mean(data$", varname, ", na.rm = TRUE)\n",
                               "s <- sd(data$", varname, ", na.rm = TRUE)\n",
@@ -237,7 +241,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 code <- paste0(code, "# Requires: install.packages('classInt')\n",
                               "ci <- classInt::classIntervals(data$", varname,
                               ", n = ", nbins, ", style = 'jenks')\n",
-                              "breaks <- ci$brks\n")
+                              "breaks <- unique(sort(ci$brks))\n")
             }
 
             # Add label generation
@@ -336,7 +340,7 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     </li>
                     <li><strong>Set number of categories</strong> and label style</li>
                     <li><strong>Review</strong> the frequency table and distribution plot</li>
-                    <li><strong>Add to data</strong> - Check 'Add Categorized Variable to Data' in Output options to add directly to your dataset</li>
+                    <li><strong>Add to data</strong> - Enable the 'Categorized variable' output (below the binning options) to add it directly to your dataset</li>
                   </ol>
                   <hr>
                   <p><strong>Tip:</strong> The new categorized variable will appear in your data view and can be used in other analyses like Alluvial Diagrams, Cross Tables, etc.</p>
@@ -438,6 +442,17 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
+            # Cache the computed breaks in plot state so the render callback
+            # (.plot) reuses them instead of recomputing from self$data /
+            # self$options. Only simple, serializable values are stored.
+            if (self$options$showplot) {
+                self$results$plot$setState(list(
+                    breaks  = breaks,
+                    method  = method,
+                    varname = varname
+                ))
+            }
+
             # Additional check for manual breaks
             if (method == "manual") {
                 custom <- as.numeric(trimws(strsplit(manual_breaks, ",")[[1]]))
@@ -480,6 +495,9 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     notice_html$labelMismatch <- .noticeBox("WARNING", jmvcore::format(
                         "Custom labels mismatch: provided {} labels but have {} categories. Using numbered labels instead.",
                         length(custom_labels), n_categories))
+                } else if (anyDuplicated(custom_labels) > 0) {
+                    notice_html$labelMismatch <- .noticeBox("WARNING",
+                        "Custom labels contain duplicate values. Category labels must be unique; using numbered labels instead.")
                 }
             }
 
@@ -495,7 +513,6 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 breaks,
                 self$options$labels,
                 self$options$customlabels,
-                nbins,
                 self$options$includelowest,
                 self$options$rightclosed
             )
@@ -582,8 +599,13 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             for (i in valid_indices) {
                 cat_name <- names(freq)[i]
 
-                # Get range for this category with correct bracket notation
-                cat_idx <- as.integer(cat_name)
+                # Get range for this category with correct bracket notation.
+                # table() returns levels in break order, so the interval index
+                # is the loop's ordinal position (row_idx). Parsing the label
+                # (as.integer(cat_name)) only works for the "numbered" label
+                # style and returns NA (with a coercion warning) for
+                # semantic/lettered/custom/auto labels.
+                cat_idx <- row_idx
                 if (!is.na(cat_idx) && cat_idx <= n_categories) {
                     # Determine bracket notation based on cut() logic
                     # right=TRUE (rightclosed=TRUE): (a, b] except first is [a, b] when include.lowest=TRUE
@@ -610,9 +632,16 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     range_str <- as.character(cat_name)
                 }
 
-                # Calculate percentages based on valid observations only
-                pct_val <- freq[i] / n_valid_obs
-                cum_pct_val <- cumsum_freq[row_idx] / n_valid_obs
+                # Calculate percentages based on valid observations only.
+                # Guard the denominator: manual breaks can leave zero valid
+                # categorized observations, which would give NaN/Inf.
+                if (n_valid_obs > 0) {
+                    pct_val <- freq[i] / n_valid_obs
+                    cum_pct_val <- cumsum_freq[row_idx] / n_valid_obs
+                } else {
+                    pct_val <- NaN
+                    cum_pct_val <- NaN
+                }
 
                 freqTable$addRow(rowKey = row_idx, values = list(
                     category = cat_name,
@@ -699,20 +728,26 @@ categorizeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
             }
 
-            # Get breaks
-            if (self$options$excl) {
-                x_clean <- x[!is.na(x)]
+            # Prefer breaks cached in plot state (set in .run) to avoid
+            # recomputing; fall back to recomputation if state is unavailable.
+            state <- image$state
+            if (!is.null(state) && !is.null(state$breaks)) {
+                breaks <- state$breaks
             } else {
-                x_clean <- x
-            }
+                if (self$options$excl) {
+                    x_clean <- x[!is.na(x)]
+                } else {
+                    x_clean <- x
+                }
 
-            breaks <- private$.calculateBreaks(
-                x_clean,
-                self$options$method,
-                self$options$nbins,
-                self$options$breaks,
-                self$options$sdmult
-            )
+                breaks <- private$.calculateBreaks(
+                    x_clean,
+                    self$options$method,
+                    self$options$nbins,
+                    self$options$breaks,
+                    self$options$sdmult
+                )
+            }
 
             if (!is.null(breaks)) {
                 breaks <- sort(unique(breaks))
