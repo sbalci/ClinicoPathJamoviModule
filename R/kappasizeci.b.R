@@ -23,6 +23,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         .cached_result = NULL,
         .cached_summary = NULL,
         .cached_explanation = NULL,
+        .cached_notices = NULL,
 
         # Input validation methods
         .validateInputs = function() {
@@ -53,12 +54,15 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     errors <- c(errors, "kappaL must be less than kappaU")
                 }
 
-                if (self$options$kappa0 < self$options$kappaL || self$options$kappa0 > self$options$kappaU) {
-                    errors <- c(errors, "kappa0 should be within the confidence interval [kappaL, kappaU]")
+                # kappaSize requires kappa0 to lie strictly inside the interval;
+                # kappa0 == kappaL or kappa0 == kappaU errors inside the engine.
+                if (self$options$kappa0 <= self$options$kappaL || self$options$kappa0 >= self$options$kappaU) {
+                    errors <- c(errors, "kappa0 must be strictly within the confidence interval (kappaL, kappaU)")
                 }
             } else {
-                if (self$options$kappa0 < self$options$kappaL) {
-                    errors <- c(errors, "kappa0 should be greater than or equal to kappaL")
+                # One-sided: kappaSize requires kappa0 strictly greater than the lower limit.
+                if (self$options$kappa0 <= self$options$kappaL) {
+                    errors <- c(errors, "kappa0 must be greater than kappaL")
                 }
             }
 
@@ -91,7 +95,9 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Parse proportions with flexible delimiters
                 props_clean <- gsub("[,;|\\t]+", ",", props_str)
                 props_split <- strsplit(props_clean, ",")[[1]]
-                props_numeric <- as.numeric(trimws(props_split))
+                # suppressWarnings: the space-separated fallback below is the intended
+                # path when this comma parse yields NAs, so do not surface a coercion warning.
+                props_numeric <- suppressWarnings(as.numeric(trimws(props_split)))
 
                 # Handle space-separated format
                 if (length(props_numeric) == 1 && grepl("\\s+", props_str)) {
@@ -119,7 +125,9 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 }
 
                 prop_sum <- sum(props_numeric)
-                if (abs(prop_sum - 1) > 0.01) {
+                # Match kappaSize's strict tolerance: proportions must sum to 1
+                # within 0.001 (a looser 0.01 lets inputs pass here but reject in the engine).
+                if (abs(prop_sum - 1) > 0.001) {
                     error_msg <- paste0("Proportions should sum to 1.0, current sum is ", round(prop_sum, 3))
                     return(list(error = error_msg))
                 }
@@ -179,6 +187,7 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 private$.cached_result <- NULL
                 private$.cached_summary <- NULL
                 private$.cached_explanation <- NULL
+                private$.cached_notices <- NULL
             }
 
             return(private$.prepared_params)
@@ -286,6 +295,8 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                     one_sided = is_one_sided
                 )
             } else {
+                # Defensive fallback: current kappaSize versions always return a
+                # classed list, so this non-list branch is not reached in practice.
                 sentence <- private$.buildExampleSentence(
                     required_n = required_n,
                     kappa0 = NA,
@@ -307,11 +318,13 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 if ("n" %in% names(result)) {
                     return(as.numeric(ceiling(result$n)))
                 }
+                # Defensive fallback: kappaSize uses $n, not $N.
                 if ("N" %in% names(result)) {
                     return(as.numeric(ceiling(result$N)))
                 }
             }
 
+            # Defensive fallback: kappaSize returns a classed list, not a bare numeric.
             if (is.numeric(result) && length(result) == 1) {
                 return(as.numeric(ceiling(result)))
             }
@@ -342,9 +355,36 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             ))
         },
 
+        # Build methodology (INFO) and large-sample (WARNING) notices as HTML.
+        # Rendered via a dedicated Html output rather than jmvcore::Notice objects
+        # to avoid the notice serialization / no-newline limitations in jamovi.
+        .buildNotices = function(required_n) {
+            info <- paste0(
+                "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #3c8dbc; background:#f4f8fb;'>",
+                "<b>Methodology.</b> The required sample size is computed with the confidence-interval ",
+                "width approach implemented in the kappaSize package (Rotondi &amp; Donner). It returns ",
+                "the minimum number of subjects so that the 100(1 &minus; &alpha;)% confidence interval ",
+                "for Cohen's &kappa; (two-sided, or one-sided lower bound) attains the requested precision, ",
+                "given the expected category proportions and the number of raters.",
+                "</div>"
+            )
+
+            warn <- ""
+            if (!is.na(required_n) && required_n > 1000) {
+                warn <- paste0(
+                    "<div style='margin:6px 0; padding:8px 10px; border-left:3px solid #d9534f; background:#fdf3f3;'>",
+                    "<b>Warning.</b> The computed sample size (", required_n, ") is very large and may be ",
+                    "impractical for a typical interobserver-agreement study. Consider a wider confidence ",
+                    "interval (lower precision), revisiting the expected category proportions, or increasing ",
+                    "the number of raters.",
+                    "</div>"
+                )
+            }
+
+            return(paste0(warn, info))
+        },
+
         # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
-        #   [hygiene/notices] 0 jmvcore::Notice uses (currently jmvcore::reject only); add INFO methodology summary
-        #   [hygiene/notices] add WARNING when computed sample size is unfeasibly large
         #   [i18n] 0 .() wraps; bootstrap jamovi/i18n/ then /prepare-translation kappasizeci
         #   [testing] no tests/testthat/test-kappasizeci.R - verify against kappaSize::CIBinary/3Cats/4Cats/5Cats
 
@@ -361,16 +401,21 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 self$results$text1$setContent(private$.cached_result)
                 self$results$text_summary$setContent(private$.cached_summary)
                 self$results$text2$setContent(private$.cached_explanation)
+                self$results$notices$setContent(private$.cached_notices)
                 return()
             }
 
-            # Prepare parameters with caching
+            # Prepare parameters and run the calculation OUTSIDE the display tryCatch.
+            # These call jmvcore::reject() on failure (missing kappaSize package,
+            # invalid proportions, or an engine calculation error); letting those
+            # conditions propagate makes jamovi render them as real error notices
+            # instead of swallowing them into the result body text.
+            params <- private$.prepareParameters()
+            raw_result <- private$.calculateSampleSize(params)
+
+            # Build outputs defensively; only unexpected formatting/summary errors
+            # are caught here (the reject-throwing steps already ran above).
             tryCatch({
-                params <- private$.prepareParameters()
-
-                # Calculate sample size
-                raw_result <- private$.calculateSampleSize(params)
-
                 # Format the result
                 formatted_result <- private$.formatSampleSizeOutput(raw_result)
 
@@ -380,20 +425,30 @@ kappaSizeCIClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                 # Generate explanation
                 explanation <- private$.generateExplanation(params)
 
+                # Methodology / large-sample notices
+                required_n <- private$.extractRequiredN(raw_result)
+                notices_html <- private$.buildNotices(required_n)
+
                 # Cache results
                 private$.cached_result <- formatted_result
                 private$.cached_summary <- summary_text
                 private$.cached_explanation <- explanation
+                private$.cached_notices <- notices_html
 
                 # Set results
                 self$results$text1$setContent(formatted_result)
                 self$results$text_summary$setContent(summary_text)
                 self$results$text2$setContent(explanation)
+                self$results$notices$setContent(notices_html)
 
             }, error = function(e) {
                 error_msg <- paste("Error in kappa sample size calculation:", e$message)
                 self$results$text1$setContent(error_msg)
+                # Clear the other outputs so a previous run's content is not left
+                # displayed alongside the error message.
+                self$results$text_summary$setContent("")
                 self$results$text2$setContent("Please check your input parameters and ensure the kappaSize package is installed.")
+                self$results$notices$setContent("")
             })
         }
     )
