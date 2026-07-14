@@ -103,13 +103,19 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           self$results$dataQualityHeading$setVisible(FALSE)
           self$results$dataQualityTable$setVisible(FALSE)
           self$results$dataQualitySummary$setVisible(FALSE)
+          # Section headings for the median / survival tables start hidden and
+          # are revealed only once their analyses populate, so empty titles do
+          # not show alongside the welcome/todo message.
+          self$results$medianHeading$setVisible(FALSE)
+          self$results$survTableHeading$setVisible(FALSE)
 
           # Handle showSummaries visibility
           if (self$options$showSummaries) {
             self$results$medianSummary$setVisible(TRUE)
             self$results$survTableSummary$setVisible(TRUE)
-            # Person-time summary requires both showSummaries AND person_time
+            # Person-time summary (and its heading) require both showSummaries AND person_time
             if (self$options$person_time) {
+              self$results$personTimeHeading2$setVisible(TRUE)
               self$results$personTimeSummary$setVisible(TRUE)
             }
           }
@@ -128,7 +134,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
             
             # Person-time explanation requires both showExplanations AND person_time
             if (self$options$person_time) {
-              self$results$personTimeHeading2$setVisible(TRUE)
               self$results$personTimeHeading3$setVisible(TRUE)
               self$results$personTimeExplanation$setVisible(TRUE)
             }
@@ -360,12 +365,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         min_time <- min(time_vals, na.rm = TRUE)
         max_time <- max(time_vals, na.rm = TRUE)
         median_time <- median(time_vals, na.rm = TRUE)
-        
-        # Event rate by time periods
-        # FIX: Count events properly
-        early_events <- sum(mydata[[myoutcome]][time_vals <= median_time] >= 1, na.rm = TRUE)
-        late_events <- n_events - early_events
-        
+
         # Data quality warnings
         warnings <- character()
         if (n_events < 10) {
@@ -416,8 +416,10 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         if (!subcondition1b1) {
           outcome_valid <- subcondition1a
         } else {
-          required_levels <- c(self$options$dod, self$options$dooc, self$options$awd, self$options$awod)
-          outcome_valid <- all(!is.null(required_levels))
+          # c() silently drops NULLs, so all(!is.null(c(...))) would miss a
+          # missing level; check each level individually instead.
+          required_levels <- list(self$options$dod, self$options$dooc, self$options$awd, self$options$awod)
+          outcome_valid <- all(vapply(required_levels, Negate(is.null), logical(1)))
           # Must also exist in data
           if (outcome_valid) {
             level_vars <- c("dod", "dooc", "awd", "awod")
@@ -460,6 +462,24 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
       # get and label Data ----
       .getData = function() {
 
+        # Memoize: janitor::clean_names + labelled on the whole dataset is
+        # expensive and .getData() is called several times per run. Cache the
+        # result keyed on the data plus the options that drive the name lookups
+        # (mirrors the caching pattern used by .getCachedSurvfit).
+        cache_key <- NULL
+        if (requireNamespace('digest', quietly = TRUE)) {
+          cache_key <- paste0("getData_", digest::digest(list(
+            self$data,
+            self$options$elapsedtime,
+            self$options$outcome,
+            self$options$dxdate,
+            self$options$fudate
+          )))
+          if (exists(cache_key, envir = private$.cache)) {
+            return(get(cache_key, envir = private$.cache))
+          }
+        }
+
         mydata <- self$data
 
         mydata$row_names <- rownames(mydata)
@@ -491,13 +511,18 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myfudate <-
           names(all_labels)[all_labels == self$options$fudate]
 
-        return(list(
+        result <- list(
           "mydata_labelled" = mydata
           , "mytime_labelled" = mytime
           , "myoutcome_labelled" = myoutcome
           , "mydxdate_labelled" = mydxdate
           , "myfudate_labelled" = myfudate
-        ))
+        )
+
+        if (!is.null(cache_key))
+          assign(cache_key, result, envir = private$.cache)
+
+        return(result)
 
 
       }
@@ -1155,6 +1180,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         mydata <- results$cleanData
 
+        # Reveal the section heading now that the median-survival analysis runs
+        self$results$medianHeading$setVisible(TRUE)
+
         mydata[[mytime]] <-
           jmvcore::toNumeric(mydata[[mytime]])
 
@@ -1293,14 +1321,8 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         }
         data_frame <- results1table
 
-        # Handle NA values for competing risk (rmean not applicable)
-        data_frame <- data_frame %>%
-          dplyr::mutate(
-            mean_time = ifelse(is.na(rmean), NA, round(rmean, 2)),
-            mean_ci = ifelse(is.na(x0_95lcl) | is.na(x0_95ucl),
-                            NA_character_,
-                            glue::glue("{x0_95lcl} - {x0_95ucl}"))
-          )
+        # (mean_time / mean_ci were computed here but are not defined as
+        # medianTable columns in the .r.yaml, so they were dead; removed.)
         for (i in seq_along(data_frame[, 1, drop = T])) {
           medianTable$addRow(rowKey = i, values = c(data_frame[i,]))
         }
@@ -1382,7 +1404,7 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                              quality_info,
                              "The median survival time is when 50% of subjects have experienced the event.",
                              "This means that 50% of subjects in this group survived longer than this time period.",
-                             "Note: Confidence intervals are calculated using the log-log transformation method for improved accuracy with censored data (not plain Greenwood formula)."
+                             "Note: Confidence intervals use survfit's default log-transformation method (conf.type='log'), based on Greenwood's variance estimate."
           )
         }
 
@@ -1489,6 +1511,9 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
         myfactor <- results$name3explanatory
 
         mydata <- results$cleanData
+
+        # Reveal the section heading now that the survival-table analysis runs
+        self$results$survTableHeading$setVisible(TRUE)
 
         mydata[[mytime]] <-
           jmvcore::toNumeric(mydata[[mytime]])
@@ -1607,7 +1632,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         km_fit_df <-
           as.data.frame(km_fit_summary[c(
-            #"strata",
                                          "time",
                                          "n.risk",
                                          "n.event",
@@ -1617,21 +1641,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
                                          "upper")])
 
 
-
-        # km_fit_df[, 1] <- gsub(
-        #   pattern = "thefactor=",
-        #   replacement = paste0(self$options$explanatory, " "),
-        #   x = km_fit_df[, 1]
-        # )
-
-
-        # km_fit_df2 <- km_fit_df
-
-        # km_fit_df[, 1] <- gsub(
-        #   pattern = paste0(myexplanatory_labelled,"="),
-        #   replacement = paste0(self$options$explanatory, " "),
-        #   x = km_fit_df[, 1]
-        # )
 
         survTable <- self$results$survTable
 
@@ -1643,19 +1652,11 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
 
         ## survTableSummary 1,3,5-yr survival summary ----
 
-        # km_fit_df2[, 1] <- gsub(
-        #   pattern = paste0(myexplanatory_labelled,"="),
-        #   replacement = paste0(self$options$explanatory, " is "),
-        #   x = km_fit_df2[, 1]
-        # )
-
-        ## survTableSummary 1,3,5-yr survival summary ----
-
         km_fit_df %>%
           dplyr::mutate(
             description =
               glue::glue(
-                "{time} {self$options$timetypeoutput} survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n The estimated probability of surviving beyond {time} {self$options$timetypeoutput} was {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n At this time point, there were {n.risk} subjects still at risk and {n.event} events had occurred in this group. \n Event rate by this timepoint: {scales::percent(n.event / km_fit_df$n.risk[1])}."
+                "{time} {self$options$timetypeoutput} survival is {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n The estimated probability of surviving beyond {time} {self$options$timetypeoutput} was {scales::percent(surv)} [{scales::percent(lower)}-{scales::percent(upper)}, 95% CI]. \n At this time point, there were {n.risk} subjects still at risk and {n.event} events had occurred in this group. \n Events in this interval as a proportion of the initial cohort: {scales::percent(n.event / km_fit_df$n.risk[1])}."
               )
           ) %>%
           dplyr::select(description) %>%
@@ -3000,50 +3001,6 @@ singlearmClass <- if (requireNamespace('jmvcore', quietly=TRUE)) R6::R6Class(
           )
           self$results$clinicalSummary$setContent(fallback_html)
         })
-      }
-      
-      # Helper function to restore original variable names in output tables (from oddsratio)
-      ,
-      .restoreOriginalNamesInTable = function(table_data, all_labels) {
-          if (is.null(table_data) || nrow(table_data) == 0) return(table_data)
-          
-          # Create a mapping from cleaned names to original names
-          name_mapping <- setNames(unlist(all_labels), names(all_labels))
-          
-          # Restore names in the first column (which typically contains variable names)
-          if (ncol(table_data) > 0) {
-              first_col <- table_data[[1]]
-              
-              # Process each row in the first column
-              for (i in seq_along(first_col)) {
-                  current_name <- first_col[i]
-                  
-                  # Skip if it's not a string or is empty
-                  if (is.na(current_name) || current_name == "" || !is.character(current_name)) next
-                  
-                  # Handle different naming patterns:
-                  # 1. Direct variable name match
-                  if (current_name %in% names(name_mapping)) {
-                      first_col[i] <- name_mapping[current_name]
-                  }
-                  # 2. Variable name with factor level (e.g., "variable_nameLevel1")
-                  else {
-                      # Try to find a matching cleaned name that's a prefix
-                      for (clean_name in names(name_mapping)) {
-                          if (startsWith(current_name, clean_name)) {
-                              # Replace the cleaned prefix with original name
-                              suffix <- substring(current_name, nchar(clean_name) + 1)
-                              first_col[i] <- paste0(name_mapping[clean_name], suffix)
-                              break
-                          }
-                      }
-                  }
-              }
-              
-              table_data[[1]] <- first_col
-          }
-          
-          return(table_data)
       }
       
       # Helper function to create plot data with original variable names (from oddsratio)

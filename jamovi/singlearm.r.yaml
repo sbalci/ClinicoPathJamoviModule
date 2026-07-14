@@ -60,10 +60,6 @@ items:
           - analysistype
 
 
-    # - name:  mydataview
-    #   title: mydataview
-    #   type:  Preformatted
-
     - name:  medianHeading
       title: Median Survival Analysis
       type:  Preformatted
@@ -78,12 +74,6 @@ items:
         - name: records
           title: "Records"
           type: integer
-        # - name: n_max
-        #   title: "n_max"
-        #   type: number
-        # - name: n_start
-        #   title: "n_start"
-        #   type: number
         - name: events
           title: "Events"
           type: integer
@@ -112,6 +102,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -204,6 +203,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
           - showExplanations
 
 
@@ -287,19 +295,26 @@ items:
         - rate_multiplier
         - time_intervals
         - person_time
-        - outcome
-        - outcomeLevel
         - fudate
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - showExplanations
 
 
     - name:  personTimeHeading2
       title: Person-Time Analysis Natural Language Summary
       type:  Preformatted
-      visible: (person_time)
+      visible: (person_time && showSummaries)
 
 
     - name: personTimeSummary
@@ -362,6 +377,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
           - medianline
 
 
@@ -384,6 +408,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
       refs:
           - KMunicate
           - KMunicate2
@@ -411,6 +444,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -436,6 +478,15 @@ items:
           - dxdate
           - tint
           - multievent
+          - analysistype
+          - dod
+          - dooc
+          - awd
+          - awod
+          - uselandmark
+          - landmark
+          - timetypeoutput
+          - timetypedata
 
 
 
@@ -497,6 +548,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - baseline_hazard
 
     - name: baselineHazardPlot
@@ -515,6 +575,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - baseline_hazard
 
     - name: smoothedHazardPlot
@@ -533,6 +602,15 @@ items:
         - dxdate
         - tint
         - multievent
+        - analysistype
+        - dod
+        - dooc
+        - awd
+        - awod
+        - uselandmark
+        - landmark
+        - timetypeoutput
+        - timetypedata
         - hazard_smoothing
 
     - name: baselineHazardSummary
