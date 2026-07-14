@@ -43,6 +43,8 @@ items:
         - counts
         - paired
         - ratio
+        - clinicalpreset
+        - typestatistics
 
     - name: about
       title: About This Analysis
@@ -67,6 +69,7 @@ items:
     - name: report
       title: Copy-Ready Report
       type: Html
+      visible: (showexplanations)
 
     - name:  todo
       title: Analysis Setup
