@@ -348,7 +348,7 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Table$new(
                 options=options,
                 name="hsrocresults",
-                title="HSROC Model Results",
+                title="Proportional-Hazards SROC Model Results",
                 visible="(hsroc_analysis)",
                 clearWith=list(
                     "study",
@@ -648,14 +648,14 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Diagnostic Test Meta-Analysis for Pathology
 #'
-#' Comprehensive meta-analysis of diagnostic test accuracy studies designed 
-#' for 
-#' pathology research. Performs bivariate random-effects modeling, HSROC 
-#' analysis, 
-#' meta-regression, and publication bias assessment for AI algorithm 
-#' validation 
+#' Comprehensive meta-analysis of diagnostic test accuracy studies designed
+#' for
+#' pathology research. Performs bivariate random-effects modeling,
+#' proportional-hazards SROC analysis,
+#' meta-regression, and publication bias assessment for AI algorithm
+#' validation
 #' and biomarker diagnostic accuracy synthesis.
-#' 
+#'
 #' @param data the data as a data frame
 #' @param study Variable containing unique study identifiers
 #' @param true_positives Number of true positive results in each study
@@ -664,7 +664,8 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param true_negatives Number of true negative results in each study
 #' @param covariate Optional covariate for meta-regression analysis
 #' @param bivariate_analysis Perform bivariate random-effects meta-analysis
-#' @param hsroc_analysis Perform hierarchical summary ROC (HSROC) analysis
+#' @param hsroc_analysis Perform Holling proportional-hazards summary ROC
+#'   analysis
 #' @param meta_regression Perform meta-regression with specified covariate
 #' @param heterogeneity_analysis Perform heterogeneity analysis including
 #'   I-squared and Q statistics
@@ -799,4 +800,3 @@ diagnosticmeta <- function(
 
     analysis$results
 }
-

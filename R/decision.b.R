@@ -9,8 +9,6 @@
 #'   3. View results in tables and plots
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
-#' @import boot
 #' @importFrom stats quantile qnorm
 #' @importFrom dplyr %>% mutate case_when
 #' @importFrom forcats as_factor fct_relevel

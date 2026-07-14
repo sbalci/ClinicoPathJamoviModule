@@ -80,7 +80,7 @@ Imports: aftgee, arsenal, assertions, BART, base64enc, BayesFactor, bayesplot,
         xts, zeallot
 VignetteBuilder: knitr
 Remotes: jthomasmock/gtExtras, grantmcdermott/parttree, hrbrmstr/ggeconodist,
-        jbengler/tidyplots, CHOP-CGTInformatics/ggswim, alstockdale/sumvar,
+        jbengler/tidyplots, CHOP-CGTInformatics/ggswim@b3c67a0796a850624745a439cac33d981d83e1dc, alstockdale/sumvar,
         mlr-org/mlr3extralearners@v1.0.0, CCICB/ggEDA, cran/parcor,
         ClinicoPath/waffle@f5150355d99521417cb406156b5ee0c626fe94a8, bioc::ComplexHeatmap, bioc::mixOmics,
         bioc::survcomp, bbc/bbplot, bioc::sva, bioc::Icens, cran/fastshap,

@@ -11,6 +11,7 @@
 #' @importFrom tibble tibble
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom scales pretty_breaks
+#' @importFrom ggswim geom_swim_lane geom_swim_marker scale_marker_discrete geom_swim_arrow theme_ggswim theme_ggswim_dark
 #' @return An \code{R6} class generator object for the \code{swimmerplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 
 swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class(
@@ -24,8 +25,8 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         .detected_format = NULL,
 
         # Notice collection helpers. A single Preformatted (plain-text) output item:
-        # avoids BOTH the jmvcore::Notice serialization error from
-        # self$results$insert(999, Notice) AND any HTML in notices (project convention:
+        # avoids both the jmvcore::Notice serialization error and any HTML in
+        # notices (project convention:
         # notice content must be plain text). ====
         .noticeList = list(),
 
@@ -1515,7 +1516,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                     error_msg <- paste0(
                         "<div style='color: red; padding: 15px; border: 1px solid red; border-radius: 5px; margin: 10px;'>",
                         "<h4>", .("Data Validation Error"), "</h4>",
-                        "<p><strong>", .("Error:"), "</strong> ", htmltools::htmlEscape(validation_result$message), "</p>",
+                        jmvcore::format(
+                            .("<p><strong>Error:</strong> {message}</p>"),
+                            message = htmltools::htmlEscape(validation_result$message)
+                        ),
                         "<p><strong>", .("Please check:"), "</strong></p>",
                         "<ul>",
                         "<li>", .("All required variables are selected"), "</li>",
@@ -1657,7 +1661,10 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
                 error_msg <- paste(
                     "<div style='color: red; padding: 10px; border: 1px solid red; border-radius: 5px;'>",
                     "<h4>", .("Error in Swimmer Plot Analysis"), "</h4>",
-                    "<p><strong>", .("Error:"), "</strong> ", htmltools::htmlEscape(e$message), "</p>",
+                    jmvcore::format(
+                        .("<p><strong>Error:</strong> {message}</p>"),
+                        message = htmltools::htmlEscape(e$message)
+                    ),
                     "<p><strong>", .("Suggestions:"), "</strong></p>",
                     "<ul>",
                     "<li>", .("Ensure all required variables are selected"), "</li>",

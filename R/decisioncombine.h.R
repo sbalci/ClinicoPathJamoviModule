@@ -216,6 +216,7 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         forestPlot = function() private$.items[["forestPlot"]],
         decisionTreePlot = function() private$.items[["decisionTreePlot"]],
         recommendationTable = function() private$.items[["recommendationTable"]],
+        addedPattern = function() private$.items[["addedPattern"]],
         notices = function() private$.items[["notices"]]),
     private = list(),
     public=list(
@@ -628,6 +629,22 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="rationale", 
                         `title`="Clinical Rationale", 
                         `type`="text"))))
+            self$add(jmvcore::Output$new(
+                options=options,
+                name="addedPattern",
+                title="Add Test Pattern to Data",
+                varTitle="Combined Test Pattern",
+                varDescription="Positive/negative result pattern across the selected diagnostic tests",
+                measureType="nominal",
+                clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
@@ -706,6 +723,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
 #'   \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Hierarchical decision tree showing test patterns with performance-based recommendations \cr
 #'   \code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
+#'   \code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'

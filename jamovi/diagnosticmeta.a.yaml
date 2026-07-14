@@ -8,9 +8,9 @@ jas: '1.2'
 
 description:
     main: |
-        Comprehensive meta-analysis of diagnostic test accuracy studies designed for 
-        pathology research. Performs bivariate random-effects modeling, HSROC analysis, 
-        meta-regression, and publication bias assessment for AI algorithm validation 
+        Comprehensive meta-analysis of diagnostic test accuracy studies designed for
+        pathology research. Performs bivariate random-effects modeling, proportional-hazards SROC analysis,
+        meta-regression, and publication bias assessment for AI algorithm validation
         and biomarker diagnostic accuracy synthesis.
     # R:
     #     dontrun: true
@@ -102,11 +102,11 @@ options:
           R: Perform bivariate random-effects meta-analysis
 
     - name: hsroc_analysis
-      title: HSROC analysis
+      title: Proportional-hazards SROC analysis
       type: Bool
       default: false
       description:
-          R: Perform hierarchical summary ROC (HSROC) analysis
+          R: Perform Holling proportional-hazards summary ROC analysis
 
     - name: meta_regression
       title: Meta-regression

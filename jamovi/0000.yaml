@@ -2111,7 +2111,7 @@ analyses:
       distribution charts that effectively communicate statistical distribution 
 
       characteristics with The Economist's distinctive visual style. Perfect
-      for 
+      for
 
       comparing distributions across categories, showing price variations, or 
 
@@ -2710,11 +2710,11 @@ analyses:
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
       for 
 
-      pathology research. Performs bivariate random-effects modeling, HSROC
-      analysis, 
+      pathology research. Performs bivariate random-effects modeling,
+      proportional-hazards SROC analysis,
 
       meta-regression, and publication bias assessment for AI algorithm
-      validation 
+      validation
 
       and biomarker diagnostic accuracy synthesis.
     menuSubgroup: IHC Analysis

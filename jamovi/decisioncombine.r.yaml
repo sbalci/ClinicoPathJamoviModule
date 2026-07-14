@@ -337,6 +337,22 @@ items:
           type: text
       description: 'Recommended optimal test combination pattern based on Youden index and clinical performance metrics'
 
+    - name: addedPattern
+      title: 'Add Test Pattern to Data'
+      type: Output
+      varTitle: 'Combined Test Pattern'
+      varDescription: 'Positive/negative result pattern across the selected diagnostic tests'
+      measureType: nominal
+      clearWith:
+        - gold
+        - goldPositive
+        - test1
+        - test1Positive
+        - test2
+        - test2Positive
+        - test3
+        - test3Positive
+
     - name: notices
       title: Notices
       type: Html

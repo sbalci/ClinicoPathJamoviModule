@@ -4,8 +4,8 @@
 #' with enhanced features for clinical diagnostic performance evaluation.
 #'
 #' @import jmvcore
-#' @import pROC
 #' @importFrom caret confusionMatrix
+#' @importFrom pROC roc
 #' @importFrom stats quantile binom.test glm predict
 #' @export
 #' @return An \code{R6} class generator object for the \code{enhancedROCClass} backend; used internally by the jamovi analysis wrapper and not called directly.

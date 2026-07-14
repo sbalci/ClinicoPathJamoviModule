@@ -200,33 +200,6 @@ options:
             overrides the category computed from the % value — e.g., a shrinking
             tumor can still be PD due to a new lesion. Affects coloring and metrics.
 
-    # Clinical Preset Options
-    # - name: clinicalPreset
-    #   title: Clinical Study Preset
-    #   type: List
-    #   options:
-    #     - title: "Custom (Manual Settings)"
-    #       name: custom
-    #     - title: "Phase II Efficacy Study"
-    #       name: phase2
-    #     - title: "Phase I/II Dose Escalation"
-    #       name: phase1_2
-    #     - title: "Biomarker Correlation Study"
-    #       name: biomarker
-    #     - title: "Publication Ready"
-    #       name: publication
-    #   default: custom
-    #   description:
-    #       R: >
-    #         Choose a clinical study preset to automatically configure appropriate settings
-    #       jamovi: >
-    #         Choose a preset configuration for your study type:
-    #         • Custom: Manual control over all settings
-    #         • Phase II: Standard efficacy analysis with ORR/DCR focus
-    #         • Phase I/II: Safety and efficacy with detailed annotations
-    #         • Biomarker: Group-based analysis with statistical comparisons
-    #         • Publication: Clean, professional plots for manuscripts
-
     - name: showThresholds
       title: RECIST thresholds
       type: Bool

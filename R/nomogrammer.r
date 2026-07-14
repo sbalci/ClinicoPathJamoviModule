@@ -62,8 +62,9 @@
 #'
 #' @seealso \code{\link{decision}}, \code{\link{decisioncalculator}} for related diagnostic test functions
 #'
-#' @import ggplot2
-#' @import scales
+#' @importFrom ggplot2 aes annotate element_blank element_text geom_line geom_vline
+#' @importFrom ggplot2 ggplot ggtitle margin rel scale_color_manual
+#' @importFrom ggplot2 scale_x_continuous scale_y_continuous sec_axis theme theme_bw
 #' @importFrom stats line
 #' @export
 #'

@@ -4,18 +4,6 @@
 #' @noRd
 NULL
 
-# Helper function to escape variable names with special characters for formulas
-# TODO (cleanup): this helper is unused. All formula-building paths now go through
-# `jmvcore::composeTerms(as.list(var_names))` (at L659) which handles backticks
-# correctly including names that internally contain backticks (this helper does not).
-# Safe to delete in a follow-up cleanup pass - also noted in audit comment at L71-72.
-.escapeVariableNames <- function(var_names) {
-    # Check if variable names contain special characters that need escaping
-    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
-    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
-    return(var_names)
-}
-
 nogoldstandardClass <- if (requireNamespace("jmvcore")) {
     R6::R6Class(
         "nogoldstandardClass",

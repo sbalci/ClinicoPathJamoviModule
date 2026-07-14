@@ -83,7 +83,7 @@ children:
                 label: Bivariate random-effects model
               - type: CheckBox
                 name: hsroc_analysis
-                label: HSROC analysis (summary ROC curve)
+                label: Proportional-hazards SROC analysis
               - type: CheckBox
                 name: heterogeneity_analysis
                 label: Heterogeneity assessment (study variability)

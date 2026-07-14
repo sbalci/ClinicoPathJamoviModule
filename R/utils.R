@@ -8,7 +8,7 @@
 # PACKAGE DEPENDENCIES AND OPERATORS
 # ============================================================================
 
-#' @importFrom stats binomial qbeta glm predict quantile
+#' @importFrom stats binomial qbeta glm predict quantile cov var
 #' @importFrom utils sessionInfo tail
 NULL
 

@@ -2256,9 +2256,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         safe_timeVar <- private$.escapeVar(self$options$timeVar)
         safe_groupVar <- private$.escapeVar(self$options$groupVar)
 
-        # Apply clinical presets
-        private$.applyClinicalPreset()
-
         # Generate enhanced clinical metrics with confidence intervals ----
         if (isTRUE(self$options$showConfidenceIntervals)) {
           private$.generateEnhancedClinicalMetrics(processed_data, metrics)
@@ -2526,12 +2523,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         useGroupColoring <- !is.null(plotData$options$colorBy) &&
                            plotData$options$colorBy == "group" &&
                            "patient_group" %in% names(df)
-
-        # Preset-aware enhancements
-        preset <- "custom"  # clinicalPreset option was removed; behavior fixed to "custom"
-        if (preset == "biomarker" && !useGroupColoring) {
-          message("Biomarker preset: Consider enabling group-based coloring for biomarker analysis")
-        }
 
         if (useGroupColoring) {
           # Generate distinct colors for groups using reusable method
@@ -2858,15 +2849,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         spiderColorScheme <- options$spiderColorScheme %||% "classic"
         useGroupColoring <- spiderColorBy == "group" && "patient_group" %in% names(df)
 
-        # Preset-aware spider plot enhancements
-        preset <- "custom"  # clinicalPreset option was removed; behavior fixed to "custom"
-        if (preset == "biomarker" && !useGroupColoring) {
-          message("Biomarker preset: Group-based spider plot coloring recommended for biomarker studies")
-        }
-        if (preset == "phase1_2" && self$options$inputType == "percentage") {
-          message("Phase I/II preset: Raw measurements with time points provide better safety monitoring")
-        }
-        
         # Set up color variables and schemes
         if (useGroupColoring) {
           # Group-based coloring using reusable method
@@ -3163,69 +3145,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         )
         
         self$results$aboutAnalysis$setContent(about_text)
-      }
-
-      ,
-      # Get effective option value (supports preset overrides in future)
-      .getEffectiveOption = function(optionName) {
-        # For now, return the option directly since JS events handle the preset changes
-        # This method provides future extensibility for R-side preset logic if needed
-        return(self$options[[optionName]])
-      }
-
-      ,
-      # Apply clinical presets ----
-      .applyClinicalPreset = function() {
-        preset <- "custom"  # clinicalPreset option was removed; behavior fixed to "custom"
-        
-
-        if (preset != "custom") {
-          warning(
-            .("Clinical presets are temporarily disabled; using custom settings."),
-            call. = FALSE
-          )
-        }
-
-        return()
-      }
-
-      ,
-      # Preset-specific validation methods
-      .validatePhase2Requirements = function() {
-        # Phase II studies typically need confidence intervals and significance testing
-        if (!self$options$showConfidenceIntervals) {
-          message("Phase II preset: Confidence intervals recommended for regulatory submissions")
-        }
-        if (!self$options$generateCopyReadyReport) {
-          message("Phase II preset: Copy-ready report enabled for regulatory documentation")
-        }
-      }
-
-      ,
-      .validatePhase12Requirements = function() {
-        # Phase I/II studies need detailed monitoring and flexible analysis
-        if (is.null(self$options$timeVar) && self$options$inputType == "raw") {
-          message("Phase I/II preset: Time variable recommended for safety monitoring")
-        }
-      }
-
-      ,
-      .validateBiomarkerRequirements = function() {
-        # Biomarker studies require group variables for meaningful analysis
-        if (is.null(self$options$groupVar)) {
-          message("Biomarker preset: Group variable required for biomarker correlation analysis")
-        }
-      }
-
-      ,
-      .validatePublicationRequirements = function() {
-        # Publication quality requires specific statistical and visual standards
-        if (self$options$barAlpha < 1.0) {
-          message("Publication preset: Solid colors (alpha=1.0) recommended for print clarity")
-        }
-        if (!self$options$showConfidenceIntervals) {
-          message("Publication preset: Confidence intervals essential for peer review")
-        }
       }
 
       ,
@@ -3688,34 +3607,13 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           "</div>",
 
           "<div style='background-color: #dbeafe; padding: 10px; border-radius: 3px; margin: 10px 0;'>",
-          "<h5 style='margin-top: 0;'>", .("Quick Tips & Preset Guide:"), "</h5>",
+          "<h5 style='margin-top: 0;'>", .("Quick Tips:"), "</h5>",
           "<ul style='margin: 5px 0; margin-left: 20px;'>",
           "<li>", .("Most studies use 'Percentage Changes' format"), "</li>",
           "<li>", .("Enable 'Show RECIST Thresholds' for clinical interpretation"), "</li>",
-          "<li><strong>", .("Clinical Presets:"), "</strong></li>",
-          "<ul style='margin-left: 15px;'>",
-          "<li>", .("Phase II: Standard efficacy analysis with confidence intervals"), "</li>",
-          "<li>", .("Phase I/II: Detailed monitoring with safety focus"), "</li>",
-          "<li>", .("Biomarker: Group-based analysis (requires Group Variable)"), "</li>",
-          "<li>", .("Publication: Clean, professional plots for manuscripts"), "</li>",
+          "<li>", .("Use a group variable to compare biomarker-defined cohorts"), "</li>",
+          "<li>", .("Enable confidence intervals for reporting response rates"), "</li>",
           "</ul>",
-          "</ul>",
-
-          # Add preset-specific guidance based on current selection
-          # if (self$options$clinicalPreset != "custom") {
-          #   paste0("<div style='background-color: #f0f9ff; padding: 8px; border-radius: 3px; margin: 5px 0;'>",
-          #          "<strong>", .("Current Preset:"), " ", .("settings"),"</strong><br>",
-          #          switch(self$options$clinicalPreset,
-          #            "phase2" = .("Optimized for regulatory submissions with statistical rigor"),
-          #            "phase1_2" = .("Configured for safety monitoring and exploratory analysis"),
-          #            "biomarker" = .("Set up for group comparisons and biomarker correlations"),
-          #            "publication" = .("Professional appearance suitable for peer-reviewed journals"),
-          #            ""
-          #          ),
-          #          "</div>")
-          # } else {
-          #   ""
-          # },
 
           "</div>",
 

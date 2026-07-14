@@ -48,7 +48,8 @@ diagnosticmeta(
 
 \item{bivariate_analysis}{Perform bivariate random-effects meta-analysis}
 
-\item{hsroc_analysis}{Perform hierarchical summary ROC (HSROC) analysis}
+\item{hsroc_analysis}{Perform Holling proportional-hazards summary ROC
+analysis}
 
 \item{meta_regression}{Perform meta-regression with specified covariate}
 
@@ -95,23 +96,23 @@ including interpretation guidance}
 \value{
 A results object containing:
 \tabular{llllll}{
-\code{results$welcome} \tab \tab \tab \tab \tab a html \cr
-\code{results$instructions} \tab \tab \tab \tab \tab a html \cr
-\code{results$summary} \tab \tab \tab \tab \tab a html \cr
-\code{results$about} \tab \tab \tab \tab \tab a html \cr
-\code{results$bivariateresults} \tab \tab \tab \tab \tab a table \cr
-\code{results$hsrocresults} \tab \tab \tab \tab \tab a table \cr
-\code{results$heterogeneity} \tab \tab \tab \tab \tab a table \cr
-\code{results$metaregression} \tab \tab \tab \tab \tab a table \cr
-\code{results$publicationbias} \tab \tab \tab \tab \tab a table \cr
-\code{results$individualstudies} \tab \tab \tab \tab \tab a table \cr
-\code{results$forestplot} \tab \tab \tab \tab \tab an image \cr
-\code{results$srocplot} \tab \tab \tab \tab \tab an image \cr
-\code{results$funnelplot} \tab \tab \tab \tab \tab an image \cr
-\code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
-\code{results$forestplot_explanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$srocplot_explanation} \tab \tab \tab \tab \tab a html \cr
-\code{results$funnelplot_explanation} \tab \tab \tab \tab \tab a html \cr
+  \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
+  \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+  \code{results$summary} \tab \tab \tab \tab \tab a html \cr
+  \code{results$about} \tab \tab \tab \tab \tab a html \cr
+  \code{results$bivariateresults} \tab \tab \tab \tab \tab a table \cr
+  \code{results$hsrocresults} \tab \tab \tab \tab \tab a table \cr
+  \code{results$heterogeneity} \tab \tab \tab \tab \tab a table \cr
+  \code{results$metaregression} \tab \tab \tab \tab \tab a table \cr
+  \code{results$publicationbias} \tab \tab \tab \tab \tab a table \cr
+  \code{results$individualstudies} \tab \tab \tab \tab \tab a table \cr
+  \code{results$forestplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$srocplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$funnelplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
+  \code{results$forestplot_explanation} \tab \tab \tab \tab \tab a html \cr
+  \code{results$srocplot_explanation} \tab \tab \tab \tab \tab a html \cr
+  \code{results$funnelplot_explanation} \tab \tab \tab \tab \tab a html \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -123,8 +124,8 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \description{
 Comprehensive meta-analysis of diagnostic test accuracy studies designed
 for
-pathology research. Performs bivariate random-effects modeling, HSROC
-analysis,
+pathology research. Performs bivariate random-effects modeling,
+proportional-hazards SROC analysis,
 meta-regression, and publication bias assessment for AI algorithm
 validation
 and biomarker diagnostic accuracy synthesis.

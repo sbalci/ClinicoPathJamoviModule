@@ -1,7 +1,6 @@
 #' @title Combine Medical Decision Tests
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
 #' @importFrom dplyr %>% mutate case_when
 #' @importFrom forcats as_factor fct_relevel
 #' @importFrom epiR epi.tests
@@ -88,7 +87,7 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 self$results$individualTest3$setVisible(showIndividual && hasTest3)
 
                 # Initialize fixed-structure tables for Test 1, 2, 3
-                for (i in 1:3) {
+                for (i in seq_len(3L)) {
                     group <- self$results[[paste0("individualTest", i)]]
                     contTable <- group[[paste0("test", i, "Contingency")]]
                     statsTable <- group[[paste0("test", i, "Stats")]]
@@ -986,22 +985,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     pattern_values <- paste0(t1, "/", t2, "/", t3)
                 }
 
-                # Add column to original dataset.
-                # jmvcore has no `self$results$setColumn()` method; writing a
-                # column back to the dataset requires a `type: Output` result
-                # item (populated via setRowNums()/setValues()). Use that API
-                # when the accessor is present and degrade gracefully otherwise,
-                # so enabling this option never crashes the analysis.
-                if (!is.null(self$results$addedPattern)) {
-                    if (self$results$addedPattern$isNotFilled()) {
-                        self$results$addedPattern$setRowNums(rownames(data_prep))
-                        self$results$addedPattern$setValues(pattern_values)
-                    }
-                } else {
-                    private$.addNotice(
-                        "INFO", "Pattern Column Not Added",
-                        "Adding the test pattern back to the dataset is not available in this build. The combination pattern is shown in the results tables above."
-                    )
+                output <- self$results$addedPattern
+                if (output$isNotFilled()) {
+                    output$setRowNums(rownames(data_prep))
+                    output$setValues(pattern_values)
                 }
             },
             .plotBarChart = function(image, ...) {

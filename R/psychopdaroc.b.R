@@ -227,7 +227,7 @@
 #' @export
 #' @importFrom R6 R6Class
 #' @import jmvcore
-#' @import ggplot2
+#' @importFrom cutpointr cutpointr
 #' @importFrom MASS ginv
 # ============================================================================
 # MAIN ANALYSIS CLASS

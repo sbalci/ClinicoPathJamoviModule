@@ -77,7 +77,7 @@ items:
           format: zto,pvalue
 
     - name: hsrocresults
-      title: HSROC Model Results
+      title: Proportional-Hazards SROC Model Results
       type: Table
       visible: (hsroc_analysis)
       clearWith:

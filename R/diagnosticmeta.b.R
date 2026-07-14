@@ -3,6 +3,7 @@
 #' @import jmvcore
 #' @importFrom mada reitsma phm
 #' @importFrom metafor rma
+#' @importFrom htmltools tagList
 #' @importFrom stats qnorm pnorm qt pt
 #' @export
 #' @return An \code{R6} class generator object for the \code{diagnosticmetaClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -27,6 +28,36 @@ diagnosticmetaClass <- R6::R6Class(
         # Helper for null-safe operations
         `%||%` = function(x, y) {
             if (is.null(x)) y else x
+        },
+
+        .metaforMethod = function(method) {
+            switch(
+                tolower(method %||% "reml"),
+                "fixed" = "FE",
+                "ml" = "ML",
+                "reml" = "REML",
+                "mm" = "DL",
+                "vc" = "HE",
+                "REML"
+            )
+        },
+
+        .metaforLevel = function() {
+            level <- self$options$confidence_level %||% 95
+            max(50, min(99, as.numeric(level)))
+        },
+
+        .renderSymbols = function(text) {
+            replacements <- c(
+                "[[SUP2]]" = intToUtf8(0x00B2),
+                "[[GE]]" = intToUtf8(0x2265),
+                "[[APPROX]]" = intToUtf8(0x2248),
+                "[[TIMES]]" = intToUtf8(0x00D7)
+            )
+            for (token in names(replacements)) {
+                text <- gsub(token, replacements[[token]], text, fixed = TRUE)
+            }
+            text
         },
 
         # Helper function to get color palette for accessibility
@@ -215,17 +246,6 @@ diagnosticmetaClass <- R6::R6Class(
             analysis_data <- prepared_data$analysis_data
             mada_data <- prepared_data$mada_data
 
-            # mydataview <- self$results$mydataview
-            # mydataview$setContent(
-            #     list(
-            #         debug_prepared_data = head(prepared_data),
-            #         debug_analysis_data = head(analysis_data),
-            #         debug_mada_data = head(mada_data)
-            #         )
-            # )
-
-
-
             # Prepare data for analysis - debug info removed for clean output
 
             # Perform bivariate meta-analysis when enabled
@@ -251,15 +271,23 @@ diagnosticmetaClass <- R6::R6Class(
             }
             self$results$summary$setVisible(self$options$show_analysis_summary)
 
-            # Perform HSROC analysis if requested
+            # Perform the Holling proportional-hazards SROC analysis if requested
             if (isTRUE(self$options$hsroc_analysis)) {
                 tryCatch({
-                    private$.performHSROCAnalysis(meta_data = meta_data,
-                                                  mada_data = mada_data)
+                    private$.performPHMSROCAnalysis(
+                        meta_data = meta_data,
+                        mada_data = mada_data
+                    )
                 }, error = function(e) {
                     # SERIALIZATION FIX: Don't insert Notice objects (causes serialization errors)
                     # Use table note instead
-                    self$results$hsrocresults$setNote("error", sprintf('HSROC analysis error: %s', htmltools::htmlEscape(e$message)))
+                    self$results$hsrocresults$setNote(
+                        "error",
+                        sprintf(
+                            "Proportional-hazards SROC analysis error: %s",
+                            htmltools::htmlEscape(e$message)
+                        )
+                    )
                 })
             }
 
@@ -380,8 +408,75 @@ diagnosticmetaClass <- R6::R6Class(
 
             biv_model <- mada::reitsma(mada_data, method = method_used)
             private$.biv_model <- biv_model
-            summary_results <- summary(biv_model, level = conf_level)
-            coefficients <- summary_results[["coefficients"]]
+            summary_results <- tryCatch(
+                summary(biv_model, level = conf_level),
+                error = function(e) NULL
+            )
+            coefficients <- if (!is.null(summary_results)) {
+                summary_results[["coefficients"]]
+            } else {
+                NULL
+            }
+
+            # mada 0.5.12 fits method = "fixed" correctly, but its
+            # summary.reitsma() assumes a random-effects covariance matrix and
+            # errors. Build the same four summary rows directly from the fitted
+            # fixed-effect coefficients and covariance matrix.
+            if (is.null(coefficients) && method_used == "fixed") {
+                fixed_coef <- biv_model$coefficients
+                fixed_vcov <- biv_model$vcov
+                if (is.matrix(fixed_coef) && nrow(fixed_coef) >= 1 &&
+                    all(c("tsens", "tfpr") %in% colnames(fixed_coef)) &&
+                    is.matrix(fixed_vcov) && nrow(fixed_vcov) >= 2) {
+                    logit_estimate <- c(
+                        tsens = fixed_coef[1, "tsens"],
+                        tfpr = fixed_coef[1, "tfpr"]
+                    )
+                    standard_error <- sqrt(diag(fixed_vcov)[1:2])
+                    z_value <- logit_estimate / standard_error
+                    p_value <- 2 * stats::pnorm(-abs(z_value))
+                    z_critical <- stats::qnorm(1 - (1 - conf_level) / 2)
+                    logit_lower <- logit_estimate - z_critical * standard_error
+                    logit_upper <- logit_estimate + z_critical * standard_error
+                    ci_prefix <- paste0(100 * conf_level, "%ci.")
+
+                    coefficients <- rbind(
+                        "tsens.(Intercept)" = c(
+                            logit_estimate["tsens"], standard_error[1],
+                            z_value["tsens"], p_value["tsens"],
+                            logit_lower["tsens"], logit_upper["tsens"]
+                        ),
+                        "tfpr.(Intercept)" = c(
+                            logit_estimate["tfpr"], standard_error[2],
+                            z_value["tfpr"], p_value["tfpr"],
+                            logit_lower["tfpr"], logit_upper["tfpr"]
+                        ),
+                        "sensitivity" = c(
+                            stats::plogis(logit_estimate["tsens"]),
+                            NA_real_, NA_real_, NA_real_,
+                            stats::plogis(logit_lower["tsens"]),
+                            stats::plogis(logit_upper["tsens"])
+                        ),
+                        "false pos. rate" = c(
+                            stats::plogis(logit_estimate["tfpr"]),
+                            NA_real_, NA_real_, NA_real_,
+                            stats::plogis(logit_lower["tfpr"]),
+                            stats::plogis(logit_upper["tfpr"])
+                        )
+                    )
+                    colnames(coefficients) <- c(
+                        "Estimate", "Std. Error", "z", "Pr(>|z|)",
+                        paste0(ci_prefix, "lb"), paste0(ci_prefix, "ub")
+                    )
+                    self$results$bivariateresults$setNote(
+                        "fixed_summary",
+                        paste(
+                            "Fixed-effect confidence intervals were computed",
+                            "from the fitted Reitsma covariance matrix."
+                        )
+                    )
+                }
+            }
 
             if (is.null(coefficients) || !is.matrix(coefficients)) {
                 self$results$bivariateresults$setNote("model_error", "Reitsma model failed - coefficient matrix missing")
@@ -568,7 +663,7 @@ diagnosticmetaClass <- R6::R6Class(
             bivariate_table$setNote("method", paste("Reitsma model estimated via", method_used))
         },
         
-        .performHSROCAnalysis = function(meta_data, mada_data) {
+        .performPHMSROCAnalysis = function(meta_data, mada_data) {
 
             if (requireNamespace("mada", quietly = TRUE)) {
 
@@ -577,53 +672,59 @@ diagnosticmetaClass <- R6::R6Class(
 
                 # Validate input data
                 if (is.null(meta_data) || nrow(meta_data) == 0) {
-                    self$results$hsrocresults$setNote("insufficient", "Insufficient data for HSROC analysis")
+                    self$results$hsrocresults$setNote(
+                        "insufficient",
+                        "Insufficient data for proportional-hazards SROC analysis"
+                    )
                     return()
                 }
 
                 # Check for required columns
                 required_cols <- c("tp", "fp", "fn", "tn")
                 if (!all(required_cols %in% names(meta_data))) {
-                    self$results$hsrocresults$setNote("missing", "Missing required columns for HSROC analysis")
+                    self$results$hsrocresults$setNote(
+                        "missing",
+                        "Missing required columns for proportional-hazards SROC analysis"
+                    )
                     return()
                 }
 
                 if (is.null(mada_data) || nrow(mada_data) == 0) {
-                    self$results$hsrocresults$setNote("invalid", "Processed data unavailable for HSROC analysis")
+                    self$results$hsrocresults$setNote(
+                        "invalid",
+                        "Processed data unavailable for proportional-hazards SROC analysis"
+                    )
                     return()
                 }
 
                 # Check if we have enough data
                 if (nrow(mada_data) < 3) {
-                    self$results$hsrocresults$setNote("toofew", "HSROC requires at least 3 studies")
+                    self$results$hsrocresults$setNote(
+                        "toofew",
+                        "Proportional-hazards SROC analysis requires at least 3 studies"
+                    )
                     return()
                 }
 
-                # Check for zero cells in MADA data which cause problems
+                # mada::phm() applies its documented continuity correction when
+                # zero cells are present. Surface that behavior to the user.
                 zero_cells <- any(meta_data$tp == 0 | meta_data$fp == 0 |
                                   meta_data$fn == 0 | meta_data$tn == 0)
                 if (zero_cells) {
-                    self$results$hsrocresults$setNote("zerocells", "Zero cells detected - HSROC may be unreliable")
+                    self$results$hsrocresults$setNote(
+                        "zerocells",
+                        paste(
+                            "Zero cells detected; mada::phm applies a continuity",
+                            "correction, so results should be interpreted cautiously."
+                        )
+                    )
                 }
 
-                # Attempt HSROC model fitting
-
-                # TODO (correctness): the function uses `mada::phm` (Holling
-                # proportional-hazards SROC) but labels the output as HSROC
-                # (Rutter-Gatsonis), and `param_labels` at lines 688-690 spell
-                # out the Rutter-Gatsonis theta/Lambda parametrization that `phm` does
-                # NOT return. Either (a) relabel the table to "Proportional
-                # Hazards SROC (Holling)" and update the parameter names to
-                # match phm's actual output, or (b) add a true HSROC backend
-                # (the `HSROC` package, or a Stan/JAGS implementation). The
-                # current labels are misleading for clinicians reviewing
-                # diagnostic meta-analyses. See review-function notes.
-
-                # Fit HSROC model with enhanced error handling
+                # Fit the Holling proportional-hazards SROC model.
                 hsroc_model <- tryCatch({
                     result <- mada::phm(mada_data)
                     if (is.null(result)) {
-                        stop("HSROC model fitting returned NULL")
+                        stop("Proportional-hazards SROC model fitting returned NULL")
                     }
                     # Model fitted successfully
                     result
@@ -632,33 +733,48 @@ diagnosticmetaClass <- R6::R6Class(
                     tryCatch({
                         result <- suppressWarnings(mada::phm(mada_data))
                         if (is.null(result)) {
-                            stop("HSROC model fitting returned NULL after warning")
+                            stop("Proportional-hazards SROC model fitting returned NULL after warning")
                         }
                         result
                     }, error = function(e2) {
-                        self$results$hsrocresults$setNote("error", paste("HSROC fitting failed:", e2$message))
+                        self$results$hsrocresults$setNote(
+                            "error",
+                            paste("Proportional-hazards SROC fitting failed:", e2$message)
+                        )
                         return(NULL)
                     })
                 }, error = function(e) {
-                    self$results$hsrocresults$setNote("error", paste("HSROC fitting error:", e$message))
+                    self$results$hsrocresults$setNote(
+                        "error",
+                        paste("Proportional-hazards SROC fitting error:", e$message)
+                    )
                     return(NULL)
                 })
 
                 # Validate model object
                 if (is.null(hsroc_model)) {
-                    self$results$hsrocresults$setNote("failed", "HSROC model fitting failed - check data quality")
+                    self$results$hsrocresults$setNote(
+                        "failed",
+                        "Proportional-hazards SROC fitting failed; check data quality"
+                    )
                     return()
                 }
 
                 # Get summary with error handling
                 hsroc_summary <- tryCatch({
-                    result <- summary(hsroc_model)
+                    result <- summary(
+                        hsroc_model,
+                        level = private$.metaforLevel() / 100
+                    )
                     if (is.null(result)) {
-                        stop("HSROC summary is NULL")
+                        stop("Proportional-hazards SROC summary is NULL")
                     }
                     result
                 }, error = function(e) {
-                    self$results$hsrocresults$setNote("summary_error", paste("HSROC summary error:", e$message))
+                    self$results$hsrocresults$setNote(
+                        "summary_error",
+                        paste("Proportional-hazards SROC summary error:", e$message)
+                    )
                     return(NULL)
                 })
 
@@ -666,9 +782,7 @@ diagnosticmetaClass <- R6::R6Class(
                     return()
                 }
 
-                # Extract HSROC summary information
-
-                # Extract HSROC parameters - coefficients are in hsroc_summary$object$coefficients
+                # Extract model parameters from the mada summary object.
                 coefficients <- NULL
                 tryCatch({
                     if (!is.null(hsroc_summary$object) && "coefficients" %in% names(hsroc_summary$object)) {
@@ -683,13 +797,19 @@ diagnosticmetaClass <- R6::R6Class(
                 })
 
                 if (is.null(coefficients)) {
-                    self$results$hsrocresults$setNote("no_coefficients", "HSROC summary contains no coefficients")
+                    self$results$hsrocresults$setNote(
+                        "no_coefficients",
+                        "Proportional-hazards SROC summary contains no coefficients"
+                    )
                     return()
                 }
 
                 # Validate coefficient structure
                 if (length(coefficients) == 0) {
-                    self$results$hsrocresults$setNote("empty_coefficients", "HSROC coefficients are empty")
+                    self$results$hsrocresults$setNote(
+                        "empty_coefficients",
+                        "Proportional-hazards SROC coefficients are empty"
+                    )
                     return()
                 }
 
@@ -697,9 +817,8 @@ diagnosticmetaClass <- R6::R6Class(
                 if (is.vector(coefficients) && !is.null(names(coefficients))) {
                     # Define parameter labels
                     param_labels <- list(
-                        "theta" = "HSROC Threshold (\u{03b8})",
-                        "Lambda" = "HSROC Accuracy (\u{039b})",
-                        "taus_sq" = "Between-Study Variance (\u{03c4}\u{00b2})"
+                        "theta" = "Diagnostic accuracy parameter (theta)",
+                        "taus_sq" = "Between-study variance (tau^2)"
                     )
 
                     hsroc_table <- self$results$hsrocresults
@@ -743,9 +862,18 @@ diagnosticmetaClass <- R6::R6Class(
                         ))
                     }
 
-                    hsroc_table$setNote("success", "HSROC analysis completed successfully")
+                    hsroc_table$setNote(
+                        "method",
+                        paste(
+                            "Holling proportional-hazards SROC model fitted",
+                            "with adjusted profile maximum likelihood."
+                        )
+                    )
                 } else {
-                    self$results$hsrocresults$setNote("unsupported_format", "HSROC coefficients format not supported")
+                    self$results$hsrocresults$setNote(
+                        "unsupported_format",
+                        "Proportional-hazards SROC coefficient format is not supported"
+                    )
                 }
             }
         },
@@ -764,54 +892,105 @@ diagnosticmetaClass <- R6::R6Class(
                 analysis_data$logit_sens <- stats::qlogis(analysis_data$sens)
                 analysis_data$logit_spec <- stats::qlogis(analysis_data$spec)
 
-                # TODO (correctness): all `metafor::rma` calls in this file
-                # silently use the metafor defaults (level=95, method="REML")
-                # and ignore the user's `confidence_level` and `method`
-                # options. Affects:
-                #   - heterogeneity (this block, lines below)
-                #   - meta-regression (.performMetaRegression, ~line 854)
-                # Pass `level = self$options$confidence_level` and
-                # `method = self$options$method` (with the existing Reitsma
-                # method whitelist applied) to each rma() call so the
-                # user-selected confidence level is honored across all tables.
-                #
-                # TODO (correctness): when zero_cell_correction = "none" and
-                # any study has a true zero in TP/FN (or TN/FP), the variance
-                # below becomes 1/0 = Inf and propagates into metafor::rma
-                # without any finite-value check. Add an `is.finite()` guard
-                # on `var_logit_sens` / `var_logit_spec` and either drop those
-                # rows with a STRONG_WARNING notice or force the user to pick
-                # a non-`none` correction. Same pattern in
-                # .performMetaRegression at ~line 851.
                 analysis_data$var_logit_sens <- 1 / analysis_data$tp + 1 / analysis_data$fn
                 analysis_data$var_logit_spec <- 1 / analysis_data$tn + 1 / analysis_data$fp
-
-                sens_meta <- metafor::rma(yi = logit_sens, vi = var_logit_sens,
-                                          data = analysis_data, method = "REML")
-
-                spec_meta <- metafor::rma(yi = logit_spec, vi = var_logit_spec,
-                                          data = analysis_data, method = "REML")
 
                 het_table <- self$results$heterogeneity
                 het_table$deleteRows()
 
-                het_table$addRow(rowKey = "sensitivity", values = list(
-                    measure = "Sensitivity",
-                    q_statistic = sens_meta$QE,
-                    df = sens_meta$k - 1,
-                    p_value = sens_meta$QEp,
-                    i_squared = max(0, (sens_meta$QE - (sens_meta$k - 1)) / sens_meta$QE * 100),
-                    tau_squared = sens_meta$tau2
-                ))
+                sens_valid <- is.finite(analysis_data$logit_sens) &
+                    is.finite(analysis_data$var_logit_sens) &
+                    analysis_data$var_logit_sens > 0
+                spec_valid <- is.finite(analysis_data$logit_spec) &
+                    is.finite(analysis_data$var_logit_spec) &
+                    analysis_data$var_logit_spec > 0
 
-                het_table$addRow(rowKey = "specificity", values = list(
-                    measure = "Specificity",
-                    q_statistic = spec_meta$QE,
-                    df = spec_meta$k - 1,
-                    p_value = spec_meta$QEp,
-                    i_squared = max(0, (spec_meta$QE - (spec_meta$k - 1)) / spec_meta$QE * 100),
-                    tau_squared = spec_meta$tau2
-                ))
+                dropped_sens <- sum(!sens_valid)
+                dropped_spec <- sum(!spec_valid)
+                if (dropped_sens > 0 || dropped_spec > 0) {
+                    het_table$setNote(
+                        "nonfinite_rows",
+                        sprintf(
+                            paste(
+                                "Excluded non-finite study rows from univariate",
+                                "heterogeneity models (sensitivity: %d; specificity: %d).",
+                                "Choose a zero-cell correction to retain zero-cell studies."
+                            ),
+                            dropped_sens,
+                            dropped_spec
+                        )
+                    )
+                }
+
+                rma_method <- private$.metaforMethod(self$options$method)
+                rma_level <- private$.metaforLevel()
+
+                fit_heterogeneity <- function(data, measure) {
+                    if (nrow(data) < 2) {
+                        het_table$setNote(
+                            paste0("insufficient_", tolower(measure)),
+                            paste("At least two finite studies are required for", measure)
+                        )
+                        return(NULL)
+                    }
+
+                    tryCatch(
+                        metafor::rma(
+                            yi = data$effect,
+                            vi = data$variance,
+                            method = rma_method,
+                            level = rma_level
+                        ),
+                        error = function(e) {
+                            het_table$setNote(
+                                paste0("error_", tolower(measure)),
+                                paste(measure, "heterogeneity model failed:", e$message)
+                            )
+                            NULL
+                        }
+                    )
+                }
+
+                sens_meta <- fit_heterogeneity(
+                    data.frame(
+                        effect = analysis_data$logit_sens[sens_valid],
+                        variance = analysis_data$var_logit_sens[sens_valid]
+                    ),
+                    "Sensitivity"
+                )
+                spec_meta <- fit_heterogeneity(
+                    data.frame(
+                        effect = analysis_data$logit_spec[spec_valid],
+                        variance = analysis_data$var_logit_spec[spec_valid]
+                    ),
+                    "Specificity"
+                )
+
+                add_heterogeneity_row <- function(row_key, measure, model) {
+                    if (is.null(model)) {
+                        return()
+                    }
+                    i_squared <- if (is.finite(model$QE) && model$QE > 0) {
+                        max(0, (model$QE - (model$k - 1)) / model$QE * 100)
+                    } else {
+                        0
+                    }
+                    het_table$addRow(rowKey = row_key, values = list(
+                        measure = measure,
+                        q_statistic = model$QE,
+                        df = model$k - 1,
+                        p_value = model$QEp,
+                        i_squared = i_squared,
+                        tau_squared = model$tau2
+                    ))
+                }
+
+                add_heterogeneity_row("sensitivity", "Sensitivity", sens_meta)
+                add_heterogeneity_row("specificity", "Specificity", spec_meta)
+                het_table$setNote(
+                    "method",
+                    paste("Univariate auxiliary models used", rma_method, "estimation.")
+                )
             }
         },
         
@@ -875,27 +1054,87 @@ diagnosticmetaClass <- R6::R6Class(
                 metareg_table <- self$results$metaregression
                 metareg_table$deleteRows()
 
-                sens_metareg <- tryCatch({
-                    metafor::rma(yi = logit_sens, vi = var_logit_sens,
-                                 mods = ~ covariate, data = analysis_data, method = "REML")
-                }, error = function(e) {
-                    private$.appendInstructionMessage(
-                        paste0("<div class='alert alert-warning'><h4> Sensitivity Meta-Regression Failed</h4><p>",
-                               htmltools::htmlEscape(e$message), "</p></div>")
-                    )
-                    return(NULL)
-                })
+                sens_valid <- is.finite(analysis_data$logit_sens) &
+                    is.finite(analysis_data$var_logit_sens) &
+                    analysis_data$var_logit_sens > 0
+                spec_valid <- is.finite(analysis_data$logit_spec) &
+                    is.finite(analysis_data$var_logit_spec) &
+                    analysis_data$var_logit_spec > 0
+                sens_data <- analysis_data[sens_valid, , drop = FALSE]
+                spec_data <- analysis_data[spec_valid, , drop = FALSE]
 
-                spec_metareg <- tryCatch({
-                    metafor::rma(yi = logit_spec, vi = var_logit_spec,
-                                 mods = ~ covariate, data = analysis_data, method = "REML")
-                }, error = function(e) {
-                    private$.appendInstructionMessage(
-                        paste0("<div class='alert alert-warning'><h4> Specificity Meta-Regression Failed</h4><p>",
-                               htmltools::htmlEscape(e$message), "</p></div>")
+                dropped_sens <- sum(!sens_valid)
+                dropped_spec <- sum(!spec_valid)
+                if (dropped_sens > 0 || dropped_spec > 0) {
+                    metareg_table$setNote(
+                        "nonfinite_rows",
+                        sprintf(
+                            paste(
+                                "Excluded non-finite study rows from meta-regression",
+                                "(sensitivity: %d; specificity: %d).",
+                                "Choose a zero-cell correction to retain zero-cell studies."
+                            ),
+                            dropped_sens,
+                            dropped_spec
+                        )
                     )
-                    return(NULL)
-                })
+                }
+
+                rma_method <- private$.metaforMethod(self$options$method)
+                rma_level <- private$.metaforLevel()
+
+                fit_meta_regression <- function(data, effect, variance, measure) {
+                    if (nrow(data) < 3) {
+                        metareg_table$setNote(
+                            paste0("insufficient_", tolower(measure)),
+                            paste(
+                                "At least three finite studies are required for",
+                                paste0(measure, " meta-regression.")
+                            )
+                        )
+                        return(NULL)
+                    }
+
+                    tryCatch(
+                        metafor::rma(
+                            yi = data[[effect]],
+                            vi = data[[variance]],
+                            mods = ~ covariate,
+                            data = data,
+                            method = rma_method,
+                            level = rma_level
+                        ),
+                        error = function(e) {
+                            private$.appendInstructionMessage(
+                                paste0(
+                                    "<div class='alert alert-warning'><h4> ",
+                                    measure,
+                                    " Meta-Regression Failed</h4><p>",
+                                    htmltools::htmlEscape(e$message),
+                                    "</p></div>"
+                                )
+                            )
+                            NULL
+                        }
+                    )
+                }
+
+                sens_metareg <- fit_meta_regression(
+                    sens_data,
+                    "logit_sens",
+                    "var_logit_sens",
+                    "Sensitivity"
+                )
+                spec_metareg <- fit_meta_regression(
+                    spec_data,
+                    "logit_spec",
+                    "var_logit_spec",
+                    "Specificity"
+                )
+                metareg_table$setNote(
+                    "method",
+                    paste("Meta-regression used", rma_method, "estimation.")
+                )
 
                 # Defense-in-depth: even though jamovi tables render cells as
                 # plain text, the covariate parameter name originates from a
@@ -1391,7 +1630,7 @@ diagnosticmetaClass <- R6::R6Class(
         # TODO (UX): `self$results$instructions` is overloaded as: (a) onboarding
         # message when no data, (b) data-validation error sink (lines 151, 186),
         # (c) meta-regression-missing-covariate notice (.appendInstructionMessage),
-        # (d) HSROC unavailable / sparse-data notices. Mixing onboarding with
+        # (d) SROC unavailable / sparse-data notices. Mixing onboarding with
         # error states makes the UI confusing - first-time users see error
         # styling when they have not yet selected variables. Splitting into a
         # dedicated `notices` Html output (notice-pattern from waterfall.b.R)
@@ -1407,7 +1646,7 @@ diagnosticmetaClass <- R6::R6Class(
                 "<ol style='margin-bottom: 0;'>",
                 "<li><strong>Select Study Identifier:</strong> Choose the variable containing unique study names</li>",
                 "<li><strong>Define 2x2 Table:</strong> Select variables for TP, FP, FN, TN counts</li>",
-                "<li><strong>Choose Analysis Options:</strong> Enable bivariate analysis, HSROC, or publication bias assessment</li>",
+                "<li><strong>Choose Analysis Options:</strong> Enable bivariate analysis, proportional-hazards SROC, or publication bias assessment</li>",
                 "<li><strong>Configure Plots:</strong> Select forest plots, SROC curves, or funnel plots as needed</li>",
                 "</ol>",
                 "</div>",
@@ -1488,7 +1727,7 @@ diagnosticmetaClass <- R6::R6Class(
             <h3>Analysis Methods</h3>
             <ul>
                 <li><strong>Bivariate Random-Effects Model (Recommended):</strong> Jointly analyzes sensitivity and specificity accounting for correlation</li>
-                <li><strong>HSROC Analysis:</strong> Hierarchical summary ROC curve modeling</li>
+                <li><strong>Proportional-Hazards SROC Analysis:</strong> Holling model estimated by adjusted profile maximum likelihood</li>
                 <li><strong>Meta-Regression:</strong> Investigates sources of heterogeneity using study-level covariates</li>
                 <li><strong>Publication Bias Assessment:</strong> Deeks' funnel plot asymmetry test</li>
             </ul>
@@ -1625,12 +1864,12 @@ diagnosticmetaClass <- R6::R6Class(
             <h3> Heterogeneity Assessment</h3>
             
             <div style='background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 10px 0;'>
-                <h4>I² Statistic Interpretation:</h4>
+                <h4>I[[SUP2]] Statistic Interpretation:</h4>
                 <ul>
-                    <li><strong>I² < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
-                    <li><strong>I² 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
-                    <li><strong>I² 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
-                    <li><strong>I² > 75%:</strong> Considerable heterogeneity - avoid pooling, use subgroup analysis</li>
+                    <li><strong>I[[SUP2]] < 25%:</strong> Low heterogeneity - results can be reliably pooled</li>
+                    <li><strong>I[[SUP2]] 25-50%:</strong> Moderate heterogeneity - investigate potential sources</li>
+                    <li><strong>I[[SUP2]] 50-75%:</strong> Substantial heterogeneity - pooling questionable</li>
+                    <li><strong>I[[SUP2]] > 75%:</strong> Considerable heterogeneity - avoid pooling, use subgroup analysis</li>
                 </ul>
             </div>
             
@@ -1646,7 +1885,7 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>Deeks' Funnel Plot Test:</h4>
             <ul>
-                <li><strong>p ≥ 0.05:</strong> No significant asymmetry - low risk of publication bias</li>
+                <li><strong>p [[GE]] 0.05:</strong> No significant asymmetry - low risk of publication bias</li>
                 <li><strong>p < 0.05:</strong> Significant asymmetry - potential publication bias detected</li>
             </ul>
             
@@ -1664,8 +1903,8 @@ diagnosticmetaClass <- R6::R6Class(
             
             <h4>IHC Marker Validation:</h4>
             <ul>
-                <li><strong>Screening Applications:</strong> Prioritize high sensitivity (≥90%)</li>
-                <li><strong>Confirmatory Testing:</strong> Prioritize high specificity (≥90%)</li>
+                <li><strong>Screening Applications:</strong> Prioritize high sensitivity ([[GE]]90%)</li>
+                <li><strong>Confirmatory Testing:</strong> Prioritize high specificity ([[GE]]90%)</li>
                 <li><strong>Balanced Performance:</strong> Consider clinical costs of false positives vs false negatives</li>
             </ul>
             
@@ -1709,7 +1948,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <li> <strong>Study Selection:</strong> Number of studies included and excluded</li>
                 <li> <strong>Pooled Estimates:</strong> Sensitivity and specificity with 95% confidence intervals</li>
                 <li> <strong>Likelihood Ratios:</strong> For clinical decision-making context</li>
-                <li> <strong>Heterogeneity:</strong> I² values and potential sources investigated</li>
+                <li> <strong>Heterogeneity:</strong> I[[SUP2]] values and potential sources investigated</li>
                 <li> <strong>Publication Bias:</strong> Deeks' test results and visual assessment</li>
                 <li> <strong>Clinical Implications:</strong> Population-specific predictive values</li>
                 <li> <strong>Limitations:</strong> Study quality, missing data, generalizability</li>
@@ -1720,7 +1959,7 @@ diagnosticmetaClass <- R6::R6Class(
             </div>
             "
             
-            self$results$interpretation$setContent(html)
+            self$results$interpretation$setContent(private$.renderSymbols(html))
         },
 
         .appendInstructionMessage = function(message) {
@@ -1799,7 +2038,7 @@ diagnosticmetaClass <- R6::R6Class(
                 sprintf("<p><strong>Positive Likelihood Ratio:</strong> %.2f - A positive test is %.1fx more likely in disease than healthy</p>",
                         lr_pos, lr_pos)
             } else {
-                "<p><strong>Positive Likelihood Ratio:</strong> Not estimable with the current data (specificity ≈ 100% or model unstable).</p>"
+                private$.renderSymbols("<p><strong>Positive Likelihood Ratio:</strong> Not estimable with the current data (specificity [[APPROX]] 100% or model unstable).</p>")
             }
 
             nlr_text <- if (is.finite(lr_neg)) {
@@ -1807,11 +2046,13 @@ diagnosticmetaClass <- R6::R6Class(
                     sprintf("<p><strong>Negative Likelihood Ratio:</strong> %.2f - A negative test is %.1fx more likely in healthy than disease</p>",
                             lr_neg, inv_lr_neg)
                 } else {
-                    sprintf("<p><strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity ≈ 100%%).</p>",
-                            lr_neg)
+                    private$.renderSymbols(sprintf(
+                        "<p><strong>Negative Likelihood Ratio:</strong> %.2f - Interpretation unstable (sensitivity [[APPROX]] 100%%).</p>",
+                        lr_neg
+                    ))
                 }
             } else {
-                "<p><strong>Negative Likelihood Ratio:</strong> Not estimable with the current data (sensitivity ≈ 100% or model unstable).</p>"
+                private$.renderSymbols("<p><strong>Negative Likelihood Ratio:</strong> Not estimable with the current data (sensitivity [[APPROX]] 100% or model unstable).</p>")
             }
 
             copy_text <- sprintf(
@@ -2162,15 +2403,15 @@ diagnosticmetaClass <- R6::R6Class(
                     <p>Combines results from multiple diagnostic accuracy studies to estimate overall test performance through:</p>
                     <ul>
                         <li> <strong>Bivariate modeling</strong> - Jointly analyzes sensitivity and specificity</li>
-                        <li> <strong>HSROC curves</strong> - Models the trade-off between sensitivity and specificity</li>
+                        <li> <strong>Proportional-hazards SROC modeling</strong> - Models the trade-off between sensitivity and false-positive rate</li>
                         <li> <strong>Heterogeneity assessment</strong> - Evaluates consistency across studies</li>
                         <li> <strong>Publication bias</strong> - Checks for selective reporting</li>
                     </ul>
                 </div>
 
                 <div style='margin: 15px 0; background-color: #e3f2fd; padding: 15px; border-radius: 5px; border-left: 4px solid #2196F3;'>
-                    <h5> Understanding Bivariate vs HSROC Models</h5>
-                    <p><strong>Both models are valuable and provide complementary information:</strong></p>
+                    <h5> Understanding Bivariate and Proportional-Hazards SROC Models</h5>
+                    <p><strong>These models answer related questions using different parameterizations:</strong></p>
 
                     <p><strong>Bivariate Random-Effects Model (Recommended Primary Approach):</strong></p>
                     <ul>
@@ -2181,16 +2422,16 @@ diagnosticmetaClass <- R6::R6Class(
                         <li> <strong>Use this when:</strong> Studies use the same diagnostic threshold</li>
                     </ul>
 
-                    <p><strong>HSROC Model (Hierarchical Summary ROC):</strong></p>
+                    <p><strong>Holling Proportional-Hazards SROC Model:</strong></p>
                     <ul>
-                        <li> Models the <em>entire ROC curve</em> across different thresholds</li>
-                        <li> Provides threshold-independent accuracy estimates (Λ parameter)</li>
-                        <li> Captures asymmetry in diagnostic accuracy (β parameter)</li>
-                        <li> Better for studies with <em>varying cutoffs or thresholds</em></li>
-                        <li> <strong>Use this when:</strong> Studies use different diagnostic thresholds</li>
+                        <li> Relates sensitivity (<em>p</em>) and false-positive rate (<em>u</em>) through <em>u</em><sup>theta</sup> = <em>p</em></li>
+                        <li> Reports theta as the diagnostic accuracy parameter</li>
+                        <li> Reports tau<sup>2</sup> as between-study variation in diagnostic accuracy</li>
+                        <li> Uses adjusted profile maximum likelihood and is suitable for smaller study sets</li>
+                        <li> Is distinct from the Rutter-Gatsonis HSROC model</li>
                     </ul>
 
-                    <p><strong> Clinical Insight:</strong> The SROC plot shown by this module is derived from the <em>bivariate model</em>, which provides a simpler and more intuitive visualization. The HSROC table provides additional parametric information (θ = threshold, Λ = accuracy) that can be useful for understanding test performance across different threshold scenarios. <strong>Both approaches are statistically valid</strong> - the choice depends on your research question and whether thresholds vary across studies.</p>
+                    <p><strong> Clinical Insight:</strong> The plotted SROC curve is derived from the <em>bivariate model</em>. The proportional-hazards SROC table is a separate compact model of diagnostic accuracy and between-study variation; it should not be interpreted as a Rutter-Gatsonis HSROC threshold/accuracy table.</p>
                 </div>
 
                 <div style='margin: 15px 0;'>
@@ -2206,7 +2447,7 @@ diagnosticmetaClass <- R6::R6Class(
                 <div style='margin: 15px 0; background-color: #fff3cd; padding: 15px; border-radius: 5px;'>
                     <h5> Key Requirements & Assumptions</h5>
                     <ul>
-                        <li>Minimum 3 studies with 2×2 diagnostic data</li>
+                        <li>Minimum 3 studies with 2[[TIMES]]2 diagnostic data</li>
                         <li>Studies should evaluate the same test and target condition</li>
                         <li>Reference standard should be consistent across studies</li>
                         <li>Patient spectrum should be clinically relevant</li>
@@ -2230,7 +2471,7 @@ diagnosticmetaClass <- R6::R6Class(
             </div>
             "
 
-            self$results$about$setContent(html)
+            self$results$about$setContent(private$.renderSymbols(html))
         },
 
         # Optimized data preparation with caching
@@ -2451,7 +2692,7 @@ diagnosticmetaClass <- R6::R6Class(
                     <h5> No Bias Indicators</h5>
                     <ul>
                         <li><strong>Symmetric Funnel:</strong> Studies distributed evenly on both sides</li>
-                        <li><strong>Deeks' Test p ≥ 0.05:</strong> No statistical evidence of asymmetry</li>
+                        <li><strong>Deeks' Test p [[GE]] 0.05:</strong> No statistical evidence of asymmetry</li>
                         <li><strong>Small Studies Present:</strong> Range of precision levels represented</li>
                     </ul>
                 </div>
@@ -2468,7 +2709,9 @@ diagnosticmetaClass <- R6::R6Class(
             </div>
             "
 
-            self$results$funnelplot_explanation$setContent(html)
+            self$results$funnelplot_explanation$setContent(
+                private$.renderSymbols(html)
+            )
         }
 
         # TODO (forward-looking): no `.asSource()` method - the jamovi syntax
