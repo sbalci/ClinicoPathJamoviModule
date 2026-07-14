@@ -19,6 +19,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
             .analysis_data = NULL,
             .comparison_results = NULL,
             .change_summary = NULL,
+            .analysis_notes = NULL,
 
             # Constants for maintainability
             .constants = list(
@@ -27,8 +28,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 CONFIDENCE_LEVEL = 0.95,
                 MAX_GROUPS_FOR_PAIRWISE = 10,
                 MAX_GROUPS_FOR_DISPLAY = 20,
-                PROGRESS_REPORT_INTERVAL = 20,
-                HTML_PREALLOC_SIZE = 1000
+                PROGRESS_REPORT_INTERVAL = 20
             ),
 
             # Validation helper functions
@@ -50,6 +50,75 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 if (!is.null(value) && !is.numeric(value)) {
                     jmvcore::reject(paste(name, .("must be a numeric value")), code = "")
                 }
+            },
+
+            # Validate all option values. Called from .run() (NOT .init()) so that
+            # jmvcore::reject() errors actually surface to the user instead of being
+            # swallowed by an init-time error handler.
+            .validate_options = function() {
+                private$.validate_numeric_range(self$options$point_alpha, .("Point transparency"), 0, 1)
+                private$.validate_numeric_range(self$options$violin_alpha, .("Violin transparency"), 0, 1)
+                private$.validate_numeric_range(self$options$point_size, .("Point size"), 0.1, 5)
+                private$.validate_numeric_range(self$options$boxplot_width, .("Boxplot width"), 0.1, 1)
+
+                # Validate jitter seed is numeric
+                private$.validate_numeric_type(self$options$jitter_seed, .("Jitter seed"))
+
+                # Validate responder threshold only when change scores are enabled
+                if (self$options$show_change_scores) {
+                    private$.validate_numeric_range(self$options$responder_threshold, .("Responder threshold"), 0, 100)
+                }
+
+                # Validate CV bands only when enabled
+                if (self$options$show_cv_bands) {
+                    private$.validate_numeric_range(self$options$cv_band_1, .("CV Band 1 percentage"), 1, 50)
+                    private$.validate_numeric_range(self$options$cv_band_2, .("CV Band 2 percentage"), 1, 50)
+                }
+
+                # Validate numeric types
+                private$.validate_numeric_type(self$options$clinical_cutoff, .("Clinical cutoff"))
+                private$.validate_numeric_type(self$options$reference_range_min, .("Reference range minimum"))
+                private$.validate_numeric_type(self$options$reference_range_max, .("Reference range maximum"))
+
+                # Validate positive values only when relevant options are enabled
+                if (self$options$show_mcid) {
+                    private$.validate_numeric_positive(self$options$mcid_value, .("MCID value"))
+                }
+
+                # Validate reference range logic only when both values are set and non-zero
+                if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max)) {
+                    if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max)) {
+                        if (self$options$reference_range_min != 0 && self$options$reference_range_max != 0 &&
+                            self$options$reference_range_min >= self$options$reference_range_max) {
+                            jmvcore::reject(.("Reference range minimum must be less than maximum"), code = "")
+                        }
+                    }
+                }
+            },
+
+            # Analysis-note accumulator: operationally important, data-driven conditions
+            # detected during .run() are surfaced in an always-visible Html output so they
+            # persist in saved results (base warning()/message() do not).
+            .addAnalysisNote = function(msg) {
+                private$.analysis_notes <- c(private$.analysis_notes, msg)
+            },
+            .renderAnalysisNotes = function() {
+                notes <- private$.analysis_notes
+                if (is.null(notes) || length(notes) == 0) {
+                    self$results$analysisNotes$setContent("")
+                    return()
+                }
+                items <- paste0(
+                    "<li>", vapply(notes, htmltools::htmlEscape, character(1)), "</li>",
+                    collapse = ""
+                )
+                html <- paste0(
+                    "<div style='background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 5px; margin-bottom: 15px;'>",
+                    "<h4 style='color: #856404; margin-top: 0;'>", .("Analysis Notes"), "</h4>",
+                    "<ul style='margin-bottom: 0;'>", items, "</ul>",
+                    "</div>"
+                )
+                self$results$analysisNotes$setContent(html)
             },
 
             # Optimized HTML generation helper
@@ -95,61 +164,16 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 private$.checkpoint(flush = flush)
             },
             .init = function() {
-                # Only perform validation if we have data - otherwise just return to show welcome message
-                if (is.null(self$data) || nrow(self$data) == 0 ||
-                    self$options$y_var == "" || self$options$x_var == "" ||
-                    length(self$options$y_var) == 0 || length(self$options$x_var) == 0) {
-                    return()
-                }
-
-                # Use validation helpers for cleaner, more maintainable code
-                tryCatch(
-                    {
-                        private$.validate_numeric_range(self$options$point_alpha, .("Point transparency"), 0, 1)
-                        private$.validate_numeric_range(self$options$violin_alpha, .("Violin transparency"), 0, 1)
-                        private$.validate_numeric_range(self$options$point_size, .("Point size"), 0.1, 5)
-                        private$.validate_numeric_range(self$options$boxplot_width, .("Boxplot width"), 0.1, 1)
-
-                        # Validate jitter seed is numeric
-                        private$.validate_numeric_type(self$options$jitter_seed, .("Jitter seed"))
-
-                        # Validate responder threshold only when change scores are enabled
-                        if (self$options$show_change_scores) {
-                            private$.validate_numeric_range(self$options$responder_threshold, .("Responder threshold"), 0, 100)
-                        }
-
-                        # Validate CV bands only when enabled
-                        if (self$options$show_cv_bands) {
-                            private$.validate_numeric_range(self$options$cv_band_1, .("CV Band 1 percentage"), 1, 50)
-                            private$.validate_numeric_range(self$options$cv_band_2, .("CV Band 2 percentage"), 1, 50)
-                        }
-
-                        # Validate numeric types
-                        private$.validate_numeric_type(self$options$clinical_cutoff, .("Clinical cutoff"))
-                        private$.validate_numeric_type(self$options$reference_range_min, .("Reference range minimum"))
-                        private$.validate_numeric_type(self$options$reference_range_max, .("Reference range maximum"))
-
-                        # Validate positive values only when relevant options are enabled
-                        if (self$options$show_mcid) {
-                            private$.validate_numeric_positive(self$options$mcid_value, .("MCID value"))
-                        }
-
-                        # Validate reference range logic only when both values are set and non-zero
-                        if (!is.null(self$options$reference_range_min) && !is.null(self$options$reference_range_max)) {
-                            if (is.numeric(self$options$reference_range_min) && is.numeric(self$options$reference_range_max)) {
-                                if (self$options$reference_range_min >= self$options$reference_range_max) {
-                                    jmvcore::reject(.("Reference range minimum must be less than maximum"), code = "")
-                                }
-                            }
-                        }
-                    },
-                    error = function(e) {
-                        # If validation fails in init, just return - errors will be caught in .run()
-                        return()
-                    }
-                )
+                # Option validation is performed in .run() via private$.validate_options()
+                # so that jmvcore::reject() errors surface to the user. Performing it here
+                # (inside a swallowing tryCatch) would silently discard those errors.
             },
             .run = function() {
+                # Reset accumulated analysis notes at the top of every run so they do not
+                # accumulate across runs and so stale notes clear on option-only changes.
+                private$.analysis_notes <- character(0)
+                self$results$analysisNotes$setContent("")
+
                 # Check if required variables have been selected
                 if (is.null(self$options$y_var) || is.null(self$options$x_var) ||
                     self$options$y_var == "" || self$options$x_var == "" ||
@@ -203,12 +227,17 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     self$results$todo$setContent("")
                 }
 
+                # Validate option values (rejects surface to the user here, not in .init())
+                private$.validate_options()
+
                 # Validate dataset
                 if (nrow(self$data) == 0) {
                     jmvcore::reject(.("Error: The provided dataset contains no complete rows. Please check your data and try again."))
                 }
 
-                # Safely require ggrain
+                # Safely require ggrain. Write the hard dependency error to the always-visible
+                # analysisNotes item (NOT the visibility-gated interpretation item) so it can
+                # never be hidden by unchecking the 'Usage guide' option.
                 if (!requireNamespace("ggrain", quietly = TRUE)) {
                     error_msg <- "
                 <div style='color: red; background-color: #ffebee; padding: 20px; border-radius: 8px;'>
@@ -216,7 +245,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 <p>The ggrain package is required for advanced raincloud plot functionality.</p>
                 <p>Please install it using: <code>install.packages('ggrain')</code></p>
                 </div>"
-                    self$results$interpretation$setContent(error_msg)
+                    self$results$analysisNotes$setContent(error_msg)
                     return()
                 }
 
@@ -232,7 +261,7 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                 cov_var <- self$options$cov_var
 
                 if (self$options$show_longitudinal && (is.null(id_var) || id_var == "")) {
-                    warning(.("Longitudinal connections requested but ID variable is not set."))
+                    private$.addAnalysisNote(.("Longitudinal connections were requested but no ID variable is set; connections were not drawn. Select a Longitudinal ID variable to enable them."))
                 }
 
                 # Prepare analysis data
@@ -285,6 +314,13 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
 
                 # Apply log transformation if requested
                 if (self$options$log_transform) {
+                    # A 0.01 offset is added to tolerate exact zeros, but values <= -0.01 make
+                    # the log argument non-positive and would silently produce NaN (dropping
+                    # points and biasing every downstream statistic). Reject with an actionable
+                    # message instead.
+                    if (any(analysis_data[[y_var]] <= -0.01, na.rm = TRUE)) {
+                        jmvcore::reject(.("Log transformation cannot be applied: the Y-axis variable contains non-positive values. Remove the log transform or use a variable with strictly positive values."))
+                    }
                     # Add small constant to avoid log(0) issues
                     analysis_data[[y_var]] <- log(analysis_data[[y_var]] + 0.01)
                 }
@@ -386,16 +422,63 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     self$results$methods_text$setContent(methods_html)
                 }
 
-                # Store data for plotting
+                # Collect operationally important, data-driven notes for the always-visible
+                # analysisNotes output. These mirror conditions detected during plotting that
+                # base warning()/message() would not persist in saved results.
+                x_levels <- levels(analysis_data[[x_var]])
+
+                if (self$options$show_longitudinal && !is.null(id_var) && id_var != "" &&
+                    id_var %in% names(analysis_data)) {
+                    id_counts <- table(analysis_data[[id_var]])
+                    if (sum(id_counts > 1) == 0) {
+                        private$.addAnalysisNote(.("Longitudinal connections were requested but no subject has repeated observations, so no connections were drawn."))
+                    }
+                }
+
+                if (!is.null(self$options$trial_arms) && self$options$trial_arms != "") {
+                    arm_labels <- trimws(strsplit(self$options$trial_arms, ",")[[1]])
+                    if (length(arm_labels) != length(x_levels)) {
+                        private$.addAnalysisNote(paste0(
+                            .("Treatment arm labels were ignored: "), length(arm_labels),
+                            .(" label(s) provided for "), length(x_levels),
+                            .(" group(s). Provide one comma-separated label per group.")
+                        ))
+                    }
+                }
+
+                if (!is.null(self$options$time_labels) && self$options$time_labels != "" &&
+                    self$options$show_longitudinal && !is.null(id_var) && id_var != "") {
+                    time_labels <- trimws(strsplit(self$options$time_labels, ",")[[1]])
+                    if (length(time_labels) != length(x_levels)) {
+                        private$.addAnalysisNote(paste0(
+                            .("Time point labels were ignored: "), length(time_labels),
+                            .(" label(s) provided for "), length(x_levels),
+                            .(" time point(s). Provide one comma-separated label per time point.")
+                        ))
+                    }
+                }
+
+                # Render accumulated notes (clears the output when there are none).
+                private$.renderAnalysisNotes()
+
+                # Store data for plotting and expose it as plot state (canonical jamovi
+                # pattern). analysis_data is already a base data.frame; guard setState so a
+                # serialization failure can never break the run - the private field remains
+                # the fallback source in .plot().
                 private$.analysis_data <- analysis_data
+                tryCatch(
+                    self$results$plot$setState(analysis_data),
+                    error = function(e) NULL
+                )
             },
             .plot = function(image, ggtheme, theme, ...) {
-                # Check if analysis was performed
-                if (is.null(private$.analysis_data)) {
+                # Prefer the serialized plot state; fall back to the private field (populated
+                # at the end of .run()) so state-only re-renders and file re-opens both work.
+                if (is.null(image$state) && is.null(private$.analysis_data)) {
                     return()
                 }
 
-                analysis_data <- private$.analysis_data
+                analysis_data <- if (!is.null(image$state)) image$state else private$.analysis_data
                 y_var <- self$options$y_var
                 x_var <- self$options$x_var
                 fill_var <- self$options$fill_var
@@ -701,8 +784,10 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     )
                 }
 
-                # Add clinical cutoff line if specified
-                if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) && !is.na(self$options$clinical_cutoff)) {
+                # Add clinical cutoff line only when a non-zero cutoff is actually set
+                # (0 is the "unset" default; drawing a threshold at y=0 by default is wrong).
+                if (!is.null(self$options$clinical_cutoff) && is.numeric(self$options$clinical_cutoff) &&
+                    !is.na(self$options$clinical_cutoff) && self$options$clinical_cutoff != 0) {
                     p <- p + ggplot2::geom_hline(
                         yintercept = self$options$clinical_cutoff,
                         linetype = "dashed",
@@ -944,7 +1029,9 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                         return(grDevices::colorRampPalette(base_colors)(n_colors))
                     }
                 } else if (palette_name == "viridis") {
-                    return(viridis::viridis(n_colors, discrete = TRUE))
+                    # viridisLite::viridis() has no `discrete` argument; passing it errors and
+                    # silently falls back to default colors, so the Viridis option never works.
+                    return(viridis::viridis(n_colors))
                 } else if (palette_name == "pastel") {
                     base_colors <- c("#FFB3BA", "#BAFFC9", "#BAE1FF", "#FFFFBA", "#FFDFBA", "#E0BBE4")
                     if (n_colors <= length(base_colors)) {
@@ -1120,7 +1207,10 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     "<li><strong>Raincloud Position:</strong> ", switch(rain_side,
                         "l" = "Left side",
                         "r" = "Right side",
-                        "f" = "Flanking (both sides)"
+                        "f" = "Flanking (both sides)",
+                        "f1x1" = "Flanking 1x1 (paired)",
+                        "f2x2" = "Flanking 2x2 (grouped)",
+                        rain_side
                     ), "</li>",
                     if (has_longitudinal) paste0("<li><strong>Longitudinal Connections:</strong> Connected by ", htmltools::htmlEscape(id_var), "</li>") else "",
                     if (has_likert) "<li><strong>Likert Mode:</strong> Y-axis jittering enabled for ordinal data</li>" else "",
@@ -1285,7 +1375,12 @@ advancedraincloudClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
-                html <- paste0(html, "</tbody></table></div>")
+                html <- paste0(
+                    html, "</tbody></table>",
+                    "<p style='font-size: 12px; color: #2e7d32; margin-top: 10px;'>",
+                    "<em>", .("Confidence intervals use a large-sample normal (z) approximation and may be too narrow for small samples; interpret with caution when group sizes are small."), "</em>",
+                    "</p></div>"
+                )
                 return(html)
             },
             .calculate_effect_size = function(group1, group2, type) {
