@@ -22,10 +22,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # init ----
 
-        # TODO (data hygiene): the `num_levels * plotwidth` sizing below is unbounded - 
-        # a `grvar` column with hundreds of unique levels produces enormous canvases.
-        # Cap num_levels at a sane upper bound (e.g., 16) with a notice when exceeded,
-        # or defer sizing to .run/.plot post-validation. Same concern as jjradarplot.
+        # The grouped plot2 canvas grows with the number of `grvar` levels. A
+        # high-cardinality split variable would otherwise produce an enormous
+        # (potentially unrenderable) canvas, so the effective level count used
+        # for sizing is capped at a sane upper bound. Same concern as jjradarplot.
         .init = function() {
 
             plotwidth <- if (!is.null(self$options$plotwidth)) self$options$plotwidth else 600
@@ -37,7 +37,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 mydata <- self$data
                 grvar <-  self$options$grvar
                 num_levels <- nlevels(as.factor(mydata[[grvar]]))
-                self$results$plot2$setSize(num_levels * plotwidth, plotheight)
+                # Cap the sizing multiplier so many-level factors do not blow up
+                # the canvas; the panels themselves still all render.
+                sizing_levels <- max(1, min(num_levels, 16))
+                self$results$plot2$setSize(sizing_levels * plotwidth, plotheight)
             }
 
             # Set size for plot3 (enhanced scatter)
@@ -57,6 +60,14 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # run ----
 
         .run = function() {
+
+            # Reset the (append-style) warnings output at the top of every run so
+            # stale method-substitution / degenerate-data notices from a previous
+            # run cycle do not linger when the current run no longer triggers them.
+            if ("warnings" %in% self$results$itemNames) {
+                self$results$warnings$setContent("")
+                self$results$warnings$setVisible(FALSE)
+            }
 
             # Initial Message ----
             if ( is.null(self$options$dep) || is.null(self$options$group)) {
@@ -92,14 +103,28 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.generateExplanations()
         },
 
+        # Assemble the near-identical preset-notification HTML from a single
+        # template. `title` and `items` are hardcoded literals (no user input),
+        # so no HTML escaping is required.
+        .presetMessage = function(title, items) {
+            paste0(
+                "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
+                "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: ", title, "</h4>",
+                "<p><strong>The following settings have been automatically configured:</strong></p>",
+                "<ul>", paste0(items, collapse = ""), "</ul>",
+                "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
+                "</div>"
+            )
+        },
+
         # Clinical presets record their settings in private$overrides (below) instead of
         # writing back into the read-only jamovi option objects; downstream code reads the
         # effective value via private$.option(name). (2026-07-13 audit fix.)
-        #
-        # TODO (cleanup): L90-101 / L107-117 / L122-131 contain near-identical
-        # `preset_message` HTML blocks. Consider templating to a single helper that
-        # accepts (title, items) to reduce duplication and drift risk.
         .applyClinicalPreset = function() {
+            # Reset any overrides from a previous run so a stale preset cannot
+            # leak into a subsequent "custom" run if the R6 instance is reused.
+            private$overrides <- list()
+
             preset <- self$options$clinicalPreset
             if (preset == "custom") {
                 return()
@@ -109,48 +134,36 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             preset_message <- NULL
 
             if (preset == "biomarker_correlation") {
-                preset_message <- paste0(
-                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Biomarker Correlation</h4>",
-                    "<p><strong>The following settings have been automatically configured:</strong></p>",
-                    "<ul>",
-                    "<li>Statistical test: <strong>Nonparametric (Spearman correlation)</strong></li>",
-                    "<li>Additional plot: <strong>ggpubr scatter plot enabled</strong></li>",
-                    "<li>Color palette: <strong>JCO (Journal of Clinical Oncology)</strong></li>",
-                    "</ul>",
-                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
-                    "</div>"
+                preset_message <- private$.presetMessage(
+                    "Biomarker Correlation",
+                    c(
+                        "<li>Statistical test: <strong>Nonparametric (Spearman correlation)</strong></li>",
+                        "<li>Additional plot: <strong>ggpubr scatter plot enabled</strong></li>",
+                        "<li>Color palette: <strong>JCO (Journal of Clinical Oncology)</strong></li>"
+                    )
                 )
                 private$overrides[["typestatistics"]] <- "nonparametric"
                 private$overrides[["addGGPubrPlot"]] <- TRUE
                 private$overrides[["ggpubrPalette"]] <- "jco"
 
             } else if (preset == "treatment_response_analysis") {
-                preset_message <- paste0(
-                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Treatment Response Analysis</h4>",
-                    "<p><strong>The following settings have been automatically configured:</strong></p>",
-                    "<ul>",
-                    "<li>Statistical test: <strong>Robust (trimmed mean correlation)</strong></li>",
-                    "<li>Marginal distributions: <strong>Enabled</strong></li>",
-                    "</ul>",
-                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
-                    "</div>"
+                preset_message <- private$.presetMessage(
+                    "Treatment Response Analysis",
+                    c(
+                        "<li>Statistical test: <strong>Robust (trimmed mean correlation)</strong></li>",
+                        "<li>Marginal distributions: <strong>Enabled</strong></li>"
+                    )
                 )
                 private$overrides[["typestatistics"]] <- "robust"
                 private$overrides[["marginal"]] <- TRUE
 
             } else if (preset == "publication_ready") {
-                preset_message <- paste0(
-                    "<div style='background:#e3f2fd; border-left:4px solid #2196F3; padding:15px; margin:10px 0;'>",
-                    "<h4 style='color:#1976D2; margin-top:0;'> Clinical Preset Applied: Publication Ready</h4>",
-                    "<p><strong>The following settings have been automatically configured:</strong></p>",
-                    "<ul>",
-                    "<li>Theme: <strong>Original ggstatsplot theme</strong></li>",
-                    "<li>Results subtitle: <strong>Enabled (shows statistics on plot)</strong></li>",
-                    "</ul>",
-                    "<p style='margin-bottom:0;'><em>You can modify these settings manually or select 'Custom' preset.</em></p>",
-                    "</div>"
+                preset_message <- private$.presetMessage(
+                    "Publication Ready",
+                    c(
+                        "<li>Theme: <strong>Original ggstatsplot theme</strong></li>",
+                        "<li>Results subtitle: <strong>Enabled (shows statistics on plot)</strong></li>"
+                    )
                 )
                 private$overrides[["originaltheme"]] <- TRUE
                 private$overrides[["resultssubtitle"]] <- TRUE
@@ -165,34 +178,40 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         .generateExplanations = function() {
             if (self$options$showExplanations) {
+                test_type <- private$.option("typestatistics")
+
+                method_text <- switch(
+                    test_type,
+                    "parametric" = "The Pearson correlation coefficient (r) measures the strength and direction of the <strong>linear</strong> relationship between the two variables. The p-value indicates the statistical significance of the correlation.",
+                    "nonparametric" = "Spearman's rho measures the strength and direction of the <strong>monotonic (rank-based)</strong> relationship between the two variables, and does not assume a linear relationship or normally distributed data. The p-value indicates the statistical significance of the association.",
+                    "robust" = "The robust (percentage-bend) correlation coefficient measures the association between the two variables while <strong>down-weighting the influence of outliers</strong>. The p-value indicates the statistical significance of the association.",
+                    "bayes" = "The Bayesian analysis reports a Bayes factor quantifying the <strong>strength of evidence</strong> for or against an association between the two variables, alongside the estimated correlation.",
+                    "The correlation coefficient measures the strength and direction of the relationship between the two variables. The p-value indicates the statistical significance of the correlation."
+                )
+
                 self$results$explanations$setVisible(TRUE)
                 self$results$explanations$setContent(
-                    "<h3>Explanations</h3>
+                    paste0(
+                        "<h3>Explanations</h3>
                     <p>
-                        This scatter plot shows the relationship between two continuous variables.
-                        The correlation coefficient (r) measures the strength and direction of the linear relationship between the two variables.
-                        The p-value indicates the statistical significance of the correlation.
+                        This scatter plot shows the relationship between two continuous variables. ",
+                        method_text,
+                        "
                     </p>"
+                    )
                 )
             }
         },
 
 
-        # plot ----
-
-        .plot = function(image, ggtheme, theme, ...) {
-
-            if (is.null(self$options$dep) || is.null(self$options$group))
-                return()
-
-            plotData <- self$data
-
-            plotData[[self$options$dep]] <- jmvcore::toNumeric(plotData[[self$options$dep]])
-            plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
-
-            # Prepare arguments for ggscatterstats
+        # Resolve the plot title / axis labels from the user-supplied options,
+        # falling back to sensible variable-name defaults. Shared by plot, plot2
+        # and plot3 (set includeGrvar = TRUE for the grouped-plot default title).
+        .resolveLabels = function(includeGrvar = FALSE) {
             if (!is.null(self$options$mytitle) && self$options$mytitle != "") {
                 title <- jmvcore::format(self$options$mytitle)
+            } else if (includeGrvar) {
+                title <- paste(self$options$dep, "vs", self$options$group, "by", self$options$grvar)
             } else {
                 title <- paste(self$options$dep, "vs", self$options$group)
             }
@@ -207,6 +226,36 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ytitle <- jmvcore::format(self$options$ytitle)
             } else {
                 ytitle <- self$options$group
+            }
+
+            list(title = title, xtitle = xtitle, ytitle = ytitle)
+        },
+
+        # plot ----
+
+        .plot = function(image, ggtheme, theme, ...) {
+
+            if (is.null(self$options$dep) || is.null(self$options$group))
+                return()
+
+            plotData <- self$data
+
+            plotData[[self$options$dep]] <- jmvcore::toNumeric(plotData[[self$options$dep]])
+            plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
+
+            # Prepare arguments for ggscatterstats
+            labels <- private$.resolveLabels(includeGrvar = FALSE)
+            title <- labels$title
+            xtitle <- labels$xtitle
+            ytitle <- labels$ytitle
+
+            # Smoothing formula: only "gam" needs an explicit spline formula;
+            # otherwise the default y ~ x linear form is used. Without this a
+            # method="gam" fit collapses to a straight line (identical to lm).
+            smooth_formula <- if (identical(self$options$smoothMethod, "gam")) {
+                y ~ s(x, bs = "cs")
+            } else {
+                y ~ x
             }
 
             # Function arguments
@@ -224,11 +273,14 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 k = self$options$k,
                 marginal = private$.option("marginal"),
                 marginal.type = self$options$marginalType,
-                point.size = self$options$pointsize,
-                point.alpha = self$options$pointalpha,
+                point.args = list(
+                    size = self$options$pointsize,
+                    alpha = self$options$pointalpha
+                ),
                 method = self$options$smoothMethod,  # Wire smoothMethod
+                formula = smooth_formula,            # GAM needs an explicit spline formula
                 smooth.line.args = list(
-                    size = self$options$smoothlinesize,
+                    linewidth = self$options$smoothlinesize,
                     color = self$options$smoothlinecolor
                 )
             )
@@ -267,22 +319,16 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
 
             # Prepare arguments for grouped_ggscatterstats
-            if (!is.null(self$options$mytitle) && self$options$mytitle != "") {
-                title <- jmvcore::format(self$options$mytitle)
-            } else {
-                title <- paste(self$options$dep, "vs", self$options$group, "by", self$options$grvar)
-            }
+            labels <- private$.resolveLabels(includeGrvar = TRUE)
+            title <- labels$title
+            xtitle <- labels$xtitle
+            ytitle <- labels$ytitle
 
-            if (!is.null(self$options$xtitle) && self$options$xtitle != "") {
-                xtitle <- jmvcore::format(self$options$xtitle)
+            # Smoothing formula: only "gam" needs an explicit spline formula.
+            smooth_formula <- if (identical(self$options$smoothMethod, "gam")) {
+                y ~ s(x, bs = "cs")
             } else {
-                xtitle <- self$options$dep
-            }
-
-            if (!is.null(self$options$ytitle) && self$options$ytitle != "") {
-                ytitle <- jmvcore::format(self$options$ytitle)
-            } else {
-                ytitle <- self$options$group
+                y ~ x
             }
 
             # Call grouped_ggscatterstats with proper NSE handling
@@ -303,11 +349,14 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     k = !!self$options$k,
                     marginal = !!private$.option("marginal"),
                     marginal.type = !!self$options$marginalType,  # CRITICAL FIX: Use actual option value
-                    point.size = !!self$options$pointsize,
-                    point.alpha = !!self$options$pointalpha,
+                    point.args = !!list(
+                        size = self$options$pointsize,
+                        alpha = self$options$pointalpha
+                    ),
                     method = !!self$options$smoothMethod, # Wire smoothMethod
+                    formula = !!smooth_formula,           # GAM needs an explicit spline formula
                     smooth.line.args = !!list(
-                        size = self$options$smoothlinesize,
+                        linewidth = self$options$smoothlinesize,
                         color = self$options$smoothlinecolor
                     )
                 )
@@ -333,11 +382,14 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         marginal.type = !!self$options$marginalType, # Correctly use option
                         xfill = !!self$options$xsidefill,
                         yfill = !!self$options$ysidefill,
-                        point.size = !!self$options$pointsize,
-                        point.alpha = !!self$options$pointalpha,
+                        point.args = !!list(
+                            size = self$options$pointsize,
+                            alpha = self$options$pointalpha
+                        ),
                         method = !!self$options$smoothMethod,
+                        formula = !!smooth_formula,       # GAM needs an explicit spline formula
                         smooth.line.args = !!list(
-                            size = self$options$smoothlinesize,
+                            linewidth = self$options$smoothlinesize,
                             color = self$options$smoothlinecolor
                         )
                     )
@@ -393,23 +445,10 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             plotData[[self$options$group]] <- jmvcore::toNumeric(plotData[[self$options$group]])
 
             # Prepare title and labels
-            if (!is.null(self$options$mytitle) && self$options$mytitle != "") {
-                title <- jmvcore::format(self$options$mytitle)
-            } else {
-                title <- paste(self$options$dep, "vs", self$options$group)
-            }
-
-            if (!is.null(self$options$xtitle) && self$options$xtitle != "") {
-                xtitle <- jmvcore::format(self$options$xtitle)
-            } else {
-                xtitle <- self$options$dep
-            }
-
-            if (!is.null(self$options$ytitle) && self$options$ytitle != "") {
-                ytitle <- jmvcore::format(self$options$ytitle)
-            } else {
-                ytitle <- self$options$group
-            }
+            labels <- private$.resolveLabels(includeGrvar = FALSE)
+            title <- labels$title
+            xtitle <- labels$xtitle
+            ytitle <- labels$ytitle
 
             # Build base aesthetic mapping
             aes_mapping <- ggplot2::aes(
@@ -460,8 +499,18 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "lm"
             )
 
+            # Only "gam" needs an explicit spline formula; otherwise the default
+            # y ~ x linear form is used. Without this a method="gam" fit collapses
+            # to a straight line (identical to lm).
+            smooth_formula <- if (identical(smooth_method, "gam")) {
+                y ~ s(x, bs = "cs")
+            } else {
+                y ~ x
+            }
+
             p <- p + ggplot2::geom_smooth(
                 method = smooth_method,
+                formula = smooth_formula,
                 se = TRUE,
                 linewidth = self$options$smoothlinesize,
                 color = self$options$smoothlinecolor
@@ -537,9 +586,9 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 }
 
                 # Show warning if method was changed.
-                # Guard on itemNames: the `warnings` Html output is optional and
-                # may not exist in .r.yaml; jmvcore throws (not NULL) on access to
-                # an undefined results item, so probe existence before touching it.
+                # The `warnings` Html output is declared in .r.yaml; the itemNames
+                # probe is retained as a defensive guard (jmvcore throws rather than
+                # returning NULL on access to an undefined results item).
                 if (!is.null(warning_msg) && ("warnings" %in% self$results$itemNames)) {
                     current_warnings <- self$results$warnings$state
                     if (is.null(current_warnings)) {
@@ -553,21 +602,44 @@ jjscatterstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     self$results$warnings$setVisible(TRUE)
                 }
 
-                cor_result <- stats::cor.test(
-                    plotData[[self$options$dep]],
-                    plotData[[self$options$group]],
-                    method = cor_method
-                )
+                # Guard against degenerate input: correlation is undefined with
+                # fewer than 3 complete pairs or a constant (zero-variance) axis.
+                x_vals <- plotData[[self$options$dep]]
+                y_vals <- plotData[[self$options$group]]
+                complete <- stats::complete.cases(x_vals, y_vals)
+                n_complete <- sum(complete)
+                degenerate <- n_complete < 3 ||
+                    length(unique(x_vals[complete])) < 2 ||
+                    length(unique(y_vals[complete])) < 2
 
-                cor_text <- sprintf(
-                    "%s: r = %.3f, p %s %.3f",
-                    method_label,
-                    cor_result$estimate,
-                    ifelse(cor_result$p.value < 0.001, "<", "="),
-                    ifelse(cor_result$p.value < 0.001, 0.001, cor_result$p.value)
-                )
+                if (degenerate) {
+                    if ("warnings" %in% self$results$itemNames) {
+                        insufficient_msg <- paste0(
+                            "<p style='color:#856404;'>Correlation not computed: ",
+                            "insufficient or degenerate data (need at least 3 complete ",
+                            "pairs and non-constant x and y).</p>"
+                        )
+                        self$results$warnings$setContent(insufficient_msg)
+                        self$results$warnings$setVisible(TRUE)
+                    }
+                    p <- p + ggplot2::labs(subtitle = "Correlation not computed (insufficient data)")
+                } else {
+                    cor_result <- stats::cor.test(
+                        x_vals,
+                        y_vals,
+                        method = cor_method
+                    )
 
-                p <- p + ggplot2::labs(subtitle = cor_text)
+                    cor_text <- sprintf(
+                        "%s: r = %.3f, p %s %.3f",
+                        method_label,
+                        cor_result$estimate,
+                        ifelse(cor_result$p.value < 0.001, "<", "="),
+                        ifelse(cor_result$p.value < 0.001, 0.001, cor_result$p.value)
+                    )
+
+                    p <- p + ggplot2::labs(subtitle = cor_text)
+                }
             }, error = function(e) {
                 # If correlation fails, continue without it
                 # htmlEscape e$message since cor.test errors may include column-name fragments
