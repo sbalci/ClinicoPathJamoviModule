@@ -82,7 +82,7 @@ children:
             label: Forest plot
           - type: CheckBox
             name: showDecisionTree
-            label: Decision tree
+            label: Decision space (sens vs spec)
 
   - type: CollapseBox
     label: Filters

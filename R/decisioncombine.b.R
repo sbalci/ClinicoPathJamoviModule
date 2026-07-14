@@ -54,6 +54,23 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 self$results$notices$setContent(html)
             },
+            .extractEst = function(detail_df, stat_name, fallback = NA_real_) {
+                # Robustly extract a single estimate from epiR::epi.tests()$detail.
+                # Degrades gracefully (uses fallback) when the $detail shape differs
+                # across epiR versions or a statistic key is absent / duplicated.
+                val <- detail_df[detail_df$statistic == stat_name, "est"]
+                if (length(val) != 1 || is.null(val)) {
+                    return(fallback)
+                }
+                val
+            },
+            .safeProp = function(num, den) {
+                # Zero-safe proportion used as a hand-computed fallback for epiR extraction.
+                if (length(den) != 1 || is.na(den) || den == 0) {
+                    return(NA_real_)
+                }
+                num / den
+            },
 
             # TODO [meddecide audit 2026-05-14] - see docs/audit/MODULE_AUDIT_REPORT_20260514-1847.md
             #   [hygiene/notices] custom private$.addNotice/private$.renderNotices duplicates jmvcore::Notice - consolidate
@@ -104,6 +121,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             },
             .run = function() {
                 # Main analysis flow - fail fast approach
+
+                # Reset notices at start of each run to prevent accumulation across re-runs
+                private$.noticeList <- list()
 
                 # Check if we have minimum required variables
                 if (!private$.hasRequiredVars()) {
@@ -410,25 +430,11 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return()
                 }
 
-                # Apply continuity correction for zero cells to avoid infinite estimates
-                use_continuity <- any(c(tp, fp, fn, tn) == 0)
-                if (use_continuity) {
-                    tp_adj <- tp + 0.5
-                    fp_adj <- fp + 0.5
-                    fn_adj <- fn + 0.5
-                    tn_adj <- tn + 0.5
-                    cont_table_for_epi <- matrix(c(tp_adj, fp_adj, fn_adj, tn_adj),
-                        nrow = 2, byrow = TRUE,
-                        dimnames = list(c("Positive", "Negative"), c("Positive", "Negative"))
-                    )
-
-                    private$.addNotice(
-                        "INFO", "Continuity Correction",
-                        sprintf("Continuity correction (+0.5) applied to Test %d due to zero cell count(s).", test_num)
-                    )
-                } else {
-                    cont_table_for_epi <- cont_table
-                }
+                # Individual-test statistics are proportions (sens/spec/PPV/NPV) that remain
+                # well-defined with zero cells, so point estimates are computed on the raw
+                # (unadjusted) contingency table -- mirroring the combination-pattern path and
+                # keeping the displayed statistics consistent with the integer table above.
+                # (No LR/DOR/CI are reported here, so no continuity correction is required.)
 
                 # Get results tables
                 if (test_num == 1) {
@@ -460,15 +466,16 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 ))
 
                 # Calculate statistics using epiR
-                result <- epiR::epi.tests(cont_table_for_epi, conf.level = 0.95)
+                result <- epiR::epi.tests(cont_table, conf.level = 0.95)
 
                 # Extract values - epiR returns $detail as a data frame
+                # Guard against epiR $detail shape differences with hand-computed fallbacks
                 detail_df <- as.data.frame(result$detail)
 
-                sens <- detail_df[detail_df$statistic == "se", "est"]
-                spec <- detail_df[detail_df$statistic == "sp", "est"]
-                ppv <- detail_df[detail_df$statistic == "pv.pos", "est"]
-                npv <- detail_df[detail_df$statistic == "pv.neg", "est"]
+                sens <- private$.extractEst(detail_df, "se", private$.safeProp(tp, tp + fn))
+                spec <- private$.extractEst(detail_df, "sp", private$.safeProp(tn, fp + tn))
+                ppv <- private$.extractEst(detail_df, "pv.pos", private$.safeProp(tp, tp + fp))
+                npv <- private$.extractEst(detail_df, "pv.neg", private$.safeProp(tn, fn + tn))
 
                 # Populate statistics table
                 statsTable$setRow(rowKey = "sens", values = list(
@@ -558,6 +565,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 cont_table <- table(data_prep$pattern_result, data_prep$goldVariable2)
 
                 if (!all(dim(cont_table) == c(2, 2))) {
+                    private$.addNotice(
+                        "INFO", "Pattern Omitted",
+                        sprintf('Pattern "%s" produced no variation (an empty result cell) and was omitted from the combination results.', pattern_name)
+                    )
                     return()
                 }
 
@@ -609,12 +620,13 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                 result <- epiR::epi.tests(cont_table, conf.level = 0.95)
 
                 # Extract values - epiR returns $detail as a data frame
+                # Guard against epiR $detail shape differences with hand-computed fallbacks
                 detail_df <- as.data.frame(result$detail)
 
-                sens <- detail_df[detail_df$statistic == "se", "est"]
-                spec <- detail_df[detail_df$statistic == "sp", "est"]
-                ppv <- detail_df[detail_df$statistic == "pv.pos", "est"]
-                npv <- detail_df[detail_df$statistic == "pv.neg", "est"]
+                sens <- private$.extractEst(detail_df, "se", private$.safeProp(tp, tp + fn))
+                spec <- private$.extractEst(detail_df, "sp", private$.safeProp(tn, fp + tn))
+                ppv <- private$.extractEst(detail_df, "pv.pos", private$.safeProp(tp, tp + fp))
+                npv <- private$.extractEst(detail_df, "pv.neg", private$.safeProp(tn, fn + tn))
                 acc <- (tp + tn) / (tp + fp + fn + tn)
 
                 # Calculate Wilson CIs for all metrics
@@ -831,10 +843,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     data_prep$test2Variable2 == "Positive"
                 private$.analyzeSinglePattern(data_prep, "Parallel (>=1 pos)", parallel_condition)
 
-                # Serial strategy: Positive only if BOTH tests are positive (high specificity)
-                serial_condition <- data_prep$test1Variable2 == "Positive" &
-                    data_prep$test2Variable2 == "Positive"
-                private$.analyzeSinglePattern(data_prep, "Serial (all pos)", serial_condition)
+                # Serial strategy (all tests positive) is mathematically identical to the
+                # already-enumerated all-positive pattern ("+/+"), so it is not added again
+                # here -- this avoids duplicate rows and duplicate recommendation candidates.
             },
             .addThreeTestStrategies = function(data_prep) {
                 # Add clinical strategy rows for 3-test combinations
@@ -845,11 +856,9 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     data_prep$test3Variable2 == "Positive"
                 private$.analyzeSinglePattern(data_prep, "Parallel (>=1 pos)", parallel_condition)
 
-                # Serial strategy: Positive only if ALL tests are positive (high specificity)
-                serial_condition <- data_prep$test1Variable2 == "Positive" &
-                    data_prep$test2Variable2 == "Positive" &
-                    data_prep$test3Variable2 == "Positive"
-                private$.analyzeSinglePattern(data_prep, "Serial (all pos)", serial_condition)
+                # Serial strategy (all tests positive) is mathematically identical to the
+                # already-enumerated all-positive pattern ("+/+/+"), so it is not added again
+                # here -- this avoids duplicate rows and duplicate recommendation candidates.
 
                 # Majority rule: Positive if at least 2 of 3 tests are positive (balanced)
                 t1_pos <- data_prep$test1Variable2 == "Positive"
@@ -1029,10 +1038,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     }
                 }
 
+                # Proportion metrics are bounded to [0, 1] and shown as percentages; unbounded
+                # metrics (Youden's J, LR+, LR-, DOR) must use a free auto scale, otherwise the
+                # fixed [0, 1] limit clips their bars to blank.
+                proportion_metrics <- c("prevalence", "sens", "spec", "ppv", "npv", "acc", "balancedAccuracy")
+                all_proportions <- all(metrics %in% proportion_metrics)
+
                 # Create plot
                 p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = Pattern, y = Value, fill = Metric)) +
                     ggplot2::geom_bar(stat = "identity", position = "dodge") +
-                    ggplot2::scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1)) +
                     ggplot2::labs(
                         title = "Diagnostic Performance Comparison",
                         x = "Test Pattern",
@@ -1040,6 +1054,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     ) +
                     ggplot2::theme_minimal() +
                     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+                if (all_proportions) {
+                    p <- p + ggplot2::scale_y_continuous(labels = scales::percent_format(), limits = c(0, 1))
+                }
 
                 print(p)
                 return(TRUE)
@@ -1058,9 +1076,15 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
                     return(FALSE)
                 }
 
-                # Select metrics for heatmap
+                # Select metrics for heatmap; honor a single-statistic filter when the selected
+                # statistic is part of the heatmap panel, otherwise show the full panel
+                # (prevalence/LR+/LR-/DOR are not on the heatmap and leave it unfiltered).
                 metrics <- c("sens", "spec", "ppv", "npv", "acc", "balancedAccuracy", "youden")
-                metric_data <- filtered_df[, c("pattern", metrics)]
+                stat_filter <- self$options$filterStatistic
+                if (stat_filter != "all" && stat_filter %in% metrics) {
+                    metrics <- stat_filter
+                }
+                metric_data <- filtered_df[, c("pattern", metrics), drop = FALSE]
 
                 # Reshape to long format
                 plot_data <- tidyr::pivot_longer(
@@ -1088,10 +1112,30 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
 
                 table_df <- ciTable$asDF()
 
-                # Filter by statistic
+                # Filter by statistic. The CI table stores display labels (e.g. "Sensitivity"),
+                # so the option code must be mapped to its label before subsetting -- comparing
+                # the code directly to the label always yielded an empty plot. Statistics not
+                # present in the CI table (prevalence/balancedAccuracy/youden) leave the plot
+                # unfiltered rather than blanking it.
                 stat_filter <- self$options$filterStatistic
                 if (stat_filter != "all") {
-                    table_df <- table_df[table_df$statistic == stat_filter, ]
+                    stat_label_map <- c(
+                        prevalence = "Prevalence",
+                        sens = "Sensitivity",
+                        spec = "Specificity",
+                        ppv = "PPV",
+                        npv = "NPV",
+                        acc = "Accuracy",
+                        balancedAccuracy = "Balanced Accuracy",
+                        youden = "Youden's J",
+                        lrPos = "LR+",
+                        lrNeg = "LR-",
+                        dor = "DOR"
+                    )
+                    target_label <- stat_label_map[[stat_filter]]
+                    if (!is.null(target_label) && target_label %in% table_df$statistic) {
+                        table_df <- table_df[table_df$statistic == target_label, ]
+                    }
                 }
 
                 if (nrow(table_df) == 0) {
@@ -1171,9 +1215,10 @@ decisioncombineClass <- if (requireNamespace("jmvcore")) {
             asSource = function() {
                 gold <- self$options$gold
                 test1 <- self$options$test1
-                test2 <- self$options$test2
 
-                if (is.null(gold) || is.null(test1) || is.null(test2)) {
+                # Emit syntax whenever the analysis can run (gold + test1 present). test2/test3
+                # are optional, so single-test and two-test analyses also get reproducible code.
+                if (is.null(gold) || is.null(test1)) {
                     return("")
                 }
 
