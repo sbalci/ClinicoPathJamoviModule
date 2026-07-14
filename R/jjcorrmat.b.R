@@ -66,34 +66,52 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$results$warnings$setVisible(TRUE)
         },
 
+        # Resolve possible B64-encoded column names supplied by jamovi.
+        # Row filtering never changes column names, so resolving against
+        # self$data (default) or a prepared subset is equivalent. Single
+        # source of truth used by every code path (validation, data prep,
+        # table, interpretation) so B64 handling stays consistent.
+        .resolveName = function(var, data = NULL) {
+            if (is.null(var)) return(NULL)
+            if (is.null(data)) data <- self$data
+            if (var %in% names(data)) return(var)
+            b64 <- jmvcore::toB64(var)
+            if (b64 %in% names(data)) return(b64)
+            var
+        },
+
+        # Single source of truth for the getting-started welcome HTML,
+        # shared by .init and .run to avoid drift between two copies.
+        .welcomeMessage = function() {
+            .("<br>Welcome to ClinicoPath Correlation Matrix Analysis
+            <br><br>
+            <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)
+            <br><br>
+            <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables
+            <br><br>
+            <strong>Quick Start:</strong>
+            <br>1. Select 2 or more continuous variables
+            <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)
+            <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)
+            <br>4. Use partial correlations (3+ variables) to control for confounding effects
+            <br><br>
+            <strong>Correlation Types:</strong>
+            <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
+            <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
+            <br><br>
+            This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
+            <br>
+            Please cite jamovi and the packages as given below.
+            <br><hr>")
+        },
+
         # init ----
         .init = function() {
 
             # Show welcome message when no variables or insufficient variables are selected
             if (is.null(self$options$dep) || length(self$options$dep) < 2) {
-                
-                todo <- .("<br>Welcome to ClinicoPath Correlation Matrix Analysis
-                <br><br>
-                <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)
-                <br><br>
-                <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables
-                <br><br>
-                <strong>Quick Start:</strong>
-                <br>1. Select 2 or more continuous variables
-                <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)
-                <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)
-                <br>4. Use partial correlations (3+ variables) to control for confounding effects
-                <br><br>
-                <strong>Correlation Types:</strong>
-                <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
-                <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
-                <br><br>
-                This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
-                <br>
-                Please cite jamovi and the packages as given below.
-                <br><hr>")
 
-                self$results$todo$setContent(todo)
+                self$results$todo$setContent(private$.welcomeMessage())
                 return()
             }
 
@@ -150,14 +168,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             )
 
             mydata <- self$data
-            # Resolve possible B64 column names from jamovi
-            resolve_name <- function(var) {
-                if (is.null(var)) return(NULL)
-                if (var %in% names(mydata)) return(var)
-                b64 <- jmvcore::toB64(var)
-                if (b64 %in% names(mydata)) return(b64)
-                var
-            }
+            # Resolve possible B64 column names from jamovi (shared helper)
+            resolve_name <- function(var) private$.resolveName(var, mydata)
 
             # SELECTIVE NA OMISSION - only remove rows with NAs in selected correlation variables
             # This prevents dropping patients with NAs in unused columns
@@ -208,13 +220,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             # Enhanced validation for correlation analysis
             mydata <- self$data
-            resolve_name <- function(var) {
-                if (is.null(var)) return(NULL)
-                if (var %in% names(mydata)) return(var)
-                b64 <- jmvcore::toB64(var)
-                if (b64 %in% names(mydata)) return(b64)
-                var
-            }
+            resolve_name <- function(var) private$.resolveName(var, mydata)
 
             # Check if variables exist in data
             for (var in self$options$dep) {
@@ -380,9 +386,29 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # Validation with clinical warnings
         .validateClinicalInputs = function() {
-            # Check minimum sample size for reliable correlations
-            if (nrow(self$data) < 20) {
-                private$.addWarning("STRONG_WARNING", sprintf('Small sample size (N = %d). Correlations with N < 20 may be unreliable. Consider collecting more data or interpreting results cautiously.', nrow(self$data)))
+            # Check minimum sample size for reliable correlations.
+            # Use the effective complete-case N over the selected variables
+            # (after numeric coercion) rather than the raw row count, so a
+            # large dataset with heavy missingness in the selected variables
+            # is not falsely cleared. Complete-case N across all selected
+            # variables is the lower bound of any single pair's N, making it
+            # a conservative guard for both listwise and pairwise handling.
+            effective_n <- tryCatch({
+                dep_cols <- vapply(self$options$dep,
+                                   function(v) private$.resolveName(v),
+                                   character(1))
+                dep_cols <- dep_cols[dep_cols %in% names(self$data)]
+                if (length(dep_cols) >= 2) {
+                    sub <- self$data[, dep_cols, drop = FALSE]
+                    for (cc in names(sub)) sub[[cc]] <- jmvcore::toNumeric(sub[[cc]])
+                    sum(complete.cases(sub))
+                } else {
+                    nrow(self$data)
+                }
+            }, error = function(e) nrow(self$data))
+
+            if (effective_n < 20) {
+                private$.addWarning("STRONG_WARNING", sprintf('Small sample size (N = %d complete cases). Correlations with N < 20 may be unreliable. Consider collecting more data or interpreting results cautiously.', effective_n))
             }
 
             # Check for too many variables (interpretation complexity)
@@ -425,8 +451,15 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .generateInterpretation = function(mydata, options_data) {
             if (length(options_data$myvars) < 2) return()
 
-            # Calculate correlation matrix for interpretation
-            cor_data <- mydata[, options_data$myvars, drop = FALSE]
+            # Calculate correlation matrix for interpretation.
+            # Resolve possible B64 column names before indexing (consistent
+            # with the table/plot paths), then restore the original variable
+            # names so the interpretation text shows user-facing labels.
+            myvars_resolved <- vapply(options_data$myvars,
+                                      function(v) private$.resolveName(v, mydata),
+                                      character(1))
+            cor_data <- mydata[, myvars_resolved, drop = FALSE]
+            names(cor_data) <- options_data$myvars
 
             # Convert to numeric
             for (var in names(cor_data)) {
@@ -640,28 +673,7 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         # TODO ----
 
-        todo <- .("<br>Welcome to ClinicoPath Correlation Matrix Analysis
-        <br><br>
-        <strong>What this does:</strong> Analyzes relationships between continuous variables (e.g., biomarker levels, lab values, imaging metrics)
-        <br><br>
-        <strong>When to use:</strong> When examining associations between 2+ continuous clinical variables
-        <br><br>
-        <strong>Quick Start:</strong>
-        <br>1. Select 2 or more continuous variables
-        <br>2. Choose correlation method (Pearson for normal data, Spearman for non-normal)
-        <br>3. Optionally group by categorical variable (e.g., tumor grade, treatment group)
-        <br>4. Use partial correlations (3+ variables) to control for confounding effects
-        <br><br>
-        <strong>Correlation Types:</strong>
-        <br>\u2022 <strong>Zero-order (regular):</strong> Direct relationship between two variables
-        <br>\u2022 <strong>Partial:</strong> Relationship while controlling for all other variables (reduces confounding)
-        <br><br>
-        This function uses ggplot2 and ggstatsplot packages. See documentations <a href = 'https://www.indrapatil.com/ggstatsplot/reference/ggcorrmat.html' target='_blank'>ggcorrmat</a> and <a href = 'https://www.indrapatil.com/ggstatsplot/reference/grouped_ggcorrmat.html' target='_blank'>grouped_ggcorrmat</a>.
-        <br>
-        Please cite jamovi and the packages as given below.
-        <br><hr>")
-
-        self$results$todo$setContent(todo)
+        self$results$todo$setContent(private$.welcomeMessage())
 
         return()
 
@@ -688,6 +700,16 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         # Pre-process data and options for performance
         mydata <- private$.prepareData()
         options_data <- private$.prepareOptions()
+
+        # Populate the correlation table exactly once here (grouped when a
+        # grouping variable is set, ungrouped otherwise). Previously both
+        # .plot and .plot2 populated it, each doing deleteRows() first, which
+        # made the final contents order-dependent (overwritten) when grvar was
+        # set.
+        private$.populateTable(
+            mydata, options_data,
+            group = if (!is.null(self$options$grvar)) self$options$grvar else NULL
+        )
 
         if (self$options$showexplanations) {
             private$.generateAboutContent()
@@ -757,30 +779,22 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
     # Clear existing rows - jamovi tables use deleteRows(), not clear()
     table$deleteRows()
 
-    resolve_name <- function(var) {
-        if (is.null(var)) return(NULL)
-        if (var %in% names(mydata)) return(var)
-        b64 <- jmvcore::toB64(var)
-        if (b64 %in% names(mydata)) return(b64)
-        var
-    }
+    resolve_name <- function(var) private$.resolveName(var, mydata)
 
     vars <- vapply(options_data$myvars, resolve_name, character(1))
 
-    # Handle missing values pairwise if requested
-    use_arg <- if (self$options$naHandling == "pairwise") "pairwise.complete.obs" else "complete.obs"
-
+    # Missing data: cor.test performs casewise (pairwise) complete-case deletion
+    # on each variable pair internally, and when naHandling == "listwise" the
+    # incoming data has already had incomplete rows dropped in .prepareData, so
+    # no explicit filtering is needed here. The confidence interval honors the
+    # user's Confidence Level so the table matches the plot.
     add_rows_for_subset <- function(df, grp_label = "All") {
         for (i in 1:(length(vars) - 1)) {
             for (j in (i + 1):length(vars)) {
                 x <- df[[vars[i]]]
                 y <- df[[vars[j]]]
-                if (use_arg == "listwise") {
-                    keep <- complete.cases(x, y)
-                    x <- x[keep]; y <- y[keep]
-                }
                 method <- if (options_data$typestatistics == "nonparametric") "spearman" else "pearson"
-                ct <- tryCatch(cor.test(x, y, method = method), error = function(e) NULL)
+                ct <- tryCatch(cor.test(x, y, method = method, conf.level = options_data$conflevel), error = function(e) NULL)
                 r <- if (!is.null(ct)) unname(ct$estimate) else NA
                 p <- if (!is.null(ct)) ct$p.value else NA
                 ci <- if (!is.null(ct) && !is.null(ct$conf.int)) ct$conf.int else c(NA, NA)
@@ -866,9 +880,9 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint before expensive correlation computation
             private$.checkpoint()
 
-            # Skip heavy plotting in testthat runs; still populate table/interpretation
+            # Skip heavy plotting in testthat runs; the table is populated once
+            # in .run(), interpretation is still generated here.
             if (Sys.getenv("TESTTHAT") == "true") {
-                private$.populateTable(mydata, options_data, group = NULL)
                 private$.generateInterpretation(mydata, options_data)
                 return(TRUE)
             }
@@ -901,7 +915,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 caption = options_data$caption
             )
 
-            private$.populateTable(mydata, options_data, group = NULL)
+            # Correlation table is populated once in .run(); only the plot and
+            # interpretation are produced here.
             # Generate clinical interpretation ----
             private$.generateInterpretation(mydata, options_data)
 
@@ -975,7 +990,6 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.checkpoint()
 
                 if (Sys.getenv("TESTTHAT") == "true") {
-                    private$.populateTable(mydata, options_data, group = grvar)
                     private$.generateInterpretation(mydata, options_data)
                     return(TRUE)
                 }
@@ -1010,7 +1024,8 @@ jjcorrmatClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
             }
 
-            private$.populateTable(mydata, options_data, group = grvar)
+            # Correlation table is populated once in .run(); only the grouped
+            # plot and interpretation are produced here.
             # Generate clinical interpretation ----
             private$.generateInterpretation(mydata, options_data)
 
