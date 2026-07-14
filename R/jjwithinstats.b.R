@@ -163,34 +163,19 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         .messages = NULL,
         .data_messages = NULL,
 
-        # Notice collection list for HTML-based notices (avoids serialization errors)
-        .noticeList = list(),
-
-        # TODO (cleanup): `.escapeVar` is dead code - defined here but never
-        # called anywhere in this file (grep confirms 1 occurrence: the
-        # definition). The inline `if (grepl("[^A-Za-z0-9_]", v)) jmvcore::composeTerm(v) else v`
-        # patterns at L525/L574/L1163 already do this work without the helper
-        # - and they could simplify to just `jmvcore::composeTerm(v)` which
-        # already handles syntactic names by returning them unwrapped. Remove
-        # this helper.
-        #
-        # TODO (cleanup): `.safeHtmlOutput` at L290 is a roll-your-own
-        # htmlEscape with extra `/` \u2192 `&#x2F;` substitution. Functionally
-        # correct but non-standard. Replace with `htmltools::htmlEscape()` to
-        # match the convention used in other audited files (jjridges,
-        # jjsegmentedtotalbar). Drop-in replacement at the helper site only;
-        # call sites at L328-329 and L440/L445/L580/L1135 (post-audit) need
-        # no changes.
-        # Variable name safety utility ----
-        .escapeVar = function(var) {
-            if (is.null(var)) return(NULL)
-            # Escape special characters for safe variable access
-            # Use jmvcore::composeTerm for variables with spaces/special chars
-            if (grepl("[^A-Za-z0-9_]", var)) {
-                jmvcore::composeTerm(var)
-            } else {
-                var
-            }
+        # Shared welcome / getting-started message (used by .init and .run) ----
+        .welcomeMessage = function() {
+            paste0(
+                "<br><strong>Welcome to ClinicoPath</strong><br><br>",
+                "This tool generates Violin Plots for repeated measurements (e.g., biomarker levels over time, treatment responses).<br><br>",
+                "<strong>Data Format:</strong> Wide format required - each row = one subject, columns = separate time points/measurements.<br><br>",
+                "<strong>Requirements:</strong><br>",
+                "\u2022 Select at least 2 measurements (First and Second Measurement fields)<br>",
+                "\u2022 No missing values allowed<br>",
+                "\u2022 Use for comparing 2-4 measurements from the same subjects<br><br>",
+                "See documentation: <a href='https://www.indrapatil.com/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>",
+                "Please cite jamovi and packages as instructed.<br><hr>"
+            )
         },
 
         # init ----
@@ -220,7 +205,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 private$.applyClinicalPresets()
                 
                 # Pre-prepare data and options for performance
-                private$.prepareData()
+                private$.prepareData(emit_messages = FALSE)
                 private$.prepareOptions()
                 
                 # Clear any welcome message when variables are selected
@@ -230,16 +215,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 self$results$plot$setVisible(visible = FALSE)
                 
                 # Show welcome message when insufficient variables
-                welcome_msg <- "<br><strong>Welcome to ClinicoPath</strong><br><br>
-                        This tool generates Violin Plots for repeated measurements (e.g., biomarker levels over time, treatment responses).<br><br>
-                        <strong>Data Format:</strong> Wide format required - each row = one subject, columns = separate time points/measurements.<br><br>
-                        <strong>Requirements:</strong><br>
-                        \u2022 Select at least 2 measurements (First and Second Measurement fields)<br>
-                        \u2022 No missing values allowed<br>
-                        \u2022 Use for comparing 2-4 measurements from the same subjects<br><br>
-                        See documentation: <a href='https://www.indrapatil.com/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
-                        Please cite jamovi and packages as instructed.<br><hr>"
-                
+                welcome_msg <- private$.welcomeMessage()
+
                 self$results$todo$setVisible(visible = TRUE)
                 self$results$todo$setContent(welcome_msg)
             }
@@ -253,48 +230,22 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             }
             private$.messages <- append(private$.messages, message)
 
-            # LEGACY: Keep HTML warnings for backward compatibility
+            # Render accumulated messages into the HTML warnings output
             if (!is.null(self$results$warnings)) {
                 self$results$warnings$setContent(paste(private$.messages, collapse = ""))
                 self$results$warnings$setVisible(TRUE)
             }
-
-            # MODERN: Add to HTML-based notice system (no serialization issues)
-            # Note: We don't call .renderNotices() here - that's done at end of .run()
-            # This just accumulates the notices for later rendering
         },
         
         # Reset messages for new analysis run
         .resetMessages = function() {
             private$.messages <- character()
-            # Clear HTML-based notice list
-            private$.noticeList <- list()
             # Don't clear TODO here, as it might hold "Welcome" or "Ready"
             # warning content is cleared
             if (!is.null(self$results$warnings)) {
                 self$results$warnings$setContent("")
                 # Don't hide yet, wait until run to decide visibility or let specific checks set it
             }
-        },
-
-        # DEPRECATED: Old notice system with serialization errors
-        # DO NOT USE - kept for reference only
-        # Use .addNoticeHTML() instead
-        # .addNotice = function(content, type = "WARNING", name = NULL) {
-        #     # This method causes serialization errors due to insert(999, notice)
-        #     # See CLAUDE.md > Notice Serialization and HTML Conversion
-        #     stop("Deprecated: Use .addNoticeHTML() instead to avoid serialization errors")
-        # },
-
-        # MODERN NOTICE SYSTEM (HTML-based, no serialization issues) ----
-
-        # Add a notice to the HTML-based collection (recommended for all new code)
-        .addNoticeHTML = function(type, title, content) {
-            private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-                type = type,
-                title = title,
-                content = content
-            )
         },
 
         # HTML sanitization for security
@@ -309,42 +260,6 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             text <- gsub("'", "&#x27;", text, fixed = TRUE)
             text <- gsub("/", "&#x2F;", text, fixed = TRUE)
             return(text)
-        },
-
-        # Render collected notices as HTML (call at end of .run())
-        .renderNotices = function() {
-            if (length(private$.noticeList) == 0) {
-                return()
-            }
-
-            # Map notice types to colors and icons
-            typeStyles <- list(
-                ERROR = list(color = "#dc2626", bgcolor = "#fef2f2", border = "#fca5a5", icon = ""),
-                STRONG_WARNING = list(color = "#ea580c", bgcolor = "#fff7ed", border = "#fdba74", icon = ""),
-                WARNING = list(color = "#ca8a04", bgcolor = "#fefce8", border = "#fde047", icon = ""),
-                INFO = list(color = "#2563eb", bgcolor = "#eff6ff", border = "#93c5fd", icon = "")
-            )
-
-            html <- "<div style='margin: 10px 0;'>"
-
-            for (notice in private$.noticeList) {
-                style <- typeStyles[[notice$type]]
-                if (is.null(style)) style <- typeStyles$INFO
-
-                html <- paste0(html,
-                    "<div style='background-color: ", style$bgcolor, "; ",
-                    "border-left: 4px solid ", style$border, "; ",
-                    "padding: 12px; margin: 8px 0; border-radius: 4px;'>",
-                    "<strong style='color: ", style$color, ";'>",
-                    style$icon, " ", private$.safeHtmlOutput(notice$title), "</strong><br>",
-                    "<span style='color: #374151;'>", private$.safeHtmlOutput(notice$content), "</span>",
-                    "</div>"
-                )
-            }
-
-            html <- paste0(html, "</div>")
-
-            self$results$notices$setContent(html)
         },
 
         # Helper to cache data-specific messages
@@ -448,12 +363,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 var_safe <- private$.safeHtmlOutput(var)
 
                 if (length(num_vals) < 3) {
-                    private$.accumulateMessage(
+                    private$.accumulateDataMessage(
                         glue::glue(.("<br> <strong>Warning:</strong> {var_safe} has less than 3 valid observations<br>"))
                     )
                 }
                 if (length(unique(num_vals)) < 2) {
-                    private$.accumulateMessage(
+                    private$.accumulateDataMessage(
                         glue::glue(.("<br> <strong>Warning:</strong> {var_safe} has no variation (all values identical)<br>"))
                     )
                 }
@@ -469,7 +384,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             # Small sample size warning
             if (total_subjects < 10) {
-                private$.accumulateMessage(
+                private$.accumulateDataMessage(
                     .("<br> <strong>Small Sample Size:</strong> With fewer than 10 subjects, results may be unreliable. Consider larger sample or descriptive analysis.<br>")
                 )
             }
@@ -486,7 +401,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     outliers <- sum(num_vals > (q75 + 1.5 * iqr) | num_vals < (q25 - 1.5 * iqr))
                     
                     if (outliers > length(num_vals) * 0.1) {  # More than 10% outliers
-                        private$.accumulateMessage(
+                        private$.accumulateDataMessage(
                             .("<br> <strong>Many Outliers Detected:</strong> Consider Robust test type to reduce outlier influence<br>")
                         )
                         break  # Only show this message once
@@ -501,12 +416,19 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     num_vals <- num_vals[!is.na(num_vals)]
                     
                     if (length(num_vals) > 5) {
-                        # Simple skewness check using mean vs median
+                        # Moment coefficient of skewness (g1). |skewness| > 1
+                        # flags a substantially skewed distribution, a far more
+                        # reliable criterion than |mean - median| > sd.
+                        n_v <- length(num_vals)
                         mean_val <- mean(num_vals)
-                        median_val <- median(num_vals)
-                        
-                        if (abs(mean_val - median_val) > sd(num_vals)) {  # Highly skewed
-                            private$.accumulateMessage(
+                        sd_val <- sd(num_vals)
+                        skewness <- if (sd_val > 0)
+                            (sum((num_vals - mean_val)^3) / n_v) / (sd_val^3)
+                        else
+                            0
+
+                        if (abs(skewness) > 1) {  # Substantially skewed
+                            private$.accumulateDataMessage(
                                 .("<br> <strong>Skewed Data Detected:</strong> Consider Nonparametric test for skewed biomarker or clinical data<br>")
                             )
                             break  # Only show this message once
@@ -517,7 +439,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         },
 
         # Optimized data preparation with robust caching
-        .prepareData = function(force_refresh = FALSE) {
+        .prepareData = function(force_refresh = FALSE, emit_messages = TRUE) {
             # IMMEDIATE CHECK: Return NULL if minimum variables not selected
             if (is.null(self$options$dep1) || is.null(self$options$dep2)) {
                 return(NULL)
@@ -532,12 +454,11 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             vars <- Filter(Negate(is.null), c(self$options$dep1, self$options$dep2,
                                              self$options$dep3, self$options$dep4))
 
-            # Extract actual data for selected variables
-            # Use safe variable names for variables with spaces/special chars
-            safe_vars <- sapply(vars, function(v) {
-                if (grepl("[^A-Za-z0-9_]", v)) jmvcore::composeTerm(v) else v
-            })
-            data_subset <- self$data[, safe_vars, drop = FALSE]
+            # Extract actual data for selected variables using the RAW variable
+            # names. data.frame column access requires the raw name; a
+            # composeTerm()/backtick-quoted name (e.g. `CRP baseline`) yields an
+            # "undefined columns selected" error for names with spaces/symbols.
+            data_subset <- self$data[, vars, drop = FALSE]
 
             current_hash <- digest::digest(list(
                 dep1 = self$options$dep1, dep2 = self$options$dep2,
@@ -548,11 +469,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             ), algo = "md5")
             
             # Only reprocess if data has changed or forced refresh
-            if (!is.null(private$.prepared_data) && 
-                private$.data_hash == current_hash && 
+            if (!is.null(private$.prepared_data) &&
+                private$.data_hash == current_hash &&
                 !force_refresh) {
-                # Re-emit cached messages
-                if (!is.null(private$.data_messages)) {
+                # Re-emit cached data messages only when the caller wants them
+                # (i.e. .run(), which calls .resetMessages() first). Render calls
+                # (.plot()/.init()) pass emit_messages = FALSE so warnings are
+                # not appended a second time and duplicated in the output.
+                if (emit_messages && !is.null(private$.data_messages)) {
                     for (msg in private$.data_messages) {
                         private$.accumulateMessage(msg)
                     }
@@ -582,11 +506,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             
             mydata$rowid <- seq.int(nrow(mydata))
 
-            # Check if required variables exist in dataset using safe names
-            safe_vars_check <- sapply(vars, function(v) {
-                if (grepl("[^A-Za-z0-9_]", v)) jmvcore::composeTerm(v) else v
-            })
-            missing_vars <- vars[!safe_vars_check %in% names(mydata)]
+            # Check if required variables exist in dataset (raw names)
+            missing_vars <- vars[!vars %in% names(mydata)]
             if (length(missing_vars) > 0) {
                 private$.accumulateDataMessage(
                     paste0(.("<br> Variables not found in dataset: "), private$.safeHtmlOutput(paste(missing_vars, collapse = ", ")), "<br>")
@@ -599,10 +520,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             private$.checkpoint()
 
             # Convert variables to numeric with labelled awareness
-            for (i in seq_along(vars)) {
-                var <- vars[i]
-                safe_var <- safe_vars_check[i]
-                col <- mydata[[safe_var]]
+            for (var in vars) {
+                col <- mydata[[var]]
 
                 # jmvcore::toNumeric() extracts the underlying numeric values,
                 # including for haven_labelled columns (SPSS/Stata imports).
@@ -611,7 +530,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # factor position codes (e.g. 10, 20, 30 -> 1, 2, 3), silently
                 # corrupting the within-subjects analysis. This matches the
                 # direct toNumeric() pattern used by jjbetweenstats/jjdotplotstats.
-                mydata[[safe_var]] <- jmvcore::toNumeric(col)
+                mydata[[var]] <- jmvcore::toNumeric(col)
             }
             
             # Enhanced validation for optional parameters
@@ -699,18 +618,18 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Checkpoint before expensive data transformation
             private$.checkpoint()
 
-            # Perform pivot_longer transformation once using safe variable names
-            # Use unname() to avoid "Can't rename variables" error from named vector
+            # Perform pivot_longer transformation once using the RAW variable
+            # names. Passing raw column names (via unname() to avoid the
+            # "Can't rename variables" error from a named vector) keeps
+            # data access correct for names with spaces/special characters.
             long_data <- tidyr::pivot_longer(
                 mydata,
-                cols = unname(safe_vars_check),
+                cols = unname(vars),
                 names_to = "measurement",
                 values_to = "value"
             )
 
-            # Map safe names back to original names for display
-            names_mapping <- setNames(vars, safe_vars_check)
-            long_data$measurement <- names_mapping[as.character(long_data$measurement)]
+            # Preserve measurement ordering for display
             long_data$measurement <- factor(long_data$measurement, levels = vars)
             
             private$.prepared_data <- long_data
@@ -943,16 +862,8 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 ### todo ----
 
-                # Simple welcome message for testing
-                todo <- "<br><strong>Welcome to ClinicoPath</strong><br><br>
-                        This tool generates Violin Plots for repeated measurements (e.g., biomarker levels over time, treatment responses).<br><br>
-                        <strong>Data Format:</strong> Wide format required - each row = one subject, columns = separate time points/measurements.<br><br>
-                        <strong>Requirements:</strong><br>
-                        \u2022 Select at least 2 measurements (First and Second Measurement fields)<br>
-                        \u2022 No missing values allowed<br>
-                        \u2022 Use for comparing 2-4 measurements from the same subjects<br><br>
-                        See documentation: <a href='https://www.indrapatil.com/ggstatsplot/reference/ggwithinstats.html' target='_blank'>ggwithinstats</a><br>
-                        Please cite jamovi and packages as instructed.<br><hr>"
+                # Welcome / getting-started message
+                todo <- private$.welcomeMessage()
 
                 # Ensure todo is visible and set content
                 self$results$todo$setVisible(visible = TRUE)
@@ -1030,9 +941,6 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     private$.generateExplanations()
                 }
 
-                # Render accumulated HTML-based notices (if any)
-                private$.renderNotices()
-
             }
         }
 
@@ -1045,7 +953,7 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 return()
 
             # Use prepared data and options ----
-            long_data <- private$.prepareData()
+            long_data <- private$.prepareData(emit_messages = FALSE)
             opts <- private$.prepareOptions()
             
             if (is.null(long_data)) {
@@ -1069,8 +977,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     data = long_data,
                     x = measurement,
                     y = value,
-                    paired = TRUE,
-                    id = "rowid",
+                    # ggwithinstats is always within-subjects; there is no
+                    # `paired` formal. Pass the subject identifier explicitly
+                    # via subject.id so pairing does not rely on incidental
+                    # row order (the previous `id = "rowid"` was silently
+                    # dropped into ...).
+                    subject.id = "rowid",
                     title = opts$mytitle,
                     xlab = opts$xtitle,
                     ylab = opts$ytitle,
@@ -1142,15 +1054,12 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 if (!is.null(self$options$dep3)) deps <- c(deps, self$options$dep3)
                 if (!is.null(self$options$dep4)) deps <- c(deps, self$options$dep4)
 
-                # Use safe variable names for variables with spaces/special chars
-                safe_deps <- sapply(deps, function(v) {
-                    if (grepl("[^A-Za-z0-9_]", v)) jmvcore::composeTerm(v) else v
-                })
-
-                # CRITICAL FIX: Paired analysis requires listwise deletion
-                # Only keep subjects with processing data for ALL selected measurements
+                # CRITICAL FIX: Paired analysis requires listwise deletion.
+                # Only keep subjects with data for ALL selected measurements.
+                # Index with RAW variable names (composeTerm/backtick-quoted
+                # names break data.frame column access for names with spaces).
                 mydata <- self$data
-                mydata <- mydata[, safe_deps, drop = FALSE]
+                mydata <- mydata[, deps, drop = FALSE]
                 mydata <- jmvcore::naOmit(mydata)
                 
                 # Check for empty data after filtering
@@ -1161,13 +1070,13 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Create subject ID for paired analysis
                 mydata$Subject_ID <- seq_len(nrow(mydata))
 
-                # Convert to long format using safe variable names
+                # Convert to long format using raw variable names
                 long_data <- data.frame()
                 for (i in seq_along(deps)) {
                     temp <- data.frame(
                         Subject_ID = mydata$Subject_ID,
-                        Measurement = deps[i],  # Original name for display
-                        Value = mydata[[safe_deps[i]]]  # Safe name for access
+                        Measurement = deps[i],
+                        Value = mydata[[deps[i]]]
                     )
                     long_data <- rbind(long_data, temp)
                 }
@@ -1228,24 +1137,42 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
                 # Add statistical comparisons
                 if (self$options$ggpubrAddStats && self$options$ggpubrPlotType != "line") {
-                    # Determine appropriate paired test method
-                    test_method <- switch(
-                        self$options$typestatistics,
-                        "parametric" = "t.test",
-                        "nonparametric" = "wilcox.test",
-                        "robust" = "t.test",  # Fallback
-                        "bayes" = NULL,
-                        "t.test"  # Default
-                    )
-
-                    if (!is.null(test_method)) {
-                        # Use global p-value for >2 groups, paired for 2 groups
-                        # For >2 groups, ggpubr might warn but paired=TRUE is key
-                        plot <- plot + ggpubr::stat_compare_means(
-                            method = test_method,
-                            paired = TRUE,
-                            label = "p.signif"
+                    if (length(deps) > 2) {
+                        # Pairwise t.test/wilcox.test cannot compare >2 groups and
+                        # would error (previously swallowed by the empty handler).
+                        # Use an omnibus test for a single global p-value.
+                        omnibus_method <- switch(
+                            self$options$typestatistics,
+                            "parametric" = "anova",
+                            "nonparametric" = "kruskal.test",
+                            "robust" = "anova",        # Fallback
+                            "bayes" = NULL,
+                            "anova"                     # Default
                         )
+
+                        if (!is.null(omnibus_method)) {
+                            plot <- plot + ggpubr::stat_compare_means(
+                                method = omnibus_method
+                            )
+                        }
+                    } else {
+                        # Two measurements: paired two-sample comparison
+                        test_method <- switch(
+                            self$options$typestatistics,
+                            "parametric" = "t.test",
+                            "nonparametric" = "wilcox.test",
+                            "robust" = "t.test",        # Fallback
+                            "bayes" = NULL,
+                            "t.test"                    # Default
+                        )
+
+                        if (!is.null(test_method)) {
+                            plot <- plot + ggpubr::stat_compare_means(
+                                method = test_method,
+                                paired = TRUE,
+                                label = "p.signif"
+                            )
+                        }
                     }
                 }
 
@@ -1257,8 +1184,14 @@ jjwithinstatsClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 TRUE
 
             }, error = function(e) {
-                # Silent fail for secondary plot or log error
-                # self$results$todo$setContent(paste("ggpubr error:", e$message))
+                # Surface the (html-escaped) error instead of failing silently.
+                # ggpubr messages may embed user column-name fragments.
+                error_msg <- paste0(
+                    .("<br>Error creating ggpubr plot: "),
+                    private$.safeHtmlOutput(e$message),
+                    .("<br>The primary within-subjects plot above is unaffected.<br><hr>")
+                )
+                self$results$todo$setContent(error_msg)
             })
         }
 
