@@ -912,7 +912,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor))) {
+                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
+                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
                     self$results$lightKappaTable$setNote(
                         "error",
                         "Light's kappa requires categorical data. Your data appears to be continuous. Use ICC instead."
@@ -1722,15 +1723,18 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 }
                             }
                             a_value <- mean(pairwise_A)
-                            # Approximate SE and z-test for averaged A
-                            se_value <- sd(pairwise_A) / sqrt(length(pairwise_A))
-                            if (is.na(se_value) || se_value < .Machine$double.eps) {
-                                z_value <- NA
-                                p_value <- NA
-                            } else {
-                                z_value <- a_value / se_value
-                                p_value <- 2 * pnorm(-abs(z_value))
-                            }
+                            # The pairwise Robinson's A values share raters and are
+                            # therefore dependent; an SE built from their standard
+                            # deviation does not define a valid null distribution, so
+                            # the averaged multi-rater A is reported descriptively
+                            # (no z-test / p-value) rather than with an invalid p-value.
+                            se_value <- NA_real_
+                            z_value <- NA_real_
+                            p_value <- NA_real_
+                            self$results$robinsonATable$setNote(
+                                "multirater_descriptive",
+                                "For >2 raters the reported value is the mean of dependent pairwise A statistics and is descriptive only; no significance test is provided because the pairwise values are not independent."
+                            )
                         }
 
                         # Interpret A value
@@ -3095,8 +3099,9 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     boot_tdi[b] <- quantile(boot_abs, probs = coverage, names = FALSE)
                                 }
 
-                                ci_lower <- quantile(boot_tdi, probs = 0.025, names = FALSE)
-                                ci_upper <- quantile(boot_tdi, probs = 0.975, names = FALSE)
+                                tdi_alpha <- 1 - self$options$confLevel
+                                ci_lower <- quantile(boot_tdi, probs = tdi_alpha / 2, names = FALSE)
+                                ci_upper <- quantile(boot_tdi, probs = 1 - tdi_alpha / 2, names = FALSE)
 
                                 # Determine if methods meet acceptability criteria
                                 meets_criteria <- tdi_estimate <= acceptable_limit
@@ -3446,7 +3451,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                             ci_upper <- NA
                                         } else {
                                             p_hat <- specific_agreement
-                                            z <- qnorm(0.975) # 95% CI
+                                            z <- qnorm(1 - (1 - self$options$confLevel) / 2)
                                             denom <- 1 + z^2 / n_eff
                                             center <- (p_hat + z^2 / (2 * n_eff)) / denom
                                             margin <- z * sqrt(p_hat * (1 - p_hat) / n_eff + z^2 / (4 * n_eff^2)) / denom
@@ -5650,29 +5655,27 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 is_ordinal <- length(all_levels) >= 3
 
                                 if (requireNamespace("irr", quietly = TRUE)) {
-                                    if (is_ordinal) {
-                                        # Weighted kappa for ordinal
-                                        kappa_result <- irr::kappa2(cbind(data1, data2), weight = "squared")
-                                        stat_name <- "Weighted \u{03BA}"
-                                    } else {
-                                        # Unweighted kappa for nominal
-                                        kappa_result <- irr::kappa2(cbind(data1, data2), weight = "unweighted")
-                                        stat_name <- "Cohen's \u{03BA}"
-                                    }
+                                    # Use the non-null asymptotic SE from vcd::Kappa (via
+                                    # .pairKappaWithCI); irr::kappa2()$statistic is the
+                                    # H0:kappa=0 z, whose implied SE (kappa/z) is the NULL
+                                    # SE and yields too-narrow CIs.
+                                    irr_weight <- if (is_ordinal) "squared" else "unweighted"
+                                    stat_name <- if (is_ordinal) "Weighted \u{03BA}" else "Cohen's \u{03BA}"
 
-                                    kappa_value <- kappa_result$value
-                                    p_value <- kappa_result$p.value
+                                    kc <- private$.pairKappaWithCI(
+                                        data.frame(t1 = data1, t2 = data2),
+                                        irr_weight
+                                    )
+                                    kappa_value <- kc$kappa
+                                    p_value <- kc$p
 
-                                    # Confidence interval (approximate from z statistic, when available)
+                                    # Confidence interval from the ASE, honoring confLevel
                                     ci_lower <- NA_real_
                                     ci_upper <- NA_real_
-                                    z_stat <- kappa_result$statistic
-                                    if (!is.null(z_stat) && is.finite(z_stat) && abs(z_stat) > 1e-6 && is.finite(kappa_value)) {
-                                        se_kappa <- abs(kappa_value / z_stat)
-                                        if (se_kappa < 2) {
-                                            ci_lower <- max(-1, kappa_value - 1.96 * se_kappa)
-                                            ci_upper <- min(1, kappa_value + 1.96 * se_kappa)
-                                        }
+                                    if (!is.na(kc$se) && kc$se > 0 && is.finite(kappa_value)) {
+                                        zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
+                                        ci_lower <- max(-1, kappa_value - zc * kc$se)
+                                        ci_upper <- min(1, kappa_value + zc * kc$se)
                                     }
 
                                     # Interpretation
@@ -5806,15 +5809,19 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                     interp <- "Outstanding"
                                 }
 
-                                # Approximate CI from z statistic when available
+                                # Approximate CI from z statistic when available.
+                                # NOTE: Fleiss' kappa has no vcd::Kappa equivalent, so
+                                # this reuses irr's null-hypothesis SE (kappa/z) as an
+                                # approximation; confLevel is now honored for the width.
                                 ci_lower <- NA_real_
                                 ci_upper <- NA_real_
                                 z_stat <- kappa_result$statistic
                                 if (!is.null(z_stat) && is.finite(z_stat) && abs(z_stat) > 1e-6 && is.finite(kappa_value)) {
                                     se_kappa <- abs(kappa_value / z_stat)
                                     if (se_kappa < 2) {
-                                        ci_lower <- max(-1, kappa_value - 1.96 * se_kappa)
-                                        ci_upper <- min(1, kappa_value + 1.96 * se_kappa)
+                                        zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
+                                        ci_lower <- max(-1, kappa_value - zc * se_kappa)
+                                        ci_upper <- min(1, kappa_value + zc * se_kappa)
                                     }
                                 }
 
@@ -5965,7 +5972,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 # Detects if raters have different marginal distributions
 
                 # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor))) {
+                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
+                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
                     self$results$raterBiasTable$setNote(
                         "error",
                         "Rater Bias Test requires categorical data. Your data appears to be continuous."
@@ -6243,7 +6251,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor))) {
+                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
+                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
                     self$results$bhapkarTable$setNote(
                         "error",
                         "Bhapkar test requires categorical data. Your data appears to be continuous."
@@ -6536,7 +6545,8 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 # Validate data is categorical
-                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor))) {
+                if (any(sapply(ratings, is.numeric)) && !any(sapply(ratings, is.factor)) &&
+                    max(sapply(ratings, function(x) length(unique(na.omit(x))))) > 20) {
                     self$results$stuartMaxwellTable$setNote(
                         "error",
                         "Stuart-Maxwell test requires categorical data. Your data appears to be continuous."
@@ -6856,7 +6866,10 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             )
                         },
                         error = function(e) {
-                            kappa_results[[rater_name]] <- list(
+                            # <<- so the failed rater persists to the enclosing
+                            # kappa_results; a plain <- would assign to this handler's
+                            # local frame and silently drop the rater.
+                            kappa_results[[rater_name]] <<- list(
                                 rater = rater_name,
                                 subjects = nrow(pairwise_clean),
                                 kappa = NA,
@@ -7026,7 +7039,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                                 stop("non-finite kappa or ASE")
                             }
                             z <- kappa / ase
-                            zc <- stats::qnorm(0.975)
+                            zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
                             list(
                                 kappa = kappa, se = ase,
                                 ci_lower = kappa - zc * ase,
@@ -7061,7 +7074,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 } else {
                     NA_real_
                 }
-                zc <- stats::qnorm(0.975)
+                zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
                 ci <- if (!is.na(se)) {
                     kres$value + c(-1, 1) * zc * se
                 } else {
@@ -7277,13 +7290,13 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                 }
 
                 cats <- sort(unique(modes))
-                z975 <- stats::qnorm(0.975)
+                zc <- stats::qnorm(1 - (1 - self$options$confLevel) / 2)
 
                 for (cat in cats) {
                     idx <- which(modes == cat)
                     m <- mean(agrees[idx])
                     se <- if (length(idx) > 1) stats::sd(agrees[idx]) / sqrt(length(idx)) else 0
-                    ci <- m + c(-1, 1) * z975 * se
+                    ci <- m + c(-1, 1) * zc * se
                     ci <- pmax(0, pmin(1, ci))
                     tbl$addRow(rowKey = cat, values = list(
                         category       = as.character(cat),
@@ -7806,8 +7819,12 @@ agreementClass <- if (requireNamespace("jmvcore")) {
 
                         kappa <- if (abs(1 - pe) < .Machine$double.eps) NA_real_ else (po - pe) / (1 - pe)
 
-                        # PABAK = 2*Po - 1
-                        pabak <- 2 * po - 1
+                        # PABAK (Byrt et al. 1993): general multi-category form
+                        # (q*Po - 1)/(q - 1), where q = number of categories. This
+                        # reduces to the familiar binary 2*Po - 1 when q == 2. Using
+                        # the binary formula for q > 2 overstates chance-corrected
+                        # agreement.
+                        pabak <- if (n_cat > 1) (n_cat * po - 1) / (n_cat - 1) else NA_real_
 
                         # For 2x2 tables: compute prevalence and bias indices
                         if (n_cat == 2) {
@@ -9152,20 +9169,25 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                     ))
                 }
 
-                # Apply multiplicity correction if requested
+                # Apply multiplicity correction if requested. Exclude the intercept:
+                # its p-value tests whether the reference-level mean is zero, which is
+                # not a comparison of interest and would inflate the family size.
                 if (self$options$multipleTestCorrection != "none" && nrow(coefs) > 1) {
-                    adj_p <- p.adjust(raw_p, method = self$options$multipleTestCorrection)
-                    # Update table with adjusted p-values
-                    for (i in seq_len(nrow(coefs))) {
-                        me_table$setCell(rowKey = i, col = "p_value", value = adj_p[i])
-                    }
-                    me_table$setNote(
-                        "correction",
-                        paste0(
-                            "P-values adjusted using ", self$options$multipleTestCorrection,
-                            " correction for ", length(adj_p), " comparisons."
+                    adjust_idx <- which(term_names != "(Intercept)")
+                    if (length(adjust_idx) >= 1) {
+                        adj_p <- p.adjust(raw_p[adjust_idx], method = self$options$multipleTestCorrection)
+                        # Update table with adjusted p-values (contrasts only)
+                        for (k in seq_along(adjust_idx)) {
+                            me_table$setCell(rowKey = adjust_idx[k], col = "p_value", value = adj_p[k])
+                        }
+                        me_table$setNote(
+                            "correction",
+                            paste0(
+                                "P-values adjusted using ", self$options$multipleTestCorrection,
+                                " correction for ", length(adj_p), " comparisons (intercept excluded)."
+                            )
                         )
-                    )
+                    }
                 }
 
                 # Variance components
@@ -9466,6 +9488,17 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                         boot_kripp <- sapply(boot_results, function(x) x$kripp_alpha)
                         boot_icc <- if (!is.null(boot_results[[1]]$icc)) sapply(boot_results, function(x) x$icc) else NULL
 
+                        # Precompute the leave-one-out (jackknife) metric sets ONCE and
+                        # reuse them across every metric's BCa acceleration, instead of
+                        # recomputing the full metric set inside each bca_ci() call
+                        # (previously up to 4x min(n, 200) redundant refits).
+                        jack_n <- min(n_cases, 200)
+                        jack_metrics <- lapply(seq_len(jack_n), function(i) {
+                            tryCatch(compute_metrics(ratings[-i, , drop = FALSE]),
+                                error = function(e) NULL
+                            )
+                        })
+
                         # BCa CI helper with explicit metric_name parameter
                         conf <- self$options$confLevel
                         bca_ci <- function(obs_val, boot_dist, metric_name, alpha = 1 - conf) {
@@ -9478,16 +9511,14 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             z0 <- qnorm(mean(boot_dist < obs_val))
                             if (is.infinite(z0)) z0 <- 0
 
-                            # Jackknife acceleration
-                            jack_vals <- sapply(seq_len(min(n_cases, 200)), function(i) {
-                                tryCatch(
-                                    {
-                                        jack_res <- compute_metrics(ratings[-i, , drop = FALSE])
-                                        val <- jack_res[[metric_name]]
-                                        if (is.null(val)) NA else val
-                                    },
-                                    error = function(e) obs_val
-                                )
+                            # Jackknife acceleration (reuses precomputed leave-one-out fits)
+                            jack_vals <- sapply(seq_len(jack_n), function(i) {
+                                jm <- jack_metrics[[i]]
+                                if (is.null(jm)) {
+                                    return(obs_val)
+                                }
+                                val <- jm[[metric_name]]
+                                if (is.null(val)) NA else val
                             })
                             jack_mean <- mean(jack_vals, na.rm = TRUE)
                             jack_diff <- jack_mean - jack_vals
@@ -9556,7 +9587,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             ))
                         }
 
-                        table$setNote("boot", paste0("Based on ", n_boot, " bootstrap resamples (case resampling). Seed: 42 for reproducibility."))
+                        table$setNote("boot", paste0("Based on ", n_boot, " bootstrap resamples (case resampling). Seed: ", seed_val, " for reproducibility."))
                     },
                     error = function(e) {
                         self$results$bootstrapCITable$setNote("error", paste("Bootstrap CI error:", htmltools::htmlEscape(e$message)))
@@ -9837,7 +9868,7 @@ agreementClass <- if (requireNamespace("jmvcore")) {
                             ))
                         }
 
-                        table$setNote("info", paste0("Bootstrap test with ", n_boot, " replications (seed = 42). N = ", n_cases, " cases."))
+                        table$setNote("info", paste0("Bootstrap test with ", n_boot, " replications (seed = ", seed_val, "). N = ", n_cases, " cases."))
                     },
                     error = function(e) {
                         self$results$pairedAgreementTable$setNote("error", paste("Paired agreement error:", htmltools::htmlEscape(e$message)))
