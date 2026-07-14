@@ -34,7 +34,6 @@
 ^pdfs/
 ^data-raw/
 ^datageneration/
-^tests/
 ^meddecide/
 ^ClinicoPathDescriptives/
 ^ClinicoPathLinuxDescriptives/

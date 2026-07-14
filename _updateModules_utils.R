@@ -203,9 +203,13 @@ sync_namespace_with_description <- function(module_dir, dry_run = FALSE) {
     for (line in namespace_lines) {
       line <- trimws(line)
       
-      # import(package)
+      # import(package) or import(package, except = c(...)) -> take FIRST arg only.
+      # The old `([^)]+)` captured up to the first ')', which for an
+      # `import(dplyr, except = c(a, b))` directive grabbed
+      # "dplyr, except = c(a, b" and injected it as a bogus package name into
+      # DESCRIPTION Imports. Extract just the leading package identifier.
       if (grepl("^import\\(", line)) {
-        pkg <- gsub("^import\\(([^)]+)\\).*", "\\1", line)
+        pkg <- sub("^import\\(\\s*[\"']?([A-Za-z0-9._]+).*", "\\1", line)
         imported_packages <- c(imported_packages, pkg)
       }
       
@@ -1314,7 +1318,8 @@ check_all_modules_dependencies <- function(module_specs, fail_on_error = TRUE) {
     }
     if (length(res$warnings) > 0) {
       any_errors <- TRUE
-      cat("  ⚠️  ", nm, ": used behind requireNamespace() but NOT declared (add to Suggests): ",
+      cat("  ⚠️  ", nm, ": used behind requireNamespace() but NOT declared (add to Imports; ",
+          "jamovi installs Imports first-run, so runtime deps must NOT sit in Suggests): ",
           paste(res$warnings, collapse = ", "), "\n", sep = "")
     }
     if (length(res$errors) > 0) {
@@ -1326,8 +1331,10 @@ check_all_modules_dependencies <- function(module_specs, fail_on_error = TRUE) {
 
   if (any_errors && fail_on_error) {
     stop("❌ Dependency reconciliation failed: one or more submodules use packages ",
-         "without a direct DESCRIPTION declaration. Add required ",
-         "packages to Imports/Depends and guarded optional packages to Suggests.")
+         "without a direct DESCRIPTION declaration. Add every runtime dependency ",
+         "(unguarded AND requireNamespace-guarded) to Imports/Depends -- jamovi ",
+         "installs Imports first-run and cannot install a missing package on demand, ",
+         "so Suggests is not a valid home for runtime deps.")
   }
   invisible(!any_errors)
 }
