@@ -124,21 +124,6 @@ NULL
 #' @noRd
 NULL
 
-# TODO (cleanup): this .escapeVariableNames is a DUPLICATE of the one in R/utils.R (silent-
-#   divergence risk) - use the shared one or delete this copy. Worse, its 7 callers (L458-524 area)
-#   assign `escaped_varN <- .escapeVariableNames(varN)` but NEVER reference the result (the stop()s
-#   interpolate the RAW varN), so both the helper calls and the local copy are effectively dead.
-#   Separately (security): those per-variable stop(paste("Error processing variable '", varN, ...))
-#   handlers interpolate the raw column name - the security audit should route them through
-#   jmvcore::reject (escaped channel) rather than stop().
-# Helper function to escape variable names with special characters for formulas
-.escapeVariableNames <- function(var_names) {
-    # Check if variable names contain special characters that need escaping
-    need_escaping <- grepl("[^a-zA-Z0-9._]", var_names)
-    var_names[need_escaping] <- paste0("`", var_names[need_escaping], "`")
-    return(var_names)
-}
-
 # Helper function to validate and clean variable names for jamovi interface
 .validateVennVariableNames <- function(var_names) {
     if (is.null(var_names) || length(var_names) == 0) {
@@ -341,25 +326,9 @@ vennClass <- if (requireNamespace('jmvcore'))
 
                 # Check if required variables (var1 and var2) are provided.
                 if (is.null(self$options$var1) || is.null(self$options$var2)) {
-                    # Keep the friendly welcome message in todo (non-critical guidance)
-                    todo <- paste0(
-                        "<br><strong>", .("Welcome to ClinicoPath Venn Diagram Tool"), "</strong>",
-                        "<br><br>",
-                        .("This tool helps you visualize overlaps between categorical variables using Venn and Upset diagrams."),
-                        "<br><br>",
-                        "<div style='background-color: #e8f4f8; padding: 12px; border-radius: 4px; border-left: 3px solid #17a2b8; font-size: 0.95em;'>",
-                        "<strong> ", .("Step-by-Step Variable Selection:"), "</strong>",
-                        "<ol style='margin: 8px 0 0 0; padding-left: 20px;'>",
-                        "<li><strong>", .("Start with Variable 1"), "</strong> - ", .("Select your first categorical variable"), "</li>",
-                        "<li><strong>", .("Add Variable 2"), "</strong> - ", .("Choose a second variable (unlocks after Variable 1)"), "</li>",
-                        "<li><strong>", .("Optional: Variable 3"), "</strong> - ", .("Add a third variable for 3-way analysis"), "</li>",
-                        "<li><strong>", .("Optional: Variable 4"), "</strong> - ", .("Add a fourth variable for 4-way analysis"), "</li>",
-                        "</ol>",
-                        "<em> ", .("Tip: Each variable must be categorical (factor) and you'll need to select which level represents 'true' for each."), "</em>",
-                        "</div>",
-                        "<hr><br>"
-                    )
-                    self$results$todo$setContent(todo)
+                    # Onboarding guidance is shown in the richer 'welcome' panel above;
+                    # keep 'todo' empty here to avoid duplicate onboarding content.
+                    self$results$todo$setContent("")
                     return()
                 } else {
                     # Clear welcome message once variables are selected.
@@ -457,10 +426,10 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name1]] <- ifelse(full_data[[var1]] == var1true, TRUE, FALSE)
                             name_mapping[[safe_name1]] <- var1
                         }, error = function(e) {
-                            # If direct access fails, try with escaped name or provide helpful error
-                            escaped_var1 <- .escapeVariableNames(var1)
-                            stop(paste("Error processing variable '", var1, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var1, "`", sep = ""))
+                            # Route the raw column name through jamovi's escaped error channel
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var1, e$message, var1)
                         })
                     }
                     if (!is.null(self$options$var2)) {
@@ -469,9 +438,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name2]] <- ifelse(full_data[[var2]] == var2true, TRUE, FALSE)
                             name_mapping[[safe_name2]] <- var2
                         }, error = function(e) {
-                            escaped_var2 <- .escapeVariableNames(var2)
-                            stop(paste("Error processing variable '", var2, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var2, "`", sep = ""))
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var2, e$message, var2)
                         })
                     }
                     if (!is.null(self$options$var3)) {
@@ -480,9 +449,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name3]] <- ifelse(full_data[[var3]] == var3true, TRUE, FALSE)
                             name_mapping[[safe_name3]] <- var3
                         }, error = function(e) {
-                            escaped_var3 <- .escapeVariableNames(var3)
-                            stop(paste("Error processing variable '", var3, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var3, "`", sep = ""))
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var3, e$message, var3)
                         })
                     }
                     if (!is.null(self$options$var4)) {
@@ -491,9 +460,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name4]] <- ifelse(full_data[[var4]] == var4true, TRUE, FALSE)
                             name_mapping[[safe_name4]] <- var4
                         }, error = function(e) {
-                            escaped_var4 <- .escapeVariableNames(var4)
-                            stop(paste("Error processing variable '", var4, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var4, "`", sep = ""))
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var4, e$message, var4)
                         })
                     }
                     if (!is.null(self$options$var5)) {
@@ -502,9 +471,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name5]] <- ifelse(full_data[[var5]] == var5true, TRUE, FALSE)
                             name_mapping[[safe_name5]] <- var5
                         }, error = function(e) {
-                            escaped_var5 <- .escapeVariableNames(var5)
-                            stop(paste("Error processing variable '", var5, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var5, "`", sep = ""))
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var5, e$message, var5)
                         })
                     }
                     if (!is.null(self$options$var6)) {
@@ -513,9 +482,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name6]] <- ifelse(full_data[[var6]] == var6true, TRUE, FALSE)
                             name_mapping[[safe_name6]] <- var6
                         }, error = function(e) {
-                            escaped_var6 <- .escapeVariableNames(var6)
-                            stop(paste("Error processing variable '", var6, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var6, "`", sep = ""))
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var6, e$message, var6)
                         })
                     }
                     if (!is.null(self$options$var7)) {
@@ -524,9 +493,9 @@ vennClass <- if (requireNamespace('jmvcore'))
                             mydata[[safe_name7]] <- ifelse(full_data[[var7]] == var7true, TRUE, FALSE)
                             name_mapping[[safe_name7]] <- var7
                         }, error = function(e) {
-                            escaped_var7 <- .escapeVariableNames(var7)
-                            stop(paste("Error processing variable '", var7, "': ", e$message,
-                                       ". Try using backticks around the variable name: `", var7, "`", sep = ""))
+                            jmvcore::reject(
+                                "Error processing variable '{}': {}. Try using backticks around the variable name: `{}`",
+                                code = NULL, var7, e$message, var7)
                         })
                     }
 
@@ -619,8 +588,10 @@ vennClass <- if (requireNamespace('jmvcore'))
                         private$.generateSetCalculations(mydata2, namescolumn2, summaryData)
                     }
 
-                    # Generate membership table if requested
-                    if (self$options$showSetCalculations && (self$options$showMembershipTable || self$options$membershipGroups)) {
+                    # Generate membership table if requested.
+                    # Decoupled from showSetCalculations so the membership table / data output
+                    # can be produced independently (previously silently no-oped without it).
+                    if (self$options$showMembershipTable || self$options$membershipGroups) {
                         private$.generateMembershipTable(mydata, names(mydata), private$.name_mapping, row_numbers)
                     }
 
@@ -819,10 +790,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     if (!self$options$var2true %in% levels(as.factor(var2_data))) {
                         available_levels <- paste(levels(as.factor(var2_data)), collapse=", ")
                         private$.errors <- c(private$.errors,
-                            sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s",
-                                htmltools::htmlEscape(self$options$var2true),
-                                htmltools::htmlEscape(self$options$var2),
-                                htmltools::htmlEscape(available_levels)))
+                            sprintf("Selected 'true' level '%s' not found in Variable '%s'. Available levels: %s", self$options$var2true, self$options$var2, available_levels))
                         return(FALSE)
                     }
                 }
@@ -906,14 +874,15 @@ vennClass <- if (requireNamespace('jmvcore'))
                     "<ol style='margin-left: 20px;'>",
                     "<li>", .("Select 2-7 categorical variables"), "</li>",
                     "<li>", .("Choose the 'true' level for each variable (e.g., 'Positive', 'Present', 'Yes')"), "</li>",
-                    "<li>", .("Engine is automatically selected: classic (2-4 variables) or advanced (5+ variables)"), "</li>",
+                    "<li>", .("Select one or more plot engines in the Plot Selection panel"), "</li>",
                     "<li>", .("Adjust visualization options as needed"), "</li>",
                     "<li>", .("Interpret intersections - larger overlaps indicate stronger associations"), "</li>",
                     "</ol>",
-                    "<p><strong>", .("Automatic Engine Selection:"), "</strong></p>",
+                    "<p><strong>", .("Choosing a Plot Engine:"), "</strong></p>",
                     "<ul style='margin-left: 20px;'>",
-                    "<li><strong>2-4 variables:</strong> ", .("Uses ggvenn (classic, simple visualization)"), "</li>",
-                    "<li><strong>5+ variables:</strong> ", .("Uses ggVennDiagram (advanced features, extensive customization, publication-ready)"), "</li>",
+                    "<li><strong>ggvenn:</strong> ", .("Classic Venn diagram for up to 4 variables"), "</li>",
+                    "<li><strong>ggVennDiagram:</strong> ", .("Advanced Venn with extensive customization; recommended for 5 or more variables"), "</li>",
+                    "<li><strong>UpSetR / ComplexUpset:</strong> ", .("Matrix-style intersection plots for many variables"), "</li>",
                     "</ul>",
                     "</div>"
                 )
@@ -1720,12 +1689,6 @@ vennClass <- if (requireNamespace('jmvcore'))
                 })
             },
 
-            # Utility function for escaping variable names with special characters
-            .escapeVar = function(x) {
-                # mimic modelbuilder behavior for safe variable naming
-                gsub("[^A-Za-z0-9_]+", "_", make.names(x))
-            },
-
             # Populate jamovi tables safely using a data frame and column mapping
             .populateTableSafely = function(table_result, data_frame, column_mapping) {
                 tryCatch({
@@ -1929,10 +1892,7 @@ vennClass <- if (requireNamespace('jmvcore'))
                     self$results$analysisInfo$setContent(info_html)
                     self$results$analysisInfo$setVisible(TRUE)
                 }
-            },
-
-            # Private field to store exclusion warning message
-            .excluded_warning = NULL
+            }
         ), # End of private list
         public = list(
             #' @description

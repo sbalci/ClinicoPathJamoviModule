@@ -205,9 +205,12 @@ options:
       default: freq
       description:
           R: >
-            How to sort the intersections in the UpSet plot.
+            How to sort the intersections in the UpSet plot. 'None' (unsorted)
+            applies to the ComplexUpset engine only; the UpSetR engine always
+            orders intersections by frequency.
           jamovi: >
-            Choose how to sort the intersections.
+            Choose how to sort the intersections. 'None' applies to ComplexUpset
+            only; UpSetR always sorts by frequency.
 
     - name: minSize
       title: 'Minimum intersection size'
@@ -216,9 +219,11 @@ options:
       default: 0
       description:
           R: >
-            Minimum size of intersections to display.
+            Minimum size of intersections to display. Applies to the ComplexUpset
+            engine only; UpSetR does not filter intersections by minimum size.
           jamovi: >
-            Only show intersections with at least this many members.
+            Only show intersections with at least this many members (ComplexUpset
+            engine only; not applied to UpSetR).
 
     - name: showAnnotations
       title: "Percentage labels"
