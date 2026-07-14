@@ -5,8 +5,8 @@
 #' @importFrom DiagrammeRsvg export_svg
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom magrittr %>%
-#' @importFrom stats as.formula
-#' @importFrom grDevices rgb
+#' @importFrom janitor clean_names
+#' @importFrom htmltools htmlEscape
 #' @importFrom vtree vtree
 #'
 #' @return An \code{R6} class generator object for the \code{vartreeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
@@ -45,8 +45,9 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             blocks <- vapply(private$.noticeList, function(notice) {
                 prefix <- switch(notice$type,
                     ERROR          = "ERROR: ",
-                    STRONG_WARNING = "WARNING: ",
+                    STRONG_WARNING = "STRONG WARNING: ",
                     WARNING        = "WARNING: ",
+                    INFO           = "INFO: ",
                     "")
                 paste0(prefix, notice$title, "\n", notice$content)
             }, character(1))
@@ -294,7 +295,6 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             # Missing Value Handling with Notice system
             # Capture original counts BEFORE exclusion
             original_n <- nrow(mydata)
-            original_complete <- sum(complete.cases(mydata[, myvars, drop = FALSE]))
 
             excl <- self$options$excl
             excluded_n <- 0
@@ -313,6 +313,13 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                         excluded_n, excluded_pct, original_n, nrow(mydata)
                     ))
                 }
+            }
+
+            # Guard: abort cleanly if missing-value exclusion removed every row
+            if (nrow(mydata) == 0) {
+                private$.addNotice('ERROR', 'No Complete Cases',
+                    'All cases were removed by missing-value exclusion. No complete observations remain for the selected variables. Disable missing-value exclusion (NA) or check your data.')
+                return()
             }
 
             # Small sample warning
@@ -353,12 +360,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 # Format: "varname=level" tells vtree to show % for that level
                 perc_spec <- paste0(percvar, "=", self$options$percvarLevel)
 
-                # If we already have a summary, combine them; otherwise use perc spec
-                if (!is.null(xsummary)) {
-                    xsummary <- paste0(xsummary, "\n", perc_spec)
-                } else {
-                    xsummary <- perc_spec
-                }
+                # Accumulate summary specs as a character VECTOR (each element is a
+                # separate vtree summary) instead of newline-joining into one string,
+                # so percentage and mean/SD render as distinct node summaries.
+                xsummary <- c(xsummary, perc_spec)
             }
 
             # Handle Summary Variable - Enhanced statistical summaries
@@ -380,12 +385,10 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                     summarylocation1, "\\n"
                 )
 
-                # CRITICAL FIX: Combine with percvar summary if it exists
-                if (!is.null(xsummary)) {
-                    xsummary <- paste0(xsummary, "\n", summ_spec)
-                } else {
-                    xsummary <- summ_spec
-                }
+                # Append as a separate vector element so a percentage spec (if any)
+                # and this mean/SD spec both render (vtree accepts a character
+                # vector of summary specs).
+                xsummary <- c(xsummary, summ_spec)
             }
 
             # Handle Prune Below - Enhanced pruning controls
@@ -460,8 +463,8 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 maxwidth <- ifelse(horizontal == TRUE, 400, 1000)
             }
             
-            results1 <- base::sub('width=\"[[:digit:]pt\"]+',
-                                  paste0('width=', maxwidth, 'pt '),
+            results1 <- base::sub('width=\"[0-9.]+pt\"',
+                                  paste0('width=\"', maxwidth, 'pt\"'),
                                   results1)
 
             results1 <- paste0('<div style="width: 100%; overflow-x: auto; white-space: nowrap;">',
@@ -603,8 +606,6 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 vars_fixed <- sapply(self$options$vars, jmvcore::composeTerm)
                 
                 # Create properly formatted variable list
-                # TODO (cleanup): the `#' @importFrom stats as.formula` at L11 is a dead import
-                #   (no as.formula call in the body) - remove it.
                 # deparse() emits valid R string literals with embedded quotes/backslashes escaped,
                 # so a column name like a"b cannot corrupt the generated syntax-pane code.
                 vars_syntax <- paste0("c(", paste(vapply(vars_fixed, deparse, character(1)), collapse = ", "), ")")
@@ -623,7 +624,7 @@ vartreeClass <- if (requireNamespace('jmvcore')) R6::R6Class(
                 paste0("<b>", .("Clinical Summary:"), "</b><br>"),
                 paste0("\u{2022} ", .("Variable trees help identify patient subgroups and treatment patterns"), "<br>"),
                 paste0("\u{2022} ", .("Each branch represents a unique combination of patient characteristics"), "<br>"),
-                paste0("\u{2022} ", .("Node sizes indicate patient counts - larger nodes represent more common patterns"), "<br>")
+                paste0("\u{2022} ", .("Patient counts (n) are shown as text within each node, not encoded by node size"), "<br>")
             )
             
             # Add specific guidance based on analysis setup

@@ -11,10 +11,20 @@ items:
       clearWith:
         - vars
         - percvar
+        - percvarLevel
         - summaryvar
+        - summarylocation
         - prunebelow
+        - pruneLevel1
+        - pruneLevel2
         - follow
+        - followLevel1
+        - followLevel2
         - excl
+        - style
+        - pct
+        - pattern
+        - sequence
 
     - name:  todo
       title: To Do
@@ -23,21 +33,89 @@ items:
     - name:  text1
       title: Variable Tree
       type:  Html
+      clearWith:
+        - vars
+        - percvar
+        - percvarLevel
+        - summaryvar
+        - summarylocation
+        - prunebelow
+        - pruneLevel1
+        - pruneLevel2
+        - follow
+        - followLevel1
+        - followLevel2
+        - excl
+        - style
+        - pct
+        - pattern
+        - sequence
 
     - name:  text2
       title: Pattern Table
       type:  Preformatted
       visible: (ptable)
+      clearWith:
+        - vars
+        - percvar
+        - percvarLevel
+        - summaryvar
+        - summarylocation
+        - prunebelow
+        - pruneLevel1
+        - pruneLevel2
+        - follow
+        - followLevel1
+        - followLevel2
+        - excl
+        - style
+        - pct
+        - pattern
+        - sequence
 
     - name:  reportSentence
       title: Copy-Ready Report Sentence
       type:  Preformatted
       visible: (showInterpretation)
+      clearWith:
+        - vars
+        - percvar
+        - percvarLevel
+        - summaryvar
+        - summarylocation
+        - prunebelow
+        - pruneLevel1
+        - pruneLevel2
+        - follow
+        - followLevel1
+        - followLevel2
+        - excl
+        - style
+        - pct
+        - pattern
+        - sequence
 
     - name:  interpretation
       title: Clinical Interpretation
       type:  Html
       visible: (showInterpretation)
+      clearWith:
+        - vars
+        - percvar
+        - percvarLevel
+        - summaryvar
+        - summarylocation
+        - prunebelow
+        - pruneLevel1
+        - pruneLevel2
+        - follow
+        - followLevel1
+        - followLevel2
+        - excl
+        - style
+        - pct
+        - pattern
+        - sequence
 
     # - name:  text3
     #   title: Venn Table
