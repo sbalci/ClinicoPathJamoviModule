@@ -88,6 +88,15 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
                 self$results$plot$setSize(plotwidth, total_height)
 
+                # ggpubr histogram panels are stacked vertically (ggarrange nrow = length(dep));
+                # scale their height by the number of variables so multi-variable output is
+                # not compressed into the fixed r.yaml height.
+                if (isTRUE(self$options$addGGPubrPlot)) {
+                    ggpubr_height <- if (deplen > 1) deplen * plotheight * 1.15 else plotheight
+                    self$results$ggpubrPlot$setSize(plotwidth, ggpubr_height)
+                    self$results$ggpubrPlot2$setSize(1200, ggpubr_height)
+                }
+
 
                 if (!is.null(self$options$grvar)) {
 
@@ -176,19 +185,8 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                 # Checkpoint before expensive data processing
                 private$.checkpoint()
 
-                # Only copy data if transformations are needed
                 vars <- self$options$dep
-                needs_transformation <- FALSE
-                
-                if (!is.null(vars)) {
-                    for (var in vars) {
-                        if (!is.numeric(self$data[[var]])) {
-                            needs_transformation <- TRUE
-                            break
-                        }
-                    }
-                }
-                
+
                 # VALIDATE NUMERIC VARIABLES - reject factors instead of blind conversion
                 factor_warnings <- character()
                 for (var in vars) {
@@ -214,15 +212,17 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             },
 
             # Shared plot generation function to eliminate duplication
-            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL, messages = TRUE) {
+            .generateHistogram = function(data, x_var, options_data, aesthetics_data, grvar_sym = NULL) {
                 # Checkpoint before expensive statistical plot generation
                 private$.checkpoint(flush = FALSE)
 
                 # Build base arguments common to all plots
+                # Note: the deprecated `messages` argument was removed - ggstatsplot >= 1.0.0
+                # no longer accepts it and forwards it to geom_histogram, triggering an
+                # "Ignoring unknown parameters" warning.
                 base_args <- list(
                     data = data,
                     x = rlang::sym(x_var),
-                    messages = messages,
                     type = options_data$typestatistics,
                     results.subtitle = options_data$resultssubtitle,
                     centrality.plotting = options_data$centralityline,
@@ -460,8 +460,13 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                     sd_val <- sd(var_data)
                     
                     # Distribution shape assessment
+                    # Population-moment (g1) skewness: m3 / m2^1.5. The previous
+                    # sum((x-mean)^3)/(n*sd^3) form mixed an n-denominator third moment
+                    # with an (n-1)-denominator sample SD, biasing the estimate.
                     skewness_val <- if (sd_val > 0) {
-                        sum((var_data - mean_val)^3) / (n * sd_val^3)
+                        m2 <- sum((var_data - mean_val)^2) / n
+                        m3 <- sum((var_data - mean_val)^3) / n
+                        m3 / m2^1.5
                     } else 0
                     
                     # Normality assessment (simple)
@@ -607,6 +612,12 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
 
             # run ----
             .run = function() {
+                # Defensive: ensure clinical-preset overrides are populated even if a
+                # render/run path executes before .init(). private$overrides is instance
+                # state read by .prepareOptions()/.calculateOptionsHash() via
+                # private$.option(); .applyClinicalPreset() is idempotent.
+                private$.applyClinicalPreset()
+
                 ## Initial Message ----
                 if (is.null(self$options$dep) || length(self$options$dep) == 0) {
 
@@ -705,7 +716,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             ,
             .plot = function(image, ggtheme, theme, ...) {
                 # Main plot generation function
-                
+                # Defensive: repopulate clinical-preset overrides in case this render
+                # path runs without a prior .init() (idempotent).
+                private$.applyClinicalPreset()
+
                 # Early return if no variables selected (don't show error)
                 if (is.null(self$options$dep) || length(self$options$dep) == 0) {
                     return()
@@ -756,8 +770,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 data = mydata,
                                 x_var = x_var,
                                 options_data = options_data,
-                                aesthetics_data = aesthetics_data,
-                                messages = FALSE
+                                aesthetics_data = aesthetics_data
                             )
                         }
                     )
@@ -786,7 +799,10 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
             ,
             .plot2 = function(image, ggtheme, theme, ...) {
                 # Grouped plot generation function
-                
+                # Defensive: repopulate clinical-preset overrides in case this render
+                # path runs without a prior .init() (idempotent).
+                private$.applyClinicalPreset()
+
                 # Early return if no variables selected (don't show error)
                 if (is.null(self$options$dep) || length(self$options$dep) == 0) {
                     return()
@@ -844,8 +860,7 @@ jjhistostatsClass <- if (requireNamespace('jmvcore'))
                                 x_var = x_var,
                                 options_data = options_data,
                                 aesthetics_data = aesthetics_data,
-                                grvar_sym = rlang::sym(grvar),
-                                messages = FALSE
+                                grvar_sym = rlang::sym(grvar)
                             )
                         }
                     )
