@@ -6,16 +6,6 @@ jrs:   '1.1'
 
 items:
 
-    - name: notices
-      title: Important Information
-      type: Preformatted
-      clearWith:
-          - outcome
-          - outcomeLevel
-          - elapsedtime
-          - explanatory
-          - contexpl
-
     - name:  todo
       title: To Do
       type:  Html
@@ -123,6 +113,10 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - multievent
+        - tint
+        - dxdate
+        - fudate
       columns:
         - name: term
           title: 'Interaction'
@@ -154,6 +148,10 @@ items:
         - outcome
         - elapsedtime
         - outcomeLevel
+        - multievent
+        - tint
+        - dxdate
+        - fudate
       columns:
         - name: interaction
           title: 'Interaction'
@@ -743,6 +741,9 @@ items:
           - outcome
           - explanatory
           - contexpl
+          - numRiskGroups
+          - outcomeLevel
+          - elapsedtime
 
 
     - name: riskScoreMetrics
@@ -954,6 +955,9 @@ items:
           - ac
           - adjexplanatory
           - outcome
+          - ac_method
+          - explanatory
+          - contexpl
 
 
 # Nomogram

@@ -364,10 +364,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .debug_dummy_plot_enabled = function() FALSE,
       .debug_write = function(lines) invisible(FALSE),
 
-      # Notice collection (single Preformatted plain-text output item; avoids the
-      # jmvcore::Notice serialization error from self$results$insert(999, Notice)).
-      .noticeList = list(),
-
       # Per-run compute caches. .cleandata() is invoked ~25x and .cox_model()
       # ~15x within a single .run(); each .cox_model() call re-fits Cox (and,
       # for competing risks, re-expands the dataset via survival::finegray).
@@ -378,27 +374,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       .dataComputed = FALSE,
       .coxCache = NULL,
       .coxComputed = FALSE,
-
-      .addNotice = function(type, title, content) {
-          private$.noticeList[[length(private$.noticeList) + 1]] <- list(
-              type = type, title = title, content = content
-          )
-          private$.renderNotices()
-      },
-
-      .renderNotices = function() {
-          if (length(private$.noticeList) == 0) {
-              self$results$notices$setContent("")
-              return()
-          }
-          blocks <- vapply(private$.noticeList, function(notice) {
-              prefix <- switch(notice$type,
-                  ERROR = "ERROR: ", STRONG_WARNING = "WARNING: ",
-                  WARNING = "WARNING: ", "")
-              paste0(prefix, notice$title, "\n", notice$content)
-          }, character(1))
-          self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-      },
 
       # HTML notice helper (replaces self$results$insert(N, jmvcore::Notice))
       # See R/survivalcont.b.R:700-743 for canonical pattern.
@@ -1732,9 +1707,14 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           
           self$results$todo$setVisible(TRUE)
           self$results$todo$setContent(paste0("<b>Error:</b> ", error_msg))
-          
-          # Return NULL to stop analysis early
-          return(NULL)
+
+          # Stop the analysis with the tailored message. Returning NULL here would
+          # feed NULL into .cleandata_impl's dplyr::left_join(), which throws a
+          # cryptic error that .executeAnalysis() then surfaces in `todo`, clobbering
+          # the specific negative-time guidance above. reject() carries error_msg
+          # through as conditionMessage(), so the guidance survives. (error_msg is a
+          # pre-formatted literal with no '%', so it is safe as a reject format.)
+          jmvcore::reject(error_msg)
         }
 
         df_time <- mydata %>% jmvcore::select(c("row_names", "mytime"))
@@ -2310,7 +2290,6 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       },
 
       .run = function() {
-        private$.noticeList <- list()
         private$.resetComputeCaches()
         private$.initializeMessageOutputs()
         # Modular execution using helper functions
@@ -2854,8 +2833,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                     group_ci_upper <- (stats::qchisq(0.975, 2) / 2) / group_time * rate_multiplier
                   }
 
-                  # Add to personTimeTable with group label
-                  self$results$personTimeTable$addRow(rowKey=rowKey_counter, values=list(
+                  # Add to personTimeTable with group label.
+                  # Use a "grp_" key namespace disjoint from the "int_" interval
+                  # rows below so the two sub-loops never collide on rowKey.
+                  self$results$personTimeTable$addRow(rowKey=paste0("grp_", rowKey_counter), values=list(
                     interval=paste0("Group: ", as.character(group)),
                     events=group_events_count,
                     person_time=round(group_time, 2),
@@ -2936,8 +2917,9 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                 interval_ci_upper <- (stats::qchisq(0.975, 2) / 2) / person_time_in_interval * rate_multiplier
               }
 
-              # Add to personTimeTable
-              self$results$personTimeTable$addRow(rowKey=i+1, values=list(
+              # Add to personTimeTable (interval rows use an "int_" key namespace
+              # disjoint from the "grp_" group rows above)
+              self$results$personTimeTable$addRow(rowKey=paste0("int_", i+1), values=list(
                 interval=paste0(start_time, "-", end_time),
                 events=events_in_interval,
                 person_time=round(person_time_in_interval, 2),
@@ -3490,8 +3472,10 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           }
         }
 
-        # Set datadist globally
-        options(datadist = dd)
+        # Set datadist globally; restore on exit so rms datadist state does not
+        # leak into the user's session and affect later rms-based analyses.
+        old_datadist <- options(datadist = dd)
+        on.exit(options(old_datadist), add = TRUE)
 
         # Get baseline Cox model (to check for Fine-Gray)
         cox_model <- private$.cox_model()
@@ -3515,7 +3499,11 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
              # Define datadist for expanded data
              # Note: datadist must use the data used in fit
              dd_fg <- rms::datadist(fg_data)
-             options(datadist = "dd_fg")
+             # Pass the datadist object, not a string naming a function-local
+             # variable: rms cannot get("dd_fg") from here, which would make
+             # cph()/nomogram() fail silently inside .calculate_nomogram()'s
+             # tryCatch. The on.exit above restores the original datadist.
+             options(datadist = dd_fg)
              
              # Update formula for Fine-Gray structure
              # Note: cph uses its own formula parsing, variables must be in data
@@ -3559,7 +3547,7 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
                         fun = function(lp) {
                           1 - surv_at_time^exp(lp - mean(f$linear.predictors))
                         },
-                        funlabel = paste("Predicted", pred_times[1], "month risk"),
+                        funlabel = paste("Predicted", pred_times[1], self$options$timetypeoutput, "risk"),
                         fun.at = seq(0.1, 0.9, by = 0.1))
         }, silent = TRUE)
 
@@ -4699,6 +4687,18 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           self$results$addRiskGroup$setValues(mydata$risk_group)
         }
 
+        ### Store state for the risk-group survival plot ----
+        # .plotRiskGroups reads image$state (mytime, myoutcome, risk_group);
+        # without this the plot renderer returns early and stays blank.
+        if (self$options$plotRiskGroups && !is.null(result)) {
+          self$results$riskGroupPlot$setState(data.frame(
+            mytime     = mydata$mytime,
+            myoutcome  = mydata$myoutcome,
+            risk_group = mydata$risk_group,
+            stringsAsFactors = FALSE
+          ))
+        }
+
         ### Calculate summary statistics ----
         event_indicator <- .eventIndicator(mydata$myoutcome)
         if (is.null(event_indicator)) {
@@ -4749,7 +4749,8 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
           "
 <br>
 <b>Risk Score Model Performance:</b><br>
-Harrell's C-index: {sprintf('%.3f', c_index)}<br>
+Harrell's C-index (apparent, in-sample): {sprintf('%.3f', c_index)}<br>
+<i>This apparent concordance is optimistic; see the C-index validation table for an optimism-corrected estimate.</i><br>
 <br>"
 # Number of patients in risk groups:<br>
 # {group_text}<br>
@@ -5041,139 +5042,14 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           return(NULL)
         }
 
-      # Adjusted-curve summary/comparison sub-analyses are currently disabled:
-      # the options ac_summary / ac_timepoints / ac_compare are commented out in
-      # .a.yaml (intended defaults: FALSE / '12, 36, 60' / FALSE). Reference those
-      # defaults directly here - accessing an undeclared option via self$options$
-      # throws "options$<name> does not exist" and would crash this method (which
-      # runs whenever Adjusted Survival Curves are enabled with a valid variable).
-      ac_summary    <- FALSE
-      ac_compare    <- FALSE
-      ac_timepoints <- "12, 36, 60"
-
-      # Get timepoints for summaries
-      timepoints <- if (ac_summary) {
-        tryCatch({
-          pts <- as.numeric(trimws(unlist(strsplit(ac_timepoints, ","))))
-          pts <- sort(unique(pts[!is.na(pts)]))
-          if (length(pts) == 0) c(12, 36, 60) else pts
-        }, error = function(e) c(12, 36, 60))
-      } else {
-        NULL
-      }
-
-      # Calculate adjusted curves for each level
-      results <- list()
-      summary_rows <- list()
-
-      for (level in levels) {
-        tryCatch({
-          # Create prediction data with mean/mode values for covariates
-          pred_df <- data.frame(
-            mytime = sort(unique(c(timepoints, data$mytime)))
-          )
-
-          # Add averaged covariates
-          for (var in names(data)) {
-            if (var != "mytime" && var != adj_var && var != "row_names") {
-              if (is.numeric(data[[var]])) {
-                pred_df[[var]] <- mean(data[[var]], na.rm = TRUE)
-              } else if (is.factor(data[[var]])) {
-                pred_df[[var]] <- names(which.max(table(data[[var]])))
-              }
-            }
-          }
-          pred_df[[adj_var]] <- level
-
-          # Calculate adjusted survival
-          pred_surv <- survival::survfit(cox_model, newdata = pred_df)
-
-          # Store curve data
-          if (!is.null(pred_surv)) {
-            level_stats <- data.frame(
-              time = pred_surv$time,
-              survival = pred_surv$surv,
-              std.err = pred_surv$std.err,
-              lower = pred_surv$lower,
-              upper = pred_surv$upper,
-              n.risk = pred_surv$n.risk
-            )
-
-            results[[as.character(level)]] <- list(
-              full_curve = level_stats
-            )
-
-            # Calculate summary statistics at specified timepoints
-            if (!is.null(timepoints)) {
-              for (t in timepoints) {
-                idx <- which.min(abs(level_stats$time - t))
-                if (length(idx) > 0) {
-                  summary_row <- list(
-                    Level = as.character(level),
-                    Timepoint = t,
-                    Survival = level_stats$survival[idx],
-                    SE = level_stats$std.err[idx],
-                    CI_Lower = level_stats$lower[idx],
-                    CI_Upper = level_stats$upper[idx],
-                    N_at_Risk = level_stats$n.risk[idx]
-                  )
-                  if (!any(sapply(summary_row, is.null)) &&
-                      !any(sapply(summary_row, is.na))) {
-                    summary_rows[[length(summary_rows) + 1]] <- summary_row
-                  }
-                }
-              }
-            }
-          }
-        }, error = function(e) {
-          warning(paste("Error processing level", level, ":", e$message))
-        })
-      }
-
-      # Add metadata
-      attr(results, "timepoints") <- timepoints
-      attr(results, "levels") <- levels
-      attr(results, "variable") <- adj_var
-      attr(results, "method") <- self$options$ac_method
-
-      # Generate summary table
-      if (length(summary_rows) > 0) {
-        # Sort by level and timepoint
-        sorted_indices <- order(
-          sapply(summary_rows, function(x) x$Level),
-          sapply(summary_rows, function(x) x$Timepoint)
-        )
-        summary_rows <- summary_rows[sorted_indices]
-
-        # Add rows to table
-        for (i in seq_along(summary_rows)) {
-          row <- summary_rows[[i]]
-          self$results$adjustedSummaryTable$addRow(
-            rowKey = i,
-            values = list(
-              Level = row$Level,
-              Timepoint = row$Timepoint,
-              Survival = round(row$Survival, 3),
-              SE = round(row$SE, 3),
-              CI_Lower = round(row$CI_Lower, 3),
-              CI_Upper = round(row$CI_Upper, 3)
-            )
-          )
-        }
-      }
-
-      # Run additional analyses (gated by the disabled-feature defaults above)
-      if (ac_summary) {
-        private$.adjustedSurvTable(results, cox_model)
-        private$.adjustedMedianSurv(results, cox_model)
-        private$.adjustedCox(results, cox_model)
-      }
-
-      if (ac_compare) {
-        private$.adjustedPairwise(results, cox_model)
-      }
-
-      return(results)
+      # The per-level adjusted-curve summary loop that used to live here (a
+      # survfit() per level feeding `adjustedSummaryTable`) was dead code:
+      # `adjustedSummaryTable` is commented out in .r.yaml and the ac_summary /
+      # ac_compare features are hard-wired FALSE (their options are disabled in
+      # .a.yaml), so nothing it computed was ever displayed. The visible adjusted
+      # survival curve is produced by .plot_adj(); the adjustment-variable
+      # validation and the Fine-Gray info notice above are the only live work here.
+      return(invisible(NULL))
     }
 
 
@@ -6616,12 +6492,15 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
     ) -> tCox
 
     # Convert finalfit table to HTML with nice formatting
+    # escape = TRUE: finalfit HR cells are plain text, so HTML-escaping keeps
+    # formatting intact while preventing user column labels (row names) that
+    # contain HTML from being injected as markup into this type:Html output.
     text_html <- knitr::kable(
       tCox[[1]],
       row.names = FALSE,
       align = c('l', 'l', 'r', 'l', 'l'),
       format = "html",
-      escape = FALSE
+      escape = TRUE
     )
 
     # Set the content for the HR table
@@ -6706,7 +6585,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Count events from the data
         cleaneddata <- private$.cleandata()
         mydata <- cleaneddata$cleanData
-        n_events <- sum(as.numeric(mydata$myoutcome) == 1, na.rm = TRUE)
+        n_events <- sum(.eventIndicator(mydata$myoutcome), na.rm = TRUE)
 
         # Generate summary text
         summary_parts <- list()
@@ -6727,7 +6606,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
           if (!is.null(strongest_var) && !is.null(strongest_effect)) {
             summary_parts$strongest <- paste0(
-              "<br><br><b>Strongest predictor:</b> ", strongest_var, " was associated with ",
+              "<br><br><b>Strongest predictor:</b> ", htmltools::htmlEscape(strongest_var), " was associated with ",
               strongest_effect, " (hazard ratio = ", round(strongest_hr, 2), ")."
             )
           }
