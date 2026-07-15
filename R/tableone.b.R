@@ -14,7 +14,6 @@
 #' @importFrom kableExtra kable kable_styling
 #' @importFrom rlang sym
 #' @importFrom magrittr %>%
-#' @importFrom htmltools htmlEscape
 
 #'
 tableoneClass <- if (requireNamespace("jmvcore", quietly = TRUE)) R6::R6Class(

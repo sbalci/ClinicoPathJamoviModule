@@ -6,7 +6,6 @@
 #' @importFrom labelled set_variable_labels var_label
 #' @importFrom magrittr %>%
 #' @importFrom janitor clean_names
-#' @importFrom htmltools htmlEscape
 #' @importFrom vtree vtree
 #'
 #' @return An \code{R6} class generator object for the \code{vartreeClass} backend; used internally by the jamovi analysis wrapper and not called directly.
