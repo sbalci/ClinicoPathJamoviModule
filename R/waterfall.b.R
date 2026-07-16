@@ -2255,9 +2255,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
 
         df <- plotData$data$waterfall
 
-        # Optimize for large datasets
-        df <- private$.optimizeForLargeDatasets(df)
-
         # Sort data
         if (plotData$options$sortBy == "response") {
           # conventional oncology waterfall: worst (highest) on left, best (lowest) on right
@@ -3046,34 +3043,6 @@ waterfallClass <- if (requireNamespace('jmvcore')) R6::R6Class(
         self$results$copyReadyReport$setContent(report_text)
       }
 
-      ,
-      # Optimize plotting performance for large datasets ----
-      .optimizeForLargeDatasets = function(df) {
-        n_patients <- nrow(df)
-
-        # For very large datasets, consider sampling or aggregation strategies
-        if (n_patients > 2000) {
-          message(sprintf("Large dataset detected (%d patients). Consider performance optimizations.", n_patients))
-
-          # Option 1: Warn user about potential performance impact
-          if (n_patients > 5000) {
-            warning(paste0(
-              "Very large dataset (", n_patients, " patients). ",
-              "Plotting may be slow. Consider filtering data or using summary statistics."
-            ))
-          }
-
-          # Option 2: For extremely large datasets, suggest subsampling
-          if (n_patients > 10000) {
-            message(paste0(
-              "Extremely large dataset detected. ",
-              "Consider subsampling for visualization or using summary tables only."
-            ))
-          }
-        }
-
-        return(df)
-      }
 
       ,
       # Generate group comparison analysis ----

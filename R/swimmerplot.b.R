@@ -20,7 +20,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
         # Clinical preset context storage
 
         # Auto-detection variables (simplified since we now stop analysis)
-        .auto_detected_dates = FALSE,
         .detected_format = NULL,
 
         # Notice collection helpers. A single Preformatted (plain-text) output item:
@@ -57,12 +56,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             }, character(1))
 
             self$results$notices$setContent(paste(blocks, collapse = "\n\n"))
-        },
-
-        # Escape variable names for safe handling
-        .escapeVar = function(x) {
-            # Handle variables with spaces/special characters
-            gsub("[^A-Za-z0-9_]+", "_", make.names(x))
         },
 
         # Enhanced clinical date parsing with contextual guidance
@@ -1287,94 +1280,6 @@ swimmerplotClass <- if (requireNamespace('jmvcore', quietly = TRUE)) R6::R6Class
             return(interpretation)
         },
         
-        # Generate clinical summary with copy-ready text
-        .generateClinicalSummary = function(stats, patient_data) {
-            # Basic study summary
-            summary_text <- sprintf(
-                .(.("This swimmer plot analysis included %d patients with a median follow-up of %.1f %s (range: %.1f to %.1f %s). Total person-time was %.1f %s across all patients.")),
-                stats$n_patients,
-                stats$median_duration, 
-                self$options$timeUnit,
-                stats$min_duration,
-                stats$max_duration,
-                self$options$timeUnit,
-                stats$total_person_time,
-                self$options$timeUnit
-            )
-            
-            
-            # Add response analysis if available
-            if (self$options$responseAnalysis && !is.null(stats$response_counts) && length(stats$response_counts) > 0) {
-                best_response <- names(stats$response_counts)[which.max(stats$response_counts)]
-                best_pct <- stats$response_percentages[[best_response]]
-                safe_best_response <- htmltools::htmlEscape(best_response)
-
-                # Calculate clinical response rates
-                # Note: Response names are normalized to uppercase (CR, PR, SD, PD) during .computeStats()
-                if ("CR" %in% names(stats$response_counts) || "PR" %in% names(stats$response_counts)) {
-                    orr_count <- sum(stats$response_counts[names(stats$response_counts) %in% c("CR", "PR")])
-                    orr_pct <- orr_count / sum(stats$response_counts) * 100
-
-                    dcr_count <- sum(stats$response_counts[names(stats$response_counts) %in% c("CR", "PR", "SD")])
-                    dcr_pct <- dcr_count / sum(stats$response_counts) * 100
-
-                    response_text <- sprintf(
-                        .("Response evaluation showed an objective response rate (ORR) of %.1f%% (%d/%d patients) and disease control rate (DCR) of %.1f%% (%d/%d patients). The most frequent response category was %s (%.1f%%)."),
-                        orr_pct, orr_count, sum(stats$response_counts),
-                        dcr_pct, dcr_count, sum(stats$response_counts),
-                        safe_best_response, best_pct
-                    )
-                } else {
-                    response_text <- sprintf(
-                        .("Response data was available for all patients, with %s being the most common category (%.1f%% of observations)."),
-                        safe_best_response, best_pct
-                    )
-                }
-                
-                summary_text <- paste(summary_text, response_text)
-                
-            }
-            
-            # Add methodology note
-            methodology_note <- .("This timeline visualization uses the ggswim package to display patient treatment courses, clinical milestones, and outcome assessments in a comprehensive swimmer plot format suitable for clinical research reporting.")
-            summary_text <- paste(summary_text, methodology_note)
-            
-            return(summary_text)
-        },
-        
-        # Display clinical summary in a prominent panel
-        .displayClinicalSummary = function(summary_text) {
-            summary_html <- paste0(
-                "<div style='background-color: #f8f9fa; padding: 20px; border-left: 4px solid #007bff; border-radius: 8px; margin: 15px 0; font-family: system-ui, -apple-system, sans-serif;'>",
-                "<h3 style='color: #007bff; margin-top: 0; font-size: 1.2em; display: flex; align-items: center;'>",
-                "<span style='margin-right: 8px;'></span>",
-                .("Clinical Summary"),
-                "</h3>",
-                "<div style='background-color: white; padding: 15px; border-radius: 6px; margin: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>",
-                "<p style='margin: 0; line-height: 1.6; color: #333; font-size: 0.95em;'>", summary_text, "</p>",
-                "</div>",
-                "<div style='margin-top: 15px; padding: 10px; background-color: #e3f2fd; border-radius: 4px; border: 1px dashed #1976d2;'>",
-                "<p style='margin: 0; font-size: 0.85em; color: #1565c0;'>",
-                "<strong>", .("Copy-ready text:"), "</strong> ", 
-                .("The above summary is formatted for direct use in research reports, manuscripts, and clinical documentation."),
-                "</p>",
-                "</div>",
-                "</div>"
-            )
-            
-            # Use existing interpretation result or create new one
-            if (is.null(self$results$interpretation)) {
-                # If no interpretation result exists, use instructions
-                current_content <- self$results$instructions$content
-                if (!is.null(current_content) && current_content != "") {
-                    self$results$instructions$setContent(paste(current_content, summary_html))
-                } else {
-                    self$results$instructions$setContent(summary_html)
-                }
-            } else {
-                self$results$interpretation$setContent(summary_html)
-            }
-        },
 
         # Add clinical profile notices based on data characteristics
         .addClinicalProfileNotices = function(patient_data, stats) {

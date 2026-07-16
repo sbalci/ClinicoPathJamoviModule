@@ -117,11 +117,6 @@ items:
         - pattern
         - sequence
 
-    # - name:  text3
-    #   title: Venn Table
-    #   type:  Preformatted
-    #   visible: (venntable)
-
 
 refs:
     - vtree
