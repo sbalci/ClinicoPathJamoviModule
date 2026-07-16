@@ -193,6 +193,7 @@
 #' @importFrom R6 R6Class
 #' @importFrom survival Surv
 #' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme
+#' @importFrom flexsurv flexsurvreg flexsurvspline
 #' @noRd
 NULL
 
