@@ -328,6 +328,12 @@ children:
           - type: ComboBox
             name: ac_method
             enable: (ac)
+      - type: Label
+        label: Adjusted Survival Tables
+        children:
+          - type: CheckBox
+            name: ac_summary
+            enable: (ac)
   - type: CollapseBox
     label: Stratification Variables
     collapsed: true

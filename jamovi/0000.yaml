@@ -1,12 +1,12 @@
 ---
 title: Common Analysis for Clinicopathological Research
 name: ClinicoPath
-version: 1.0.0
+version: 1.0.1
 jms: '1.0'
 authors:
   - Serdar Balci
 maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
-date: '2026-07-13'
+date: '2026-07-16'
 type: R
 description: >-
   ClinicoPath help researchers to generate natural language summaries of their
@@ -2111,7 +2111,7 @@ analyses:
       distribution charts that effectively communicate statistical distribution 
 
       characteristics with The Economist's distinctive visual style. Perfect
-      for
+      for 
 
       comparing distributions across categories, showing price variations, or 
 
@@ -2708,7 +2708,7 @@ analyses:
     menuTitle: Diagnostic Test Meta-Analysis for Pathology
     description: >
       Comprehensive meta-analysis of diagnostic test accuracy studies designed
-      for 
+      for
 
       pathology research. Performs bivariate random-effects modeling,
       proportional-hazards SROC analysis,

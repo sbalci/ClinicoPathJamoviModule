@@ -115,6 +115,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         subtitle = function() private$.items[["subtitle"]],
         todo = function() private$.items[["todo"]],
         todo2 = function() private$.items[["todo2"]],
+        varNameWarnings = function() private$.items[["varNameWarnings"]],
         tablestyle1 = function() private$.items[["tablestyle1"]],
         tablestyle2 = function() private$.items[["tablestyle2"]],
         tablestyle3 = function() private$.items[["tablestyle3"]],
@@ -153,6 +154,7 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "group",
+                    "p_adjust",
                     "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -189,6 +191,15 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
+                name="varNameWarnings",
+                title="Variable Name Warnings",
+                visible=FALSE,
+                clearWith=list(
+                    "vars",
+                    "group",
+                    "excl")))
+            self$add(jmvcore::Html$new(
+                options=options,
                 name="tablestyle1",
                 title="`Cross Table - ${group}`",
                 clearWith=list(
@@ -219,6 +230,8 @@ crosstableResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "group",
                     "sty",
+                    "cont",
+                    "p_adjust",
                     "excl"),
                 visible="(sty:gtsummary)",
                 refs="gtsummary"))
@@ -346,6 +359,7 @@ crosstableBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$subtitle} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo2} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$varNameWarnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle1} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle2} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tablestyle3} \tab \tab \tab \tab \tab a html \cr

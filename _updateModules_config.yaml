@@ -37,8 +37,8 @@
 # ==============================================
 
 
-new_version: "1.0.0"
-new_date: "2026-07-13"
+new_version: "1.0.1"
+new_date: "2026-07-16"
 quick: false
 TEST: false
 jjstatsplot: true
@@ -115,8 +115,11 @@ modules:
     r_files:
       - "utils.R"
       - "error_handling.R"
-      - "diagnostichelpers.R"
-      - "decisiongraph_utils.R"
+      # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
+      # decisiongraph_utils.R intentionally NOT shipped: the decisiongraph and
+      # bayesdca analyses live under menuGroup meddecideExtraD (umbrella/dev only,
+      # not production meddecide), so this helper was orphaned dead weight here.
+      # It stays in main + JamoviTest; re-add if those analyses go to production.
       - "psychopdaROC_utilities.R"
       - "nomogrammer.R"
     data_files:
@@ -132,7 +135,7 @@ modules:
     r_files:
       - "utils.R"
       - "survival_utils.R"
-      - "diagnostichelpers.R"
+      # diagnostichelpers.R removed: all 17 functions are dead umbrella-wide.
       # survivalPower_distributions.R is intentionally NOT shipped to production jsurvival:
       # the survivalPower analysis is dev-routed to menuGroup SurvivalT (JamoviTest) and is
       # absent from jsurvival's 0000.yaml, so this helper (11 functions, 0 callers in jsurvival)
@@ -188,7 +191,11 @@ modules:
     directory: "/Users/serdarbalci/Documents/GitHub/OncoPath"
     r_files:
       - "utils.R"
-      - "ihc_utilities.R"
+      # ihc_utilities.R intentionally NOT shipped to production OncoPath: its
+      # consumers (ihcimmune/ihcbasic/ihcadvanced/ihcdiagnostic) are dev-routed to
+      # menuGroup OncoPathD/T, and the one production analysis here
+      # (ihcheterogeneity) does not use it. It stays in main + JamoviTest; re-add
+      # if those IHC analyses are promoted to a production OncoPath menuGroup.
       # stagemigration-*.R helpers are intentionally NOT shipped to production OncoPath:
       # the stagemigration analysis is dev-routed to menuGroup OncoPathT (JamoviTest), so
       # these files would be orphaned dead weight in the OncoPath release build. They stay
@@ -216,7 +223,6 @@ modules:
       - "utils.R"
       - "survival_utils.R"
       - "error_handling.R"
-      - "diagnostichelpers.R"
       - "survivalPower_distributions.R"
       - "multisurvival-interactions.R"
       - "multisurvival-metrics.R"

@@ -7,7 +7,6 @@
 #' @rawNamespace import(dplyr, except = c(as_data_frame, groups, select, union))
 #' @import tidyr
 #' @importFrom effectsize cohens_d hedges_g eta_squared omega_squared
-#' @importFrom rstatix wilcox_test t_test
 #'
 #' @return An \code{R6} class generator object for the \code{jjridgesClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

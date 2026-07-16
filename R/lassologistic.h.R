@@ -531,7 +531,8 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "nfolds",
                     "standardize",
                     "random_seed",
-                    "scoringMaxPoints")))
+                    "scoringMaxPoints",
+                    "scoringMethod")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="lookupTable",
@@ -754,6 +755,8 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
+                    "penalty",
+                    "alpha",
                     "nfolds",
                     "standardize",
                     "random_seed")))
@@ -793,6 +796,8 @@ lassologisticResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "outcomeLevel",
                     "explanatory",
                     "lambda",
+                    "penalty",
+                    "alpha",
                     "nfolds",
                     "standardize",
                     "random_seed")))}))

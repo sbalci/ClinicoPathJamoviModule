@@ -302,6 +302,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 title="Summary of Outcome Recoding",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -340,6 +341,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="number")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -368,6 +370,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `type`="text")),
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -380,7 +383,10 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "useHierarchy",
                     "eventPriority",
                     "intervalCensoring",
-                    "adminCensoring")))
+                    "intervalStart",
+                    "intervalEnd",
+                    "adminCensoring",
+                    "adminDate")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="outcomeViz",
@@ -391,6 +397,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(visualization)",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -405,6 +412,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 visible="(showNaturalSummary)",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",
@@ -428,6 +436,7 @@ outcomeorganizerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 measureType="nominal",
                 clearWith=list(
                     "outcome",
+                    "patientID",
                     "outcomeLevel",
                     "multievent",
                     "analysistype",

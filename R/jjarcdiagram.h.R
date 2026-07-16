@@ -303,7 +303,9 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "source",
                     "target",
                     "weight",
-                    "group")))
+                    "group",
+                    "aggregateEdges",
+                    "directed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
@@ -317,7 +319,9 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "source",
                     "target",
                     "weight",
-                    "group")))
+                    "group",
+                    "aggregateEdges",
+                    "directed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -325,7 +329,30 @@ jjarcdiagramResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 width=600,
                 height=400,
                 renderFun=".plot",
-                requiresData=TRUE))
+                requiresData=TRUE,
+                clearWith=list(
+                    "source",
+                    "target",
+                    "weight",
+                    "group",
+                    "showNodes",
+                    "nodeSize",
+                    "nodeSizeValue",
+                    "sortNodes",
+                    "sortDecreasing",
+                    "horizontal",
+                    "arcWidth",
+                    "arcWidthValue",
+                    "arcTransparency",
+                    "directed",
+                    "aggregateEdges",
+                    "weightMode",
+                    "colorByGroup",
+                    "arcColorMode",
+                    "showLegend",
+                    "labelSize",
+                    "plotTitle",
+                    "analysisPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="networkStats",

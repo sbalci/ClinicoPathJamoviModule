@@ -248,7 +248,22 @@ linechartResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=800,
                 height=600,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE,
+                clearWith=list(
+                    "xvar",
+                    "yvar",
+                    "groupby",
+                    "theme",
+                    "colorPalette",
+                    "points",
+                    "smooth",
+                    "confidence",
+                    "trendline",
+                    "refline",
+                    "reflineLabel",
+                    "xlabel",
+                    "ylabel",
+                    "title")))}))
 
 linechartBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "linechartBase",

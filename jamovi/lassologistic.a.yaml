@@ -5,7 +5,7 @@ menuGroup: meddecide
 menuSubgroup: Prediction Models
 menuTitle: LASSO Logistic
 menuSubtitle: Penalized feature selection for binary classification
-version: '1.0.0'
+version: '1.0.1'
 jas: '1.2'
 
 description:

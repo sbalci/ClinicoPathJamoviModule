@@ -528,7 +528,16 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSummary",
@@ -618,6 +627,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
                     "showExplanations")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
@@ -701,18 +719,25 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rate_multiplier",
                     "time_intervals",
                     "person_time",
-                    "outcome",
-                    "outcomeLevel",
                     "fudate",
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
                     "showExplanations")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="personTimeHeading2",
                 title="Person-Time Analysis Natural Language Summary",
-                visible="(person_time)"))
+                visible="(person_time && showSummaries)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeSummary",
@@ -772,6 +797,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
                     "medianline")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -792,7 +826,16 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent"),
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata"),
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
@@ -818,7 +861,16 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -841,7 +893,16 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survivalPlotsHeading3",
@@ -901,6 +962,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
                     "baseline_hazard")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -919,6 +989,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
                     "baseline_hazard")))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -937,6 +1016,15 @@ singlearmResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "dxdate",
                     "tint",
                     "multievent",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "uselandmark",
+                    "landmark",
+                    "timetypeoutput",
+                    "timetypedata",
                     "hazard_smoothing")))
             self$add(jmvcore::Html$new(
                 options=options,

@@ -543,14 +543,9 @@ test_that("function handles perfect separation", {
 # =============================================================================
 
 test_that("utility functions work correctly", {
-  # Test HTML table creation
-  html_table <- print.sensSpecTable(
-    Title = "Test Matrix",
-    TP = 20, FP = 5, TN = 30, FN = 8
-  )
-  expect_type(html_table, "character")
-  expect_true(nchar(html_table) > 0)
-  
+  # (print.sensSpecTable and validateROCInputs were exported-but-dead helpers
+  # removed from utils.R; only raw_to_prob remains and is tested here.)
+
   # Test raw to probability conversion
   values <- c(1, 2, 3, 4, 5)
   actual <- c(0, 0, 1, 1, 1)
@@ -558,11 +553,6 @@ test_that("utility functions work correctly", {
   expect_type(probs, "double")
   expect_equal(length(probs), length(values))
   expect_true(all(probs >= 0 & probs <= 1, na.rm = TRUE))
-  
-  # Test input validation
-  validation <- validateROCInputs(values, actual, pos_class = "1")
-  expect_type(validation, "list")
-  expect_true("valid" %in% names(validation))
 })
 
 test_that("bootstrap IDI calculation works", {

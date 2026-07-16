@@ -182,6 +182,7 @@ bayesianmetaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        notices = function() private$.items[["notices"]],
         modelSummary = function() private$.items[["modelSummary"]],
         studyEffects = function() private$.items[["studyEffects"]],
         mcmcDiagnostics = function() private$.items[["mcmcDiagnostics"]],
@@ -207,6 +208,11 @@ bayesianmetaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="instructions",
                 title="Instructions",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
+                visible=FALSE))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="modelSummary",
@@ -294,7 +300,7 @@ bayesianmetaanalysisResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6
                 name="modelComparison",
                 title="Model Comparison",
                 rows=1,
-                visible="(modelType:hierarchical)",
+                visible="(modelType:random_effects || modelType:hierarchical)",
                 columns=list(
                     list(
                         `name`="model", 
@@ -417,6 +423,7 @@ bayesianmetaanalysisBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$modelSummary} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$studyEffects} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$mcmcDiagnostics} \tab \tab \tab \tab \tab a table \cr

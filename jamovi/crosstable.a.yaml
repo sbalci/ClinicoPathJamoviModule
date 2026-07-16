@@ -3,7 +3,7 @@ name:  crosstable
 title: Cross Tables
 menuGroup: Exploration
 menuSubgroup: ClinicoPath Comparisons
-version: '1.0.0'
+version: '1.0.1'
 jas: '1.2'
 
 description:

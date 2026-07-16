@@ -168,17 +168,17 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Single Variable Quality Check",
                 refs=list(
                     "ClinicoPathJamoviModule"))
-            self$add(jmvcore::Preformatted$new(
+            self$add(jmvcore::Html$new(
                 options=options,
                 name="notices",
                 title="Important Information",
                 clearWith=list(
                     "var",
                     "showOutliers",
-                    "showDistribution",
-                    "showDuplicates",
-                    "showPatterns",
-                    "clinicalValidation")))
+                    "outlierTransform",
+                    "clinicalValidation",
+                    "unitSystem",
+                    "cvMinMean")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -186,11 +186,21 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="qualityText",
-                title="Quality Assessment Summary"))
+                title="Quality Assessment Summary",
+                clearWith=list(
+                    "var",
+                    "showOutliers",
+                    "outlierTransform",
+                    "showPatterns",
+                    "clinicalValidation",
+                    "unitSystem",
+                    "cvMinMean")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="missingVals",
                 title="Missing Data Analysis",
+                clearWith=list(
+                    "var"),
                 rows=0,
                 columns=list(
                     list(
@@ -209,12 +219,20 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="noOutliers",
                 title="Outlier Detection (Consensus: >=2 methods)",
-                visible="(showOutliers)"))
+                visible="(showOutliers)",
+                clearWith=list(
+                    "var",
+                    "showOutliers",
+                    "outlierTransform")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="outliers",
                 title="Outlier Detection (Consensus: >=2 methods)",
                 visible="(showOutliers)",
+                clearWith=list(
+                    "var",
+                    "showOutliers",
+                    "outlierTransform"),
                 rows=0,
                 columns=list(
                     list(
@@ -250,6 +268,10 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="outlierMethodSummary",
                 title="Outlier Detection Method Summary (Heuristic)",
                 visible="(showOutliers)",
+                clearWith=list(
+                    "var",
+                    "showOutliers",
+                    "outlierTransform"),
                 rows=0,
                 columns=list(
                     list(
@@ -273,6 +295,11 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="distribution",
                 title="Distribution Analysis",
                 visible="(showDistribution)",
+                clearWith=list(
+                    "var",
+                    "showDistribution",
+                    "cvMinMean",
+                    "rareCategoryThreshold"),
                 rows=0,
                 columns=list(
                     list(
@@ -292,6 +319,9 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="duplicates",
                 title="Duplicate Values",
                 visible="(showDuplicates)",
+                clearWith=list(
+                    "var",
+                    "showDuplicates"),
                 rows=0,
                 columns=list(
                     list(
@@ -311,6 +341,11 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="patterns",
                 title="Data Patterns",
                 visible="(showPatterns)",
+                clearWith=list(
+                    "var",
+                    "showPatterns",
+                    "clinicalValidation",
+                    "unitSystem"),
                 rows=0,
                 columns=list(
                     list(
@@ -329,17 +364,27 @@ checkdataResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="naturalSummary",
                 title="Natural-Language Summary",
-                visible="(showSummary)"))
+                visible="(showSummary)",
+                clearWith=list(
+                    "var",
+                    "showOutliers",
+                    "outlierTransform",
+                    "clinicalValidation",
+                    "unitSystem")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
                 title="About This Analysis",
-                visible="(showAbout)"))
+                visible="(showAbout)",
+                clearWith=list(
+                    "var")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="caveatsAssumptions",
                 title="Caveats & Assumptions",
-                visible="(showCaveats)"))}))
+                visible="(showCaveats)",
+                clearWith=list(
+                    "var")))}))
 
 checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "checkdataBase",
@@ -394,7 +439,7 @@ checkdataBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   quality assessment.
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$qualityText} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$missingVals} \tab \tab \tab \tab \tab a table \cr

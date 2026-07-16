@@ -917,7 +917,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "specifyCutScore",
                     "boot_runs",
                     "break_ties",
-                    "tol_metric"),
+                    "tol_metric",
+                    "usePriorPrev",
+                    "priorPrev"),
                 template=jmvcore::Table$new(
                     options=options,
                     rows=0,
@@ -988,7 +990,9 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "classVar",
                     "positiveClass",
                     "subGroup",
-                    "direction"),
+                    "direction",
+                    "usePriorPrev",
+                    "priorPrev"),
                 columns=list(
                     list(
                         `name`="threshold", 
@@ -1215,7 +1219,8 @@ psychopdaROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                         "showOptimalPoint",
                         "cleanPlot",
                         "showConfidenceBands",
-                        "quantileCIs"))))
+                        "quantileCIs",
+                        "combinePlots"))))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="interactivePlot",

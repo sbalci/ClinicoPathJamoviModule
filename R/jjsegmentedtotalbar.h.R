@@ -403,7 +403,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
         clinical_summary = function() private$.items[["clinical_summary"]],
         statistical_tests = function() private$.items[["statistical_tests"]],
         preset_guidance = function() private$.items[["preset_guidance"]],
-        presetInfo = function() private$.items[["presetInfo"]],
         warnings = function() private$.items[["warnings"]],
         explanations = function() private$.items[["explanations"]]),
     private = list(),
@@ -430,7 +429,34 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 requiresData=TRUE,
                 renderFun=".plot",
                 clearWith=list(
-                    "plot_type")))
+                    "x_var",
+                    "y_var",
+                    "fill_var",
+                    "facet_var",
+                    "exclude_missing",
+                    "plot_type",
+                    "chart_style",
+                    "color_palette",
+                    "orientation",
+                    "sort_categories",
+                    "bar_width",
+                    "plot_title",
+                    "x_title",
+                    "y_title",
+                    "legend_title",
+                    "legend_position",
+                    "show_percentages",
+                    "percentage_format",
+                    "show_counts",
+                    "label_threshold",
+                    "add_outline",
+                    "outline_color",
+                    "export_ready",
+                    "flerlage_show_labels",
+                    "flerlage_label_size",
+                    "flerlage_label_color",
+                    "flerlage_alpha",
+                    "flerlage_box_color")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -453,7 +479,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     list(
                         `name`="total_observations", 
                         `title`="Total Observations", 
-                        `type`="integer"),
+                        `type`="number"),
                     list(
                         `name`="chart_type", 
                         `title`="Chart Type", 
@@ -479,7 +505,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     list(
                         `name`="count", 
                         `title`="Count", 
-                        `type`="integer"),
+                        `type`="number"),
                     list(
                         `name`="percentage", 
                         `title`="Group Percentage", 
@@ -493,7 +519,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                     list(
                         `name`="total_in_category", 
                         `title`="Category Total", 
-                        `type`="integer"))))
+                        `type`="number"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="detailed_stats",
@@ -548,7 +574,7 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                         `type`="text"),
                     list(
                         `name`="statistic", 
-                        `title`="Chi-square", 
+                        `title`="Statistic", 
                         `type`="number"),
                     list(
                         `name`="df", 
@@ -567,13 +593,6 @@ jjsegmentedtotalbarResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6:
                 options=options,
                 name="preset_guidance",
                 title="Template Guidance",
-                visible=FALSE,
-                clearWith=list(
-                    "analysis_preset")))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="presetInfo",
-                title="Preset Information",
                 visible=FALSE,
                 clearWith=list(
                     "analysis_preset")))
@@ -676,7 +695,6 @@ jjsegmentedtotalbarBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
 #'   \code{results$clinical_summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$statistical_tests} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$preset_guidance} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
 #' }

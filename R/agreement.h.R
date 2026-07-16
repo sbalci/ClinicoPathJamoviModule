@@ -1733,7 +1733,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "vars",
                     "krippMethod",
                     "bootstrap",
-                    "nBoot")))
+                    "nBoot",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="krippExplanation",
@@ -2680,7 +2681,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "nBoot")))
+                    "nBoot",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="bootstrapCIExplanation",
@@ -2918,7 +2920,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,pvalue")),
                 clearWith=list(
                     "vars",
-                    "iccType")))
+                    "iccType",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="iccExplanation",
@@ -3010,7 +3013,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `title`="Interpretation", 
                         `type`="text")),
                 clearWith=list(
-                    "vars")))
+                    "vars",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="linCCCExplanation",
@@ -3277,7 +3281,8 @@ agreementResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text")),
                 clearWith=list(
                     "vars",
-                    "iotaStandardize")))
+                    "iotaStandardize",
+                    "confLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="iotaExplanation",

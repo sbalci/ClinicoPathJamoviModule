@@ -282,7 +282,9 @@ jjpiestatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "showexplanations",
                     "showSummary",
                     "showAssumptions",
-                    "showInterpretation"))
+                    "showInterpretation",
+                    "addGGPubrDonut",
+                    "ggpubrDonutPalette"))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",

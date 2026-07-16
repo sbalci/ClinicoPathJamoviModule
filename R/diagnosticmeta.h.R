@@ -248,7 +248,6 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     "diagnosticmetaResults",
     inherit = jmvcore::Group,
     active = list(
-        welcome = function() private$.items[["welcome"]],
         instructions = function() private$.items[["instructions"]],
         summary = function() private$.items[["summary"]],
         about = function() private$.items[["about"]],
@@ -278,11 +277,6 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "metafor"))
             self$add(jmvcore::Html$new(
                 options=options,
-                name="welcome",
-                title="Welcome",
-                visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
                 name="instructions",
                 title="Getting Started",
                 visible=TRUE))
@@ -296,7 +290,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives")))
+                    "true_negatives",
+                    "zero_cell_correction",
+                    "confidence_level")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -314,7 +310,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_negatives",
                     "true_negatives",
                     "confidence_level",
-                    "method"),
+                    "method",
+                    "zero_cell_correction"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -356,7 +353,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_positives",
                     "false_negatives",
                     "true_negatives",
-                    "method"),
+                    "method",
+                    "zero_cell_correction",
+                    "confidence_level"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -393,7 +392,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_positives",
                     "false_negatives",
                     "true_negatives",
-                    "method"),
+                    "method",
+                    "zero_cell_correction",
+                    "confidence_level"),
                 columns=list(
                     list(
                         `name`="measure", 
@@ -435,7 +436,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "false_negatives",
                     "true_negatives",
                     "covariate",
-                    "method"),
+                    "method",
+                    "zero_cell_correction",
+                    "confidence_level"),
                 columns=list(
                     list(
                         `name`="measure", 
@@ -475,7 +478,8 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives"),
+                    "true_negatives",
+                    "zero_cell_correction"),
                 columns=list(
                     list(
                         `name`="test", 
@@ -555,7 +559,10 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives")))
+                    "true_negatives",
+                    "zero_cell_correction",
+                    "confidence_level",
+                    "color_palette")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="srocplot",
@@ -570,14 +577,16 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives")))
+                    "true_negatives",
+                    "zero_cell_correction",
+                    "color_palette")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="funnelplot",
                 title="Funnel Plot for Publication Bias",
                 width=600,
                 height=500,
-                visible="(funnel_plot)",
+                visible="(funnel_plot && publication_bias)",
                 requiresData=TRUE,
                 renderFun=".funnelplot",
                 clearWith=list(
@@ -585,7 +594,9 @@ diagnosticmetaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "true_positives",
                     "false_positives",
                     "false_negatives",
-                    "true_negatives")))
+                    "true_negatives",
+                    "zero_cell_correction",
+                    "color_palette")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -648,14 +659,14 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
 #' Diagnostic Test Meta-Analysis for Pathology
 #'
-#' Comprehensive meta-analysis of diagnostic test accuracy studies designed
+#' Comprehensive meta-analysis of diagnostic test accuracy studies designed 
 #' for
-#' pathology research. Performs bivariate random-effects modeling,
+#' pathology research. Performs bivariate random-effects modeling, 
 #' proportional-hazards SROC analysis,
-#' meta-regression, and publication bias assessment for AI algorithm
+#' meta-regression, and publication bias assessment for AI algorithm 
 #' validation
 #' and biomarker diagnostic accuracy synthesis.
-#'
+#' 
 #' @param data the data as a data frame
 #' @param study Variable containing unique study identifiers
 #' @param true_positives Number of true positive results in each study
@@ -695,7 +706,6 @@ diagnosticmetaBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   including interpretation guidance
 #' @return A results object containing:
 #' \tabular{llllll}{
-#'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$summary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$about} \tab \tab \tab \tab \tab a html \cr
@@ -800,3 +810,4 @@ diagnosticmeta <- function(
 
     analysis$results
 }
+

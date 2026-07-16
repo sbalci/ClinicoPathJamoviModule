@@ -276,6 +276,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="reproducibilitytable",
                 title="Reproducibility Assessment",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -304,6 +316,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="samplingbiastable",
                 title="Sampling Bias Analysis",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="comparison", 
@@ -321,7 +345,7 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                         `format`="zto,pvalue"),
                     list(
                         `name`="effect_size", 
-                        `title`="Effect Size (Cohen's d)", 
+                        `title`="Effect Size (Hedges' g)", 
                         `type`="number", 
                         `format`="zto"),
                     list(
@@ -332,6 +356,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 options=options,
                 name="variancetable",
                 title="Variance Component Analysis",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="component", 
@@ -356,6 +392,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="poweranalysistable",
                 title="Power Analysis Results",
                 visible="(power_analysis)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="scenario", 
@@ -384,6 +432,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="spatialanalysistable",
                 title="Spatial Heterogeneity Analysis",
                 visible="(spatial_id)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="region", 
@@ -412,6 +472,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="compartmentComparison",
                 title="Compartment Heterogeneity Comparison",
                 visible="(compareCompartments && length(spatial_id) > 0)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -445,6 +517,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 name="compartmentTests",
                 title="Statistical Tests for Compartment Differences",
                 visible="(compartmentTests && length(spatial_id) > 0)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 columns=list(
                     list(
                         `name`="test_type", 
@@ -475,6 +559,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=700,
                 height=500,
                 visible="(show_variability_plots)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 renderFun=".biopsyplot"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -483,6 +579,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=600,
                 height=400,
                 visible="(show_variability_plots)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 renderFun=".variabilityplot"))
             self$add(jmvcore::Image$new(
                 options=options,
@@ -491,6 +599,18 @@ ihcheterogeneityResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                 width=600,
                 height=400,
                 visible="(show_variability_plots)",
+                clearWith=list(
+                    "wholesection",
+                    "biopsy1",
+                    "biopsy2",
+                    "biopsy3",
+                    "biopsy4",
+                    "biopsies",
+                    "spatial_id",
+                    "cv_threshold",
+                    "correlation_threshold",
+                    "analysis_type",
+                    "sampling_strategy"),
                 renderFun=".spatialplot"))}))
 
 ihcheterogeneityBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

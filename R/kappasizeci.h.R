@@ -109,6 +109,7 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "kappaSizeCIResults",
     inherit = jmvcore::Group,
     active = list(
+        notices = function() private$.items[["notices"]],
         text1 = function() private$.items[["text1"]],
         text_summary = function() private$.items[["text_summary"]],
         text2 = function() private$.items[["text2"]]),
@@ -122,18 +123,58 @@ kappaSizeCIResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 refs=list(
                     "ClinicoPathJamoviModule",
                     "kappaSize"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notes",
+                clearWith=list(
+                    "outcome",
+                    "citype",
+                    "kappa0",
+                    "kappaL",
+                    "kappaU",
+                    "props",
+                    "raters",
+                    "alpha")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Analysis result"))
+                title="Analysis result",
+                clearWith=list(
+                    "outcome",
+                    "citype",
+                    "kappa0",
+                    "kappaL",
+                    "kappaU",
+                    "props",
+                    "raters",
+                    "alpha")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text_summary",
-                title="Summary"))
+                title="Summary",
+                clearWith=list(
+                    "outcome",
+                    "citype",
+                    "kappa0",
+                    "kappaL",
+                    "kappaU",
+                    "props",
+                    "raters",
+                    "alpha")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Study Explanation"))}))
+                title="Study Explanation",
+                clearWith=list(
+                    "outcome",
+                    "citype",
+                    "kappa0",
+                    "kappaL",
+                    "kappaU",
+                    "props",
+                    "raters",
+                    "alpha")))}))
 
 kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "kappaSizeCIBase",
@@ -170,6 +211,7 @@ kappaSizeCIBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alpha The significance level.
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$text1} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text_summary} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$text2} \tab \tab \tab \tab \tab a preformatted \cr

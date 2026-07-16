@@ -133,7 +133,8 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "distribution",
                     "excl",
                     "grvar",
-                    "sampleLarge")))
+                    "sampleLarge",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -157,7 +158,8 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "distribution",
                     "excl",
                     "grvar",
-                    "sampleLarge")))
+                    "sampleLarge",
+                    "seed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 title="Automatically Selected Plot",
@@ -174,7 +176,8 @@ statsplot2Results <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "alluvsty",
                     "excl",
                     "grvar",
-                    "sampleLarge")))}))
+                    "sampleLarge",
+                    "seed")))}))
 
 statsplot2Base <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "statsplot2Base",

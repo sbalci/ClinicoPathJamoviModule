@@ -181,7 +181,15 @@ categorizeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="todo",
                 title="Instructions",
                 clearWith=list(
-                    "var")))
+                    "var",
+                    "method",
+                    "nbins",
+                    "labels",
+                    "customlabels",
+                    "sdmult",
+                    "includelowest",
+                    "rightclosed",
+                    "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="summaryText",

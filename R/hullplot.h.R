@@ -266,7 +266,25 @@ hullplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Hull Plot",
                 width=800,
                 height=600,
-                renderFun=".plot"))
+                renderFun=".plot",
+                clearWith=list(
+                    "x_var",
+                    "y_var",
+                    "group_var",
+                    "color_var",
+                    "size_var",
+                    "hull_concavity",
+                    "hull_alpha",
+                    "hull_expand",
+                    "show_labels",
+                    "point_size",
+                    "point_alpha",
+                    "color_palette",
+                    "plot_theme",
+                    "plot_title",
+                    "x_label",
+                    "y_label",
+                    "confidence_ellipses")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="statistics",
@@ -338,7 +356,8 @@ hullplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param hull_alpha Transparency level for hull polygons. 0 = completely
 #'   transparent, 1 = opaque.
 #' @param show_labels If TRUE, displays group labels inside hull regions.
-#' @param point_size Size of scatter plot points.
+#' @param point_size Size of scatter plot points. Ignored when a Size Variable
+#'   is selected, because point size is then mapped to that variable's values.
 #' @param point_alpha Transparency level for scatter plot points.
 #' @param color_palette Color palette for hulls and points.
 #' @param plot_theme Overall visual theme for the plot.

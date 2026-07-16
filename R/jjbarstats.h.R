@@ -159,8 +159,8 @@ jjbarstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 "conflevel",
                 conflevel,
                 default=0.95,
-                min=0,
-                max=1)
+                min=0.5,
+                max=0.999)
             private$..ratio <- jmvcore::OptionString$new(
                 "ratio",
                 ratio,
@@ -352,7 +352,9 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "grvar",
                     "counts",
                     "paired",
-                    "ratio")))
+                    "ratio",
+                    "clinicalpreset",
+                    "typestatistics")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="about",
@@ -376,7 +378,8 @@ jjbarstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="report",
-                title="Copy-Ready Report"))
+                title="Copy-Ready Report",
+                visible="(showexplanations)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

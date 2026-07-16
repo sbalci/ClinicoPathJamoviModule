@@ -56,6 +56,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test2 <- jmvcore::OptionVariable$new(
                 "test2",
                 test2,
+                default=NULL,
                 suggested=list(
                     "nominal"),
                 permitted=list(
@@ -63,7 +64,8 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             private$..test2Positive <- jmvcore::OptionLevel$new(
                 "test2Positive",
                 test2Positive,
-                variable="(test2)")
+                variable="(test2)",
+                allowNone=TRUE)
             private$..test3 <- jmvcore::OptionVariable$new(
                 "test3",
                 test3,
@@ -133,12 +135,7 @@ decisioncombineOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "all",
                     "allPositive",
                     "allNegative",
-                    "majorityPositive",
-                    "majorityNegative",
-                    "mixed",
-                    "parallel",
-                    "serial",
-                    "majority"),
+                    "mixed"),
                 default="all")
 
             self$.addOption(private$..gold)
@@ -540,9 +537,13 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 renderFun=".plotBarChart",
                 clearWith=list(
                     "gold",
+                    "goldPositive",
                     "test1",
+                    "test1Positive",
                     "test2",
+                    "test2Positive",
                     "test3",
+                    "test3Positive",
                     "filterStatistic",
                     "filterPattern")))
             self$add(jmvcore::Image$new(
@@ -555,9 +556,13 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 renderFun=".plotHeatmap",
                 clearWith=list(
                     "gold",
+                    "goldPositive",
                     "test1",
+                    "test1Positive",
                     "test2",
+                    "test2Positive",
                     "test3",
+                    "test3Positive",
                     "filterStatistic",
                     "filterPattern")))
             self$add(jmvcore::Image$new(
@@ -570,24 +575,32 @@ decisioncombineResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 renderFun=".plotForest",
                 clearWith=list(
                     "gold",
+                    "goldPositive",
                     "test1",
+                    "test1Positive",
                     "test2",
+                    "test2Positive",
                     "test3",
+                    "test3Positive",
                     "filterStatistic",
                     "filterPattern")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="decisionTreePlot",
-                title="Decision Tree - Test Combination Strategy",
+                title="Decision Space: Sensitivity vs Specificity",
                 width=900,
                 height=700,
                 visible="(showDecisionTree)",
                 renderFun=".plotDecisionTree",
                 clearWith=list(
                     "gold",
+                    "goldPositive",
                     "test1",
+                    "test1Positive",
                     "test2",
+                    "test2Positive",
                     "test3",
+                    "test3Positive",
                     "filterStatistic",
                     "filterPattern")))
             self$add(jmvcore::Table$new(
@@ -698,14 +711,15 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param showBarPlot Boolean to display bar chart visualization.
 #' @param showHeatmap Boolean to display heatmap visualization.
 #' @param showForest Boolean to display forest plot.
-#' @param showDecisionTree Boolean to display decision tree visualization.
+#' @param showDecisionTree Boolean to display the decision-space (sensitivity
+#'   vs specificity) scatter plot.
 #' @param showRecommendation Boolean to show optimal pattern recommendation
 #'   table.
 #' @param addPatternToData Boolean to add test pattern column to the dataset.
-#' @param filterStatistic Character indicating which statistic to display
-#'   (default: all).
-#' @param filterPattern Character indicating which pattern type to display
-#'   (default: all).
+#' @param filterStatistic Character indicating which statistic to display in
+#'   the plots (default: all).
+#' @param filterPattern Character indicating which pattern type to display in
+#'   the plots (default: all).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$combinationTable} \tab \tab \tab \tab \tab Counts and diagnostic performance metrics for each test combination pattern and clinical strategy, including prevalence, balanced accuracy, Youden's J, likelihood ratios, and diagnostic odds ratios \cr
@@ -721,7 +735,7 @@ decisioncombineBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #'   \code{results$barPlot} \tab \tab \tab \tab \tab Grouped bar chart comparing sensitivity, specificity, PPV, NPV, and accuracy across test combinations \cr
 #'   \code{results$heatmapPlot} \tab \tab \tab \tab \tab Color-coded heatmap showing all diagnostic metrics for each test pattern \cr
 #'   \code{results$forestPlot} \tab \tab \tab \tab \tab Forest plot displaying 95 percent confidence intervals for key diagnostic metrics \cr
-#'   \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Hierarchical decision tree showing test patterns with performance-based recommendations \cr
+#'   \code{results$decisionTreePlot} \tab \tab \tab \tab \tab Decision-space scatter plot positioning each test pattern by its sensitivity and specificity, with point size scaled by Youden's J \cr
 #'   \code{results$recommendationTable} \tab \tab \tab \tab \tab Recommended optimal test combination pattern based on Youden index and clinical performance metrics \cr
 #'   \code{results$addedPattern} \tab \tab \tab \tab \tab an output \cr
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
@@ -740,7 +754,7 @@ decisioncombine <- function(
     goldPositive,
     test1,
     test1Positive,
-    test2,
+    test2 = NULL,
     test2Positive,
     test3 = NULL,
     test3Positive,

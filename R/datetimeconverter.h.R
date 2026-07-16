@@ -311,19 +311,31 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
             self$add(jmvcore::Html$new(
                 options=options,
                 name="formatInfo",
-                title="Format Detection"))
+                title="Format Detection",
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityMetrics",
-                title="Quality Assessment"))
+                title="Quality Assessment",
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="previewTable",
-                title="Conversion Preview"))
+                title="Conversion Preview",
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="componentPreview",
-                title="Extracted Components Preview"))
+                title="Extracted Components Preview",
+                clearWith=list(
+                    "datetime_var",
+                    "datetime_format")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="qualityAssessment",
@@ -358,6 +370,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="nominal",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -368,6 +381,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -378,6 +392,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -388,6 +403,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format",
                     "month_out")))
             self$add(jmvcore::Output$new(
@@ -399,6 +415,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="nominal",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format",
                     "monthname_out")))
             self$add(jmvcore::Output$new(
@@ -410,6 +427,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -420,6 +438,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -430,6 +449,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -440,6 +460,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -450,6 +471,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="nominal",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -460,6 +482,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -470,6 +493,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))
             self$add(jmvcore::Output$new(
                 options=options,
@@ -480,6 +504,7 @@ datetimeconverterResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 measureType="continuous",
                 clearWith=list(
                     "datetime_var",
+                    "timezone",
                     "datetime_format")))}))
 
 datetimeconverterBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(

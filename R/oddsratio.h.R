@@ -162,11 +162,18 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 title="Odds Ratio Table",
                 clearWith=list(
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text2",
-                title="Model Performance Metrics"))
+                title="Model Performance Metrics",
+                clearWith=list(
+                    "explanatory",
+                    "outcome",
+                    "outcomeLevel",
+                    "usePenalized")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -177,7 +184,9 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "outcomeLevel",
+                    "usePenalized")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="oddsRatioExplanation",
@@ -219,7 +228,9 @@ oddsratioResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "explanatory",
                     "outcome",
-                    "diagnosticPredictor")))
+                    "outcomeLevel",
+                    "diagnosticPredictor",
+                    "predictorLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="nomogram",
@@ -263,8 +274,8 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param explanatory The explanatory variables to be used in the analysis.
 #' @param outcome The outcome variable to be used in the analysis.
 #' @param outcomeLevel Specify which outcome level represents the positive
-#'   case for likelihood ratio calculations. If not specified, the function will
-#'   use the second level alphabetically.
+#'   case for likelihood ratio calculations. A positive outcome level is
+#'   required; the analysis stops with an error if it is not specified.
 #' @param diagnosticPredictor Specify the predictor to drive likelihood
 #'   ratios; must be binary. Defaults to the first explanatory variable.
 #' @param predictorLevel Specify which level of the diagnostic predictor

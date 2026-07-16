@@ -114,15 +114,39 @@ kappaSizePowerResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text1",
-                title="Analysis result"))
+                title="Analysis result",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "kappa1",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "power")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text_summary",
-                title="Summary"))
+                title="Summary",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "kappa1",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "power")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Study Explanation"))}))
+                title="Study Explanation",
+                clearWith=list(
+                    "outcome",
+                    "kappa0",
+                    "kappa1",
+                    "props",
+                    "raters",
+                    "alpha",
+                    "power")))}))
 
 kappaSizePowerBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "kappaSizePowerBase",

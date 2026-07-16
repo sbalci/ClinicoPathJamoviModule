@@ -449,13 +449,11 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="instructions",
-                title="Instructions",
-                visible=FALSE))
+                title="Instructions"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Analysis Todo",
-                visible=FALSE))
+                title="Analysis Todo"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="summary",
@@ -466,7 +464,16 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "event_var",
                     "pred_vars",
                     "prior_type",
-                    "mcmc_method"),
+                    "mcmc_method",
+                    "mcmc_chains",
+                    "mcmc_iterations",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -488,7 +495,14 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "mcmc_iterations",
                     "mcmc_chains",
-                    "prior_type"),
+                    "prior_type",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="metric", 
@@ -511,7 +525,16 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "pred_vars",
                     "mcmc_iterations",
-                    "credible_level"),
+                    "mcmc_chains",
+                    "credible_level",
+                    "prior_type",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -560,7 +583,16 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "pred_vars",
                     "mcmc_iterations",
-                    "variable_selection_threshold"),
+                    "mcmc_chains",
+                    "variable_selection_threshold",
+                    "prior_type",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="variable", 
@@ -596,7 +628,16 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(show_top_models)",
                 clearWith=list(
                     "mcmc_iterations",
-                    "model_selection_method"),
+                    "mcmc_chains",
+                    "model_selection_method",
+                    "prior_type",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="model_rank", 
@@ -633,7 +674,11 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "mcmc_chains",
                     "mcmc_iterations",
-                    "convergence_diagnostic"),
+                    "convergence_diagnostic",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_type",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -665,7 +710,18 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(show_top_models)",
                 clearWith=list(
                     "model_selection_method",
-                    "variable_selection_threshold"),
+                    "variable_selection_threshold",
+                    "occam_ratio",
+                    "mcmc_iterations",
+                    "mcmc_chains",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_type",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="selection_method", 
@@ -702,7 +758,16 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(uncertainty_quantification)",
                 clearWith=list(
                     "mcmc_iterations",
-                    "credible_level"),
+                    "mcmc_chains",
+                    "credible_level",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_type",
+                    "prior_inclusion_prob",
+                    "beta_alpha",
+                    "beta_beta",
+                    "complexity_penalty",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="quantity", 
@@ -735,7 +800,11 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(sensitivity_analysis)",
                 clearWith=list(
                     "prior_type",
-                    "sensitivity_analysis"),
+                    "sensitivity_analysis",
+                    "prior_inclusion_prob",
+                    "mcmc_iterations",
+                    "mcmc_chains",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="prior_specification", 
@@ -767,7 +836,11 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible="(cross_validation)",
                 clearWith=list(
                     "cross_validation",
-                    "cv_folds"),
+                    "cv_folds",
+                    "mcmc_iterations",
+                    "mcmc_chains",
+                    "prior_type",
+                    "seed_value"),
                 columns=list(
                     list(
                         `name`="fold", 
@@ -803,7 +876,12 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "mcmc_iterations",
-                    "model_selection_method")))
+                    "mcmc_chains",
+                    "model_selection_method",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_type",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="inclusionProbsPlot",
@@ -814,7 +892,14 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "pred_vars",
-                    "variable_selection_threshold")))
+                    "variable_selection_threshold",
+                    "mcmc_iterations",
+                    "mcmc_chains",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_type",
+                    "prior_inclusion_prob",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="coefficientsPlot",
@@ -825,7 +910,13 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "pred_vars",
-                    "credible_level")))
+                    "credible_level",
+                    "mcmc_iterations",
+                    "mcmc_chains",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_type",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="convergencePlot",
@@ -836,7 +927,10 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "mcmc_chains",
-                    "mcmc_iterations")))
+                    "mcmc_iterations",
+                    "burn_in",
+                    "proposal_variance",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="modelSpacePlot",
@@ -847,7 +941,12 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "mcmc_iterations",
-                    "prior_type")))
+                    "mcmc_chains",
+                    "prior_type",
+                    "burn_in",
+                    "proposal_variance",
+                    "prior_inclusion_prob",
+                    "seed_value")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="predictionsPlot",
@@ -858,7 +957,11 @@ bayesianmaResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 requiresData=TRUE,
                 clearWith=list(
                     "prediction_intervals",
-                    "credible_level")))
+                    "credible_level",
+                    "mcmc_iterations",
+                    "mcmc_chains",
+                    "prior_type",
+                    "seed_value")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",

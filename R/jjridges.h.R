@@ -522,7 +522,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "y_var",
                     "test_type",
                     "show_stats",
-                    "effsize_type")))
+                    "effsize_type",
+                    "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="warnings",
@@ -548,7 +549,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "show_stats")))
+                    "show_stats",
+                    "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSummary",
@@ -559,7 +561,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "y_var",
                     "show_stats",
                     "test_type",
-                    "effsize_type")))
+                    "effsize_type",
+                    "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutPanel",
@@ -614,7 +617,14 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "plot_subtitle",
                     "plot_caption",
                     "x_label",
-                    "y_label")))
+                    "y_label",
+                    "clinicalPreset",
+                    "show_fill_legend",
+                    "show_facet_legend",
+                    "add_sample_size",
+                    "add_density_values",
+                    "custom_annotations",
+                    "dpi")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="statistics",
@@ -667,7 +677,10 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,dp:2")),
                 clearWith=list(
                     "x_var",
-                    "y_var")))
+                    "y_var",
+                    "fill_var",
+                    "facet_var",
+                    "clinicalPreset")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tests",
@@ -678,6 +691,10 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="comparison", 
                         `title`="Comparison", 
+                        `type`="text"),
+                    list(
+                        `name`="method", 
+                        `title`="Method", 
                         `type`="text"),
                     list(
                         `name`="statistic", 
@@ -701,12 +718,12 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `format`="zto,dp:3"),
                     list(
                         `name`="ci_lower", 
-                        `title`="CI Lower", 
+                        `title`="Effect CI Lower", 
                         `type`="number", 
                         `format`="zto,dp:3"),
                     list(
                         `name`="ci_upper", 
-                        `title`="CI Upper", 
+                        `title`="Effect CI Upper", 
                         `type`="number", 
                         `format`="zto,dp:3")),
                 clearWith=list(
@@ -714,7 +731,10 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "y_var",
                     "test_type",
                     "p_adjust_method",
-                    "effsize_type")))
+                    "effsize_type",
+                    "fill_var",
+                    "facet_var",
+                    "clinicalPreset")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -723,7 +743,8 @@ jjridgesResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "x_var",
                     "y_var",
-                    "plot_type")))}))
+                    "plot_type",
+                    "clinicalPreset")))}))
 
 jjridgesBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjridgesBase",

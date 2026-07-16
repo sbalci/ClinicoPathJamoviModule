@@ -10,7 +10,6 @@
 #' @importFrom lubridate ymd_hms ymd ydm mdy myd dmy dym interval time_length
 #' @importFrom tibble tibble
 #' @importFrom RColorBrewer brewer.pal
-#' @importFrom scales pretty_breaks
 #' @importFrom ggswim geom_swim_lane geom_swim_marker scale_marker_discrete geom_swim_arrow theme_ggswim theme_ggswim_dark
 #' @return An \code{R6} class generator object for the \code{swimmerplotClass} backend; used internally by the jamovi analysis wrapper and not called directly.
 

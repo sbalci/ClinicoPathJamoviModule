@@ -27,7 +27,7 @@ benfordOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 digits,
                 default=2,
                 min=1,
-                max=4)
+                max=3)
 
             self$.addOption(private$..var)
             self$.addOption(private$..digits)
@@ -72,7 +72,10 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanation",
-                title="About Benford's Law in Clinical Data"))
+                title="About Benford's Law in Clinical Data",
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="dataWarning",
@@ -86,6 +89,9 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="summary",
                 title="Analysis Summary",
                 rows=0,
+                clearWith=list(
+                    "var",
+                    "digits"),
                 columns=list(
                     list(
                         `name`="statistic", 
@@ -102,19 +108,31 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
-                title="Guidelines"))
+                title="Guidelines",
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text",
-                title="Detailed Analysis Results"))
+                title="Detailed Analysis Results",
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
-                title="Suspicious Data Points"))
+                title="Suspicious Data Points",
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="reportSentence",
-                title="Clinical Report"))
+                title="Clinical Report",
+                clearWith=list(
+                    "var",
+                    "digits")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -122,7 +140,10 @@ benfordResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 width=700,
                 height=500,
                 renderFun=".plot",
-                requiresData=TRUE))}))
+                requiresData=TRUE,
+                clearWith=list(
+                    "var",
+                    "digits")))}))
 
 benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "benfordBase",
@@ -151,7 +172,9 @@ benfordBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data The data as a data frame.
 #' @param var a string naming the variable from \code{data} that contains the
 #'   continuous values used for the report
-#' @param digits Number of first digits to analyze (default: 2)
+#' @param digits Number of first digits to analyze (default: 2). Limited to
+#'   1-3 digits; the benford.analysis package does not provide a MAD conformity
+#'   classification beyond 3 digits.
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$welcome} \tab \tab \tab \tab \tab a html \cr

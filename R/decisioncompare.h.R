@@ -488,6 +488,15 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="Negative Likelihood Ratio", 
                         `type`="number")),
                 clearWith=list(
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "excludeIndeterminate",
                     "pp",
                     "pprob")))
             self$add(jmvcore::Table$new(
@@ -681,7 +690,18 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 requiresData=TRUE,
                 visible="(plot)",
                 clearWith=list(
-                    "plot"),
+                    "plot",
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "excludeIndeterminate",
+                    "pp",
+                    "pprob"),
                 refs=list(
                     "ggplot2")))
             self$add(jmvcore::Image$new(
@@ -694,7 +714,18 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 requiresData=TRUE,
                 visible="(radarplot)",
                 clearWith=list(
-                    "radarplot"),
+                    "radarplot",
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "excludeIndeterminate",
+                    "pp",
+                    "pprob"),
                 refs=list(
                     "ggplot2")))
             self$add(jmvcore::Image$new(
@@ -707,7 +738,16 @@ decisioncompareResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 requiresData=TRUE,
                 visible="(heatmap)",
                 clearWith=list(
-                    "heatmap"),
+                    "heatmap",
+                    "gold",
+                    "goldPositive",
+                    "test1",
+                    "test1Positive",
+                    "test2",
+                    "test2Positive",
+                    "test3",
+                    "test3Positive",
+                    "excludeIndeterminate"),
                 refs=list(
                     "ggplot2")))
             self$add(jmvcore::Html$new(

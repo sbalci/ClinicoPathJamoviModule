@@ -317,7 +317,14 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="Total", 
                         `title`="Total", 
-                        `type`="number"))))
+                        `type`="number")),
+                clearWith=list(
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="nTable",
@@ -359,7 +366,13 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="ratioTable",
@@ -421,7 +434,13 @@ decisionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="number")),
                 clearWith=list(
                     "pp",
-                    "pprob")))
+                    "pprob",
+                    "gold",
+                    "newtest",
+                    "goldPositive",
+                    "testPositive",
+                    "goldNegative",
+                    "testNegative")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="missingDataSummary",

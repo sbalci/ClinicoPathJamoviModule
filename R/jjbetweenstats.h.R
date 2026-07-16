@@ -156,8 +156,8 @@ jjbetweenstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "conflevel",
                 conflevel,
                 default=0.95,
-                min=0,
-                max=1)
+                min=0.5,
+                max=0.999)
             private$..varequal <- jmvcore::OptionBool$new(
                 "varequal",
                 varequal,
@@ -441,6 +441,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 clearWith=list(
                     "dep",
                     "group",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
                     "ggpubrPlotType",
                     "ggpubrPalette",
                     "ggpubrAddStats",
@@ -458,6 +461,9 @@ jjbetweenstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "dep",
                     "group",
                     "grvar",
+                    "mytitle",
+                    "xtitle",
+                    "ytitle",
                     "ggpubrPlotType",
                     "ggpubrPalette",
                     "ggpubrAddStats",

@@ -260,14 +260,7 @@ lollipopResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="notices",
-                title="Important Information",
-                clearWith=list(
-                    "dep",
-                    "group",
-                    "sortBy",
-                    "orientation",
-                    "aggregation",
-                    "colorScheme")))
+                title="Important Information"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -336,7 +329,11 @@ lollipopBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param orientation Chart orientation (vertical or horizontal lollipops).
 #' @param showValues Whether to display value labels on the lollipops.
 #' @param showMean Whether to display a reference line at the mean value.
-#' @param colorScheme Color scheme for the lollipops.
+#' @param colorScheme Base color hue for the lollipops. The lollipop chart
+#'   draws a single data series, so the scheme sets one base color (the first
+#'   color of the chosen palette) rather than mapping a different color to each
+#'   group. This option is ignored when Conditional coloring or Highlighting is
+#'   active, since those modes use their own fixed colors.
 #' @param theme Overall theme/appearance of the plot.
 #' @param pointSize Size of the lollipop points.
 #' @param lineWidth Width of the lollipop stems.

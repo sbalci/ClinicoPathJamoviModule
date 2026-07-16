@@ -239,10 +239,8 @@ survivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 survivalTestType,
                 options=list(
                     "logrank",
-                    "gehan_breslow",
-                    "tarone_ware",
-                    "peto_peto",
-                    "fleming_harrington"),
+                    "fh_rho0_5",
+                    "fh_rho1"),
                 default="logrank")
             private$..ph_cox <- jmvcore::OptionBool$new(
                 "ph_cox",
@@ -1292,7 +1290,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "outcome",
                     "elapsedtime",
                     "ci95",
-                    "risktable")))
+                    "risktable",
+                    "outcomeLevel")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="adjustedCurvesPlot",
@@ -1309,7 +1308,8 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "explanatory",
                     "outcome",
                     "elapsedtime",
-                    "ci95")))
+                    "ci95",
+                    "outcomeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="remarkChecklist",
@@ -1991,7 +1991,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "calibration_timepoint",
                     "calibration_ngroups",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="calibrationGroupTable",
@@ -2032,7 +2034,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "calibration_timepoint",
                     "calibration_ngroups",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="calibrationPlot",
@@ -2047,7 +2051,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "calibration_timepoint",
                     "calibration_ngroups",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="calibrationInterpretation",
@@ -2098,7 +2104,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rcs_variable",
                     "rcs_knots",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="rcsPlot",
@@ -2113,7 +2121,9 @@ survivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "rcs_variable",
                     "rcs_knots",
                     "explanatory",
-                    "outcome")))
+                    "outcome",
+                    "elapsedtime",
+                    "outcomeLevel")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="rcsInterpretation",

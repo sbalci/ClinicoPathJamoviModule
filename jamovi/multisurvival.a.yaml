@@ -4,7 +4,7 @@ title: Multivariable Survival Analysis
 menuGroup: Survival
 menuSubgroup: ClinicoPath Survival
 menuSubtitle: 'Multivariable Cox-regression, Adjusted Survival'
-version: '1.0.0'
+version: '1.0.1'
 jas: '1.2'
 
 description:
@@ -622,26 +622,24 @@ options:
       description:
           R: Method for computing adjusted survival curves
 
-    # - name: ac_summary
-    #   title: Show Summary Statistics
-    #   type: Bool
-    #   default: false
-    #   description:
-    #       R: Calculate and display summary statistics for adjusted curves
+    - name: ac_summary
+      title: Adjusted survival summary tables
+      type: Bool
+      default: false
+      description:
+          R: >
+            Display numeric adjusted-survival outputs (survival at the cutpoint
+            timepoints with 95% CI, adjusted median survival, and the adjusted
+            Cox hazard-ratio table) in addition to the adjusted-survival curve.
 
-    # - name: ac_timepoints
-    #   title: Summary Timepoints
-    #   type: String
-    #   default: '12, 36, 60'
-    #   description:
-    #       R: Timepoints for calculating summary statistics (comma-separated)
+    # ac_timepoints intentionally not exposed: the adjusted-survival tables reuse
+    # the existing `cutp` option for their timepoints.
 
-    # - name: ac_compare
-    #   title: Compare Curves
-    #   type: Bool
-    #   default: false
-    #   description:
-    #       R: Perform statistical comparison between adjusted curves
+    # ac_compare (pairwise comparison of adjusted curves) intentionally not
+    # revived: the shelved .adjustedPairwise() implementation performed an
+    # UNADJUSTED log-rank test (survdiff) on model-name strings, which is both a
+    # runtime bug and statistically mislabeled. A correct covariate-adjusted
+    # pairwise contrast would need to be authored on the Cox model, not wired.
 
 
 # Nomogram ----

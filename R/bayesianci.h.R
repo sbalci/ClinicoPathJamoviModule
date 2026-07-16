@@ -298,6 +298,7 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     inherit = jmvcore::Group,
     active = list(
         instructions = function() private$.items[["instructions"]],
+        notices = function() private$.items[["notices"]],
         dataInfo = function() private$.items[["dataInfo"]],
         priorSpecification = function() private$.items[["priorSpecification"]],
         posteriorSummary = function() private$.items[["posteriorSummary"]],
@@ -329,6 +330,14 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 name="instructions",
                 title="Analysis Instructions",
                 visible=TRUE))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="notices",
+                title="Notices",
+                clearWith=list(
+                    "outcome",
+                    "outcome_type",
+                    "additional_levels")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="dataInfo",
@@ -337,6 +346,7 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=1,
                 clearWith=list(
                     "outcome",
+                    "outcome_type",
                     "group_var"),
                 columns=list(
                     list(
@@ -354,6 +364,7 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 visible=TRUE,
                 rows=1,
                 clearWith=list(
+                    "outcome_type",
                     "prior_type",
                     "beta_alpha",
                     "beta_beta",
@@ -393,8 +404,16 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "posterior_summary",
                     "outcome",
+                    "outcome_type",
                     "group_var",
-                    "mcmc_method"),
+                    "mcmc_method",
+                    "prior_type",
+                    "beta_alpha",
+                    "beta_beta",
+                    "normal_mean",
+                    "normal_sd",
+                    "gamma_shape",
+                    "gamma_rate"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -433,9 +452,17 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows=1,
                 clearWith=list(
                     "outcome",
+                    "outcome_type",
                     "credible_level",
                     "additional_levels",
-                    "mcmc_method"),
+                    "mcmc_method",
+                    "prior_type",
+                    "beta_alpha",
+                    "beta_beta",
+                    "normal_mean",
+                    "normal_sd",
+                    "gamma_shape",
+                    "gamma_rate"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -473,7 +500,15 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "hpd_intervals",
                     "outcome",
-                    "credible_level"),
+                    "outcome_type",
+                    "credible_level",
+                    "prior_type",
+                    "beta_alpha",
+                    "beta_beta",
+                    "normal_mean",
+                    "normal_sd",
+                    "gamma_shape",
+                    "gamma_rate"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -512,7 +547,15 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "credible_vs_confidence",
                     "outcome",
-                    "credible_level"),
+                    "outcome_type",
+                    "credible_level",
+                    "prior_type",
+                    "beta_alpha",
+                    "beta_beta",
+                    "normal_mean",
+                    "normal_sd",
+                    "gamma_shape",
+                    "gamma_rate"),
                 columns=list(
                     list(
                         `name`="parameter", 
@@ -596,7 +639,8 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "sensitivity_analysis",
                     "prior_type",
-                    "outcome"),
+                    "outcome",
+                    "credible_level"),
                 columns=list(
                     list(
                         `name`="prior_specification", 
@@ -668,6 +712,7 @@ bayesianciResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "clinical_interpretation",
                     "outcome",
+                    "outcome_type",
                     "credible_level"),
                 columns=list(
                     list(
@@ -831,6 +876,7 @@ bayesianciBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$instructions} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$dataInfo} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$priorSpecification} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$posteriorSummary} \tab \tab \tab \tab \tab a table \cr

@@ -152,7 +152,7 @@ swimmerplotOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "maxMilestones",
                 maxMilestones,
                 min=1,
-                max=10,
+                max=5,
                 default=5)
             private$..milestone1Name <- jmvcore::OptionString$new(
                 "milestone1Name",
@@ -551,6 +551,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "eventTimeVar",
                     "laneWidth",
                     "markerSize",
+                    "colorPalette",
                     "plotTheme",
                     "showLegend",
                     "referenceLines",
@@ -577,6 +578,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "startTime",
                     "endTime",
                     "responseVar",
+                    "censorVar",
                     "timeType",
                     "dateFormat",
                     "timeUnit",
@@ -769,6 +771,7 @@ swimmerplotResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "startTime",
                     "endTime",
                     "responseVar",
+                    "censorVar",
                     "timeUnit",
                     "personTimeAnalysis")))
             self$add(jmvcore::Table$new(
@@ -873,7 +876,8 @@ swimmerplotBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param timeUnit Time unit to use for display and calculations.
 #' @param timeDisplay Choose whether to align all start times to 0 or use
 #'   absolute start times.
-#' @param maxMilestones Maximum number of milestone events to support.
+#' @param maxMilestones Maximum number of milestone events to support
+#'   (milestone slots 1-5 are defined).
 #' @param milestone1Name Name for the first milestone event (e.g., Surgery,
 #'   Treatment Start).
 #' @param milestone1Date Date/time variable when milestone 1 occurred.

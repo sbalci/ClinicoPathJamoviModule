@@ -594,7 +594,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="coxTable",
@@ -635,7 +644,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="tCoxtext2",
@@ -655,7 +673,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="coxRegressionHeading3",
@@ -724,7 +751,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeSummary",
@@ -743,7 +779,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="personTimeExplanation",
@@ -803,7 +848,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "outcome",
                     "outcomeLevel",
                     "findcut",
-                    "multiple_cutoffs")))
+                    "multiple_cutoffs",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="rmstSummary",
@@ -816,7 +868,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "outcome",
                     "outcomeLevel",
                     "findcut",
-                    "multiple_cutoffs")))
+                    "multiple_cutoffs",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="rmstExplanation",
@@ -862,7 +921,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "contexpl",
                     "outcome",
                     "outcomeLevel",
-                    "findcut")))
+                    "findcut",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="residualDiagnosticsExplanation",
@@ -906,7 +972,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="cutoffAnalysisHeading3",
@@ -944,7 +1019,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot5",
@@ -968,7 +1052,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="medianSummary",
@@ -988,7 +1081,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="medianTable",
@@ -1044,7 +1146,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="survTableSummary",
@@ -1064,7 +1175,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="survTable",
@@ -1119,7 +1239,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -1143,7 +1272,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot3",
@@ -1167,7 +1305,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot6",
@@ -1191,7 +1338,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent"),
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size"),
                 refs=list(
                     "KMunicate",
                     "KMunicate2")))
@@ -1233,7 +1389,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="loglogPlotExplanation",
@@ -1257,7 +1422,14 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "contexpl",
                     "outcome",
                     "outcomeLevel",
-                    "findcut")))
+                    "findcut",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedtime",
@@ -1281,7 +1453,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="outcomeredefined",
@@ -1305,7 +1486,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedcutoff",
@@ -1331,7 +1521,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multipleCutTable",
@@ -1369,7 +1568,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="multipleMedianTable",
@@ -1421,7 +1629,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="multipleCutoffsExplanation",
@@ -1485,7 +1702,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotMultipleCutoffs",
@@ -1513,7 +1739,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plotMultipleSurvival",
@@ -1541,7 +1776,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))
             self$add(jmvcore::Output$new(
                 options=options,
                 name="calculatedmulticut",
@@ -1569,7 +1813,16 @@ survivalcontResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "fudate",
                     "dxdate",
                     "tint",
-                    "multievent")))}))
+                    "multievent",
+                    "uselandmark",
+                    "landmark",
+                    "analysistype",
+                    "dod",
+                    "dooc",
+                    "awd",
+                    "awod",
+                    "cutp",
+                    "min_group_size")))}))
 
 survivalcontBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "survivalcontBase",

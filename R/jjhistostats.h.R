@@ -377,6 +377,7 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "centralityline",
                     "centralitytype",
                     "resultssubtitle",
+                    "enableOneSampleTest",
                     "test.value",
                     "conf.level",
                     "bf.message",
@@ -472,7 +473,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 visible="(addDistributionDiagnostics && ggpubrShowQQ)",
                 clearWith=list(
-                    "dep")))
+                    "dep",
+                    "ggpubrDensityColor")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="ecdfPlot",
@@ -483,7 +485,8 @@ jjhistostatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                 requiresData=TRUE,
                 visible="(addDistributionDiagnostics && ggpubrShowECDF)",
                 clearWith=list(
-                    "dep")))}))
+                    "dep",
+                    "ggpubrDensityColor")))}))
 
 jjhistostatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjhistostatsBase",

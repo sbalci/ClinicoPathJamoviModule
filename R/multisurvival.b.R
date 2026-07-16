@@ -5042,14 +5042,18 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
           return(NULL)
         }
 
-      # The per-level adjusted-curve summary loop that used to live here (a
-      # survfit() per level feeding `adjustedSummaryTable`) was dead code:
-      # `adjustedSummaryTable` is commented out in .r.yaml and the ac_summary /
-      # ac_compare features are hard-wired FALSE (their options are disabled in
-      # .a.yaml), so nothing it computed was ever displayed. The visible adjusted
-      # survival curve is produced by .plot_adj(); the adjustment-variable
-      # validation and the Fine-Gray info notice above are the only live work here.
-      return(invisible(NULL))
+        # Numeric adjusted-survival tables (opt-in via ac_summary): adjusted
+        # survival at the cutpoint timepoints, adjusted median survival, and the
+        # adjusted Cox hazard-ratio table. Each backend populates its own result
+        # slots. The adjusted survival curve itself is drawn by .plot_adj().
+        if (self$options$ac_summary) {
+          private$.checkpoint()
+          private$.adjustedSurvTable(cleaneddata, cox_model)
+          private$.adjustedMedianSurv(cleaneddata, cox_model)
+          private$.adjustedCox(cleaneddata, cox_model)
+        }
+
+        return(invisible(NULL))
     }
 
 
@@ -5094,19 +5098,19 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       all_results <- list()
 
       for (level in levels) {
-        # Create prediction data
-        n_times <- length(timepoints)
-        pred_data <- data.frame(
-          mytime = timepoints
-        )
+        # Single-row covariate profile for this level. Summarising ONE curve at
+        # the requested timepoints keeps surv[i] aligned with timepoints[i];
+        # multiple identical rows produced multiple curves whose flattened
+        # summary()$surv silently mis-mapped the later timepoints.
+        pred_data <- mydata[1, , drop = FALSE]
 
-        # Add mean covariates
+        # Add mean/mode covariates
         for (var in names(pred_base)) {
-          pred_data[[var]] <- rep(pred_base[[var]], n_times)
+          pred_data[[var]] <- pred_base[[var]]
         }
 
         # Add level
-        pred_data[[adj_var]] <- rep(level, n_times)
+        pred_data[[adj_var]] <- level
 
         # Calculate survival
         surv_fit <- survival::survfit(cox_model, newdata = pred_data)
@@ -5116,13 +5120,13 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         for (i in seq_along(timepoints)) {
           if (i <= length(surv_summ$time)) {
             all_results[[length(all_results) + 1]] <- list(
-              Level = level,
-              Time = timepoints[i],
-              "Number at Risk" = surv_summ$n.risk[i],
-              Events = surv_summ$n.event[i],
-              "Adjusted Survival" = scales::percent(surv_summ$surv[i], accuracy = 0.1),
-              "95% CI Lower" = scales::percent(surv_summ$lower[i], accuracy = 0.1),
-              "95% CI Upper" = scales::percent(surv_summ$upper[i], accuracy = 0.1)
+              strata = level,
+              time = timepoints[i],
+              atrisk = surv_summ$n.risk[i],
+              events = surv_summ$n.event[i],
+              surv = scales::percent(surv_summ$surv[i], accuracy = 0.1),
+              lower = scales::percent(surv_summ$lower[i], accuracy = 0.1),
+              upper = scales::percent(surv_summ$upper[i], accuracy = 0.1)
             )
           }
         }
@@ -5145,15 +5149,15 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         # Generate natural language interpretations
         summaries <- sapply(all_results, function(row) {
           glue::glue(
-            "For {row$Level} at {row$Time} months, adjusted survival is {row$`Adjusted Survival`} ",
-            "[{row$`95% CI Lower`}-{row$`95% CI Upper`}, 95% CI]. ",
-            "At this timepoint, {row$`Number at Risk`} subjects were at risk ",
-            "and {row$Events} events had occurred. ",
+            "For {row$strata} at {row$time} {self$options$timetypeoutput}, adjusted survival is {row$surv} ",
+            "[{row$lower}-{row$upper}, 95% CI]. ",
+            "At this timepoint, {row$atrisk} subjects were at risk ",
+            "and {row$events} events had occurred. ",
             "These estimates account for the average values of covariates."
           )
         })
 
-        self$results$adjustedSurvTableSummary$setContent(summaries)
+        self$results$adjustedSurvTableSummary$setContent(paste(summaries, collapse = "<br><br>"))
       }
 
       return(all_results)
@@ -5575,123 +5579,6 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
 
 
 
-      ,
-    ## Adjusted Pariwise ----
-    .adjustedPairwise = function(results, cox_model) {
-      # Get components
-      mytime <- results$name1time
-      myoutcome <- results$name2outcome
-      adj_var <- results$adjexplanatory_name
-      mydata <- results$cleanData
-
-      # Error checking
-      if (is.null(mydata) || is.null(cox_model)) {
-        warning(.("Missing data or model for pairwise comparisons"))
-        return(NULL)
-      }
-
-      # Get levels
-      levels <- sort(unique(mydata[[adj_var]]))
-      if (length(levels) < 2) {
-        warning(.("Need at least 2 levels for pairwise comparisons"))
-        return(NULL)
-      }
-
-      # Create prediction dataset with average values
-      pred_base <- data.frame(mytime = max(mydata[[mytime]]))
-      for (var in names(mydata)) {
-        if (var != "mytime" && var != adj_var && var != "row_names") {
-          if (is.numeric(mydata[[var]])) {
-            pred_base[[var]] <- mean(mydata[[var]], na.rm = TRUE)
-          } else if (is.factor(mydata[[var]])) {
-            pred_base[[var]] <- names(which.max(table(mydata[[var]])))
-          }
-        }
-      }
-
-      # Initialize p-value matrix
-      n_levels <- length(levels)
-      p_values <- matrix(NA, n_levels, n_levels)
-      rownames(p_values) <- levels
-      colnames(p_values) <- levels
-
-      # Calculate pairwise comparisons
-      for (i in 1:(n_levels-1)) {
-        for (j in (i+1):n_levels) {
-          tryCatch({
-            # Create test dataset
-            test_data <- rbind(pred_base, pred_base)
-            test_data[[adj_var]] <- factor(c(levels[i], levels[j]))
-
-            # Calculate survival difference
-            test_fit <- survival::survfit(cox_model, newdata = test_data)
-            surv_diff <- survival::survdiff(Surv(mytime, myoutcome) ~ factor(test_data[[adj_var]]))
-            p_val <- 1 - pchisq(surv_diff$chisq, df = 1)
-
-            p_values[i,j] <- p_val
-            p_values[j,i] <- p_val
-          }, error = function(e) {
-            warning(paste("Error comparing levels", levels[i], "and", levels[j], ":", e$message))
-          })
-        }
-      }
-
-      # Adjust p-values
-      padjustmethod <- self$options$padjustmethod
-      adj_p <- p.adjust(p_values[upper.tri(p_values)], method = padjustmethod)
-      p_values[upper.tri(p_values)] <- adj_p
-      p_values[lower.tri(p_values)] <- t(p_values)[lower.tri(p_values)]
-
-      # Convert to long format
-      comparisons <- list()
-      counter <- 1
-      for (i in 1:(n_levels-1)) {
-        for (j in (i+1):n_levels) {
-          if (!is.na(p_values[i,j])) {
-            comparisons[[counter]] <- list(
-              rowname = levels[i],
-              name = levels[j],
-              value = p_values[i,j]
-            )
-            counter <- counter + 1
-          }
-        }
-      }
-
-      # Add results to table
-      if (length(comparisons) > 0) {
-        # Clear existing rows (jmvcore Table has no setRows(); deleteRows() clears all)
-        self$results$adjustedPairwiseTable$deleteRows()
-
-        # Add new rows
-        for (i in seq_along(comparisons)) {
-          comp <- comparisons[[i]]
-          self$results$adjustedPairwiseTable$addRow(
-            rowKey = i,
-            values = list(
-              rowname = comp$rowname,
-              name = comp$name,
-              value = format.pval(comp$value, digits = 3)
-            )
-          )
-        }
-
-        # Create natural language summaries
-        summaries <- lapply(comparisons, function(comp) {
-          glue::glue(
-            "The adjusted survival difference between {comp$rowname} and {comp$name} groups ",
-            "has a p-value of {format.pval(comp$value, digits=3, eps=0.001)}. ",
-            "This comparison accounts for covariates set at their average values. ",
-            "{if(comp$value < 0.05) 'This difference is statistically significant' else 'This difference is not statistically significant'} ",
-            "after {padjustmethod} adjustment for multiple comparisons."
-          )
-        })
-
-        self$results$adjustedPairwiseSummary$setContent(unlist(summaries))
-      }
-
-      return(comparisons)
-    }
 
 
 
@@ -5699,9 +5586,11 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       ,
     ## Adjusted Median Survival ----
     .adjustedMedianSurv = function(results, cox_model) {
-      # Get required data
-      mytime <- results$name1time
-      myoutcome <- results$name2outcome
+      # Get required data. cleanData carries the standardized survival columns
+      # "mytime"/"myoutcome" (see .definemytime/.definemyoutcome); results$name*
+      # hold the *display labels*, which are not column names.
+      mytime <- "mytime"
+      myoutcome <- "myoutcome"
       adj_var <- results$adjexplanatory_name
       mydata <- results$cleanData
 
@@ -5713,18 +5602,20 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
       # Get levels of adjustment variable
       levels <- sort(unique(mydata[[adj_var]]))
 
-      # Create prediction data with average covariate values
-      pred_data <- data.frame(
-        mytime = sort(unique(mydata[[mytime]]))
-      )
-
-      # Add mean/mode values for covariates
+      # Build a SINGLE covariate profile (one row): means for numeric covariates,
+      # modes for factors, with factor levels preserved. survfit() on one row
+      # yields exactly one adjusted survival curve, so summary()$table returns a
+      # named vector with a single median/CI. (The previous version used
+      # sort(unique(mytime)) as newdata rows, producing many curves and a matrix
+      # $table whose ["median"] lookup silently returned NA.)
+      pred_data <- mydata[1, , drop = FALSE]
       for (var in names(mydata)) {
         if (var != "mytime" && var != adj_var && var != "row_names") {
           if (is.numeric(mydata[[var]])) {
             pred_data[[var]] <- mean(mydata[[var]], na.rm = TRUE)
           } else if (is.factor(mydata[[var]])) {
-            pred_data[[var]] <- names(which.max(table(mydata[[var]])))
+            pred_data[[var]] <- factor(names(which.max(table(mydata[[var]]))),
+                                       levels = levels(mydata[[var]]))
           }
         }
       }
@@ -5736,7 +5627,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         level_data <- pred_data
         level_data[[adj_var]] <- level
 
-        # Calculate adjusted survival
+        # Calculate adjusted survival (one curve for this covariate profile)
         adj_surv <- survival::survfit(cox_model, newdata = level_data)
 
         # Get summary stats
@@ -5805,7 +5696,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         "These estimates account for the average values of all other covariates in the model."
       )
 
-      self$results$adjustedMedianSummary$setContent(medianSummary)
+      self$results$adjustedMedianSummary$setContent(paste(medianSummary, collapse = "<br><br>"))
     }
 
 
@@ -5857,7 +5748,7 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
             Variable = rownames[i],
             HR = sprintf("%.2f (%.2f-%.2f)",
                          coef_matrix[i,1], coef_matrix[i,2], coef_matrix[i,3]),
-            Pvalue = format.pval(coef_matrix[i,4], digits=3)
+            Pvalue = coef_matrix[i,4]
           )
         )
       }
@@ -5884,16 +5775,15 @@ where 0.5 suggests no discriminative ability and 1.0 indicates perfect discrimin
         "All estimates are adjusted for other variables in the model."
       )
 
-      self$results$adjustedCoxSummary$setContent(coxSummary)
+      self$results$adjustedCoxSummary$setContent(paste(coxSummary, collapse = "<br><br>"))
 
-      # Proportional hazards check if requested
+      # Proportional hazards check if requested (adjustedCoxPH is a Preformatted
+      # slot; capture the printed cox.zph table as text).
       if (self$options$ph_cox) {
         zph <- survival::cox.zph(cox_model)
-        self$results$adjustedCoxPH$setContent(print(zph))
-
-        # Set state for plot
-        image8 <- self$results$adjustedCoxPHPlot
-        image8$setState(zph)
+        self$results$adjustedCoxPH$setContent(
+          paste(utils::capture.output(print(zph)), collapse = "\n")
+        )
       }
     }
 

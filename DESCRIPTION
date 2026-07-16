@@ -1,8 +1,8 @@
 Type: Package
 Package: ClinicoPath
 Title: Comprehensive Analysis for Clinicopathological Research
-Version: 1.0.0
-Date: 2026-07-13
+Version: 1.0.1
+Date: 2026-07-16
 Authors@R: person(given = "Serdar", family = "Balci", role = c("aut", "cre", "cph"), email = "serdarbalci@serdarbalci.com", comment = c(ORCID = "0000-0002-7852-3851"))
 Maintainer: Serdar Balci <serdarbalci@serdarbalci.com>
 Description: Provides a comprehensive jamovi module designed specifically
@@ -67,7 +67,7 @@ Imports: aftgee, arsenal, assertions, BART, base64enc, BayesFactor, bayesplot,
         pwr, qgraph, quantreg, R6, randomForest, randomForestSRC, ranger, rank,
         RANN, RColorBrewer, rcompanion, rcrossref, relsurv, report, reReg,
         reshape2, ResourceSelection, reticulate, riskRegression, rlang, rms,
-        robust, robustbase, robustHD, ROCR, rpart, rpart.plot, rsm, rstatix,
+        robust, robustbase, robustHD, ROCR, rpart, rpart.plot, rsm,
         rstpm2, rsvg, Rtsne, sandwich, scales, scattermore, segmented, sf,
         shiny, sjPlot, skimr, smcure, spatstat, spatstat.explore,
         spatstat.geom, spBayesSurv, spdep, stats, stringr, summarytools,
@@ -312,7 +312,6 @@ Collate:
     'desctools.b.R'
     'desctools.h.R'
     'diagnostic_sample_size_examples_documentation.R'
-    'diagnostichelpers.R'
     'diagnosticmeta.b.R'
     'diagnosticmeta.h.R'
     'diagnosticsamplesize.b.R'

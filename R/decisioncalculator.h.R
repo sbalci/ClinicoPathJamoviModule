@@ -253,7 +253,19 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                     "FN",
                     "pp",
                     "pprob",
-                    "ci")))
+                    "ci",
+                    "fnote",
+                    "multiplecuts",
+                    "cutoff1",
+                    "cutoff2",
+                    "tp1",
+                    "fp1",
+                    "tn1",
+                    "fn1",
+                    "tp2",
+                    "fp2",
+                    "tn2",
+                    "fn2")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -341,6 +353,10 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="Wrong Test", 
                         `type`="number")),
                 clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
                     "pp",
                     "pprob")))
             self$add(jmvcore::Table$new(
@@ -403,6 +419,10 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="Negative Likelihood Ratio", 
                         `type`="number")),
                 clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
                     "pp",
                     "pprob")))
             self$add(jmvcore::Table$new(
@@ -438,6 +458,10 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `title`="Diagnostic Odds Ratio", 
                         `type`="number")),
                 clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
                     "pp",
                     "pprob")))
             self$add(jmvcore::Table$new(
@@ -469,6 +493,10 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `type`="number", 
                         `format`="pc")),
                 clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
                     "pp",
                     "pprob"),
                 refs=list(
@@ -500,6 +528,10 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                         `superTitle`="95% Confidence Interval", 
                         `type`="number")),
                 clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
                     "pp",
                     "pprob"),
                 refs=list(
@@ -515,6 +547,10 @@ decisioncalculatorResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::
                 requiresData=TRUE,
                 visible="(fagan)",
                 clearWith=list(
+                    "TP",
+                    "FP",
+                    "TN",
+                    "FN",
                     "pp",
                     "pprob",
                     "fagan"),

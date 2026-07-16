@@ -260,7 +260,9 @@ timeintervalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
                     "use_landmark",
                     "landmark_time",
                     "remove_negative",
-                    "remove_extreme")))}))
+                    "remove_extreme",
+                    "extreme_multiplier",
+                    "timezone")))}))
 
 timeintervalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "timeintervalBase",

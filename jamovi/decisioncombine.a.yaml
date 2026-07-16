@@ -4,7 +4,7 @@ title: Combine Medical Decision Tests
 menuGroup: meddecide
 menuSubgroup: Decision
 menuSubtitle: Combine and evaluate test patterns
-version: '1.0.0'
+version: '1.0.1'
 jas: '1.2'
 
 description:

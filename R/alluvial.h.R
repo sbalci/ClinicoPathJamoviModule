@@ -289,7 +289,11 @@ alluvialResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "excl",
                     "fillGgalluvial",
                     "marg",
-                    "usetitle")))
+                    "usetitle",
+                    "bin",
+                    "custombinlabels",
+                    "fill",
+                    "curveType")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",

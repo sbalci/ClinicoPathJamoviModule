@@ -200,7 +200,8 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "composite_threshold",
                     "zscore_threshold",
                     "iqr_multiplier",
-                    "confidence_level")))
+                    "confidence_level",
+                    "seed")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -218,7 +219,8 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "composite_threshold",
                     "zscore_threshold",
                     "iqr_multiplier",
-                    "confidence_level")))
+                    "confidence_level",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="outlier_table",
@@ -232,7 +234,8 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "composite_threshold",
                     "zscore_threshold",
                     "iqr_multiplier",
-                    "confidence_level")))
+                    "confidence_level",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="method_comparison",
@@ -244,7 +247,8 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "composite_threshold",
                     "zscore_threshold",
                     "iqr_multiplier",
-                    "confidence_level")))
+                    "confidence_level",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="exclusion_summary",
@@ -258,7 +262,8 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "composite_threshold",
                     "zscore_threshold",
                     "iqr_multiplier",
-                    "confidence_level")))
+                    "confidence_level",
+                    "seed")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
@@ -268,7 +273,12 @@ outlierdetectionResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6
                     "vars",
                     "method_category",
                     "univariate_methods",
-                    "multivariate_methods")))}))
+                    "multivariate_methods",
+                    "composite_threshold",
+                    "zscore_threshold",
+                    "iqr_multiplier",
+                    "confidence_level",
+                    "seed")))}))
 
 outlierdetectionBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "outlierdetectionBase",

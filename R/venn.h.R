@@ -529,7 +529,25 @@ vennResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "var4true",
                     "var5true",
                     "var6true",
-                    "var7true"))
+                    "var7true",
+                    "sortBy",
+                    "minSize",
+                    "showAnnotations",
+                    "shapeType",
+                    "regionLabels",
+                    "labelGeometry",
+                    "labelPrecisionDigits",
+                    "setNameSize",
+                    "labelSize",
+                    "edgeSize",
+                    "edgeColor",
+                    "edgeLineType",
+                    "edgeAlpha",
+                    "fillAlpha",
+                    "showSetLabels",
+                    "setLabelColor",
+                    "fillColorMapping",
+                    "colorPalette"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="welcome",
@@ -745,8 +763,12 @@ vennBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param show_complexUpset .
 #' @param show_ggvenn .
 #' @param show_ggVennDiagram .
-#' @param sortBy How to sort the intersections in the UpSet plot.
-#' @param minSize Minimum size of intersections to display.
+#' @param sortBy How to sort the intersections in the UpSet plot. 'None'
+#'   (unsorted) applies to the ComplexUpset engine only; the UpSetR engine
+#'   always orders intersections by frequency.
+#' @param minSize Minimum size of intersections to display. Applies to the
+#'   ComplexUpset engine only; UpSetR does not filter intersections by minimum
+#'   size.
 #' @param showAnnotations Add percentage labels to intersection sizes in
 #'   ComplexUpset plots or enhanced text scaling in UpSetR plots.
 #' @param explanatory Add detailed explanatory footnotes with interpretation

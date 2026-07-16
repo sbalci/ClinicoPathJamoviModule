@@ -949,6 +949,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "direction",
                                 "confidenceLevel",
                                 "useBootstrap"),
                             columns=list(
@@ -1115,7 +1116,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1159,6 +1161,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "direction",
                                 "customCutoffs"),
                             columns=list(
                                 list(
@@ -1218,7 +1221,8 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                             clearWith=list(
                                 "outcome",
                                 "predictors",
-                                "positiveClass"),
+                                "positiveClass",
+                                "direction"),
                             columns=list(
                                 list(
                                     `name`="predictor", 
@@ -1266,6 +1270,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "direction",
                                 "useObservedPrevalence",
                                 "prevalence"),
                             columns=list(
@@ -1316,6 +1321,7 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "direction",
                                 "partialRange",
                                 "partialAucType"),
                             columns=list(
@@ -1481,7 +1487,12 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "direction",
                                 "smoothMethod",
+                                "showCutoffPoints",
+                                "showConfidenceBands",
+                                "confidenceLevel",
+                                "plotTheme",
                                 "plotWidth",
                                 "plotHeight"),
                             width=600,
@@ -1510,6 +1521,11 @@ enhancedROCResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                                 "outcome",
                                 "predictors",
                                 "positiveClass",
+                                "direction",
+                                "showCutoffPoints",
+                                "showConfidenceBands",
+                                "confidenceLevel",
+                                "plotTheme",
                                 "plotWidth",
                                 "plotHeight"),
                             width=600,

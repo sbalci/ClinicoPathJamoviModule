@@ -454,6 +454,7 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
     inherit = jmvcore::Group,
     active = list(
         todo = function() private$.items[["todo"]],
+        analysisNotes = function() private$.items[["analysisNotes"]],
         plot = function() private$.items[["plot"]],
         statistics = function() private$.items[["statistics"]],
         comparisons = function() private$.items[["comparisons"]],
@@ -523,6 +524,10 @@ advancedraincloudResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R
                 name="todo",
                 title="Instructions",
                 visible="(y_var:null || x_var:null)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="analysisNotes",
+                title="Analysis Notes"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot",
@@ -668,6 +673,7 @@ advancedraincloudBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$analysisNotes} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$statistics} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$comparisons} \tab \tab \tab \tab \tab a html \cr

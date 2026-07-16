@@ -21,7 +21,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             show_explanation = FALSE,
             show_formulas = FALSE,
             show_cost_analysis = FALSE,
-            show_nomogram = FALSE, ...) {
+            show_plots = FALSE, ...) {
 
             super$initialize(
                 package="ClinicoPath",
@@ -116,9 +116,9 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 "show_cost_analysis",
                 show_cost_analysis,
                 default=FALSE)
-            private$..show_nomogram <- jmvcore::OptionBool$new(
-                "show_nomogram",
-                show_nomogram,
+            private$..show_plots <- jmvcore::OptionBool$new(
+                "show_plots",
+                show_plots,
                 default=FALSE)
 
             self$.addOption(private$..preset)
@@ -136,7 +136,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..show_explanation)
             self$.addOption(private$..show_formulas)
             self$.addOption(private$..show_cost_analysis)
-            self$.addOption(private$..show_nomogram)
+            self$.addOption(private$..show_plots)
         }),
     active = list(
         preset = function() private$..preset$value,
@@ -154,7 +154,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         show_explanation = function() private$..show_explanation$value,
         show_formulas = function() private$..show_formulas$value,
         show_cost_analysis = function() private$..show_cost_analysis$value,
-        show_nomogram = function() private$..show_nomogram$value),
+        show_plots = function() private$..show_plots$value),
     private = list(
         ..preset = NA,
         ..test1_name = NA,
@@ -171,7 +171,7 @@ sequentialtestsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..show_explanation = NA,
         ..show_formulas = NA,
         ..show_cost_analysis = NA,
-        ..show_nomogram = NA)
+        ..show_plots = NA)
 )
 
 sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -215,7 +215,10 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                     "test1_sens",
                     "test1_spec",
                     "test2_sens",
-                    "test2_spec")))
+                    "test2_spec",
+                    "test1_name",
+                    "test2_name",
+                    "population_size")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="plain_summary",
@@ -311,6 +314,14 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 name="population_flow_table",
                 title="Population Flow Analysis",
                 rows=0,
+                clearWith=list(
+                    "strategy",
+                    "prevalence",
+                    "test1_sens",
+                    "test1_spec",
+                    "test2_sens",
+                    "test2_spec",
+                    "population_size"),
                 columns=list(
                     list(
                         `name`="stage", 
@@ -355,9 +366,19 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$add(jmvcore::Table$new(
                 options=options,
                 name="cost_analysis_table",
-                title="Cost Analysis (Per 1000 Patients)",
+                title="Cost Analysis",
                 visible="(show_cost_analysis)",
                 rows=0,
+                clearWith=list(
+                    "strategy",
+                    "prevalence",
+                    "test1_sens",
+                    "test1_spec",
+                    "test2_sens",
+                    "test2_spec",
+                    "test1_cost",
+                    "test2_cost",
+                    "population_size"),
                 columns=list(
                     list(
                         `name`="item", 
@@ -392,7 +413,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_flow_diagram",
-                visible="(show_nomogram)"))
+                visible="(show_plots)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_performance",
@@ -400,7 +421,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_performance",
-                visible="(show_nomogram)"))
+                visible="(show_plots)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_probability",
@@ -408,7 +429,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_probability",
-                visible="(show_nomogram)"))
+                visible="(show_plots)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_population_flow",
@@ -416,7 +437,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_population_flow",
-                visible="(show_nomogram)"))
+                visible="(show_plots)"))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot_sensitivity_analysis",
@@ -424,7 +445,7 @@ sequentialtestsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 width=600,
                 height=400,
                 renderFun=".plot_sensitivity_analysis",
-                visible="(show_nomogram)"))
+                visible="(show_plots)"))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinical_guidance",
@@ -485,7 +506,7 @@ sequentialtestsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param show_explanation .
 #' @param show_formulas .
 #' @param show_cost_analysis .
-#' @param show_nomogram .
+#' @param show_plots .
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$notices} \tab \tab \tab \tab \tab a preformatted \cr
@@ -527,7 +548,7 @@ sequentialtests <- function(
     show_explanation = FALSE,
     show_formulas = FALSE,
     show_cost_analysis = FALSE,
-    show_nomogram = FALSE) {
+    show_plots = FALSE) {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("sequentialtests requires jmvcore to be installed (restart may be required)")
@@ -549,7 +570,7 @@ sequentialtests <- function(
         show_explanation = show_explanation,
         show_formulas = show_formulas,
         show_cost_analysis = show_cost_analysis,
-        show_nomogram = show_nomogram)
+        show_plots = show_plots)
 
     analysis <- sequentialtestsClass$new(
         options = options,

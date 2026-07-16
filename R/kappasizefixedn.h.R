@@ -53,11 +53,12 @@ kappaSizeFixedNOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 alpha,
                 default=0.05,
                 min=0.01,
-                max=0.99)
+                max=0.2)
             private$..n <- jmvcore::OptionNumber$new(
                 "n",
                 n,
-                default=100)
+                default=100,
+                min=2)
 
             self$.addOption(private$..outcome)
             self$.addOption(private$..kappa0)

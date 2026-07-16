@@ -234,12 +234,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         todo = function() private$.items[["todo"]],
         notices = function() private$.items[["notices"]],
         plot2 = function() private$.items[["plot2"]],
-        plot = function() private$.items[["plot"]],
-        interpretation = function() private$.items[["interpretation"]],
-        assumptions = function() private$.items[["assumptions"]],
-        reportSentence = function() private$.items[["reportSentence"]],
-        guidedSteps = function() private$.items[["guidedSteps"]],
-        recommendations = function() private$.items[["recommendations"]]),
+        plot = function() private$.items[["plot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -300,32 +295,7 @@ jjdotplotstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 width=400,
                 height=300,
                 renderFun=".plot",
-                requiresData=TRUE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="interpretation",
-                title="Clinical Interpretation",
-                visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="assumptions",
-                title="Data Assessment & Recommendations",
-                visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="reportSentence",
-                title="Report Template",
-                visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="guidedSteps",
-                title="Analysis Steps",
-                visible=FALSE))
-            self$add(jmvcore::Html$new(
-                options=options,
-                name="recommendations",
-                title="Next Steps",
-                visible=FALSE))}))
+                requiresData=TRUE))}))
 
 jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "jjdotplotstatsBase",
@@ -420,11 +390,6 @@ jjdotplotstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$notices} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
-#'   \code{results$interpretation} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$assumptions} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$reportSentence} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$guidedSteps} \tab \tab \tab \tab \tab a html \cr
-#'   \code{results$recommendations} \tab \tab \tab \tab \tab a html \cr
 #' }
 #'
 #' @export

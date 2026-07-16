@@ -171,8 +171,8 @@ jjscatterstatsOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "conflevel",
                 conflevel,
                 default=0.95,
-                min=0,
-                max=1)
+                min=0.5,
+                max=0.999)
             private$..bfmessage <- jmvcore::OptionBool$new(
                 "bfmessage",
                 bfmessage,
@@ -393,6 +393,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         todo = function() private$.items[["todo"]],
         presetInfo = function() private$.items[["presetInfo"]],
         explanations = function() private$.items[["explanations"]],
+        warnings = function() private$.items[["warnings"]],
         plot2 = function() private$.items[["plot2"]],
         plot = function() private$.items[["plot"]],
         plot3 = function() private$.items[["plot3"]],
@@ -412,6 +413,7 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "ggpubr",
                     "ClinicoPathJamoviModule"),
                 clearWith=list(
+                    "clinicalPreset",
                     "dep",
                     "group",
                     "grvar",
@@ -455,6 +457,11 @@ jjscatterstatsResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="explanations",
                 title="Explanations",
                 visible="(showExplanations)"))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="warnings",
+                title="Warnings",
+                visible=FALSE))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="plot2",
@@ -579,8 +586,8 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param ytitle .
 #' @param originaltheme .
 #' @param resultssubtitle .
-#' @param conflevel Confidence level for confidence intervals (between 0 and
-#'   1).
+#' @param conflevel Confidence level for confidence intervals (between 0.50
+#'   and 0.999).
 #' @param bfmessage Whether to display Bayes Factor in the subtitle when using
 #'   Bayesian analysis.
 #' @param k Number of decimal places for displaying statistics in the
@@ -608,6 +615,7 @@ jjscatterstatsBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   \code{results$todo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$presetInfo} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$explanations} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$warnings} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$plot2} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$plot3} \tab \tab \tab \tab \tab an image \cr

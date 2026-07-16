@@ -239,7 +239,11 @@ cotestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "test2_sens",
                     "test2_spec",
                     "prevalence",
-                    "fagan")))}))
+                    "fagan",
+                    "indep",
+                    "cond_dep_pos",
+                    "cond_dep_neg",
+                    "preset")))}))
 
 cotestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "cotestBase",

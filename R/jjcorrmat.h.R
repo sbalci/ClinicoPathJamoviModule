@@ -255,6 +255,7 @@ jjcorrmatResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "padjustmethod",
                     "k",
                     "partial",
+                    "naHandling",
                     "lowcolor",
                     "midcolor",
                     "highcolor",

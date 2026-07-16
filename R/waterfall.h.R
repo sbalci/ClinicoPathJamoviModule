@@ -428,7 +428,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timeVar",
                     "inputType",
                     "colorScheme",
-                    "groupVar")))
+                    "groupVar",
+                    "responseCategoryVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="aboutAnalysis",
@@ -463,7 +464,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "timeVar",
-                    "inputType")))
+                    "inputType",
+                    "responseCategoryVar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="personTimeTable",
@@ -497,7 +499,12 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     list(
                         `name`="median_duration", 
                         `title`="Median Duration", 
-                        `type`="text"))))
+                        `type`="text")),
+                clearWith=list(
+                    "patientID",
+                    "responseVar",
+                    "timeVar",
+                    "inputType")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="clinicalMetrics",
@@ -516,7 +523,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "timeVar",
-                    "inputType")))
+                    "inputType",
+                    "responseCategoryVar")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="waterfallplot",
@@ -553,7 +561,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
-                    "generateCopyReadyReport")))
+                    "generateCopyReadyReport",
+                    "responseCategoryVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalSignificance",
@@ -562,7 +571,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "patientID",
                     "responseVar",
-                    "showClinicalSignificance")))
+                    "showClinicalSignificance",
+                    "responseCategoryVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="clinicalGlossary",
@@ -604,7 +614,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "responseVar",
                     "timeVar",
                     "inputType",
-                    "showConfidenceIntervals")))
+                    "showConfidenceIntervals",
+                    "responseCategoryVar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="groupComparisonTable",
@@ -640,7 +651,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "groupVar",
-                    "inputType")))
+                    "inputType",
+                    "responseCategoryVar")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="groupComparisonTest",
@@ -668,7 +680,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "patientID",
                     "responseVar",
                     "groupVar",
-                    "inputType")))
+                    "inputType",
+                    "responseCategoryVar")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="spiderplot",
@@ -705,7 +718,8 @@ waterfallResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "timeVar",
                     "inputType",
                     "groupVar",
-                    "showExplanations")))
+                    "showExplanations",
+                    "responseCategoryVar")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="explanations",

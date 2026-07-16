@@ -308,10 +308,20 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 clearWith=list(
                     "vars",
                     "percvar",
+                    "percvarLevel",
                     "summaryvar",
+                    "summarylocation",
                     "prunebelow",
+                    "pruneLevel1",
+                    "pruneLevel2",
                     "follow",
-                    "excl")))
+                    "followLevel1",
+                    "followLevel2",
+                    "excl",
+                    "style",
+                    "pct",
+                    "pattern",
+                    "sequence")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="todo",
@@ -319,22 +329,90 @@ vartreeResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             self$add(jmvcore::Html$new(
                 options=options,
                 name="text1",
-                title="Variable Tree"))
+                title="Variable Tree",
+                clearWith=list(
+                    "vars",
+                    "percvar",
+                    "percvarLevel",
+                    "summaryvar",
+                    "summarylocation",
+                    "prunebelow",
+                    "pruneLevel1",
+                    "pruneLevel2",
+                    "follow",
+                    "followLevel1",
+                    "followLevel2",
+                    "excl",
+                    "style",
+                    "pct",
+                    "pattern",
+                    "sequence")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="text2",
                 title="Pattern Table",
-                visible="(ptable)"))
+                visible="(ptable)",
+                clearWith=list(
+                    "vars",
+                    "percvar",
+                    "percvarLevel",
+                    "summaryvar",
+                    "summarylocation",
+                    "prunebelow",
+                    "pruneLevel1",
+                    "pruneLevel2",
+                    "follow",
+                    "followLevel1",
+                    "followLevel2",
+                    "excl",
+                    "style",
+                    "pct",
+                    "pattern",
+                    "sequence")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="reportSentence",
                 title="Copy-Ready Report Sentence",
-                visible="(showInterpretation)"))
+                visible="(showInterpretation)",
+                clearWith=list(
+                    "vars",
+                    "percvar",
+                    "percvarLevel",
+                    "summaryvar",
+                    "summarylocation",
+                    "prunebelow",
+                    "pruneLevel1",
+                    "pruneLevel2",
+                    "follow",
+                    "followLevel1",
+                    "followLevel2",
+                    "excl",
+                    "style",
+                    "pct",
+                    "pattern",
+                    "sequence")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="interpretation",
                 title="Clinical Interpretation",
-                visible="(showInterpretation)"))}))
+                visible="(showInterpretation)",
+                clearWith=list(
+                    "vars",
+                    "percvar",
+                    "percvarLevel",
+                    "summaryvar",
+                    "summarylocation",
+                    "prunebelow",
+                    "pruneLevel1",
+                    "pruneLevel2",
+                    "follow",
+                    "followLevel1",
+                    "followLevel2",
+                    "excl",
+                    "style",
+                    "pct",
+                    "pattern",
+                    "sequence")))}))
 
 vartreeBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "vartreeBase",

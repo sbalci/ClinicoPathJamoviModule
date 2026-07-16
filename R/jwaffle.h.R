@@ -180,7 +180,7 @@ jwaffleResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="warnings",
                 title="Messages",
-                visible=TRUE,
+                visible=FALSE,
                 clearWith=list(
                     "counts",
                     "groups",

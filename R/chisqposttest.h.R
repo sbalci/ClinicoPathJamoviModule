@@ -260,6 +260,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "excl")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -304,6 +305,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "excl",
                     "exp")))
             self$add(jmvcore::Html$new(
@@ -314,7 +316,9 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "excl",
+                    "sig",
                     "showResiduals",
                     "residualsCutoff")))
             self$add(jmvcore::Html$new(
@@ -325,7 +329,9 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "excl",
+                    "sig",
                     "showResiduals",
                     "residualsCutoff")))
             self$add(jmvcore::Html$new(
@@ -365,7 +371,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                         `format`="zto,pvalue"),
                     list(
                         `name`="effect_size", 
-                        `title`="Effect Size (Phi)", 
+                        `title`="Effect Size (Phi/V)", 
                         `type`="number"),
                     list(
                         `name`="phi_ci", 
@@ -378,9 +384,12 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "posthoc",
                     "sig",
-                    "excl")))
+                    "excl",
+                    "testSelection",
+                    "phiCI")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="detailedComparisons",
@@ -389,6 +398,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "posthoc",
                     "sig",
                     "excl",
@@ -419,6 +429,13 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
+                    "excl",
+                    "posthoc",
+                    "sig",
+                    "testSelection",
+                    "showResiduals",
+                    "residualsCutoff",
                     "exportResults")))
             self$add(jmvcore::Html$new(
                 options=options,
@@ -448,6 +465,7 @@ chisqposttestResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 clearWith=list(
                     "rows",
                     "cols",
+                    "counts",
                     "excl")))}))
 
 chisqposttestBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
