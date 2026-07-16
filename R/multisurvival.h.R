@@ -47,11 +47,15 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             ac_method = "average",
             ac_summary = FALSE,
             showNomogram = FALSE,
+            compare_models = FALSE,
             use_stratify = FALSE,
             stratvar = NULL,
             person_time = FALSE,
             time_intervals = "12, 36, 60",
             rate_multiplier = 100,
+            show_survmetrics = FALSE,
+            survmetrics_timepoints = "12, 24, 36, 60",
+            survmetrics_show_plots = FALSE,
             showExplanations = FALSE,
             showSummaries = TRUE, ...) {
 
@@ -311,6 +315,10 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "showNomogram",
                 showNomogram,
                 default=FALSE)
+            private$..compare_models <- jmvcore::OptionBool$new(
+                "compare_models",
+                compare_models,
+                default=FALSE)
             private$..use_stratify <- jmvcore::OptionBool$new(
                 "use_stratify",
                 use_stratify,
@@ -336,6 +344,18 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 "rate_multiplier",
                 rate_multiplier,
                 default=100)
+            private$..show_survmetrics <- jmvcore::OptionBool$new(
+                "show_survmetrics",
+                show_survmetrics,
+                default=FALSE)
+            private$..survmetrics_timepoints <- jmvcore::OptionString$new(
+                "survmetrics_timepoints",
+                survmetrics_timepoints,
+                default="12, 24, 36, 60")
+            private$..survmetrics_show_plots <- jmvcore::OptionBool$new(
+                "survmetrics_show_plots",
+                survmetrics_show_plots,
+                default=FALSE)
             private$..showExplanations <- jmvcore::OptionBool$new(
                 "showExplanations",
                 showExplanations,
@@ -390,11 +410,15 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
             self$.addOption(private$..ac_method)
             self$.addOption(private$..ac_summary)
             self$.addOption(private$..showNomogram)
+            self$.addOption(private$..compare_models)
             self$.addOption(private$..use_stratify)
             self$.addOption(private$..stratvar)
             self$.addOption(private$..person_time)
             self$.addOption(private$..time_intervals)
             self$.addOption(private$..rate_multiplier)
+            self$.addOption(private$..show_survmetrics)
+            self$.addOption(private$..survmetrics_timepoints)
+            self$.addOption(private$..survmetrics_show_plots)
             self$.addOption(private$..showExplanations)
             self$.addOption(private$..showSummaries)
         }),
@@ -444,11 +468,15 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ac_method = function() private$..ac_method$value,
         ac_summary = function() private$..ac_summary$value,
         showNomogram = function() private$..showNomogram$value,
+        compare_models = function() private$..compare_models$value,
         use_stratify = function() private$..use_stratify$value,
         stratvar = function() private$..stratvar$value,
         person_time = function() private$..person_time$value,
         time_intervals = function() private$..time_intervals$value,
         rate_multiplier = function() private$..rate_multiplier$value,
+        show_survmetrics = function() private$..show_survmetrics$value,
+        survmetrics_timepoints = function() private$..survmetrics_timepoints$value,
+        survmetrics_show_plots = function() private$..survmetrics_show_plots$value,
         showExplanations = function() private$..showExplanations$value,
         showSummaries = function() private$..showSummaries$value),
     private = list(
@@ -497,11 +525,15 @@ multisurvivalOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         ..ac_method = NA,
         ..ac_summary = NA,
         ..showNomogram = NA,
+        ..compare_models = NA,
         ..use_stratify = NA,
         ..stratvar = NA,
         ..person_time = NA,
         ..time_intervals = NA,
         ..rate_multiplier = NA,
+        ..show_survmetrics = NA,
+        ..survmetrics_timepoints = NA,
+        ..survmetrics_show_plots = NA,
         ..showExplanations = NA,
         ..showSummaries = NA)
 )
@@ -525,6 +557,9 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         multivariableCoxSummary = function() private$.items[["multivariableCoxSummary"]],
         glossaryPanel = function() private$.items[["glossaryPanel"]],
         assumptionsPanel = function() private$.items[["assumptionsPanel"]],
+        survMetricsTable = function() private$.items[["survMetricsTable"]],
+        survMetricsSummary = function() private$.items[["survMetricsSummary"]],
+        survMetricsPlot = function() private$.items[["survMetricsPlot"]],
         personTimeHeading = function() private$.items[["personTimeHeading"]],
         personTimeTable = function() private$.items[["personTimeTable"]],
         personTimeSummaryHeading = function() private$.items[["personTimeSummaryHeading"]],
@@ -566,6 +601,8 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
         adjustedCoxText = function() private$.items[["adjustedCoxText"]],
         adjustedCoxSummary = function() private$.items[["adjustedCoxSummary"]],
         adjustedCoxPH = function() private$.items[["adjustedCoxPH"]],
+        modelContributionTable = function() private$.items[["modelContributionTable"]],
+        modelContributionSummary = function() private$.items[["modelContributionSummary"]],
         multivariableCoxExplanation = function() private$.items[["multivariableCoxExplanation"]],
         multivariableCoxHeading3 = function() private$.items[["multivariableCoxHeading3"]],
         adjustedSurvivalExplanation = function() private$.items[["adjustedSurvivalExplanation"]],
@@ -789,6 +826,74 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                 name="assumptionsPanel",
                 title="Assumptions & Caveats",
                 visible="(showExplanations)"))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="survMetricsTable",
+                title="Model Performance Metrics",
+                visible="(show_survmetrics)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="metric", 
+                        `title`="Metric", 
+                        `type`="text"),
+                    list(
+                        `name`="value", 
+                        `title`="Value", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_lower", 
+                        `title`="Lower", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="ci_upper", 
+                        `title`="Upper", 
+                        `superTitle`="95% CI", 
+                        `type`="number", 
+                        `format`="zto"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Interpretation", 
+                        `type`="text")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "show_survmetrics",
+                    "survmetrics_timepoints")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="survMetricsSummary",
+                title="",
+                visible="(show_survmetrics && showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "explanatory",
+                    "contexpl",
+                    "show_survmetrics",
+                    "survmetrics_timepoints")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="survMetricsPlot",
+                title="Brier Score Over Time",
+                width=600,
+                height=450,
+                renderFun=".plotSurvMetrics",
+                visible="(show_survmetrics && survmetrics_show_plots)",
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "show_survmetrics",
+                    "survmetrics_show_plots",
+                    "survmetrics_timepoints")))
             self$add(jmvcore::Preformatted$new(
                 options=options,
                 name="personTimeHeading",
@@ -1455,6 +1560,55 @@ multisurvivalResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cla
                     "adjexplanatory",
                     "ph_cox",
                     "ac_method")))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="modelContributionTable",
+                title="Covariate Contribution (single-term deletion)",
+                visible="(compare_models)",
+                rows=0,
+                columns=list(
+                    list(
+                        `name`="term", 
+                        `title`="Covariate", 
+                        `type`="text"),
+                    list(
+                        `name`="df", 
+                        `title`="df", 
+                        `type`="integer"),
+                    list(
+                        `name`="aic", 
+                        `title`="AIC if dropped", 
+                        `type`="number"),
+                    list(
+                        `name`="lrt", 
+                        `title`="LRT statistic", 
+                        `type`="number"),
+                    list(
+                        `name`="pvalue", 
+                        `title`="p", 
+                        `type`="number", 
+                        `format`="zto,pvalue"),
+                    list(
+                        `name`="interpretation", 
+                        `title`="Contribution", 
+                        `type`="text")),
+                clearWith=list(
+                    "outcome",
+                    "outcomeLevel",
+                    "elapsedtime",
+                    "explanatory",
+                    "contexpl",
+                    "compare_models")))
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="modelContributionSummary",
+                title="",
+                visible="(compare_models && showSummaries)",
+                clearWith=list(
+                    "outcome",
+                    "explanatory",
+                    "contexpl",
+                    "compare_models")))
             self$add(jmvcore::Html$new(
                 options=options,
                 name="multivariableCoxExplanation",
@@ -1538,7 +1692,7 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "multisurvival",
-                version = c(1,0,0),
+                version = c(1,0,1),
                 options = options,
                 results = multisurvivalResults$new(options=options),
                 data = data,
@@ -1666,6 +1820,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   adjusted Cox hazard-ratio table) in addition to the adjusted-survival
 #'   curve.
 #' @param showNomogram .
+#' @param compare_models If true, reports a likelihood-ratio test and AIC for
+#'   dropping each covariate from the full model (base R drop1). Shows which
+#'   covariates significantly improve model fit.
 #' @param use_stratify If true, uses stratification to handle variables that
 #'   violate the proportional hazards assumption. Stratification creates
 #'   separate baseline hazard functions for different groups.
@@ -1681,6 +1838,16 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   60+.
 #' @param rate_multiplier Specify the multiplier for incidence rates (e.g.,
 #'   100 for rates per 100 person-years, 1000 for rates per 1000 person-years).
+#' @param show_survmetrics Report model performance metrics for the Cox model:
+#'   Harrell's concordance (C-index), inverse-probability-of-censoring-weighted
+#'   (IPCW) Brier score and time-dependent AUC at the chosen timepoints, and the
+#'   Integrated Brier Score. Computed with the riskRegression package.
+#' @param survmetrics_timepoints Comma-separated timepoints at which to report
+#'   the Brier score and time-dependent AUC. Timepoints beyond the observed
+#'   follow-up are ignored. Should correspond to clinically meaningful follow-up
+#'   times.
+#' @param survmetrics_show_plots Display a plot of the IPCW Brier score across
+#'   follow-up time.
 #' @param showExplanations Display detailed explanations for each analysis
 #'   component to help interpret the statistical methods and results.
 #' @param showSummaries Display natural language summaries alongside tables
@@ -1704,6 +1871,9 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$multivariableCoxSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$glossaryPanel} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$assumptionsPanel} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survMetricsTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$survMetricsSummary} \tab \tab \tab \tab \tab a html \cr
+#'   \code{results$survMetricsPlot} \tab \tab \tab \tab \tab an image \cr
 #'   \code{results$personTimeHeading} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$personTimeTable} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$personTimeSummaryHeading} \tab \tab \tab \tab \tab a preformatted \cr
@@ -1745,6 +1915,8 @@ multisurvivalBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$adjustedCoxText} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$adjustedCoxSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$adjustedCoxPH} \tab \tab \tab \tab \tab a preformatted \cr
+#'   \code{results$modelContributionTable} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$modelContributionSummary} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multivariableCoxExplanation} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$multivariableCoxHeading3} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$adjustedSurvivalExplanation} \tab \tab \tab \tab \tab a html \cr
@@ -1806,11 +1978,15 @@ multisurvival <- function(
     ac_method = "average",
     ac_summary = FALSE,
     showNomogram = FALSE,
+    compare_models = FALSE,
     use_stratify = FALSE,
     stratvar = NULL,
     person_time = FALSE,
     time_intervals = "12, 36, 60",
     rate_multiplier = 100,
+    show_survmetrics = FALSE,
+    survmetrics_timepoints = "12, 24, 36, 60",
+    survmetrics_show_plots = FALSE,
     showExplanations = FALSE,
     showSummaries = TRUE) {
 
@@ -1884,11 +2060,15 @@ multisurvival <- function(
         ac_method = ac_method,
         ac_summary = ac_summary,
         showNomogram = showNomogram,
+        compare_models = compare_models,
         use_stratify = use_stratify,
         stratvar = stratvar,
         person_time = person_time,
         time_intervals = time_intervals,
         rate_multiplier = rate_multiplier,
+        show_survmetrics = show_survmetrics,
+        survmetrics_timepoints = survmetrics_timepoints,
+        survmetrics_show_plots = survmetrics_show_plots,
         showExplanations = showExplanations,
         showSummaries = showSummaries)
 

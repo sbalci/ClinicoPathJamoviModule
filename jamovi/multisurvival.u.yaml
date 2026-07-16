@@ -372,6 +372,25 @@ children:
           - type: CheckBox
             name: showNomogram
   - type: CollapseBox
+    label: Model Performance Metrics
+    collapsed: true
+    children:
+      - type: LayoutBox
+        margin: large
+        children:
+          - type: CheckBox
+            name: show_survmetrics
+          - type: TextBox
+            name: survmetrics_timepoints
+            format: string
+            enable: (show_survmetrics)
+            width: large
+          - type: CheckBox
+            name: survmetrics_show_plots
+            enable: (show_survmetrics)
+          - type: CheckBox
+            name: compare_models
+  - type: CollapseBox
     label: Person-Time Analysis
     collapsed: true
     children:

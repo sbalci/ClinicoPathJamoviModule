@@ -384,15 +384,14 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 self$results$pairwiseSummary$setVisible(FALSE)
                 self$results$pairwiseTable$setVisible(FALSE)
                 
-                # Parametric models outputs
-                self$results$parametricModelComparison$setVisible(FALSE)
-                self$results$parametricModelSummary$setVisible(FALSE)
+                # Parametric models (core: comparison, summary, fitted-vs-KM plot,
+                # explanation) are controlled by their .r.yaml `visible:` gates on
+                # use_parametric. The extended outputs below are not implemented in
+                # this release, so keep them force-hidden regardless of their options.
                 self$results$parametricDiagnostics$setVisible(FALSE)
-                self$results$parametricSurvivalPlot$setVisible(FALSE)
                 self$results$hazardFunctionPlot$setVisible(FALSE)
                 self$results$extrapolationPlot$setVisible(FALSE)
                 self$results$extrapolationTable$setVisible(FALSE)
-                self$results$parametricModelsExplanation$setVisible(FALSE)
                 
                 # Always show core survival analysis elements when data is present
                 self$results$medianSurvivalHeading$setVisible(TRUE)
@@ -1365,10 +1364,10 @@ survivalClass <- if (requireNamespace('jmvcore'))
                 private$.exportSurvivalData(results)
                 private$.checkpoint()  # Add checkpoint here
 
-                ## Parametric Survival Models - DISABLED for this release ----
-                # if (self$options$use_parametric) {
-                #     private$.parametricSurvival(results)
-                # }
+                ## Parametric Survival Models (flexsurv) ----
+                if (self$options$use_parametric) {
+                    private$.parametricSurvival(results)
+                }
                 private$.checkpoint()  # Add checkpoint here
 
                 ## Calibration Curves ----
@@ -5137,8 +5136,162 @@ survivalClass <- if (requireNamespace('jmvcore'))
             # These prevent crashes if use_parametric is accidentally enabled
             # ================================================================
             ,
+            .distLabel = function(dist) {
+                labs <- c(exp = "Exponential", weibull = "Weibull", lnorm = "Log-Normal",
+                          llogis = "Log-Logistic", gamma = "Gamma", gengamma = "Generalized Gamma",
+                          gompertz = "Gompertz", survspline = "Royston-Parmar spline")
+                if (!is.null(dist) && dist %in% names(labs)) unname(labs[dist]) else dist
+            }
+            ,
+            # Parametric survival models (flexsurv): distribution fit, AIC/BIC
+            # comparison, model summary, and a fitted-vs-Kaplan-Meier plot.
+            .parametricSurvival = function(results) {
+                if (!isTRUE(self$options$use_parametric)) return()
+                if (!requireNamespace("flexsurv", quietly = TRUE)) {
+                    self$results$parametricModelSummary$setNote("flexsurv",
+                        "The flexsurv package is required for parametric survival models.")
+                    return()
+                }
+                if (private$.isCompetingRisk()) {
+                    self$results$parametricModelSummary$setNote("compete",
+                        "Parametric survival models are shown for standard (single-event) survival and are not available for competing-risks analyses.")
+                    return()
+                }
+
+                mydata <- results$cleanData
+                df <- data.frame(
+                    .time   = jmvcore::toNumeric(mydata[[results$name1time]]),
+                    .status = jmvcore::toNumeric(mydata[[results$name2outcome]])
+                )
+                keep <- stats::complete.cases(df) & df$.time > 0
+                df   <- df[keep, , drop = FALSE]
+                if (nrow(df) < 5 || sum(df$.status, na.rm = TRUE) < 2) {
+                    self$results$parametricModelSummary$setNote("data",
+                        "Not enough events / observations to fit a parametric survival model.")
+                    return()
+                }
+
+                factorName <- results$name3explanatory
+                useCov <- isTRUE(self$options$parametric_covariates) &&
+                          !is.null(factorName) && factorName %in% names(mydata)
+                if (useCov) {
+                    df$.grp <- factor(mydata[[factorName]][keep])
+                    if (nlevels(df$.grp) < 2) useCov <- FALSE
+                }
+                rhs  <- if (useCov) ".grp" else "1"
+                form <- stats::as.formula(paste0("survival::Surv(.time, .status) ~ ", rhs))
+                dist <- self$options$parametric_distribution
+
+                fitOne <- function(dd) {
+                    if (dd == "survspline") {
+                        flexsurv::flexsurvspline(form, data = df,
+                            k = as.integer(self$options$spline_knots),
+                            scale = self$options$spline_scale)
+                    } else {
+                        flexsurv::flexsurvreg(form, data = df, dist = dd)
+                    }
+                }
+
+                fit <- tryCatch(fitOne(dist), error = function(e) e)
+                if (inherits(fit, "error")) {
+                    self$results$parametricModelSummary$setNote("fit",
+                        paste0("Parametric fit failed: ", conditionMessage(fit)))
+                    return()
+                }
+
+                # ---- Model summary (parameters + Wald p for covariate terms) ----
+                res     <- fit$res
+                covrows <- if (useCov) grep("^\\.grp", rownames(res)) else integer(0)
+                smy     <- self$results$parametricModelSummary
+                smy$deleteRows()
+                for (i in seq_len(nrow(res))) {
+                    est <- res[i, "est"]; se <- res[i, "se"]
+                    pv  <- if (i %in% covrows && is.finite(se) && se > 0)
+                               2 * stats::pnorm(-abs(est / se)) else NA_real_
+                    prm <- rownames(res)[i]
+                    if (useCov)
+                        prm <- sub("^\\.grp", paste0(results$myexplanatory_labelled, ": "), prm)
+                    smy$addRow(rowKey = i, values = list(
+                        parameter = prm, estimate = est, se = se,
+                        ci_lower = res[i, "L95%"], ci_upper = res[i, "U95%"], pvalue = pv
+                    ))
+                }
+                smy$setNote("modelfit", paste0(
+                    private$.distLabel(dist), " model - AIC ", round(AIC(fit), 1),
+                    ", BIC ", round(BIC(fit), 1),
+                    ", log-likelihood ", round(as.numeric(stats::logLik(fit)), 1),
+                    if (useCov) ". Covariate coefficients are on the log-time (AFT) scale; a negative value indicates shorter survival." else "."
+                ))
+
+                # ---- Distribution comparison (AIC / BIC / logLik) ----
+                if (isTRUE(self$options$compare_distributions)) {
+                    cmp <- self$results$parametricModelComparison
+                    cmp$deleteRows()
+                    for (dd in c("exp","weibull","lnorm","llogis","gamma","gengamma","gompertz")) {
+                        f <- tryCatch(flexsurv::flexsurvreg(form, data = df, dist = dd),
+                                      error = function(e) NULL)
+                        if (is.null(f)) next
+                        cmp$addRow(rowKey = dd, values = list(
+                            distribution = private$.distLabel(dd),
+                            aic = AIC(f), bic = BIC(f),
+                            loglik = as.numeric(stats::logLik(f)), df = f$npars
+                        ))
+                    }
+                }
+
+                # ---- Fitted-vs-Kaplan-Meier plot state (serializable coords) ----
+                if (isTRUE(self$options$parametric_survival_plots)) {
+                    grid <- seq(min(df$.time), max(df$.time), length.out = 100)
+                    fitted_df <- tryCatch({
+                        ps <- summary(fit, type = "survival", t = grid, tidy = TRUE)
+                        names(ps)[names(ps) == "est"] <- "surv"
+                        ps$grp <- if (useCov) as.character(ps$.grp) else "Overall"
+                        ps[, c("time", "surv", "grp")]
+                    }, error = function(e) NULL)
+                    km_df <- tryCatch({
+                        km  <- survival::survfit(form, data = df)
+                        grp <- if (useCov) sub("^\\.grp=", "", rep(names(km$strata), km$strata))
+                               else rep("Overall", length(km$time))
+                        data.frame(time = km$time, surv = km$surv, grp = grp)
+                    }, error = function(e) NULL)
+                    self$results$parametricSurvivalPlot$setState(list(
+                        fitted = fitted_df, km = km_df,
+                        dist = private$.distLabel(dist),
+                        timeLabel = self$options$timetypeoutput
+                    ))
+                }
+            }
+            ,
             .plotParametricSurvival = function(image, ggtheme, theme, ...) {
-                return(FALSE)
+                state <- image$state
+                if (is.null(state) || is.null(state$fitted) || nrow(state$fitted) == 0)
+                    return(FALSE)
+                if (!requireNamespace("ggplot2", quietly = TRUE)) return(FALSE)
+
+                p <- ggplot2::ggplot() +
+                    ggplot2::geom_line(
+                        data = state$fitted,
+                        ggplot2::aes(x = time, y = surv, color = grp),
+                        linewidth = 1
+                    )
+                if (!is.null(state$km) && nrow(state$km) > 0) {
+                    p <- p + ggplot2::geom_step(
+                        data = state$km,
+                        ggplot2::aes(x = time, y = surv, color = grp),
+                        linetype = "dashed", alpha = 0.6
+                    )
+                }
+                p <- p +
+                    ggplot2::scale_y_continuous(limits = c(0, 1), name = "Survival probability") +
+                    ggplot2::labs(
+                        x = paste0("Time (", state$timeLabel, ")"),
+                        title = paste0("Parametric survival (", state$dist, ") vs Kaplan-Meier"),
+                        color = "Group",
+                        caption = "Solid = fitted parametric model; dashed = Kaplan-Meier"
+                    ) +
+                    ggtheme
+                print(p)
+                TRUE
             }
             ,
             .plotHazardFunction = function(image, ggtheme, theme, ...) {

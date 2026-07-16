@@ -254,7 +254,7 @@ oddsratioBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
             super$initialize(
                 package = "ClinicoPath",
                 name = "oddsratio",
-                version = c(1,0,0),
+                version = c(1,0,1),
                 options = options,
                 results = oddsratioResults$new(options=options),
                 data = data,

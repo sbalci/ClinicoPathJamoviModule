@@ -653,25 +653,19 @@ options:
 
 # Reduced Explanatory ----
 
-    # - name: reduced_explanatory
-    #   title: Reduced Model Variables
-    #   type: Variables
-    #   suggested: [ ordinal, nominal ]
-    #   permitted: [ factor ]
-    #   description:
-    #     R: >
-    #       Variables to include in a reduced model for comparison. This can be used to test
-    #       whether excluding some variables affects model fit.
-    #
-    #
-    # - name: compare_models
-    #   title: Compare with reduced model
-    #   type: Bool
-    #   default: false
-    #   description:
-    #     R: >
-    #       If true, compares the full model against the reduced model to assess the impact of removing
-    #       certain explanatory variables.
+    # reduced_explanatory intentionally not exposed: the covariate-contribution
+    # table (compare_models) uses single-term deletion (drop1) on the fitted
+    # model, so no separate reduced-model variable selection is required.
+
+    - name: compare_models
+      title: Covariate contribution (single-term deletion)
+      type: Bool
+      default: false
+      description:
+        R: >
+          If true, reports a likelihood-ratio test and AIC for dropping each
+          covariate from the full model (base R drop1). Shows which covariates
+          significantly improve model fit.
 
 
   # - type: CollapseBox
@@ -932,52 +926,38 @@ options:
 # SurvMetrics - Enhanced Model Performance Metrics ----
 # COMMENTED OUT - Corresponding UI elements commented out in multisurvival.u.yaml
 
-    # - name: show_survmetrics
-    #   title: "Show Model Performance Metrics (SurvMetrics)"
-    #   type: Bool
-    #   default: false
-    #   description:
-    #     R: >
-    #       Calculate comprehensive survival model performance metrics using the SurvMetrics package.
-    #       Includes Concordance Index, Brier Score, Integrated Brier Score, and prediction accuracy metrics.
-    #     ui: >
-    #       Enable advanced model performance metrics including C-index, Brier scores,
-    #       and prediction accuracy measures.
+    - name: show_survmetrics
+      title: "Model performance metrics"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Report model performance metrics for the Cox model: Harrell's
+          concordance (C-index), inverse-probability-of-censoring-weighted (IPCW)
+          Brier score and time-dependent AUC at the chosen timepoints, and the
+          Integrated Brier Score. Computed with the riskRegression package.
 
-    # - name: survmetrics_timepoints
-    #   title: "Time Points for Brier Score"
-    #   type: String
-    #   default: '12, 24, 36, 60'
-    #   description:
-    #     R: >
-    #       Comma-separated time points at which to calculate Brier Score.
-    #       Should correspond to clinically meaningful follow-up times.
-    #     ui: >
-    #       Specify time points (comma-separated) for time-dependent Brier Score calculation.
-    #       Example: '12, 24, 36, 60' for 1, 2, 3, and 5 years.
+    - name: survmetrics_timepoints
+      title: "Timepoints for Brier / AUC"
+      type: String
+      default: '12, 24, 36, 60'
+      description:
+        R: >
+          Comma-separated timepoints at which to report the Brier score and
+          time-dependent AUC. Timepoints beyond the observed follow-up are
+          ignored. Should correspond to clinically meaningful follow-up times.
 
-    # - name: survmetrics_ibs_points
-    #   title: "Number of Points for Integrated Brier Score"
-    #   type: Integer
-    #   default: 100
-    #   min: 50
-    #   max: 500
-    #   description:
-    #     R: >
-    #       Number of time points to use for calculating Integrated Brier Score.
-    #       More points provide smoother estimates but increase computation time.
-    #     ui: >
-    #       Number of time points for Integrated Brier Score calculation (50-500).
+    # survmetrics_ibs_points intentionally not exposed: the Integrated Brier
+    # Score is computed by riskRegression over the requested timepoint range,
+    # so no separate grid-size option is needed.
 
-    # - name: survmetrics_show_plots
-    #   title: "Show Performance Plots"
-    #   type: Bool
-    #   default: false
-    #   description:
-    #     R: >
-    #       Generate plots of model performance metrics over time (Brier Score, calibration).
-    #     ui: >
-    #       Display plots showing how model performance varies over follow-up time.
+    - name: survmetrics_show_plots
+      title: "Brier score over time plot"
+      type: Bool
+      default: false
+      description:
+        R: >
+          Display a plot of the IPCW Brier score across follow-up time.
 
 # Time-Dependent Covariates ---- (EXPERIMENTAL - will be implemented later)
     # - name: use_time_dependent

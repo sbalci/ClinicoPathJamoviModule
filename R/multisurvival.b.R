@@ -2254,10 +2254,15 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
         #   private$.calculate_aft()
         # }
 
-        # SurvMetrics - Model Performance Metrics - COMMENTED OUT (options disabled in .a.yaml/.u.yaml)
-        # if (self$options$show_survmetrics) {
-        #   private$.calculate_survmetrics()
-        # }
+        # Model performance metrics (C-index, IPCW Brier / AUC, IBS via riskRegression)
+        if (self$options$show_survmetrics) {
+          private$.calculate_survmetrics()
+        }
+
+        # Covariate contribution (single-term deletion LRT / AIC)
+        if (self$options$compare_models) {
+          private$.compare_models()
+        }
 
         # EXPERIMENTAL:         if (self$options$use_tree) {
         # EXPERIMENTAL:           private$.calculate_survivaldecisiontree()
@@ -3133,28 +3138,29 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
       # DISABLED: Options commented out in .a.yaml and .u.yaml
       # Function call commented out in .run() (line ~1919)
       .calculate_survmetrics = function() {
-        # SAFEGUARD: Feature disabled
-        if (TRUE) return()
-
-        # Early return if SurvMetrics not requested
         if (!self$options$show_survmetrics) {
           return()
         }
 
         private$.checkpoint()
 
-        # Check for SurvMetrics package
-        if (!requireNamespace('SurvMetrics', quietly = TRUE)) {
-          warning_msg <- paste0(
-            "<h4>SurvMetrics Package Required</h4>",
-            "<p>The SurvMetrics package is not installed. Install it using:</p>",
-            "<pre>install.packages('SurvMetrics')</pre>"
+        # Performance metrics are defined for standard (single-event) survival
+        # models. Competing-risks / Fine-Gray fits use a different prediction
+        # target, so skip with an explanatory note rather than report a wrong number.
+        if (self$options$multievent && self$options$analysistype == "compete") {
+          self$results$survMetricsSummary$setContent(
+            "<p>Model performance metrics (Brier score, IBS, time-dependent AUC) are computed for standard survival models and are not shown for competing-risks / Fine-Gray analyses.</p>"
           )
-          self$results$survMetricsSummary$setContent(warning_msg)
           return()
         }
 
-        # Get Cox model from private storage
+        if (!requireNamespace("riskRegression", quietly = TRUE)) {
+          self$results$survMetricsSummary$setContent(
+            "<h4>riskRegression package required</h4><p>Install it with <code>install.packages('riskRegression')</code> to compute Brier score, IBS and time-dependent AUC.</p>"
+          )
+          return()
+        }
+
         cox_model <- private$.cox_model()
         if (is.null(cox_model)) {
           return()
@@ -3162,252 +3168,229 @@ multisurvivalClass <- if (requireNamespace('jmvcore'))
 
         private$.checkpoint()
 
-        # Get cleaned data
         cleaneddata <- private$.cleandata()
         mydata <- cleaneddata$cleanData
 
         tryCatch({
-          # Extract predictions
-          pred_risk <- predict(cox_model, type = "risk")
-          
-          # Get actual survival information
-          actual_time <- mydata$mytime
-          actual_status <- .eventIndicator(mydata$myoutcome)
-          if (is.null(actual_status) || all(is.na(actual_status))) {
-            jmvcore::reject("Could not derive event indicator for SurvMetrics calculations.")
-          }
-          actual_status[is.na(actual_status)] <- FALSE
+          tbl <- self$results$survMetricsTable
+          tbl$deleteRows()
+          rk <- 0L
+          max_time <- max(mydata$mytime, na.rm = TRUE)
 
-          # Create Surv object
-          surv_obj <- survival::Surv(actual_time, actual_status)
-
-          private$.checkpoint()
-
-          # 1. Concordance Index (C-index)
-          cindex_result <- tryCatch({
-            SurvMetrics::Cindex(
-              Surv.rsp = surv_obj,
-              Surv.rsp.new = NULL,
-              lpnew = log(pred_risk),
-              ties = "average"
-            )
-          }, error = function(e) {
-            list(cindex = summary(cox_model)$concordance[1],
-                 lower = NA, upper = NA)
-          })
-
-          # Add C-index to table
-          self$results$survMetricsTable$addRow(rowKey = "cindex", values = list(
-            metric = "Concordance Index (C-index)",
-            value = cindex_result$cindex %||% cindex_result,
-            ci_lower = cindex_result$lower,
-            ci_upper = cindex_result$upper,
-            interpretation = ifelse(
-              (cindex_result$cindex %||% cindex_result) > 0.7,
-              "Good discrimination",
-              ifelse((cindex_result$cindex %||% cindex_result) > 0.6,
-                     "Acceptable discrimination",
-                     "Poor discrimination")
-            )
+          # ---- 1. Discrimination: Harrell's concordance (C-index) from the Cox fit ----
+          conc   <- summary(cox_model)$concordance
+          c_index <- unname(conc[1])
+          c_se    <- if (length(conc) >= 2) unname(conc[2]) else NA_real_
+          rk <- rk + 1L
+          tbl$addRow(rowKey = rk, values = list(
+            metric   = "Concordance index (Harrell's C)",
+            value    = c_index,
+            ci_lower = if (is.na(c_se)) NA_real_ else max(0, c_index - 1.96 * c_se),
+            ci_upper = if (is.na(c_se)) NA_real_ else min(1, c_index + 1.96 * c_se),
+            interpretation = if (isTRUE(c_index > 0.7)) "Good discrimination"
+                             else if (isTRUE(c_index > 0.6)) "Acceptable discrimination"
+                             else "Limited discrimination"
           ))
 
           private$.checkpoint()
 
-          # 2. Brier Score at time points
-          time_points_str <- self$options$survmetrics_timepoints
-          time_points <- as.numeric(unlist(strsplit(time_points_str, ",")))
-          time_points <- time_points[!is.na(time_points)]
+          # ---- 2. Time-point metrics: IPCW Brier, time-dependent AUC, and IBS ----
+          # via riskRegression::Score (Kaplan-Meier censoring weights). Refit the
+          # model locally with x/y = TRUE so Score can generate predictions.
+          tps <- suppressWarnings(as.numeric(trimws(unlist(strsplit(self$options$survmetrics_timepoints, ",")))))
+          tps <- sort(unique(tps[!is.na(tps) & tps > 0 & tps < max_time]))
 
-          if (length(time_points) > 0) {
-            # Filter time points within data range
-            max_time <- max(actual_time, na.rm = TRUE)
-            time_points <- time_points[time_points <= max_time]
+          if (length(tps) > 0) {
+            cox_local <- survival::coxph(stats::formula(cox_model), data = mydata,
+                                         x = TRUE, y = TRUE)
+            sc <- riskRegression::Score(
+              list(Cox = cox_local),
+              formula   = survival::Surv(mytime, myoutcome) ~ 1,
+              data      = mydata,
+              times     = tps,
+              metrics   = c("brier", "auc"),
+              summary   = "ibs",
+              se.fit    = FALSE,
+              conf.int  = FALSE,
+              null.model = FALSE
+            )
+            br <- as.data.frame(sc$Brier$score); br <- br[br$model == "Cox", , drop = FALSE]
+            au <- as.data.frame(sc$AUC$score);   au <- au[au$model == "Cox", , drop = FALSE]
 
-            if (length(time_points) > 0) {
-              brier_result <- jmvcore::tryNaN({
-                # Note: SurvMetrics::Brier may have different API
-                # Fallback to pec package if available
-                if (requireNamespace('pec', quietly = TRUE)) {
-                  pec_result <- pec::pec(
-                    object = list(model = cox_model),
-                    formula = surv_obj ~ 1,
-                    data = mydata,
-                    times = time_points,
-                    exact = FALSE
-                  )
-                  mean(pec_result$AppErr$model, na.rm = TRUE)
-                } else {
-                  NA
-                }
-              })
+            for (t in tps) {
+              bval <- br$Brier[br$times == t]
+              if (length(bval) == 1 && !is.na(bval)) {
+                rk <- rk + 1L
+                tbl$addRow(rowKey = rk, values = list(
+                  metric   = paste0("Brier score (t = ", t, " ", self$options$timetypeoutput, ")"),
+                  value    = bval, ci_lower = NA_real_, ci_upper = NA_real_,
+                  interpretation = if (bval < 0.15) "Excellent accuracy"
+                                   else if (bval < 0.25) "Good accuracy" else "Poor accuracy"
+                ))
+              }
+              aval <- au$AUC[au$times == t]
+              if (length(aval) == 1 && !is.na(aval)) {
+                rk <- rk + 1L
+                tbl$addRow(rowKey = rk, values = list(
+                  metric   = paste0("Time-dependent AUC (t = ", t, " ", self$options$timetypeoutput, ")"),
+                  value    = aval, ci_lower = NA_real_, ci_upper = NA_real_,
+                  interpretation = if (aval > 0.8) "Excellent discrimination"
+                                   else if (aval > 0.7) "Good discrimination"
+                                   else if (aval > 0.6) "Fair discrimination" else "Poor discrimination"
+                ))
+              }
+            }
 
-              if (!is.na(brier_result)) {
-                self$results$survMetricsTable$addRow(rowKey = "brier", values = list(
-                  metric = paste0("Brier Score (avg at t=", paste(round(time_points), collapse = ","), ")"),
-                  value = brier_result,
-                  ci_lower = NA,
-                  ci_upper = NA,
-                  interpretation = ifelse(
-                    brier_result < 0.15,
-                    "Excellent prediction accuracy",
-                    ifelse(brier_result < 0.25,
-                           "Good prediction accuracy",
-                           "Poor prediction accuracy")
-                  )
+            # Integrated Brier Score over 0..max(timepoints) (cumulative IBS row)
+            if (!is.null(br$IBS)) {
+              ibs <- utils::tail(br$IBS[!is.na(br$IBS)], 1)
+              if (length(ibs) == 1) {
+                rk <- rk + 1L
+                tbl$addRow(rowKey = rk, values = list(
+                  metric   = paste0("Integrated Brier Score (0 to ", max(tps), " ", self$options$timetypeoutput, ")"),
+                  value    = ibs, ci_lower = NA_real_, ci_upper = NA_real_,
+                  interpretation = if (ibs < 0.15) "Excellent overall prediction"
+                                   else if (ibs < 0.25) "Good overall prediction" else "Poor overall prediction"
                 ))
               }
             }
           }
 
-          private$.checkpoint()
-
-          # 3. Integrated Brier Score (IBS)
-          ibs_points <- self$options$survmetrics_ibs_points
-          ibs_times <- seq(0, max(actual_time, na.rm = TRUE), length.out = ibs_points)
-
-          ibs_result <- jmvcore::tryNaN({
-            if (requireNamespace('pec', quietly = TRUE)) {
-              pec_result <- pec::pec(
-                object = list(model = cox_model),
-                formula = surv_obj ~ 1,
-                data = mydata,
-                times = ibs_times,
-                exact = FALSE
-              )
-              pec::crps(pec_result)$model
-            } else {
-              NA
-            }
-          })
-
-          if (!is.na(ibs_result)) {
-            self$results$survMetricsTable$addRow(rowKey = "ibs", values = list(
-              metric = "Integrated Brier Score (IBS)",
-              value = ibs_result,
-              ci_lower = NA,
-              ci_upper = NA,
-              interpretation = ifelse(
-                ibs_result < 0.15,
-                "Excellent overall prediction",
-                ifelse(ibs_result < 0.25,
-                       "Good overall prediction",
-                       "Poor overall prediction")
-              )
+          if (self$options$showSummaries) {
+            self$results$survMetricsSummary$setContent(paste0(
+              "<h4>Model Performance Summary</h4>",
+              "<p><b>Discrimination</b> (Harrell's C = ", round(c_index, 3), "): the probability that, ",
+              "for a random pair of subjects, the one predicted higher-risk experiences the event first. ",
+              "C &gt; 0.7 is good, 0.6-0.7 acceptable. <b>Time-dependent AUC</b> extends this to each timepoint.</p>",
+              "<p><b>Brier score</b> is the inverse-probability-of-censoring-weighted mean squared error ",
+              "between predicted survival and observed status at a timepoint (lower is better; &lt; 0.25 acceptable). ",
+              "The <b>Integrated Brier Score</b> averages it over the follow-up.</p>",
+              "<p style='color:#666;font-size:0.9em;'><i>Brier / AUC / IBS computed with riskRegression using Kaplan-Meier censoring weights.</i></p>"
             ))
           }
 
-          # Generate summary
-          if (self$options$showSummaries) {
-            c_value <- cindex_result$cindex %||% cindex_result
-            discrimination_quality <- ifelse(
-              c_value > 0.7, "good", ifelse(c_value > 0.6, "acceptable", "limited")
-            )
-
-            summary_html <- glue::glue("
-<h4>Model Performance Summary</h4>
-<p><b>Discrimination:</b> C-index = {round(c_value, 3)} ({discrimination_quality})</p>
-<p><b>Interpretation:</b></p>
-<ul>
-  <li>C-index > 0.7: Good ability to discriminate between high and low risk patients</li>
-  <li>C-index 0.6-0.7: Acceptable discrimination</li>
-  <li>C-index < 0.6: Limited predictive ability</li>
-</ul>
-<p><b>Calibration:</b> Brier Score measures prediction accuracy (lower is better)</p>
-<ul>
-  <li>Brier Score < 0.15: Excellent calibration</li>
-  <li>Brier Score < 0.25: Good calibration</li>
-  <li>Brier Score > 0.25: Poor calibration</li>
-</ul>
-")
-            self$results$survMetricsSummary$setContent(summary_html)
-          }
-
         }, error = function(e) {
-          error_msg <- paste0(
-            "<h4>SurvMetrics Calculation Error</h4>",
-            "<p>Error: ", e$message, "</p>",
-            "<p>Note: SurvMetrics calculation requires a valid Cox model with sufficient events.</p>"
-          )
-          self$results$survMetricsSummary$setContent(error_msg)
+          self$results$survMetricsSummary$setContent(paste0(
+            "<h4>Performance metric error</h4><p>", e$message, "</p>",
+            "<p>These metrics require a standard Cox model with sufficient events and follow-up.</p>"
+          ))
         })
       }
 
       ,
       # DISABLED: Options commented out in .a.yaml and .u.yaml
-      .plotSurvMetrics = function(image, ...) {
-        # SAFEGUARD: Feature disabled
-        if (TRUE) return(FALSE)
-
-        # Early return if plots not requested
+      .plotSurvMetrics = function(image, ggtheme, theme, ...) {
         if (!self$options$show_survmetrics || !self$options$survmetrics_show_plots) {
           return(FALSE)
         }
-
-        # Get Cox model
-        cox_model <- private$.cox_model()
-        if (is.null(cox_model)) {
+        # Standard survival models only (see .calculate_survmetrics)
+        if (self$options$multievent && self$options$analysistype == "compete") {
+          return(FALSE)
+        }
+        if (!requireNamespace("riskRegression", quietly = TRUE)) {
           return(FALSE)
         }
 
-        # Get cleaned data
-        cleaneddata <- private$.cleandata()
-        mydata <- cleaneddata$cleanData
+        cox_model <- private$.cox_model()
+        if (is.null(cox_model)) return(FALSE)
+        mydata <- private$.cleandata()$cleanData
 
-        tryCatch({
-          if (!requireNamespace('pec', quietly = TRUE)) {
-            return(FALSE)
-          }
-
-          # Create survival object
-          event_indicator <- .eventIndicator(mydata$myoutcome)
-          if (is.null(event_indicator) || all(is.na(event_indicator))) {
-            return(FALSE)
-          }
-          event_indicator[is.na(event_indicator)] <- FALSE
-          surv_obj <- survival::Surv(mydata$mytime, event_indicator)
-
-          # Calculate Brier scores over time
-          time_seq <- seq(0, max(mydata$mytime, na.rm = TRUE), length.out = 100)
-          pec_result <- pec::pec(
-            object = list(Model = cox_model),
-            formula = surv_obj ~ 1,
-            data = mydata,
-            times = time_seq,
-            exact = FALSE
+        p <- tryCatch({
+          max_time <- max(mydata$mytime, na.rm = TRUE)
+          # Grid of timepoints strictly inside the observed follow-up
+          grid <- seq(max_time / 50, max_time * 0.98, length.out = 40)
+          cox_local <- survival::coxph(stats::formula(cox_model), data = mydata,
+                                       x = TRUE, y = TRUE)
+          sc <- riskRegression::Score(
+            list(Cox = cox_local),
+            formula = survival::Surv(mytime, myoutcome) ~ 1,
+            data = mydata, times = grid, metrics = "brier",
+            se.fit = FALSE, conf.int = FALSE, null.model = FALSE
           )
-
-          # Create plot
-          plot_data <- data.frame(
-            time = time_seq,
-            brier = pec_result$AppErr$Model
-          )
-
-          p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = time, y = brier)) +
-            ggplot2::geom_line(color = "#2E8B57", size = 1.2) +
-            ggplot2::geom_hline(yintercept = 0.25, linetype = "dashed", color = "red",
-                               alpha = 0.5) +
+          br <- as.data.frame(sc$Brier$score)
+          br <- br[br$model == "Cox" & !is.na(br$Brier), c("times", "Brier")]
+          if (nrow(br) == 0) return(FALSE)
+          ggplot2::ggplot(br, ggplot2::aes(x = times, y = Brier)) +
+            ggplot2::geom_line(linewidth = 1.1, colour = "#2E8B57") +
+            ggplot2::geom_hline(yintercept = 0.25, linetype = "dashed",
+                                colour = "red", alpha = 0.6) +
             ggplot2::labs(
               title = "Brier Score Over Time",
-              x = "Time",
-              y = "Brier Score",
-              caption = "Lower values indicate better prediction accuracy\nRed line: threshold for acceptable performance"
+              x = paste0("Time (", self$options$timetypeoutput, ")"),
+              y = "Brier score (IPCW)",
+              caption = "Lower is better. Dashed line = 0.25 (random-prediction reference)."
             ) +
-            ggplot2::theme_minimal() +
-            ggplot2::theme(
-              plot.title = ggplot2::element_text(face = "bold", size = 14),
-              axis.text = ggplot2::element_text(size = 11),
-              axis.title = ggplot2::element_text(size = 12)
-            )
+            ggtheme
+        }, error = function(e) NULL)
 
-          print(p)
-          TRUE
-
-        }, error = function(e) {
-          FALSE
-        })
+        if (is.null(p)) return(FALSE)
+        print(p)
+        TRUE
       }
 
+      ,
+      # Covariate contribution: single-term deletion LRT / AIC (base R drop1)
+      .compare_models = function() {
+        if (!self$options$compare_models) return()
 
+        full <- private$.cox_model()
+        if (is.null(full)) return()
+
+        # Single-term deletion is defined for standard Cox models.
+        if (self$options$multievent && self$options$analysistype == "compete") {
+          self$results$modelContributionSummary$setContent(
+            "<p>Covariate contribution (single-term deletion) is shown for standard Cox models and is not available for competing-risks / Fine-Gray analyses.</p>"
+          )
+          return()
+        }
+
+        mydata <- private$.cleandata()$cleanData
+
+        tryCatch({
+          full_local  <- survival::coxph(stats::formula(full), data = mydata, x = TRUE, y = TRUE)
+          term_labels <- attr(stats::terms(full_local), "term.labels")
+          if (length(term_labels) < 2) {
+            self$results$modelContributionSummary$setContent(
+              "<p>Add at least two covariates to compare their individual contributions.</p>"
+            )
+            return()
+          }
+
+          dd       <- stats::drop1(full_local, test = "Chisq")
+          full_aic <- stats::AIC(full_local)
+
+          tbl <- self$results$modelContributionTable
+          tbl$deleteRows()
+          rk <- 0L
+          for (term in rownames(dd)) {
+            if (term == "<none>") next
+            pval <- dd[term, "Pr(>Chi)"]
+            rk <- rk + 1L
+            tbl$addRow(rowKey = rk, values = list(
+              term  = term,
+              df    = dd[term, "Df"],
+              aic   = dd[term, "AIC"],
+              lrt   = dd[term, "LRT"],
+              pvalue = pval,
+              interpretation = if (isTRUE(pval < 0.05)) "Significant contribution to fit"
+                               else "No significant contribution"
+            ))
+          }
+
+          if (self$options$showSummaries) {
+            self$results$modelContributionSummary$setContent(paste0(
+              "<p>Each row is a likelihood-ratio test comparing the full model against the model with that ",
+              "single covariate removed (all others retained). A small p-value indicates the covariate ",
+              "significantly improves fit. An <b>AIC if dropped</b> below the full-model AIC (",
+              round(full_aic, 1), ") indicates the covariate could be removed without penalising fit.</p>"
+            ))
+          }
+        }, error = function(e) {
+          self$results$modelContributionSummary$setContent(paste0(
+            "<h4>Covariate contribution error</h4><p>", e$message, "</p>"
+          ))
+        })
+      }
 
 
 

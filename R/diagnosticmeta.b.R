@@ -1559,10 +1559,43 @@ diagnosticmetaClass <- R6::R6Class(
                 attributes(meta_data) <- attributes(meta_data)[c("names", "row.names", "class")]
             }
 
+            # Pre-compute the SROC regression curve and the 95% confidence region
+            # (ellipse) here, where the Reitsma model object is available, and
+            # store only the resulting (fpr, sens) coordinates so the plot state
+            # stays serializable. The ellipse is the confidence region for the
+            # pooled (logit-sensitivity, logit-fpr) mean derived from the bivariate
+            # vcov, back-transformed to ROC space.
+            sroc_curve <- NULL
+            conf_ellipse <- NULL
+            tryCatch({
+                crv <- as.data.frame(mada::sroc(biv_model))
+                if (ncol(crv) >= 2) {
+                    names(crv)[1:2] <- c("fpr", "sens")
+                    crv <- crv[stats::complete.cases(crv[, c("fpr", "sens")]), c("fpr", "sens"), drop = FALSE]
+                    if (nrow(crv) > 1) sroc_curve <- crv
+                }
+
+                mu  <- as.numeric(stats::coef(biv_model))   # (tsens, tfpr), logit scale
+                Sig <- stats::vcov(biv_model)
+                if (length(mu) >= 2 && all(is.finite(mu[1:2])) &&
+                    is.matrix(Sig) && all(dim(Sig) >= 2) && all(is.finite(Sig[1:2, 1:2]))) {
+                    theta <- seq(0, 2 * pi, length.out = 200)
+                    L     <- t(chol(Sig[1:2, 1:2]))
+                    rad   <- sqrt(stats::qchisq(0.95, df = 2))
+                    pts   <- L %*% (rad * rbind(cos(theta), sin(theta))) + mu[1:2]
+                    conf_ellipse <- data.frame(
+                        fpr  = stats::plogis(pts[2, ]),
+                        sens = stats::plogis(pts[1, ])
+                    )
+                }
+            }, error = function(e) NULL)
+
             plot_state <- list(
                 data = meta_data,
                 pooled_sens = as.numeric(sum_sens),
-                pooled_fpr = as.numeric(sum_fpr)
+                pooled_fpr = as.numeric(sum_fpr),
+                sroc_curve = sroc_curve,
+                conf_ellipse = conf_ellipse
             )
 
             image$setState(plot_state)
@@ -1570,15 +1603,11 @@ diagnosticmetaClass <- R6::R6Class(
         
         .srocplot = function(image, ggtheme, theme, ...) {
 
-            # TODO (UX): the SROC plot draws individual study points and the
-            # pooled summary point but does not add the bivariate confidence
-            # region (ellipse) or the SROC regression curve. Publication-grade
-            # diagnostic meta-analysis plots typically include both. Sources:
-            # the Reitsma bivariate vcov gives the joint logit-sens / logit-fpr
-            # covariance; mada has internal SROC machinery (see
-            # `mada:::SROC.reitsma`). Add (a) a 95% confidence ellipse around
-            # the pooled point using the vcov, and (b) the SROC regression
-            # curve (logit-sens as a function of logit-fpr).
+            # The SROC plot shows individual study points, the pooled summary
+            # point, the SROC regression curve, and the 95% confidence region
+            # (ellipse). The curve and ellipse coordinates are pre-computed in
+            # .populateSROCPlot from the Reitsma bivariate model and carried in
+            # the (serializable) plot state.
 
             state <- image$state
             if (is.null(state)) {
@@ -1628,16 +1657,54 @@ diagnosticmetaClass <- R6::R6Class(
                 # Get color palette for accessibility
                 colors <- private$.getColorPalette()
 
-                # Create a simple SROC plot without confidence regions (since mada summary may not have them)
+                # Base plot: individual study points sized by sample size
                 p <- ggplot2::ggplot(meta_data, ggplot2::aes(x = fpr, y = sens)) +
-                    ggplot2::geom_point(ggplot2::aes(size = n), color = colors$study_points, alpha = 0.7) + # Study points
-                    ggplot2::geom_point(data = data.frame(fpr = sum_fpr, sens = sum_sens),
-                                      color = colors$primary, size = 5, shape = 17) + # Summary point
+                    ggplot2::geom_point(ggplot2::aes(size = n), color = colors$study_points, alpha = 0.7)
+
+                # SROC regression curve (from the Reitsma bivariate model)
+                if (!is.null(state$sroc_curve) && is.data.frame(state$sroc_curve) &&
+                    nrow(state$sroc_curve) > 1) {
+                    p <- p + ggplot2::geom_path(
+                        data = state$sroc_curve,
+                        ggplot2::aes(x = fpr, y = sens),
+                        color = colors$primary, linewidth = 0.8, inherit.aes = FALSE
+                    )
+                }
+
+                # 95% confidence region (ellipse) around the pooled estimate
+                if (!is.null(state$conf_ellipse) && is.data.frame(state$conf_ellipse) &&
+                    nrow(state$conf_ellipse) > 2) {
+                    p <- p + ggplot2::geom_path(
+                        data = state$conf_ellipse,
+                        ggplot2::aes(x = fpr, y = sens),
+                        color = colors$primary, linewidth = 0.6, linetype = "dashed",
+                        inherit.aes = FALSE
+                    )
+                }
+
+                # Pooled summary point on top
+                if (has_summary) {
+                    p <- p + ggplot2::geom_point(
+                        data = data.frame(fpr = sum_fpr, sens = sum_sens),
+                        ggplot2::aes(x = fpr, y = sens),
+                        color = colors$primary, size = 5, shape = 17, inherit.aes = FALSE
+                    )
+                }
+
+                have_curve   <- !is.null(state$sroc_curve)
+                have_ellipse <- !is.null(state$conf_ellipse)
+                subtitle_txt <- paste0(
+                    "Studies (circles), pooled estimate (triangle)",
+                    if (have_curve) ", SROC curve" else "",
+                    if (have_ellipse) ", 95% confidence region" else ""
+                )
+
+                p <- p +
                     ggplot2::scale_x_continuous(limits = c(0, 1), name = "False Positive Rate (1 - Specificity)") +
                     ggplot2::scale_y_continuous(limits = c(0, 1), name = "Sensitivity") +
                     ggplot2::labs(
                         title = "Summary ROC Plot",
-                        subtitle = "Individual studies (circles) and pooled estimate (triangle)",
+                        subtitle = subtitle_txt,
                         size = "Sample Size"
                     ) +
                     ggtheme +
